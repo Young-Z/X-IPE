@@ -133,6 +133,7 @@ Execute tasks by following these 6 steps in order:
 
 | Request Pattern | Task Type |
 |-----------------|-----------|
+| "ideate", "brainstorm", "refine idea", "analyze my idea" | Ideation |
 | "new feature", "add feature" | Requirement Gathering |
 | "break down", "split features" | Feature Breakdown |
 | "refine", "clarify requirements" | Feature Refinement |
@@ -332,6 +333,7 @@ ELSE:
 
 | Task Type | Skill | Category | Next Task | Human Review |
 |-----------|-------|----------|-----------|--------------|
+| Ideation | `task-type-ideation-@requirement-stage` | requirement-stage | Requirement Gathering | Yes |
 | Requirement Gathering | `task-type-requirement-gathering-@requirement-stage` | requirement-stage | Feature Breakdown | Yes |
 | Feature Breakdown | `task-type-feature-breakdown-@requirement-stage` | requirement-stage | Feature Refinement | Yes |
 | Feature Refinement | `task-type-feature-refinement-@feature-stage` | feature-stage | Technical Design | Yes |

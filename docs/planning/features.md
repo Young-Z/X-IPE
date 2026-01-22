@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 01-22-2026 10:00:00
+> Last Updated: 01-22-2026 11:42:00
 
 ## Overview
 
@@ -27,6 +27,8 @@ This board tracks all features across the project lifecycle.
 | FEATURE-005 | Interactive Console | v2.0 | Designed | [specification.md](../requirements/FEATURE-005/specification.md) | 01-18-2026 | 01-22-2026 10:30:00 |
 | FEATURE-006 | Settings & Configuration | v1.0 | Implemented | [specification.md](../requirements/FEATURE-006/specification.md) | 01-18-2026 | 01-19-2026 14:30:00 |
 | FEATURE-007 | Git Integration | v1.0 | Planned | - | 01-18-2026 | 01-18-2026 00:10:00 |
+| FEATURE-008 | Workplace (Idea Management) | v1.0 | Completed | [specification.md](../requirements/FEATURE-008/specification.md) | 01-22-2026 | 01-22-2026 11:42:00 |
+| FEATURE-009 | File Change Indicator | v1.0 | Implemented | [specification.md](../requirements/FEATURE-009/specification.md) | 01-22-2026 | 01-22-2026 11:20:00 |
 
 ---
 
@@ -39,14 +41,15 @@ This board tracks all features across the project lifecycle.
 - None
 
 ### Designed (1)
-- FEATURE-005: Interactive Console v2.0 🆕
+- FEATURE-005: Interactive Console v2.0
 
-### Implemented (5)
+### Implemented (6)
 - FEATURE-001: Project Navigation
 - FEATURE-002: Content Viewer
 - FEATURE-003: Content Editor
 - FEATURE-004: Live Refresh
 - FEATURE-006: Settings & Configuration
+- FEATURE-009: File Change Indicator 🆕
 
 ### Tested (0)
 - None
@@ -140,5 +143,23 @@ This board tracks all features across the project lifecycle.
 **Dependencies:** FEATURE-002  
 **Specification:** -  
 **Technical Design:** -  
+
+---
+
+### FEATURE-008: Workplace (Idea Management)
+
+**Version:** v1.0  
+**Status:** Designed  
+**Description:** Idea upload, tree view navigation, inline editing with auto-save, and folder rename functionality  
+**Dependencies:** None (reuses existing ContentService infrastructure)  
+**Specification:** [specification.md](../requirements/FEATURE-008/specification.md)  
+**Technical Design:** [technical-design.md](../requirements/FEATURE-008/technical-design.md)  
+
+**Key Components:**
+- `IdeasService` - Backend service for idea CRUD operations
+- `WorkplaceView` - Two-column frontend layout
+- `IdeaTree` - Tree navigation with inline rename
+- `IdeaEditor` - Auto-save with 5s debounce
+- `IdeaUploader` - Drag-drop + file picker
 
 ---

@@ -279,6 +279,16 @@
             transform: rotate(-90deg);
         }
         
+        /* Workplace header - special styling */
+        .nav-workplace-header {
+            background-color: rgba(255, 193, 7, 0.1);
+            border-left: 3px solid #ffc107;
+        }
+        
+        .nav-workplace-header:hover {
+            background-color: rgba(255, 193, 7, 0.2);
+        }
+        
         .nav-section-content {
             padding-left: 0.5rem;
         }
@@ -316,6 +326,31 @@
         
         .nav-folder-content {
             padding-left: 1rem;
+        }
+        
+        /* =================================================================
+         * FEATURE-009: File Change Indicator
+         * ================================================================= */
+        .change-indicator {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: var(--bs-warning, #ffc107);
+            border-radius: 50%;
+            margin-right: 6px;
+            flex-shrink: 0;
+            animation: changeIndicatorFadeIn 0.3s ease-in-out;
+            box-shadow: 0 0 4px var(--bs-warning, #ffc107);
+        }
+        
+        .nav-item.has-changes {
+            display: flex;
+            align-items: center;
+        }
+        
+        @keyframes changeIndicatorFadeIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
         }
         
         .nav-empty {
@@ -477,6 +512,238 @@
         .auto-refresh-toggle .form-check-input:checked {
             background-color: #28a745;
             border-color: #28a745;
+        }
+        
+        /* =================================================================
+         * WORKPLACE - FEATURE-008
+         * ================================================================= */
+        .workplace-container {
+            display: flex;
+            height: 100%;
+            width: 100%;
+        }
+        
+        .workplace-sidebar {
+            width: 280px;
+            min-width: 280px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .workplace-upload-btn {
+            margin: 12px;
+            flex-shrink: 0;
+        }
+        
+        .workplace-tree {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 8px 8px;
+        }
+        
+        .workplace-tree-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .workplace-tree-item {
+            cursor: pointer;
+        }
+        
+        .workplace-tree-item-content {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: background-color 0.15s;
+        }
+        
+        .workplace-tree-item-content:hover {
+            background-color: #e9ecef;
+        }
+        
+        .workplace-tree-item-content i {
+            color: #6c757d;
+            flex-shrink: 0;
+        }
+        
+        .workplace-tree-item.has-children > ul {
+            display: none;
+        }
+        
+        .workplace-tree-item.has-children.expanded > ul {
+            display: block;
+        }
+        
+        .workplace-tree-item.has-children > .workplace-tree-item-content::before {
+            content: '\F229';
+            font-family: 'bootstrap-icons';
+            font-size: 0.7rem;
+            margin-right: 2px;
+            transition: transform 0.15s;
+        }
+        
+        .workplace-tree-item.has-children.expanded > .workplace-tree-item-content::before {
+            transform: rotate(90deg);
+        }
+        
+        .workplace-tree-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .workplace-rename-input {
+            border: 1px solid #007bff;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 0.85rem;
+            width: 100%;
+            outline: none;
+        }
+        
+        .workplace-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: #fff;
+        }
+        
+        .workplace-placeholder,
+        .workplace-empty,
+        .workplace-error {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #6c757d;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .workplace-placeholder i,
+        .workplace-empty i,
+        .workplace-error i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .workplace-error i {
+            color: #dc3545;
+        }
+        
+        /* Workplace Editor */
+        .workplace-editor {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .workplace-editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            flex-shrink: 0;
+        }
+        
+        .workplace-editor-path {
+            font-size: 0.85rem;
+            color: #6c757d;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .workplace-editor-status {
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .workplace-editor-status i.spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        .workplace-editor-textarea {
+            flex: 1;
+            width: 100%;
+            border: none;
+            padding: 12px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+        }
+        
+        .workplace-editor-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+        
+        /* Workplace Uploader */
+        .workplace-uploader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 2rem;
+        }
+        
+        .workplace-dropzone {
+            width: 100%;
+            max-width: 500px;
+            padding: 3rem 2rem;
+            border: 2px dashed #adb5bd;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .workplace-dropzone:hover,
+        .workplace-dropzone.dragover {
+            border-color: #007bff;
+            background-color: #f0f7ff;
+        }
+        
+        .workplace-dropzone i {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+        
+        .workplace-dropzone.dragover i {
+            color: #007bff;
+        }
+        
+        .workplace-dropzone.uploading {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        
+        .workplace-upload-status {
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #6c757d;
         }
         
         /* Markdown Body Styles - FEATURE-002 */

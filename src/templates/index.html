@@ -664,6 +664,559 @@ class ContentEditor {
 }
 
 /**
+ * Workplace Manager
+ * FEATURE-008: Workplace (Idea Management)
+ * 
+ * Two-column view for managing ideas with upload, tree navigation,
+ * inline editing with auto-save, and folder rename.
+ */
+class WorkplaceManager {
+    constructor() {
+        this.currentView = 'tree'; // tree | upload | editor
+        this.currentPath = null;
+        this.saveTimer = null;
+        this.saveDelay = 5000; // 5 seconds auto-save delay
+        this.hasUnsavedChanges = false;
+        this.originalContent = '';
+        this.renamingFolder = null;
+    }
+    
+    /**
+     * Render the workplace view in the content area
+     */
+    async render(container) {
+        container.innerHTML = `
+            <div class="workplace-container">
+                <div class="workplace-sidebar">
+                    <button class="btn btn-primary workplace-upload-btn" id="workplace-upload-btn">
+                        <i class="bi bi-cloud-upload"></i> Upload Idea
+                    </button>
+                    <div class="workplace-tree" id="workplace-tree">
+                        <div class="loading-spinner">
+                            <div class="spinner-border spinner-border-sm" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="workplace-content" id="workplace-content">
+                    <div class="workplace-placeholder">
+                        <i class="bi bi-lightbulb"></i>
+                        <h5>Welcome to Workplace</h5>
+                        <p class="text-muted">Upload an idea or select a file from the tree</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Bind events
+        document.getElementById('workplace-upload-btn').addEventListener('click', () => {
+            this.showUploadView();
+        });
+        
+        // Load tree
+        await this.loadTree();
+    }
+    
+    /**
+     * Load and render the idea tree
+     */
+    async loadTree() {
+        const treeContainer = document.getElementById('workplace-tree');
+        if (!treeContainer) return;
+        
+        try {
+            const response = await fetch('/api/ideas/tree');
+            const data = await response.json();
+            
+            if (data.success && data.tree) {
+                this.renderTree(treeContainer, data.tree);
+            } else {
+                treeContainer.innerHTML = `
+                    <div class="workplace-empty">
+                        <i class="bi bi-folder-x"></i>
+                        <p>No ideas yet</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Failed to load idea tree:', error);
+            treeContainer.innerHTML = `
+                <div class="workplace-error">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <p>Failed to load ideas</p>
+                </div>
+            `;
+        }
+    }
+    
+    /**
+     * Render tree nodes recursively
+     */
+    renderTree(container, nodes, level = 0) {
+        if (!nodes || nodes.length === 0) {
+            container.innerHTML = `
+                <div class="workplace-empty">
+                    <i class="bi bi-folder-x"></i>
+                    <p>No ideas yet</p>
+                </div>
+            `;
+            return;
+        }
+        
+        const ul = document.createElement('ul');
+        ul.className = 'workplace-tree-list';
+        if (level === 0) ul.classList.add('workplace-tree-root');
+        
+        for (const node of nodes) {
+            const li = document.createElement('li');
+            li.className = 'workplace-tree-item';
+            li.dataset.path = node.path;
+            li.dataset.type = node.type;
+            li.dataset.name = node.name;
+            
+            const itemContent = document.createElement('div');
+            itemContent.className = 'workplace-tree-item-content';
+            itemContent.style.paddingLeft = `${level * 16 + 8}px`;
+            
+            const icon = document.createElement('i');
+            icon.className = node.type === 'folder' ? 'bi bi-folder' : 'bi bi-file-earmark';
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'workplace-tree-name';
+            nameSpan.textContent = node.name;
+            
+            itemContent.appendChild(icon);
+            itemContent.appendChild(nameSpan);
+            li.appendChild(itemContent);
+            
+            // Event handlers
+            if (node.type === 'file') {
+                itemContent.addEventListener('click', () => this.openFile(node.path));
+            } else {
+                // Folder: click to toggle, double-click to rename (only top-level)
+                itemContent.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    li.classList.toggle('expanded');
+                });
+                
+                // Only allow rename on top-level idea folders
+                if (level === 0) {
+                    itemContent.addEventListener('dblclick', (e) => {
+                        e.stopPropagation();
+                        this.startFolderRename(li, node.name);
+                    });
+                }
+            }
+            
+            // Render children
+            if (node.children && node.children.length > 0) {
+                this.renderTree(li, node.children, level + 1);
+                li.classList.add('has-children');
+            }
+            
+            ul.appendChild(li);
+        }
+        
+        container.innerHTML = '';
+        container.appendChild(ul);
+    }
+    
+    /**
+     * Start inline folder rename
+     */
+    startFolderRename(li, currentName) {
+        if (this.renamingFolder) return;
+        
+        this.renamingFolder = li;
+        const nameSpan = li.querySelector('.workplace-tree-name');
+        const originalName = currentName;
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'workplace-rename-input';
+        input.value = currentName;
+        
+        nameSpan.replaceWith(input);
+        input.focus();
+        input.select();
+        
+        const finishRename = async (save) => {
+            if (!this.renamingFolder) return;
+            
+            const newName = input.value.trim();
+            this.renamingFolder = null;
+            
+            if (save && newName && newName !== originalName) {
+                try {
+                    const response = await fetch('/api/ideas/rename', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            old_name: originalName,
+                            new_name: newName
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        this._showToast('Folder renamed successfully', 'success');
+                        await this.loadTree();
+                    } else {
+                        this._showToast(result.error || 'Failed to rename folder', 'error');
+                        // Restore original name
+                        const newSpan = document.createElement('span');
+                        newSpan.className = 'workplace-tree-name';
+                        newSpan.textContent = originalName;
+                        input.replaceWith(newSpan);
+                    }
+                } catch (error) {
+                    console.error('Failed to rename folder:', error);
+                    this._showToast('Failed to rename folder', 'error');
+                    const newSpan = document.createElement('span');
+                    newSpan.className = 'workplace-tree-name';
+                    newSpan.textContent = originalName;
+                    input.replaceWith(newSpan);
+                }
+            } else {
+                const newSpan = document.createElement('span');
+                newSpan.className = 'workplace-tree-name';
+                newSpan.textContent = originalName;
+                input.replaceWith(newSpan);
+            }
+        };
+        
+        input.addEventListener('blur', () => finishRename(true));
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                finishRename(true);
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                finishRename(false);
+            }
+        });
+    }
+    
+    /**
+     * Open a file in the editor
+     */
+    async openFile(path) {
+        // Check for unsaved changes
+        if (this.hasUnsavedChanges) {
+            if (!window.confirm('You have unsaved changes. Do you want to discard them?')) {
+                return;
+            }
+        }
+        
+        this.currentView = 'editor';
+        this.currentPath = path;
+        this.hasUnsavedChanges = false;
+        
+        const contentArea = document.getElementById('workplace-content');
+        contentArea.innerHTML = `
+            <div class="workplace-editor">
+                <div class="workplace-editor-header">
+                    <span class="workplace-editor-path">${this._escapeHtml(path)}</span>
+                    <span class="workplace-editor-status" id="workplace-editor-status"></span>
+                </div>
+                <div class="workplace-editor-loading">
+                    <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        try {
+            const response = await fetch(`/api/file/content?path=${encodeURIComponent(path)}`);
+            const data = await response.json();
+            
+            this.originalContent = data.content || '';
+            this.renderEditor(contentArea, data.content || '');
+        } catch (error) {
+            console.error('Failed to load file:', error);
+            contentArea.innerHTML = `
+                <div class="workplace-error">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <p>Failed to load file</p>
+                </div>
+            `;
+        }
+    }
+    
+    /**
+     * Render the editor with content
+     */
+    renderEditor(container, content) {
+        container.innerHTML = `
+            <div class="workplace-editor">
+                <div class="workplace-editor-header">
+                    <span class="workplace-editor-path">${this._escapeHtml(this.currentPath)}</span>
+                    <span class="workplace-editor-status" id="workplace-editor-status"></span>
+                </div>
+                <textarea class="workplace-editor-textarea" id="workplace-editor-textarea">${this._escapeHtml(content)}</textarea>
+            </div>
+        `;
+        
+        const textarea = document.getElementById('workplace-editor-textarea');
+        textarea.addEventListener('input', () => {
+            this.onContentChange();
+        });
+    }
+    
+    /**
+     * Handle content change - schedule auto-save
+     */
+    onContentChange() {
+        this.hasUnsavedChanges = true;
+        this.updateStatus('modified');
+        
+        // Clear existing timer
+        if (this.saveTimer) {
+            clearTimeout(this.saveTimer);
+        }
+        
+        // Schedule save after 5 seconds
+        this.saveTimer = setTimeout(() => {
+            this.saveContent();
+        }, this.saveDelay);
+    }
+    
+    /**
+     * Save the current content
+     */
+    async saveContent() {
+        if (!this.currentPath || !this.hasUnsavedChanges) return;
+        
+        const textarea = document.getElementById('workplace-editor-textarea');
+        if (!textarea) return;
+        
+        const content = textarea.value;
+        this.updateStatus('saving');
+        
+        try {
+            const response = await fetch('/api/file/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    path: this.currentPath,
+                    content: content
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this.originalContent = content;
+                this.hasUnsavedChanges = false;
+                this.updateStatus('saved');
+                
+                // Clear saved status after 2 seconds
+                setTimeout(() => {
+                    if (!this.hasUnsavedChanges) {
+                        this.updateStatus('');
+                    }
+                }, 2000);
+            } else {
+                throw new Error(result.error || 'Failed to save');
+            }
+        } catch (error) {
+            console.error('Failed to save file:', error);
+            this.updateStatus('error');
+            this._showToast('Failed to save file', 'error');
+        }
+    }
+    
+    /**
+     * Update editor status indicator
+     */
+    updateStatus(status) {
+        const statusEl = document.getElementById('workplace-editor-status');
+        if (!statusEl) return;
+        
+        switch (status) {
+            case 'modified':
+                statusEl.innerHTML = '<i class="bi bi-circle-fill text-warning"></i> Modified';
+                break;
+            case 'saving':
+                statusEl.innerHTML = '<i class="bi bi-arrow-repeat spin"></i> Saving...';
+                break;
+            case 'saved':
+                statusEl.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Saved';
+                break;
+            case 'error':
+                statusEl.innerHTML = '<i class="bi bi-exclamation-circle-fill text-danger"></i> Save failed';
+                break;
+            default:
+                statusEl.innerHTML = '';
+        }
+    }
+    
+    /**
+     * Show upload view
+     */
+    showUploadView() {
+        // Check for unsaved changes
+        if (this.hasUnsavedChanges) {
+            if (!window.confirm('You have unsaved changes. Do you want to discard them?')) {
+                return;
+            }
+        }
+        
+        this.currentView = 'upload';
+        this.currentPath = null;
+        this.hasUnsavedChanges = false;
+        
+        const contentArea = document.getElementById('workplace-content');
+        contentArea.innerHTML = `
+            <div class="workplace-uploader">
+                <div class="workplace-dropzone" id="workplace-dropzone">
+                    <i class="bi bi-cloud-upload"></i>
+                    <h5>Drag & Drop Files Here</h5>
+                    <p class="text-muted">or click to browse</p>
+                    <input type="file" id="workplace-file-input" multiple style="display: none;">
+                </div>
+                <div class="workplace-upload-status d-none" id="workplace-upload-status">
+                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                    <span>Uploading...</span>
+                </div>
+            </div>
+        `;
+        
+        this.setupUploader();
+    }
+    
+    /**
+     * Setup upload event handlers
+     */
+    setupUploader() {
+        const dropzone = document.getElementById('workplace-dropzone');
+        const fileInput = document.getElementById('workplace-file-input');
+        
+        if (!dropzone || !fileInput) return;
+        
+        // Click to browse
+        dropzone.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                this.uploadFiles(e.target.files);
+            }
+        });
+        
+        // Drag and drop
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+        
+        dropzone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+        });
+        
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length > 0) {
+                this.uploadFiles(e.dataTransfer.files);
+            }
+        });
+    }
+    
+    /**
+     * Upload files to the server
+     */
+    async uploadFiles(files) {
+        const statusEl = document.getElementById('workplace-upload-status');
+        const dropzone = document.getElementById('workplace-dropzone');
+        
+        if (statusEl) statusEl.classList.remove('d-none');
+        if (dropzone) dropzone.classList.add('uploading');
+        
+        try {
+            const formData = new FormData();
+            for (const file of files) {
+                formData.append('files', file);
+            }
+            
+            const response = await fetch('/api/ideas/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this._showToast(`Uploaded ${result.files_uploaded.length} file(s) to ${result.folder_name}`, 'success');
+                await this.loadTree();
+                
+                // Show placeholder after successful upload
+                const contentArea = document.getElementById('workplace-content');
+                contentArea.innerHTML = `
+                    <div class="workplace-placeholder">
+                        <i class="bi bi-check-circle text-success"></i>
+                        <h5>Upload Complete</h5>
+                        <p class="text-muted">Files uploaded to ${this._escapeHtml(result.folder_name)}</p>
+                    </div>
+                `;
+            } else {
+                throw new Error(result.error || 'Upload failed');
+            }
+        } catch (error) {
+            console.error('Upload failed:', error);
+            this._showToast(error.message || 'Upload failed', 'error');
+            
+            if (statusEl) statusEl.classList.add('d-none');
+            if (dropzone) dropzone.classList.remove('uploading');
+        }
+    }
+    
+    /**
+     * Show toast notification
+     */
+    _showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) return;
+        
+        const toast = document.createElement('div');
+        toast.className = `toast-notification toast-${type}`;
+        
+        const icon = type === 'success' ? 'bi-check-circle' : 
+                     type === 'error' ? 'bi-exclamation-circle' : 'bi-info-circle';
+        
+        toast.innerHTML = `
+            <i class="bi ${icon}"></i>
+            <span>${message}</span>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Trigger animation
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        // Remove after delay
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+    
+    /**
+     * Escape HTML special characters
+     */
+    _escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text || '';
+        return div.innerHTML;
+    }
+}
+
+/**
  * Content Refresh Manager
  * FEATURE-004: Live Refresh (Polling Implementation)
  * 
@@ -1165,6 +1718,10 @@ class ProjectSidebar {
         this.lastStructureHash = null;
         this.pollInterval = 5000; // 5 seconds
         
+        // FEATURE-009: Track changed paths for visual indicator
+        this.changedPaths = new Set();
+        this.previousPaths = new Set();
+        
         this._startPolling();
     }
     
@@ -1189,16 +1746,23 @@ class ProjectSidebar {
             const data = await response.json();
             const newHash = this._hashStructure(data.sections);
             
-            // First load - just cache
+            // First load - initialize paths
             if (this.lastStructureHash === null) {
                 this.lastStructureHash = newHash;
+                this.previousPaths = this._extractAllPaths(data.sections);
                 return;
             }
             
             // Check if structure changed
             if (this.lastStructureHash !== newHash) {
-                console.log('[ProjectSidebar] Structure changed, refreshing...');
+                console.log('[ProjectSidebar] Structure changed, detecting changes...');
+                
+                // FEATURE-009: Detect which paths changed
+                const currentPaths = this._extractAllPaths(data.sections);
+                this._detectChangedPaths(this.previousPaths, currentPaths);
+                
                 this.lastStructureHash = newHash;
+                this.previousPaths = currentPaths;
                 this.sections = data.sections;
                 this.render();
                 this.showToast('File structure updated', 'info');
@@ -1215,6 +1779,118 @@ class ProjectSidebar {
         return JSON.stringify(sections);
     }
     
+    // =========================================================================
+    // FEATURE-009: File Change Indicator
+    // =========================================================================
+    
+    /**
+     * Extract all file/folder paths from structure
+     */
+    _extractAllPaths(sections) {
+        const paths = new Set();
+        
+        const traverse = (items) => {
+            for (const item of items) {
+                if (item.path) {
+                    paths.add(item.path);
+                }
+                if (item.children) {
+                    traverse(item.children);
+                }
+            }
+        };
+        
+        for (const section of sections) {
+            if (section.children) {
+                traverse(section.children);
+            }
+        }
+        
+        return paths;
+    }
+    
+    /**
+     * Detect changed paths between old and new structure
+     */
+    _detectChangedPaths(oldPaths, newPaths) {
+        // Find new paths (added)
+        for (const path of newPaths) {
+            if (!oldPaths.has(path)) {
+                console.log('[ProjectSidebar] New path detected:', path);
+                this._addChangedPath(path);
+            }
+        }
+        
+        // Find removed paths (mark parent as changed)
+        for (const path of oldPaths) {
+            if (!newPaths.has(path)) {
+                console.log('[ProjectSidebar] Removed path detected:', path);
+                const parent = this._getParentPath(path);
+                if (parent) {
+                    this._addChangedPath(parent);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Add path and bubble up to parents
+     */
+    _addChangedPath(path) {
+        if (!path) return;
+        
+        this.changedPaths.add(path);
+        
+        // Bubble up to parents
+        const parts = path.split('/');
+        for (let i = parts.length - 1; i > 0; i--) {
+            const parentPath = parts.slice(0, i).join('/');
+            this.changedPaths.add(parentPath);
+        }
+    }
+    
+    /**
+     * Clear path and cleanup parents if no changed children
+     */
+    _clearChangedPath(path) {
+        if (!this.changedPaths.has(path)) return;
+        
+        this.changedPaths.delete(path);
+        console.log('[ProjectSidebar] Cleared change indicator for:', path);
+        
+        // Check parents - clear if no other changed children
+        const parts = path.split('/');
+        for (let i = parts.length - 1; i > 0; i--) {
+            const parentPath = parts.slice(0, i).join('/');
+            if (!this._hasChangedChildren(parentPath)) {
+                this.changedPaths.delete(parentPath);
+                console.log('[ProjectSidebar] Cleared parent indicator for:', parentPath);
+            }
+        }
+    }
+    
+    /**
+     * Check if folder has any changed children
+     */
+    _hasChangedChildren(folderPath) {
+        const prefix = folderPath + '/';
+        for (const path of this.changedPaths) {
+            if (path.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Get parent path
+     */
+    _getParentPath(path) {
+        const parts = path.split('/');
+        if (parts.length <= 1) return null;
+        return parts.slice(0, -1).join('/');
+    }
+    
     /**
      * Load project structure from API
      */
@@ -1228,6 +1904,7 @@ class ProjectSidebar {
             const data = await response.json();
             this.sections = data.sections;
             this.lastStructureHash = this._hashStructure(data.sections);
+            this.previousPaths = this._extractAllPaths(data.sections);
             this.render();
         } catch (error) {
             console.error('Failed to load project structure:', error);
@@ -1264,6 +1941,18 @@ class ProjectSidebar {
     renderSection(section) {
         const icon = section.icon || 'bi-folder';
         const hasChildren = section.children && section.children.length > 0;
+        
+        // Special handling for Workplace section - no expandable content
+        if (section.id === 'workplace') {
+            return `
+                <div class="nav-section" data-section-id="${section.id}">
+                    <div class="nav-section-header nav-workplace-header" data-section-id="${section.id}">
+                        <i class="bi ${icon}"></i>
+                        <span>${section.label}</span>
+                    </div>
+                </div>
+            `;
+        }
         
         let html = `
             <div class="nav-section" data-section-id="${section.id}">
@@ -1316,12 +2005,15 @@ class ProjectSidebar {
         const folderId = folder.path.replace(/[\/\.]/g, '-');
         const hasChildren = folder.children && folder.children.length > 0;
         const paddingLeft = 2 + (depth * 0.75);
+        const isChanged = this.changedPaths.has(folder.path);
         
         let html = `
-            <div class="nav-item nav-folder" 
+            <div class="nav-item nav-folder${isChanged ? ' has-changes' : ''}" 
                  style="padding-left: ${paddingLeft}rem"
                  data-bs-toggle="collapse" 
-                 data-bs-target="#folder-${folderId}">
+                 data-bs-target="#folder-${folderId}"
+                 data-path="${folder.path}">
+                ${isChanged ? '<span class="change-indicator"></span>' : ''}
                 <i class="bi bi-folder"></i>
                 <span>${folder.name}</span>
                 ${hasChildren ? '<i class="bi bi-chevron-down chevron ms-auto" style="font-size: 0.7rem;"></i>' : ''}
@@ -1346,11 +2038,13 @@ class ProjectSidebar {
         const icon = this.getFileIcon(file.name);
         const paddingLeft = 2 + (depth * 0.75);
         const isActive = this.selectedFile === file.path;
+        const isChanged = this.changedPaths.has(file.path);
         
         return `
-            <div class="nav-item nav-file ${isActive ? 'active' : ''}" 
+            <div class="nav-item nav-file${isActive ? ' active' : ''}${isChanged ? ' has-changes' : ''}" 
                  style="padding-left: ${paddingLeft}rem"
                  data-path="${file.path}">
+                ${isChanged ? '<span class="change-indicator"></span>' : ''}
                 <i class="bi ${icon}"></i>
                 <span>${file.name}</span>
             </div>
@@ -1392,12 +2086,44 @@ class ProjectSidebar {
                 
                 const path = item.dataset.path;
                 this.selectedFile = path;
+                
+                // FEATURE-009: Clear change indicator for this file
+                if (this.changedPaths.has(path)) {
+                    this._clearChangedPath(path);
+                    // Update UI - remove indicator and class
+                    item.classList.remove('has-changes');
+                    const indicator = item.querySelector('.change-indicator');
+                    if (indicator) indicator.remove();
+                    // Update parent folders if needed
+                    this._updateParentIndicators(path);
+                }
+                
                 this.onFileSelect(path);
             });
         });
         
+        // Workplace section click handler
+        const workplaceHeader = this.container.querySelector('.nav-workplace-header');
+        if (workplaceHeader) {
+            workplaceHeader.addEventListener('click', () => {
+                // Clear file selection
+                fileItems.forEach(f => f.classList.remove('active'));
+                this.selectedFile = null;
+                
+                // Update breadcrumb
+                const breadcrumb = document.getElementById('breadcrumb');
+                breadcrumb.innerHTML = '<li class="breadcrumb-item active">Workplace</li>';
+                
+                // Render WorkplaceManager view
+                const container = document.getElementById('content-body');
+                if (window.workplaceManager) {
+                    window.workplaceManager.render(container);
+                }
+            });
+        }
+        
         // Section header collapse tracking
-        const sectionHeaders = this.container.querySelectorAll('.nav-section-header');
+        const sectionHeaders = this.container.querySelectorAll('.nav-section-header:not(.nav-workplace-header)');
         sectionHeaders.forEach(header => {
             const target = document.querySelector(header.dataset.bsTarget);
             if (target) {
@@ -1409,6 +2135,25 @@ class ProjectSidebar {
                 });
             }
         });
+    }
+    
+    /**
+     * FEATURE-009: Update parent folder indicators after clearing a file
+     */
+    _updateParentIndicators(path) {
+        const parts = path.split('/');
+        for (let i = parts.length - 1; i > 0; i--) {
+            const parentPath = parts.slice(0, i).join('/');
+            if (!this.changedPaths.has(parentPath)) {
+                // Find and update the parent folder element
+                const parentEl = this.container.querySelector(`.nav-folder[data-path="${parentPath}"]`);
+                if (parentEl) {
+                    parentEl.classList.remove('has-changes');
+                    const indicator = parentEl.querySelector('.change-indicator');
+                    if (indicator) indicator.remove();
+                }
+            }
+        }
     }
     
     /**
@@ -1489,6 +2234,10 @@ document.addEventListener('DOMContentLoaded', () => {
         contentRenderer: contentRenderer
     });
     window.contentEditor = contentEditor;
+    
+    // Initialize workplace manager (FEATURE-008)
+    const workplaceManager = new WorkplaceManager();
+    window.workplaceManager = workplaceManager;
     
     // Initialize planning file poller (5s HTTP polling for task-board.md & features.md)
     // Standalone - no sockets, just polls every 5 seconds

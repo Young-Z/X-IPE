@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-008: Workplace (Idea Management)** - Dedicated space for idea management
+  - Two-column layout with tree navigation and content editor
+  - IdeasService backend with get_tree(), upload(), rename_folder() methods
+  - API endpoints: GET /api/ideas/tree, POST /api/ideas/upload, POST /api/ideas/rename
+  - File upload via drag-and-drop or click-to-browse
+  - Auto-save editor with 5-second debounce and status indicator (Saving.../Saved)
+  - Inline folder rename on double-click
+  - Uploads stored in `docs/ideas/{Draft Idea - MMDDYYYY HHMMSS}/` (files directly in folder)
+  - Workplace appears as first item in sidebar navigation
+
 - **FEATURE-005 v4.0: Interactive Console** - Full-featured terminal with xterm.js
   - xterm.js 5.3.0 integration with 256-color support
   - Session persistence (1 hour timeout, 10KB output buffer)

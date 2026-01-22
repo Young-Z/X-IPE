@@ -17,14 +17,15 @@ from pathlib import Path
 class TestProjectService:
     """Unit tests for ProjectService class"""
 
-    def test_get_structure_returns_three_sections(self, app, project_service):
-        """AC-2: Three top-level menu sections exist"""
+    def test_get_structure_returns_four_sections(self, app, project_service):
+        """AC-2: Four top-level menu sections exist (including Workplace)"""
         structure = project_service.get_structure()
         
         assert 'sections' in structure
-        assert len(structure['sections']) == 3
+        assert len(structure['sections']) == 4
         
         section_ids = [s['id'] for s in structure['sections']]
+        assert 'workplace' in section_ids
         assert 'planning' in section_ids
         assert 'requirements' in section_ids
         assert 'code' in section_ids

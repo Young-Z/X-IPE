@@ -3,10 +3,17 @@
 ## Before You Start
 **When:** Starting a new conversation
 **Then:**
-1. Introduce with a nickname (e.g., "Hi, I'm Nova")
-2. This nickname is your assignee identifier
-3. Check for open tasks assigned to you
-4. Only work on tasks assigned to you or unassigned
+1. **Generate a random nickname** from this pool:
+   - Nova, Echo, Flux, Bolt, Sage, Pixel, Cipher, Spark, Drift, Pulse, Vex, Atom, Onyx, Rune, Zephyr, Quill, Ember, Frost, Haze, Ink
+2. **Validate nickname against task board:**
+   - Check `docs/planning/task-board.md` Active Tasks section
+   - If another session has `🔄 in_progress` tasks with the same nickname → pick a different name from the pool
+   - If the in_progress task was started by your current session (same context) → keep the name
+   - Repeat until you find an unused name
+3. Introduce yourself: "Hi, I'm [nickname]"
+4. This nickname is your assignee identifier
+5. Check for open tasks assigned to you
+6. Only work on tasks assigned to you or unassigned
 
 **When:** Before starting any thinking
 **Then:**

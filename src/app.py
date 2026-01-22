@@ -16,12 +16,15 @@ import sys
 from flask import Flask, render_template, jsonify, request, current_app
 from flask_socketio import SocketIO, emit
 
-from src.services import ProjectService, ContentService, SettingsService, ProjectFoldersService
+from src.services import ProjectService, ContentService, SettingsService, ProjectFoldersService, IdeasService
 from src.services import session_manager
 from src.config import config_by_name
 
 # Global settings service instance
 settings_service = None
+
+# Global ideas service instance (FEATURE-008)
+ideas_service = None
 
 # Global project folders service instance (FEATURE-006 v2.0)
 project_folders_service = None
@@ -63,7 +66,7 @@ def create_app(config=None):
         app.config.from_object(config)
     
     # Initialize settings service
-    global settings_service, project_folders_service
+    global settings_service, project_folders_service, ideas_service
     db_path = app.config.get('SETTINGS_DB_PATH', app.config.get('SETTINGS_DB', os.path.join(app.instance_path, 'settings.db')))
     settings_service = SettingsService(db_path)
     project_folders_service = ProjectFoldersService(db_path)
@@ -79,6 +82,7 @@ def create_app(config=None):
     register_routes(app)
     register_settings_routes(app)
     register_project_routes(app)
+    register_ideas_routes(app)  # FEATURE-008
     
     # Initialize Socket.IO with the app
     socketio.init_app(app)
@@ -512,6 +516,122 @@ def register_project_routes(app):
             project = result['project']
             app.config['PROJECT_ROOT'] = project['path']
             
+            return jsonify(result)
+        return jsonify(result), 400
+
+
+def register_ideas_routes(app):
+    """
+    Register idea management routes.
+    
+    FEATURE-008: Workplace (Idea Management)
+    """
+    
+    @app.route('/api/ideas/tree', methods=['GET'])
+    def get_ideas_tree():
+        """
+        GET /api/ideas/tree
+        
+        Get tree structure of docs/ideas/ directory.
+        
+        Response:
+            - success: true
+            - tree: array of folder/file objects
+        """
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        service = IdeasService(project_root)
+        
+        try:
+            tree = service.get_tree()
+            return jsonify({
+                'success': True,
+                'tree': tree
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @app.route('/api/ideas/upload', methods=['POST'])
+    def upload_ideas():
+        """
+        POST /api/ideas/upload
+        
+        Upload files to a new idea folder.
+        
+        Request: multipart/form-data with 'files' field
+        
+        Response:
+            - success: true/false
+            - folder_name: string
+            - folder_path: string
+            - files_uploaded: array of filenames
+        """
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        service = IdeasService(project_root)
+        
+        if 'files' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No files provided'
+            }), 400
+        
+        uploaded_files = request.files.getlist('files')
+        if not uploaded_files or all(f.filename == '' for f in uploaded_files):
+            return jsonify({
+                'success': False,
+                'error': 'No files provided'
+            }), 400
+        
+        # Convert to (filename, content) tuples
+        files = [(f.filename, f.read()) for f in uploaded_files if f.filename]
+        
+        result = service.upload(files)
+        
+        if result['success']:
+            return jsonify(result)
+        return jsonify(result), 400
+    
+    @app.route('/api/ideas/rename', methods=['POST'])
+    def rename_idea_folder():
+        """
+        POST /api/ideas/rename
+        
+        Rename an idea folder.
+        
+        Request body:
+            - old_name: string - Current folder name
+            - new_name: string - New folder name
+        
+        Response:
+            - success: true/false
+            - old_name: string
+            - new_name: string
+            - new_path: string
+        """
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        service = IdeasService(project_root)
+        
+        if not request.is_json:
+            return jsonify({
+                'success': False,
+                'error': 'JSON required'
+            }), 400
+        
+        data = request.get_json()
+        old_name = data.get('old_name')
+        new_name = data.get('new_name')
+        
+        if not old_name or not new_name:
+            return jsonify({
+                'success': False,
+                'error': 'old_name and new_name are required'
+            }), 400
+        
+        result = service.rename_folder(old_name, new_name)
+        
+        if result['success']:
             return jsonify(result)
         return jsonify(result), 400
 
