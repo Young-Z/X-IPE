@@ -787,6 +787,154 @@ class IdeasService:
             counter += 1
         
         return name
+    
+    def delete_item(self, path: str) -> Dict[str, Any]:
+        """
+        Delete a file or folder within docs/ideas/.
+        
+        Args:
+            path: Relative path from project root (e.g., 'docs/ideas/folder/file.md')
+        
+        Returns:
+            Dict with success, path, type or error
+        """
+        import shutil
+        
+        if not path:
+            return {
+                'success': False,
+                'error': 'Path is required'
+            }
+        
+        # Validate path is within ideas directory
+        full_path = self.project_root / path
+        
+        try:
+            # Resolve to prevent path traversal attacks
+            resolved_path = full_path.resolve()
+            ideas_resolved = self.ideas_root.resolve()
+            
+            if not str(resolved_path).startswith(str(ideas_resolved)):
+                return {
+                    'success': False,
+                    'error': 'Path must be within docs/ideas/'
+                }
+        except Exception:
+            return {
+                'success': False,
+                'error': 'Invalid path'
+            }
+        
+        if not full_path.exists():
+            return {
+                'success': False,
+                'error': f'Path not found: {path}'
+            }
+        
+        item_type = 'folder' if full_path.is_dir() else 'file'
+        
+        try:
+            if full_path.is_dir():
+                shutil.rmtree(full_path)
+            else:
+                full_path.unlink()
+            
+            return {
+                'success': True,
+                'path': path,
+                'type': item_type
+            }
+        except OSError as e:
+            return {
+                'success': False,
+                'error': f'Failed to delete: {str(e)}'
+            }
+    
+    def get_next_version_number(self, folder_path: str, base_name: str = 'idea-summary') -> int:
+        """
+        Get the next version number for a versioned file.
+        
+        Args:
+            folder_path: Relative path to the idea folder
+            base_name: Base name of the file (default: 'idea-summary')
+        
+        Returns:
+            Next version number (1 if no versions exist)
+        """
+        full_folder = self.project_root / folder_path
+        if not full_folder.exists():
+            return 1
+        
+        # Find existing versions
+        pattern = re.compile(rf'^{re.escape(base_name)}-v(\d+)\.md$')
+        max_version = 0
+        
+        for item in full_folder.iterdir():
+            if item.is_file():
+                match = pattern.match(item.name)
+                if match:
+                    version = int(match.group(1))
+                    max_version = max(max_version, version)
+        
+        return max_version + 1
+    
+    def create_versioned_summary(self, folder_path: str, content: str, base_name: str = 'idea-summary') -> Dict[str, Any]:
+        """
+        Create a new versioned idea summary file.
+        
+        Args:
+            folder_path: Relative path to the idea folder (e.g., 'docs/ideas/MyIdea')
+            content: Markdown content for the summary
+            base_name: Base name of the file (default: 'idea-summary')
+        
+        Returns:
+            Dict with success, file_path, version or error
+        """
+        full_folder = self.project_root / folder_path
+        
+        if not full_folder.exists():
+            return {
+                'success': False,
+                'error': f'Folder not found: {folder_path}'
+            }
+        
+        # Validate path is within ideas directory
+        try:
+            resolved_path = full_folder.resolve()
+            ideas_resolved = self.ideas_root.resolve()
+            
+            if not str(resolved_path).startswith(str(ideas_resolved)):
+                return {
+                    'success': False,
+                    'error': 'Folder must be within docs/ideas/'
+                }
+        except Exception:
+            return {
+                'success': False,
+                'error': 'Invalid folder path'
+            }
+        
+        # Get next version number
+        version = self.get_next_version_number(folder_path, base_name)
+        
+        # Create the versioned file
+        filename = f'{base_name}-v{version}.md'
+        file_path = full_folder / filename
+        
+        try:
+            file_path.write_text(content, encoding='utf-8')
+            
+            return {
+                'success': True,
+                'file_path': f'{folder_path}/{filename}',
+                'version': version,
+                'filename': filename
+            }
+        except OSError as e:
+            return {
+                'success': False,
+                'error': f'Failed to create file: {str(e)}'
+            }
 
 
 # =============================================================================

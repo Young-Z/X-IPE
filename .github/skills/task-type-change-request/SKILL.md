@@ -1,0 +1,593 @@
+---
+name: task-type-change-request
+description: Process change requests by analyzing impact on existing requirements and features. Determines if CR modifies existing feature (→ refinement) or requires new feature (→ requirement update + feature breakdown). Triggers on "change request", "CR", "modify feature", "update requirement".
+---
+
+# Task Type: Change Request
+
+## Purpose
+
+Process change requests (CRs) systematically by:
+1. Analyzing the change request against existing requirements and features
+2. Classifying the CR as either modification to existing feature or new feature
+3. Routing to appropriate workflow (Feature Refinement or Requirement Update + Feature Breakdown)
+4. Maintaining traceability and documentation
+
+---
+
+## Important Notes
+
+### Skill Prerequisite
+- If you HAVE NOT learned `task-execution-guideline` skill, please learn it first before executing this skill.
+
+**Important:** If Agent DO NOT have skill capability, can directly go to `.github/skills/` folder to learn skills. And SKILL.md file is the entry point to understand each skill.
+
+---
+
+## Task Type Default Attributes
+
+| Attribute | Value |
+|-----------|-------|
+| Task Type | Change Request |
+| Category | Standalone |
+| Next Task Type | Feature Refinement OR Feature Breakdown (determined by classification) |
+| Require Human Review | Yes |
+
+---
+
+## Skill Output
+
+This skill MUST return these attributes to the Task Data Model:
+
+```yaml
+Output:
+  status: completed | blocked
+  next_task_type: task-type-feature-refinement | task-type-feature-breakdown
+  require_human_review: Yes
+  task_output_links: [docs/requirements/change-requests/CR-XXX.md]
+  
+  # Dynamic attributes (CR-specific)
+  cr_id: CR-XXX
+  cr_classification: modification | new_feature
+  affected_features: [FEATURE-XXX, ...]  # For modifications
+  new_feature_ids: [FEATURE-XXX, ...]    # For new features
+  requirement_updated: true | false
+```
+
+---
+
+## Definition of Ready (DoR)
+
+| # | Checkpoint | Required |
+|---|------------|----------|
+| 1 | Change request description provided | Yes |
+| 2 | Requestor/stakeholder identified | No |
+| 3 | Business justification available | Yes |
+| 4 | docs/requirements/requirement-details.md exists | Yes |
+| 5 | docs/planning/features.md exists | Yes |
+
+---
+
+## Classification Criteria
+
+### Best Practices for CR Classification
+
+Based on software engineering best practices, use these criteria to determine if a CR is a **modification** or **new feature**:
+
+#### Modification/Enhancement (Existing Feature)
+
+| Criteria | Examples |
+|----------|----------|
+| Extends existing behavior | Add sorting to existing search results |
+| Changes parameters/settings | Increase timeout from 30s to 60s |
+| Improves existing workflow | Add confirmation step to existing checkout |
+| Adds options to existing UI | New filter in existing dropdown |
+| Enhances existing API | Add optional parameter to endpoint |
+| Performance improvement | Optimize existing query |
+| Bug-driven enhancement | Add validation that was missing |
+
+**Characteristics:**
+- Works within current system boundaries
+- Builds upon existing user stories
+- No new API endpoints/screens required (just changes to existing)
+- Usually smaller in scope (<1 sprint)
+- Same users, extended functionality
+
+#### New Feature
+
+| Criteria | Examples |
+|----------|----------|
+| Introduces new capability | Add chat when only email exists |
+| New user workflow | Add multi-factor authentication |
+| New data model required | Add inventory tracking to sales app |
+| New API endpoints/screens | Add reporting dashboard |
+| New user type | Add vendor portal to customer app |
+| Independent functionality | Add notification system |
+| Changes product offering | Add subscription tier |
+
+**Characteristics:**
+- Expands system boundaries
+- Requires new user stories
+- Needs new UI screens, API endpoints, or data models
+- Usually larger in scope (≥1 sprint)
+- May require separate documentation/onboarding
+
+---
+
+## Decision Tree
+
+```yaml
+Classification Logic:
+  Step 1: Check if CR relates to existing feature
+    - Search features.md for related functionality
+    - Check if any existing feature covers this domain
+    
+  Step 2: Evaluate based on Step 1 result
+    IF no_related_feature_exists:
+      THEN: classification = "new_feature"
+      ACTION: Update requirements, add to feature board
+      
+    IF related_feature_exists:
+      THEN: Proceed to Step 3
+      
+  Step 3: Evaluate scope change
+    IF cr_changes_fundamental_scope = true:
+      THEN: classification = "new_feature"
+      ACTION: Update requirements, create new feature
+      
+    IF cr_changes_fundamental_scope = false:
+      THEN: classification = "modification"
+      ACTION: Update existing feature specification
+```
+
+### Scope Change Indicators
+
+A CR changes fundamental scope if it:
+- Introduces entirely new workflows
+- Requires new data models
+- Adds new user types or roles
+- Creates new integration points
+- Significantly changes the feature's purpose
+
+---
+
+## Execution Procedure
+
+### Step 1: Understand the Change Request
+
+**Action:** Parse the CR to understand what is being requested
+
+```
+1. Identify WHAT change is being requested
+2. Identify WHO requested it and WHY
+3. Identify WHEN it's needed (priority/urgency)
+4. Document the CR context
+```
+
+**🌐 Web Search (Recommended):**
+Use web search capability to research:
+- Similar features in competitor products
+- Industry standards for the requested change
+- Best practices for the domain
+- Regulatory requirements if applicable
+
+**Output:** CR understanding summary
+
+---
+
+### Step 2: Review Existing Requirements and Features
+
+**Action:** Analyze current state to understand impact
+
+```
+1. READ docs/requirements/requirement-details.md
+   - Understand overall project scope
+   - Identify related high-level requirements
+
+2. READ docs/planning/features.md (Feature Board)
+   - List all existing features
+   - Note feature statuses and dependencies
+   - Identify potentially related features
+
+3. FOR EACH potentially related feature:
+   IF docs/requirements/FEATURE-XXX/specification.md exists:
+     READ specification to understand:
+       - Current functionality
+       - User stories
+       - Acceptance criteria
+       - Out of scope items
+```
+
+**Output:** Related features list with relevance notes
+
+---
+
+### Step 3: Classify the Change Request
+
+**Action:** Apply classification criteria to determine CR type
+
+```
+1. Create comparison matrix:
+   
+   | Aspect | CR Requirement | Existing Feature(s) |
+   |--------|---------------|---------------------|
+   | Users  | [who]         | [who]               |
+   | Workflow | [what flow] | [what flow]         |
+   | Data Model | [data]   | [data]              |
+   | UI Elements | [screens]| [screens]          |
+   | API Endpoints | [APIs] | [APIs]             |
+
+2. Evaluate scope change:
+   - Does CR work within existing boundaries? → MODIFICATION
+   - Does CR expand system boundaries? → NEW FEATURE
+   - Is CR a significant enhancement to existing? → Judgment call
+
+3. Document classification decision with reasoning
+```
+
+**Classification Decision:**
+```yaml
+classification: modification | new_feature
+reasoning: |
+  [Explain why this classification was chosen]
+  [Reference specific criteria that apply]
+affected_features: [FEATURE-XXX, ...]  # If modification
+proposed_new_feature: <title>          # If new feature
+```
+
+---
+
+### Step 4: Ask Human for Approval
+
+**Action:** Present classification to human for confirmation
+
+```
+Present to human:
+1. CR Summary
+2. Classification: MODIFICATION or NEW FEATURE
+3. Reasoning for classification
+4. Affected features (if modification)
+5. Proposed approach
+
+Wait for human approval before proceeding
+```
+
+⚠️ **MANDATORY:** Do NOT proceed without explicit human approval of classification.
+
+---
+
+### Step 5: Execute Based on Classification
+
+#### Path A: Modification to Existing Feature
+
+```
+1. CREATE docs/requirements/change-requests/CR-XXX.md
+   - Document the CR details
+   - Link to affected feature(s)
+
+2. UPDATE docs/requirements/FEATURE-XXX/specification.md
+   - Add entry to Version History table
+   - Update affected sections
+   - Revise user stories if needed
+   - Update acceptance criteria
+   - Add to Change Request References section
+
+3. CHECK if requirement-details.md needs update:
+   IF cr_affects_high_level_requirements = true:
+     UPDATE docs/requirements/requirement-details.md:
+       - Update High-Level Requirements section if scope expanded
+       - Add entry to Clarifications table documenting the change
+       - Update Constraints if new constraints introduced
+     SET requirement_updated = true
+   ELSE:
+     SET requirement_updated = false
+
+4. SET next_task_type = task-type-feature-refinement
+   - Continue with feature refinement workflow
+   - Technical design may need updates
+```
+
+**When to update requirement-details.md:**
+- CR adds new high-level capability to existing feature
+- CR changes project constraints
+- CR affects multiple features
+- CR changes user types or stakeholders
+- CR modifies business rules at project level
+
+**Specification Update Pattern:**
+```markdown
+## Version History
+
+| Version | Date | Description |
+|---------|------|-------------|
+| v1.1 | 01-22-2026 | CR-001: Added bulk import capability |
+| v1.0 | 01-15-2026 | Initial specification |
+
+---
+
+## Change Request References
+
+| CR ID | Date | Description | Impact |
+|-------|------|-------------|--------|
+| CR-001 | 01-22-2026 | Bulk import | Added FR-5, updated UI requirements |
+```
+
+#### Path B: New Feature
+
+```
+1. CREATE docs/requirements/change-requests/CR-XXX.md
+   - Document the CR details
+   - Mark as "New Feature"
+
+2. UPDATE docs/requirements/requirement-details.md
+   - Add new requirement to High-Level Requirements section
+   - Document in Clarifications table
+   - Update Project Overview if scope changed
+
+3. SET next_task_type = task-type-feature-breakdown
+   - Continue with feature breakdown workflow
+   - New feature will be added to feature board
+```
+
+---
+
+### Step 6: Create CR Documentation
+
+**Action:** Create CR record at `docs/requirements/change-requests/CR-XXX.md`
+
+**CR Document Template:**
+```markdown
+# Change Request: CR-XXX
+
+> Created: MM-DD-YYYY
+> Status: Approved | Pending | Rejected
+> Classification: Modification | New Feature
+
+## Request Details
+
+**Requestor:** [Name/Role]
+**Date Received:** MM-DD-YYYY
+**Priority:** High | Medium | Low
+
+## Description
+
+[Detailed description of the change request]
+
+## Business Justification
+
+[Why this change is needed, business value]
+
+## Impact Analysis
+
+### Classification
+
+**Type:** Modification to FEATURE-XXX | New Feature
+
+**Reasoning:**
+[Explain why this classification was chosen]
+
+### Affected Components
+
+| Component | Impact Level | Details |
+|-----------|--------------|---------|
+| [Feature/Module] | High/Medium/Low | [What changes] |
+
+### Dependencies
+
+- [List any dependencies on other features or systems]
+
+## Proposed Approach
+
+[High-level approach to implementing this CR]
+
+## Approval
+
+- [ ] Classification approved by human
+- [ ] Approach approved by human
+- [ ] Ready for execution
+
+## Links
+
+- Related Feature: [FEATURE-XXX](../FEATURE-XXX/specification.md)
+- Requirement Details: [requirement-details.md](../requirement-details.md)
+
+---
+```
+
+---
+
+## Definition of Done (DoD)
+
+| # | Checkpoint | Required |
+|---|------------|----------|
+| 1 | CR documented in docs/requirements/change-requests/CR-XXX.md | Yes |
+| 2 | Classification determined and documented | Yes |
+| 3 | Human approved classification | Yes |
+| 4 | Relevant documents updated (specification OR requirements) | Yes |
+| 5 | Next task type correctly set | Yes |
+
+**Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
+
+---
+
+## Task Completion Output
+
+Upon completion, return:
+```yaml
+category: Standalone
+next_task_type: task-type-feature-refinement | task-type-feature-breakdown
+require_human_review: Yes
+task_output_links:
+  - docs/requirements/change-requests/CR-XXX.md
+  - [updated specification or requirement-details.md]
+cr_id: CR-XXX
+cr_classification: modification | new_feature
+affected_features: [FEATURE-XXX, ...]  # If modification
+requirement_updated: true | false
+```
+
+---
+
+## Patterns
+
+### Pattern: Enhancement CR
+
+**When:** CR adds capability to existing feature
+**Example:** "Add export to CSV for the existing report"
+
+```
+1. Identify: FEATURE-005 (Reporting) exists
+2. Check: CSV export is within reporting scope
+3. Classify: MODIFICATION (adds to existing workflow)
+4. Action: Update FEATURE-005 specification
+5. Next: Feature Refinement → Technical Design
+```
+
+### Pattern: New Capability CR
+
+**When:** CR introduces functionality not covered by any feature
+**Example:** "Add real-time notifications"
+
+```
+1. Identify: No notification feature exists
+2. Check: New data models, new UI, new service required
+3. Classify: NEW FEATURE
+4. Action: Update requirement-details.md
+5. Next: Feature Breakdown → creates FEATURE-XXX
+```
+
+### Pattern: Scope Expansion CR
+
+**When:** CR significantly expands existing feature
+**Example:** "Extend user authentication to support SSO"
+
+```
+1. Identify: FEATURE-001 (Authentication) exists
+2. Check: SSO requires new integration, new flow, new data
+3. Classify: MODIFICATION (but major) or NEW FEATURE
+4. Decision: If SSO is a separate workflow → NEW FEATURE
+           If SSO is another login method → MODIFICATION
+5. Present to human for decision
+```
+
+### Pattern: Multi-Feature CR
+
+**When:** CR affects multiple existing features
+**Example:** "Add audit logging across the system"
+
+```
+1. Identify: Multiple features affected
+2. Check: Is this cross-cutting concern?
+3. Classify: Usually NEW FEATURE (infrastructure)
+4. Action: Create new feature for audit logging
+5. Note: May require updates to existing features later
+```
+
+---
+
+## Anti-Patterns
+
+| Anti-Pattern | Why Bad | Do Instead |
+|--------------|---------|------------|
+| Skip classification | Wrong workflow chosen | Always classify explicitly |
+| Assume modification | May miss scope expansion | Use decision tree |
+| No human approval | Risk of wrong direction | Always get approval |
+| Skip documentation | Lost traceability | Create CR document |
+| Modify multiple features at once | Hard to track | One CR = One classification |
+| No version history update | Lost change history | Update specification version |
+
+---
+
+## Example: Full Execution
+
+**Change Request:** "Add bulk import capability for user data in the User Management feature"
+
+### Step 1: Understand CR
+```yaml
+what: Bulk import for user data
+who: System administrators
+why: Manual user creation is time-consuming for large organizations
+when: Medium priority
+```
+
+### Step 2: Review Existing
+```
+- requirement-details.md: User management is in scope
+- features.md: FEATURE-003 (User Management) exists, status: Implemented
+- FEATURE-003/specification.md:
+  - Current: Create, read, update, delete individual users
+  - Out of scope: "Bulk operations (planned for v2.0)"
+```
+
+### Step 3: Classify
+
+| Aspect | CR | FEATURE-003 |
+|--------|-----|-------------|
+| Users | Admins | Admins |
+| Workflow | Import CSV → Create users | Form → Create user |
+| Data Model | Same user model | User model |
+| UI | New import modal | Existing user form |
+| API | New import endpoint | CRUD endpoints |
+
+**Classification:** MODIFICATION
+- Same users, same data model
+- Extends existing feature capability
+- "Bulk operations" mentioned in out-of-scope as future enhancement
+
+### Step 4: Human Approval
+```
+Classification: MODIFICATION to FEATURE-003 (User Management)
+Reasoning: Bulk import extends existing user management without changing 
+           its fundamental purpose. Uses same data model, targets same users.
+Approach: Update specification, then refine feature.
+
+Human says: "approve"
+```
+
+### Step 5: Execute (Path A)
+
+**Created:** docs/requirements/change-requests/CR-001.md
+
+**Updated:** docs/requirements/FEATURE-003/specification.md
+```markdown
+## Version History
+
+| Version | Date | Description |
+|---------|------|-------------|
+| v1.1 | 01-22-2026 | CR-001: Added bulk import capability |
+| v1.0 | 01-10-2026 | Initial specification |
+
+[Updated functional requirements, acceptance criteria, UI requirements]
+
+## Change Request References
+
+| CR ID | Date | Description | Impact |
+|-------|------|-------------|--------|
+| CR-001 | 01-22-2026 | Bulk user import | Added FR-5, new acceptance criteria |
+```
+
+**Removed from Out of Scope:** "Bulk operations"
+
+### Step 6: Return Output
+```yaml
+category: Standalone
+next_task_type: task-type-feature-refinement
+require_human_review: Yes
+task_output_links:
+  - docs/requirements/change-requests/CR-001.md
+  - docs/requirements/FEATURE-003/specification.md
+cr_id: CR-001
+cr_classification: modification
+affected_features: [FEATURE-003]
+requirement_updated: false
+```
+
+---
+
+## Notes
+
+- Always maintain traceability from CR to affected documents
+- Classification is not always black and white - when in doubt, ask human
+- Version history in specifications is crucial for audit trail
+- One CR should result in one classification (split complex CRs if needed)
+- CR documentation helps with future impact analysis

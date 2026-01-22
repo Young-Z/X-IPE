@@ -1,6 +1,6 @@
 # Technical Design: Workplace (Idea Management)
 
-> Feature ID: FEATURE-008 | Version: v1.0 | Last Updated: 01-22-2026
+> Feature ID: FEATURE-008 | Version: v1.1 | Last Updated: 01-22-2026
 
 ---
 
@@ -8,6 +8,7 @@
 
 | Version | Date | Description |
 |---------|------|-------------|
+| v1.1 | 01-22-2026 | CR-001: Added Copilot button technical design |
 | v1.0 | 01-22-2026 | Initial design |
 
 ---
@@ -32,6 +33,10 @@
 | `IdeaTree` | Frontend tree navigation component | UI component | #ideas #frontend #tree |
 | `IdeaEditor` | File editor with auto-save (5s debounce) | UI component | #ideas #frontend #editor |
 | `IdeaUploader` | Drag-drop and file picker component | UI component | #ideas #frontend #upload |
+| `ContentRenderer._handleCopilotClick()` | Copilot button click handler (CR-001) | UI component | #ideas #copilot #terminal |
+| `TerminalManager.sendCopilotRefineCommand()` | Send refine command to terminal (CR-001) | Terminal integration | #terminal #copilot |
+| `TerminalManager._isInCopilotMode()` | Detect if terminal in Copilot CLI mode (CR-001) | Terminal integration | #terminal #copilot |
+| `TerminalManager._sendWithTypingEffect()` | Simulate human typing (CR-001) | Terminal integration | #terminal #typing |
 
 ### Dependencies
 
@@ -40,6 +45,8 @@
 | `ContentService` | FEATURE-002 | [technical-design.md](../FEATURE-002/technical-design.md) | Reuse `save_content()` for auto-save, `get_content()` for file loading |
 | `ProjectService` | FEATURE-001 | [technical-design.md](../FEATURE-001/technical-design.md) | Reference tree scanning pattern for `IdeasService.get_tree()` |
 | `FileNode` | FEATURE-001 | [services.py](../../../src/services.py) | Reuse dataclass for tree structure |
+| `TerminalManager` | FEATURE-005 | [terminal.js](../../../static/js/terminal.js) | Terminal management for Copilot button (CR-001) |
+| `TerminalPanel` | FEATURE-005 | [terminal.js](../../../static/js/terminal.js) | Panel expand/collapse for Copilot button (CR-001) |
 
 ### Major Flow
 
@@ -48,6 +55,7 @@
 3. **Auto-save:** User edits → 5s debounce → Frontend calls `POST /api/file/save` → Existing ContentService saves → Show "Saved" indicator
 4. **Upload:** User drops files → Frontend calls `POST /api/ideas/upload` → `IdeasService.upload()` creates folder + saves files → Refresh tree
 5. **Rename:** User double-clicks folder → Edit name → Frontend calls `POST /api/ideas/rename` → `IdeasService.rename_folder()` → Refresh tree
+6. **Copilot Refine (CR-001):** User clicks Copilot button → Expand terminal → Check if in Copilot mode → Create new terminal if needed → Send `copilot` command → Wait 1.5s → Send `refine the idea {path}` command
 
 ### Usage Example
 
@@ -186,6 +194,43 @@ sequenceDiagram
     I-->>A: {success: true}
     A-->>T: 200 OK
     T->>T: Refresh tree
+```
+
+#### Copilot Refine Flow (CR-001)
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant C as ContentRenderer
+    participant TP as TerminalPanel
+    participant TM as TerminalManager
+    participant T as Terminal
+    participant S as Socket.IO
+
+    U->>C: Click Copilot button
+    C->>C: _handleCopilotClick()
+    C->>TP: expand()
+    TP->>TP: Show terminal panel
+    C->>TM: sendCopilotRefineCommand(filePath)
+    TM->>TM: Check _isInCopilotMode()
+    alt In Copilot Mode
+        TM->>TM: addTerminal() (new session)
+    end
+    TM->>TM: setFocus(targetIndex)
+    TM->>TM: _sendWithTypingEffect("copilot")
+    loop Each character
+        TM->>S: emit('input', char)
+        Note over TM: 30-80ms delay
+    end
+    TM->>S: emit('input', '\r')
+    Note over TM: Wait 1.5s for CLI init
+    TM->>TM: _sendWithTypingEffect("refine the idea {path}")
+    loop Each character
+        TM->>S: emit('input', char)
+        Note over TM: 30-80ms delay
+    end
+    TM->>S: emit('input', '\r')
+    S-->>T: Command executed
 ```
 
 ### Data Models
@@ -552,7 +597,174 @@ class IdeaUploader {
     padding: 2px 4px;
     font-size: inherit;
 }
+
+/* Copilot button (CR-001) */
+.workplace-copilot-btn {
+    /* Uses Bootstrap btn-outline-info */
+}
 ```
+
+---
+
+## CR-001: Copilot Button Implementation
+
+> Added: 01-22-2026
+
+### Overview
+
+The Copilot button provides one-click integration with Copilot CLI for idea refinement. When clicked, it automatically opens the terminal and sends the appropriate commands to start a Copilot refinement session.
+
+### Components Modified
+
+| File | Component | Changes |
+|------|-----------|---------|
+| `src/templates/index.html` | `ContentRenderer` | Added Copilot button HTML, `_handleCopilotClick()` method |
+| `static/js/terminal.js` | `TerminalManager` | Added `sendCopilotRefineCommand()`, `_isInCopilotMode()`, `_sendWithTypingEffect()` |
+
+### Implementation Details
+
+#### ContentRenderer._handleCopilotClick()
+
+```javascript
+/**
+ * Handle Copilot button click - open terminal and send refine command
+ * Location: src/templates/index.html (ContentRenderer class)
+ */
+_handleCopilotClick() {
+    if (!this.currentPath) return;
+    
+    // Expand terminal panel
+    if (window.terminalPanel) {
+        window.terminalPanel.expand();
+    }
+    
+    // Send copilot command to terminal with typing simulation
+    if (window.terminalManager) {
+        window.terminalManager.sendCopilotRefineCommand(this.currentPath);
+    }
+}
+```
+
+#### TerminalManager.sendCopilotRefineCommand()
+
+```javascript
+/**
+ * Send Copilot refine command with typing simulation
+ * Location: static/js/terminal.js (TerminalManager class)
+ * @param {string} filePath - Path to the idea file to refine
+ */
+sendCopilotRefineCommand(filePath) {
+    let targetIndex = this.activeIndex;
+    
+    // Create terminal if none exists
+    if (this.terminals.length === 0) {
+        targetIndex = this.addTerminal();
+    } else if (targetIndex < 0) {
+        targetIndex = 0;
+    }
+    
+    // Check if current terminal is in Copilot mode
+    const needsNewTerminal = this._isInCopilotMode(targetIndex);
+    if (needsNewTerminal && this.terminals.length < MAX_TERMINALS) {
+        targetIndex = this.addTerminal();
+    }
+    
+    this.setFocus(targetIndex);
+    
+    // Send commands with typing simulation
+    const copilotCommand = 'copilot';
+    const refineCommand = `refine the idea ${filePath}`;
+    
+    this._sendWithTypingEffect(targetIndex, copilotCommand, () => {
+        setTimeout(() => {
+            this._sendWithTypingEffect(targetIndex, refineCommand);
+        }, 1500); // Wait for copilot CLI to initialize
+    });
+}
+```
+
+#### TerminalManager._isInCopilotMode()
+
+```javascript
+/**
+ * Check if terminal appears to be in Copilot CLI mode
+ * Detects by checking terminal buffer for Copilot prompt indicators
+ */
+_isInCopilotMode(index) {
+    if (index < 0 || index >= this.terminals.length) return false;
+    
+    const terminal = this.terminals[index];
+    if (!terminal) return false;
+    
+    // Check last few lines for copilot indicators
+    const buffer = terminal.buffer.active;
+    for (let i = Math.max(0, buffer.cursorY - 5); i <= buffer.cursorY; i++) {
+        const line = buffer.getLine(i);
+        if (line) {
+            const text = line.translateToString(true);
+            // Copilot CLI prompt indicators
+            if (text.includes('copilot>') || text.includes('Copilot') || text.includes('⏺')) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+```
+
+#### TerminalManager._sendWithTypingEffect()
+
+```javascript
+/**
+ * Send text with typing simulation effect
+ * Random delay 30-80ms between characters for realistic typing
+ */
+_sendWithTypingEffect(index, text, callback) {
+    if (index < 0 || index >= this.sockets.length) return;
+    
+    const socket = this.sockets[index];
+    if (!socket || !socket.connected) return;
+    
+    const chars = text.split('');
+    let i = 0;
+    
+    const typeChar = () => {
+        if (i < chars.length) {
+            socket.emit('input', chars[i]);
+            i++;
+            const delay = 30 + Math.random() * 50;
+            setTimeout(typeChar, delay);
+        } else {
+            setTimeout(() => {
+                socket.emit('input', '\r'); // Enter key
+                if (callback) callback();
+            }, 100);
+        }
+    };
+    
+    typeChar();
+}
+```
+
+### Button HTML
+
+```html
+<button class="btn btn-sm btn-outline-info workplace-copilot-btn" 
+        id="workplace-copilot-btn" 
+        title="Refine with Copilot">
+    <i class="bi bi-robot"></i> Copilot
+</button>
+```
+
+### Edge Cases
+
+| Scenario | Behavior |
+|----------|----------|
+| No terminal exists | Creates new terminal first |
+| Already in Copilot mode | Creates new terminal session (if < MAX_TERMINALS) |
+| At MAX_TERMINALS and in Copilot mode | Uses existing terminal (may cause issues) |
+| Terminal disconnected | Command not sent (socket check) |
+| No file selected | Button click does nothing (currentPath check) |
 
 ---
 
@@ -560,6 +772,7 @@ class IdeaUploader {
 
 | Date | Phase | Change Summary |
 |------|-------|----------------|
+| 01-22-2026 | CR-001 | Added Copilot button integration: terminal panel expand, Copilot mode detection, typing simulation, refine command automation |
 | 01-22-2026 | Initial Design | Initial technical design for FEATURE-008: Workplace (Idea Management). Two-column layout with IdeasService backend, auto-save editor, drag-drop upload, and inline folder rename. |
 
 ---

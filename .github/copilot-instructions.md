@@ -65,15 +65,18 @@
 
 | Task Type | Skill | Category | Next Task | Human Review |
 |-----------|-------|----------|-----------|--------------|
-| Requirement Gathering | `task-type-requirement-gathering-@requirement-stage` | requirement-stage | Feature Breakdown | Yes |
-| Feature Breakdown | `task-type-feature-breakdown-@requirement-stage` | requirement-stage | Feature Refinement | Yes |
-| Feature Refinement | `task-type-feature-refinement-@feature-stage` | feature-stage | Technical Design | Yes |
-| Technical Design | `task-type-technical-design-@feature-stage` | feature-stage | Test Generation | Yes |
-| Test Generation | `task-type-test-generation-@feature-stage` | feature-stage | Code Implementation | No |
-| Code Implementation | `task-type-code-implementation-@feature-stage` | feature-stage | Human Playground | No |
-| Human Playground | `task-type-human-playground-@feature-stage` | feature-stage | Feature Closing | Yes |
-| Feature Closing | `task-type-feature-closing-@feature-stage` | feature-stage | User Manual | No |
+| Ideation | `task-type-ideation` | ideation-stage | Share Idea or Requirement Gathering | Yes |
+| Share Idea | `task-type-share-idea` | ideation-stage | Requirement Gathering | Yes |
+| Requirement Gathering | `task-type-requirement-gathering` | requirement-stage | Feature Breakdown | Yes |
+| Feature Breakdown | `task-type-feature-breakdown` | requirement-stage | Feature Refinement | Yes |
+| Feature Refinement | `task-type-feature-refinement` | feature-stage | Technical Design | Yes |
+| Technical Design | `task-type-technical-design` | feature-stage | Test Generation | Yes |
+| Test Generation | `task-type-test-generation` | feature-stage | Code Implementation | No |
+| Code Implementation | `task-type-code-implementation` | feature-stage | Human Playground | No |
+| Human Playground | `task-type-human-playground` | feature-stage | Feature Closing | Yes |
+| Feature Closing | `task-type-feature-closing` | feature-stage | User Manual | No |
 | Bug Fix | `task-type-bug-fix` | Standalone | - | Yes |
+| Change Request | `task-type-change-request` | Standalone | Feature Refinement OR Feature Breakdown | Yes |
 | Project Initialization | `task-type-project-init` | Standalone | Dev Environment | No |
 | Dev Environment | `task-type-dev-environment` | Standalone | - | No |
 | User Manual | `task-type-user-manual` | Standalone | - | Yes |

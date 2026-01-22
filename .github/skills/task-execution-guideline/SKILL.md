@@ -59,11 +59,11 @@ Task:
 
 ### Category Derivation
 
-| Task Type Suffix | Category |
-|------------------|----------|
-| `-@feature-stage` | feature-stage |
-| `-@requirement-stage` | requirement-stage |
-| No suffix | Standalone |
+| Task Type | Category |
+|-----------|----------|
+| `task-type-feature-refinement`, `task-type-technical-design`, `task-type-test-generation`, `task-type-code-implementation`, `task-type-human-playground`, `task-type-feature-closing` | feature-stage |
+| `task-type-ideation`, `task-type-requirement-gathering`, `task-type-feature-breakdown` | requirement-stage |
+| `task-type-bug-fix`, `task-type-change-request`, `task-type-project-init`, `task-type-dev-environment`, `task-type-user-manual` | Standalone |
 
 ### Task States
 
@@ -142,6 +142,7 @@ Execute tasks by following these 6 steps in order:
 | "playground", "demo", "test manually" | Human Playground |
 | "close feature", "create PR" | Feature Closing |
 | "fix bug", "not working" | Bug Fix |
+| "change request", "CR", "modify feature", "update requirement" | Change Request |
 | "set up project", "initialize" | Project Initialization |
 
 **Output:** Task Data Model with core fields populated AND tasks created on board
@@ -246,8 +247,8 @@ Output:
 | Category | Additional Skill | Required? |
 |----------|------------------|-----------|
 | Standalone | (none) | N/A |
-| feature-stage | `@feature-stage+feature-board-management` | Yes (must exist) |
-| requirement-stage | `@requirement-stage+requirement-board-management` | No (optional, disabled) |
+| feature-stage | `feature-stage+feature-board-management` | Yes (must exist) |
+| requirement-stage | `requirement-stage+requirement-board-management` | No (optional, disabled) |
 
 **Notes:**
 - If category skill not found, execution continues without error
@@ -333,16 +334,18 @@ ELSE:
 
 | Task Type | Skill | Category | Next Task | Human Review |
 |-----------|-------|----------|-----------|--------------|
-| Ideation | `task-type-ideation-@requirement-stage` | requirement-stage | Requirement Gathering | Yes |
-| Requirement Gathering | `task-type-requirement-gathering-@requirement-stage` | requirement-stage | Feature Breakdown | Yes |
-| Feature Breakdown | `task-type-feature-breakdown-@requirement-stage` | requirement-stage | Feature Refinement | Yes |
-| Feature Refinement | `task-type-feature-refinement-@feature-stage` | feature-stage | Technical Design | Yes |
-| Technical Design | `task-type-technical-design-@feature-stage` | feature-stage | Test Generation | Yes |
-| Test Generation | `task-type-test-generation-@feature-stage` | feature-stage | Code Implementation | No |
-| Code Implementation | `task-type-code-implementation-@feature-stage` | feature-stage | Human Playground | No |
-| Human Playground | `task-type-human-playground-@feature-stage` | feature-stage | Feature Closing | Yes |
-| Feature Closing | `task-type-feature-closing-@feature-stage` | feature-stage | User Manual | No |
+| Ideation | `task-type-ideation` | ideation-stage | Share Idea or Requirement Gathering | Yes |
+| Share Idea | `task-type-share-idea` | ideation-stage | Requirement Gathering | Yes |
+| Requirement Gathering | `task-type-requirement-gathering` | requirement-stage | Feature Breakdown | Yes |
+| Feature Breakdown | `task-type-feature-breakdown` | requirement-stage | Feature Refinement | Yes |
+| Feature Refinement | `task-type-feature-refinement` | feature-stage | Technical Design | Yes |
+| Technical Design | `task-type-technical-design` | feature-stage | Test Generation | Yes |
+| Test Generation | `task-type-test-generation` | feature-stage | Code Implementation | No |
+| Code Implementation | `task-type-code-implementation` | feature-stage | Human Playground | No |
+| Human Playground | `task-type-human-playground` | feature-stage | Feature Closing | Yes |
+| Feature Closing | `task-type-feature-closing` | feature-stage | User Manual | No |
 | Bug Fix | `task-type-bug-fix` | Standalone | - | Yes |
+| Change Request | `task-type-change-request` | Standalone | Feature Refinement OR Feature Breakdown | Yes |
 | Project Initialization | `task-type-project-init` | Standalone | Dev Environment | No |
 | Dev Environment | `task-type-dev-environment` | Standalone | - | No |
 | User Manual | `task-type-user-manual` | Standalone | - | Yes |
@@ -356,7 +359,7 @@ ELSE:
 **Step 1: Planning**
 ```
 Match: "implement" → Code Implementation
-Category: feature-stage (from suffix -@feature-stage)
+Category: feature-stage
 Description: "Implement user login feature with authentication"
 
 ⚠️ MANDATORY: Create tasks on board BEFORE proceeding
@@ -378,7 +381,7 @@ Description: "Implement user login feature with authentication"
 
 **Step 3: Execute**
 ```
-Load: task-type-code-implementation-@feature-stage
+Load: task-type-code-implementation
 Work: Write code, tests
 Output:
   status: completed
@@ -392,7 +395,7 @@ Output:
 **Step 4: Closing**
 ```
 Load: task-board-management → Update TASK-001 to completed
-Load: @feature-stage+feature-board-management → Update feature status
+Load: feature-stage+feature-board-management → Update feature status
 Output:
   category_level_change_summary: "FEATURE-001 updated to Done Code Implementation"
 ```

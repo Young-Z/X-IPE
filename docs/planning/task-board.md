@@ -6,6 +6,7 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-071 | Change Request | CR-001: Add Copilot button to idea content view | Nova | 🔄 in_progress | 01-22-2026 13:45:00 | - | Feature Refinement |
 | TASK-042 | Human Playground | Interactive testing for FEATURE-003: Content Editor | Nova | ⏸️ deferred | 01-20-2026 09:30:00 | - | Feature Closing |
 | TASK-032 | Human Playground | Create interactive playground for FEATURE-005: Interactive Console | Nova | ⏸️ deferred | 01-19-2026 12:15:00 | - | Feature Closing |
 
@@ -15,6 +16,12 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-073 | Share Idea | Export idea-summary-v2.md to HTML | Spark | 01-22-2026 14:02:00 | [formal-idea-summary-v2.html](docs/ideas/Draft%20Idea%20-%2001222026%20195931/formal-idea-summary-v2.html) | Styled HTML with Bootstrap, print-friendly, 10KB. |
+| TASK-072 | Ideation | Refine idea: Draft Idea - 01222026 195931 (v2) | Spark | 01-22-2026 13:55:00 | [idea-summary-v2.md](docs/ideas/Draft%20Idea%20-%2001222026%20195931/idea-summary-v2.md) | v2: File/folder creation & deletion via context menu, scoped to docs/ideas/ only. |
+| TASK-069 | Code Implementation | Idea content view: format-based rendering with Edit button | Nova | 01-22-2026 13:06:00 | [index.html](src/templates/index.html), [base.html](src/templates/base.html) | View mode: markdown rendered, code highlighted. Edit button on header right. Modified indicator left of button. Binary files (.docx etc) show placeholder. 295/295 tests pass. |
+| TASK-070 | Ideation | Refine idea: Draft Idea - 01222026 195931 (v1) | Flux | 01-22-2026 12:55:00 | [idea-summary-v1.md](docs/ideas/Draft%20Idea%20-%2001222026%20195931/idea-summary-v1.md) | v1 refined: single-user local deployment, full project coverage, toast notifications for live refresh. |
+| TASK-068 | Bug Fix | Enhance ideation: versioned idea summaries + delete files/folders with confirm | Ember | 01-22-2026 20:35:00 | [services.py](src/services.py), [app.py](src/app.py), [index.html](src/templates/index.html), [base.html](src/templates/base.html), [SKILL.md](.github/skills/task-type-ideation/SKILL.md), [test_ideas.py](tests/test_ideas.py) | Backend: delete_item(), create_versioned_summary(), get_next_version_number(). Frontend: confirmDelete(), deleteItem(), delete button in tree. 64/64 tests pass. |
+| TASK-067 | Ideation | Refine idea: Draft Idea - 01222026 195931 | Ember | 01-22-2026 12:20:00 | [idea-summary.md](docs/ideas/Draft%20Idea%20-%2001222026%20195931/idea-summary.md) | Brainstorming complete. v1 scope defined: single-user, local deployment, simple editing, basic terminal, toast notifications. |
 | TASK-063 | Feature Closing | Close FEATURE-008: Workplace (Idea Management) | Nova | 01-22-2026 11:42:00 | [CHANGELOG.md](CHANGELOG.md), [specification.md](docs/requirements/FEATURE-008/specification.md) | Feature complete. 14/14 ACs verified. 260/260 tests passing. |
 | TASK-058 | Code Implementation | Implement FEATURE-008: Workplace (Idea Management) | Nova | 01-22-2026 11:35:00 | [services.py](src/services.py), [app.py](src/app.py), [index.html](src/templates/index.html), [base.html](src/templates/base.html) | Backend: IdeasService, 3 API endpoints. Frontend: WorkplaceManager, auto-save, drag-drop upload, inline rename. 260/260 tests passing. |
 | TASK-066 | Feature Closing | Close FEATURE-009: File Change Indicator | Nova | 01-22-2026 11:22:00 | [CHANGELOG.md](CHANGELOG.md) | Feature complete. 8 ACs verified. Ready for use. |
@@ -29,7 +36,7 @@
 | TASK-056 | Technical Design | Create technical design for FEATURE-008: Workplace (Idea Management) | Nova | 01-22-2026 11:06:00 | [technical-design.md](docs/requirements/FEATURE-008/technical-design.md) | IdeasService, 3 API endpoints, 4 frontend components. 3-phase implementation. |
 | TASK-055 | Feature Refinement | Refine specification for FEATURE-008: Workplace (Idea Management) | Nova | 01-22-2026 11:01:00 | [specification.md](docs/requirements/FEATURE-008/specification.md) | 14 ACs, 6 FRs, edge cases documented. Feature board updated to Refined. |
 | TASK-054 | Feature Breakdown | Break down FEATURE-008: Workplace (Idea Management) | Nova | 01-22-2026 10:58:00 | [features.md](docs/planning/features.md), [requirement-details.md](docs/requirements/requirement-details.md) | FEATURE-008 added to board. Single feature approach chosen. |
-| TASK-053 | Requirement Gathering | Gather requirements for FEATURE-008: Workplace (Idea Management) | Nova | 01-22-2026 10:55:00 | [requirement-details.md](docs/requirements/requirement-details.md), [SKILL.md](.github/skills/task-type-ideation-@requirement-stage/SKILL.md) | FEATURE-008 documented with 11 ACs. Ideation skill created. |
+| TASK-053 | Requirement Gathering | Gather requirements for FEATURE-008: Workplace (Idea Management) | Nova | 01-22-2026 10:55:00 | [requirement-details.md](docs/requirements/requirement-details.md), [SKILL.md](.github/skills/task-type-ideation/SKILL.md) | FEATURE-008 documented with 11 ACs. Ideation skill created. |
 | TASK-052 | Feature Closing | Close FEATURE-005 v4.0: Interactive Console | Nova | 01-22-2026 12:20:00 | [CHANGELOG.md](CHANGELOG.md), [specification.md](docs/requirements/FEATURE-005/specification.md) | Feature complete. 17 ACs verified. 211/211 tests passing. Ready for merge. |
 | TASK-051 | Human Playground | Interactive testing for FEATURE-005 v4.0: Interactive Console | Nova | 01-22-2026 12:15:00 | - | Skipped by human request. |
 | TASK-050 | Code Implementation | Implement FEATURE-005 v4.0: Interactive Console | Nova | 01-22-2026 12:00:00 | [services.py](src/services.py), [app.py](src/app.py), [index.html](src/templates/index.html), [base.html](src/templates/base.html) | Backend: OutputBuffer, PersistentSession, SessionManager, PTYSession, WebSocket handlers. Frontend: TerminalManager, xterm.js integration, split-pane UI. 211/211 tests passing. |
@@ -125,9 +132,9 @@
 ## Quick Stats
 
 - **Total Active:** 2
-- **In Progress:** 0
+- **In Progress:** 1
 - **Blocked:** 0
-- **Completed Today:** 34
+- **Completed Today:** 39
 
 ---
 

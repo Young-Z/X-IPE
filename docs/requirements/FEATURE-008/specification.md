@@ -1,7 +1,7 @@
 # Feature Specification: Workplace (Idea Management)
 
 > Feature ID: FEATURE-008  
-> Version: v1.0  
+> Version: v1.1  
 > Status: Complete  
 > Last Updated: 01-22-2026
 
@@ -9,6 +9,7 @@
 
 | Version | Date | Description |
 |---------|------|-------------|
+| v1.1 | 01-22-2026 | CR-001: Added Copilot button for idea refinement |
 | v1.0 | 01-22-2026 | Initial specification |
 | v1.0 | 01-22-2026 | Implementation complete |
 
@@ -16,7 +17,7 @@
 
 The Workplace feature introduces a dedicated space for users to manage their ideas before they become formal requirements. Users can upload idea files (documents, notes, code snippets, images), organize them in folders, edit content with auto-save functionality, and rename folders as ideas evolve. The Workplace appears as the first item in the sidebar navigation, emphasizing its role as the starting point for the ideation workflow.
 
-This feature integrates with a new agent skill (`task-type-ideation-@requirement-stage`) that analyzes uploaded ideas, brainstorms with users to refine concepts, and produces structured summaries ready for requirement gathering.
+This feature integrates with a new agent skill (`task-type-ideation`) that analyzes uploaded ideas, brainstorms with users to refine concepts, and produces structured summaries ready for requirement gathering.
 
 ## User Stories
 
@@ -25,6 +26,7 @@ This feature integrates with a new agent skill (`task-type-ideation-@requirement
 - As a **user**, I want to **edit idea files with auto-save**, so that **I don't lose my work and don't have to manually save**.
 - As a **user**, I want to **rename idea folders**, so that **I can give meaningful names as my ideas evolve**.
 - As a **user**, I want to **see Workplace as the first sidebar item**, so that **I can easily access my idea workspace**.
+- As a **user**, I want to **quickly refine my idea with Copilot CLI**, so that **I can get AI assistance without manually typing commands** (CR-001).
 
 ## Acceptance Criteria
 
@@ -42,6 +44,11 @@ This feature integrates with a new agent skill (`task-type-ideation-@requirement
 - [x] AC-12: Folders in the tree can be renamed via inline editing (double-click)
 - [x] AC-13: Folder rename updates the physical folder name on disk
 - [x] AC-14: Tree view updates automatically when files/folders are added, renamed, or deleted
+- [x] AC-15: "Copilot" button appears to the left of the Edit button in content view header (CR-001)
+- [x] AC-16: Clicking Copilot button expands the terminal panel (CR-001)
+- [x] AC-17: If terminal is in Copilot CLI mode, a new terminal session is created (CR-001)
+- [x] AC-18: Copilot button sends `copilot` command with typing simulation (CR-001)
+- [x] AC-19: After copilot CLI init, sends `refine the idea {file path}` command (CR-001)
 
 ## Functional Requirements
 
@@ -122,6 +129,31 @@ This feature integrates with a new agent skill (`task-type-ideation-@requirement
   5. Handle name conflicts (append number if exists)
 - Output: Folder renamed physically and in UI
 - Validation: No special characters that are invalid for filesystem
+
+### FR-7: Copilot Refinement Button (CR-001)
+
+**Description:** One-click Copilot CLI integration for idea refinement
+
+**Details:**
+- Input: User clicks "Copilot" button in content view header
+- Process:
+  1. Expand terminal panel via `window.terminalPanel.expand()`
+  2. Check if current terminal is in Copilot CLI mode (detect prompt indicators)
+  3. If in Copilot mode and space available, create new terminal session
+  4. Focus on target terminal
+  5. Send `copilot` command with typing simulation (30-80ms per character)
+  6. Wait 1.5 seconds for CLI initialization
+  7. Send `refine the idea {current file path}` command with typing simulation
+- Output: Terminal expanded with Copilot CLI running refine command
+- Button: Located left of Edit button, uses Bootstrap `btn-outline-info` styling with robot icon
+
+**Copilot Mode Detection:**
+- Check terminal buffer for indicators: `copilot>`, `Copilot`, `⏺`
+- If detected, create new terminal to avoid command conflicts
+
+**Typing Simulation:**
+- Random delay 30-80ms between characters for realistic typing effect
+- Send Enter key after command completes
 
 ## Non-Functional Requirements
 
@@ -262,5 +294,13 @@ When Workplace selected:
 - [x] Upload file types: Any file type GitHub Copilot can understand ✅
 - [x] Auto-save delay: 5 seconds ✅
 - [x] Date format in folder names: ISO format (YYYY-MM-DD) ✅
+
+---
+
+## Change Request References
+
+| CR ID | Date | Description | Impact |
+|-------|------|-------------|--------|
+| CR-001 | 01-22-2026 | Add Copilot button for idea refinement | Added US-6, AC-15 to AC-19, FR-7 |
 
 ---

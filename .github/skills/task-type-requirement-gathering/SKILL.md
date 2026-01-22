@@ -18,20 +18,36 @@ Gather and document requirements from user requests by:
 ## Important Notes
 
 ### Skill Prerequisite
-- If you HAVE NOT learned `task-execution-guideline` and `task-board-management` skill, please learn them first before executing this skill.
+- If you HAVE NOT learned `task-execution-guideline` skill, please learn it first before executing this skill.
 
 **Important:** If Agent DO NOT have skill capability, can directly go to `.github/skills/` folder to learn skills. And SKILL.md file is the entry point to understand each skill.
 
 ---
 
-## Quick Reference
+## Task Type Default Attributes
 
 | Attribute | Value |
 |-----------|-------|
 | Task Type | Requirement Gathering |
-| Standalone | No |
-| Next Task | Feature Breakdown |
-| Auto-advance | No |
+| Category | requirement-stage |
+| Next Task Type | Feature Breakdown |
+| Require Human Review | Yes |
+
+---
+
+## Skill Output
+
+This skill MUST return these attributes to the Task Data Model:
+
+```yaml
+Output:
+  status: completed | blocked
+  next_task_type: Feature Breakdown
+  require_human_review: Yes
+  task_output_links: [docs/requirements/requirement-details.md]
+  # Dynamic attributes for requirement-stage
+  requirement_summary_updated: true | false
+```
 
 ---
 
@@ -59,6 +75,13 @@ Gather and document requirements from user requests by:
 4. Note any constraints mentioned
 ```
 
+**🌐 Web Search (Optional):**
+Use web search capability to research:
+- Industry standards and best practices for similar features
+- Competitor products and their feature sets
+- Domain-specific terminology and concepts
+- Regulatory or compliance requirements in the domain
+
 **Output:** Initial understanding summary
 
 ### Step 2: Ask Clarifying Questions
@@ -85,13 +108,21 @@ Gather and document requirements from user requests by:
 2. Avoid making assumptions
 3. Unless Human enforces, do not skip any clarifications
 
-### Step 3: Create Requirement Summary
+### Step 3: Create Requirement Details Document
 
 **Action:** Create or update `docs/requirements/requirement-details.md`
 
 **Rules:**
 - Use [requirement-details.md](templates/requirement-details.md) as template
+- **Document requirements in detail** - this is the source of truth for all downstream tasks
 - Ensure all sections are filled based on gathered information
+- Include all clarifications and decisions made during the gathering process
+
+**Documentation Guidelines:**
+- Be thorough and specific - vague requirements lead to incorrect implementations
+- Document the "why" behind requirements, not just the "what"
+- Include examples and edge cases discussed with the human
+- Capture any constraints, assumptions, or dependencies mentioned
 
 ---
 
@@ -101,7 +132,6 @@ Gather and document requirements from user requests by:
 |---|------------|----------|
 | 1 | `docs/requirements/requirement-details.md` created/updated | Yes |
 | 2 | All clarifying questions answered | Yes |
-| 3 | Human has reviewed requirements | Yes |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
 
@@ -111,9 +141,9 @@ Gather and document requirements from user requests by:
 
 Upon completion, return:
 ```yaml
-feature_id: N/A
-feature_status: Requirements Gathered
-next_task_type: Feature Breakdown
+category: {Category}
+next_task_type: {Next Task Type}
+require_human_review: {Require Human Review}
 task_output_links:
   - docs/requirements/requirement-details.md
 ```
@@ -191,8 +221,12 @@ task_output_links:
    # Requirement Summary
    ... (fill all sections) ...
 
-5. Return task_output_links:
-   - docs/requirements/requirement-details.md
+5. Return Task Completion Output:
+   category: requirement-stage
+   next_task_type: Feature Breakdown
+   require_human_review: Yes
+   task_output_links:
+     - docs/requirements/requirement-details.md
 
 6. Resume Task Flow from task-execution-guideline skill
 ```

@@ -230,8 +230,8 @@ Contains: Tasks with status = cancelled
 | Category | Description |
 |----------|-------------|
 | Standalone | No additional board tracking |
-| feature-stage | Updates feature board via @feature-stage+feature-board-management |
-| requirement-stage | Updates requirement board via @requirement-stage+requirement-board-management |
+| feature-stage | Updates feature board via feature-stage+feature-board-management |
+| requirement-stage | Updates requirement board via requirement-stage+requirement-board-management |
 
 ---
 

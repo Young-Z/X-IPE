@@ -52,8 +52,8 @@ auto_advance: false  # Set to true for automatic task chaining
 | Category | Description | Additional Skill |
 |----------|-------------|------------------|
 | Standalone | No category-level tracking | (none) |
-| feature-stage | Feature board tracking | @feature-stage+feature-board-management |
-| requirement-stage | Requirement board tracking | @requirement-stage+requirement-board-management |
+| feature-stage | Feature board tracking | feature-stage+feature-board-management |
+| requirement-stage | Requirement board tracking | requirement-stage+requirement-board-management |
 
 ---
 

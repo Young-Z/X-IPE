@@ -634,6 +634,45 @@ def register_ideas_routes(app):
         if result['success']:
             return jsonify(result)
         return jsonify(result), 400
+    
+    @app.route('/api/ideas/delete', methods=['POST'])
+    def delete_idea_item():
+        """
+        POST /api/ideas/delete
+        
+        Delete an idea file or folder.
+        
+        Request body:
+            - path: string - Relative path to file/folder within docs/ideas/
+        
+        Response:
+            - success: true/false
+            - path: string
+            - type: 'file' | 'folder'
+        """
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        service = IdeasService(project_root)
+        
+        if not request.is_json:
+            return jsonify({
+                'success': False,
+                'error': 'JSON required'
+            }), 400
+        
+        data = request.get_json()
+        path = data.get('path')
+        
+        if not path:
+            return jsonify({
+                'success': False,
+                'error': 'path is required'
+            }), 400
+        
+        result = service.delete_item(path)
+        
+        if result['success']:
+            return jsonify(result)
+        return jsonify(result), 400
 
 
 # Entry point for running with `python -m src.app`

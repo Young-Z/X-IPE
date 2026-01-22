@@ -582,6 +582,105 @@
                 localStorage.setItem(SESSION_KEY, JSON.stringify(validIds));
             } catch (e) {}
         }
+
+        /**
+         * Send Copilot refine command with typing simulation
+         * @param {string} filePath - Path to the idea file to refine
+         */
+        sendCopilotRefineCommand(filePath) {
+            // Check if we need a new terminal (if current one is in copilot mode)
+            let targetIndex = this.activeIndex;
+            
+            // If no terminals exist, create one
+            if (this.terminals.length === 0) {
+                targetIndex = this.addTerminal();
+            } else if (targetIndex < 0) {
+                targetIndex = 0;
+            }
+            
+            // Check if current terminal appears to be in copilot CLI mode
+            // We detect this by checking if a new terminal is needed
+            const needsNewTerminal = this._isInCopilotMode(targetIndex);
+            
+            if (needsNewTerminal && this.terminals.length < MAX_TERMINALS) {
+                targetIndex = this.addTerminal();
+            }
+            
+            this.setFocus(targetIndex);
+            
+            // Build the command sequence
+            const copilotCommand = 'copilot';
+            const refineCommand = `refine the idea ${filePath}`;
+            
+            // Send commands with typing simulation
+            this._sendWithTypingEffect(targetIndex, copilotCommand, () => {
+                // After copilot command, wait and send the refine command
+                setTimeout(() => {
+                    this._sendWithTypingEffect(targetIndex, refineCommand);
+                }, 1500); // Wait for copilot CLI to initialize
+            });
+        }
+
+        /**
+         * Check if terminal appears to be in Copilot CLI mode
+         * @param {number} index - Terminal index
+         * @returns {boolean} - True if appears to be in copilot mode
+         */
+        _isInCopilotMode(index) {
+            if (index < 0 || index >= this.terminals.length) return false;
+            
+            // Get terminal buffer content to check for copilot indicators
+            const terminal = this.terminals[index];
+            if (!terminal) return false;
+            
+            // Check last few lines of terminal buffer for copilot prompt indicators
+            const buffer = terminal.buffer.active;
+            for (let i = Math.max(0, buffer.cursorY - 5); i <= buffer.cursorY; i++) {
+                const line = buffer.getLine(i);
+                if (line) {
+                    const text = line.translateToString(true);
+                    // Copilot CLI typically shows a specific prompt or status
+                    if (text.includes('copilot>') || text.includes('Copilot') || text.includes('⏺')) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Send text with typing simulation effect
+         * @param {number} index - Terminal index
+         * @param {string} text - Text to type
+         * @param {Function} callback - Optional callback after completion
+         */
+        _sendWithTypingEffect(index, text, callback) {
+            if (index < 0 || index >= this.sockets.length) return;
+            
+            const socket = this.sockets[index];
+            if (!socket || !socket.connected) return;
+            
+            const chars = text.split('');
+            let i = 0;
+            
+            const typeChar = () => {
+                if (i < chars.length) {
+                    socket.emit('input', chars[i]);
+                    i++;
+                    // Random delay between 30-80ms for realistic typing
+                    const delay = 30 + Math.random() * 50;
+                    setTimeout(typeChar, delay);
+                } else {
+                    // Send Enter key after typing complete
+                    setTimeout(() => {
+                        socket.emit('input', '\r');
+                        if (callback) callback();
+                    }, 100);
+                }
+            };
+            
+            typeChar();
+        }
     }
 
     /**
