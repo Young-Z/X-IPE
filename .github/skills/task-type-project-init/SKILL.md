@@ -1,0 +1,227 @@
+---
+name: task-type-project-init
+description: Initialize a new project with standard folder structure and documentation. Use when starting a fresh project or onboarding to existing project. Triggers on requests like "init project", "start new project", "set up project", "onboard to project".
+---
+
+# Task Type: Project Initialization
+
+## Purpose
+
+Set up or onboard to a project with consistent folder structure and documentation.
+
+---
+
+## Important Notes
+
+### Skill Prerequisite
+- If you HAVE NOT learned `task-execution-guideline` skill, please learn it first before executing this skill.
+
+**Important:** If Agent DO NOT have skill capability, can directly go to `.github/skills/` folder to learn skills. And SKILL.md file is the entry point to understand each skill.
+
+---
+
+## Task Type Default Attributes
+
+| Attribute | Value |
+|-----------|-------|
+| Task Type | Project Initialization |
+| Category | Standalone |
+| Next Task Type | Development Environment Setup |
+| Require Human Review | No |
+
+---
+
+## Skill Output
+
+This skill MUST return these attributes to the Task Data Model:
+
+```yaml
+Output:
+  status: completed | blocked
+  next_task_type: Development Environment Setup
+  require_human_review: No
+  task_output_links: [docs/planning/task-board.md]
+  # Dynamic attributes (skill-specific)
+  project_structure_created: true | false
+```
+
+---
+
+## Definition of Ready (DoR)
+
+| # | Checkpoint | Required |
+|---|------------|----------|
+|  |  |  |
+
+---
+
+## Execution Procedure
+
+### Step 1: Scan Existing Structure
+
+```
+IF project exists:
+  1. Read all files (focus on: README, docs/, config files)
+  2. Understand current architecture
+ELSE:
+  → Go to Step 2
+```
+
+### Step 2: Create Standard Structure
+
+**Standard Project Structure:**
+
+```
+project-root/
+├── docs/
+│   ├── planning/
+│   │   ├── task-board.md          # Task tracking (via task-board-management)
+│   │   ├── feature-*.md           # Feature specifications
+│   │   └── technical-design-*.md  # Design documents
+│   ├── reference/
+│   │   └── lessons_learned.md     # Project learnings
+│   └── project-management-guideline/        # Collaboration docs
+├── README.md                      # Project overview
+└── .gitignore                     # Git ignore rules
+```
+
+**Enforced Creation Rules:**
+```
+`docs/`: IF missing, CREATE
+`docs/planning/`: IF missing, CREATE
+`docs/reference/`: IF missing, CREATE
+`docs/project-management-guideline/`: IF missing, CREATE
+.gitignore: IF missing, CREATE
+README.md: IF missing, CREATE
+```
+
+### Step 3: Initialize Task Board
+
+```
+Load skill: task-board-management
+Execute: Operation 1 - Init Task Board
+
+This creates: docs/planning/task-board.md
+```
+
+### Step 4: Initialize Documentation
+
+**Create `docs/reference/lessons_learned.md`:**
+
+```markdown
+# Lessons Learned
+
+## Template
+| Date | Category | Lesson | Context |
+|------|----------|--------|---------|
+| YYYY-MM-DD | <category> | <what learned> | <situation> |
+```
+
+---
+
+## Definition of Done (DoD)
+
+| # | Checkpoint | Required |
+|---|------------|----------|
+| 1 | Standard folder structure exists | Yes |
+| 2 | Task board initialized (via task-board-management) | Yes |
+
+**Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
+
+---
+
+## Task Completion Output
+
+Upon completion, return:
+```yaml
+category: {Category}
+next_task_type: {Next Task Type}
+require_human_review: {Require Human Review}
+task_output_links:
+  - docs/planning/task-board.md
+```
+
+---
+
+## Patterns
+
+### Pattern: Minimal Setup
+
+**When:** Quick project start needed
+**Then:**
+```
+1. Create only: docs/planning/
+2. Init task board (via task-board-management)
+3. Initialize: README.md, .gitignore
+4. Skip: docs/reference/, docs/project-management-guideline/ (add later)
+```
+
+### Pattern: Existing Project Onboarding
+
+**When:** Joining existing project
+**Then:**
+```
+1. READ first (don't create files)
+2. Map existing structure to standard
+3. Only ADD missing critical files
+4. Preserve existing conventions
+5. Init task board if missing
+```
+
+---
+
+## Anti-Patterns
+
+| Anti-Pattern | Why Bad | Do Instead |
+|--------------|---------|------------|
+| Restructure existing project | Breaks working code | Add missing files only |
+| Create empty placeholder files | Noise, maintenance burden | Create when needed |
+| Skip task board | No task tracking | Always init via task-board-management |
+| Copy template blindly | May not fit tech stack | Adapt to project |
+
+---
+
+## File Creation Rules
+
+**Critical:** Only create files in these locations:
+- `docs/` - Documentation
+
+**Never create:**
+- Files in project root (except README, config)
+- Arbitrary folders outside structure
+- Duplicate documentation
+
+---
+
+## Example
+
+**Request:** "Initialize a new Python API project"
+
+**Execution:**
+```
+1. Execute Task Flow from task-execution-guideline skill
+
+2. Scan existing structure:
+   → No existing project found
+
+3. Create structure:
+   docs/planning/
+   docs/reference/lessons_learned.md
+   docs/project-management-guideline/
+   README.md
+   .gitignore
+
+4. Init task board:
+   → Load skill: task-board-management
+   → Execute: Operation 1 - Init Task Board
+   → Created: docs/planning/task-board.md
+
+5. Return Task Completion Output:
+   category: standalone
+   next_task_type: Development Environment Setup
+   require_human_review: No
+   task_output_links:
+     - docs/planning/task-board.md
+
+6. Resume Task Flow from task-execution-guideline skill
+```

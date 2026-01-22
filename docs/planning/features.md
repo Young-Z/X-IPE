@@ -1,0 +1,144 @@
+# Feature Board
+
+> Last Updated: 01-22-2026 10:00:00
+
+## Overview
+
+This board tracks all features across the project lifecycle.
+
+**Status Definitions:**
+- **Planned** - Feature identified, awaiting refinement
+- **Refined** - Specification complete, ready for design
+- **Designed** - Technical design complete, ready for implementation
+- **Implemented** - Code complete, ready for testing
+- **Tested** - Tests complete, ready for deployment
+- **Completed** - Feature fully deployed and verified
+
+---
+
+## Feature Tracking
+
+| Feature ID | Feature Title | Version | Status | Specification Link | Created | Last Updated |
+|------------|---------------|---------|--------|-------------------|---------|--------------|
+| FEATURE-001 | Project Navigation | v1.0 | Implemented | [specification.md](../requirements/FEATURE-001/specification.md) | 01-18-2026 | 01-18-2026 00:35:00 |
+| FEATURE-002 | Content Viewer | v1.0 | Implemented | [specification.md](../requirements/FEATURE-002/specification.md) | 01-18-2026 | 01-18-2026 00:55:00 |
+| FEATURE-003 | Content Editor | v1.0 | Implemented | [specification.md](../requirements/FEATURE-003/specification.md) | 01-18-2026 | 01-20-2026 09:30:00 |
+| FEATURE-004 | Live Refresh | v1.0 | Implemented | [specification.md](../requirements/FEATURE-004/specification.md) | 01-18-2026 | 01-19-2026 00:45:00 |
+| FEATURE-005 | Interactive Console | v2.0 | Designed | [specification.md](../requirements/FEATURE-005/specification.md) | 01-18-2026 | 01-22-2026 10:30:00 |
+| FEATURE-006 | Settings & Configuration | v1.0 | Implemented | [specification.md](../requirements/FEATURE-006/specification.md) | 01-18-2026 | 01-19-2026 14:30:00 |
+| FEATURE-007 | Git Integration | v1.0 | Planned | - | 01-18-2026 | 01-18-2026 00:10:00 |
+
+---
+
+## Status Details
+
+### Planned (1)
+- FEATURE-007: Git Integration
+
+### Refined (0)
+- None
+
+### Designed (1)
+- FEATURE-005: Interactive Console v2.0 🆕
+
+### Implemented (5)
+- FEATURE-001: Project Navigation
+- FEATURE-002: Content Viewer
+- FEATURE-003: Content Editor
+- FEATURE-004: Live Refresh
+- FEATURE-006: Settings & Configuration
+
+### Tested (0)
+- None
+
+### Completed (0)
+- None
+
+---
+
+## Feature Details
+
+### FEATURE-001: Project Navigation
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Dynamic sidebar with folder tree navigation for project structure  
+**Dependencies:** None  
+**Specification:** -  
+**Technical Design:** -  
+
+---
+
+### FEATURE-002: Content Viewer
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Markdown and code file rendering with syntax highlighting  
+**Dependencies:** FEATURE-001  
+**Specification:** -  
+**Technical Design:** -  
+
+---
+
+### FEATURE-003: Content Editor
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Edit mode for modifying files with direct save to filesystem  
+**Dependencies:** FEATURE-002  
+**Specification:** -  
+**Technical Design:** -  
+
+---
+
+### FEATURE-004: Live Refresh
+
+**Version:** v1.0  
+**Status:** Designed  
+**Description:** Auto-detect file changes and refresh content in browser  
+**Dependencies:** FEATURE-002  
+**Specification:** [specification.md](../requirements/FEATURE-004/specification.md)  
+**Technical Design:** [technical-design.md](../requirements/FEATURE-004/technical-design.md)  
+
+---
+
+### FEATURE-005: Interactive Console
+
+**Version:** v2.0  
+**Status:** Designed  
+**Description:** Full terminal emulator with xterm.js, session persistence, auto-reconnection, and optional split-pane support  
+**Dependencies:** FEATURE-001  
+**Specification:** [specification.md](../requirements/FEATURE-005/specification.md)  
+**Technical Design:** [technical-design.md](../requirements/FEATURE-005/technical-design.md)  
+
+**v2.0 New Features:**
+- xterm.js integration (replace VanillaTerminal)
+- Session persistence (1hr with 10KB buffer)
+- Auto-reconnection with session reattach
+- Connection status indicator
+- Multiple terminals (up to 2 split panes)
+- Debounced resize with PTY SIGWINCH  
+
+---
+
+### FEATURE-006: Settings & Configuration
+
+**Version:** v1.0  
+**Status:** Implemented  
+**Description:** Settings page for project root path and app configuration  
+**Dependencies:** FEATURE-001  
+**Specification:** [specification.md](../requirements/FEATURE-006/specification.md)  
+**Technical Design:** [technical-design.md](../requirements/FEATURE-006/technical-design.md)  
+
+---
+
+### FEATURE-007: Git Integration
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Version history and side-by-side diff comparison  
+**Dependencies:** FEATURE-002  
+**Specification:** -  
+**Technical Design:** -  
+
+---

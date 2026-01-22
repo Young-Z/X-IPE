@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Document Viewer</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .settings-header {
+            margin-bottom: 2rem;
+        }
+        
+        .settings-header h1 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.75rem;
+            color: #333;
+        }
+        
+        .settings-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .settings-card .card-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn-save {
+            min-width: 140px;
+        }
+        
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1050;
+        }
+        
+        .project-table {
+            margin-bottom: 0;
+        }
+        
+        .project-table th {
+            font-weight: 600;
+            color: #666;
+            font-size: 0.875rem;
+        }
+        
+        .project-table td {
+            vertical-align: middle;
+        }
+        
+        .project-name {
+            font-weight: 500;
+        }
+        
+        .project-path {
+            font-family: monospace;
+            font-size: 0.875rem;
+            color: #666;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .active-badge {
+            font-size: 0.75rem;
+        }
+        
+        .btn-action {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast for notifications -->
+    <div class="toast-container">
+        <div id="successToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <span id="toastMessage">Settings saved successfully</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-container">
+        <!-- Header -->
+        <div class="settings-header">
+            <h1>
+                <i class="bi bi-gear"></i>
+                Settings
+            </h1>
+            <p class="text-muted mb-0">Configure your Document Viewer application</p>
+        </div>
+        
+        <!-- Project Folders Section (v2.0) -->
+        <div class="settings-card card">
+            <div class="card-header">
+                <span>
+                    <i class="bi bi-folder me-2"></i>
+                    Project Folders
+                </span>
+                <button type="button" class="btn btn-primary btn-sm" id="addProjectBtn">
+                    <i class="bi bi-plus-lg me-1"></i>
+                    Add Project
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <table class="table project-table mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Path</th>
+                            <th style="width: 140px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projectsList">
+                        <!-- Populated by JavaScript -->
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                Loading projects...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Legacy Project Root (hidden, for backwards compatibility) -->
+        <div class="settings-card card d-none">
+            <div class="card-header">
+                <i class="bi bi-folder me-2"></i>
+                Project Configuration (Legacy)
+            </div>
+            <div class="card-body">
+                <form id="settingsForm">
+                    <div class="mb-4">
+                        <label for="projectRoot" class="form-label fw-medium">
+                            Project Root Directory
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="projectRoot" 
+                               name="project_root"
+                               value="{{ settings.project_root }}"
+                               placeholder="/path/to/your/project">
+                        <div class="form-text">
+                            The root directory for project file navigation. Must be an existing, readable directory.
+                        </div>
+                        <div class="invalid-feedback" id="projectRootError"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer bg-white d-flex justify-content-end gap-2">
+                <a href="/" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-lg me-1"></i>
+                    Cancel
+                </a>
+                <button type="button" class="btn btn-primary btn-save" id="saveBtn">
+                    <i class="bi bi-check-lg me-1"></i>
+                    Save Settings
+                </button>
+            </div>
+        </div>
+        
+        <!-- Back link -->
+        <div class="mt-3">
+            <a href="/" class="text-decoration-none">
+                <i class="bi bi-arrow-left me-1"></i>
+                Back to Document Viewer
+            </a>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Project Modal -->
+    <div class="modal fade" id="projectModal" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="projectModalLabel">Add Project Folder</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="projectForm">
+                        <input type="hidden" id="projectId">
+                        <div class="mb-3">
+                            <label for="projectName" class="form-label">Project Name</label>
+                            <input type="text" class="form-control" id="projectName" placeholder="My Project" required>
+                            <div class="invalid-feedback" id="nameError"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="projectPath" class="form-label">Project Path</label>
+                            <input type="text" class="form-control" id="projectPath" placeholder="/path/to/project" required>
+                            <div class="form-text">Absolute path to the project directory</div>
+                            <div class="invalid-feedback" id="pathError"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveProjectBtn">
+                        <i class="bi bi-check-lg me-1"></i>
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete "<strong id="deleteProjectName"></strong>"?</p>
+                    <p class="text-muted small mb-0">This won't delete any files, just the reference.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger btn-sm" id="confirmDeleteBtn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        /**
+         * ProjectFoldersManager - Handles project folders CRUD operations
+         * FEATURE-006 v2.0: Multi-Project Folder Support
+         */
+        class ProjectFoldersManager {
+            constructor() {
+                this.projectsList = document.getElementById('projectsList');
+                this.addProjectBtn = document.getElementById('addProjectBtn');
+                this.projectModal = new bootstrap.Modal(document.getElementById('projectModal'));
+                this.deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+                
+                // Form elements
+                this.projectForm = document.getElementById('projectForm');
+                this.projectIdInput = document.getElementById('projectId');
+                this.projectNameInput = document.getElementById('projectName');
+                this.projectPathInput = document.getElementById('projectPath');
+                this.saveProjectBtn = document.getElementById('saveProjectBtn');
+                this.modalTitle = document.getElementById('projectModalLabel');
+                
+                // Delete elements
+                this.deleteProjectName = document.getElementById('deleteProjectName');
+                this.confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+                
+                // Toast
+                this.toast = new bootstrap.Toast(document.getElementById('successToast'));
+                this.toastMessage = document.getElementById('toastMessage');
+                
+                this.projects = [];
+                this.activeProjectId = null;
+                this.deleteTargetId = null;
+                
+                this.bindEvents();
+                this.loadProjects();
+            }
+            
+            bindEvents() {
+                this.addProjectBtn.addEventListener('click', () => this.openAddModal());
+                this.saveProjectBtn.addEventListener('click', () => this.saveProject());
+                this.confirmDeleteBtn.addEventListener('click', () => this.confirmDelete());
+                
+                // Clear validation on input
+                this.projectNameInput.addEventListener('input', () => {
+                    this.projectNameInput.classList.remove('is-invalid');
+                });
+                this.projectPathInput.addEventListener('input', () => {
+                    this.projectPathInput.classList.remove('is-invalid');
+                });
+            }
+            
+            async loadProjects() {
+                try {
+                    const response = await fetch('/api/projects');
+                    const data = await response.json();
+                    
+                    this.projects = data.projects;
+                    this.activeProjectId = data.active_project_id;
+                    this.renderProjects();
+                } catch (error) {
+                    console.error('Failed to load projects:', error);
+                    this.projectsList.innerHTML = `
+                        <tr>
+                            <td colspan="3" class="text-center text-danger py-4">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                Failed to load projects
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+            
+            renderProjects() {
+                if (this.projects.length === 0) {
+                    this.projectsList.innerHTML = `
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">
+                                No projects configured
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                this.projectsList.innerHTML = this.projects.map(project => `
+                    <tr data-project-id="${project.id}">
+                        <td>
+                            <span class="project-name">${this.escapeHtml(project.name)}</span>
+                            ${project.id === this.activeProjectId ? 
+                                '<span class="badge bg-primary ms-2 active-badge">Active</span>' : ''}
+                        </td>
+                        <td>
+                            <span class="project-path" title="${this.escapeHtml(project.path)}">
+                                ${this.escapeHtml(project.path)}
+                            </span>
+                        </td>
+                        <td>
+                            ${project.id !== this.activeProjectId ? `
+                                <button class="btn btn-outline-success btn-action me-1" 
+                                        onclick="projectManager.switchProject(${project.id})"
+                                        title="Switch to this project">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-outline-secondary btn-action me-1" 
+                                    onclick="projectManager.openEditModal(${project.id})"
+                                    title="Edit project">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            ${this.projects.length > 1 && project.id !== this.activeProjectId ? `
+                                <button class="btn btn-outline-danger btn-action" 
+                                        onclick="projectManager.openDeleteModal(${project.id}, '${this.escapeHtml(project.name)}')"
+                                        title="Delete project">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            openAddModal() {
+                this.modalTitle.textContent = 'Add Project Folder';
+                this.projectIdInput.value = '';
+                this.projectNameInput.value = '';
+                this.projectPathInput.value = '';
+                this.clearErrors();
+                this.projectModal.show();
+            }
+            
+            openEditModal(projectId) {
+                const project = this.projects.find(p => p.id === projectId);
+                if (!project) return;
+                
+                this.modalTitle.textContent = 'Edit Project Folder';
+                this.projectIdInput.value = project.id;
+                this.projectNameInput.value = project.name;
+                this.projectPathInput.value = project.path;
+                this.clearErrors();
+                this.projectModal.show();
+            }
+            
+            openDeleteModal(projectId, projectName) {
+                this.deleteTargetId = projectId;
+                this.deleteProjectName.textContent = projectName;
+                this.deleteModal.show();
+            }
+            
+            async saveProject() {
+                const id = this.projectIdInput.value;
+                const name = this.projectNameInput.value.trim();
+                const path = this.projectPathInput.value.trim();
+                
+                // Validate
+                let hasError = false;
+                if (!name) {
+                    this.showFieldError('projectName', 'nameError', 'Project name is required');
+                    hasError = true;
+                }
+                if (!path) {
+                    this.showFieldError('projectPath', 'pathError', 'Project path is required');
+                    hasError = true;
+                }
+                if (hasError) return;
+                
+                this.saveProjectBtn.disabled = true;
+                this.saveProjectBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+                
+                try {
+                    const url = id ? `/api/projects/${id}` : '/api/projects';
+                    const method = id ? 'PUT' : 'POST';
+                    
+                    const response = await fetch(url, {
+                        method: method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, path })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.projectModal.hide();
+                        this.showToast(id ? 'Project updated!' : 'Project added!', 'success');
+                        this.loadProjects();
+                    } else {
+                        // Show field errors
+                        if (data.errors?.name) {
+                            this.showFieldError('projectName', 'nameError', data.errors.name);
+                        }
+                        if (data.errors?.path) {
+                            this.showFieldError('projectPath', 'pathError', data.errors.path);
+                        }
+                        if (data.error) {
+                            this.showToast(data.error, 'danger');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Save failed:', error);
+                    this.showToast('Network error. Please try again.', 'danger');
+                } finally {
+                    this.saveProjectBtn.disabled = false;
+                    this.saveProjectBtn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Save';
+                }
+            }
+            
+            async confirmDelete() {
+                if (!this.deleteTargetId) return;
+                
+                this.confirmDeleteBtn.disabled = true;
+                
+                try {
+                    const response = await fetch(`/api/projects/${this.deleteTargetId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.deleteModal.hide();
+                        this.showToast('Project deleted!', 'success');
+                        this.loadProjects();
+                    } else {
+                        this.showToast(data.error || 'Failed to delete', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Delete failed:', error);
+                    this.showToast('Network error. Please try again.', 'danger');
+                } finally {
+                    this.confirmDeleteBtn.disabled = false;
+                    this.deleteTargetId = null;
+                }
+            }
+            
+            async switchProject(projectId) {
+                try {
+                    const response = await fetch('/api/projects/switch', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ project_id: projectId })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.activeProjectId = data.active_project_id;
+                        this.renderProjects();
+                        this.showToast(`Switched to ${data.project.name}`, 'success');
+                    } else {
+                        this.showToast(data.error || 'Failed to switch', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Switch failed:', error);
+                    this.showToast('Network error. Please try again.', 'danger');
+                }
+            }
+            
+            showFieldError(inputId, errorId, message) {
+                const input = document.getElementById(inputId);
+                const error = document.getElementById(errorId);
+                input.classList.add('is-invalid');
+                error.textContent = message;
+            }
+            
+            clearErrors() {
+                this.projectNameInput.classList.remove('is-invalid');
+                this.projectPathInput.classList.remove('is-invalid');
+                document.getElementById('nameError').textContent = '';
+                document.getElementById('pathError').textContent = '';
+            }
+            
+            showToast(message, type = 'success') {
+                this.toastMessage.textContent = message;
+                const toastEl = document.getElementById('successToast');
+                toastEl.className = `toast align-items-center border-0 text-bg-${type}`;
+                this.toast.show();
+            }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+        
+        // Global reference for inline onclick handlers
+        let projectManager;
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            projectManager = new ProjectFoldersManager();
+        });
+    </script>
+</body>
+</html>

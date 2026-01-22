@@ -1,0 +1,1537 @@
+{% extends "base.html" %}
+
+{% block title %}X IPE - AI Native Integrated Project Environment{% endblock %}
+
+{% block body %}
+<!-- Page Root: 3-row vertical layout (top menu, middle, bottom console) -->
+<div class="page-root" id="page-root">
+    <!-- ROW 1: Top Menu Bar -->
+    <header class="top-menu">
+        <div class="brand">
+            <span class="brand-name">X IPE</span>
+            <span class="brand-subtitle">AI native integrated project environment</span>
+        </div>
+        <div class="menu-actions">
+            <a href="/settings" class="menu-link" title="Settings">
+                <i class="bi bi-gear"></i>
+                <span>Settings</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- ROW 2: Middle Section (sidebar + content) -->
+    <div class="middle-section" id="middle-section">
+        <!-- LEFT: Sidebar Navigation -->
+        <nav class="sidebar" id="sidebar">
+            <!-- Project Switcher (FEATURE-006 v2.0) -->
+            <div class="project-switcher">
+                <select id="project-select" title="Switch project folder">
+                    <option value="">Loading projects...</option>
+                </select>
+            </div>
+            
+            <div class="sidebar-content" id="sidebar-content">
+                <div class="loading-spinner">
+                    <div class="spinner-border spinner-border-sm text-light" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    
+        <!-- RIGHT: Content Area -->
+        <main class="content-area">
+            <div class="content-header">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb" id="breadcrumb">
+                        <li class="breadcrumb-item active">Select a file</li>
+                    </ol>
+                </nav>
+                <div class="header-actions d-flex align-items-center gap-2">
+                    <!-- FEATURE-004: Live Refresh Toggle -->
+                    <div class="auto-refresh-toggle d-flex align-items-center gap-1">
+                        <label class="form-check-label small text-muted" for="auto-refresh-toggle">
+                            <i class="bi bi-arrow-repeat"></i> Auto-refresh
+                        </label>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" 
+                                   id="auto-refresh-toggle" checked
+                                   title="Toggle automatic content refresh">
+                        </div>
+                    </div>
+                    <!-- FEATURE-003: Content Editor Actions -->
+                    <div class="editor-actions d-none" id="editor-actions">
+                        <button class="btn btn-sm btn-outline-primary" id="btn-edit" title="Edit file (Ctrl+E)">
+                            <i class="bi bi-pencil"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-primary d-none" id="btn-save" title="Save file (Ctrl+S)">
+                            <i class="bi bi-check-lg"></i> Save
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary d-none" id="btn-cancel" title="Cancel editing (Esc)">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-body" id="content-body">
+                <div class="content-placeholder">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <h5>Select a file to view</h5>
+                    <p class="text-muted">Choose a file from the sidebar to view its contents</p>
+                </div>
+            </div>
+        </main>
+    </div><!-- end middle-section -->
+
+    <!-- ROW 3: Interactive Console - Terminal Panel -->
+    <div class="terminal-panel collapsed" id="terminal-panel">
+        <div class="terminal-resize-handle" id="terminal-resize-handle"></div>
+        <div class="terminal-header" id="terminal-header">
+            <div class="terminal-title">
+                <i class="bi bi-terminal"></i>
+                <span>Console</span>
+            </div>
+            <div class="terminal-status">
+                <span class="status-indicator" id="terminal-status-indicator"></span>
+                <span class="status-text" id="terminal-status-text">Connecting...</span>
+            </div>
+            <div class="terminal-actions">
+                <button id="add-terminal-btn" title="Add Terminal">+</button>
+                <button id="terminal-zen-btn" title="Zen Mode">
+                    <i class="bi bi-arrows-fullscreen"></i>
+                </button>
+                <button id="terminal-toggle" title="Toggle terminal">
+                    <i class="bi bi-chevron-up"></i>
+                </button>
+            </div>
+        </div>
+        <div class="terminal-panes" id="terminal-panes">
+            <!-- Panes inserted dynamically by TerminalManager -->
+        </div>
+    </div><!-- end terminal-panel -->
+</div><!-- end page-root -->
+
+<!-- Toast Container for notifications -->
+<div class="toast-container" id="toast-container"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/**
+ * Content Renderer
+ * FEATURE-002: Content Viewer
+ * 
+ * Renders file content with appropriate formatting:
+ * - Markdown files: parsed with marked.js, syntax highlighting, Mermaid diagrams
+ * - Code files: syntax highlighting with highlight.js
+ * - Other files: plain text
+ */
+class ContentRenderer {
+    constructor(containerId) {
+        this.container = document.getElementById(containerId);
+        this.currentPath = null;
+        this.initMermaid();
+        this.initMarked();
+    }
+    
+    /**
+     * Initialize Mermaid.js configuration
+     */
+    initMermaid() {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: 'default',
+                securityLevel: 'loose'
+            });
+        }
+    }
+    
+    /**
+     * Initialize Marked.js configuration with highlight.js
+     */
+    initMarked() {
+        if (typeof marked !== 'undefined') {
+            marked.setOptions({
+                highlight: function(code, lang) {
+                    if (typeof hljs !== 'undefined' && lang && hljs.getLanguage(lang)) {
+                        try {
+                            return hljs.highlight(code, { language: lang }).value;
+                        } catch (e) {
+                            console.error('Highlight error:', e);
+                        }
+                    }
+                    return code;
+                },
+                breaks: true,
+                gfm: true
+            });
+        }
+    }
+    
+    /**
+     * Load and render file content
+     */
+    async load(path) {
+        if (!path) return;
+        
+        this.currentPath = path;
+        this.showLoading();
+        
+        try {
+            const response = await fetch(`/api/file/content?path=${encodeURIComponent(path)}`);
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || `HTTP error ${response.status}`);
+            }
+            
+            const data = await response.json();
+            this.render(data);
+        } catch (error) {
+            console.error('Failed to load file:', error);
+            this.showError(error.message);
+        }
+    }
+    
+    /**
+     * Render content based on file type
+     */
+    render(data) {
+        const { content, type, path, extension } = data;
+        
+        if (type === 'markdown') {
+            this.renderMarkdown(content);
+        } else {
+            this.renderCode(content, type);
+        }
+    }
+    
+    /**
+     * Render markdown content with Mermaid diagrams
+     */
+    renderMarkdown(content) {
+        // Pre-process Mermaid blocks
+        const mermaidBlocks = [];
+        const processedContent = content.replace(
+            /```mermaid\n([\s\S]*?)```/g,
+            (match, diagram, offset) => {
+                const id = `mermaid-${mermaidBlocks.length}`;
+                mermaidBlocks.push({ id, diagram: diagram.trim() });
+                return `<div class="mermaid" id="${id}"></div>`;
+            }
+        );
+        
+        // Parse markdown
+        let html;
+        if (typeof marked !== 'undefined') {
+            html = marked.parse(processedContent);
+        } else {
+            // Fallback: escape HTML and preserve whitespace
+            html = '<pre>' + this.escapeHtml(content) + '</pre>';
+        }
+        
+        // Wrap in markdown-body container
+        this.container.innerHTML = `<div class="markdown-body">${html}</div>`;
+        
+        // Render Mermaid diagrams
+        this.renderMermaidDiagrams(mermaidBlocks);
+        
+        // Apply syntax highlighting to code blocks
+        this.highlightCodeBlocks();
+    }
+    
+    /**
+     * Render Mermaid diagrams
+     */
+    async renderMermaidDiagrams(blocks) {
+        if (typeof mermaid === 'undefined' || blocks.length === 0) return;
+        
+        for (const block of blocks) {
+            const element = document.getElementById(block.id);
+            if (element) {
+                try {
+                    const { svg } = await mermaid.render(block.id + '-svg', block.diagram);
+                    element.innerHTML = svg;
+                } catch (error) {
+                    console.error('Mermaid render error:', error);
+                    element.innerHTML = `<div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Diagram rendering error: ${error.message}
+                    </div>`;
+                }
+            }
+        }
+    }
+    
+    /**
+     * Apply syntax highlighting to code blocks
+     */
+    highlightCodeBlocks() {
+        if (typeof hljs === 'undefined') return;
+        
+        this.container.querySelectorAll('pre code').forEach(block => {
+            hljs.highlightElement(block);
+        });
+    }
+    
+    /**
+     * Render code with syntax highlighting
+     */
+    renderCode(content, type) {
+        let highlighted = this.escapeHtml(content);
+        
+        if (typeof hljs !== 'undefined') {
+            try {
+                if (type !== 'text' && hljs.getLanguage(type)) {
+                    highlighted = hljs.highlight(content, { language: type }).value;
+                } else {
+                    highlighted = hljs.highlightAuto(content).value;
+                }
+            } catch (e) {
+                console.error('Highlight error:', e);
+            }
+        }
+        
+        this.container.innerHTML = `
+            <div class="code-viewer">
+                <pre><code class="language-${type}">${highlighted}</code></pre>
+            </div>
+        `;
+    }
+    
+    /**
+     * Show loading state
+     */
+    showLoading() {
+        this.container.innerHTML = `
+            <div class="content-loading">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        `;
+    }
+    
+    /**
+     * Show error message
+     */
+    showError(message) {
+        this.container.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle"></i>
+                <strong>Error:</strong> ${this.escapeHtml(message)}
+            </div>
+        `;
+    }
+    
+    /**
+     * Escape HTML to prevent XSS
+     */
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+}
+
+/**
+ * Content Editor
+ * FEATURE-003: Content Editor
+ * 
+ * Provides in-place editing of document content via textarea.
+ * Integrates with ContentRenderer to switch between view/edit modes.
+ */
+class ContentEditor {
+    constructor(options) {
+        this.containerId = options.containerId || 'content-body';
+        this.contentRenderer = options.contentRenderer;
+        
+        // State
+        this.isEditing = false;
+        this.currentPath = null;
+        this.originalContent = null;
+        this.hasUnsavedChanges = false;
+        
+        // DOM elements
+        this.container = document.getElementById(this.containerId);
+        this.editorActions = document.getElementById('editor-actions');
+        this.btnEdit = document.getElementById('btn-edit');
+        this.btnSave = document.getElementById('btn-save');
+        this.btnCancel = document.getElementById('btn-cancel');
+        this.textarea = null;
+        
+        this._setupEventListeners();
+        this._setupKeyboardShortcuts();
+        this._setupBeforeUnload();
+    }
+    
+    /**
+     * Setup click event listeners for buttons
+     */
+    _setupEventListeners() {
+        if (this.btnEdit) {
+            this.btnEdit.addEventListener('click', () => this.startEditing());
+        }
+        if (this.btnSave) {
+            this.btnSave.addEventListener('click', () => this.save());
+        }
+        if (this.btnCancel) {
+            this.btnCancel.addEventListener('click', () => this.cancel());
+        }
+    }
+    
+    /**
+     * Setup keyboard shortcuts
+     */
+    _setupKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + E: Start editing
+            if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                if (!this.isEditing && this.currentPath) {
+                    e.preventDefault();
+                    this.startEditing();
+                }
+            }
+            
+            // Ctrl/Cmd + S: Save
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                if (this.isEditing) {
+                    e.preventDefault();
+                    this.save();
+                }
+            }
+            
+            // Escape: Cancel editing
+            if (e.key === 'Escape') {
+                if (this.isEditing) {
+                    e.preventDefault();
+                    this.cancel();
+                }
+            }
+        });
+    }
+    
+    /**
+     * Setup beforeunload handler to warn about unsaved changes
+     */
+    _setupBeforeUnload() {
+        window.addEventListener('beforeunload', (e) => {
+            if (this.hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                return e.returnValue;
+            }
+        });
+    }
+    
+    /**
+     * Set current path when a file is selected
+     */
+    setCurrentPath(path) {
+        // If editing and path changes, warn about unsaved changes
+        if (this.isEditing && this.currentPath !== path) {
+            if (this.hasUnsavedChanges) {
+                const confirm = window.confirm('You have unsaved changes. Do you want to discard them?');
+                if (!confirm) {
+                    return false;  // Block navigation
+                }
+            }
+            // Cancel current edit
+            this._exitEditMode(false);
+        }
+        
+        this.currentPath = path;
+        
+        // Show edit button when file is loaded
+        if (path && this.editorActions) {
+            this.editorActions.classList.remove('d-none');
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Check if navigation is allowed
+     */
+    canNavigate() {
+        if (this.hasUnsavedChanges) {
+            return window.confirm('You have unsaved changes. Do you want to discard them?');
+        }
+        return true;
+    }
+    
+    /**
+     * Start editing the current file
+     */
+    async startEditing() {
+        if (!this.currentPath || this.isEditing) return;
+        
+        // Fetch raw content
+        try {
+            const response = await fetch(`/api/file/content?path=${encodeURIComponent(this.currentPath)}`);
+            if (!response.ok) {
+                throw new Error('Failed to load file content');
+            }
+            const data = await response.json();
+            this.originalContent = data.content;
+            
+            // Switch to edit mode
+            this._enterEditMode(data.content);
+            
+        } catch (error) {
+            console.error('Failed to start editing:', error);
+            this._showToast('Failed to load file for editing', 'error');
+        }
+    }
+    
+    /**
+     * Enter edit mode - show textarea
+     */
+    _enterEditMode(content) {
+        this.isEditing = true;
+        
+        // Create textarea
+        this.textarea = document.createElement('textarea');
+        this.textarea.className = 'content-editor-textarea';
+        this.textarea.value = content;
+        this.textarea.placeholder = 'Enter content...';
+        
+        // Track changes
+        this.textarea.addEventListener('input', () => {
+            this.hasUnsavedChanges = this.textarea.value !== this.originalContent;
+            this._updateSaveButtonState();
+        });
+        
+        // Replace content with textarea
+        this.container.innerHTML = '';
+        this.container.appendChild(this.textarea);
+        
+        // Focus textarea
+        this.textarea.focus();
+        
+        // Update button visibility
+        this._updateButtonVisibility(true);
+        
+        // Disable auto-refresh while editing
+        if (window.refreshManager) {
+            window.refreshManager.disable();
+        }
+    }
+    
+    /**
+     * Exit edit mode - restore viewer
+     */
+    _exitEditMode(rerender = true) {
+        this.isEditing = false;
+        this.hasUnsavedChanges = false;
+        this.textarea = null;
+        
+        // Update button visibility
+        this._updateButtonVisibility(false);
+        
+        // Re-enable auto-refresh
+        if (window.refreshManager) {
+            window.refreshManager.enable();
+        }
+        
+        // Re-render content
+        if (rerender && this.currentPath && this.contentRenderer) {
+            this.contentRenderer.load(this.currentPath);
+        }
+    }
+    
+    /**
+     * Update button visibility based on edit state
+     */
+    _updateButtonVisibility(isEditing) {
+        if (this.btnEdit) {
+            this.btnEdit.classList.toggle('d-none', isEditing);
+        }
+        if (this.btnSave) {
+            this.btnSave.classList.toggle('d-none', !isEditing);
+        }
+        if (this.btnCancel) {
+            this.btnCancel.classList.toggle('d-none', !isEditing);
+        }
+    }
+    
+    /**
+     * Update save button enabled state
+     */
+    _updateSaveButtonState() {
+        if (this.btnSave) {
+            this.btnSave.disabled = !this.hasUnsavedChanges;
+        }
+    }
+    
+    /**
+     * Save the file
+     */
+    async save() {
+        if (!this.isEditing || !this.currentPath || !this.textarea) return;
+        
+        const content = this.textarea.value;
+        
+        // Disable save button during save
+        if (this.btnSave) {
+            this.btnSave.disabled = true;
+            this.btnSave.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+        }
+        
+        try {
+            const response = await fetch('/api/file/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    path: this.currentPath,
+                    content: content
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this._showToast('File saved successfully', 'success');
+                this.originalContent = content;
+                this.hasUnsavedChanges = false;
+                
+                // Exit edit mode and re-render
+                this._exitEditMode(true);
+            } else {
+                throw new Error(result.error || 'Failed to save file');
+            }
+            
+        } catch (error) {
+            console.error('Failed to save file:', error);
+            this._showToast(error.message || 'Failed to save file', 'error');
+            
+            // Restore save button
+            if (this.btnSave) {
+                this.btnSave.disabled = false;
+                this.btnSave.innerHTML = '<i class="bi bi-check-lg"></i> Save';
+            }
+        }
+    }
+    
+    /**
+     * Cancel editing
+     */
+    cancel() {
+        if (!this.isEditing) return;
+        
+        // Check for unsaved changes
+        if (this.hasUnsavedChanges) {
+            const confirm = window.confirm('You have unsaved changes. Do you want to discard them?');
+            if (!confirm) return;
+        }
+        
+        this._exitEditMode(true);
+    }
+    
+    /**
+     * Show toast notification
+     */
+    _showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) return;
+        
+        const toast = document.createElement('div');
+        toast.className = `toast-notification toast-${type}`;
+        
+        const icon = type === 'success' ? 'bi-check-circle' : 
+                     type === 'error' ? 'bi-exclamation-circle' : 'bi-info-circle';
+        
+        toast.innerHTML = `
+            <i class="bi ${icon}"></i>
+            <span>${message}</span>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Trigger animation
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        // Remove after delay
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+}
+
+/**
+ * Content Refresh Manager
+ * FEATURE-004: Live Refresh (Polling Implementation)
+ * 
+ * Handles automatic content refresh when files change on disk.
+ * Uses HTTP polling every 5 seconds to detect changes.
+ */
+class ContentRefreshManager {
+    constructor(options) {
+        this.contentRenderer = options.contentRenderer;
+        this.enabled = this._loadEnabledState();
+        this.scrollPosition = 0;
+        this.lastContent = null;
+        this.lastPath = null;
+        this.pollInterval = 5000; // 5 seconds
+        this.pollTimer = null;
+        
+        this._setupToggleListener();
+        this._updateToggleUI();
+        this._startPolling();
+    }
+    
+    /**
+     * Load enabled state from localStorage
+     */
+    _loadEnabledState() {
+        const saved = localStorage.getItem('autoRefreshEnabled');
+        return saved === null ? true : saved === 'true';
+    }
+    
+    /**
+     * Save enabled state to localStorage
+     */
+    _saveEnabledState() {
+        localStorage.setItem('autoRefreshEnabled', this.enabled.toString());
+    }
+    
+    /**
+     * Setup toggle UI listener
+     */
+    _setupToggleListener() {
+        const toggle = document.getElementById('auto-refresh-toggle');
+        if (toggle) {
+            toggle.addEventListener('change', (e) => {
+                this.setEnabled(e.target.checked);
+            });
+        }
+    }
+    
+    /**
+     * Update toggle UI to match current state
+     */
+    _updateToggleUI() {
+        const toggle = document.getElementById('auto-refresh-toggle');
+        if (toggle) {
+            toggle.checked = this.enabled;
+        }
+    }
+    
+    /**
+     * Start polling loop
+     */
+    _startPolling() {
+        console.log('[ContentRefreshManager] Starting polling (every 5s)');
+        this.pollTimer = setInterval(() => {
+            this._checkForChanges();
+        }, this.pollInterval);
+    }
+    
+    /**
+     * Check for content changes via HTTP polling
+     */
+    async _checkForChanges() {
+        if (!this.enabled) return;
+        
+        const currentPath = this.contentRenderer?.currentPath;
+        if (!currentPath) return;
+        
+        // Skip if path changed - reset tracking
+        if (currentPath !== this.lastPath) {
+            this.lastContent = null;
+            this.lastPath = currentPath;
+            return;
+        }
+        
+        // Skip planning files (handled by PlanningFilePoller)
+        if (/planning[\/\\](task-board|features)\.md$/i.test(currentPath)) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/file/content?path=${encodeURIComponent(currentPath)}`);
+            
+            if (!response.ok) {
+                // File might be deleted
+                if (response.status === 404) {
+                    this._handleFileDeletion();
+                }
+                return;
+            }
+            
+            const data = await response.json();
+            const newContent = data.content;
+            
+            // First load - just cache
+            if (this.lastContent === null) {
+                this.lastContent = newContent;
+                return;
+            }
+            
+            // Check if content changed
+            if (this.lastContent !== newContent) {
+                console.log('[ContentRefreshManager] Content changed, refreshing...');
+                this.lastContent = newContent;
+                this._refreshContent(data);
+            }
+        } catch (error) {
+            console.error('[ContentRefreshManager] Poll error:', error);
+        }
+    }
+    
+    /**
+     * Handle file deletion
+     */
+    _handleFileDeletion() {
+        const container = this.contentRenderer?.container;
+        if (container) {
+            container.innerHTML = `
+                <div class="alert alert-warning d-flex flex-column align-items-center justify-content-center h-100 m-4">
+                    <i class="bi bi-file-earmark-x display-4 mb-3"></i>
+                    <h5>File Not Found</h5>
+                    <p class="text-muted text-center">
+                        The file you were viewing has been deleted or moved.
+                    </p>
+                    <button class="btn btn-outline-primary" onclick="window.projectSidebar?.load()">
+                        <i class="bi bi-folder2-open"></i> Browse Files
+                    </button>
+                </div>
+            `;
+        }
+        this.lastContent = null;
+        this.lastPath = null;
+    }
+    
+    /**
+     * Refresh the content view with scroll preservation
+     */
+    _refreshContent(data) {
+        const contentBody = document.getElementById('content-body');
+        this.scrollPosition = contentBody ? contentBody.scrollTop : 0;
+        
+        // Re-render using ContentRenderer
+        if (this.contentRenderer) {
+            this.contentRenderer.render(data);
+        }
+        
+        // Restore scroll position
+        if (contentBody) {
+            requestAnimationFrame(() => {
+                const maxScroll = contentBody.scrollHeight - contentBody.clientHeight;
+                contentBody.scrollTop = Math.min(this.scrollPosition, maxScroll);
+            });
+        }
+        
+        // Show refresh indicator
+        this._showRefreshIndicator();
+    }
+    
+    /**
+     * Refresh the current content (public method)
+     */
+    async refresh() {
+        const currentPath = this.contentRenderer?.currentPath;
+        if (!currentPath) return;
+        
+        // Save scroll position
+        const contentBody = document.getElementById('content-body');
+        this.scrollPosition = contentBody ? contentBody.scrollTop : 0;
+        
+        try {
+            // Reload content
+            await this.contentRenderer.load(currentPath);
+            
+            // Restore scroll position
+            if (contentBody) {
+                const maxScroll = contentBody.scrollHeight - contentBody.clientHeight;
+                contentBody.scrollTop = Math.min(this.scrollPosition, maxScroll);
+            }
+            
+            // Update cached content
+            const response = await fetch(`/api/file/content?path=${encodeURIComponent(currentPath)}`);
+            if (response.ok) {
+                const data = await response.json();
+                this.lastContent = data.content;
+            }
+            
+            this._showRefreshIndicator();
+        } catch (error) {
+            console.error('Refresh failed:', error);
+        }
+    }
+    
+    /**
+     * Show visual indicator that content was refreshed
+     */
+    _showRefreshIndicator() {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        
+        const toast = document.createElement('div');
+        toast.className = 'refresh-toast';
+        toast.innerHTML = `
+            <i class="bi bi-arrow-repeat"></i>
+            Content updated
+        `;
+        
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    }
+    
+    /**
+     * Set auto-refresh enabled state
+     */
+    setEnabled(enabled) {
+        this.enabled = enabled;
+        this._saveEnabledState();
+        this._updateToggleUI();
+    }
+    
+    /**
+     * Disable auto-refresh (called when editing)
+     */
+    disable() {
+        this.enabled = false;
+        this._updateToggleUI();
+    }
+    
+    /**
+     * Enable auto-refresh (called after editing)
+     */
+    enable() {
+        this.enabled = this._loadEnabledState();
+        this._updateToggleUI();
+    }
+    
+    /**
+     * Get current enabled state
+     */
+    isEnabled() {
+        return this.enabled;
+    }
+}
+
+/**
+ * Planning File Poller
+ * 
+ * Automatically polls for updates on planning files (task-board.md, features.md)
+ * every 5 seconds to ensure the latest content is always displayed.
+ * Uses simple HTTP polling - no sockets.
+ */
+class PlanningFilePoller {
+    constructor(options) {
+        this.pollInterval = options.pollInterval || 5000; // 5 seconds
+        this.lastContent = null;
+        this.lastPath = null;
+        // Match any path ending with these filenames
+        this.planningFilePatterns = [
+            /planning[\/\\]task-board\.md$/i,
+            /planning[\/\\]features\.md$/i
+        ];
+        
+        // Start the polling loop immediately
+        this._startPollingLoop();
+    }
+    
+    /**
+     * Check if a path is a planning file
+     */
+    isPlanningFile(path) {
+        if (!path) return false;
+        return this.planningFilePatterns.some(pattern => pattern.test(path));
+    }
+    
+    /**
+     * Get the currently viewed file path from ContentRenderer
+     */
+    getCurrentPath() {
+        return window.contentRenderer?.currentPath || null;
+    }
+    
+    /**
+     * Start the main polling loop - runs forever
+     */
+    _startPollingLoop() {
+        console.log('[PlanningFilePoller] Starting polling loop (every 5s)');
+        
+        setInterval(() => {
+            this._checkAndRefresh();
+        }, this.pollInterval);
+    }
+    
+    /**
+     * Check current file and refresh if needed
+     */
+    async _checkAndRefresh() {
+        const currentPath = this.getCurrentPath();
+        
+        // Reset if path changed
+        if (currentPath !== this.lastPath) {
+            this.lastContent = null;
+            this.lastPath = currentPath;
+        }
+        
+        // Only poll planning files
+        if (!this.isPlanningFile(currentPath)) {
+            return;
+        }
+        
+        console.log(`[PlanningFilePoller] Checking ${currentPath}...`);
+        
+        try {
+            const response = await fetch(`/api/file/content?path=${encodeURIComponent(currentPath)}`);
+            if (!response.ok) return;
+            
+            const data = await response.json();
+            const newContent = data.content;
+            
+            // First load - just store content
+            if (this.lastContent === null) {
+                console.log('[PlanningFilePoller] Initial content cached');
+                this.lastContent = newContent;
+                return;
+            }
+            
+            // Check if content changed
+            if (this.lastContent !== newContent) {
+                console.log('[PlanningFilePoller] Content CHANGED! Refreshing...');
+                this.lastContent = newContent;
+                this._refreshContent(data);
+            }
+        } catch (error) {
+            console.error('[PlanningFilePoller] Error:', error);
+        }
+    }
+    
+    /**
+     * Refresh the content view with scroll preservation
+     */
+    _refreshContent(data) {
+        const contentBody = document.getElementById('content-body');
+        const scrollTop = contentBody ? contentBody.scrollTop : 0;
+        
+        // Re-render using ContentRenderer
+        if (window.contentRenderer) {
+            window.contentRenderer.render(data);
+        }
+        
+        // Restore scroll position
+        if (contentBody) {
+            requestAnimationFrame(() => {
+                const maxScroll = contentBody.scrollHeight - contentBody.clientHeight;
+                contentBody.scrollTop = Math.min(scrollTop, maxScroll);
+            });
+        }
+        
+        // Show toast notification
+        this._showToast();
+    }
+    
+    /**
+     * Show refresh notification
+     */
+    _showToast() {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        
+        const toast = document.createElement('div');
+        toast.className = 'refresh-toast';
+        toast.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Updated';
+        container.appendChild(toast);
+        
+        setTimeout(() => toast.remove(), 2500);
+    }
+}
+
+/**
+ * Project Switcher
+ * FEATURE-006 v2.0: Multi-Project Folder Support
+ * 
+ * Loads project folders from API and handles switching between projects.
+ * When a project is switched, it refreshes the sidebar.
+ */
+class ProjectSwitcher {
+    constructor(selectId, onSwitch) {
+        this.select = document.getElementById(selectId);
+        this.onSwitch = onSwitch;
+        this.projects = [];
+        this.activeProjectId = null;
+        
+        this.bindEvents();
+        this.load();
+    }
+    
+    bindEvents() {
+        this.select.addEventListener('change', (e) => this.handleSwitch(e));
+    }
+    
+    async load() {
+        try {
+            const response = await fetch('/api/projects');
+            const data = await response.json();
+            
+            this.projects = data.projects;
+            this.activeProjectId = data.active_project_id;
+            this.render();
+        } catch (error) {
+            console.error('Failed to load projects:', error);
+            this.select.innerHTML = '<option value="">Failed to load</option>';
+        }
+    }
+    
+    render() {
+        if (this.projects.length === 0) {
+            this.select.innerHTML = '<option value="">No projects</option>';
+            return;
+        }
+        
+        this.select.innerHTML = this.projects.map(project => {
+            const isActive = project.id === this.activeProjectId;
+            return `<option value="${project.id}" ${isActive ? 'selected' : ''}>
+                ${isActive ? '✓ ' : ''}${this.escapeHtml(project.name)}
+            </option>`;
+        }).join('');
+    }
+    
+    async handleSwitch(e) {
+        const projectId = parseInt(e.target.value);
+        if (!projectId || projectId === this.activeProjectId) return;
+        
+        try {
+            const response = await fetch('/api/projects/switch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ project_id: projectId })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.activeProjectId = data.active_project_id;
+                this.render();
+                
+                // Show toast
+                this.showToast(`Switched to ${data.project.name}`);
+                
+                // Callback to refresh sidebar
+                if (this.onSwitch) {
+                    this.onSwitch(data.project);
+                }
+            } else {
+                console.error('Switch failed:', data.error);
+                this.showToast('Failed to switch project', 'danger');
+            }
+        } catch (error) {
+            console.error('Switch error:', error);
+            this.showToast('Network error', 'danger');
+        }
+    }
+    
+    showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        
+        const toast = document.createElement('div');
+        toast.className = type === 'success' ? 'refresh-toast' : 'refresh-toast bg-danger';
+        toast.innerHTML = `<i class="bi bi-folder-check"></i> ${this.escapeHtml(message)}`;
+        container.appendChild(toast);
+        
+        setTimeout(() => toast.remove(), 2500);
+    }
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+}
+
+/**
+ * Project Sidebar Navigation
+ * FEATURE-001: Project Navigation (Polling Implementation)
+ * 
+ * Uses HTTP polling every 5 seconds to detect structure changes.
+ */
+class ProjectSidebar {
+    constructor(containerId) {
+        this.container = document.getElementById(containerId);
+        this.selectedFile = null;
+        this.sections = [];
+        this.lastStructureHash = null;
+        this.pollInterval = 5000; // 5 seconds
+        
+        this._startPolling();
+    }
+    
+    /**
+     * Start polling for structure changes
+     */
+    _startPolling() {
+        console.log('[ProjectSidebar] Starting structure polling (every 5s)');
+        setInterval(() => {
+            this._checkForChanges();
+        }, this.pollInterval);
+    }
+    
+    /**
+     * Check for structure changes via HTTP polling
+     */
+    async _checkForChanges() {
+        try {
+            const response = await fetch('/api/project/structure');
+            if (!response.ok) return;
+            
+            const data = await response.json();
+            const newHash = this._hashStructure(data.sections);
+            
+            // First load - just cache
+            if (this.lastStructureHash === null) {
+                this.lastStructureHash = newHash;
+                return;
+            }
+            
+            // Check if structure changed
+            if (this.lastStructureHash !== newHash) {
+                console.log('[ProjectSidebar] Structure changed, refreshing...');
+                this.lastStructureHash = newHash;
+                this.sections = data.sections;
+                this.render();
+                this.showToast('File structure updated', 'info');
+            }
+        } catch (error) {
+            console.error('[ProjectSidebar] Poll error:', error);
+        }
+    }
+    
+    /**
+     * Create a simple hash of the structure for comparison
+     */
+    _hashStructure(sections) {
+        return JSON.stringify(sections);
+    }
+    
+    /**
+     * Load project structure from API
+     */
+    async load() {
+        try {
+            const response = await fetch('/api/project/structure');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            this.sections = data.sections;
+            this.lastStructureHash = this._hashStructure(data.sections);
+            this.render();
+        } catch (error) {
+            console.error('Failed to load project structure:', error);
+            this.container.innerHTML = `
+                <div class="nav-empty text-danger">
+                    <i class="bi bi-exclamation-triangle"></i> Failed to load project structure
+                </div>
+            `;
+        }
+    }
+    
+    /**
+     * Render the navigation tree
+     */
+    render() {
+        if (!this.sections || this.sections.length === 0) {
+            this.container.innerHTML = '<div class="nav-empty">No sections found</div>';
+            return;
+        }
+        
+        let html = '';
+        
+        for (const section of this.sections) {
+            html += this.renderSection(section);
+        }
+        
+        this.container.innerHTML = html;
+        this.bindEvents();
+    }
+    
+    /**
+     * Render a single section
+     */
+    renderSection(section) {
+        const icon = section.icon || 'bi-folder';
+        const hasChildren = section.children && section.children.length > 0;
+        
+        let html = `
+            <div class="nav-section" data-section-id="${section.id}">
+                <div class="nav-section-header" data-bs-toggle="collapse" data-bs-target="#section-${section.id}">
+                    <i class="bi ${icon}"></i>
+                    <span>${section.label}</span>
+                    <i class="bi bi-chevron-down chevron"></i>
+                </div>
+                <div class="collapse show nav-section-content" id="section-${section.id}">
+        `;
+        
+        if (!section.exists) {
+            html += '<div class="nav-empty">Folder not found</div>';
+        } else if (!hasChildren) {
+            html += '<div class="nav-empty">No files</div>';
+        } else {
+            html += this.renderChildren(section.children);
+        }
+        
+        html += '</div></div>';
+        return html;
+    }
+    
+    /**
+     * Render children (files and folders)
+     */
+    renderChildren(children, depth = 0) {
+        if (!children || children.length === 0) {
+            return '';
+        }
+        
+        let html = '';
+        const indent = depth * 1; // rem
+        
+        for (const item of children) {
+            if (item.type === 'folder') {
+                html += this.renderFolder(item, depth);
+            } else {
+                html += this.renderFile(item, depth);
+            }
+        }
+        
+        return html;
+    }
+    
+    /**
+     * Render a folder item
+     */
+    renderFolder(folder, depth) {
+        const folderId = folder.path.replace(/[\/\.]/g, '-');
+        const hasChildren = folder.children && folder.children.length > 0;
+        const paddingLeft = 2 + (depth * 0.75);
+        
+        let html = `
+            <div class="nav-item nav-folder" 
+                 style="padding-left: ${paddingLeft}rem"
+                 data-bs-toggle="collapse" 
+                 data-bs-target="#folder-${folderId}">
+                <i class="bi bi-folder"></i>
+                <span>${folder.name}</span>
+                ${hasChildren ? '<i class="bi bi-chevron-down chevron ms-auto" style="font-size: 0.7rem;"></i>' : ''}
+            </div>
+        `;
+        
+        if (hasChildren) {
+            html += `
+                <div class="collapse show nav-folder-content" id="folder-${folderId}">
+                    ${this.renderChildren(folder.children, depth + 1)}
+                </div>
+            `;
+        }
+        
+        return html;
+    }
+    
+    /**
+     * Render a file item
+     */
+    renderFile(file, depth) {
+        const icon = this.getFileIcon(file.name);
+        const paddingLeft = 2 + (depth * 0.75);
+        const isActive = this.selectedFile === file.path;
+        
+        return `
+            <div class="nav-item nav-file ${isActive ? 'active' : ''}" 
+                 style="padding-left: ${paddingLeft}rem"
+                 data-path="${file.path}">
+                <i class="bi ${icon}"></i>
+                <span>${file.name}</span>
+            </div>
+        `;
+    }
+    
+    /**
+     * Get icon for file type
+     */
+    getFileIcon(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        const icons = {
+            'md': 'bi-file-earmark-text',
+            'py': 'bi-filetype-py',
+            'js': 'bi-filetype-js',
+            'ts': 'bi-filetype-tsx',
+            'html': 'bi-filetype-html',
+            'css': 'bi-filetype-css',
+            'json': 'bi-filetype-json',
+            'yaml': 'bi-file-code',
+            'yml': 'bi-file-code',
+            'txt': 'bi-file-text'
+        };
+        return icons[ext] || 'bi-file-earmark';
+    }
+    
+    /**
+     * Bind click events to file items
+     */
+    bindEvents() {
+        // File click events
+        const fileItems = this.container.querySelectorAll('.nav-file');
+        fileItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                // Remove active from all
+                fileItems.forEach(f => f.classList.remove('active'));
+                // Add active to clicked
+                item.classList.add('active');
+                
+                const path = item.dataset.path;
+                this.selectedFile = path;
+                this.onFileSelect(path);
+            });
+        });
+        
+        // Section header collapse tracking
+        const sectionHeaders = this.container.querySelectorAll('.nav-section-header');
+        sectionHeaders.forEach(header => {
+            const target = document.querySelector(header.dataset.bsTarget);
+            if (target) {
+                target.addEventListener('hide.bs.collapse', () => {
+                    header.classList.add('collapsed');
+                });
+                target.addEventListener('show.bs.collapse', () => {
+                    header.classList.remove('collapsed');
+                });
+            }
+        });
+    }
+    
+    /**
+     * Handle file selection - loads content via ContentRenderer
+     */
+    onFileSelect(path) {
+        console.log('File selected:', path);
+        
+        // Check with ContentEditor if navigation is allowed (unsaved changes)
+        if (window.contentEditor) {
+            const canNavigate = window.contentEditor.setCurrentPath(path);
+            if (!canNavigate) {
+                return;  // Navigation blocked due to unsaved changes
+            }
+        }
+        
+        // Update breadcrumb
+        const breadcrumb = document.getElementById('breadcrumb');
+        const parts = path.split('/');
+        breadcrumb.innerHTML = parts.map((part, index) => {
+            const isLast = index === parts.length - 1;
+            return `<li class="breadcrumb-item ${isLast ? 'active' : ''}">${part}</li>`;
+        }).join('');
+        
+        // Load content via ContentRenderer
+        if (window.contentRenderer) {
+            window.contentRenderer.load(path);
+        }
+        
+        // Emit custom event for other components
+        const event = new CustomEvent('fileSelected', { detail: { path } });
+        document.dispatchEvent(event);
+    }
+    
+    /**
+     * Show toast notification
+     */
+    showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toastId = 'toast-' + Date.now();
+        
+        const bgClass = {
+            'info': 'bg-info',
+            'success': 'bg-success',
+            'warning': 'bg-warning',
+            'error': 'bg-danger'
+        }[type] || 'bg-info';
+        
+        const toastHtml = `
+            <div id="${toastId}" class="toast ${bgClass} text-white" role="alert">
+                <div class="toast-body d-flex align-items-center">
+                    <span>${message}</span>
+                    <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+        
+        container.insertAdjacentHTML('beforeend', toastHtml);
+        const toastEl = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+        toast.show();
+        
+        toastEl.addEventListener('hidden.bs.toast', () => {
+            toastEl.remove();
+        });
+    }
+}
+
+// Initialize sidebar, content renderer, and terminal panel on page load
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize content renderer (FEATURE-002)
+    const contentRenderer = new ContentRenderer('content-body');
+    window.contentRenderer = contentRenderer;
+    
+    // Initialize content editor (FEATURE-003)
+    const contentEditor = new ContentEditor({
+        containerId: 'content-body',
+        contentRenderer: contentRenderer
+    });
+    window.contentEditor = contentEditor;
+    
+    // Initialize planning file poller (5s HTTP polling for task-board.md & features.md)
+    // Standalone - no sockets, just polls every 5 seconds
+    const planningPoller = new PlanningFilePoller({
+        pollInterval: 5000  // 5 seconds
+    });
+    window.planningPoller = planningPoller;
+    
+    // Initialize sidebar (FEATURE-001)
+    const sidebar = new ProjectSidebar('sidebar-content');
+    sidebar.load();
+    
+    // Make sidebar globally accessible
+    window.projectSidebar = sidebar;
+    
+    // Initialize project switcher (FEATURE-006 v2.0)
+    const projectSwitcher = new ProjectSwitcher('project-select', (project) => {
+        // When project is switched, reload the sidebar and clear content
+        sidebar.load();
+        contentRenderer.container.innerHTML = `
+            <div class="content-placeholder">
+                <i class="bi bi-folder-check"></i>
+                <h5>Switched to ${projectSwitcher.escapeHtml(project.name)}</h5>
+                <p class="text-muted">Select a file from the sidebar to view</p>
+            </div>
+        `;
+    });
+    window.projectSwitcher = projectSwitcher;
+    
+    // Initialize content refresh manager (FEATURE-004 - Polling)
+    // Uses HTTP polling every 5 seconds - no WebSocket dependency
+    const refreshManager = new ContentRefreshManager({
+        contentRenderer: contentRenderer
+    });
+    window.refreshManager = refreshManager;
+    
+    // Initialize terminal panel (FEATURE-005)
+    // TerminalManager and TerminalPanel are defined in /static/js/terminal.js
+    const terminalManager = new TerminalManager('terminal-panes');
+    terminalManager.initialize();
+    const terminalPanel = new TerminalPanel(terminalManager);
+    window.terminalManager = terminalManager;
+    window.terminalPanel = terminalPanel;
+});
+</script>
+{% endblock %}

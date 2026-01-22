@@ -1,0 +1,295 @@
+/**
+ * Terminal Panel Styles
+ * FEATURE-005: Interactive Console
+ * 
+ * Part of page-root flex layout as ROW 3 (bottom).
+ * Uses flex sizing instead of fixed positioning.
+ */
+
+/* Terminal Panel - Flex item in page-root */
+.terminal-panel {
+    flex: 0 0 auto;
+    background-color: #1e1e1e;
+    border-top: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    position: relative;  /* Required for resize handle positioning */
+}
+
+/* Collapsed state - just show header */
+.terminal-panel.collapsed {
+    height: 36px;
+}
+
+/* Expanded state - fixed height */
+.terminal-panel.expanded {
+    height: 300px;
+}
+
+/* Zen mode - overlay full screen (still needs fixed for overlay) */
+.terminal-panel.zen-mode {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100vh !important;
+    z-index: 9999;
+}
+
+/* Resize handle - visible drag bar at top of panel */
+.terminal-resize-handle {
+    position: absolute;
+    top: -3px;
+    left: 0;
+    right: 0;
+    height: 6px;
+    cursor: ns-resize;
+    background: transparent;
+    z-index: 101;
+}
+
+.terminal-resize-handle::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 3px;
+    background: #555;
+    border-radius: 2px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.terminal-resize-handle:hover::before,
+.terminal-panel.resizing .terminal-resize-handle::before {
+    opacity: 1;
+}
+
+.terminal-resize-handle:hover,
+.terminal-panel.resizing .terminal-resize-handle {
+    background: rgba(0, 122, 204, 0.3);
+}
+
+/* Hide resize handle when collapsed or in zen mode */
+.terminal-panel.collapsed .terminal-resize-handle,
+.terminal-panel.zen-mode .terminal-resize-handle {
+    display: none;
+}
+
+/* Terminal header bar */
+.terminal-header {
+    height: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    background-color: #252526;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    color: #ccc;
+    font-size: 13px;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.terminal-header:hover {
+    background: #2d2d2d;
+}
+
+.terminal-header .terminal-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Status indicator */
+.terminal-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    font-size: 12px;
+    color: #888;
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+.status-indicator.connected {
+    background-color: #4ec9b0;
+    box-shadow: 0 0 4px #4ec9b0;
+}
+
+.status-indicator.disconnected {
+    background-color: #f14c4c;
+    box-shadow: 0 0 4px #f14c4c;
+}
+
+/* Terminal actions */
+.terminal-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.terminal-actions button {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: #ccc;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.terminal-actions button:hover {
+    background-color: #3c3c3c;
+    color: #fff;
+}
+
+/* Pane container */
+.terminal-panes {
+    flex: 1;
+    display: none;
+    flex-direction: row;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.terminal-panel.expanded .terminal-panes,
+.terminal-panel.zen-mode .terminal-panes {
+    display: flex;
+}
+
+/* Horizontal splitter between panes */
+.pane-splitter {
+    flex: 0 0 4px;
+    background: #333;
+    cursor: ew-resize;
+    position: relative;
+    z-index: 10;
+}
+
+.pane-splitter::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 2px;
+    height: 30px;
+    background: #555;
+    border-radius: 1px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.pane-splitter:hover::before,
+.terminal-panes.dragging-splitter .pane-splitter::before {
+    opacity: 1;
+}
+
+.pane-splitter:hover,
+.terminal-panes.dragging-splitter .pane-splitter {
+    background: rgba(0, 122, 204, 0.5);
+}
+
+/* Individual terminal pane */
+.terminal-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #1e1e1e;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+    min-width: 100px;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.terminal-pane.focused {
+    border-color: #007acc;
+}
+
+/* Pane header */
+.pane-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 8px;
+    background-color: #252526;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.pane-title {
+    font-size: 11px;
+    color: #888;
+    font-weight: 500;
+}
+
+.terminal-pane.focused .pane-title {
+    color: #ccc;
+}
+
+.close-pane-btn {
+    width: 18px;
+    height: 18px;
+    border: none;
+    border-radius: 3px;
+    background: transparent;
+    color: #888;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-pane-btn:hover {
+    background-color: #c42b1c;
+    color: #fff;
+}
+
+/* Terminal content - xterm container */
+.terminal-content {
+    flex: 1;
+    padding: 4px;
+    overflow: hidden;
+    /* Critical: prevent sub-pixel rendering issues */
+    contain: strict;
+    min-height: 0;
+}
+
+/* xterm fills container */
+.terminal-content .xterm {
+    height: 100%;
+    width: 100%;
+}
+
+.terminal-content .xterm-screen {
+    width: 100% !important;
+}
+
+.terminal-content .xterm-viewport {
+    overflow-y: auto !important;
+    /* Hide scrollbar but keep scroll functionality */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.terminal-content .xterm-viewport::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
