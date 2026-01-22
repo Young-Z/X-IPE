@@ -2,7 +2,7 @@
 
 > Requirement ID: REQ-001  
 > Created: 01-18-2026  
-> Last Updated: 01-18-2026
+> Last Updated: 01-22-2026
 
 ## Project Overview
 
@@ -42,10 +42,70 @@ Create a web viewer for AI-created project documentation with:
 | FEATURE-005 | Interactive Console | v1.0 | Collapsible terminal panel for shell command execution | FEATURE-001 |
 | FEATURE-006 | Settings & Configuration | v1.0 | Settings page for project root path and app configuration | FEATURE-001 |
 | FEATURE-007 | Git Integration | v1.0 | Version history and side-by-side diff comparison | FEATURE-002 |
+| FEATURE-008 | Workplace (Idea Management) | v1.0 | Idea upload, tree view, inline editing with auto-save, folder rename | None |
+| FEATURE-009 | File Change Indicator | v1.0 | Yellow dot indicator for changed files/folders in sidebar | FEATURE-001 |
 
 ---
 
 ## Feature Details
+
+### FEATURE-008: Workplace (Idea Management)
+
+**Version:** v1.0  
+**Brief Description:** Workplace for managing ideas with upload capability, tree view navigation, inline editing with auto-save, and folder rename functionality.
+
+**Acceptance Criteria:**
+- [ ] Workplace is the first item in the sidebar navigation
+- [ ] Two-column layout: left sidebar with idea tree, right content area
+- [ ] "Upload Idea" button at top of left sidebar
+- [ ] Idea tree shows folders and files from `docs/ideas/`
+- [ ] Clicking a file opens it in the right content view
+- [ ] File editor with auto-save after 5 seconds of no changes
+- [ ] Visual indicators for "Saving..." and "Saved" states
+- [ ] Upload view supports drag-and-drop and file picker
+- [ ] Uploaded files stored in `docs/ideas/{temp idea - YYYY-MM-DD}/files/`
+- [ ] Folders can be renamed inline (double-click to edit)
+- [ ] Folder rename updates physical folder name on disk
+
+**Dependencies:**
+- None (can be developed independently, reuses existing infrastructure)
+
+**Technical Considerations:**
+- Reuse ContentService for file operations
+- Debounce auto-save with 5-second timer
+- File upload endpoint with multipart form data
+- Folder rename API endpoint
+- Inline rename with contenteditable or input field
+
+---
+
+### FEATURE-009: File Change Indicator
+
+**Version:** v1.0  
+**Brief Description:** Yellow dot visual indicator for changed files and folders in the sidebar to notify users of updates.
+
+**Acceptance Criteria:**
+- [ ] Yellow dot appears before file/folder name when content changes on disk
+- [ ] Yellow dot appears when structure changes (new/deleted files)
+- [ ] Dot bubbles up to parent folders (if `docs/planning/features.md` changes, both file and `planning/` and `docs/` show dots)
+- [ ] Clicking a file clears the dot for that file
+- [ ] Parent folder dots clear automatically when no changed children remain
+- [ ] Dot uses Bootstrap warning color for UI consistency
+- [ ] Dots do not persist across page refresh (session-only)
+- [ ] Works with existing polling-based structure detection
+
+**Dependencies:**
+- FEATURE-001: Project Navigation (enhancement to existing sidebar)
+
+**Technical Considerations:**
+- Track changed paths in memory (Set or Map)
+- Extend existing `_checkForChanges()` method to identify changed paths
+- Modify `renderFile()` and `renderFolder()` to show dot indicator
+- Clear tracking on file click events
+- Propagate changes up folder hierarchy
+- CSS styling for dot indicator (small circle before item name)
+
+---
 
 ### FEATURE-001: Project Navigation
 
