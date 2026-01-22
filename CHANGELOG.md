@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-009: File Change Indicator** - Visual notification for changed files
+  - Yellow dot indicator (6px, Bootstrap warning color) appears before file/folder names
+  - Dot shows when file content or structure changes (detected via 5s polling)
+  - Bubble-up: parent folders also show dots when children change
+  - Click-to-clear: clicking a file removes its dot
+  - Parent cleanup: parent dots clear when no changed children remain
+  - Session-only: dots reset on page refresh (no persistence)
+  - Implemented in ProjectSidebar class with changedPaths Set tracking
+
 - **FEATURE-008: Workplace (Idea Management)** - Dedicated space for idea management
   - Two-column layout with tree navigation and content editor
   - IdeasService backend with get_tree(), upload(), rename_folder() methods

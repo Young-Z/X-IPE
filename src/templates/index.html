@@ -679,12 +679,17 @@ class WorkplaceManager {
         this.hasUnsavedChanges = false;
         this.originalContent = '';
         this.renamingFolder = null;
+        this.pollInterval = 5000; // 5 seconds tree refresh
+        this.pollTimer = null;
+        this.lastTreeHash = null;
+        this.isActive = false; // Track if workplace view is active
     }
     
     /**
      * Render the workplace view in the content area
      */
     async render(container) {
+        this.isActive = true;
         container.innerHTML = `
             <div class="workplace-container">
                 <div class="workplace-sidebar">
@@ -714,8 +719,64 @@ class WorkplaceManager {
             this.showUploadView();
         });
         
-        // Load tree
+        // Load tree and start polling
         await this.loadTree();
+        this._startPolling();
+    }
+    
+    /**
+     * Stop workplace (called when navigating away)
+     */
+    stop() {
+        this.isActive = false;
+        this._stopPolling();
+    }
+    
+    /**
+     * Start polling for tree changes
+     */
+    _startPolling() {
+        this._stopPolling(); // Clear any existing timer
+        this.pollTimer = setInterval(() => {
+            if (this.isActive) {
+                this._checkForTreeChanges();
+            }
+        }, this.pollInterval);
+    }
+    
+    /**
+     * Stop polling
+     */
+    _stopPolling() {
+        if (this.pollTimer) {
+            clearInterval(this.pollTimer);
+            this.pollTimer = null;
+        }
+    }
+    
+    /**
+     * Check for tree changes and refresh if needed
+     */
+    async _checkForTreeChanges() {
+        try {
+            const response = await fetch('/api/ideas/tree');
+            const data = await response.json();
+            
+            if (data.success && data.tree) {
+                const newHash = JSON.stringify(data.tree);
+                if (this.lastTreeHash && this.lastTreeHash !== newHash) {
+                    // Tree changed, refresh it
+                    const treeContainer = document.getElementById('workplace-tree');
+                    if (treeContainer) {
+                        this.renderTree(treeContainer, data.tree);
+                        this._showToast('Ideas updated', 'info');
+                    }
+                }
+                this.lastTreeHash = newHash;
+            }
+        } catch (error) {
+            console.error('Failed to check for tree changes:', error);
+        }
     }
     
     /**
@@ -730,8 +791,10 @@ class WorkplaceManager {
             const data = await response.json();
             
             if (data.success && data.tree) {
+                this.lastTreeHash = JSON.stringify(data.tree);
                 this.renderTree(treeContainer, data.tree);
             } else {
+                this.lastTreeHash = null;
                 treeContainer.innerHTML = `
                     <div class="workplace-empty">
                         <i class="bi bi-folder-x"></i>
@@ -2161,6 +2224,11 @@ class ProjectSidebar {
      */
     onFileSelect(path) {
         console.log('File selected:', path);
+        
+        // Stop workplace polling when navigating to a file
+        if (window.workplaceManager) {
+            window.workplaceManager.stop();
+        }
         
         // Check with ContentEditor if navigation is allowed (unsaved changes)
         if (window.contentEditor) {
