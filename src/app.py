@@ -16,7 +16,7 @@ import sys
 from flask import Flask, render_template, jsonify, request, current_app
 from flask_socketio import SocketIO, emit
 
-from src.services import ProjectService, ContentService, SettingsService, ProjectFoldersService, IdeasService
+from src.services import ProjectService, ContentService, SettingsService, ProjectFoldersService, IdeasService, ConfigService
 from src.services import session_manager
 from src.config import config_by_name
 
@@ -28,6 +28,9 @@ ideas_service = None
 
 # Global project folders service instance (FEATURE-006 v2.0)
 project_folders_service = None
+
+# Global config service instance (FEATURE-010)
+config_service = None
 
 # Socket.IO instance with ping/pong for keep-alive
 socketio = SocketIO(
@@ -66,15 +69,25 @@ def create_app(config=None):
         app.config.from_object(config)
     
     # Initialize settings service
-    global settings_service, project_folders_service, ideas_service
+    global settings_service, project_folders_service, ideas_service, config_service
     db_path = app.config.get('SETTINGS_DB_PATH', app.config.get('SETTINGS_DB', os.path.join(app.instance_path, 'settings.db')))
     settings_service = SettingsService(db_path)
     project_folders_service = ProjectFoldersService(db_path)
     
+    # Initialize config service and load .x-ipe.yaml (FEATURE-010)
+    if not app.config.get('TESTING'):
+        config_service = ConfigService()
+        config_data = config_service.load()
+        if config_data:
+            app.config['X_IPE_CONFIG'] = config_data
+            # Use config paths if no explicit PROJECT_ROOT set
+            if not app.config.get('PROJECT_ROOT'):
+                app.config['PROJECT_ROOT'] = config_data.get_file_tree_path()
+    
     # Apply project_root from settings if not overridden by config
     saved_root = settings_service.get('project_root')
-    if saved_root and saved_root != '.' and not app.config.get('TESTING'):
-        # Only apply if it's a valid path
+    if saved_root and saved_root != '.' and not app.config.get('TESTING') and not app.config.get('X_IPE_CONFIG'):
+        # Only apply if it's a valid path and no .x-ipe.yaml detected
         if os.path.exists(saved_root) and os.path.isdir(saved_root):
             app.config['PROJECT_ROOT'] = saved_root
     
@@ -359,6 +372,47 @@ def register_settings_routes(app):
             app.config['PROJECT_ROOT'] = new_path
         
         return jsonify({'success': True, 'message': 'Settings saved successfully'})
+    
+    @app.route('/api/config', methods=['GET'])
+    def get_config():
+        """
+        GET /api/config
+        
+        Get current project configuration from .x-ipe.yaml.
+        
+        FEATURE-010: Project Root Configuration
+        
+        Response (config detected):
+            - detected: true
+            - config_file: string - Path to .x-ipe.yaml
+            - version: int
+            - project_root: string
+            - x_ipe_app: string
+            - file_tree_scope: string
+            - terminal_cwd: string
+        
+        Response (no config):
+            - detected: false
+            - config_file: null
+            - using_defaults: true
+            - project_root: string - Current project root
+            - message: string
+        """
+        config_data = app.config.get('X_IPE_CONFIG')
+        
+        if config_data:
+            return jsonify({
+                'detected': True,
+                **config_data.to_dict()
+            })
+        else:
+            return jsonify({
+                'detected': False,
+                'config_file': None,
+                'using_defaults': True,
+                'project_root': app.config.get('PROJECT_ROOT', os.getcwd()),
+                'message': 'No .x-ipe.yaml found. Using default paths.'
+            })
 
 
 def register_project_routes(app):

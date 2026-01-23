@@ -157,6 +157,23 @@
             </div>
         </div>
         
+        <!-- Project Configuration Section (from .x-ipe.yaml) -->
+        <div class="settings-card card" id="projectConfigCard">
+            <div class="card-header">
+                <span>
+                    <i class="bi bi-gear-wide-connected me-2"></i>
+                    Project Configuration
+                </span>
+                <span class="badge bg-secondary" id="configStatusBadge">Loading...</span>
+            </div>
+            <div class="card-body" id="configContent">
+                <div class="text-center text-muted py-3">
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    Loading configuration...
+                </div>
+            </div>
+        </div>
+        
         <!-- Legacy Project Root (hidden, for backwards compatibility) -->
         <div class="settings-card card d-none">
             <div class="card-header">
@@ -547,9 +564,99 @@
         // Global reference for inline onclick handlers
         let projectManager;
         
+        /**
+         * ConfigManager - Displays project configuration from .x-ipe.yaml
+         * FEATURE-010: Project Root Configuration
+         */
+        class ConfigManager {
+            constructor() {
+                this.configCard = document.getElementById('projectConfigCard');
+                this.configContent = document.getElementById('configContent');
+                this.statusBadge = document.getElementById('configStatusBadge');
+                this.loadConfig();
+            }
+            
+            async loadConfig() {
+                try {
+                    const response = await fetch('/api/config');
+                    const data = await response.json();
+                    this.renderConfig(data);
+                } catch (error) {
+                    console.error('Failed to load config:', error);
+                    this.statusBadge.textContent = 'Error';
+                    this.statusBadge.className = 'badge bg-danger';
+                    this.configContent.innerHTML = `
+                        <div class="text-center text-danger py-3">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Failed to load configuration
+                        </div>
+                    `;
+                }
+            }
+            
+            renderConfig(data) {
+                if (!data.detected) {
+                    this.statusBadge.textContent = 'Not Detected';
+                    this.statusBadge.className = 'badge bg-secondary';
+                    this.configContent.innerHTML = `
+                        <div class="text-muted">
+                            <i class="bi bi-info-circle me-2"></i>
+                            No <code>.x-ipe.yaml</code> configuration file detected.
+                            <br><small class="text-muted">The application is using default settings.</small>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                this.statusBadge.textContent = 'Detected';
+                this.statusBadge.className = 'badge bg-success';
+                
+                const config = data.config;
+                this.configContent.innerHTML = `
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            <i class="bi bi-file-earmark-code me-1"></i>
+                            Config file: <code>${this.escapeHtml(data.config_file)}</code>
+                        </small>
+                    </div>
+                    <table class="table table-sm table-borderless mb-0">
+                        <tbody>
+                            <tr>
+                                <td class="text-muted" style="width: 150px;">Version</td>
+                                <td><code>${config.version}</code></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Project Root</td>
+                                <td><code>${this.escapeHtml(config.project_root)}</code></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">X-IPE App</td>
+                                <td><code>${this.escapeHtml(config.x_ipe_app)}</code></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">File Tree Scope</td>
+                                <td><code>${config.file_tree_scope}</code></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Terminal CWD</td>
+                                <td><code>${config.terminal_cwd}</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `;
+            }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+        
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
             projectManager = new ProjectFoldersManager();
+            new ConfigManager();
         });
     </script>
 </body>

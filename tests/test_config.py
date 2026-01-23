@@ -232,7 +232,8 @@ class TestConfigServiceDiscovery:
         config_path = service._discover()
         
         assert config_path is not None
-        assert config_path == temp_nested_structure['config_file']
+        # Use resolve() for consistent path comparison on macOS
+        assert config_path.resolve() == temp_nested_structure['config_file'].resolve()
 
     def test_discover_returns_none_when_not_found(self, temp_dir_no_config):
         """_discover() returns None when no config file exists"""
