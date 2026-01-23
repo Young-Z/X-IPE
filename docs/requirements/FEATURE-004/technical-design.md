@@ -216,7 +216,7 @@ class ContentRefreshManager {
 
 #### Step 1: Extend FileWatcher to emit content_changed
 
-**File:** `src/services.py`
+**File:** `src/services/file_service.py`
 
 Modify `FileWatcherHandler._add_event()` to emit both event types:
 
@@ -490,7 +490,7 @@ document.getElementById('auto-refresh-toggle').addEventListener('change', (e) =>
 
 ## Implementation Checklist
 
-- [ ] Extend `FileWatcher._emit_event()` to emit `content_changed`
+- [ ] Extend `FileWatcher._emit_event()` in `services/file_service.py` to emit `content_changed`
 - [ ] Create `ContentRefreshManager` JavaScript class
 - [ ] Add toggle UI control in content header
 - [ ] Implement scroll position preservation

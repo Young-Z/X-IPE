@@ -173,7 +173,7 @@ VALUES ('active_project_id', '1');
 
 ### Component 1: ProjectFoldersService
 
-**File:** `src/services.py`
+**File:** `src/services/settings_service.py`
 
 ```python
 class ProjectFoldersService:

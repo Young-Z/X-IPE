@@ -225,7 +225,7 @@ defaults:
 
 ### Component 1: ConfigService
 
-**File:** `src/services.py`
+**File:** `src/services/config_service.py`
 
 ```python
 import os
@@ -562,7 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ### Component 5: SessionManager Integration
 
-**File:** `src/services.py` (modify `SessionManager.create_session`)
+**File:** `src/services/terminal_service.py` (modify `SessionManager.create_session`)
 
 ```python
 class SessionManager:
@@ -596,7 +596,7 @@ class SessionManager:
 
 ### Phase 1: Backend Core (ConfigService)
 
-1. Add `ConfigData` dataclass to `services.py`
+1. Add `ConfigData` dataclass to `services/config_service.py`
 2. Add `ConfigService` class with `discover()`, `parse()`, `validate()` methods
 3. Write unit tests for ConfigService
 4. Verify tests pass
@@ -682,3 +682,4 @@ class SessionManager:
 | Date | Phase | Change Summary |
 |------|-------|----------------|
 | 01-23-2026 | Initial Design | Initial technical design created for FEATURE-010. ConfigService with discover/parse/validate, ConfigData dataclass, /api/config endpoint, Settings page integration, SessionManager terminal_cwd support. |
+| 01-23-2026 | Refactoring | Updated file paths: `src/services.py` split into `src/services/` package. ConfigService and ConfigData now in `src/services/config_service.py`, SessionManager in `src/services/terminal_service.py`. Imports via `from src.services import X` still work due to `__init__.py` re-exports. |

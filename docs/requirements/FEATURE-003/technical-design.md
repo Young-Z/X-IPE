@@ -207,7 +207,7 @@ sequenceDiagram
 
 #### 1. ContentService Extension (Backend)
 
-**Location:** `src/services.py`
+**Location:** `src/services/file_service.py`
 
 Add `save_content()` method to existing `ContentService`:
 
@@ -619,13 +619,15 @@ if (!contentEditor.canNavigate()) {
 
 ```
 src/
-├── app.py           # Add POST /api/file/save route
-├── services.py      # Add save_content() to ContentService
+├── app.py                     # Add POST /api/file/save route
+├── services/
+│   ├── __init__.py            # Re-exports all services
+│   └── file_service.py        # Add save_content() to ContentService
 ├── templates/
-│   ├── base.html    # (no changes needed)
-│   └── index.html   # Add ContentEditor class, editor-actions div
+│   ├── base.html              # (no changes needed)
+│   └── index.html             # Add ContentEditor class, editor-actions div
 tests/
-└── test_editor.py   # NEW: Editor tests
+└── test_editor.py             # NEW: Editor tests
 ```
 
 ---
@@ -653,7 +655,7 @@ tests/
 
 ### Implementation Checklist
 
-- [ ] Add `save_content()` method to `ContentService` in `services.py`
+- [ ] Add `save_content()` method to `ContentService` in `services/file_service.py`
 - [ ] Add `_validate_path_for_write()` method to `ContentService`
 - [ ] Add `POST /api/file/save` route in `app.py`
 - [ ] Create `ContentEditor` JavaScript class in `index.html`

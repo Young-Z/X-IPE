@@ -44,7 +44,7 @@
 |------------|--------|-------------|-------------------|
 | `ContentService` | FEATURE-002 | [technical-design.md](../FEATURE-002/technical-design.md) | Reuse `save_content()` for auto-save, `get_content()` for file loading |
 | `ProjectService` | FEATURE-001 | [technical-design.md](../FEATURE-001/technical-design.md) | Reference tree scanning pattern for `IdeasService.get_tree()` |
-| `FileNode` | FEATURE-001 | [services.py](../../../src/services.py) | Reuse dataclass for tree structure |
+| `FileNode` | FEATURE-001 | [file_service.py](../../../src/services/file_service.py) | Reuse dataclass for tree structure |
 | `TerminalManager` | FEATURE-005 | [terminal.js](../../../static/js/terminal.js) | Terminal management for Copilot button (CR-001) |
 | `TerminalPanel` | FEATURE-005 | [terminal.js](../../../static/js/terminal.js) | Panel expand/collapse for Copilot button (CR-001) |
 
@@ -241,7 +241,7 @@ sequenceDiagram
 class IdeasService:
     """
     Service for managing idea files and folders.
-    Location: src/services.py
+    Location: src/services/ideas_service.py
     """
     
     IDEAS_PATH = 'docs/ideas'
@@ -482,7 +482,7 @@ class IdeaUploader {
 
 **Phase 1: Backend (IdeasService + API)**
 
-1. Add `IdeasService` class to `src/services.py`
+1. Add `IdeasService` class to `src/services/ideas_service.py`
    - `get_tree()` - scan docs/ideas/
    - `upload()` - create folder + save files
    - `rename_folder()` - rename with validation
@@ -774,5 +774,6 @@ _sendWithTypingEffect(index, text, callback) {
 |------|-------|----------------|
 | 01-22-2026 | CR-001 | Added Copilot button integration: terminal panel expand, Copilot mode detection, typing simulation, refine command automation |
 | 01-22-2026 | Initial Design | Initial technical design for FEATURE-008: Workplace (Idea Management). Two-column layout with IdeasService backend, auto-save editor, drag-drop upload, and inline folder rename. |
+| 01-23-2026 | Refactoring | Updated file paths: `src/services.py` split into `src/services/` package. IdeasService now in `src/services/ideas_service.py`, FileNode in `src/services/file_service.py`. Imports via `from src.services import X` still work due to `__init__.py` re-exports. |
 
 ---

@@ -383,7 +383,7 @@ Add to `base.html` or existing stylesheet:
 |------|---------|
 | `src/templates/index.html` | Extend `ProjectSidebar` class with change tracking |
 | `src/templates/base.html` | Add CSS styles for `.change-indicator` |
-| `src/services.py` | Add `mtime` field to `FileNode` for content change detection |
+| `src/services/file_service.py` | Add `mtime` field to `FileNode` for content change detection |
 
 ---
 
@@ -403,3 +403,4 @@ Add to `base.html` or existing stylesheet:
 | Date | Phase | Change Summary |
 |------|-------|----------------|
 | 01-23-2026 | Bug Fix | Added `mtime` field to `FileNode` dataclass and `_scan_directory()` to include file modification times in structure API. Frontend updated to track `previousPathMtimes` as Map instead of Set, and `_detectChangedPaths()` now compares mtimes to detect content modifications in addition to structure changes. This fixes the bug where file change indicators only appeared for new/deleted files, not content modifications. |
+| 01-23-2026 | Refactoring | Updated file paths: `src/services.py` split into `src/services/` package. FileNode now in `src/services/file_service.py`. Imports via `from src.services import X` still work due to `__init__.py` re-exports. |

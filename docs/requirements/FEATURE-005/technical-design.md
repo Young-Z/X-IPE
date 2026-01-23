@@ -40,7 +40,7 @@ When a 3-byte UTF-8 character (e.g., `→`) spans two read operations:
 Use Python's **incremental UTF-8 decoder** which buffers incomplete sequences:
 
 ```python
-# Location: src/services.py - PTYSession._read_loop()
+# Location: src/services/terminal_service.py - PTYSession._read_loop()
 
 import codecs
 
@@ -90,7 +90,7 @@ def _read_loop(self) -> None:
 
 | File | Change |
 |------|--------|
-| `src/services.py` | `PTYSession._read_loop()` - use incremental decoder |
+| `src/services/terminal_service.py` | `PTYSession._read_loop()` - use incremental decoder |
 
 ---
 
@@ -103,9 +103,9 @@ def _read_loop(self) -> None:
 
 | Component | Responsibility | Location | Tags |
 |-----------|----------------|----------|------|
-| `SessionManager` | Manage persistent PTY sessions | `src/services.py` | #session #backend |
-| `PersistentSession` | Wrap PTY with buffer + state | `src/services.py` | #session #pty |
-| `OutputBuffer` | Circular buffer for reconnection | `src/services.py` | #buffer #replay |
+| `SessionManager` | Manage persistent PTY sessions | `src/services/terminal_service.py` | #session #backend |
+| `PersistentSession` | Wrap PTY with buffer + state | `src/services/terminal_service.py` | #session #pty |
+| `OutputBuffer` | Circular buffer for reconnection | `src/services/terminal_service.py` | #buffer #replay |
 | `Flask-SocketIO` | WebSocket server with session events | `src/app.py` | #websocket #api |
 | `TerminalManager` | Frontend multi-terminal orchestrator | `index.html` | #frontend #manager |
 | `xterm.js` | Full terminal emulator | CDN | #xterm #frontend |
@@ -195,7 +195,7 @@ def _read_loop(self) -> None:
 **Purpose:** Circular buffer for storing recent terminal output for replay on reconnection.
 
 ```python
-# Location: src/services.py
+# Location: src/services/terminal_service.py
 
 from collections import deque
 
@@ -232,7 +232,7 @@ class OutputBuffer:
 **Purpose:** Wraps PTYSession with persistence support including buffer and state tracking.
 
 ```python
-# Location: src/services.py
+# Location: src/services/terminal_service.py
 
 import uuid
 import threading
@@ -321,7 +321,7 @@ class PersistentSession:
 **Purpose:** Manages all persistent sessions with lifecycle and cleanup.
 
 ```python
-# Location: src/services.py
+# Location: src/services/terminal_service.py
 
 CLEANUP_INTERVAL = 300  # 5 minutes
 
@@ -986,9 +986,9 @@ function debounce(func, wait) {
 | Step | Task | Files | Est. |
 |------|------|-------|------|
 | 1.1 | Add xterm.js CDN links | `base.html` | 5m |
-| 1.2 | Implement OutputBuffer class | `services.py` | 15m |
-| 1.3 | Implement PersistentSession class | `services.py` | 30m |
-| 1.4 | Implement SessionManager class | `services.py` | 30m |
+| 1.2 | Implement OutputBuffer class | `services/terminal_service.py` | 15m |
+| 1.3 | Implement PersistentSession class | `services/terminal_service.py` | 30m |
+| 1.4 | Implement SessionManager class | `services/terminal_service.py` | 30m |
 | 1.5 | Update WebSocket handlers | `app.py` | 30m |
 | 1.6 | Replace VanillaTerminal with xterm.js | `index.html` | 45m |
 | 1.7 | Add localStorage session persistence | `index.html` | 15m |
@@ -1053,7 +1053,7 @@ function debounce(func, wait) {
 - [ ] Remove VanillaTerminal class from `index.html`
 - [ ] Remove AnsiParser class from `index.html`
 - [ ] Add xterm.js CDN links to `base.html`
-- [ ] Add OutputBuffer, PersistentSession, SessionManager to `services.py`
+- [ ] Add OutputBuffer, PersistentSession, SessionManager to `services/terminal_service.py`
 - [ ] Update WebSocket handlers in `app.py`
 - [ ] Replace terminal initialization in `index.html`
 - [ ] Add connection status UI

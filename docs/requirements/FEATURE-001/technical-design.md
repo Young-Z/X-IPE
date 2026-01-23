@@ -256,7 +256,9 @@ class StructureChangedEvent:
 src/
 ├── __init__.py
 ├── app.py              # Flask app, routes, WebSocket
-├── services.py         # ProjectService, FileWatcher
+├── services/           # Services package
+│   ├── __init__.py     # Re-exports all services
+│   └── file_service.py # ProjectService, FileWatcher, FileNode, Section, ContentService
 ├── config.py           # Configuration (project root)
 └── templates/
     ├── base.html       # Base template with Bootstrap
@@ -276,7 +278,7 @@ static/
    - Create base HTML template with Bootstrap 5
 
 2. **Backend - ProjectService:**
-   - Create `src/services.py`
+   - Create `src/services/file_service.py`
    - Implement `ProjectService.get_structure()` to scan directories
    - Add file type filtering (md, py, js, etc.)
    - Add hidden file exclusion
@@ -330,5 +332,6 @@ static/
 | Date | Phase | Change Summary |
 |------|-------|----------------|
 | 01-18-2026 | Initial Design | Initial technical design created for Project Navigation feature. Covers backend API, WebSocket for real-time updates, and frontend sidebar component. |
+| 01-23-2026 | Refactoring | Updated file paths: `src/services.py` split into `src/services/` package. ProjectService, FileWatcher, FileNode, Section, ContentService now in `src/services/file_service.py`. Imports via `from src.services import X` still work due to `__init__.py` re-exports. |
 
 ---

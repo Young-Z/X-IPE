@@ -349,5 +349,6 @@ renderer.code = function(code, language) {
 | Date | Phase | Change Summary |
 |------|-------|----------------|
 | 01-18-2026 | Initial Design | Initial technical design for Content Viewer. Covers markdown rendering with marked.js, Mermaid diagrams, and code highlighting with highlight.js. |
+| 01-23-2026 | Refactoring | Updated file paths: `src/services.py` split into `src/services/` package. ContentService now in `src/services/file_service.py`. Imports via `from src.services import X` still work due to `__init__.py` re-exports. |
 
 ---
