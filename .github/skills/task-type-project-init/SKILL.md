@@ -55,6 +55,23 @@ Output:
 
 ---
 
+## Execution Flow
+
+Execute Project Initialization by following these steps in order:
+
+| Step | Name | Action | Gate to Next |
+|------|------|--------|--------------|
+| 1 | Scan Existing | Check if project exists, read structure if so | Scan complete |
+| 2 | Create Structure | Create `docs/planning/`, `docs/reference/`, etc. | Folders created |
+| 3 | Init Task Board | Call task-board-management skill | Task board created |
+| 4 | Init Docs | Create `lessons_learned.md` and other docs | Docs initialized |
+
+**⛔ BLOCKING RULES:**
+- Step 3: MUST use task-board-management skill (not manual file creation)
+- Existing projects: Only ADD missing files, do NOT restructure
+
+---
+
 ## Execution Procedure
 
 ### Step 1: Scan Existing Structure

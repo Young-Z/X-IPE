@@ -68,6 +68,25 @@ Output:
 
 ---
 
+## Execution Flow
+
+Execute Technical Design by following these steps in order:
+
+| Step | Name | Action | Gate to Next |
+|------|------|--------|--------------|
+| 1 | Query Board | Get Feature Data Model from feature board | Feature data received |
+| 2 | Read Spec | Thoroughly read feature specification | Spec understood |
+| 3 | Reference Arch | Check existing architecture patterns | Patterns identified |
+| 4 | Research | Search for best practices and libraries | Research complete |
+| 5 | Create Design | Write two-part technical design document | Design written |
+| 6 | Complete | Verify DoD, output summary, request human review | Human review |
+
+**⛔ BLOCKING RULES:**
+- Step 1: BLOCKED if feature not on board or status not "Done Feature Refinement"
+- Step 6 → Human Review: Human MUST approve technical design before Test Generation
+
+---
+
 ## Design Principles
 
 ### KISS (Keep It Simple, Stupid)

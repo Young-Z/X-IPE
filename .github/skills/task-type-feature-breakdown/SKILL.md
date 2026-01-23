@@ -62,6 +62,25 @@ Output:
 
 ---
 
+## Execution Flow
+
+Execute Feature Breakdown by following these steps in order:
+
+| Step | Name | Action | Gate to Next |
+|------|------|--------|--------------|
+| 1 | Analyze | Read requirement-details.md or user request | Requirements understood |
+| 2 | Identify Features | Extract features using MVP-first criteria | Features identified |
+| 3 | Create Summary | Create/update requirement-details.md with feature list | Summary written |
+| 4 | Update Board | Call feature-board-management to create features | Board updated |
+| 5 | Complete | Verify DoD, output summary, request human review | Human review |
+
+**⛔ BLOCKING RULES:**
+- Step 2: First feature MUST be "Minimum Runnable Feature" (MVP)
+- Step 4: MUST use feature-board-management skill (not manual file editing)
+- Step 5 → Human Review: Human MUST approve feature list before refinement
+
+---
+
 ## Execution Procedure
 
 ### Step 1: Analyze Requirements

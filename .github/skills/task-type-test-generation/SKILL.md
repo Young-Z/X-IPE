@@ -75,6 +75,26 @@ Output:
 
 ---
 
+## Execution Flow
+
+Execute Test Generation by following these steps in order:
+
+| Step | Name | Action | Gate to Next |
+|------|------|--------|--------------|
+| 1 | Query Board | Get Feature Data Model from feature board | Feature data received |
+| 2 | Read Design | Extract testable components from technical design | Components identified |
+| 3 | Read Architecture | Check referenced architecture for test patterns | Patterns understood |
+| 4 | Read Spec | Get acceptance criteria from specification | Criteria extracted |
+| 5 | Design Strategy | Plan unit, integration, and API tests | Strategy defined |
+| 6 | Generate Tests | Create all test files | Tests written |
+| 7 | Verify TDD Ready | Run tests, confirm ALL fail | All tests fail |
+
+**⛔ BLOCKING RULES:**
+- Step 7: ALL tests MUST fail (no implementation exists)
+- Step 7: If any test passes → test is wrong or implementation exists
+
+---
+
 ## Execution Procedure
 
 ### Step 1: Query Feature Board

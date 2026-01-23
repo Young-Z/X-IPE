@@ -60,6 +60,24 @@ Output:
 
 ---
 
+## Execution Flow
+
+Execute Development Environment Setup by following these steps in order:
+
+| Step | Name | Action | Gate to Next |
+|------|------|--------|--------------|
+| 1 | Determine Stack | Identify tech stack (Python/Node.js) from context or ask user | Stack selected |
+| 2 | Init Package Manager | Run `uv init` or `npm init`, create src/tests folders | Package manager ready |
+| 3 | Init Git | Call git-version-control skill to init repo and .gitignore | Git initialized |
+| 4 | Document Setup | Create `docs/environment/setup.md` with instructions | Documentation created |
+| 5 | Commit | Stage and commit all setup files | Initial commit done |
+
+**⛔ BLOCKING RULES:**
+- Step 2: BLOCKED until tech stack is confirmed
+- Step 3: BLOCKED if git-version-control skill fails
+
+---
+
 ## Execution Procedure
 
 ### Step 1: Determine Tech Stack

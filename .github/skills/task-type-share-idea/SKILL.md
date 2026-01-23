@@ -48,6 +48,25 @@ Convert refined idea summaries to human-readable shareable formats by:
 
 ---
 
+## Execution Flow
+
+Execute Share Idea by following these steps in order:
+
+| Step | Name | Action | Gate to Next |
+|------|------|--------|--------------|
+| 1 | Identify Source | Locate latest `idea-summary-vN.md` file | Source file found |
+| 2 | Confirm Format | Ask human for target format(s) | Format(s) confirmed |
+| 3 | Prepare Content | Restructure content for target format | Content ready |
+| 4 | Convert | Use pandoc/MCP to generate output files | Files generated |
+| 5 | Verify | Confirm output files exist and have content | Files verified |
+| 6 | Complete | Report files to human | Human confirms receipt |
+
+**⛔ BLOCKING RULES:**
+- Step 2: BLOCKED until human confirms target format(s)
+- Step 5: BLOCKED if output files are empty or missing
+
+---
+
 ## Supported Output Formats
 
 | Format | Extension | Tool | Best For |

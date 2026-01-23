@@ -68,6 +68,25 @@ Output:
 
 ---
 
+## Execution Flow
+
+Execute Change Request by following these steps in order:
+
+| Step | Name | Action | Gate to Next |
+|------|------|--------|--------------|
+| 1 | Understand CR | Parse what, who, why, when of the change request | CR context documented |
+| 2 | Review Existing | Read requirement-details.md and features.md | Related features identified |
+| 3 | Classify CR | Apply classification criteria (modification vs new feature) | Classification determined |
+| 4 | Human Approval | Present classification and reasoning to human | Human approves |
+| 5 | Execute Path | Update spec (modification) or requirements (new feature) | Documents updated |
+| 6 | Document CR | Create `CR-XXX.md` in change-requests folder | CR documented |
+
+**⛔ BLOCKING RULES:**
+- Step 4: BLOCKED until human explicitly approves classification
+- Step 5: Do NOT proceed without human approval of classification
+
+---
+
 ## Classification Criteria
 
 ### Best Practices for CR Classification

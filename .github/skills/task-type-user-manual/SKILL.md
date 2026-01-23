@@ -59,6 +59,23 @@ Output:
 
 ---
 
+## Execution Flow
+
+Execute User Manual by following these steps in order:
+
+| Step | Name | Action | Gate to Next |
+|------|------|--------|--------------|
+| 1 | Identify Commands | Analyze config files to find run/test commands | Commands identified |
+| 2 | Verify Commands | Execute commands to confirm they work | Commands verified |
+| 3 | Update README | Add/update "How to Run" section in README.md | README updated |
+| 4 | Complete | Inform human with verified commands | Human review |
+
+**⛔ BLOCKING RULES:**
+- Step 2 → 3: BLOCKED until run command executes successfully
+- Step 4: Human MUST confirm README is clear
+
+---
+
 ## Execution Procedure
 
 ### Step 1: Identify Run Instructions

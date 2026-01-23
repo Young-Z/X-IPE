@@ -67,6 +67,26 @@ Output:
 
 ---
 
+## Execution Flow
+
+Execute Human Playground by following these steps in order:
+
+| Step | Name | Action | Gate to Next |
+|------|------|--------|--------------|
+| 1 | Create Examples | Build runnable playground files in `playground/` | Playground file created |
+| 2 | Document Usage | Add entry to `playground/README.md` | README updated |
+| 3 | Create Tests | Write human simulation tests in `playground/tests/` | Test files created |
+| 4 | Validate | Run playground command and verify it works | Exit code 0 |
+| 5 | Run Tests | Execute human simulation tests | All tests pass |
+| 6 | Complete | Verify DoD, output summary, request human review | Human review |
+
+**⛔ BLOCKING RULES:**
+- Step 4: BLOCKED until playground command runs without error
+- Step 5: BLOCKED until human simulation tests pass
+- Step 6 → Human Review: Human MUST validate playground before Feature Closing
+
+---
+
 ## Execution Procedure
 
 ### Step 1: Create Runnable Examples

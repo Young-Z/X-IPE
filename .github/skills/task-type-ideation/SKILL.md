@@ -49,6 +49,25 @@ Learn and refine user ideas through collaborative brainstorming by:
 
 ---
 
+## Execution Flow
+
+Execute Ideation by following these steps in order:
+
+| Step | Name | Action | Gate to Next |
+|------|------|--------|--------------|
+| 1 | Analyze Files | Read all files in idea folder | Files analyzed |
+| 2 | Generate Summary | Create understanding summary for user | Summary shared |
+| 3 | Brainstorm | Ask clarifying questions (3-5 at a time) | Idea refined |
+| 4 | Research | Search for common principles if topic is established | Research complete |
+| 5 | Create Summary | Write `idea-summary-vN.md` with infographics | Summary created |
+| 6 | Complete | Request human review and approval | Human approves |
+
+**⛔ BLOCKING RULES:**
+- Step 3: Continue brainstorming until idea is well-defined
+- Step 6 → Human Review: Human MUST approve idea summary before proceeding
+
+---
+
 ## Execution Procedure
 
 ### Step 1: Locate and Analyze Idea Files

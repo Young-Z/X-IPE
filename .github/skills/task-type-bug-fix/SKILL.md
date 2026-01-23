@@ -59,6 +59,27 @@ Output:
 
 ---
 
+## Execution Flow
+
+Execute Bug Fix by following these steps in order:
+
+| Step | Name | Action | Gate to Next |
+|------|------|--------|--------------|
+| 1 | Understand | Read bug description, categorize severity | Bug understood |
+| 2 | Reproduce | Follow steps to confirm bug occurs | Bug reproduced |
+| 3 | Diagnose | Trace root cause, check technical design | Root cause found |
+| 4 | Design Fix | Identify fix options, choose minimal fix | Fix approach selected |
+| 5 | Write Test | Create failing test that reproduces bug | Test fails |
+| 6 | Implement | Write minimum code to fix bug | Test passes |
+| 7 | Verify | Confirm bug fixed, all tests pass | Verification complete |
+
+**⛔ BLOCKING RULES:**
+- Step 5 → 6: BLOCKED until test is written and FAILS
+- Step 6 → 7: BLOCKED until the new test PASSES
+- If fix changes key interfaces: MUST update technical design FIRST
+
+---
+
 ## Execution Procedure
 
 ### Step 1: Understand the Bug

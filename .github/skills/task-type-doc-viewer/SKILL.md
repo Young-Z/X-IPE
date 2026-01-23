@@ -43,6 +43,23 @@ Generate a web-based documentation viewer for browsing project docs by:
 
 ---
 
+## Execution Flow
+
+Execute Documentation Viewer by following these steps in order:
+
+| Step | Name | Action | Gate to Next |
+|------|------|--------|--------------|
+| 1 | Create Folder | Create `doc-viewer/` directory | Folder exists |
+| 2 | Create Server | Build `server.py` with API endpoint | Server file created |
+| 3 | Create Viewer | Build `index.html` with marked.js and mermaid.js | HTML file created |
+| 4 | Create README | Write usage instructions | README created |
+| 5 | Test | Run server and verify docs display | Server works |
+
+**⛔ BLOCKING RULES:**
+- Step 5: BLOCKED until server runs and displays documentation correctly
+
+---
+
 ## Execution Procedure
 
 ### Step 1: Create Doc-Viewer Folder Structure

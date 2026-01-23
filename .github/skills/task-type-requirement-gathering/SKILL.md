@@ -59,6 +59,23 @@ Output:
 | 2 | Human available for clarification | Yes |
 | 3 | AI Agent no more clarifying questions | Yes |
 
+---
+
+## Execution Flow
+
+Execute Requirement Gathering by following these steps in order:
+
+| Step | Name | Action | Gate to Next |
+|------|------|--------|--------------|
+| 1 | Understand | Parse what, who, why from user request | Initial understanding |
+| 2 | Research | Search for industry standards and best practices | Research complete |
+| 3 | Clarify | Ask clarifying questions (3-5 at a time) | All questions answered |
+| 4 | Document | Create/update `requirement-details.md` | Document created |
+| 5 | Complete | Verify DoD, request human review | Human review |
+
+**⛔ BLOCKING RULES:**
+- Step 3: Continue asking until ALL ambiguities resolved
+- Step 5 → Human Review: Human MUST approve requirements before Feature Breakdown
 
 ---
 

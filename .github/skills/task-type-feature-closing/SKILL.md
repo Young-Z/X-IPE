@@ -67,6 +67,23 @@ Output:
 
 ---
 
+## Execution Flow
+
+Execute Feature Closing by following these steps in order:
+
+| Step | Name | Action | Gate to Next |
+|------|------|--------|--------------|
+| 1 | Verify Criteria | Check all acceptance criteria are met | All criteria met |
+| 2 | Finalize Docs | Update README, API docs, CHANGELOG | Docs complete |
+| 3 | Create PR | Create pull request with proper description | PR created |
+| 4 | Output Summary | Provide completion summary to human | Summary delivered |
+
+**⛔ BLOCKING RULES:**
+- Step 1 → 2: BLOCKED if any acceptance criterion not met
+- Step 1: If criteria not met, STOP and report to human
+
+---
+
 ## Execution Procedure
 
 ### Step 1: Verify Acceptance Criteria

@@ -76,6 +76,26 @@ Before writing ANY implementation code, agent MUST:
 
 ---
 
+## Execution Flow
+
+Execute Code Implementation by following these steps in order:
+
+| Step | Name | Action | Gate to Next |
+|------|------|--------|--------------|
+| 1 | Query Board | Get Feature Data Model from feature board | Feature data received |
+| 2 | Learn Design | Read technical design document thoroughly | Design understood |
+| 3 | Read Architecture | Read referenced architecture designs (if any) | Architecture understood |
+| 4 | Load Tests | Locate and run tests, verify they FAIL | Tests fail (TDD ready) |
+| 5 | Implement | Write minimum code to pass tests | Tests pass |
+| 6 | Verify | Run all tests, linter, check coverage | All checks pass |
+
+**⛔ BLOCKING RULES:**
+- Step 4 → 5: BLOCKED until tests exist AND fail
+- Step 4: If tests pass or don't exist → STOP, complete Test Generation first
+- Step 5: If design needs changes → UPDATE technical design BEFORE implementing
+
+---
+
 ## Implementation Principles
 
 ### KISS (Keep It Simple, Stupid)
