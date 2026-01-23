@@ -34,6 +34,7 @@ class FileNode:
     type: str  # 'file' or 'folder'
     path: str
     children: Optional[List['FileNode']] = None
+    mtime: Optional[float] = None  # Modification time for files (FEATURE-009 bug fix)
 
     def to_dict(self) -> Dict:
         result = {
@@ -43,6 +44,8 @@ class FileNode:
         }
         if self.children is not None:
             result['children'] = [c.to_dict() for c in self.children]
+        if self.mtime is not None:
+            result['mtime'] = self.mtime
         return result
 
 
@@ -193,10 +196,13 @@ class ProjectService:
             elif entry.is_file():
                 # Only include supported file types
                 if entry.suffix.lower() in self.SUPPORTED_EXTENSIONS:
+                    # Include mtime for content change detection (FEATURE-009 bug fix)
+                    mtime = entry.stat().st_mtime
                     node = FileNode(
                         name=entry.name,
                         type='file',
-                        path=relative_path
+                        path=relative_path,
+                        mtime=mtime
                     )
                     items.append(node)
         

@@ -2532,7 +2532,7 @@ class ProjectSidebar {
         
         // FEATURE-009: Track changed paths for visual indicator
         this.changedPaths = new Set();
-        this.previousPaths = new Set();
+        this.previousPathMtimes = new Map();  // Map<path, mtime> for content change detection
         
         this._startPolling();
     }
@@ -2561,20 +2561,20 @@ class ProjectSidebar {
             // First load - initialize paths
             if (this.lastStructureHash === null) {
                 this.lastStructureHash = newHash;
-                this.previousPaths = this._extractAllPaths(data.sections);
+                this.previousPathMtimes = this._extractAllPathMtimes(data.sections);
                 return;
             }
             
-            // Check if structure changed
+            // Check if structure changed (includes mtime changes since JSON hash includes mtime)
             if (this.lastStructureHash !== newHash) {
                 console.log('[ProjectSidebar] Structure changed, detecting changes...');
                 
-                // FEATURE-009: Detect which paths changed
-                const currentPaths = this._extractAllPaths(data.sections);
-                this._detectChangedPaths(this.previousPaths, currentPaths);
+                // FEATURE-009: Detect which paths changed (structure + content)
+                const currentPathMtimes = this._extractAllPathMtimes(data.sections);
+                this._detectChangedPaths(this.previousPathMtimes, currentPathMtimes);
                 
                 this.lastStructureHash = newHash;
-                this.previousPaths = currentPaths;
+                this.previousPathMtimes = currentPathMtimes;
                 this.sections = data.sections;
                 this.render();
                 this.showToast('File structure updated', 'info');
@@ -2596,15 +2596,17 @@ class ProjectSidebar {
     // =========================================================================
     
     /**
-     * Extract all file/folder paths from structure
+     * Extract all file/folder paths with mtimes from structure
+     * Returns Map<path, mtime> where mtime is null for folders
      */
-    _extractAllPaths(sections) {
-        const paths = new Set();
+    _extractAllPathMtimes(sections) {
+        const pathMtimes = new Map();
         
         const traverse = (items) => {
             for (const item of items) {
                 if (item.path) {
-                    paths.add(item.path);
+                    // Store mtime for files (used for content change detection)
+                    pathMtimes.set(item.path, item.mtime || null);
                 }
                 if (item.children) {
                     traverse(item.children);
@@ -2618,28 +2620,40 @@ class ProjectSidebar {
             }
         }
         
-        return paths;
+        return pathMtimes;
     }
     
     /**
      * Detect changed paths between old and new structure
+     * Detects: new files, removed files, and content modifications (mtime changes)
      */
-    _detectChangedPaths(oldPaths, newPaths) {
+    _detectChangedPaths(oldPathMtimes, newPathMtimes) {
         // Find new paths (added)
-        for (const path of newPaths) {
-            if (!oldPaths.has(path)) {
+        for (const [path, mtime] of newPathMtimes) {
+            if (!oldPathMtimes.has(path)) {
                 console.log('[ProjectSidebar] New path detected:', path);
                 this._addChangedPath(path);
             }
         }
         
         // Find removed paths (mark parent as changed)
-        for (const path of oldPaths) {
-            if (!newPaths.has(path)) {
+        for (const [path, mtime] of oldPathMtimes) {
+            if (!newPathMtimes.has(path)) {
                 console.log('[ProjectSidebar] Removed path detected:', path);
                 const parent = this._getParentPath(path);
                 if (parent) {
                     this._addChangedPath(parent);
+                }
+            }
+        }
+        
+        // Find modified files (mtime changed) - BUG FIX for content change detection
+        for (const [path, newMtime] of newPathMtimes) {
+            if (newMtime !== null && oldPathMtimes.has(path)) {
+                const oldMtime = oldPathMtimes.get(path);
+                if (oldMtime !== null && newMtime !== oldMtime) {
+                    console.log('[ProjectSidebar] Content modified:', path, 'mtime:', oldMtime, '->', newMtime);
+                    this._addChangedPath(path);
                 }
             }
         }

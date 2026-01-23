@@ -383,6 +383,7 @@ Add to `base.html` or existing stylesheet:
 |------|---------|
 | `src/templates/index.html` | Extend `ProjectSidebar` class with change tracking |
 | `src/templates/base.html` | Add CSS styles for `.change-indicator` |
+| `src/services.py` | Add `mtime` field to `FileNode` for content change detection |
 
 ---
 
@@ -394,3 +395,11 @@ Add to `base.html` or existing stylesheet:
 | Memory leak | Set cleared on page refresh (by design) |
 | Race condition in polling | Existing debounce handles this |
 | UI flicker on re-render | Only re-render when clicking (not polling) |
+
+---
+
+## Design Change Log
+
+| Date | Phase | Change Summary |
+|------|-------|----------------|
+| 01-23-2026 | Bug Fix | Added `mtime` field to `FileNode` dataclass and `_scan_directory()` to include file modification times in structure API. Frontend updated to track `previousPathMtimes` as Map instead of Set, and `_detectChangedPaths()` now compares mtimes to detect content modifications in addition to structure changes. This fixes the bug where file change indicators only appeared for new/deleted files, not content modifications. |

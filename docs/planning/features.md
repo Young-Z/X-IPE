@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 01-23-2026 05:37:00
+> Last Updated: 01-23-2026 05:41:00
 
 ## Overview
 
@@ -29,7 +29,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-007 | Git Integration | v1.0 | Planned | - | 01-18-2026 | 01-18-2026 00:10:00 |
 | FEATURE-008 | Workplace (Idea Management) | v1.0 | Completed | [specification.md](../requirements/FEATURE-008/specification.md) | 01-22-2026 | 01-22-2026 11:42:00 |
 | FEATURE-009 | File Change Indicator | v1.0 | Completed | [specification.md](../requirements/FEATURE-009/specification.md) | 01-22-2026 | 01-22-2026 11:21:00 |
-| FEATURE-010 | Project Root Configuration | v1.0 | Refined | [specification.md](../requirements/FEATURE-010/specification.md) | 01-23-2026 | 01-23-2026 05:37:00 |
+| FEATURE-010 | Project Root Configuration | v1.0 | Designed | [specification.md](../requirements/FEATURE-010/specification.md) | 01-23-2026 | 01-23-2026 05:41:00 |
 
 ---
 
@@ -38,11 +38,12 @@ This board tracks all features across the project lifecycle.
 ### Planned (1)
 - FEATURE-007: Git Integration
 
-### Refined (1)
-- FEATURE-010: Project Root Configuration
+### Refined (0)
+- None
 
-### Designed (1)
+### Designed (2)
 - FEATURE-005: Interactive Console v2.0
+- FEATURE-010: Project Root Configuration
 
 ### Implemented (5)
 - FEATURE-001: Project Navigation
@@ -167,11 +168,11 @@ This board tracks all features across the project lifecycle.
 ### FEATURE-010: Project Root Configuration
 
 **Version:** v1.0  
-**Status:** Refined  
+**Status:** Designed  
 **Description:** Support `.x-ipe.yaml` configuration file for nested project structures where X-IPE runs as a subfolder within a larger project  
 **Dependencies:** FEATURE-006 (Settings & Configuration)  
 **Specification:** [docs/requirements/FEATURE-010/specification.md](../requirements/FEATURE-010/specification.md)  
-**Technical Design:** -  
+**Technical Design:** [docs/requirements/FEATURE-010/technical-design.md](../requirements/FEATURE-010/technical-design.md)  
 
 **Key Capabilities:**
 - Config file (`.x-ipe.yaml`) at project root
@@ -184,5 +185,6 @@ This board tracks all features across the project lifecycle.
 
 **Tasks:**
 - TASK-079 (Feature Refinement) - Completed on 01-23-2026
+- TASK-080 (Technical Design) - Completed on 01-23-2026
 
 ---

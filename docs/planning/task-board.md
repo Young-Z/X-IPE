@@ -6,7 +6,6 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-079 | Bug Fix | File change indicator doesn't show when file content is modified | Nova | 🔄 in_progress | 01-23-2026 05:37:00 | - | - |
 
 ---
 
@@ -14,6 +13,8 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-081 | Bug Fix | File change indicator doesn't show when file content is modified | Nova | 01-23-2026 05:42:00 | [services.py](src/services.py), [index.html](src/templates/index.html), [test_change_indicator.py](tests/test_change_indicator.py) | Root cause: only structure changes detected, not mtime. Fix: added mtime to FileNode, frontend tracks mtime changes. 306/306 tests pass. |
+| TASK-080 | Technical Design | Create technical design for FEATURE-010: Project Root Configuration | Nova | 01-23-2026 05:41:00 | [technical-design.md](docs/requirements/FEATURE-010/technical-design.md) | ConfigService, ConfigData, /api/config, Settings integration, 3-phase implementation. |
 | TASK-079 | Feature Refinement | Refine specification for FEATURE-010: Project Root Configuration | Nova | 01-23-2026 05:37:00 | [specification.md](docs/requirements/FEATURE-010/specification.md) | 11 ACs, 6 FRs. Config discovery, path validation, Settings display. |
 | TASK-078 | Feature Breakdown | Break down FEATURE-010: Project Root Configuration | Ember | 01-23-2026 05:36:00 | [features.md](docs/planning/features.md), [requirement-details.md](docs/requirements/requirement-details.md) | Single feature, added to feature board with status Planned. |
 | TASK-077 | Requirement Gathering | Gather requirements for FEATURE-010: Project Root Configuration | Ember | 01-23-2026 05:30:00 | [requirement-details.md](docs/requirements/requirement-details.md) | .x-ipe.yaml config file. 11 ACs. Config discovery, path validation, Settings read-only display. |
@@ -140,7 +141,7 @@
 - **Total Active:** 0
 - **In Progress:** 0
 - **Blocked:** 0
-- **Completed Today:** 1
+- **Completed Today:** 3
 
 ---
 

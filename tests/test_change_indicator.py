@@ -91,6 +91,71 @@ class TestProjectStructureAPI:
         # Structure should be different
         assert data1 != data2
 
+    def test_structure_includes_mtime_for_files(self, client, temp_project):
+        """BUG FIX: Structure API returns mtime for content change detection"""
+        planning_dir = temp_project / 'docs' / 'planning'
+        planning_dir.mkdir(parents=True, exist_ok=True)
+        test_file = planning_dir / 'test.md'
+        test_file.write_text('# Test')
+        
+        response = client.get('/api/project/structure')
+        data = response.get_json()
+        
+        # Find the file in the response
+        planning_section = next(
+            (s for s in data['sections'] if s['id'] == 'planning'),
+            None
+        )
+        assert planning_section is not None
+        
+        # Find test.md in children
+        test_file_node = None
+        for child in planning_section.get('children', []):
+            if child.get('name') == 'test.md':
+                test_file_node = child
+                break
+        
+        assert test_file_node is not None
+        # mtime should be included for content change detection
+        assert 'mtime' in test_file_node
+        assert isinstance(test_file_node['mtime'], (int, float))
+
+    def test_structure_mtime_changes_when_content_modified(self, client, temp_project):
+        """BUG FIX: mtime changes when file content is modified"""
+        import time
+        
+        planning_dir = temp_project / 'docs' / 'planning'
+        planning_dir.mkdir(parents=True, exist_ok=True)
+        test_file = planning_dir / 'test.md'
+        test_file.write_text('# Initial')
+        
+        response1 = client.get('/api/project/structure')
+        data1 = response1.get_json()
+        
+        # Wait briefly to ensure mtime differs
+        time.sleep(0.1)
+        
+        # Modify file content
+        test_file.write_text('# Modified content')
+        
+        response2 = client.get('/api/project/structure')
+        data2 = response2.get_json()
+        
+        # Find test.md mtime in both responses
+        def get_file_mtime(data, filename):
+            for section in data['sections']:
+                for child in section.get('children', []):
+                    if child.get('name') == filename:
+                        return child.get('mtime')
+            return None
+        
+        mtime1 = get_file_mtime(data1, 'test.md')
+        mtime2 = get_file_mtime(data2, 'test.md')
+        
+        assert mtime1 is not None
+        assert mtime2 is not None
+        assert mtime2 > mtime1  # mtime should increase after modification
+
 
 class TestPathUtilityLogic:
     """Test utility functions that would be used in frontend

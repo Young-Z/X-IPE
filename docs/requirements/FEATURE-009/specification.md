@@ -124,7 +124,7 @@ As a user browsing the project sidebar, I want to see a visual indicator when fi
 - Notification sound or browser notification
 - Change timestamp display
 - Diff preview on hover
-- File content comparison (only structure/existence check)
+- ~~File content comparison (only structure/existence check)~~ **Now supported via mtime tracking (v1.1)**
 
 ---
 
