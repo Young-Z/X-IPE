@@ -234,6 +234,19 @@ class WorkplaceManager {
             const actionBtns = document.createElement('div');
             actionBtns.className = 'workplace-tree-actions';
             
+            // Rename button (only for top-level folders)
+            if (node.type === 'folder' && level === 0) {
+                const renameBtn = document.createElement('button');
+                renameBtn.className = 'workplace-tree-action-btn workplace-tree-rename-btn';
+                renameBtn.innerHTML = '<i class="bi bi-pencil"></i>';
+                renameBtn.title = 'Rename folder';
+                renameBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.startFolderRename(li, node.name);
+                });
+                actionBtns.appendChild(renameBtn);
+            }
+            
             // Download button (only for files)
             if (node.type === 'file') {
                 const downloadBtn = document.createElement('button');
@@ -267,19 +280,11 @@ class WorkplaceManager {
             if (node.type === 'file') {
                 itemContent.addEventListener('click', () => this.openFile(node.path));
             } else {
-                // Folder: click to toggle, double-click to rename (only top-level)
+                // Folder: click to toggle
                 itemContent.addEventListener('click', (e) => {
                     e.stopPropagation();
                     li.classList.toggle('expanded');
                 });
-                
-                // Only allow rename on top-level idea folders
-                if (level === 0) {
-                    itemContent.addEventListener('dblclick', (e) => {
-                        e.stopPropagation();
-                        this.startFolderRename(li, node.name);
-                    });
-                }
             }
             
             // Render children (append to li, don't clear it)
@@ -555,11 +560,20 @@ class WorkplaceManager {
      * Render content based on file type (view mode)
      */
     renderContent(container, content) {
+        const isEditable = this.fileType !== 'binary' && this.fileType !== 'image';
+        const isHtmlFile = this.fileExtension === 'html' || this.fileExtension === 'htm';
+        const isPreviewable = isHtmlFile || this.fileType === 'markdown';
+        
         const header = `
             <div class="workplace-editor-header">
                 <span class="workplace-editor-path">${this._escapeHtml(this.currentPath)}</span>
                 <div class="workplace-editor-actions">
                     <span class="workplace-editor-status" id="workplace-editor-status"></span>
+                    ${isEditable ? `
+                    <button class="btn btn-sm btn-outline-secondary workplace-edit-btn" id="workplace-edit-btn" title="Edit file">
+                        <i class="bi bi-pencil"></i> Edit
+                    </button>
+                    ` : ''}
                     <button class="btn btn-sm btn-outline-info workplace-copilot-btn" id="workplace-copilot-btn" title="Refine with Copilot">
                         <i class="bi bi-robot"></i> Copilot
                     </button>
@@ -572,34 +586,31 @@ class WorkplaceManager {
             bodyContent = this._renderImage();
         } else if (this.fileType === 'binary') {
             bodyContent = this._renderBinaryPlaceholder();
+        } else if (isHtmlFile) {
+            // HTML file: show rendered preview
+            bodyContent = this._renderHtmlPreview(content);
         } else if (this.fileType === 'markdown') {
-            bodyContent = this._renderMarkdown(content);
+            // Markdown: show rendered preview with same design
+            bodyContent = this._renderMarkdownPreview(content);
         } else if (this.fileType === 'code') {
             bodyContent = this._renderCode(content, this.fileExtension);
         } else {
             bodyContent = `<pre class="workplace-text-content">${this._escapeHtml(content)}</pre>`;
         }
         
-        // Show hint for editable files (not for images or binary)
-        const isEditable = this.fileType !== 'binary' && this.fileType !== 'image';
-        const editHint = isEditable ? '<span class="workplace-edit-hint text-muted small">Double-click to edit</span>' : '';
-        
         container.innerHTML = `
             <div class="workplace-editor">
                 ${header}
-                <div class="workplace-content-body" id="workplace-content-body" title="${isEditable ? 'Double-click to edit' : ''}">
+                <div class="workplace-content-body" id="workplace-content-body">
                     ${bodyContent}
                 </div>
-                ${editHint ? `<div class="workplace-edit-hint-container">${editHint}</div>` : ''}
             </div>
         `;
         
-        // Bind double-click to edit (for editable files)
-        if (isEditable) {
-            const contentBody = document.getElementById('workplace-content-body');
-            if (contentBody) {
-                contentBody.addEventListener('dblclick', () => this.enterEditMode());
-            }
+        // Bind edit button
+        const editBtn = document.getElementById('workplace-edit-btn');
+        if (editBtn) {
+            editBtn.addEventListener('click', () => this.enterEditMode());
         }
         
         // Bind copilot button
@@ -634,6 +645,48 @@ class WorkplaceManager {
         if (window.terminalManager) {
             window.terminalManager.sendCopilotRefineCommand(this.currentPath);
         }
+    }
+    
+    /**
+     * Render HTML file as iframe preview
+     */
+    _renderHtmlPreview(content) {
+        // Create a blob URL for the HTML content
+        const blob = new Blob([content], { type: 'text/html' });
+        const blobUrl = URL.createObjectURL(blob);
+        
+        // Store for cleanup
+        if (this._htmlBlobUrl) {
+            URL.revokeObjectURL(this._htmlBlobUrl);
+        }
+        this._htmlBlobUrl = blobUrl;
+        
+        return `
+            <div class="workplace-preview">
+                <div class="workplace-preview-toolbar">
+                    <span class="badge bg-success"><i class="bi bi-eye"></i> Preview</span>
+                </div>
+                <iframe class="workplace-preview-iframe" src="${blobUrl}" sandbox="allow-scripts allow-same-origin"></iframe>
+            </div>
+        `;
+    }
+    
+    /**
+     * Render Markdown file as preview with same design as HTML
+     */
+    _renderMarkdownPreview(content) {
+        const renderedHtml = this._renderMarkdown(content);
+        
+        return `
+            <div class="workplace-preview">
+                <div class="workplace-preview-toolbar">
+                    <span class="badge bg-success"><i class="bi bi-eye"></i> Preview</span>
+                </div>
+                <div class="workplace-preview-content">
+                    ${renderedHtml}
+                </div>
+            </div>
+        `;
     }
     
     /**
@@ -801,6 +854,11 @@ class WorkplaceManager {
                 return;
             }
         }
+        // Clean up EasyMDE if active
+        if (this.easyMDE) {
+            this.easyMDE.toTextArea();
+            this.easyMDE = null;
+        }
         this.isEditing = false;
         this.hasUnsavedChanges = false;
         const contentArea = document.getElementById('workplace-content');
@@ -812,6 +870,8 @@ class WorkplaceManager {
      */
     renderEditor() {
         const container = document.getElementById('workplace-content');
+        const isMarkdown = this.fileType === 'markdown';
+        
         container.innerHTML = `
             <div class="workplace-editor">
                 <div class="workplace-editor-header">
@@ -828,10 +888,36 @@ class WorkplaceManager {
         `;
         
         const textarea = document.getElementById('workplace-editor-textarea');
-        textarea.addEventListener('input', () => {
-            this.onContentChange();
-        });
-        textarea.focus();
+        
+        if (isMarkdown && typeof EasyMDE !== 'undefined') {
+            // Use EasyMDE for markdown files
+            this.easyMDE = new EasyMDE({
+                element: textarea,
+                spellChecker: false,
+                autosave: { enabled: false },
+                toolbar: [
+                    'bold', 'italic', 'heading', '|',
+                    'quote', 'unordered-list', 'ordered-list', '|',
+                    'link', 'image', 'code', '|',
+                    'preview', 'side-by-side', 'fullscreen', '|',
+                    'guide'
+                ],
+                status: false,
+                minHeight: '300px',
+                placeholder: 'Start writing...',
+                renderingConfig: { codeSyntaxHighlighting: true }
+            });
+            
+            this.easyMDE.codemirror.on('change', () => {
+                this.onContentChange();
+            });
+        } else {
+            // Plain textarea for HTML and other files
+            textarea.addEventListener('input', () => {
+                this.onContentChange();
+            });
+            textarea.focus();
+        }
         
         // Bind cancel button
         const cancelBtn = document.getElementById('workplace-cancel-btn');
@@ -864,10 +950,15 @@ class WorkplaceManager {
     async saveContent() {
         if (!this.currentPath || !this.hasUnsavedChanges) return;
         
-        const textarea = document.getElementById('workplace-editor-textarea');
-        if (!textarea) return;
+        let content;
+        if (this.easyMDE) {
+            content = this.easyMDE.value();
+        } else {
+            const textarea = document.getElementById('workplace-editor-textarea');
+            if (!textarea) return;
+            content = textarea.value;
+        }
         
-        const content = textarea.value;
         this.updateStatus('saving');
         
         try {

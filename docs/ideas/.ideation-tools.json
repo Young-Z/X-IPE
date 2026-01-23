@@ -1,8 +1,8 @@
 {
   "version": "1.0",
   "ideation": {
-    "antv-infographic": true,
-    "mermaid": false
+    "antv-infographic": false,
+    "mermaid": true
   },
   "mockup": {
     "frontend-design": true
