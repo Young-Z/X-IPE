@@ -158,7 +158,7 @@ Process:
    - Increment Completed Today (if completed)
 ```
 
-**⛔ IMPORTANT:** Completed tasks must be MOVED (deleted from Active, added to Completed), 
+**IMPORTANT:** Completed tasks must be MOVED (deleted from Active, added to Completed), 
 NOT just have their status updated while remaining in the Active Tasks section.
 
 ### Operation 5: Query Tasks
@@ -191,6 +191,46 @@ Process:
 2. Update auto_advance in Global Settings
 3. Confirm change
 ```
+
+### Operation 7: Validate Board Integrity (DoD Check)
+
+**When:** ANY operation is performed on the task board
+**Then:** Validate and fix misplaced tasks
+
+```
+Process:
+1. Scan Active Tasks section:
+   FOR each task in Active Tasks:
+     IF status = completed:
+       → MOVE to Completed Tasks section
+       → Log: "Fixed: TASK-XXX moved to Completed"
+     IF status = cancelled:
+       → MOVE to Cancelled Tasks section
+       → Log: "Fixed: TASK-XXX moved to Cancelled"
+
+2. Scan Completed Tasks section:
+   FOR each task in Completed Tasks:
+     IF status ≠ completed:
+       → MOVE back to Active Tasks section
+       → Log: "Fixed: TASK-XXX moved to Active"
+
+3. Scan Cancelled Tasks section:
+   FOR each task in Cancelled Tasks:
+     IF status ≠ cancelled:
+       → MOVE back to Active Tasks section
+       → Log: "Fixed: TASK-XXX moved to Active"
+
+4. Reconcile Quick Stats:
+   - Count actual tasks in each section
+   - Update stats if mismatched
+   - Log any corrections made
+
+5. Return validation report:
+   - tasks_fixed: [list of moved tasks]
+   - stats_corrected: true | false
+```
+
+**⚠️ MANDATORY:** This operation runs automatically as the final step of ALL other operations (Create, Update, Query, etc.) to ensure board integrity.
 
 ---
 
@@ -342,26 +382,43 @@ Result:
 - TASK-007: Code Implementation (blocked)
 ```
 
-### Example 5: Board After Multiple Operations
+### Example 6: Board Integrity Validation
 
-```yaml
-Task_Board:
-  auto_advance: true
-  
+**Scenario:** Task board has misplaced tasks after manual edits
+
+```
+Initial State (corrupted):
   Active Tasks:
-    - TASK-002: Feature Closing | Nova | in_progress | User Manual
-    - TASK-003: User Manual | Nova | pending | null
-    - TASK-004: Bug Fix | Nova | blocked | null
+    - TASK-001: Code Implementation | ✅ completed  ← WRONG!
+    - TASK-002: Bug Fix | 🔄 in_progress
+    - TASK-003: Feature Closing | ❌ cancelled  ← WRONG!
   
   Completed Tasks:
-    - TASK-001: Code Implementation | Nova | 2026-01-15 | Feature done
+    - TASK-004: Technical Design | 🔄 in_progress  ← WRONG!
+
+Step 1: Scan Active Tasks
+→ TASK-001 status=completed → Move to Completed Tasks
+→ TASK-003 status=cancelled → Move to Cancelled Tasks
+
+Step 2: Scan Completed Tasks
+→ TASK-004 status=in_progress → Move to Active Tasks
+
+Step 3: Reconcile Stats
+→ Total Active: 2 (was showing 3)
+→ Corrected
+
+Result:
+  Active Tasks:
+    - TASK-002: Bug Fix | 🔄 in_progress
+    - TASK-004: Technical Design | 🔄 in_progress
+  
+  Completed Tasks:
+    - TASK-001: Code Implementation | ✅ completed
   
   Cancelled Tasks:
-    - (none)
-  
-  Quick Stats:
-    - Total Active: 3
-    - In Progress: 1
-    - Blocked: 1
-    - Completed Today: 1
+    - TASK-003: Feature Closing | ❌ cancelled
+
+Validation Report:
+  tasks_fixed: [TASK-001, TASK-003, TASK-004]
+  stats_corrected: true
 ```
