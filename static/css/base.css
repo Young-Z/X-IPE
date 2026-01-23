@@ -1,0 +1,252 @@
+/* =================================================================
+ * BASE CSS - Core Layout System
+ * Structure: Top (menu) -> Middle (sidebar + content) -> Bottom (console)
+ * ================================================================= */
+
+:root {
+    --top-menu-height: 36px;
+    --sidebar-width: 280px;
+    --console-collapsed-height: 36px;
+    --console-expanded-height: 300px;
+    --sidebar-bg: #1e1e2e;
+    --sidebar-text: #cdd6f4;
+    --sidebar-hover: #313244;
+    --sidebar-active: #45475a;
+    --content-bg: #ffffff;
+    --header-height: 50px;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* =================================================================
+ * ROOT LAYOUT: 3-row vertical stack
+ * ================================================================= */
+.page-root {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ROW 1: Top Menu - fixed height */
+.top-menu {
+    flex: 0 0 var(--top-menu-height);
+    height: var(--top-menu-height);
+    background: #1e1e1e;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    z-index: 300;
+}
+
+.top-menu .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #fff;
+    text-decoration: none;
+}
+
+.top-menu .brand-name {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.top-menu .brand-subtitle {
+    font-size: 0.65rem;
+    color: #888;
+    margin-left: 0.5rem;
+}
+
+.top-menu .menu-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.top-menu .menu-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #888;
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 4px;
+    transition: all 0.15s;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.top-menu .menu-link:hover {
+    color: #fff;
+    background: #333;
+}
+
+.top-menu .menu-link i {
+    font-size: 1rem;
+}
+
+/* ROW 2: Middle Section - fills remaining space */
+.middle-section {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    min-height: 0; /* Critical: allows flex child to shrink */
+    z-index: 400;
+    position: relative;
+}
+
+/* =================================================================
+ * MIDDLE RIGHT: Content Area
+ * ================================================================= */
+.content-area {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--content-bg);
+    min-width: 0; /* Critical: prevents flex item from overflowing */
+    min-height: 0; /* Critical: allows scrolling inside */
+}
+
+.content-header {
+    flex: 0 0 var(--header-height);
+    height: var(--header-height);
+    padding: 0 1rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f8f9fa;
+}
+
+.content-header .breadcrumb {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.content-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1.5rem;
+    min-height: 0; /* Critical: allows scrolling */
+}
+
+/* =================================================================
+ * SCROLLBAR STYLING
+ * ================================================================= */
+.sidebar-content::-webkit-scrollbar,
+.content-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-content::-webkit-scrollbar-track,
+.content-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.content-body::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.content-body::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* =================================================================
+ * CONTENT: Placeholder & Loading
+ * ================================================================= */
+.content-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #6c757d;
+}
+
+.content-placeholder i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+}
+
+.loading-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.content-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+}
+
+/* =================================================================
+ * TOAST NOTIFICATIONS
+ * ================================================================= */
+.toast-container {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 1050;
+}
+
+.refresh-toast {
+    background: linear-gradient(135deg, #28a745, #218838);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: refreshToastAnim 2.5s ease-in-out forwards;
+    margin-bottom: 8px;
+}
+
+.refresh-toast i {
+    animation: spin 0.5s ease-in-out;
+}
+
+@keyframes refreshToastAnim {
+    0% { opacity: 0; transform: translateX(20px); }
+    15% { opacity: 1; transform: translateX(0); }
+    85% { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(20px); }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
