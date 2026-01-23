@@ -1,0 +1,34 @@
+# X-IPE Configuration File
+# ========================
+# Place this file at your project root as ".x-ipe.yaml" (without .example)
+# X-IPE will auto-discover it when launched from any subdirectory.
+#
+# Example project structure:
+#   my-project/
+#   ├── .x-ipe.yaml        <- This config file
+#   ├── src/
+#   ├── docs/
+#   └── x-ipe/             <- X-IPE application folder
+#       ├── src/
+#       └── ...
+
+version: 1
+
+paths:
+  # Path to your project root (relative to this config file)
+  # Use "." if config is at project root
+  project_root: "."
+  
+  # Path to X-IPE application folder (relative to this config file)
+  x_ipe_app: "./x-ipe"
+
+defaults:
+  # What to show in the file tree sidebar
+  # Options: "project_root" | "x_ipe_app"
+  # Default: "project_root"
+  file_tree_scope: "project_root"
+  
+  # Working directory for the terminal
+  # Options: "project_root" | "x_ipe_app"
+  # Default: "project_root"
+  terminal_cwd: "project_root"
