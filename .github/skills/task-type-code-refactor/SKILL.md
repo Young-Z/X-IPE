@@ -68,70 +68,28 @@ Output:
 
 ---
 
-## ⚠️ Execution Flow Overview
+## Execution Flow
 
-**MANDATORY: Follow ALL steps in order. Do NOT skip any step.**
+Execute refactoring by following these steps in order:
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ PHASE 1: ASSESSMENT                                                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ □ Step 1.1: Identify Scope          → What files/modules to refactor?       │
-│ □ Step 1.2: Analyze Code Quality    → Rate quality 1-10, find code smells   │
-│ □ Step 1.3: Analyze Feature Align   → Does code match spec/design?          │
-│ □ Step 1.4: Analyze Test Coverage   → Is coverage ≥80%?                     │
-│ □ Step 1.5: Generate Refactor Plan  → Select principles, define phases      │
-│                                                                             │
-│ 🛑 CHECKPOINT: Present plan to human, get approval before proceeding        │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                     ↓
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ PHASE 2: PREPARATION                                                        │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ □ Step 2.1: Verify Feature Details  → If gaps found, notify human           │
-│ □ Step 2.2: Add Missing Tests       → Get coverage to ≥80% BEFORE refactor  │
-│                                                                             │
-│ 🛑 CHECKPOINT: All tests pass, coverage ≥80%                                │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                     ↓
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ PHASE 3: EXECUTION                                                          │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ □ Step 3.1: Refactor Code           → Apply principles, make changes        │
-│ □ Step 3.2: Split Large Files       → Break into smaller, focused files     │
-│ □ Step 3.3: Update Tests (if needed)→ Fix imports, NOT assertions           │
-│                                                                             │
-│ 🛑 CHECKPOINT: All tests pass after EACH change                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                     ↓
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ PHASE 4: FINALIZATION  ← ⚠️ DO NOT SKIP THIS PHASE                          │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ □ Step 4.1: Verify Quality          → Re-score, compare before/after        │
-│ □ Step 4.2: Update Technical Design → Sync docs with new file structure     │
-│                                                                             │
-│ 🛑 CHECKPOINT: Technical designs updated, DoD checklist complete            │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                     ↓
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ COMPLETION                                                                  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ □ Verify ALL DoD checkpoints        → Check table below                     │
-│ □ Generate completion output        → YAML format with all attributes       │
-│ □ Request human review              → Required for refactoring tasks        │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+| Step | Name | Action | Gate to Next |
+|------|------|--------|--------------|
+| 1 | Identify Scope | Determine files/modules to refactor | Scope documented |
+| 2 | Analyze Quality | Rate code quality 1-10, find code smells | Quality scored |
+| 3 | Check Feature Alignment | Compare code vs spec/design (if feature-related) | Gaps documented |
+| 4 | Check Test Coverage | Verify coverage ≥80% | Coverage sufficient |
+| 5 | Generate Plan | Select principles, define refactor phases | **Human approves plan** |
+| 6 | Add Missing Tests | Write tests to reach ≥80% coverage | All tests pass |
+| 7 | Refactor Code | Apply principles, split files | Tests pass after each change |
+| 8 | Verify Quality | Re-score quality, compare before/after | Quality improved |
+| 9 | Update Technical Designs | Sync docs with new file structure | Docs updated |
+| 10 | Complete | Verify DoD, generate output, request review | Human review |
 
-### Phase Completion Checklist
-
-Before moving to the next phase, verify:
-
-| Phase | Must Have |
-|-------|-----------|
-| **Phase 1 → 2** | Scope documented, quality scored, plan approved by human |
-| **Phase 2 → 3** | Tests pass, coverage ≥80%, feature gaps resolved or acknowledged |
-| **Phase 3 → 4** | All tests pass, code structure improved |
-| **Phase 4 → Done** | Quality re-scored, technical designs updated, DoD complete |
+**⛔ BLOCKING RULES:**
+- Step 5 → 6: BLOCKED until human approves refactoring plan
+- Step 6 → 7: BLOCKED if test coverage < 80%
+- Step 9: MUST update all technical designs that reference changed files
+- Step 10: MUST verify ALL DoD checkpoints before marking complete
 
 ---
 
