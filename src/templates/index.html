@@ -12,6 +12,10 @@
             <span class="brand-subtitle">An AI native integrated project environment for end to end business value delivery</span>
         </div>
         <div class="menu-actions">
+            <button class="menu-link" id="skills-btn" title="Skills">
+                <i class="bi bi-lightning"></i>
+                <span>Skills</span>
+            </button>
             <a href="/settings" class="menu-link" title="Settings">
                 <i class="bi bi-gear"></i>
                 <span>Settings</span>
@@ -48,29 +52,10 @@
                     </ol>
                 </nav>
                 <div class="header-actions d-flex align-items-center gap-2">
-                    <!-- FEATURE-004: Live Refresh Toggle -->
-                    <div class="auto-refresh-toggle d-flex align-items-center gap-1">
-                        <label class="form-check-label small text-muted" for="auto-refresh-toggle">
-                            <i class="bi bi-arrow-repeat"></i> Auto-refresh
-                        </label>
-                        <div class="form-check form-switch mb-0">
-                            <input class="form-check-input" type="checkbox" 
-                                   id="auto-refresh-toggle" checked
-                                   title="Toggle automatic content refresh">
-                        </div>
-                    </div>
-                    <!-- FEATURE-003: Content Editor Actions -->
-                    <div class="editor-actions d-none" id="editor-actions">
-                        <button class="btn btn-sm btn-outline-primary" id="btn-edit" title="Edit file (Ctrl+E)">
-                            <i class="bi bi-pencil"></i> Edit
-                        </button>
-                        <button class="btn btn-sm btn-primary d-none" id="btn-save" title="Save file (Ctrl+S)">
-                            <i class="bi bi-check-lg"></i> Save
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary d-none" id="btn-cancel" title="Cancel editing (Esc)">
-                            <i class="bi bi-x-lg"></i> Cancel
-                        </button>
-                    </div>
+                    <!-- FEATURE-008: Workplace Create Idea Button -->
+                    <button class="btn btn-sm btn-primary d-none" id="btn-create-idea" title="Create new idea">
+                        <i class="bi bi-plus-lg"></i> Create Idea
+                    </button>
                 </div>
             </div>
             
@@ -111,6 +96,27 @@
         </div>
     </div><!-- end terminal-panel -->
 </div><!-- end page-root -->
+
+<!-- Skills Modal -->
+<div class="modal fade" id="skills-modal" tabindex="-1" aria-labelledby="skills-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="skills-modal-label">
+                    <i class="bi bi-lightning me-2"></i>Available Skills
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="skills-modal-body">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Toast Container for notifications -->
 <div class="toast-container" id="toast-container"></div>
@@ -733,6 +739,7 @@ class WorkplaceManager {
         this.isEditing = false; // Track view/edit mode
         this.fileType = null; // markdown | code | text
         this.fileExtension = null;
+        this.easyMDE = null; // EasyMDE editor instance for compose view
     }
     
     /**
@@ -744,17 +751,11 @@ class WorkplaceManager {
             <div class="workplace-container">
                 <div class="workplace-sidebar">
                     <div class="workplace-sidebar-icons">
-                        <button class="workplace-sidebar-icon" title="New Idea" id="workplace-icon-new">
-                            <i class="bi bi-plus-lg"></i>
-                        </button>
                         <button class="workplace-sidebar-icon" title="Browse Ideas" id="workplace-icon-browse">
                             <i class="bi bi-folder2"></i>
                         </button>
                     </div>
                     <div class="workplace-sidebar-content">
-                        <button class="btn btn-primary workplace-upload-btn" id="workplace-upload-btn">
-                            <i class="bi bi-plus-lg"></i> New Idea
-                        </button>
                         <div class="workplace-tree" id="workplace-tree">
                             <div class="loading-spinner">
                                 <div class="spinner-border spinner-border-sm" role="status">
@@ -774,16 +775,7 @@ class WorkplaceManager {
             </div>
         `;
         
-        // Bind events
-        document.getElementById('workplace-upload-btn').addEventListener('click', () => {
-            this.showUploadView();
-        });
-        
         // Bind sidebar icon events
-        document.getElementById('workplace-icon-new').addEventListener('click', () => {
-            this.showUploadView();
-        });
-        
         document.getElementById('workplace-icon-browse').addEventListener('click', () => {
             // Toggle expanded state on mobile/touch
             const sidebar = document.querySelector('.workplace-sidebar');
@@ -1158,6 +1150,12 @@ class WorkplaceManager {
             if (!window.confirm('You have unsaved changes. Do you want to discard them?')) {
                 return;
             }
+        }
+        
+        // Clean up previous EasyMDE instance
+        if (this.easyMDE) {
+            this.easyMDE.toTextArea();
+            this.easyMDE = null;
         }
         
         this.currentView = 'editor';
@@ -1596,6 +1594,12 @@ class WorkplaceManager {
             }
         }
         
+        // Clean up previous EasyMDE instance
+        if (this.easyMDE) {
+            this.easyMDE.toTextArea();
+            this.easyMDE = null;
+        }
+        
         this.currentView = 'upload';
         this.currentPath = null;
         this.hasUnsavedChanges = false;
@@ -1678,16 +1682,63 @@ class WorkplaceManager {
         
         if (!submitBtn || !textarea) return;
         
+        // Initialize EasyMDE markdown editor
+        if (typeof EasyMDE !== 'undefined') {
+            this.easyMDE = new EasyMDE({
+                element: textarea,
+                autofocus: true,
+                spellChecker: false,
+                placeholder: 'Write your idea here...\n\nYou can use Markdown formatting:\n- **bold** and *italic*\n- # Headers\n- - Bullet lists\n- `code` blocks',
+                toolbar: [
+                    'bold', 'italic', 'heading', '|',
+                    'quote', 'unordered-list', 'ordered-list', '|',
+                    'link', 'code', '|',
+                    'preview', 'side-by-side', '|',
+                    'guide'
+                ],
+                status: ['lines', 'words'],
+                renderingConfig: {
+                    codeSyntaxHighlighting: true
+                },
+                shortcuts: {
+                    'toggleSideBySide': null // Disable side-by-side shortcut to avoid conflicts
+                }
+            });
+            
+            // Fix z-index when side-by-side is toggled
+            const middleSection = document.getElementById('middle-section');
+            const observer = new MutationObserver(() => {
+                const container = this.easyMDE.element.closest('.EasyMDEContainer');
+                if (container && container.classList.contains('sided--no-fullscreen')) {
+                    middleSection.style.zIndex = '400';
+                } else {
+                    middleSection.style.zIndex = '';
+                }
+            });
+            const container = this.easyMDE.element.closest('.EasyMDEContainer');
+            if (container) {
+                observer.observe(container, { attributes: true, attributeFilter: ['class'] });
+            }
+            
+            // Ctrl+Enter to submit
+            this.easyMDE.codemirror.on('keydown', (cm, e) => {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    this.submitComposedIdea();
+                }
+            });
+        } else {
+            // Fallback to basic textarea behavior
+            textarea.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    this.submitComposedIdea();
+                }
+            });
+        }
+        
         submitBtn.addEventListener('click', () => {
             this.submitComposedIdea();
-        });
-        
-        // Allow Ctrl+Enter to submit
-        textarea.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'Enter') {
-                e.preventDefault();
-                this.submitComposedIdea();
-            }
         });
     }
     
@@ -1695,12 +1746,18 @@ class WorkplaceManager {
      * Submit composed idea as a new markdown file
      */
     async submitComposedIdea() {
-        const textarea = document.getElementById('workplace-compose-textarea');
         const statusEl = document.getElementById('workplace-upload-status');
         
-        if (!textarea) return;
+        // Get content from EasyMDE or fallback to textarea
+        let content;
+        if (this.easyMDE) {
+            content = this.easyMDE.value().trim();
+        } else {
+            const textarea = document.getElementById('workplace-compose-textarea');
+            if (!textarea) return;
+            content = textarea.value.trim();
+        }
         
-        const content = textarea.value.trim();
         if (!content) {
             this._showToast('Please write something before submitting', 'warning');
             return;
@@ -2091,7 +2148,6 @@ class ContentRefreshManager {
      * Start polling loop
      */
     _startPolling() {
-        console.log('[ContentRefreshManager] Starting polling (every 5s)');
         this.pollTimer = setInterval(() => {
             this._checkForChanges();
         }, this.pollInterval);
@@ -2140,12 +2196,11 @@ class ContentRefreshManager {
             
             // Check if content changed
             if (this.lastContent !== newContent) {
-                console.log('[ContentRefreshManager] Content changed, refreshing...');
                 this.lastContent = newContent;
                 this._refreshContent(data);
             }
         } catch (error) {
-            console.error('[ContentRefreshManager] Poll error:', error);
+            // Silently ignore poll errors
         }
     }
     
@@ -2322,8 +2377,6 @@ class PlanningFilePoller {
      * Start the main polling loop - runs forever
      */
     _startPollingLoop() {
-        console.log('[PlanningFilePoller] Starting polling loop (every 5s)');
-        
         setInterval(() => {
             this._checkAndRefresh();
         }, this.pollInterval);
@@ -2346,8 +2399,6 @@ class PlanningFilePoller {
             return;
         }
         
-        console.log(`[PlanningFilePoller] Checking ${currentPath}...`);
-        
         try {
             const response = await fetch(`/api/file/content?path=${encodeURIComponent(currentPath)}`);
             if (!response.ok) return;
@@ -2357,19 +2408,17 @@ class PlanningFilePoller {
             
             // First load - just store content
             if (this.lastContent === null) {
-                console.log('[PlanningFilePoller] Initial content cached');
                 this.lastContent = newContent;
                 return;
             }
             
             // Check if content changed
             if (this.lastContent !== newContent) {
-                console.log('[PlanningFilePoller] Content CHANGED! Refreshing...');
                 this.lastContent = newContent;
                 this._refreshContent(data);
             }
         } catch (error) {
-            console.error('[PlanningFilePoller] Error:', error);
+            // Silently ignore poll errors
         }
     }
     
@@ -2541,7 +2590,6 @@ class ProjectSidebar {
      * Start polling for structure changes
      */
     _startPolling() {
-        console.log('[ProjectSidebar] Starting structure polling (every 5s)');
         setInterval(() => {
             this._checkForChanges();
         }, this.pollInterval);
@@ -2567,9 +2615,7 @@ class ProjectSidebar {
             
             // Check if structure changed (includes mtime changes since JSON hash includes mtime)
             if (this.lastStructureHash !== newHash) {
-                console.log('[ProjectSidebar] Structure changed, detecting changes...');
-                
-                // FEATURE-009: Detect which paths changed (structure + content)
+                // Detect which paths changed (structure + content)
                 const currentPathMtimes = this._extractAllPathMtimes(data.sections);
                 this._detectChangedPaths(this.previousPathMtimes, currentPathMtimes);
                 
@@ -2631,7 +2677,6 @@ class ProjectSidebar {
         // Find new paths (added)
         for (const [path, mtime] of newPathMtimes) {
             if (!oldPathMtimes.has(path)) {
-                console.log('[ProjectSidebar] New path detected:', path);
                 this._addChangedPath(path);
             }
         }
@@ -2639,7 +2684,6 @@ class ProjectSidebar {
         // Find removed paths (mark parent as changed)
         for (const [path, mtime] of oldPathMtimes) {
             if (!newPathMtimes.has(path)) {
-                console.log('[ProjectSidebar] Removed path detected:', path);
                 const parent = this._getParentPath(path);
                 if (parent) {
                     this._addChangedPath(parent);
@@ -2647,12 +2691,11 @@ class ProjectSidebar {
             }
         }
         
-        // Find modified files (mtime changed) - BUG FIX for content change detection
+        // Find modified files (mtime changed)
         for (const [path, newMtime] of newPathMtimes) {
             if (newMtime !== null && oldPathMtimes.has(path)) {
                 const oldMtime = oldPathMtimes.get(path);
                 if (oldMtime !== null && newMtime !== oldMtime) {
-                    console.log('[ProjectSidebar] Content modified:', path, 'mtime:', oldMtime, '->', newMtime);
                     this._addChangedPath(path);
                 }
             }
@@ -2682,7 +2725,6 @@ class ProjectSidebar {
         if (!this.changedPaths.has(path)) return;
         
         this.changedPaths.delete(path);
-        console.log('[ProjectSidebar] Cleared change indicator for:', path);
         
         // Check parents - clear if no other changed children
         const parts = path.split('/');
@@ -2690,7 +2732,6 @@ class ProjectSidebar {
             const parentPath = parts.slice(0, i).join('/');
             if (!this._hasChangedChildren(parentPath)) {
                 this.changedPaths.delete(parentPath);
-                console.log('[ProjectSidebar] Cleared parent indicator for:', parentPath);
             }
         }
     }
@@ -2730,7 +2771,7 @@ class ProjectSidebar {
             const data = await response.json();
             this.sections = data.sections;
             this.lastStructureHash = this._hashStructure(data.sections);
-            this.previousPaths = this._extractAllPaths(data.sections);
+            this.previousPathMtimes = this._extractAllPathMtimes(data.sections);
             this.render();
         } catch (error) {
             console.error('Failed to load project structure:', error);
@@ -2936,9 +2977,21 @@ class ProjectSidebar {
                 fileItems.forEach(f => f.classList.remove('active'));
                 this.selectedFile = null;
                 
+                // BUGFIX: Clear contentRenderer.currentPath to prevent auto-refresh
+                // from redirecting back to previously viewed file when on Workplace
+                if (window.contentRenderer) {
+                    window.contentRenderer.currentPath = null;
+                }
+                
                 // Update breadcrumb
                 const breadcrumb = document.getElementById('breadcrumb');
                 breadcrumb.innerHTML = '<li class="breadcrumb-item active">Workplace</li>';
+                
+                // Show Create Idea button in top bar
+                const createIdeaBtn = document.getElementById('btn-create-idea');
+                if (createIdeaBtn) {
+                    createIdeaBtn.classList.remove('d-none');
+                }
                 
                 // Render WorkplaceManager view
                 const container = document.getElementById('content-body');
@@ -2986,11 +3039,15 @@ class ProjectSidebar {
      * Handle file selection - loads content via ContentRenderer
      */
     onFileSelect(path) {
-        console.log('File selected:', path);
-        
         // Stop workplace polling when navigating to a file
         if (window.workplaceManager) {
             window.workplaceManager.stop();
+        }
+        
+        // Hide Create Idea button when leaving Workplace
+        const createIdeaBtn = document.getElementById('btn-create-idea');
+        if (createIdeaBtn) {
+            createIdeaBtn.classList.add('d-none');
         }
         
         // Check with ContentEditor if navigation is allowed (unsaved changes)
@@ -3070,6 +3127,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const workplaceManager = new WorkplaceManager();
     window.workplaceManager = workplaceManager;
     
+    // Wire up Create Idea button in top bar
+    const createIdeaBtn = document.getElementById('btn-create-idea');
+    if (createIdeaBtn) {
+        createIdeaBtn.addEventListener('click', () => {
+            if (window.workplaceManager) {
+                window.workplaceManager.showUploadView();
+            }
+        });
+    }
+    
     // Initialize planning file poller (5s HTTP polling for task-board.md & features.md)
     // Standalone - no sockets, just polls every 5 seconds
     const planningPoller = new PlanningFilePoller({
@@ -3112,6 +3179,75 @@ document.addEventListener('DOMContentLoaded', () => {
     const terminalPanel = new TerminalPanel(terminalManager);
     window.terminalManager = terminalManager;
     window.terminalPanel = terminalPanel;
+    
+    // Skills Modal Handler
+    const skillsBtn = document.getElementById('skills-btn');
+    const skillsModal = new bootstrap.Modal(document.getElementById('skills-modal'));
+    const skillsModalBody = document.getElementById('skills-modal-body');
+    
+    skillsBtn.addEventListener('click', async () => {
+        // Show loading state
+        skillsModalBody.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        `;
+        skillsModal.show();
+        
+        try {
+            const response = await fetch('/api/skills');
+            const data = await response.json();
+            
+            if (data.success && data.skills.length > 0) {
+                skillsModalBody.innerHTML = `
+                    <div class="list-group list-group-flush">
+                        ${data.skills.map(skill => `
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1 fw-semibold">
+                                            <i class="bi bi-lightning-charge text-warning me-1"></i>
+                                            ${escapeHtml(skill.name)}
+                                        </h6>
+                                        <p class="mb-0 text-muted small">${escapeHtml(skill.description || 'No description available')}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (data.success && data.skills.length === 0) {
+                skillsModalBody.innerHTML = `
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox fs-1"></i>
+                        <p class="mt-2">No skills found</p>
+                    </div>
+                `;
+            } else {
+                skillsModalBody.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        ${escapeHtml(data.error || 'Failed to load skills')}
+                    </div>
+                `;
+            }
+        } catch (error) {
+            skillsModalBody.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Error loading skills: ${escapeHtml(error.message)}
+                </div>
+            `;
+        }
+    });
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 });
 </script>
 {% endblock %}

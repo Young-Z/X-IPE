@@ -13,6 +13,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Highlight.js Theme -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" rel="stylesheet">
+    <!-- EasyMDE Markdown Editor CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css" rel="stylesheet">
     <style>
         /* =================================================================
          * ROOT LAYOUT SYSTEM
@@ -103,6 +105,9 @@
             padding: 0.375rem 0.75rem;
             border-radius: 4px;
             transition: all 0.15s;
+            background: none;
+            border: none;
+            cursor: pointer;
         }
         
         .top-menu .menu-link:hover {
@@ -121,6 +126,8 @@
             flex-direction: row;
             overflow: hidden;
             min-height: 0; /* Critical: allows flex child to shrink */
+            z-index: 400;
+            position: relative;
         }
         
         /* ROW 3: Bottom Console - variable height (handled by terminal.css) */
@@ -966,6 +973,39 @@
             color: #adb5bd;
         }
         
+        /* EasyMDE Markdown Editor Customizations */
+        .workplace-compose .EasyMDEContainer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .workplace-compose .EasyMDEContainer .CodeMirror {
+            flex: 1;
+            min-height: 250px;
+            border-radius: 0 0 8px 8px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .workplace-compose .editor-toolbar {
+            border-radius: 8px 8px 0 0;
+            background: #f8f9fa;
+        }
+        
+        .workplace-compose .editor-preview {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 1rem;
+        }
+        
+        .workplace-compose .editor-preview pre code {
+            background: #f6f8fa;
+            border-radius: 4px;
+            padding: 0.5rem;
+            display: block;
+        }
+        
         .workplace-compose-actions {
             display: flex;
             justify-content: flex-end;
@@ -1195,6 +1235,8 @@
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <!-- Highlight.js for syntax highlighting -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- EasyMDE Markdown Editor JS -->
+    <script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
     <!-- Mermaid.js for diagrams -->
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
     <!-- AntV Infographic for infographic DSL diagrams -->

@@ -16,7 +16,7 @@ import sys
 from flask import Flask, render_template, jsonify, request, current_app
 from flask_socketio import SocketIO, emit
 
-from src.services import ProjectService, ContentService, SettingsService, ProjectFoldersService, IdeasService, ConfigService
+from src.services import ProjectService, ContentService, SettingsService, ProjectFoldersService, IdeasService, ConfigService, SkillsService
 from src.services import session_manager
 from src.config import config_by_name
 
@@ -727,6 +727,40 @@ def register_ideas_routes(app):
         if result['success']:
             return jsonify(result)
         return jsonify(result), 400
+    
+    """
+    ==========================================================================
+    SKILLS API
+    
+    Read-only API for skills defined in .github/skills/
+    ==========================================================================
+    """
+    
+    @app.route('/api/skills', methods=['GET'])
+    def get_skills():
+        """
+        GET /api/skills
+        
+        Get list of all skills with name and description.
+        
+        Response:
+            - success: true
+            - skills: array of {name, description}
+        """
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        service = SkillsService(project_root)
+        
+        try:
+            skills = service.get_all()
+            return jsonify({
+                'success': True,
+                'skills': skills
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
 
 
 # Entry point for running with `python -m src.app`

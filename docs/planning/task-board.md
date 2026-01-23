@@ -13,6 +13,8 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-086 | Bug Fix | All files/folders highlighted when any file changes | Flux | 01-23-2026 06:15:00 | [index.html](src/templates/index.html) | Root cause: load() set previousPaths but _checkForChanges() used previousPathMtimes. Fix: Changed load() to initialize previousPathMtimes. 347/348 tests pass (1 unrelated). |
+| TASK-085 | Bug Fix | Toast causes redirect away from Workplace page when file changes on disk | Nova | 01-23-2026 06:10:00 | [index.html](src/templates/index.html) | Root cause: contentRenderer.currentPath not cleared when switching to Workplace. Fix: Clear currentPath in Workplace click handler. 348/348 tests pass. |
 | TASK-084 | Feature Closing | Close FEATURE-010: Project Root Configuration | Nova | 01-23-2026 05:58:00 | [CHANGELOG.md](CHANGELOG.md), [specification.md](docs/requirements/FEATURE-010/specification.md) | 11/11 ACs verified. 348 tests passing. Feature complete. |
 | TASK-083 | Code Implementation | Implement FEATURE-010: Project Root Configuration | Nova | 01-23-2026 05:55:00 | [services.py](src/services.py), [app.py](src/app.py), [settings.html](src/templates/settings.html), [test_config.py](tests/test_config.py) | ConfigData, ConfigService, /api/config endpoint, Settings UI section, startup integration. 42/42 config tests, 348/348 total tests pass. |
 | TASK-082 | Test Generation | Generate tests for FEATURE-010: Project Root Configuration | Nova | 01-23-2026 05:47:00 | [test_config.py](tests/test_config.py) | 42 tests: ConfigData (6), Discovery (5), Parsing (4), Validation (12), Load (5), API (4), Integration (2), Edge Cases (4). TDD ready - 42 failing. |
@@ -134,6 +136,7 @@
 | Human Playground | task-type-human-playground | Feature Closing |
 | Feature Closing | task-type-feature-closing | - |
 | Bug Fix | task-type-bug-fix | - |
+| Code Refactor | task-type-code-refactor | - |
 | Project Initialization | task-type-project-init | Dev Environment Setup |
 | Dev Environment Setup | task-type-dev-environment | - |
 
@@ -141,10 +144,10 @@
 
 ## Quick Stats
 
-- **Total Active:** 1
-- **In Progress:** 1
+- **Total Active:** 0
+- **In Progress:** 0
 - **Blocked:** 0
-- **Completed Today:** 4
+- **Completed Today:** 6
 
 ---
 

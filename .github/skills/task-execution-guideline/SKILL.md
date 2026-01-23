@@ -63,7 +63,7 @@ Task:
 |-----------|----------|
 | `task-type-feature-refinement`, `task-type-technical-design`, `task-type-test-generation`, `task-type-code-implementation`, `task-type-human-playground`, `task-type-feature-closing` | feature-stage |
 | `task-type-ideation`, `task-type-requirement-gathering`, `task-type-feature-breakdown` | requirement-stage |
-| `task-type-bug-fix`, `task-type-change-request`, `task-type-project-init`, `task-type-dev-environment`, `task-type-user-manual` | Standalone |
+| `task-type-bug-fix`, `task-type-code-refactor`, `task-type-change-request`, `task-type-project-init`, `task-type-dev-environment`, `task-type-user-manual` | Standalone |
 
 ### Task States
 
@@ -142,6 +142,7 @@ Execute tasks by following these 6 steps in order:
 | "playground", "demo", "test manually" | Human Playground |
 | "close feature", "create PR" | Feature Closing |
 | "fix bug", "not working" | Bug Fix |
+| "refactor", "restructure", "split file", "clean up code", "improve code quality" | Code Refactor |
 | "change request", "CR", "modify feature", "update requirement" | Change Request |
 | "set up project", "initialize" | Project Initialization |
 
@@ -345,6 +346,7 @@ ELSE:
 | Human Playground | `task-type-human-playground` | feature-stage | Feature Closing | Yes |
 | Feature Closing | `task-type-feature-closing` | feature-stage | User Manual | No |
 | Bug Fix | `task-type-bug-fix` | Standalone | - | Yes |
+| Code Refactor | `task-type-code-refactor` | Standalone | - | Yes |
 | Change Request | `task-type-change-request` | Standalone | Feature Refinement OR Feature Breakdown | Yes |
 | Project Initialization | `task-type-project-init` | Standalone | Dev Environment | No |
 | Dev Environment | `task-type-dev-environment` | Standalone | - | No |
