@@ -6,7 +6,6 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-105 | Code Implementation | Add image preview support to Workplace | Sage | 🔄 in_progress | 01-23-2026 17:02:00 | - | - |
 
 ---
 
@@ -14,11 +13,9 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-105 | Code Implementation | Add image preview support to Workplace | Sage | 01-23-2026 17:05:00 | [workplace.js](static/js/features/workplace.js), [workplace.css](static/css/workplace.css), [app.py](src/app.py) | Image preview in Workplace. |
 | TASK-104 | Code Refactor | Validate frontend CSS/JS refactoring (retroactive) | Bolt | 01-24-2026 00:55:00 | [static/css/](static/css/), [static/js/](static/js/) | Quality 4.2→7.3. Principles: Component Isolation, Style Colocation, Single Responsibility. 375 tests pass. |
 | TASK-103 | Bug Fix | Implement missing CR-002 frontend drag-drop to folders | Sage | 01-23-2026 16:50:00 | [workplace.js](static/js/features/workplace.js), [workplace.css](static/css/workplace.css) | Fixed drag-drop to existing folders. |
-
-| Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
-|---------|-----------|-------------|------|--------------|--------------|-------|
 | TASK-102 | Ideation | Refine idea v2: Test - 01232026 225812 (Checklist Web App) | Zephyr | 01-23-2026 15:50:00 | [idea-summary-v2.md](docs/ideas/Test%20-%2001232026%20225812/idea-summary-v2.md), [mockup.html](docs/ideas/Test%20-%2001232026%20225812/mockup.html) | Closed. |
 | TASK-101 | Ideation | Refine idea: Draft Idea - 01232026 225812 (Checklist Web App) | Zephyr | 01-23-2026 15:53:00 | [idea-summary-v1.md](docs/ideas/Draft%20Idea%20-%2001232026%20225812/idea-summary-v1.md), [mockup.html](docs/ideas/Draft%20Idea%20-%2001232026%20225812/mockup.html) | Closed. |
 | TASK-100 | Human Playground | Interactive testing for FEATURE-008 v1.3 (CR-003) | Flux | 01-23-2026 15:05:00 | [playground_ideation_toolbox.py](playground/playground_ideation_toolbox.py), [test_playground_ideation_toolbox.py](playground/tests/test_playground_ideation_toolbox.py) | Feature playground complete. |
