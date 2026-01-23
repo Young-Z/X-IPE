@@ -22,6 +22,7 @@ class WorkplaceManager {
         this.fileType = null; // markdown | code | text
         this.fileExtension = null;
         this.easyMDE = null; // EasyMDE editor instance for compose view
+        this.toolboxConfig = null; // CR-003: Ideation Toolbox config
     }
     
     /**
@@ -92,6 +93,9 @@ class WorkplaceManager {
         // Load tree and start polling
         await this.loadTree();
         this._startPolling();
+        
+        // CR-003: Initialize Ideation Toolbox
+        this._initToolbox();
     }
     
     /**
@@ -1351,6 +1355,105 @@ class WorkplaceManager {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
         }, 3000);
+    }
+    
+    // =========================================================================
+    // CR-003: Ideation Toolbox Methods
+    // =========================================================================
+    
+    /**
+     * Initialize the Ideation Toolbox
+     * Loads saved state and binds checkbox event handlers
+     */
+    _initToolbox() {
+        // Show the toolbox dropdown (hidden by default)
+        const toolboxDropdown = document.getElementById('toolbox-dropdown');
+        if (toolboxDropdown) {
+            toolboxDropdown.classList.remove('d-none');
+        }
+        
+        // Load initial state from backend
+        this._loadToolboxState();
+        
+        // Bind checkbox change handlers
+        document.querySelectorAll('.toolbox-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', () => this._onToolboxChange());
+        });
+    }
+    
+    /**
+     * Load toolbox configuration from backend
+     * Updates checkbox states to match saved config
+     */
+    async _loadToolboxState() {
+        try {
+            const response = await fetch('/api/ideas/toolbox');
+            const config = await response.json();
+            this.toolboxConfig = config;
+            
+            // Update checkboxes to match config
+            for (const [section, tools] of Object.entries(config)) {
+                if (typeof tools === 'object' && section !== 'version') {
+                    for (const [tool, enabled] of Object.entries(tools)) {
+                        const checkbox = document.querySelector(
+                            `.toolbox-checkbox[data-section="${section}"][data-tool="${tool}"]`
+                        );
+                        if (checkbox) {
+                            checkbox.checked = enabled;
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load toolbox config:', error);
+        }
+    }
+    
+    /**
+     * Handle checkbox change event
+     * Builds config from current checkbox states and saves to backend
+     */
+    async _onToolboxChange() {
+        // Build config from current checkbox states
+        const config = {
+            version: '1.0',
+            ideation: {},
+            mockup: {},
+            sharing: {}
+        };
+        
+        document.querySelectorAll('.toolbox-checkbox').forEach(checkbox => {
+            const section = checkbox.dataset.section;
+            const tool = checkbox.dataset.tool;
+            if (section && tool) {
+                config[section][tool] = checkbox.checked;
+            }
+        });
+        
+        // Save to backend
+        await this._saveToolboxState(config);
+    }
+    
+    /**
+     * Save toolbox configuration to backend
+     * @param {Object} config - Toolbox configuration object
+     */
+    async _saveToolboxState(config) {
+        try {
+            const response = await fetch('/api/ideas/toolbox', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(config)
+            });
+            const result = await response.json();
+            if (result.success) {
+                this.toolboxConfig = config;
+            } else {
+                console.error('Failed to save toolbox config:', result.error);
+            }
+        } catch (error) {
+            console.error('Failed to save toolbox config:', error);
+        }
     }
     
     /**

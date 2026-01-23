@@ -490,15 +490,12 @@
 
         /**
          * Internal fit logic - fits all terminals and sends resize to server
+         * Note: Do NOT call terminal.refresh() here - it resets scroll position
          */
         _doFit() {
             this.fitAddons.forEach((fitAddon, index) => {
                 try {
                     fitAddon.fit();
-                    const terminal = this.terminals[index];
-                    if (terminal) {
-                        terminal.refresh(0, terminal.rows - 1);
-                    }
                     const dims = fitAddon.proposeDimensions();
                     if (dims && this.sockets[index] && this.sockets[index].connected) {
                         this.sockets[index].emit('resize', { rows: dims.rows, cols: dims.cols });

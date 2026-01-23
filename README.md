@@ -30,6 +30,7 @@
 - [📁 Project Structure](#-project-structure)
 - [📖 Documentation](#-documentation)
 - [📸 Screenshots](#-screenshots)
+- [📋 Version Changelog](#-version-changelog)
 - [📄 License](#-license)
 
 ---
@@ -816,6 +817,14 @@ X-IPE/
 **Coding & Testing Views**
 
 ![Coding & Testing Views](resources/9.%20coding-testing-views-@feature-delivery.png)
+
+---
+
+## 📋 Version Changelog
+
+| Version | Date | Summary |
+|---------|------|---------|
+| v1.0 | 2026-01-23 | Initial release of X-IPE with complete AI-native project lifecycle management, featuring ideation, requirement gathering, feature breakdown, technical design, code implementation, and human playground capabilities. |
 
 ---
 

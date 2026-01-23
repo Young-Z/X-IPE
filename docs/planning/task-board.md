@@ -13,6 +13,9 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-108 | Bug Fix | CR-003 Ideation Toolbox JS missing after refactor | Sage | 01-23-2026 17:40:00 | [workplace.js](static/js/features/workplace.js) | Root cause: JS not included in refactor commit 9ed12c2. Fix: Added _initToolbox(), _loadToolboxState(), _onToolboxChange(), _saveToolboxState() methods to WorkplaceManager. |
+| TASK-107 | Bug Fix | Terminal scrolls to top when content is long | Drift | 01-23-2026 17:22:00 | [terminal.js](static/js/terminal.js) | Root cause: `terminal.refresh()` in `_doFit()` reset scroll position. Fix: Removed unnecessary refresh call. |
+| TASK-106 | Ideation | Refine idea: Voice Input for Console | Bolt | 01-24-2026 17:23:00 | [idea-summary-v1.md](docs/ideas/Draft%20Idea%20-%2001242026%20000728/idea-summary-v1.md), [mockup.html](docs/ideas/Draft%20Idea%20-%2001242026%20000728/mockup.html) | Closed. |
 | TASK-105 | Code Implementation | Add image preview support to Workplace | Sage | 01-23-2026 17:05:00 | [workplace.js](static/js/features/workplace.js), [workplace.css](static/css/workplace.css), [app.py](src/app.py) | Image preview in Workplace. |
 | TASK-104 | Code Refactor | Validate frontend CSS/JS refactoring (retroactive) | Bolt | 01-24-2026 00:55:00 | [static/css/](static/css/), [static/js/](static/js/) | Quality 4.2→7.3. Principles: Component Isolation, Style Colocation, Single Responsibility. 375 tests pass. |
 | TASK-103 | Bug Fix | Implement missing CR-002 frontend drag-drop to folders | Sage | 01-23-2026 16:50:00 | [workplace.js](static/js/features/workplace.js), [workplace.css](static/css/workplace.css) | Fixed drag-drop to existing folders. |
