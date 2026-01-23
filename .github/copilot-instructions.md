@@ -83,6 +83,22 @@
 | Dev Environment | `task-type-dev-environment` | Standalone | - | No |
 | User Manual | `task-type-user-manual` | Standalone | - | Yes |
 
+### 🛑 STOP AND THINK: Pre-Flight Checklist
+
+**Before touching ANY code or making ANY changes, ask yourself:**
+
+```
+1. What task type is this? → Check registry table above
+2. Did I create a task on task-board.md? → If NO, STOP and create it
+3. Did I load the corresponding skill? → If NO, STOP and load it
+4. Am I following the skill's procedure? → If NO, STOP and read it
+```
+
+**Common Mistakes to Avoid:**
+- User says "refactor this" → You must use `task-type-code-refactor` skill, NOT just start coding
+- User says "fix this bug" → You must use `task-type-bug-fix` skill, NOT just fix it
+- User says "add this feature" → You must identify the right task type first
+
 ### ⚠️ DO NOT Skip Skills
 
 **Forbidden Actions:**
@@ -93,6 +109,7 @@
 - ❌ Fixing bugs without writing a failing test first
 - ❌ Implementing features without reading technical design
 - ❌ Making changes without following the skill's execution procedure
+- ❌ Refactoring code without using `task-type-code-refactor` skill
 
 **Required Actions:**
 - ✅ Always create task on task-board.md BEFORE starting work
