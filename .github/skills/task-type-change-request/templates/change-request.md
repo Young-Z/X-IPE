@@ -1,13 +1,14 @@
 # Change Request: CR-XXX
 
-> Created: MM-DD-YYYY
+> Created: YYYY-MM-DD
 > Status: Pending
 > Classification: [To be determined]
+> Related Feature: FEATURE-XXX
 
 ## Request Details
 
 **Requestor:** [Name/Role]
-**Date Received:** MM-DD-YYYY
+**Date Received:** YYYY-MM-DD
 **Priority:** High | Medium | Low
 
 ## Description
@@ -62,14 +63,14 @@
 **Classification Result:** [modification | new_feature]
 
 **Actions Taken:**
-- [ ] CR document created
-- [ ] [If modification] Specification updated: FEATURE-XXX/specification.md
+- [ ] CR document created in feature folder
+- [ ] [If modification] Specification Version History updated with CR link
 - [ ] [If new feature] Requirement details updated
 - [ ] Next task type set: [task-type-feature-refinement | task-type-feature-breakdown]
 
 ## Links
 
-- Related Feature(s): [FEATURE-XXX](../FEATURE-XXX/specification.md)
+- Feature Specification: [specification.md](./specification.md)
 - Requirement Details: [requirement-details.md](../requirement-details.md)
 
 ---
@@ -78,4 +79,4 @@
 
 | Date | Change | By |
 |------|--------|----|
-| MM-DD-YYYY | CR created | [Agent/Human] |
+| YYYY-MM-DD | CR created | [Agent/Human] |

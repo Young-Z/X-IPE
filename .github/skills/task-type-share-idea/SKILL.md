@@ -30,11 +30,19 @@ Convert refined idea summaries to human-readable shareable formats by:
 | Attribute | Value |
 |-----------|-------|
 | Task Type | Share Idea |
-| Category | ideation-stage |
-| Standalone | No |
-| Next Task | Requirement Gathering (optional) |
+| Category | Standalone |
+| Standalone | Yes |
+| Next Task | - |
 | Auto-advance | No |
 | Human Review | Yes |
+
+---
+
+## Task Type Required Input Attributes
+
+| Attribute | Default Value |
+|-----------|---------------|
+| Auto Proceed | False |
 
 ---
 

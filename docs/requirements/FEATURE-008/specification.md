@@ -1,17 +1,18 @@
 # Feature Specification: Workplace (Idea Management)
 
 > Feature ID: FEATURE-008  
-> Version: v1.1  
-> Status: Complete  
-> Last Updated: 01-22-2026
+> Version: v1.3  
+> Status: Refined  
+> Last Updated: 01-23-2026
 
 ## Version History
 
-| Version | Date | Description |
-|---------|------|-------------|
-| v1.1 | 01-22-2026 | CR-001: Added Copilot button for idea refinement |
-| v1.0 | 01-22-2026 | Initial specification |
-| v1.0 | 01-22-2026 | Implementation complete |
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| v1.3 | 2026-01-23 | CR-003: Add Ideation Toolbox for skill configuration | [CR-003](./CR-003.md) |
+| v1.2 | 2026-01-23 | CR-002: Add drag-drop file upload to existing folders | [CR-002](./CR-002.md) |
+| v1.1 | 2026-01-22 | CR-001: Added Copilot button for idea refinement | [CR-001](./CR-001.md) |
+| v1.0 | 2026-01-22 | Initial specification | - |
 
 ## Overview
 
@@ -27,6 +28,8 @@ This feature integrates with a new agent skill (`task-type-ideation`) that analy
 - As a **user**, I want to **rename idea folders**, so that **I can give meaningful names as my ideas evolve**.
 - As a **user**, I want to **see Workplace as the first sidebar item**, so that **I can easily access my idea workspace**.
 - As a **user**, I want to **quickly refine my idea with Copilot CLI**, so that **I can get AI assistance without manually typing commands** (CR-001).
+- As a **user**, I want to **drag and drop files into existing idea folders**, so that **I can easily add new materials to ideas I'm already working on** (CR-002).
+- As a **user**, I want to **configure which AI skills are available for ideation**, so that **I can customize my workflow and enable/disable tools as needed** (CR-003).
 
 ## Acceptance Criteria
 
@@ -44,11 +47,24 @@ This feature integrates with a new agent skill (`task-type-ideation`) that analy
 - [x] AC-12: Folders in the tree can be renamed via inline editing (double-click)
 - [x] AC-13: Folder rename updates the physical folder name on disk
 - [x] AC-14: Tree view updates automatically when files/folders are added, renamed, or deleted
+- [ ] AC-20: Users can drag files onto folder nodes in the idea tree (CR-002)
+- [ ] AC-21: Folder highlights visually when files are dragged over it (CR-002)
+- [ ] AC-22: Dropping files onto a folder uploads them directly to that folder (CR-002)
+- [ ] AC-23: Toast notification confirms successful upload to existing folder (CR-002)
 - [x] AC-15: "Copilot" button appears to the left of the Edit button in content view header (CR-001)
 - [x] AC-16: Clicking Copilot button expands the terminal panel (CR-001)
 - [x] AC-17: If terminal is in Copilot CLI mode, a new terminal session is created (CR-001)
 - [x] AC-18: Copilot button sends `copilot` command with typing simulation (CR-001)
 - [x] AC-19: After copilot CLI init, sends `refine the idea {file path}` command (CR-001)
+- [ ] AC-24: "Ideation Toolbox" button visible next to "Create Idea" button (CR-003)
+- [ ] AC-25: Clicking Toolbox button opens dropdown panel with 3 sections (CR-003)
+- [ ] AC-26: Ideation section contains checkboxes: antv-infographic, mermaid (CR-003)
+- [ ] AC-27: Mockup section contains checkbox: frontend-design (CR-003)
+- [ ] AC-28: Sharing section shows placeholder text (CR-003)
+- [ ] AC-29: Default selections: mermaid checked, frontend-design checked (CR-003)
+- [ ] AC-30: `.ideation-tools.json` created in docs/ideas/ on first use (CR-003)
+- [ ] AC-31: Checkbox changes save immediately to JSON file (CR-003)
+- [ ] AC-32: UI state reflects JSON file state on page load (CR-003)
 
 ## Functional Requirements
 
@@ -154,6 +170,82 @@ This feature integrates with a new agent skill (`task-type-ideation`) that analy
 **Typing Simulation:**
 - Random delay 30-80ms between characters for realistic typing effect
 - Send Enter key after command completes
+
+### FR-8: Drag-Drop Upload to Existing Folders (CR-002)
+
+**Description:** Enable file upload via drag-and-drop onto existing idea folders in the tree
+
+**Details:**
+- Input: User drags files from system onto a folder node in the idea tree
+- Process:
+  1. Detect dragover on folder nodes
+  2. Highlight folder as valid drop target
+  3. On drop, extract files from drag event
+  4. Call `/api/ideas/upload` with `target_folder` parameter
+  5. Show toast notification on success/failure
+  6. Refresh tree view
+- Output: Files uploaded directly to target folder, tree refreshed
+
+**Backend Changes:**
+- Add optional `target_folder` form field to `/api/ideas/upload`
+- If provided, upload files directly to that folder
+- If not provided, create new timestamped folder (existing behavior)
+
+**Frontend Changes:**
+- Add `draggable-folder` class to folder nodes
+- Bind `dragover`, `dragleave`, `drop` events to folder nodes
+- Visual feedback: Add `drop-target` class on dragover
+
+### FR-9: Ideation Toolbox Configuration (CR-003)
+
+**Description:** Provide UI for configuring ideation tools with persistent state
+
+**Details:**
+- Input: User clicks "Ideation Toolbox" button next to "Create Idea"
+- Process:
+  1. Show dropdown panel with 3 sections
+  2. Load existing settings from `.ideation-tools.json` (or use defaults)
+  3. Display checkboxes for each tool option
+  4. On checkbox change, save immediately to JSON file
+  5. Close panel on outside click or button re-click
+- Output: Tool configuration saved to JSON file
+
+**Sections and Options:**
+1. **Ideation** (for idea analysis and visualization)
+   - `antv-infographic`: AntV Infographic DSL generation (default: unchecked)
+   - `mermaid`: Mermaid diagram support (default: checked)
+2. **Mockup** (for UI prototyping)
+   - `frontend-design`: Frontend design skill (default: checked)
+3. **Sharing** (for idea distribution - future expansion)
+   - Placeholder text: "Coming soon..."
+
+**JSON File Schema:**
+```json
+{
+  "version": "1.0",
+  "ideation": {
+    "antv-infographic": false,
+    "mermaid": true
+  },
+  "mockup": {
+    "frontend-design": true
+  },
+  "sharing": {}
+}
+```
+
+**File Location:** `docs/ideas/.ideation-tools.json`
+
+**Backend Changes:**
+- Add `GET /api/ideas/toolbox` - Read toolbox config
+- Add `POST /api/ideas/toolbox` - Save toolbox config
+- Create file with defaults if not exists on first read
+
+**Frontend Changes:**
+- Add "Ideation Toolbox" button with gear/toolbox icon
+- Bootstrap dropdown panel with styled sections
+- Checkbox inputs with labels
+- Auto-save on checkbox change
 
 ## Non-Functional Requirements
 
@@ -272,6 +364,21 @@ When Workplace selected:
 **Scenario:** User has pending changes and clicks another file  
 **Expected Behavior:** Trigger immediate save before loading new file
 
+### Edge Case 6: Drop on File Node (CR-002)
+
+**Scenario:** User drags files onto a file node instead of folder  
+**Expected Behavior:** Ignore drop (only folders are valid drop targets)
+
+### Edge Case 7: Drop on Root of Tree (CR-002)
+
+**Scenario:** User drags files onto empty space in tree (not on any folder)  
+**Expected Behavior:** Ignore drop (must target specific folder)
+
+### Edge Case 8: Target Folder Deleted During Drag (CR-002)
+
+**Scenario:** Folder is deleted by external process while user is dragging  
+**Expected Behavior:** Show error toast "Folder no longer exists", refresh tree
+
 ## Out of Scope
 
 - Multiple file upload progress tracking (show only success/failure)
@@ -301,6 +408,7 @@ When Workplace selected:
 
 | CR ID | Date | Description | Impact |
 |-------|------|-------------|--------|
+| CR-002 | 01-23-2026 | Drag-drop file upload to existing folders | Added US-7, AC-20 to AC-23, FR-8 |
 | CR-001 | 01-22-2026 | Add Copilot button for idea refinement | Added US-6, AC-15 to AC-19, FR-7 |
 
 ---

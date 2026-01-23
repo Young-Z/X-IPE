@@ -35,6 +35,14 @@ Safely refactor and validate existing code through:
 
 ---
 
+## Task Type Required Input Attributes
+
+| Attribute | Default Value |
+|-----------|---------------|
+| Auto Proceed | False |
+
+---
+
 ## Skill Output
 
 This skill MUST return these attributes to the Task Data Model:

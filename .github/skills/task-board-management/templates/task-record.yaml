@@ -40,9 +40,9 @@ next_task_type: ""                   # Task type to create after this completes
                                      # - Feature Breakdown → Technical Design
                                      # - Technical Design → Test Generation
                                      # - Test Generation → Code Implementation
-                                     # - Code Implementation → Human Playground
-                                     # - Human Playground → Feature Closing
+                                     # - Code Implementation → Feature Closing
                                      # - Feature Closing → (none)
+                                     # - Human Playground → (none) [Standalone]
                                      # - Bug Fix → (none)
                                      # - Project Initialization → (none)
                                      # - Dev Environment Setup → (none)

@@ -1,6 +1,6 @@
 # Technical Design: Workplace (Idea Management)
 
-> Feature ID: FEATURE-008 | Version: v1.1 | Last Updated: 01-22-2026
+> Feature ID: FEATURE-008 | Version: v1.3 | Last Updated: 01-23-2026
 
 ---
 
@@ -8,6 +8,8 @@
 
 | Version | Date | Description |
 |---------|------|-------------|
+| v1.3 | 01-23-2026 | CR-003: Add Ideation Toolbox for skill configuration |
+| v1.2 | 01-23-2026 | CR-002: Add drag-drop file upload to existing folders |
 | v1.1 | 01-22-2026 | CR-001: Added Copilot button technical design |
 | v1.0 | 01-22-2026 | Initial design |
 
@@ -24,7 +26,7 @@
 |-----------|----------------|--------------|------|
 | `IdeasService` | CRUD operations for idea files/folders | Backend service class | #ideas #service #backend |
 | `IdeasService.get_tree()` | Scan and return docs/ideas/ structure | Read idea tree | #ideas #tree |
-| `IdeasService.upload()` | Handle file upload to new idea folder | Create idea folders | #ideas #upload |
+| `IdeasService.upload()` | Handle file upload to new or existing folder | Create/update idea folders | #ideas #upload |
 | `IdeasService.rename_folder()` | Rename idea folder on disk | Folder management | #ideas #rename |
 | `POST /api/ideas/tree` | API endpoint for idea tree | REST API | #ideas #api |
 | `POST /api/ideas/upload` | API endpoint for file upload | REST API | #ideas #api #upload |
@@ -37,6 +39,15 @@
 | `TerminalManager.sendCopilotRefineCommand()` | Send refine command to terminal (CR-001) | Terminal integration | #terminal #copilot |
 | `TerminalManager._isInCopilotMode()` | Detect if terminal in Copilot CLI mode (CR-001) | Terminal integration | #terminal #copilot |
 | `TerminalManager._sendWithTypingEffect()` | Simulate human typing (CR-001) | Terminal integration | #terminal #typing |
+| `WorkplaceManager._setupFolderDragDrop()` | Setup drag-drop handlers on folder nodes (CR-002) | UI component | #ideas #frontend #dragdrop |
+| `WorkplaceManager._uploadToFolder()` | Upload files to specific folder (CR-002) | UI component | #ideas #frontend #upload |
+| `IdeasService.get_toolbox()` | Read toolbox config from JSON file (CR-003) | Backend service | #ideas #toolbox #config |
+| `IdeasService.save_toolbox()` | Save toolbox config to JSON file (CR-003) | Backend service | #ideas #toolbox #config |
+| `GET /api/ideas/toolbox` | API endpoint for reading toolbox config (CR-003) | REST API | #ideas #api #toolbox |
+| `POST /api/ideas/toolbox` | API endpoint for saving toolbox config (CR-003) | REST API | #ideas #api #toolbox |
+| `WorkplaceManager._initToolbox()` | Initialize toolbox dropdown UI (CR-003) | UI component | #ideas #frontend #toolbox |
+| `WorkplaceManager._loadToolboxState()` | Load toolbox state from backend (CR-003) | UI component | #ideas #frontend #toolbox |
+| `WorkplaceManager._saveToolboxState()` | Save toolbox state to backend (CR-003) | UI component | #ideas #frontend #toolbox |
 
 ### Dependencies
 
@@ -54,8 +65,11 @@
 2. **File View/Edit:** User clicks file → Frontend calls `GET /api/file/content?path=...` → Existing ContentService returns content → Display in editor
 3. **Auto-save:** User edits → 5s debounce → Frontend calls `POST /api/file/save` → Existing ContentService saves → Show "Saved" indicator
 4. **Upload:** User drops files → Frontend calls `POST /api/ideas/upload` → `IdeasService.upload()` creates folder + saves files → Refresh tree
-5. **Rename:** User double-clicks folder → Edit name → Frontend calls `POST /api/ideas/rename` → `IdeasService.rename_folder()` → Refresh tree
-6. **Copilot Refine (CR-001):** User clicks Copilot button → Expand terminal → Check if in Copilot mode → Create new terminal if needed → Send `copilot` command → Wait 1.5s → Send `refine the idea {path}` command
+5. **Upload to Existing (CR-002):** User drags files to folder → Frontend calls `POST /api/ideas/upload` with `target_folder` → `IdeasService.upload()` saves to existing folder → Refresh tree
+6. **Rename:** User double-clicks folder → Edit name → Frontend calls `POST /api/ideas/rename` → `IdeasService.rename_folder()` → Refresh tree
+7. **Copilot Refine (CR-001):** User clicks Copilot button → Expand terminal → Check if in Copilot mode → Create new terminal if needed → Send `copilot` command → Wait 1.5s → Send `refine the idea {path}` command
+8. **Toolbox Load (CR-003):** User clicks Workplace → Frontend calls `GET /api/ideas/toolbox` → `IdeasService.get_toolbox()` reads `.ideation-tools.json` → Returns config (or defaults) → Update checkbox states
+9. **Toolbox Save (CR-003):** User toggles checkbox → Frontend calls `POST /api/ideas/toolbox` with updated config → `IdeasService.save_toolbox()` writes JSON file → Returns success
 
 ### Usage Example
 
@@ -66,7 +80,11 @@ tree = ideas.get_tree()  # Returns list of FileNode
 
 # Upload files
 result = ideas.upload(files=[('notes.md', b'# My Idea')], date='2026-01-22')
-# Creates: docs/ideas/temp idea - 2026-01-22/files/notes.md
+# Creates: docs/ideas/Draft Idea - 01222026 HHMMSS/notes.md
+
+# Upload to existing folder (CR-002)
+result = ideas.upload(files=[('extra.md', b'# More')], target_folder='mobile-app-idea')
+# Saves to: docs/ideas/mobile-app-idea/extra.md
 
 # Rename folder
 result = ideas.rename_folder('temp idea - 2026-01-22', 'mobile-app-idea')
@@ -173,6 +191,31 @@ sequenceDiagram
     UP-->>U: Show success toast
 ```
 
+#### Upload to Existing Folder Flow (CR-002)
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant T as IdeaTree
+    participant A as Flask API
+    participant I as IdeasService
+    participant FS as FileSystem
+
+    U->>T: Drag files over folder
+    T->>T: Add drop-target highlight
+    U->>T: Drop files
+    T->>T: Remove highlight
+    T->>A: POST /api/ideas/upload (target_folder=folder_name)
+    A->>I: upload(files, target_folder=folder_name)
+    I->>I: Validate target_folder exists
+    I->>FS: Write files to existing folder
+    FS-->>I: Success
+    I-->>A: {success: true, folder: "existing_folder"}
+    A-->>T: 200 OK
+    T->>T: Refresh tree
+    T-->>U: Show success toast
+```
+
 #### Folder Rename Flow
 
 ```mermaid
@@ -257,11 +300,19 @@ class IdeasService:
         """
         pass
     
-    def upload(self, files: List[Tuple[str, bytes]], date: str = None) -> Dict:
+    def upload(self, files: List[Tuple[str, bytes]], date: str = None, target_folder: str = None) -> Dict:
         """
-        Upload files to new idea folder.
-        Creates: docs/ideas/temp idea - {YYYY-MM-DD}/files/{filename}
-        Returns: {success, folder_name, files_uploaded}
+        Upload files to new or existing idea folder.
+        
+        Args:
+            files: List of (filename, content_bytes) tuples
+            date: Optional datetime string for new folder naming
+            target_folder: Optional existing folder name to upload into (CR-002)
+        
+        If target_folder is provided: Upload to existing folder
+        If target_folder is None: Create new timestamped folder
+        
+        Returns: {success, folder_name, folder_path, files_uploaded}
         """
         pass
     
@@ -431,22 +482,44 @@ class IdeaUploader {
 
 **Request:** `multipart/form-data`
 - `files`: Multiple file uploads
+- `target_folder` (optional, CR-002): Existing folder name to upload into
 
-**Response:**
+**New Folder Upload (default):**
 ```json
+// Request: multipart/form-data with files only
+// Response:
 {
     "success": true,
-    "folder_name": "temp idea - 2026-01-22",
-    "folder_path": "docs/ideas/temp idea - 2026-01-22",
+    "folder_name": "Draft Idea - 01232026 125500",
+    "folder_path": "docs/ideas/Draft Idea - 01232026 125500",
     "files_uploaded": ["notes.md", "sketch.png"]
 }
 ```
 
-**Error Response:**
+**Existing Folder Upload (CR-002):**
 ```json
+// Request: multipart/form-data with files + target_folder
+// Response:
+{
+    "success": true,
+    "folder_name": "mobile-app-idea",
+    "folder_path": "docs/ideas/mobile-app-idea",
+    "files_uploaded": ["extra-notes.md"]
+}
+```
+
+**Error Responses:**
+```json
+// File too large
 {
     "success": false,
     "error": "File too large (max 10MB)"
+}
+
+// Target folder not found (CR-002)
+{
+    "success": false,
+    "error": "Target folder 'nonexistent' does not exist"
 }
 ```
 
@@ -601,6 +674,22 @@ class IdeaUploader {
 /* Copilot button (CR-001) */
 .workplace-copilot-btn {
     /* Uses Bootstrap btn-outline-info */
+}
+
+/* Folder drop target (CR-002) */
+.idea-folder-node {
+    transition: background-color 0.2s, outline 0.2s;
+}
+
+.idea-folder-node.drop-target {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    outline: 2px dashed var(--bs-primary);
+    outline-offset: -2px;
+}
+
+.idea-folder-node.drop-target .bi-folder,
+.idea-folder-node.drop-target .bi-folder2 {
+    color: var(--bs-primary);
 }
 ```
 
@@ -768,12 +857,495 @@ _sendWithTypingEffect(index, text, callback) {
 
 ---
 
+## CR-002: Drag-Drop Upload to Existing Folders
+
+> Added: 01-23-2026
+
+### Overview
+
+This change request enables users to drag and drop files directly onto existing idea folders in the tree view. Files are uploaded directly into the target folder without creating a new subfolder.
+
+### Components Modified
+
+| File | Component | Changes |
+|------|-----------|---------|
+| `src/services/ideas_service.py` | `IdeasService.upload()` | Added optional `target_folder` parameter |
+| `src/app.py` | `upload_ideas()` | Extract `target_folder` from form data, pass to service |
+| `static/js/app.js` | `WorkplaceManager` | Added `_setupFolderDragDrop()`, `_uploadToFolder()` methods |
+
+### Implementation Details
+
+#### Backend: IdeasService.upload() Changes
+
+```python
+def upload(self, files: List[tuple], date: str = None, target_folder: str = None) -> Dict[str, Any]:
+    """
+    Upload files to a new or existing idea folder.
+    
+    Args:
+        files: List of (filename, content_bytes) tuples
+        date: Optional datetime string for new folder naming
+        target_folder: Optional existing folder name to upload into (CR-002)
+    
+    Returns:
+        Dict with success, folder_name, folder_path, files_uploaded
+    """
+    if not files:
+        return {'success': False, 'error': 'No files provided'}
+    
+    # CR-002: Upload to existing folder if target_folder provided
+    if target_folder:
+        folder_path = self.ideas_root / target_folder
+        if not folder_path.exists():
+            return {
+                'success': False,
+                'error': f"Target folder '{target_folder}' does not exist"
+            }
+        folder_name = target_folder
+    else:
+        # Original behavior: create new timestamped folder
+        if date is None:
+            date = datetime.now().strftime('%m%d%Y %H%M%S')
+        base_name = f'Draft Idea - {date}'
+        folder_name = self._generate_unique_name(base_name)
+        folder_path = self.ideas_root / folder_name
+        folder_path.mkdir(parents=True, exist_ok=True)
+    
+    # Save files to folder
+    uploaded_files = []
+    for filename, content in files:
+        file_path = folder_path / filename
+        file_path.write_bytes(content)
+        uploaded_files.append(filename)
+    
+    return {
+        'success': True,
+        'folder_name': folder_name,
+        'folder_path': str(folder_path.relative_to(self.project_root)),
+        'files_uploaded': uploaded_files
+    }
+```
+
+#### Backend: API Endpoint Changes
+
+```python
+@app.route('/api/ideas/upload', methods=['POST'])
+def upload_ideas():
+    """POST /api/ideas/upload - Upload files to new or existing folder"""
+    project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+    service = IdeasService(project_root)
+    
+    if 'files' not in request.files:
+        return jsonify({'success': False, 'error': 'No files provided'}), 400
+    
+    uploaded_files = request.files.getlist('files')
+    if not uploaded_files or all(f.filename == '' for f in uploaded_files):
+        return jsonify({'success': False, 'error': 'No files provided'}), 400
+    
+    # CR-002: Get optional target_folder from form data
+    target_folder = request.form.get('target_folder', None)
+    
+    # Convert to (filename, content) tuples
+    files = []
+    for f in uploaded_files:
+        if f.filename:
+            files.append((f.filename, f.read()))
+    
+    result = service.upload(files, target_folder=target_folder)
+    
+    if result.get('success'):
+        return jsonify(result)
+    else:
+        return jsonify(result), 400
+```
+
+#### Frontend: WorkplaceManager._setupFolderDragDrop()
+
+```javascript
+/**
+ * Setup drag-drop handlers on folder nodes in the tree
+ * Called after tree render
+ */
+_setupFolderDragDrop() {
+    const folderNodes = document.querySelectorAll('.idea-folder-node');
+    
+    folderNodes.forEach(node => {
+        const folderName = node.dataset.folderName;
+        
+        // Prevent default to allow drop
+        node.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            node.classList.add('drop-target');
+        });
+        
+        node.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            node.classList.remove('drop-target');
+        });
+        
+        node.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            node.classList.remove('drop-target');
+            
+            if (e.dataTransfer.files.length > 0) {
+                await this._uploadToFolder(e.dataTransfer.files, folderName);
+            }
+        });
+    });
+}
+```
+
+#### Frontend: WorkplaceManager._uploadToFolder()
+
+```javascript
+/**
+ * Upload files to a specific existing folder
+ * @param {FileList} files - Files to upload
+ * @param {string} folderName - Target folder name
+ */
+async _uploadToFolder(files, folderName) {
+    try {
+        const formData = new FormData();
+        for (const file of files) {
+            formData.append('files', file);
+        }
+        formData.append('target_folder', folderName);
+        
+        const response = await fetch('/api/ideas/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            this._showToast(
+                `Uploaded ${result.files_uploaded.length} file(s) to ${folderName}`,
+                'success'
+            );
+            await this.loadTree();
+        } else {
+            this._showToast(result.error || 'Upload failed', 'error');
+        }
+    } catch (error) {
+        console.error('Upload to folder failed:', error);
+        this._showToast('Upload failed: ' + error.message, 'error');
+    }
+}
+```
+
+### Tree Node HTML Structure
+
+```html
+<!-- Folder node with drag-drop support -->
+<div class="tree-item idea-folder-node" 
+     data-folder-name="mobile-app-idea"
+     data-path="docs/ideas/mobile-app-idea">
+    <span class="tree-toggle" onclick="toggleFolder(this)">
+        <i class="bi bi-chevron-right"></i>
+    </span>
+    <i class="bi bi-folder2"></i>
+    <span class="tree-name">mobile-app-idea</span>
+</div>
+```
+
+### Edge Cases
+
+| Scenario | Behavior |
+|----------|----------|
+| Drop on file node | Ignored (only folders are drop targets) |
+| Drop on tree root/empty space | Ignored (must target specific folder) |
+| Target folder deleted during drag | Error toast: "Target folder does not exist" |
+| Drop same-named file | Overwrites existing file in folder |
+| Drop multiple files | All files uploaded to same folder |
+| Network error | Error toast with message, tree not refreshed |
+
+---
+
 ## Design Change Log
 
 | Date | Phase | Change Summary |
 |------|-------|----------------|
+| 01-23-2026 | CR-003 | Added Ideation Toolbox: IdeasService.get_toolbox() and save_toolbox() for config persistence, /api/ideas/toolbox endpoints, WorkplaceManager toolbox dropdown with sections and checkboxes, bidirectional state sync with .ideation-tools.json |
+| 01-23-2026 | CR-002 | Added drag-drop upload to existing folders: IdeasService.upload() accepts target_folder, API extracts from form data, frontend handles dragover/drop on folder nodes with visual feedback |
 | 01-22-2026 | CR-001 | Added Copilot button integration: terminal panel expand, Copilot mode detection, typing simulation, refine command automation |
 | 01-22-2026 | Initial Design | Initial technical design for FEATURE-008: Workplace (Idea Management). Two-column layout with IdeasService backend, auto-save editor, drag-drop upload, and inline folder rename. |
 | 01-23-2026 | Refactoring | Updated file paths: `src/services.py` split into `src/services/` package. IdeasService now in `src/services/ideas_service.py`, FileNode in `src/services/file_service.py`. Imports via `from src.services import X` still work due to `__init__.py` re-exports. |
 
 ---
+
+## CR-003: Ideation Toolbox Configuration
+
+### Overview
+
+Add "Ideation Toolbox" button beside "Create Idea" that opens a dropdown panel with 3 sections containing tool checkboxes. State persists to `.ideation-tools.json` in the ideas folder root.
+
+### Workflow Diagram
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant W as WorkplaceManager
+    participant A as Flask API
+    participant I as IdeasService
+    participant FS as FileSystem
+
+    Note over U,FS: Initial Load (Workplace)
+    U->>W: Click Workplace
+    W->>A: GET /api/ideas/toolbox
+    A->>I: get_toolbox()
+    I->>FS: Read .ideation-tools.json
+    alt File exists
+        FS-->>I: JSON content
+    else File not exists
+        I->>I: Return defaults
+    end
+    I-->>A: Config object
+    A-->>W: JSON response
+    W->>W: Update checkbox states
+
+    Note over U,FS: Checkbox Toggle
+    U->>W: Toggle checkbox
+    W->>W: Update UI immediately
+    W->>A: POST /api/ideas/toolbox
+    A->>I: save_toolbox(config)
+    I->>FS: Write .ideation-tools.json
+    FS-->>I: Success
+    I-->>A: {success: true}
+    A-->>W: 200 OK
+```
+
+### JSON File Schema
+
+**File:** `docs/ideas/.ideation-tools.json`
+
+```json
+{
+    "version": "1.0",
+    "ideation": {
+        "antv-infographic": false,
+        "mermaid": true
+    },
+    "mockup": {
+        "frontend-design": true
+    },
+    "sharing": {}
+}
+```
+
+### Backend: IdeasService Methods
+
+```python
+# Add to src/services/ideas_service.py
+
+TOOLBOX_FILE = '.ideation-tools.json'
+DEFAULT_TOOLBOX = {
+    "version": "1.0",
+    "ideation": {
+        "antv-infographic": False,
+        "mermaid": True
+    },
+    "mockup": {
+        "frontend-design": True
+    },
+    "sharing": {}
+}
+
+def get_toolbox(self) -> dict:
+    """
+    Read toolbox configuration from JSON file.
+    Returns defaults if file doesn't exist.
+    """
+    toolbox_path = self.ideas_root / TOOLBOX_FILE
+    if toolbox_path.exists():
+        try:
+            with open(toolbox_path, 'r') as f:
+                return json.load(f)
+        except (json.JSONDecodeError, IOError):
+            return DEFAULT_TOOLBOX.copy()
+    return DEFAULT_TOOLBOX.copy()
+
+def save_toolbox(self, config: dict) -> dict:
+    """
+    Save toolbox configuration to JSON file.
+    Creates file if not exists.
+    """
+    toolbox_path = self.ideas_root / TOOLBOX_FILE
+    try:
+        # Ensure ideas directory exists
+        self.ideas_root.mkdir(parents=True, exist_ok=True)
+        with open(toolbox_path, 'w') as f:
+            json.dump(config, f, indent=2)
+        return {'success': True}
+    except IOError as e:
+        return {'success': False, 'error': str(e)}
+```
+
+### Backend: API Endpoints
+
+```python
+# Add to src/app.py
+
+@app.route('/api/ideas/toolbox', methods=['GET'])
+def get_ideas_toolbox():
+    """Get ideation toolbox configuration"""
+    ideas_service = IdeasService(get_project_root())
+    config = ideas_service.get_toolbox()
+    return jsonify(config)
+
+@app.route('/api/ideas/toolbox', methods=['POST'])
+def save_ideas_toolbox():
+    """Save ideation toolbox configuration"""
+    ideas_service = IdeasService(get_project_root())
+    config = request.json
+    result = ideas_service.save_toolbox(config)
+    return jsonify(result)
+```
+
+### Frontend: Button and Dropdown HTML
+
+```html
+<!-- Add to workplace controls (index.html) next to Create Idea button -->
+<div class="btn-group">
+    <button id="create-idea-btn" class="btn btn-sm btn-outline-primary">
+        <i class="bi bi-plus-lg"></i> Create Idea
+    </button>
+    <div class="dropdown">
+        <button id="toolbox-btn" class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-tools"></i> Ideation Toolbox
+        </button>
+        <div class="dropdown-menu toolbox-menu p-3" style="min-width: 250px;">
+            <!-- Section 1: Ideation -->
+            <h6 class="dropdown-header">
+                <i class="bi bi-lightbulb"></i> Ideation
+            </h6>
+            <div class="form-check">
+                <input class="form-check-input toolbox-checkbox" type="checkbox" 
+                       id="tool-antv-infographic" data-section="ideation" data-tool="antv-infographic">
+                <label class="form-check-label" for="tool-antv-infographic">
+                    AntV Infographic
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input toolbox-checkbox" type="checkbox" 
+                       id="tool-mermaid" data-section="ideation" data-tool="mermaid" checked>
+                <label class="form-check-label" for="tool-mermaid">
+                    Mermaid Diagrams
+                </label>
+            </div>
+            
+            <div class="dropdown-divider"></div>
+            
+            <!-- Section 2: Mockup -->
+            <h6 class="dropdown-header">
+                <i class="bi bi-brush"></i> Mockup
+            </h6>
+            <div class="form-check">
+                <input class="form-check-input toolbox-checkbox" type="checkbox" 
+                       id="tool-frontend-design" data-section="mockup" data-tool="frontend-design" checked>
+                <label class="form-check-label" for="tool-frontend-design">
+                    Frontend Design
+                </label>
+            </div>
+            
+            <div class="dropdown-divider"></div>
+            
+            <!-- Section 3: Sharing -->
+            <h6 class="dropdown-header">
+                <i class="bi bi-share"></i> Sharing
+            </h6>
+            <p class="text-muted small mb-0 px-2">Coming soon...</p>
+        </div>
+    </div>
+</div>
+```
+
+### Frontend: JavaScript Handler
+
+```javascript
+// Add to WorkplaceManager class in app.js
+
+_initToolbox() {
+    // Load initial state
+    this._loadToolboxState();
+    
+    // Bind checkbox change handlers
+    document.querySelectorAll('.toolbox-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', () => this._onToolboxChange());
+    });
+}
+
+async _loadToolboxState() {
+    try {
+        const response = await fetch('/api/ideas/toolbox');
+        const config = await response.json();
+        this.toolboxConfig = config;
+        
+        // Update checkboxes to match config
+        for (const [section, tools] of Object.entries(config)) {
+            if (typeof tools === 'object' && section !== 'version') {
+                for (const [tool, enabled] of Object.entries(tools)) {
+                    const checkbox = document.querySelector(
+                        `.toolbox-checkbox[data-section="${section}"][data-tool="${tool}"]`
+                    );
+                    if (checkbox) {
+                        checkbox.checked = enabled;
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Failed to load toolbox config:', error);
+    }
+}
+
+async _onToolboxChange() {
+    // Build config from current checkbox states
+    const config = {
+        version: '1.0',
+        ideation: {},
+        mockup: {},
+        sharing: {}
+    };
+    
+    document.querySelectorAll('.toolbox-checkbox').forEach(checkbox => {
+        const section = checkbox.dataset.section;
+        const tool = checkbox.dataset.tool;
+        config[section][tool] = checkbox.checked;
+    });
+    
+    // Save to backend
+    await this._saveToolboxState(config);
+}
+
+async _saveToolboxState(config) {
+    try {
+        const response = await fetch('/api/ideas/toolbox', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(config)
+        });
+        const result = await response.json();
+        if (!result.success) {
+            console.error('Failed to save toolbox config:', result.error);
+        }
+    } catch (error) {
+        console.error('Failed to save toolbox config:', error);
+    }
+}
+```
+
+### Edge Cases
+
+| Scenario | Behavior |
+|----------|----------|
+| `.ideation-tools.json` doesn't exist | Return/use defaults (mermaid: true, frontend-design: true) |
+| Invalid JSON in file | Return defaults |
+| Missing section in JSON | Preserve existing, fill missing with defaults |
+| Checkbox toggled rapidly | Each change triggers save (debounce optional) |
+| Network error on save | Log error, UI remains updated |
+| ideas folder doesn't exist | Create folder when saving config |

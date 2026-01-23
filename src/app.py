@@ -612,9 +612,10 @@ def register_ideas_routes(app):
         """
         POST /api/ideas/upload
         
-        Upload files to a new idea folder.
+        Upload files to a new or existing idea folder.
         
         Request: multipart/form-data with 'files' field
+        Optional: 'target_folder' field to upload to existing folder (CR-002)
         
         Response:
             - success: true/false
@@ -638,10 +639,13 @@ def register_ideas_routes(app):
                 'error': 'No files provided'
             }), 400
         
+        # CR-002: Get optional target_folder from form data
+        target_folder = request.form.get('target_folder', None)
+        
         # Convert to (filename, content) tuples
         files = [(f.filename, f.read()) for f in uploaded_files if f.filename]
         
-        result = service.upload(files)
+        result = service.upload(files, target_folder=target_folder)
         
         if result['success']:
             return jsonify(result)
@@ -723,6 +727,51 @@ def register_ideas_routes(app):
             }), 400
         
         result = service.delete_item(path)
+        
+        if result['success']:
+            return jsonify(result)
+        return jsonify(result), 400
+    
+    @app.route('/api/ideas/toolbox', methods=['GET'])
+    def get_ideas_toolbox():
+        """
+        GET /api/ideas/toolbox
+        
+        Get ideation toolbox configuration.
+        
+        Response:
+            - version: string
+            - ideation: {antv-infographic: bool, mermaid: bool}
+            - mockup: {frontend-design: bool}
+            - sharing: {}
+        """
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        service = IdeasService(project_root)
+        
+        config = service.get_toolbox()
+        return jsonify(config)
+    
+    @app.route('/api/ideas/toolbox', methods=['POST'])
+    def save_ideas_toolbox():
+        """
+        POST /api/ideas/toolbox
+        
+        Save ideation toolbox configuration.
+        
+        Request body:
+            - version: string
+            - ideation: {antv-infographic: bool, mermaid: bool}
+            - mockup: {frontend-design: bool}
+            - sharing: {}
+        
+        Response:
+            - success: true/false
+        """
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        service = IdeasService(project_root)
+        
+        config = request.get_json()
+        result = service.save_toolbox(config)
         
         if result['success']:
             return jsonify(result)

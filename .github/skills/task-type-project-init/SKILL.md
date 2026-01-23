@@ -31,6 +31,14 @@ Set up or onboard to a project with consistent folder structure and documentatio
 
 ---
 
+## Task Type Required Input Attributes
+
+| Attribute | Default Value |
+|-----------|---------------|
+| Auto Proceed | False |
+
+---
+
 ## Skill Output
 
 This skill MUST return these attributes to the Task Data Model:

@@ -29,10 +29,18 @@ Execute **Human Playground** tasks by:
 | Attribute | Value |
 |-----------|-------|
 | Task Type | Human Playground |
-| Category | feature-stage |
-| Next Task Type | Feature Closing |
+| Category | Standalone |
+| Next Task Type | - |
 | Require Human Review | Yes |
 | Feature Phase | Human Playground |
+
+---
+
+## Task Type Required Input Attributes
+
+| Attribute | Default Value |
+|-----------|---------------|
+| Auto Proceed | False |
 
 ---
 
@@ -43,12 +51,12 @@ This skill MUST return these attributes to the Task Data Model:
 ```yaml
 Output:
   status: completed | blocked
-  next_task_type: Feature Closing
+  next_task_type: null
   require_human_review: Yes
   task_output_links: [docs/playground/]
   
-  # Feature stage dynamic attributes (REQUIRED)
-  category: feature-stage
+  # Standalone task attributes
+  category: Standalone
   feature_id: FEATURE-XXX
   feature_title: {title}
   feature_version: {version}
@@ -200,9 +208,9 @@ Upon completion, return:
 ```yaml
 feature_id: {Feature ID}
 feature_status: {In|Done} {Feature Phase}
-category: {Category}
-next_task_type: {Next Task Type}
-require_human_review: {Require Human Review}
+category: Standalone
+next_task_type: null
+require_human_review: Yes
 task_output_links:
   - playground/playground_{feature_name}.py
   - playground/tests/test_playground_{feature_name}.py
@@ -367,8 +375,8 @@ rl.on('line', async (input) => {
 7. Return Task Completion Output:
    feature_id: FEATURE-002
    feature_status: Done Human Playground
-   category: feature-stage
-   next_task_type: Feature Closing
+   category: Standalone
+   next_task_type: null
    require_human_review: Yes
    task_output_links:
      - playground/playground_auth.py

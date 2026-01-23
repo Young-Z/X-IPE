@@ -33,9 +33,75 @@ Learn and refine user ideas through collaborative brainstorming by:
 | Task Type | Ideation |
 | Category | ideation-stage |
 | Standalone | No |
-| Next Task | Share Idea or Requirement Gathering |
+| Next Task | Idea Mockup |
 | Auto-advance | No |
 | Human Review | Yes |
+
+---
+
+## Task Type Required Input Attributes
+
+| Attribute | Default Value |
+|-----------|---------------|
+| Auto Proceed | False |
+| Ideation Toolbox Meta | `{project_root}/docs/ideas/.ideation-tools.json` |
+
+### Ideation Toolbox Meta File
+
+**Location:** `docs/ideas/.ideation-tools.json` (relative to project root)
+
+**Purpose:** Defines which tools are enabled for ideation, mockup creation, and idea sharing.
+
+**Format:**
+```json
+{
+  "version": "1.0",
+  "ideation": {
+    "antv-infographic": false,
+    "mermaid": true
+  },
+  "mockup": {
+    "frontend-design": true
+  },
+  "sharing": {}
+}
+```
+
+**Configuration Sections:**
+
+| Section | Purpose | Example Tools |
+|---------|---------|---------------|
+| `ideation` | Visual representation during brainstorming | `antv-infographic`, `mermaid` |
+| `mockup` | UI/UX mockup creation | `frontend-design`, `figma-mcp` |
+| `sharing` | Export/share idea artifacts | `pptx-export`, `pdf-export` |
+
+**Tool Loading Rules:**
+
+1. **File exists:** Load and parse the JSON configuration
+2. **File missing:** 
+   - Create default file with all tools set to `false`
+   - Inform user: "No ideation tools configured. Create `.ideation-tools.json` to enable tools."
+3. **Tool enabled (`true`):** Attempt to use the tool during ideation
+4. **Tool disabled (`false`):** Skip the tool
+5. **Tool unavailable:** Log limitation and proceed without it
+
+### Tool Behavior by Section
+
+When tools are enabled in the meta file, the agent MUST attempt to use them during the ideation process:
+
+| Tool Type | When to Use | Example Tools |
+|-----------|-------------|---------------|
+| Design Tools | Visual mockups, wireframes | `frontend-design`, Figma MCP |
+| Diagram Tools | Flowcharts, architecture diagrams | `mermaid`, `antv-infographic` |
+| Research Tools | Market analysis, competitor research | Web search, databases |
+| Prototyping Tools | Quick demos, proof of concepts | Code generation, no-code tools |
+
+**Usage Rules:**
+1. Read `.ideation-tools.json` at start of ideation task
+2. For each section (`ideation`, `mockup`, `sharing`), check enabled tools
+3. If tool is enabled (`true`) → Attempt to use during relevant steps
+4. If tool is unavailable or fails → Document the limitation and proceed manually
+5. Always inform user which tools are active based on config
 
 ---
 
@@ -55,22 +121,60 @@ Execute Ideation by following these steps in order:
 
 | Step | Name | Action | Gate to Next |
 |------|------|--------|--------------|
-| 1 | Analyze Files | Read all files in idea folder | Files analyzed |
-| 2 | Generate Summary | Create understanding summary for user | Summary shared |
-| 3 | Brainstorm | Ask clarifying questions (3-5 at a time) | Idea refined |
-| 4 | Research | Search for common principles if topic is established | Research complete |
-| 5 | Create Summary | Write `idea-summary-vN.md` with infographics | Summary created |
-| 6 | Complete | Request human review and approval | Human approves |
+| 1 | Load Toolbox Meta | Read `.ideation-tools.json` config | Config loaded |
+| 2 | Analyze Files | Read all files in idea folder | Files analyzed |
+| 3 | Initialize Tools | Set up enabled tools from config | Tools ready (or skipped) |
+| 4 | Generate Summary | Create understanding summary for user | Summary shared |
+| 5 | Brainstorm | Ask clarifying questions (3-5 at a time) | Idea refined |
+| 6 | Research | Search for common principles if topic is established | Research complete |
+| 7 | Create Summary | Write `idea-summary-vN.md` with infographics | Summary created |
+| 8 | Rename Folder | If folder is "Draft Idea - xxx", rename based on idea content | Folder renamed |
+| 9 | Complete | Request human review and approval | Human approves |
 
 **⛔ BLOCKING RULES:**
-- Step 3: Continue brainstorming until idea is well-defined
-- Step 6 → Human Review: Human MUST approve idea summary before proceeding
+- Step 5: Continue brainstorming until idea is well-defined
+- Step 9 → Human Review: Human MUST approve idea summary before proceeding
 
 ---
 
 ## Execution Procedure
 
-### Step 1: Locate and Analyze Idea Files
+### Step 1: Load Ideation Toolbox Meta
+
+**Action:** Read and parse the ideation tools configuration file
+
+**Default Path:** `docs/ideas/.ideation-tools.json`
+
+```
+1. Check if .ideation-tools.json exists at docs/ideas/
+2. If exists:
+   a. Parse JSON file
+   b. Validate version and structure
+   c. Extract enabled tools from each section
+3. If NOT exists:
+   a. Create default config file with all tools disabled
+   b. Inform user: "Created default .ideation-tools.json - configure tools to enable"
+4. Log active tool configuration
+```
+
+**Expected Format:**
+```json
+{
+  "version": "1.0",
+  "ideation": {
+    "antv-infographic": false,
+    "mermaid": true
+  },
+  "mockup": {
+    "frontend-design": true
+  },
+  "sharing": {}
+}
+```
+
+**Output:** Tool configuration summary showing enabled tools per section
+
+### Step 2: Locate and Analyze Idea Files
 
 **Action:** Read all files in the specified idea folder
 
@@ -83,7 +187,59 @@ Execute Ideation by following these steps in order:
 
 **Output:** Initial analysis summary
 
-### Step 2: Generate Understanding Summary
+### Step 3: Initialize Ideation Tools (Based on Config)
+
+**Action:** Set up and test tools enabled in `.ideation-tools.json`
+
+**When:** Any tool is set to `true` in the config file
+
+```
+1. For each section in config (ideation, mockup, sharing):
+   a. Identify tools with value = true
+   b. For each enabled tool:
+      - Check if tool is available (skill, MCP, API)
+      - Test basic connectivity/functionality
+      - Document tool capabilities and limitations
+2. If tool unavailable:
+   a. Log the issue
+   b. Inform user of limitation
+   c. Proceed with manual alternatives
+```
+
+**Tool Mapping & Skill Invocation:**
+
+| Config Key | Skill/Capability | How to Invoke |
+|------------|------------------|---------------|
+| `ideation.antv-infographic` | `infographic-syntax-creator` skill | Call skill to generate infographic DSL syntax |
+| `ideation.mermaid` | Mermaid code blocks | Generate mermaid diagrams directly in markdown |
+| `mockup.frontend-design` | `frontend-design` skill | Call skill to create HTML/CSS mockups |
+| `mockup.figma-mcp` | Figma MCP server | Use MCP tools for Figma integration |
+
+**Skill Invocation Rules:**
+
+```
+For each enabled tool in config:
+  IF config.ideation["antv-infographic"] == true:
+    → Load and invoke `infographic-syntax-creator` skill for visual summaries
+    → Use infographic DSL in idea-summary document
+    
+  IF config.ideation["mermaid"] == true:
+    → Generate mermaid diagrams for flowcharts, architecture
+    → Embed as ```mermaid code blocks in documents
+    
+  IF config.mockup["frontend-design"] == true:
+    → Load and invoke `frontend-design` skill during brainstorming
+    → Create interactive HTML mockups when discussing UI concepts
+    → Save mockups to docs/ideas/{folder}/mockup-vN.html (version aligned with idea-summary)
+    
+  IF config.mockup["figma-mcp"] == true:
+    → Use Figma MCP tools if available
+    → Create/update designs in connected Figma files
+```
+
+**Output:** Tools status report (enabled/disabled/unavailable)
+
+### Step 4: Generate Understanding Summary
 
 **Action:** Create a summary of what you understand from the uploaded content
 
@@ -102,13 +258,60 @@ Execute Ideation by following these steps in order:
 
 ### Questions & Ambiguities
 {What needs clarification?}
+
+### Enabled Tools (from .ideation-tools.json)
+- Ideation: {list enabled ideation tools}
+- Mockup: {list enabled mockup tools}
+- Sharing: {list enabled sharing tools}
 ```
 
 **Output:** Share summary with user for validation
 
-### Step 3: Brainstorming Session
+### Step 5: Brainstorming Session
 
 **Action:** Engage user with clarifying questions to refine the idea
+
+**Tool-Enhanced Brainstorming (Based on Config):**
+
+When tools are enabled in `.ideation-tools.json`, invoke corresponding skills during brainstorming:
+
+| Config Enabled | Skill to Invoke | When to Use |
+|----------------|-----------------|-------------|
+| `mockup.frontend-design: true` | `frontend-design` skill | User describes UI → Create HTML mockup |
+| `ideation.mermaid: true` | Mermaid syntax | User describes flow → Generate diagram |
+| `ideation.antv-infographic: true` | `infographic-syntax-creator` skill | Visualize lists, comparisons |
+
+**Example: Config-Driven Tool Usage:**
+```
+Config: { "mockup": { "frontend-design": true } }
+
+User: "I want a dashboard with charts and filters"
+Agent Action:
+  1. Ask clarifying questions about chart types, layout preferences
+  2. IF mockup.frontend-design == true:
+     → Invoke `frontend-design` skill
+     → Create interactive HTML mockup
+     → Save to docs/ideas/{folder}/mockup-vN.html (aligned with idea-summary version)
+  3. Share mockup: "I've created a mockup - does this match your vision?"
+  4. Iterate based on feedback
+```
+
+**Example: Mermaid Diagram Generation:**
+```
+Config: { "ideation": { "mermaid": true } }
+
+User: "The user flow goes from login to dashboard to settings"
+Agent Action:
+  1. IF ideation.mermaid == true:
+     → Generate mermaid flowchart
+     → Share in conversation:
+     
+     ```mermaid
+     flowchart LR
+       Login --> Dashboard --> Settings
+     ```
+  2. Ask: "Does this capture the flow correctly?"
+```
 
 **Question Categories:**
 
@@ -127,14 +330,16 @@ Execute Ideation by following these steps in order:
 - Build on previous answers
 - Challenge assumptions constructively
 - Suggest alternatives when appropriate
+- **Check config before using tools** - only invoke if enabled
 
 **Important:**
 1. This is a collaborative brainstorming session, not an interview
 2. Offer creative suggestions and perspectives
 3. Help user think through implications
 4. Continue until idea is well-defined
+5. **Invoke enabled skills** to make abstract concepts concrete
 
-### Step 4: Research Common Principles (If Applicable)
+### Step 6: Research Common Principles (If Applicable)
 
 **Action:** Identify if the idea involves common/established topics and research relevant principles
 
@@ -172,7 +377,7 @@ Execute Ideation by following these steps in order:
 
 ---
 
-### Step 5: Create Idea Summary Document
+### Step 7: Create Idea Summary Document
 
 **Action:** Create versioned summary file `docs/ideas/{folder}/idea-summary-vN.md`
 
@@ -180,166 +385,99 @@ Execute Ideation by following these steps in order:
 - Do NOT update existing idea-summary files
 - Always create a NEW versioned file: `idea-summary-v1.md`, `idea-summary-v2.md`, etc.
 - The version number auto-increments based on existing files in the folder
-- **Use infographic DSL** to visually represent key information (see Infographic Guidelines below)
+- **Use visualization tools based on config** (see `references/visualization-guide.md`)
+- **If tools were used:** Include artifacts created (mockups, prototypes) in the summary
 
-**Template:**
-```markdown
-# Idea Summary
+**Mockup Versioning:**
 
-> Idea ID: IDEA-XXX
-> Folder: {folder_name}
-> Version: vN
-> Created: {date}
-> Status: Refined
+When creating mockups, the version MUST align with the idea-summary version:
 
-## Overview
-{Brief description of the refined idea}
+```
+Naming Convention: mockup-vN.html (where N matches idea-summary-vN.md)
 
-## Problem Statement
-{What problem does this idea solve?}
+Examples:
+- idea-summary-v1.md → mockup-v1.html
+- idea-summary-v2.md → mockup-v2.html
+- idea-summary-v3.md → mockup-v3.html
 
-## Target Users
-{Who will benefit?}
-
-## Proposed Solution
-{High-level description of the solution}
-
-## Key Features
-
-{Use infographic for features list - see example below}
-
-```infographic
-infographic list-grid-badge-card
-data
-  title Key Features
-  lists
-    - label Feature 1
-      desc Description of feature 1
-      icon flash
-    - label Feature 2
-      desc Description of feature 2
-      icon shield
+Location: docs/ideas/{folder}/mockup-vN.html (same folder as idea-summary)
 ```
 
-## Success Criteria
-- [ ] Criterion 1
-- [ ] Criterion 2
-
-## Constraints & Considerations
-- Constraint 1
-- Constraint 2
-
-## Brainstorming Notes
-{Key insights from brainstorming session}
-
-## Source Files
-- file1.md
-- file2.txt
-
-## Next Steps
-- [ ] Proceed to Requirement Gathering
-
-## References & Common Principles
-{Include if the idea involves common/established topics}
-
-### Applied Principles
-- **Principle 1:** {Description} - [Source](URL)
-- **Principle 2:** {Description} - [Source](URL)
-
-### Further Reading
-- [Resource 1](URL) - {Brief description}
-- [Resource 2](URL) - {Brief description}
+**Versioning Logic:**
 ```
+1. Determine current idea-summary version (N)
+2. If creating mockup during this ideation session:
+   → Name it mockup-vN.html to match the idea-summary version
+3. If mockup-vN.html already exists:
+   → Overwrite it (mockup is tied to that idea version)
+4. Reference mockup in idea-summary-vN.md:
+   → Link: [View Mockup](./mockup-vN.html)
+```
+
+**Config-Driven Visualization:**
+
+```
+When creating idea summary, check .ideation-tools.json config:
+
+IF config.ideation["antv-infographic"] == true:
+  → Invoke `infographic-syntax-creator` skill
+  → Use infographic DSL for: feature lists, roadmaps, comparisons
+
+IF config.ideation["mermaid"] == true:
+  → Use mermaid syntax for: flowcharts, architecture, sequences
+
+IF BOTH are false:
+  → Use standard markdown (bullet lists, tables)
+```
+
+**Template:** See `templates/idea-summary.md`
+
+**Visualization Guide:** See `references/visualization-guide.md`
+
+**Output:** New versioned idea summary file and aligned mockup file (if mockup tools enabled)
 
 ---
 
-## Infographic Guidelines
+### Step 8: Rename Folder (If Draft Idea)
 
-**When to use infographics in idea summaries:**
+**Action:** If the idea folder has the default "Draft Idea" name, rename it based on the refined idea content
 
-Use the `infographic-syntax-creator` skill to generate visual representations. Embed them in markdown using fenced code blocks:
+**When to Rename:**
+- Folder name matches pattern: `Draft Idea - MMDDYYYY HHMMSS`
+- Idea has been refined and has a clear identity
 
-````markdown
-```infographic
-infographic <template-name>
-data
-  ...
+**Naming Logic:**
 ```
-````
-
-### Recommended Infographic Usage
-
-| Information Type | Recommended Template | Example Use |
-|-----------------|---------------------|-------------|
-| Feature list | `list-grid-badge-card`, `list-row-horizontal-icon-arrow` | Key Features section |
-| Process/Workflow | `sequence-snake-steps-simple`, `sequence-timeline-simple` | User journey, implementation phases |
-| Pros/Cons | `compare-binary-horizontal-badge-card-arrow` | Trade-off analysis |
-| SWOT Analysis | `compare-swot` | Strategic analysis |
-| Priority Matrix | `compare-quadrant-quarter-simple-card` | Feature prioritization |
-| Architecture | `hierarchy-tree-tech-style-badge-card` | System overview |
-| Mind Map | `hierarchy-mindmap-branch-gradient-capsule-item` | Concept exploration |
-| Metrics/KPIs | `chart-pie-compact-card`, `chart-column-simple` | Success metrics |
-
-### Infographic Examples for Ideas
-
-**Feature List:**
-```infographic
-infographic list-grid-badge-card
-data
-  title Core Features
-  lists
-    - label Fast Performance
-      desc Sub-second response times
-      icon flash
-    - label Secure by Default
-      desc End-to-end encryption
-      icon shield check
-    - label Easy Integration
-      desc REST API & SDKs
-      icon puzzle
-    - label Real-time Sync
-      desc Live collaboration
-      icon sync
+1. Check if folder name starts with "Draft Idea - "
+2. If YES:
+   a. Extract timestamp suffix (MMDDYYYY HHMMSS)
+   b. Generate idea name from:
+      - Core concept identified in brainstorming
+      - Main theme from idea summary
+      - Keep it concise (2-5 words)
+   c. Format new name: "{Idea Name} - {timestamp}"
+   d. Rename folder using filesystem/API
+   e. Update any internal references if needed
+3. If NO (already has custom name):
+   a. Skip renaming
+   b. Log: "Folder already has custom name"
 ```
 
-**Implementation Phases:**
-```infographic
-infographic sequence-roadmap-vertical-simple
-data
-  title Implementation Roadmap
-  sequences
-    - label Phase 1: MVP
-      desc Core features only
-    - label Phase 2: Beta
-      desc User testing & feedback
-    - label Phase 3: Launch
-      desc Public release
-    - label Phase 4: Scale
-      desc Performance optimization
-```
+**Naming Guidelines:**
+- Use Title Case for idea name
+- Keep name concise but descriptive (2-5 words)
+- Avoid special characters (use only alphanumeric, spaces, hyphens)
+- Preserve the original timestamp suffix
 
-**Pros/Cons Analysis:**
-```infographic
-infographic compare-binary-horizontal-badge-card-arrow
-data
-  compares
-    - label Pros
-      children
-        - label Lower cost
-        - label Faster delivery
-        - label Better UX
-    - label Cons
-      children
-        - label Learning curve
-        - label Migration effort
-```
+**Examples:**
 
-### When NOT to Use Infographics
+| Original Folder | Idea Content | New Folder Name |
+|-----------------|--------------|-----------------|
+| `Draft Idea - 01232026 143500` | Mobile app for task management | `Task Manager App - 01232026 143500` |
+| `Draft Idea - 01222026 091200` | AI-powered code review tool | `AI Code Reviewer - 01222026 091200` |
+| `Draft Idea - 01212026 160000` | E-commerce checkout optimization | `Checkout Optimizer - 01212026 160000` |
 
-- Simple bullet lists (< 3 items)
-- Highly technical specifications
-- Code examples or API documentation
-- Legal/compliance text
+**Output:** Folder renamed (or skipped if already named)
 
 ---
 
@@ -347,13 +485,18 @@ data
 
 | # | Checkpoint | Required |
 |---|------------|----------|
-| 1 | All idea files analyzed | Yes |
-| 2 | Brainstorming session completed | Yes |
-| 3 | Common principles researched (if topic is common/established) | If Applicable |
-| 4 | `docs/ideas/{folder}/idea-summary-vN.md` created (versioned) | Yes |
-| 5 | Infographics used for visual elements where appropriate | Recommended |
-| 6 | References included for researched principles | If Applicable |
-| 7 | Human has reviewed and approved idea summary | Yes |
+| 1 | `.ideation-tools.json` loaded and parsed | Yes |
+| 2 | All idea files analyzed | Yes |
+| 3 | Enabled tools initialized (based on config) | If Tools Enabled |
+| 4 | Brainstorming session completed | Yes |
+| 5 | Enabled skills invoked during brainstorming | If Tools Enabled |
+| 6 | Common principles researched (if topic is common/established) | If Applicable |
+| 7 | `docs/ideas/{folder}/idea-summary-vN.md` created (versioned) | Yes |
+| 8 | Visualization used based on config (infographic/mermaid) | If Tools Enabled |
+| 9 | Ideation artifacts documented (mockups, prototypes) | If Mockup Tools Used |
+| 10 | Folder renamed if "Draft Idea - xxx" pattern | If Applicable |
+| 11 | References included for researched principles | If Applicable |
+| 12 | Human has reviewed and approved idea summary | Yes |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
 
@@ -366,10 +509,13 @@ Upon completion, return:
 idea_id: IDEA-XXX
 idea_status: Refined
 idea_version: vN
-next_task_type: Requirement Gathering
+idea_folder: {new folder name if renamed, otherwise original}
+folder_renamed: true | false
+next_task_type: Idea Mockup
 require_human_review: true
 task_output_links:
   - docs/ideas/{folder}/idea-summary-vN.md
+  - docs/ideas/{folder}/mockup-vN.html  # if mockup tools enabled
 ```
 
 ---
@@ -431,7 +577,9 @@ task_output_links:
 | Accepting everything at face value | May miss issues | Challenge assumptions constructively |
 | Skipping to requirements | Idea not refined | Complete ideation first |
 | Being passive | Not collaborative | Offer suggestions actively |
-| Plain text for everything | Harder to scan visually | Use infographics for lists, flows, comparisons |
+| Ignoring `.ideation-tools.json` | Misses tool capabilities | Always check config first |
+| Using tools when disabled in config | Unexpected behavior | Respect config settings |
+| Plain text when visualization enabled | Harder to scan visually | Use configured tools (infographic/mermaid) |
 
 ---
 
@@ -439,34 +587,105 @@ task_output_links:
 
 **Scenario:** User uploads business plan draft to `docs/ideas/mobile-app-idea/files/`
 
+**Config File:** `docs/ideas/.ideation-tools.json`
+```json
+{
+  "version": "1.0",
+  "ideation": {
+    "antv-infographic": true,
+    "mermaid": true
+  },
+  "mockup": {
+    "frontend-design": true
+  },
+  "sharing": {}
+}
+```
+
 **Execution:**
 ```
 1. Execute Task Flow from task-execution-guideline skill
 
-2. Analyze Files:
+2. Load Toolbox Meta:
+   - Read docs/ideas/.ideation-tools.json
+   - Enabled tools:
+     - ideation.antv-infographic: true → will invoke infographic-syntax-creator
+     - ideation.mermaid: true → will use mermaid diagrams
+     - mockup.frontend-design: true → will invoke frontend-design skill
+
+3. Analyze Files:
    - Read business-plan.md
    - Read user-research.txt
    - Read competitor-notes.md
 
-3. Generate Summary:
+4. Initialize Tools:
+   - infographic-syntax-creator skill → Available
+   - mermaid capability → Available  
+   - frontend-design skill → Available
+   - Status: All enabled tools ready
+
+5. Generate Summary:
    "I understand you want to build a mobile app for..."
+   "Enabled tools: antv-infographic, mermaid (visualization), frontend-design (mockups)"
    
-4. Brainstorming Questions:
+6. Brainstorming Questions (with Config-Driven Tool Usage):
    - "Your notes mention both iOS and Android - should v1 target both?"
    - "The user research shows two distinct personas - which is primary?"
-   - "Have you considered a web-first approach instead?"
+   - User describes dashboard flow:
+     → config.ideation.mermaid == true
+     → Generate mermaid flowchart to visualize
+   - User wants to see dashboard layout:
+     → config.mockup.frontend-design == true  
+     → Invoke frontend-design skill
+     → Create HTML mockup, save to docs/ideas/mobile-app-idea/mockup-v1.html
+   - Share mockup: "Does this layout match your vision?"
+   - Iterate based on feedback
 
-5. Research Common Principles (if applicable):
+7. Research Common Principles (if applicable):
    - Mobile app → Research: Mobile UX best practices, offline-first patterns
    - User auth → Research: OAuth 2.0, biometric auth standards
    - Document sources for references section
 
-6. Create docs/ideas/mobile-app-idea/idea-summary-v1.md with:
+8. Create docs/ideas/mobile-app-idea/idea-summary-v1.md with:
    - Overview and problem statement (text)
-   - Key Features (infographic: list-grid-badge-card)
+   - Key Features (config.ideation.antv-infographic == true → use infographic: list-grid-badge-card)
+   - User Flow (config.ideation.mermaid == true → use mermaid flowchart)
    - Implementation Phases (infographic: sequence-roadmap-vertical-simple)
    - Platform Comparison (infographic: compare-binary-horizontal-badge-card-arrow)
+   - Ideation Artifacts section with link to mockups created
    - References & Common Principles section with researched sources
 
-7. Resume Task Flow from task-execution-guideline skill
+9. Resume Task Flow from task-execution-guideline skill
 ```
+
+**Example WITHOUT Tools (All Disabled):**
+
+**Config File:** `docs/ideas/.ideation-tools.json`
+```json
+{
+  "version": "1.0",
+  "ideation": {
+    "antv-infographic": false,
+    "mermaid": false
+  },
+  "mockup": {
+    "frontend-design": false
+  },
+  "sharing": {}
+}
+```
+
+**Execution:** 
+- Skip Step 4 (Initialize Tools) - no tools enabled
+- Proceed with standard brainstorming without creating visual artifacts
+- Use standard markdown (bullet lists, tables) in idea summary
+
+---
+
+## Skill Resources
+
+| Resource | Path | Description |
+|----------|------|-------------|
+| Idea Summary Template | `templates/idea-summary.md` | Template for creating idea summary documents |
+| Ideation Tools Config | `templates/ideation-tools.json` | Default config for `.ideation-tools.json` |
+| Visualization Guide | `references/visualization-guide.md` | Detailed guide for infographic and mermaid usage |

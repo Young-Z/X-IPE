@@ -36,6 +36,14 @@ Execute **Feature Closing** tasks by:
 
 ---
 
+## Task Type Required Input Attributes
+
+| Attribute | Default Value |
+|-----------|---------------|
+| Auto Proceed | False |
+
+---
+
 ## Skill Output
 
 This skill MUST return these attributes to the Task Data Model:
@@ -61,8 +69,8 @@ Output:
 
 | # | Checkpoint | Required |
 |---|------------|----------|
-| 1 | Human has tested playground | Yes |
-| 2 | Feature status is "Done Human Playground" | Yes |
+| 1 | Code implementation complete | Yes |
+| 2 | Feature status is "Implemented" | Yes |
 | 3 | All tests passing | Yes |
 
 ---
@@ -311,8 +319,8 @@ task_output_links:
 1. Execute Task Flow from task-execution-guideline skill
 
 2. DoR Check:
-   - Human tested playground ✓
-   - Feature status: Done Human Playground ✓
+   - Code implementation complete ✓
+   - Feature status: Implemented ✓
    - Tests passing ✓
 
 3. Step 1 - Verify Criteria:

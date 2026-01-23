@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "ideation": {
+    "antv-infographic": true,
+    "mermaid": false
+  },
+  "mockup": {
+    "frontend-design": true
+  },
+  "sharing": {}
+}

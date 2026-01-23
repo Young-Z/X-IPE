@@ -255,6 +255,102 @@ class TestIdeasServiceUpload:
 
 
 # ============================================================================
+# IdeasService Unit Tests - upload() with target_folder (CR-002)
+# ============================================================================
+
+class TestIdeasServiceUploadToExistingFolder:
+    """Unit tests for IdeasService.upload() with target_folder parameter (CR-002)"""
+
+    def test_upload_to_existing_folder_success(self, ideas_service_populated, populated_ideas_dir):
+        """upload() with target_folder saves files to existing folder"""
+        files = [('extra.md', b'# Extra content')]
+        
+        result = ideas_service_populated.upload(files, target_folder='mobile-app-idea')
+        
+        assert result['success'] is True
+        assert result['folder_name'] == 'mobile-app-idea'
+        file_path = populated_ideas_dir / 'mobile-app-idea' / 'extra.md'
+        assert file_path.exists()
+
+    def test_upload_to_existing_folder_preserves_existing_files(self, ideas_service_populated, populated_ideas_dir):
+        """upload() with target_folder does not overwrite existing files"""
+        files = [('newfile.md', b'# New file')]
+        
+        ideas_service_populated.upload(files, target_folder='mobile-app-idea')
+        
+        # Original files should still exist
+        files_dir = populated_ideas_dir / 'mobile-app-idea' / 'files'
+        assert (files_dir / 'notes.md').exists()
+        assert (files_dir / 'sketch.txt').exists()
+
+    def test_upload_to_existing_folder_returns_correct_path(self, ideas_service_populated, populated_ideas_dir):
+        """upload() with target_folder returns correct folder_path"""
+        files = [('test.md', b'# Test')]
+        
+        result = ideas_service_populated.upload(files, target_folder='mobile-app-idea')
+        
+        assert 'docs/ideas/mobile-app-idea' in result['folder_path']
+
+    def test_upload_to_nonexistent_folder_fails(self, ideas_service_populated, populated_ideas_dir):
+        """upload() with nonexistent target_folder returns error"""
+        files = [('test.md', b'# Test')]
+        
+        result = ideas_service_populated.upload(files, target_folder='nonexistent-folder')
+        
+        assert result['success'] is False
+        assert 'does not exist' in result['error']
+
+    def test_upload_to_existing_folder_multiple_files(self, ideas_service_populated, populated_ideas_dir):
+        """upload() with target_folder handles multiple files"""
+        files = [
+            ('file1.md', b'Content 1'),
+            ('file2.txt', b'Content 2')
+        ]
+        
+        result = ideas_service_populated.upload(files, target_folder='mobile-app-idea')
+        
+        assert result['success'] is True
+        assert len(result['files_uploaded']) == 2
+        assert (populated_ideas_dir / 'mobile-app-idea' / 'file1.md').exists()
+        assert (populated_ideas_dir / 'mobile-app-idea' / 'file2.txt').exists()
+
+    def test_upload_to_existing_folder_overwrites_same_name_file(self, ideas_service_populated, populated_ideas_dir):
+        """upload() with target_folder overwrites file with same name"""
+        # First, create a file in the folder
+        folder_path = populated_ideas_dir / 'mobile-app-idea'
+        (folder_path / 'overwrite.md').write_bytes(b'Original content')
+        
+        # Upload file with same name
+        files = [('overwrite.md', b'New content')]
+        result = ideas_service_populated.upload(files, target_folder='mobile-app-idea')
+        
+        assert result['success'] is True
+        assert (folder_path / 'overwrite.md').read_bytes() == b'New content'
+
+    def test_upload_without_target_folder_still_creates_new(self, ideas_service_populated, populated_ideas_dir):
+        """upload() without target_folder creates new folder (existing behavior)"""
+        files = [('test.md', b'# Test')]
+        
+        result = ideas_service_populated.upload(files)  # No target_folder
+        
+        assert result['success'] is True
+        assert result['folder_name'].startswith('Draft Idea - ')
+        # Should create new folder, not use existing
+        assert result['folder_name'] != 'mobile-app-idea'
+
+    def test_upload_to_existing_folder_binary_files(self, ideas_service_populated, populated_ideas_dir):
+        """upload() with target_folder handles binary files"""
+        binary_content = bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])  # PNG header
+        files = [('image.png', binary_content)]
+        
+        result = ideas_service_populated.upload(files, target_folder='mobile-app-idea')
+        
+        assert result['success'] is True
+        file_path = populated_ideas_dir / 'mobile-app-idea' / 'image.png'
+        assert file_path.read_bytes() == binary_content
+
+
+# ============================================================================
 # IdeasService Unit Tests - rename_folder()
 # ============================================================================
 
@@ -435,6 +531,92 @@ class TestIdeasUploadAPI:
         
         assert result['success'] is False
         assert 'no files' in result['error'].lower()
+
+
+# ============================================================================
+# API Tests - POST /api/ideas/upload with target_folder (CR-002)
+# ============================================================================
+
+class TestIdeasUploadToFolderAPI:
+    """API tests for POST /api/ideas/upload with target_folder parameter (CR-002)"""
+
+    def test_upload_to_existing_folder_returns_200(self, populated_client):
+        """POST /api/ideas/upload with target_folder returns 200 OK"""
+        data = {
+            'files': (BytesIO(b'test content'), 'test.md'),
+            'target_folder': 'mobile-app-idea'
+        }
+        response = populated_client.post('/api/ideas/upload', data=data, content_type='multipart/form-data')
+        
+        assert response.status_code == 200
+
+    def test_upload_to_existing_folder_returns_correct_folder_name(self, populated_client):
+        """POST /api/ideas/upload with target_folder returns target folder name"""
+        data = {
+            'files': (BytesIO(b'test content'), 'test.md'),
+            'target_folder': 'mobile-app-idea'
+        }
+        response = populated_client.post('/api/ideas/upload', data=data, content_type='multipart/form-data')
+        result = json.loads(response.data)
+        
+        assert result['success'] is True
+        assert result['folder_name'] == 'mobile-app-idea'
+
+    def test_upload_to_existing_folder_creates_file(self, populated_client, temp_project_dir):
+        """POST /api/ideas/upload with target_folder creates file in existing folder"""
+        data = {
+            'files': (BytesIO(b'test content'), 'newfile.md'),
+            'target_folder': 'mobile-app-idea'
+        }
+        response = populated_client.post('/api/ideas/upload', data=data, content_type='multipart/form-data')
+        result = json.loads(response.data)
+        
+        assert result['success'] is True
+        file_path = Path(temp_project_dir) / 'docs' / 'ideas' / 'mobile-app-idea' / 'newfile.md'
+        assert file_path.exists()
+
+    def test_upload_to_nonexistent_folder_returns_error(self, populated_client):
+        """POST /api/ideas/upload with nonexistent target_folder returns 400"""
+        data = {
+            'files': (BytesIO(b'test content'), 'test.md'),
+            'target_folder': 'does-not-exist'
+        }
+        response = populated_client.post('/api/ideas/upload', data=data, content_type='multipart/form-data')
+        result = json.loads(response.data)
+        
+        assert response.status_code == 400
+        assert result['success'] is False
+        assert 'does not exist' in result['error']
+
+    def test_upload_to_existing_folder_multiple_files(self, populated_client, temp_project_dir):
+        """POST /api/ideas/upload with target_folder handles multiple files"""
+        data = {
+            'files': [
+                (BytesIO(b'content 1'), 'file1.md'),
+                (BytesIO(b'content 2'), 'file2.txt')
+            ],
+            'target_folder': 'mobile-app-idea'
+        }
+        response = populated_client.post('/api/ideas/upload', data=data, content_type='multipart/form-data')
+        result = json.loads(response.data)
+        
+        assert result['success'] is True
+        assert len(result['files_uploaded']) == 2
+        assert (Path(temp_project_dir) / 'docs' / 'ideas' / 'mobile-app-idea' / 'file1.md').exists()
+        assert (Path(temp_project_dir) / 'docs' / 'ideas' / 'mobile-app-idea' / 'file2.txt').exists()
+
+    def test_upload_without_target_folder_creates_new_folder(self, populated_client, temp_project_dir):
+        """POST /api/ideas/upload without target_folder creates new folder (existing behavior)"""
+        data = {
+            'files': (BytesIO(b'test content'), 'test.md')
+            # No target_folder
+        }
+        response = populated_client.post('/api/ideas/upload', data=data, content_type='multipart/form-data')
+        result = json.loads(response.data)
+        
+        assert result['success'] is True
+        assert result['folder_name'].startswith('Draft Idea - ')
+        assert result['folder_name'] != 'mobile-app-idea'
 
 
 # ============================================================================
@@ -990,3 +1172,328 @@ class TestCopilotButtonEdgeCases:
             command = f'refine the idea {path}'
             assert path in command
             # Path is sent as-is, shell will handle quoting if needed
+
+
+# ============================================================================
+# CR-003: Ideation Toolbox Configuration - Unit Tests
+# ============================================================================
+
+class TestIdeasServiceToolbox:
+    """Unit tests for IdeasService toolbox methods (CR-003)"""
+    
+    def test_get_toolbox_returns_defaults_when_file_not_exists(self, temp_project_dir):
+        """
+        CR-003: get_toolbox() returns default config when .ideation-tools.json doesn't exist.
+        """
+        from src.services import IdeasService
+        
+        service = IdeasService(temp_project_dir)
+        config = service.get_toolbox()
+        
+        assert config['version'] == '1.0'
+        assert config['ideation']['antv-infographic'] is False
+        assert config['ideation']['mermaid'] is True
+        assert config['mockup']['frontend-design'] is True
+        assert config['sharing'] == {}
+    
+    def test_get_toolbox_reads_existing_file(self, temp_ideas_dir, temp_project_dir):
+        """
+        CR-003: get_toolbox() reads config from existing .ideation-tools.json file.
+        """
+        from src.services import IdeasService
+        
+        # Create custom config
+        toolbox_path = temp_ideas_dir / '.ideation-tools.json'
+        custom_config = {
+            "version": "1.0",
+            "ideation": {
+                "antv-infographic": True,
+                "mermaid": False
+            },
+            "mockup": {
+                "frontend-design": False
+            },
+            "sharing": {}
+        }
+        with open(toolbox_path, 'w') as f:
+            json.dump(custom_config, f)
+        
+        service = IdeasService(temp_project_dir)
+        config = service.get_toolbox()
+        
+        assert config['ideation']['antv-infographic'] is True
+        assert config['ideation']['mermaid'] is False
+        assert config['mockup']['frontend-design'] is False
+    
+    def test_get_toolbox_returns_defaults_on_invalid_json(self, temp_ideas_dir, temp_project_dir):
+        """
+        CR-003: get_toolbox() returns defaults when JSON is invalid.
+        """
+        from src.services import IdeasService
+        
+        # Create invalid JSON file
+        toolbox_path = temp_ideas_dir / '.ideation-tools.json'
+        toolbox_path.write_text('{ invalid json }')
+        
+        service = IdeasService(temp_project_dir)
+        config = service.get_toolbox()
+        
+        # Should return defaults
+        assert config['ideation']['mermaid'] is True
+        assert config['mockup']['frontend-design'] is True
+    
+    def test_save_toolbox_creates_file(self, temp_ideas_dir, temp_project_dir):
+        """
+        CR-003: save_toolbox() creates .ideation-tools.json file.
+        """
+        from src.services import IdeasService
+        
+        service = IdeasService(temp_project_dir)
+        config = {
+            "version": "1.0",
+            "ideation": {"antv-infographic": True, "mermaid": True},
+            "mockup": {"frontend-design": False},
+            "sharing": {}
+        }
+        
+        result = service.save_toolbox(config)
+        
+        assert result['success'] is True
+        toolbox_path = temp_ideas_dir / '.ideation-tools.json'
+        assert toolbox_path.exists()
+        
+        saved_config = json.loads(toolbox_path.read_text())
+        assert saved_config['ideation']['antv-infographic'] is True
+        assert saved_config['mockup']['frontend-design'] is False
+    
+    def test_save_toolbox_updates_existing_file(self, temp_ideas_dir, temp_project_dir):
+        """
+        CR-003: save_toolbox() updates existing config file.
+        """
+        from src.services import IdeasService
+        
+        # Create initial config
+        toolbox_path = temp_ideas_dir / '.ideation-tools.json'
+        initial_config = {
+            "version": "1.0",
+            "ideation": {"antv-infographic": False, "mermaid": True},
+            "mockup": {"frontend-design": True},
+            "sharing": {}
+        }
+        with open(toolbox_path, 'w') as f:
+            json.dump(initial_config, f)
+        
+        service = IdeasService(temp_project_dir)
+        updated_config = {
+            "version": "1.0",
+            "ideation": {"antv-infographic": True, "mermaid": False},
+            "mockup": {"frontend-design": True},
+            "sharing": {}
+        }
+        
+        result = service.save_toolbox(updated_config)
+        
+        assert result['success'] is True
+        saved_config = json.loads(toolbox_path.read_text())
+        assert saved_config['ideation']['antv-infographic'] is True
+        assert saved_config['ideation']['mermaid'] is False
+    
+    def test_save_toolbox_creates_ideas_directory_if_missing(self, temp_project_dir):
+        """
+        CR-003: save_toolbox() creates docs/ideas/ directory if it doesn't exist.
+        """
+        from src.services import IdeasService
+        
+        # Ensure ideas directory doesn't exist
+        ideas_path = Path(temp_project_dir) / 'docs' / 'ideas'
+        assert not ideas_path.exists()
+        
+        service = IdeasService(temp_project_dir)
+        config = {
+            "version": "1.0",
+            "ideation": {"antv-infographic": False, "mermaid": True},
+            "mockup": {"frontend-design": True},
+            "sharing": {}
+        }
+        
+        result = service.save_toolbox(config)
+        
+        assert result['success'] is True
+        assert ideas_path.exists()
+        assert (ideas_path / '.ideation-tools.json').exists()
+    
+    def test_get_toolbox_preserves_extra_fields(self, temp_ideas_dir, temp_project_dir):
+        """
+        CR-003: get_toolbox() preserves extra fields in config.
+        """
+        from src.services import IdeasService
+        
+        toolbox_path = temp_ideas_dir / '.ideation-tools.json'
+        config_with_extras = {
+            "version": "1.0",
+            "ideation": {"antv-infographic": True, "mermaid": True, "custom-tool": True},
+            "mockup": {"frontend-design": True},
+            "sharing": {"export-pdf": True},
+            "custom_section": {"something": "value"}
+        }
+        with open(toolbox_path, 'w') as f:
+            json.dump(config_with_extras, f)
+        
+        service = IdeasService(temp_project_dir)
+        config = service.get_toolbox()
+        
+        assert config['ideation']['custom-tool'] is True
+        assert config['sharing']['export-pdf'] is True
+        assert config['custom_section']['something'] == 'value'
+
+
+# ============================================================================
+# CR-003: Ideation Toolbox Configuration - API Tests
+# ============================================================================
+
+class TestToolboxAPI:
+    """API tests for toolbox endpoints (CR-003)"""
+    
+    def test_get_toolbox_endpoint_returns_defaults(self, populated_client, temp_project_dir):
+        """
+        CR-003: GET /api/ideas/toolbox returns default config.
+        """
+        response = populated_client.get('/api/ideas/toolbox')
+        
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data['version'] == '1.0'
+        assert 'ideation' in data
+        assert 'mockup' in data
+        assert 'sharing' in data
+    
+    def test_get_toolbox_endpoint_returns_saved_config(self, populated_client, temp_project_dir, populated_ideas_dir):
+        """
+        CR-003: GET /api/ideas/toolbox returns saved config from file.
+        """
+        # Create config file
+        toolbox_path = populated_ideas_dir / '.ideation-tools.json'
+        custom_config = {
+            "version": "1.0",
+            "ideation": {"antv-infographic": True, "mermaid": False},
+            "mockup": {"frontend-design": False},
+            "sharing": {}
+        }
+        with open(toolbox_path, 'w') as f:
+            json.dump(custom_config, f)
+        
+        response = populated_client.get('/api/ideas/toolbox')
+        
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data['ideation']['antv-infographic'] is True
+        assert data['ideation']['mermaid'] is False
+    
+    def test_save_toolbox_endpoint(self, populated_client, temp_project_dir, populated_ideas_dir):
+        """
+        CR-003: POST /api/ideas/toolbox saves config.
+        """
+        config = {
+            "version": "1.0",
+            "ideation": {"antv-infographic": True, "mermaid": True},
+            "mockup": {"frontend-design": False},
+            "sharing": {}
+        }
+        
+        response = populated_client.post(
+            '/api/ideas/toolbox',
+            data=json.dumps(config),
+            content_type='application/json'
+        )
+        
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data['success'] is True
+        
+        # Verify file was created
+        toolbox_path = populated_ideas_dir / '.ideation-tools.json'
+        assert toolbox_path.exists()
+    
+    def test_save_then_get_toolbox_roundtrip(self, populated_client, temp_project_dir):
+        """
+        CR-003: Save config then get should return same values.
+        """
+        config = {
+            "version": "1.0",
+            "ideation": {"antv-infographic": True, "mermaid": False},
+            "mockup": {"frontend-design": True},
+            "sharing": {}
+        }
+        
+        # Save
+        save_response = populated_client.post(
+            '/api/ideas/toolbox',
+            data=json.dumps(config),
+            content_type='application/json'
+        )
+        assert save_response.status_code == 200
+        
+        # Get
+        get_response = populated_client.get('/api/ideas/toolbox')
+        assert get_response.status_code == 200
+        data = get_response.get_json()
+        
+        assert data['ideation']['antv-infographic'] is True
+        assert data['ideation']['mermaid'] is False
+        assert data['mockup']['frontend-design'] is True
+    
+    def test_save_toolbox_with_partial_config(self, populated_client, temp_project_dir):
+        """
+        CR-003: POST /api/ideas/toolbox handles partial config.
+        """
+        partial_config = {
+            "version": "1.0",
+            "ideation": {"mermaid": False}
+        }
+        
+        response = populated_client.post(
+            '/api/ideas/toolbox',
+            data=json.dumps(partial_config),
+            content_type='application/json'
+        )
+        
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data['success'] is True
+    
+    def test_toolbox_config_persists_across_requests(self, populated_client, temp_project_dir):
+        """
+        CR-003: Config changes persist across multiple requests.
+        """
+        # First save
+        config1 = {
+            "version": "1.0",
+            "ideation": {"antv-infographic": False, "mermaid": True},
+            "mockup": {"frontend-design": True},
+            "sharing": {}
+        }
+        populated_client.post(
+            '/api/ideas/toolbox',
+            data=json.dumps(config1),
+            content_type='application/json'
+        )
+        
+        # Second save (update)
+        config2 = {
+            "version": "1.0",
+            "ideation": {"antv-infographic": True, "mermaid": True},
+            "mockup": {"frontend-design": False},
+            "sharing": {}
+        }
+        populated_client.post(
+            '/api/ideas/toolbox',
+            data=json.dumps(config2),
+            content_type='application/json'
+        )
+        
+        # Verify latest state
+        response = populated_client.get('/api/ideas/toolbox')
+        data = response.get_json()
+        
+        assert data['ideation']['antv-infographic'] is True
+        assert data['mockup']['frontend-design'] is False

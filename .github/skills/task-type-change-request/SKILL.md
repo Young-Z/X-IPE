@@ -35,6 +35,14 @@ Process change requests (CRs) systematically by:
 
 ---
 
+## Task Type Required Input Attributes
+
+| Attribute | Default Value |
+|-----------|---------------|
+| Auto Proceed | False |
+
+---
+
 ## Skill Output
 
 This skill MUST return these attributes to the Task Data Model:
@@ -44,7 +52,7 @@ Output:
   status: completed | blocked
   next_task_type: task-type-feature-refinement | task-type-feature-breakdown
   require_human_review: Yes
-  task_output_links: [docs/requirements/change-requests/CR-XXX.md]
+  task_output_links: [docs/requirements/FEATURE-XXX/CR-XXX.md]
   
   # Dynamic attributes (CR-specific)
   cr_id: CR-XXX
@@ -79,7 +87,7 @@ Execute Change Request by following these steps in order:
 | 3 | Classify CR | Apply classification criteria (modification vs new feature) | Classification determined |
 | 4 | Human Approval | Present classification and reasoning to human | Human approves |
 | 5 | Execute Path | Update spec (modification) or requirements (new feature) | Documents updated |
-| 6 | Document CR | Create `CR-XXX.md` in change-requests folder | CR documented |
+| 6 | Document CR | Create `CR-XXX.md` in feature folder and update specification version history | CR documented |
 
 **⛔ BLOCKING RULES:**
 - Step 4: BLOCKED until human explicitly approves classification
@@ -280,16 +288,16 @@ Wait for human approval before proceeding
 #### Path A: Modification to Existing Feature
 
 ```
-1. CREATE docs/requirements/change-requests/CR-XXX.md
+1. CREATE docs/requirements/FEATURE-XXX/CR-XXX.md
    - Document the CR details
-   - Link to affected feature(s)
+   - Store in the affected feature's folder
+   - Link to the feature specification
 
 2. UPDATE docs/requirements/FEATURE-XXX/specification.md
-   - Add entry to Version History table
+   - Add entry to Version History table with CR reference
    - Update affected sections
    - Revise user stories if needed
    - Update acceptance criteria
-   - Add to Change Request References section
 
 3. CHECK if requirement-details.md needs update:
    IF cr_affects_high_level_requirements = true:
@@ -313,59 +321,57 @@ Wait for human approval before proceeding
 - CR changes user types or stakeholders
 - CR modifies business rules at project level
 
-**Specification Update Pattern:**
+**Specification Version History Update Pattern:**
 ```markdown
 ## Version History
-
-| Version | Date | Description |
-|---------|------|-------------|
-| v1.1 | 01-22-2026 | CR-001: Added bulk import capability |
-| v1.0 | 01-15-2026 | Initial specification |
-
----
-
-## Change Request References
-
-| CR ID | Date | Description | Impact |
-|-------|------|-------------|--------|
-| CR-001 | 01-22-2026 | Bulk import | Added FR-5, updated UI requirements |
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| 1.1 | 2026-01-22 | Added bulk import capability | [CR-001](./CR-001.md) |
+| 1.0 | 2026-01-15 | Initial specification | - |
 ```
 
 #### Path B: New Feature
 
 ```
-1. CREATE docs/requirements/change-requests/CR-XXX.md
-   - Document the CR details
-   - Mark as "New Feature"
-
-2. UPDATE docs/requirements/requirement-details.md
+1. UPDATE docs/requirements/requirement-details.md
    - Add new requirement to High-Level Requirements section
    - Document in Clarifications table
    - Update Project Overview if scope changed
 
-3. SET next_task_type = task-type-feature-breakdown
+2. SET next_task_type = task-type-feature-breakdown
    - Continue with feature breakdown workflow
    - New feature will be added to feature board
+   - CR document will be created in the new feature folder after breakdown
+
+3. NOTE: After feature breakdown creates FEATURE-XXX folder:
+   - CREATE docs/requirements/FEATURE-XXX/CR-XXX.md
+   - This links the CR to the newly created feature
 ```
 
 ---
 
 ### Step 6: Create CR Documentation
 
-**Action:** Create CR record at `docs/requirements/change-requests/CR-XXX.md`
+**Action:** Create CR record in the feature folder at `docs/requirements/FEATURE-XXX/CR-XXX.md`
+
+**Important:** 
+- CR files are stored **inside the affected feature folder**, NOT in a separate change-requests folder
+- This maintains traceability by co-locating the CR with its affected feature
+- The specification's Version History links to the CR document
 
 **CR Document Template:**
 ```markdown
 # Change Request: CR-XXX
 
-> Created: MM-DD-YYYY
+> Created: YYYY-MM-DD
 > Status: Approved | Pending | Rejected
 > Classification: Modification | New Feature
+> Related Feature: FEATURE-XXX
 
 ## Request Details
 
 **Requestor:** [Name/Role]
-**Date Received:** MM-DD-YYYY
+**Date Received:** YYYY-MM-DD
 **Priority:** High | Medium | Low
 
 ## Description
@@ -401,13 +407,13 @@ Wait for human approval before proceeding
 
 ## Approval
 
-- [ ] Classification approved by human
-- [ ] Approach approved by human
-- [ ] Ready for execution
+- [x] Classification approved by human
+- [x] Approach approved by human
+- [x] Ready for execution
 
 ## Links
 
-- Related Feature: [FEATURE-XXX](../FEATURE-XXX/specification.md)
+- Feature Specification: [specification.md](./specification.md)
 - Requirement Details: [requirement-details.md](../requirement-details.md)
 
 ---
@@ -419,11 +425,12 @@ Wait for human approval before proceeding
 
 | # | Checkpoint | Required |
 |---|------------|----------|
-| 1 | CR documented in docs/requirements/change-requests/CR-XXX.md | Yes |
+| 1 | CR documented in `docs/requirements/FEATURE-XXX/CR-XXX.md` | Yes |
 | 2 | Classification determined and documented | Yes |
 | 3 | Human approved classification | Yes |
-| 4 | Relevant documents updated (specification OR requirements) | Yes |
-| 5 | Next task type correctly set | Yes |
+| 4 | Feature specification Version History updated with CR reference | Yes (if modification) |
+| 5 | Relevant documents updated (specification OR requirements) | Yes |
+| 6 | Next task type correctly set | Yes |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
 
@@ -437,8 +444,8 @@ category: Standalone
 next_task_type: task-type-feature-refinement | task-type-feature-breakdown
 require_human_review: Yes
 task_output_links:
-  - docs/requirements/change-requests/CR-XXX.md
-  - [updated specification or requirement-details.md]
+  - docs/requirements/FEATURE-XXX/CR-XXX.md
+  - docs/requirements/FEATURE-XXX/specification.md  # if modification
 cr_id: CR-XXX
 cr_classification: modification | new_feature
 affected_features: [FEATURE-XXX, ...]  # If modification
@@ -565,24 +572,17 @@ Human says: "approve"
 
 ### Step 5: Execute (Path A)
 
-**Created:** docs/requirements/change-requests/CR-001.md
+**Created:** docs/requirements/FEATURE-003/CR-001.md (in feature folder)
 
 **Updated:** docs/requirements/FEATURE-003/specification.md
 ```markdown
 ## Version History
-
-| Version | Date | Description |
-|---------|------|-------------|
-| v1.1 | 01-22-2026 | CR-001: Added bulk import capability |
-| v1.0 | 01-10-2026 | Initial specification |
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| 1.1 | 2026-01-22 | Added bulk import capability | [CR-001](./CR-001.md) |
+| 1.0 | 2026-01-10 | Initial specification | - |
 
 [Updated functional requirements, acceptance criteria, UI requirements]
-
-## Change Request References
-
-| CR ID | Date | Description | Impact |
-|-------|------|-------------|--------|
-| CR-001 | 01-22-2026 | Bulk user import | Added FR-5, new acceptance criteria |
 ```
 
 **Removed from Out of Scope:** "Bulk operations"
@@ -593,7 +593,7 @@ category: Standalone
 next_task_type: task-type-feature-refinement
 require_human_review: Yes
 task_output_links:
-  - docs/requirements/change-requests/CR-001.md
+  - docs/requirements/FEATURE-003/CR-001.md
   - docs/requirements/FEATURE-003/specification.md
 cr_id: CR-001
 cr_classification: modification
@@ -605,8 +605,8 @@ requirement_updated: false
 
 ## Notes
 
-- Always maintain traceability from CR to affected documents
+- **CR files live inside feature folders** - maintains traceability and co-location
+- Version history in specifications links directly to CR documents
 - Classification is not always black and white - when in doubt, ask human
-- Version history in specifications is crucial for audit trail
 - One CR should result in one classification (split complex CRs if needed)
-- CR documentation helps with future impact analysis
+- For new features, CR is created after feature breakdown creates the folder

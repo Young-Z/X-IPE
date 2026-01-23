@@ -37,6 +37,14 @@ Implement code for a single feature by:
 
 ---
 
+## Task Type Required Input Attributes
+
+| Attribute | Default Value |
+|-----------|---------------|
+| Auto Proceed | False |
+
+---
+
 ## Skill Output
 
 This skill MUST return these attributes to the Task Data Model:
@@ -44,7 +52,7 @@ This skill MUST return these attributes to the Task Data Model:
 ```yaml
 Output:
   status: completed | blocked
-  next_task_type: Human Playground
+  next_task_type: Feature Closing
   require_human_review: No
   task_output_links: [src/, tests/]
   
@@ -530,7 +538,7 @@ feature_id: FEATURE-001
 feature_status: Done Code Implementation
 category: feature-stage
 feature_phase: Code Implementation
-next_task_type: Human Playground
+next_task_type: Feature Closing
 require_human_review: No
 task_output_links:
   - src/auth/service.py

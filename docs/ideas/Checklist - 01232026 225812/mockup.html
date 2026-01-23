@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkmate - Personal Checklist v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #FEFCF9;
+      --bg-secondary: #F7F4EF;
+      --bg-card: #FFFFFF;
+      --bg-elevated: #FFFFFF;
+      --text-primary: #1A1715;
+      --text-secondary: #5C5652;
+      --text-muted: #9C9590;
+      --border: #E8E4DE;
+      --border-focus: #B8A99A;
+      --accent: #6B5344;
+      --accent-hover: #8B7364;
+      --overdue: #C9553D;
+      --overdue-bg: #FEF2F0;
+      --overdue-border: #F5D0CA;
+      --today: #C4940D;
+      --today-bg: #FEFAED;
+      --today-border: #F0E4B8;
+      --complete: #4A7C59;
+      --complete-bg: #F2F8F4;
+      --complete-border: #C5DCC9;
+      --shadow-sm: 0 1px 3px rgba(26, 23, 21, 0.04);
+      --shadow-md: 0 4px 12px rgba(26, 23, 21, 0.06);
+      --shadow-lg: 0 8px 24px rgba(26, 23, 21, 0.08);
+      --drag-shadow: 0 12px 32px rgba(26, 23, 21, 0.15);
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #141210;
+      --bg-secondary: #1C1917;
+      --bg-card: #252220;
+      --bg-elevated: #2D2926;
+      --text-primary: #F5F2EF;
+      --text-secondary: #A8A29E;
+      --text-muted: #6B6560;
+      --border: #3D3835;
+      --border-focus: #6B5F55;
+      --accent: #C4A98A;
+      --accent-hover: #D4C4AA;
+      --overdue: #E86B55;
+      --overdue-bg: #2D1F1C;
+      --overdue-border: #4A2A24;
+      --today: #D4A41D;
+      --today-bg: #2D2815;
+      --today-border: #4A4020;
+      --complete: #6A9C79;
+      --complete-bg: #1C2D20;
+      --complete-border: #2A4A32;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
+      --drag-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-primary);
+      min-height: 100vh;
+      color: var(--text-primary);
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .app-container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* Header with theme toggle */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 40px;
+      animation: fadeSlideDown 0.5s ease-out;
+    }
+
+    @keyframes fadeSlideDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-mark {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-md);
+      transform: rotate(-2deg);
+    }
+
+    .logo-mark svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--bg-primary);
+      stroke-width: 2.5;
+      fill: none;
+    }
+
+    .brand-text h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .brand-text p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+      position: relative;
+    }
+
+    .icon-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--text-secondary);
+      stroke-width: 2;
+      fill: none;
+      transition: stroke var(--transition);
+    }
+
+    .icon-btn:hover {
+      border-color: var(--border-focus);
+      background: var(--bg-elevated);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .icon-btn:hover svg {
+      stroke: var(--text-primary);
+    }
+
+    .icon-btn .tooltip {
+      position: absolute;
+      bottom: -32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text-primary);
+      color: var(--bg-primary);
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+    }
+
+    .icon-btn:hover .tooltip {
+      opacity: 1;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      animation: fadeSlideDown 0.5s ease-out 0.1s backwards;
+    }
+
+    .toolbar-btn {
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all var(--transition);
+    }
+
+    .toolbar-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .toolbar-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--bg-elevated);
+    }
+
+    .toolbar-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .toolbar-btn.primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    /* Add Task Input */
+    .add-task-section {
+      margin-bottom: 32px;
+      animation: fadeSlideDown 0.5s ease-out 0.15s backwards;
+    }
+
+    .add-task-form {
+      display: flex;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 6px;
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition);
+    }
+
+    .add-task-form:focus-within {
+      border-color: var(--border-focus);
+      box-shadow: var(--shadow-md);
+    }
+
+    .add-task-form input[type="text"] {
+      flex: 1;
+      padding: 12px 14px;
+      border: none;
+      background: transparent;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+    }
+
+    .add-task-form input[type="text"]:focus {
+      outline: none;
+    }
+
+    .add-task-form input[type="text"]::placeholder {
+      color: var(--text-muted);
+    }
+
+    .add-task-form input[type="date"] {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .add-task-form input[type="date"]:focus {
+      outline: none;
+      border-color: var(--border-focus);
+    }
+
+    .add-task-form button {
+      padding: 12px 20px;
+      background: var(--accent);
+      color: var(--bg-primary);
+      border: none;
+      border-radius: 10px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .add-task-form button:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .keyboard-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .keyboard-hint kbd {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.7rem;
+    }
+
+    /* Task List */
+    .task-list {
+      list-style: none;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all var(--transition);
+      animation: fadeSlideUp 0.4s ease-out backwards;
+      cursor: grab;
+    }
+
+    .task-item:nth-child(1) { animation-delay: 0.2s; }
+    .task-item:nth-child(2) { animation-delay: 0.25s; }
+    .task-item:nth-child(3) { animation-delay: 0.3s; }
+    .task-item:nth-child(4) { animation-delay: 0.35s; }
+    .task-item:nth-child(5) { animation-delay: 0.4s; }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .task-item:hover {
+      border-color: var(--border-focus);
+      box-shadow: var(--shadow-md);
+    }
+
+    .task-item.dragging {
+      box-shadow: var(--drag-shadow);
+      transform: rotate(2deg) scale(1.02);
+      border-color: var(--accent);
+      z-index: 100;
+    }
+
+    .task-item.overdue {
+      background: var(--overdue-bg);
+      border-color: var(--overdue-border);
+    }
+
+    .task-item.today {
+      background: var(--today-bg);
+      border-color: var(--today-border);
+    }
+
+    .task-item.completed {
+      background: var(--complete-bg);
+      border-color: var(--complete-border);
+      opacity: 0.8;
+    }
+
+    /* Drag Handle */
+    .drag-handle {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: grab;
+      opacity: 0.3;
+      transition: opacity var(--transition);
+      flex-shrink: 0;
+    }
+
+    .drag-handle span {
+      width: 12px;
+      height: 2px;
+      background: var(--text-muted);
+      border-radius: 1px;
+    }
+
+    .task-item:hover .drag-handle {
+      opacity: 0.7;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    /* Checkbox */
+    .task-checkbox {
+      position: relative;
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .task-checkbox input {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      z-index: 1;
+    }
+
+    .task-checkbox .checkmark {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-card);
+    }
+
+    .task-checkbox .checkmark svg {
+      width: 12px;
+      height: 12px;
+      stroke: white;
+      stroke-width: 3;
+      fill: none;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all var(--transition);
+    }
+
+    .task-checkbox input:checked + .checkmark {
+      background: var(--complete);
+      border-color: var(--complete);
+    }
+
+    .task-checkbox input:checked + .checkmark svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .task-checkbox input:hover + .checkmark {
+      border-color: var(--text-muted);
+    }
+
+    /* Task Content */
+    .task-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.4;
+      transition: all var(--transition);
+    }
+
+    .task-item.completed .task-title {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .task-due {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .task-due svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .task-item.overdue .task-due {
+      color: var(--overdue);
+      font-weight: 500;
+    }
+
+    .task-item.today .task-due {
+      color: var(--today);
+      font-weight: 500;
+    }
+
+    /* Task Actions */
+    .task-actions {
+      display: flex;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .task-item:hover .task-actions {
+      opacity: 1;
+    }
+
+    .task-actions button {
+      width: 30px;
+      height: 30px;
+      border: none;
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+    }
+
+    .task-actions button svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--text-muted);
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .task-actions button:hover {
+      background: var(--text-primary);
+    }
+
+    .task-actions button:hover svg {
+      stroke: var(--bg-primary);
+    }
+
+    .task-actions button.delete:hover {
+      background: var(--overdue);
+    }
+
+    /* Section Divider */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 28px 0 20px;
+    }
+
+    .section-divider span {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+    }
+
+    /* Stats */
+    .stats-bar {
+      display: flex;
+      gap: 20px;
+      margin-top: 40px;
+      padding: 20px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      animation: fadeSlideUp 0.5s ease-out 0.5s backwards;
+    }
+
+    .stat {
+      text-align: center;
+      flex: 1;
+    }
+
+    .stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .stat.overdue .stat-value { color: var(--overdue); }
+    .stat.complete .stat-value { color: var(--complete); }
+
+    /* Keyboard Shortcuts Modal Hint */
+    .shortcuts-hint {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      box-shadow: var(--shadow-lg);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: fadeSlideUp 0.4s ease-out 1s backwards;
+    }
+
+    .shortcuts-hint kbd {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--text-primary);
+      color: var(--bg-primary);
+      padding: 14px 24px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 48px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .app-container {
+        padding: 24px 16px 80px;
+      }
+
+      header {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+
+      .toolbar {
+        flex-wrap: wrap;
+      }
+
+      .add-task-form {
+        flex-wrap: wrap;
+      }
+
+      .add-task-form input[type="text"] {
+        width: 100%;
+      }
+
+      .add-task-form input[type="date"],
+      .add-task-form button {
+        flex: 1;
+      }
+
+      .task-actions {
+        opacity: 1;
+      }
+
+      .shortcuts-hint {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <div class="brand">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Checkmate</h1>
+          <p>Thursday, January 23, 2026</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="themeToggle" title="Toggle theme">
+          <svg class="sun-icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" style="display: none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <span class="tooltip">Ctrl+D</span>
+        </button>
+        <button class="icon-btn" id="exportBtn" title="Export tasks">
+          <svg viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span class="tooltip">Ctrl+E</span>
+        </button>
+        <button class="icon-btn" id="importBtn" title="Import tasks">
+          <svg viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span class="tooltip">Import JSON</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <button class="toolbar-btn primary" id="loadSampleBtn">
+        <svg viewBox="0 0 24 24">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        Load Sample Data
+      </button>
+      <button class="toolbar-btn" id="clearCompletedBtn">
+        <svg viewBox="0 0 24 24">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+        Clear Completed
+      </button>
+    </div>
+
+    <div class="add-task-section">
+      <form class="add-task-form" id="addTaskForm">
+        <input type="text" id="taskInput" placeholder="What needs to be done?" autocomplete="off">
+        <input type="date" id="taskDate" value="2026-01-23">
+        <button type="submit">Add</button>
+      </form>
+      <div class="keyboard-hint">
+        <kbd>Enter</kbd> to add • <kbd>Esc</kbd> to clear
+      </div>
+    </div>
+
+    <ul class="task-list" id="taskList">
+      <li class="task-item overdue" draggable="true">
+        <div class="drag-handle">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <label class="task-checkbox">
+          <input type="checkbox">
+          <span class="checkmark">
+            <svg viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </span>
+        </label>
+        <div class="task-content">
+          <div class="task-title">Review quarterly budget report</div>
+          <div class="task-due">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Yesterday — Overdue
+          </div>
+        </div>
+        <div class="task-actions">
+          <button class="edit" title="Edit">
+            <svg viewBox="0 0 24 24">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </button>
+          <button class="delete" title="Delete">
+            <svg viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+      </li>
+
+      <li class="task-item today" draggable="true">
+        <div class="drag-handle">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <label class="task-checkbox">
+          <input type="checkbox">
+          <span class="checkmark">
+            <svg viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </span>
+        </label>
+        <div class="task-content">
+          <div class="task-title">Call dentist for appointment</div>
+          <div class="task-due">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Today
+          </div>
+        </div>
+        <div class="task-actions">
+          <button class="edit" title="Edit">
+            <svg viewBox="0 0 24 24">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </button>
+          <button class="delete" title="Delete">
+            <svg viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+      </li>
+
+      <li class="task-item today" draggable="true">
+        <div class="drag-handle">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <label class="task-checkbox">
+          <input type="checkbox">
+          <span class="checkmark">
+            <svg viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </span>
+        </label>
+        <div class="task-content">
+          <div class="task-title">Submit expense report for December</div>
+          <div class="task-due">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Today
+          </div>
+        </div>
+        <div class="task-actions">
+          <button class="edit" title="Edit">
+            <svg viewBox="0 0 24 24">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </button>
+          <button class="delete" title="Delete">
+            <svg viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+      </li>
+
+      <li class="task-item" draggable="true">
+        <div class="drag-handle">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <label class="task-checkbox">
+          <input type="checkbox">
+          <span class="checkmark">
+            <svg viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </span>
+        </label>
+        <div class="task-content">
+          <div class="task-title">Buy groceries for the week</div>
+          <div class="task-due">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Saturday, Jan 25
+          </div>
+        </div>
+        <div class="task-actions">
+          <button class="edit" title="Edit">
+            <svg viewBox="0 0 24 24">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </button>
+          <button class="delete" title="Delete">
+            <svg viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+      </li>
+
+      <li class="task-item" draggable="true">
+        <div class="drag-handle">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <label class="task-checkbox">
+          <input type="checkbox">
+          <span class="checkmark">
+            <svg viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </span>
+        </label>
+        <div class="task-content">
+          <div class="task-title">Schedule car maintenance</div>
+          <div class="task-due">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Next week
+          </div>
+        </div>
+        <div class="task-actions">
+          <button class="edit" title="Edit">
+            <svg viewBox="0 0 24 24">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </button>
+          <button class="delete" title="Delete">
+            <svg viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+      </li>
+
+      <div class="section-divider">
+        <span>Completed</span>
+      </div>
+
+      <li class="task-item completed" draggable="true">
+        <div class="drag-handle">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <label class="task-checkbox">
+          <input type="checkbox" checked>
+          <span class="checkmark">
+            <svg viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </span>
+        </label>
+        <div class="task-content">
+          <div class="task-title">Reply to Sarah's email</div>
+          <div class="task-due">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Completed today
+          </div>
+        </div>
+        <div class="task-actions">
+          <button class="delete" title="Delete">
+            <svg viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+      </li>
+
+      <li class="task-item completed" draggable="true">
+        <div class="drag-handle">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <label class="task-checkbox">
+          <input type="checkbox" checked>
+          <span class="checkmark">
+            <svg viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </span>
+        </label>
+        <div class="task-content">
+          <div class="task-title">Book flight to Seattle</div>
+          <div class="task-due">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Completed yesterday
+          </div>
+        </div>
+        <div class="task-actions">
+          <button class="delete" title="Delete">
+            <svg viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+      </li>
+    </ul>
+
+    <div class="stats-bar">
+      <div class="stat">
+        <div class="stat-value">5</div>
+        <div class="stat-label">Pending</div>
+      </div>
+      <div class="stat complete">
+        <div class="stat-value">2</div>
+        <div class="stat-label">Completed</div>
+      </div>
+      <div class="stat overdue">
+        <div class="stat-value">1</div>
+        <div class="stat-label">Overdue</div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Checkmate v2.0 • Data stored in localStorage • <a href="#" id="resetLink">Reset Demo</a></p>
+    </footer>
+  </div>
+
+  <div class="shortcuts-hint">
+    <kbd>Ctrl</kbd>+<kbd>D</kbd> Dark mode
+  </div>
+
+  <div class="toast" id="toast">Action completed!</div>
+
+  <script>
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const sunIcon = themeToggle.querySelector('.sun-icon');
+    const moonIcon = themeToggle.querySelector('.moon-icon');
+    
+    function setTheme(dark) {
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      sunIcon.style.display = dark ? 'none' : 'block';
+      moonIcon.style.display = dark ? 'block' : 'none';
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+    }
+    
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      setTheme(!isDark);
+      showToast(isDark ? 'Light mode enabled' : 'Dark mode enabled');
+    });
+    
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') setTheme(true);
+    
+    // Toast notification
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Ctrl+D: Toggle dark mode
+      if (e.ctrlKey && e.key === 'd') {
+        e.preventDefault();
+        themeToggle.click();
+      }
+      // Ctrl+E: Export
+      if (e.ctrlKey && e.key === 'e') {
+        e.preventDefault();
+        showToast('Tasks exported to checkmate-tasks.json');
+      }
+      // Escape: Clear input
+      if (e.key === 'Escape') {
+        document.getElementById('taskInput').value = '';
+        document.getElementById('taskInput').blur();
+      }
+    });
+    
+    // Task input Enter key
+    document.getElementById('addTaskForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('taskInput');
+      if (input.value.trim()) {
+        showToast('Task added: ' + input.value);
+        input.value = '';
+      }
+    });
+    
+    // Load sample data button
+    document.getElementById('loadSampleBtn').addEventListener('click', () => {
+      showToast('Sample data loaded!');
+    });
+    
+    // Clear completed button
+    document.getElementById('clearCompletedBtn').addEventListener('click', () => {
+      showToast('2 completed tasks removed');
+    });
+    
+    // Export button
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      showToast('Tasks exported to checkmate-tasks.json');
+    });
+    
+    // Import button
+    document.getElementById('importBtn').addEventListener('click', () => {
+      showToast('Select a JSON file to import');
+    });
+    
+    // Reset demo link
+    document.getElementById('resetLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      showToast('Demo reset to initial state');
+    });
+    
+    // Drag and drop simulation
+    const taskItems = document.querySelectorAll('.task-item');
+    taskItems.forEach(item => {
+      item.addEventListener('dragstart', () => {
+        item.classList.add('dragging');
+      });
+      item.addEventListener('dragend', () => {
+        item.classList.remove('dragging');
+        showToast('Task order updated');
+      });
+    });
+  </script>
+</body>
+</html>

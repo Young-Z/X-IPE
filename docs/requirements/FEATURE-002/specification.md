@@ -5,6 +5,12 @@
 > Status: Refined  
 > Last Updated: 01-18-2026
 
+## Version History
+
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| v1.0 | 01-18-2026 | Initial specification | - |
+
 ## Overview
 
 The Content Viewer feature renders file contents in the main content area when a user selects a file from the sidebar navigation. It supports two primary content types: Markdown documents (rendered as styled HTML with Mermaid diagram support) and code files (displayed with syntax highlighting).

@@ -614,13 +614,19 @@ class WorkplaceManager {
         this.isActive = true;
         container.innerHTML = `
             <div class="workplace-container">
-                <div class="workplace-sidebar">
+                <div class="workplace-sidebar" id="workplace-sidebar">
                     <div class="workplace-sidebar-icons">
                         <button class="workplace-sidebar-icon" title="Browse Ideas" id="workplace-icon-browse">
                             <i class="bi bi-folder2"></i>
                         </button>
                     </div>
                     <div class="workplace-sidebar-content">
+                        <div class="workplace-sidebar-header">
+                            <span class="workplace-sidebar-title">Ideas</span>
+                            <button class="workplace-pin-btn" title="Pin sidebar" id="workplace-pin-btn">
+                                <i class="bi bi-pin-angle"></i>
+                            </button>
+                        </div>
                         <div class="workplace-tree" id="workplace-tree">
                             <div class="loading-spinner">
                                 <div class="spinner-border spinner-border-sm" role="status">
@@ -634,7 +640,7 @@ class WorkplaceManager {
                     <div class="workplace-placeholder">
                         <i class="bi bi-lightbulb"></i>
                         <h5>Welcome to Workplace</h5>
-                        <p class="text-muted">Hover sidebar to browse ideas</p>
+                        <p class="text-muted">Hover sidebar to browse ideas, or click pin to keep it open</p>
                     </div>
                 </div>
             </div>
@@ -643,8 +649,27 @@ class WorkplaceManager {
         // Bind sidebar icon events
         document.getElementById('workplace-icon-browse').addEventListener('click', () => {
             // Toggle expanded state on mobile/touch
-            const sidebar = document.querySelector('.workplace-sidebar');
+            const sidebar = document.getElementById('workplace-sidebar');
             sidebar.classList.toggle('expanded');
+        });
+        
+        // Bind pin button
+        document.getElementById('workplace-pin-btn').addEventListener('click', () => {
+            const sidebar = document.getElementById('workplace-sidebar');
+            const pinBtn = document.getElementById('workplace-pin-btn');
+            const isPinned = sidebar.classList.toggle('pinned');
+            
+            // Update icon and title
+            const icon = pinBtn.querySelector('i');
+            if (isPinned) {
+                icon.classList.remove('bi-pin-angle');
+                icon.classList.add('bi-pin-angle-fill');
+                pinBtn.title = 'Unpin sidebar';
+            } else {
+                icon.classList.remove('bi-pin-angle-fill');
+                icon.classList.add('bi-pin-angle');
+                pinBtn.title = 'Pin sidebar';
+            }
         });
         
         // Load tree and start polling
@@ -1508,7 +1533,7 @@ class WorkplaceManager {
                             <h5>Drag & Drop Files Here</h5>
                             <p class="text-muted mb-3">or click to browse</p>
                             <input type="file" id="workplace-file-input" multiple style="display: none;"
-                                   accept=".md,.txt,.json,.yaml,.yml,.xml,.csv,.py,.js,.ts,.jsx,.tsx,.html,.css,.sh,.sql,.java,.c,.cpp,.h,.go,.rs,.rb,.php,.swift,.kt">
+                                   accept=".md,.txt,.json,.yaml,.yml,.xml,.csv,.py,.js,.ts,.jsx,.tsx,.html,.css,.sh,.sql,.java,.c,.cpp,.h,.go,.rs,.rb,.php,.swift,.kt,.png,.jpg,.jpeg,.gif,.svg,.webp,.bmp,.ico">
                         </div>
                         <div class="workplace-supported-formats">
                             <p class="mb-2"><i class="bi bi-check-circle text-success me-1"></i><strong>Supported formats:</strong></p>
@@ -1518,10 +1543,11 @@ class WorkplaceManager {
                                 <span class="format-tag format-tag-code"><i class="bi bi-code-slash"></i> .py .js .ts .jsx .tsx</span>
                                 <span class="format-tag format-tag-code"><i class="bi bi-file-code"></i> .html .css .sh .sql</span>
                                 <span class="format-tag format-tag-code"><i class="bi bi-terminal"></i> .java .c .cpp .go .rs .rb</span>
+                                <span class="format-tag format-tag-image"><i class="bi bi-image"></i> .png .jpg .gif .svg .webp</span>
                             </div>
                             <p class="text-muted small mt-2 mb-0">
                                 <i class="bi bi-info-circle me-1"></i>
-                                Text-based files work best for AI analysis. Binary files (images, PDFs) have limited support.
+                                Text-based files work best for AI analysis. Images can be uploaded for visual reference.
                             </p>
                         </div>
                     </div>
@@ -1570,14 +1596,28 @@ class WorkplaceManager {
                 }
             });
             
-            // Fix z-index when side-by-side is toggled
+            // Fix z-index when side-by-side is toggled and exit fullscreen when side-by-side is turned off
             const middleSection = document.getElementById('middle-section');
+            let wasSideBySideActive = false;
+            
             const observer = new MutationObserver(() => {
                 const container = this.easyMDE.element.closest('.EasyMDEContainer');
-                if (container && container.classList.contains('sided--no-fullscreen')) {
+                const isSideBySideActive = container && container.classList.contains('sided--no-fullscreen');
+                const isFullscreen = container && container.classList.contains('EasyMDEContainer--fullscreen');
+                
+                if (isSideBySideActive) {
+                    // Side-by-side is ON
                     middleSection.style.zIndex = '400';
+                    wasSideBySideActive = true;
                 } else {
+                    // Side-by-side is OFF
                     middleSection.style.zIndex = '';
+                    
+                    // If side-by-side was just turned off but still in fullscreen, exit fullscreen
+                    if (wasSideBySideActive && isFullscreen) {
+                        EasyMDE.toggleFullScreen(this.easyMDE);
+                    }
+                    wasSideBySideActive = false;
                 }
             });
             const container = this.easyMDE.element.closest('.EasyMDEContainer');
@@ -2798,7 +2838,15 @@ class ProjectSidebar {
             'json': 'bi-filetype-json',
             'yaml': 'bi-file-code',
             'yml': 'bi-file-code',
-            'txt': 'bi-file-text'
+            'txt': 'bi-file-text',
+            'png': 'bi-file-image',
+            'jpg': 'bi-file-image',
+            'jpeg': 'bi-file-image',
+            'gif': 'bi-file-image',
+            'svg': 'bi-file-image',
+            'webp': 'bi-file-image',
+            'bmp': 'bi-file-image',
+            'ico': 'bi-file-image'
         };
         return icons[ext] || 'bi-file-earmark';
     }

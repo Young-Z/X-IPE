@@ -48,9 +48,9 @@
 | Feature Breakdown | task-type-feature-breakdown | Technical Design |
 | Technical Design | task-type-technical-design | Test Generation |
 | Test Generation | task-type-test-generation | Code Implementation |
-| Code Implementation | task-type-code-implementation | Human Playground |
-| Human Playground | task-type-human-playground | Feature Closing |
+| Code Implementation | task-type-code-implementation | Feature Closing |
 | Feature Closing | task-type-feature-closing | - |
+| Human Playground | task-type-human-playground | - |
 | Bug Fix | task-type-bug-fix | - |
 | Project Initialization | task-type-project-init | - |
 | Dev Environment Setup | task-type-dev-environment | - |

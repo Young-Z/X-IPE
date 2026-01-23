@@ -7,9 +7,9 @@
 
 ## Version History
 
-| Version | Date | Description |
-|---------|------|-------------|
-| v1.0 | 01-23-2026 | Initial specification |
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| v1.0 | 01-23-2026 | Initial specification | - |
 
 ## Overview
 

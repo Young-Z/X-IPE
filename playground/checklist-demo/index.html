@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkmate ✓</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #faf8f3;
+      --paper-lines: #e8dfd3;
+      --ink: #2d2a26;
+      --ink-light: #6b6560;
+      --accent: #e85d4c;
+      --accent-glow: rgba(232, 93, 76, 0.2);
+      --success: #4a9d6e;
+      --success-glow: rgba(74, 157, 110, 0.15);
+      --shadow: rgba(45, 42, 38, 0.08);
+      --shadow-deep: rgba(45, 42, 38, 0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+      background: 
+        radial-gradient(ellipse at 20% 0%, rgba(232, 93, 76, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 100%, rgba(74, 157, 110, 0.08) 0%, transparent 50%),
+        linear-gradient(180deg, #f5f0e8 0%, #ebe4d8 100%);
+      background-attachment: fixed;
+      color: var(--ink);
+      padding: 2rem;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeDown 0.8s ease-out;
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-family: 'Caveat', cursive;
+      font-size: 4rem;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+    }
+
+    h1 span {
+      display: inline-block;
+      color: var(--accent);
+      animation: bounce 2s ease-in-out infinite;
+      animation-delay: 0.5s;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-3px) rotate(-5deg); }
+      75% { transform: translateY(-3px) rotate(5deg); }
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: var(--ink-light);
+      font-weight: 400;
+    }
+
+    .progress-section {
+      margin-bottom: 2rem;
+      animation: fadeDown 0.8s ease-out 0.1s backwards;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: var(--paper);
+      border-radius: 100px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px var(--shadow);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success), #6bc488);
+      border-radius: 100px;
+      width: 0%;
+      transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--ink-light);
+    }
+
+    .progress-text strong {
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .notepad {
+      background: var(--paper);
+      border-radius: 16px;
+      box-shadow: 
+        0 4px 6px var(--shadow),
+        0 12px 24px var(--shadow-deep),
+        0 0 0 1px rgba(255,255,255,0.8) inset;
+      overflow: hidden;
+      animation: fadeUp 0.8s ease-out 0.2s backwards;
+      position: relative;
+    }
+
+    .notepad::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 40px;
+      width: 2px;
+      height: 100%;
+      background: rgba(232, 93, 76, 0.2);
+      z-index: 1;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .add-task-form {
+      display: flex;
+      gap: 0.75rem;
+      padding: 1.5rem 1.5rem 1.5rem 60px;
+      border-bottom: 2px solid var(--paper-lines);
+      background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+    }
+
+    .add-task-form input {
+      flex: 1;
+      padding: 0.875rem 1.25rem;
+      font-size: 1rem;
+      font-family: 'DM Sans', sans-serif;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      background: white;
+      color: var(--ink);
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: all 0.3s ease;
+    }
+
+    .add-task-form input::placeholder {
+      color: var(--ink-light);
+      opacity: 0.6;
+    }
+
+    .add-task-form input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 2px 8px var(--shadow), 0 0 0 4px var(--accent-glow);
+    }
+
+    .add-task-form button {
+      padding: 0.875rem 1.5rem;
+      font-size: 1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    .add-task-form button:hover {
+      background: #d64d3c;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(232, 93, 76, 0.35);
+    }
+
+    .add-task-form button:active {
+      transform: translateY(0);
+    }
+
+    .task-list {
+      list-style: none;
+      min-height: 200px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem 1.25rem 60px;
+      border-bottom: 1px solid var(--paper-lines);
+      background: repeating-linear-gradient(
+        transparent,
+        transparent 27px,
+        var(--paper-lines) 27px,
+        var(--paper-lines) 28px
+      );
+      transition: all 0.3s ease;
+      animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .task-item:hover {
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .task-item.completed {
+      background-color: var(--success-glow);
+    }
+
+    .task-item.removing {
+      animation: slideOut 0.3s ease forwards;
+    }
+
+    @keyframes slideOut {
+      to { opacity: 0; transform: translateX(20px); height: 0; padding: 0; margin: 0; }
+    }
+
+    .checkbox {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .checkbox input {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .checkbox .checkmark {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 28px;
+      height: 28px;
+      border: 2.5px solid var(--ink-light);
+      border-radius: 8px;
+      background: white;
+      transition: all 0.3s ease;
+    }
+
+    .checkbox input:checked + .checkmark {
+      background: var(--success);
+      border-color: var(--success);
+      animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .checkbox .checkmark::after {
+      content: '';
+      position: absolute;
+      display: none;
+      left: 9px;
+      top: 4px;
+      width: 6px;
+      height: 12px;
+      border: solid white;
+      border-width: 0 3px 3px 0;
+      transform: rotate(45deg);
+    }
+
+    .checkbox input:checked + .checkmark::after {
+      display: block;
+      animation: checkDraw 0.3s ease forwards;
+    }
+
+    @keyframes checkDraw {
+      from { height: 0; }
+      to { height: 12px; }
+    }
+
+    .task-text {
+      flex: 1;
+      font-size: 1.05rem;
+      line-height: 1.5;
+      transition: all 0.3s ease;
+    }
+
+    .task-item.completed .task-text {
+      text-decoration: line-through;
+      color: var(--ink-light);
+      opacity: 0.7;
+    }
+
+    .delete-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--ink-light);
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .task-item:hover .delete-btn {
+      opacity: 1;
+    }
+
+    .delete-btn:hover {
+      background: rgba(232, 93, 76, 0.1);
+      color: var(--accent);
+    }
+
+    .delete-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--ink-light);
+    }
+
+    .empty-state .emoji {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .empty-state p {
+      font-family: 'Caveat', cursive;
+      font-size: 1.5rem;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.85rem;
+      color: var(--ink-light);
+      animation: fadeUp 0.8s ease-out 0.4s backwards;
+    }
+
+    footer kbd {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      background: var(--paper);
+      border: 1px solid var(--paper-lines);
+      border-radius: 4px;
+      box-shadow: 0 2px 0 var(--paper-lines);
+    }
+
+    .confetti {
+      position: fixed;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      h1 { font-size: 3rem; }
+      .add-task-form { flex-direction: column; padding-left: 1.5rem; }
+      .notepad::before { left: 20px; }
+      .task-item { padding-left: 40px; }
+      .delete-btn { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Checkmate <span>✓</span></h1>
+      <p class="subtitle">Your cozy corner for getting things done</p>
+    </header>
+
+    <div class="progress-section">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-text">
+        <span><strong id="completedCount">0</strong> completed</span>
+        <span><span id="remainingCount">0</span> remaining</span>
+      </div>
+    </div>
+
+    <div class="notepad">
+      <form class="add-task-form" id="addTaskForm">
+        <input type="text" id="taskInput" placeholder="What needs to be done?" autocomplete="off">
+        <button type="submit">Add</button>
+      </form>
+      <ul class="task-list" id="taskList"></ul>
+    </div>
+
+    <footer>
+      <p>Press <kbd>Enter</kbd> to add • Click to complete • Made with ♥</p>
+    </footer>
+  </div>
+
+  <script>
+    const taskList = document.getElementById('taskList');
+    const taskInput = document.getElementById('taskInput');
+    const addTaskForm = document.getElementById('addTaskForm');
+    const progressFill = document.getElementById('progressFill');
+    const completedCount = document.getElementById('completedCount');
+    const remainingCount = document.getElementById('remainingCount');
+
+    let tasks = JSON.parse(localStorage.getItem('checkmate-tasks')) || [
+      { id: 1, text: 'Welcome to Checkmate! ✨', completed: false },
+      { id: 2, text: 'Click the checkbox to complete a task', completed: false },
+      { id: 3, text: 'Hover and click × to delete', completed: false },
+    ];
+
+    function saveTasks() {
+      localStorage.setItem('checkmate-tasks', JSON.stringify(tasks));
+    }
+
+    function updateProgress() {
+      const total = tasks.length;
+      const completed = tasks.filter(t => t.completed).length;
+      const remaining = total - completed;
+      
+      completedCount.textContent = completed;
+      remainingCount.textContent = remaining;
+      
+      const percentage = total === 0 ? 0 : (completed / total) * 100;
+      progressFill.style.width = `${percentage}%`;
+    }
+
+    function createConfetti(x, y) {
+      const colors = ['#e85d4c', '#4a9d6e', '#f4c542', '#5b9bd5', '#9b59b6'];
+      for (let i = 0; i < 12; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.cssText = `
+          left: ${x}px;
+          top: ${y}px;
+          width: 10px;
+          height: 10px;
+          background: ${colors[Math.floor(Math.random() * colors.length)]};
+          border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+          transform: rotate(${Math.random() * 360}deg);
+        `;
+        document.body.appendChild(confetti);
+        
+        const angle = (Math.random() * 360) * (Math.PI / 180);
+        const velocity = 100 + Math.random() * 150;
+        const vx = Math.cos(angle) * velocity;
+        const vy = Math.sin(angle) * velocity - 200;
+        
+        let posX = x, posY = y, opacity = 1;
+        const gravity = 400;
+        let startTime = null;
+        
+        function animate(time) {
+          if (!startTime) startTime = time;
+          const elapsed = (time - startTime) / 1000;
+          
+          posX = x + vx * elapsed;
+          posY = y + vy * elapsed + 0.5 * gravity * elapsed * elapsed;
+          opacity = Math.max(0, 1 - elapsed / 1.5);
+          
+          confetti.style.transform = `translate(${posX - x}px, ${posY - y}px) rotate(${elapsed * 720}deg)`;
+          confetti.style.opacity = opacity;
+          
+          if (opacity > 0) {
+            requestAnimationFrame(animate);
+          } else {
+            confetti.remove();
+          }
+        }
+        requestAnimationFrame(animate);
+      }
+    }
+
+    function renderTasks() {
+      if (tasks.length === 0) {
+        taskList.innerHTML = `
+          <li class="empty-state">
+            <div class="emoji">📝</div>
+            <p>No tasks yet. Add one above!</p>
+          </li>
+        `;
+      } else {
+        taskList.innerHTML = tasks.map(task => `
+          <li class="task-item ${task.completed ? 'completed' : ''}" data-id="${task.id}">
+            <label class="checkbox">
+              <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id}, event)">
+              <span class="checkmark"></span>
+            </label>
+            <span class="task-text">${escapeHtml(task.text)}</span>
+            <button class="delete-btn" onclick="deleteTask(${task.id})" title="Delete task">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </li>
+        `).join('');
+      }
+      updateProgress();
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function addTask(text) {
+      if (!text.trim()) return;
+      
+      const newTask = {
+        id: Date.now(),
+        text: text.trim(),
+        completed: false
+      };
+      
+      tasks.unshift(newTask);
+      saveTasks();
+      renderTasks();
+      taskInput.value = '';
+    }
+
+    function toggleTask(id, event) {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        task.completed = !task.completed;
+        saveTasks();
+        renderTasks();
+        
+        if (task.completed && event) {
+          const rect = event.target.getBoundingClientRect();
+          createConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        }
+      }
+    }
+
+    function deleteTask(id) {
+      const item = document.querySelector(`[data-id="${id}"]`);
+      if (item) {
+        item.classList.add('removing');
+        setTimeout(() => {
+          tasks = tasks.filter(t => t.id !== id);
+          saveTasks();
+          renderTasks();
+        }, 300);
+      }
+    }
+
+    addTaskForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      addTask(taskInput.value);
+    });
+
+    // Initial render
+    renderTasks();
+  </script>
+</body>
+</html>

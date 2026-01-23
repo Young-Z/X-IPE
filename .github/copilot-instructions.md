@@ -65,15 +65,16 @@
 
 | Task Type | Skill | Category | Next Task | Human Review |
 |-----------|-------|----------|-----------|--------------|
-| Ideation | `task-type-ideation` | ideation-stage | Share Idea or Requirement Gathering | Yes |
-| Share Idea | `task-type-share-idea` | ideation-stage | Requirement Gathering | Yes |
+| Ideation | `task-type-ideation` | ideation-stage | Idea Mockup | No |
+| Idea Mockup | `task-type-idea-mockup` | ideation-stage | Requirement Gathering | No |
+| Share Idea | `task-type-share-idea` | Standalone | - | Yes |
 | Requirement Gathering | `task-type-requirement-gathering` | requirement-stage | Feature Breakdown | Yes |
 | Feature Breakdown | `task-type-feature-breakdown` | requirement-stage | Feature Refinement | Yes |
 | Feature Refinement | `task-type-feature-refinement` | feature-stage | Technical Design | Yes |
 | Technical Design | `task-type-technical-design` | feature-stage | Test Generation | Yes |
 | Test Generation | `task-type-test-generation` | feature-stage | Code Implementation | No |
-| Code Implementation | `task-type-code-implementation` | feature-stage | Human Playground | No |
-| Human Playground | `task-type-human-playground` | feature-stage | Feature Closing | Yes |
+| Code Implementation | `task-type-code-implementation` | feature-stage | Feature Closing | No |
+| Human Playground | `task-type-human-playground` | Standalone | - | Yes |
 | Feature Closing | `task-type-feature-closing` | feature-stage | User Manual | No |
 | Bug Fix | `task-type-bug-fix` | Standalone | - | Yes |
 | Code Refactor | `task-type-code-refactor` | Standalone | - | Yes |

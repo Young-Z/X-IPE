@@ -7,10 +7,10 @@
 
 ## Version History
 
-| Version | Date | Description |
-|---------|------|-------------|
-| v2.0 | 01-22-2026 | Major upgrade: xterm.js integration, session persistence (1hr/10KB buffer), auto-reconnection, connection status, split-pane (up to 2 terminals), debounced resize |
-| v1.0 | 01-18-2026 | Initial specification with VanillaTerminal, basic PTY, WebSocket communication |
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| v2.0 | 01-22-2026 | Major upgrade: xterm.js integration, session persistence (1hr/10KB buffer), auto-reconnection, connection status, split-pane (up to 2 terminals), debounced resize | - |
+| v1.0 | 01-18-2026 | Initial specification with VanillaTerminal, basic PTY, WebSocket communication | - |
 
 ## Overview
 

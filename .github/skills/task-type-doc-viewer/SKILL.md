@@ -35,6 +35,14 @@ Generate a web-based documentation viewer for browsing project docs by:
 
 ---
 
+## Task Type Required Input Attributes
+
+| Attribute | Default Value |
+|-----------|---------------|
+| Auto Proceed | False |
+
+---
+
 ## Definition of Ready (DoR)
 
 | # | Checkpoint | Required |

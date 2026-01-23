@@ -98,8 +98,7 @@ Created   Feature   Technical    Code       Human     Feature
 | **Planned** | Feature identified, awaiting refinement | Feature Breakdown (auto) |
 | **Refined** | Specification complete, ready for design | Feature Refinement task completion |
 | **Designed** | Technical design complete, ready for implementation | Technical Design task completion (Test Generation keeps Designed) |
-| **Implemented** | Code complete, ready for human testing | Code Implementation task completion |
-| **Tested** | Human tested, ready for closing | Human Playground task completion |
+| **Implemented** | Code complete, ready for closing | Code Implementation task completion |
 | **Completed** | Feature fully deployed and verified | Feature Closing task completion |
 
 ---
@@ -227,7 +226,6 @@ feature_phase: Technical Design
 | `Technical Design` | Designed | - | Set from task_output_links |
 | `Test Generation` | Designed | - | - |
 | `Code Implementation` | Implemented | - | - |
-| `Human Playground` | Tested | - | - |
 | `Feature Closing` | Completed | - | - |
 
 **Execution:**

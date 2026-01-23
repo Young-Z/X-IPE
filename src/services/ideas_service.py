@@ -3,6 +3,8 @@ FEATURE-008: Workplace (Idea Management)
 
 IdeasService: CRUD operations for idea files and folders
 """
+import copy
+import json
 import re
 import shutil
 from datetime import datetime
@@ -23,6 +25,18 @@ class IdeasService:
     IDEAS_PATH = 'docs/ideas'
     INVALID_CHARS = r'[/\\:*?"<>|]'
     MAX_NAME_LENGTH = 255
+    TOOLBOX_FILE = '.ideation-tools.json'
+    DEFAULT_TOOLBOX = {
+        "version": "1.0",
+        "ideation": {
+            "antv-infographic": False,
+            "mermaid": True
+        },
+        "mockup": {
+            "frontend-design": True
+        },
+        "sharing": {}
+    }
     
     def __init__(self, project_root: str):
         """
@@ -79,13 +93,14 @@ class IdeasService:
         
         return items
     
-    def upload(self, files: List[tuple], date: str = None) -> Dict[str, Any]:
+    def upload(self, files: List[tuple], date: str = None, target_folder: str = None) -> Dict[str, Any]:
         """
-        Upload files to a new idea folder.
+        Upload files to a new or existing idea folder.
         
         Args:
             files: List of (filename, content_bytes) tuples
             date: Optional datetime string (MMDDYYYY HHMMSS). Uses now if not provided.
+            target_folder: Optional existing folder name to upload into (CR-002)
         
         Returns:
             Dict with success, folder_name, folder_path, files_uploaded
@@ -96,17 +111,27 @@ class IdeasService:
                 'error': 'No files provided'
             }
         
-        # Generate folder name with datetime
-        if date is None:
-            date = datetime.now().strftime('%m%d%Y %H%M%S')
-        
-        base_name = f'Draft Idea - {date}'
-        folder_name = self._generate_unique_name(base_name)
-        
-        # Create folder (files go directly in folder, not in subfolder)
-        self.ideas_root.mkdir(parents=True, exist_ok=True)
-        folder_path = self.ideas_root / folder_name
-        folder_path.mkdir(parents=True, exist_ok=True)
+        # CR-002: Upload to existing folder if target_folder provided
+        if target_folder:
+            folder_path = self.ideas_root / target_folder
+            if not folder_path.exists():
+                return {
+                    'success': False,
+                    'error': f"Target folder '{target_folder}' does not exist"
+                }
+            folder_name = target_folder
+        else:
+            # Original behavior: create new timestamped folder
+            if date is None:
+                date = datetime.now().strftime('%m%d%Y %H%M%S')
+            
+            base_name = f'Draft Idea - {date}'
+            folder_name = self._generate_unique_name(base_name)
+            
+            # Create folder (files go directly in folder, not in subfolder)
+            self.ideas_root.mkdir(parents=True, exist_ok=True)
+            folder_path = self.ideas_root / folder_name
+            folder_path.mkdir(parents=True, exist_ok=True)
         
         # Save files directly to folder
         uploaded_files = []
@@ -351,3 +376,42 @@ class IdeasService:
                 'success': False,
                 'error': f'Failed to create file: {str(e)}'
             }
+    
+    def get_toolbox(self) -> Dict:
+        """
+        Read toolbox configuration from JSON file.
+        Returns defaults if file doesn't exist or is invalid.
+        
+        Returns:
+            Dictionary with toolbox configuration
+        """
+        toolbox_path = self.ideas_root / self.TOOLBOX_FILE
+        if toolbox_path.exists():
+            try:
+                with open(toolbox_path, 'r') as f:
+                    return json.load(f)
+            except (json.JSONDecodeError, IOError):
+                return copy.deepcopy(self.DEFAULT_TOOLBOX)
+        return copy.deepcopy(self.DEFAULT_TOOLBOX)
+    
+    def save_toolbox(self, config: Dict) -> Dict:
+        """
+        Save toolbox configuration to JSON file.
+        Creates ideas directory and file if they don't exist.
+        
+        Args:
+            config: Dictionary with toolbox configuration
+            
+        Returns:
+            Dictionary with success status
+        """
+        try:
+            # Ensure ideas directory exists
+            self.ideas_root.mkdir(parents=True, exist_ok=True)
+            
+            toolbox_path = self.ideas_root / self.TOOLBOX_FILE
+            with open(toolbox_path, 'w') as f:
+                json.dump(config, f, indent=2)
+            return {'success': True}
+        except IOError as e:
+            return {'success': False, 'error': str(e)}

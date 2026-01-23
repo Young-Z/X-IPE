@@ -61,9 +61,10 @@ Task:
 
 | Task Type | Category |
 |-----------|----------|
-| `task-type-feature-refinement`, `task-type-technical-design`, `task-type-test-generation`, `task-type-code-implementation`, `task-type-human-playground`, `task-type-feature-closing` | feature-stage |
-| `task-type-ideation`, `task-type-requirement-gathering`, `task-type-feature-breakdown` | requirement-stage |
-| `task-type-bug-fix`, `task-type-code-refactor`, `task-type-change-request`, `task-type-project-init`, `task-type-dev-environment`, `task-type-user-manual` | Standalone |
+| `task-type-feature-refinement`, `task-type-technical-design`, `task-type-test-generation`, `task-type-code-implementation`, `task-type-feature-closing` | feature-stage |
+| `task-type-ideation`, `task-type-idea-mockup` | ideation-stage |
+| `task-type-requirement-gathering`, `task-type-feature-breakdown` | requirement-stage |
+| `task-type-bug-fix`, `task-type-code-refactor`, `task-type-change-request`, `task-type-project-init`, `task-type-dev-environment`, `task-type-user-manual`, `task-type-human-playground`, `task-type-share-idea` | Standalone |
 
 ### Task States
 
@@ -134,6 +135,8 @@ Execute tasks by following these 6 steps in order:
 | Request Pattern | Task Type |
 |-----------------|-----------|
 | "ideate", "brainstorm", "refine idea", "analyze my idea" | Ideation |
+| "create mockup", "visualize idea", "prototype UI", "design mockup" | Idea Mockup |
+| "share idea", "convert to ppt", "make presentation", "export idea" | Share Idea |
 | "new feature", "add feature" | Requirement Gathering |
 | "break down", "split features" | Feature Breakdown |
 | "refine", "clarify requirements" | Feature Refinement |
@@ -249,11 +252,12 @@ Output:
 |----------|------------------|-----------|
 | Standalone | (none) | N/A |
 | feature-stage | `feature-stage+feature-board-management` | Yes (must exist) |
+| ideation-stage | `ideation-stage+ideation-board-management` | No (optional) |
 | requirement-stage | `requirement-stage+requirement-board-management` | No (optional, disabled) |
 
 **Notes:**
 - If category skill not found, execution continues without error
-- This allows requirement-stage tasks to work without requirement board management
+- This allows ideation-stage and requirement-stage tasks to work without board management
 - Category-level change summary will be null if skill is skipped
 
 **Output:** `category_level_change_summary` added to Task Data Model (or null if skipped)
@@ -335,15 +339,16 @@ ELSE:
 
 | Task Type | Skill | Category | Next Task | Human Review |
 |-----------|-------|----------|-----------|--------------|
-| Ideation | `task-type-ideation` | ideation-stage | Share Idea or Requirement Gathering | Yes |
-| Share Idea | `task-type-share-idea` | ideation-stage | Requirement Gathering | Yes |
+| Ideation | `task-type-ideation` | ideation-stage | Idea Mockup | No |
+| Idea Mockup | `task-type-idea-mockup` | ideation-stage | Requirement Gathering | No |
+| Share Idea | `task-type-share-idea` | Standalone | - | Yes |
 | Requirement Gathering | `task-type-requirement-gathering` | requirement-stage | Feature Breakdown | Yes |
 | Feature Breakdown | `task-type-feature-breakdown` | requirement-stage | Feature Refinement | Yes |
 | Feature Refinement | `task-type-feature-refinement` | feature-stage | Technical Design | Yes |
 | Technical Design | `task-type-technical-design` | feature-stage | Test Generation | Yes |
 | Test Generation | `task-type-test-generation` | feature-stage | Code Implementation | No |
-| Code Implementation | `task-type-code-implementation` | feature-stage | Human Playground | No |
-| Human Playground | `task-type-human-playground` | feature-stage | Feature Closing | Yes |
+| Code Implementation | `task-type-code-implementation` | feature-stage | Feature Closing | No |
+| Human Playground | `task-type-human-playground` | Standalone | - | Yes |
 | Feature Closing | `task-type-feature-closing` | feature-stage | User Manual | No |
 | Bug Fix | `task-type-bug-fix` | Standalone | - | Yes |
 | Code Refactor | `task-type-code-refactor` | Standalone | - | Yes |
@@ -367,9 +372,8 @@ Description: "Implement user login feature with authentication"
 ⚠️ MANDATORY: Create tasks on board BEFORE proceeding
 → Load task-board-management skill
 → Create: TASK-001 (Code Implementation) - status: pending
-→ Create: TASK-002 (Human Playground) - status: pending
-→ Create: TASK-003 (Feature Closing) - status: pending
-→ Verify all 3 tasks appear in Active Tasks section of task-board.md
+→ Create: TASK-002 (Feature Closing) - status: pending
+→ Verify all tasks appear in Active Tasks section of task-board.md
 ```
 
 **Step 2: DoR**
@@ -387,7 +391,7 @@ Load: task-type-code-implementation
 Work: Write code, tests
 Output:
   status: completed
-  next_task_type: Human Playground
+  next_task_type: Feature Closing
   require_human_review: false
   task_output_links: [src/auth/login.ts, tests/auth/login.test.ts]
   feature_id: FEATURE-001
@@ -411,7 +415,7 @@ Output standard summary
 
 **Step 6: Routing**
 ```
-auto_advance = true, next_task_type = Human Playground
+auto_advance = true, next_task_type = Feature Closing
 → Start TASK-002 from Step 2
 ```
 

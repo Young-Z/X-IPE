@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "ideation": {
+    "antv-infographic": false,
+    "mermaid": true
+  },
+  "mockup": {
+    "frontend-design": true,
+    "figma-mcp": false,
+    "excalidraw": false
+  },
+  "sharing": {
+    "pptx-export": false,
+    "docx-export": false,
+    "pdf-export": false
+  }
+}

@@ -5,6 +5,12 @@
 > Status: Refined  
 > Last Updated: 01-20-2026
 
+## Version History
+
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| v1.0 | 01-20-2026 | Initial specification | - |
+
 ## Overview
 
 The Content Editor feature enables users to modify file contents directly in the browser and save changes back to the filesystem. It extends the Content Viewer (FEATURE-002) by adding an "Edit" mode that transforms the rendered view into an editable text area.

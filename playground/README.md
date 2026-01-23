@@ -12,6 +12,10 @@ Interactive playgrounds for human testing of implemented features.
 | Settings & Configuration (Interactive) | `uv run python playground/playground_settings.py -i` |
 | Project Folders (FEATURE-006 v2.0) | `uv run python playground/playground_project_folders.py --demo` |
 | Project Folders (Interactive) | `uv run python playground/playground_project_folders.py` |
+| Ideas Upload (FEATURE-008 v1.2 CR-002) | `uv run python playground/playground_ideas_upload.py --demo` |
+| Ideas Upload (Interactive) | `uv run python playground/playground_ideas_upload.py` |
+| Ideation Toolbox (FEATURE-008 v1.3 CR-003) | `uv run python playground/playground_ideation_toolbox.py --demo` |
+| Ideation Toolbox (Interactive) | `uv run python playground/playground_ideation_toolbox.py` |
 
 ## Human Simulation Tests
 
@@ -22,6 +26,8 @@ These tests simulate human interaction scenarios to validate the user experience
 | Interactive Console | `uv run python playground/tests/test_playground_interactive_console.py` |
 | Settings & Configuration | `uv run python playground/tests/test_playground_settings.py` |
 | Project Folders (v2.0) | `uv run python playground/tests/test_playground_project_folders.py` |
+| Ideas Upload (CR-002) | `uv run python playground/tests/test_playground_ideas_upload.py` |
+| Ideation Toolbox (CR-003) | `uv run python playground/tests/test_playground_ideation_toolbox.py` |
 
 ## Interactive Console (FEATURE-005)
 

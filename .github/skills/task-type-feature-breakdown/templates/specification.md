@@ -1,5 +1,10 @@
 # Specification: {FEATURE-ID} - {Feature Title}
 
+## Version History
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| 1.0 | YYYY-MM-DD | Initial specification | - |
+
 ## Overview
 [Brief description of what this feature does]
 

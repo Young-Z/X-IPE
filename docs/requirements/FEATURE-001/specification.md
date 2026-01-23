@@ -5,6 +5,12 @@
 > Status: Refined  
 > Last Updated: 01-18-2026
 
+## Version History
+
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| v1.0 | 01-18-2026 | Initial specification | - |
+
 ## Overview
 
 The Project Navigation feature provides a dynamic sidebar that displays the folder structure of an AI agent-created project. Users can browse through the project hierarchy using an expandable/collapsible tree view, with three predefined top-level sections mapping to standard project folders: Project Plan, Requirements/Technical Design, and Code Repository.

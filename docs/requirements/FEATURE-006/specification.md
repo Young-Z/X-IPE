@@ -5,6 +5,13 @@
 > Status: Refined  
 > Last Updated: 01-20-2026
 
+## Version History
+
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| v2.0 | 01-20-2026 | Multiple project folders, project switcher, auto-refresh | - |
+| v1.0 | 01-18-2026 | Initial specification | - |
+
 ## Overview
 
 The Settings & Configuration feature provides a dedicated settings page where users can manage project folders and configure application preferences. **In v2.0**, users can manage a list of named project folders and switch between them from the main document viewer page using a dropdown selector.

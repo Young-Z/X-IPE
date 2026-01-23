@@ -144,11 +144,22 @@ Process:
    - status, last_updated
    - task_output_links
    - category (if changed)
-4. IF status is terminal (completed/cancelled):
-   → Move to appropriate section
-   → Add category_level_change_summary to notes
-5. Update Quick Stats
+4. ⚠️ CRITICAL - Handle terminal status:
+   IF status = completed:
+     → REMOVE task row from "Active Tasks" section
+     → ADD task row to "Completed Tasks" section
+     → Include category_level_change_summary in Notes column
+   IF status = cancelled:
+     → REMOVE task row from "Active Tasks" section  
+     → ADD task row to "Cancelled Tasks" section
+     → Include cancellation reason in Reason column
+5. Update Quick Stats:
+   - Decrement Total Active (if moved out of Active)
+   - Increment Completed Today (if completed)
 ```
+
+**⛔ IMPORTANT:** Completed tasks must be MOVED (deleted from Active, added to Completed), 
+NOT just have their status updated while remaining in the Active Tasks section.
 
 ### Operation 5: Query Tasks
 
@@ -196,19 +207,22 @@ auto_advance: false  # Controls task chaining
 | Task ID | Task Type | Category | Role | Status | Next Task |
 |---------|-----------|----------|------|--------|-----------|
 
-Contains: pending, in_progress, blocked, deferred tasks
+Contains: pending, in_progress, blocked, deferred tasks ONLY
+⛔ **NEVER contains completed or cancelled tasks**
 
 ### Completed Tasks
 | Task ID | Task Type | Category | Completed | Category Changes |
 |---------|-----------|----------|-----------|------------------|
 
-Contains: Tasks with status = completed
+Contains: Tasks with status = completed ONLY
+✅ **Tasks MUST be moved here when completed (removed from Active)**
 
 ### Cancelled Tasks
 | Task ID | Task Type | Reason | Cancelled |
 |---------|-----------|--------|-----------|
 
-Contains: Tasks with status = cancelled
+Contains: Tasks with status = cancelled ONLY
+❌ **Tasks MUST be moved here when cancelled (removed from Active)**
 
 ---
 
@@ -259,7 +273,7 @@ Step 2: Create Task
 → role_assigned: Nova
 → Generate task_id: TASK-001
 → status: pending
-→ next_task_type: Human Playground
+→ next_task_type: Feature Closing
 
 Result: Board created at task-board.md with TASK-001
 ```
@@ -335,8 +349,8 @@ Task_Board:
   auto_advance: true
   
   Active Tasks:
-    - TASK-002: Human Playground | Nova | in_progress | Feature Closing
-    - TASK-003: Feature Closing | Nova | pending | null
+    - TASK-002: Feature Closing | Nova | in_progress | User Manual
+    - TASK-003: User Manual | Nova | pending | null
     - TASK-004: Bug Fix | Nova | blocked | null
   
   Completed Tasks:

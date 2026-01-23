@@ -5,6 +5,12 @@
 > Created: 01-22-2026  
 > Last Updated: 01-22-2026
 
+## Version History
+
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| v1.0 | 01-22-2026 | Initial specification | - |
+
 ## Overview
 
 Visual indicator (yellow dot) in the sidebar to notify users when files or folders have changed, allowing users to quickly identify updates without manual checking.

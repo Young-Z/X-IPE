@@ -5,6 +5,12 @@
 > Status: Refined  
 > Last Updated: 01-19-2026
 
+## Version History
+
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| v1.0 | 01-19-2026 | Initial specification | - |
+
 ## Overview
 
 The Live Refresh feature provides automatic content updates when the currently viewed file changes on disk. As AI agents modify documentation or code files, the browser automatically refreshes the content without requiring manual page reloads, ensuring human reviewers always see the latest version.
