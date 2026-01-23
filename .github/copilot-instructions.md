@@ -76,6 +76,7 @@
 | Human Playground | `task-type-human-playground` | feature-stage | Feature Closing | Yes |
 | Feature Closing | `task-type-feature-closing` | feature-stage | User Manual | No |
 | Bug Fix | `task-type-bug-fix` | Standalone | - | Yes |
+| Code Refactor | `task-type-code-refactor` | Standalone | - | Yes |
 | Change Request | `task-type-change-request` | Standalone | Feature Refinement OR Feature Breakdown | Yes |
 | Project Initialization | `task-type-project-init` | Standalone | Dev Environment | No |
 | Dev Environment | `task-type-dev-environment` | Standalone | - | No |

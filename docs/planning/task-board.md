@@ -6,6 +6,9 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-088 | Ideation | Refine idea: Draft Idea - 01232026 162319 (Retail POS) | Flux | ⏳ pending | 01-23-2026 08:30:00 | [idea-summary-v1.md](docs/ideas/Draft%20Idea%20-%2001232026%20162319/idea-summary-v1.md), [idea-summary-v2.md](docs/ideas/Draft%20Idea%20-%2001232026%20162319/idea-summary-v2.md) | Requirement Gathering |
+| TASK-089 | Share Idea | Export idea-summary-v2.md to PPTX | Spark | ✅ completed | 01-23-2026 08:36:00 | [formal-idea-summary-v2.pptx](docs/ideas/Draft%20Idea%20-%2001232026%20162319/formal-idea-summary-v2.pptx) | Requirement Gathering |
+| TASK-087 | Code Refactor | Refactor large codebase files (services.py, app.py, index.html, base.html) | Nova | 🔄 in_progress | 01-23-2026 07:05:00 | - | - |
 
 ---
 
@@ -147,7 +150,7 @@
 - **Total Active:** 0
 - **In Progress:** 0
 - **Blocked:** 0
-- **Completed Today:** 6
+- **Completed Today:** 7
 
 ---
 
