@@ -656,6 +656,61 @@ uv run python -m src.app
 uv run pytest tests/ -v
 ```
 
+### Running as a Subfolder in Your Project
+
+X-IPE can run as a subfolder within a larger project, allowing you to view your entire project structure while keeping X-IPE isolated. This is useful when X-IPE is a tool within a bigger codebase.
+
+**Setup:**
+
+1. Place X-IPE in a subfolder of your project:
+   ```
+   my-project/
+   ├── .x-ipe.yaml          # Config file at project root
+   ├── src/                  # Your project source
+   ├── docs/                 # Your project docs
+   └── x-ipe/                # X-IPE application folder
+       ├── src/
+       ├── docs/
+       └── ...
+   ```
+
+2. Create `.x-ipe.yaml` at your project root:
+   ```yaml
+   # .x-ipe.yaml
+   version: 1
+   paths:
+     project_root: "."       # Relative to this config file
+     x_ipe_app: "./x-ipe"    # Path to X-IPE folder
+   defaults:
+     file_tree_scope: "project_root"   # Show entire project in file tree
+     terminal_cwd: "project_root"      # Terminal starts at project root
+   ```
+
+3. Run X-IPE from **anywhere** in your project:
+   ```bash
+   # From project root
+   cd my-project
+   uv run --directory x-ipe python -m src.app
+
+   # Or from X-IPE folder
+   cd my-project/x-ipe
+   uv run python -m src.app
+   ```
+
+X-IPE will automatically discover `.x-ipe.yaml` by searching the current directory and up to 20 parent directories.
+
+**Config Options:**
+
+| Field | Description | Required |
+|-------|-------------|----------|
+| `version` | Config version (always `1`) | Yes |
+| `paths.project_root` | Path to your project root (relative to config) | Yes |
+| `paths.x_ipe_app` | Path to X-IPE folder (relative to config) | Yes |
+| `defaults.file_tree_scope` | `"project_root"` or `"x_ipe_app"` (default: `"project_root"`) | No |
+| `defaults.terminal_cwd` | `"project_root"` or `"x_ipe_app"` (default: `"project_root"`) | No |
+
+**Without `.x-ipe.yaml`:** X-IPE works exactly as before—file tree shows the X-IPE folder, terminal starts in the X-IPE directory.
+
 ---
 
 ## 📁 Project Structure
