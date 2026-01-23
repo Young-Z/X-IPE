@@ -212,6 +212,11 @@ class WorkplaceManager {
             
             const itemContent = document.createElement('div');
             itemContent.className = 'workplace-tree-item-content';
+            // CR-002: Add idea-folder-node class and data for drag-drop targets
+            if (node.type === 'folder') {
+                itemContent.classList.add('idea-folder-node');
+                itemContent.dataset.folderName = node.name;
+            }
             itemContent.style.paddingLeft = `${level * 16 + 8}px`;
             
             const icon = document.createElement('i');
@@ -288,6 +293,11 @@ class WorkplaceManager {
             container.innerHTML = '';
         }
         container.appendChild(ul);
+        
+        // CR-002: Setup drag-drop on folder nodes after tree is rendered
+        if (level === 0) {
+            this._setupFolderDragDrop();
+        }
     }
     
     /**
@@ -306,6 +316,11 @@ class WorkplaceManager {
             
             const itemContent = document.createElement('div');
             itemContent.className = 'workplace-tree-item-content';
+            // CR-002: Add idea-folder-node class and data for drag-drop targets
+            if (node.type === 'folder') {
+                itemContent.classList.add('idea-folder-node');
+                itemContent.dataset.folderName = node.name;
+            }
             itemContent.style.paddingLeft = `${level * 16 + 8}px`;
             
             const icon = document.createElement('i');
@@ -521,12 +536,13 @@ class WorkplaceManager {
                          'cs', 'go', 'rs', 'rb', 'php', 'swift', 'kt', 'scala', 'sh', 'bash',
                          'html', 'css', 'scss', 'less', 'json', 'xml', 'yaml', 'yml', 'toml',
                          'sql', 'r', 'lua', 'pl', 'pm'];
+        const imageExts = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'ico', 'svg', 'webp'];
         const binaryExts = ['docx', 'doc', 'xlsx', 'xls', 'pptx', 'ppt', 'pdf', 'zip', 'rar',
-                           'png', 'jpg', 'jpeg', 'gif', 'bmp', 'ico', 'svg', 'webp',
                            'mp3', 'mp4', 'wav', 'avi', 'mov', 'exe', 'dll', 'bin'];
         
         if (markdownExts.includes(ext)) return 'markdown';
         if (codeExts.includes(ext)) return 'code';
+        if (imageExts.includes(ext)) return 'image';
         if (binaryExts.includes(ext)) return 'binary';
         return 'text';
     }
@@ -548,7 +564,9 @@ class WorkplaceManager {
         `;
         
         let bodyContent;
-        if (this.fileType === 'binary') {
+        if (this.fileType === 'image') {
+            bodyContent = this._renderImage();
+        } else if (this.fileType === 'binary') {
             bodyContent = this._renderBinaryPlaceholder();
         } else if (this.fileType === 'markdown') {
             bodyContent = this._renderMarkdown(content);
@@ -558,13 +576,14 @@ class WorkplaceManager {
             bodyContent = `<pre class="workplace-text-content">${this._escapeHtml(content)}</pre>`;
         }
         
-        // Show hint for editable files
-        const editHint = this.fileType !== 'binary' ? '<span class="workplace-edit-hint text-muted small">Double-click to edit</span>' : '';
+        // Show hint for editable files (not for images or binary)
+        const isEditable = this.fileType !== 'binary' && this.fileType !== 'image';
+        const editHint = isEditable ? '<span class="workplace-edit-hint text-muted small">Double-click to edit</span>' : '';
         
         container.innerHTML = `
             <div class="workplace-editor">
                 ${header}
-                <div class="workplace-content-body" id="workplace-content-body" title="${this.fileType !== 'binary' ? 'Double-click to edit' : ''}">
+                <div class="workplace-content-body" id="workplace-content-body" title="${isEditable ? 'Double-click to edit' : ''}">
                     ${bodyContent}
                 </div>
                 ${editHint ? `<div class="workplace-edit-hint-container">${editHint}</div>` : ''}
@@ -572,7 +591,7 @@ class WorkplaceManager {
         `;
         
         // Bind double-click to edit (for editable files)
-        if (this.fileType !== 'binary') {
+        if (isEditable) {
             const contentBody = document.getElementById('workplace-content-body');
             if (contentBody) {
                 contentBody.addEventListener('dblclick', () => this.enterEditMode());
@@ -611,6 +630,21 @@ class WorkplaceManager {
         if (window.terminalManager) {
             window.terminalManager.sendCopilotRefineCommand(this.currentPath);
         }
+    }
+    
+    /**
+     * Render image preview
+     */
+    _renderImage() {
+        const fileName = this.currentPath.split('/').pop();
+        // Use the file API to serve the image
+        const imageSrc = `/api/file/content?path=${encodeURIComponent(this.currentPath)}&raw=true`;
+        return `
+            <div class="workplace-image-preview">
+                <img src="${imageSrc}" alt="${this._escapeHtml(fileName)}" class="workplace-preview-img" />
+                <p class="text-muted small mt-2 text-center">${this._escapeHtml(fileName)}</p>
+            </div>
+        `;
     }
     
     /**
@@ -1212,6 +1246,80 @@ class WorkplaceManager {
             
             if (statusEl) statusEl.classList.add('d-none');
             if (dropzone) dropzone.classList.remove('uploading');
+        }
+    }
+    
+    /**
+     * CR-002: Setup drag-drop handlers on folder nodes in the tree
+     * Called after tree render
+     */
+    _setupFolderDragDrop() {
+        const folderNodes = document.querySelectorAll('.idea-folder-node');
+        
+        folderNodes.forEach(node => {
+            const folderName = node.dataset.folderName;
+            if (!folderName) return;
+            
+            // Prevent default to allow drop
+            node.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                node.classList.add('drop-target');
+            });
+            
+            node.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Only remove if leaving the node itself, not entering a child
+                if (!node.contains(e.relatedTarget)) {
+                    node.classList.remove('drop-target');
+                }
+            });
+            
+            node.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                node.classList.remove('drop-target');
+                
+                if (e.dataTransfer.files.length > 0) {
+                    await this._uploadToFolder(e.dataTransfer.files, folderName);
+                }
+            });
+        });
+    }
+    
+    /**
+     * CR-002: Upload files to a specific existing folder
+     * @param {FileList} files - Files to upload
+     * @param {string} folderName - Target folder name
+     */
+    async _uploadToFolder(files, folderName) {
+        try {
+            const formData = new FormData();
+            for (const file of files) {
+                formData.append('files', file);
+            }
+            formData.append('target_folder', folderName);
+            
+            const response = await fetch('/api/ideas/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this._showToast(
+                    `Uploaded ${result.files_uploaded.length} file(s) to ${folderName}`,
+                    'success'
+                );
+                await this.loadTree();
+            } else {
+                this._showToast(result.error || 'Upload failed', 'error');
+            }
+        } catch (error) {
+            console.error('Upload to folder failed:', error);
+            this._showToast('Upload failed: ' + error.message, 'error');
         }
     }
     

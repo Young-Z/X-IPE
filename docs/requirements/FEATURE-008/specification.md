@@ -47,10 +47,10 @@ This feature integrates with a new agent skill (`task-type-ideation`) that analy
 - [x] AC-12: Folders in the tree can be renamed via inline editing (double-click)
 - [x] AC-13: Folder rename updates the physical folder name on disk
 - [x] AC-14: Tree view updates automatically when files/folders are added, renamed, or deleted
-- [ ] AC-20: Users can drag files onto folder nodes in the idea tree (CR-002)
-- [ ] AC-21: Folder highlights visually when files are dragged over it (CR-002)
-- [ ] AC-22: Dropping files onto a folder uploads them directly to that folder (CR-002)
-- [ ] AC-23: Toast notification confirms successful upload to existing folder (CR-002)
+- [x] AC-20: Users can drag files onto folder nodes in the idea tree (CR-002)
+- [x] AC-21: Folder highlights visually when files are dragged over it (CR-002)
+- [x] AC-22: Dropping files onto a folder uploads them directly to that folder (CR-002)
+- [x] AC-23: Toast notification confirms successful upload to existing folder (CR-002)
 - [x] AC-15: "Copilot" button appears to the left of the Edit button in content view header (CR-001)
 - [x] AC-16: Clicking Copilot button expands the terminal panel (CR-001)
 - [x] AC-17: If terminal is in Copilot CLI mode, a new terminal session is created (CR-001)

@@ -694,3 +694,43 @@
     background-color: #f8d7da;
     color: #721c24;
 }
+
+/* =================================================================
+ * CR-002: FOLDER DROP TARGET STYLES
+ * ================================================================= */
+.idea-folder-node {
+    transition: background-color 0.2s, outline 0.2s;
+}
+
+.idea-folder-node.drop-target {
+    background-color: rgba(13, 110, 253, 0.1);
+    outline: 2px dashed var(--bs-primary, #0d6efd);
+    outline-offset: -2px;
+    border-radius: 4px;
+}
+
+.idea-folder-node.drop-target .bi-folder,
+.idea-folder-node.drop-target .bi-folder2 {
+    color: var(--bs-primary, #0d6efd);
+}
+
+/* =================================================================
+ * IMAGE PREVIEW
+ * ================================================================= */
+.workplace-image-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 1rem;
+    background: #f8f9fa;
+}
+
+.workplace-preview-img {
+    max-width: 100%;
+    max-height: calc(100vh - 200px);
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}

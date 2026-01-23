@@ -13,7 +13,7 @@ FEATURE-005: Interactive Console v4.0
 """
 import os
 import sys
-from flask import Flask, render_template, jsonify, request, current_app
+from flask import Flask, render_template, jsonify, request, current_app, send_file
 from flask_socketio import SocketIO, emit
 
 from src.services import ProjectService, ContentService, SettingsService, ProjectFoldersService, IdeasService, ConfigService, SkillsService
@@ -137,11 +137,15 @@ def register_routes(app):
     @app.route('/api/file/content')
     def get_file_content():
         """
-        GET /api/file/content?path=<relative_path>
+        GET /api/file/content?path=<relative_path>&raw=<true/false>
         
         Returns the content of a file with metadata for rendering.
+        If raw=true, serves the raw file content (for images).
         """
+        from pathlib import Path
+        
         file_path = request.args.get('path')
+        raw = request.args.get('raw', 'false').lower() == 'true'
         
         if not file_path:
             return jsonify({'error': 'Path parameter required'}), 400
@@ -150,6 +154,35 @@ def register_routes(app):
         
         try:
             service = ContentService(project_root)
+            
+            # Raw mode: serve file directly (for images)
+            if raw:
+                # Resolve path manually (same logic as ContentService.get_content)
+                full_path = (Path(project_root) / file_path).resolve()
+                
+                # Security check: ensure path is within project root
+                if not str(full_path).startswith(str(Path(project_root).resolve())):
+                    return jsonify({'error': 'Access denied'}), 403
+                
+                if not full_path.exists():
+                    return jsonify({'error': 'File not found'}), 404
+                
+                # Determine MIME type
+                ext = full_path.suffix.lower()
+                mime_types = {
+                    '.png': 'image/png',
+                    '.jpg': 'image/jpeg',
+                    '.jpeg': 'image/jpeg',
+                    '.gif': 'image/gif',
+                    '.bmp': 'image/bmp',
+                    '.ico': 'image/x-icon',
+                    '.svg': 'image/svg+xml',
+                    '.webp': 'image/webp',
+                }
+                mime_type = mime_types.get(ext, 'application/octet-stream')
+                
+                return send_file(full_path, mimetype=mime_type)
+            
             result = service.get_content(file_path)
             return jsonify(result)
         except FileNotFoundError:
