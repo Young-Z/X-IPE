@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-010: Project Root Configuration** - Support for X-IPE as subfolder in larger projects
+  - `.x-ipe.yaml` config file at project root defines path mappings
+  - Config discovery: searches cwd then parent directories (up to 20 levels)
+  - ConfigService with load(), discover, parse, validate methods
+  - ConfigData with get_file_tree_path(), get_terminal_cwd() helpers
+  - /api/config endpoint returns detected configuration
+  - Settings page shows "Project Configuration" section (read-only)
+  - Automatic PROJECT_ROOT configuration at app startup
+  - Backward compatible: works without config file (existing behavior unchanged)
+  - PyYAML dependency added for YAML parsing
+  - 42 comprehensive tests covering all config scenarios
+
 - **FEATURE-009: File Change Indicator** - Visual notification for changed files
   - Yellow dot indicator (6px, Bootstrap warning color) appears before file/folder names
   - Dot shows when file content or structure changes (detected via 5s polling)

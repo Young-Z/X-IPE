@@ -29,7 +29,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-007 | Git Integration | v1.0 | Planned | - | 01-18-2026 | 01-18-2026 00:10:00 |
 | FEATURE-008 | Workplace (Idea Management) | v1.0 | Completed | [specification.md](../requirements/FEATURE-008/specification.md) | 01-22-2026 | 01-22-2026 11:42:00 |
 | FEATURE-009 | File Change Indicator | v1.0 | Completed | [specification.md](../requirements/FEATURE-009/specification.md) | 01-22-2026 | 01-22-2026 11:21:00 |
-| FEATURE-010 | Project Root Configuration | v1.0 | Implemented | [specification.md](../requirements/FEATURE-010/specification.md) | 01-23-2026 | 01-23-2026 05:55:00 |
+| FEATURE-010 | Project Root Configuration | v1.0 | Completed | [specification.md](../requirements/FEATURE-010/specification.md) | 01-23-2026 | 01-23-2026 05:58:00 |
 
 ---
 
@@ -44,20 +44,20 @@ This board tracks all features across the project lifecycle.
 ### Designed (1)
 - FEATURE-005: Interactive Console v2.0
 
-### Implemented (6)
+### Implemented (5)
 - FEATURE-001: Project Navigation
 - FEATURE-002: Content Viewer
 - FEATURE-003: Content Editor
 - FEATURE-004: Live Refresh
 - FEATURE-006: Settings & Configuration
-- FEATURE-010: Project Root Configuration
 
 ### Tested (0)
 - None
 
-### Completed (2)
+### Completed (3)
 - FEATURE-008: Workplace (Idea Management) ✅
 - FEATURE-009: File Change Indicator ✅
+- FEATURE-010: Project Root Configuration ✅
 
 ---
 

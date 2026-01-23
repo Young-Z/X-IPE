@@ -13,6 +13,7 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-084 | Feature Closing | Close FEATURE-010: Project Root Configuration | Nova | 01-23-2026 05:58:00 | [CHANGELOG.md](CHANGELOG.md), [specification.md](docs/requirements/FEATURE-010/specification.md) | 11/11 ACs verified. 348 tests passing. Feature complete. |
 | TASK-083 | Code Implementation | Implement FEATURE-010: Project Root Configuration | Nova | 01-23-2026 05:55:00 | [services.py](src/services.py), [app.py](src/app.py), [settings.html](src/templates/settings.html), [test_config.py](tests/test_config.py) | ConfigData, ConfigService, /api/config endpoint, Settings UI section, startup integration. 42/42 config tests, 348/348 total tests pass. |
 | TASK-082 | Test Generation | Generate tests for FEATURE-010: Project Root Configuration | Nova | 01-23-2026 05:47:00 | [test_config.py](tests/test_config.py) | 42 tests: ConfigData (6), Discovery (5), Parsing (4), Validation (12), Load (5), API (4), Integration (2), Edge Cases (4). TDD ready - 42 failing. |
 | TASK-081 | Bug Fix | File change indicator doesn't show when file content is modified | Nova | 01-23-2026 05:42:00 | [services.py](src/services.py), [index.html](src/templates/index.html), [test_change_indicator.py](tests/test_change_indicator.py) | Root cause: only structure changes detected, not mtime. Fix: added mtime to FileNode, frontend tracks mtime changes. 306/306 tests pass. |

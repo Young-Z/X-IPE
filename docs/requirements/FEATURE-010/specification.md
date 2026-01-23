@@ -26,17 +26,17 @@ The config discovery mechanism traverses from the current working directory up t
 
 ## Acceptance Criteria
 
-- [ ] AC-1: X-IPE reads `.x-ipe.yaml` config file if present in cwd or parent directories
-- [ ] AC-2: Config discovery traverses from cwd up to 20 parent directories before giving up
-- [ ] AC-3: Config defines `paths.project_root` and `paths.x_ipe_app` (relative to config file location)
-- [ ] AC-4: Config defines `defaults.file_tree_scope` ("project_root" or "x_ipe_app")
-- [ ] AC-5: Config defines `defaults.terminal_cwd` for terminal working directory
-- [ ] AC-6: File tree defaults to `project_root` when `file_tree_scope: "project_root"`
-- [ ] AC-7: Works when launched from project root (`python x-ipe/main.py`) or x-ipe folder (`python main.py`)
-- [ ] AC-8: Invalid paths in config show warning toast and fall back to current working directory
-- [ ] AC-9: Existing multi-project folder behavior (FEATURE-006) remains unchanged
-- [ ] AC-10: Settings page shows read-only display of detected `.x-ipe.yaml` config values
-- [ ] AC-11: Without `.x-ipe.yaml`, X-IPE behaves exactly as before (backward compatible)
+- [x] AC-1: X-IPE reads `.x-ipe.yaml` config file if present in cwd or parent directories
+- [x] AC-2: Config discovery traverses from cwd up to 20 parent directories before giving up
+- [x] AC-3: Config defines `paths.project_root` and `paths.x_ipe_app` (relative to config file location)
+- [x] AC-4: Config defines `defaults.file_tree_scope` ("project_root" or "x_ipe_app")
+- [x] AC-5: Config defines `defaults.terminal_cwd` for terminal working directory
+- [x] AC-6: File tree defaults to `project_root` when `file_tree_scope: "project_root"`
+- [x] AC-7: Works when launched from project root (`python x-ipe/main.py`) or x-ipe folder (`python main.py`)
+- [x] AC-8: Invalid paths in config show warning toast and fall back to current working directory
+- [x] AC-9: Existing multi-project folder behavior (FEATURE-006) remains unchanged
+- [x] AC-10: Settings page shows read-only display of detected `.x-ipe.yaml` config values
+- [x] AC-11: Without `.x-ipe.yaml`, X-IPE behaves exactly as before (backward compatible)
 
 ## Functional Requirements
 

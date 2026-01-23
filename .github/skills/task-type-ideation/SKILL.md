@@ -115,7 +115,45 @@ Learn and refine user ideas through collaborative brainstorming by:
 3. Help user think through implications
 4. Continue until idea is well-defined
 
-### Step 4: Create Idea Summary Document
+### Step 4: Research Common Principles (If Applicable)
+
+**Action:** Identify if the idea involves common/established topics and research relevant principles
+
+**When to Research:**
+- The idea touches well-known domains (e.g., authentication, e-commerce, data pipelines)
+- Industry best practices exist for the problem space
+- Established patterns or frameworks are relevant
+- The idea could benefit from proven approaches
+
+**Research Process:**
+```
+1. Identify if topic is common/established
+2. Use web_search tool to research:
+   - Industry best practices
+   - Common design patterns
+   - Established principles
+   - Reference implementations
+3. Document findings as "Common Principles"
+4. Note authoritative sources for references
+```
+
+**Example Common Topics & Principles:**
+
+| Topic | Common Principles to Research |
+|-------|------------------------------|
+| Authentication | OAuth 2.0, JWT best practices, MFA patterns |
+| API Design | REST conventions, OpenAPI, rate limiting |
+| Data Storage | ACID properties, CAP theorem, data modeling |
+| UI/UX | Nielsen heuristics, accessibility (WCAG), mobile-first |
+| Security | OWASP Top 10, zero-trust, encryption standards |
+| Scalability | Horizontal scaling, caching strategies, CDN usage |
+| DevOps | CI/CD pipelines, IaC, observability |
+
+**Output:** List of relevant principles with sources to include in idea summary
+
+---
+
+### Step 5: Create Idea Summary Document
 
 **Action:** Create versioned summary file `docs/ideas/{folder}/idea-summary-vN.md`
 
@@ -181,6 +219,17 @@ data
 
 ## Next Steps
 - [ ] Proceed to Requirement Gathering
+
+## References & Common Principles
+{Include if the idea involves common/established topics}
+
+### Applied Principles
+- **Principle 1:** {Description} - [Source](URL)
+- **Principle 2:** {Description} - [Source](URL)
+
+### Further Reading
+- [Resource 1](URL) - {Brief description}
+- [Resource 2](URL) - {Brief description}
 ```
 
 ---
@@ -281,9 +330,11 @@ data
 |---|------------|----------|
 | 1 | All idea files analyzed | Yes |
 | 2 | Brainstorming session completed | Yes |
-| 3 | `docs/ideas/{folder}/idea-summary-vN.md` created (versioned) | Yes |
-| 4 | Infographics used for visual elements where appropriate | Recommended |
-| 5 | Human has reviewed and approved idea summary | Yes |
+| 3 | Common principles researched (if topic is common/established) | If Applicable |
+| 4 | `docs/ideas/{folder}/idea-summary-vN.md` created (versioned) | Yes |
+| 5 | Infographics used for visual elements where appropriate | Recommended |
+| 6 | References included for researched principles | If Applicable |
+| 7 | Human has reviewed and approved idea summary | Yes |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
 
@@ -386,11 +437,17 @@ task_output_links:
    - "The user research shows two distinct personas - which is primary?"
    - "Have you considered a web-first approach instead?"
 
-5. Create docs/ideas/mobile-app-idea/idea-summary-v1.md with:
+5. Research Common Principles (if applicable):
+   - Mobile app → Research: Mobile UX best practices, offline-first patterns
+   - User auth → Research: OAuth 2.0, biometric auth standards
+   - Document sources for references section
+
+6. Create docs/ideas/mobile-app-idea/idea-summary-v1.md with:
    - Overview and problem statement (text)
    - Key Features (infographic: list-grid-badge-card)
    - Implementation Phases (infographic: sequence-roadmap-vertical-simple)
    - Platform Comparison (infographic: compare-binary-horizontal-badge-card-arrow)
+   - References & Common Principles section with researched sources
 
-6. Resume Task Flow from task-execution-guideline skill
+7. Resume Task Flow from task-execution-guideline skill
 ```
