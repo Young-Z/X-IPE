@@ -209,17 +209,28 @@ class ContentRenderer {
     }
     
     /**
-     * Render markdown content with Mermaid diagrams
+     * Render markdown content with Mermaid diagrams and Infographic DSL
      */
     renderMarkdown(content) {
         // Pre-process Mermaid blocks
         const mermaidBlocks = [];
-        const processedContent = content.replace(
+        let processedContent = content.replace(
             /```mermaid\n([\s\S]*?)```/g,
             (match, diagram, offset) => {
                 const id = `mermaid-${mermaidBlocks.length}`;
                 mermaidBlocks.push({ id, diagram: diagram.trim() });
                 return `<div class="mermaid" id="${id}"></div>`;
+            }
+        );
+        
+        // Pre-process Infographic blocks
+        const infographicBlocks = [];
+        processedContent = processedContent.replace(
+            /```infographic\n([\s\S]*?)```/g,
+            (match, syntax) => {
+                const id = `infographic-${infographicBlocks.length}`;
+                infographicBlocks.push({ id, syntax: syntax.trim() });
+                return `<div class="infographic-container" id="${id}" style="min-height: 200px; width: 100%; margin: 1rem 0;"></div>`;
             }
         );
         
@@ -237,6 +248,9 @@ class ContentRenderer {
         
         // Render Mermaid diagrams
         this.renderMermaidDiagrams(mermaidBlocks);
+        
+        // Render Infographic diagrams
+        this.renderInfographicDiagrams(infographicBlocks);
         
         // Apply syntax highlighting to code blocks
         this.highlightCodeBlocks();
@@ -259,6 +273,39 @@ class ContentRenderer {
                     element.innerHTML = `<div class="alert alert-warning">
                         <i class="bi bi-exclamation-triangle"></i>
                         Diagram rendering error: ${error.message}
+                    </div>`;
+                }
+            }
+        }
+    }
+    
+    /**
+     * Render Infographic DSL diagrams using AntV Infographic
+     */
+    async renderInfographicDiagrams(blocks) {
+        if (typeof AntVInfographic === 'undefined' || blocks.length === 0) return;
+        
+        for (const block of blocks) {
+            const element = document.getElementById(block.id);
+            if (element) {
+                try {
+                    const infographic = new AntVInfographic.Infographic({
+                        container: `#${block.id}`,
+                        width: '100%',
+                        height: '100%',
+                    });
+                    infographic.render(block.syntax);
+                    // Re-render after fonts load for better display
+                    if (document.fonts?.ready) {
+                        document.fonts.ready.then(() => {
+                            infographic.render(block.syntax);
+                        }).catch(e => console.warn('Font loading error:', e));
+                    }
+                } catch (error) {
+                    console.error('Infographic render error:', error);
+                    element.innerHTML = `<div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Infographic rendering error: ${error.message}
                     </div>`;
                 }
             }
@@ -696,13 +743,23 @@ class WorkplaceManager {
         container.innerHTML = `
             <div class="workplace-container">
                 <div class="workplace-sidebar">
-                    <button class="btn btn-primary workplace-upload-btn" id="workplace-upload-btn">
-                        <i class="bi bi-cloud-upload"></i> Upload Idea
-                    </button>
-                    <div class="workplace-tree" id="workplace-tree">
-                        <div class="loading-spinner">
-                            <div class="spinner-border spinner-border-sm" role="status">
-                                <span class="visually-hidden">Loading...</span>
+                    <div class="workplace-sidebar-icons">
+                        <button class="workplace-sidebar-icon" title="New Idea" id="workplace-icon-new">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                        <button class="workplace-sidebar-icon" title="Browse Ideas" id="workplace-icon-browse">
+                            <i class="bi bi-folder2"></i>
+                        </button>
+                    </div>
+                    <div class="workplace-sidebar-content">
+                        <button class="btn btn-primary workplace-upload-btn" id="workplace-upload-btn">
+                            <i class="bi bi-plus-lg"></i> New Idea
+                        </button>
+                        <div class="workplace-tree" id="workplace-tree">
+                            <div class="loading-spinner">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -711,7 +768,7 @@ class WorkplaceManager {
                     <div class="workplace-placeholder">
                         <i class="bi bi-lightbulb"></i>
                         <h5>Welcome to Workplace</h5>
-                        <p class="text-muted">Upload an idea or select a file from the tree</p>
+                        <p class="text-muted">Hover sidebar to browse ideas</p>
                     </div>
                 </div>
             </div>
@@ -720,6 +777,17 @@ class WorkplaceManager {
         // Bind events
         document.getElementById('workplace-upload-btn').addEventListener('click', () => {
             this.showUploadView();
+        });
+        
+        // Bind sidebar icon events
+        document.getElementById('workplace-icon-new').addEventListener('click', () => {
+            this.showUploadView();
+        });
+        
+        document.getElementById('workplace-icon-browse').addEventListener('click', () => {
+            // Toggle expanded state on mobile/touch
+            const sidebar = document.querySelector('.workplace-sidebar');
+            sidebar.classList.toggle('expanded');
         });
         
         // Load tree and start polling
@@ -1112,9 +1180,6 @@ class WorkplaceManager {
                         <button class="btn btn-sm btn-outline-info workplace-copilot-btn" id="workplace-copilot-btn" title="Refine with Copilot">
                             <i class="bi bi-robot"></i> Copilot
                         </button>
-                        <button class="btn btn-sm btn-outline-primary workplace-edit-btn" id="workplace-edit-btn" title="Edit file">
-                            <i class="bi bi-pencil"></i> Edit
-                        </button>
                     </div>
                 </div>
                 <div class="workplace-editor-loading">
@@ -1173,9 +1238,6 @@ class WorkplaceManager {
                     <button class="btn btn-sm btn-outline-info workplace-copilot-btn" id="workplace-copilot-btn" title="Refine with Copilot">
                         <i class="bi bi-robot"></i> Copilot
                     </button>
-                    <button class="btn btn-sm btn-outline-primary workplace-edit-btn" id="workplace-edit-btn" title="Edit file">
-                        <i class="bi bi-pencil"></i> Edit
-                    </button>
                 </div>
             </div>
         `;
@@ -1191,30 +1253,25 @@ class WorkplaceManager {
             bodyContent = `<pre class="workplace-text-content">${this._escapeHtml(content)}</pre>`;
         }
         
-        // Hide Edit button for binary files
-        const showEditBtn = this.fileType !== 'binary';
-        const headerHtml = showEditBtn ? header : `
-            <div class="workplace-editor-header">
-                <span class="workplace-editor-path">${this._escapeHtml(this.currentPath)}</span>
-                <div class="workplace-editor-actions">
-                    <span class="workplace-editor-status" id="workplace-editor-status"></span>
-                </div>
-            </div>
-        `;
+        // Show hint for editable files
+        const editHint = this.fileType !== 'binary' ? '<span class="workplace-edit-hint text-muted small">Double-click to edit</span>' : '';
         
         container.innerHTML = `
             <div class="workplace-editor">
-                ${headerHtml}
-                <div class="workplace-content-body" id="workplace-content-body">
+                ${header}
+                <div class="workplace-content-body" id="workplace-content-body" title="${this.fileType !== 'binary' ? 'Double-click to edit' : ''}">
                     ${bodyContent}
                 </div>
+                ${editHint ? `<div class="workplace-edit-hint-container">${editHint}</div>` : ''}
             </div>
         `;
         
-        // Bind edit button (if visible)
-        const editBtn = document.getElementById('workplace-edit-btn');
-        if (editBtn) {
-            editBtn.addEventListener('click', () => this.enterEditMode());
+        // Bind double-click to edit (for editable files)
+        if (this.fileType !== 'binary') {
+            const contentBody = document.getElementById('workplace-content-body');
+            if (contentBody) {
+                contentBody.addEventListener('dblclick', () => this.enterEditMode());
+            }
         }
         
         // Bind copilot button
@@ -1226,6 +1283,11 @@ class WorkplaceManager {
         // Render Mermaid diagrams if any
         if (this.fileType === 'markdown' && typeof mermaid !== 'undefined') {
             this._renderMermaidDiagrams();
+        }
+        
+        // Render Infographic diagrams if any
+        if (this.fileType === 'markdown' && typeof AntVInfographic !== 'undefined') {
+            this._renderInfographicDiagrams();
         }
     }
     
@@ -1268,7 +1330,7 @@ class WorkplaceManager {
     _renderMarkdown(content) {
         // Pre-process Mermaid blocks
         const mermaidBlocks = [];
-        const processedContent = content.replace(
+        let processedContent = content.replace(
             /```mermaid\n([\s\S]*?)```/g,
             (match, diagram) => {
                 const id = `workplace-mermaid-${mermaidBlocks.length}`;
@@ -1277,6 +1339,18 @@ class WorkplaceManager {
             }
         );
         this._mermaidBlocks = mermaidBlocks;
+        
+        // Pre-process Infographic blocks
+        const infographicBlocks = [];
+        processedContent = processedContent.replace(
+            /```infographic\n([\s\S]*?)```/g,
+            (match, syntax) => {
+                const id = `workplace-infographic-${infographicBlocks.length}`;
+                infographicBlocks.push({ id, syntax: syntax.trim() });
+                return `<div class="infographic-container" id="${id}" style="min-height: 200px; width: 100%; margin: 1rem 0;"></div>`;
+            }
+        );
+        this._infographicBlocks = infographicBlocks;
         
         // Parse markdown
         let html;
@@ -1333,6 +1407,35 @@ class WorkplaceManager {
                     el.innerHTML = svg;
                 } catch (e) {
                     el.innerHTML = `<pre class="text-danger">Mermaid error: ${e.message}</pre>`;
+                }
+            }
+        }
+    }
+    
+    /**
+     * Render Infographic DSL diagrams using AntV Infographic
+     */
+    async _renderInfographicDiagrams() {
+        if (!this._infographicBlocks || this._infographicBlocks.length === 0) return;
+        
+        for (const block of this._infographicBlocks) {
+            const el = document.getElementById(block.id);
+            if (el) {
+                try {
+                    const infographic = new AntVInfographic.Infographic({
+                        container: `#${block.id}`,
+                        width: '100%',
+                        height: '100%',
+                    });
+                    infographic.render(block.syntax);
+                    // Re-render after fonts load
+                    if (document.fonts?.ready) {
+                        document.fonts.ready.then(() => {
+                            infographic.render(block.syntax);
+                        }).catch(e => console.warn('Font loading error:', e));
+                    }
+                } catch (e) {
+                    el.innerHTML = `<pre class="text-danger">Infographic error: ${e.message}</pre>`;
                 }
             }
         }
@@ -1483,7 +1586,7 @@ class WorkplaceManager {
     }
     
     /**
-     * Show upload view
+     * Show upload/compose view
      */
     showUploadView() {
         // Check for unsaved changes
@@ -1500,35 +1603,148 @@ class WorkplaceManager {
         const contentArea = document.getElementById('workplace-content');
         contentArea.innerHTML = `
             <div class="workplace-uploader">
-                <div class="workplace-dropzone" id="workplace-dropzone">
-                    <i class="bi bi-cloud-upload"></i>
-                    <h5>Drag & Drop Files Here</h5>
-                    <p class="text-muted mb-3">or click to browse</p>
-                    <input type="file" id="workplace-file-input" multiple style="display: none;"
-                           accept=".md,.txt,.json,.yaml,.yml,.xml,.csv,.py,.js,.ts,.jsx,.tsx,.html,.css,.sh,.sql,.java,.c,.cpp,.h,.go,.rs,.rb,.php,.swift,.kt">
-                </div>
-                <div class="workplace-supported-formats">
-                    <p class="mb-2"><i class="bi bi-check-circle text-success me-1"></i><strong>Supported formats:</strong></p>
-                    <div class="format-tags">
-                        <span class="format-tag format-tag-docs"><i class="bi bi-file-text"></i> .md .txt</span>
-                        <span class="format-tag format-tag-data"><i class="bi bi-braces"></i> .json .yaml .xml .csv</span>
-                        <span class="format-tag format-tag-code"><i class="bi bi-code-slash"></i> .py .js .ts .jsx .tsx</span>
-                        <span class="format-tag format-tag-code"><i class="bi bi-file-code"></i> .html .css .sh .sql</span>
-                        <span class="format-tag format-tag-code"><i class="bi bi-terminal"></i> .java .c .cpp .go .rs .rb</span>
+                <!-- Tab Navigation -->
+                <ul class="nav nav-tabs workplace-tabs" id="ideaTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="compose-tab" data-bs-toggle="tab" data-bs-target="#compose-pane" type="button" role="tab">
+                            <i class="bi bi-pencil-square"></i> Compose Idea
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload-pane" type="button" role="tab">
+                            <i class="bi bi-cloud-upload"></i> Upload Files
+                        </button>
+                    </li>
+                </ul>
+                
+                <!-- Tab Content -->
+                <div class="tab-content workplace-tab-content" id="ideaTabContent">
+                    <!-- Compose Tab -->
+                    <div class="tab-pane fade show active" id="compose-pane" role="tabpanel">
+                        <div class="workplace-compose">
+                            <textarea class="workplace-compose-textarea" id="workplace-compose-textarea" 
+                                      placeholder="Write your idea here...&#10;&#10;You can use Markdown formatting:&#10;- **bold** and *italic*&#10;- # Headers&#10;- - Bullet lists&#10;- \`code\` blocks"></textarea>
+                            <div class="workplace-compose-actions">
+                                <button class="btn btn-primary" id="workplace-submit-idea">
+                                    <i class="bi bi-send"></i> Submit Idea
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <p class="text-muted small mt-2 mb-0">
-                        <i class="bi bi-info-circle me-1"></i>
-                        Text-based files work best for AI analysis. Binary files (images, PDFs) have limited support.
-                    </p>
+                    
+                    <!-- Upload Tab -->
+                    <div class="tab-pane fade" id="upload-pane" role="tabpanel">
+                        <div class="workplace-dropzone" id="workplace-dropzone">
+                            <i class="bi bi-cloud-upload"></i>
+                            <h5>Drag & Drop Files Here</h5>
+                            <p class="text-muted mb-3">or click to browse</p>
+                            <input type="file" id="workplace-file-input" multiple style="display: none;"
+                                   accept=".md,.txt,.json,.yaml,.yml,.xml,.csv,.py,.js,.ts,.jsx,.tsx,.html,.css,.sh,.sql,.java,.c,.cpp,.h,.go,.rs,.rb,.php,.swift,.kt">
+                        </div>
+                        <div class="workplace-supported-formats">
+                            <p class="mb-2"><i class="bi bi-check-circle text-success me-1"></i><strong>Supported formats:</strong></p>
+                            <div class="format-tags">
+                                <span class="format-tag format-tag-docs"><i class="bi bi-file-text"></i> .md .txt</span>
+                                <span class="format-tag format-tag-data"><i class="bi bi-braces"></i> .json .yaml .xml .csv</span>
+                                <span class="format-tag format-tag-code"><i class="bi bi-code-slash"></i> .py .js .ts .jsx .tsx</span>
+                                <span class="format-tag format-tag-code"><i class="bi bi-file-code"></i> .html .css .sh .sql</span>
+                                <span class="format-tag format-tag-code"><i class="bi bi-terminal"></i> .java .c .cpp .go .rs .rb</span>
+                            </div>
+                            <p class="text-muted small mt-2 mb-0">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Text-based files work best for AI analysis. Binary files (images, PDFs) have limited support.
+                            </p>
+                        </div>
+                    </div>
                 </div>
+                
                 <div class="workplace-upload-status d-none" id="workplace-upload-status">
                     <div class="spinner-border spinner-border-sm" role="status"></div>
-                    <span>Uploading...</span>
+                    <span>Processing...</span>
                 </div>
             </div>
         `;
         
         this.setupUploader();
+        this.setupComposer();
+    }
+    
+    /**
+     * Setup compose event handlers
+     */
+    setupComposer() {
+        const submitBtn = document.getElementById('workplace-submit-idea');
+        const textarea = document.getElementById('workplace-compose-textarea');
+        
+        if (!submitBtn || !textarea) return;
+        
+        submitBtn.addEventListener('click', () => {
+            this.submitComposedIdea();
+        });
+        
+        // Allow Ctrl+Enter to submit
+        textarea.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                this.submitComposedIdea();
+            }
+        });
+    }
+    
+    /**
+     * Submit composed idea as a new markdown file
+     */
+    async submitComposedIdea() {
+        const textarea = document.getElementById('workplace-compose-textarea');
+        const statusEl = document.getElementById('workplace-upload-status');
+        
+        if (!textarea) return;
+        
+        const content = textarea.value.trim();
+        if (!content) {
+            this._showToast('Please write something before submitting', 'warning');
+            return;
+        }
+        
+        if (statusEl) statusEl.classList.remove('d-none');
+        
+        try {
+            // Create a Blob with the content as a markdown file
+            const blob = new Blob([content], { type: 'text/markdown' });
+            const file = new File([blob], 'new idea.md', { type: 'text/markdown' });
+            
+            const formData = new FormData();
+            formData.append('files', file);
+            
+            const response = await fetch('/api/ideas/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this._showToast(`Idea created in ${result.folder_name}`, 'success');
+                await this.loadTree();
+                
+                // Show success message
+                const contentArea = document.getElementById('workplace-content');
+                contentArea.innerHTML = `
+                    <div class="workplace-placeholder">
+                        <i class="bi bi-check-circle text-success"></i>
+                        <h5>Idea Created!</h5>
+                        <p class="text-muted">Your idea has been saved to "${result.folder_name}"</p>
+                    </div>
+                `;
+            } else {
+                throw new Error(result.error || 'Failed to create idea');
+            }
+        } catch (error) {
+            console.error('Failed to submit idea:', error);
+            this._showToast('Failed to create idea: ' + error.message, 'error');
+        } finally {
+            if (statusEl) statusEl.classList.add('d-none');
+        }
     }
     
     /**

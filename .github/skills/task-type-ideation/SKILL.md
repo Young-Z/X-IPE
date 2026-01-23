@@ -11,7 +11,7 @@ Learn and refine user ideas through collaborative brainstorming by:
 1. Analyzing uploaded idea files from Workplace
 2. Generating an initial understanding summary
 3. Asking clarifying questions to brainstorm with user
-4. Creating a structured idea summary document
+4. Creating a structured idea summary document with visual infographics
 5. Preparing for Share Idea or Requirement Gathering
 
 ---
@@ -20,6 +20,7 @@ Learn and refine user ideas through collaborative brainstorming by:
 
 ### Skill Prerequisite
 - If you HAVE NOT learned `task-execution-guideline` and `task-board-management` skill, please learn them first before executing this skill.
+- **Infographic Skill:** Learn `infographic-syntax-creator` skill to generate visual infographics in the idea summary.
 
 **Important:** If Agent DO NOT have skill capability, can directly go to `.github/skills/` folder to learn skills. And SKILL.md file is the entry point to understand each skill.
 
@@ -122,6 +123,7 @@ Learn and refine user ideas through collaborative brainstorming by:
 - Do NOT update existing idea-summary files
 - Always create a NEW versioned file: `idea-summary-v1.md`, `idea-summary-v2.md`, etc.
 - The version number auto-increments based on existing files in the folder
+- **Use infographic DSL** to visually represent key information (see Infographic Guidelines below)
 
 **Template:**
 ```markdown
@@ -146,9 +148,21 @@ Learn and refine user ideas through collaborative brainstorming by:
 {High-level description of the solution}
 
 ## Key Features
-| Feature | Description | Priority |
-|---------|-------------|----------|
-| ... | ... | High/Medium/Low |
+
+{Use infographic for features list - see example below}
+
+```infographic
+infographic list-grid-badge-card
+data
+  title Key Features
+  lists
+    - label Feature 1
+      desc Description of feature 1
+      icon flash
+    - label Feature 2
+      desc Description of feature 2
+      icon shield
+```
 
 ## Success Criteria
 - [ ] Criterion 1
@@ -171,6 +185,96 @@ Learn and refine user ideas through collaborative brainstorming by:
 
 ---
 
+## Infographic Guidelines
+
+**When to use infographics in idea summaries:**
+
+Use the `infographic-syntax-creator` skill to generate visual representations. Embed them in markdown using fenced code blocks:
+
+````markdown
+```infographic
+infographic <template-name>
+data
+  ...
+```
+````
+
+### Recommended Infographic Usage
+
+| Information Type | Recommended Template | Example Use |
+|-----------------|---------------------|-------------|
+| Feature list | `list-grid-badge-card`, `list-row-horizontal-icon-arrow` | Key Features section |
+| Process/Workflow | `sequence-snake-steps-simple`, `sequence-timeline-simple` | User journey, implementation phases |
+| Pros/Cons | `compare-binary-horizontal-badge-card-arrow` | Trade-off analysis |
+| SWOT Analysis | `compare-swot` | Strategic analysis |
+| Priority Matrix | `compare-quadrant-quarter-simple-card` | Feature prioritization |
+| Architecture | `hierarchy-tree-tech-style-badge-card` | System overview |
+| Mind Map | `hierarchy-mindmap-branch-gradient-capsule-item` | Concept exploration |
+| Metrics/KPIs | `chart-pie-compact-card`, `chart-column-simple` | Success metrics |
+
+### Infographic Examples for Ideas
+
+**Feature List:**
+```infographic
+infographic list-grid-badge-card
+data
+  title Core Features
+  lists
+    - label Fast Performance
+      desc Sub-second response times
+      icon flash
+    - label Secure by Default
+      desc End-to-end encryption
+      icon shield check
+    - label Easy Integration
+      desc REST API & SDKs
+      icon puzzle
+    - label Real-time Sync
+      desc Live collaboration
+      icon sync
+```
+
+**Implementation Phases:**
+```infographic
+infographic sequence-roadmap-vertical-simple
+data
+  title Implementation Roadmap
+  sequences
+    - label Phase 1: MVP
+      desc Core features only
+    - label Phase 2: Beta
+      desc User testing & feedback
+    - label Phase 3: Launch
+      desc Public release
+    - label Phase 4: Scale
+      desc Performance optimization
+```
+
+**Pros/Cons Analysis:**
+```infographic
+infographic compare-binary-horizontal-badge-card-arrow
+data
+  compares
+    - label Pros
+      children
+        - label Lower cost
+        - label Faster delivery
+        - label Better UX
+    - label Cons
+      children
+        - label Learning curve
+        - label Migration effort
+```
+
+### When NOT to Use Infographics
+
+- Simple bullet lists (< 3 items)
+- Highly technical specifications
+- Code examples or API documentation
+- Legal/compliance text
+
+---
+
 ## Definition of Done (DoD)
 
 | # | Checkpoint | Required |
@@ -178,7 +282,8 @@ Learn and refine user ideas through collaborative brainstorming by:
 | 1 | All idea files analyzed | Yes |
 | 2 | Brainstorming session completed | Yes |
 | 3 | `docs/ideas/{folder}/idea-summary-vN.md` created (versioned) | Yes |
-| 4 | Human has reviewed and approved idea summary | Yes |
+| 4 | Infographics used for visual elements where appropriate | Recommended |
+| 5 | Human has reviewed and approved idea summary | Yes |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
 
@@ -256,6 +361,7 @@ task_output_links:
 | Accepting everything at face value | May miss issues | Challenge assumptions constructively |
 | Skipping to requirements | Idea not refined | Complete ideation first |
 | Being passive | Not collaborative | Offer suggestions actively |
+| Plain text for everything | Harder to scan visually | Use infographics for lists, flows, comparisons |
 
 ---
 
@@ -280,7 +386,11 @@ task_output_links:
    - "The user research shows two distinct personas - which is primary?"
    - "Have you considered a web-first approach instead?"
 
-5. Create docs/ideas/mobile-app-idea/idea-summary.md
+5. Create docs/ideas/mobile-app-idea/idea-summary-v1.md with:
+   - Overview and problem statement (text)
+   - Key Features (infographic: list-grid-badge-card)
+   - Implementation Phases (infographic: sequence-roadmap-vertical-simple)
+   - Platform Comparison (infographic: compare-binary-horizontal-badge-card-arrow)
 
 6. Resume Task Flow from task-execution-guideline skill
 ```

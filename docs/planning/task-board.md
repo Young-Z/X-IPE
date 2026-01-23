@@ -6,9 +6,7 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-071 | Change Request | CR-001: Add Copilot button to idea content view | Nova | 🔄 in_progress | 01-22-2026 13:45:00 | - | Feature Refinement |
-| TASK-042 | Human Playground | Interactive testing for FEATURE-003: Content Editor | Nova | ⏸️ deferred | 01-20-2026 09:30:00 | - | Feature Closing |
-| TASK-032 | Human Playground | Create interactive playground for FEATURE-005: Interactive Console | Nova | ⏸️ deferred | 01-19-2026 12:15:00 | - | Feature Closing |
+| TASK-079 | Bug Fix | File change indicator doesn't show when file content is modified | Nova | 🔄 in_progress | 01-23-2026 05:37:00 | - | - |
 
 ---
 
@@ -16,6 +14,13 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-079 | Feature Refinement | Refine specification for FEATURE-010: Project Root Configuration | Nova | 01-23-2026 05:37:00 | [specification.md](docs/requirements/FEATURE-010/specification.md) | 11 ACs, 6 FRs. Config discovery, path validation, Settings display. |
+| TASK-078 | Feature Breakdown | Break down FEATURE-010: Project Root Configuration | Ember | 01-23-2026 05:36:00 | [features.md](docs/planning/features.md), [requirement-details.md](docs/requirements/requirement-details.md) | Single feature, added to feature board with status Planned. |
+| TASK-077 | Requirement Gathering | Gather requirements for FEATURE-010: Project Root Configuration | Ember | 01-23-2026 05:30:00 | [requirement-details.md](docs/requirements/requirement-details.md) | .x-ipe.yaml config file. 11 ACs. Config discovery, path validation, Settings read-only display. |
+| TASK-076 | Ideation | Refine idea: Draft Idea - 01232026 131611 (X-IPE subfolder structure) | Ember | 01-23-2026 05:17:00 | [idea-summary-v1.md](docs/ideas/Draft%20Idea%20-%2001232026%20131611/idea-summary-v1.md) | Config file `.x-ipe.yaml` at project root. Dual path support (project_root, x_ipe_app). File tree defaults to project root with UI switch. Config discovery traverses parents. |
+| TASK-075 | Code Implementation | Add compose idea feature to New Idea button | Nova | 01-23-2026 04:57:00 | [index.html](src/templates/index.html), [base.html](src/templates/base.html) | Button renamed to "New Idea". Tabbed UI: Compose (textarea with Ctrl+Enter submit) + Upload. Compose creates "new idea.md" and uploads to server. 304/304 tests pass. |
+| TASK-074 | Code Implementation | Integrate AntV Infographic DSL into markdown rendering + copy skills | Sage | 01-23-2026 04:55:00 | [base.html](src/templates/base.html), [index.html](src/templates/index.html), [infographic-syntax-creator](.github/skills/infographic-syntax-creator/SKILL.md) | Added @antv/infographic script. Extended ContentRenderer + WorkplaceManager for ```infographic blocks. Copied infographic-syntax-creator skill. 304/304 tests pass. |
+| TASK-071 | Change Request | CR-001: Add Copilot button to idea content view | Nova | 01-23-2026 04:51:00 | [index.html](src/templates/index.html) | Copilot button added to idea content view header. Working as confirmed by human. |
 | TASK-073 | Share Idea | Export idea-summary-v2.md to HTML | Spark | 01-22-2026 14:02:00 | [formal-idea-summary-v2.html](docs/ideas/Draft%20Idea%20-%2001222026%20195931/formal-idea-summary-v2.html) | Styled HTML with Bootstrap, print-friendly, 10KB. |
 | TASK-072 | Ideation | Refine idea: Draft Idea - 01222026 195931 (v2) | Spark | 01-22-2026 13:55:00 | [idea-summary-v2.md](docs/ideas/Draft%20Idea%20-%2001222026%20195931/idea-summary-v2.md) | v2: File/folder creation & deletion via context menu, scoped to docs/ideas/ only. |
 | TASK-069 | Code Implementation | Idea content view: format-based rendering with Edit button | Nova | 01-22-2026 13:06:00 | [index.html](src/templates/index.html), [base.html](src/templates/base.html) | View mode: markdown rendered, code highlighted. Edit button on header right. Modified indicator left of button. Binary files (.docx etc) show placeholder. 295/295 tests pass. |
@@ -95,7 +100,8 @@
 
 | Task ID | Task Type | Description | Reason | Last Updated | Output Links |
 |---------|-----------|-------------|--------|--------------|--------------|
-| | | | | | |
+| TASK-042 | Human Playground | Interactive testing for FEATURE-003: Content Editor | No longer needed | 01-23-2026 04:52:00 | - |
+| TASK-032 | Human Playground | Create interactive playground for FEATURE-005: Interactive Console | No longer needed | 01-23-2026 04:52:00 | - |
 
 ---
 
@@ -131,10 +137,10 @@
 
 ## Quick Stats
 
-- **Total Active:** 2
-- **In Progress:** 1
+- **Total Active:** 0
+- **In Progress:** 0
 - **Blocked:** 0
-- **Completed Today:** 39
+- **Completed Today:** 1
 
 ---
 

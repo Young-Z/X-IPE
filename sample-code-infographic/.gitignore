@@ -1,0 +1,13 @@
+node_modules
+dist
+esm
+lib
+tsconfig.tsbuildinfo
+pnpm-lock.yaml
+package-lock.json
+coverage
+.claude
+.docusaurus
+build
+.codex/skills
+.claude/skills

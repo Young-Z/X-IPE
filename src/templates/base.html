@@ -524,13 +524,73 @@
         }
         
         .workplace-sidebar {
-            width: 280px;
-            min-width: 280px;
+            width: 48px;
+            min-width: 48px;
             background-color: #f8f9fa;
             border-right: 1px solid #dee2e6;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            transition: width 0.2s ease, min-width 0.2s ease;
+        }
+        
+        .workplace-sidebar:hover,
+        .workplace-sidebar.expanded {
+            width: 280px;
+            min-width: 280px;
+        }
+        
+        .workplace-sidebar-icons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 0;
+            gap: 4px;
+        }
+        
+        .workplace-sidebar-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #6c757d;
+            transition: all 0.15s;
+            border: none;
+            background: none;
+        }
+        
+        .workplace-sidebar-icon:hover {
+            background-color: #e9ecef;
+            color: #0d6efd;
+        }
+        
+        .workplace-sidebar-icon.active {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+        
+        .workplace-sidebar-icon i {
+            font-size: 1.1rem;
+        }
+        
+        .workplace-sidebar-content {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .workplace-sidebar:hover .workplace-sidebar-content,
+        .workplace-sidebar.expanded .workplace-sidebar-content {
+            display: flex;
+        }
+        
+        .workplace-sidebar:hover .workplace-sidebar-icons,
+        .workplace-sidebar.expanded .workplace-sidebar-icons {
+            display: none;
         }
         
         .workplace-upload-btn {
@@ -746,10 +806,26 @@
             gap: 12px;
         }
         
-        .workplace-edit-btn,
         .workplace-cancel-btn {
             font-size: 0.8rem;
             padding: 4px 12px;
+        }
+        
+        /* Edit hint for double-click */
+        .workplace-edit-hint-container {
+            padding: 4px 16px 8px;
+            text-align: center;
+            border-top: 1px solid #f0f0f0;
+            background: #fafafa;
+        }
+        
+        .workplace-edit-hint {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+        
+        .workplace-content-body[title]:not([title=""]) {
+            cursor: pointer;
         }
         
         /* Workplace Content Body (view mode) */
@@ -814,10 +890,93 @@
         .workplace-uploader {
             display: flex;
             flex-direction: column;
+            height: 100%;
+            padding: 1rem;
+        }
+        
+        /* Workplace Tabs */
+        .workplace-tabs {
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 1rem;
+        }
+        
+        .workplace-tabs .nav-link {
+            color: #6c757d;
+            border: none;
+            padding: 0.75rem 1.25rem;
+        }
+        
+        .workplace-tabs .nav-link:hover {
+            border: none;
+            color: #007bff;
+        }
+        
+        .workplace-tabs .nav-link.active {
+            color: #007bff;
+            border: none;
+            border-bottom: 2px solid #007bff;
+            background: none;
+        }
+        
+        .workplace-tab-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .workplace-tab-content .tab-pane {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+        }
+        
+        .workplace-tab-content .tab-pane.active {
+            display: flex;
+        }
+        
+        /* Compose Area */
+        .workplace-compose {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .workplace-compose-textarea {
+            flex: 1;
+            min-height: 300px;
+            width: 100%;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+        }
+        
+        .workplace-compose-textarea:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+        }
+        
+        .workplace-compose-textarea::placeholder {
+            color: #adb5bd;
+        }
+        
+        .workplace-compose-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+        
+        /* Upload Tab Pane */
+        #upload-pane {
             align-items: center;
             justify-content: center;
-            height: 100%;
-            padding: 2rem;
+            padding-top: 2rem;
         }
         
         .workplace-dropzone {
@@ -1038,6 +1197,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <!-- Mermaid.js for diagrams -->
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <!-- AntV Infographic for infographic DSL diagrams -->
+    <script src="https://unpkg.com/@antv/infographic@latest/dist/infographic.min.js"></script>
     <!-- Socket.IO for WebSocket communication -->
     <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4/dist/socket.io.min.js"></script>
     <!-- xterm.js for FEATURE-005 Interactive Console -->

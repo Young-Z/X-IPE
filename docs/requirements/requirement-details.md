@@ -2,7 +2,7 @@
 
 > Requirement ID: REQ-001  
 > Created: 01-18-2026  
-> Last Updated: 01-22-2026
+> Last Updated: 01-23-2026
 
 ## Project Overview
 
@@ -44,6 +44,7 @@ Create a web viewer for AI-created project documentation with:
 | FEATURE-007 | Git Integration | v1.0 | Version history and side-by-side diff comparison | FEATURE-002 |
 | FEATURE-008 | Workplace (Idea Management) | v1.0 | Idea upload, tree view, inline editing with auto-save, folder rename | None |
 | FEATURE-009 | File Change Indicator | v1.0 | Yellow dot indicator for changed files/folders in sidebar | FEATURE-001 |
+| FEATURE-010 | Project Root Configuration | v1.0 | .x-ipe.yaml config file for nested project structure support | FEATURE-006 |
 
 ---
 
@@ -258,6 +259,63 @@ Create a web viewer for AI-created project documentation with:
 - GitPython or subprocess for git commands
 - diff2html or similar for diff visualization
 - Handle non-git repositories gracefully
+
+---
+
+### FEATURE-010: Project Root Configuration
+
+**Version:** v1.0  
+**Brief Description:** Support `.x-ipe.yaml` configuration file for nested project structures where X-IPE runs as a subfolder within a larger project.
+
+**Acceptance Criteria:**
+- [ ] X-IPE reads `.x-ipe.yaml` config file if present
+- [ ] Config discovery: check cwd first, then traverse parent directories until found or root reached
+- [ ] Config defines `project_root` and `x_ipe_app` paths (relative to config file location)
+- [ ] Config defines `defaults.file_tree_scope` ("project_root" or "x_ipe_app")
+- [ ] Config defines `defaults.terminal_cwd` for terminal working directory
+- [ ] File tree defaults to configured `project_root` when config is present
+- [ ] Works when launched from project root (`python x-ipe/main.py`) or x-ipe folder (`python main.py`)
+- [ ] Invalid paths in config show warning toast, fall back to current working directory
+- [ ] Existing multi-project folder behavior (FEATURE-006) remains unchanged
+- [ ] Settings page shows read-only display of detected `.x-ipe.yaml` config
+- [ ] Without `.x-ipe.yaml`, X-IPE behaves as before (backward compatible)
+
+**Config File Structure:**
+```yaml
+# .x-ipe.yaml - placed at project root
+version: 1
+paths:
+  project_root: "."              # Relative to this config file
+  x_ipe_app: "./x-ipe"          # Path to X-IPE application
+defaults:
+  file_tree_scope: "project_root"  # or "x_ipe_app"
+  terminal_cwd: "project_root"
+```
+
+**Expected Folder Structure:**
+```
+project-root/           ← project_root (shown in file tree by default)
+├── .x-ipe.yaml         ← Configuration file
+├── x-ipe/              ← x_ipe_app path
+│   ├── main.py
+│   ├── src/
+│   └── ...
+├── .github/skills/     ← Visible in file tree
+├── docs/               ← Visible in file tree
+└── ...
+```
+
+**Dependencies:**
+- FEATURE-006: Settings & Configuration (for Settings page integration)
+
+**Technical Considerations:**
+- New ConfigService to parse `.x-ipe.yaml` (PyYAML)
+- Config discovery traverses parent directories (max ~20 levels for safety)
+- Path validation: ensure paths exist and are within project bounds
+- Integrate with existing ProjectService for file tree scope
+- Integrate with TerminalService for terminal cwd
+- Settings page: read-only card showing detected config values
+- Security: validate paths don't escape project root (no `../../../` attacks)
 
 ---
 

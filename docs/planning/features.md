@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 01-22-2026 11:42:00
+> Last Updated: 01-23-2026 05:37:00
 
 ## Overview
 
@@ -29,6 +29,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-007 | Git Integration | v1.0 | Planned | - | 01-18-2026 | 01-18-2026 00:10:00 |
 | FEATURE-008 | Workplace (Idea Management) | v1.0 | Completed | [specification.md](../requirements/FEATURE-008/specification.md) | 01-22-2026 | 01-22-2026 11:42:00 |
 | FEATURE-009 | File Change Indicator | v1.0 | Completed | [specification.md](../requirements/FEATURE-009/specification.md) | 01-22-2026 | 01-22-2026 11:21:00 |
+| FEATURE-010 | Project Root Configuration | v1.0 | Refined | [specification.md](../requirements/FEATURE-010/specification.md) | 01-23-2026 | 01-23-2026 05:37:00 |
 
 ---
 
@@ -37,8 +38,8 @@ This board tracks all features across the project lifecycle.
 ### Planned (1)
 - FEATURE-007: Git Integration
 
-### Refined (0)
-- None
+### Refined (1)
+- FEATURE-010: Project Root Configuration
 
 ### Designed (1)
 - FEATURE-005: Interactive Console v2.0
@@ -160,5 +161,28 @@ This board tracks all features across the project lifecycle.
 - `IdeaTree` - Tree navigation with inline rename
 - `IdeaEditor` - Auto-save with 5s debounce
 - `IdeaUploader` - Drag-drop + file picker
+
+---
+
+### FEATURE-010: Project Root Configuration
+
+**Version:** v1.0  
+**Status:** Refined  
+**Description:** Support `.x-ipe.yaml` configuration file for nested project structures where X-IPE runs as a subfolder within a larger project  
+**Dependencies:** FEATURE-006 (Settings & Configuration)  
+**Specification:** [docs/requirements/FEATURE-010/specification.md](../requirements/FEATURE-010/specification.md)  
+**Technical Design:** -  
+
+**Key Capabilities:**
+- Config file (`.x-ipe.yaml`) at project root
+- Config discovery: cwd → parent directories → fallback
+- Dual path awareness: `project_root` and `x_ipe_app`
+- File tree defaults to project root when configured
+- Terminal cwd configurable
+- Settings page shows read-only config display
+- Backward compatible (works without config file)
+
+**Tasks:**
+- TASK-079 (Feature Refinement) - Completed on 01-23-2026
 
 ---
