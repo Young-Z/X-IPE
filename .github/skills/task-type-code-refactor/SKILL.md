@@ -43,12 +43,13 @@ Safely refactor and validate existing code through:
 
 ---
 
-## Skill Output
+## Skill/Task Completion Output
 
-This skill MUST return these attributes to the Task Data Model:
+This skill MUST return these attributes to the Task Data Model upon task completion:
 
 ```yaml
 Output:
+  category: standalone
   status: completed | blocked
   next_task_type: null
   require_human_review: Yes
@@ -103,52 +104,12 @@ Execute refactoring by following these steps in order:
 
 ## Refactoring Principles by Application Type
 
-### Web Application (Frontend)
-```
-1. Component Isolation - Each component in its own file
-2. State Management Separation - Logic separated from UI
-3. Style Colocation - CSS/styles with components OR in dedicated files
-4. Utility Extraction - Shared helpers in utils/
-5. API Layer Abstraction - All API calls in services/
-6. Type Safety - Interfaces/types in dedicated files
-```
-
-### Web Application (Backend)
-```
-1. Route/Controller Separation - Routes in routes/, handlers in controllers/
-2. Service Layer - Business logic in services/
-3. Repository Pattern - Data access abstracted
-4. Middleware Extraction - Cross-cutting concerns isolated
-5. Config Centralization - All config in config/
-6. Error Handling Standardization - Consistent error types
-```
-
-### CLI Application
-```
-1. Command Pattern - Each command in separate file
-2. Input/Output Abstraction - IO operations isolated
-3. Config Management - Settings separated from logic
-4. Plugin Architecture - Extensible command system
-5. Help/Documentation - Self-documenting commands
-```
-
-### Library/Package
-```
-1. Public API Surface - Clear exports in index
-2. Internal Modules - Private implementation hidden
-3. Type Definitions - Full TypeScript/type hints
-4. Documentation - JSDoc/docstrings on public API
-5. Backward Compatibility - Version-safe changes
-```
-
-### Monolith to Modules
-```
-1. Domain Boundaries - Split by business domain
-2. Dependency Direction - Core modules have no external deps
-3. Interface Segregation - Small, focused interfaces
-4. Shared Kernel - Common code in shared/
-5. Anti-Corruption Layer - Adapters for external systems
-```
+See [references/refactoring-principles.md](references/refactoring-principles.md) for detailed principles organized by:
+- Web Application (Frontend) - Component isolation, state management
+- Web Application (Backend) - Service layer, repository pattern
+- CLI Application - Command pattern, config management
+- Library/Package - Public API surface, type definitions
+- Monolith to Modules - Domain boundaries, shared kernel
 
 ---
 
@@ -569,27 +530,39 @@ ELSE:
 
 ---
 
-## Task Completion Output
+## Patterns
 
-Upon completion, return:
-```yaml
-category: Standalone
-next_task_type: null
-require_human_review: Yes
-task_output_links:
-  - {refactored-file-paths}
-  - {new-test-file-paths}
-  - {updated-design-path}
+### Pattern: Safe Refactor
 
-# Dynamic attributes
-refactor_scope: {description of what was refactored}
-quality_score_before: X
-quality_score_after: Y
-tests_added: N
-files_split: M
-principles_applied:
-  - {principle 1}
-  - {principle 2}
+**When:** Code has sufficient test coverage (≥80%)
+**Then:**
+```
+1. Run tests to confirm baseline
+2. Make incremental changes
+3. Run tests after each change
+4. Commit working states
+```
+
+### Pattern: Low Coverage
+
+**When:** Test coverage < 80%
+**Then:**
+```
+1. STOP refactoring
+2. Add tests for uncovered code
+3. Reach 80% coverage
+4. Resume refactoring
+```
+
+### Pattern: Feature-Related Refactor
+
+**When:** Code is part of documented feature
+**Then:**
+```
+1. Read feature specification
+2. Read technical design
+3. Ensure refactor aligns with design
+4. Update technical design if needed
 ```
 
 ---
@@ -608,135 +581,12 @@ principles_applied:
 
 ---
 
-## Example Execution
+## Example
 
-**Request:** "Refactor the services.py file - it's getting too large"
-
-### Phase 1: Assessment
-
-```
-Step 1.1: Identify Scope
-  target: src/services.py (850 lines)
-  type: Web Backend (Flask)
-  feature_id: null (general refactoring)
-
-Step 1.2: Quality Analysis
-  - Readability: 5/10 (hard to navigate)
-  - Maintainability: 4/10 (changes risky)
-  - Testability: 6/10 (some mocking needed)
-  - Cohesion: 3/10 (multiple concerns)
-  - Coupling: 5/10 (moderate)
-  - DRY: 6/10 (some duplication)
-  quality_score_before: 4.8
-
-Step 1.3: Feature Alignment
-  → No feature_id, skipping
-
-Step 1.4: Test Coverage
-  coverage_before: 72% on services.py
-  critical_gaps:
-    - FileWatcherService.watch() untested
-    - error handling paths untested
-
-Step 1.5: Refactoring Plan
-  principles:
-    - Service Layer
-    - Single Responsibility
-    - Config Centralization
-  phases:
-    - phase: 1 - Add missing tests
-    - phase: 2 - Extract FileService
-    - phase: 3 - Extract TerminalService
-    - phase: 4 - Extract SettingsService
-```
-
-### Phase 2: Preparation
-
-```
-Step 2.1: Feature Details
-  → No feature, skipping
-
-Step 2.2: Add Tests
-  - Added 8 tests for FileWatcherService
-  - Added 5 tests for error handling
-  tests_added: 13
-  coverage_after_prep: 86%
-  ✅ Ready to refactor
-```
-
-### Phase 3: Execution
-
-```
-Step 3.1: Refactor
-  Phase 1: Extract FileService
-    - Created src/services/file_service.py
-    - Moved FileService, FileWatcherService, ContentService
-    - Updated imports in app.py
-    - All 348 tests pass
-    - Committed
-
-  Phase 2: Extract TerminalService
-    - Created src/services/terminal_service.py
-    - Moved TerminalSession, SessionManager, etc.
-    - All 348 tests pass
-    - Committed
-
-  Phase 3: Extract SettingsService
-    - Created src/services/settings_service.py
-    - Moved SettingsService, ProjectFoldersService
-    - All 348 tests pass
-    - Committed
-
-Step 3.2: Split Complete
-  files_split: 3
-  original: 850 lines
-  new files: 
-    - file_service.py: 280 lines
-    - terminal_service.py: 320 lines
-    - settings_service.py: 250 lines
-```
-
-### Phase 4: Finalization
-
-```
-Step 4.1: Quality Verification
-  - Readability: 8/10
-  - Maintainability: 8/10
-  - Testability: 8/10
-  - Cohesion: 9/10
-  - Coupling: 7/10
-  - DRY: 7/10
-  quality_score_after: 7.8
-  
-  All 348 tests pass
-  Coverage maintained at 86%
-
-Step 4.2: Design Update
-  → No technical design exists, skipping
-```
-
-### Output
-
-```yaml
-category: Standalone
-next_task_type: null
-require_human_review: Yes
-task_output_links:
-  - src/services/file_service.py
-  - src/services/terminal_service.py
-  - src/services/settings_service.py
-  - tests/test_file_service.py (13 tests added)
-
-refactor_scope: "Split services.py (850 lines) into 3 domain-specific service modules"
-quality_score_before: 4.8
-quality_score_after: 7.8
-tests_added: 13
-files_split: 3
-principles_applied:
-  - Service Layer
-  - Single Responsibility
-  - Config Centralization
-```
+See [references/examples.md](references/examples.md) for detailed execution examples including:
+- Large file refactoring (850 lines → 3 modules)
+- Low coverage blocking scenario
+- Feature-related refactoring with design updates
 
 ---
 

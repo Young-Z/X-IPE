@@ -16,9 +16,23 @@
 - [What is NOT included]
 - [Deferred to other features]
 
+## Technical Scope
+- [ ] Frontend
+- [ ] Backend
+- [ ] Full Stack (Frontend + Backend)
+- [ ] API Only
+- [ ] Database/Data Layer
+- [ ] Infrastructure/DevOps
+
 ## Dependencies
 - [Other features this depends on]
 - [External dependencies]
+
+## Linked Mockups
+
+| Mockup Function Name | Mockup Link |
+|---------------------|-------------|
+| ... | ... |
 
 ## User Stories
 - As a [user type], I want to [action] so that [benefit]

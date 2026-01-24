@@ -39,12 +39,13 @@ Set up development environment with tech stack selection, proper folder structur
 
 ---
 
-## Skill Output
+## Skill/Task Completion Output
 
-This skill MUST return these attributes to the Task Data Model:
+This skill MUST return these attributes to the Task Data Model upon task completion:
 
 ```yaml
 Output:
+  category: standalone
   status: completed | blocked
   next_task_type: null
   require_human_review: No
@@ -375,80 +376,61 @@ Agent: "No preference specified. Using default Python with uv."
 
 ---
 
-## Examples
+## Patterns
 
-### Example 1: Python Project Setup
+### Pattern: Explicit Stack Request
 
-**Request:** "Set up environment for a Python API project"
-
-**Execution:**
+**When:** User specifies tech stack in request
+**Then:**
 ```
-1. Determine tech stack → python (detected from request)
-2. Initialize package manager:
-   $ uv init
-   $ uv venv
-   $ mkdir src tests
-   $ touch src/__init__.py tests/__init__.py
+1. Extract stack from request
+2. Skip selection prompt
+3. Proceed with initialization
+```
 
-3. Initialize git:
-   $ git init
-   $ [Create .gitignore from python template]
+### Pattern: Context Detection
 
-4. Create docs/environment/setup.md (Python version)
+**When:** Project files hint at tech stack
+**Then:**
+```
+1. Check for pyproject.toml → Python
+2. Check for package.json → Node.js
+3. Recommend detected stack
+4. Confirm with user
+```
 
-5. Commit setup:
-   $ git add .
-   $ git commit -m "TASK-001 commit for: Set up Python development environment with uv and project structure"
+### Pattern: Existing Git Repo
 
-6. Return output:
-   status: completed
-   next_task_type: null
-   require_human_review: No
-   task_output_links: [docs/environment/setup.md, .gitignore, README.md]
-   tech_stack: python
-   package_manager: uv
-   git_initialized: true
-   initial_commit_hash: a3f8c92...
+**When:** .git folder already exists
+**Then:**
+```
+1. Skip git init
+2. Update .gitignore if needed
+3. Proceed with package manager setup
 ```
 
 ---
 
-### Example 2: Node.js Project Setup
+## Anti-Patterns
 
-**Request:** "Initialize Node.js development environment"
+| Anti-Pattern | Why Bad | Do Instead |
+|--------------|---------|------------|
+| Skip git init | No version control | Always initialize git |
+| Wrong .gitignore | Track unwanted files | Use tech-stack-specific template |
+| Missing src/tests folders | Inconsistent structure | Always create standard folders |
+| No initial commit | Lose setup state | Commit after setup |
+| Assume tech stack | Wrong environment | Ask or detect from context |
+| Skip venv (Python) | Global package pollution | Always create virtual environment |
 
-**Execution:**
-```
-1. Determine tech stack → nodejs (detected from request)
-2. Ask user: "Would you like to use npm or yarn?"
-   User: "npm"
-   
-3. Initialize package manager:
-   $ npm init -y
-   $ mkdir src tests
-   $ echo "console.log('Hello');" > src/index.js
-   $ echo "// Tests" > tests/index.test.js
+---
 
-4. Initialize git:
-   $ git init
-   $ [Create .gitignore from nodejs template]
+## Example
 
-5. Create docs/environment/setup.md (Node.js version)
-
-6. Commit setup:
-   $ git add .
-   $ git commit -m "TASK-002 commit for: Initialize Node.js development environment with npm"
-
-7. Return output:
-   status: completed
-   next_task_type: null
-   require_human_review: No
-   task_output_links: [docs/environment/setup.md, .gitignore, README.md]
-   tech_stack: nodejs
-   package_manager: npm
-   git_initialized: true
-   initial_commit_hash: b4e9d71...
-```
+See [references/examples.md](references/examples.md) for detailed execution examples including:
+- Python project setup with uv and venv
+- Node.js project setup with npm
+- Missing setup guide (blocked scenario)
+- Existing VS Code config (merge mode)
 
 ---
 

@@ -44,19 +44,17 @@ Execute **Human Playground** tasks by:
 
 ---
 
-## Skill Output
+## Skill/Task Completion Output
 
-This skill MUST return these attributes to the Task Data Model:
+This skill MUST return these attributes to the Task Data Model upon task completion:
 
 ```yaml
 Output:
+  category: standalone
   status: completed | blocked
   next_task_type: null
   require_human_review: Yes
   task_output_links: [docs/playground/]
-  
-  # Standalone task attributes
-  category: Standalone
   feature_id: FEATURE-XXX
   feature_title: {title}
   feature_version: {version}
@@ -199,22 +197,6 @@ Interactive playgrounds for human testing.
 | 6 | Human can interact with feature | Yes |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
-
----
-
-## Task Completion Output
-
-Upon completion, return:
-```yaml
-feature_id: {Feature ID}
-feature_status: {In|Done} {Feature Phase}
-category: Standalone
-next_task_type: null
-require_human_review: Yes
-task_output_links:
-  - playground/playground_{feature_name}.py
-  - playground/tests/test_playground_{feature_name}.py
-```
 
 ---
 

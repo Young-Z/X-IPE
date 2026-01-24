@@ -45,19 +45,17 @@ Create technical design for a single feature by:
 
 ---
 
-## Skill Output
+## Skill/Task Completion Output
 
-This skill MUST return these attributes to the Task Data Model:
+This skill MUST return these attributes to the Task Data Model upon task completion:
 
 ```yaml
 Output:
+  category: feature-stage
   status: completed | blocked
   next_task_type: Code Implementation
   require_human_review: Yes
   task_output_links: [docs/requirements/FEATURE-XXX/technical-design.md]
-  
-  # Feature stage dynamic attributes (REQUIRED)
-  category: feature-stage
   feature_id: FEATURE-XXX
   feature_title: {title}
   feature_version: {version}
@@ -149,6 +147,34 @@ Technical design documents MUST use this two-part structure. Adapt content based
 - **Dependencies:** Components from other features/foundation this feature relies on
 - **Major Flow:** High-level description of how components interact
 - **Usage Example:** Code snippet showing how to use the implemented feature
+
+---
+
+### Mockup Reference (Conditional)
+
+**🎨 When to Reference Mockups:**
+```
+IF Technical Scope in specification.md includes [Frontend] OR [Full Stack]:
+  1. MUST review "Linked Mockups" section in specification.md
+  2. Open and analyze each linked mockup file
+  3. Design frontend components based on mockup:
+     - Component hierarchy and structure
+     - State management requirements
+     - Event handlers and user interactions
+     - CSS/styling approach
+  4. Include mockup-derived requirements in Part 2 Implementation Guide
+  5. Reference mockup filenames in design decisions
+
+ELSE (Backend/API Only/Database/Infrastructure):
+  - Skip mockup reference
+  - Focus on service architecture, data models, APIs
+```
+
+**Design Document Note:**
+When Technical Scope includes frontend, Part 2 SHOULD include:
+- UI Component breakdown
+- State management strategy
+- Mockup-to-component mapping
 
 **Format Guidelines:**
 - Use tables for component listings (Component | Responsibility | Scope/Impact | Tags)
@@ -424,22 +450,6 @@ When the technical design needs to be updated (during implementation, bug fix, o
 
 ---
 
-## Task Completion Output
-
-Upon completion, return:
-```yaml
-feature_id: FEATURE-XXX
-feature_status: Done Technical Design
-category: feature-stage
-feature_phase: Technical Design
-next_task_type: Code Implementation
-require_human_review: Yes
-task_output_links:
-  - docs/requirements/FEATURE-XXX/technical-design.md
-```
-
----
-
 ## Anti-Patterns
 
 | Anti-Pattern | Why Bad | Do Instead |
@@ -450,6 +460,53 @@ task_output_links:
 | Monolithic design | Hard to change | Design modular components |
 | Missing workflows | Hard to understand | Always include Mermaid diagrams |
 | No tags | Hard for AI to find | Always add searchable tags |
+
+---
+
+## Patterns
+
+### Pattern: API-Based Feature
+
+**When:** Feature exposes REST/GraphQL endpoints
+**Then:**
+```
+1. Focus Part 2 on API specification
+2. Include request/response schemas
+3. Document authentication requirements
+4. Add sequence diagrams for complex flows
+```
+
+### Pattern: Background Service
+
+**When:** Feature runs as background process
+**Then:**
+```
+1. Design for fault tolerance
+2. Include retry/backoff strategies
+3. Document monitoring points
+4. Add state diagrams for lifecycle
+```
+
+### Pattern: UI-Heavy Feature
+
+**When:** Feature is primarily frontend
+**Then:**
+```
+1. Focus on component architecture
+2. Document state management
+3. Include wireframes or mockup references
+4. Describe user interaction flows
+```
+
+---
+
+## Example
+
+See [references/examples.md](references/examples.md) for detailed execution examples including:
+- User authentication technical design
+- Complex feature with multiple modules
+- Missing specification (blocked)
+- Design update from change request
 
 ---
 

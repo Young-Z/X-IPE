@@ -8,6 +8,12 @@
 
 [Brief description of the requirement/epic - 2-3 paragraphs explaining the business need, user goals, and overall scope]
 
+## Linked Mockups
+
+| Mockup Function Name | Mockup Link |
+|---------------------|-------------|
+| ... | ... |
+
 ## Feature List
 
 | Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
@@ -22,6 +28,9 @@
 
 **Version:** v1.0  
 **Brief Description:** [1-2 sentence description of what this feature does]
+
+**Mockup Links:**
+- [Mockup function name](mockup-link-url)
 
 **Acceptance Criteria:**
 - [ ] Criterion 1

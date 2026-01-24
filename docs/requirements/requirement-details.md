@@ -45,6 +45,7 @@ Create a web viewer for AI-created project documentation with:
 | FEATURE-008 | Workplace (Idea Management) | v1.0 | Idea upload, tree view, inline editing with auto-save, folder rename | None |
 | FEATURE-009 | File Change Indicator | v1.0 | Yellow dot indicator for changed files/folders in sidebar | FEATURE-001 |
 | FEATURE-010 | Project Root Configuration | v1.0 | .x-ipe.yaml config file for nested project structure support | FEATURE-006 |
+| FEATURE-011 | Stage Toolbox | v1.0 | Comprehensive tool management modal with accordion UI for all development stages | None |
 
 ---
 
@@ -338,3 +339,75 @@ project-root/           ← project_root (shown in file tree by default)
 3. Code files display with syntax highlighting
 4. User can edit and save files
 5. Changes on disk auto-refresh in browser
+
+---
+
+### FEATURE-011: Stage Toolbox
+
+**Version:** v1.0  
+**Brief Description:** Comprehensive tool management modal with accordion UI for all development stages (Ideation, Requirement, Feature, Quality, Refactoring).
+
+**Source:**
+- Idea Summary: `docs/ideas/Toolbox Design/idea-summary-v2.md`
+- Mockup: `docs/ideas/Toolbox Design/mockups/stage-toolbox-modal-v2.html`
+
+**Clarifications:**
+
+| Question | Answer |
+|----------|--------|
+| Migration behavior | Delete old `.ideation-tools.json` after migration |
+| Tool discovery | Hardcoded tools in config schema |
+| Placeholder stages | Show "Coming soon" disabled state |
+| Trigger location | Top bar icon only (remove from Workplace) |
+| Config persistence | Immediate - persist on every toggle |
+
+**Acceptance Criteria:**
+
+1. **Modal UI**
+   - [ ] AC-1.1: Modal opens via top bar toolbox icon button
+   - [ ] AC-1.2: Modal uses light theme matching mockup v2
+   - [ ] AC-1.3: Modal width is 680px with max-height 85vh
+   - [ ] AC-1.4: Modal closes via X button or clicking overlay
+   - [ ] AC-1.5: ESC key closes modal
+
+2. **Accordion Structure**
+   - [ ] AC-2.1: 5 accordion sections (Ideation, Requirement, Feature, Quality, Refactoring)
+   - [ ] AC-2.2: Each section has color-coded icon (💡🟡, 📋🔵, ⚙️🟢, ✅🟣, 🔄🔴)
+   - [ ] AC-2.3: Click header to expand/collapse section
+   - [ ] AC-2.4: Only one section expanded at a time
+   - [ ] AC-2.5: "N active" badge shows enabled tool count per stage
+
+3. **Ideation Stage (Functional)**
+   - [ ] AC-3.1: Three sub-phases: Ideation, Mockup, Sharing
+   - [ ] AC-3.2: Ideation phase has tools: `antv-infographic`, `mermaid`
+   - [ ] AC-3.3: Mockup phase has tool: `frontend-design`
+   - [ ] AC-3.4: Sharing phase shows "No tools configured"
+   - [ ] AC-3.5: Toggle switches enable/disable each tool
+   - [ ] AC-3.6: Toggle changes persist immediately to config file
+
+4. **Placeholder Stages**
+   - [ ] AC-4.1: Requirement, Feature, Quality, Refactoring show "placeholder" badge
+   - [ ] AC-4.2: Sub-phases show "Coming soon..." empty state
+   - [ ] AC-4.3: No functional toggles in placeholder stages
+
+5. **Configuration**
+   - [ ] AC-5.1: Config stored in `config/tools.json`
+   - [ ] AC-5.2: Config uses nested 3-level structure (stage > phase > tool)
+   - [ ] AC-5.3: Auto-create `config/` directory if not exists
+   - [ ] AC-5.4: Auto-migrate from `.ideation-tools.json` if exists
+   - [ ] AC-5.5: Delete old `.ideation-tools.json` after successful migration
+
+6. **Top Bar Integration**
+   - [ ] AC-6.1: Toolbox icon button added to top bar (right side)
+   - [ ] AC-6.2: Green accent color for toolbox button
+   - [ ] AC-6.3: Tooltip shows "Stage Toolbox" on hover
+   - [ ] AC-6.4: Remove toolbox from Workplace panel
+
+**Dependencies:**
+- None (replaces existing FEATURE-008 v1.3 toolbox functionality)
+
+**Technical Considerations:**
+- New API endpoint: `GET/POST /api/config/tools`
+- New frontend component: `StageToolboxModal` 
+- Reuse existing toggle/accordion patterns from app
+- Migration logic runs once on first load if old config exists

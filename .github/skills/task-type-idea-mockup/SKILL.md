@@ -57,7 +57,7 @@ Mockup should NOT include:
 
 ---
 
-## Quick Reference
+## Task Type Default Attributes
 
 | Attribute | Value |
 |-----------|-------|
@@ -394,10 +394,11 @@ Instead, create a new version: `{Current Idea Folder}/idea-summary-v{N+1}.md`
 
 ---
 
-## Task Completion Output
+## Skill/Task Completion Output
 
-Upon completion, return:
+This skill MUST return these attributes to the Task Data Model upon task completion:
 ```yaml
+category: ideation-stage
 task_type: Idea Mockup
 idea_id: IDEA-XXX
 current_idea_folder: {Current Idea Folder}   # e.g., docs/ideas/mobile-app-idea
@@ -490,119 +491,8 @@ task_output_links:
 
 ## Example
 
-**Scenario:** Create mockups for mobile-app-idea after ideation
-
-**Input:**
-- `Current Idea Folder`: `docs/ideas/mobile-app-idea` (from previous Ideation task)
-
-**Config:** `docs/ideas/.ideation-tools.json`
-```json
-{
-  "version": "1.0",
-  "mockup": {
-    "frontend-design": true,
-    "figma-mcp": false
-  }
-}
-```
-
-**Idea Summary Excerpt:**
-```markdown
-## Key Features
-- User dashboard with activity charts
-- Settings page for preferences
-- Mobile-responsive design
-```
-
-**Execution:**
-```
-1. Execute Task Flow from task-execution-guideline skill
-
-2. Validate Current Idea Folder:
-   - Current Idea Folder = docs/ideas/mobile-app-idea
-   - Folder exists ✓
-   - idea-summary-v1.md exists ✓
-
-3. Load Config:
-   - Read .ideation-tools.json
-   - mockup.frontend-design: true → enabled
-   - mockup.figma-mcp: false → disabled
-
-4. Read Idea Summary:
-   - Load docs/ideas/mobile-app-idea/idea-summary-v1.md
-   - Extract: dashboard, settings page, mobile-responsive
-
-5. Identify Mockup Needs:
-   - Priority 1: User dashboard (charts, mobile)
-   - Priority 2: Settings page
-
-6. Create Mockups:
-   - Invoke frontend-design skill:
-     → Create dashboard-v1.html (responsive, with chart placeholders)
-     → Create settings-v1.html (form layout)
-
-7. Save Artifacts:
-   - docs/ideas/mobile-app-idea/mockups/dashboard-v1.html
-   - docs/ideas/mobile-app-idea/mockups/dashboard-v1.css
-   - docs/ideas/mobile-app-idea/mockups/settings-v1.html
-   - docs/ideas/mobile-app-idea/mockups/settings-v1.css
-
-8. Update Summary:
-   - Create docs/ideas/mobile-app-idea/idea-summary-v2.md with mockup links
-
-9. Human Review:
-   - Present mockups for approval
-   - "Open docs/ideas/mobile-app-idea/mockups/dashboard-v1.html in browser to preview"
-
-10. Output:
-    task_output_links:
-      - docs/ideas/mobile-app-idea/mockups/dashboard-v1.html
-      - docs/ideas/mobile-app-idea/mockups/settings-v1.html
-      - docs/ideas/mobile-app-idea/idea-summary-v2.md
-
-11. Resume Task Flow from task-execution-guideline skill
-```
-
----
-
-## Example WITHOUT Mockup Tools
-
-**Input:**
-- `Current Idea Folder`: `docs/ideas/simple-idea`
-
-**Config:** `docs/ideas/.ideation-tools.json`
-```json
-{
-  "version": "1.0",
-  "mockup": {
-    "frontend-design": false,
-    "figma-mcp": false
-  }
-}
-```
-
-**Execution:**
-```
-1. Validate Current Idea Folder:
-   - Current Idea Folder = docs/ideas/simple-idea ✓
-
-2. Load Config:
-   - All mockup tools disabled
-   - Ask human: "No mockup tools enabled. Proceed with manual description?"
-
-3. If human approves manual mode:
-   - Create mockup-description.md with:
-     - Detailed layout descriptions
-     - Component specifications
-     - ASCII wireframes (optional)
-   - Save to docs/ideas/simple-idea/mockups/mockup-description.md
-
-4. Output:
-   task_output_links:
-     - docs/ideas/simple-idea/mockups/mockup-description.md
-
-5. If human declines:
-   - Skip mockup creation
-   - Note in idea summary: "Mockups deferred - no tools available"
-   - Proceed to next task
-```
+See [references/examples.md](references/examples.md) for detailed execution examples including:
+- Mockup with frontend-design tool enabled
+- Mockup without tools (manual mode)
+- Missing idea folder (blocked scenario)
+- No idea summary (blocked scenario)

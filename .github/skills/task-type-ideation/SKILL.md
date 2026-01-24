@@ -26,7 +26,7 @@ Learn and refine user ideas through collaborative brainstorming by:
 
 ---
 
-## Quick Reference
+## Task Type Default Attributes
 
 | Attribute | Value |
 |-----------|-------|
@@ -502,10 +502,11 @@ IF BOTH are false:
 
 ---
 
-## Task Completion Output
+## Skill/Task Completion Output
 
-Upon completion, return:
+This skill MUST return these attributes to the Task Data Model upon task completion:
 ```yaml
+category: ideation-stage
 idea_id: IDEA-XXX
 idea_status: Refined
 idea_version: vN
@@ -585,100 +586,11 @@ task_output_links:
 
 ## Example
 
-**Scenario:** User uploads business plan draft to `docs/ideas/mobile-app-idea/files/`
-
-**Config File:** `docs/ideas/.ideation-tools.json`
-```json
-{
-  "version": "1.0",
-  "ideation": {
-    "antv-infographic": true,
-    "mermaid": true
-  },
-  "mockup": {
-    "frontend-design": true
-  },
-  "sharing": {}
-}
-```
-
-**Execution:**
-```
-1. Execute Task Flow from task-execution-guideline skill
-
-2. Load Toolbox Meta:
-   - Read docs/ideas/.ideation-tools.json
-   - Enabled tools:
-     - ideation.antv-infographic: true → will invoke infographic-syntax-creator
-     - ideation.mermaid: true → will use mermaid diagrams
-     - mockup.frontend-design: true → will invoke frontend-design skill
-
-3. Analyze Files:
-   - Read business-plan.md
-   - Read user-research.txt
-   - Read competitor-notes.md
-
-4. Initialize Tools:
-   - infographic-syntax-creator skill → Available
-   - mermaid capability → Available  
-   - frontend-design skill → Available
-   - Status: All enabled tools ready
-
-5. Generate Summary:
-   "I understand you want to build a mobile app for..."
-   "Enabled tools: antv-infographic, mermaid (visualization), frontend-design (mockups)"
-   
-6. Brainstorming Questions (with Config-Driven Tool Usage):
-   - "Your notes mention both iOS and Android - should v1 target both?"
-   - "The user research shows two distinct personas - which is primary?"
-   - User describes dashboard flow:
-     → config.ideation.mermaid == true
-     → Generate mermaid flowchart to visualize
-   - User wants to see dashboard layout:
-     → config.mockup.frontend-design == true  
-     → Invoke frontend-design skill
-     → Create HTML mockup, save to docs/ideas/mobile-app-idea/mockup-v1.html
-   - Share mockup: "Does this layout match your vision?"
-   - Iterate based on feedback
-
-7. Research Common Principles (if applicable):
-   - Mobile app → Research: Mobile UX best practices, offline-first patterns
-   - User auth → Research: OAuth 2.0, biometric auth standards
-   - Document sources for references section
-
-8. Create docs/ideas/mobile-app-idea/idea-summary-v1.md with:
-   - Overview and problem statement (text)
-   - Key Features (config.ideation.antv-infographic == true → use infographic: list-grid-badge-card)
-   - User Flow (config.ideation.mermaid == true → use mermaid flowchart)
-   - Implementation Phases (infographic: sequence-roadmap-vertical-simple)
-   - Platform Comparison (infographic: compare-binary-horizontal-badge-card-arrow)
-   - Ideation Artifacts section with link to mockups created
-   - References & Common Principles section with researched sources
-
-9. Resume Task Flow from task-execution-guideline skill
-```
-
-**Example WITHOUT Tools (All Disabled):**
-
-**Config File:** `docs/ideas/.ideation-tools.json`
-```json
-{
-  "version": "1.0",
-  "ideation": {
-    "antv-infographic": false,
-    "mermaid": false
-  },
-  "mockup": {
-    "frontend-design": false
-  },
-  "sharing": {}
-}
-```
-
-**Execution:** 
-- Skip Step 4 (Initialize Tools) - no tools enabled
-- Proceed with standard brainstorming without creating visual artifacts
-- Use standard markdown (bullet lists, tables) in idea summary
+See [references/examples.md](references/examples.md) for detailed execution examples including:
+- Business plan ideation with tools enabled (infographics, mermaid, mockups)
+- Ideation without tools (all disabled)
+- Missing config file handling
+- Draft folder rename scenario
 
 ---
 

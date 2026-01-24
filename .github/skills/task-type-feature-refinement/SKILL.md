@@ -44,19 +44,17 @@ Refine feature requirements for a single feature by:
 
 ---
 
-## Skill Output
+## Skill/Task Completion Output
 
-This skill MUST return these attributes to the Task Data Model:
+This skill MUST return these attributes to the Task Data Model upon task completion:
 
 ```yaml
 Output:
+  category: feature-stage
   status: completed | blocked
   next_task_type: task-type-technical-design
   require_human_review: Yes
   task_output_links: [docs/requirements/FEATURE-XXX/specification.md]
-  
-  # Feature stage dynamic attributes (REQUIRED)
-  category: feature-stage
   feature_id: FEATURE-XXX
   feature_title: {title}
   feature_version: {version}
@@ -149,6 +147,24 @@ Use web search capability to research:
 - User experience best practices for similar features
 - Common pitfalls and edge cases in similar implementations
 - Accessibility requirements and standards (WCAG)
+
+**🎨 Mockup Reference (Conditional):**
+```
+IF Technical Scope includes [Frontend] OR [Full Stack]:
+  1. Check specification.md for "Linked Mockups" section
+  2. Open and review each linked mockup file
+  3. Extract UI/UX requirements:
+     - Layout and component structure
+     - User interaction patterns
+     - Visual design elements
+     - Form fields and validation
+  4. Document UI-specific acceptance criteria based on mockups
+  5. Note any gaps between mockup and requirements
+
+ELSE (Backend/API Only/Database):
+  - Skip mockup reference
+  - Focus on data models, APIs, and business logic
+```
 
 ---
 
@@ -357,82 +373,64 @@ As a [user type], I want to [action/goal], so that [benefit/value].
 
 ---
 
-## Example Execution
+## Patterns
 
-**Feature:** FEATURE-001: User Authentication
+### Pattern: Well-Defined Feature
 
-**Step 1: Query Feature Board**
-```yaml
-# Query returns:
-feature_id: FEATURE-001
-title: User Authentication
-version: v1.0
-status: Planned
-description: JWT-based user authentication with login, logout, token refresh
-dependencies: []
+**When:** Feature has clear scope from breakdown
+**Then:**
+```
+1. Query feature board for context
+2. Read requirement-details.md
+3. Create specification with standard sections
+4. Request human review
 ```
 
-**Step 2: Gather Context**
+### Pattern: Feature with Dependencies
+
+**When:** Feature depends on other features
+**Then:**
 ```
-- Read requirement-details.md
-- No dependencies to check
-- Check docs/architecture/ for auth patterns (if exist)
-```
-
-**Step 3: Create Specification**
-```markdown
-# Feature Specification: User Authentication
-
-> Feature ID: FEATURE-001  
-> Version: v1.0  
-> Status: Refined  
-> Last Updated: 01-17-2026
-
-## Overview
-
-This feature implements a secure user authentication system using JSON Web Tokens (JWT). Users will be able to register, login, logout, and refresh their authentication tokens. The system prioritizes security and user experience with appropriate session management.
-
-## User Stories
-
-- As a **new user**, I want to **register with email and password**, so that **I can create an account and access protected features**.
-- As a **registered user**, I want to **login with my credentials**, so that **I can access my personalized content**.
-- As a **logged-in user**, I want to **stay logged in across sessions**, so that **I don't have to re-authenticate frequently**.
-- As a **logged-in user**, I want to **securely logout**, so that **my session is terminated and my data is protected**.
-
-## Acceptance Criteria
-
-- [ ] User can register with email and password
-- [ ] User receives JWT access token and refresh token on successful login
-- [ ] Access token expires after 1 hour
-- [ ] User can refresh access token using refresh token
-- [ ] Refresh token expires after 7 days
-- [ ] User can logout and invalidate both tokens
-- [ ] Invalid credentials return clear error message
-- [ ] Password must meet complexity requirements (8+ chars, uppercase, lowercase, number)
-
-[... etc, full specification continues ...]
+1. Read dependent feature specifications first
+2. Identify integration points
+3. Document assumptions about dependencies
+4. Note blocking vs non-blocking dependencies
 ```
 
-**Step 4: Return Output**
-```yaml
-status: completed
-next_task_type: task-type-technical-design
-require_human_review: Yes
-task_output_links: [docs/requirements/FEATURE-001/specification.md]
-category: feature-stage
-feature_id: FEATURE-001
-feature_title: User Authentication
-feature_version: v1.0
-feature_phase: refinement
+### Pattern: Complex Domain
+
+**When:** Feature involves unfamiliar domain rules
+**Then:**
+```
+1. Research domain best practices (web search)
+2. Document compliance requirements
+3. Include domain glossary in specification
+4. Ask human for domain-specific clarifications
 ```
 
-**Automatic Category Closing (Step 4):**
-```
-Feature board management updates:
-- FEATURE-001 status: Planned → Refined
-- Specification link added
-- Returns: "Updated FEATURE-001 (User Authentication) status to Refined"
-```
+---
+
+## Anti-Patterns
+
+| Anti-Pattern | Why Bad | Do Instead |
+|--------------|---------|------------|
+| Skip board query | Missing context | Always query feature board first |
+| Vague acceptance criteria | Untestable | Make criteria specific and measurable |
+| Technical implementation details | Wrong focus | Focus on WHAT, not HOW |
+| Ignore dependencies | Integration failures | Document all dependencies |
+| Multiple specification files | Version confusion | Single file with version history |
+| Skip web research | Reinvent wheel | Research domain best practices |
+
+---
+
+## Example
+
+See [references/examples.md](references/examples.md) for detailed execution examples including:
+- User authentication specification
+- Enhancement refinement from change request
+- Missing feature entry (blocked)
+- Complex feature requiring split
+- Specification with thorough edge case coverage
 
 ---
 

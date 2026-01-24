@@ -40,24 +40,39 @@ Break user requests into high-level features by:
 | Attribute | Default Value |
 |-----------|---------------|
 | Auto Proceed | False |
+| Mockup List | N/A |
+
+**Mockup List Structure:**
+```yaml
+mockup_list:
+  - mockup_name: "Description of what function the mockup is for"
+    mockup_link: "URL to the mockup"
+  - mockup_name: "Another mockup description"
+    mockup_link: "URL to the mockup"
+```
 
 ---
 
-## Skill Output
+## Skill/Task Completion Output
 
-This skill MUST return these attributes to the Task Data Model:
+This skill MUST return these attributes to the Task Data Model upon task completion:
 
 ```yaml
 Output:
+  category: requirement-stage
   status: completed | blocked
   next_task_type: task-type-feature-refinement
   require_human_review: Yes
   task_output_links: [docs/requirements/requirement-details.md]
+  mockup_list: [inherited from input or N/A]
   
   # Dynamic attributes for requirement-stage
   requirement_id: REQ-XXX
   feature_ids: [FEATURE-001, FEATURE-002, FEATURE-003]
   feature_count: 3
+  linked_mockups:
+    - mockup_name: "Description of mockup function"
+      mockup_path: "docs/requirements/FEATURE-XXX/mockups/mockup-name.html"
 ```
 
 ---
@@ -78,6 +93,7 @@ Execute Feature Breakdown by following these steps in order:
 |------|------|--------|--------------|
 | 1 | Analyze | Read requirement-details.md or user request | Requirements understood |
 | 2 | Identify Features | Extract features using MVP-first criteria | Features identified |
+| 2.5 | Process Mockups | Copy mockups to feature folders if mockup_list provided | Mockups processed |
 | 3 | Create Summary | Create/update requirement-details.md with feature list | Summary written |
 | 4 | Update Board | Call feature-board-management to create features | Board updated |
 | 5 | Complete | Verify DoD, output summary, request human review | Human review |
@@ -125,6 +141,60 @@ ELSE:
 | MVP Requirement | First feature = Runnable core loop |
 | Complexity | Start simple, then add complexity |
 | Dependencies | Minimize cross-feature dependencies |
+
+---
+
+### Step 2.5: Process Mockups (if mockup_list provided)
+
+**Action:** Copy mockups from source to feature folder and link them
+
+**When mockup_list is provided in input:**
+
+```
+FOR EACH feature in identified_features:
+  1. Create mockups folder: docs/requirements/{FEATURE-ID}/mockups/
+  
+  2. FOR EACH mockup in mockup_list (that relates to this feature):
+     - Copy mockup file from mockup_link source
+     - Rename to: {mockup_name}.{original_extension}
+     - Save to: docs/requirements/{FEATURE-ID}/mockups/{mockup_name}.{ext}
+  
+  3. Record linked mockups for output
+```
+
+**File Operations:**
+```yaml
+# Example: Input mockup_list
+mockup_list:
+  - mockup_name: "main-dashboard"
+    mockup_link: "docs/ideas/Draft Idea - 01232026/mockup.html"
+  - mockup_name: "settings-panel"
+    mockup_link: "docs/ideas/Draft Idea - 01232026/mockups/settings.html"
+
+# Result: Files created
+docs/requirements/FEATURE-001/mockups/main-dashboard.html
+docs/requirements/FEATURE-001/mockups/settings-panel.html
+```
+
+**Linking Mockups:**
+1. Add mockup links to `docs/requirements/requirement-details.md` in "Linked Mockups" table
+2. Add mockup links to each `docs/requirements/{FEATURE-ID}/specification.md` in "Linked Mockups" table
+
+**Mockup Link Format:**
+```markdown
+## Linked Mockups
+
+| Mockup Function Name | Mockup Link |
+|---------------------|-------------|
+| main-dashboard | [main-dashboard.html](FEATURE-001/mockups/main-dashboard.html) |
+| settings-panel | [settings-panel.html](FEATURE-001/mockups/settings-panel.html) |
+```
+
+**Rules:**
+- If mockup_list is N/A or empty, skip this step
+- Use relative paths from the document location
+- Preserve original file extension when copying
+- Create mockups folder only if mockup_list has items
 
 ---
 
@@ -252,103 +322,70 @@ CALL feature-stage+feature-board-management skill:
 | 2 | All features have detailed sections in requirement-details.md | Yes |
 | 3 | Feature board updated via feature-board-management skill | Yes |
 | 4 | All features have status "Planned" on feature board | Yes |
+| 5 | If mockup_list provided: mockups copied to `docs/requirements/{FEATURE-ID}/mockups/` | Conditional |
+| 6 | If mockup_list provided: Linked Mockups section updated in requirement-details.md and specification.md | Conditional |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
 
 ---
 
-## Example Execution
+## Patterns
 
-**Request:** "Break down e-commerce checkout requirement into features"
+### Pattern: Clear Requirements
 
-**Step 1: Analyze**
+**When:** Well-documented requirements exist
+**Then:**
 ```
-Identified features:
-1. Shopping Cart - Manage items before purchase
-2. Payment Processing - Handle payment transactions
-3. Order Confirmation - Confirm and track orders
+1. Read requirement-details.md thoroughly
+2. Identify natural feature boundaries
+3. Apply MVP-first principle
+4. Document dependencies between features
 ```
 
-**Step 2: Create requirement-details.md**
-```markdown
-# Requirement Summary
+### Pattern: Vague Requirements
 
-> Requirement ID: REQ-005  
-> Created: 01-17-2026  
-> Last Updated: 01-17-2026
+**When:** Requirements are ambiguous or incomplete
+**Then:**
+```
+1. Ask clarifying questions to human
+2. Document assumptions made
+3. Start with minimal feature set
+4. Flag areas needing more detail
+```
 
-## Overview
+### Pattern: Large Scope
 
-E-commerce checkout functionality allowing users to complete purchases. Includes shopping cart management, payment processing, and order confirmation with email notifications.
-
-## Feature List
-
-| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
-|------------|---------------|---------|-------------------|-------------------|
-| FEATURE-010 | Shopping Cart | v1.0 | Add, remove, update items in cart | None |
-| FEATURE-011 | Payment Processing | v1.0 | Process credit card payments via Stripe | FEATURE-010 |
-| FEATURE-012 | Order Confirmation | v1.0 | Generate order confirmation and send email | FEATURE-011 |
+**When:** Requirement covers many features
+**Then:**
+```
+1. Group by domain/functionality
+2. Identify MVP core (first feature)
+3. Create feature hierarchy
+4. Limit initial breakdown to 5-7 features
+```
 
 ---
 
-## Feature Details
+## Anti-Patterns
 
-### FEATURE-010: Shopping Cart
-
-**Version:** v1.0  
-**Brief Description:** Allow users to add, remove, and update quantity of items in shopping cart
-
-**Acceptance Criteria:**
-- [ ] User can add products to cart
-- [ ] User can update quantity in cart
-- [ ] User can remove items from cart
-- [ ] Cart persists across sessions
-- [ ] Cart shows subtotal and item count
-
-**Dependencies:**
-- None
-
-**Technical Considerations:**
-- Store cart in browser localStorage for guest users
-- Sync to database for logged-in users
-- Calculate subtotal client and server-side
+| Anti-Pattern | Why Bad | Do Instead |
+|--------------|---------|------------|
+| Too many features | Overwhelming, hard to track | Limit to 5-7 features max |
+| Features too granular | Micromanagement | Combine related functions |
+| MVP not first | Critical path unclear | Always start with runnable MVP |
+| Circular dependencies | Impossible to implement | Ensure DAG structure |
+| Manual board updates | Inconsistent state | Use feature-board-management skill |
+| Vague feature titles | Unclear scope | Use specific, action-oriented names |
 
 ---
 
-[More features...]
-```
+## Example
 
-**Step 3: Call Feature Board Management**
-```yaml
-operation: create_or_update_features
-features:
-  - feature_id: FEATURE-010
-    title: Shopping Cart
-    version: v1.0
-    description: Add, remove, update items in cart
-    dependencies: []
-  - feature_id: FEATURE-011
-    title: Payment Processing
-    version: v1.0
-    description: Process credit card payments via Stripe
-    dependencies: [FEATURE-010]
-  - feature_id: FEATURE-012
-    title: Order Confirmation
-    version: v1.0
-    description: Generate order confirmation and send email
-    dependencies: [FEATURE-011]
-```
-
-**Step 4: Return Output**
-```yaml
-status: completed
-next_task_type: task-type-feature-refinement
-require_human_review: Yes
-task_output_links: [docs/requirements/requirement-details.md]
-requirement_id: REQ-005
-feature_ids: [FEATURE-010, FEATURE-011, FEATURE-012]
-feature_count: 3
-```
+See [references/examples.md](references/examples.md) for detailed execution examples including:
+- E-commerce platform feature breakdown
+- API integration feature breakdown
+- Change request (NEW_FEATURE) breakdown
+- Granularity and sizing guidelines
 
 ---
 

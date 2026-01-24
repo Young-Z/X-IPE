@@ -135,6 +135,23 @@ cd doc-viewer && python3 server.py
 
 ---
 
+## Skill/Task Completion Output Attributes
+
+This skill MUST return these attributes to the Task Data Model upon task completion:
+```yaml
+Output:
+  category: standalone
+  status: completed | blocked
+  next_task_type: null
+  require_human_review: No
+  task_output_links:
+    - doc-viewer/server.py
+    - doc-viewer/index.html
+    - doc-viewer/README.md
+```
+
+---
+
 ## Definition of Done (DoD)
 
 | # | Checkpoint | Required |
@@ -145,21 +162,6 @@ cd doc-viewer && python3 server.py
 | 4 | Server runs and displays documentation | Yes |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
-
----
-
-## Task Completion Output
-
-Upon completion, return:
-```yaml
-category: {Category}
-next_task_type: {Next Task Type}
-require_human_review: {Require Human Review}
-task_output_links:
-  - doc-viewer/server.py
-  - doc-viewer/index.html
-  - doc-viewer/README.md
-```
 
 ---
 

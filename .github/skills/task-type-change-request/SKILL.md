@@ -43,12 +43,13 @@ Process change requests (CRs) systematically by:
 
 ---
 
-## Skill Output
+## Skill/Task Completion Output
 
-This skill MUST return these attributes to the Task Data Model:
+This skill MUST return these attributes to the Task Data Model upon task completion:
 
 ```yaml
 Output:
+  category: standalone
   status: completed | blocked
   next_task_type: task-type-feature-refinement | task-type-feature-breakdown
   require_human_review: Yes
@@ -436,78 +437,15 @@ Wait for human approval before proceeding
 
 ---
 
-## Task Completion Output
-
-Upon completion, return:
-```yaml
-category: Standalone
-next_task_type: task-type-feature-refinement | task-type-feature-breakdown
-require_human_review: Yes
-task_output_links:
-  - docs/requirements/FEATURE-XXX/CR-XXX.md
-  - docs/requirements/FEATURE-XXX/specification.md  # if modification
-cr_id: CR-XXX
-cr_classification: modification | new_feature
-affected_features: [FEATURE-XXX, ...]  # If modification
-requirement_updated: true | false
-```
-
----
-
 ## Patterns
 
-### Pattern: Enhancement CR
-
-**When:** CR adds capability to existing feature
-**Example:** "Add export to CSV for the existing report"
-
-```
-1. Identify: FEATURE-005 (Reporting) exists
-2. Check: CSV export is within reporting scope
-3. Classify: MODIFICATION (adds to existing workflow)
-4. Action: Update FEATURE-005 specification
-5. Next: Feature Refinement → Technical Design
-```
-
-### Pattern: New Capability CR
-
-**When:** CR introduces functionality not covered by any feature
-**Example:** "Add real-time notifications"
-
-```
-1. Identify: No notification feature exists
-2. Check: New data models, new UI, new service required
-3. Classify: NEW FEATURE
-4. Action: Update requirement-details.md
-5. Next: Feature Breakdown → creates FEATURE-XXX
-```
-
-### Pattern: Scope Expansion CR
-
-**When:** CR significantly expands existing feature
-**Example:** "Extend user authentication to support SSO"
-
-```
-1. Identify: FEATURE-001 (Authentication) exists
-2. Check: SSO requires new integration, new flow, new data
-3. Classify: MODIFICATION (but major) or NEW FEATURE
-4. Decision: If SSO is a separate workflow → NEW FEATURE
-           If SSO is another login method → MODIFICATION
-5. Present to human for decision
-```
-
-### Pattern: Multi-Feature CR
-
-**When:** CR affects multiple existing features
-**Example:** "Add audit logging across the system"
-
-```
-1. Identify: Multiple features affected
-2. Check: Is this cross-cutting concern?
-3. Classify: Usually NEW FEATURE (infrastructure)
-4. Action: Create new feature for audit logging
-5. Note: May require updates to existing features later
-```
+See [references/patterns.md](references/patterns.md) for detailed pattern guidance including:
+- Enhancement CR pattern
+- New Capability CR pattern
+- Scope Expansion CR pattern
+- Multi-Feature CR pattern
+- Boundary cases and scoring criteria
+- CR chain handling
 
 ---
 
@@ -524,82 +462,13 @@ requirement_updated: true | false
 
 ---
 
-## Example: Full Execution
+## Example
 
-**Change Request:** "Add bulk import capability for user data in the User Management feature"
-
-### Step 1: Understand CR
-```yaml
-what: Bulk import for user data
-who: System administrators
-why: Manual user creation is time-consuming for large organizations
-when: Medium priority
-```
-
-### Step 2: Review Existing
-```
-- requirement-details.md: User management is in scope
-- features.md: FEATURE-003 (User Management) exists, status: Implemented
-- FEATURE-003/specification.md:
-  - Current: Create, read, update, delete individual users
-  - Out of scope: "Bulk operations (planned for v2.0)"
-```
-
-### Step 3: Classify
-
-| Aspect | CR | FEATURE-003 |
-|--------|-----|-------------|
-| Users | Admins | Admins |
-| Workflow | Import CSV → Create users | Form → Create user |
-| Data Model | Same user model | User model |
-| UI | New import modal | Existing user form |
-| API | New import endpoint | CRUD endpoints |
-
-**Classification:** MODIFICATION
-- Same users, same data model
-- Extends existing feature capability
-- "Bulk operations" mentioned in out-of-scope as future enhancement
-
-### Step 4: Human Approval
-```
-Classification: MODIFICATION to FEATURE-003 (User Management)
-Reasoning: Bulk import extends existing user management without changing 
-           its fundamental purpose. Uses same data model, targets same users.
-Approach: Update specification, then refine feature.
-
-Human says: "approve"
-```
-
-### Step 5: Execute (Path A)
-
-**Created:** docs/requirements/FEATURE-003/CR-001.md (in feature folder)
-
-**Updated:** docs/requirements/FEATURE-003/specification.md
-```markdown
-## Version History
-| Version | Date | Description | Change Request |
-|---------|------|-------------|----------------|
-| 1.1 | 2026-01-22 | Added bulk import capability | [CR-001](./CR-001.md) |
-| 1.0 | 2026-01-10 | Initial specification | - |
-
-[Updated functional requirements, acceptance criteria, UI requirements]
-```
-
-**Removed from Out of Scope:** "Bulk operations"
-
-### Step 6: Return Output
-```yaml
-category: Standalone
-next_task_type: task-type-feature-refinement
-require_human_review: Yes
-task_output_links:
-  - docs/requirements/FEATURE-003/CR-001.md
-  - docs/requirements/FEATURE-003/specification.md
-cr_id: CR-001
-cr_classification: modification
-affected_features: [FEATURE-003]
-requirement_updated: false
-```
+See [references/examples.md](references/examples.md) for detailed execution examples including:
+- Bulk import CR classification (NEW_FEATURE)
+- UI enhancement CR classification (ENHANCEMENT)
+- Ambiguous request requiring clarification
+- Bug report redirection (NOT_A_CR)
 
 ---
 

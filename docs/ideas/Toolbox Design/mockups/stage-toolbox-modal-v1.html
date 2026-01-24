@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stage Toolbox - Mockup v1</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-overlay: rgba(0, 0, 0, 0.75);
+      --bg-modal: #1a1a1e;
+      --bg-modal-header: #141417;
+      --bg-accordion: #222226;
+      --bg-accordion-hover: #2a2a2f;
+      --bg-phase: #1e1e22;
+      --bg-tool: #161619;
+      --bg-toggle-off: #3a3a42;
+      --bg-toggle-on: #10b981;
+      --text-primary: #f0f0f2;
+      --text-secondary: #9898a0;
+      --text-muted: #606068;
+      --border-subtle: #2e2e34;
+      --border-accent: #3b3b44;
+      --accent-ideation: #f59e0b;
+      --accent-requirement: #3b82f6;
+      --accent-feature: #10b981;
+      --accent-quality: #8b5cf6;
+      --accent-refactoring: #ef4444;
+      --shadow-glow: 0 0 60px rgba(16, 185, 129, 0.1);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0d0d0f 0%, #1a1a1e 50%, #0d0d0f 100%);
+      min-height: 100vh;
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* Top Bar Demo */
+    .top-bar-demo {
+      width: 100%;
+      max-width: 900px;
+      height: 48px;
+      background: var(--bg-modal-header);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      margin-bottom: 30px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .app-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--accent-feature);
+      letter-spacing: -0.5px;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .top-bar-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .top-bar-btn:hover {
+      background: var(--bg-accordion);
+      color: var(--text-primary);
+    }
+
+    .top-bar-btn.toolbox-trigger {
+      background: linear-gradient(135deg, var(--accent-feature) 0%, #059669 100%);
+      color: white;
+      position: relative;
+    }
+
+    .top-bar-btn.toolbox-trigger::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent-feature), #059669);
+      opacity: 0;
+      z-index: -1;
+      filter: blur(8px);
+      transition: opacity 0.3s ease;
+    }
+
+    .top-bar-btn.toolbox-trigger:hover::after {
+      opacity: 0.5;
+    }
+
+    .tooltip {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-modal);
+      color: var(--text-primary);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .top-bar-btn:hover .tooltip {
+      opacity: 1;
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-overlay);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Modal */
+    .modal {
+      width: 480px;
+      max-height: 85vh;
+      background: var(--bg-modal);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-glow), 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      transform: scale(0.95) translateY(10px);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      overflow: hidden;
+    }
+
+    .modal-overlay.active .modal {
+      transform: scale(1) translateY(0);
+    }
+
+    /* Modal Header */
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--bg-modal-header);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .modal-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    .modal-title svg {
+      color: var(--accent-feature);
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background: var(--bg-accordion);
+      color: var(--text-primary);
+    }
+
+    /* Modal Body */
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+    }
+
+    .modal-body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .modal-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+      background: var(--border-accent);
+      border-radius: 3px;
+    }
+
+    /* Accordion */
+    .accordion {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .accordion-item {
+      border-radius: var(--radius-md);
+      background: var(--bg-accordion);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .accordion-item:hover {
+      border-color: var(--border-accent);
+    }
+
+    .accordion-item.expanded {
+      background: var(--bg-accordion-hover);
+    }
+
+    .accordion-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s ease;
+    }
+
+    .accordion-header:hover {
+      background: var(--bg-accordion-hover);
+    }
+
+    .accordion-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .accordion-item[data-stage="ideation"] .accordion-icon {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-ideation);
+    }
+
+    .accordion-item[data-stage="requirement"] .accordion-icon {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent-requirement);
+    }
+
+    .accordion-item[data-stage="feature"] .accordion-icon {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-feature);
+    }
+
+    .accordion-item[data-stage="quality"] .accordion-icon {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--accent-quality);
+    }
+
+    .accordion-item[data-stage="refactoring"] .accordion-icon {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--accent-refactoring);
+    }
+
+    .accordion-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .accordion-title {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      margin-bottom: 2px;
+    }
+
+    .accordion-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .accordion-badge {
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      background: var(--bg-phase);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .accordion-badge.active {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-feature);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .accordion-chevron {
+      color: var(--text-muted);
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .accordion-item.expanded .accordion-chevron {
+      transform: rotate(180deg);
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .accordion-item.expanded .accordion-content {
+      max-height: 500px;
+    }
+
+    .accordion-body {
+      padding: 0 16px 16px 16px;
+    }
+
+    /* Phase Groups */
+    .phase-group {
+      margin-bottom: 12px;
+    }
+
+    .phase-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .phase-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      padding-left: 4px;
+    }
+
+    .phase-tools {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* Tool Item */
+    .tool-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: var(--bg-tool);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      transition: all 0.2s ease;
+    }
+
+    .tool-item:hover {
+      border-color: var(--border-accent);
+      background: var(--bg-phase);
+    }
+
+    .tool-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tool-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      background: var(--bg-accordion);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .tool-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Toggle Switch */
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      cursor: pointer;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-toggle-off);
+      border-radius: 11px;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 3px;
+      top: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background: var(--bg-toggle-on);
+    }
+
+    .toggle input:checked + .toggle-slider::before {
+      transform: translateX(18px);
+    }
+
+    /* Empty State */
+    .empty-phase {
+      padding: 16px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 12px;
+      background: var(--bg-tool);
+      border-radius: var(--radius-sm);
+      border: 1px dashed var(--border-subtle);
+    }
+
+    /* Placeholder Badge */
+    .placeholder-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      background: rgba(96, 96, 104, 0.2);
+      color: var(--text-muted);
+      border-radius: 4px;
+      margin-left: 8px;
+    }
+
+    /* Mockup Info */
+    .mockup-info {
+      max-width: 900px;
+      width: 100%;
+      margin-top: 30px;
+      padding: 20px;
+      background: var(--bg-accordion);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .mockup-info h3 {
+      font-size: 14px;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    .mockup-info ul {
+      list-style: none;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .mockup-info li {
+      padding: 6px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mockup-info li::before {
+      content: '→';
+      color: var(--accent-feature);
+    }
+
+    .demo-hint {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .demo-hint strong {
+      color: var(--accent-feature);
+    }
+  </style>
+</head>
+<body>
+
+  <p class="demo-hint">Click the <strong>green toolbox button</strong> in the top bar to open the modal</p>
+
+  <!-- Top Bar Demo -->
+  <div class="top-bar-demo">
+    <div class="top-bar-left">
+      <span class="app-logo">X-IPE</span>
+    </div>
+    <div class="top-bar-right">
+      <button class="top-bar-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        </svg>
+        <span class="tooltip">Home</span>
+      </button>
+      <button class="top-bar-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <line x1="3" y1="9" x2="21" y2="9"/>
+          <line x1="9" y1="21" x2="9" y2="9"/>
+        </svg>
+        <span class="tooltip">Workplace</span>
+      </button>
+      <button class="top-bar-btn toolbox-trigger" onclick="toggleModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        </svg>
+        <span class="tooltip">Stage Toolbox</span>
+      </button>
+      <button class="top-bar-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        <span class="tooltip">Settings</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Overlay -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOverlay(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+          </svg>
+          Stage Toolbox
+        </div>
+        <button class="modal-close" onclick="toggleModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="accordion">
+          
+          <!-- Ideation Stage -->
+          <div class="accordion-item expanded" data-stage="ideation">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div class="accordion-icon">💡</div>
+              <div class="accordion-info">
+                <div class="accordion-title">Ideation Stage</div>
+                <div class="accordion-subtitle">Brainstorm & visualize ideas</div>
+              </div>
+              <span class="accordion-badge active">1 active</span>
+              <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+            <div class="accordion-content">
+              <div class="accordion-body">
+                <div class="phase-group">
+                  <div class="phase-label">Ideation</div>
+                  <div class="phase-tools">
+                    <div class="tool-item">
+                      <div class="tool-info">
+                        <div class="tool-icon">📊</div>
+                        <span class="tool-name">antv-infographic</span>
+                      </div>
+                      <label class="toggle">
+                        <input type="checkbox">
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                    <div class="tool-item">
+                      <div class="tool-info">
+                        <div class="tool-icon">🔀</div>
+                        <span class="tool-name">mermaid</span>
+                      </div>
+                      <label class="toggle">
+                        <input type="checkbox">
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div class="phase-group">
+                  <div class="phase-label">Mockup</div>
+                  <div class="phase-tools">
+                    <div class="tool-item">
+                      <div class="tool-info">
+                        <div class="tool-icon">🎨</div>
+                        <span class="tool-name">frontend-design</span>
+                      </div>
+                      <label class="toggle">
+                        <input type="checkbox" checked>
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div class="phase-group">
+                  <div class="phase-label">Sharing</div>
+                  <div class="empty-phase">No tools configured</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Requirement Stage -->
+          <div class="accordion-item" data-stage="requirement">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div class="accordion-icon">📋</div>
+              <div class="accordion-info">
+                <div class="accordion-title">Requirement Stage <span class="placeholder-badge">placeholder</span></div>
+                <div class="accordion-subtitle">Gather & analyze requirements</div>
+              </div>
+              <span class="accordion-badge">0 active</span>
+              <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+            <div class="accordion-content">
+              <div class="accordion-body">
+                <div class="phase-group">
+                  <div class="phase-label">Gathering</div>
+                  <div class="empty-phase">Coming soon...</div>
+                </div>
+                <div class="phase-group">
+                  <div class="phase-label">Analysis</div>
+                  <div class="empty-phase">Coming soon...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature Stage -->
+          <div class="accordion-item" data-stage="feature">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div class="accordion-icon">⚙️</div>
+              <div class="accordion-info">
+                <div class="accordion-title">Feature Stage <span class="placeholder-badge">placeholder</span></div>
+                <div class="accordion-subtitle">Design & implement features</div>
+              </div>
+              <span class="accordion-badge">0 active</span>
+              <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+            <div class="accordion-content">
+              <div class="accordion-body">
+                <div class="phase-group">
+                  <div class="phase-label">Design</div>
+                  <div class="empty-phase">Coming soon...</div>
+                </div>
+                <div class="phase-group">
+                  <div class="phase-label">Implementation</div>
+                  <div class="empty-phase">Coming soon...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quality Stage -->
+          <div class="accordion-item" data-stage="quality">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div class="accordion-icon">✅</div>
+              <div class="accordion-info">
+                <div class="accordion-title">Quality Stage <span class="placeholder-badge">placeholder</span></div>
+                <div class="accordion-subtitle">Test & review code quality</div>
+              </div>
+              <span class="accordion-badge">0 active</span>
+              <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+            <div class="accordion-content">
+              <div class="accordion-body">
+                <div class="phase-group">
+                  <div class="phase-label">Testing</div>
+                  <div class="empty-phase">Coming soon...</div>
+                </div>
+                <div class="phase-group">
+                  <div class="phase-label">Review</div>
+                  <div class="empty-phase">Coming soon...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Refactoring Stage -->
+          <div class="accordion-item" data-stage="refactoring">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div class="accordion-icon">🔄</div>
+              <div class="accordion-info">
+                <div class="accordion-title">Refactoring Stage <span class="placeholder-badge">placeholder</span></div>
+                <div class="accordion-subtitle">Improve & optimize code</div>
+              </div>
+              <span class="accordion-badge">0 active</span>
+              <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+            <div class="accordion-content">
+              <div class="accordion-body">
+                <div class="phase-group">
+                  <div class="phase-label">Analysis</div>
+                  <div class="empty-phase">Coming soon...</div>
+                </div>
+                <div class="phase-group">
+                  <div class="phase-label">Execution</div>
+                  <div class="empty-phase">Coming soon...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mockup Info -->
+  <div class="mockup-info">
+    <h3>🎨 Mockup v1: Stage Toolbox Modal</h3>
+    <ul>
+      <li>Dark-themed modal matching Skills modal reference</li>
+      <li>Accordion sections for 5 stages (Ideation, Requirement, Feature, Quality, Refactoring)</li>
+      <li>Sub-phases displayed under each stage with tool lists</li>
+      <li>Simple on/off toggle switches for each tool</li>
+      <li>Top bar icon triggers modal opening</li>
+      <li>Color-coded stage icons for visual distinction</li>
+      <li>Placeholder badges for unimplemented stages</li>
+      <li>"1 active" badge shows tools currently enabled</li>
+    </ul>
+  </div>
+
+  <script>
+    function toggleModal() {
+      const overlay = document.getElementById('modalOverlay');
+      overlay.classList.toggle('active');
+    }
+
+    function closeModalOnOverlay(event) {
+      if (event.target === event.currentTarget) {
+        toggleModal();
+      }
+    }
+
+    function toggleAccordion(header) {
+      const item = header.parentElement;
+      const wasExpanded = item.classList.contains('expanded');
+      
+      // Close all accordions
+      document.querySelectorAll('.accordion-item').forEach(i => {
+        i.classList.remove('expanded');
+      });
+      
+      // Toggle clicked one
+      if (!wasExpanded) {
+        item.classList.add('expanded');
+      }
+    }
+
+    // Update badge counts when toggles change
+    document.querySelectorAll('.toggle input').forEach(toggle => {
+      toggle.addEventListener('change', () => {
+        const accordionItem = toggle.closest('.accordion-item');
+        const activeCount = accordionItem.querySelectorAll('.toggle input:checked').length;
+        const badge = accordionItem.querySelector('.accordion-badge');
+        badge.textContent = `${activeCount} active`;
+        badge.classList.toggle('active', activeCount > 0);
+      });
+    });
+  </script>
+
+</body>
+</html>

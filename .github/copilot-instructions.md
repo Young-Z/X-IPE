@@ -138,3 +138,22 @@ Always follow:
 3. **YAGNI** - You Aren't Gonna Need It
 4. **KISS** - Keep It Simple
 
+---
+
+## Skill Management
+
+### Creating, Updating, or Validating X-IPE Skills
+
+**When:** Creating a new skill, updating an existing skill, or validating skill structure
+**Then:** Always use the `x-ipe-skill-creator` skill
+
+```
+1. Load skill: `x-ipe-skill-creator`
+2. Follow the skill creation process defined in the skill
+3. Use appropriate template based on skill type:
+   - Task Type → templates/task-type-skill.md
+   - Skill Category → templates/skill-category-skill.md
+   - Tool Skill → TBD
+4. Validate against skill-creator checklist before completing
+```
+

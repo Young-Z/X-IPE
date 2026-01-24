@@ -22,3 +22,9 @@
 
 ## Open Questions
 - [Any unresolved items]
+
+## Linked Mockups
+
+| Mockup Function Name | Mockup Link |
+|---------------------|-------------|
+| ... | ... |

@@ -41,12 +41,13 @@ Execute **User Manual** tasks by:
 
 ---
 
-## Skill Output
+## Skill/Task Completion Output
 
-This skill MUST return these attributes to the Task Data Model:
+This skill MUST return these attributes to the Task Data Model upon task completion:
 
 ```yaml
 Output:
+  category: standalone
   status: completed | blocked
   next_task_type: null
   require_human_review: Yes
@@ -142,6 +143,93 @@ Execute User Manual by following these steps in order:
 | 1 | Run command identified and verified (executed successfully) | Yes |
 | 2 | `README.md` updated with clear run instructions | Yes |
 | 3 | `README.md` includes test execution instructions | Yes |
+
+**Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
+
+---
+
+## Patterns
+
+### Pattern: Python Project
+
+**When:** pyproject.toml exists
+**Then:**
+```
+1. Check for uv.lock → use `uv run`
+2. Find entry point in pyproject.toml
+3. Test: uv run python src/{entry}.py
+4. Document: uv sync + run command
+```
+
+### Pattern: Node.js Project
+
+**When:** package.json exists
+**Then:**
+```
+1. Check scripts section for start/dev
+2. Test: npm start or npm run dev
+3. Document: npm install + run command
+```
+
+### Pattern: Web Application
+
+**When:** App serves on a port
+**Then:**
+```
+1. Run command and verify server starts
+2. Include the URL in README
+3. Add browser access instructions
+4. Note any default credentials
+```
+
+---
+
+## Anti-Patterns
+
+| Anti-Pattern | Why Bad | Do Instead |
+|--------------|---------|------------|
+| Document without testing | Commands may fail | Verify all commands work |
+| Missing prerequisites | Users can't run | List all dependencies |
+| Outdated instructions | Misleading | Verify before documenting |
+| Skip test commands | Incomplete manual | Always include test instructions |
+| Assume environment | Portability issues | Document setup from scratch |
+
+---
+
+## Example
+
+**Request:** "Document how to run this Python web app"
+
+**Execution:**
+```
+1. Execute Task Flow from task-execution-guideline skill
+
+2. Step 1 - Identify Commands:
+   Found: pyproject.toml with entry point src/app.py
+   Run command: uv run python -m src.app
+   Test command: uv run pytest
+
+3. Step 2 - Verify Commands:
+   $ uv run python -m src.app
+   Running on http://localhost:5000
+   ✓ Verified
+
+4. Step 3 - Update README:
+   Added "How to Run" section with:
+   - Prerequisites: Python 3.12+, uv
+   - Installation: uv sync
+   - Run: uv run python -m src.app
+   - Test: uv run pytest
+
+5. Return Task Completion Output:
+   status: completed
+   next_task_type: null
+   require_human_review: Yes
+   task_output_links: [README.md]
+   run_command: "uv run python -m src.app"
+
+6. Resume Task Flow from task-execution-guideline skill
+```
 
 ---
 

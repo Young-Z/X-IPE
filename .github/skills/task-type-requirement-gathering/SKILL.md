@@ -40,21 +40,34 @@ Gather and document requirements from user requests by:
 | Attribute | Default Value |
 |-----------|---------------|
 | Auto Proceed | False |
+| Mockup List | N/A |
+
+**Mockup List Structure:**
+```yaml
+mockup_list:
+  - mockup_name: "Description of what function the mockup is for"
+    mockup_link: "URL to the mockup"
+  - mockup_name: "Another mockup description"
+    mockup_link: "URL to the mockup"
+```
 
 ---
 
-## Skill Output
+## Skill/Task Completion Output Attributes
 
-This skill MUST return these attributes to the Task Data Model:
+This skill MUST return these attributes to the Task Data Model upon task completion:
 
 ```yaml
 Output:
+  category: requirement-stage
   status: completed | blocked
   next_task_type: Feature Breakdown
   require_human_review: Yes
-  task_output_links: [docs/requirements/requirement-details.md]
+  task_output_links: [docs/requirements/requirement-details.md] # or requirement-details-part-X.md
+  mockup_list: [inherited from input or N/A]
   # Dynamic attributes for requirement-stage
   requirement_summary_updated: true | false
+  requirement_details_part: 1 | 2 | 3 | ... # current active part number
 ```
 
 ---
@@ -75,14 +88,15 @@ Execute Requirement Gathering by following these steps in order:
 
 | Step | Name | Action | Gate to Next |
 |------|------|--------|--------------|
-| 1 | Understand | Parse what, who, why from user request | Initial understanding |
-| 2 | Research | Search for industry standards and best practices | Research complete |
-| 3 | Clarify | Ask clarifying questions (3-5 at a time) | All questions answered |
-| 4 | Document | Create/update `requirement-details.md` | Document created |
+| 1 | Understand | Parse what, who, why from user request (optional: web research) | Initial understanding |
+| 2 | Clarify | Ask clarifying questions (3-5 at a time) | All questions answered |
+| 3 | Check File | Check if requirement-details needs splitting (>500 lines) | File ready |
+| 4 | Document | Create/update `requirement-details.md` (or current part) | Document created |
 | 5 | Complete | Verify DoD, request human review | Human review |
 
 **⛔ BLOCKING RULES:**
-- Step 3: Continue asking until ALL ambiguities resolved
+- Step 2: Continue asking until ALL ambiguities resolved
+- Step 3: MUST split file if current part exceeds 500 lines before adding new content
 - Step 5 → Human Review: Human MUST approve requirements before Feature Breakdown
 
 ---
@@ -133,15 +147,82 @@ Use web search capability to research:
 2. Avoid making assumptions
 3. Unless Human enforces, do not skip any clarifications
 
-### Step 3: Create Requirement Details Document
+### Step 3: Check File Size and Split if Needed
 
-**Action:** Create or update `docs/requirements/requirement-details.md`
+**Action:** Check if requirement-details file needs splitting before adding new content
+
+**Splitting Rules:**
+- **Threshold:** 500 lines
+- **When:** Before adding NEW requirements, check current file line count
+- **How:** If current file > 500 lines, create new part
+
+**Procedure:**
+```
+1. Determine current active file:
+   a. Check if docs/requirements/requirement-details.md exists
+   b. Check if docs/requirements/requirement-details-part-X.md files exist
+   c. Find the highest part number (latest active part)
+
+2. Count lines in current active file:
+   - If no file exists → current_lines = 0, active_file = requirement-details.md
+   - If requirement-details.md exists (no parts) → count its lines
+   - If parts exist → count lines in highest part number file
+
+3. IF current_lines > 500:
+   a. IF file is requirement-details.md (original, no parts yet):
+      - Rename requirement-details.md → requirement-details-part-1.md
+      - Create new requirement-details-part-2.md with header template
+      - New file becomes active
+   
+   b. ELSE IF file is requirement-details-part-X.md:
+      - Create new requirement-details-part-(X+1).md with header template
+      - New file becomes active
+
+4. ELSE (current_lines <= 500):
+   - Continue using current active file
+```
+
+**New Part Header Template:**
+```markdown
+# Requirement Details - Part {X}
+
+> Continued from: [requirement-details-part-{X-1}.md](requirement-details-part-{X-1}.md)  
+> Created: {MM-DD-YYYY}
+
+---
+
+## Feature Details (Continued)
+
+```
+
+**File Naming Convention:**
+| Scenario | File Names |
+|----------|------------|
+| Single file (< 500 lines total) | `requirement-details.md` |
+| After first split | `requirement-details-part-1.md`, `requirement-details-part-2.md` |
+| After second split | `requirement-details-part-1.md`, `requirement-details-part-2.md`, `requirement-details-part-3.md` |
+
+**Index File (Optional):**
+When parts exist, consider creating `requirement-details-index.md`:
+```markdown
+# Requirement Details Index
+
+| Part | File | Features Covered |
+|------|------|------------------|
+| 1 | [Part 1](requirement-details-part-1.md) | FEATURE-001 to FEATURE-005 |
+| 2 | [Part 2](requirement-details-part-2.md) | FEATURE-006 to FEATURE-010 |
+```
+
+### Step 4: Create Requirement Details Document
+
+**Action:** Create or update the active requirement-details file (determined in Step 3)
 
 **Rules:**
-- Use [requirement-details.md](templates/requirement-details.md) as template
+- Use [requirement-details.md](templates/requirement-details.md) as template for new files
 - **Document requirements in detail** - this is the source of truth for all downstream tasks
 - Ensure all sections are filled based on gathered information
 - Include all clarifications and decisions made during the gathering process
+- **Add new content to the current active part file**
 
 **Documentation Guidelines:**
 - Be thorough and specific - vague requirements lead to incorrect implementations
@@ -155,23 +236,11 @@ Use web search capability to research:
 
 | # | Checkpoint | Required |
 |---|------------|----------|
-| 1 | `docs/requirements/requirement-details.md` created/updated | Yes |
+| 1 | `docs/requirements/requirement-details.md` (or current part) created/updated | Yes |
 | 2 | All clarifying questions answered | Yes |
+| 3 | If file split occurred, old file renamed correctly | Conditional |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
-
----
-
-## Task Completion Output
-
-Upon completion, return:
-```yaml
-category: {Category}
-next_task_type: {Next Task Type}
-require_human_review: {Require Human Review}
-task_output_links:
-  - docs/requirements/requirement-details.md
-```
 
 ---
 
@@ -248,6 +317,7 @@ task_output_links:
 
 5. Return Task Completion Output:
    category: requirement-stage
+   status: completed
    next_task_type: Feature Breakdown
    require_human_review: Yes
    task_output_links:

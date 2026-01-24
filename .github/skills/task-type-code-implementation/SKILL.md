@@ -45,19 +45,17 @@ Implement code for a single feature by:
 
 ---
 
-## Skill Output
+## Skill/Task Completion Output
 
-This skill MUST return these attributes to the Task Data Model:
+This skill MUST return these attributes to the Task Data Model upon task completion:
 
 ```yaml
 Output:
+  category: feature-stage
   status: completed | blocked
   next_task_type: Feature Closing
   require_human_review: No
   task_output_links: [src/, tests/]
-  
-  # Feature stage dynamic attributes (REQUIRED)
-  category: feature-stage
   feature_id: FEATURE-XXX
   feature_title: {title}
   feature_version: {version}
@@ -135,6 +133,37 @@ Execute Code Implementation by following these steps in order:
 3. Refactor if needed (REFACTOR - clean up)
 4. Repeat
 ```
+
+---
+
+### 🎨 Mockup Reference (Conditional)
+
+**When implementing frontend code:**
+```
+IF Technical Scope in specification.md includes [Frontend] OR [Full Stack]:
+  1. MUST open and reference "Linked Mockups" from specification.md
+  2. Keep mockup visible during frontend implementation
+  3. Match implementation to mockup:
+     - Component structure and hierarchy
+     - Layout and positioning
+     - Interactive elements and behaviors
+     - Form fields and their validations
+     - Visual states (hover, active, disabled, error)
+  4. Verify implementation visually matches mockup
+  5. Note any deviations and document reasons
+
+ELSE (Backend/API Only/Database/Infrastructure):
+  - Skip mockup reference
+  - Implement based on technical design only
+```
+
+**Implementation Tip:**
+For frontend work, implement in this order:
+1. Component structure (HTML/JSX)
+2. Styling (CSS) to match mockup
+3. Interactivity (event handlers)
+4. State management
+5. API integration
 
 ---
 
@@ -434,19 +463,40 @@ src/
 
 ---
 
-## Task Completion Output
+## Patterns
 
-Upon completion, return:
-```yaml
-feature_id: FEATURE-XXX
-feature_status: Done Code Implementation
-category: feature-stage
-feature_phase: Code Implementation
-next_task_type: Human Playground
-require_human_review: No
-task_output_links:
-  - src/{feature-related-files}
-  - tests/{test-files}
+### Pattern: TDD Flow
+
+**When:** Tests exist from Test Generation
+**Then:**
+```
+1. Run tests - confirm all FAIL
+2. Implement smallest unit first
+3. Run tests - some pass
+4. Continue until all pass
+5. Refactor if needed
+```
+
+### Pattern: Design Reference
+
+**When:** Technical design references architecture patterns
+**Then:**
+```
+1. Read referenced architecture docs
+2. Follow existing patterns exactly
+3. Reuse shared utilities
+4. Ask if patterns unclear
+```
+
+### Pattern: Blocked by Tests
+
+**When:** Tests don't exist or pass unexpectedly
+**Then:**
+```
+1. STOP implementation
+2. Return to Test Generation task
+3. Create/fix failing tests
+4. Resume implementation
 ```
 
 ---
@@ -465,87 +515,13 @@ task_output_links:
 
 ---
 
-## Example Execution
+## Example
 
-**Feature:** FEATURE-001: User Authentication
-
-### Step 1: Query Feature Board
-```yaml
-CALL: query_feature(FEATURE-001)
-RECEIVE:
-  feature_id: FEATURE-001
-  title: User Authentication
-  status: Designed
-  technical_design_link: docs/requirements/FEATURE-001/technical-design.md
-```
-
-### Step 2: Learn Technical Design
-```
-READ: docs/requirements/FEATURE-001/technical-design.md
-
-Part 1 (Quick Overview):
-- Components: AuthService, TokenManager, UserRepository
-- Tags: #auth #login #jwt
-- Dependencies: None
-
-Part 2 (Detailed Design):
-- Data Models: User, TokenResponse
-- Endpoints: POST /login, POST /logout
-- Password hashing: bcrypt
-- Token expiration: 1 hour
-
-NO architecture references found.
-```
-
-### Step 3: Read Architecture (None referenced)
-```
-No architecture references in technical design.
-Proceeding to implementation.
-```
-
-### Step 4: Write Tests First
-```python
-# tests/test_auth_service.py - Created with 5 test cases
-# Run: pytest tests/ -v
-# Result: 5 FAILED (expected - no implementation yet)
-```
-
-### Step 5: Implement Code
-```
-Created:
-- src/auth/__init__.py
-- src/auth/models.py (User, TokenResponse)
-- src/auth/service.py (AuthService)
-- src/auth/token_manager.py (TokenManager)
-- src/auth/repository.py (UserRepository)
-
-Run tests after each file:
-- pytest tests/ -v
-- Result: 5 PASSED
-```
-
-### Step 6: Verify Quality
-```
-- All tests pass ✓
-- Coverage: 87% ✓
-- Linter passes ✓
-- Matches technical design ✓
-```
-
-### Return Output
-```yaml
-feature_id: FEATURE-001
-feature_status: Done Code Implementation
-category: feature-stage
-feature_phase: Code Implementation
-next_task_type: Feature Closing
-require_human_review: No
-task_output_links:
-  - src/auth/service.py
-  - src/auth/models.py
-  - src/auth/token_manager.py
-  - tests/test_auth_service.py
-```
+See [references/examples.md](references/examples.md) for detailed execution examples including:
+- Authentication service implementation (TDD)
+- Test failure during implementation (design gap)
+- Missing tests (blocked scenario)
+- Multiple features batch implementation
 
 ---
 

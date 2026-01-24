@@ -25,7 +25,7 @@ Convert refined idea summaries to human-readable shareable formats by:
 
 ---
 
-## Quick Reference
+## Task Type Default Attributes
 
 | Attribute | Value |
 |-----------|-------|
@@ -224,10 +224,11 @@ Examples:
 
 ---
 
-## Task Completion Output
+## Skill/Task Completion Output
 
-Upon completion, return:
+This skill MUST return these attributes to the Task Data Model upon task completion:
 ```yaml
+category: standalone
 task_type: Share Idea
 idea_folder: docs/ideas/{folder}
 source_file: idea-summary-vN.md

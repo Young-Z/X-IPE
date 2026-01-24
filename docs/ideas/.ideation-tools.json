@@ -2,7 +2,7 @@
   "version": "1.0",
   "ideation": {
     "antv-infographic": false,
-    "mermaid": true
+    "mermaid": false
   },
   "mockup": {
     "frontend-design": true

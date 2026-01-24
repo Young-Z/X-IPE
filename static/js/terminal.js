@@ -309,27 +309,51 @@
         }
 
         /**
-         * Create Socket.IO connection
+         * Create Socket.IO connection with improved stability
          */
         _createSocket(index, existingSessionId) {
             const socket = io({
-                transports: ['websocket', 'polling'],  // Allow fallback to polling
-                upgrade: true,                          // Allow transport upgrade
+                transports: ['websocket'],           // WebSocket only for lower latency
+                upgrade: false,                       // No upgrade needed since we start with WS
                 reconnection: true,
                 reconnectionAttempts: Infinity,
                 reconnectionDelay: 1000,
-                reconnectionDelayMax: 5000,
+                reconnectionDelayMax: 10000,          // Max 10s between retries
                 randomizationFactor: 0.5,
-                timeout: 60000,
+                timeout: 20000,                       // Initial connection timeout
                 forceNew: false,
-                // Match server ping settings for stable connection
-                pingTimeout: 60000,                     // Must be >= server's ping_timeout
-                pingInterval: 25000                     // Match server's ping_interval
+                // Heartbeat settings - slightly lower than server for safety margin
+                pingTimeout: 55000,                   // Server is 60s, give 5s margin
+                pingInterval: 20000                   // Server is 25s, send more frequently
             });
+            
+            // Track connection health
+            let lastPongTime = Date.now();
+            let healthCheckInterval = null;
+            
+            const startHealthCheck = () => {
+                if (healthCheckInterval) clearInterval(healthCheckInterval);
+                healthCheckInterval = setInterval(() => {
+                    const timeSincePong = Date.now() - lastPongTime;
+                    // If no pong for 45s, connection may be unhealthy
+                    if (timeSincePong > 45000 && socket.connected) {
+                        console.warn(`[Terminal ${index + 1}] Connection may be stale (${Math.round(timeSincePong/1000)}s since last pong)`);
+                    }
+                }, 15000);
+            };
+            
+            const stopHealthCheck = () => {
+                if (healthCheckInterval) {
+                    clearInterval(healthCheckInterval);
+                    healthCheckInterval = null;
+                }
+            };
 
             socket.on('connect', () => {
                 const idx = this._getSocketIndex(socket);
                 console.log(`[Terminal ${idx + 1}] Connected`);
+                lastPongTime = Date.now();
+                startHealthCheck();
                 this._updateStatus();
                 
                 const dims = this.fitAddons[idx]?.proposeDimensions();
@@ -370,27 +394,33 @@
                     this.terminals[idx].write(data);
                 }
             });
+            
+            // Handle pong to track connection health
+            socket.io.engine.on('pong', () => {
+                lastPongTime = Date.now();
+            });
 
             socket.on('disconnect', reason => {
                 const idx = this._getSocketIndex(socket);
                 console.log(`[Terminal ${idx + 1}] Disconnected: ${reason}`);
+                stopHealthCheck();
                 this._updateStatus();
+                
                 if (reason !== 'io client disconnect' && idx >= 0) {
-                    this.terminals[idx].write('\r\n\x1b[31m[Disconnected - reconnecting...]\x1b[0m\r\n');
-                }
-                // Handle specific disconnect reasons
-                if (reason === 'ping timeout') {
-                    console.warn(`[Terminal ${idx + 1}] Ping timeout - server may be unresponsive`);
-                } else if (reason === 'transport close') {
-                    console.warn(`[Terminal ${idx + 1}] Transport closed unexpectedly`);
-                } else if (reason === 'transport error') {
-                    console.warn(`[Terminal ${idx + 1}] Transport error occurred`);
+                    // Only show message for unexpected disconnects
+                    if (reason === 'ping timeout') {
+                        this.terminals[idx].write('\r\n\x1b[31m[Connection timeout - reconnecting...]\x1b[0m\r\n');
+                    } else if (reason === 'transport close' || reason === 'transport error') {
+                        this.terminals[idx].write('\r\n\x1b[31m[Connection lost - reconnecting...]\x1b[0m\r\n');
+                    }
                 }
             });
 
             socket.io.on('reconnect', attempt => {
                 const idx = this._getSocketIndex(socket);
                 console.log(`[Terminal ${idx + 1}] Reconnected after ${attempt} attempts`);
+                lastPongTime = Date.now();
+                startHealthCheck();
                 this._updateStatus();
                 
                 if (idx >= 0) {
@@ -408,25 +438,21 @@
                 const idx = this._getSocketIndex(socket);
                 console.log(`[Terminal ${idx + 1}] Reconnection attempt ${attempt}`);
                 if (attempt === 1 && idx >= 0) {
-                    this.terminals[idx].write('\x1b[33m[Attempting to reconnect...]\x1b[0m\r\n');
+                    this.terminals[idx].write('\x1b[33m[Reconnecting...]\x1b[0m\r\n');
                 }
             });
 
             socket.io.on('reconnect_failed', () => {
                 const idx = this._getSocketIndex(socket);
+                stopHealthCheck();
                 if (idx >= 0) {
-                    this.terminals[idx].write('\r\n\x1b[31m[Connection lost - please refresh]\x1b[0m\r\n');
+                    this.terminals[idx].write('\r\n\x1b[31m[Connection lost - please refresh page]\x1b[0m\r\n');
                 }
             });
 
             socket.on('connect_error', error => {
                 console.error(`[Terminal ${index + 1}] Connection error:`, error.message || error);
                 this._updateStatus();
-            });
-
-            // Handle ping/pong events for debugging
-            socket.io.on('ping', () => {
-                // Socket.IO automatically responds with pong
             });
 
             return socket;

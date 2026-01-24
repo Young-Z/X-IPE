@@ -1,0 +1,7 @@
+- let's move ideation toolbox to to top bar
+- now it's not only have ideation stage tool selection, it will have all stages tool selection (ideation stage, requirement stage, feature stage, quality stage, refactoring stage) some of stage is not implemented yet, but leave placeholder
+- for each stage, we may have sub phases as ideation, mockup and sharing
+- tool list is still under these sub phases
+- the .ideation-tools.json now let's move to project root/config/tools.json
+- the interaction function should remain the same but support all stages
+- the UIUX for toolbox window, I suggest modal window you have more space, you can reference Skills modal window which I attached 'Skill modal window'

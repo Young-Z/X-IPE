@@ -44,19 +44,17 @@ Execute **Feature Closing** tasks by:
 
 ---
 
-## Skill Output
+## Skill/Task Completion Output
 
-This skill MUST return these attributes to the Task Data Model:
+This skill MUST return these attributes to the Task Data Model upon task completion:
 
 ```yaml
 Output:
+  category: feature-stage
   status: completed | blocked
   next_task_type: User Manual
   require_human_review: No
   task_output_links: [PR link, changelog]
-  
-  # Feature stage dynamic attributes (REQUIRED)
-  category: feature-stage
   feature_id: FEATURE-XXX
   feature_title: {title}
   feature_version: {version}
@@ -105,6 +103,23 @@ Execute Feature Closing by following these steps in order:
 4. Flag any unmet criteria
 ```
 
+**🎨 Mockup Verification (Conditional):**
+```
+IF Technical Scope in specification.md includes [Frontend] OR [Full Stack]:
+  1. Open "Linked Mockups" from specification.md
+  2. Compare implemented UI against mockup:
+     - Layout matches mockup design
+     - All UI elements present
+     - Interactions work as shown
+     - Visual styling is consistent
+  3. Add mockup compliance to verification results
+  4. Document any approved deviations
+
+ELSE (Backend/API Only/Database):
+  - Skip visual verification
+  - Focus on functional acceptance criteria
+```
+
 **Verification Template:**
 
 ```markdown
@@ -115,6 +130,7 @@ Execute Feature Closing by following these steps in order:
 | 1 | [Criterion 1] | ✓ Met | [How verified] |
 | 2 | [Criterion 2] | ✓ Met | [How verified] |
 | 3 | [Criterion 3] | ✗ Not Met | [What's missing] |
+| 4 | UI matches mockup (if applicable) | ✓ Met | Visual comparison |
 ```
 
 **If criteria not met:**
@@ -231,23 +247,6 @@ feat: [Feature Name] - [Brief Description]
 | 4 | Summary provided to human | Yes |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
-
----
-
-## Task Completion Output
-
-Upon completion, return:
-```yaml
-feature_id: {Feature ID}
-feature_status: {In|Done} {Feature Phase}
-category: {Category}
-next_task_type: {Next Task Type}
-require_human_review: {Require Human Review}
-task_output_links:
-  - PR #{number}
-  - CHANGELOG.md
-  - docs/features/{FEATURE-ID}/
-```
 
 ---
 

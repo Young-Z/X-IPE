@@ -6,6 +6,7 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-110 | Feature Breakdown | Break down FEATURE-011: Stage Toolbox | Sage | 🔄 in_progress | 01-24-2026 06:01:00 | - | Feature Refinement |
 
 ---
 
@@ -179,3 +180,4 @@
 ```yaml
 auto_advance: true  # Change to false for manual control
 ```
+| TASK-109 | Ideation | Refine idea: Draft Idea - 01242026 094313 (Toolbox Expansion) | Zephyr | ✅ complete | 01-24-2026 01:45:00 | - | Idea Mockup |

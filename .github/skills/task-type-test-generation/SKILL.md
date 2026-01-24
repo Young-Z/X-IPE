@@ -46,19 +46,17 @@ Generate comprehensive test cases for a single feature by:
 
 ---
 
-## Skill Output
+## Skill/Task Completion Output
 
-This skill MUST return these attributes to the Task Data Model:
+This skill MUST return these attributes to the Task Data Model upon task completion:
 
 ```yaml
 Output:
+  category: feature-stage
   status: completed | blocked
   next_task_type: Code Implementation
   require_human_review: No
   task_output_links: [tests/]
-  
-  # Feature stage dynamic attributes (REQUIRED)
-  category: feature-stage
   feature_id: FEATURE-XXX
   feature_title: {title}
   feature_version: {version}
@@ -148,6 +146,24 @@ RECEIVE Feature Data Model:
 4. CHECK Design Change Log for any updates
 
 5. NOTE any references to architecture designs
+
+6. **🎨 CHECK Technical Scope for mockup-based tests:**
+   ```
+   IF Technical Scope includes [Frontend] OR [Full Stack]:
+     a. Review "Linked Mockups" in specification.md
+     b. Open mockup files to understand UI expectations
+     c. Generate frontend-specific tests:
+        - Component rendering tests
+        - User interaction tests (click, input, submit)
+        - Visual state tests (loading, error, success)
+        - Form validation tests
+        - Accessibility tests (if applicable)
+     d. Reference mockup elements in test descriptions
+   
+   ELSE (Backend/API Only/Database):
+     - Skip frontend/UI tests
+     - Focus on unit tests, integration tests, API tests
+   ```
 ```
 
 **⚠️ STRICT REQUIREMENT:**
@@ -396,27 +412,39 @@ FOR EACH endpoint in technical design:
 
 ---
 
-## Task Completion Output
+## Patterns
 
-Upon completion, return:
-```yaml
-feature_id: FEATURE-XXX
-feature_status: Done Test Generation
-category: feature-stage
-feature_phase: Test Generation
-next_task_type: Code Implementation
-require_human_review: No
-task_output_links:
-  - tests/unit/{feature}/
-  - tests/integration/{feature}/
-  - tests/api/{feature}/
-tests_created:
-  - tests/unit/services/auth_service_test.py
-  - tests/unit/models/user_test.py
-  - tests/integration/auth_flow_test.py
-  - tests/api/auth_api_test.py
-test_count: 29
-baseline_status: "29 tests failing, 0 passing (TDD ready)"
+### Pattern: API Feature
+
+**When:** Feature includes REST endpoints
+**Then:**
+```
+1. Unit tests for service layer
+2. Integration tests for full flow
+3. API tests for each endpoint
+4. Test auth and error responses
+```
+
+### Pattern: Background Service
+
+**When:** Feature runs as async/background process
+**Then:**
+```
+1. Unit tests for core logic
+2. Mock external dependencies
+3. Test timeout and retry behavior
+4. Verify cleanup on failure
+```
+
+### Pattern: Data Processing
+
+**When:** Feature processes/transforms data
+**Then:**
+```
+1. Test with valid input → expected output
+2. Test with edge cases (empty, null, max)
+3. Test with invalid input → proper errors
+4. Use parameterized tests for variations
 ```
 
 ---
@@ -457,98 +485,13 @@ tests/
 
 ---
 
-## Example Execution
+## Example
 
-**Feature:** FEATURE-001: User Authentication
-
-### Step 1: Query Feature Board
-```yaml
-CALL: query_feature(FEATURE-001)
-RECEIVE:
-  feature_id: FEATURE-001
-  title: User Authentication
-  status: Designed
-  technical_design_link: docs/requirements/FEATURE-001/technical-design.md
-  specification_link: docs/requirements/FEATURE-001/specification.md
-```
-
-### Step 2: Read Technical Design
-```
-From docs/requirements/FEATURE-001/technical-design.md:
-- Components: AuthService, TokenManager, UserRepository
-- Interfaces: authenticate(), logout(), refresh_token()
-- Endpoints: POST /login, POST /logout, POST /refresh
-- Error cases: Invalid credentials, expired token
-```
-
-### Step 3: Check Architecture (None referenced)
-```
-No architecture references found.
-```
-
-### Step 4: Read Specification
-```
-Acceptance Criteria:
-- User can login with email/password
-- User receives JWT token on successful login
-- Invalid credentials return error
-- User can logout
-- User can refresh token
-```
-
-### Step 5: Design Test Strategy
-```
-Unit Tests: AuthService (8), TokenManager (5), UserRepository (4) = 17
-Integration Tests: Auth flow (3), Token flow (2) = 5
-API Tests: /login (4), /logout (2), /refresh (3) = 9
-Total: 31 tests
-```
-
-### Step 6-8: Generate Tests
-```
-Created:
-- tests/unit/services/auth_service_test.py (8 tests)
-- tests/unit/utils/token_manager_test.py (5 tests)
-- tests/unit/repos/user_repository_test.py (4 tests)
-- tests/integration/auth_flow_test.py (5 tests)
-- tests/api/auth_api_test.py (9 tests)
-```
-
-### Step 9: Document Coverage
-```
-| Component | Unit | Integration | API |
-|-----------|------|-------------|-----|
-| AuthService | 8 | - | - |
-| TokenManager | 5 | - | - |
-| UserRepository | 4 | - | - |
-| Auth Flow | - | 5 | - |
-| Auth API | - | - | 9 |
-| **Total** | 17 | 5 | 9 |
-```
-
-### Step 10: Verify TDD Ready
-```
-pytest tests/ -v
-Result: 31 tests FAILED (expected - no implementation)
-baseline_status: "31 tests failing, 0 passing (TDD ready)"
-```
-
-### Return Output
-```yaml
-feature_id: FEATURE-001
-feature_status: Done Test Generation
-category: feature-stage
-feature_phase: Test Generation
-next_task_type: Code Implementation
-require_human_review: No
-task_output_links:
-  - tests/unit/services/auth_service_test.py
-  - tests/integration/auth_flow_test.py
-  - tests/api/auth_api_test.py
-tests_created: [5 files]
-test_count: 31
-baseline_status: "31 tests failing, 0 passing (TDD ready)"
-```
+See [references/examples.md](references/examples.md) for detailed execution examples including:
+- Standard TDD test generation (31 tests across 3 levels)
+- Incremental addition to existing test file
+- Missing technical design (blocked)
+- JavaScript/TypeScript project with Jest
 
 ---
 

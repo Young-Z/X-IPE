@@ -39,12 +39,13 @@ Set up or onboard to a project with consistent folder structure and documentatio
 
 ---
 
-## Skill Output
+## Skill/Task Completion Output
 
-This skill MUST return these attributes to the Task Data Model:
+This skill MUST return these attributes to the Task Data Model upon task completion:
 
 ```yaml
 Output:
+  category: standalone
   status: completed | blocked
   next_task_type: Development Environment Setup
   require_human_review: No
@@ -152,19 +153,6 @@ This creates: docs/planning/task-board.md
 | 2 | Task board initialized (via task-board-management) | Yes |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
-
----
-
-## Task Completion Output
-
-Upon completion, return:
-```yaml
-category: {Category}
-next_task_type: {Next Task Type}
-require_human_review: {Require Human Review}
-task_output_links:
-  - docs/planning/task-board.md
-```
 
 ---
 
