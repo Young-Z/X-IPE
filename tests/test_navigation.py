@@ -17,18 +17,33 @@ from pathlib import Path
 class TestProjectService:
     """Unit tests for ProjectService class"""
 
-    def test_get_structure_returns_four_sections(self, app, project_service):
-        """AC-2: Four top-level menu sections exist (including Workplace)"""
+    def test_get_structure_returns_five_sections(self, app, project_service):
+        """AC-2: Five top-level menu sections exist (including Workplace and Themes)"""
         structure = project_service.get_structure()
         
         assert 'sections' in structure
-        assert len(structure['sections']) == 4
+        assert len(structure['sections']) == 5
         
         section_ids = [s['id'] for s in structure['sections']]
         assert 'workplace' in section_ids
+        assert 'themes' in section_ids  # FEATURE-012 AC-4.1
         assert 'planning' in section_ids
         assert 'requirements' in section_ids
         assert 'code' in section_ids
+
+    def test_get_structure_themes_section_maps_correctly(self, app, project_service, temp_project):
+        """FEATURE-012 AC-4.2: Themes menu shows folder tree of docs/themes/"""
+        # Create a theme folder
+        themes_dir = temp_project / 'docs' / 'themes' / 'theme-default'
+        themes_dir.mkdir(parents=True, exist_ok=True)
+        (themes_dir / 'design-system.md').write_text('# Design System')
+        
+        structure = project_service.get_structure()
+        
+        themes_section = next(s for s in structure['sections'] if s['id'] == 'themes')
+        assert themes_section['path'] == 'docs/themes'
+        assert themes_section['label'] == 'Themes'
+        assert themes_section['icon'] == 'bi-palette'
 
     def test_get_structure_planning_section_maps_correctly(self, app, project_service, temp_project):
         """AC-3: Project Plan section maps to docs/planning/ folder"""

@@ -49,6 +49,7 @@ Output:
   status: completed | blocked
   next_task_type: null
   require_human_review: No
+  auto_proceed: {from input Auto Proceed}
   task_output_links: [docs/environment/setup.md, .gitignore, README.md]
   
   # Dynamic attributes (skill-specific)

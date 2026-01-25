@@ -47,6 +47,7 @@ Task:
   # Execution fields (set by task type skill)
   next_task_type: <Task Type> | null
   require_human_review: true | false
+  auto_proceed: true | false  # From task type skill input, flows to auto_advance
   task_output_links: [<links>] | null
   {Dynamic Attributes}: <from task type skill>   # Fully dynamic per task type
   
@@ -54,7 +55,7 @@ Task:
   category_level_change_summary: <≤100 words> | null
   
   # Control fields
-  auto_advance: true | false
+  auto_advance: true | false  # Set from auto_proceed output
 ```
 
 ### Category Derivation
@@ -62,7 +63,7 @@ Task:
 | Task Type | Category |
 |-----------|----------|
 | `task-type-feature-refinement`, `task-type-technical-design`, `task-type-test-generation`, `task-type-code-implementation`, `task-type-feature-closing` | feature-stage |
-| `task-type-ideation`, `task-type-idea-mockup` | ideation-stage |
+| `task-type-ideation`, `task-type-idea-mockup`, `task-type-idea-to-architecture` | ideation-stage |
 | `task-type-requirement-gathering`, `task-type-feature-breakdown` | requirement-stage |
 | `task-type-bug-fix`, `task-type-code-refactor`, `task-type-change-request`, `task-type-project-init`, `task-type-dev-environment`, `task-type-user-manual`, `task-type-human-playground`, `task-type-share-idea` | Standalone |
 
@@ -136,6 +137,7 @@ Execute tasks by following these 6 steps in order:
 |-----------------|-----------|
 | "ideate", "brainstorm", "refine idea", "analyze my idea" | Ideation |
 | "create mockup", "visualize idea", "prototype UI", "design mockup" | Idea Mockup |
+| "create architecture", "design system", "architecture diagram", "system design" | Idea to Architecture |
 | "share idea", "convert to ppt", "make presentation", "export idea" | Share Idea |
 | "new feature", "add feature" | Requirement Gathering |
 | "break down", "split features" | Feature Breakdown |
@@ -298,7 +300,7 @@ OPTIONAL - Push to remote (based on project settings or human preference):
 
 **Human Review Check:**
 ```
-IF require_human_review = true AND auto_advance = false:
+IF require_human_review = true AND auto_proceed = false:
    → Output summary and STOP for human review
 ```
 
@@ -313,7 +315,7 @@ IF require_human_review = true AND auto_advance = false:
 > Category Changes: <category_level_change_summary>
 > Require Human Review: <require_human_review>
 > Task Output Links: <task_output_links>
-> Auto Advance: <auto_advance>
+> Auto Proceed: <auto_proceed>  # From task type skill completion output
 > --- Dynamic Attributes ---
 > <attr_1>: <value>
 > <attr_2>: <value>
@@ -326,6 +328,8 @@ IF require_human_review = true AND auto_advance = false:
 
 **Process:**
 ```
+Set auto_advance = auto_proceed  # Map from task type skill output
+
 IF auto_advance = true AND next_task_type EXISTS:
    → Find next task on board (already created in Step 1)
    → Start execution from Step 2
@@ -339,8 +343,9 @@ ELSE:
 
 | Task Type | Skill | Category | Next Task | Human Review |
 |-----------|-------|----------|-----------|--------------|
-| Ideation | `task-type-ideation` | ideation-stage | Idea Mockup | No |
+| Ideation | `task-type-ideation` | ideation-stage | Idea Mockup OR Idea to Architecture | No |
 | Idea Mockup | `task-type-idea-mockup` | ideation-stage | Requirement Gathering | No |
+| Idea to Architecture | `task-type-idea-to-architecture` | ideation-stage | Requirement Gathering | No |
 | Share Idea | `task-type-share-idea` | Standalone | - | Yes |
 | Requirement Gathering | `task-type-requirement-gathering` | requirement-stage | Feature Breakdown | Yes |
 | Feature Breakdown | `task-type-feature-breakdown` | requirement-stage | Feature Refinement | Yes |

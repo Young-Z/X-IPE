@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{THEME_NAME}} - Component Visualization</title>
+    <link href="https://fonts.googleapis.com/css2?family={{HEADING_FONT_ENCODED}}:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Colors */
+            --color-primary: {{PRIMARY}};
+            --color-secondary: {{SECONDARY}};
+            --color-accent: {{ACCENT}};
+            --color-neutral: {{NEUTRAL}};
+            --color-success: {{SUCCESS}};
+            --color-warning: {{WARNING}};
+            --color-error: {{ERROR}};
+            --color-info: {{INFO}};
+            
+            /* Neutral Scale ({{SCALE_NAME}}) */
+            --{{SCALE_PREFIX}}-50: {{SCALE_50}};
+            --{{SCALE_PREFIX}}-100: {{SCALE_100}};
+            --{{SCALE_PREFIX}}-200: {{SCALE_200}};
+            --{{SCALE_PREFIX}}-300: {{SCALE_300}};
+            --{{SCALE_PREFIX}}-400: {{SCALE_400}};
+            --{{SCALE_PREFIX}}-500: {{SCALE_500}};
+            --{{SCALE_PREFIX}}-600: {{SCALE_600}};
+            --{{SCALE_PREFIX}}-700: {{SCALE_700}};
+            --{{SCALE_PREFIX}}-800: {{SCALE_800}};
+            --{{SCALE_PREFIX}}-900: {{SCALE_900}};
+            
+            /* Typography */
+            --font-heading: '{{HEADING_FONT}}', system-ui, sans-serif;
+            --font-body: {{BODY_FONT}};
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            
+            /* Border Radius */
+            --radius-sm: {{RADIUS_SM}};
+            --radius-md: {{RADIUS_MD}};
+            --radius-lg: {{RADIUS_LG}};
+            --radius-full: 9999px;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--{{SCALE_PREFIX}}-50);
+            color: var(--color-primary);
+            line-height: 1.5;
+            padding: 48px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-family: var(--font-heading);
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            color: var(--color-secondary);
+            margin-bottom: 48px;
+        }
+        
+        .section {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--{{SCALE_PREFIX}}-200);
+        }
+        
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-sm);
+            border-bottom: 1px solid var(--{{SCALE_PREFIX}}-200);
+        }
+        
+        /* Color Swatches */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: var(--space-md);
+        }
+        
+        .color-swatch {
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--{{SCALE_PREFIX}}-200);
+        }
+        
+        .color-swatch-preview {
+            height: 80px;
+        }
+        
+        .color-swatch-info {
+            padding: var(--space-sm) var(--space-md);
+            background: white;
+        }
+        
+        .color-swatch-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+        
+        .color-swatch-value {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--color-secondary);
+        }
+        
+        /* Typography Samples */
+        .typography-grid {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+        
+        .type-sample {
+            display: flex;
+            align-items: baseline;
+            gap: var(--space-lg);
+        }
+        
+        .type-label {
+            width: 100px;
+            flex-shrink: 0;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--color-secondary);
+        }
+        
+        .text-xs { font-size: 12px; }
+        .text-sm { font-size: 14px; }
+        .text-base { font-size: 16px; }
+        .text-lg { font-size: 18px; }
+        .text-xl { font-size: 20px; }
+        .text-2xl { font-size: 24px; }
+        .text-3xl { font-size: 30px; }
+        .text-4xl { font-size: 36px; }
+        
+        /* Spacing Visualization */
+        .spacing-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-lg);
+            align-items: flex-end;
+        }
+        
+        .spacing-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+        
+        .spacing-bar {
+            background: var(--color-accent);
+            border-radius: var(--radius-sm);
+        }
+        
+        .spacing-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--color-secondary);
+        }
+        
+        /* Component Samples */
+        .component-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-lg);
+            align-items: flex-start;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: var(--color-accent);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .btn-primary:hover {
+            filter: brightness(0.9);
+        }
+        
+        .btn-secondary {
+            background: var(--{{SCALE_PREFIX}}-100);
+            color: var(--{{SCALE_PREFIX}}-700);
+            border: 1px solid var(--{{SCALE_PREFIX}}-200);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--{{SCALE_PREFIX}}-200);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: var(--color-accent);
+            border: 1px solid var(--color-accent);
+        }
+        
+        .btn-outline:hover {
+            background: {{ACCENT_LIGHT_BG}};
+        }
+        
+        /* Cards */
+        .sample-card {
+            width: 280px;
+            background: white;
+            border: 1px solid var(--{{SCALE_PREFIX}}-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .sample-card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+        
+        .sample-card-body {
+            font-size: 14px;
+            color: var(--color-secondary);
+            line-height: 1.5;
+        }
+        
+        /* Form Input */
+        .sample-input {
+            width: 280px;
+        }
+        
+        .input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 14px;
+            border: 1px solid var(--{{SCALE_PREFIX}}-200);
+            border-radius: var(--radius-md);
+            background: white;
+            color: var(--color-primary);
+        }
+        
+        .input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px {{ACCENT_FOCUS_RING}};
+        }
+        
+        .input::placeholder {
+            color: var(--{{SCALE_PREFIX}}-400);
+        }
+        
+        .input-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--color-primary);
+            margin-bottom: 6px;
+        }
+        
+        /* Border Radius Demo */
+        .radius-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-lg);
+        }
+        
+        .radius-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .radius-box {
+            width: 64px;
+            height: 64px;
+            background: var(--color-accent);
+        }
+        
+        .radius-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--color-secondary);
+        }
+        
+        /* Shadow Demo */
+        .shadow-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-xl);
+        }
+        
+        .shadow-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .shadow-box {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: var(--radius-md);
+        }
+        
+        .shadow-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--color-secondary);
+        }
+    </style>
+    
+    <!-- JSON-LD Structured Data for AI Parsing -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "DesignSystem",
+        "name": "{{THEME_NAME}}",
+        "description": "{{DESCRIPTION}}",
+        "version": "1.0",
+        "tokens": {
+            "colors": {
+                "primary": "{{PRIMARY}}",
+                "secondary": "{{SECONDARY}}",
+                "accent": "{{ACCENT}}",
+                "neutral": "{{NEUTRAL}}",
+                "success": "{{SUCCESS}}",
+                "warning": "{{WARNING}}",
+                "error": "{{ERROR}}",
+                "info": "{{INFO}}"
+            },
+            "neutralScale": {
+                "{{SCALE_PREFIX}}-50": "{{SCALE_50}}",
+                "{{SCALE_PREFIX}}-100": "{{SCALE_100}}",
+                "{{SCALE_PREFIX}}-200": "{{SCALE_200}}",
+                "{{SCALE_PREFIX}}-300": "{{SCALE_300}}",
+                "{{SCALE_PREFIX}}-400": "{{SCALE_400}}",
+                "{{SCALE_PREFIX}}-500": "{{SCALE_500}}",
+                "{{SCALE_PREFIX}}-600": "{{SCALE_600}}",
+                "{{SCALE_PREFIX}}-700": "{{SCALE_700}}",
+                "{{SCALE_PREFIX}}-800": "{{SCALE_800}}",
+                "{{SCALE_PREFIX}}-900": "{{SCALE_900}}"
+            },
+            "typography": {
+                "fontHeading": "{{HEADING_FONT}}, system-ui, sans-serif",
+                "fontBody": "{{BODY_FONT}}",
+                "fontMono": "JetBrains Mono, monospace",
+                "sizes": {
+                    "xs": "12px",
+                    "sm": "14px",
+                    "base": "16px",
+                    "lg": "18px",
+                    "xl": "20px",
+                    "2xl": "24px",
+                    "3xl": "30px",
+                    "4xl": "36px"
+                }
+            },
+            "spacing": {
+                "xs": "4px",
+                "sm": "8px",
+                "md": "16px",
+                "lg": "24px",
+                "xl": "32px",
+                "2xl": "48px",
+                "3xl": "64px"
+            },
+            "borderRadius": {
+                "sm": "{{RADIUS_SM}}",
+                "md": "{{RADIUS_MD}}",
+                "lg": "{{RADIUS_LG}}",
+                "xl": "16px",
+                "2xl": "24px",
+                "full": "9999px"
+            }
+        }
+    }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>{{THEME_NAME}}</h1>
+        <p class="subtitle">Component Visualization & Design Token Reference</p>
+        
+        <!-- Color Palette -->
+        <div class="section">
+            <h2 class="section-title">Color Palette</h2>
+            <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--color-secondary);">Core Colors</h3>
+            <div class="color-grid" style="margin-bottom: 24px;">
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{PRIMARY}};" data-color="primary"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Primary</div>
+                        <div class="color-swatch-value">{{PRIMARY}}</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{SECONDARY}};" data-color="secondary"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Secondary</div>
+                        <div class="color-swatch-value">{{SECONDARY}}</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{ACCENT}};" data-color="accent"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Accent</div>
+                        <div class="color-swatch-value">{{ACCENT}}</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{NEUTRAL}};" data-color="neutral"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Neutral</div>
+                        <div class="color-swatch-value">{{NEUTRAL}}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--color-secondary);">Semantic Colors</h3>
+            <div class="color-grid" style="margin-bottom: 24px;">
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{SUCCESS}};" data-color="success"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Success</div>
+                        <div class="color-swatch-value">{{SUCCESS}}</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{WARNING}};" data-color="warning"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Warning</div>
+                        <div class="color-swatch-value">{{WARNING}}</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{ERROR}};" data-color="error"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Error</div>
+                        <div class="color-swatch-value">{{ERROR}}</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{INFO}};" data-color="info"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Info</div>
+                        <div class="color-swatch-value">{{INFO}}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--color-secondary);">Neutral Scale ({{SCALE_NAME}})</h3>
+            <div class="color-grid">
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{SCALE_50}};"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">{{SCALE_NAME}} 50</div>
+                        <div class="color-swatch-value">{{SCALE_50}}</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{SCALE_100}};"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">{{SCALE_NAME}} 100</div>
+                        <div class="color-swatch-value">{{SCALE_100}}</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{SCALE_200}};"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">{{SCALE_NAME}} 200</div>
+                        <div class="color-swatch-value">{{SCALE_200}}</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{SCALE_300}};"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">{{SCALE_NAME}} 300</div>
+                        <div class="color-swatch-value">{{SCALE_300}}</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{SCALE_400}};"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">{{SCALE_NAME}} 400</div>
+                        <div class="color-swatch-value">{{SCALE_400}}</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{SCALE_500}};"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">{{SCALE_NAME}} 500</div>
+                        <div class="color-swatch-value">{{SCALE_500}}</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{SCALE_600}};"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">{{SCALE_NAME}} 600</div>
+                        <div class="color-swatch-value">{{SCALE_600}}</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{SCALE_700}};"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">{{SCALE_NAME}} 700</div>
+                        <div class="color-swatch-value">{{SCALE_700}}</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{SCALE_800}};"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">{{SCALE_NAME}} 800</div>
+                        <div class="color-swatch-value">{{SCALE_800}}</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: {{SCALE_900}};"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">{{SCALE_NAME}} 900</div>
+                        <div class="color-swatch-value">{{SCALE_900}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Typography -->
+        <div class="section">
+            <h2 class="section-title">Typography</h2>
+            <div class="typography-grid">
+                <div class="type-sample">
+                    <span class="type-label">text-4xl</span>
+                    <span class="text-4xl" style="font-family: var(--font-heading); font-weight: 700;">The quick brown fox</span>
+                </div>
+                <div class="type-sample">
+                    <span class="type-label">text-3xl</span>
+                    <span class="text-3xl" style="font-family: var(--font-heading); font-weight: 600;">The quick brown fox</span>
+                </div>
+                <div class="type-sample">
+                    <span class="type-label">text-2xl</span>
+                    <span class="text-2xl" style="font-family: var(--font-heading); font-weight: 600;">The quick brown fox</span>
+                </div>
+                <div class="type-sample">
+                    <span class="type-label">text-xl</span>
+                    <span class="text-xl" style="font-family: var(--font-heading); font-weight: 600;">The quick brown fox</span>
+                </div>
+                <div class="type-sample">
+                    <span class="type-label">text-lg</span>
+                    <span class="text-lg">The quick brown fox jumps over the lazy dog</span>
+                </div>
+                <div class="type-sample">
+                    <span class="type-label">text-base</span>
+                    <span class="text-base">The quick brown fox jumps over the lazy dog</span>
+                </div>
+                <div class="type-sample">
+                    <span class="type-label">text-sm</span>
+                    <span class="text-sm">The quick brown fox jumps over the lazy dog</span>
+                </div>
+                <div class="type-sample">
+                    <span class="type-label">text-xs</span>
+                    <span class="text-xs">The quick brown fox jumps over the lazy dog</span>
+                </div>
+                <div class="type-sample">
+                    <span class="type-label">mono</span>
+                    <span style="font-family: var(--font-mono); font-size: 14px;">const theme = '{{THEME_ID}}';</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Spacing -->
+        <div class="section">
+            <h2 class="section-title">Spacing Scale</h2>
+            <div class="spacing-grid">
+                <div class="spacing-item">
+                    <div class="spacing-bar" style="width: 4px; height: 40px;"></div>
+                    <span class="spacing-label">4px</span>
+                </div>
+                <div class="spacing-item">
+                    <div class="spacing-bar" style="width: 8px; height: 40px;"></div>
+                    <span class="spacing-label">8px</span>
+                </div>
+                <div class="spacing-item">
+                    <div class="spacing-bar" style="width: 12px; height: 40px;"></div>
+                    <span class="spacing-label">12px</span>
+                </div>
+                <div class="spacing-item">
+                    <div class="spacing-bar" style="width: 16px; height: 40px;"></div>
+                    <span class="spacing-label">16px</span>
+                </div>
+                <div class="spacing-item">
+                    <div class="spacing-bar" style="width: 24px; height: 40px;"></div>
+                    <span class="spacing-label">24px</span>
+                </div>
+                <div class="spacing-item">
+                    <div class="spacing-bar" style="width: 32px; height: 40px;"></div>
+                    <span class="spacing-label">32px</span>
+                </div>
+                <div class="spacing-item">
+                    <div class="spacing-bar" style="width: 48px; height: 40px;"></div>
+                    <span class="spacing-label">48px</span>
+                </div>
+                <div class="spacing-item">
+                    <div class="spacing-bar" style="width: 64px; height: 40px;"></div>
+                    <span class="spacing-label">64px</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Border Radius -->
+        <div class="section">
+            <h2 class="section-title">Border Radius</h2>
+            <div class="radius-grid">
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: {{RADIUS_SM}};"></div>
+                    <span class="radius-label">{{RADIUS_SM}} (sm)</span>
+                </div>
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: {{RADIUS_MD}};"></div>
+                    <span class="radius-label">{{RADIUS_MD}} (md)</span>
+                </div>
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: {{RADIUS_LG}};"></div>
+                    <span class="radius-label">{{RADIUS_LG}} (lg)</span>
+                </div>
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: 16px;"></div>
+                    <span class="radius-label">16px (xl)</span>
+                </div>
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: 9999px;"></div>
+                    <span class="radius-label">full</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Shadows -->
+        <div class="section">
+            <h2 class="section-title">Shadows</h2>
+            <div class="shadow-grid">
+                <div class="shadow-item">
+                    <div class="shadow-box" style="box-shadow: var(--shadow-sm);"></div>
+                    <span class="shadow-label">shadow-sm</span>
+                </div>
+                <div class="shadow-item">
+                    <div class="shadow-box" style="box-shadow: var(--shadow-md);"></div>
+                    <span class="shadow-label">shadow-md</span>
+                </div>
+                <div class="shadow-item">
+                    <div class="shadow-box" style="box-shadow: var(--shadow-lg);"></div>
+                    <span class="shadow-label">shadow-lg</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Components -->
+        <div class="section">
+            <h2 class="section-title">Components</h2>
+            <div class="component-grid">
+                <!-- Buttons -->
+                <div>
+                    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--color-secondary);">Buttons</h3>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn btn-primary">Primary</button>
+                        <button class="btn btn-secondary">Secondary</button>
+                        <button class="btn btn-outline">Outline</button>
+                    </div>
+                </div>
+                
+                <!-- Card -->
+                <div>
+                    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--color-secondary);">Card</h3>
+                    <div class="sample-card">
+                        <h4 class="sample-card-title">Card Title</h4>
+                        <p class="sample-card-body">This is a sample card component with the {{THEME_NAME}} theme styling applied.</p>
+                    </div>
+                </div>
+                
+                <!-- Input -->
+                <div>
+                    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--color-secondary);">Form Input</h3>
+                    <div class="sample-input">
+                        <label class="input-label">Email Address</label>
+                        <input type="email" class="input" placeholder="you@example.com">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

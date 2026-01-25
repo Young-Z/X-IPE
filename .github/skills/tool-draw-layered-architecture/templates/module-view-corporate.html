@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}}</title>
+    <link href="https://fonts.googleapis.com/css2?family={{FONT_HEADING}}:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================
+           Corporate Theme - Enhanced Style
+           Style: Clean, Blueprint, Technical with Interactions
+           ======================================== */
+        :root {
+            /* Primary colors - Corporate monochrome */
+            --color-primary: {{COLOR_PRIMARY}};
+            --color-secondary: {{COLOR_SECONDARY}};
+            --color-accent: {{COLOR_ACCENT}};
+            --color-neutral: {{COLOR_NEUTRAL}};
+            
+            /* Corporate style specific */
+            --corp-bg: #ffffff;
+            --corp-border: #374151;
+            --corp-badge-bg: #1f2937;
+            --corp-badge-text: #ffffff;
+            --corp-label-bg: #f3f4f6;
+            --corp-label-text: #6b7280;
+            --corp-accent-orange: #f59e0b;
+            --corp-accent-teal: #14b8a6;
+            --corp-accent-blue: #3b82f6;
+            
+            /* Accent colors for hover effects */
+            --accent-blue: #3b82f6;
+            --accent-indigo: #6366f1;
+            --accent-emerald: #10b981;
+            
+            /* Layer backgrounds */
+            --layer-bg-default: #ffffff;
+            --layer-bg-highlight: #eff6ff;
+            --layer-bg-alt: #fafafa;
+            
+            /* Typography from theme */
+            --font-heading: '{{FONT_HEADING}}', sans-serif;
+            --font-body: {{FONT_BODY}};
+            
+            /* Diagram-specific tokens */
+            --diagram-bg: #ffffff;
+            --layer-gap: 16px;
+            --module-gap: 14px;
+            --component-gap: 10px;
+            --border-radius: 8px;
+            --component-radius: 18px;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-normal: 200ms ease;
+            --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* ========================================
+           Reset & Base
+           ======================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+            padding: 32px;
+        }
+        
+        /* ========================================
+           Diagram Container
+           ======================================== */
+        .diagram {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .diagram-title {
+            font-family: var(--font-heading);
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--corp-border);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .diagram-content {
+            display: flex;
+            flex-direction: column;
+            gap: var(--layer-gap);
+        }
+        
+        /* ========================================
+           Layer Styles - Corporate with Hover Effects
+           ======================================== */
+        .layer-wrapper {
+            display: flex;
+            gap: 0;
+            transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+            animation: fadeSlideIn 0.5s ease-out backwards;
+        }
+        
+        .layer-wrapper:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-radius: var(--border-radius);
+        }
+        
+        /* Staggered animation delays */
+        .layer-wrapper:nth-child(1) { animation-delay: 0.1s; }
+        .layer-wrapper:nth-child(2) { animation-delay: 0.2s; }
+        .layer-wrapper:nth-child(3) { animation-delay: 0.3s; }
+        .layer-wrapper:nth-child(4) { animation-delay: 0.4s; }
+        .layer-wrapper:nth-child(5) { animation-delay: 0.5s; }
+        
+        /* Side label (vertical text) */
+        .layer-label {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            background: var(--corp-badge-bg);
+            padding: 16px 8px;
+            font-family: var(--font-heading);
+            font-size: 12px;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            min-width: 36px;
+            transition: background var(--transition-normal), min-width var(--transition-normal);
+        }
+        
+        .layer-wrapper:hover .layer-label {
+            background: var(--accent-indigo);
+            min-width: 40px;
+        }
+        
+        .layer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: var(--module-gap);
+            padding: 20px;
+            border: 2px solid var(--corp-border);
+            border-left: none;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            background: var(--layer-bg-default);
+            transition: border-color var(--transition-normal), background var(--transition-normal);
+        }
+        
+        .layer-wrapper:hover .layer {
+            border-color: var(--accent-indigo);
+        }
+        
+        /* Layer background variants */
+        .layer-highlight {
+            background: var(--layer-bg-highlight);
+        }
+        
+        .layer-alt {
+            background: var(--layer-bg-alt);
+        }
+        
+        .layer-header {
+            font-family: var(--font-heading);
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            background: var(--corp-badge-bg);
+            text-align: center;
+            padding: 10px 20px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            transition: background var(--transition-normal);
+        }
+        
+        .layer-wrapper:hover .layer-header {
+            background: linear-gradient(135deg, var(--corp-badge-bg) 0%, var(--accent-indigo) 100%);
+        }
+        
+        .layer-row {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--module-gap);
+        }
+        
+        /* ========================================
+           Module Styles - Corporate Cards with Hover
+           ======================================== */
+        .module {
+            background: var(--corp-bg);
+            border: 2px dashed var(--corp-border);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: border-color var(--transition-normal), 
+                        box-shadow var(--transition-normal),
+                        transform var(--transition-fast);
+        }
+        
+        .module:hover {
+            border-color: var(--accent-blue);
+            box-shadow: var(--shadow-md);
+            transform: scale(1.01);
+        }
+        
+        .module-title {
+            font-family: var(--font-heading);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--corp-border);
+            text-align: left;
+            transition: color var(--transition-fast);
+        }
+        
+        .module:hover .module-title {
+            color: var(--accent-blue);
+        }
+        
+        .module-content {
+            display: grid;
+            gap: var(--component-gap);
+            align-items: start;
+            justify-items: stretch;
+        }
+        
+        /* ========================================
+           Component Styles - Badge Pills with Hover Effects
+           ======================================== */
+        .component {
+            width: 100%;
+            height: 100%;
+            background: var(--corp-badge-bg);
+            color: var(--corp-badge-text);
+            border-radius: var(--component-radius);
+            padding: 8px 16px;
+            font-family: var(--font-heading);
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 36px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all var(--transition-normal);
+        }
+        
+        /* Shimmer effect on hover */
+        .component::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: left 0.5s ease;
+        }
+        
+        .component:hover {
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-indigo) 100%);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .component:hover::before {
+            left: 100%;
+        }
+        
+        .component:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        /* Full width component */
+        .component-full {
+            border-radius: 6px;
+        }
+        
+        /* Accent color variants */
+        .component-orange {
+            background: var(--corp-accent-orange);
+        }
+        
+        .component-blue {
+            background: var(--corp-accent-blue);
+        }
+        
+        .component-outline {
+            background: transparent;
+            border: 1.5px solid #d1d5db;
+            color: #374151;
+        }
+        
+        /* ========================================
+           Icon Components (Infrastructure style) with Animation
+           ======================================== */
+        .component-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            padding: 16px 12px;
+            color: #374151;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-normal);
+        }
+        
+        .component-icon:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-4px);
+        }
+        
+        .component-icon .icon {
+            font-size: 36px;
+            line-height: 1;
+            transition: transform var(--transition-smooth);
+        }
+        
+        .component-icon:hover .icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+        
+        .component-icon .label {
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            color: #6b7280;
+            transition: color var(--transition-fast);
+        }
+        
+        .component-icon:hover .label {
+            color: var(--accent-indigo);
+            font-weight: 600;
+        }
+        
+        /* ========================================
+           Brand/Logo Components
+           ======================================== */
+        .brand-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px;
+            background: transparent;
+        }
+        
+        .brand-item .brand-icon {
+            font-size: 20px;
+        }
+        
+        .brand-item .brand-name {
+            font-family: var(--font-heading);
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .brand-item.brand-qwen .brand-name { color: #3b82f6; }
+        .brand-item.brand-deepseek .brand-name { color: #f59e0b; }
+        
+        /* ========================================
+           Sub-sections (Channel Guardrails style)
+           ======================================== */
+        .sub-section {
+            background: var(--corp-bg);
+            border: 2px dashed var(--corp-border);
+            border-radius: var(--border-radius);
+            padding: 14px;
+        }
+        
+        .sub-section-title {
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--corp-border);
+            margin-bottom: 10px;
+        }
+        
+        .sub-section-grid {
+            display: grid;
+            gap: var(--component-gap);
+        }
+        
+        /* ========================================
+           Branding Footer
+           ======================================== */
+        .powered-by {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13px;
+            color: var(--corp-accent-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .powered-by .brand-logo {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--corp-accent-orange);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .powered-by .brand-name {
+            font-weight: 600;
+            color: var(--corp-border);
+        }
+        
+        /* ========================================
+           Grid Column Utilities
+           ======================================== */
+        .cols-1 { grid-column: span 1; }
+        .cols-2 { grid-column: span 2; }
+        .cols-3 { grid-column: span 3; }
+        .cols-4 { grid-column: span 4; }
+        .cols-5 { grid-column: span 5; }
+        .cols-6 { grid-column: span 6; }
+        .cols-7 { grid-column: span 7; }
+        .cols-8 { grid-column: span 8; }
+        .cols-9 { grid-column: span 9; }
+        .cols-10 { grid-column: span 10; }
+        .cols-11 { grid-column: span 11; }
+        .cols-12 { grid-column: span 12; }
+        
+        /* ========================================
+           Grid Row Utilities
+           ======================================== */
+        .rows-1 { grid-row: span 1; }
+        .rows-2 { grid-row: span 2; }
+        .rows-3 { grid-row: span 3; }
+        .rows-4 { grid-row: span 4; }
+        
+        /* ========================================
+           Internal Grid Utilities
+           ======================================== */
+        .grid-1x1 { grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr); }
+        .grid-1x2 { grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .grid-1x3 { grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .grid-2x1 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(1, 1fr); }
+        .grid-2x2 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .grid-2x3 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .grid-3x1 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(1, 1fr); }
+        .grid-3x2 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .grid-3x3 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .grid-4x1 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(1, 1fr); }
+        .grid-4x2 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr); }
+        
+        /* ========================================
+           Alignment Utilities
+           ======================================== */
+        .align-left { justify-items: start; }
+        .align-center { justify-items: center; align-items: center; }
+        .align-right { justify-items: end; }
+        .align-top { align-items: start; }
+        .align-middle { align-items: center; }
+        .align-bottom { align-items: end; }
+        
+        /* ========================================
+           Tooltip Effect
+           ======================================== */
+        .component[data-tooltip] {
+            position: relative;
+        }
+        
+        .component[data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(8px);
+            background: #1f2937;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all var(--transition-fast);
+            z-index: 10;
+        }
+        
+        .component[data-tooltip]:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-4px);
+        }
+        
+        /* ========================================
+           Pulse Animation for Key Components
+           ======================================== */
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+        
+        .component-highlight {
+            animation: pulse-ring 2s infinite;
+        }
+        
+        /* ========================================
+           Subtle Entry Animation
+           ======================================== */
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="diagram">
+        <h1 class="diagram-title">{{TITLE}}</h1>
+        <div class="diagram-content">
+            {{LAYERS}}
+        </div>
+        <!-- Optional: Powered by branding -->
+        {{FOOTER}}
+    </div>
+</body>
+</html>

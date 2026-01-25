@@ -1,0 +1,67 @@
+{
+  "selected-theme": {
+    "theme-folder-path": "docs/themes/theme-default",
+    "theme-name": "theme-default"
+  },
+  "stages": {
+    "feature": {
+      "design": {
+        "_order": 1
+      },
+      "implementation": {
+        "_order": 2
+      }
+    },
+    "ideation": {
+      "architecture": {
+        "_order": 3,
+        "excalidraw": false,
+        "mermaid": false,
+        "tool-architecture-dsl": true,
+        "tool-draw-layered-architecture": true,
+        "tool-draw-system-landscape": true
+      },
+      "ideation": {
+        "_order": 1,
+        "antv-infographic": false,
+        "mermaid": true,
+        "tool-architecture-dsl": true,
+        "tool-draw-layered-architecture": false,
+        "tool-draw-system-landscape": false,
+        "_extra_instruction": "d"
+      },
+      "mockup": {
+        "_order": 2,
+        "tool-frontend-design": true
+      },
+      "sharing": {
+        "_order": 4
+      }
+    },
+    "quality": {
+      "review": {
+        "_order": 2
+      },
+      "testing": {
+        "_order": 1
+      }
+    },
+    "refactoring": {
+      "analysis": {
+        "_order": 1
+      },
+      "execution": {
+        "_order": 2
+      }
+    },
+    "requirement": {
+      "analysis": {
+        "_order": 2
+      },
+      "gathering": {
+        "_order": 1
+      }
+    }
+  },
+  "version": "2.0"
+}

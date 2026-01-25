@@ -55,6 +55,7 @@ Output:
   status: completed | blocked
   next_task_type: Code Implementation
   require_human_review: Yes
+  auto_proceed: {from input Auto Proceed}
   task_output_links: [docs/requirements/FEATURE-XXX/technical-design.md]
   feature_id: FEATURE-XXX
   feature_title: {title}

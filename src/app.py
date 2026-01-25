@@ -13,10 +13,11 @@ FEATURE-005: Interactive Console v4.0
 """
 import os
 import sys
+import json
 from flask import Flask, render_template, jsonify, request, current_app, send_file
 from flask_socketio import SocketIO, emit
 
-from src.services import ProjectService, ContentService, SettingsService, ProjectFoldersService, IdeasService, ConfigService, SkillsService
+from src.services import ProjectService, ContentService, SettingsService, ProjectFoldersService, IdeasService, ConfigService, SkillsService, ToolsConfigService, ThemesService
 from src.services import session_manager
 from src.config import config_by_name
 
@@ -32,12 +33,16 @@ project_folders_service = None
 # Global config service instance (FEATURE-010)
 config_service = None
 
+# Global tools config service instance (FEATURE-011)
+tools_config_service = None
+
 # Socket.IO instance with ping/pong for keep-alive
+# Increased timeouts for stability - session stays open for 1 hour regardless of focus
 socketio = SocketIO(
     cors_allowed_origins="*",
     async_mode='threading',
-    ping_timeout=60,         # Wait 60s for pong response
-    ping_interval=25,        # Send ping every 25s
+    ping_timeout=300,        # Wait 5 minutes for pong response (was 60s)
+    ping_interval=60,        # Send ping every 60s (was 25s)
     max_http_buffer_size=1e8,  # 100MB max message size
     always_connect=True,     # Always emit connect even on reconnect
     logger=False,
@@ -72,7 +77,7 @@ def create_app(config=None):
         app.config.from_object(config)
     
     # Initialize settings service
-    global settings_service, project_folders_service, ideas_service, config_service
+    global settings_service, project_folders_service, ideas_service, config_service, tools_config_service
     db_path = app.config.get('SETTINGS_DB_PATH', app.config.get('SETTINGS_DB', os.path.join(app.instance_path, 'settings.db')))
     settings_service = SettingsService(db_path)
     project_folders_service = ProjectFoldersService(db_path)
@@ -99,6 +104,7 @@ def create_app(config=None):
     register_settings_routes(app)
     register_project_routes(app)
     register_ideas_routes(app)  # FEATURE-008
+    register_tools_config_routes(app)  # FEATURE-011
     
     # Initialize Socket.IO with the app
     socketio.init_app(app)
@@ -862,6 +868,181 @@ def register_ideas_routes(app):
 
 
 # Entry point for running with `python -m src.app`
+def register_tools_config_routes(app):
+    """
+    Register tools configuration routes.
+    
+    FEATURE-011: Stage Toolbox
+    """
+    
+    def _get_tools_service():
+        """Get ToolsConfigService instance for current project root."""
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        return ToolsConfigService(project_root)
+    
+    @app.route('/api/config/tools', methods=['GET'])
+    def get_tools_config():
+        """
+        GET /api/config/tools
+        
+        Get current tools configuration.
+        
+        Response:
+            - success: true
+            - config: tools configuration object
+        """
+        try:
+            service = _get_tools_service()
+            config = service.load()
+            return jsonify({
+                'success': True,
+                'config': config
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @app.route('/api/config/tools', methods=['POST'])
+    def save_tools_config():
+        """
+        POST /api/config/tools
+        
+        Save tools configuration.
+        
+        Request Body: JSON with 'stages' key
+        
+        Response:
+            - success: true/false
+            - error: string (on failure)
+        """
+        try:
+            config = request.get_json(force=True, silent=True)
+            if config is None:
+                return jsonify({
+                    'success': False,
+                    'error': 'Invalid JSON or empty body'
+                }), 400
+            
+            if 'stages' not in config:
+                return jsonify({
+                    'success': False,
+                    'error': 'Invalid config format: missing stages key'
+                }), 400
+            
+            service = _get_tools_service()
+            service.save(config)
+            return jsonify({'success': True})
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @app.route('/api/config/copilot-prompt', methods=['GET'])
+    def get_copilot_prompt_config():
+        """
+        GET /api/config/copilot-prompt
+        
+        Get Copilot prompt configuration for the Copilot button dropdown.
+        
+        Response:
+            - prompts: List of prompt objects with id, label, icon, command
+            - placeholder: Dictionary of placeholder descriptions
+        """
+        try:
+            project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+            config_path = os.path.join(project_root, 'config', 'copilot-prompt.json')
+            
+            if os.path.exists(config_path):
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                return jsonify(config)
+            else:
+                # Return empty prompts if config doesn't exist
+                return jsonify({
+                    'version': '1.0',
+                    'prompts': [],
+                    'placeholder': {}
+                })
+        except Exception as e:
+            return jsonify({
+                'prompts': [],
+                'error': str(e)
+            }), 500
+    
+    # ============================================================
+    # FEATURE-012: Design Themes API
+    # ============================================================
+    
+    def _get_themes_service():
+        """Get ThemesService instance for current project root."""
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        return ThemesService(project_root)
+    
+    @app.route('/api/themes', methods=['GET'])
+    def list_themes():
+        """
+        GET /api/themes
+        
+        List all themes with metadata.
+        
+        Response:
+            - themes: List of theme objects with name, description, colors, files, path
+            - selected: Currently selected theme name from config (null if none)
+        """
+        try:
+            themes_service = _get_themes_service()
+            themes = themes_service.list_themes()
+            
+            # Get selected theme from tools config (new format)
+            tools_service = _get_tools_service()
+            config = tools_service.load()
+            selected_theme_config = config.get('selected-theme', {})
+            selected = selected_theme_config.get('theme-name') if selected_theme_config else None
+            
+            return jsonify({
+                'themes': themes,
+                'selected': selected
+            })
+        except Exception as e:
+            return jsonify({
+                'themes': [],
+                'selected': 'theme-default',
+                'error': str(e)
+            }), 500
+    
+    @app.route('/api/themes/<name>', methods=['GET'])
+    def get_theme_detail(name):
+        """
+        GET /api/themes/<name>
+        
+        Get detailed information about a specific theme.
+        
+        Args:
+            name: Theme folder name (e.g., "theme-default")
+            
+        Response:
+            - Theme detail object with design_system content
+            - 404 if theme not found
+        """
+        try:
+            themes_service = _get_themes_service()
+            theme = themes_service.get_theme(name)
+            
+            if theme is None:
+                return jsonify({
+                    'error': f'Theme not found: {name}'
+                }), 404
+            
+            return jsonify(theme)
+        except Exception as e:
+            return jsonify({
+                'error': str(e)
+            }), 500
+
+
 if __name__ == '__main__':
     app = create_app()
     # Start session cleanup task

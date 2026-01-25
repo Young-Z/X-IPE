@@ -54,6 +54,7 @@ Output:
   status: completed | blocked
   next_task_type: User Manual
   require_human_review: No
+  auto_proceed: {from input Auto Proceed}
   task_output_links: [PR link, changelog]
   feature_id: FEATURE-XXX
   feature_title: {title}

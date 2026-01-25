@@ -65,8 +65,9 @@
 
 | Task Type | Skill | Category | Next Task | Human Review |
 |-----------|-------|----------|-----------|--------------|
-| Ideation | `task-type-ideation` | ideation-stage | Idea Mockup | No |
+| Ideation | `task-type-ideation` | ideation-stage | Idea Mockup OR Idea to Architecture | No |
 | Idea Mockup | `task-type-idea-mockup` | ideation-stage | Requirement Gathering | No |
+| Idea to Architecture | `task-type-idea-to-architecture` | ideation-stage | Requirement Gathering | No |
 | Share Idea | `task-type-share-idea` | Standalone | - | Yes |
 | Requirement Gathering | `task-type-requirement-gathering` | requirement-stage | Feature Breakdown | Yes |
 | Feature Breakdown | `task-type-feature-breakdown` | requirement-stage | Feature Refinement | Yes |

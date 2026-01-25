@@ -144,6 +144,7 @@ Output:
   status: completed | blocked
   next_task_type: null
   require_human_review: No
+  auto_proceed: {from input Auto Proceed}
   task_output_links:
     - doc-viewer/server.py
     - doc-viewer/index.html

@@ -8,18 +8,22 @@
 
 **Scenario:** User uploads business plan draft to `docs/ideas/mobile-app-idea/files/`
 
-**Config File:** `docs/ideas/.ideation-tools.json`
+**Config File:** `config/tools.json`
 ```json
 {
-  "version": "1.0",
-  "ideation": {
-    "antv-infographic": true,
-    "mermaid": true
-  },
-  "mockup": {
-    "frontend-design": true
-  },
-  "sharing": {}
+  "version": "2.0",
+  "stages": {
+    "ideation": {
+      "ideation": {
+        "antv-infographic": true,
+        "mermaid": true
+      },
+      "mockup": {
+        "frontend-design": true
+      },
+      "sharing": {}
+    }
+  }
 }
 ```
 
@@ -28,11 +32,11 @@
 1. Execute Task Flow from task-execution-guideline skill
 
 2. Load Toolbox Meta:
-   - Read docs/ideas/.ideation-tools.json
+   - Read config/tools.json
    - Enabled tools:
-     - ideation.antv-infographic: true → will invoke infographic-syntax-creator
-     - ideation.mermaid: true → will use mermaid diagrams
-     - mockup.frontend-design: true → will invoke frontend-design skill
+     - stages.ideation.ideation.antv-infographic: true → will invoke infographic-syntax-creator
+     - stages.ideation.ideation.mermaid: true → will use mermaid diagrams
+     - stages.ideation.mockup.frontend-design: true → will invoke frontend-design skill
 
 3. Analyze Files:
    - Read business-plan.md
@@ -53,10 +57,10 @@
    - "Your notes mention both iOS and Android - should v1 target both?"
    - "The user research shows two distinct personas - which is primary?"
    - User describes dashboard flow:
-     → config.ideation.mermaid == true
+     → config.stages.ideation.ideation.mermaid == true
      → Generate mermaid flowchart to visualize
    - User wants to see dashboard layout:
-     → config.mockup.frontend-design == true  
+     → config.stages.ideation.mockup.frontend-design == true  
      → Invoke frontend-design skill
      → Create HTML mockup, save to docs/ideas/mobile-app-idea/mockup-v1.html
    - Share mockup: "Does this layout match your vision?"
@@ -69,8 +73,8 @@
 
 8. Create docs/ideas/mobile-app-idea/idea-summary-v1.md with:
    - Overview and problem statement (text)
-   - Key Features (config.ideation.antv-infographic == true → use infographic: list-grid-badge-card)
-   - User Flow (config.ideation.mermaid == true → use mermaid flowchart)
+   - Key Features (config.stages.ideation.ideation.antv-infographic == true → use infographic: list-grid-badge-card)
+   - User Flow (config.stages.ideation.ideation.mermaid == true → use mermaid flowchart)
    - Implementation Phases (infographic: sequence-roadmap-vertical-simple)
    - Platform Comparison (infographic: compare-binary-horizontal-badge-card-arrow)
    - Ideation Artifacts section with link to mockups created
@@ -83,18 +87,22 @@
 
 ## Example 2: Ideation WITHOUT Tools (All Disabled)
 
-**Config File:** `docs/ideas/.ideation-tools.json`
+**Config File:** `config/tools.json`
 ```json
 {
-  "version": "1.0",
-  "ideation": {
-    "antv-infographic": false,
-    "mermaid": false
-  },
-  "mockup": {
-    "frontend-design": false
-  },
-  "sharing": {}
+  "version": "2.0",
+  "stages": {
+    "ideation": {
+      "ideation": {
+        "antv-infographic": false,
+        "mermaid": false
+      },
+      "mockup": {
+        "frontend-design": false
+      },
+      "sharing": {}
+    }
+  }
 }
 ```
 
@@ -125,28 +133,32 @@
 
 ## Example 3: Missing Config File
 
-**Scenario:** No `.ideation-tools.json` exists
+**Scenario:** No `config/tools.json` exists
 
 **Execution:**
 ```
-1. Check for docs/ideas/.ideation-tools.json
+1. Check for config/tools.json
    → File NOT FOUND
 
 2. Create default config file:
    {
-     "version": "1.0",
-     "ideation": {
-       "antv-infographic": false,
-       "mermaid": false
-     },
-     "mockup": {
-       "frontend-design": false
-     },
-     "sharing": {}
+     "version": "2.0",
+     "stages": {
+       "ideation": {
+         "ideation": {
+           "antv-infographic": false,
+           "mermaid": false
+         },
+         "mockup": {
+           "frontend-design": false
+         },
+         "sharing": {}
+       }
+     }
    }
 
 3. Inform user:
-   "Created default .ideation-tools.json with all tools disabled.
+   "Created default config/tools.json with all tools disabled.
     To enable visualization tools, update the config file."
 
 4. Proceed with standard text-based ideation

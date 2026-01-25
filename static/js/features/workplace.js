@@ -22,7 +22,24 @@ class WorkplaceManager {
         this.fileType = null; // markdown | code | text
         this.fileExtension = null;
         this.easyMDE = null; // EasyMDE editor instance for compose view
-        this.toolboxConfig = null; // CR-003: Ideation Toolbox config
+        this.copilotPrompts = []; // Loaded from config/copilot-prompt.json
+        this._loadCopilotPrompts();
+    }
+    
+    /**
+     * Load Copilot prompts from config file
+     */
+    async _loadCopilotPrompts() {
+        try {
+            const response = await fetch('/api/config/copilot-prompt');
+            if (response.ok) {
+                const data = await response.json();
+                this.copilotPrompts = data.prompts || [];
+            }
+        } catch (error) {
+            console.warn('Failed to load copilot prompts:', error);
+            this.copilotPrompts = [];
+        }
     }
     
     /**
@@ -32,7 +49,7 @@ class WorkplaceManager {
         this.isActive = true;
         container.innerHTML = `
             <div class="workplace-container">
-                <div class="workplace-sidebar" id="workplace-sidebar">
+                <div class="workplace-sidebar pinned" id="workplace-sidebar">
                     <div class="workplace-sidebar-icons">
                         <button class="workplace-sidebar-icon" title="Browse Ideas" id="workplace-icon-browse">
                             <i class="bi bi-folder2"></i>
@@ -41,8 +58,8 @@ class WorkplaceManager {
                     <div class="workplace-sidebar-content">
                         <div class="workplace-sidebar-header">
                             <span class="workplace-sidebar-title">Ideas</span>
-                            <button class="workplace-pin-btn" title="Pin sidebar" id="workplace-pin-btn">
-                                <i class="bi bi-pin-angle"></i>
+                            <button class="workplace-pin-btn" title="Unpin sidebar" id="workplace-pin-btn">
+                                <i class="bi bi-pin-angle-fill"></i>
                             </button>
                         </div>
                         <div class="workplace-tree" id="workplace-tree">
@@ -93,9 +110,6 @@ class WorkplaceManager {
         // Load tree and start polling
         await this.loadTree();
         this._startPolling();
-        
-        // CR-003: Initialize Ideation Toolbox
-        this._initToolbox();
     }
     
     /**
@@ -188,9 +202,42 @@ class WorkplaceManager {
     }
     
     /**
+     * Collect expanded folder paths before re-rendering
+     */
+    _getExpandedPaths(container) {
+        const expanded = new Set();
+        const expandedItems = container.querySelectorAll('.workplace-tree-item.expanded');
+        expandedItems.forEach(item => {
+            if (item.dataset.path) {
+                expanded.add(item.dataset.path);
+            }
+        });
+        return expanded;
+    }
+    
+    /**
+     * Restore expanded state to folders after re-rendering
+     */
+    _restoreExpandedPaths(container, expandedPaths) {
+        if (!expandedPaths || expandedPaths.size === 0) return;
+        const items = container.querySelectorAll('.workplace-tree-item[data-type="folder"]');
+        items.forEach(item => {
+            if (expandedPaths.has(item.dataset.path)) {
+                item.classList.add('expanded');
+            }
+        });
+    }
+    
+    /**
      * Render tree nodes recursively
      */
     renderTree(container, nodes, level = 0) {
+        // Preserve expanded state before re-rendering
+        let expandedPaths = null;
+        if (level === 0) {
+            expandedPaths = this._getExpandedPaths(container);
+        }
+        
         if (!nodes || nodes.length === 0) {
             if (level === 0) {
                 container.innerHTML = `
@@ -219,7 +266,8 @@ class WorkplaceManager {
             // CR-002: Add idea-folder-node class and data for drag-drop targets
             if (node.type === 'folder') {
                 itemContent.classList.add('idea-folder-node');
-                itemContent.dataset.folderName = node.name;
+                // Use full path (relative to docs/ideas/) for nested folder support
+                itemContent.dataset.folderPath = node.path;
             }
             itemContent.style.paddingLeft = `${level * 16 + 8}px`;
             
@@ -306,6 +354,8 @@ class WorkplaceManager {
         // CR-002: Setup drag-drop on folder nodes after tree is rendered
         if (level === 0) {
             this._setupFolderDragDrop();
+            // Restore expanded state after rendering
+            this._restoreExpandedPaths(container, expandedPaths);
         }
     }
     
@@ -328,7 +378,8 @@ class WorkplaceManager {
             // CR-002: Add idea-folder-node class and data for drag-drop targets
             if (node.type === 'folder') {
                 itemContent.classList.add('idea-folder-node');
-                itemContent.dataset.folderName = node.name;
+                // Use full path (relative to docs/ideas/) for nested folder support
+                itemContent.dataset.folderPath = node.path;
             }
             itemContent.style.paddingLeft = `${level * 16 + 8}px`;
             
@@ -506,9 +557,7 @@ class WorkplaceManager {
                     <span class="workplace-editor-path">${this._escapeHtml(path)}</span>
                     <div class="workplace-editor-actions">
                         <span class="workplace-editor-status" id="workplace-editor-status"></span>
-                        <button class="btn btn-sm btn-outline-info workplace-copilot-btn" id="workplace-copilot-btn" title="Refine with Copilot">
-                            <i class="bi bi-robot"></i> Copilot
-                        </button>
+                        ${this._renderCopilotButton()}
                     </div>
                 </div>
                 <div class="workplace-editor-loading">
@@ -574,9 +623,7 @@ class WorkplaceManager {
                         <i class="bi bi-pencil"></i> Edit
                     </button>
                     ` : ''}
-                    <button class="btn btn-sm btn-outline-info workplace-copilot-btn" id="workplace-copilot-btn" title="Refine with Copilot">
-                        <i class="bi bi-robot"></i> Copilot
-                    </button>
+                    ${this._renderCopilotButton()}
                 </div>
             </div>
         `;
@@ -613,11 +660,8 @@ class WorkplaceManager {
             editBtn.addEventListener('click', () => this.enterEditMode());
         }
         
-        // Bind copilot button
-        const copilotBtn = document.getElementById('workplace-copilot-btn');
-        if (copilotBtn) {
-            copilotBtn.addEventListener('click', () => this._handleCopilotClick());
-        }
+        // Bind copilot button with hover dropdown
+        this._bindCopilotButton();
         
         // Render Mermaid diagrams if any
         if (this.fileType === 'markdown' && typeof mermaid !== 'undefined') {
@@ -627,6 +671,11 @@ class WorkplaceManager {
         // Render Infographic diagrams if any
         if (this.fileType === 'markdown' && typeof AntVInfographic !== 'undefined') {
             this._renderInfographicDiagrams();
+        }
+        
+        // Render Architecture DSL diagrams if any
+        if (this.fileType === 'markdown') {
+            this._renderArchitectureDiagrams();
         }
     }
     
@@ -644,6 +693,89 @@ class WorkplaceManager {
         // Send copilot command to terminal with typing simulation
         if (window.terminalManager) {
             window.terminalManager.sendCopilotRefineCommand(this.currentPath);
+        }
+    }
+    
+    /**
+     * Render Copilot button with dropdown container
+     */
+    _renderCopilotButton() {
+        const dropdownItems = this.copilotPrompts.map(prompt => `
+            <div class="copilot-dropdown-item" data-prompt-id="${prompt.id}">
+                <i class="${prompt.icon || 'bi bi-arrow-right'}"></i>
+                <span>${this._escapeHtml(prompt.label)}</span>
+            </div>
+        `).join('');
+        
+        return `
+            <div class="copilot-btn-container" id="copilot-btn-container">
+                <button class="btn btn-sm btn-outline-info workplace-copilot-btn" id="workplace-copilot-btn" title="Refine with Copilot">
+                    <i class="bi bi-robot"></i> Copilot
+                </button>
+                ${this.copilotPrompts.length > 0 ? `
+                <div class="copilot-dropdown" id="copilot-dropdown">
+                    ${dropdownItems}
+                </div>
+                ` : ''}
+            </div>
+        `;
+    }
+    
+    /**
+     * Bind Copilot button click and hover events
+     */
+    _bindCopilotButton() {
+        const container = document.getElementById('copilot-btn-container');
+        const copilotBtn = document.getElementById('workplace-copilot-btn');
+        const dropdown = document.getElementById('copilot-dropdown');
+        
+        if (!copilotBtn) return;
+        
+        // Click handler - same as before
+        copilotBtn.addEventListener('click', () => this._handleCopilotClick());
+        
+        if (!dropdown || !container) return;
+        
+        // Show dropdown on hover
+        container.addEventListener('mouseenter', () => {
+            dropdown.classList.add('show');
+        });
+        
+        container.addEventListener('mouseleave', () => {
+            dropdown.classList.remove('show');
+        });
+        
+        // Handle dropdown item clicks
+        dropdown.querySelectorAll('.copilot-dropdown-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const promptId = item.getAttribute('data-prompt-id');
+                this._handleCopilotPromptClick(promptId);
+                dropdown.classList.remove('show');
+            });
+        });
+    }
+    
+    /**
+     * Handle click on a specific Copilot prompt from dropdown
+     */
+    _handleCopilotPromptClick(promptId) {
+        if (!this.currentPath) return;
+        
+        const prompt = this.copilotPrompts.find(p => p.id === promptId);
+        if (!prompt) return;
+        
+        // Replace <current-idea-file> placeholder with actual file path
+        const command = prompt.command.replace(/<current-idea-file>/g, this.currentPath);
+        
+        // Expand terminal panel
+        if (window.terminalPanel) {
+            window.terminalPanel.expand();
+        }
+        
+        // Send the prompt command to terminal
+        if (window.terminalManager) {
+            window.terminalManager.sendCopilotPromptCommand(command);
         }
     }
     
@@ -748,6 +880,18 @@ class WorkplaceManager {
         );
         this._infographicBlocks = infographicBlocks;
         
+        // Pre-process Architecture DSL blocks
+        const architectureBlocks = [];
+        processedContent = processedContent.replace(
+            /```(?:architecture-dsl|arch-dsl|architecture)\n([\s\S]*?)```/g,
+            (match, dsl) => {
+                const id = `workplace-architecture-${architectureBlocks.length}`;
+                architectureBlocks.push({ id, dsl: dsl.trim() });
+                return `<div class="architecture-diagram-container" id="${id}" style="min-height: 200px; width: 100%; margin: 1rem 0; overflow: auto;"></div>`;
+            }
+        );
+        this._architectureBlocks = architectureBlocks;
+        
         // Parse markdown
         let html;
         if (typeof marked !== 'undefined') {
@@ -835,6 +979,167 @@ class WorkplaceManager {
                 }
             }
         }
+    }
+    
+    /**
+     * Render Architecture DSL diagrams
+     */
+    async _renderArchitectureDiagrams() {
+        if (!this._architectureBlocks || this._architectureBlocks.length === 0) return;
+        
+        for (const block of this._architectureBlocks) {
+            const el = document.getElementById(block.id);
+            if (el) {
+                try {
+                    const html = this._renderArchitectureHTML(this._parseArchitectureDSL(block.dsl));
+                    el.innerHTML = html;
+                } catch (e) {
+                    el.innerHTML = `<pre class="text-danger">Architecture DSL error: ${e.message}</pre>`;
+                }
+            }
+        }
+    }
+    
+    /**
+     * Parse Architecture DSL into AST
+     */
+    _parseArchitectureDSL(dsl) {
+        const errors = [];
+        const warnings = [];
+        const lines = dsl.split('\n');
+        
+        const ast = {
+            type: 'document', viewType: null, title: null, theme: 'theme-default',
+            direction: 'top-to-bottom', grid: { cols: 12, rows: 6 }, textAlign: 'left',
+            layers: [], errors, warnings
+        };
+
+        let currentLayer = null;
+        let currentModule = null;
+        let inMultiLineComment = false;
+
+        for (const rawLine of lines) {
+            let line = rawLine.trim();
+            if (inMultiLineComment) { if (line.includes("'/")) inMultiLineComment = false; continue; }
+            if (line.startsWith("/'")) { inMultiLineComment = true; continue; }
+            if (line.startsWith("'") || line === '') continue;
+            const commentIdx = line.indexOf("'");
+            if (commentIdx > 0) line = line.substring(0, commentIdx).trim();
+
+            if (line.startsWith('@startuml')) { const m = line.match(/@startuml\s+(module-view|landscape-view)/); if (m) ast.viewType = m[1]; continue; }
+            if (line === '@enduml') continue;
+            if (line.startsWith('title ')) { const m = line.match(/title\s+"([^"]+)"/); if (m) ast.title = m[1]; continue; }
+            if (line.startsWith('grid ') && !currentModule) { const m = line.match(/grid\s+(\d+)\s*x\s*(\d+)/); if (m) ast.grid = { cols: parseInt(m[1]), rows: parseInt(m[2]) }; continue; }
+            
+            if (line.startsWith('layer ')) {
+                const m = line.match(/layer\s+"([^"]+)"(?:\s+as\s+(\w+))?\s*\{?/);
+                if (m) {
+                    currentLayer = { type: 'layer', name: m[1], alias: m[2] || null, rows: 1, color: null, borderColor: null, textAlign: ast.textAlign, modules: [] };
+                    ast.layers.push(currentLayer);
+                }
+                continue;
+            }
+            if (currentLayer && !currentModule) {
+                if (line.startsWith('rows ')) { const m = line.match(/rows\s+(\d+)/); if (m) currentLayer.rows = parseInt(m[1]); continue; }
+                if (line.startsWith('color ')) { const m = line.match(/color\s+"([^"]+)"/); if (m) currentLayer.color = m[1]; continue; }
+                if (line.startsWith('border-color ')) { const m = line.match(/border-color\s+"([^"]+)"/); if (m) currentLayer.borderColor = m[1]; continue; }
+                if (line.startsWith('module ')) {
+                    const m = line.match(/module\s+"([^"]+)"(?:\s+as\s+(\w+))?\s*\{?/);
+                    if (m) {
+                        currentModule = { type: 'module', name: m[1], alias: m[2] || null, cols: 12, rows: 1, grid: { cols: 1, rows: 1 }, gap: '8px', components: [] };
+                        currentLayer.modules.push(currentModule);
+                    }
+                    continue;
+                }
+                if (line === '}') { currentLayer = null; continue; }
+            }
+            if (currentModule) {
+                if (line.startsWith('cols ')) { const m = line.match(/cols\s+(\d+)/); if (m) currentModule.cols = parseInt(m[1]); continue; }
+                if (line.startsWith('rows ') && !line.includes(',')) { const m = line.match(/rows\s+(\d+)/); if (m) currentModule.rows = parseInt(m[1]); continue; }
+                if (line.startsWith('grid ')) { const m = line.match(/grid\s+(\d+)\s*x\s*(\d+)/); if (m) currentModule.grid = { cols: parseInt(m[1]), rows: parseInt(m[2]) }; continue; }
+                if (line.startsWith('gap ')) { const m = line.match(/gap\s+(\d+(?:px|rem))/); if (m) currentModule.gap = m[1]; continue; }
+                if (line.startsWith('component ')) {
+                    const m = line.match(/component\s+"([^"]+)"(?:\s*\{\s*cols\s+(\d+)(?:\s*,\s*rows\s+(\d+))?\s*\})?(?:\s*<<(\w+)>>)?/);
+                    if (m) currentModule.components.push({ type: 'component', name: m[1], cols: m[2] ? parseInt(m[2]) : 1, rows: m[3] ? parseInt(m[3]) : 1, stereotype: m[4] || null });
+                    continue;
+                }
+                if (line === '}') { currentModule = null; continue; }
+            }
+        }
+        return ast;
+    }
+    
+    /**
+     * Render Architecture AST to HTML
+     */
+    _renderArchitectureHTML(ast) {
+        const c = 'arch-diagram';
+        const patterns = [
+            { p: ['presentation', 'ui', 'frontend', 'view'], bg: '#fce7f3', border: '#ec4899' },
+            { p: ['service', 'api', 'gateway'], bg: '#fef3c7', border: '#f97316' },
+            { p: ['business', 'domain', 'logic', 'core'], bg: '#dbeafe', border: '#3b82f6' },
+            { p: ['data', 'persistence', 'storage', 'db'], bg: '#dcfce7', border: '#22c55e' },
+            { p: ['infrastructure', 'infra', 'platform'], bg: '#f3e8ff', border: '#a855f7' }
+        ];
+        const detectColors = (name) => {
+            const n = name.toLowerCase();
+            for (const pat of patterns) if (pat.p.some(x => n.includes(x))) return { bg: pat.bg, border: pat.border };
+            return { bg: '#ffffff', border: '#374151' };
+        };
+        const esc = (t) => { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; };
+        
+        let html = `<style>
+            .${c} { font-family: 'Inter', system-ui, sans-serif; max-width: 1200px; margin: 0 auto; }
+            .${c}-title { font-size: 22px; font-weight: 700; color: #374151; text-align: center; margin-bottom: 20px; }
+            .${c}-content { display: flex; flex-direction: column; gap: 16px; }
+            .${c}-layer-wrapper { display: flex; gap: 0; border-radius: 8px; transition: transform 0.3s, box-shadow 0.3s; }
+            .${c}-layer-wrapper:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+            .${c}-layer-label { writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); background: #1f2937; padding: 16px 8px; font-size: 12px; font-weight: 600; color: #fff; display: flex; align-items: center; justify-content: center; border-radius: 0 8px 8px 0; min-width: 36px; transition: background 0.2s, min-width 0.2s; }
+            .${c}-layer-wrapper:hover .${c}-layer-label { background: #6366f1; min-width: 40px; }
+            .${c}-layer-wrapper:hover .${c}-layer { border-color: #6366f1; }
+            .${c}-layer { flex: 1; padding: 20px; border: 2px solid; border-left: none; border-radius: 0 8px 8px 0; transition: border-color 0.2s; }
+            .${c}-layer-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
+            .${c}-module { background: #fff; border: 1.5px dashed #d1d5db; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 12px; transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s; }
+            .${c}-module:hover { border-color: #3b82f6; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); transform: scale(1.01); }
+            .${c}-module-title { font-size: 14px; font-weight: 700; color: #374151; }
+            .${c}-module-content { display: grid; gap: 10px; }
+            .${c}-component { background: #1f2937; color: #fff; border-radius: 18px; padding: 8px 16px; font-size: 12px; font-weight: 500; text-align: center; display: flex; align-items: center; justify-content: center; min-height: 36px; transition: all 0.2s; cursor: default; }
+            .${c}-component:hover { background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+            .${c}-icon-component { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px; min-height: 60px; transition: transform 0.2s; cursor: default; }
+            .${c}-icon-component:hover { transform: scale(1.1); }
+            .${c}-icon { font-size: 28px; }
+            .${c}-icon-label { font-size: 11px; color: #6b7280; }
+        </style><div class="${c}">`;
+        
+        if (ast.title) html += `<div class="${c}-title">${esc(ast.title)}</div>`;
+        html += `<div class="${c}-content">`;
+        
+        for (const layer of ast.layers) {
+            const colors = layer.color ? { bg: layer.color, border: layer.borderColor || '#374151' } : detectColors(layer.name);
+            html += `<div class="${c}-layer-wrapper"><div class="${c}-layer-label">${esc(layer.name.toUpperCase())}</div>`;
+            html += `<div class="${c}-layer" style="background: ${colors.bg}; border-color: ${colors.border};"><div class="${c}-layer-row">`;
+            
+            for (const module of layer.modules) {
+                const gridCols = module.grid?.cols || 1;
+                const gap = parseInt(module.gap) || 10;
+                html += `<div class="${c}-module" style="grid-column: span ${module.cols || 12};"><div class="${c}-module-title">${esc(module.name)}</div>`;
+                html += `<div class="${c}-module-content" style="grid-template-columns: repeat(${gridCols}, 1fr); gap: ${gap}px;">`;
+                
+                for (const comp of module.components) {
+                    const gs = `grid-column: span ${comp.cols || 1}; grid-row: span ${comp.rows || 1};`;
+                    if (comp.stereotype && ['icon', 'folder', 'file', 'db'].includes(comp.stereotype)) {
+                        const icons = { folder: '📁', file: '📄', db: '🗄️', icon: '⚙️' };
+                        html += `<div class="${c}-icon-component" style="${gs}"><span class="${c}-icon">${icons[comp.stereotype] || '📦'}</span><span class="${c}-icon-label">${esc(comp.name)}</span></div>`;
+                    } else {
+                        html += `<div class="${c}-component" style="${gs}">${esc(comp.name)}</div>`;
+                    }
+                }
+                html += '</div></div>';
+            }
+            html += '</div></div></div>';
+        }
+        html += '</div></div>';
+        return html;
     }
     
     /**
@@ -1352,8 +1657,8 @@ class WorkplaceManager {
         const folderNodes = document.querySelectorAll('.idea-folder-node');
         
         folderNodes.forEach(node => {
-            const folderName = node.dataset.folderName;
-            if (!folderName) return;
+            const folderPath = node.dataset.folderPath;
+            if (!folderPath) return;
             
             // Prevent default to allow drop
             node.addEventListener('dragover', (e) => {
@@ -1377,7 +1682,7 @@ class WorkplaceManager {
                 node.classList.remove('drop-target');
                 
                 if (e.dataTransfer.files.length > 0) {
-                    await this._uploadToFolder(e.dataTransfer.files, folderName);
+                    await this._uploadToFolder(e.dataTransfer.files, folderPath);
                 }
             });
         });
@@ -1386,15 +1691,15 @@ class WorkplaceManager {
     /**
      * CR-002: Upload files to a specific existing folder
      * @param {FileList} files - Files to upload
-     * @param {string} folderName - Target folder name
+     * @param {string} folderPath - Target folder path (relative to docs/ideas/)
      */
-    async _uploadToFolder(files, folderName) {
+    async _uploadToFolder(files, folderPath) {
         try {
             const formData = new FormData();
             for (const file of files) {
                 formData.append('files', file);
             }
-            formData.append('target_folder', folderName);
+            formData.append('target_folder', folderPath);
             
             const response = await fetch('/api/ideas/upload', {
                 method: 'POST',
@@ -1404,6 +1709,8 @@ class WorkplaceManager {
             const result = await response.json();
             
             if (result.success) {
+                // Extract folder name from path for display
+                const folderName = folderPath.split('/').pop();
                 this._showToast(
                     `Uploaded ${result.files_uploaded.length} file(s) to ${folderName}`,
                     'success'
@@ -1451,101 +1758,6 @@ class WorkplaceManager {
     // =========================================================================
     // CR-003: Ideation Toolbox Methods
     // =========================================================================
-    
-    /**
-     * Initialize the Ideation Toolbox
-     * Loads saved state and binds checkbox event handlers
-     */
-    _initToolbox() {
-        // Show the toolbox dropdown (hidden by default)
-        const toolboxDropdown = document.getElementById('toolbox-dropdown');
-        if (toolboxDropdown) {
-            toolboxDropdown.classList.remove('d-none');
-        }
-        
-        // Load initial state from backend
-        this._loadToolboxState();
-        
-        // Bind checkbox change handlers
-        document.querySelectorAll('.toolbox-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', () => this._onToolboxChange());
-        });
-    }
-    
-    /**
-     * Load toolbox configuration from backend
-     * Updates checkbox states to match saved config
-     */
-    async _loadToolboxState() {
-        try {
-            const response = await fetch('/api/ideas/toolbox');
-            const config = await response.json();
-            this.toolboxConfig = config;
-            
-            // Update checkboxes to match config
-            for (const [section, tools] of Object.entries(config)) {
-                if (typeof tools === 'object' && section !== 'version') {
-                    for (const [tool, enabled] of Object.entries(tools)) {
-                        const checkbox = document.querySelector(
-                            `.toolbox-checkbox[data-section="${section}"][data-tool="${tool}"]`
-                        );
-                        if (checkbox) {
-                            checkbox.checked = enabled;
-                        }
-                    }
-                }
-            }
-        } catch (error) {
-            console.error('Failed to load toolbox config:', error);
-        }
-    }
-    
-    /**
-     * Handle checkbox change event
-     * Builds config from current checkbox states and saves to backend
-     */
-    async _onToolboxChange() {
-        // Build config from current checkbox states
-        const config = {
-            version: '1.0',
-            ideation: {},
-            mockup: {},
-            sharing: {}
-        };
-        
-        document.querySelectorAll('.toolbox-checkbox').forEach(checkbox => {
-            const section = checkbox.dataset.section;
-            const tool = checkbox.dataset.tool;
-            if (section && tool) {
-                config[section][tool] = checkbox.checked;
-            }
-        });
-        
-        // Save to backend
-        await this._saveToolboxState(config);
-    }
-    
-    /**
-     * Save toolbox configuration to backend
-     * @param {Object} config - Toolbox configuration object
-     */
-    async _saveToolboxState(config) {
-        try {
-            const response = await fetch('/api/ideas/toolbox', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(config)
-            });
-            const result = await response.json();
-            if (result.success) {
-                this.toolboxConfig = config;
-            } else {
-                console.error('Failed to save toolbox config:', result.error);
-            }
-        } catch (error) {
-            console.error('Failed to save toolbox config:', error);
-        }
-    }
     
     /**
      * Show delete confirmation dialog using Bootstrap 5 modal

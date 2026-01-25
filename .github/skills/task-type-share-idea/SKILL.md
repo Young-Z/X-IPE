@@ -40,9 +40,79 @@ Convert refined idea summaries to human-readable shareable formats by:
 
 ## Task Type Required Input Attributes
 
-| Attribute | Default Value |
-|-----------|---------------|
-| Auto Proceed | False |
+| Attribute | Default Value | Description |
+|-----------|---------------|-------------|
+| Auto Proceed | False | Auto-advance to next task |
+| Ideation Toolbox Meta | `{project_root}/config/tools.json` | Config file for enabled sharing tools |
+| Current Idea Folder | N/A | **Required from context** - path to current idea folder |
+| Extra Instructions | N/A | Additional context or requirements for document sharing |
+
+### Extra Instructions Attribute
+
+**Purpose:** Provides additional context or requirements for the document sharing process.
+
+**Source:** This value can be obtained from:
+1. Human input (explicit instructions provided)
+2. `config/tools.json` → `stages.ideation.sharing._extra_instruction` field
+3. Default: N/A (no extra instructions)
+
+**Loading Logic:**
+```
+1. IF human provides explicit Extra Instructions:
+   → Use human-provided value
+
+2. ELSE IF config/tools.json exists:
+   a. Read stages.ideation.sharing._extra_instruction field
+   b. IF field exists AND is not empty:
+      → Use value from config
+   c. ELSE:
+      → Use default: N/A
+
+3. IF Extra Instructions != N/A:
+   → Apply these instructions when preparing content structure
+   → Consider them when selecting output formats
+   → Factor them into document styling/branding
+   → Reference them during content conversion
+```
+
+**Usage:** When Extra Instructions are provided, the agent MUST incorporate them into the sharing workflow, particularly when formatting content and generating output documents.
+
+### Ideation Toolbox Meta File
+
+**Location:** `config/tools.json` (relative to project root)
+
+**Relevant Config Section:**
+```json
+{
+  "version": "2.0",
+  "stages": {
+    "ideation": {
+      "sharing": {
+        "pptx": true,
+        "pdf": true,
+        "docx": false
+      }
+    }
+  }
+}
+```
+
+**Tool Loading Rules:**
+
+1. **File exists:** Load and parse the JSON configuration
+2. **File missing:** Inform user sharing tools not configured, proceed with all formats available
+3. **Tool enabled (`true`):** Offer format as available option
+4. **Tool disabled (`false`):** Skip the format from options
+5. **Empty section:** Default to all formats available
+
+**Sharing Tool Mapping:**
+
+| Config Key | Format | What It Creates |
+|------------|--------|-----------------|
+| `stages.ideation.sharing.pptx` | PowerPoint | .pptx presentation files |
+| `stages.ideation.sharing.pdf` | PDF | .pdf read-only documents |
+| `stages.ideation.sharing.docx` | Word | .docx editable documents |
+| `stages.ideation.sharing.html` | HTML | .html web viewable files |
 
 ---
 
@@ -62,33 +132,59 @@ Execute Share Idea by following these steps in order:
 
 | Step | Name | Action | Gate to Next |
 |------|------|--------|--------------|
-| 1 | Identify Source | Locate latest `idea-summary-vN.md` file | Source file found |
-| 2 | Confirm Format | Ask human for target format(s) | Format(s) confirmed |
-| 3 | Prepare Content | Restructure content for target format | Content ready |
-| 4 | Convert | Use pandoc/MCP to generate output files | Files generated |
-| 5 | Verify | Confirm output files exist and have content | Files verified |
-| 6 | Complete | Report files to human | Human confirms receipt |
+| 1 | Load Config | Read `config/tools.json` sharing section | Config loaded |
+| 2 | Identify Source | Locate latest `idea-summary-vN.md` file | Source file found |
+| 3 | Confirm Format | Ask human for target format(s) from enabled options | Format(s) confirmed |
+| 4 | Prepare Content | Restructure content for target format | Content ready |
+| 5 | Convert | Use pandoc/MCP to generate output files | Files generated |
+| 6 | Verify | Confirm output files exist and have content | Files verified |
+| 7 | Complete | Report files to human | Human confirms receipt |
 
 **⛔ BLOCKING RULES:**
-- Step 2: BLOCKED until human confirms target format(s)
-- Step 5: BLOCKED if output files are empty or missing
+- Step 3: BLOCKED until human confirms target format(s)
+- Step 6: BLOCKED if output files are empty or missing
 
 ---
 
 ## Supported Output Formats
 
-| Format | Extension | Tool | Best For |
-|--------|-----------|------|----------|
-| PowerPoint | .pptx | pandoc / MCP | Presentations |
-| Word | .docx | pandoc / MCP | Documents, reviews |
-| PDF | .pdf | pandoc / MCP | Read-only sharing |
-| HTML | .html | pandoc / MCP | Web viewing |
+| Format | Extension | Tool | Best For | Config Key |
+|--------|-----------|------|----------|------------|
+| PowerPoint | .pptx | pandoc / MCP | Presentations | `stages.ideation.sharing.pptx` |
+| Word | .docx | pandoc / MCP | Documents, reviews | `stages.ideation.sharing.docx` |
+| PDF | .pdf | pandoc / MCP | Read-only sharing | `stages.ideation.sharing.pdf` |
+| HTML | .html | pandoc / MCP | Web viewing | `stages.ideation.sharing.html` |
 
 ---
 
 ## Execution Procedure
 
-### Step 1: Identify Source File
+### Step 1: Load Sharing Tool Configuration
+
+**Action:** Read and parse the sharing section from tools config
+
+**Default Path:** `config/tools.json`
+
+```
+1. Check if config/tools.json exists
+2. If exists:
+   a. Parse JSON file
+   b. Extract stages.ideation.sharing section configuration
+   c. Identify enabled formats (value = true)
+   d. Extract _extra_instruction from stages.ideation.sharing section (if exists)
+3. If NOT exists OR sharing section empty:
+   a. Default to all formats available
+   b. Log: "No sharing config found, all formats available"
+4. Load Extra Instructions:
+   a. IF human provided explicit Extra Instructions → Use human value
+   b. ELSE IF _extra_instruction field exists and is not empty → Use config value
+   c. ELSE → Set Extra Instructions = N/A
+5. Log active sharing formats configuration and Extra Instructions (if any)
+```
+
+**Output:** List of enabled sharing formats
+
+### Step 2: Identify Source File
 
 **Action:** Locate the refined idea summary to convert
 
@@ -230,6 +326,7 @@ This skill MUST return these attributes to the Task Data Model upon task complet
 ```yaml
 category: standalone
 task_type: Share Idea
+auto_proceed: {from input Auto Proceed}
 idea_folder: docs/ideas/{folder}
 source_file: idea-summary-vN.md
 shared_formats:

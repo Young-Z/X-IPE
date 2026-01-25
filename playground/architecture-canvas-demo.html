@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture DSL Canvas Renderer Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+            padding: 24px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: minmax(400px, 1fr) minmax(600px, 2fr);
+            gap: 24px;
+        }
+        
+        @media (max-width: 1400px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .panel.canvas-panel {
+            min-width: 0; /* Allow shrinking */
+        }
+        
+        .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .panel-content {
+            padding: 20px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 500px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            resize: vertical;
+            background: #fafafa;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .canvas-container {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 500px;
+            overflow: auto;
+        }
+        
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .errors {
+            margin-top: 16px;
+            padding: 12px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 6px;
+            color: #dc2626;
+            font-size: 13px;
+            display: none;
+        }
+        
+        .errors.show {
+            display: block;
+        }
+        
+        .warnings {
+            margin-top: 16px;
+            padding: 12px;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 6px;
+            color: #d97706;
+            font-size: 13px;
+            display: none;
+        }
+        
+        .warnings.show {
+            display: block;
+        }
+        
+        .status {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .status.success {
+            color: #059669;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏗️ Architecture DSL Canvas Renderer</h1>
+        <p class="subtitle">FEATURE-017: JavaScript library for rendering Architecture DSL to HTML Canvas</p>
+        
+        <div class="demo-grid">
+            <!-- DSL Input Panel -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">📝 DSL Input</span>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" onclick="loadExample()">Load Example</button>
+                        <button class="btn btn-primary" onclick="renderDiagram()">Render →</button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <textarea id="dsl-input" placeholder="Enter Architecture DSL here..."></textarea>
+                    <div id="errors" class="errors"></div>
+                    <div id="warnings" class="warnings"></div>
+                </div>
+            </div>
+            
+            <!-- Canvas Output Panel -->
+            <div class="panel canvas-panel">
+                <div class="panel-header">
+                    <span class="panel-title">🖼️ Canvas Output</span>
+                    <div class="btn-group">
+                        <span id="status" class="status"></span>
+                        <button class="btn btn-secondary" onclick="exportPNG()">Export PNG</button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div class="canvas-container">
+                        <canvas id="diagram-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inline the library code for standalone demo -->
+    <script type="module">
+        // ============================================
+        // Architecture DSL Parser
+        // ============================================
+        class ArchitectureDSLParser {
+            constructor() {
+                this.errors = [];
+                this.warnings = [];
+            }
+
+            parse(dsl) {
+                this.errors = [];
+                this.warnings = [];
+                
+                const lines = dsl.split('\n');
+                const ast = {
+                    type: 'document',
+                    viewType: null,
+                    title: null,
+                    theme: 'theme-default',
+                    direction: 'top-to-bottom',
+                    grid: { cols: 12, rows: 6 },
+                    textAlign: 'left',
+                    layers: [],
+                    errors: this.errors,
+                    warnings: this.warnings
+                };
+
+                let currentLayer = null;
+                let currentModule = null;
+                let lineNum = 0;
+                let inMultiLineComment = false;
+
+                for (const rawLine of lines) {
+                    lineNum++;
+                    let line = rawLine.trim();
+
+                    if (inMultiLineComment) {
+                        if (line.includes("'/")) inMultiLineComment = false;
+                        continue;
+                    }
+                    if (line.startsWith("/'")) { inMultiLineComment = true; continue; }
+                    if (line.startsWith("'") || line === '') continue;
+
+                    const commentIdx = line.indexOf("'");
+                    if (commentIdx > 0) line = line.substring(0, commentIdx).trim();
+
+                    if (line.startsWith('@startuml')) {
+                        const match = line.match(/@startuml\s+(module-view|landscape-view)/);
+                        if (match) ast.viewType = match[1];
+                        continue;
+                    }
+                    if (line === '@enduml') continue;
+                    if (line.startsWith('title ')) {
+                        const match = line.match(/title\s+"([^"]+)"/);
+                        if (match) ast.title = match[1];
+                        continue;
+                    }
+                    if (line.startsWith('theme ')) {
+                        const match = line.match(/theme\s+"([^"]+)"/);
+                        if (match) ast.theme = match[1];
+                        continue;
+                    }
+                    if (line.startsWith('direction ')) {
+                        const match = line.match(/direction\s+(top-to-bottom|left-to-right)/);
+                        if (match) ast.direction = match[1];
+                        continue;
+                    }
+                    if (line.startsWith('grid ') && !currentModule) {
+                        const match = line.match(/grid\s+(\d+)\s*x\s*(\d+)/);
+                        if (match) ast.grid = { cols: parseInt(match[1]), rows: parseInt(match[2]) };
+                        continue;
+                    }
+                    if (line.startsWith('text-align ') && !currentLayer && !currentModule) {
+                        const match = line.match(/text-align\s+(left|center|right)/);
+                        if (match) ast.textAlign = match[1];
+                        continue;
+                    }
+                    if (line.startsWith('layer ')) {
+                        const match = line.match(/layer\s+"([^"]+)"(?:\s+as\s+(\w+))?\s*\{?/);
+                        if (match) {
+                            currentLayer = {
+                                type: 'layer', name: match[1], alias: match[2] || null,
+                                rows: 1, color: null, borderColor: null,
+                                textAlign: ast.textAlign, modules: []
+                            };
+                            ast.layers.push(currentLayer);
+                        }
+                        continue;
+                    }
+                    if (currentLayer && !currentModule) {
+                        if (line.startsWith('rows ')) {
+                            const match = line.match(/rows\s+(\d+)/);
+                            if (match) currentLayer.rows = parseInt(match[1]);
+                            continue;
+                        }
+                        if (line.startsWith('color ')) {
+                            const match = line.match(/color\s+"([^"]+)"/);
+                            if (match) currentLayer.color = match[1];
+                            continue;
+                        }
+                        if (line.startsWith('border-color ')) {
+                            const match = line.match(/border-color\s+"([^"]+)"/);
+                            if (match) currentLayer.borderColor = match[1];
+                            continue;
+                        }
+                        if (line.startsWith('text-align ')) {
+                            const match = line.match(/text-align\s+(left|center|right)/);
+                            if (match) currentLayer.textAlign = match[1];
+                            continue;
+                        }
+                        if (line.startsWith('module ')) {
+                            const match = line.match(/module\s+"([^"]+)"(?:\s+as\s+(\w+))?\s*\{?/);
+                            if (match) {
+                                currentModule = {
+                                    type: 'module', name: match[1], alias: match[2] || null,
+                                    cols: 12, rows: 1, grid: { cols: 1, rows: 1 },
+                                    align: { h: 'center', v: 'center' }, gap: '8px',
+                                    color: null, textAlign: currentLayer.textAlign, components: []
+                                };
+                                currentLayer.modules.push(currentModule);
+                            }
+                            continue;
+                        }
+                        if (line === '}') { currentLayer = null; continue; }
+                    }
+                    if (currentModule) {
+                        if (line.startsWith('cols ')) {
+                            const match = line.match(/cols\s+(\d+)/);
+                            if (match) currentModule.cols = parseInt(match[1]);
+                            continue;
+                        }
+                        if (line.startsWith('rows ') && !line.includes(',')) {
+                            const match = line.match(/rows\s+(\d+)/);
+                            if (match) currentModule.rows = parseInt(match[1]);
+                            continue;
+                        }
+                        if (line.startsWith('grid ')) {
+                            const match = line.match(/grid\s+(\d+)\s*x\s*(\d+)/);
+                            if (match) currentModule.grid = { cols: parseInt(match[1]), rows: parseInt(match[2]) };
+                            continue;
+                        }
+                        if (line.startsWith('align ')) {
+                            const match = line.match(/align\s+(left|center|right)\s+(top|center|bottom)/);
+                            if (match) currentModule.align = { h: match[1], v: match[2] };
+                            continue;
+                        }
+                        if (line.startsWith('gap ')) {
+                            const match = line.match(/gap\s+(\d+(?:px|rem))/);
+                            if (match) currentModule.gap = match[1];
+                            continue;
+                        }
+                        if (line.startsWith('component ')) {
+                            const match = line.match(/component\s+"([^"]+)"(?:\s*\{\s*cols\s+(\d+)(?:\s*,\s*rows\s+(\d+))?\s*\})?(?:\s*<<(\w+)>>)?/);
+                            if (match) {
+                                currentModule.components.push({
+                                    type: 'component', name: match[1],
+                                    cols: match[2] ? parseInt(match[2]) : 1,
+                                    rows: match[3] ? parseInt(match[3]) : 1,
+                                    stereotype: match[4] || null
+                                });
+                            }
+                            continue;
+                        }
+                        if (line === '}') { currentModule = null; continue; }
+                    }
+                }
+                return ast;
+            }
+        }
+
+        // ============================================
+        // Architecture Canvas Renderer
+        // ============================================
+        class ArchitectureCanvasRenderer {
+            constructor(options = {}) {
+                this.PADDING = options.padding || 32;
+                this.LAYER_GAP = 16;
+                this.MODULE_GAP = 14;
+                this.COMPONENT_GAP = 10;
+                this.BORDER_RADIUS = 8;
+                this.COMPONENT_RADIUS = 18;
+                this.LAYER_LABEL_WIDTH = 36;
+                this.LAYER_PADDING = 20;
+                this.MODULE_PADDING = 14;
+                this.COMPONENT_MIN_HEIGHT = 36;
+                
+                this.LAYER_COLOR_PATTERNS = [
+                    { patterns: ['presentation', 'ui', 'frontend', 'view'], bg: '#fce7f3', border: '#ec4899' },
+                    { patterns: ['service', 'api', 'gateway'], bg: '#fef3c7', border: '#f97316' },
+                    { patterns: ['business', 'domain', 'logic', 'core'], bg: '#dbeafe', border: '#3b82f6' },
+                    { patterns: ['data', 'persistence', 'storage', 'db'], bg: '#dcfce7', border: '#22c55e' },
+                    { patterns: ['infrastructure', 'infra', 'platform'], bg: '#f3e8ff', border: '#a855f7' }
+                ];
+                
+                this.colors = {
+                    layerBg: '#ffffff', layerBorder: '#374151', moduleBorder: '#d1d5db',
+                    badgeBg: '#1f2937', badgeText: '#ffffff', labelBg: '#1f2937',
+                    labelText: '#ffffff', titleText: '#374151', moduleTitle: '#374151'
+                };
+                
+                this.fonts = {
+                    title: "700 26px 'Inter', sans-serif",
+                    layerLabel: "600 12px 'Inter', sans-serif",
+                    moduleTitle: "700 14px 'Inter', sans-serif",
+                    component: "500 12px 'Inter', sans-serif",
+                    iconLabel: "500 11px 'Inter', sans-serif"
+                };
+                
+                this.ctx = null;
+                this.canvas = null;
+                this.scale = options.scale || (window.devicePixelRatio || 1);
+            }
+            
+            _detectLayerColors(layerName) {
+                const nameLower = layerName.toLowerCase();
+                for (const pattern of this.LAYER_COLOR_PATTERNS) {
+                    if (pattern.patterns.some(p => nameLower.includes(p))) {
+                        return { bg: pattern.bg, border: pattern.border };
+                    }
+                }
+                return { bg: this.colors.layerBg, border: this.colors.layerBorder };
+            }
+
+            render(ast, canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                
+                const layout = this._calculateLayout(ast);
+                const width = layout.width + this.PADDING * 2;
+                const height = layout.height + this.PADDING * 2;
+                
+                canvas.width = width * this.scale;
+                canvas.height = height * this.scale;
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+                this.ctx.scale(this.scale, this.scale);
+                
+                // Background gradient
+                const gradient = this.ctx.createLinearGradient(0, 0, width, height);
+                gradient.addColorStop(0, '#f8fafc');
+                gradient.addColorStop(1, '#f1f5f9');
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, width, height);
+                
+                let y = this.PADDING;
+                if (ast.title) y = this._drawTitle(ast.title, width, y);
+                
+                for (const layerLayout of layout.layers) {
+                    this._drawLayer(layerLayout, this.PADDING, y);
+                    y += layerLayout.height + this.LAYER_GAP;
+                }
+            }
+
+            _calculateLayout(ast) {
+                // Calculate minimum width needed based on modules
+                // Each column needs at least 90px for readable component text
+                const minColWidth = 90;
+                const maxModulesInLayer = Math.max(...ast.layers.map(l => l.modules.length), 1);
+                const totalGaps = (maxModulesInLayer - 1) * this.MODULE_GAP;
+                const minContentWidth = 12 * minColWidth + totalGaps + this.LAYER_PADDING * 2;
+                const maxWidth = Math.max(1280, minContentWidth + this.LAYER_LABEL_WIDTH);
+                const contentWidth = maxWidth - this.LAYER_LABEL_WIDTH;
+                const layers = [];
+                let totalHeight = ast.title ? 50 : 0;
+                
+                for (const layer of ast.layers) {
+                    const layerLayout = this._calculateLayerLayout(layer, contentWidth);
+                    layers.push(layerLayout);
+                    totalHeight += layerLayout.height + this.LAYER_GAP;
+                }
+                if (layers.length > 0) totalHeight -= this.LAYER_GAP;
+                
+                return { width: maxWidth, height: totalHeight, layers };
+            }
+
+            _calculateLayerLayout(layer, contentWidth) {
+                const moduleAreaWidth = contentWidth - this.LAYER_PADDING * 2;
+                const modules = [];
+                let maxModuleHeight = 0;
+                const totalGapSpace = (layer.modules.length - 1) * this.MODULE_GAP;
+                const colUnitWidth = (moduleAreaWidth - totalGapSpace) / 12;
+                
+                for (const module of layer.modules) {
+                    const moduleWidth = colUnitWidth * module.cols;
+                    const moduleLayout = this._calculateModuleLayout(module, moduleWidth - this.MODULE_PADDING * 2);
+                    modules.push({ ...moduleLayout, module, width: moduleWidth });
+                    maxModuleHeight = Math.max(maxModuleHeight, moduleLayout.height);
+                }
+                
+                return { layer, width: contentWidth, height: this.LAYER_PADDING * 2 + maxModuleHeight, modules };
+            }
+
+            _calculateModuleLayout(module, availableWidth) {
+                const titleHeight = 24, titleGap = 12;
+                const gridCols = module.grid.cols, gridRows = module.grid.rows;
+                const gap = parseInt(module.gap) || this.COMPONENT_GAP;
+                const totalHGap = (gridCols - 1) * gap;
+                const cellWidth = (availableWidth - totalHGap) / gridCols;
+                const cellHeight = this.COMPONENT_MIN_HEIGHT;
+                
+                const components = [];
+                let col = 0, row = 0;
+                
+                for (const comp of module.components) {
+                    const spanCols = comp.cols || 1, spanRows = comp.rows || 1;
+                    if (col + spanCols > gridCols) { col = 0; row++; }
+                    
+                    components.push({
+                        component: comp,
+                        x: col * (cellWidth + gap),
+                        y: row * (cellHeight + gap),
+                        width: cellWidth * spanCols + gap * (spanCols - 1),
+                        height: cellHeight * spanRows + gap * (spanRows - 1)
+                    });
+                    
+                    col += spanCols;
+                    if (col >= gridCols) { col = 0; row++; }
+                }
+                
+                const actualRows = Math.max(row + (col > 0 ? 1 : 0), 1);
+                const contentHeight = actualRows * cellHeight + (actualRows - 1) * gap;
+                
+                return {
+                    module, titleHeight, titleGap, contentHeight, gap,
+                    height: titleHeight + titleGap + contentHeight + this.MODULE_PADDING * 2,
+                    components
+                };
+            }
+
+            _drawTitle(title, width, y) {
+                this.ctx.font = this.fonts.title;
+                this.ctx.fillStyle = this.colors.titleText;
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'top';
+                this.ctx.fillText(title, width / 2, y);
+                return y + 50;
+            }
+
+            _drawLayer(layerLayout, x, y) {
+                const { layer, width, height, modules } = layerLayout;
+                const autoColors = this._detectLayerColors(layer.name);
+                const layerBg = layer.color || autoColors.bg;
+                const borderColor = layer.borderColor || autoColors.border;
+                
+                // Layer content area
+                this._roundRect(x + this.LAYER_LABEL_WIDTH, y, width, height, { tl: 0, tr: 8, br: 8, bl: 0 });
+                this.ctx.fillStyle = layerBg;
+                this.ctx.fill();
+                this.ctx.strokeStyle = borderColor;
+                this.ctx.lineWidth = 2;
+                this.ctx.stroke();
+                
+                // Side label
+                this._roundRect(x, y, this.LAYER_LABEL_WIDTH, height, { tl: 8, tr: 0, br: 0, bl: 8 });
+                this.ctx.fillStyle = this.colors.labelBg;
+                this.ctx.fill();
+                
+                // Label text (rotated)
+                this.ctx.save();
+                this.ctx.translate(x + this.LAYER_LABEL_WIDTH / 2, y + height / 2);
+                this.ctx.rotate(-Math.PI / 2);
+                this.ctx.font = this.fonts.layerLabel;
+                this.ctx.fillStyle = this.colors.labelText;
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.fillText(layer.name.toUpperCase(), 0, 0);
+                this.ctx.restore();
+                
+                // Draw modules
+                let moduleX = x + this.LAYER_LABEL_WIDTH + this.LAYER_PADDING;
+                const moduleY = y + this.LAYER_PADDING;
+                
+                for (const moduleLayout of modules) {
+                    this._drawModule(moduleLayout, moduleX, moduleY, height - this.LAYER_PADDING * 2);
+                    moduleX += moduleLayout.width + this.MODULE_GAP;
+                }
+            }
+
+            _drawModule(moduleLayout, x, y, maxHeight) {
+                const { module, width, components, titleHeight, titleGap } = moduleLayout;
+                
+                // Module background with dashed border
+                this.ctx.beginPath();
+                this._roundRectPath(x, y, width, maxHeight, 8);
+                this.ctx.fillStyle = this.colors.layerBg;
+                this.ctx.fill();
+                this.ctx.strokeStyle = this.colors.moduleBorder;
+                this.ctx.lineWidth = 1.5;
+                this.ctx.setLineDash([5, 5]);
+                this.ctx.stroke();
+                this.ctx.setLineDash([]);
+                
+                // Module title
+                this.ctx.font = this.fonts.moduleTitle;
+                this.ctx.fillStyle = this.colors.moduleTitle;
+                this.ctx.textAlign = 'left';
+                this.ctx.textBaseline = 'top';
+                this.ctx.fillText(module.name, x + this.MODULE_PADDING, y + this.MODULE_PADDING);
+                
+                // Components
+                const contentX = x + this.MODULE_PADDING;
+                const contentY = y + this.MODULE_PADDING + titleHeight + titleGap;
+                
+                for (const compLayout of components) {
+                    this._drawComponent(compLayout.component, contentX + compLayout.x, contentY + compLayout.y, compLayout.width, compLayout.height);
+                }
+            }
+
+            _drawComponent(component, x, y, width, height) {
+                if (component.stereotype && ['icon', 'folder', 'file', 'db'].includes(component.stereotype)) {
+                    this._drawIconComponent(component, x, y, width, height);
+                    return;
+                }
+                
+                const radius = Math.min(height / 2, this.COMPONENT_RADIUS);
+                
+                // Pill shape
+                this.ctx.beginPath();
+                this.ctx.moveTo(x + radius, y);
+                this.ctx.lineTo(x + width - radius, y);
+                this.ctx.arc(x + width - radius, y + height / 2, radius, -Math.PI / 2, Math.PI / 2);
+                this.ctx.lineTo(x + radius, y + height);
+                this.ctx.arc(x + radius, y + height / 2, radius, Math.PI / 2, -Math.PI / 2);
+                this.ctx.closePath();
+                this.ctx.fillStyle = this.colors.badgeBg;
+                this.ctx.fill();
+                
+                // Text
+                this.ctx.font = this.fonts.component;
+                this.ctx.fillStyle = this.colors.badgeText;
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                
+                let text = component.name;
+                const maxTextWidth = width - 32;
+                while (this.ctx.measureText(text + '...').width > maxTextWidth && text.length > 3) {
+                    text = text.slice(0, -1);
+                }
+                if (text !== component.name) text += '...';
+                
+                this.ctx.fillText(text, x + width / 2, y + height / 2);
+            }
+
+            _drawIconComponent(component, x, y, width, height) {
+                const icons = { folder: '📁', file: '📄', db: '🗄️', icon: '⚙️' };
+                const icon = icons[component.stereotype] || '📦';
+                
+                const iconSize = 28;
+                const labelGap = 6;
+                const totalContentHeight = iconSize + labelGap + 14;
+                const startY = y + (height - totalContentHeight) / 2;
+                
+                this.ctx.font = `${iconSize}px serif`;
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'top';
+                this.ctx.fillText(icon, x + width / 2, startY);
+                
+                this.ctx.font = this.fonts.iconLabel;
+                this.ctx.fillStyle = '#6b7280';
+                
+                let text = component.name;
+                const maxTextWidth = width - 8;
+                while (this.ctx.measureText(text).width > maxTextWidth && text.length > 3) {
+                    text = text.slice(0, -1);
+                }
+                if (text !== component.name) text = text.slice(0, -2) + '...';
+                
+                this.ctx.fillText(text, x + width / 2, startY + iconSize + labelGap);
+            }
+
+            _roundRectPath(x, y, width, height, radius) {
+                this.ctx.moveTo(x + radius, y);
+                this.ctx.lineTo(x + width - radius, y);
+                this.ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.ctx.lineTo(x + width, y + height - radius);
+                this.ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.ctx.lineTo(x + radius, y + height);
+                this.ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.ctx.lineTo(x, y + radius);
+                this.ctx.quadraticCurveTo(x, y, x + radius, y);
+                this.ctx.closePath();
+            }
+
+            _roundRect(x, y, width, height, radii) {
+                const { tl = 0, tr = 0, br = 0, bl = 0 } = radii;
+                this.ctx.beginPath();
+                this.ctx.moveTo(x + tl, y);
+                this.ctx.lineTo(x + width - tr, y);
+                this.ctx.quadraticCurveTo(x + width, y, x + width, y + tr);
+                this.ctx.lineTo(x + width, y + height - br);
+                this.ctx.quadraticCurveTo(x + width, y + height, x + width - br, y + height);
+                this.ctx.lineTo(x + bl, y + height);
+                this.ctx.quadraticCurveTo(x, y + height, x, y + height - bl);
+                this.ctx.lineTo(x, y + tl);
+                this.ctx.quadraticCurveTo(x, y, x + tl, y);
+                this.ctx.closePath();
+            }
+        }
+
+        // ============================================
+        // Main API
+        // ============================================
+        function renderToCanvas(dsl, canvas) {
+            const parser = new ArchitectureDSLParser();
+            const ast = parser.parse(dsl);
+            const renderer = new ArchitectureCanvasRenderer();
+            renderer.render(ast, canvas);
+            return { ast, renderer, errors: ast.errors, warnings: ast.warnings };
+        }
+        
+        function exportDataURL(canvas) {
+            return canvas.toDataURL('image/png');
+        }
+        
+        // Make functions available globally
+        window.renderToCanvas = renderToCanvas;
+        window.exportDataURL = exportDataURL;
+        
+        // Example DSL
+        window.exampleDSL = `@startuml module-view
+title "X-IPE Application Architecture"
+direction top-to-bottom
+grid 12 x 6
+
+layer "Presentation" {
+  color "#fce7f3"
+  border-color "#ec4899"
+  rows 2
+  
+  module "Jinja2 Templates" { 
+    cols 4
+    rows 2
+    grid 1 x 3
+    align center center
+    gap 8px
+    component "index.html" { cols 1, rows 1 }
+    component "settings.html" { cols 1, rows 1 }
+    component "base.html" { cols 1, rows 1 }
+  }
+  
+  module "Frontend JS Modules" { 
+    cols 8
+    rows 2
+    grid 2 x 3
+    align center center
+    gap 8px
+    component "Workplace Manager" { cols 1, rows 1 }
+    component "Terminal" { cols 1, rows 1 }
+    component "Stage Toolbox" { cols 1, rows 1 }
+    component "Content Renderer" { cols 1, rows 1 }
+    component "Event Bus" { cols 2, rows 1 }
+  }
+}
+
+layer "Business Logic" {
+  color "#dbeafe"
+  border-color "#3b82f6"
+  rows 2
+  
+  module "Core Services" { 
+    cols 4
+    rows 2
+    grid 1 x 3
+    align center center
+    gap 8px
+    component "FileService" { cols 1, rows 1 }
+    component "IdeasService" { cols 1, rows 1 }
+    component "TerminalService" { cols 1, rows 1 }
+  }
+  
+  module "Configuration Services" { 
+    cols 4
+    rows 2
+    grid 1 x 3
+    align center center
+    gap 8px
+    component "ConfigService" { cols 1, rows 1 }
+    component "SettingsService" { cols 1, rows 1 }
+    component "ToolsConfigService" { cols 1, rows 1 }
+  }
+  
+  module "Extension Services" { 
+    cols 4
+    rows 2
+    grid 1 x 2
+    align center center
+    gap 8px
+    component "ThemesService" { cols 1, rows 1 }
+    component "SkillsService" { cols 1, rows 1 }
+  }
+}
+
+layer "Data" {
+  color "#dcfce7"
+  border-color "#22c55e"
+  rows 2
+  
+  module "Project Files" { 
+    cols 4
+    rows 2
+    grid 1 x 3
+    align center center
+    gap 8px
+    component "docs/" { cols 1, rows 1 } <<folder>>
+    component "src/" { cols 1, rows 1 } <<folder>>
+    component "static/" { cols 1, rows 1 } <<folder>>
+  }
+  
+  module "Configuration" { 
+    cols 4
+    rows 2
+    grid 1 x 2
+    align center center
+    gap 8px
+    component "config/tools.json" { cols 1, rows 1 } <<file>>
+    component ".x-ipe.yaml" { cols 1, rows 1 } <<file>>
+  }
+  
+  module "Session Data" { 
+    cols 4
+    rows 2
+    grid 1 x 1
+    align center center
+    gap 8px
+    component "instance/" { cols 1, rows 1 } <<folder>>
+  }
+}
+
+@enduml`;
+        
+        // Auto-render on load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadExample();
+            renderDiagram();
+        });
+    </script>
+    
+    <script>
+        function loadExample() {
+            document.getElementById('dsl-input').value = window.exampleDSL;
+        }
+        
+        function renderDiagram() {
+            const dsl = document.getElementById('dsl-input').value;
+            const canvas = document.getElementById('diagram-canvas');
+            const errorsDiv = document.getElementById('errors');
+            const warningsDiv = document.getElementById('warnings');
+            const statusSpan = document.getElementById('status');
+            
+            errorsDiv.classList.remove('show');
+            warningsDiv.classList.remove('show');
+            errorsDiv.innerHTML = '';
+            warningsDiv.innerHTML = '';
+            
+            try {
+                const result = window.renderToCanvas(dsl, canvas);
+                
+                if (result.errors.length > 0) {
+                    errorsDiv.innerHTML = '<strong>Errors:</strong><br>' + 
+                        result.errors.map(e => `Line ${e.line}: ${e.message}`).join('<br>');
+                    errorsDiv.classList.add('show');
+                }
+                
+                if (result.warnings.length > 0) {
+                    warningsDiv.innerHTML = '<strong>Warnings:</strong><br>' + 
+                        result.warnings.map(w => `${w.layer || ''}: ${w.message}`).join('<br>');
+                    warningsDiv.classList.add('show');
+                }
+                
+                const layerCount = result.ast.layers.length;
+                const moduleCount = result.ast.layers.reduce((sum, l) => sum + l.modules.length, 0);
+                const componentCount = result.ast.layers.reduce((sum, l) => 
+                    sum + l.modules.reduce((s, m) => s + m.components.length, 0), 0);
+                
+                statusSpan.textContent = `✓ ${layerCount} layers, ${moduleCount} modules, ${componentCount} components`;
+                statusSpan.className = 'status success';
+                
+            } catch (error) {
+                errorsDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+                errorsDiv.classList.add('show');
+                statusSpan.textContent = '✗ Render failed';
+                statusSpan.className = 'status';
+                console.error(error);
+            }
+        }
+        
+        function exportPNG() {
+            const canvas = document.getElementById('diagram-canvas');
+            const dataURL = window.exportDataURL(canvas);
+            const link = document.createElement('a');
+            link.download = 'architecture-diagram.png';
+            link.href = dataURL;
+            link.click();
+        }
+    </script>
+</body>
+</html>

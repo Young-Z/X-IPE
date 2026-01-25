@@ -107,7 +107,53 @@ Output:
   category_level_change_summary: "Refined idea in {folder}, created idea-summary-vN.md"
 ```
 
-### Operation 2: Track Shared Documents
+### Operation 2: Track Mockup Artifacts
+
+**When:** Idea Mockup task completes
+**Then:** Track created mockup files
+
+```
+Input: Task Data Model with:
+  - task_type: Idea Mockup
+  - idea_folder: docs/ideas/{folder}
+  - mockups_created: [{type, path}, ...]
+  - idea_summary_version: vN+1
+  - task_output_links: [paths to mockup files]
+
+Process:
+1. Verify each mockup file exists
+2. Confirm files are in {folder}/mockups/
+3. Verify idea summary was updated
+4. Return summary
+
+Output:
+  category_level_change_summary: "Created {N} mockups in {folder}/mockups/"
+```
+
+### Operation 3: Track Architecture Diagrams
+
+**When:** Idea to Architecture task completes
+**Then:** Track created architecture diagrams
+
+```
+Input: Task Data Model with:
+  - task_type: Idea to Architecture
+  - idea_folder: docs/ideas/{folder}
+  - diagrams_created: [{type, path}, ...]
+  - idea_summary_version: vN+1
+  - task_output_links: [paths to diagram files]
+
+Process:
+1. Verify each diagram file exists
+2. Confirm files are in {folder}/architecture/
+3. Verify idea summary was updated
+4. Return summary
+
+Output:
+  category_level_change_summary: "Created {N} architecture diagrams in {folder}/architecture/"
+```
+
+### Operation 4: Track Shared Documents
 
 **When:** Share Idea task completes
 **Then:** Track generated documents
@@ -137,9 +183,16 @@ Output:
 docs/
 └── ideas/
     └── {idea-folder}/
-        ├── {uploaded files}              # Original uploaded files
+        ├── files/                        # Original uploaded files
+        │   └── {uploaded files}
+        ├── mockups/                      # UI mockups (from Idea Mockup task)
+        │   ├── dashboard-v1.html
+        │   └── dashboard-v1.css
+        ├── architecture/                 # Architecture diagrams (from Idea to Architecture task)
+        │   ├── system-architecture-v1.md
+        │   └── data-flow-v1.md
         ├── idea-summary-v1.md            # First refined version
-        ├── idea-summary-v2.md            # Second refined version (optional)
+        ├── idea-summary-v2.md            # Updated with mockups/architecture
         ├── formal-idea-summary-v1.pptx   # Shared PowerPoint
         ├── formal-idea-summary-v1.docx   # Shared Word document
         └── ...
@@ -151,7 +204,9 @@ docs/
 
 | Task Type Skill | Operation | Next Task |
 |-----------------|-----------|-----------|
-| task-type-ideation | Track Idea Refinement | Share Idea or Requirement Gathering |
+| task-type-ideation | Track Idea Refinement | Idea Mockup, Idea to Architecture, or Requirement Gathering |
+| task-type-idea-mockup | Track Mockup Artifacts | Requirement Gathering |
+| task-type-idea-to-architecture | Track Architecture Diagrams | Requirement Gathering |
 | task-type-share-idea | Track Shared Documents | - |
 
 ---
@@ -159,9 +214,9 @@ docs/
 ## Idea Status Flow
 
 ```
-Draft → Refined → Shared
-  ↑        ↓         ↓
-Upload   Ideation   Share Idea
+Draft → Refined → Mockup/Architecture → Shared
+  ↑        ↓              ↓                ↓
+Upload   Ideation   Mockup/Arch Tasks   Share Idea
 ```
 
 ---

@@ -55,6 +55,7 @@ Output:
   status: completed | blocked
   next_task_type: Feature Closing
   require_human_review: No
+  auto_proceed: {from input Auto Proceed}
   task_output_links: [src/, tests/]
   feature_id: FEATURE-XXX
   feature_title: {title}

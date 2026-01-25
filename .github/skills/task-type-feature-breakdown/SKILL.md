@@ -1,6 +1,6 @@
 ---
 name: task-type-feature-breakdown
-description: Break requirements into high-level features and create feature list in requirement-details.md. Calls feature-board-management to initialize feature tracking. Use when requirements are gathered and need to be split into discrete features. Triggers on requests like "break down features", "split into features", "create feature list".
+description: Break requirements into high-level features and create feature list in requirement-details.md (or current active part). Calls feature-board-management to initialize feature tracking. Use when requirements are gathered and need to be split into discrete features. Triggers on requests like "break down features", "split into features", "create feature list".
 ---
 
 # Task Type: Feature Breakdown
@@ -8,9 +8,9 @@ description: Break requirements into high-level features and create feature list
 ## Purpose
 
 Break user requests into high-level features by:
-1. Analyzing requirement documentation
+1. Analyzing requirement documentation (or current active part)
 2. Identifying feature boundaries
-3. Creating feature list in requirement-details.md
+3. Creating feature list in requirement-details.md (or current active part)
 4. Calling feature-board-management to create features on board
 
 ---
@@ -63,13 +63,14 @@ Output:
   status: completed | blocked
   next_task_type: task-type-feature-refinement
   require_human_review: Yes
-  task_output_links: [docs/requirements/requirement-details.md]
+  task_output_links: [docs/requirements/requirement-details.md] # or requirement-details-part-X.md
   mockup_list: [inherited from input or N/A]
   
   # Dynamic attributes for requirement-stage
   requirement_id: REQ-XXX
   feature_ids: [FEATURE-001, FEATURE-002, FEATURE-003]
   feature_count: 3
+  requirement_details_part: null | 1 | 2 | ... # current active part number (null if no parts)
   linked_mockups:
     - mockup_name: "Description of mockup function"
       mockup_path: "docs/requirements/FEATURE-XXX/mockups/mockup-name.html"
@@ -91,17 +92,20 @@ Execute Feature Breakdown by following these steps in order:
 
 | Step | Name | Action | Gate to Next |
 |------|------|--------|--------------|
-| 1 | Analyze | Read requirement-details.md or user request | Requirements understood |
+| 1 | Analyze | Read requirement-details.md (or current active part) or user request | Requirements understood |
 | 2 | Identify Features | Extract features using MVP-first criteria | Features identified |
 | 2.5 | Process Mockups | Copy mockups to feature folders if mockup_list provided | Mockups processed |
-| 3 | Create Summary | Create/update requirement-details.md with feature list | Summary written |
+| 3 | Create Summary | Create/update requirement-details.md (or current active part) with feature list | Summary written |
 | 4 | Update Board | Call feature-board-management to create features | Board updated |
-| 5 | Complete | Verify DoD, output summary, request human review | Human review |
+| 5 | Update Index | If parts exist, update requirement-details-index.md | Index updated |
+| 6 | Complete | Verify DoD, output summary, request human review | Human review |
 
 **⛔ BLOCKING RULES:**
+- Step 1: If parts exist, work with the CURRENT ACTIVE PART (highest part number)
 - Step 2: First feature MUST be "Minimum Runnable Feature" (MVP)
+- Step 3: Feature List goes into the PART FILE, NOT the index
 - Step 4: MUST use feature-board-management skill (not manual file editing)
-- Step 5 → Human Review: Human MUST approve feature list before refinement
+- Step 6 → Human Review: Human MUST approve feature list before refinement
 
 ---
 
@@ -112,13 +116,15 @@ Execute Feature Breakdown by following these steps in order:
 **Action:** Review requirement information to identify features
 
 ```
-IF docs/requirements/requirement-details.md exists:
-  1. Read existing requirement summary
-  2. Identify features from requirements
-ELSE:
-  1. Analyze user request
-  2. Extract requirements
-  3. Identify features from request
+1. Determine which file to read:
+   a. Check if docs/requirements/requirement-details-part-X.md files exist
+   b. IF parts exist → Read the CURRENT ACTIVE PART (highest part number)
+   c. ELSE IF docs/requirements/requirement-details.md exists → Read it
+   d. ELSE → Analyze user request directly
+
+2. Read the determined file:
+   - Understand existing requirement summary
+   - Identify features from requirements
 ```
 
 **Look for:**
@@ -198,11 +204,20 @@ docs/requirements/FEATURE-001/mockups/settings-panel.html
 
 ---
 
-### Step 2: Create/Update Requirement Summary
+### Step 3: Create/Update Requirement Summary
 
-**Action:** Create or update `docs/requirements/requirement-details.md`
+**Action:** Create or update requirement-details file (or current active part)
 
-**File Structure:**
+**Target File Determination:**
+```
+IF requirement-details-part-X.md files exist:
+  → Update the CURRENT ACTIVE PART (highest part number)
+  → Add Feature List section to that part
+ELSE:
+  → Update docs/requirements/requirement-details.md
+```
+
+**Single File Structure (requirement-details.md):**
 ```markdown
 # Requirement Summary
 
@@ -219,45 +234,48 @@ docs/requirements/FEATURE-001/mockups/settings-panel.html
 |------------|---------------|---------|-------------------|-------------------|
 | FEATURE-001 | User Authentication | v1.0 | JWT-based user authentication with login, logout, token refresh | None |
 | FEATURE-002 | User Profile | v1.0 | User profile management and settings | FEATURE-001 |
-| FEATURE-003 | Password Reset | v1.0 | Password reset functionality via email | FEATURE-001 |
 
 ---
 
 ## Feature Details
 
 ### FEATURE-001: User Authentication
-
-**Version:** v1.0  
-**Brief Description:** Implement JWT-based user authentication with login, logout, and token refresh capabilities
-
-**Acceptance Criteria:**
-- [ ] User can login with email/password
-- [ ] User receives JWT token on successful login
-- [ ] Token can be refreshed before expiration
-- [ ] User can logout and invalidate token
-- [ ] Invalid credentials return appropriate error
-
-**Dependencies:**
-- None
-
-**Technical Considerations:**
-- JWT token expiration: 1 hour
-- Refresh token expiration: 7 days
-- Password hashing: bcrypt with salt rounds = 10
-- Rate limiting: Max 5 login attempts per minute
-
----
-
-### FEATURE-002: User Profile
-[Similar structure for each feature]
-
----
-
-### FEATURE-003: Password Reset  
-[Similar structure for each feature]
-
----
+[Feature details...]
 ```
+
+**Part File Structure (requirement-details-part-X.md):**
+```markdown
+# Requirement Details - Part {X}
+
+> Continued from: [requirement-details-part-{X-1}.md](requirement-details-part-{X-1}.md)  
+> Created: MM-DD-YYYY
+
+---
+
+## Feature List
+
+| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------------|---------|-------------------|-------------------|
+| FEATURE-012 | Design Themes | v1.0 | Theme folder structure and toolbox integration | FEATURE-011 |
+| FEATURE-013 | Default Theme | v1.0 | Pre-built default theme with design tokens | FEATURE-012 |
+
+---
+
+## Linked Mockups
+
+| Mockup Function Name | Feature | Mockup Link |
+|---------------------|---------|-------------|
+| themes-toolbox | FEATURE-012 | [themes-toolbox.html](FEATURE-012/mockups/themes-toolbox.html) |
+
+---
+
+## Feature Details (Continued)
+
+### FEATURE-012: Design Themes
+[Feature details...]
+```
+
+**⚠️ IMPORTANT:** Each part file has its OWN Feature List section containing ONLY the features in that part. The index file does NOT contain a Feature List.
 
 **Feature Details Template (for each feature):**
 ```markdown
@@ -289,7 +307,7 @@ docs/requirements/FEATURE-001/mockups/settings-panel.html
 
 ---
 
-### Step 3: Call Feature Board Management
+### Step 4: Call Feature Board Management
 
 **Action:** Create features on the feature board
 
@@ -310,7 +328,41 @@ CALL feature-stage+feature-board-management skill:
     [... etc for all features]
 ```
 
-**Output:** Features created on docs/requirements/features.md with status "Planned"
+**Output:** Features created on docs/planning/features.md with status "Planned"
+
+---
+
+### Step 5: Update Index (if parts exist)
+
+**Action:** Update requirement-details-index.md when parts exist
+
+**When to execute:** Only if requirement-details-part-X.md files exist
+
+**Procedure:**
+```
+1. Check if parts exist (requirement-details-part-X.md files)
+2. IF parts exist:
+   a. Open docs/requirements/requirement-details-index.md
+   b. Update "Parts Overview" table with new feature range
+   c. Update "Lines" column with approximate line count
+   d. Save file
+```
+
+**Index File Structure:**
+```markdown
+# Requirement Details Index
+
+> Last Updated: MM-DD-YYYY
+
+## Parts Overview
+
+| Part | File | Features Covered | Lines |
+|------|------|------------------|-------|
+| 1 | [Part 1](requirement-details-part-1.md) | FEATURE-001 to FEATURE-011 | ~420 |
+| 2 | [Part 2](requirement-details-part-2.md) | FEATURE-012 to FEATURE-017 | ~415 |
+```
+
+**⚠️ IMPORTANT:** Index file contains ONLY Parts Overview table. NO Feature List in index - each part has its own.
 
 ---
 
@@ -318,12 +370,13 @@ CALL feature-stage+feature-board-management skill:
 
 | # | Checkpoint | Required |
 |---|------------|----------|
-| 1 | `docs/requirements/requirement-details.md` created/updated with feature list | Yes |
-| 2 | All features have detailed sections in requirement-details.md | Yes |
+| 1 | Requirement-details file (or current part) updated with Feature List | Yes |
+| 2 | All features have detailed sections in requirement-details (or part) | Yes |
 | 3 | Feature board updated via feature-board-management skill | Yes |
 | 4 | All features have status "Planned" on feature board | Yes |
-| 5 | If mockup_list provided: mockups copied to `docs/requirements/{FEATURE-ID}/mockups/` | Conditional |
-| 6 | If mockup_list provided: Linked Mockups section updated in requirement-details.md and specification.md | Conditional |
+| 5 | If parts exist: requirement-details-index.md updated | Conditional |
+| 6 | If mockup_list provided: mockups copied to `docs/requirements/{FEATURE-ID}/mockups/` | Conditional |
+| 7 | If mockup_list provided: Linked Mockups section updated | Conditional |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
 

@@ -79,6 +79,12 @@ class ProjectService:
             'icon': 'bi-lightbulb'
         },
         {
+            'id': 'themes',
+            'label': 'Themes',
+            'path': 'docs/themes',
+            'icon': 'bi-palette'
+        },
+        {
             'id': 'planning',
             'label': 'Project Plan',
             'path': 'docs/planning',

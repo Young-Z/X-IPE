@@ -49,6 +49,7 @@ Output:
   status: completed | blocked
   next_task_type: null
   require_human_review: Yes
+  auto_proceed: {from input Auto Proceed}
   task_output_links: [<paths to fixed files>]
   # Dynamic attributes (skill-specific)
   bug_severity: Critical | High | Medium | Low

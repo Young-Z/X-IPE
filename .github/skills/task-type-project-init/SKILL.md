@@ -49,6 +49,7 @@ Output:
   status: completed | blocked
   next_task_type: Development Environment Setup
   require_human_review: No
+  auto_proceed: {from input Auto Proceed}
   task_output_links: [docs/planning/task-board.md]
   # Dynamic attributes (skill-specific)
   project_structure_created: true | false

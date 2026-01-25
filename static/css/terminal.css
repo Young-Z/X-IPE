@@ -293,3 +293,40 @@
 
 .terminal-content .xterm-viewport::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
+}
+
+/**
+ * Fix for xterm.js scroll-to-top issue on typing
+ * 
+ * xterm.js uses a hidden textarea for keyboard input. When the browser
+ * focuses this textarea, it may scroll the page/container to bring it into view.
+ * 
+ * The xterm-helper-textarea is positioned at the cursor location by xterm.js,
+ * but if it's outside the viewport, the browser will scroll to it.
+ * 
+ * Solution: Ensure the textarea stays within the terminal bounds and prevent
+ * browser auto-scroll behavior using scroll-margin and containment.
+ */
+.terminal-content .xterm-helper-textarea {
+    /* Prevent browser from scrolling to focus this element */
+    scroll-margin: 0;
+    scroll-padding: 0;
+    /* Keep within terminal bounds */
+    position: absolute !important;
+    /* Use CSS containment to isolate focus scrolling */
+    contain: strict;
+}
+
+/* Prevent scroll jumping when textarea receives focus */
+.terminal-content .xterm {
+    /* Isolate scroll context */
+    overflow: hidden;
+    /* Prevent focus scroll propagation */
+    overflow-anchor: none;
+}
+
+/* Alternative fix: ensure the xterm rows container doesn't trigger scroll */
+.terminal-content .xterm-rows {
+    overflow-anchor: none;
+}
+

@@ -1,10 +1,10 @@
 # Visualization Guidelines
 
-Use visualization tools based on `.ideation-tools.json` config.
+Use visualization tools based on `config/tools.json` config.
 
 ---
 
-## When `ideation.antv-infographic: true`
+## When `stages.ideation.ideation.antv-infographic: true`
 
 Invoke `infographic-syntax-creator` skill to generate visual representations. Embed in markdown:
 
@@ -31,7 +31,7 @@ data
 
 ---
 
-## When `ideation.mermaid: true`
+## When `stages.ideation.ideation.mermaid: true`
 
 Generate mermaid diagrams directly. Embed in markdown:
 
@@ -154,4 +154,4 @@ stateDiagram-v2
 - Highly technical specifications
 - Code examples or API documentation
 - Legal/compliance text
-- **When both `ideation.antv-infographic` and `ideation.mermaid` are `false`** → Use standard markdown
+- **When both `stages.ideation.ideation.antv-infographic` and `stages.ideation.ideation.mermaid` are `false`** → Use standard markdown

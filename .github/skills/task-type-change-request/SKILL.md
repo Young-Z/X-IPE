@@ -53,6 +53,7 @@ Output:
   status: completed | blocked
   next_task_type: task-type-feature-refinement | task-type-feature-breakdown
   require_human_review: Yes
+  auto_proceed: {from input Auto Proceed}
   task_output_links: [docs/requirements/FEATURE-XXX/CR-XXX.md]
   
   # Dynamic attributes (CR-specific)

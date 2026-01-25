@@ -32,6 +32,7 @@
         fontSize: 14,
         fontFamily: 'Menlo, Monaco, "Courier New", monospace',
         scrollback: 1000,
+        scrollOnUserInput: false,  // Disable auto-scroll when pressing up/down arrows
         allowProposedApi: true,
         windowsPty: {
             backend: undefined,
@@ -79,7 +80,37 @@
             this.statusText = document.getElementById('terminal-status-text');
             this.addButton = document.getElementById('add-terminal-btn');
             
+            // Track if initial fit has been done (for containers that start hidden)
+            this._initialFitDone = false;
+            
             this._setupEventListeners();
+            this._setupResizeObserver();
+        }
+        
+        /**
+         * Setup ResizeObserver to detect when terminal container becomes visible
+         * This fixes the initial sizing issue when terminal panel starts collapsed
+         */
+        _setupResizeObserver() {
+            if (!this.paneContainer || typeof ResizeObserver === 'undefined') return;
+            
+            this._resizeObserver = new ResizeObserver(debounce((entries) => {
+                for (const entry of entries) {
+                    const { width, height } = entry.contentRect;
+                    // Only fit if container has actual dimensions
+                    if (width > 0 && height > 0) {
+                        console.log(`[Terminal] Container resized to ${width}x${height} - fitting terminals`);
+                        this._doFit();
+                        
+                        // Mark initial fit as done once we have proper dimensions
+                        if (!this._initialFitDone && this.terminals.length > 0) {
+                            this._initialFitDone = true;
+                        }
+                    }
+                }
+            }, 50));
+            
+            this._resizeObserver.observe(this.paneContainer);
         }
 
         _setupEventListeners() {
@@ -92,6 +123,35 @@
             
             // Window resize - resize all terminals (debounced)
             window.addEventListener('resize', debounce(() => this._resizeAll(), 150));
+            
+            // Handle page visibility changes - keep socket alive when tab is hidden
+            // Session should stay open for 1 hour regardless of tab focus
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    console.log('[Terminal] Tab became visible - checking connections');
+                    this._checkAndReconnectAll();
+                } else {
+                    console.log('[Terminal] Tab hidden - connections will stay alive');
+                }
+            });
+            
+            // Handle window focus/blur as backup
+            window.addEventListener('focus', () => {
+                console.log('[Terminal] Window focused - checking connections');
+                this._checkAndReconnectAll();
+            });
+        }
+        
+        /**
+         * Check all sockets and reconnect if needed
+         */
+        _checkAndReconnectAll() {
+            this.sockets.forEach((socket, index) => {
+                if (socket && !socket.connected) {
+                    console.log(`[Terminal ${index + 1}] Reconnecting after visibility change`);
+                    socket.connect();
+                }
+            });
         }
 
         /**
@@ -147,6 +207,10 @@
             this.fitAddons.push(fitAddon);
             this.sessionIds.push(existingSessionId);
             
+            // Prevent scroll-to-top when typing in terminal
+            // xterm.js uses a hidden textarea that can trigger browser scroll on focus
+            this._setupScrollPrevention(terminal, contentDiv);
+            
             // Fit terminal to container
             this.fitAll();
             
@@ -154,10 +218,22 @@
             const socket = this._createSocket(index, existingSessionId);
             this.sockets.push(socket);
             
-            // Handle input
+            // Handle input - scroll to bottom on typing and prevent page scroll
             terminal.onData(data => {
                 if (socket.connected) {
+                    // Preserve page scroll position
+                    const scrollX = window.scrollX;
+                    const scrollY = window.scrollY;
+                    
                     socket.emit('input', data);
+                    
+                    // Scroll terminal to bottom (where cursor is)
+                    terminal.scrollToBottom();
+                    
+                    // Restore page scroll if it changed
+                    if (window.scrollX !== scrollX || window.scrollY !== scrollY) {
+                        window.scrollTo(scrollX, scrollY);
+                    }
                 }
             });
             
@@ -310,6 +386,7 @@
 
         /**
          * Create Socket.IO connection with improved stability
+         * Session stays alive for 1 hour regardless of tab focus
          */
         _createSocket(index, existingSessionId) {
             const socket = io({
@@ -318,13 +395,13 @@
                 reconnection: true,
                 reconnectionAttempts: Infinity,
                 reconnectionDelay: 1000,
-                reconnectionDelayMax: 10000,          // Max 10s between retries
+                reconnectionDelayMax: 30000,          // Max 30s between retries
                 randomizationFactor: 0.5,
-                timeout: 20000,                       // Initial connection timeout
+                timeout: 60000,                       // Initial connection timeout (60s)
                 forceNew: false,
-                // Heartbeat settings - slightly lower than server for safety margin
-                pingTimeout: 55000,                   // Server is 60s, give 5s margin
-                pingInterval: 20000                   // Server is 25s, send more frequently
+                // Heartbeat settings - match server (ping_timeout=300s, ping_interval=60s)
+                pingTimeout: 300000,                  // Server waits 5min for pong
+                pingInterval: 60000                   // Server pings every 60s
             });
             
             // Track connection health
@@ -335,11 +412,11 @@
                 if (healthCheckInterval) clearInterval(healthCheckInterval);
                 healthCheckInterval = setInterval(() => {
                     const timeSincePong = Date.now() - lastPongTime;
-                    // If no pong for 45s, connection may be unhealthy
-                    if (timeSincePong > 45000 && socket.connected) {
+                    // If no pong for 3 minutes, connection may be unhealthy (server timeout is 5min)
+                    if (timeSincePong > 180000 && socket.connected) {
                         console.warn(`[Terminal ${index + 1}] Connection may be stale (${Math.round(timeSincePong/1000)}s since last pong)`);
                     }
-                }, 15000);
+                }, 60000);  // Check every minute
             };
             
             const stopHealthCheck = () => {
@@ -391,7 +468,10 @@
             socket.on('output', data => {
                 const idx = this._getSocketIndex(socket);
                 if (idx >= 0) {
-                    this.terminals[idx].write(data);
+                    const terminal = this.terminals[idx];
+                    terminal.write(data);
+                    // Scroll terminal viewport to bottom after output
+                    terminal.scrollToBottom();
                 }
             });
             
@@ -498,7 +578,7 @@
         }
 
         /**
-         * Set focus to a terminal
+         * Set focus to a terminal without scrolling the page
          */
         setFocus(index) {
             if (index < 0 || index >= this.terminals.length) return;
@@ -511,7 +591,132 @@
             if (pane) pane.classList.add('focused');
             
             this.activeIndex = index;
-            this.terminals[index].focus();
+            
+            // Focus terminal without triggering browser scroll
+            this._focusWithoutScroll(this.terminals[index]);
+        }
+
+        /**
+         * Focus terminal without triggering browser scroll-to-focus behavior
+         * xterm.js uses a hidden textarea for input, which can cause scroll jumps
+         */
+        _focusWithoutScroll(terminal) {
+            if (!terminal) return;
+            
+            // Save current scroll positions (window and content-body)
+            const scrollX = window.scrollX;
+            const scrollY = window.scrollY;
+            const contentBody = document.querySelector('.content-body');
+            const contentBodyScroll = contentBody?.scrollTop || 0;
+            
+            // Get the terminal's viewport element to preserve its scroll
+            const viewport = terminal.element?.querySelector('.xterm-viewport');
+            const terminalScrollTop = viewport?.scrollTop || 0;
+            
+            // Focus with preventScroll option (modern browsers)
+            try {
+                const textarea = terminal.element?.querySelector('.xterm-helper-textarea');
+                if (textarea) {
+                    textarea.focus({ preventScroll: true });
+                } else {
+                    terminal.focus();
+                }
+            } catch (e) {
+                terminal.focus();
+            }
+            
+            // Restore scroll positions immediately
+            if (window.scrollX !== scrollX || window.scrollY !== scrollY) {
+                window.scrollTo(scrollX, scrollY);
+            }
+            if (contentBody && contentBody.scrollTop !== contentBodyScroll) {
+                contentBody.scrollTop = contentBodyScroll;
+            }
+            if (viewport && viewport.scrollTop !== terminalScrollTop) {
+                viewport.scrollTop = terminalScrollTop;
+            }
+        }
+
+        /**
+         * Setup scroll prevention for terminal's hidden textarea
+         * Prevents browser from scrolling page/containers when textarea receives focus/input
+         */
+        _setupScrollPrevention(terminal, container) {
+            // Wait for terminal to fully render and create its textarea
+            requestAnimationFrame(() => {
+                const textarea = terminal.element?.querySelector('.xterm-helper-textarea');
+                if (!textarea) return;
+                
+                // Find scrollable parent containers (e.g., .content-body)
+                const contentBody = document.querySelector('.content-body');
+                
+                // Store scroll positions for all scrollable elements
+                let savedScrollX = 0;
+                let savedScrollY = 0;
+                let savedContentBodyScroll = 0;
+                
+                const saveScrollPositions = () => {
+                    savedScrollX = window.scrollX;
+                    savedScrollY = window.scrollY;
+                    if (contentBody) {
+                        savedContentBodyScroll = contentBody.scrollTop;
+                    }
+                };
+                
+                const restoreScrollPositions = () => {
+                    // Restore window scroll
+                    if (window.scrollX !== savedScrollX || window.scrollY !== savedScrollY) {
+                        window.scrollTo(savedScrollX, savedScrollY);
+                    }
+                    // Restore content-body scroll (main scrollable area)
+                    if (contentBody && contentBody.scrollTop !== savedContentBodyScroll) {
+                        contentBody.scrollTop = savedContentBodyScroll;
+                    }
+                };
+                
+                // Intercept focus events to prevent scroll
+                textarea.addEventListener('focus', (e) => {
+                    saveScrollPositions();
+                    // Use multiple mechanisms to restore scroll
+                    queueMicrotask(restoreScrollPositions);
+                    requestAnimationFrame(restoreScrollPositions);
+                }, { capture: true });
+                
+                // Intercept keydown - this is where the scroll often happens
+                textarea.addEventListener('keydown', (e) => {
+                    saveScrollPositions();
+                    // Restore after key processing
+                    queueMicrotask(restoreScrollPositions);
+                    requestAnimationFrame(restoreScrollPositions);
+                }, { capture: true });
+                
+                // Intercept input events
+                textarea.addEventListener('input', (e) => {
+                    saveScrollPositions();
+                    queueMicrotask(restoreScrollPositions);
+                    requestAnimationFrame(restoreScrollPositions);
+                }, { capture: true });
+                
+                // Also handle the container click to prevent scroll on re-focus
+                container.addEventListener('mousedown', (e) => {
+                    saveScrollPositions();
+                    requestAnimationFrame(restoreScrollPositions);
+                });
+                
+                // Additional: observe for any scroll changes and restore
+                // This catches edge cases where other mechanisms fail
+                let scrollCheckTimeout = null;
+                const scheduleScrollCheck = () => {
+                    if (scrollCheckTimeout) clearTimeout(scrollCheckTimeout);
+                    scrollCheckTimeout = setTimeout(() => {
+                        if (document.activeElement === textarea) {
+                            restoreScrollPositions();
+                        }
+                    }, 10);
+                };
+                
+                textarea.addEventListener('keypress', scheduleScrollCheck, { capture: true });
+            });
         }
 
         /**
@@ -637,11 +842,109 @@
             
             // Send commands with typing simulation
             this._sendWithTypingEffect(targetIndex, copilotCommand, () => {
-                // After copilot command, wait and send the refine command
-                setTimeout(() => {
+                // After copilot command, wait for CLI to be ready before sending refine command
+                this._waitForCopilotReady(targetIndex, () => {
                     this._sendWithTypingEffect(targetIndex, refineCommand);
-                }, 1500); // Wait for copilot CLI to initialize
+                });
             });
+        }
+
+        /**
+         * Send a custom Copilot prompt command with typing simulation
+         * @param {string} promptCommand - The command to send (with placeholders already replaced)
+         */
+        sendCopilotPromptCommand(promptCommand) {
+            // Check if we need a new terminal (if current one is in copilot mode)
+            let targetIndex = this.activeIndex;
+            
+            // If no terminals exist, create one
+            if (this.terminals.length === 0) {
+                targetIndex = this.addTerminal();
+            } else if (targetIndex < 0) {
+                targetIndex = 0;
+            }
+            
+            // Check if current terminal appears to be in copilot CLI mode
+            const needsNewTerminal = this._isInCopilotMode(targetIndex);
+            
+            if (needsNewTerminal && this.terminals.length < MAX_TERMINALS) {
+                targetIndex = this.addTerminal();
+            }
+            
+            this.setFocus(targetIndex);
+            
+            // Build the command sequence
+            const copilotCommand = 'copilot';
+            
+            // Send commands with typing simulation
+            this._sendWithTypingEffect(targetIndex, copilotCommand, () => {
+                // After copilot command, wait for CLI to be ready before sending the prompt
+                this._waitForCopilotReady(targetIndex, () => {
+                    this._sendWithTypingEffect(targetIndex, promptCommand);
+                });
+            });
+        }
+
+        /**
+         * Wait for Copilot CLI to be ready (prompt appears)
+         * @param {number} index - Terminal index
+         * @param {Function} callback - Callback when ready
+         * @param {number} maxAttempts - Maximum polling attempts
+         */
+        _waitForCopilotReady(index, callback, maxAttempts = 30) {
+            let attempts = 0;
+            const pollInterval = 200; // Check every 200ms
+            
+            const checkReady = () => {
+                attempts++;
+                
+                if (this._isCopilotPromptReady(index)) {
+                    // Small additional delay to ensure prompt is fully rendered
+                    setTimeout(callback, 300);
+                    return;
+                }
+                
+                if (attempts >= maxAttempts) {
+                    // Timeout - proceed anyway after max wait (6 seconds)
+                    console.warn('Copilot CLI initialization timeout, proceeding anyway');
+                    setTimeout(callback, 500);
+                    return;
+                }
+                
+                setTimeout(checkReady, pollInterval);
+            };
+            
+            // Start checking after initial delay
+            setTimeout(checkReady, 500);
+        }
+
+        /**
+         * Check if Copilot CLI prompt is ready for input
+         * @param {number} index - Terminal index
+         * @returns {boolean} - True if prompt is ready
+         */
+        _isCopilotPromptReady(index) {
+            if (index < 0 || index >= this.terminals.length) return false;
+            
+            const terminal = this.terminals[index];
+            if (!terminal) return false;
+            
+            // Check last few lines of terminal buffer for copilot ready indicators
+            const buffer = terminal.buffer.active;
+            for (let i = Math.max(0, buffer.cursorY - 3); i <= buffer.cursorY; i++) {
+                const line = buffer.getLine(i);
+                if (line) {
+                    const text = line.translateToString(true);
+                    // Copilot CLI shows specific prompts when ready:
+                    // - ">" prompt at line start
+                    // - "⏺" indicator
+                    // - Ends with ">" suggesting ready for input
+                    if (text.match(/^>[\s]*$/) || text.includes('⏺') || text.match(/>\s*$/)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         /**

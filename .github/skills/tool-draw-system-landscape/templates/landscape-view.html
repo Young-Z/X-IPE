@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}}</title>
+    <link href="https://fonts.googleapis.com/css2?family={{FONT_HEADING}}:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================
+           Theme Tokens (from design-system.md)
+           ======================================== */
+        :root {
+            /* Primary colors from theme */
+            --color-primary: {{COLOR_PRIMARY}};
+            --color-secondary: {{COLOR_SECONDARY}};
+            --color-accent: {{COLOR_ACCENT}};
+            --color-neutral: {{COLOR_NEUTRAL}};
+            
+            /* Typography from theme */
+            --font-heading: '{{FONT_HEADING}}', sans-serif;
+            --font-body: {{FONT_BODY}};
+            
+            /* Status colors (fixed) */
+            --status-healthy: #22c55e;
+            --status-warning: #f97316;
+            --status-critical: #ef4444;
+            
+            /* Diagram-specific tokens (fixed) */
+            --diagram-bg: #f8fafc;
+            --zone-gap: 20px;
+            --app-gap: 16px;
+        }
+        
+        /* ========================================
+           Reset & Base
+           ======================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--diagram-bg);
+            min-height: 100vh;
+            padding: 32px;
+        }
+        
+        /* ========================================
+           Landscape Container
+           ======================================== */
+        .landscape {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .landscape-title {
+            font-family: var(--font-heading);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-primary);
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        /* ========================================
+           Zones Container
+           ======================================== */
+        .zones {
+            display: flex;
+            flex-direction: column;
+            gap: var(--zone-gap);
+        }
+        
+        /* ========================================
+           Zone Styles
+           ======================================== */
+        .zone {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .zone-title {
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .zone-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--app-gap);
+        }
+        
+        /* ========================================
+           App Styles
+           ======================================== */
+        .app {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            min-width: 160px;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        
+        .app:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .app-name {
+            font-family: var(--font-heading);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+            padding-right: 20px;
+        }
+        
+        .app-meta {
+            font-size: 11px;
+            color: var(--color-secondary);
+            line-height: 1.5;
+        }
+        
+        /* ========================================
+           Status Indicator
+           ======================================== */
+        .app-status {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .app-status.healthy {
+            background: var(--status-healthy);
+            box-shadow: 0 0 6px var(--status-healthy);
+        }
+        
+        .app-status.warning {
+            background: var(--status-warning);
+            box-shadow: 0 0 6px var(--status-warning);
+        }
+        
+        .app-status.critical {
+            background: var(--status-critical);
+            box-shadow: 0 0 6px var(--status-critical);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* ========================================
+           Database Styles
+           ======================================== */
+        .database {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-radius: 8px;
+            padding: 16px 20px;
+            min-width: 140px;
+            border: 2px solid #0ea5e9;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .database:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+        }
+        
+        .database-icon {
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+        
+        .database-name {
+            font-family: var(--font-heading);
+            font-size: 12px;
+            font-weight: 600;
+            color: #0c4a6e;
+        }
+        
+        /* ========================================
+           Flows Section
+           ======================================== */
+        .flows {
+            margin-top: 24px;
+            padding: 16px 20px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .flows-title {
+            font-family: var(--font-heading);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-secondary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .flow-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 8px;
+        }
+        
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--color-primary);
+            padding: 8px 12px;
+            background: #f8fafc;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .flow-source,
+        .flow-target {
+            font-weight: 600;
+            color: var(--color-accent);
+        }
+        
+        .flow-arrow {
+            color: #94a3b8;
+            font-weight: bold;
+        }
+        
+        .flow-action {
+            color: var(--color-secondary);
+            font-style: italic;
+            margin-left: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="landscape">
+        <h1 class="landscape-title">{{TITLE}}</h1>
+        
+        <div class="zones">
+            {{ZONES}}
+        </div>
+        
+        <div class="flows">
+            <h3 class="flows-title">Action Flows</h3>
+            <div class="flow-list">
+                {{FLOWS}}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

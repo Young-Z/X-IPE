@@ -11,13 +11,17 @@
 **Input:**
 - `Current Idea Folder`: `docs/ideas/mobile-app-idea` (from previous Ideation task)
 
-**Config:** `docs/ideas/.ideation-tools.json`
+**Config:** `config/tools.json`
 ```json
 {
-  "version": "1.0",
-  "mockup": {
-    "frontend-design": true,
-    "figma-mcp": false
+  "version": "2.0",
+  "stages": {
+    "ideation": {
+      "mockup": {
+        "frontend-design": true,
+        "figma-mcp": false
+      }
+    }
   }
 }
 ```
@@ -40,9 +44,9 @@
    - idea-summary-v1.md exists ✓
 
 3. Load Config:
-   - Read .ideation-tools.json
-   - mockup.frontend-design: true → enabled
-   - mockup.figma-mcp: false → disabled
+   - Read config/tools.json
+   - stages.ideation.mockup.frontend-design: true → enabled
+   - stages.ideation.mockup.figma-mcp: false → disabled
 
 4. Read Idea Summary:
    - Load docs/ideas/mobile-app-idea/idea-summary-v1.md
@@ -86,13 +90,17 @@
 **Input:**
 - `Current Idea Folder`: `docs/ideas/simple-idea`
 
-**Config:** `docs/ideas/.ideation-tools.json`
+**Config:** `config/tools.json`
 ```json
 {
-  "version": "1.0",
-  "mockup": {
-    "frontend-design": false,
-    "figma-mcp": false
+  "version": "2.0",
+  "stages": {
+    "ideation": {
+      "mockup": {
+        "frontend-design": false,
+        "figma-mcp": false
+      }
+    }
   }
 }
 ```

@@ -100,7 +100,9 @@ class IdeasService:
         Args:
             files: List of (filename, content_bytes) tuples
             date: Optional datetime string (MMDDYYYY HHMMSS). Uses now if not provided.
-            target_folder: Optional existing folder name to upload into (CR-002)
+            target_folder: Optional existing folder path to upload into (CR-002)
+                          Can be relative to project root (e.g., 'docs/ideas/MyFolder/SubFolder')
+                          or relative to ideas root (e.g., 'MyFolder/SubFolder')
         
         Returns:
             Dict with success, folder_name, folder_path, files_uploaded
@@ -113,6 +115,12 @@ class IdeasService:
         
         # CR-002: Upload to existing folder if target_folder provided
         if target_folder:
+            # Strip 'docs/ideas/' prefix if present (for paths from frontend tree)
+            if target_folder.startswith(self.IDEAS_PATH + '/'):
+                target_folder = target_folder[len(self.IDEAS_PATH) + 1:]
+            elif target_folder.startswith(self.IDEAS_PATH):
+                target_folder = target_folder[len(self.IDEAS_PATH):]
+            
             folder_path = self.ideas_root / target_folder
             if not folder_path.exists():
                 return {

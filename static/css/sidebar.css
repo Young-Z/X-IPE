@@ -9,12 +9,39 @@
 .sidebar {
     flex: 0 0 var(--sidebar-width);
     width: var(--sidebar-width);
+    min-width: 200px;
+    max-width: 500px;
     background-color: var(--sidebar-bg);
     color: var(--sidebar-text);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     min-height: 0; /* Critical: allows scrolling inside */
+}
+
+/* Sidebar Resize Handle */
+.sidebar-resize-handle {
+    flex: 0 0 4px;
+    width: 4px;
+    background-color: transparent;
+    cursor: col-resize;
+    transition: background-color 0.2s ease;
+    position: relative;
+}
+
+.sidebar-resize-handle:hover,
+.sidebar-resize-handle.resizing {
+    background-color: var(--bs-primary, #0d6efd);
+}
+
+.sidebar-resize-handle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -3px;
+    right: -3px;
+    bottom: 0;
+    /* Larger hit area for easier grabbing */
 }
 
 .sidebar-header {

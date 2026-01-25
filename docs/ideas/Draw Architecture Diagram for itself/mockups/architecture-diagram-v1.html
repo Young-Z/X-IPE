@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-IPE Architecture Diagram</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Theme: theme-default - Technical Blueprint Aesthetic */
+        :root {
+            --color-primary: #0f172a;
+            --color-secondary: #475569;
+            --color-accent: #10b981;
+            --color-neutral: #e2e8f0;
+            --color-success: #22c55e;
+            --color-warning: #f59e0b;
+            --color-error: #ef4444;
+            --color-info: #3b82f6;
+            
+            /* Layer colors */
+            --layer-presentation: #fce7f3;
+            --layer-presentation-border: #ec4899;
+            --layer-business: #dbeafe;
+            --layer-business-border: #3b82f6;
+            --layer-data: #dcfce7;
+            --layer-data-border: #22c55e;
+            
+            --font-heading: 'Space Grotesk', system-ui, sans-serif;
+            --font-body: 'Space Grotesk', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            --space-unit: 4px;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-dramatic: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+            padding: 40px;
+            color: var(--color-primary);
+        }
+
+        /* Blueprint grid background */
+        .blueprint-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .header h1 {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .header .subtitle {
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            color: var(--color-accent);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .header .version {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* Architecture diagram */
+        .architecture {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--shadow-dramatic);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Layer styling */
+        .layer {
+            margin-bottom: 24px;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            position: relative;
+            animation: slideInUp 0.5s ease-out backwards;
+        }
+
+        .layer:nth-child(1) { animation-delay: 0.1s; }
+        .layer:nth-child(2) { animation-delay: 0.2s; }
+        .layer:nth-child(3) { animation-delay: 0.3s; }
+
+        .layer:last-child {
+            margin-bottom: 0;
+        }
+
+        .layer-presentation {
+            background: linear-gradient(135deg, var(--layer-presentation) 0%, #fdf2f8 100%);
+            border: 2px solid var(--layer-presentation-border);
+        }
+
+        .layer-business {
+            background: linear-gradient(135deg, var(--layer-business) 0%, #eff6ff 100%);
+            border: 2px solid var(--layer-business-border);
+        }
+
+        .layer-data {
+            background: linear-gradient(135deg, var(--layer-data) 0%, #f0fdf4 100%);
+            border: 2px solid var(--layer-data-border);
+        }
+
+        .layer-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .layer-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .layer-presentation .layer-icon {
+            background: var(--layer-presentation-border);
+            color: white;
+        }
+
+        .layer-business .layer-icon {
+            background: var(--layer-business-border);
+            color: white;
+        }
+
+        .layer-data .layer-icon {
+            background: var(--layer-data-border);
+            color: white;
+        }
+
+        .layer-title {
+            font-family: var(--font-heading);
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .layer-badge {
+            margin-left: auto;
+            font-family: var(--font-mono);
+            font-size: 0.625rem;
+            padding: 4px 8px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--color-secondary);
+            letter-spacing: 0.05em;
+        }
+
+        /* Modules grid */
+        .modules {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .module {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .module:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .module-title {
+            font-family: var(--font-heading);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .module-title::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .layer-presentation .module-title::before {
+            background: var(--layer-presentation-border);
+        }
+
+        .layer-business .module-title::before {
+            background: var(--layer-business-border);
+        }
+
+        .layer-data .module-title::before {
+            background: var(--layer-data-border);
+        }
+
+        /* Components */
+        .components {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .component {
+            font-family: var(--font-mono);
+            font-size: 0.6875rem;
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            background: #f8fafc;
+            color: var(--color-secondary);
+            border: 1px solid var(--color-neutral);
+            transition: all 0.2s ease;
+        }
+
+        .component:hover {
+            background: var(--color-accent);
+            color: white;
+            border-color: var(--color-accent);
+            transform: scale(1.02);
+        }
+
+        .component.folder {
+            background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%);
+            border-color: #fbbf24;
+            color: #92400e;
+        }
+
+        .component.folder:hover {
+            background: #fbbf24;
+            color: white;
+        }
+
+        .component.file {
+            background: linear-gradient(135deg, #e0e7ff 0%, #eef2ff 100%);
+            border-color: #818cf8;
+            color: #4338ca;
+        }
+
+        .component.file:hover {
+            background: #818cf8;
+            color: white;
+        }
+
+        /* Connection arrows */
+        .arrows {
+            display: flex;
+            justify-content: center;
+            padding: 8px 0;
+            position: relative;
+        }
+
+        .arrow-group {
+            display: flex;
+            gap: 40px;
+        }
+
+        .arrow {
+            width: 2px;
+            height: 24px;
+            background: linear-gradient(180deg, var(--color-accent) 0%, transparent 100%);
+            position: relative;
+        }
+
+        .arrow::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid var(--color-accent);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 32px;
+            text-align: center;
+            animation: fadeIn 0.6s ease-out 0.5s backwards;
+        }
+
+        .legend {
+            display: inline-flex;
+            gap: 24px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.presentation { background: var(--layer-presentation-border); }
+        .legend-dot.business { background: var(--layer-business-border); }
+        .legend-dot.data { background: var(--layer-data-border); }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Export button */
+        .export-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--color-accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .export-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-dramatic);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+
+            .architecture {
+                padding: 20px;
+            }
+
+            .modules {
+                grid-template-columns: 1fr;
+            }
+
+            .legend {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="blueprint-bg"></div>
+    
+    <div class="container">
+        <header class="header">
+            <h1>X-IPE Application Architecture</h1>
+            <div class="subtitle">Module View • Layered Architecture</div>
+            <div class="version">v1.0 • 2026-01-24</div>
+        </header>
+
+        <div class="architecture">
+            <!-- Presentation Layer -->
+            <div class="layer layer-presentation">
+                <div class="layer-header">
+                    <div class="layer-icon">🎨</div>
+                    <span class="layer-title">Presentation Layer</span>
+                    <span class="layer-badge">UI & VIEWS</span>
+                </div>
+                <div class="modules">
+                    <div class="module">
+                        <div class="module-title">Templates</div>
+                        <div class="components">
+                            <span class="component">index.html</span>
+                            <span class="component">settings.html</span>
+                            <span class="component">base.html</span>
+                        </div>
+                    </div>
+                    <div class="module" style="grid-column: span 2;">
+                        <div class="module-title">Frontend Modules</div>
+                        <div class="components">
+                            <span class="component">WorkplaceManager</span>
+                            <span class="component">Terminal</span>
+                            <span class="component">StageToolbox</span>
+                            <span class="component">ContentRenderer</span>
+                            <span class="component">EventBus</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrows">
+                <div class="arrow-group">
+                    <div class="arrow"></div>
+                    <div class="arrow"></div>
+                    <div class="arrow"></div>
+                </div>
+            </div>
+
+            <!-- Business Logic Layer -->
+            <div class="layer layer-business">
+                <div class="layer-header">
+                    <div class="layer-icon">⚙️</div>
+                    <span class="layer-title">Business Logic Layer</span>
+                    <span class="layer-badge">SERVICES</span>
+                </div>
+                <div class="modules">
+                    <div class="module">
+                        <div class="module-title">Core Services</div>
+                        <div class="components">
+                            <span class="component">FileService</span>
+                            <span class="component">IdeasService</span>
+                            <span class="component">TerminalService</span>
+                        </div>
+                    </div>
+                    <div class="module">
+                        <div class="module-title">Config Services</div>
+                        <div class="components">
+                            <span class="component">ConfigService</span>
+                            <span class="component">SettingsService</span>
+                            <span class="component">ToolsConfigService</span>
+                        </div>
+                    </div>
+                    <div class="module">
+                        <div class="module-title">Extension Services</div>
+                        <div class="components">
+                            <span class="component">ThemesService</span>
+                            <span class="component">SkillsService</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrows">
+                <div class="arrow-group">
+                    <div class="arrow"></div>
+                    <div class="arrow"></div>
+                    <div class="arrow"></div>
+                </div>
+            </div>
+
+            <!-- Data Layer -->
+            <div class="layer layer-data">
+                <div class="layer-header">
+                    <div class="layer-icon">💾</div>
+                    <span class="layer-title">Data Layer</span>
+                    <span class="layer-badge">STORAGE</span>
+                </div>
+                <div class="modules">
+                    <div class="module">
+                        <div class="module-title">Project Files</div>
+                        <div class="components">
+                            <span class="component folder">📁 docs/</span>
+                            <span class="component folder">📁 src/</span>
+                            <span class="component folder">📁 static/</span>
+                        </div>
+                    </div>
+                    <div class="module">
+                        <div class="module-title">Configuration</div>
+                        <div class="components">
+                            <span class="component file">📄 tools.json</span>
+                            <span class="component file">📄 .x-ipe.yaml</span>
+                        </div>
+                    </div>
+                    <div class="module">
+                        <div class="module-title">Session Data</div>
+                        <div class="components">
+                            <span class="component folder">📁 instance/</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="legend">
+                <div class="legend-item">
+                    <span class="legend-dot presentation"></span>
+                    <span>Presentation</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot business"></span>
+                    <span>Business Logic</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot data"></span>
+                    <span>Data</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <button class="export-btn" onclick="window.print()">📥 Export PNG</button>
+
+    <script>
+        // Add subtle parallax effect to blueprint grid
+        document.addEventListener('mousemove', (e) => {
+            const bg = document.querySelector('.blueprint-bg');
+            const x = (e.clientX / window.innerWidth - 0.5) * 10;
+            const y = (e.clientY / window.innerHeight - 0.5) * 10;
+            bg.style.transform = `translate(${x}px, ${y}px)`;
+        });
+
+        // Component hover sound effect simulation via visual feedback
+        document.querySelectorAll('.component').forEach(comp => {
+            comp.addEventListener('mouseenter', () => {
+                comp.style.transform = 'scale(1.05)';
+            });
+            comp.addEventListener('mouseleave', () => {
+                comp.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

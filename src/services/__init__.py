@@ -47,6 +47,12 @@ from .settings_service import (
 # Skills Service
 from .skills_service import SkillsService
 
+# Tools Config Service (FEATURE-011)
+from .tools_config_service import ToolsConfigService
+
+# Themes Service (FEATURE-012)
+from .themes_service import ThemesService
+
 
 __all__ = [
     # Config
@@ -77,4 +83,8 @@ __all__ = [
     'ProjectFoldersService',
     # Skills
     'SkillsService',
+    # Tools Config
+    'ToolsConfigService',
+    # Themes
+    'ThemesService',
 ]

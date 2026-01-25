@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}}</title>
+    <link href="https://fonts.googleapis.com/css2?family={{FONT_HEADING}}:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================
+           Theme Tokens (from design-system.md)
+           ======================================== */
+        :root {
+            /* Primary colors from theme */
+            --color-primary: {{COLOR_PRIMARY}};
+            --color-secondary: {{COLOR_SECONDARY}};
+            --color-accent: {{COLOR_ACCENT}};
+            --color-neutral: {{COLOR_NEUTRAL}};
+            
+            /* Typography from theme */
+            --font-heading: '{{FONT_HEADING}}', sans-serif;
+            --font-body: {{FONT_BODY}};
+            
+            /* Diagram-specific tokens (fixed) */
+            --diagram-bg: #f8fafc;
+            --layer-gap: 16px;
+            --module-gap: 12px;
+            --component-gap: 8px;
+            --border-radius: 8px;
+            --component-radius: 6px;
+            
+            /* Layer colors (can be overridden per layer) */
+            --layer-presentation-bg: #fce7f3;
+            --layer-presentation-border: #ec4899;
+            --layer-service-bg: #fef3c7;
+            --layer-service-border: #f97316;
+            --layer-business-bg: #dbeafe;
+            --layer-business-border: #3b82f6;
+            --layer-data-bg: #dcfce7;
+            --layer-data-border: #22c55e;
+            --layer-infrastructure-bg: #f3e8ff;
+            --layer-infrastructure-border: #a855f7;
+        }
+        
+        /* ========================================
+           Reset & Base
+           ======================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--diagram-bg);
+            min-height: 100vh;
+            padding: 32px;
+        }
+        
+        /* ========================================
+           Diagram Container
+           ======================================== */
+        .diagram {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .diagram-title {
+            font-family: var(--font-heading);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-primary);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .diagram-content {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat({{ROW_COUNT}}, auto);
+            gap: var(--layer-gap);
+        }
+        
+        /* ========================================
+           Layer Styles
+           ======================================== */
+        .layer {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--module-gap);
+            padding: 20px 16px 16px;
+            border-radius: var(--border-radius);
+            position: relative;
+            border-width: 2px;
+            border-style: solid;
+        }
+        
+        .layer::before {
+            content: attr(data-label);
+            position: absolute;
+            top: -10px;
+            left: 16px;
+            background: white;
+            padding: 2px 10px;
+            font-family: var(--font-heading);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 4px;
+        }
+        
+        /* Layer type variants */
+        .layer-presentation {
+            background: var(--layer-presentation-bg);
+            border-color: var(--layer-presentation-border);
+        }
+        .layer-presentation::before { color: var(--layer-presentation-border); }
+        
+        .layer-service {
+            background: var(--layer-service-bg);
+            border-color: var(--layer-service-border);
+        }
+        .layer-service::before { color: var(--layer-service-border); }
+        
+        .layer-business {
+            background: var(--layer-business-bg);
+            border-color: var(--layer-business-border);
+        }
+        .layer-business::before { color: var(--layer-business-border); }
+        
+        .layer-data {
+            background: var(--layer-data-bg);
+            border-color: var(--layer-data-border);
+        }
+        .layer-data::before { color: var(--layer-data-border); }
+        
+        .layer-infrastructure {
+            background: var(--layer-infrastructure-bg);
+            border-color: var(--layer-infrastructure-border);
+        }
+        .layer-infrastructure::before { color: var(--layer-infrastructure-border); }
+        
+        /* ========================================
+           Module Styles
+           ======================================== */
+        .module {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .module-title {
+            font-family: var(--font-heading);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .module-content {
+            display: grid;
+            gap: var(--component-gap);
+            /* Allow items to fill their grid cells */
+            align-items: start;
+            justify-items: stretch;
+        }
+        
+        /* ========================================
+           Component Styles
+           ======================================== */
+        .component {
+            background: #f1f5f9;
+            border-radius: var(--component-radius);
+            padding: 10px 12px;
+            font-size: 12px;
+            color: var(--color-primary);
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Stereotype indicators */
+        .component[data-stereotype="service"]::before { content: "⚙️ "; }
+        .component[data-stereotype="api"]::before { content: "🔌 "; }
+        .component[data-stereotype="db"]::before { content: "🗄️ "; }
+        .component[data-stereotype="file"]::before { content: "📄 "; }
+        .component[data-stereotype="folder"]::before { content: "📁 "; }
+        
+        /* ========================================
+           Grid Column Utilities
+           ======================================== */
+        .cols-1 { grid-column: span 1; }
+        .cols-2 { grid-column: span 2; }
+        .cols-3 { grid-column: span 3; }
+        .cols-4 { grid-column: span 4; }
+        .cols-5 { grid-column: span 5; }
+        .cols-6 { grid-column: span 6; }
+        .cols-7 { grid-column: span 7; }
+        .cols-8 { grid-column: span 8; }
+        .cols-9 { grid-column: span 9; }
+        .cols-10 { grid-column: span 10; }
+        .cols-11 { grid-column: span 11; }
+        .cols-12 { grid-column: span 12; }
+        
+        /* ========================================
+           Grid Row Utilities
+           ======================================== */
+        .rows-1 { grid-row: span 1; }
+        .rows-2 { grid-row: span 2; }
+        .rows-3 { grid-row: span 3; }
+        .rows-4 { grid-row: span 4; }
+        
+        /* ========================================
+           Internal Grid Utilities
+           ======================================== */
+        .grid-1x1 { grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr); }
+        .grid-1x2 { grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .grid-1x3 { grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .grid-2x1 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(1, 1fr); }
+        .grid-2x2 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .grid-2x3 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .grid-3x1 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(1, 1fr); }
+        .grid-3x2 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .grid-3x3 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .grid-4x1 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(1, 1fr); }
+        .grid-4x2 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr); }
+        
+        /* ========================================
+           Alignment Utilities
+           ======================================== */
+        .align-left { justify-items: start; }
+        .align-center { justify-items: center; }
+        .align-right { justify-items: end; }
+        .align-top { align-items: start; }
+        .align-middle { align-items: center; }
+        .align-bottom { align-items: end; }
+    </style>
+</head>
+<body>
+    <div class="diagram">
+        <h1 class="diagram-title">{{TITLE}}</h1>
+        <div class="diagram-content">
+            {{LAYERS}}
+        </div>
+    </div>
+</body>
+</html>

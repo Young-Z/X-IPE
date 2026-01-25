@@ -22,6 +22,8 @@
     <link href="/static/css/editor.css" rel="stylesheet">
     <link href="/static/css/workplace.css" rel="stylesheet">
     <link href="/static/css/terminal.css" rel="stylesheet">
+    <!-- FEATURE-011: Stage Toolbox -->
+    <link href="/static/css/features/stage-toolbox.css" rel="stylesheet">
     
     {% block extra_css %}{% endblock %}
 </head>
@@ -46,8 +48,8 @@
     <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-unicode11@0.6.0/lib/xterm-addon-unicode11.js"></script>
-    <!-- FEATURE-005: Terminal Manager -->
-    <script src="/static/js/terminal.js"></script>
+    <!-- FEATURE-005: Terminal Manager v2 -->
+    <script src="/static/js/terminal-v2.js"></script>
     
     <!-- Application JS (modular) -->
     <script src="/static/js/core/content-renderer.js"></script>
@@ -56,6 +58,8 @@
     <script src="/static/js/features/project-switcher.js"></script>
     <script src="/static/js/features/sidebar.js"></script>
     <script src="/static/js/features/workplace.js"></script>
+    <!-- FEATURE-011: Stage Toolbox -->
+    <script src="/static/js/features/stage-toolbox.js"></script>
     <script src="/static/js/init.js"></script>
     
     {% block extra_js %}{% endblock %}

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-IPE Integration Landscape</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================
+           Theme Tokens
+           ======================================== */
+        :root {
+            --color-primary: #1e293b;
+            --color-secondary: #64748b;
+            --color-accent: #3b82f6;
+            --color-neutral: #f1f5f9;
+            
+            --font-heading: 'Inter', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            
+            --status-healthy: #22c55e;
+            --status-warning: #f97316;
+            --status-critical: #ef4444;
+            
+            --diagram-bg: #f8fafc;
+            --zone-gap: 20px;
+            --app-gap: 16px;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--diagram-bg);
+            min-height: 100vh;
+            padding: 32px;
+        }
+        
+        .landscape {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .landscape-title {
+            font-family: var(--font-heading);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-primary);
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .zones {
+            display: flex;
+            flex-direction: column;
+            gap: var(--zone-gap);
+        }
+        
+        .zone {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .zone-title {
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .zone-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--app-gap);
+            justify-content: space-evenly;
+        }
+        
+        .app {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            min-width: 160px;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        
+        .app:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .app-name {
+            font-family: var(--font-heading);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+            padding-right: 20px;
+        }
+        
+        .app-meta {
+            font-size: 11px;
+            color: var(--color-secondary);
+            line-height: 1.5;
+        }
+        
+        .app-status {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .app-status.healthy {
+            background: var(--status-healthy);
+            box-shadow: 0 0 6px var(--status-healthy);
+        }
+        
+        .app-status.warning {
+            background: var(--status-warning);
+            box-shadow: 0 0 6px var(--status-warning);
+        }
+        
+        .app-status.critical {
+            background: var(--status-critical);
+            box-shadow: 0 0 6px var(--status-critical);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .database {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-radius: 8px;
+            padding: 16px 20px;
+            min-width: 140px;
+            border: 2px solid #0ea5e9;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .database:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+        }
+        
+        .database-icon {
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+        
+        .database-name {
+            font-family: var(--font-heading);
+            font-size: 12px;
+            font-weight: 600;
+            color: #0c4a6e;
+        }
+        
+        .flows {
+            margin-top: 24px;
+            padding: 16px 20px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .flows-title {
+            font-family: var(--font-heading);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-secondary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .flow-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 8px;
+        }
+        
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--color-primary);
+            padding: 8px 12px;
+            background: #f8fafc;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .flow-source,
+        .flow-target {
+            font-weight: 600;
+            color: var(--color-accent);
+        }
+        
+        .flow-arrow {
+            color: #94a3b8;
+            font-weight: bold;
+        }
+        
+        .flow-action {
+            color: var(--color-secondary);
+            font-style: italic;
+            margin-left: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="landscape">
+        <h1 class="landscape-title">X-IPE Integration Landscape</h1>
+        
+        <div class="zones">
+            <!-- External Systems Zone -->
+            <div class="zone">
+                <h2 class="zone-title">External Systems</h2>
+                <div class="zone-content">
+                    <div class="app" id="copilot">
+                        <div class="app-status healthy"></div>
+                        <div class="app-name">Copilot CLI</div>
+                        <div class="app-meta">
+                            <div>Tech: Node.js</div>
+                            <div>Platform: Terminal</div>
+                        </div>
+                    </div>
+                    <div class="app" id="github">
+                        <div class="app-status healthy"></div>
+                        <div class="app-name">GitHub</div>
+                        <div class="app-meta">
+                            <div>Tech: REST API</div>
+                            <div>Platform: Cloud</div>
+                        </div>
+                    </div>
+                    <div class="app" id="mcp">
+                        <div class="app-status healthy"></div>
+                        <div class="app-name">MCP Servers</div>
+                        <div class="app-meta">
+                            <div>Tech: MCP Protocol</div>
+                            <div>Platform: Local/Cloud</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- X-IPE Application Zone -->
+            <div class="zone">
+                <h2 class="zone-title">X-IPE Application</h2>
+                <div class="zone-content">
+                    <div class="app" id="flask">
+                        <div class="app-status healthy"></div>
+                        <div class="app-name">Flask Backend</div>
+                        <div class="app-meta">
+                            <div>Tech: Python/Flask</div>
+                            <div>Platform: Local</div>
+                        </div>
+                    </div>
+                    <div class="app" id="frontend">
+                        <div class="app-status healthy"></div>
+                        <div class="app-name">Web Frontend</div>
+                        <div class="app-meta">
+                            <div>Tech: JavaScript</div>
+                            <div>Platform: Browser</div>
+                        </div>
+                    </div>
+                    <div class="app" id="terminal">
+                        <div class="app-status healthy"></div>
+                        <div class="app-name">WebSocket Terminal</div>
+                        <div class="app-meta">
+                            <div>Tech: xterm.js</div>
+                            <div>Platform: Browser</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Skills & Configuration Zone -->
+            <div class="zone">
+                <h2 class="zone-title">Skills & Configuration</h2>
+                <div class="zone-content">
+                    <div class="app" id="skills">
+                        <div class="app-status healthy"></div>
+                        <div class="app-name">GitHub Skills</div>
+                        <div class="app-meta">
+                            <div>Tech: Markdown</div>
+                            <div>Platform: .github/skills/</div>
+                        </div>
+                    </div>
+                    <div class="app" id="toolsconfig">
+                        <div class="app-status healthy"></div>
+                        <div class="app-name">Tools Config</div>
+                        <div class="app-meta">
+                            <div>Tech: JSON</div>
+                            <div>Platform: config/</div>
+                        </div>
+                    </div>
+                    <div class="app" id="themes">
+                        <div class="app-status healthy"></div>
+                        <div class="app-name">Themes</div>
+                        <div class="app-meta">
+                            <div>Tech: Markdown/HTML</div>
+                            <div>Platform: docs/themes/</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Storage Zone -->
+            <div class="zone">
+                <h2 class="zone-title">Storage</h2>
+                <div class="zone-content">
+                    <div class="database" id="projectfiles">
+                        <div class="database-icon">🗄️</div>
+                        <div class="database-name">Project Files</div>
+                    </div>
+                    <div class="database" id="ideasfolder">
+                        <div class="database-icon">💡</div>
+                        <div class="database-name">Ideas Folder</div>
+                    </div>
+                    <div class="database" id="sessiondata">
+                        <div class="database-icon">📊</div>
+                        <div class="database-name">Session Data</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flows">
+            <h3 class="flows-title">Action Flows</h3>
+            <div class="flow-list">
+                <!-- External to X-IPE -->
+                <div class="flow">
+                    <span class="flow-source">Copilot CLI</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-target">Flask Backend</span>
+                    <span class="flow-action">Execute Commands</span>
+                </div>
+                <div class="flow">
+                    <span class="flow-source">Copilot CLI</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-target">Terminal</span>
+                    <span class="flow-action">Stream Output</span>
+                </div>
+                <div class="flow">
+                    <span class="flow-source">GitHub</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-target">Skills</span>
+                    <span class="flow-action">Load Skills</span>
+                </div>
+                <div class="flow">
+                    <span class="flow-source">MCP Servers</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-target">Flask Backend</span>
+                    <span class="flow-action">Tool Calls</span>
+                </div>
+                
+                <!-- X-IPE Internal -->
+                <div class="flow">
+                    <span class="flow-source">Frontend</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-target">Flask Backend</span>
+                    <span class="flow-action">API Requests</span>
+                </div>
+                <div class="flow">
+                    <span class="flow-source">Frontend</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-target">Terminal</span>
+                    <span class="flow-action">Terminal Input</span>
+                </div>
+                <div class="flow">
+                    <span class="flow-source">Flask Backend</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-target">Frontend</span>
+                    <span class="flow-action">Render Templates</span>
+                </div>
+                
+                <!-- X-IPE to Config -->
+                <div class="flow">
+                    <span class="flow-source">Flask Backend</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-target">Skills</span>
+                    <span class="flow-action">Load Task Skills</span>
+                </div>
+                <div class="flow">
+                    <span class="flow-source">Flask Backend</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-target">Tools Config</span>
+                    <span class="flow-action">Read Config</span>
+                </div>
+                <div class="flow">
+                    <span class="flow-source">Flask Backend</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-target">Themes</span>
+                    <span class="flow-action">Apply Themes</span>
+                </div>
+                
+                <!-- X-IPE to Storage -->
+                <div class="flow">
+                    <span class="flow-source">Flask Backend</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-target">Project Files</span>
+                    <span class="flow-action">Read/Write Files</span>
+                </div>
+                <div class="flow">
+                    <span class="flow-source">Flask Backend</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-target">Ideas Folder</span>
+                    <span class="flow-action">Manage Ideas</span>
+                </div>
+                <div class="flow">
+                    <span class="flow-source">Flask Backend</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-target">Session Data</span>
+                    <span class="flow-action">Session State</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

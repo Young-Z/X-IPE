@@ -54,6 +54,7 @@ Output:
   status: completed | blocked
   next_task_type: null
   require_human_review: Yes
+  auto_proceed: {from input Auto Proceed}
   task_output_links: [docs/playground/]
   feature_id: FEATURE-XXX
   feature_title: {title}

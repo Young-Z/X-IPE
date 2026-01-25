@@ -63,6 +63,7 @@ Output:
   status: completed | blocked
   next_task_type: Feature Breakdown
   require_human_review: Yes
+  auto_proceed: {from input Auto Proceed}
   task_output_links: [docs/requirements/requirement-details.md] # or requirement-details-part-X.md
   mockup_list: [inherited from input or N/A]
   # Dynamic attributes for requirement-stage
@@ -191,6 +192,20 @@ Use web search capability to research:
 
 ---
 
+## Feature List
+
+| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------------|---------|-------------------|-------------------|
+
+---
+
+## Linked Mockups
+
+| Mockup Function Name | Feature | Mockup Link |
+|---------------------|---------|-------------|
+
+---
+
 ## Feature Details (Continued)
 
 ```
@@ -202,16 +217,22 @@ Use web search capability to research:
 | After first split | `requirement-details-part-1.md`, `requirement-details-part-2.md` |
 | After second split | `requirement-details-part-1.md`, `requirement-details-part-2.md`, `requirement-details-part-3.md` |
 
-**Index File (Optional):**
-When parts exist, consider creating `requirement-details-index.md`:
+**Index File (Required when parts exist):**
+When parts exist, create/update `requirement-details-index.md`:
 ```markdown
 # Requirement Details Index
 
-| Part | File | Features Covered |
-|------|------|------------------|
-| 1 | [Part 1](requirement-details-part-1.md) | FEATURE-001 to FEATURE-005 |
-| 2 | [Part 2](requirement-details-part-2.md) | FEATURE-006 to FEATURE-010 |
+> Last Updated: MM-DD-YYYY
+
+## Parts Overview
+
+| Part | File | Features Covered | Lines |
+|------|------|------------------|-------|
+| 1 | [Part 1](requirement-details-part-1.md) | FEATURE-001 to FEATURE-005 | ~420 |
+| 2 | [Part 2](requirement-details-part-2.md) | FEATURE-006 to FEATURE-010 | ~380 |
 ```
+
+**Note:** Feature List is NOT in index - each part file has its own Feature List section.
 
 ### Step 4: Create Requirement Details Document
 

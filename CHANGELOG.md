@@ -8,6 +8,81 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-016: Architecture Diagram Renderer** - Tool skill for rendering Architecture DSL as visual diagrams
+  - `.github/skills/tool-architecture-draw/` folder with complete skill structure
+  - `SKILL.md`: Main skill definition with rendering workflow and capabilities
+  - `templates/base-styles.css`: Complete CSS with design tokens and flexbox utilities
+  - `templates/module-view.html`: HTML template for Module View diagrams
+  - `templates/landscape-view.html`: HTML template for Landscape View diagrams
+  - `references/rendering-rules.md`: Detailed DSL-to-HTML mapping and error handling
+  - `examples/module-view-rendered.html`: Rendered AI Platform Architecture
+  - `examples/landscape-view-rendered.html`: Rendered Enterprise Application Landscape
+  - Module View rendering: layers with vertical labels, dashed-border modules, pill-shaped component badges
+  - Landscape View rendering: zone containers, app boxes with status indicators, database cylinders, SVG flow arrows
+  - Flexbox utility classes: jc-*, ai-*, fd-*, gap-* for layout control
+  - Status colors: healthy (#22c55e), warning (#f97316), critical (#ef4444)
+  - Export capabilities: PNG (html2canvas), SVG (DOM serialization), standalone HTML
+  - Registered in `config/tools.json` under `stages.ideation.ideation.tool-architecture-draw`
+  - 71 comprehensive tests validating structure, templates, CSS, rules, examples, and config
+
+- **FEATURE-015: Architecture DSL Skill** - Tool skill for architecture diagram DSL translation
+  - `.github/skills/tool-architecture-dsl/` folder with complete skill structure
+  - `SKILL.md`: Main skill definition with workflow, capabilities, and quick reference
+  - `references/grammar.md`: Complete DSL grammar in BNF format with validation rules
+  - `examples/module-view.dsl`: AI Platform Architecture example (3-layer structure)
+  - `examples/landscape-view.dsl`: Enterprise Application Landscape example
+  - PlantUML-inspired syntax: `@startuml module-view` / `@enduml` blocks
+  - Module View elements: `layer`, `module`, `component`, `component <<stereotype>>`
+  - Landscape View elements: `zone`, `app` (with tech/platform/status), `database`
+  - Action flows: `source --> target : "action label"` (action-focused)
+  - CSS Flexbox-inspired layout: `style "justify-content: space-evenly; column-gap: 16px"`
+  - Supported style properties: justify-content, align-items, flex-direction, row-gap, column-gap
+  - `text-align left|center|right` with inheritance (top → layer → module)
+  - `virtual-box { }` for grouping with vertical stacking
+  - Registered in `config/tools.json` under `stages.ideation.ideation.tool-architecture-dsl`
+  - 52 comprehensive tests validating structure, grammar, examples, and config
+
+- **FEATURE-013: Default Theme Content** - Pre-built default theme for X-IPE
+  - `docs/themes/theme-default/` folder with complete design system
+  - `design-system.md`: Core tokens (colors, typography, spacing, radius, shadows)
+  - Color palette: Primary (#0f172a), Secondary (#475569), Accent (#10b981), Neutral (#e2e8f0)
+  - Semantic colors: Success, Warning, Error, Info
+  - Full slate neutral scale (50-900)
+  - Typography: Inter headings, System UI body, JetBrains Mono code
+  - 8-step spacing scale (4-64px)
+  - Component specs: buttons, cards, form inputs
+  - `component-visualization.html`: Visual preview of all design tokens
+  - JSON-LD structured data for AI agent parsing
+  - Serves as template for creating custom themes
+
+- **FEATURE-012: Design Themes** - Theming system for consistent brand design in mockups
+  - ThemesService backend for theme discovery and parsing
+  - Scans `docs/themes/theme-*/` folders for valid themes
+  - Extracts color tokens (primary, secondary, accent, neutral) from design-system.md
+  - Extracts description from first paragraph of design-system.md
+  - API: `GET /api/themes` returns list with metadata (name, description, colors, files, path)
+  - API: `GET /api/themes/{name}` returns theme details with design-system content
+  - Stage Toolbox integration: Themes section at top of modal
+  - 4-column visual theme card grid with auto-generated color swatches
+  - Click card to select theme (pink accent border, checkmark indicator)
+  - Theme selection persisted in `config/tools.json` under `themes.selected`
+  - Scrollable grid when >8 themes (max-height: 280px)
+  - 36 comprehensive tests covering service, API, and edge cases
+
+- **FEATURE-011: Stage Toolbox** - Comprehensive tool management modal
+  - Modal UI with 680px width, light theme, accordion structure
+  - 5 development stages: Ideation (functional), Requirement, Feature, Quality, Refactoring (placeholders)
+  - Ideation stage with 3 phases: Ideation (`antv-infographic`, `mermaid`), Mockup (`frontend-design`), Sharing
+  - Toggle switches for enabling/disabling tools with immediate persistence
+  - Active tool count badges per stage
+  - ToolsConfigService backend with `config/tools.json` storage
+  - Auto-migration from legacy `.ideation-tools.json` (deletes old file after migration)
+  - GET/POST `/api/config/tools` API endpoints
+  - StageToolboxModal JavaScript class with full modal lifecycle
+  - Top bar "Toolbox" button with green accent (replaces old Workplace dropdown)
+  - ESC key and overlay click to close modal
+  - 29 comprehensive tests covering service, API, and integration
+
 - **FEATURE-010: Project Root Configuration** - Support for X-IPE as subfolder in larger projects
   - `.x-ipe.yaml` config file at project root defines path mappings
   - Config discovery: searches cwd then parent directories (up to 20 levels)

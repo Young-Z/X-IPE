@@ -24,6 +24,7 @@ window.projectSwitcher = null;
 window.planningPoller = null;
 window.terminalManager = null;
 window.terminalPanel = null;
+window.stageToolboxModal = null; // FEATURE-011
 
 /**
  * Initialize all application components
@@ -67,6 +68,9 @@ function initializeApp() {
         `;
     });
     
+    // Initialize sidebar resize functionality
+    initSidebarResize();
+    
     // Setup Create Idea button
     const createIdeaBtn = document.getElementById('btn-create-idea');
     if (createIdeaBtn) {
@@ -75,6 +79,17 @@ function initializeApp() {
                 window.workplaceManager.showUploadView();
             }
         });
+    }
+    
+    // FEATURE-011: Initialize Stage Toolbox Modal
+    if (typeof StageToolboxModal !== 'undefined') {
+        window.stageToolboxModal = new StageToolboxModal();
+        const toolboxBtn = document.getElementById('btn-stage-toolbox');
+        if (toolboxBtn) {
+            toolboxBtn.addEventListener('click', () => {
+                window.stageToolboxModal.open();
+            });
+        }
     }
     
     // Initialize terminal panel (FEATURE-005)
@@ -88,6 +103,68 @@ function initializeApp() {
     initSkillsModal();
     
     console.log('[App] Initialized successfully');
+}
+
+/**
+ * Initialize sidebar resize functionality
+ */
+function initSidebarResize() {
+    const sidebar = document.getElementById('sidebar');
+    const resizeHandle = document.getElementById('sidebar-resize-handle');
+    
+    if (!sidebar || !resizeHandle) return;
+    
+    let isResizing = false;
+    let startX = 0;
+    let startWidth = 0;
+    
+    const minWidth = 200;
+    const maxWidth = 500;
+    
+    resizeHandle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        startX = e.clientX;
+        startWidth = sidebar.offsetWidth;
+        resizeHandle.classList.add('resizing');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        
+        const delta = e.clientX - startX;
+        let newWidth = startWidth + delta;
+        
+        // Clamp to min/max
+        newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
+        
+        sidebar.style.flex = `0 0 ${newWidth}px`;
+        sidebar.style.width = `${newWidth}px`;
+    });
+    
+    document.addEventListener('mouseup', () => {
+        if (isResizing) {
+            isResizing = false;
+            resizeHandle.classList.remove('resizing');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            
+            // Save to localStorage for persistence
+            localStorage.setItem('sidebar-width', sidebar.offsetWidth);
+        }
+    });
+    
+    // Restore saved width
+    const savedWidth = localStorage.getItem('sidebar-width');
+    if (savedWidth) {
+        const width = parseInt(savedWidth, 10);
+        if (width >= minWidth && width <= maxWidth) {
+            sidebar.style.flex = `0 0 ${width}px`;
+            sidebar.style.width = `${width}px`;
+        }
+    }
 }
 
 /**

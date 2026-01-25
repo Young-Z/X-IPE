@@ -304,6 +304,21 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    overflow: hidden;
+}
+
+/* EasyMDE in workplace editor (edit mode) */
+.workplace-editor .EasyMDEContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.workplace-editor .EasyMDEContainer .CodeMirror {
+    flex: 1;
+    min-height: 200px;
+    overflow-y: auto !important;
 }
 
 .workplace-editor-header {
@@ -345,6 +360,7 @@
     line-height: 1.5;
     resize: none;
     outline: none;
+    overflow-y: auto;
 }
 
 .workplace-editor-loading {
@@ -532,11 +548,13 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    overflow: hidden;
 }
 
 .workplace-compose-textarea {
     flex: 1;
     min-height: 300px;
+    max-height: calc(100vh - 300px);
     width: 100%;
     border: 1px solid #dee2e6;
     border-radius: 8px;
@@ -546,6 +564,7 @@
     line-height: 1.6;
     resize: none;
     outline: none;
+    overflow-y: auto;
 }
 
 .workplace-compose-textarea:focus {
@@ -567,10 +586,12 @@
 .workplace-compose .EasyMDEContainer .CodeMirror {
     flex: 1;
     min-height: 250px;
+    max-height: calc(100vh - 350px);
     border-radius: 0 0 8px 8px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 1rem;
     line-height: 1.6;
+    overflow-y: auto !important;
 }
 
 .workplace-compose .editor-toolbar {
@@ -733,4 +754,63 @@
     object-fit: contain;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* =================================================================
+ * COPILOT BUTTON DROPDOWN
+ * ================================================================= */
+.copilot-btn-container {
+    position: relative;
+    display: inline-block;
+}
+
+.copilot-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 220px;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+    padding: 6px 0;
+    margin-top: 4px;
+}
+
+.copilot-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.copilot-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #495057;
+    transition: background-color 0.1s;
+}
+
+.copilot-dropdown-item:hover {
+    background-color: #f0f7ff;
+    color: #0d6efd;
+}
+
+.copilot-dropdown-item i {
+    font-size: 1rem;
+    color: #6c757d;
+    width: 20px;
+    text-align: center;
+}
+
+.copilot-dropdown-item:hover i {
+    color: #0d6efd;
 }
