@@ -256,6 +256,7 @@ Execute Ideation by following these steps in order:
 |------------|------------------|---------------|
 | `stages.ideation.ideation.antv-infographic` | `infographic-syntax-creator` skill | Call skill to generate infographic DSL syntax |
 | `stages.ideation.ideation.mermaid` | Mermaid code blocks | Generate mermaid diagrams directly in markdown |
+| `stages.ideation.ideation.tool-architecture-dsl` | `tool-architecture-dsl` skill | Generate Architecture DSL directly in markdown (IPE renders it) |
 | `stages.ideation.mockup.frontend-design` | `frontend-design` skill | Call skill to create HTML/CSS mockups |
 | `stages.ideation.mockup.figma-mcp` | Figma MCP server | Use MCP tools for Figma integration |
 
@@ -268,8 +269,14 @@ For each enabled tool in config:
     → Use infographic DSL in idea-summary document
     
   IF config.stages.ideation.ideation["mermaid"] == true:
-    → Generate mermaid diagrams for flowcharts, architecture
+    → Generate mermaid diagrams for flowcharts, sequences
     → Embed as ```mermaid code blocks in documents
+    
+  IF config.stages.ideation.ideation["tool-architecture-dsl"] == true:
+    → Load `tool-architecture-dsl` skill for layered architecture diagrams
+    → Generate Architecture DSL directly in markdown
+    → Embed as ```architecture-dsl code blocks (IPE renders natively)
+    → Use for: module view (layers, services), landscape view (integrations)
     
   IF config.stages.ideation.mockup["frontend-design"] == true:
     → Load and invoke `frontend-design` skill during brainstorming
@@ -324,6 +331,7 @@ When tools are enabled in `config/tools.json`, invoke corresponding skills durin
 | `stages.ideation.mockup.frontend-design: true` | `frontend-design` skill | User describes UI → Create HTML mockup |
 | `stages.ideation.ideation.mermaid: true` | Mermaid syntax | User describes flow → Generate diagram |
 | `stages.ideation.ideation.antv-infographic: true` | `infographic-syntax-creator` skill | Visualize lists, comparisons |
+| `stages.ideation.ideation.tool-architecture-dsl: true` | `tool-architecture-dsl` skill | User describes layers/services → Generate architecture DSL |
 
 **Example: Config-Driven Tool Usage:**
 ```
@@ -355,6 +363,51 @@ Agent Action:
        Login --> Dashboard --> Settings
      ```
   2. Ask: "Does this capture the flow correctly?"
+```
+
+**Example: Architecture DSL Generation:**
+```
+Config: { "stages": { "ideation": { "ideation": { "tool-architecture-dsl": true } } } }
+
+User: "The system has 3 layers: frontend, backend services, and database"
+Agent Action:
+  1. IF stages.ideation.ideation.tool-architecture-dsl == true:
+     → Load `tool-architecture-dsl` skill
+     → Generate Architecture DSL directly in markdown
+     → Embed in idea-summary as:
+     
+     ```architecture-dsl
+     @startuml module-view
+     title "System Architecture"
+     theme "theme-default"
+     direction top-to-bottom
+     grid 12 x 6
+     
+     layer "Frontend" {
+       color "#fce7f3"
+       border-color "#ec4899"
+       rows 2
+       module "Web" { cols 12, rows 2, grid 1 x 1, component "React App" { cols 1, rows 1 } }
+     }
+     
+     layer "Backend" {
+       color "#dbeafe"
+       border-color "#3b82f6"
+       rows 2
+       module "Services" { cols 12, rows 2, grid 2 x 1, component "API" { cols 1, rows 1 }, component "Workers" { cols 1, rows 1 } }
+     }
+     
+     layer "Data" {
+       color "#dcfce7"
+       border-color "#22c55e"
+       rows 2
+       module "Storage" { cols 12, rows 2, grid 1 x 1, component "PostgreSQL" { cols 1, rows 1 } }
+     }
+     
+     @enduml
+     ```
+  2. IPE renders this as interactive diagram in the browser
+  3. Ask: "Does this architecture structure match your vision?"
 ```
 
 **Question Categories:**
@@ -468,9 +521,14 @@ IF config.stages.ideation.ideation["antv-infographic"] == true:
   → Use infographic DSL for: feature lists, roadmaps, comparisons
 
 IF config.stages.ideation.ideation["mermaid"] == true:
-  → Use mermaid syntax for: flowcharts, architecture, sequences
+  → Use mermaid syntax for: flowcharts, sequences, state diagrams
 
-IF BOTH are false:
+IF config.stages.ideation.ideation["tool-architecture-dsl"] == true:
+  → Use Architecture DSL for: layered architecture, module views, landscape views
+  → Embed directly in markdown as ```architecture-dsl code blocks
+  → IPE renders these natively as interactive diagrams
+
+IF ALL are false:
   → Use standard markdown (bullet lists, tables)
 ```
 
@@ -648,7 +706,8 @@ Your idea has been refined. What would you like to do next?
 | Being passive | Not collaborative | Offer suggestions actively |
 | Ignoring `config/tools.json` | Misses tool capabilities | Always check config first |
 | Using tools when disabled in config | Unexpected behavior | Respect config settings |
-| Plain text when visualization enabled | Harder to scan visually | Use configured tools (infographic/mermaid) |
+| Plain text when visualization enabled | Harder to scan visually | Use configured tools (infographic/mermaid/architecture-dsl) |
+| Creating separate HTML for architecture | Unnecessary when DSL enabled | Embed `architecture-dsl` directly in markdown (IPE renders it) |
 
 ---
 

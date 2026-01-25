@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 01-24-2026 14:07:00
+> Last Updated: 01-25-2026 12:40:00
 
 ## Overview
 
@@ -37,21 +37,29 @@ This board tracks all features across the project lifecycle.
 | FEATURE-015 | Architecture DSL Skill | v1.0 | Completed | [specification.md](../requirements/FEATURE-015/specification.md) | 01-24-2026 | 01-24-2026 13:27:00 |
 | FEATURE-016 | Architecture Diagram Renderer | v1.0 | Completed | [specification.md](../requirements/FEATURE-016/specification.md) | 01-24-2026 | 01-24-2026 14:00:00 |
 | FEATURE-017 | Architecture DSL JavaScript Library | v1.0 | Planned | - | 01-24-2026 | 01-24-2026 14:07:00 |
+| FEATURE-018 | X-IPE CLI Tool | v1.0 | Designed | [specification.md](../requirements/FEATURE-018/specification.md) | 01-25-2026 | 01-25-2026 05:25:00 |
+| FEATURE-019 | Simplified Project Setup | v1.0 | Planned | - | 01-25-2026 | 01-25-2026 05:15:00 |
+| FEATURE-020 | Skills Discovery & Override | v1.0 | Planned | - | 01-25-2026 | 01-25-2026 05:15:00 |
+| FEATURE-021 | Console Voice Input | v1.0 | Designed | [specification.md](../requirements/FEATURE-021/specification.md) | 01-25-2026 | 01-25-2026 12:40:00 |
 
 ---
 
 ## Status Details
 
-### Planned (3)
+### Planned (5)
 - FEATURE-007: Git Integration
 - FEATURE-014: Theme-Aware Frontend Design Skill
 - FEATURE-017: Architecture DSL JavaScript Library
+- FEATURE-019: Simplified Project Setup
+- FEATURE-020: Skills Discovery & Override
 
 ### Refined (0)
 - None
 
-### Designed (1)
+### Designed (3)
 - FEATURE-005: Interactive Console v2.0
+- FEATURE-018: X-IPE CLI Tool
+- FEATURE-021: Console Voice Input
 
 ### Implemented (5)
 - FEATURE-001: Project Navigation
@@ -301,5 +309,69 @@ This board tracks all features across the project lifecycle.
 - TypeScript support with type definitions
 - Zero runtime dependencies
 - NPM-compatible package structure
+
+---
+
+### FEATURE-018: X-IPE CLI Tool
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Transform X-IPE from a cloned repository into a pip-installable PyPI package with CLI commands for initializing projects, running the server, upgrading skills, and checking status.  
+**Dependencies:** None (foundation feature)  
+**Specification:** -  
+**Technical Design:** -  
+
+**Source:**
+- Requirements: `docs/requirements/requirement-details-part-2.md`
+
+**Key Capabilities:**
+- PyPI distribution via `pip install x-ipe`
+- CLI commands: `x-ipe init`, `x-ipe serve`, `x-ipe upgrade`, `x-ipe status`, `x-ipe info`
+- Skills bundled as package data
+- Static files (CSS, JS, templates) included
+- `click` or `argparse` CLI parsing
+
+---
+
+### FEATURE-019: Simplified Project Setup
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** The `x-ipe init` command creates a complete project structure with docs folders, hidden .x-ipe runtime folder, and merged .github configuration.  
+**Dependencies:** FEATURE-018 (X-IPE CLI Tool)  
+**Specification:** -  
+**Technical Design:** -  
+
+**Source:**
+- Requirements: `docs/requirements/requirement-details-part-2.md`
+
+**Key Capabilities:**
+- Creates `docs/` folder structure (ideas, planning, requirements, themes)
+- Creates `.x-ipe/` hidden folder for runtime data (db, cache, sessions)
+- Creates/merges `.github/skills/` with skills from package
+- Creates `.x-ipe.yaml` config file with defaults
+- Auto-detects git and updates `.gitignore`
+- Non-destructive: skips existing files with warning
+
+---
+
+### FEATURE-020: Skills Discovery & Override
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Skills are loaded from the installed X-IPE package by default, but local skills in `.github/skills/` take precedence, allowing project-specific customization.  
+**Dependencies:** FEATURE-018 (X-IPE CLI Tool), FEATURE-019 (Simplified Project Setup)  
+**Specification:** -  
+**Technical Design:** -  
+
+**Source:**
+- Requirements: `docs/requirements/requirement-details-part-2.md`
+
+**Key Capabilities:**
+- Skills bundled in package, accessible via `importlib.resources`
+- Local skills in `.github/skills/` override package skills by name
+- `x-ipe upgrade` syncs package skills with backup of modified locals
+- Hash-based detection of local modifications
+- API shows skill source (package vs local)
 
 ---

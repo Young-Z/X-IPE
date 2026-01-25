@@ -1112,7 +1112,8 @@
             this.panel.style.height = this.panelHeight + 'px';
             this.toggleBtn.querySelector('i').className = 'bi bi-chevron-down';
 
-            this.terminalManager.fitAll();
+            // Wait for layout to stabilize then fit
+            setTimeout(() => this.terminalManager.fitAll(), 0);
         }
 
         collapse() {

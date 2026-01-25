@@ -22,13 +22,13 @@
         "tool-draw-system-landscape": true
       },
       "ideation": {
+        "_extra_instruction": "- for infographic tool: just see its `Mind Map`, `list-grid`, `list-row`, `list-sector`, `sequence-ascending`, `sequence-color`, `sequence-horizontal`, `sequence-zigzag`, `sequence-funnel` or `sequence-pyramid` in suitable context.\n- for mermaid tool: just use it in workflow, sequence diagram\n- for Architecture DSL tool: embed ```architecture-dsl code blocks directly in markdown (IPE renders natively). Use for layered architecture, module views, and system landscapes.",
         "_order": 1,
-        "antv-infographic": false,
+        "antv-infographic": true,
         "mermaid": true,
         "tool-architecture-dsl": true,
         "tool-draw-layered-architecture": false,
-        "tool-draw-system-landscape": false,
-        "_extra_instruction": "d"
+        "tool-draw-system-landscape": false
       },
       "mockup": {
         "_order": 2,

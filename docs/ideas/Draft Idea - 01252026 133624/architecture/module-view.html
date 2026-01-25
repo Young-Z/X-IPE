@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Knowledge Base - Layered Architecture</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --corp-bg: #ffffff;
+            --corp-border: #374151;
+            --corp-badge-bg: #1f2937;
+            --corp-badge-text: #ffffff;
+            --accent-blue: #3b82f6;
+            --accent-indigo: #6366f1;
+            --font-heading: 'Inter', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --layer-gap: 16px;
+            --module-gap: 14px;
+            --component-gap: 10px;
+            --border-radius: 8px;
+            --component-radius: 18px;
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --transition-fast: 150ms ease;
+            --transition-normal: 200ms ease;
+            --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+            padding: 32px;
+        }
+        .diagram { max-width: 1200px; margin: 0 auto; }
+        .diagram-title {
+            font-family: var(--font-heading);
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--corp-border);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .diagram-content {
+            display: flex;
+            flex-direction: column;
+            gap: var(--layer-gap);
+        }
+        .layer-wrapper {
+            display: flex;
+            gap: 0;
+            transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+            animation: fadeSlideIn 0.5s ease-out backwards;
+        }
+        .layer-wrapper:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-radius: var(--border-radius);
+        }
+        .layer-wrapper:nth-child(1) { animation-delay: 0.1s; }
+        .layer-wrapper:nth-child(2) { animation-delay: 0.2s; }
+        .layer-wrapper:nth-child(3) { animation-delay: 0.3s; }
+        .layer-wrapper:nth-child(4) { animation-delay: 0.4s; }
+        .layer-wrapper:nth-child(5) { animation-delay: 0.5s; }
+        .layer-label {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            background: var(--corp-badge-bg);
+            padding: 16px 8px;
+            font-family: var(--font-heading);
+            font-size: 12px;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            min-width: 36px;
+            transition: background var(--transition-normal);
+        }
+        .layer-wrapper:hover .layer-label { background: var(--accent-indigo); min-width: 40px; }
+        .layer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: var(--module-gap);
+            padding: 20px;
+            border: 2px solid var(--corp-border);
+            border-left: none;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            background: var(--corp-bg);
+            transition: border-color var(--transition-normal);
+        }
+        .layer-wrapper:hover .layer { border-color: var(--accent-indigo); }
+        .layer-row {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--module-gap);
+        }
+        .module {
+            background: var(--corp-bg);
+            border: 2px dashed var(--corp-border);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            height: 100%;
+            box-sizing: border-box;
+            transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+        }
+        .module:hover {
+            border-color: var(--accent-blue);
+            box-shadow: var(--shadow-md);
+        }
+        .module-title {
+            font-family: var(--font-heading);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--corp-border);
+            text-align: left;
+            transition: color var(--transition-fast);
+        }
+        .module:hover .module-title { color: var(--accent-blue); }
+        .module-content {
+            display: grid;
+            gap: var(--component-gap);
+            align-items: start;
+            justify-items: stretch;
+        }
+        .component {
+            width: 100%;
+            height: 100%;
+            background: var(--corp-badge-bg);
+            color: var(--corp-badge-text);
+            border-radius: var(--component-radius);
+            padding: 8px 16px;
+            font-family: var(--font-heading);
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 36px;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+        .component:hover {
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-indigo) 100%);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: var(--shadow-md);
+        }
+        .component-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            padding: 12px 8px;
+            color: #374151;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-normal);
+        }
+        .component-icon:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-4px);
+        }
+        .component-icon .icon { font-size: 28px; line-height: 1; }
+        .component-icon .label {
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            color: #6b7280;
+        }
+        .component-icon:hover .label { color: var(--accent-indigo); font-weight: 600; }
+        
+        /* Grid utilities */
+        .cols-4 { grid-column: span 4; }
+        .cols-6 { grid-column: span 6; }
+        .cols-8 { grid-column: span 8; }
+        .grid-1x2 { grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .grid-1x3 { grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .grid-2x2 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
+        
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Layer-specific colors */
+        .layer-consumer { background: #fef3c7; border-color: #f59e0b; }
+        .layer-consumer + .layer-label, .label-consumer { background: #f59e0b; }
+        .layer-api { background: #fce7f3; border-color: #ec4899; }
+        .label-api { background: #ec4899; }
+        .layer-rag { background: #dbeafe; border-color: #3b82f6; }
+        .label-rag { background: #3b82f6; }
+        .layer-processing { background: #e0e7ff; border-color: #6366f1; }
+        .label-processing { background: #6366f1; }
+        .layer-data { background: #dcfce7; border-color: #22c55e; }
+        .label-data { background: #22c55e; }
+    </style>
+</head>
+<body>
+    <div class="diagram">
+        <h1 class="diagram-title">Enterprise Knowledge Base - Layered Architecture</h1>
+        <div class="diagram-content">
+            
+            <!-- Layer 1: Consumer Interfaces -->
+            <div class="layer-wrapper">
+                <div class="layer-label label-consumer">Consumer Interfaces</div>
+                <div class="layer layer-consumer">
+                    <div class="layer-row">
+                        <div class="module cols-6">
+                            <div class="module-title">AI Consumers</div>
+                            <div class="module-content grid-2x2">
+                                <div class="component">Internal Chatbots</div>
+                                <div class="component">GitHub Copilot</div>
+                                <div class="component">Automation Agents</div>
+                                <div class="component">Customer AI</div>
+                            </div>
+                        </div>
+                        <div class="module cols-6">
+                            <div class="module-title">Human Consumers</div>
+                            <div class="module-content grid-2x2">
+                                <div class="component">Employee Portal</div>
+                                <div class="component">Search UI</div>
+                                <div class="component">Mobile App</div>
+                                <div class="component">Admin Console</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Layer 2: API Gateway -->
+            <div class="layer-wrapper">
+                <div class="layer-label label-api">API Gateway</div>
+                <div class="layer layer-api">
+                    <div class="layer-row">
+                        <div class="module cols-4">
+                            <div class="module-title">Gateway Services</div>
+                            <div class="module-content grid-1x2">
+                                <div class="component">Authentication</div>
+                                <div class="component">Rate Limiting</div>
+                            </div>
+                        </div>
+                        <div class="module cols-8">
+                            <div class="module-title">API Endpoints</div>
+                            <div class="module-content grid-2x2">
+                                <div class="component">REST API</div>
+                                <div class="component">GraphQL API</div>
+                                <div class="component">Streaming API</div>
+                                <div class="component">Webhook Handler</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Layer 3: RAG Engine -->
+            <div class="layer-wrapper">
+                <div class="layer-label label-rag">RAG Engine</div>
+                <div class="layer layer-rag">
+                    <div class="layer-row">
+                        <div class="module cols-4">
+                            <div class="module-title">Query Processing</div>
+                            <div class="module-content grid-1x3">
+                                <div class="component">Query Parser</div>
+                                <div class="component">Intent Classifier</div>
+                                <div class="component">Query Expander</div>
+                            </div>
+                        </div>
+                        <div class="module cols-4">
+                            <div class="module-title">Retrieval Pipeline</div>
+                            <div class="module-content grid-1x3">
+                                <div class="component">Hybrid Search</div>
+                                <div class="component">Semantic Ranker</div>
+                                <div class="component">Context Builder</div>
+                            </div>
+                        </div>
+                        <div class="module cols-4">
+                            <div class="module-title">Generation</div>
+                            <div class="module-content grid-1x3">
+                                <div class="component">Prompt Engine</div>
+                                <div class="component">LLM Router</div>
+                                <div class="component">Citation Generator</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Layer 4: Knowledge Processing -->
+            <div class="layer-wrapper">
+                <div class="layer-label label-processing">Knowledge Processing</div>
+                <div class="layer layer-processing">
+                    <div class="layer-row">
+                        <div class="module cols-4">
+                            <div class="module-title">Ingestion Pipeline</div>
+                            <div class="module-content grid-1x3">
+                                <div class="component">Source Connectors</div>
+                                <div class="component">Document Parser</div>
+                                <div class="component">Content Cleaner</div>
+                            </div>
+                        </div>
+                        <div class="module cols-4">
+                            <div class="module-title">Embedding Pipeline</div>
+                            <div class="module-content grid-1x3">
+                                <div class="component">Chunking Engine</div>
+                                <div class="component">Embedding Model</div>
+                                <div class="component">Index Manager</div>
+                            </div>
+                        </div>
+                        <div class="module cols-4">
+                            <div class="module-title">Knowledge Services</div>
+                            <div class="module-content grid-1x3">
+                                <div class="component">Graph Builder</div>
+                                <div class="component">Freshness Checker</div>
+                                <div class="component">Metadata Enricher</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Layer 5: Data Storage -->
+            <div class="layer-wrapper">
+                <div class="layer-label label-data">Data Storage</div>
+                <div class="layer layer-data">
+                    <div class="layer-row">
+                        <div class="module cols-4">
+                            <div class="module-title">Vector Storage</div>
+                            <div class="module-content grid-1x2">
+                                <div class="component-icon"><span class="icon">🗄️</span><span class="label">Pinecone/Milvus</span></div>
+                                <div class="component-icon"><span class="icon">📊</span><span class="label">Vector Index</span></div>
+                            </div>
+                        </div>
+                        <div class="module cols-4">
+                            <div class="module-title">Document Storage</div>
+                            <div class="module-content grid-1x2">
+                                <div class="component-icon"><span class="icon">🐘</span><span class="label">PostgreSQL</span></div>
+                                <div class="component-icon"><span class="icon">☁️</span><span class="label">S3/Blob Store</span></div>
+                            </div>
+                        </div>
+                        <div class="module cols-4">
+                            <div class="module-title">Knowledge Graph</div>
+                            <div class="module-content grid-1x2">
+                                <div class="component-icon"><span class="icon">🕸️</span><span class="label">Neo4j/Neptune</span></div>
+                                <div class="component-icon"><span class="icon">🔗</span><span class="label">Graph Index</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</body>
+</html>

@@ -132,6 +132,27 @@ Execute Technical Design by following these steps in order:
 
 ---
 
+### Module Size Rule (800-Line Threshold)
+
+> **Rule:** When adding new functionality to an existing file, if the result would exceed **800 lines of code**, extract the new functionality into a **standalone module**.
+
+**Rationale:**
+- Files over 800 lines become difficult to navigate and maintain
+- Standalone modules enable better separation of concerns
+- Easier to test, debug, and refactor isolated modules
+- Reduces merge conflicts in collaborative development
+
+**How to Apply:**
+1. Before adding code to existing file, check current line count
+2. Estimate new functionality size
+3. If `current + new > 800`, create new module
+4. Keep integration points minimal (exports/imports)
+
+**Good:** Creating `voice-input.js` (400 lines) separate from `terminal-v2.js` (500 lines)
+**Bad:** Adding voice input directly to terminal-v2.js making it 900+ lines
+
+---
+
 ## Two-Part Document Structure
 
 Technical design documents MUST use this two-part structure. Adapt content based on implementation type (API, CLI, frontend, backend, etc.).

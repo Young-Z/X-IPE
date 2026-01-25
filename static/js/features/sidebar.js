@@ -256,12 +256,12 @@ class ProjectSidebar {
         
         let html = `
             <div class="nav-section" data-section-id="${section.id}">
-                <div class="nav-section-header" data-bs-toggle="collapse" data-bs-target="#section-${section.id}">
+                <div class="nav-section-header collapsed" data-bs-toggle="collapse" data-bs-target="#section-${section.id}">
                     <i class="bi ${icon}"></i>
                     <span>${section.label}</span>
                     <i class="bi bi-chevron-down chevron"></i>
                 </div>
-                <div class="collapse show nav-section-content" id="section-${section.id}">
+                <div class="collapse nav-section-content" id="section-${section.id}">
         `;
         
         if (!section.exists) {
@@ -278,6 +278,7 @@ class ProjectSidebar {
     
     /**
      * Render children (files and folders)
+     * Files are rendered above folders
      */
     renderChildren(children, depth = 0) {
         if (!children || children.length === 0) {
@@ -287,12 +288,18 @@ class ProjectSidebar {
         let html = '';
         const indent = depth * 1; // rem
         
-        for (const item of children) {
-            if (item.type === 'folder') {
-                html += this.renderFolder(item, depth);
-            } else {
-                html += this.renderFile(item, depth);
-            }
+        // Separate files and folders
+        const files = children.filter(item => item.type !== 'folder');
+        const folders = children.filter(item => item.type === 'folder');
+        
+        // Render files first
+        for (const item of files) {
+            html += this.renderFile(item, depth);
+        }
+        
+        // Then render folders
+        for (const item of folders) {
+            html += this.renderFolder(item, depth);
         }
         
         return html;
@@ -322,7 +329,7 @@ class ProjectSidebar {
         
         if (hasChildren) {
             html += `
-                <div class="collapse show nav-folder-content" id="folder-${folderId}">
+                <div class="collapse nav-folder-content" id="folder-${folderId}">
                     ${this.renderChildren(folder.children, depth + 1)}
                 </div>
             `;
@@ -454,6 +461,189 @@ class ProjectSidebar {
                     header.classList.remove('collapsed');
                 });
             }
+        });
+        
+        // Hover expand/collapse for sections and folders
+        this._bindHoverExpand();
+    }
+    
+    /**
+     * Bind hover expand/collapse behavior to sections and folders
+     * Expands after 1 sec hover, collapses 1 second after mouse leaves
+     * Click pins the item (won't auto-collapse)
+     */
+    _bindHoverExpand() {
+        // Section headers (not workplace)
+        const sectionHeaders = this.container.querySelectorAll('.nav-section-header:not(.nav-workplace-header)');
+        sectionHeaders.forEach(header => {
+            const targetSelector = header.dataset.bsTarget;
+            const target = document.querySelector(targetSelector);
+            if (!target) return;
+            
+            let collapseTimeout = null;
+            let expandTimeout = null;
+            let isPinned = false;
+            const section = header.closest('.nav-section');
+            
+            // Click to pin/unpin
+            header.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (expandTimeout) {
+                    clearTimeout(expandTimeout);
+                    expandTimeout = null;
+                }
+                if (collapseTimeout) {
+                    clearTimeout(collapseTimeout);
+                    collapseTimeout = null;
+                }
+                
+                if (isPinned) {
+                    // Unpin and collapse
+                    isPinned = false;
+                    header.classList.remove('pinned');
+                    bootstrap.Collapse.getOrCreateInstance(target).hide();
+                } else {
+                    // Pin and expand
+                    isPinned = true;
+                    header.classList.add('pinned');
+                    if (!target.classList.contains('show')) {
+                        bootstrap.Collapse.getOrCreateInstance(target).show();
+                    }
+                }
+            });
+            
+            // Expand after 1 sec hover
+            header.addEventListener('mouseenter', () => {
+                if (collapseTimeout) {
+                    clearTimeout(collapseTimeout);
+                    collapseTimeout = null;
+                }
+                if (!target.classList.contains('show') && !isPinned) {
+                    expandTimeout = setTimeout(() => {
+                        bootstrap.Collapse.getOrCreateInstance(target).show();
+                    }, 500);
+                }
+            });
+            
+            header.addEventListener('mouseleave', () => {
+                if (expandTimeout) {
+                    clearTimeout(expandTimeout);
+                    expandTimeout = null;
+                }
+            });
+            
+            // Collapse after 1 sec when leaving the entire section (if not pinned)
+            section.addEventListener('mouseleave', () => {
+                if (expandTimeout) {
+                    clearTimeout(expandTimeout);
+                    expandTimeout = null;
+                }
+                if (!isPinned) {
+                    collapseTimeout = setTimeout(() => {
+                        if (target.classList.contains('show')) {
+                            bootstrap.Collapse.getOrCreateInstance(target).hide();
+                        }
+                    }, 500);
+                }
+            });
+            
+            // Cancel collapse if re-entering section
+            section.addEventListener('mouseenter', () => {
+                if (collapseTimeout) {
+                    clearTimeout(collapseTimeout);
+                    collapseTimeout = null;
+                }
+            });
+        });
+        
+        // Folder items
+        const folderItems = this.container.querySelectorAll('.nav-folder');
+        folderItems.forEach(folder => {
+            const targetSelector = folder.dataset.bsTarget;
+            const target = document.querySelector(targetSelector);
+            if (!target) return;
+            
+            let collapseTimeout = null;
+            let expandTimeout = null;
+            let isPinned = false;
+            
+            // Click to pin/unpin
+            folder.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (expandTimeout) {
+                    clearTimeout(expandTimeout);
+                    expandTimeout = null;
+                }
+                if (collapseTimeout) {
+                    clearTimeout(collapseTimeout);
+                    collapseTimeout = null;
+                }
+                
+                if (isPinned) {
+                    // Unpin and collapse
+                    isPinned = false;
+                    folder.classList.remove('pinned');
+                    bootstrap.Collapse.getOrCreateInstance(target).hide();
+                } else {
+                    // Pin and expand
+                    isPinned = true;
+                    folder.classList.add('pinned');
+                    if (!target.classList.contains('show')) {
+                        bootstrap.Collapse.getOrCreateInstance(target).show();
+                    }
+                }
+            });
+            
+            // Expand after 1 sec hover
+            folder.addEventListener('mouseenter', () => {
+                if (collapseTimeout) {
+                    clearTimeout(collapseTimeout);
+                    collapseTimeout = null;
+                }
+                if (!target.classList.contains('show') && !isPinned) {
+                    expandTimeout = setTimeout(() => {
+                        bootstrap.Collapse.getOrCreateInstance(target).show();
+                    }, 500);
+                }
+            });
+            
+            folder.addEventListener('mouseleave', (e) => {
+                if (expandTimeout) {
+                    clearTimeout(expandTimeout);
+                    expandTimeout = null;
+                }
+                // Only start collapse timer if not entering the folder content and not pinned
+                if (!target.contains(e.relatedTarget) && !isPinned) {
+                    collapseTimeout = setTimeout(() => {
+                        if (target.classList.contains('show')) {
+                            bootstrap.Collapse.getOrCreateInstance(target).hide();
+                        }
+                    }, 500);
+                }
+            });
+            
+            target.addEventListener('mouseleave', (e) => {
+                // Only start collapse timer if not re-entering the folder header and not pinned
+                if (e.relatedTarget !== folder && !folder.contains(e.relatedTarget) && !isPinned) {
+                    collapseTimeout = setTimeout(() => {
+                        if (target.classList.contains('show')) {
+                            bootstrap.Collapse.getOrCreateInstance(target).hide();
+                        }
+                    }, 500);
+                }
+            });
+            
+            // Cancel collapse if hovering folder or its content
+            target.addEventListener('mouseenter', () => {
+                if (collapseTimeout) {
+                    clearTimeout(collapseTimeout);
+                    collapseTimeout = null;
+                }
+            });
         });
     }
     

@@ -228,6 +228,25 @@
 }
 
 /* =================================================================
+ * PINNED STATE (Click to keep open)
+ * ================================================================= */
+.nav-section-header.pinned::after,
+.nav-folder.pinned::after {
+    content: '\F588';  /* Bootstrap Icons pin-fill */
+    font-family: 'bootstrap-icons';
+    font-size: 0.65rem;
+    margin-left: auto;
+    padding-left: 0.5rem;
+    color: var(--bs-warning, #ffc107);
+    opacity: 0.9;
+}
+
+.nav-section-header.pinned .chevron,
+.nav-folder.pinned .chevron {
+    display: none;
+}
+
+/* =================================================================
  * PROJECT SWITCHER - FEATURE-006
  * ================================================================= */
 .project-switcher {

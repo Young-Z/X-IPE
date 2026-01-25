@@ -62,6 +62,17 @@
         }
     };
 
+    /**
+     * Debounce utility
+     */
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
     // =========================================================================
     // TerminalInstance - Single terminal with its socket
     // =========================================================================
@@ -257,6 +268,23 @@
             this.terminals = [];
             this.activeIndex = -1;
             this.onStatusChange = null;
+
+            this._setupResizeObserver();
+        }
+
+        _setupResizeObserver() {
+            if (!this.container || typeof ResizeObserver === 'undefined') return;
+
+            this._resizeObserver = new ResizeObserver(debounce((entries) => {
+                for (const entry of entries) {
+                    const { width, height } = entry.contentRect;
+                    if (width > 0 && height > 0) {
+                        this.fitAll();
+                    }
+                }
+            }, 50));
+
+            this._resizeObserver.observe(this.container);
         }
 
         /**

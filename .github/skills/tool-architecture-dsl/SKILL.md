@@ -8,6 +8,21 @@ version: 2.0
 
 Generate Architecture DSL definitions for software architecture diagrams.
 
+## IPE Markdown Support
+
+**IPE natively renders Architecture DSL** in markdown files. Embed directly using:
+
+````markdown
+```architecture-dsl
+@startuml module-view
+title "Your Architecture"
+...
+@enduml
+```
+````
+
+This renders as an **interactive diagram** in the IPE viewer - no HTML files needed for ideation documents.
+
 ## When to Use
 
 | Use Architecture DSL | Use Mermaid |
@@ -54,6 +69,7 @@ layer "Name" {
 | **Module cols** | MUST sum to 12 per layer |
 | **grid C x R** | C = columns, R = rows |
 | **Layer rows** | Required for each layer |
+| **Multi-line names** | Use `\n` in names to wrap text |
 
 ### Grid Syntax
 
@@ -63,6 +79,25 @@ rows 2         → Layer occupies 2 document rows
 cols 4         → Module takes 4/12 width
 grid 2 x 3     → Module internal: 2 cols × 3 rows
 ```
+
+### Multi-line Names
+
+For long names in layers, modules, or components, use `\n` to break lines:
+
+```architecture-dsl
+layer "Platform Services\n(BUILD + CONFIGURE)" {
+  ...
+  module "Source\nConnectors" {
+    ...
+    component "Azure\nOpenAI" { cols 1, rows 1 }
+  }
+}
+```
+
+Renders as:
+- Layer label: "PLATFORM SERVICES" on line 1, "(BUILD + CONFIGURE)" on line 2
+- Module title: "Source" on line 1, "Connectors" on line 2
+- Component: "Azure" on line 1, "OpenAI" on line 2
 
 ---
 

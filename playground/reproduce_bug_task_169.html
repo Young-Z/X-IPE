@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bug Reproduction TASK-169</title>
+</head>
+<body>
+    <div id="middle-section"></div>
+    <div class="EasyMDEContainer">
+        <textarea id="mock-editor"></textarea>
+        <!-- CodeMirror wrapper -->
+        <div class="CodeMirror"></div>
+    </div>
+
+    <script>
+        // Mock EasyMDE
+        class MockEasyMDE {
+            constructor() {
+                this.element = document.getElementById('mock-editor');
+                this.codemirror = {
+                    getWrapperElement: () => document.querySelector('.CodeMirror'),
+                    on: () => {}
+                };
+            }
+            static toggleFullScreen(instance) {
+                console.log('EasyMDE.toggleFullScreen called');
+                // Simulate toggle logic: if it has class, remove it. If not, add it.
+                // NOTE: Standard EasyMDE adds/removes CodeMirror-fullscreen
+                const wrapper = instance.codemirror.getWrapperElement();
+                wrapper.classList.toggle('CodeMirror-fullscreen');
+            }
+        }
+        window.EasyMDE = MockEasyMDE;
+
+        // Code from workplace.js (Fixed Version)
+        function initWorkplace(easyMDE) {
+            const middleSection = document.getElementById('middle-section');
+            let wasSideBySideActive = false;
+            
+            const cmWrapper = easyMDE.codemirror.getWrapperElement();
+            const observer = new MutationObserver(() => {
+                const isSideBySideActive = cmWrapper.classList.contains('editor-preview-active-side');
+                // Check for fullscreen on both wrapper (Standard EasyMDE) and container (Custom)
+                const container = easyMDE.element.closest('.EasyMDEContainer');
+                const isFullscreen = cmWrapper.classList.contains('CodeMirror-fullscreen') || 
+                                     (container && container.classList.contains('EasyMDEContainer--fullscreen'));
+                
+                console.log('Observer:', { isSideBySideActive, isFullscreen, wasSideBySideActive });
+
+                if (isSideBySideActive) {
+                    console.log('Side-by-side ON');
+                    middleSection.style.zIndex = '400';
+                    wasSideBySideActive = true;
+                } else {
+                    console.log('Side-by-side OFF');
+                    middleSection.style.zIndex = '';
+                    
+                    // If side-by-side was just turned off but still in fullscreen, exit fullscreen
+                    if (wasSideBySideActive && isFullscreen) {
+                        console.log('Attempting to exit fullscreen...');
+                        EasyMDE.toggleFullScreen(easyMDE);
+                    }
+                    wasSideBySideActive = false;
+                }
+            });
+            
+            if (cmWrapper) {
+                observer.observe(cmWrapper, { attributes: true, attributeFilter: ['class'] });
+            }
+        }
+
+        // Test Scenario
+        const easyMDE = new MockEasyMDE();
+        initWorkplace(easyMDE);
+
+        const cmWrapper = document.querySelector('.CodeMirror');
+        const container = document.querySelector('.EasyMDEContainer');
+
+        console.log('--- TEST START ---');
+
+        // Step 1: Simulate Toggle Side-by-Side ON
+        // Real behavior: EasyMDE adds 'editor-preview-active-side' to wrapper, and 'CodeMirror-fullscreen' to wrapper.
+        console.log('Action: Toggle Side-by-Side ON');
+        cmWrapper.classList.add('editor-preview-active-side');
+        cmWrapper.classList.add('CodeMirror-fullscreen');
+        // NOTE: The buggy code observes CONTAINER, not wrapper. 
+        // So observer might NOT fire if only child changes.
+        // But let's assume EasyMDE *might* touch container. If not, the bug is even more obvious.
+        // Let's touch container to force mutation event.
+        container.classList.add('dummy-change'); 
+
+        setTimeout(() => {
+            // Step 2: Simulate Toggle Side-by-Side OFF
+            console.log('Action: Toggle Side-by-Side OFF');
+            cmWrapper.classList.remove('editor-preview-active-side');
+            // NOTE: EasyMDE stays in fullscreen usually
+            // container.classList.add('dummy-change-2');
+
+            // Wait for observer
+            setTimeout(() => {
+                const isFullscreen = cmWrapper.classList.contains('CodeMirror-fullscreen');
+                console.log('Final Result: isFullscreen =', isFullscreen);
+                
+                if (isFullscreen) {
+                    console.error('TEST FAILED: Still in fullscreen!');
+                    document.body.innerHTML += '<h1 style="color:red">TEST FAILED</h1>';
+                } else {
+                    console.log('TEST PASSED: Exited fullscreen.');
+                    document.body.innerHTML += '<h1 style="color:green">TEST PASSED</h1>';
+                }
+            }, 100);
+        }, 100);
+
+    </script>
+</body>
+</html>

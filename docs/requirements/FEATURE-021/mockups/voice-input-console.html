@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Input Console - Mockup</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0d0d0f;
+            --bg-panel: #151518;
+            --bg-header: #1a1a1f;
+            --bg-hover: #242429;
+            --border-color: #2a2a30;
+            --text-primary: #e4e4e7;
+            --text-secondary: #71717a;
+            --text-muted: #52525b;
+            --accent-cyan: #22d3ee;
+            --accent-green: #4ade80;
+            --accent-red: #f87171;
+            --accent-orange: #fb923c;
+            --glow-cyan: rgba(34, 211, 238, 0.4);
+            --glow-green: rgba(74, 222, 128, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 40px;
+        }
+
+        .mockup-container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* Console Panel */
+        .console-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.3),
+                0 2px 4px -2px rgba(0, 0, 0, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+        }
+
+        /* Console Header */
+        .console-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            height: 44px;
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .console-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .console-title i {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Connection Status */
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            padding: 4px 10px;
+            background: rgba(74, 222, 128, 0.08);
+            border-radius: 20px;
+            border: 1px solid rgba(74, 222, 128, 0.15);
+        }
+
+        .connection-status.connected {
+            color: var(--accent-green);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            box-shadow: 0 0 6px var(--glow-green);
+            animation: pulse-green 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--glow-green); }
+            50% { opacity: 0.7; box-shadow: 0 0 10px var(--glow-green); }
+        }
+
+        /* Header Right Actions */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.15s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .action-btn.active {
+            background: rgba(34, 211, 238, 0.12);
+            color: var(--accent-cyan);
+        }
+
+        /* Voice Animation Indicator */
+        .voice-indicator {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            padding: 0 8px;
+            height: 32px;
+            opacity: 0;
+            transform: translateX(10px);
+            transition: all 0.2s ease;
+        }
+
+        .voice-indicator.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .voice-bar {
+            width: 3px;
+            height: 12px;
+            background: var(--accent-cyan);
+            border-radius: 2px;
+            animation: voice-wave 0.5s ease-in-out infinite;
+            box-shadow: 0 0 8px var(--glow-cyan);
+        }
+
+        .voice-bar:nth-child(1) { animation-delay: 0s; height: 8px; }
+        .voice-bar:nth-child(2) { animation-delay: 0.1s; height: 14px; }
+        .voice-bar:nth-child(3) { animation-delay: 0.2s; height: 10px; }
+        .voice-bar:nth-child(4) { animation-delay: 0.15s; height: 16px; }
+        .voice-bar:nth-child(5) { animation-delay: 0.05s; height: 8px; }
+
+        @keyframes voice-wave {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.4); }
+        }
+
+        /* Mic Toggle */
+        .mic-toggle {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .mic-toggle:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .mic-toggle.active {
+            background: rgba(34, 211, 238, 0.15);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.3);
+        }
+
+        .mic-toggle.recording {
+            background: rgba(251, 146, 60, 0.15);
+            color: var(--accent-orange);
+            box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.3);
+            animation: pulse-recording 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse-recording {
+            0%, 100% { box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.3); }
+            50% { box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.15), 0 0 12px rgba(251, 146, 60, 0.2); }
+        }
+
+        .divider {
+            width: 1px;
+            height: 20px;
+            background: var(--border-color);
+            margin: 0 4px;
+        }
+
+        /* Terminal Panes */
+        .terminal-panes {
+            display: flex;
+            height: 280px;
+        }
+
+        .terminal-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .terminal-pane.focused {
+            border-color: var(--accent-cyan);
+            box-shadow: inset 0 0 20px rgba(34, 211, 238, 0.03);
+        }
+
+        .pane-splitter {
+            width: 1px;
+            background: var(--border-color);
+            cursor: ew-resize;
+        }
+
+        .pane-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 12px;
+            height: 28px;
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .pane-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .terminal-pane.focused .pane-title {
+            color: var(--text-secondary);
+        }
+
+        .close-pane-btn {
+            width: 18px;
+            height: 18px;
+            border: none;
+            border-radius: 4px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.15s;
+        }
+
+        .terminal-pane:hover .close-pane-btn {
+            opacity: 1;
+        }
+
+        .close-pane-btn:hover {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        /* Terminal Content */
+        .terminal-content {
+            flex: 1;
+            padding: 12px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            background: var(--bg-panel);
+            overflow: auto;
+        }
+
+        .prompt {
+            color: var(--accent-cyan);
+        }
+
+        .command {
+            color: var(--text-primary);
+        }
+
+        .output {
+            color: var(--text-secondary);
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: var(--accent-cyan);
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Transcription Preview */
+        .transcription-preview {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(251, 146, 60, 0.08);
+            border-top: 1px solid rgba(251, 146, 60, 0.2);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+
+        .transcription-preview.active {
+            display: flex;
+        }
+
+        .transcription-label {
+            color: var(--accent-orange);
+            font-weight: 600;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .transcription-text {
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        /* Hotkey Badge */
+        .hotkey-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            padding: 3px 6px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-muted);
+        }
+
+        /* Demo Controls */
+        .demo-controls {
+            margin-top: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 24px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+
+        .demo-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .demo-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .demo-btn {
+            padding: 10px 18px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-header);
+            color: var(--text-primary);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .demo-btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--text-muted);
+        }
+
+        .demo-btn.active {
+            background: rgba(34, 211, 238, 0.1);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        /* Legend */
+        .legend {
+            margin-top: 32px;
+            padding: 20px 24px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+
+        .legend-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .legend-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-header);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .legend-icon.cyan { color: var(--accent-cyan); background: rgba(34, 211, 238, 0.1); }
+        .legend-icon.green { color: var(--accent-green); background: rgba(74, 222, 128, 0.1); }
+        .legend-icon.orange { color: var(--accent-orange); background: rgba(251, 146, 60, 0.1); }
+    </style>
+</head>
+<body>
+    <h1>Voice Input for Console</h1>
+    <p class="subtitle">Interactive UI Mockup • TASK-106</p>
+
+    <div class="mockup-container">
+        <!-- Console Panel -->
+        <div class="console-panel">
+            <!-- Console Header -->
+            <div class="console-header">
+                <div class="header-left">
+                    <div class="console-title">
+                        <i class="bi bi-terminal"></i>
+                        <span>Console</span>
+                    </div>
+                    <div class="connection-status connected">
+                        <span class="status-dot"></span>
+                        <span>Connected</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <!-- Voice Animation Indicator -->
+                    <div class="voice-indicator" id="voiceIndicator">
+                        <div class="voice-bar"></div>
+                        <div class="voice-bar"></div>
+                        <div class="voice-bar"></div>
+                        <div class="voice-bar"></div>
+                        <div class="voice-bar"></div>
+                    </div>
+                    <!-- Mic Toggle -->
+                    <button class="mic-toggle" id="micToggle" title="Toggle Voice Input (Ctrl+Shift+V to speak)">
+                        <i class="bi bi-mic"></i>
+                    </button>
+                    <!-- Add Terminal -->
+                    <button class="action-btn" title="Add Terminal">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                    <div class="divider"></div>
+                    <!-- Zen Mode -->
+                    <button class="action-btn" title="Zen Mode">
+                        <i class="bi bi-arrows-fullscreen"></i>
+                    </button>
+                    <!-- Collapse -->
+                    <button class="action-btn" title="Collapse">
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Transcription Preview -->
+            <div class="transcription-preview" id="transcriptionPreview">
+                <span class="transcription-label">Voice</span>
+                <span class="transcription-text" id="transcriptionText">git status</span>
+                <span class="hotkey-badge">Release to send</span>
+            </div>
+
+            <!-- Terminal Panes -->
+            <div class="terminal-panes">
+                <div class="terminal-pane focused" id="pane1">
+                    <div class="pane-header">
+                        <span class="pane-title">Terminal 1</span>
+                        <button class="close-pane-btn">×</button>
+                    </div>
+                    <div class="terminal-content">
+                        <div><span class="prompt">~/project $</span> <span class="command">npm run build</span></div>
+                        <div class="output">> x-ipe@1.0.0 build</div>
+                        <div class="output">> tsc && vite build</div>
+                        <div class="output" style="color: var(--accent-green);">✓ Build completed in 2.3s</div>
+                        <div><br></div>
+                        <div><span class="prompt">~/project $</span> <span class="cursor"></span></div>
+                    </div>
+                </div>
+                <div class="pane-splitter"></div>
+                <div class="terminal-pane" id="pane2">
+                    <div class="pane-header">
+                        <span class="pane-title">Terminal 2</span>
+                        <button class="close-pane-btn">×</button>
+                    </div>
+                    <div class="terminal-content">
+                        <div><span class="prompt">~/project $</span> <span class="command">python main.py</span></div>
+                        <div class="output">Server running on http://localhost:5000</div>
+                        <div class="output" style="color: var(--text-muted);">Press Ctrl+C to stop</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Controls -->
+        <div class="demo-controls">
+            <div class="demo-title">Interactive Demo</div>
+            <div class="demo-buttons">
+                <button class="demo-btn" id="btnIdle">Idle State</button>
+                <button class="demo-btn" id="btnMicOn">Mic Enabled</button>
+                <button class="demo-btn" id="btnRecording">Recording (Hold Ctrl+Shift+V)</button>
+                <button class="demo-btn" id="btnTranscribing">Transcribing...</button>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-title">UI Components</div>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="legend-icon green"><i class="bi bi-circle-fill" style="font-size: 8px;"></i></div>
+                    <span>Connection status (moved left)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon cyan"><i class="bi bi-mic"></i></div>
+                    <span>Mic toggle button</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon orange">
+                        <div style="display: flex; gap: 2px;">
+                            <div style="width: 2px; height: 8px; background: var(--accent-orange); border-radius: 1px;"></div>
+                            <div style="width: 2px; height: 12px; background: var(--accent-orange); border-radius: 1px;"></div>
+                            <div style="width: 2px; height: 6px; background: var(--accent-orange); border-radius: 1px;"></div>
+                        </div>
+                    </div>
+                    <span>Voice animation indicator</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon"><i class="bi bi-plus-lg"></i></div>
+                    <span>Add terminal (existing)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const micToggle = document.getElementById('micToggle');
+        const voiceIndicator = document.getElementById('voiceIndicator');
+        const transcriptionPreview = document.getElementById('transcriptionPreview');
+        const transcriptionText = document.getElementById('transcriptionText');
+        const pane1 = document.getElementById('pane1');
+        const pane2 = document.getElementById('pane2');
+
+        // Demo buttons
+        const btnIdle = document.getElementById('btnIdle');
+        const btnMicOn = document.getElementById('btnMicOn');
+        const btnRecording = document.getElementById('btnRecording');
+        const btnTranscribing = document.getElementById('btnTranscribing');
+
+        const allBtns = [btnIdle, btnMicOn, btnRecording, btnTranscribing];
+
+        function setActiveBtn(btn) {
+            allBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function setIdleState() {
+            setActiveBtn(btnIdle);
+            micToggle.classList.remove('active', 'recording');
+            voiceIndicator.classList.remove('active');
+            transcriptionPreview.classList.remove('active');
+        }
+
+        function setMicOnState() {
+            setActiveBtn(btnMicOn);
+            micToggle.classList.add('active');
+            micToggle.classList.remove('recording');
+            voiceIndicator.classList.remove('active');
+            transcriptionPreview.classList.remove('active');
+        }
+
+        function setRecordingState() {
+            setActiveBtn(btnRecording);
+            micToggle.classList.add('active', 'recording');
+            voiceIndicator.classList.add('active');
+            transcriptionPreview.classList.add('active');
+            transcriptionText.textContent = 'git status...';
+            
+            // Simulate live transcription
+            setTimeout(() => {
+                if (btnRecording.classList.contains('active')) {
+                    transcriptionText.textContent = 'git status';
+                }
+            }, 800);
+        }
+
+        function setTranscribingState() {
+            setActiveBtn(btnTranscribing);
+            micToggle.classList.add('active');
+            micToggle.classList.remove('recording');
+            voiceIndicator.classList.remove('active');
+            transcriptionPreview.classList.add('active');
+            transcriptionText.textContent = 'Processing...';
+            
+            // Simulate completion
+            setTimeout(() => {
+                if (btnTranscribing.classList.contains('active')) {
+                    transcriptionPreview.classList.remove('active');
+                }
+            }, 1500);
+        }
+
+        btnIdle.addEventListener('click', setIdleState);
+        btnMicOn.addEventListener('click', setMicOnState);
+        btnRecording.addEventListener('click', setRecordingState);
+        btnTranscribing.addEventListener('click', setTranscribingState);
+
+        // Terminal pane focus
+        pane1.addEventListener('click', () => {
+            pane1.classList.add('focused');
+            pane2.classList.remove('focused');
+        });
+
+        pane2.addEventListener('click', () => {
+            pane2.classList.add('focused');
+            pane1.classList.remove('focused');
+        });
+
+        // Mic toggle click
+        micToggle.addEventListener('click', () => {
+            if (micToggle.classList.contains('active')) {
+                setIdleState();
+            } else {
+                setMicOnState();
+            }
+        });
+
+        // Keyboard shortcut demo
+        let isHolding = false;
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'V' && !isHolding) {
+                isHolding = true;
+                if (micToggle.classList.contains('active')) {
+                    setRecordingState();
+                }
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'V' || e.key === 'Control' || e.key === 'Shift') {
+                if (isHolding) {
+                    isHolding = false;
+                    if (micToggle.classList.contains('recording')) {
+                        setTranscribingState();
+                    }
+                }
+            }
+        });
+
+        // Start with idle
+        setIdleState();
+    </script>
+</body>
+</html>

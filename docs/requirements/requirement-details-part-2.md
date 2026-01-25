@@ -15,6 +15,9 @@
 | FEATURE-015 | Architecture DSL Skill | v1.0 | Tool skill for NL ↔ DSL translation of architecture descriptions | FEATURE-011 |
 | FEATURE-016 | Architecture Diagram Renderer | v1.0 | Tool skill that renders Architecture DSL into visual HTML canvas diagrams | FEATURE-015 |
 | FEATURE-017 | Architecture DSL JavaScript Library | v1.0 | Standalone JS library that parses Architecture DSL and renders to Canvas | FEATURE-015, FEATURE-016 |
+| FEATURE-018 | X-IPE CLI Tool | v1.0 | PyPI package with CLI commands: init, serve, upgrade, status, info | None |
+| FEATURE-019 | Simplified Project Setup | v1.0 | `x-ipe init` creates docs/, .github/skills/, .x-ipe/ structure | FEATURE-018 |
+| FEATURE-020 | Skills Discovery & Override | v1.0 | Skills loaded from package, local overrides in .github/skills/ | FEATURE-018, FEATURE-019 |
 
 ---
 
@@ -413,3 +416,196 @@
 | Canvas vs HTML/CSS? | Canvas for programmatic use, HTML/CSS in X-IPE skill |
 | Browser support? | Modern browsers with Canvas 2D support |
 | Node.js support? | Yes, via node-canvas or similar |
+
+---
+
+### FEATURE-018: X-IPE CLI Tool
+
+**Version:** v1.0  
+**Brief Description:** Transform X-IPE from a cloned repository into a pip-installable PyPI package with a CLI tool. Provides commands for initializing projects, running the web server, upgrading skills, and checking status.
+
+**Source:** Human request (simplified setup discussion)  
+**Mockup:** N/A (CLI tool)
+
+**Acceptance Criteria:**
+
+1. **Package Distribution**
+   - [ ] AC-1.1: X-IPE published to PyPI as `x-ipe` package
+   - [ ] AC-1.2: Installable via `pip install x-ipe`
+   - [ ] AC-1.3: Package includes all skills as package data
+   - [ ] AC-1.4: Package includes static files (CSS, JS, templates)
+   - [ ] AC-1.5: Version follows semantic versioning
+
+2. **CLI Entry Point**
+   - [ ] AC-2.1: `x-ipe` command available after installation
+   - [ ] AC-2.2: Help text shows all available commands
+   - [ ] AC-2.3: Version flag `x-ipe --version` shows package version
+   - [ ] AC-2.4: Uses `click` or `argparse` for CLI parsing
+
+3. **Init Command**
+   - [ ] AC-3.1: `x-ipe init` creates project structure in current directory
+   - [ ] AC-3.2: Creates `docs/` folder with subfolders (ideas, planning, requirements)
+   - [ ] AC-3.3: Creates `.x-ipe/` hidden folder for runtime data (db, cache)
+   - [ ] AC-3.4: Creates/merges `.github/` folder with skills and copilot instructions
+   - [ ] AC-3.5: Creates `.x-ipe.yaml` config file with sensible defaults
+   - [ ] AC-3.6: Auto-detects git repo and updates `.gitignore`
+   - [ ] AC-3.7: Adds `.x-ipe/` and `.x-ipe.yaml` to `.gitignore`
+   - [ ] AC-3.8: Non-destructive: skips existing files/folders with warning
+   - [ ] AC-3.9: Shows summary of created/skipped items
+
+4. **Serve Command**
+   - [ ] AC-4.1: `x-ipe serve` starts web server in current directory
+   - [ ] AC-4.2: `--port` flag to specify port (default: 5000)
+   - [ ] AC-4.3: `--open` flag to auto-open browser
+   - [ ] AC-4.4: Server finds and uses `.x-ipe.yaml` if present
+   - [ ] AC-4.5: Falls back to sensible defaults without config
+   - [ ] AC-4.6: Hot reload for development (optional flag)
+
+5. **Upgrade Command**
+   - [ ] AC-5.1: `x-ipe upgrade` updates skills from package
+   - [ ] AC-5.2: Detects local skill modifications before overwriting
+   - [ ] AC-5.3: `--force` flag to overwrite local changes
+   - [ ] AC-5.4: Creates backup of modified skills before upgrade
+   - [ ] AC-5.5: Updates `.github/` copilot instructions
+
+6. **Status Command**
+   - [ ] AC-6.1: `x-ipe status` shows project X-IPE status
+   - [ ] AC-6.2: Shows if project is initialized
+   - [ ] AC-6.3: Shows skills count (package vs local)
+   - [ ] AC-6.4: Shows server status if running
+
+7. **Info Command**
+   - [ ] AC-7.1: `x-ipe info` shows detailed diagnostics
+   - [ ] AC-7.2: Shows package version
+   - [ ] AC-7.3: Shows Python version and environment
+   - [ ] AC-7.4: Shows config file location and contents
+   - [ ] AC-7.5: Shows paths (skills, docs, .x-ipe folder)
+
+**Dependencies:**
+- None (this is the foundation)
+
+**Technical Considerations:**
+- Use `pyproject.toml` for package configuration
+- Include `[project.scripts]` for CLI entry point
+- Use `importlib.resources` for accessing package data
+- Consider `click` library for CLI (cleaner than argparse)
+
+**Clarifications:**
+| Question | Answer |
+|----------|--------|
+| Installation method? | pip install x-ipe (PyPI) |
+| CLI framework? | click or argparse |
+| Package name? | x-ipe |
+| Minimum Python? | 3.10+ |
+
+---
+
+### FEATURE-019: Simplified Project Setup
+
+**Version:** v1.0  
+**Brief Description:** The `x-ipe init` command creates a complete project structure with docs folders, hidden .x-ipe runtime folder, and merged .github configuration.
+
+**Source:** Human request (simplified setup discussion)  
+**Mockup:** N/A
+
+**Acceptance Criteria:**
+
+1. **Docs Folder Structure**
+   - [ ] AC-1.1: Creates `docs/ideas/` folder
+   - [ ] AC-1.2: Creates `docs/planning/` folder with empty `task-board.md`
+   - [ ] AC-1.3: Creates `docs/requirements/` folder
+   - [ ] AC-1.4: Creates `docs/themes/` folder with `theme-default/`
+   - [ ] AC-1.5: All docs folders are version-controlled (not gitignored)
+
+2. **Runtime Folder (.x-ipe/)**
+   - [ ] AC-2.1: Creates `.x-ipe/` hidden folder
+   - [ ] AC-2.2: Stores `settings.db` in `.x-ipe/`
+   - [ ] AC-2.3: Stores session data in `.x-ipe/sessions/`
+   - [ ] AC-2.4: Stores cache in `.x-ipe/cache/`
+   - [ ] AC-2.5: Entire `.x-ipe/` folder gitignored
+
+3. **GitHub Configuration**
+   - [ ] AC-3.1: Creates `.github/skills/` with skills from package
+   - [ ] AC-3.2: Merges with existing `.github/` if present (non-destructive)
+   - [ ] AC-3.3: Copies copilot instructions to `.github/copilot-instructions.md`
+   - [ ] AC-3.4: Skills are copied (not symlinked) for portability
+   - [ ] AC-3.5: Local skills override package skills by name
+
+4. **Configuration File**
+   - [ ] AC-4.1: Creates `.x-ipe.yaml` with default configuration
+   - [ ] AC-4.2: Default paths point to current directory structure
+   - [ ] AC-4.3: Config file is gitignored (project-specific settings)
+
+5. **Git Integration**
+   - [ ] AC-5.1: Detects if current directory is a git repository
+   - [ ] AC-5.2: Creates/updates `.gitignore` with X-IPE patterns
+   - [ ] AC-5.3: Gitignore includes: `.x-ipe/`, `.x-ipe.yaml`
+   - [ ] AC-5.4: Does NOT gitignore `docs/` or `.github/skills/`
+
+**Dependencies:**
+- FEATURE-018: X-IPE CLI Tool (provides the `x-ipe` command)
+
+**Technical Considerations:**
+- Use `shutil.copytree` for folder copying with ignore patterns
+- Check for existing files before overwriting
+- Provide `--dry-run` flag to preview changes
+
+**Clarifications:**
+| Question | Answer |
+|----------|--------|
+| Overwrite existing files? | No, skip with warning |
+| docs/ location? | Project root (visible, version controlled) |
+| .x-ipe/ location? | Project root (hidden, gitignored) |
+| Skills copied or linked? | Copied for portability |
+
+---
+
+### FEATURE-020: Skills Discovery & Override
+
+**Version:** v1.0  
+**Brief Description:** Skills are loaded from the installed X-IPE package by default, but local skills in `.github/skills/` take precedence, allowing project-specific customization.
+
+**Source:** Human request (simplified setup discussion)  
+**Mockup:** N/A
+
+**Acceptance Criteria:**
+
+1. **Package Skills Discovery**
+   - [ ] AC-1.1: Skills bundled in X-IPE package at install time
+   - [ ] AC-1.2: Package skills accessible via `importlib.resources`
+   - [ ] AC-1.3: SkillsService discovers package skills automatically
+   - [ ] AC-1.4: Package skills read-only (not modified at runtime)
+
+2. **Local Skills Override**
+   - [ ] AC-2.1: Local skills in `.github/skills/` discovered
+   - [ ] AC-2.2: Local skill with same name overrides package skill
+   - [ ] AC-2.3: Override is by skill folder name (e.g., `task-type-bug-fix`)
+   - [ ] AC-2.4: Partial override: local skill completely replaces package skill
+
+3. **Skills Merge Logic**
+   - [ ] AC-3.1: Final skills list = package skills + local-only skills - overridden
+   - [ ] AC-3.2: API endpoint shows skill source (package vs local)
+   - [ ] AC-3.3: `x-ipe status` shows skills breakdown
+
+4. **Skills Upgrade**
+   - [ ] AC-4.1: `x-ipe upgrade` syncs package skills to local
+   - [ ] AC-4.2: Detects modified local skills (hash comparison)
+   - [ ] AC-4.3: Prompts before overwriting modified skills
+   - [ ] AC-4.4: `--force` flag overwrites without prompt
+   - [ ] AC-4.5: Creates `.x-ipe/backups/skills-{timestamp}/` before upgrade
+
+**Dependencies:**
+- FEATURE-018: X-IPE CLI Tool
+- FEATURE-019: Simplified Project Setup
+
+**Technical Considerations:**
+- Use file hashes (SHA-256) to detect local modifications
+- Store original package skill hashes in `.x-ipe/skill-hashes.json`
+- Consider lazy loading skills for performance
+
+**Clarifications:**
+| Question | Answer |
+|----------|--------|
+| Override granularity? | Entire skill folder, not individual files |
+| New skills in package? | Auto-discovered, no init needed |
+| Deleted package skills? | Local copy remains until manually deleted |

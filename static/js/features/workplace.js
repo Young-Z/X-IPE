@@ -934,6 +934,63 @@ class WorkplaceManager {
     }
     
     /**
+     * Render all special blocks (mermaid, infographic, architecture) within a container
+     * Used for EasyMDE preview which may be in different DOM locations
+     */
+    async _renderSpecialBlocksInContainer(container) {
+        if (!container) return;
+        
+        // Render Mermaid blocks
+        if (this._mermaidBlocks && typeof mermaid !== 'undefined') {
+            for (const block of this._mermaidBlocks) {
+                const el = container.querySelector(`#${block.id}`) || document.getElementById(block.id);
+                if (el && !el.querySelector('svg')) {
+                    try {
+                        const { svg } = await mermaid.render(block.id + '-svg-' + Date.now(), block.diagram);
+                        el.innerHTML = svg;
+                    } catch (e) {
+                        el.innerHTML = `<pre class="text-danger">Mermaid error: ${e.message}</pre>`;
+                    }
+                }
+            }
+        }
+        
+        // Render Infographic blocks
+        if (this._infographicBlocks && typeof AntVInfographic !== 'undefined') {
+            for (const block of this._infographicBlocks) {
+                const el = container.querySelector(`#${block.id}`) || document.getElementById(block.id);
+                if (el && !el.hasChildNodes()) {
+                    try {
+                        const infographic = new AntVInfographic.Infographic({
+                            container: el,
+                            width: '100%',
+                            height: '100%',
+                        });
+                        infographic.render(block.syntax);
+                    } catch (e) {
+                        el.innerHTML = `<pre class="text-danger">Infographic error: ${e.message}</pre>`;
+                    }
+                }
+            }
+        }
+        
+        // Render Architecture DSL blocks
+        if (this._architectureBlocks) {
+            for (const block of this._architectureBlocks) {
+                const el = container.querySelector(`#${block.id}`) || document.getElementById(block.id);
+                if (el && !el.hasChildNodes()) {
+                    try {
+                        const html = this._renderArchitectureHTML(this._parseArchitectureDSL(block.dsl));
+                        el.innerHTML = html;
+                    } catch (e) {
+                        el.innerHTML = `<pre class="text-danger">Architecture DSL error: ${e.message}</pre>`;
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
      * Render Mermaid diagrams
      */
     async _renderMermaidDiagrams() {
@@ -1003,143 +1060,27 @@ class WorkplaceManager {
     /**
      * Parse Architecture DSL into AST
      */
+    /**
+     * Parse Architecture DSL using the bundled library
+     */
     _parseArchitectureDSL(dsl) {
-        const errors = [];
-        const warnings = [];
-        const lines = dsl.split('\n');
-        
-        const ast = {
-            type: 'document', viewType: null, title: null, theme: 'theme-default',
-            direction: 'top-to-bottom', grid: { cols: 12, rows: 6 }, textAlign: 'left',
-            layers: [], errors, warnings
-        };
-
-        let currentLayer = null;
-        let currentModule = null;
-        let inMultiLineComment = false;
-
-        for (const rawLine of lines) {
-            let line = rawLine.trim();
-            if (inMultiLineComment) { if (line.includes("'/")) inMultiLineComment = false; continue; }
-            if (line.startsWith("/'")) { inMultiLineComment = true; continue; }
-            if (line.startsWith("'") || line === '') continue;
-            const commentIdx = line.indexOf("'");
-            if (commentIdx > 0) line = line.substring(0, commentIdx).trim();
-
-            if (line.startsWith('@startuml')) { const m = line.match(/@startuml\s+(module-view|landscape-view)/); if (m) ast.viewType = m[1]; continue; }
-            if (line === '@enduml') continue;
-            if (line.startsWith('title ')) { const m = line.match(/title\s+"([^"]+)"/); if (m) ast.title = m[1]; continue; }
-            if (line.startsWith('grid ') && !currentModule) { const m = line.match(/grid\s+(\d+)\s*x\s*(\d+)/); if (m) ast.grid = { cols: parseInt(m[1]), rows: parseInt(m[2]) }; continue; }
-            
-            if (line.startsWith('layer ')) {
-                const m = line.match(/layer\s+"([^"]+)"(?:\s+as\s+(\w+))?\s*\{?/);
-                if (m) {
-                    currentLayer = { type: 'layer', name: m[1], alias: m[2] || null, rows: 1, color: null, borderColor: null, textAlign: ast.textAlign, modules: [] };
-                    ast.layers.push(currentLayer);
-                }
-                continue;
-            }
-            if (currentLayer && !currentModule) {
-                if (line.startsWith('rows ')) { const m = line.match(/rows\s+(\d+)/); if (m) currentLayer.rows = parseInt(m[1]); continue; }
-                if (line.startsWith('color ')) { const m = line.match(/color\s+"([^"]+)"/); if (m) currentLayer.color = m[1]; continue; }
-                if (line.startsWith('border-color ')) { const m = line.match(/border-color\s+"([^"]+)"/); if (m) currentLayer.borderColor = m[1]; continue; }
-                if (line.startsWith('module ')) {
-                    const m = line.match(/module\s+"([^"]+)"(?:\s+as\s+(\w+))?\s*\{?/);
-                    if (m) {
-                        currentModule = { type: 'module', name: m[1], alias: m[2] || null, cols: 12, rows: 1, grid: { cols: 1, rows: 1 }, gap: '8px', components: [] };
-                        currentLayer.modules.push(currentModule);
-                    }
-                    continue;
-                }
-                if (line === '}') { currentLayer = null; continue; }
-            }
-            if (currentModule) {
-                if (line.startsWith('cols ')) { const m = line.match(/cols\s+(\d+)/); if (m) currentModule.cols = parseInt(m[1]); continue; }
-                if (line.startsWith('rows ') && !line.includes(',')) { const m = line.match(/rows\s+(\d+)/); if (m) currentModule.rows = parseInt(m[1]); continue; }
-                if (line.startsWith('grid ')) { const m = line.match(/grid\s+(\d+)\s*x\s*(\d+)/); if (m) currentModule.grid = { cols: parseInt(m[1]), rows: parseInt(m[2]) }; continue; }
-                if (line.startsWith('gap ')) { const m = line.match(/gap\s+(\d+(?:px|rem))/); if (m) currentModule.gap = m[1]; continue; }
-                if (line.startsWith('component ')) {
-                    const m = line.match(/component\s+"([^"]+)"(?:\s*\{\s*cols\s+(\d+)(?:\s*,\s*rows\s+(\d+))?\s*\})?(?:\s*<<(\w+)>>)?/);
-                    if (m) currentModule.components.push({ type: 'component', name: m[1], cols: m[2] ? parseInt(m[2]) : 1, rows: m[3] ? parseInt(m[3]) : 1, stereotype: m[4] || null });
-                    continue;
-                }
-                if (line === '}') { currentModule = null; continue; }
-            }
+        if (typeof ArchitectureDSL !== 'undefined') {
+            return ArchitectureDSL.parse(dsl);
         }
-        return ast;
+        // Fallback: return empty AST if library not loaded
+        console.warn('ArchitectureDSL library not loaded');
+        return { type: 'document', title: null, layers: [], errors: [{ message: 'Library not loaded' }], warnings: [] };
     }
     
     /**
-     * Render Architecture AST to HTML
+     * Render Architecture AST to HTML using the bundled library
      */
     _renderArchitectureHTML(ast) {
-        const c = 'arch-diagram';
-        const patterns = [
-            { p: ['presentation', 'ui', 'frontend', 'view'], bg: '#fce7f3', border: '#ec4899' },
-            { p: ['service', 'api', 'gateway'], bg: '#fef3c7', border: '#f97316' },
-            { p: ['business', 'domain', 'logic', 'core'], bg: '#dbeafe', border: '#3b82f6' },
-            { p: ['data', 'persistence', 'storage', 'db'], bg: '#dcfce7', border: '#22c55e' },
-            { p: ['infrastructure', 'infra', 'platform'], bg: '#f3e8ff', border: '#a855f7' }
-        ];
-        const detectColors = (name) => {
-            const n = name.toLowerCase();
-            for (const pat of patterns) if (pat.p.some(x => n.includes(x))) return { bg: pat.bg, border: pat.border };
-            return { bg: '#ffffff', border: '#374151' };
-        };
-        const esc = (t) => { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; };
-        
-        let html = `<style>
-            .${c} { font-family: 'Inter', system-ui, sans-serif; max-width: 1200px; margin: 0 auto; }
-            .${c}-title { font-size: 22px; font-weight: 700; color: #374151; text-align: center; margin-bottom: 20px; }
-            .${c}-content { display: flex; flex-direction: column; gap: 16px; }
-            .${c}-layer-wrapper { display: flex; gap: 0; border-radius: 8px; transition: transform 0.3s, box-shadow 0.3s; }
-            .${c}-layer-wrapper:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
-            .${c}-layer-label { writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); background: #1f2937; padding: 16px 8px; font-size: 12px; font-weight: 600; color: #fff; display: flex; align-items: center; justify-content: center; border-radius: 0 8px 8px 0; min-width: 36px; transition: background 0.2s, min-width 0.2s; }
-            .${c}-layer-wrapper:hover .${c}-layer-label { background: #6366f1; min-width: 40px; }
-            .${c}-layer-wrapper:hover .${c}-layer { border-color: #6366f1; }
-            .${c}-layer { flex: 1; padding: 20px; border: 2px solid; border-left: none; border-radius: 0 8px 8px 0; transition: border-color 0.2s; }
-            .${c}-layer-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
-            .${c}-module { background: #fff; border: 1.5px dashed #d1d5db; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 12px; transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s; }
-            .${c}-module:hover { border-color: #3b82f6; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); transform: scale(1.01); }
-            .${c}-module-title { font-size: 14px; font-weight: 700; color: #374151; }
-            .${c}-module-content { display: grid; gap: 10px; }
-            .${c}-component { background: #1f2937; color: #fff; border-radius: 18px; padding: 8px 16px; font-size: 12px; font-weight: 500; text-align: center; display: flex; align-items: center; justify-content: center; min-height: 36px; transition: all 0.2s; cursor: default; }
-            .${c}-component:hover { background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-            .${c}-icon-component { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px; min-height: 60px; transition: transform 0.2s; cursor: default; }
-            .${c}-icon-component:hover { transform: scale(1.1); }
-            .${c}-icon { font-size: 28px; }
-            .${c}-icon-label { font-size: 11px; color: #6b7280; }
-        </style><div class="${c}">`;
-        
-        if (ast.title) html += `<div class="${c}-title">${esc(ast.title)}</div>`;
-        html += `<div class="${c}-content">`;
-        
-        for (const layer of ast.layers) {
-            const colors = layer.color ? { bg: layer.color, border: layer.borderColor || '#374151' } : detectColors(layer.name);
-            html += `<div class="${c}-layer-wrapper"><div class="${c}-layer-label">${esc(layer.name.toUpperCase())}</div>`;
-            html += `<div class="${c}-layer" style="background: ${colors.bg}; border-color: ${colors.border};"><div class="${c}-layer-row">`;
-            
-            for (const module of layer.modules) {
-                const gridCols = module.grid?.cols || 1;
-                const gap = parseInt(module.gap) || 10;
-                html += `<div class="${c}-module" style="grid-column: span ${module.cols || 12};"><div class="${c}-module-title">${esc(module.name)}</div>`;
-                html += `<div class="${c}-module-content" style="grid-template-columns: repeat(${gridCols}, 1fr); gap: ${gap}px;">`;
-                
-                for (const comp of module.components) {
-                    const gs = `grid-column: span ${comp.cols || 1}; grid-row: span ${comp.rows || 1};`;
-                    if (comp.stereotype && ['icon', 'folder', 'file', 'db'].includes(comp.stereotype)) {
-                        const icons = { folder: '📁', file: '📄', db: '🗄️', icon: '⚙️' };
-                        html += `<div class="${c}-icon-component" style="${gs}"><span class="${c}-icon">${icons[comp.stereotype] || '📦'}</span><span class="${c}-icon-label">${esc(comp.name)}</span></div>`;
-                    } else {
-                        html += `<div class="${c}-component" style="${gs}">${esc(comp.name)}</div>`;
-                    }
-                }
-                html += '</div></div>';
-            }
-            html += '</div></div></div>';
+        if (typeof ArchitectureDSL !== 'undefined') {
+            return ArchitectureDSL.renderHTML(ast);
         }
-        html += '</div></div>';
-        return html;
+        // Fallback
+        return '<div class="alert alert-warning">Architecture DSL library not loaded</div>';
     }
     
     /**
@@ -1196,6 +1137,12 @@ class WorkplaceManager {
         
         if (isMarkdown && typeof EasyMDE !== 'undefined') {
             // Use EasyMDE for markdown files
+            const self = this;
+            this._previewRenderTimer = null;
+            this._lastRenderedContent = null;
+            this._lastRenderedHtml = null;
+            this._diagramsRendered = false;
+            
             this.easyMDE = new EasyMDE({
                 element: textarea,
                 spellChecker: false,
@@ -1210,7 +1157,37 @@ class WorkplaceManager {
                 status: false,
                 minHeight: '300px',
                 placeholder: 'Start writing...',
-                renderingConfig: { codeSyntaxHighlighting: true }
+                renderingConfig: { codeSyntaxHighlighting: true },
+                previewRender: (plainText, preview) => {
+                    // If content hasn't changed and we have rendered HTML with diagrams, reuse it
+                    if (self._lastRenderedContent === plainText && self._diagramsRendered && preview) {
+                        // Return existing innerHTML to preserve rendered diagrams
+                        return preview.innerHTML || self._lastRenderedHtml;
+                    }
+                    
+                    // Content changed - render fresh markdown
+                    const html = self._renderMarkdown(plainText);
+                    self._lastRenderedContent = plainText;
+                    self._lastRenderedHtml = html;
+                    self._diagramsRendered = false;
+                    
+                    // Debounce diagram rendering - 1 second after last change
+                    if (self._previewRenderTimer) {
+                        clearTimeout(self._previewRenderTimer);
+                    }
+                    self._previewRenderTimer = setTimeout(() => {
+                        const previewEl = preview || self.easyMDE?.gui?.preview;
+                        if (previewEl) {
+                            self._renderSpecialBlocksInContainer(previewEl).then(() => {
+                                self._diagramsRendered = true;
+                                // Cache the rendered HTML with diagrams
+                                self._lastRenderedHtml = previewEl.innerHTML;
+                            });
+                        }
+                    }, 1000);
+                    
+                    return html;
+                }
             });
             
             this.easyMDE.codemirror.on('change', () => {
@@ -1450,7 +1427,7 @@ class WorkplaceManager {
             // Fix z-index when side-by-side is toggled and exit fullscreen when side-by-side is turned off
             const middleSection = document.getElementById('middle-section');
             let wasSideBySideActive = false;
-            
+            ju
             const observer = new MutationObserver(() => {
                 const container = this.easyMDE.element.closest('.EasyMDEContainer');
                 const isSideBySideActive = container && container.classList.contains('sided--no-fullscreen');

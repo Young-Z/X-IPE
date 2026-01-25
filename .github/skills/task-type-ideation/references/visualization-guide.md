@@ -55,6 +55,175 @@ flowchart TD
 
 ---
 
+## When `stages.ideation.ideation.tool-architecture-dsl: true`
+
+Generate Architecture DSL directly in markdown. IPE renders `architecture-dsl` code blocks as interactive diagrams.
+
+**Skill:** Invoke `tool-architecture-dsl` skill to learn DSL syntax.
+
+**When to Use:**
+- Layered/tiered architecture diagrams (Module View)
+- Application landscapes (Landscape View)
+- System integration maps
+- Ideas that require visual representation of technical structure
+
+**Embed in markdown:**
+
+````markdown
+```architecture-dsl
+@startuml module-view
+title "System Architecture"
+theme "theme-default"
+direction top-to-bottom
+grid 12 x 4
+
+layer "Presentation" {
+  color "#fce7f3"
+  border-color "#ec4899"
+  rows 2
+  
+  module "Frontend" {
+    cols 6
+    rows 2
+    grid 2 x 2
+    align center center
+    component "Web App" { cols 1, rows 1 }
+    component "Mobile App" { cols 1, rows 1 }
+  }
+  
+  module "API Gateway" {
+    cols 6
+    rows 2
+    grid 1 x 1
+    component "Gateway" { cols 1, rows 1 }
+  }
+}
+
+layer "Data" {
+  color "#dcfce7"
+  border-color "#22c55e"
+  rows 2
+  
+  module "Storage" {
+    cols 12
+    rows 2
+    grid 3 x 1
+    component "PostgreSQL" { cols 1, rows 1 }
+    component "Redis" { cols 1, rows 1 }
+    component "S3" { cols 1, rows 1 }
+  }
+}
+
+@enduml
+```
+````
+
+### Architecture DSL Quick Reference
+
+| Diagram Type | Use Case | Key Syntax |
+|--------------|----------|------------|
+| **Module View** | Layered architecture, service breakdown | `@startuml module-view`, `layer`, `module`, `component` |
+| **Landscape View** | System integrations, external dependencies | `@startuml landscape-view`, `zone`, `app`, `database`, arrows |
+
+### Layer Colors
+
+| Layer | Background | Border |
+|-------|------------|--------|
+| Presentation | `#fce7f3` | `#ec4899` |
+| Business/Application | `#dbeafe` | `#3b82f6` |
+| Data | `#dcfce7` | `#22c55e` |
+
+### Example: 3-Tier Architecture
+
+```architecture-dsl
+@startuml module-view
+title "E-Commerce Platform"
+theme "theme-default"
+direction top-to-bottom
+grid 12 x 6
+
+layer "Presentation" {
+  color "#fce7f3"
+  border-color "#ec4899"
+  rows 2
+  
+  module "Web" { cols 4, rows 2, grid 1 x 1, component "React SPA" { cols 1, rows 1 } }
+  module "Mobile" { cols 4, rows 2, grid 1 x 1, component "React Native" { cols 1, rows 1 } }
+  module "Admin" { cols 4, rows 2, grid 1 x 1, component "Admin Portal" { cols 1, rows 1 } }
+}
+
+layer "Business" {
+  color "#dbeafe"
+  border-color "#3b82f6"
+  rows 2
+  
+  module "Services" {
+    cols 12
+    rows 2
+    grid 4 x 1
+    align center center
+    component "Order Service" { cols 1, rows 1 }
+    component "Product Service" { cols 1, rows 1 }
+    component "User Service" { cols 1, rows 1 }
+    component "Payment Service" { cols 1, rows 1 }
+  }
+}
+
+layer "Data" {
+  color "#dcfce7"
+  border-color "#22c55e"
+  rows 2
+  
+  module "Databases" {
+    cols 8
+    rows 2
+    grid 2 x 1
+    component "PostgreSQL" { cols 1, rows 1 }
+    component "MongoDB" { cols 1, rows 1 }
+  }
+  module "Cache" {
+    cols 4
+    rows 2
+    grid 1 x 1
+    component "Redis" { cols 1, rows 1 }
+  }
+}
+
+@enduml
+```
+
+### Example: Landscape View
+
+```architecture-dsl
+@startuml landscape-view
+title "Integration Landscape"
+
+zone "Internal Systems" {
+  app "CRM" as crm { tech: Salesforce }
+  app "ERP" as erp { tech: SAP }
+}
+
+zone "External Services" {
+  app "Payment" as pay { tech: Stripe }
+  app "Email" as email { tech: SendGrid }
+}
+
+zone "Our Platform" {
+  app "API" as api { tech: Node.js }
+  database "DB" as db
+}
+
+api --> crm : "Sync customers"
+api --> erp : "Sync orders"
+api --> pay : "Process payments"
+api --> email : "Send notifications"
+api --> db : "Store data"
+
+@enduml
+```
+
+---
+
 ## Visualization Examples
 
 ### Feature List (antv-infographic)

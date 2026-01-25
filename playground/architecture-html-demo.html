@@ -79,7 +79,6 @@
             border: 1px solid #e5e7eb;
             border-radius: 8px;
             resize: vertical;
-            background: #fafafa;
         }
         
         textarea:focus {
@@ -89,17 +88,17 @@
         }
         
         .output-container {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            border-radius: 8px;
-            padding: 24px;
             min-height: 500px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
             overflow: auto;
         }
         
         .btn-group {
             display: flex;
             gap: 8px;
-            align-items: center;
         }
         
         .btn {
@@ -282,364 +281,12 @@
         </div>
     </div>
 
-    <script type="module">
-        // ============================================
-        // Architecture DSL Parser (same as canvas version)
-        // ============================================
-        class ArchitectureDSLParser {
-            constructor() {
-                this.errors = [];
-                this.warnings = [];
-            }
-
-            parse(dsl) {
-                this.errors = [];
-                this.warnings = [];
-                
-                const lines = dsl.split('\n');
-                const ast = {
-                    type: 'document',
-                    viewType: null,
-                    title: null,
-                    theme: 'theme-default',
-                    direction: 'top-to-bottom',
-                    grid: { cols: 12, rows: 6 },
-                    textAlign: 'left',
-                    layers: [],
-                    errors: this.errors,
-                    warnings: this.warnings
-                };
-
-                let currentLayer = null;
-                let currentModule = null;
-                let lineNum = 0;
-                let inMultiLineComment = false;
-
-                for (const rawLine of lines) {
-                    lineNum++;
-                    let line = rawLine.trim();
-
-                    if (inMultiLineComment) {
-                        if (line.includes("'/")) inMultiLineComment = false;
-                        continue;
-                    }
-                    if (line.startsWith("/'")) { inMultiLineComment = true; continue; }
-                    if (line.startsWith("'") || line === '') continue;
-
-                    const commentIdx = line.indexOf("'");
-                    if (commentIdx > 0) line = line.substring(0, commentIdx).trim();
-
-                    if (line.startsWith('@startuml')) {
-                        const match = line.match(/@startuml\s+(module-view|landscape-view)/);
-                        if (match) ast.viewType = match[1];
-                        continue;
-                    }
-                    if (line === '@enduml') continue;
-                    if (line.startsWith('title ')) {
-                        const match = line.match(/title\s+"([^"]+)"/);
-                        if (match) ast.title = match[1];
-                        continue;
-                    }
-                    if (line.startsWith('theme ')) {
-                        const match = line.match(/theme\s+"([^"]+)"/);
-                        if (match) ast.theme = match[1];
-                        continue;
-                    }
-                    if (line.startsWith('direction ')) {
-                        const match = line.match(/direction\s+(top-to-bottom|left-to-right)/);
-                        if (match) ast.direction = match[1];
-                        continue;
-                    }
-                    if (line.startsWith('grid ') && !currentModule) {
-                        const match = line.match(/grid\s+(\d+)\s*x\s*(\d+)/);
-                        if (match) ast.grid = { cols: parseInt(match[1]), rows: parseInt(match[2]) };
-                        continue;
-                    }
-                    if (line.startsWith('text-align ') && !currentLayer && !currentModule) {
-                        const match = line.match(/text-align\s+(left|center|right)/);
-                        if (match) ast.textAlign = match[1];
-                        continue;
-                    }
-                    if (line.startsWith('layer ')) {
-                        const match = line.match(/layer\s+"([^"]+)"(?:\s+as\s+(\w+))?\s*\{?/);
-                        if (match) {
-                            currentLayer = {
-                                type: 'layer', name: match[1], alias: match[2] || null,
-                                rows: 1, color: null, borderColor: null,
-                                textAlign: ast.textAlign, modules: []
-                            };
-                            ast.layers.push(currentLayer);
-                        }
-                        continue;
-                    }
-                    if (currentLayer && !currentModule) {
-                        if (line.startsWith('rows ')) {
-                            const match = line.match(/rows\s+(\d+)/);
-                            if (match) currentLayer.rows = parseInt(match[1]);
-                            continue;
-                        }
-                        if (line.startsWith('color ')) {
-                            const match = line.match(/color\s+"([^"]+)"/);
-                            if (match) currentLayer.color = match[1];
-                            continue;
-                        }
-                        if (line.startsWith('border-color ')) {
-                            const match = line.match(/border-color\s+"([^"]+)"/);
-                            if (match) currentLayer.borderColor = match[1];
-                            continue;
-                        }
-                        if (line.startsWith('text-align ')) {
-                            const match = line.match(/text-align\s+(left|center|right)/);
-                            if (match) currentLayer.textAlign = match[1];
-                            continue;
-                        }
-                        if (line.startsWith('module ')) {
-                            const match = line.match(/module\s+"([^"]+)"(?:\s+as\s+(\w+))?\s*\{?/);
-                            if (match) {
-                                currentModule = {
-                                    type: 'module', name: match[1], alias: match[2] || null,
-                                    cols: 12, rows: 1, grid: { cols: 1, rows: 1 },
-                                    align: { h: 'center', v: 'center' }, gap: '8px',
-                                    color: null, textAlign: currentLayer.textAlign, components: []
-                                };
-                                currentLayer.modules.push(currentModule);
-                            }
-                            continue;
-                        }
-                        if (line === '}') { currentLayer = null; continue; }
-                    }
-                    if (currentModule) {
-                        if (line.startsWith('cols ')) {
-                            const match = line.match(/cols\s+(\d+)/);
-                            if (match) currentModule.cols = parseInt(match[1]);
-                            continue;
-                        }
-                        if (line.startsWith('rows ') && !line.includes(',')) {
-                            const match = line.match(/rows\s+(\d+)/);
-                            if (match) currentModule.rows = parseInt(match[1]);
-                            continue;
-                        }
-                        if (line.startsWith('grid ')) {
-                            const match = line.match(/grid\s+(\d+)\s*x\s*(\d+)/);
-                            if (match) currentModule.grid = { cols: parseInt(match[1]), rows: parseInt(match[2]) };
-                            continue;
-                        }
-                        if (line.startsWith('align ')) {
-                            const match = line.match(/align\s+(left|center|right)\s+(top|center|bottom)/);
-                            if (match) currentModule.align = { h: match[1], v: match[2] };
-                            continue;
-                        }
-                        if (line.startsWith('gap ')) {
-                            const match = line.match(/gap\s+(\d+(?:px|rem))/);
-                            if (match) currentModule.gap = match[1];
-                            continue;
-                        }
-                        if (line.startsWith('component ')) {
-                            const match = line.match(/component\s+"([^"]+)"(?:\s*\{\s*cols\s+(\d+)(?:\s*,\s*rows\s+(\d+))?\s*\})?(?:\s*<<(\w+)>>)?/);
-                            if (match) {
-                                currentModule.components.push({
-                                    type: 'component', name: match[1],
-                                    cols: match[2] ? parseInt(match[2]) : 1,
-                                    rows: match[3] ? parseInt(match[3]) : 1,
-                                    stereotype: match[4] || null
-                                });
-                            }
-                            continue;
-                        }
-                        if (line === '}') { currentModule = null; continue; }
-                    }
-                }
-                return ast;
-            }
-        }
-
-        // ============================================
-        // Architecture HTML Renderer
-        // ============================================
-        class ArchitectureHTMLRenderer {
-            constructor(options = {}) {
-                this.LAYER_GAP = 16;
-                this.MODULE_GAP = 14;
-                this.COMPONENT_GAP = 10;
-                this.BORDER_RADIUS = 8;
-                this.COMPONENT_RADIUS = 18;
-                
-                this.LAYER_COLOR_PATTERNS = [
-                    { patterns: ['presentation', 'ui', 'frontend', 'view'], bg: '#fce7f3', border: '#ec4899' },
-                    { patterns: ['service', 'api', 'gateway'], bg: '#fef3c7', border: '#f97316' },
-                    { patterns: ['business', 'domain', 'logic', 'core'], bg: '#dbeafe', border: '#3b82f6' },
-                    { patterns: ['data', 'persistence', 'storage', 'db'], bg: '#dcfce7', border: '#22c55e' },
-                    { patterns: ['infrastructure', 'infra', 'platform'], bg: '#f3e8ff', border: '#a855f7' }
-                ];
-                
-                this.colors = {
-                    layerBg: '#ffffff', layerBorder: '#374151', moduleBorder: '#d1d5db',
-                    badgeBg: '#1f2937', badgeText: '#ffffff', labelBg: '#1f2937',
-                    labelText: '#ffffff', titleText: '#374151', moduleTitle: '#374151',
-                    iconLabelText: '#6b7280'
-                };
-                
-                this.fonts = {
-                    heading: "'Inter', system-ui, -apple-system, sans-serif",
-                    body: "system-ui, -apple-system, sans-serif"
-                };
-                
-                this.includeHoverEffects = options.includeHoverEffects !== false;
-                this.includeAnimations = options.includeAnimations !== false;
-            }
-            
-            _detectLayerColors(layerName) {
-                const nameLower = layerName.toLowerCase();
-                for (const pattern of this.LAYER_COLOR_PATTERNS) {
-                    if (pattern.patterns.some(p => nameLower.includes(p))) {
-                        return { bg: pattern.bg, border: pattern.border };
-                    }
-                }
-                return { bg: this.colors.layerBg, border: this.colors.layerBorder };
-            }
-
-            render(ast, options = {}) {
-                const c = options.className || 'arch-diagram';
-                const includeWrapper = options.includeWrapper !== false;
-                
-                let html = '';
-                
-                if (includeWrapper) {
-                    html += this._renderStyles(c);
-                    html += `<div class="${c}">`;
-                }
-                
-                if (ast.title) {
-                    html += `<div class="${c}-title">${this._escapeHtml(ast.title)}</div>`;
-                }
-                
-                html += `<div class="${c}-content">`;
-                
-                ast.layers.forEach((layer, index) => {
-                    html += this._renderLayer(layer, c, index);
-                });
-                
-                html += '</div>';
-                
-                if (includeWrapper) {
-                    html += '</div>';
-                }
-                
-                return html;
-            }
-            
-            _renderStyles(c) {
-                const hoverStyles = this.includeHoverEffects ? `
-                    .${c}-layer-wrapper:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
-                    .${c}-layer-wrapper:hover .${c}-layer-label { background: #6366f1; min-width: 40px; }
-                    .${c}-layer-wrapper:hover .${c}-layer { border-color: #6366f1; }
-                    .${c}-module:hover { border-color: #3b82f6; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); transform: scale(1.01); }
-                    .${c}-module:hover .${c}-module-title { color: #3b82f6; }
-                    .${c}-component:hover { background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); transform: translateY(-2px) scale(1.02); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-                ` : '';
-                
-                const animationStyles = this.includeAnimations ? `
-                    @keyframes ${c}-fadeSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-                    .${c}-layer-wrapper { animation: ${c}-fadeSlideIn 0.5s ease-out backwards; }
-                    .${c}-layer-wrapper:nth-child(1) { animation-delay: 0.1s; }
-                    .${c}-layer-wrapper:nth-child(2) { animation-delay: 0.2s; }
-                    .${c}-layer-wrapper:nth-child(3) { animation-delay: 0.3s; }
-                    .${c}-layer-wrapper:nth-child(4) { animation-delay: 0.4s; }
-                    .${c}-layer-wrapper:nth-child(5) { animation-delay: 0.5s; }
-                ` : '';
-                
-                return `<style>
-                    .${c} { font-family: ${this.fonts.body}; max-width: 1200px; margin: 0 auto; }
-                    .${c}-title { font-family: ${this.fonts.heading}; font-size: 26px; font-weight: 700; color: ${this.colors.titleText}; text-align: center; margin-bottom: 24px; }
-                    .${c}-content { display: flex; flex-direction: column; gap: ${this.LAYER_GAP}px; }
-                    .${c}-layer-wrapper { display: flex; gap: 0; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: ${this.BORDER_RADIUS}px; }
-                    .${c}-layer-label { writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); background: ${this.colors.labelBg}; padding: 16px 8px; font-family: ${this.fonts.heading}; font-size: 12px; font-weight: 600; color: ${this.colors.labelText}; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; border-radius: 0 ${this.BORDER_RADIUS}px ${this.BORDER_RADIUS}px 0; min-width: 36px; transition: background 0.2s ease, min-width 0.2s ease; }
-                    .${c}-layer { flex: 1; padding: 20px; border: 2px solid; border-left: none; border-radius: 0 ${this.BORDER_RADIUS}px ${this.BORDER_RADIUS}px 0; transition: border-color 0.2s ease; }
-                    .${c}-layer-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: ${this.MODULE_GAP}px; }
-                    .${c}-module { background: ${this.colors.layerBg}; border: 1.5px dashed ${this.colors.moduleBorder}; border-radius: ${this.BORDER_RADIUS}px; padding: 14px; display: flex; flex-direction: column; gap: 12px; transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease; }
-                    .${c}-module-title { font-family: ${this.fonts.heading}; font-size: 14px; font-weight: 700; color: ${this.colors.moduleTitle}; text-align: left; transition: color 0.15s ease; }
-                    .${c}-module-content { display: grid; gap: ${this.COMPONENT_GAP}px; align-items: start; }
-                    .${c}-component { background: ${this.colors.badgeBg}; color: ${this.colors.badgeText}; border-radius: ${this.COMPONENT_RADIUS}px; padding: 8px 16px; font-family: ${this.fonts.heading}; font-size: 12px; font-weight: 500; text-align: center; display: flex; align-items: center; justify-content: center; min-height: 36px; cursor: default; transition: all 0.2s ease; }
-                    .${c}-icon-component { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 8px; min-height: 60px; }
-                    .${c}-icon { font-size: 28px; line-height: 1; }
-                    .${c}-icon-label { font-family: ${this.fonts.heading}; font-size: 11px; font-weight: 500; color: ${this.colors.iconLabelText}; text-align: center; }
-                    ${hoverStyles}
-                    ${animationStyles}
-                </style>`;
-            }
-            
-            _renderLayer(layer, c, index) {
-                const autoColors = this._detectLayerColors(layer.name);
-                const layerBg = layer.color || autoColors.bg;
-                const borderColor = layer.borderColor || autoColors.border;
-                
-                let html = `<div class="${c}-layer-wrapper">`;
-                html += `<div class="${c}-layer-label">${this._escapeHtml(layer.name.toUpperCase())}</div>`;
-                html += `<div class="${c}-layer" style="background: ${layerBg}; border-color: ${borderColor};">`;
-                html += `<div class="${c}-layer-row">`;
-                
-                for (const module of layer.modules) {
-                    html += this._renderModule(module, c);
-                }
-                
-                html += '</div></div></div>';
-                return html;
-            }
-            
-            _renderModule(module, c) {
-                const gridCols = module.grid?.cols || 1;
-                const gap = parseInt(module.gap) || this.COMPONENT_GAP;
-                const colSpan = module.cols || 12;
-                
-                let html = `<div class="${c}-module" style="grid-column: span ${colSpan};">`;
-                html += `<div class="${c}-module-title">${this._escapeHtml(module.name)}</div>`;
-                html += `<div class="${c}-module-content" style="grid-template-columns: repeat(${gridCols}, 1fr); gap: ${gap}px;">`;
-                
-                for (const comp of module.components) {
-                    html += this._renderComponent(comp, c);
-                }
-                
-                html += '</div></div>';
-                return html;
-            }
-            
-            _renderComponent(component, c) {
-                const colSpan = component.cols || 1;
-                const rowSpan = component.rows || 1;
-                const gridStyle = `grid-column: span ${colSpan}; grid-row: span ${rowSpan};`;
-                
-                if (component.stereotype && ['icon', 'folder', 'file', 'db'].includes(component.stereotype)) {
-                    const icons = { folder: '📁', file: '📄', db: '🗄️', icon: '⚙️' };
-                    const icon = icons[component.stereotype] || '📦';
-                    return `<div class="${c}-icon-component" style="${gridStyle}"><span class="${c}-icon">${icon}</span><span class="${c}-icon-label">${this._escapeHtml(component.name)}</span></div>`;
-                }
-                
-                return `<div class="${c}-component" style="${gridStyle}">${this._escapeHtml(component.name)}</div>`;
-            }
-            
-            _escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-        }
-
-        // ============================================
-        // Main API
-        // ============================================
-        function renderToHTML(dsl, options = {}) {
-            const parser = new ArchitectureDSLParser();
-            const ast = parser.parse(dsl);
-            const renderer = new ArchitectureHTMLRenderer(options);
-            const html = renderer.render(ast, options);
-            return { html, ast, errors: ast.errors, warnings: ast.warnings };
-        }
-        
-        // Make functions available globally
-        window.renderToHTML = renderToHTML;
-        
+    <!-- Load the bundled Architecture DSL library -->
+    <script src="../static/js/lib/architecture-dsl/bundle.js"></script>
+    
+    <script>
         // Example DSL
-        window.exampleDSL = `@startuml module-view
+        const exampleDSL = `@startuml module-view
 title "X-IPE Application Architecture"
 direction top-to-bottom
 grid 12 x 6
@@ -722,13 +369,13 @@ layer "Data" {
 }
 @enduml`;
         
-        // Global functions (define first)
-        window.renderDiagram = function() {
+        function renderDiagram() {
             const dsl = document.getElementById('dsl-input').value;
             const includeHoverEffects = document.getElementById('opt-hover').checked;
             const includeAnimations = document.getElementById('opt-animations').checked;
             
-            const result = renderToHTML(dsl, { includeHoverEffects, includeAnimations });
+            // Use the bundled ArchitectureDSL library
+            const result = ArchitectureDSL.renderToHTML(dsl, { includeHoverEffects, includeAnimations });
             
             document.getElementById('output-container').innerHTML = result.html;
             document.getElementById('html-source').value = result.html;
@@ -741,40 +388,42 @@ layer "Data" {
                 sum + l.modules.reduce((msum, m) => msum + m.components.length, 0), 0);
             
             if (result.errors.length > 0) {
-                status.textContent = `❌ ${result.errors.length} errors`;
+                status.textContent = '❌ ' + result.errors.length + ' errors';
                 status.className = 'status error';
             } else {
-                status.textContent = `✓ ${layerCount} layers, ${moduleCount} modules, ${componentCount} components`;
+                status.textContent = '✓ ' + layerCount + ' layers, ' + moduleCount + ' modules, ' + componentCount + ' components';
                 status.className = 'status success';
             }
-        };
+        }
         
-        window.loadExample = function() {
-            document.getElementById('dsl-input').value = window.exampleDSL;
-            window.renderDiagram();
-        };
+        function loadExample() {
+            document.getElementById('dsl-input').value = exampleDSL;
+            renderDiagram();
+        }
         
-        window.showTab = function(tabName) {
+        function showTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             
-            document.querySelector(`.tab-content#tab-${tabName}`).classList.add('active');
+            document.querySelector('.tab-content#tab-' + tabName).classList.add('active');
             event.target.classList.add('active');
-        };
+        }
         
-        window.copyHTML = function() {
+        function copyHTML() {
             const html = document.getElementById('html-source').value;
             navigator.clipboard.writeText(html).then(() => {
                 const status = document.getElementById('status');
                 const originalText = status.textContent;
                 status.textContent = '📋 Copied!';
-                setTimeout(() => { status.textContent = originalText; }, 2000);
+                setTimeout(function() { status.textContent = originalText; }, 2000);
             });
-        };
+        }
         
-        // Initialize (after functions are defined)
-        document.getElementById('dsl-input').value = window.exampleDSL;
-        window.renderDiagram();
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('dsl-input').value = exampleDSL;
+            renderDiagram();
+        });
     </script>
 </body>
 </html>
