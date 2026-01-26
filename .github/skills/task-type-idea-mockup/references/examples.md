@@ -9,7 +9,7 @@
 **Scenario:** Create mockups for mobile-app-idea after ideation
 
 **Input:**
-- `Current Idea Folder`: `docs/ideas/mobile-app-idea` (from previous Ideation task)
+- `Current Idea Folder`: `x-ipe-docs/ideas/mobile-app-idea` (from previous Ideation task)
 
 **Config:** `config/tools.json`
 ```json
@@ -39,7 +39,7 @@
 1. Execute Task Flow from task-execution-guideline skill
 
 2. Validate Current Idea Folder:
-   - Current Idea Folder = docs/ideas/mobile-app-idea
+   - Current Idea Folder = x-ipe-docs/ideas/mobile-app-idea
    - Folder exists ✓
    - idea-summary-v1.md exists ✓
 
@@ -49,7 +49,7 @@
    - stages.ideation.mockup.figma-mcp: false → disabled
 
 4. Read Idea Summary:
-   - Load docs/ideas/mobile-app-idea/idea-summary-v1.md
+   - Load x-ipe-docs/ideas/mobile-app-idea/idea-summary-v1.md
    - Extract: dashboard, settings page, mobile-responsive
 
 5. Identify Mockup Needs:
@@ -62,23 +62,23 @@
      → Create settings-v1.html (form layout)
 
 7. Save Artifacts:
-   - docs/ideas/mobile-app-idea/mockups/dashboard-v1.html
-   - docs/ideas/mobile-app-idea/mockups/dashboard-v1.css
-   - docs/ideas/mobile-app-idea/mockups/settings-v1.html
-   - docs/ideas/mobile-app-idea/mockups/settings-v1.css
+   - x-ipe-docs/ideas/mobile-app-idea/mockups/dashboard-v1.html
+   - x-ipe-docs/ideas/mobile-app-idea/mockups/dashboard-v1.css
+   - x-ipe-docs/ideas/mobile-app-idea/mockups/settings-v1.html
+   - x-ipe-docs/ideas/mobile-app-idea/mockups/settings-v1.css
 
 8. Update Summary:
-   - Create docs/ideas/mobile-app-idea/idea-summary-v2.md with mockup links
+   - Create x-ipe-docs/ideas/mobile-app-idea/idea-summary-v2.md with mockup links
 
 9. Human Review:
    - Present mockups for approval
-   - "Open docs/ideas/mobile-app-idea/mockups/dashboard-v1.html in browser to preview"
+   - "Open x-ipe-docs/ideas/mobile-app-idea/mockups/dashboard-v1.html in browser to preview"
 
 10. Output:
     task_output_links:
-      - docs/ideas/mobile-app-idea/mockups/dashboard-v1.html
-      - docs/ideas/mobile-app-idea/mockups/settings-v1.html
-      - docs/ideas/mobile-app-idea/idea-summary-v2.md
+      - x-ipe-docs/ideas/mobile-app-idea/mockups/dashboard-v1.html
+      - x-ipe-docs/ideas/mobile-app-idea/mockups/settings-v1.html
+      - x-ipe-docs/ideas/mobile-app-idea/idea-summary-v2.md
 
 11. Resume Task Flow from task-execution-guideline skill
 ```
@@ -88,7 +88,7 @@
 ## Example 2: Mockup WITHOUT Tools (Manual Mode)
 
 **Input:**
-- `Current Idea Folder`: `docs/ideas/simple-idea`
+- `Current Idea Folder`: `x-ipe-docs/ideas/simple-idea`
 
 **Config:** `config/tools.json`
 ```json
@@ -108,7 +108,7 @@
 **Execution:**
 ```
 1. Validate Current Idea Folder:
-   - Current Idea Folder = docs/ideas/simple-idea ✓
+   - Current Idea Folder = x-ipe-docs/ideas/simple-idea ✓
 
 2. Load Config:
    - All mockup tools disabled
@@ -119,11 +119,11 @@
      - Detailed layout descriptions
      - Component specifications
      - ASCII wireframes (optional)
-   - Save to docs/ideas/simple-idea/mockups/mockup-description.md
+   - Save to x-ipe-docs/ideas/simple-idea/mockups/mockup-description.md
 
 4. Output:
    task_output_links:
-     - docs/ideas/simple-idea/mockups/mockup-description.md
+     - x-ipe-docs/ideas/simple-idea/mockups/mockup-description.md
 
 5. If human declines:
    - Skip mockup creation
@@ -144,7 +144,7 @@
    - Value is N/A → BLOCKED
 
 2. List available folders:
-   $ ls docs/ideas/
+   $ ls x-ipe-docs/ideas/
    - mobile-app-idea/
    - e-commerce-checkout/
    - simple-tool/
@@ -161,7 +161,7 @@
 
 5. Human selects: "mobile-app-idea"
 
-6. Set Current Idea Folder = docs/ideas/mobile-app-idea
+6. Set Current Idea Folder = x-ipe-docs/ideas/mobile-app-idea
 
 7. Continue with mockup creation...
 ```
@@ -171,7 +171,7 @@
 ## Example 4: No Idea Summary (Blocked)
 
 **Input:**
-- `Current Idea Folder`: `docs/ideas/new-project`
+- `Current Idea Folder`: `x-ipe-docs/ideas/new-project`
 
 **Execution:**
 ```
@@ -180,7 +180,7 @@
    - Check for idea-summary-vN.md → NOT FOUND
 
 2. BLOCKED - Missing prerequisite:
-   "No idea summary found in docs/ideas/new-project/
+   "No idea summary found in x-ipe-docs/ideas/new-project/
     
     Action needed: Run Ideation task first to create idea-summary-v1.md"
 

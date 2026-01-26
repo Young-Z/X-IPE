@@ -8,7 +8,7 @@
 
 **Context:**
 - Feature: FEATURE-001 (User Authentication)
-- Technical Design: `docs/requirements/FEATURE-001/technical-design.md`
+- Technical Design: `x-ipe-docs/requirements/FEATURE-001/technical-design.md`
 - Test file exists: `tests/test_auth.py` (17 tests, all RED)
 
 ### Execution Flow
@@ -17,7 +17,7 @@
 1. Execute Task Flow from task-execution-guideline skill
 
 2. Read Technical Design:
-   - Load docs/requirements/FEATURE-001/technical-design.md
+   - Load x-ipe-docs/requirements/FEATURE-001/technical-design.md
    - Components to implement:
      - AuthService (password hashing, token generation)
      - UserRepository (user CRUD operations)

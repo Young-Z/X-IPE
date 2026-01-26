@@ -10,10 +10,10 @@ class ScaffoldManager:
     
     DOCS_STRUCTURE = [
         "docs",
-        "docs/requirements",
-        "docs/planning",
-        "docs/features",
-        "docs/ideas",
+        "x-ipe-docs/requirements",
+        "x-ipe-docs/planning",
+        "x-ipe-docs/features",
+        "x-ipe-docs/ideas",
     ]
     
     GITIGNORE_ENTRIES = [
@@ -37,7 +37,7 @@ class ScaffoldManager:
         self.skipped: List[Path] = []
     
     def create_docs_structure(self) -> None:
-        """Create docs/ folder with subfolders."""
+        """Create x-ipe-docs/ folder with subfolders."""
         for folder in self.DOCS_STRUCTURE:
             path = self.project_root / folder
             if path.exists():

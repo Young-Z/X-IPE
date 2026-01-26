@@ -266,7 +266,7 @@ class WorkplaceManager {
             // CR-002: Add idea-folder-node class and data for drag-drop targets
             if (node.type === 'folder') {
                 itemContent.classList.add('idea-folder-node');
-                // Use full path (relative to docs/ideas/) for nested folder support
+                // Use full path (relative to x-ipe-docs/ideas/) for nested folder support
                 itemContent.dataset.folderPath = node.path;
             }
             itemContent.style.paddingLeft = `${level * 16 + 8}px`;
@@ -378,7 +378,7 @@ class WorkplaceManager {
             // CR-002: Add idea-folder-node class and data for drag-drop targets
             if (node.type === 'folder') {
                 itemContent.classList.add('idea-folder-node');
-                // Use full path (relative to docs/ideas/) for nested folder support
+                // Use full path (relative to x-ipe-docs/ideas/) for nested folder support
                 itemContent.dataset.folderPath = node.path;
             }
             itemContent.style.paddingLeft = `${level * 16 + 8}px`;
@@ -1676,7 +1676,7 @@ class WorkplaceManager {
     /**
      * CR-002: Upload files to a specific existing folder
      * @param {FileList} files - Files to upload
-     * @param {string} folderPath - Target folder path (relative to docs/ideas/)
+     * @param {string} folderPath - Target folder path (relative to x-ipe-docs/ideas/)
      */
     async _uploadToFolder(files, folderPath) {
         try {

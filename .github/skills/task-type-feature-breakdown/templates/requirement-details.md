@@ -60,4 +60,4 @@ OR
 
 - This document is created during Feature Breakdown task
 - Individual feature specifications created during Feature Refinement task
-- Feature status tracked in docs/requirements/features.md (feature board)
+- Feature status tracked in x-ipe-docs/requirements/features.md (feature board)

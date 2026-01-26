@@ -258,7 +258,7 @@ feat: [Feature Name] - [Brief Description]
 | PR | GitHub/GitLab | Pull request |
 | Changelog | `CHANGELOG.md` | Version entry |
 | Summary | (in chat) | Completion report |
-| Status Log | `docs/features/FEATURE-XXX/changelog.md` | Feature history |
+| Status Log | `x-ipe-docs/features/FEATURE-XXX/changelog.md` | Feature history |
 
 ---
 
@@ -374,7 +374,7 @@ feat: [Feature Name] - [Brief Description]
    task_output_links:
      - PR #42
      - CHANGELOG.md
-     - docs/features/FEATURE-002/
+     - x-ipe-docs/features/FEATURE-002/
 
 8. Resume Task Flow from task-execution-guideline skill
    (Feature chain COMPLETE)

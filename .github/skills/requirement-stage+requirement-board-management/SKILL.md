@@ -95,7 +95,7 @@ Input: Task Data Model with:
   - task_output_links: [paths to updated docs]
 
 Process:
-1. Verify docs/requirements/requirement-details.md exists
+1. Verify x-ipe-docs/requirements/requirement-details.md exists
 2. IF requirement_summary_updated = true:
    → Confirm changes are saved
 3. Return summary of changes
@@ -130,7 +130,7 @@ Output:
 ## Requirement Documents Structure
 
 ```
-docs/
+x-ipe-docs/
 └── requirements/
     ├── requirement-details.md          # High-level requirements
     ├── features.md                     # Feature board (managed by feature-stage+feature-board-management)
@@ -164,7 +164,7 @@ category: requirement-stage
 status: completed
 requirement_summary_updated: true
 task_output_links:
-  - docs/requirements/requirement-details.md
+  - x-ipe-docs/requirements/requirement-details.md
 ```
 
 **Output:**
@@ -185,9 +185,9 @@ features_created:
   - FEATURE-002
   - FEATURE-003
 task_output_links:
-  - docs/requirements/FEATURE-001/specification.md
-  - docs/requirements/FEATURE-002/specification.md
-  - docs/requirements/FEATURE-003/specification.md
+  - x-ipe-docs/requirements/FEATURE-001/specification.md
+  - x-ipe-docs/requirements/FEATURE-002/specification.md
+  - x-ipe-docs/requirements/FEATURE-003/specification.md
 ```
 
 **Output:**

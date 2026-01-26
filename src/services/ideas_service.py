@@ -16,13 +16,13 @@ class IdeasService:
     """
     Service for managing idea files and folders.
     
-    Provides CRUD operations for the docs/ideas/ directory:
+    Provides CRUD operations for the x-ipe-docs/ideas/ directory:
     - get_tree(): List all idea folders and files
     - upload(): Upload files to a new idea folder
     - rename_folder(): Rename an idea folder
     """
     
-    IDEAS_PATH = 'docs/ideas'
+    IDEAS_PATH = 'x-ipe-docs/ideas'
     INVALID_CHARS = r'[/\\:*?"<>|]'
     MAX_NAME_LENGTH = 255
     TOOLBOX_FILE = '.ideation-tools.json'
@@ -50,8 +50,8 @@ class IdeasService:
     
     def get_tree(self) -> List[Dict]:
         """
-        Scan docs/ideas/ and return tree structure.
-        Creates docs/ideas/ if it doesn't exist.
+        Scan x-ipe-docs/ideas/ and return tree structure.
+        Creates x-ipe-docs/ideas/ if it doesn't exist.
         
         Returns:
             List of FileNode dicts representing folder/file structure
@@ -101,7 +101,7 @@ class IdeasService:
             files: List of (filename, content_bytes) tuples
             date: Optional datetime string (MMDDYYYY HHMMSS). Uses now if not provided.
             target_folder: Optional existing folder path to upload into (CR-002)
-                          Can be relative to project root (e.g., 'docs/ideas/MyFolder/SubFolder')
+                          Can be relative to project root (e.g., 'x-ipe-docs/ideas/MyFolder/SubFolder')
                           or relative to ideas root (e.g., 'MyFolder/SubFolder')
         
         Returns:
@@ -115,7 +115,7 @@ class IdeasService:
         
         # CR-002: Upload to existing folder if target_folder provided
         if target_folder:
-            # Strip 'docs/ideas/' prefix if present (for paths from frontend tree)
+            # Strip 'x-ipe-docs/ideas/' prefix if present (for paths from frontend tree)
             if target_folder.startswith(self.IDEAS_PATH + '/'):
                 target_folder = target_folder[len(self.IDEAS_PATH) + 1:]
             elif target_folder.startswith(self.IDEAS_PATH):
@@ -241,10 +241,10 @@ class IdeasService:
     
     def delete_item(self, path: str) -> Dict[str, Any]:
         """
-        Delete a file or folder within docs/ideas/.
+        Delete a file or folder within x-ipe-docs/ideas/.
         
         Args:
-            path: Relative path from project root (e.g., 'docs/ideas/folder/file.md')
+            path: Relative path from project root (e.g., 'x-ipe-docs/ideas/folder/file.md')
         
         Returns:
             Dict with success, path, type or error
@@ -266,7 +266,7 @@ class IdeasService:
             if not str(resolved_path).startswith(str(ideas_resolved)):
                 return {
                     'success': False,
-                    'error': 'Path must be within docs/ideas/'
+                    'error': 'Path must be within x-ipe-docs/ideas/'
                 }
         except Exception:
             return {
@@ -332,7 +332,7 @@ class IdeasService:
         Create a new versioned idea summary file.
         
         Args:
-            folder_path: Relative path to the idea folder (e.g., 'docs/ideas/MyIdea')
+            folder_path: Relative path to the idea folder (e.g., 'x-ipe-docs/ideas/MyIdea')
             content: Markdown content for the summary
             base_name: Base name of the file (default: 'idea-summary')
         
@@ -355,7 +355,7 @@ class IdeasService:
             if not str(resolved_path).startswith(str(ideas_resolved)):
                 return {
                     'success': False,
-                    'error': 'Folder must be within docs/ideas/'
+                    'error': 'Folder must be within x-ipe-docs/ideas/'
                 }
         except Exception:
             return {

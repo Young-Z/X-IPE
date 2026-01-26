@@ -136,7 +136,7 @@ Execute Bug Fix by following these steps in order:
    - Check recent changes (git log)
 
 2. READ Technical Design (if feature-related bug):
-   - Check docs/requirements/FEATURE-XXX/technical-design.md
+   - Check x-ipe-docs/requirements/FEATURE-XXX/technical-design.md
    - Verify implementation matches design
    - Check if bug is due to design flaw vs implementation error
 

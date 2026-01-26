@@ -106,7 +106,7 @@ class TestFileWatcherContentChangedEmission:
         
         try:
             # Create subfolder and file
-            subdir = temp_project / "docs" / "planning"
+            subdir = temp_project / "x-ipe-docs" / "planning"
             subdir.mkdir(parents=True, exist_ok=True)
             test_file = subdir / "notes.md"
             test_file.write_text("# Notes")
@@ -125,7 +125,7 @@ class TestFileWatcherContentChangedEmission:
             event_data = content_changed_calls[-1][0][1]
             # Path should be relative, not absolute
             assert not event_data['path'].startswith('/')
-            assert 'docs/planning/notes.md' in event_data['path'] or 'docs\\planning\\notes.md' in event_data['path']
+            assert 'x-ipe-docs/planning/notes.md' in event_data['path'] or 'docs\\planning\\notes.md' in event_data['path']
         finally:
             watcher.stop()
 
@@ -299,23 +299,23 @@ class TestContentRefreshManagerPathMatching:
     def test_matching_path_triggers_refresh(self):
         """Refresh triggered when event path matches current file"""
         # This would be a JavaScript test, but we test the logic
-        current_file = "docs/planning/task-board.md"
-        event_path = "docs/planning/task-board.md"
+        current_file = "x-ipe-docs/planning/task-board.md"
+        event_path = "x-ipe-docs/planning/task-board.md"
         
         assert current_file == event_path  # Should trigger refresh
 
     def test_non_matching_path_no_refresh(self):
         """No refresh when event path doesn't match current file"""
-        current_file = "docs/planning/task-board.md"
-        event_path = "docs/requirements/spec.md"
+        current_file = "x-ipe-docs/planning/task-board.md"
+        event_path = "x-ipe-docs/requirements/spec.md"
         
         assert current_file != event_path  # Should NOT trigger refresh
 
     def test_path_normalization(self):
         """Paths should be normalized for comparison"""
         # Both should be considered equal
-        path1 = "docs/planning/task-board.md"
-        path2 = "docs/planning/task-board.md"
+        path1 = "x-ipe-docs/planning/task-board.md"
+        path2 = "x-ipe-docs/planning/task-board.md"
         
         assert path1 == path2
 

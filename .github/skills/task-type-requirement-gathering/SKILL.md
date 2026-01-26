@@ -64,7 +64,7 @@ Output:
   next_task_type: Feature Breakdown
   require_human_review: Yes
   auto_proceed: {from input Auto Proceed}
-  task_output_links: [docs/requirements/requirement-details.md] # or requirement-details-part-X.md
+  task_output_links: [x-ipe-docs/requirements/requirement-details.md] # or requirement-details-part-X.md
   mockup_list: [inherited from input or N/A]
   # Dynamic attributes for requirement-stage
   requirement_summary_updated: true | false
@@ -160,8 +160,8 @@ Use web search capability to research:
 **Procedure:**
 ```
 1. Determine current active file:
-   a. Check if docs/requirements/requirement-details.md exists
-   b. Check if docs/requirements/requirement-details-part-X.md files exist
+   a. Check if x-ipe-docs/requirements/requirement-details.md exists
+   b. Check if x-ipe-docs/requirements/requirement-details-part-X.md files exist
    c. Find the highest part number (latest active part)
 
 2. Count lines in current active file:
@@ -257,7 +257,7 @@ When parts exist, create/update `requirement-details-index.md`:
 
 | # | Checkpoint | Required |
 |---|------------|----------|
-| 1 | `docs/requirements/requirement-details.md` (or current part) created/updated | Yes |
+| 1 | `x-ipe-docs/requirements/requirement-details.md` (or current part) created/updated | Yes |
 | 2 | All clarifying questions answered | Yes |
 | 3 | If file split occurred, old file renamed correctly | Conditional |
 
@@ -332,7 +332,7 @@ When parts exist, create/update `requirement-details-index.md`:
    - "Password reset needed?" → Yes, via email
    - "Remember me functionality?" → Yes
 
-4. Create docs/requirements/requirement-details.md:
+4. Create x-ipe-docs/requirements/requirement-details.md:
    # Requirement Summary
    ... (fill all sections) ...
 
@@ -342,7 +342,7 @@ When parts exist, create/update `requirement-details-index.md`:
    next_task_type: Feature Breakdown
    require_human_review: Yes
    task_output_links:
-     - docs/requirements/requirement-details.md
+     - x-ipe-docs/requirements/requirement-details.md
 
 6. Resume Task Flow from task-execution-guideline skill
 ```

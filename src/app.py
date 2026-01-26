@@ -840,7 +840,7 @@ def register_ideas_routes(app):
         """
         GET /api/ideas/tree
         
-        Get tree structure of docs/ideas/ directory.
+        Get tree structure of x-ipe-docs/ideas/ directory.
         
         Response:
             - success: true
@@ -955,7 +955,7 @@ def register_ideas_routes(app):
         Delete an idea file or folder.
         
         Request body:
-            - path: string - Relative path to file/folder within docs/ideas/
+            - path: string - Relative path to file/folder within x-ipe-docs/ideas/
         
         Response:
             - success: true/false

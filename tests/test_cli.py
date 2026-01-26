@@ -36,10 +36,10 @@ def temp_project():
 def initialized_project(temp_project):
     """Create a project with X-IPE structure already initialized."""
     # Create basic structure
-    (temp_project / "docs" / "ideas").mkdir(parents=True)
-    (temp_project / "docs" / "planning").mkdir(parents=True)
-    (temp_project / "docs" / "requirements").mkdir(parents=True)
-    (temp_project / "docs" / "themes").mkdir(parents=True)
+    (temp_project / "x-ipe-docs" / "ideas").mkdir(parents=True)
+    (temp_project / "x-ipe-docs" / "planning").mkdir(parents=True)
+    (temp_project / "x-ipe-docs" / "requirements").mkdir(parents=True)
+    (temp_project / "x-ipe-docs" / "themes").mkdir(parents=True)
     (temp_project / ".x-ipe").mkdir()
     (temp_project / ".github" / "skills").mkdir(parents=True)
     
@@ -47,7 +47,7 @@ def initialized_project(temp_project):
     config_content = """version: 1
 paths:
   project_root: "."
-  docs: "docs"
+  docs: "x-ipe-docs"
   skills: ".github/skills"
   runtime: ".x-ipe"
 server:
@@ -190,19 +190,19 @@ class TestInitCommand:
     """Tests for x-ipe init command."""
     
     def test_init_creates_docs_folder(self, runner, temp_project):
-        """Init creates docs/ folder."""
+        """Init creates x-ipe-docs/ folder."""
         from src.x_ipe.cli.main import cli
         result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills"])
         assert result.exit_code == 0
-        assert (temp_project / "docs").exists()
+        assert (temp_project / "x-ipe-docs").exists()
     
     def test_init_creates_docs_subfolders(self, runner, temp_project):
-        """Init creates docs/ideas, docs/planning, docs/requirements."""
+        """Init creates x-ipe-docs/ideas, x-ipe-docs/planning, x-ipe-docs/requirements."""
         from src.x_ipe.cli.main import cli
         result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills"])
         assert result.exit_code == 0
-        assert (temp_project / "docs" / "planning").exists()
-        assert (temp_project / "docs" / "requirements").exists()
+        assert (temp_project / "x-ipe-docs" / "planning").exists()
+        assert (temp_project / "x-ipe-docs" / "requirements").exists()
     
     def test_init_creates_runtime_folder(self, runner, temp_project):
         """Init creates .x-ipe/ hidden folder."""
@@ -264,7 +264,7 @@ class TestInitCommand:
         """Init skips existing files without --force."""
         from src.x_ipe.cli.main import cli
         # Create existing docs
-        (temp_project / "docs").mkdir()
+        (temp_project / "x-ipe-docs").mkdir()
         (temp_project / ".x-ipe.yaml").write_text("version: 1\n")
         
         result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills"])
@@ -290,7 +290,7 @@ class TestInitCommand:
         assert result.exit_code == 0
         assert "Dry run" in result.output
         # Files should NOT be created
-        assert not (temp_project / "docs").exists()
+        assert not (temp_project / "x-ipe-docs").exists()
     
     def test_init_shows_summary(self, runner, temp_project):
         """Init shows summary of created items."""
@@ -653,7 +653,7 @@ class TestConfigModule:
         """Config parses paths from YAML."""
         from src.x_ipe.core.config import XIPEConfig
         config = XIPEConfig.load(initialized_project)
-        assert config.docs_path == initialized_project / "docs"
+        assert config.docs_path == initialized_project / "x-ipe-docs"
         assert config.skills_path == initialized_project / ".github" / "skills"
     
     def test_config_parses_server_settings(self, initialized_project):
@@ -720,9 +720,9 @@ class TestScaffoldModule:
         scaffold = ScaffoldManager(temp_project)
         scaffold.create_docs_structure()
         
-        assert (temp_project / "docs").exists()
-        assert (temp_project / "docs" / "requirements").exists()
-        assert (temp_project / "docs" / "planning").exists()
+        assert (temp_project / "x-ipe-docs").exists()
+        assert (temp_project / "x-ipe-docs" / "requirements").exists()
+        assert (temp_project / "x-ipe-docs" / "planning").exists()
     
     def test_scaffold_creates_runtime_folder(self, temp_project):
         """ScaffoldManager creates .x-ipe folder."""
@@ -760,7 +760,7 @@ class TestScaffoldModule:
         scaffold.create_runtime_folder()
         
         # Nothing should be created
-        assert not (temp_project / "docs").exists()
+        assert not (temp_project / "x-ipe-docs").exists()
         assert not (temp_project / ".x-ipe").exists()
         # But paths should be tracked
         assert len(scaffold.created) > 0
@@ -774,21 +774,21 @@ class TestScaffoldModule:
         
         created, skipped = scaffold.get_summary()
         assert len(created) > 0
-        assert any("docs" in str(p) for p in created)
+        assert any("x-ipe-docs" in str(p) for p in created)
     
     def test_scaffold_tracks_skipped_paths(self, initialized_project):
         """ScaffoldManager tracks skipped existing paths."""
         from src.x_ipe.core.scaffold import ScaffoldManager
         
         # Create docs structure first
-        (initialized_project / "docs").mkdir(exist_ok=True)
+        (initialized_project / "x-ipe-docs").mkdir(exist_ok=True)
         
         scaffold = ScaffoldManager(initialized_project)
         scaffold.create_docs_structure()
         
         created, skipped = scaffold.get_summary()
         # docs should be in skipped since it already exists
-        assert any("docs" in str(p) for p in skipped)
+        assert any("x-ipe-docs" in str(p) for p in skipped)
     
     def test_scaffold_force_overwrites(self, initialized_project):
         """ScaffoldManager force mode overwrites existing."""

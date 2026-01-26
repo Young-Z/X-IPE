@@ -6,7 +6,7 @@
 1. **Generate a random nickname** from this pool:
    - Nova, Echo, Flux, Bolt, Sage, Pixel, Cipher, Spark, Drift, Pulse, Vex, Atom, Onyx, Rune, Zephyr, Quill, Ember, Frost, Haze, Ink
 2. **Validate nickname against task board:**
-   - Check `docs/planning/task-board.md` Active Tasks section
+   - Check `x-ipe-docs/planning/task-board.md` Active Tasks section
    - If another session has `🔄 in_progress` tasks with the same nickname → pick a different name from the pool
    - If the in_progress task was started by your current session (same context) → keep the name
    - Repeat until you find an unused name
@@ -28,7 +28,7 @@
 
 ## ⚠️ CRITICAL: Task Board is THE Source of Truth
 
-**The task board (`docs/planning/task-board.md`) is MANDATORY for ALL work.**
+**The task board (`x-ipe-docs/planning/task-board.md`) is MANDATORY for ALL work.**
 
 ### Before ANY Work:
 1. **Create task on task-board.md** using `task-board-management` skill

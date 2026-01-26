@@ -75,7 +75,7 @@ Architecture should NOT include:
 |-----------|---------------|-------------|
 | Auto Proceed | False | Auto-advance to next task |
 | Ideation Toolbox Meta | `{project_root}/config/tools.json` | Config file for enabled tools |
-| Current Idea Folder | N/A | **Required from context** - path to current idea folder (e.g., `docs/ideas/mobile-app-idea`) |
+| Current Idea Folder | N/A | **Required from context** - path to current idea folder (e.g., `x-ipe-docs/ideas/mobile-app-idea`) |
 | Extra Instructions | N/A | Additional context or requirements for architecture diagram creation |
 
 ### Extra Instructions Attribute
@@ -119,7 +119,7 @@ Architecture should NOT include:
 ```
 1. IF Current Idea Folder == N/A:
    → Ask human: "Which idea folder should I create architecture diagrams for?"
-   → List available folders under docs/ideas/
+   → List available folders under x-ipe-docs/ideas/
    → Wait for human selection
 
 2. IF Current Idea Folder provided:
@@ -204,7 +204,7 @@ Execute Idea to Architecture by following these steps in order:
 ```
 1. Check if Current Idea Folder is set:
    IF Current Idea Folder == N/A:
-     → List available folders under docs/ideas/
+     → List available folders under x-ipe-docs/ideas/
      → Ask human: "Which idea folder should I create architecture diagrams for?"
      → Options: [list of folders]
      → Wait for selection
@@ -458,7 +458,7 @@ category: ideation-stage
 task_type: Idea to Architecture
 auto_proceed: {from input Auto Proceed}
 idea_id: IDEA-XXX
-current_idea_folder: {Current Idea Folder}   # e.g., docs/ideas/mobile-app-idea
+current_idea_folder: {Current Idea Folder}   # e.g., x-ipe-docs/ideas/mobile-app-idea
 architecture_tools_used:
   - mermaid
 diagrams_created:

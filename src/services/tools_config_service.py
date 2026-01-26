@@ -14,7 +14,7 @@ from typing import Dict, Any
 
 CONFIG_DIR = 'config'
 CONFIG_FILE = 'tools.json'
-LEGACY_PATH = 'docs/ideas/.ideation-tools.json'
+LEGACY_PATH = 'x-ipe-docs/ideas/.ideation-tools.json'
 
 DEFAULT_CONFIG = {
     "version": "2.0",

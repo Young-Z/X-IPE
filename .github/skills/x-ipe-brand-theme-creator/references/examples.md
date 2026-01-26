@@ -139,8 +139,8 @@ sky-200:  #bae6fd   (Borders, dividers)
 ```
 
 **Files Created:**
-- `docs/themes/theme-ocean/design-system.md`
-- `docs/themes/theme-ocean/component-visualization.html`
+- `x-ipe-docs/themes/theme-ocean/design-system.md`
+- `x-ipe-docs/themes/theme-ocean/component-visualization.html`
 
 ---
 

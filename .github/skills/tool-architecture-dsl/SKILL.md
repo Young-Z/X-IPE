@@ -126,7 +126,7 @@ module "Project Files" {
   rows 2
   grid 3 x 1   ' 3 columns × 1 row = HORIZONTAL
   align center center
-  component "docs/" { cols 1, rows 1 } <<folder>>
+  component "x-ipe-docs/" { cols 1, rows 1 } <<folder>>
   component "src/" { cols 1, rows 1 } <<folder>>
   component "static/" { cols 1, rows 1 } <<folder>>
 }

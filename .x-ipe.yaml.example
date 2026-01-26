@@ -7,7 +7,7 @@
 #   my-project/
 #   ├── .x-ipe.yaml        <- This config file
 #   ├── src/
-#   ├── docs/
+#   ├── x-ipe-docs/
 #   └── x-ipe/             <- X-IPE application folder
 #       ├── src/
 #       └── ...

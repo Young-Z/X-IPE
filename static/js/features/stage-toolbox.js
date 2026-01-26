@@ -528,7 +528,7 @@ class StageToolboxModal {
             // Update config with new theme selection format
             this.config['selected-theme'] = {
                 'theme-name': themeName,
-                'theme-folder-path': `docs/themes/${themeName}`
+                'theme-folder-path': `x-ipe-docs/themes/${themeName}`
             };
         }
         

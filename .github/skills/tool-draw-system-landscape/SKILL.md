@@ -37,8 +37,8 @@ theme "theme-default"    ← Extract this value
 ```
 
 **Theme Resolution:**
-1. If `theme "{name}"` is specified → Use `docs/themes/{name}/design-system.md`
-2. If no theme specified → Default to `docs/themes/theme-default/design-system.md`
+1. If `theme "{name}"` is specified → Use `x-ipe-docs/themes/{name}/design-system.md`
+2. If no theme specified → Default to `x-ipe-docs/themes/theme-default/design-system.md`
 
 ### Step 2: Load Theme Tokens
 
@@ -46,7 +46,7 @@ Read theme tokens from the theme's design-system.md:
 
 ```bash
 # theme_name extracted from DSL (e.g., "theme-default")
-cat "docs/themes/${theme_name}/design-system.md"
+cat "x-ipe-docs/themes/${theme_name}/design-system.md"
 ```
 
 **Required tokens:**
@@ -98,9 +98,9 @@ Apply parsed values to the landscape template. See [references/landscape-mapping
 ### Step 7: Save Output
 
 ```
-docs/requirements/FEATURE-XXX/architecture/   ← Feature architecture
+x-ipe-docs/requirements/FEATURE-XXX/architecture/   ← Feature architecture
 playground/architecture/                       ← Standalone diagrams
-docs/ideas/idea-XXX/architecture/              ← Idea exploration
+x-ipe-docs/ideas/idea-XXX/architecture/              ← Idea exploration
 ```
 
 ---

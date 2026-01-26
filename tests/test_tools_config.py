@@ -46,7 +46,7 @@ def temp_project_with_config_dir(temp_project_dir):
 def temp_project_with_legacy_config(temp_project_dir):
     """Create temporary project with legacy .ideation-tools.json"""
     # Create legacy config location
-    ideas_dir = Path(temp_project_dir) / 'docs' / 'ideas'
+    ideas_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'ideas'
     ideas_dir.mkdir(parents=True, exist_ok=True)
     
     legacy_config = {
@@ -149,10 +149,10 @@ class TestToolsConfigServiceInit:
         assert service.config_path == expected
     
     def test_init_sets_legacy_path(self, temp_project_dir):
-        """ToolsConfigService sets legacy path to docs/ideas/.ideation-tools.json"""
+        """ToolsConfigService sets legacy path to x-ipe-docs/ideas/.ideation-tools.json"""
         from src.services import ToolsConfigService
         service = ToolsConfigService(temp_project_dir)
-        expected = Path(temp_project_dir).resolve() / 'docs' / 'ideas' / '.ideation-tools.json'
+        expected = Path(temp_project_dir).resolve() / 'x-ipe-docs' / 'ideas' / '.ideation-tools.json'
         assert service.legacy_path == expected
 
 
@@ -271,7 +271,7 @@ class TestToolsConfigServiceMigration:
         from src.services import ToolsConfigService
         
         # Create legacy config with only ideation section
-        ideas_dir = Path(temp_project_dir) / 'docs' / 'ideas'
+        ideas_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'ideas'
         ideas_dir.mkdir(parents=True, exist_ok=True)
         
         partial_legacy = {
@@ -298,7 +298,7 @@ class TestToolsConfigServiceMigration:
         from src.services import ToolsConfigService
         
         # Create corrupted legacy config
-        ideas_dir = Path(temp_project_dir) / 'docs' / 'ideas'
+        ideas_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'ideas'
         ideas_dir.mkdir(parents=True, exist_ok=True)
         
         legacy_path = ideas_dir / '.ideation-tools.json'

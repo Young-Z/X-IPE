@@ -54,7 +54,7 @@ Output:
   next_task_type: task-type-feature-refinement | task-type-feature-breakdown
   require_human_review: Yes
   auto_proceed: {from input Auto Proceed}
-  task_output_links: [docs/requirements/FEATURE-XXX/CR-XXX.md]
+  task_output_links: [x-ipe-docs/requirements/FEATURE-XXX/CR-XXX.md]
   
   # Dynamic attributes (CR-specific)
   cr_id: CR-XXX
@@ -73,8 +73,8 @@ Output:
 | 1 | Change request description provided | Yes |
 | 2 | Requestor/stakeholder identified | No |
 | 3 | Business justification available | Yes |
-| 4 | docs/requirements/requirement-details.md exists | Yes |
-| 5 | docs/planning/features.md exists | Yes |
+| 4 | x-ipe-docs/requirements/requirement-details.md exists | Yes |
+| 5 | x-ipe-docs/planning/features.md exists | Yes |
 
 ---
 
@@ -209,17 +209,17 @@ Use web search capability to research:
 **Action:** Analyze current state to understand impact
 
 ```
-1. READ docs/requirements/requirement-details.md
+1. READ x-ipe-docs/requirements/requirement-details.md
    - Understand overall project scope
    - Identify related high-level requirements
 
-2. READ docs/planning/features.md (Feature Board)
+2. READ x-ipe-docs/planning/features.md (Feature Board)
    - List all existing features
    - Note feature statuses and dependencies
    - Identify potentially related features
 
 3. FOR EACH potentially related feature:
-   IF docs/requirements/FEATURE-XXX/specification.md exists:
+   IF x-ipe-docs/requirements/FEATURE-XXX/specification.md exists:
      READ specification to understand:
        - Current functionality
        - User stories
@@ -290,12 +290,12 @@ Wait for human approval before proceeding
 #### Path A: Modification to Existing Feature
 
 ```
-1. CREATE docs/requirements/FEATURE-XXX/CR-XXX.md
+1. CREATE x-ipe-docs/requirements/FEATURE-XXX/CR-XXX.md
    - Document the CR details
    - Store in the affected feature's folder
    - Link to the feature specification
 
-2. UPDATE docs/requirements/FEATURE-XXX/specification.md
+2. UPDATE x-ipe-docs/requirements/FEATURE-XXX/specification.md
    - Add entry to Version History table with CR reference
    - Update affected sections
    - Revise user stories if needed
@@ -303,7 +303,7 @@ Wait for human approval before proceeding
 
 3. CHECK if requirement-details.md needs update:
    IF cr_affects_high_level_requirements = true:
-     UPDATE docs/requirements/requirement-details.md:
+     UPDATE x-ipe-docs/requirements/requirement-details.md:
        - Update High-Level Requirements section if scope expanded
        - Add entry to Clarifications table documenting the change
        - Update Constraints if new constraints introduced
@@ -335,7 +335,7 @@ Wait for human approval before proceeding
 #### Path B: New Feature
 
 ```
-1. UPDATE docs/requirements/requirement-details.md
+1. UPDATE x-ipe-docs/requirements/requirement-details.md
    - Add new requirement to High-Level Requirements section
    - Document in Clarifications table
    - Update Project Overview if scope changed
@@ -346,7 +346,7 @@ Wait for human approval before proceeding
    - CR document will be created in the new feature folder after breakdown
 
 3. NOTE: After feature breakdown creates FEATURE-XXX folder:
-   - CREATE docs/requirements/FEATURE-XXX/CR-XXX.md
+   - CREATE x-ipe-docs/requirements/FEATURE-XXX/CR-XXX.md
    - This links the CR to the newly created feature
 ```
 
@@ -354,7 +354,7 @@ Wait for human approval before proceeding
 
 ### Step 6: Create CR Documentation
 
-**Action:** Create CR record in the feature folder at `docs/requirements/FEATURE-XXX/CR-XXX.md`
+**Action:** Create CR record in the feature folder at `x-ipe-docs/requirements/FEATURE-XXX/CR-XXX.md`
 
 **Important:** 
 - CR files are stored **inside the affected feature folder**, NOT in a separate change-requests folder
@@ -427,7 +427,7 @@ Wait for human approval before proceeding
 
 | # | Checkpoint | Required |
 |---|------------|----------|
-| 1 | CR documented in `docs/requirements/FEATURE-XXX/CR-XXX.md` | Yes |
+| 1 | CR documented in `x-ipe-docs/requirements/FEATURE-XXX/CR-XXX.md` | Yes |
 | 2 | Classification determined and documented | Yes |
 | 3 | Human approved classification | Yes |
 | 4 | Feature specification Version History updated with CR reference | Yes (if modification) |

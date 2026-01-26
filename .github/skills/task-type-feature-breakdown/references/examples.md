@@ -62,8 +62,8 @@
    | FEATURE-008 | Checkout Flow | Draft | FEATURE-007 | P1 |
 
 6. Create Feature Folders:
-   - docs/requirements/FEATURE-001/
-   - docs/requirements/FEATURE-002/
+   - x-ipe-docs/requirements/FEATURE-001/
+   - x-ipe-docs/requirements/FEATURE-002/
    - ... (one folder per feature)
 
 7. Resume Task Flow from task-execution-guideline skill
@@ -86,9 +86,9 @@ dependencies_mapped: Yes
 priority_assigned: Yes
 
 task_output_links:
-  - docs/planning/features.md
-  - docs/requirements/FEATURE-001/
-  - docs/requirements/FEATURE-002/
+  - x-ipe-docs/planning/features.md
+  - x-ipe-docs/requirements/FEATURE-001/
+  - x-ipe-docs/requirements/FEATURE-002/
   - ... (10 feature folders)
 ```
 

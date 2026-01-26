@@ -167,7 +167,7 @@ class TestIdeationToolboxHumanScenarios(unittest.TestCase):
         Steps:
         1. Human configures toolbox
         2. Human creates new idea (upload/compose)
-        3. .ideation-tools.json exists in docs/ideas/
+        3. .ideation-tools.json exists in x-ipe-docs/ideas/
         
         Expected:
         - Config file persists after idea creation

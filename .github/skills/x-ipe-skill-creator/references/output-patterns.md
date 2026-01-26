@@ -71,7 +71,7 @@ For skills where output quality depends on seeing examples, provide input/output
    next_task_type: Feature Breakdown
    require_human_review: Yes
    task_output_links:
-     - docs/requirements/requirement-details.md
+     - x-ipe-docs/requirements/requirement-details.md
 
 5. Resume Task Flow from task-execution-guideline skill
 ```

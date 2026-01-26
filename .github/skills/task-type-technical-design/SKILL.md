@@ -56,7 +56,7 @@ Output:
   next_task_type: Code Implementation
   require_human_review: Yes
   auto_proceed: {from input Auto Proceed}
-  task_output_links: [docs/requirements/FEATURE-XXX/technical-design.md]
+  task_output_links: [x-ipe-docs/requirements/FEATURE-XXX/technical-design.md]
   feature_id: FEATURE-XXX
   feature_title: {title}
   feature_version: {version}
@@ -241,8 +241,8 @@ When Technical Scope includes frontend, Part 2 SHOULD include:
 
 | Design Scope | Location |
 |--------------|----------|
-| Feature-specific design | `docs/requirements/FEATURE-XXX/technical-design.md` |
-| Cross-feature/Architecture design | `docs/architecture/technical-designs/{component}.md` |
+| Feature-specific design | `x-ipe-docs/requirements/FEATURE-XXX/technical-design.md` |
+| Cross-feature/Architecture design | `x-ipe-docs/architecture/technical-designs/{component}.md` |
 
 ---
 
@@ -293,7 +293,7 @@ RECEIVE Feature Data Model:
   title: {Feature Title}
   version: v1.0
   status: Done Feature Refinement
-  specification_link: docs/requirements/FEATURE-XXX/specification.md
+  specification_link: x-ipe-docs/requirements/FEATURE-XXX/specification.md
 ```
 
 ---
@@ -318,7 +318,7 @@ RECEIVE Feature Data Model:
 **Action:** Check existing architecture patterns
 
 ```
-1. READ docs/architecture/ for existing patterns
+1. READ x-ipe-docs/architecture/ for existing patterns
 2. IDENTIFY:
    - Reusable components
    - Established conventions
@@ -345,7 +345,7 @@ DOCUMENT findings for design decisions
 
 ### Step 5: Create Technical Design Document
 
-**Action:** Write two-part technical design at `docs/requirements/FEATURE-XXX/technical-design.md`
+**Action:** Write two-part technical design at `x-ipe-docs/requirements/FEATURE-XXX/technical-design.md`
 
 **Adapt structure based on implementation type** (API, CLI, frontend, backend, etc.)
 

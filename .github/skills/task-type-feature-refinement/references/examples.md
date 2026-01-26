@@ -53,7 +53,7 @@
    - [ ] Token contains user ID and expiry
 
 6. Create Specification:
-   docs/requirements/FEATURE-001/specification.md
+   x-ipe-docs/requirements/FEATURE-001/specification.md
 
 7. Update features.md:
    - Status: Draft → Specified
@@ -79,8 +79,8 @@ user_stories: 4
 acceptance_criteria: 16
 
 task_output_links:
-  - docs/requirements/FEATURE-001/specification.md
-  - docs/planning/features.md (status updated)
+  - x-ipe-docs/requirements/FEATURE-001/specification.md
+  - x-ipe-docs/planning/features.md (status updated)
 ```
 
 ---
@@ -131,7 +131,7 @@ task_output_links:
    → NOT FOUND
 
 2. BLOCKED:
-   "FEATURE-099 not found in docs/planning/features.md
+   "FEATURE-099 not found in x-ipe-docs/planning/features.md
     
     Feature Refinement requires an existing feature entry.
     This feature may need to go through Feature Breakdown first."

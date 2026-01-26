@@ -43,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 52 comprehensive tests validating structure, grammar, examples, and config
 
 - **FEATURE-013: Default Theme Content** - Pre-built default theme for X-IPE
-  - `docs/themes/theme-default/` folder with complete design system
+  - `x-ipe-docs/themes/theme-default/` folder with complete design system
   - `design-system.md`: Core tokens (colors, typography, spacing, radius, shadows)
   - Color palette: Primary (#0f172a), Secondary (#475569), Accent (#10b981), Neutral (#e2e8f0)
   - Semantic colors: Success, Warning, Error, Info
@@ -57,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **FEATURE-012: Design Themes** - Theming system for consistent brand design in mockups
   - ThemesService backend for theme discovery and parsing
-  - Scans `docs/themes/theme-*/` folders for valid themes
+  - Scans `x-ipe-docs/themes/theme-*/` folders for valid themes
   - Extracts color tokens (primary, secondary, accent, neutral) from design-system.md
   - Extracts description from first paragraph of design-system.md
   - API: `GET /api/themes` returns list with metadata (name, description, colors, files, path)
@@ -111,7 +111,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - File upload via drag-and-drop or click-to-browse
   - Auto-save editor with 5-second debounce and status indicator (Saving.../Saved)
   - Inline folder rename on double-click
-  - Uploads stored in `docs/ideas/{Draft Idea - MMDDYYYY HHMMSS}/` (files directly in folder)
+  - Uploads stored in `x-ipe-docs/ideas/{Draft Idea - MMDDYYYY HHMMSS}/` (files directly in folder)
   - Workplace appears as first item in sidebar navigation
 
 - **FEATURE-005 v4.0: Interactive Console** - Full-featured terminal with xterm.js

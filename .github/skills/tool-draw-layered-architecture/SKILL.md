@@ -77,7 +77,7 @@ Extract from DSL:
 
 ### Step 2: Load Theme
 ```bash
-cat "docs/themes/${theme_name}/design-system.md"
+cat "x-ipe-docs/themes/${theme_name}/design-system.md"
 ```
 
 ### Step 3: Generate HTML

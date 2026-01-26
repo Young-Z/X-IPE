@@ -1,13 +1,13 @@
 ---
 name: feature-stage+feature-board-management
-description: Manage feature lifecycle in docs/planning/features.md. Category-level skill called during Step 4 (Category Closing) for feature-stage tasks. Accepts Task Data Model with feature_id and feature_phase, updates feature board, returns category_level_change_summary. Also provides query interface for Feature Data Model.
+description: Manage feature lifecycle in x-ipe-docs/planning/features.md. Category-level skill called during Step 4 (Category Closing) for feature-stage tasks. Accepts Task Data Model with feature_id and feature_phase, updates feature board, returns category_level_change_summary. Also provides query interface for Feature Data Model.
 ---
 
 # Feature Board Management
 
 ## Purpose
 
-AI Agents follow this skill to manage the feature board (`docs/planning/features.md`) - the central tracking system for all feature-level work.
+AI Agents follow this skill to manage the feature board (`x-ipe-docs/planning/features.md`) - the central tracking system for all feature-level work.
 
 **Two Usage Modes:**
 
@@ -35,7 +35,7 @@ AI Agents follow this skill to manage the feature board (`docs/planning/features
 
 ## Feature Board Structure
 
-**Location:** `docs/planning/features.md`
+**Location:** `x-ipe-docs/planning/features.md`
 
 **Content Sections:**
 1. Overview and status definitions
@@ -64,8 +64,8 @@ Feature:
   dependencies: [FEATURE-XXX, ...]  # List of feature IDs
   
   # Artifact links
-  specification_link: docs/requirements/FEATURE-XXX/specification.md | null
-  technical_design_link: docs/requirements/FEATURE-XXX/technical-design.md | null
+  specification_link: x-ipe-docs/requirements/FEATURE-XXX/specification.md | null
+  technical_design_link: x-ipe-docs/requirements/FEATURE-XXX/technical-design.md | null
   
   # Metadata
   created: MM-DD-YYYY
@@ -127,7 +127,7 @@ features:
 
 **Execution:**
 ```
-1. Create docs/planning/features.md if not exists (use template)
+1. Create x-ipe-docs/planning/features.md if not exists (use template)
 2. FOR EACH feature in features:
    IF feature_id exists on board:
      → Update feature information (title, version, description, dependencies)
@@ -146,7 +146,7 @@ features:
 success: true
 features_added: [FEATURE-001, FEATURE-002]
 features_updated: [FEATURE-003]
-board_path: docs/planning/features.md
+board_path: x-ipe-docs/planning/features.md
 message: "Created 2 features, updated 1 feature on feature board"
 ```
 
@@ -164,7 +164,7 @@ feature_id: FEATURE-001
 
 **Execution:**
 ```
-1. Read docs/planning/features.md
+1. Read x-ipe-docs/planning/features.md
 2. Find feature with matching feature_id
 3. Extract all feature information
 4. Build Feature Data Model
@@ -178,8 +178,8 @@ version: v1.0
 status: Designed
 description: JWT-based user authentication with login, logout, and token refresh
 dependencies: []
-specification_link: docs/requirements/FEATURE-001/specification.md
-technical_design_link: docs/requirements/FEATURE-001/technical-design.md
+specification_link: x-ipe-docs/requirements/FEATURE-001/specification.md
+technical_design_link: x-ipe-docs/requirements/FEATURE-001/technical-design.md
 created: 01-15-2026
 last_updated: 01-17-2026 14:30:00
 tasks:
@@ -230,7 +230,7 @@ feature_phase: Technical Design
 
 **Execution:**
 ```
-1. Read docs/planning/features.md
+1. Read x-ipe-docs/planning/features.md
 2. Find feature with feature_id
 3. Update status based on feature_phase (see table above)
 4. Update artifact links from task_output_links if applicable
@@ -281,7 +281,7 @@ feature_id: FEATURE-001
 feature_title: User Authentication
 feature_version: v1.0
 feature_phase: Technical Design
-task_output_links: [docs/requirements/FEATURE-001/technical-design.md]
+task_output_links: [x-ipe-docs/requirements/FEATURE-001/technical-design.md]
 
 # Output
 category_level_change_summary: "Updated FEATURE-001 (User Authentication) status from Refined to Designed, added technical design link"
@@ -291,7 +291,7 @@ category_level_change_summary: "Updated FEATURE-001 (User Authentication) status
 
 ## Feature Board Template Structure
 
-**File:** `docs/planning/features.md`
+**File:** `x-ipe-docs/planning/features.md`
 
 ```markdown
 # Feature Board
@@ -349,8 +349,8 @@ This board tracks all features across the project lifecycle.
 - **Status:** Designed
 - **Description:** JWT-based user authentication with login, logout, and token refresh
 - **Dependencies:** None
-- **Specification:** [docs/requirements/FEATURE-001/specification.md](FEATURE-001/specification.md)
-- **Technical Design:** [docs/requirements/FEATURE-001/technical-design.md](FEATURE-001/technical-design.md)
+- **Specification:** [x-ipe-docs/requirements/FEATURE-001/specification.md](FEATURE-001/specification.md)
+- **Technical Design:** [x-ipe-docs/requirements/FEATURE-001/technical-design.md](FEATURE-001/technical-design.md)
 - **Tasks:**
   - TASK-015 (Feature Refinement) - Completed on 01-16-2026
   - TASK-023 (Technical Design) - Completed on 01-17-2026
@@ -412,7 +412,7 @@ dependencies: []
 # Task Data Model has:
 feature_id: FEATURE-001
 feature_phase: refinement
-task_output_links: [docs/requirements/FEATURE-001/specification.md]
+task_output_links: [x-ipe-docs/requirements/FEATURE-001/specification.md]
 
 # Category skill (Step 4) calls Update Feature Status:
 # - Status changes: Planned → Refined

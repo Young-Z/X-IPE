@@ -8,7 +8,7 @@
 
 **Context:**
 - Feature: FEATURE-001 (User Authentication)
-- Specification: `docs/requirements/FEATURE-001/specification.md`
+- Specification: `x-ipe-docs/requirements/FEATURE-001/specification.md`
 
 ### Execution Flow
 
@@ -56,7 +56,7 @@
    - Token Refresh: Request → Verify Old → Generate New → Response
 
 7. Create technical-design.md at:
-   docs/requirements/FEATURE-001/technical-design.md
+   x-ipe-docs/requirements/FEATURE-001/technical-design.md
 
 8. Resume Task Flow from task-execution-guideline skill
 ```
@@ -80,7 +80,7 @@ interfaces_defined: 3
 data_flows_documented: 2
 
 task_output_links:
-  - docs/requirements/FEATURE-001/technical-design.md
+  - x-ipe-docs/requirements/FEATURE-001/technical-design.md
 ```
 
 ---
@@ -135,7 +135,7 @@ task_output_links:
 
 ```
 1. Check for Specification:
-   - Expected: docs/requirements/FEATURE-007/specification.md
+   - Expected: x-ipe-docs/requirements/FEATURE-007/specification.md
    - Result: FILE NOT FOUND
 
 2. BLOCKED - Cannot proceed:
@@ -150,7 +150,7 @@ task_output_links:
 
 3. Status: blocked
    Reason: Missing specification
-   Required: docs/requirements/FEATURE-007/specification.md
+   Required: x-ipe-docs/requirements/FEATURE-007/specification.md
 ```
 
 ---
@@ -164,7 +164,7 @@ task_output_links:
    - Add rate limiting to AuthService
 
 2. Read Existing Design:
-   - docs/requirements/FEATURE-001/technical-design.md exists
+   - x-ipe-docs/requirements/FEATURE-001/technical-design.md exists
    - Current components: AuthController, AuthService, etc.
 
 3. Update Design:

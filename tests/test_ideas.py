@@ -37,7 +37,7 @@ def temp_project_dir():
 @pytest.fixture
 def temp_ideas_dir(temp_project_dir):
     """Create temporary ideas directory structure"""
-    ideas_path = Path(temp_project_dir) / 'docs' / 'ideas'
+    ideas_path = Path(temp_project_dir) / 'x-ipe-docs' / 'ideas'
     ideas_path.mkdir(parents=True, exist_ok=True)
     return ideas_path
 
@@ -112,8 +112,8 @@ class TestIdeasServiceGetTree:
     """Unit tests for IdeasService.get_tree()"""
 
     def test_get_tree_creates_ideas_dir_if_not_exists(self, ideas_service, temp_project_dir):
-        """get_tree() creates docs/ideas/ if it doesn't exist"""
-        ideas_path = Path(temp_project_dir) / 'docs' / 'ideas'
+        """get_tree() creates x-ipe-docs/ideas/ if it doesn't exist"""
+        ideas_path = Path(temp_project_dir) / 'x-ipe-docs' / 'ideas'
         if ideas_path.exists():
             shutil.rmtree(ideas_path)
         
@@ -155,7 +155,7 @@ class TestIdeasServiceGetTree:
         result = ideas_service_populated.get_tree()
         
         mobile_app = next(item for item in result if item['name'] == 'mobile-app-idea')
-        assert mobile_app['path'] == 'docs/ideas/mobile-app-idea'
+        assert mobile_app['path'] == 'x-ipe-docs/ideas/mobile-app-idea'
 
     def test_get_tree_sorts_alphabetically(self, ideas_service_populated):
         """get_tree() returns items sorted alphabetically"""
@@ -240,7 +240,7 @@ class TestIdeasServiceUpload:
         
         result = ideas_service.upload(files)
         
-        assert result['folder_path'].startswith('docs/ideas/')
+        assert result['folder_path'].startswith('x-ipe-docs/ideas/')
 
     def test_upload_handles_binary_files(self, ideas_service, temp_ideas_dir):
         """upload() handles binary files (images, etc.)"""
@@ -289,7 +289,7 @@ class TestIdeasServiceUploadToExistingFolder:
         
         result = ideas_service_populated.upload(files, target_folder='mobile-app-idea')
         
-        assert 'docs/ideas/mobile-app-idea' in result['folder_path']
+        assert 'x-ipe-docs/ideas/mobile-app-idea' in result['folder_path']
 
     def test_upload_to_nonexistent_folder_fails(self, ideas_service_populated, populated_ideas_dir):
         """upload() with nonexistent target_folder returns error"""
@@ -377,7 +377,7 @@ class TestIdeasServiceRenameFolder:
         """rename_folder() returns new relative path"""
         result = ideas_service_populated.rename_folder('mobile-app-idea', 'renamed')
         
-        assert result['new_path'] == 'docs/ideas/renamed'
+        assert result['new_path'] == 'x-ipe-docs/ideas/renamed'
 
     def test_rename_folder_invalid_name_slash(self, ideas_service_populated):
         """rename_folder() rejects names with slash"""
@@ -507,7 +507,7 @@ class TestIdeasUploadAPI:
         result = json.loads(response.data)
         
         assert result['success'] is True
-        folder_path = Path(temp_project_dir) / 'docs' / 'ideas' / result['folder_name']
+        folder_path = Path(temp_project_dir) / 'x-ipe-docs' / 'ideas' / result['folder_name']
         assert folder_path.exists()
 
     def test_upload_multiple_files(self, client):
@@ -572,7 +572,7 @@ class TestIdeasUploadToFolderAPI:
         result = json.loads(response.data)
         
         assert result['success'] is True
-        file_path = Path(temp_project_dir) / 'docs' / 'ideas' / 'mobile-app-idea' / 'newfile.md'
+        file_path = Path(temp_project_dir) / 'x-ipe-docs' / 'ideas' / 'mobile-app-idea' / 'newfile.md'
         assert file_path.exists()
 
     def test_upload_to_nonexistent_folder_returns_error(self, populated_client):
@@ -602,8 +602,8 @@ class TestIdeasUploadToFolderAPI:
         
         assert result['success'] is True
         assert len(result['files_uploaded']) == 2
-        assert (Path(temp_project_dir) / 'docs' / 'ideas' / 'mobile-app-idea' / 'file1.md').exists()
-        assert (Path(temp_project_dir) / 'docs' / 'ideas' / 'mobile-app-idea' / 'file2.txt').exists()
+        assert (Path(temp_project_dir) / 'x-ipe-docs' / 'ideas' / 'mobile-app-idea' / 'file1.md').exists()
+        assert (Path(temp_project_dir) / 'x-ipe-docs' / 'ideas' / 'mobile-app-idea' / 'file2.txt').exists()
 
     def test_upload_without_target_folder_creates_new_folder(self, populated_client, temp_project_dir):
         """POST /api/ideas/upload without target_folder creates new folder (existing behavior)"""
@@ -717,7 +717,7 @@ class TestIdeasIntegration:
         upload_result = json.loads(upload_response.data)
         
         # Read the file via existing content API (files directly in folder, not in subfolder)
-        file_path = f"docs/ideas/{upload_result['folder_name']}/notes.md"
+        file_path = f"x-ipe-docs/ideas/{upload_result['folder_name']}/notes.md"
         content_response = client.get(f'/api/file/content?path={file_path}')
         content_result = json.loads(content_response.data)
         
@@ -735,7 +735,7 @@ class TestIdeasServiceDeleteItem:
 
     def test_delete_file_removes_file(self, ideas_service_populated, populated_ideas_dir):
         """delete_item() removes a file"""
-        file_path = 'docs/ideas/mobile-app-idea/files/notes.md'
+        file_path = 'x-ipe-docs/ideas/mobile-app-idea/files/notes.md'
         result = ideas_service_populated.delete_item(file_path)
         
         assert result['success'] is True
@@ -744,7 +744,7 @@ class TestIdeasServiceDeleteItem:
 
     def test_delete_folder_removes_folder(self, ideas_service_populated, populated_ideas_dir):
         """delete_item() removes a folder and its contents"""
-        folder_path = 'docs/ideas/mobile-app-idea'
+        folder_path = 'x-ipe-docs/ideas/mobile-app-idea'
         result = ideas_service_populated.delete_item(folder_path)
         
         assert result['success'] is True
@@ -753,14 +753,14 @@ class TestIdeasServiceDeleteItem:
 
     def test_delete_returns_path(self, ideas_service_populated):
         """delete_item() returns the deleted path"""
-        file_path = 'docs/ideas/mobile-app-idea/files/notes.md'
+        file_path = 'x-ipe-docs/ideas/mobile-app-idea/files/notes.md'
         result = ideas_service_populated.delete_item(file_path)
         
         assert result['path'] == file_path
 
     def test_delete_nonexistent_path_returns_error(self, ideas_service_populated):
         """delete_item() returns error for non-existent path"""
-        result = ideas_service_populated.delete_item('docs/ideas/nonexistent/file.md')
+        result = ideas_service_populated.delete_item('x-ipe-docs/ideas/nonexistent/file.md')
         
         assert result['success'] is False
         assert 'not found' in result['error'].lower()
@@ -780,13 +780,13 @@ class TestIdeasServiceDeleteItem:
         assert 'within' in result['error'].lower() or 'invalid' in result['error'].lower()
 
     def test_delete_outside_ideas_dir_prevented(self, ideas_service_populated, temp_project_dir):
-        """delete_item() prevents deletion outside docs/ideas/"""
+        """delete_item() prevents deletion outside x-ipe-docs/ideas/"""
         # Create a file outside ideas directory
-        outside_file = Path(temp_project_dir) / 'docs' / 'planning' / 'test.md'
+        outside_file = Path(temp_project_dir) / 'x-ipe-docs' / 'planning' / 'test.md'
         outside_file.parent.mkdir(parents=True, exist_ok=True)
         outside_file.write_text('test')
         
-        result = ideas_service_populated.delete_item('docs/planning/test.md')
+        result = ideas_service_populated.delete_item('x-ipe-docs/planning/test.md')
         
         assert result['success'] is False
 
@@ -800,7 +800,7 @@ class TestIdeasServiceVersionedSummary:
 
     def test_get_next_version_number_returns_1_for_empty_folder(self, ideas_service_populated):
         """get_next_version_number() returns 1 for folder with no versions"""
-        version = ideas_service_populated.get_next_version_number('docs/ideas/mobile-app-idea')
+        version = ideas_service_populated.get_next_version_number('x-ipe-docs/ideas/mobile-app-idea')
         assert version == 1
 
     def test_get_next_version_number_increments(self, ideas_service_populated, populated_ideas_dir):
@@ -810,7 +810,7 @@ class TestIdeasServiceVersionedSummary:
         (folder / 'idea-summary-v1.md').write_text('# v1')
         (folder / 'idea-summary-v2.md').write_text('# v2')
         
-        version = ideas_service_populated.get_next_version_number('docs/ideas/mobile-app-idea')
+        version = ideas_service_populated.get_next_version_number('x-ipe-docs/ideas/mobile-app-idea')
         assert version == 3
 
     def test_get_next_version_number_finds_highest(self, ideas_service_populated, populated_ideas_dir):
@@ -819,13 +819,13 @@ class TestIdeasServiceVersionedSummary:
         (folder / 'idea-summary-v5.md').write_text('# v5')
         (folder / 'idea-summary-v2.md').write_text('# v2')
         
-        version = ideas_service_populated.get_next_version_number('docs/ideas/mobile-app-idea')
+        version = ideas_service_populated.get_next_version_number('x-ipe-docs/ideas/mobile-app-idea')
         assert version == 6
 
     def test_create_versioned_summary_creates_file(self, ideas_service_populated, populated_ideas_dir):
         """create_versioned_summary() creates a versioned file"""
         content = '# My Idea Summary v1'
-        result = ideas_service_populated.create_versioned_summary('docs/ideas/mobile-app-idea', content)
+        result = ideas_service_populated.create_versioned_summary('x-ipe-docs/ideas/mobile-app-idea', content)
         
         assert result['success'] is True
         assert result['version'] == 1
@@ -837,7 +837,7 @@ class TestIdeasServiceVersionedSummary:
         folder = populated_ideas_dir / 'mobile-app-idea'
         (folder / 'idea-summary-v1.md').write_text('# v1')
         
-        result = ideas_service_populated.create_versioned_summary('docs/ideas/mobile-app-idea', '# v2 content')
+        result = ideas_service_populated.create_versioned_summary('x-ipe-docs/ideas/mobile-app-idea', '# v2 content')
         
         assert result['success'] is True
         assert result['version'] == 2
@@ -846,24 +846,24 @@ class TestIdeasServiceVersionedSummary:
     def test_create_versioned_summary_writes_content(self, ideas_service_populated, populated_ideas_dir):
         """create_versioned_summary() writes the provided content"""
         content = '# Detailed Summary\n\nThis is the content.'
-        ideas_service_populated.create_versioned_summary('docs/ideas/mobile-app-idea', content)
+        ideas_service_populated.create_versioned_summary('x-ipe-docs/ideas/mobile-app-idea', content)
         
         file_path = populated_ideas_dir / 'mobile-app-idea' / 'idea-summary-v1.md'
         assert file_path.read_text() == content
 
     def test_create_versioned_summary_nonexistent_folder_returns_error(self, ideas_service_populated):
         """create_versioned_summary() returns error for non-existent folder"""
-        result = ideas_service_populated.create_versioned_summary('docs/ideas/nonexistent', 'content')
+        result = ideas_service_populated.create_versioned_summary('x-ipe-docs/ideas/nonexistent', 'content')
         
         assert result['success'] is False
         assert 'not found' in result['error'].lower()
 
     def test_create_versioned_summary_outside_ideas_prevented(self, ideas_service_populated, temp_project_dir):
-        """create_versioned_summary() prevents creation outside docs/ideas/"""
-        outside_folder = Path(temp_project_dir) / 'docs' / 'planning'
+        """create_versioned_summary() prevents creation outside x-ipe-docs/ideas/"""
+        outside_folder = Path(temp_project_dir) / 'x-ipe-docs' / 'planning'
         outside_folder.mkdir(parents=True, exist_ok=True)
         
-        result = ideas_service_populated.create_versioned_summary('docs/planning', 'content')
+        result = ideas_service_populated.create_versioned_summary('x-ipe-docs/planning', 'content')
         
         assert result['success'] is False
 
@@ -878,7 +878,7 @@ class TestIdeasDeleteAPI:
     def test_delete_returns_200(self, populated_client):
         """POST /api/ideas/delete returns 200 OK for valid delete"""
         response = populated_client.post('/api/ideas/delete',
-            data=json.dumps({'path': 'docs/ideas/mobile-app-idea/files/notes.md'}),
+            data=json.dumps({'path': 'x-ipe-docs/ideas/mobile-app-idea/files/notes.md'}),
             content_type='application/json')
         
         assert response.status_code == 200
@@ -886,7 +886,7 @@ class TestIdeasDeleteAPI:
     def test_delete_returns_json(self, populated_client):
         """POST /api/ideas/delete returns JSON response"""
         response = populated_client.post('/api/ideas/delete',
-            data=json.dumps({'path': 'docs/ideas/mobile-app-idea/files/notes.md'}),
+            data=json.dumps({'path': 'x-ipe-docs/ideas/mobile-app-idea/files/notes.md'}),
             content_type='application/json')
         result = json.loads(response.data)
         
@@ -895,7 +895,7 @@ class TestIdeasDeleteAPI:
     def test_delete_removes_file(self, populated_client, populated_ideas_dir):
         """POST /api/ideas/delete removes the specified file"""
         response = populated_client.post('/api/ideas/delete',
-            data=json.dumps({'path': 'docs/ideas/mobile-app-idea/files/notes.md'}),
+            data=json.dumps({'path': 'x-ipe-docs/ideas/mobile-app-idea/files/notes.md'}),
             content_type='application/json')
         result = json.loads(response.data)
         
@@ -905,7 +905,7 @@ class TestIdeasDeleteAPI:
     def test_delete_removes_folder(self, populated_client, populated_ideas_dir):
         """POST /api/ideas/delete removes the specified folder"""
         response = populated_client.post('/api/ideas/delete',
-            data=json.dumps({'path': 'docs/ideas/mobile-app-idea'}),
+            data=json.dumps({'path': 'x-ipe-docs/ideas/mobile-app-idea'}),
             content_type='application/json')
         result = json.loads(response.data)
         
@@ -925,7 +925,7 @@ class TestIdeasDeleteAPI:
     def test_delete_nonexistent_path_returns_error(self, populated_client):
         """POST /api/ideas/delete returns error for non-existent path"""
         response = populated_client.post('/api/ideas/delete',
-            data=json.dumps({'path': 'docs/ideas/nonexistent/file.md'}),
+            data=json.dumps({'path': 'x-ipe-docs/ideas/nonexistent/file.md'}),
             content_type='application/json')
         result = json.loads(response.data)
         
@@ -944,7 +944,7 @@ class TestIdeasDeleteIntegration:
         """Delete removes folder from tree"""
         # Delete folder
         populated_client.post('/api/ideas/delete',
-            data=json.dumps({'path': 'docs/ideas/mobile-app-idea'}),
+            data=json.dumps({'path': 'x-ipe-docs/ideas/mobile-app-idea'}),
             content_type='application/json')
         
         # Get tree
@@ -964,7 +964,7 @@ class TestIdeasDeleteIntegration:
         
         # Delete
         client.post('/api/ideas/delete',
-            data=json.dumps({'path': f'docs/ideas/{folder_name}'}),
+            data=json.dumps({'path': f'x-ipe-docs/ideas/{folder_name}'}),
             content_type='application/json')
         
         # Upload again
@@ -1020,7 +1020,7 @@ class TestCopilotButtonBehavior:
         1. "copilot" - to start Copilot CLI
         2. "refine the idea {file_path}" - to trigger refinement
         """
-        test_file_path = 'docs/ideas/test-idea/Project Proposal'
+        test_file_path = 'x-ipe-docs/ideas/test-idea/Project Proposal'
         
         expected_init_command = 'copilot'
         expected_refine_command = f'refine the idea {test_file_path}'
@@ -1163,9 +1163,9 @@ class TestCopilotButtonEdgeCases:
         CR-001: File paths with spaces and special characters should be handled.
         """
         test_paths = [
-            'docs/ideas/my idea/Project Proposal',
-            'docs/ideas/test-idea-2026-01-22/notes.md',
-            'docs/ideas/Draft Idea - 01222026 195931/idea-summary.md',
+            'x-ipe-docs/ideas/my idea/Project Proposal',
+            'x-ipe-docs/ideas/test-idea-2026-01-22/notes.md',
+            'x-ipe-docs/ideas/Draft Idea - 01222026 195931/idea-summary.md',
         ]
         
         for path in test_paths:
@@ -1300,12 +1300,12 @@ class TestIdeasServiceToolbox:
     
     def test_save_toolbox_creates_ideas_directory_if_missing(self, temp_project_dir):
         """
-        CR-003: save_toolbox() creates docs/ideas/ directory if it doesn't exist.
+        CR-003: save_toolbox() creates x-ipe-docs/ideas/ directory if it doesn't exist.
         """
         from src.services import IdeasService
         
         # Ensure ideas directory doesn't exist
-        ideas_path = Path(temp_project_dir) / 'docs' / 'ideas'
+        ideas_path = Path(temp_project_dir) / 'x-ipe-docs' / 'ideas'
         assert not ideas_path.exists()
         
         service = IdeasService(temp_project_dir)

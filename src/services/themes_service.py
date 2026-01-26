@@ -3,7 +3,7 @@ FEATURE-012: Design Themes
 
 ThemesService: Discovery, parsing, and metadata extraction for themes
 
-Manages themes stored in docs/themes/theme-*/ folders.
+Manages themes stored in x-ipe-docs/themes/theme-*/ folders.
 Each theme must have design-system.md (required) and component-visualization.html (optional).
 """
 import re
@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 
 
-THEMES_DIR = 'docs/themes'
+THEMES_DIR = 'x-ipe-docs/themes'
 THEME_PREFIX = 'theme-'
 REQUIRED_FILE = 'design-system.md'
 VISUALIZATION_FILE = 'component-visualization.html'
@@ -31,7 +31,7 @@ class ThemesService:
     
     FEATURE-012: Design Themes
     
-    Themes are stored in docs/themes/theme-{name}/ directories.
+    Themes are stored in x-ipe-docs/themes/theme-{name}/ directories.
     Each theme must have a design-system.md file for validation.
     """
     
@@ -49,7 +49,7 @@ class ThemesService:
         """
         List all valid themes with metadata.
         
-        Scans docs/themes/theme-*/ folders for themes.
+        Scans x-ipe-docs/themes/theme-*/ folders for themes.
         A theme is valid if it has design-system.md file.
         
         Returns:

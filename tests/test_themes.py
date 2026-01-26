@@ -37,8 +37,8 @@ def temp_project_dir():
 
 @pytest.fixture
 def temp_project_with_themes(temp_project_dir):
-    """Create temporary project with docs/themes/ folder and sample themes"""
-    themes_dir = Path(temp_project_dir) / 'docs' / 'themes'
+    """Create temporary project with x-ipe-docs/themes/ folder and sample themes"""
+    themes_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'themes'
     
     # Create theme-default
     default_dir = themes_dir / 'theme-default'
@@ -110,14 +110,14 @@ Cool blue tones for professional applications.
 
 @pytest.fixture
 def temp_project_no_themes(temp_project_dir):
-    """Create temporary project without docs/themes/ folder"""
+    """Create temporary project without x-ipe-docs/themes/ folder"""
     return temp_project_dir
 
 
 @pytest.fixture
 def temp_project_with_invalid_theme(temp_project_dir):
     """Create project with theme missing required design-system.md file"""
-    themes_dir = Path(temp_project_dir) / 'docs' / 'themes'
+    themes_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'themes'
     
     # Theme missing design-system.md (INVALID - required file missing)
     incomplete_dir = themes_dir / 'theme-incomplete'
@@ -185,7 +185,7 @@ class TestThemesServiceInit:
         service = ThemesService(temp_project_dir)
         
         assert service.project_root == Path(temp_project_dir).resolve()
-        assert service.themes_dir == Path(temp_project_dir).resolve() / 'docs' / 'themes'
+        assert service.themes_dir == Path(temp_project_dir).resolve() / 'x-ipe-docs' / 'themes'
     
     def test_init_handles_relative_path(self, temp_project_dir):
         """ThemesService handles relative path correctly"""
@@ -217,7 +217,7 @@ class TestThemesServiceListThemes:
         assert 'theme-ocean' in theme_names
     
     def test_list_themes_returns_empty_when_no_themes_dir(self, temp_project_no_themes):
-        """list_themes returns empty list when docs/themes/ doesn't exist"""
+        """list_themes returns empty list when x-ipe-docs/themes/ doesn't exist"""
         from src.services import ThemesService
         
         service = ThemesService(temp_project_no_themes)
@@ -541,7 +541,7 @@ class TestThemeSelectionIntegration:
         config = tools_service.load()
         config['selected-theme'] = {
             'theme-name': 'theme-ocean',
-            'theme-folder-path': 'docs/themes/theme-ocean'
+            'theme-folder-path': 'x-ipe-docs/themes/theme-ocean'
         }
         tools_service.save(config)
         
@@ -549,7 +549,7 @@ class TestThemeSelectionIntegration:
         config = tools_service.load()
         
         assert config['selected-theme']['theme-name'] == 'theme-ocean'
-        assert config['selected-theme']['theme-folder-path'] == 'docs/themes/theme-ocean'
+        assert config['selected-theme']['theme-folder-path'] == 'x-ipe-docs/themes/theme-ocean'
     
     def test_default_theme_selected_when_none_specified(self, temp_project_with_themes):
         """No theme is selected when none specified in config"""
@@ -576,7 +576,7 @@ class TestThemeSelectionIntegration:
         config = tools_service.load()
         config['selected-theme'] = {
             'theme-name': 'theme-nonexistent',
-            'theme-folder-path': 'docs/themes/theme-nonexistent'
+            'theme-folder-path': 'x-ipe-docs/themes/theme-nonexistent'
         }
         tools_service.save(config)
         
@@ -597,7 +597,7 @@ class TestThemesEdgeCases:
         """Themes with unusual names are handled correctly"""
         from src.services import ThemesService
         
-        themes_dir = Path(temp_project_dir) / 'docs' / 'themes'
+        themes_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'themes'
         special_dir = themes_dir / 'theme-my-brand-2024'
         special_dir.mkdir(parents=True, exist_ok=True)
         (special_dir / 'design-system.md').write_text('# Special\n\nDescription.\n\n#123456 #234567 #345678 #456789')
@@ -612,7 +612,7 @@ class TestThemesEdgeCases:
         """Large design-system.md files are handled"""
         from src.services import ThemesService
         
-        themes_dir = Path(temp_project_dir) / 'docs' / 'themes'
+        themes_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'themes'
         large_dir = themes_dir / 'theme-large'
         large_dir.mkdir(parents=True, exist_ok=True)
         
@@ -632,7 +632,7 @@ class TestThemesEdgeCases:
         from src.services import ThemesService
         import time
         
-        themes_dir = Path(temp_project_dir) / 'docs' / 'themes'
+        themes_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'themes'
         
         # Create 20 themes
         for i in range(20):
@@ -654,7 +654,7 @@ class TestThemesEdgeCases:
         """UTF-8 content in design-system.md is handled correctly"""
         from src.services import ThemesService
         
-        themes_dir = Path(temp_project_dir) / 'docs' / 'themes'
+        themes_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'themes'
         utf8_dir = themes_dir / 'theme-utf8'
         utf8_dir.mkdir(parents=True, exist_ok=True)
         

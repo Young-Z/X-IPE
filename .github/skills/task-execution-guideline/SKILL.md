@@ -166,7 +166,7 @@ Execute tasks by following these 6 steps in order:
 
 **Task Board Verification:**
 ```
-1. Read task board at docs/planning/task-board.md
+1. Read task board at x-ipe-docs/planning/task-board.md
 2. Search for task_id in Active Tasks section
 3. IF task NOT found:
    → ⛔ STOP execution

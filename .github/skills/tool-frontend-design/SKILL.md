@@ -21,7 +21,7 @@ cat config/tools.json | jq '.["selected-theme"]["theme-name"]'
 
 # Or get the full folder path directly
 cat config/tools.json | jq '.["selected-theme"]["theme-folder-path"]'
-# Returns: "docs/themes/theme-default"
+# Returns: "x-ipe-docs/themes/theme-default"
 ```
 
 ### Step 2: Load Design System
@@ -124,7 +124,7 @@ Self-contained HTML with theme tokens as CSS variables:
 ## Output Location
 
 ```
-docs/requirements/FEATURE-XXX/mockups/   ← For feature mockups
+x-ipe-docs/requirements/FEATURE-XXX/mockups/   ← For feature mockups
 playground/mockups/                       ← For standalone mockups
 ```
 
@@ -134,7 +134,7 @@ playground/mockups/                       ← For standalone mockups
 
 ### Theme Files
 ```
-docs/themes/
+x-ipe-docs/themes/
 ├── theme-default/
 │   ├── design-system.md           ← Token definitions (REQUIRED)
 │   └── component-visualization.html ← Visual reference (optional)

@@ -40,12 +40,12 @@ class TestContentServiceSaveUnit:
 
     def test_save_content_nested_path(self, content_service, temp_project):
         """save_content() works with nested paths"""
-        nested_dir = temp_project / 'docs' / 'planning'
+        nested_dir = temp_project / 'x-ipe-docs' / 'planning'
         nested_dir.mkdir(parents=True, exist_ok=True)
         test_file = nested_dir / 'task-board.md'
         test_file.write_text('# Original')
         
-        result = content_service.save_content('docs/planning/task-board.md', '# Updated')
+        result = content_service.save_content('x-ipe-docs/planning/task-board.md', '# Updated')
         
         assert result['success'] is True
         assert test_file.read_text() == '# Updated'
@@ -278,13 +278,13 @@ class TestEditorIntegration:
     def test_edit_save_cycle(self, client, temp_project):
         """Full edit-save cycle works"""
         # Create file
-        test_file = temp_project / 'docs' / 'test.md'
+        test_file = temp_project / 'x-ipe-docs' / 'test.md'
         test_file.parent.mkdir(parents=True, exist_ok=True)
         original = '# Original Title\n\nOriginal content.'
         test_file.write_text(original)
         
         # Read file
-        response = client.get('/api/file/content?path=docs/test.md')
+        response = client.get('/api/file/content?path=x-ipe-docs/test.md')
         assert response.status_code == 200
         data = json.loads(response.data)
         assert data['content'] == original
@@ -293,13 +293,13 @@ class TestEditorIntegration:
         modified = '# Modified Title\n\nModified content.'
         response = client.post(
             '/api/file/save',
-            json={'path': 'docs/test.md', 'content': modified},
+            json={'path': 'x-ipe-docs/test.md', 'content': modified},
             content_type='application/json'
         )
         assert response.status_code == 200
         
         # Read again to verify
-        response = client.get('/api/file/content?path=docs/test.md')
+        response = client.get('/api/file/content?path=x-ipe-docs/test.md')
         data = json.loads(response.data)
         assert data['content'] == modified
 

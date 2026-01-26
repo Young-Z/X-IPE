@@ -32,43 +32,43 @@ class TestProjectService:
         assert 'code' in section_ids
 
     def test_get_structure_themes_section_maps_correctly(self, app, project_service, temp_project):
-        """FEATURE-012 AC-4.2: Themes menu shows folder tree of docs/themes/"""
+        """FEATURE-012 AC-4.2: Themes menu shows folder tree of x-ipe-docs/themes/"""
         # Create a theme folder
-        themes_dir = temp_project / 'docs' / 'themes' / 'theme-default'
+        themes_dir = temp_project / 'x-ipe-docs' / 'themes' / 'theme-default'
         themes_dir.mkdir(parents=True, exist_ok=True)
         (themes_dir / 'design-system.md').write_text('# Design System')
         
         structure = project_service.get_structure()
         
         themes_section = next(s for s in structure['sections'] if s['id'] == 'themes')
-        assert themes_section['path'] == 'docs/themes'
+        assert themes_section['path'] == 'x-ipe-docs/themes'
         assert themes_section['label'] == 'Themes'
         assert themes_section['icon'] == 'bi-palette'
 
     def test_get_structure_planning_section_maps_correctly(self, app, project_service, temp_project):
-        """AC-3: Project Plan section maps to docs/planning/ folder"""
-        # Create a file in docs/planning
-        planning_dir = temp_project / 'docs' / 'planning'
+        """AC-3: Project Plan section maps to x-ipe-docs/planning/ folder"""
+        # Create a file in x-ipe-docs/planning
+        planning_dir = temp_project / 'x-ipe-docs' / 'planning'
         planning_dir.mkdir(parents=True, exist_ok=True)
         (planning_dir / 'task-board.md').write_text('# Task Board')
         
         structure = project_service.get_structure()
         
         planning_section = next(s for s in structure['sections'] if s['id'] == 'planning')
-        assert planning_section['path'] == 'docs/planning'
+        assert planning_section['path'] == 'x-ipe-docs/planning'
         assert planning_section['label'] == 'Project Plan'
 
     def test_get_structure_requirements_section_maps_correctly(self, app, project_service, temp_project):
-        """AC-4: Requirements section maps to docs/requirements/ folder"""
-        # Create a file in docs/requirements
-        req_dir = temp_project / 'docs' / 'requirements'
+        """AC-4: Requirements section maps to x-ipe-docs/requirements/ folder"""
+        # Create a file in x-ipe-docs/requirements
+        req_dir = temp_project / 'x-ipe-docs' / 'requirements'
         req_dir.mkdir(parents=True, exist_ok=True)
         (req_dir / 'requirement-summary.md').write_text('# Requirements')
         
         structure = project_service.get_structure()
         
         req_section = next(s for s in structure['sections'] if s['id'] == 'requirements')
-        assert req_section['path'] == 'docs/requirements'
+        assert req_section['path'] == 'x-ipe-docs/requirements'
         assert req_section['label'] == 'Requirements'
 
     def test_get_structure_code_section_maps_correctly(self, app, project_service, temp_project):
@@ -87,7 +87,7 @@ class TestProjectService:
     def test_get_structure_includes_nested_folders(self, app, project_service, temp_project):
         """AC-6: Folders can be expanded/collapsed - structure includes nested items"""
         # Create nested structure
-        feature_dir = temp_project / 'docs' / 'requirements' / 'FEATURE-001'
+        feature_dir = temp_project / 'x-ipe-docs' / 'requirements' / 'FEATURE-001'
         feature_dir.mkdir(parents=True, exist_ok=True)
         (feature_dir / 'specification.md').write_text('# Spec')
         
@@ -100,7 +100,7 @@ class TestProjectService:
 
     def test_get_structure_returns_file_paths(self, app, project_service, temp_project):
         """AC-7: File items include paths for content loading"""
-        planning_dir = temp_project / 'docs' / 'planning'
+        planning_dir = temp_project / 'x-ipe-docs' / 'planning'
         planning_dir.mkdir(parents=True, exist_ok=True)
         (planning_dir / 'features.md').write_text('# Features')
         
@@ -111,7 +111,7 @@ class TestProjectService:
         
         assert file_item is not None
         assert file_item['type'] == 'file'
-        assert file_item['path'] == 'docs/planning/features.md'
+        assert file_item['path'] == 'x-ipe-docs/planning/features.md'
 
     def test_get_structure_excludes_hidden_files(self, app, project_service, temp_project):
         """BR-2: Hidden files (starting with .) are excluded"""
@@ -177,7 +177,7 @@ class TestProjectStructureAPI:
     def test_get_structure_files_have_required_fields(self, client, temp_project):
         """Each file node has name, type, path"""
         # Create a test file
-        planning_dir = temp_project / 'docs' / 'planning'
+        planning_dir = temp_project / 'x-ipe-docs' / 'planning'
         planning_dir.mkdir(parents=True, exist_ok=True)
         (planning_dir / 'test.md').write_text('# Test')
         

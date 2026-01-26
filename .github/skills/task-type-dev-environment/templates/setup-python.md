@@ -15,7 +15,7 @@ project-root/
 ├── pyproject.toml      # Project configuration
 ├── .gitignore          # Git ignore patterns
 ├── README.md           # Project documentation
-└── docs/               # Documentation
+└── x-ipe-docs/               # Documentation
     └── environment/
         └── setup.md    # This file
 ```

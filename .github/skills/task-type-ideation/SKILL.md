@@ -144,7 +144,7 @@ When tools are enabled in the meta file, the agent MUST attempt to use them duri
 
 | # | Checkpoint | Required |
 |---|------------|----------|
-| 1 | Idea files uploaded to `docs/ideas/{folder}/` | Yes |
+| 1 | Idea files uploaded to `x-ipe-docs/ideas/{folder}/` | Yes |
 | 2 | Human available for brainstorming | Yes |
 | 3 | Idea folder path provided | Yes |
 
@@ -223,7 +223,7 @@ Execute Ideation by following these steps in order:
 **Action:** Read all files in the specified idea folder
 
 ```
-1. Navigate to docs/ideas/{folder}/files/
+1. Navigate to x-ipe-docs/ideas/{folder}/files/
 2. Read each file (text, markdown, code, etc.)
 3. Identify key themes, concepts, and goals
 4. Note any gaps or ambiguities
@@ -281,7 +281,7 @@ For each enabled tool in config:
   IF config.stages.ideation.mockup["frontend-design"] == true:
     → Load and invoke `frontend-design` skill during brainstorming
     → Create interactive HTML mockups when discussing UI concepts
-    → Save mockups to docs/ideas/{folder}/mockup-vN.html (version aligned with idea-summary)
+    → Save mockups to x-ipe-docs/ideas/{folder}/mockup-vN.html (version aligned with idea-summary)
     
   IF config.stages.ideation.mockup["figma-mcp"] == true:
     → Use Figma MCP tools if available
@@ -343,7 +343,7 @@ Agent Action:
   2. IF stages.ideation.mockup.frontend-design == true:
      → Invoke `frontend-design` skill
      → Create interactive HTML mockup
-     → Save to docs/ideas/{folder}/mockup-vN.html (aligned with idea-summary version)
+     → Save to x-ipe-docs/ideas/{folder}/mockup-vN.html (aligned with idea-summary version)
   3. Share mockup: "I've created a mockup - does this match your vision?"
   4. Iterate based on feedback
 ```
@@ -476,7 +476,7 @@ Agent Action:
 
 ### Step 7: Create Idea Summary Document
 
-**Action:** Create versioned summary file `docs/ideas/{folder}/idea-summary-vN.md`
+**Action:** Create versioned summary file `x-ipe-docs/ideas/{folder}/idea-summary-vN.md`
 
 **Important:** 
 - Do NOT update existing idea-summary files
@@ -497,7 +497,7 @@ Examples:
 - idea-summary-v2.md → mockup-v2.html
 - idea-summary-v3.md → mockup-v3.html
 
-Location: docs/ideas/{folder}/mockup-vN.html (same folder as idea-summary)
+Location: x-ipe-docs/ideas/{folder}/mockup-vN.html (same folder as idea-summary)
 ```
 
 **Versioning Logic:**
@@ -593,7 +593,7 @@ IF ALL are false:
 | 4 | Brainstorming session completed | Yes |
 | 5 | Enabled skills invoked during brainstorming | If Tools Enabled |
 | 6 | Common principles researched (if topic is common/established) | If Applicable |
-| 7 | `docs/ideas/{folder}/idea-summary-vN.md` created (versioned) | Yes |
+| 7 | `x-ipe-docs/ideas/{folder}/idea-summary-vN.md` created (versioned) | Yes |
 | 8 | Visualization used based on config (infographic/mermaid) | If Tools Enabled |
 | 9 | Ideation artifacts documented (mockups, prototypes) | If Mockup Tools Used |
 | 10 | Folder renamed if "Draft Idea - xxx" pattern | If Applicable |
@@ -618,8 +618,8 @@ folder_renamed: true | false
 next_task_type: Idea Mockup | Idea to Architecture  # Human chooses based on idea type
 require_human_review: true
 task_output_links:
-  - docs/ideas/{folder}/idea-summary-vN.md
-  - docs/ideas/{folder}/mockup-vN.html  # if mockup tools enabled
+  - x-ipe-docs/ideas/{folder}/idea-summary-vN.md
+  - x-ipe-docs/ideas/{folder}/mockup-vN.html  # if mockup tools enabled
 ```
 
 ### Next Task Selection

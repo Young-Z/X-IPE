@@ -17,13 +17,13 @@ class Config:
         {
             'id': 'planning',
             'label': 'Project Plan',
-            'path': 'docs/planning',
+            'path': 'x-ipe-docs/planning',
             'icon': 'bi-kanban'
         },
         {
             'id': 'requirements',
             'label': 'Requirements',
-            'path': 'docs/requirements',
+            'path': 'x-ipe-docs/requirements',
             'icon': 'bi-file-text'
         },
         {

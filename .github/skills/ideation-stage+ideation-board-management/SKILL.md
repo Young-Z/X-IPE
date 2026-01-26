@@ -41,7 +41,7 @@ Task:
   
   # Dynamic attributes (from ideation-stage task type skills)
   idea_id: IDEA-XXX | null              # Idea identifier
-  idea_folder: docs/ideas/{folder}       # Folder path
+  idea_folder: x-ipe-docs/ideas/{folder}       # Folder path
   idea_version: vN                       # Current version number
   idea_status: Draft | Refined | Shared  # Idea status
   shared_formats: [pptx, docx, ...]      # Formats generated (for Share Idea)
@@ -56,7 +56,7 @@ This skill MUST return a `category_level_change_summary` (≤100 words) describi
 
 **Example outputs:**
 ```
-"Refined idea in docs/ideas/mobile-app/, created idea-summary-v2.md"
+"Refined idea in x-ipe-docs/ideas/mobile-app/, created idea-summary-v2.md"
 "Shared idea as PowerPoint: formal-idea-summary-v2.pptx"
 "Created 2 share formats: formal-idea-summary-v1.pptx, formal-idea-summary-v1.docx"
 ```
@@ -93,13 +93,13 @@ Step 5: Check Global DoD
 ```
 Input: Task Data Model with:
   - task_type: Ideation
-  - idea_folder: docs/ideas/{folder}
+  - idea_folder: x-ipe-docs/ideas/{folder}
   - idea_version: vN
   - idea_status: Refined
   - task_output_links: [path to idea-summary-vN.md]
 
 Process:
-1. Verify docs/ideas/{folder}/idea-summary-vN.md exists
+1. Verify x-ipe-docs/ideas/{folder}/idea-summary-vN.md exists
 2. Confirm idea is marked as Refined
 3. Return summary of changes
 
@@ -115,7 +115,7 @@ Output:
 ```
 Input: Task Data Model with:
   - task_type: Idea Mockup
-  - idea_folder: docs/ideas/{folder}
+  - idea_folder: x-ipe-docs/ideas/{folder}
   - mockups_created: [{type, path}, ...]
   - idea_summary_version: vN+1
   - task_output_links: [paths to mockup files]
@@ -138,7 +138,7 @@ Output:
 ```
 Input: Task Data Model with:
   - task_type: Idea to Architecture
-  - idea_folder: docs/ideas/{folder}
+  - idea_folder: x-ipe-docs/ideas/{folder}
   - diagrams_created: [{type, path}, ...]
   - idea_summary_version: vN+1
   - task_output_links: [paths to diagram files]
@@ -161,7 +161,7 @@ Output:
 ```
 Input: Task Data Model with:
   - task_type: Share Idea
-  - idea_folder: docs/ideas/{folder}
+  - idea_folder: x-ipe-docs/ideas/{folder}
   - source_file: idea-summary-vN.md
   - shared_formats: [pptx, docx, ...]
   - task_output_links: [paths to generated files]
@@ -180,7 +180,7 @@ Output:
 ## Idea Folder Structure
 
 ```
-docs/
+x-ipe-docs/
 └── ideas/
     └── {idea-folder}/
         ├── files/                        # Original uploaded files
@@ -232,11 +232,11 @@ task_type: Ideation
 category: ideation-stage
 status: completed
 idea_id: IDEA-001
-idea_folder: docs/ideas/mobile-app-idea
+idea_folder: x-ipe-docs/ideas/mobile-app-idea
 idea_version: v1
 idea_status: Refined
 task_output_links:
-  - docs/ideas/mobile-app-idea/idea-summary-v1.md
+  - x-ipe-docs/ideas/mobile-app-idea/idea-summary-v1.md
 ```
 
 **Output:**
@@ -252,14 +252,14 @@ task_id: TASK-070
 task_type: Share Idea
 category: ideation-stage
 status: completed
-idea_folder: docs/ideas/mobile-app-idea
+idea_folder: x-ipe-docs/ideas/mobile-app-idea
 source_file: idea-summary-v1.md
 shared_formats:
   - pptx
   - docx
 task_output_links:
-  - docs/ideas/mobile-app-idea/formal-idea-summary-v1.pptx
-  - docs/ideas/mobile-app-idea/formal-idea-summary-v1.docx
+  - x-ipe-docs/ideas/mobile-app-idea/formal-idea-summary-v1.pptx
+  - x-ipe-docs/ideas/mobile-app-idea/formal-idea-summary-v1.docx
 ```
 
 **Output:**

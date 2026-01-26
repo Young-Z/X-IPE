@@ -22,7 +22,7 @@ class TestProjectStructureAPI:
     def test_structure_endpoint_returns_file_paths(self, client, temp_project):
         """FR-1: Structure API returns file paths for change detection"""
         # Create test files
-        planning_dir = temp_project / 'docs' / 'planning'
+        planning_dir = temp_project / 'x-ipe-docs' / 'planning'
         planning_dir.mkdir(parents=True, exist_ok=True)
         (planning_dir / 'test.md').write_text('# Test')
         
@@ -43,7 +43,7 @@ class TestProjectStructureAPI:
     def test_structure_endpoint_returns_consistent_format(self, client, temp_project):
         """Ensure structure format is consistent for hashing"""
         # Create files
-        planning_dir = temp_project / 'docs' / 'planning'
+        planning_dir = temp_project / 'x-ipe-docs' / 'planning'
         planning_dir.mkdir(parents=True, exist_ok=True)
         (planning_dir / 'file1.md').write_text('# File 1')
         
@@ -55,7 +55,7 @@ class TestProjectStructureAPI:
         
     def test_structure_changes_when_file_added(self, client, temp_project):
         """Structure hash changes when new file is added"""
-        planning_dir = temp_project / 'docs' / 'planning'
+        planning_dir = temp_project / 'x-ipe-docs' / 'planning'
         planning_dir.mkdir(parents=True, exist_ok=True)
         (planning_dir / 'existing.md').write_text('# Existing')
         
@@ -73,7 +73,7 @@ class TestProjectStructureAPI:
         
     def test_structure_changes_when_file_deleted(self, client, temp_project):
         """Structure hash changes when file is deleted"""
-        planning_dir = temp_project / 'docs' / 'planning'
+        planning_dir = temp_project / 'x-ipe-docs' / 'planning'
         planning_dir.mkdir(parents=True, exist_ok=True)
         file_to_delete = planning_dir / 'to_delete.md'
         file_to_delete.write_text('# To Delete')
@@ -93,7 +93,7 @@ class TestProjectStructureAPI:
 
     def test_structure_includes_mtime_for_files(self, client, temp_project):
         """BUG FIX: Structure API returns mtime for content change detection"""
-        planning_dir = temp_project / 'docs' / 'planning'
+        planning_dir = temp_project / 'x-ipe-docs' / 'planning'
         planning_dir.mkdir(parents=True, exist_ok=True)
         test_file = planning_dir / 'test.md'
         test_file.write_text('# Test')
@@ -124,7 +124,7 @@ class TestProjectStructureAPI:
         """BUG FIX: mtime changes when file content is modified"""
         import time
         
-        planning_dir = temp_project / 'docs' / 'planning'
+        planning_dir = temp_project / 'x-ipe-docs' / 'planning'
         planning_dir.mkdir(parents=True, exist_ok=True)
         test_file = planning_dir / 'test.md'
         test_file.write_text('# Initial')
@@ -174,7 +174,7 @@ class TestPathUtilityLogic:
             return parents
         
         # Test cases
-        assert get_parent_paths('docs/planning/features.md') == ['docs/planning', 'docs']
+        assert get_parent_paths('x-ipe-docs/planning/features.md') == ['x-ipe-docs/planning', 'x-ipe-docs']
         assert get_parent_paths('src/app.py') == ['src']
         assert get_parent_paths('README.md') == []
         
@@ -185,29 +185,29 @@ class TestPathUtilityLogic:
             prefix = folder_path + '/'
             return any(p.startswith(prefix) for p in changed_paths)
         
-        changed = {'docs/planning/features.md', 'docs/planning', 'docs'}
+        changed = {'x-ipe-docs/planning/features.md', 'x-ipe-docs/planning', 'x-ipe-docs'}
         
-        assert has_changed_children('docs', changed) == True
-        assert has_changed_children('docs/planning', changed) == True
+        assert has_changed_children('x-ipe-docs', changed) == True
+        assert has_changed_children('x-ipe-docs/planning', changed) == True
         assert has_changed_children('src', changed) == False
         
     def test_detect_new_paths(self):
         """FR-1: Detect newly added paths"""
-        old_paths = {'docs/planning/task-board.md', 'docs/planning'}
-        new_paths = {'docs/planning/task-board.md', 'docs/planning/features.md', 'docs/planning'}
+        old_paths = {'x-ipe-docs/planning/task-board.md', 'x-ipe-docs/planning'}
+        new_paths = {'x-ipe-docs/planning/task-board.md', 'x-ipe-docs/planning/features.md', 'x-ipe-docs/planning'}
         
         added = new_paths - old_paths
         
-        assert added == {'docs/planning/features.md'}
+        assert added == {'x-ipe-docs/planning/features.md'}
         
     def test_detect_removed_paths(self):
         """FR-1: Detect removed paths"""
-        old_paths = {'docs/planning/task-board.md', 'docs/planning/old.md', 'docs/planning'}
-        new_paths = {'docs/planning/task-board.md', 'docs/planning'}
+        old_paths = {'x-ipe-docs/planning/task-board.md', 'x-ipe-docs/planning/old.md', 'x-ipe-docs/planning'}
+        new_paths = {'x-ipe-docs/planning/task-board.md', 'x-ipe-docs/planning'}
         
         removed = old_paths - new_paths
         
-        assert removed == {'docs/planning/old.md'}
+        assert removed == {'x-ipe-docs/planning/old.md'}
 
 
 class TestChangeIndicatorIntegration:
@@ -222,13 +222,13 @@ class TestChangeIndicatorIntegration:
         
         Steps:
         1. Open app in browser
-        2. In terminal, create file: touch docs/planning/new-file.md
+        2. In terminal, create file: touch x-ipe-docs/planning/new-file.md
         3. Wait 5 seconds for poll
         
         Expected:
         - Yellow dot appears on new-file.md
         - Yellow dot appears on planning/ folder
-        - Yellow dot appears on docs/ folder (if visible)
+        - Yellow dot appears on x-ipe-docs/ folder (if visible)
         """
         pass  # Manual test marker
         
@@ -283,9 +283,9 @@ def temp_project(tmp_path):
     project_dir.mkdir()
     
     # Create base directories
-    (project_dir / 'docs' / 'planning').mkdir(parents=True)
-    (project_dir / 'docs' / 'requirements').mkdir(parents=True)
-    (project_dir / 'docs' / 'ideas').mkdir(parents=True)
+    (project_dir / 'x-ipe-docs' / 'planning').mkdir(parents=True)
+    (project_dir / 'x-ipe-docs' / 'requirements').mkdir(parents=True)
+    (project_dir / 'x-ipe-docs' / 'ideas').mkdir(parents=True)
     (project_dir / 'src').mkdir(parents=True)
     
     return project_dir

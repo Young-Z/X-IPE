@@ -189,7 +189,7 @@ Execute Share Idea by following these steps in order:
 **Action:** Locate the refined idea summary to convert
 
 ```
-1. Navigate to docs/ideas/{folder}/
+1. Navigate to x-ipe-docs/ideas/{folder}/
 2. List available idea-summary-vN.md files
 3. Select the latest version OR human-specified version
 4. Read the source content
@@ -327,15 +327,15 @@ This skill MUST return these attributes to the Task Data Model upon task complet
 category: standalone
 task_type: Share Idea
 auto_proceed: {from input Auto Proceed}
-idea_folder: docs/ideas/{folder}
+idea_folder: x-ipe-docs/ideas/{folder}
 source_file: idea-summary-vN.md
 shared_formats:
   - pptx
   - docx
 require_human_review: true
 task_output_links:
-  - docs/ideas/{folder}/formal-idea-summary-vN.pptx
-  - docs/ideas/{folder}/formal-idea-summary-vN.docx
+  - x-ipe-docs/ideas/{folder}/formal-idea-summary-vN.pptx
+  - x-ipe-docs/ideas/{folder}/formal-idea-summary-vN.docx
 ```
 
 ---
@@ -410,7 +410,7 @@ task_output_links:
 1. Execute Task Flow from task-execution-guideline skill
 
 2. Identify Source:
-   - Found: docs/ideas/mobile-app-idea/idea-summary-v1.md
+   - Found: x-ipe-docs/ideas/mobile-app-idea/idea-summary-v1.md
    
 3. Confirm Format:
    Human selects: PowerPoint (.pptx)
@@ -426,7 +426,7 @@ task_output_links:
    - File created: formal-idea-summary-v1.pptx (245 KB)
    
 7. Report:
-   "Created formal-idea-summary-v1.pptx in docs/ideas/mobile-app-idea/"
+   "Created formal-idea-summary-v1.pptx in x-ipe-docs/ideas/mobile-app-idea/"
 
 8. Resume Task Flow from task-execution-guideline skill
 ```

@@ -536,7 +536,7 @@ async def get_document(name: str) -> str:
     Resources are useful for static or semi-static data that doesn't
     require complex parameters. They use URI templates for flexible access.
     '''
-    document_path = f"./docs/{name}"
+    document_path = f"./x-ipe-docs/{name}"
     with open(document_path, "r") as f:
         return f.read()
 

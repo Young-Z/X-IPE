@@ -50,7 +50,7 @@ Output:
   next_task_type: null
   require_human_review: No
   auto_proceed: {from input Auto Proceed}
-  task_output_links: [docs/environment/setup.md, .gitignore, README.md]
+  task_output_links: [x-ipe-docs/environment/setup.md, .gitignore, README.md]
   
   # Dynamic attributes (skill-specific)
   tech_stack: python | nodejs
@@ -79,7 +79,7 @@ Execute Development Environment Setup by following these steps in order:
 | 1 | Determine Stack | Identify tech stack (Python/Node.js) from context or ask user | Stack selected |
 | 2 | Init Package Manager | Run `uv init` or `npm init`, create src/tests folders | Package manager ready |
 | 3 | Init Git | Call git-version-control skill to init repo and .gitignore | Git initialized |
-| 4 | Document Setup | Create `docs/environment/setup.md` with instructions | Documentation created |
+| 4 | Document Setup | Create `x-ipe-docs/environment/setup.md` with instructions | Documentation created |
 | 5 | Commit | Stage and commit all setup files | Initial commit done |
 
 **⛔ BLOCKING RULES:**
@@ -186,7 +186,7 @@ project-root/
 
 ### Step 4: Document Setup
 
-**Create `docs/environment/setup.md` based on tech stack:**
+**Create `x-ipe-docs/environment/setup.md` based on tech stack:**
 
 #### For Python:
 
@@ -204,7 +204,7 @@ project-root/
 ├── src/                # Source code
 ├── tests/              # Test files
 ├── pyproject.toml      # Project configuration
-└── docs/               # Documentation
+└── x-ipe-docs/               # Documentation
 ```
 
 ## Prerequisites
@@ -259,7 +259,7 @@ project-root/
 ├── src/                # Source code
 ├── tests/              # Test files
 ├── package.json        # Project configuration
-└── docs/               # Documentation
+└── x-ipe-docs/               # Documentation
 ```
 
 ## Prerequisites
@@ -327,7 +327,7 @@ TASK-001 commit for: Set up Python development environment with uv and project s
 | 2 | Package manager initialized (uv/npm/yarn) | Yes |
 | 3 | Git repository initialized | Yes |
 | 4 | .gitignore created for tech stack | Yes |
-| 5 | Setup documented in docs/environment/setup.md | Yes |
+| 5 | Setup documented in x-ipe-docs/environment/setup.md | Yes |
 | 6 | Initial commit created with structured message | Yes |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.

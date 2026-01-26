@@ -223,8 +223,8 @@ RECEIVE Feature Data Model:
   title: {Feature Title}
   version: v1.0
   status: Designed
-  specification_link: docs/requirements/FEATURE-XXX/specification.md
-  technical_design_link: docs/requirements/FEATURE-XXX/technical-design.md
+  specification_link: x-ipe-docs/requirements/FEATURE-XXX/specification.md
+  technical_design_link: x-ipe-docs/requirements/FEATURE-XXX/technical-design.md
 ```
 
 ---
@@ -235,7 +235,7 @@ RECEIVE Feature Data Model:
 
 ```
 1. READ {technical_design_link} from Feature Data Model
-   Location: docs/requirements/FEATURE-XXX/technical-design.md
+   Location: x-ipe-docs/requirements/FEATURE-XXX/technical-design.md
 
 2. UNDERSTAND Part 1 (Agent-Facing Summary):
    - Components to implement
@@ -298,7 +298,7 @@ DO NOT:
 
 ```
 IF technical design references architecture components:
-  1. READ docs/architecture/technical-designs/{component}.md
+  1. READ x-ipe-docs/architecture/technical-designs/{component}.md
   2. UNDERSTAND:
      - Common patterns to follow
      - Required interfaces/protocols

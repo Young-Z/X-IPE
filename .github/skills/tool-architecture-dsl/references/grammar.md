@@ -65,7 +65,7 @@ title "AI Platform Architecture"
 
 ### theme
 
-Specifies the theme to use for rendering. The theme name must match a folder name in `docs/themes/`.
+Specifies the theme to use for rendering. The theme name must match a folder name in `x-ipe-docs/themes/`.
 
 ```
 theme := 'theme' string
@@ -78,7 +78,7 @@ theme "theme-default"
 ```
 
 **Usage:**
-- Renderer loads theme from `docs/themes/{theme-name}/design-system.md`
+- Renderer loads theme from `x-ipe-docs/themes/{theme-name}/design-system.md`
 - If not specified, renderer uses `theme-default`
 - Theme defines colors, fonts, and styling tokens
 
@@ -409,7 +409,7 @@ Since stereotyped components are **half-width**, they fit **more components per 
 module "Project Files" { 
   cols 4
   grid 3 x 1   ' 3 columns × 1 row = HORIZONTAL
-  component "docs/" { cols 1, rows 1 } <<folder>>
+  component "x-ipe-docs/" { cols 1, rows 1 } <<folder>>
   component "src/" { cols 1, rows 1 } <<folder>>
   component "static/" { cols 1, rows 1 } <<folder>>
 }
@@ -705,7 +705,7 @@ layer "Data" {
     grid 1 x 3
     align center center
     gap 8px
-    component "docs/" { cols 1, rows 1 } <<folder>>
+    component "x-ipe-docs/" { cols 1, rows 1 } <<folder>>
     component "src/" { cols 1, rows 1 } <<folder>>
     component "static/" { cols 1, rows 1 } <<folder>>
   }

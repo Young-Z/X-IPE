@@ -6,7 +6,7 @@
 
 ## Example 1: Business Plan Ideation with Tools Enabled
 
-**Scenario:** User uploads business plan draft to `docs/ideas/mobile-app-idea/files/`
+**Scenario:** User uploads business plan draft to `x-ipe-docs/ideas/mobile-app-idea/files/`
 
 **Config File:** `config/tools.json`
 ```json
@@ -62,7 +62,7 @@
    - User wants to see dashboard layout:
      → config.stages.ideation.mockup.frontend-design == true  
      → Invoke frontend-design skill
-     → Create HTML mockup, save to docs/ideas/mobile-app-idea/mockup-v1.html
+     → Create HTML mockup, save to x-ipe-docs/ideas/mobile-app-idea/mockup-v1.html
    - Share mockup: "Does this layout match your vision?"
    - Iterate based on feedback
 
@@ -71,7 +71,7 @@
    - User auth → Research: OAuth 2.0, biometric auth standards
    - Document sources for references section
 
-8. Create docs/ideas/mobile-app-idea/idea-summary-v1.md with:
+8. Create x-ipe-docs/ideas/mobile-app-idea/idea-summary-v1.md with:
    - Overview and problem statement (text)
    - Key Features (config.stages.ideation.ideation.antv-infographic == true → use infographic: list-grid-badge-card)
    - User Flow (config.stages.ideation.ideation.mermaid == true → use mermaid flowchart)
@@ -126,7 +126,7 @@
 
 5. Output:
    task_output_links:
-     - docs/ideas/{folder}/idea-summary-v1.md
+     - x-ipe-docs/ideas/{folder}/idea-summary-v1.md
 ```
 
 ---
@@ -177,8 +177,8 @@
 2. Idea refined to: "E-Commerce Checkout System"
 
 3. Rename Folder:
-   FROM: docs/ideas/Draft Idea - 01232026 131611/
-   TO:   docs/ideas/E-Commerce Checkout - 01232026 131611/
+   FROM: x-ipe-docs/ideas/Draft Idea - 01232026 131611/
+   TO:   x-ipe-docs/ideas/E-Commerce Checkout - 01232026 131611/
 
 4. Update all internal links in idea-summary-v1.md
 

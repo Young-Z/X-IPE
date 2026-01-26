@@ -53,11 +53,11 @@ reasoning: |
   This significantly expands the scope beyond the existing feature.
   
 affected_artifacts:
-  - docs/planning/features.md (new feature to add)
-  - docs/requirements/FEATURE-013/ (new folder to create)
+  - x-ipe-docs/planning/features.md (new feature to add)
+  - x-ipe-docs/requirements/FEATURE-013/ (new folder to create)
 
 task_output_links:
-  - docs/requirements/FEATURE-013/ (pending creation in Feature Breakdown)
+  - x-ipe-docs/requirements/FEATURE-013/ (pending creation in Feature Breakdown)
 ```
 
 ---
@@ -104,11 +104,11 @@ reasoning: |
   Same user goal, improved UX implementation.
   
 affected_artifacts:
-  - docs/requirements/FEATURE-005/specification.md
-  - docs/requirements/FEATURE-005/technical-design.md
+  - x-ipe-docs/requirements/FEATURE-005/specification.md
+  - x-ipe-docs/requirements/FEATURE-005/technical-design.md
 
 task_output_links:
-  - docs/requirements/FEATURE-005/specification.md (to update)
+  - x-ipe-docs/requirements/FEATURE-005/specification.md (to update)
 ```
 
 ---

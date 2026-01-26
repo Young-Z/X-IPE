@@ -9,7 +9,7 @@
 **Scenario:** Create architecture diagrams for e-commerce-idea after ideation
 
 **Input:**
-- `Current Idea Folder`: `docs/ideas/e-commerce-idea` (from previous Ideation task)
+- `Current Idea Folder`: `x-ipe-docs/ideas/e-commerce-idea` (from previous Ideation task)
 
 **Config:** `config/tools.json`
 ```json
@@ -41,7 +41,7 @@
 1. Execute Task Flow from task-execution-guideline skill
 
 2. Validate Current Idea Folder:
-   - Current Idea Folder = docs/ideas/e-commerce-idea
+   - Current Idea Folder = x-ipe-docs/ideas/e-commerce-idea
    - Folder exists ✓
    - idea-summary-v1.md exists ✓
 
@@ -51,7 +51,7 @@
    - stages.ideation.architecture.excalidraw: false → disabled
 
 4. Read Idea Summary:
-   - Load docs/ideas/e-commerce-idea/idea-summary-v1.md
+   - Load x-ipe-docs/ideas/e-commerce-idea/idea-summary-v1.md
    - Extract: user auth, product catalog, cart, payment, orders
 
 5. Identify Architecture Needs:
@@ -65,12 +65,12 @@
    - Generate sequence-v1.md with payment sequence
 
 7. Save Artifacts:
-   - docs/ideas/e-commerce-idea/architecture/system-architecture-v1.md
-   - docs/ideas/e-commerce-idea/architecture/data-flow-v1.md
-   - docs/ideas/e-commerce-idea/architecture/sequence-v1.md
+   - x-ipe-docs/ideas/e-commerce-idea/architecture/system-architecture-v1.md
+   - x-ipe-docs/ideas/e-commerce-idea/architecture/data-flow-v1.md
+   - x-ipe-docs/ideas/e-commerce-idea/architecture/sequence-v1.md
 
 8. Update Summary:
-   - Create docs/ideas/e-commerce-idea/idea-summary-v2.md with diagram links
+   - Create x-ipe-docs/ideas/e-commerce-idea/idea-summary-v2.md with diagram links
 
 9. Human Review:
    - Present diagrams for approval
@@ -78,10 +78,10 @@
 
 10. Output:
     task_output_links:
-      - docs/ideas/e-commerce-idea/architecture/system-architecture-v1.md
-      - docs/ideas/e-commerce-idea/architecture/data-flow-v1.md
-      - docs/ideas/e-commerce-idea/architecture/sequence-v1.md
-      - docs/ideas/e-commerce-idea/idea-summary-v2.md
+      - x-ipe-docs/ideas/e-commerce-idea/architecture/system-architecture-v1.md
+      - x-ipe-docs/ideas/e-commerce-idea/architecture/data-flow-v1.md
+      - x-ipe-docs/ideas/e-commerce-idea/architecture/sequence-v1.md
+      - x-ipe-docs/ideas/e-commerce-idea/idea-summary-v2.md
 
 11. Resume Task Flow from task-execution-guideline skill
 ```
@@ -149,7 +149,7 @@ C4Container
 ## Example 2: Architecture WITHOUT Tools (Manual Mode)
 
 **Input:**
-- `Current Idea Folder`: `docs/ideas/simple-tool`
+- `Current Idea Folder`: `x-ipe-docs/ideas/simple-tool`
 
 **Config:** `config/tools.json`
 ```json
@@ -169,7 +169,7 @@ C4Container
 **Execution:**
 ```
 1. Validate Current Idea Folder:
-   - Current Idea Folder = docs/ideas/simple-tool ✓
+   - Current Idea Folder = x-ipe-docs/ideas/simple-tool ✓
 
 2. Load Config:
    - All architecture tools disabled
@@ -180,11 +180,11 @@ C4Container
      - Component listing
      - Relationship descriptions
      - Data flow narrative
-   - Save to docs/ideas/simple-tool/architecture/architecture-description.md
+   - Save to x-ipe-docs/ideas/simple-tool/architecture/architecture-description.md
 
 4. Output:
    task_output_links:
-     - docs/ideas/simple-tool/architecture/architecture-description.md
+     - x-ipe-docs/ideas/simple-tool/architecture/architecture-description.md
 
 5. If human declines:
    - Skip architecture creation
@@ -243,7 +243,7 @@ C4Container
    - Value is N/A → BLOCKED
 
 2. List available folders:
-   $ ls docs/ideas/
+   $ ls x-ipe-docs/ideas/
    - e-commerce-idea/
    - mobile-app/
    - simple-tool/
@@ -260,7 +260,7 @@ C4Container
 
 5. Human selects: "e-commerce-idea"
 
-6. Set Current Idea Folder = docs/ideas/e-commerce-idea
+6. Set Current Idea Folder = x-ipe-docs/ideas/e-commerce-idea
 
 7. Continue with architecture creation...
 ```
@@ -270,7 +270,7 @@ C4Container
 ## Example 4: No Idea Summary (Blocked)
 
 **Input:**
-- `Current Idea Folder`: `docs/ideas/new-project`
+- `Current Idea Folder`: `x-ipe-docs/ideas/new-project`
 
 **Execution:**
 ```
@@ -279,7 +279,7 @@ C4Container
    - Check for idea-summary-vN.md → NOT FOUND
 
 2. BLOCKED - Missing prerequisite:
-   "No idea summary found in docs/ideas/new-project/
+   "No idea summary found in x-ipe-docs/ideas/new-project/
     
     Action needed: Run Ideation task first to create idea-summary-v1.md"
 

@@ -83,7 +83,7 @@ deferred → in_progress
 
 ```
 1. Use template from `templates/task-board.md`
-2. Create at `docs/planning/task-board.md`
+2. Create at `x-ipe-docs/planning/task-board.md`
 3. Initialize with default settings:
     - auto_advance: false
     - Empty task lists
@@ -96,7 +96,7 @@ deferred → in_progress
 **Then:** Find or create board
 
 ```
-1. Most of the time, task board is at `/docs/planning/task-board.md``
+1. Most of the time, task board is at `/x-ipe-docs/planning/task-board.md``
 2. IF not found:
    → Trigger Operation 1: Init Task Board
 3. Return board location
@@ -305,7 +305,7 @@ Contains: Tasks with status = cancelled ONLY
 ```
 Step 1: Locate Task Board
 → Not found in project root
-→ Not found in docs/ or .github/
+→ Not found in x-ipe-docs/ or .github/
 → Create new board
 
 Step 2: Create Task

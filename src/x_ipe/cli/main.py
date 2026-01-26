@@ -180,7 +180,7 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool) -> Non
     """Initialize X-IPE in the current project.
     
     Creates the standard X-IPE folder structure:
-    - docs/ with subfolders for planning, requirements, features
+    - x-ipe-docs/ with subfolders for planning, requirements, features
     - .x-ipe/ for runtime data (database, cache)
     - .github/skills/ with bundled skills from package
     - .x-ipe.yaml configuration file

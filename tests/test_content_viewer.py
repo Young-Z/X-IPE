@@ -18,11 +18,11 @@ class TestFileContentAPI:
     def test_get_content_returns_200_for_valid_file(self, client, temp_project):
         """API returns 200 for existing file"""
         # Create a test file
-        test_file = temp_project / 'docs' / 'planning' / 'test.md'
+        test_file = temp_project / 'x-ipe-docs' / 'planning' / 'test.md'
         test_file.parent.mkdir(parents=True, exist_ok=True)
         test_file.write_text('# Test Content')
         
-        response = client.get('/api/file/content?path=docs/planning/test.md')
+        response = client.get('/api/file/content?path=x-ipe-docs/planning/test.md')
         assert response.status_code == 200
 
     def test_get_content_returns_json(self, client, temp_project):
@@ -38,15 +38,15 @@ class TestFileContentAPI:
     def test_get_content_returns_file_content(self, client, temp_project):
         """API returns actual file content"""
         content = '# Task Board\n\nThis is a test.'
-        test_file = temp_project / 'docs' / 'planning' / 'task-board.md'
+        test_file = temp_project / 'x-ipe-docs' / 'planning' / 'task-board.md'
         test_file.parent.mkdir(parents=True, exist_ok=True)
         test_file.write_text(content)
         
-        response = client.get('/api/file/content?path=docs/planning/task-board.md')
+        response = client.get('/api/file/content?path=x-ipe-docs/planning/task-board.md')
         data = json.loads(response.data)
         
         assert data['content'] == content
-        assert data['path'] == 'docs/planning/task-board.md'
+        assert data['path'] == 'x-ipe-docs/planning/task-board.md'
 
     def test_get_content_returns_file_type_markdown(self, client, temp_project):
         """API returns correct type for markdown files"""

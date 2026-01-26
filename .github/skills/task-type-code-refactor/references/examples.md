@@ -176,8 +176,8 @@ principles_applied:
    feature_id: FEATURE-001 (User Authentication)
 
 2. Read Feature Docs:
-   - specification: docs/requirements/FEATURE-001/specification.md
-   - technical design: docs/requirements/FEATURE-001/technical-design.md
+   - specification: x-ipe-docs/requirements/FEATURE-001/specification.md
+   - technical design: x-ipe-docs/requirements/FEATURE-001/technical-design.md
    
 3. Check Test Coverage:
    coverage: 85% ✓

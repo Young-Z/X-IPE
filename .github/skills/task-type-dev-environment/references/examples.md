@@ -19,7 +19,7 @@
    - Found: pytest in dev dependencies → Test framework
 
 3. Check Existing Setup:
-   - docs/environment/setup.md: EXISTS
+   - x-ipe-docs/environment/setup.md: EXISTS
    - .vscode/: NOT EXISTS
 
 4. Read Setup Guide:
@@ -179,15 +179,15 @@ task_output_links:
 
 ## Example 3: Missing Setup Guide (Blocked)
 
-**Scenario:** No docs/environment/setup.md exists
+**Scenario:** No x-ipe-docs/environment/setup.md exists
 
 ```
 1. Check Project Files:
    - pyproject.toml: EXISTS
-   - docs/environment/setup.md: NOT FOUND
+   - x-ipe-docs/environment/setup.md: NOT FOUND
 
 2. BLOCKED:
-   "Setup guide not found at docs/environment/setup.md
+   "Setup guide not found at x-ipe-docs/environment/setup.md
     
     This file should have been created during Project Initialization.
     Cannot configure environment without knowing:

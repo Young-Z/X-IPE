@@ -137,8 +137,8 @@ See [references/refactoring-principles.md](references/refactoring-principles.md)
 
 3. IF feature-related:
    - Locate feature ID
-   - Read specification: docs/requirements/FEATURE-XXX/specification.md
-   - Read technical design: docs/requirements/FEATURE-XXX/technical-design.md
+   - Read specification: x-ipe-docs/requirements/FEATURE-XXX/specification.md
+   - Read technical design: x-ipe-docs/requirements/FEATURE-XXX/technical-design.md
 
 4. Document scope:
    refactor_scope:
@@ -294,7 +294,7 @@ IF feature_gaps.missing_from_code is NOT empty:
   WAIT for human response
 
   IF human chooses to update spec:
-    → Update docs/requirements/FEATURE-XXX/specification.md
+    → Update x-ipe-docs/requirements/FEATURE-XXX/specification.md
     → Remove or mark deferred the missing requirements
   
   IF human chooses to implement:

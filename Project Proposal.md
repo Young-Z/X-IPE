@@ -54,8 +54,8 @@ Sample Project Root
 - The content should be dynamically loaded based on the project structure created by AI agent.
 - When new feature is added, the web application should be able to automatically detect and display the new feature without manual intervention.
 - The top level menu should have three defined entries:
-    - Project Plan: should mapping to `docs/planning/` folder
-    - Requirements/Technical Design: should mapping to `docs/requirements/` folder
+    - Project Plan: should mapping to `x-ipe-docs/planning/` folder
+    - Requirements/Technical Design: should mapping to `x-ipe-docs/requirements/` folder
     - 
     - Code Repository: should mapping to `src/` folder
 - Each top level menu can be expanded to show the sub folder and files under the folder.

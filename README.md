@@ -718,10 +718,10 @@ X-IPE can run as a subfolder within a larger project, allowing you to view your 
    my-project/
    ├── .x-ipe.yaml          # Config file at project root
    ├── src/                  # Your project source
-   ├── docs/                 # Your project docs
+   ├── x-ipe-docs/                 # Your project docs
    └── x-ipe/                # X-IPE application folder
        ├── src/
-       ├── docs/
+       ├── x-ipe-docs/
        └── ...
    ```
 
@@ -780,7 +780,7 @@ X-IPE/
 ├── tests/                      # Test suite
 ├── playground/                 # Feature playground & experiments
 │   └── tests/                  # Playground-specific tests
-├── docs/                       # Documentation
+├── x-ipe-docs/                       # Documentation
 │   ├── planning/               # Task board, feature board
 │   ├── requirements/           # Feature specifications & designs
 │   │   └── FEATURE-XXX/        # Per-feature specs & tech designs

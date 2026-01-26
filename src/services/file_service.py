@@ -65,8 +65,8 @@ class ProjectService:
     Service to scan and return project folder structure.
     
     Maps three fixed sections to project directories:
-    - Project Plan -> docs/planning/
-    - Requirements -> docs/requirements/
+    - Project Plan -> x-ipe-docs/planning/
+    - Requirements -> x-ipe-docs/requirements/
     - Code -> src/
     """
 
@@ -75,25 +75,25 @@ class ProjectService:
         {
             'id': 'workplace',
             'label': 'Workplace',
-            'path': 'docs/ideas',
+            'path': 'x-ipe-docs/ideas',
             'icon': 'bi-lightbulb'
         },
         {
             'id': 'themes',
             'label': 'Themes',
-            'path': 'docs/themes',
+            'path': 'x-ipe-docs/themes',
             'icon': 'bi-palette'
         },
         {
             'id': 'planning',
             'label': 'Project Plan',
-            'path': 'docs/planning',
+            'path': 'x-ipe-docs/planning',
             'icon': 'bi-kanban'
         },
         {
             'id': 'requirements',
             'label': 'Requirements',
-            'path': 'docs/requirements',
+            'path': 'x-ipe-docs/requirements',
             'icon': 'bi-file-text'
         },
         {

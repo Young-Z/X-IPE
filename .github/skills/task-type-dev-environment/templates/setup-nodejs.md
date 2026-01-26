@@ -16,7 +16,7 @@ project-root/
 ├── package-lock.json   # Dependency lock file
 ├── .gitignore          # Git ignore patterns
 ├── README.md           # Project documentation
-└── docs/               # Documentation
+└── x-ipe-docs/               # Documentation
     └── environment/
         └── setup.md    # This file
 ```
@@ -359,7 +359,7 @@ npm install
 
 ## Additional Resources
 
-- [Node.js Documentation](https://nodejs.org/docs/)
+- [Node.js Documentation](https://nodejs.org/x-ipe-docs/)
 - [npm Documentation](https://docs.npmjs.com/)
 - [Yarn Documentation](https://yarnpkg.com/)
 - [Express.js](https://expressjs.com/) - Popular web framework

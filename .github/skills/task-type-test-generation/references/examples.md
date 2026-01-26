@@ -8,7 +8,7 @@
 
 **Context:**
 - Feature: FEATURE-001 (User Authentication)
-- Technical Design: `docs/requirements/FEATURE-001/technical-design.md`
+- Technical Design: `x-ipe-docs/requirements/FEATURE-001/technical-design.md`
 - Project Type: Python Flask API
 
 ### Execution Flow
@@ -17,7 +17,7 @@
 1. Execute Task Flow from task-execution-guideline skill
 
 2. Read Technical Design:
-   docs/requirements/FEATURE-001/technical-design.md
+   x-ipe-docs/requirements/FEATURE-001/technical-design.md
    
    Components Found:
    - AuthService: authenticate(), create_token(), verify_token()
@@ -159,14 +159,14 @@ task_output_links:
 
 ```
 1. Check for Technical Design:
-   - Expected: docs/requirements/FEATURE-003/technical-design.md
+   - Expected: x-ipe-docs/requirements/FEATURE-003/technical-design.md
    - Result: FILE NOT FOUND
 
 2. BLOCKED - Cannot proceed:
    "No technical design found for FEATURE-003.
     
     Cannot generate tests without component specifications.
-    Required: docs/requirements/FEATURE-003/technical-design.md"
+    Required: x-ipe-docs/requirements/FEATURE-003/technical-design.md"
 
 3. Status: blocked
    Reason: Missing technical design

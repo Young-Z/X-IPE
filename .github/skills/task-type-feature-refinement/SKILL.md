@@ -55,7 +55,7 @@ Output:
   next_task_type: task-type-technical-design
   require_human_review: Yes
   auto_proceed: {from input Auto Proceed}
-  task_output_links: [docs/requirements/FEATURE-XXX/specification.md]
+  task_output_links: [x-ipe-docs/requirements/FEATURE-XXX/specification.md]
   feature_id: FEATURE-XXX
   feature_title: {title}
   feature_version: {version}
@@ -126,7 +126,7 @@ RECEIVE Feature Data Model:
 **Action:** Read related documents for comprehensive understanding
 
 ```
-1. IF docs/requirements/requirement-details.md exists:
+1. IF x-ipe-docs/requirements/requirement-details.md exists:
    READ requirement-details.md to understand:
      - Overall requirement context
      - Related features
@@ -138,7 +138,7 @@ RECEIVE Feature Data Model:
      READ to understand integration points
 
 3. IF feature has architecture implications:
-   CHECK docs/architecture/ for relevant designs
+   CHECK x-ipe-docs/architecture/ for relevant designs
 ```
 
 **🌐 Web Search (Recommended):**
@@ -171,7 +171,7 @@ ELSE (Backend/API Only/Database):
 
 ### Step 3: Create/Update Feature Specification
 
-**Action:** Create or update specification at `docs/requirements/FEATURE-XXX/specification.md`
+**Action:** Create or update specification at `x-ipe-docs/requirements/FEATURE-XXX/specification.md`
 
 ---
 
@@ -365,7 +365,7 @@ As a [user type], I want to [action/goal], so that [benefit/value].
 
 | # | Checkpoint | Required |
 |---|------------|----------|
-| 1 | docs/requirements/FEATURE-XXX/specification.md created | Yes |
+| 1 | x-ipe-docs/requirements/FEATURE-XXX/specification.md created | Yes |
 | 2 | All specification sections completed | Yes |
 | 3 | Acceptance criteria are testable | Yes |
 | 4 | Dependencies documented | Yes |

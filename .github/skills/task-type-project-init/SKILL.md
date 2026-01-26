@@ -50,7 +50,7 @@ Output:
   next_task_type: Development Environment Setup
   require_human_review: No
   auto_proceed: {from input Auto Proceed}
-  task_output_links: [docs/planning/task-board.md]
+  task_output_links: [x-ipe-docs/planning/task-board.md]
   # Dynamic attributes (skill-specific)
   project_structure_created: true | false
 ```
@@ -72,7 +72,7 @@ Execute Project Initialization by following these steps in order:
 | Step | Name | Action | Gate to Next |
 |------|------|--------|--------------|
 | 1 | Scan Existing | Check if project exists, read structure if so | Scan complete |
-| 2 | Create Structure | Create `docs/planning/`, `docs/reference/`, etc. | Folders created |
+| 2 | Create Structure | Create `x-ipe-docs/planning/`, `x-ipe-docs/reference/`, etc. | Folders created |
 | 3 | Init Task Board | Call task-board-management skill | Task board created |
 | 4 | Init Docs | Create `lessons_learned.md` and other docs | Docs initialized |
 
@@ -88,7 +88,7 @@ Execute Project Initialization by following these steps in order:
 
 ```
 IF project exists:
-  1. Read all files (focus on: README, docs/, config files)
+  1. Read all files (focus on: README, x-ipe-docs/, config files)
   2. Understand current architecture
 ELSE:
   → Go to Step 2
@@ -100,7 +100,7 @@ ELSE:
 
 ```
 project-root/
-├── docs/
+├── x-ipe-docs/
 │   ├── planning/
 │   │   ├── task-board.md          # Task tracking (via task-board-management)
 │   │   ├── feature-*.md           # Feature specifications
@@ -114,10 +114,10 @@ project-root/
 
 **Enforced Creation Rules:**
 ```
-`docs/`: IF missing, CREATE
-`docs/planning/`: IF missing, CREATE
-`docs/reference/`: IF missing, CREATE
-`docs/project-management-guideline/`: IF missing, CREATE
+`x-ipe-docs/`: IF missing, CREATE
+`x-ipe-docs/planning/`: IF missing, CREATE
+`x-ipe-docs/reference/`: IF missing, CREATE
+`x-ipe-docs/project-management-guideline/`: IF missing, CREATE
 .gitignore: IF missing, CREATE
 README.md: IF missing, CREATE
 ```
@@ -128,12 +128,12 @@ README.md: IF missing, CREATE
 Load skill: task-board-management
 Execute: Operation 1 - Init Task Board
 
-This creates: docs/planning/task-board.md
+This creates: x-ipe-docs/planning/task-board.md
 ```
 
 ### Step 4: Initialize Documentation
 
-**Create `docs/reference/lessons_learned.md`:**
+**Create `x-ipe-docs/reference/lessons_learned.md`:**
 
 ```markdown
 # Lessons Learned
@@ -164,10 +164,10 @@ This creates: docs/planning/task-board.md
 **When:** Quick project start needed
 **Then:**
 ```
-1. Create only: docs/planning/
+1. Create only: x-ipe-docs/planning/
 2. Init task board (via task-board-management)
 3. Initialize: README.md, .gitignore
-4. Skip: docs/reference/, docs/project-management-guideline/ (add later)
+4. Skip: x-ipe-docs/reference/, x-ipe-docs/project-management-guideline/ (add later)
 ```
 
 ### Pattern: Existing Project Onboarding
@@ -198,7 +198,7 @@ This creates: docs/planning/task-board.md
 ## File Creation Rules
 
 **Critical:** Only create files in these locations:
-- `docs/` - Documentation
+- `x-ipe-docs/` - Documentation
 
 **Never create:**
 - Files in project root (except README, config)
@@ -219,23 +219,23 @@ This creates: docs/planning/task-board.md
    → No existing project found
 
 3. Create structure:
-   docs/planning/
-   docs/reference/lessons_learned.md
-   docs/project-management-guideline/
+   x-ipe-docs/planning/
+   x-ipe-docs/reference/lessons_learned.md
+   x-ipe-docs/project-management-guideline/
    README.md
    .gitignore
 
 4. Init task board:
    → Load skill: task-board-management
    → Execute: Operation 1 - Init Task Board
-   → Created: docs/planning/task-board.md
+   → Created: x-ipe-docs/planning/task-board.md
 
 5. Return Task Completion Output:
    category: standalone
    next_task_type: Development Environment Setup
    require_human_review: No
    task_output_links:
-     - docs/planning/task-board.md
+     - x-ipe-docs/planning/task-board.md
 
 6. Resume Task Flow from task-execution-guideline skill
 ```

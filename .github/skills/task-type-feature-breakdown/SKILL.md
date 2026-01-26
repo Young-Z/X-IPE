@@ -63,7 +63,7 @@ Output:
   status: completed | blocked
   next_task_type: task-type-feature-refinement
   require_human_review: Yes
-  task_output_links: [docs/requirements/requirement-details.md] # or requirement-details-part-X.md
+  task_output_links: [x-ipe-docs/requirements/requirement-details.md] # or requirement-details-part-X.md
   mockup_list: [inherited from input or N/A]
   
   # Dynamic attributes for requirement-stage
@@ -73,7 +73,7 @@ Output:
   requirement_details_part: null | 1 | 2 | ... # current active part number (null if no parts)
   linked_mockups:
     - mockup_name: "Description of mockup function"
-      mockup_path: "docs/requirements/FEATURE-XXX/mockups/mockup-name.html"
+      mockup_path: "x-ipe-docs/requirements/FEATURE-XXX/mockups/mockup-name.html"
 ```
 
 ---
@@ -117,9 +117,9 @@ Execute Feature Breakdown by following these steps in order:
 
 ```
 1. Determine which file to read:
-   a. Check if docs/requirements/requirement-details-part-X.md files exist
+   a. Check if x-ipe-docs/requirements/requirement-details-part-X.md files exist
    b. IF parts exist → Read the CURRENT ACTIVE PART (highest part number)
-   c. ELSE IF docs/requirements/requirement-details.md exists → Read it
+   c. ELSE IF x-ipe-docs/requirements/requirement-details.md exists → Read it
    d. ELSE → Analyze user request directly
 
 2. Read the determined file:
@@ -158,12 +158,12 @@ Execute Feature Breakdown by following these steps in order:
 
 ```
 FOR EACH feature in identified_features:
-  1. Create mockups folder: docs/requirements/{FEATURE-ID}/mockups/
+  1. Create mockups folder: x-ipe-docs/requirements/{FEATURE-ID}/mockups/
   
   2. FOR EACH mockup in mockup_list (that relates to this feature):
      - Copy mockup file from mockup_link source
      - Rename to: {mockup_name}.{original_extension}
-     - Save to: docs/requirements/{FEATURE-ID}/mockups/{mockup_name}.{ext}
+     - Save to: x-ipe-docs/requirements/{FEATURE-ID}/mockups/{mockup_name}.{ext}
   
   3. Record linked mockups for output
 ```
@@ -173,18 +173,18 @@ FOR EACH feature in identified_features:
 # Example: Input mockup_list
 mockup_list:
   - mockup_name: "main-dashboard"
-    mockup_link: "docs/ideas/Draft Idea - 01232026/mockup.html"
+    mockup_link: "x-ipe-docs/ideas/Draft Idea - 01232026/mockup.html"
   - mockup_name: "settings-panel"
-    mockup_link: "docs/ideas/Draft Idea - 01232026/mockups/settings.html"
+    mockup_link: "x-ipe-docs/ideas/Draft Idea - 01232026/mockups/settings.html"
 
 # Result: Files created
-docs/requirements/FEATURE-001/mockups/main-dashboard.html
-docs/requirements/FEATURE-001/mockups/settings-panel.html
+x-ipe-docs/requirements/FEATURE-001/mockups/main-dashboard.html
+x-ipe-docs/requirements/FEATURE-001/mockups/settings-panel.html
 ```
 
 **Linking Mockups:**
-1. Add mockup links to `docs/requirements/requirement-details.md` in "Linked Mockups" table
-2. Add mockup links to each `docs/requirements/{FEATURE-ID}/specification.md` in "Linked Mockups" table
+1. Add mockup links to `x-ipe-docs/requirements/requirement-details.md` in "Linked Mockups" table
+2. Add mockup links to each `x-ipe-docs/requirements/{FEATURE-ID}/specification.md` in "Linked Mockups" table
 
 **Mockup Link Format:**
 ```markdown
@@ -214,7 +214,7 @@ IF requirement-details-part-X.md files exist:
   → Update the CURRENT ACTIVE PART (highest part number)
   → Add Feature List section to that part
 ELSE:
-  → Update docs/requirements/requirement-details.md
+  → Update x-ipe-docs/requirements/requirement-details.md
 ```
 
 **Single File Structure (requirement-details.md):**
@@ -328,7 +328,7 @@ CALL feature-stage+feature-board-management skill:
     [... etc for all features]
 ```
 
-**Output:** Features created on docs/planning/features.md with status "Planned"
+**Output:** Features created on x-ipe-docs/planning/features.md with status "Planned"
 
 ---
 
@@ -342,7 +342,7 @@ CALL feature-stage+feature-board-management skill:
 ```
 1. Check if parts exist (requirement-details-part-X.md files)
 2. IF parts exist:
-   a. Open docs/requirements/requirement-details-index.md
+   a. Open x-ipe-docs/requirements/requirement-details-index.md
    b. Update "Parts Overview" table with new feature range
    c. Update "Lines" column with approximate line count
    d. Save file
@@ -375,7 +375,7 @@ CALL feature-stage+feature-board-management skill:
 | 3 | Feature board updated via feature-board-management skill | Yes |
 | 4 | All features have status "Planned" on feature board | Yes |
 | 5 | If parts exist: requirement-details-index.md updated | Conditional |
-| 6 | If mockup_list provided: mockups copied to `docs/requirements/{FEATURE-ID}/mockups/` | Conditional |
+| 6 | If mockup_list provided: mockups copied to `x-ipe-docs/requirements/{FEATURE-ID}/mockups/` | Conditional |
 | 7 | If mockup_list provided: Linked Mockups section updated | Conditional |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
@@ -518,7 +518,7 @@ FEATURE-003: Admin Panel (depends on FEATURE-001, FEATURE-002)
 
 This skill **MUST** call the feature-board-management skill to create features on the board. This integration:
 
-1. **Creates centralized tracking** - Single source of truth at docs/requirements/features.md
+1. **Creates centralized tracking** - Single source of truth at x-ipe-docs/requirements/features.md
 2. **Initializes status** - All features start with status "Planned"
 3. **Enables queries** - Other skills can query feature board for Feature Data Model
 4. **Supports lifecycle** - Board tracks features through all phases
@@ -529,7 +529,7 @@ This skill **MUST** call the feature-board-management skill to create features o
 
 ## Notes
 
-- No longer create individual docs/requirements/FEATURE-XXX/feature.md files
+- No longer create individual x-ipe-docs/requirements/FEATURE-XXX/feature.md files
 - All features consolidated in requirement-details.md
 - Feature board (features.md) is the status tracking system
 - Feature specifications created later during Feature Refinement task

@@ -15,7 +15,7 @@ Transform brand colors, typography preferences, and style guidelines into:
 
 ## Important Notes
 
-- Output location: `docs/themes/theme-{name}/`
+- Output location: `x-ipe-docs/themes/theme-{name}/`
 - Required files: `design-system.md`, `component-visualization.html`
 - Theme names must use kebab-case with `theme-` prefix
 - Minimum input: One accent/brand color (can be derived from web/image/text)
@@ -208,7 +208,7 @@ Determine the input type and process accordingly:
 - Ensure visual components render correctly
 
 ### Step 6: Create Theme Folder
-- Create `docs/themes/theme-{name}/`
+- Create `x-ipe-docs/themes/theme-{name}/`
 - Write `design-system.md`
 - Write `component-visualization.html`
 

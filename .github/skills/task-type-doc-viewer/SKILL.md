@@ -47,7 +47,7 @@ Generate a web-based documentation viewer for browsing project docs by:
 
 | # | Checkpoint | Required |
 |---|------------|----------|
-| 1 | Project has `docs/` folder with documentation | Yes |
+| 1 | Project has `x-ipe-docs/` folder with documentation | Yes |
 
 ---
 
@@ -93,7 +93,7 @@ project-root/
 ```python
 # Key features:
 # - Static file serving from project root
-# - /api/docs-structure endpoint that dynamically scans docs/ and .github/
+# - /api/docs-structure endpoint that dynamically scans x-ipe-docs/ and .github/
 # - No-cache headers for always showing latest content
 ```
 
@@ -102,7 +102,7 @@ project-root/
 |---------|-------------|
 | Static Files | Serve files from project root |
 | API Endpoint | `GET /api/docs-structure` returns JSON tree |
-| Auto-Detection | Dynamically scan `docs/` and `.github/` folders |
+| Auto-Detection | Dynamically scan `x-ipe-docs/` and `.github/` folders |
 | No Caching | Markdown files served with no-cache headers |
 
 ### Step 3: Create HTML Viewer
@@ -170,7 +170,7 @@ Output:
 
 ### Pattern: Basic Documentation Viewer
 
-**When:** Standard project with docs/ folder
+**When:** Standard project with x-ipe-docs/ folder
 **Then:**
 ```
 1. Create doc-viewer/ folder
@@ -225,7 +225,7 @@ Output:
 
 3. Create server.py:
    - Serve static files from project root
-   - /api/docs-structure scans docs/ and .github/
+   - /api/docs-structure scans x-ipe-docs/ and .github/
    - Returns JSON tree structure
    - No-cache headers for markdown
 

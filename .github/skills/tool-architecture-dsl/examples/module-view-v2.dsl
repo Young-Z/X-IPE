@@ -95,7 +95,7 @@ layer "Data" {
     grid 1 x 3
     align center center
     gap 8px
-    component "docs/" { cols 1, rows 1 } <<folder>>
+    component "x-ipe-docs/" { cols 1, rows 1 } <<folder>>
     component "src/" { cols 1, rows 1 } <<folder>>
     component "static/" { cols 1, rows 1 } <<folder>>
   }
