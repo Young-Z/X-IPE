@@ -99,6 +99,18 @@ function initializeApp() {
         window.terminalPanel = new TerminalPanel(window.terminalManager);
     }
     
+    // FEATURE-021: Initialize Voice Input Manager
+    if (typeof VoiceInputManager !== 'undefined' && window.terminalManager) {
+        // Wait for Socket.IO to be ready from terminal manager
+        setTimeout(() => {
+            const socket = window.terminalManager.socket;
+            if (socket) {
+                window.voiceInputManager = new VoiceInputManager(socket);
+                console.log('[Voice] VoiceInputManager initialized');
+            }
+        }, 500);
+    }
+    
     // Initialize skills modal handler
     initSkillsModal();
     

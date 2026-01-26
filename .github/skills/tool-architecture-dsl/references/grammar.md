@@ -99,6 +99,30 @@ direction := 'direction' ('top-to-bottom' | 'left-to-right')
 direction top-to-bottom
 ```
 
+### canvas
+
+Specifies explicit width and height for the diagram container. When set, the diagram will render at this exact size instead of auto-sizing.
+
+```
+canvas := 'canvas' size ',' size
+size := number ('px' | '%')?
+number := [0-9]+
+```
+
+**Format:** `canvas WIDTH, HEIGHT` or `canvas WIDTH HEIGHT`
+
+**Examples:**
+```architecture-dsl
+canvas 1200px, 600px   ' Fixed size diagram
+canvas 800px, 400px    ' Smaller diagram
+canvas 100%, 500px     ' Full width, fixed height
+```
+
+**Usage:**
+- Use when you need precise control over diagram dimensions
+- Useful for embedding in presentations or fixed-layout documents
+- If not specified, diagram auto-sizes with max-width of 1200px
+
 ### grid (v2 - Document Level)
 
 Defines the document-level grid dimensions.

@@ -8,12 +8,13 @@
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
 | TASK-169 | Bug Fix | Fix toggle side by side behavior in markdown editor | Spark | 🔄 in_progress | 01-25-2026 10:00:00 | | |
 | TASK-170 | Bug Fix | QA Verification for TASK-169 side-by-side toggle bug | Drift | 🔄 in_progress | 01-25-2026 12:00:00 | | |
+| TASK-177 | Requirement Gathering | IDEA-011: AI-Integrated Enterprise Knowledge Base requirements | Spark | ⏸️ deferred | 01-25-2026 14:50:00 | | Feature Breakdown |
 | TASK-171 | Requirement Gathering | Voice Input for Console - gather requirements from IDEA-009 | Pulse | ✅ complete | 01-25-2026 12:26:00 | [requirement-details-part-3.md](docs/requirements/requirement-details-part-3.md) | Feature Breakdown |
 | TASK-172 | Feature Breakdown | Break down FEATURE-021: Console Voice Input | Pulse | ✅ complete | 01-25-2026 12:27:00 | [features.md](docs/planning/features.md), [mockup](docs/requirements/FEATURE-021/mockups/voice-input-console.html) | Feature Refinement |
 | TASK-173 | Feature Refinement | Refine FEATURE-021: Console Voice Input specification | Pulse | ✅ complete | 01-25-2026 12:38:00 | [specification.md](docs/requirements/FEATURE-021/specification.md) | Technical Design |
 | TASK-174 | Technical Design | Technical design for FEATURE-021: Console Voice Input | Pulse | ✅ complete | 01-25-2026 12:55:00 | [technical-design.md](docs/requirements/FEATURE-021/technical-design.md) | Test Generation |
 | TASK-175 | Test Generation | Generate TDD tests for FEATURE-021: Console Voice Input | Pulse | ✅ complete | 01-25-2026 12:58:00 | [test_voice_input.py](tests/test_voice_input.py) | Code Implementation |
-| TASK-176 | Code Implementation | Implement FEATURE-021: Console Voice Input | Pulse | 🔄 in_progress | 01-25-2026 12:58:00 | | Feature Closing |
+| TASK-176 | Code Implementation | Implement FEATURE-021: Console Voice Input | Pulse | ✅ complete | 01-25-2026 13:30:00 | [voice_input_service.py](src/services/voice_input_service.py), [voice-input.js](static/js/features/voice-input.js), [index.html](src/templates/index.html) | Feature Closing |
 
 ---
 

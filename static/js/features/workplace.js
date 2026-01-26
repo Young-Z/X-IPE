@@ -980,7 +980,7 @@ class WorkplaceManager {
                 const el = container.querySelector(`#${block.id}`) || document.getElementById(block.id);
                 if (el && !el.hasChildNodes()) {
                     try {
-                        const html = this._renderArchitectureHTML(this._parseArchitectureDSL(block.dsl));
+                        const html = this._renderArchitectureHTML(this._parseArchitectureDSL(block.dsl), block.dsl);
                         el.innerHTML = html;
                     } catch (e) {
                         el.innerHTML = `<pre class="text-danger">Architecture DSL error: ${e.message}</pre>`;
@@ -1048,7 +1048,7 @@ class WorkplaceManager {
             const el = document.getElementById(block.id);
             if (el) {
                 try {
-                    const html = this._renderArchitectureHTML(this._parseArchitectureDSL(block.dsl));
+                    const html = this._renderArchitectureHTML(this._parseArchitectureDSL(block.dsl), block.dsl);
                     el.innerHTML = html;
                 } catch (e) {
                     el.innerHTML = `<pre class="text-danger">Architecture DSL error: ${e.message}</pre>`;
@@ -1075,9 +1075,9 @@ class WorkplaceManager {
     /**
      * Render Architecture AST to HTML using the bundled library
      */
-    _renderArchitectureHTML(ast) {
+    _renderArchitectureHTML(ast, originalDsl = '') {
         if (typeof ArchitectureDSL !== 'undefined') {
-            return ArchitectureDSL.renderHTML(ast);
+            return ArchitectureDSL.renderHTML(ast, { originalDsl });
         }
         // Fallback
         return '<div class="alert alert-warning">Architecture DSL library not loaded</div>';

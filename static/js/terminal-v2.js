@@ -671,7 +671,10 @@
         _bindEvents() {
             // Header click to toggle
             this.header.addEventListener('click', e => {
-                if (e.target.closest('.terminal-actions') || e.target.closest('.terminal-status')) return;
+                // Don't toggle if clicking on actions, status, or voice controls
+                if (e.target.closest('.terminal-actions') || 
+                    e.target.closest('.terminal-status') ||
+                    e.target.closest('.terminal-header-center')) return;
                 this.toggle();
             });
 
@@ -918,6 +921,47 @@
 
         sendCopilotPromptCommand(promptCommand) {
             this.paneManager.sendCopilotPromptCommand(promptCommand);
+        }
+
+        /**
+         * Get the currently focused terminal for voice input injection
+         * FEATURE-021: Console Voice Input
+         */
+        getFocusedTerminal() {
+            // Use paneManager.activeIndex directly (not this.activeIndex which may be stale)
+            const activeIdx = this.paneManager.activeIndex;
+            if (activeIdx >= 0 && this.paneManager.terminals[activeIdx]) {
+                const terminalData = this.paneManager.terminals[activeIdx];
+                return {
+                    terminal: terminalData.terminal,
+                    socket: terminalData.socket,
+                    sessionId: terminalData.sessionId,
+                    sendInput: (text) => {
+                        if (terminalData.socket && terminalData.sessionId) {
+                            terminalData.socket.emit('input', text);
+                        }
+                    }
+                };
+            }
+            return null;
+        }
+
+        /**
+         * Get the socket connection for voice manager
+         * FEATURE-021: Console Voice Input
+         */
+        get socket() {
+            // Return the first active socket for voice input
+            for (const t of this.paneManager.terminals) {
+                if (t.socket && t.socket.connected) {
+                    return t.socket;
+                }
+            }
+            // If no connected socket, return first socket
+            if (this.paneManager.terminals.length > 0) {
+                return this.paneManager.terminals[0].socket;
+            }
+            return null;
         }
 
         _syncState() {

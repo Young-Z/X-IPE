@@ -53,6 +53,14 @@ from .tools_config_service import ToolsConfigService
 # Themes Service (FEATURE-012)
 from .themes_service import ThemesService
 
+# Voice Input Service (FEATURE-021)
+from .voice_input_service_v2 import (
+    VoiceSession,
+    VoiceInputService,
+    is_voice_command,
+    VOICE_MAX_DURATION,
+)
+
 
 __all__ = [
     # Config
@@ -87,4 +95,9 @@ __all__ = [
     'ToolsConfigService',
     # Themes
     'ThemesService',
+    # Voice Input
+    'VoiceSession',
+    'VoiceInputService',
+    'is_voice_command',
+    'VOICE_MAX_DURATION',
 ]

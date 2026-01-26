@@ -42,6 +42,7 @@ This renders as an **interactive diagram** in the IPE viewer - no HTML files nee
 title "Title"
 theme "theme-default"
 direction top-to-bottom
+canvas 1200px, 600px
 grid 12 x 6
 
 layer "Name" {
@@ -70,6 +71,7 @@ layer "Name" {
 | **grid C x R** | C = columns, R = rows |
 | **Layer rows** | Required for each layer |
 | **Multi-line names** | Use `\n` in names to wrap text |
+| **canvas** | Optional: explicit width/height (e.g., `canvas 1200px, 600px`) |
 
 ### Grid Syntax
 

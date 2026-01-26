@@ -81,14 +81,31 @@
     <div class="terminal-panel collapsed" id="terminal-panel">
         <div class="terminal-resize-handle" id="terminal-resize-handle"></div>
         <div class="terminal-header" id="terminal-header">
-            <div class="terminal-title">
-                <i class="bi bi-terminal"></i>
-                <span>Console</span>
+            <!-- Left side: Title and Connection Status -->
+            <div class="terminal-header-left">
+                <div class="terminal-title">
+                    <i class="bi bi-terminal"></i>
+                    <span>Console</span>
+                </div>
+                <div class="terminal-status">
+                    <span class="status-indicator connection-status" id="terminal-status-indicator"></span>
+                    <span class="status-text" id="terminal-status-text">Connecting...</span>
+                </div>
             </div>
-            <div class="terminal-status">
-                <span class="status-indicator" id="terminal-status-indicator"></span>
-                <span class="status-text" id="terminal-status-text">Connecting...</span>
+            <!-- Center: Voice Controls (FEATURE-021) -->
+            <div class="terminal-header-center">
+                <button class="mic-toggle" id="mic-toggle" title="Toggle microphone (Ctrl+Shift+V to record when enabled)">
+                    <i class="bi bi-mic-mute"></i>
+                </button>
+                <div class="voice-indicator" id="voice-indicator">
+                    <span class="waveform-bar"></span>
+                    <span class="waveform-bar"></span>
+                    <span class="waveform-bar"></span>
+                    <span class="waveform-bar"></span>
+                    <span class="waveform-bar"></span>
+                </div>
             </div>
+            <!-- Right side: Actions -->
             <div class="terminal-actions">
                 <button id="add-terminal-btn" title="Add Terminal">+</button>
                 <button id="terminal-zen-btn" title="Zen Mode">
@@ -98,6 +115,10 @@
                     <i class="bi bi-chevron-up"></i>
                 </button>
             </div>
+        </div>
+        <!-- Transcription Preview Bar (FEATURE-021) -->
+        <div class="transcription-preview" id="transcription-preview">
+            <span class="transcription-text" id="transcription-text"></span>
         </div>
         <div class="terminal-panes" id="terminal-panes">
             <!-- Panes inserted dynamically by TerminalManager -->

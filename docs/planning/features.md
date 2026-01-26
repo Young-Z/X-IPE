@@ -40,7 +40,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-018 | X-IPE CLI Tool | v1.0 | Designed | [specification.md](../requirements/FEATURE-018/specification.md) | 01-25-2026 | 01-25-2026 05:25:00 |
 | FEATURE-019 | Simplified Project Setup | v1.0 | Planned | - | 01-25-2026 | 01-25-2026 05:15:00 |
 | FEATURE-020 | Skills Discovery & Override | v1.0 | Planned | - | 01-25-2026 | 01-25-2026 05:15:00 |
-| FEATURE-021 | Console Voice Input | v1.0 | Designed | [specification.md](../requirements/FEATURE-021/specification.md) | 01-25-2026 | 01-25-2026 12:40:00 |
+| FEATURE-021 | Console Voice Input | v1.0 | Implemented | [specification.md](../requirements/FEATURE-021/specification.md), [technical-design.md](../requirements/FEATURE-021/technical-design.md) | 01-25-2026 | 01-25-2026 13:30:00 |
 
 ---
 
@@ -56,17 +56,17 @@ This board tracks all features across the project lifecycle.
 ### Refined (0)
 - None
 
-### Designed (3)
+### Designed (2)
 - FEATURE-005: Interactive Console v2.0
 - FEATURE-018: X-IPE CLI Tool
-- FEATURE-021: Console Voice Input
 
-### Implemented (5)
+### Implemented (6)
 - FEATURE-001: Project Navigation
 - FEATURE-002: Content Viewer
 - FEATURE-003: Content Editor
 - FEATURE-004: Live Refresh
 - FEATURE-006: Settings & Configuration
+- FEATURE-021: Console Voice Input
 
 ### Tested (0)
 - None

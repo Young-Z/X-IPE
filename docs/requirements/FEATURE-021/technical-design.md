@@ -101,30 +101,34 @@ voiceManager.onTranscription = (text) => {
 ```
 
 ```python
-# Backend: Voice input service
-from src.services.voice_input_service import VoiceInputService
+# Backend: Voice input service using dashscope SDK
+from src.services.voice_input_service_v2 import VoiceInputService, is_voice_command
 
 voice_service = VoiceInputService(api_key=os.environ['ALIBABA_SPEECH_API_KEY'])
 
 # In WebSocket handler
+@socketio.on('voice_start')
+def handle_voice_start():
+    session_id = voice_service.create_session(socket_sid=request.sid)
+    voice_service.start_recognition(session_id)  # Uses dashscope SDK
+    emit('voice_ready', {'session_id': session_id})
+
 @socketio.on('voice_audio')
 def handle_voice_audio(data):
-    session_id = data['session_id']
-    audio_chunk = data['audio']
-    
-    # Stream to Alibaba Cloud
-    voice_service.send_audio(session_id, audio_chunk)
+    session_id = get_session_for_socket(request.sid)
+    audio_chunk = bytes(data['audio'])
+    voice_service.send_audio(session_id, audio_chunk)  # Forwards to recognizer
 
 @socketio.on('voice_stop')
-def handle_voice_stop(data):
-    session_id = data['session_id']
-    transcription = voice_service.finish(session_id)
+def handle_voice_stop():
+    session_id = get_session_for_socket(request.sid)
+    transcription = voice_service.stop_recognition(session_id)  # Gets final text
     
     # Check for voice commands
     if is_voice_command(transcription):
         emit('voice_command', {'command': 'close_mic'})
     else:
-        emit('voice_transcription', {'text': transcription})
+        emit('voice_result', {'text': transcription})
 ```
 
 ---
@@ -143,7 +147,7 @@ def handle_voice_stop(data):
 │  ┌─────────────────┐    ┌──────────────────┐    ┌───────────────────┐  │
 │  │  Console Header │    │ VoiceInputManager│    │  TerminalInstance │  │
 │  │  [🎤] [🔊]      │───▶│  MediaRecorder   │───▶│  xterm.js         │  │
-│  └─────────────────┘    │  WebSocket       │    │  write(text)      │  │
+│  └─────────────────┘    │  Socket.IO       │    │  write(text)      │  │
 │                         └────────┬─────────┘    └───────────────────┘  │
 │                                  │ audio chunks                         │
 └──────────────────────────────────┼──────────────────────────────────────┘
@@ -158,9 +162,11 @@ def handle_voice_stop(data):
 │                                  │                                       │
 │                         ┌────────▼─────────┐                            │
 │                         │VoiceInputService │                            │
-│                         │ session_pool     │                            │
+│                         │(dashscope SDK)   │                            │
+│                         │TranslationRecog- │                            │
+│                         │ nizerRealtime    │                            │
 │                         └────────┬─────────┘                            │
-│                                  │ WebSocket                             │
+│                                  │ SDK handles connection               │
 └──────────────────────────────────┼──────────────────────────────────────┘
                                    │
 ┌──────────────────────────────────┼──────────────────────────────────────┐

@@ -110,7 +110,6 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-left: auto;
     font-size: 12px;
     color: #888;
 }
@@ -294,4 +293,130 @@
 .terminal-content .xterm-helper-textarea {
     position: absolute !important;
 }
+
+/* =============================================================================
+   FEATURE-021: Console Voice Input
+   ============================================================================= */
+
+/* Header layout for voice controls */
+.terminal-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.terminal-header-center {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    margin-right: 10px;
+}
+
+/* Mic toggle button */
+.mic-toggle {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: #3c3c3c;
+    color: #888;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.mic-toggle:hover {
+    background: #4c4c4c;
+    color: #ccc;
+}
+
+.mic-toggle.enabled {
+    background: #0e639c;
+    color: #fff;
+}
+
+.mic-toggle.enabled:hover {
+    background: #1177bb;
+}
+
+.mic-toggle.denied {
+    background: #5a3333;
+    color: #f88;
+}
+
+/* Voice indicator - waveform bars */
+.voice-indicator {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 20px;
+    opacity: 0.3;
+    transition: opacity 0.2s;
+}
+
+.voice-indicator .waveform-bar {
+    width: 3px;
+    height: 8px;
+    background: #888;
+    border-radius: 1px;
+    transition: all 0.1s ease;
+}
+
+.voice-indicator.recording {
+    opacity: 1;
+}
+
+.voice-indicator.recording .waveform-bar {
+    background: #4ec9b0;
+    animation: voice-wave 0.5s ease-in-out infinite;
+}
+
+.voice-indicator.recording .waveform-bar:nth-child(1) { animation-delay: 0.0s; }
+.voice-indicator.recording .waveform-bar:nth-child(2) { animation-delay: 0.1s; }
+.voice-indicator.recording .waveform-bar:nth-child(3) { animation-delay: 0.2s; }
+.voice-indicator.recording .waveform-bar:nth-child(4) { animation-delay: 0.3s; }
+.voice-indicator.recording .waveform-bar:nth-child(5) { animation-delay: 0.4s; }
+
+.voice-indicator.processing .waveform-bar {
+    background: #dcdcaa;
+    animation: voice-pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes voice-wave {
+    0%, 100% { height: 8px; }
+    50% { height: 18px; }
+}
+
+@keyframes voice-pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}
+
+/* Transcription preview bar */
+.transcription-preview {
+    height: 0;
+    overflow: hidden;
+    background: #2d2d2d;
+    border-bottom: 1px solid #333;
+    font-size: 12px;
+    color: #ccc;
+    transition: height 0.2s ease;
+}
+
+.transcription-preview.visible {
+    height: 28px;
+    padding: 4px 12px;
+}
+
+.transcription-preview .transcription-text {
+    display: block;
+    line-height: 20px;
+    font-style: italic;
+    color: #9cdcfe;
+}
+
 

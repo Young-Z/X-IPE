@@ -15,6 +15,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" rel="stylesheet">
     <!-- EasyMDE Markdown Editor CSS -->
     <link href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css" rel="stylesheet">
+    <!-- CodeMirror Search Dialog CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/dialog/dialog.min.css" rel="stylesheet">
     
     <!-- Application CSS (modular) -->
     <link href="/static/css/base.css" rel="stylesheet">
@@ -38,6 +40,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <!-- EasyMDE Markdown Editor JS -->
     <script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
+    <!-- CodeMirror Search Add-ons -->
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/dialog/dialog.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/search/searchcursor.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/search/search.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/search/jump-to-line.min.js"></script>
     <!-- Mermaid.js for diagrams -->
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
     <!-- AntV Infographic for infographic DSL diagrams -->
@@ -63,6 +70,8 @@
     <script src="/static/js/features/workplace.js"></script>
     <!-- FEATURE-011: Stage Toolbox -->
     <script src="/static/js/features/stage-toolbox.js"></script>
+    <!-- FEATURE-021: Console Voice Input -->
+    <script src="/static/js/features/voice-input.js"></script>
     <script src="/static/js/init.js"></script>
     
     {% block extra_js %}{% endblock %}
