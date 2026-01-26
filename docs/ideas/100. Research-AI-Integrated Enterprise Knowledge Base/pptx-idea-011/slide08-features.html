@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #FFFFFF; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #FFFFFF; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header {
+  background: #40695B; padding: 14pt 25pt;
+}
+.header-title { color: #FFFFFF; font-size: 20pt; margin: 0; }
+.content {
+  padding: 10pt 20pt; flex: 1;
+}
+.section-label { color: #9B59B6; font-size: 10pt; margin: 0 0 6pt 0; font-weight: bold; }
+.features-grid {
+  display: flex; flex-wrap: wrap; gap: 6pt;
+}
+.feature-card {
+  background: #F4F6F6; padding: 6pt 8pt; border-radius: 4pt;
+  width: 215pt; border-left: 2pt solid #9B59B6;
+}
+.feature-title { color: #1C2833; font-size: 9pt; margin: 0 0 2pt 0; font-weight: bold; }
+.feature-desc { color: #5D6D7E; font-size: 7pt; margin: 0; }
+.p1-card { border-left-color: #40695B; }
+</style>
+</head>
+<body>
+<div class="header">
+  <p class="header-title">Key Features</p>
+</div>
+<div class="content">
+  <p class="section-label">P0 - Must Have (Core Platform)</p>
+  <div class="features-grid" style="margin-bottom: 8pt;">
+    <div class="feature-card">
+      <p class="feature-title">Multi-Source Connectors</p>
+      <p class="feature-desc">Ingest from Confluence, SharePoint, OneDrive, email</p>
+    </div>
+    <div class="feature-card">
+      <p class="feature-title">Intelligent Chunking</p>
+      <p class="feature-desc">Semantic document segmentation for retrieval</p>
+    </div>
+    <div class="feature-card">
+      <p class="feature-title">Vector Embedding Pipeline</p>
+      <p class="feature-desc">Embeddings using Qwen gte-Qwen2 models</p>
+    </div>
+    <div class="feature-card">
+      <p class="feature-title">Hybrid Search</p>
+      <p class="feature-desc">Vector + keyword search (Elasticsearch)</p>
+    </div>
+    <div class="feature-card">
+      <p class="feature-title">RAG API Endpoint</p>
+      <p class="feature-desc">REST/GraphQL API for AI agents</p>
+    </div>
+    <div class="feature-card">
+      <p class="feature-title">Access Control</p>
+      <p class="feature-desc">Azure AD SSO with RBAC enforcement</p>
+    </div>
+  </div>
+  <p class="section-label">P1/P2 - Enhanced Features</p>
+  <div class="features-grid">
+    <div class="feature-card p1-card">
+      <p class="feature-title">Employee Search Portal</p>
+      <p class="feature-desc">Natural language search (CN/EN)</p>
+    </div>
+    <div class="feature-card p1-card">
+      <p class="feature-title">Knowledge Graph</p>
+      <p class="feature-desc">Relationship mapping via Alibaba GDB</p>
+    </div>
+    <div class="feature-card p1-card">
+      <p class="feature-title">Content Freshness</p>
+      <p class="feature-desc">Auto-detect stale content</p>
+    </div>
+    <div class="feature-card p1-card">
+      <p class="feature-title">Usage Analytics</p>
+      <p class="feature-desc">Search patterns via Cloud Monitor</p>
+    </div>
+    <div class="feature-card p1-card">
+      <p class="feature-title">Feedback Loop</p>
+      <p class="feature-desc">Thumbs up/down to improve retrieval</p>
+    </div>
+    <div class="feature-card p1-card">
+      <p class="feature-title">AI Maintenance Agent</p>
+      <p class="feature-desc">Auto-update and curate content</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

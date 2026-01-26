@@ -7,12 +7,13 @@
  */
 
 /* Terminal Panel - Bottom of page */
+/* Must be above middle-section (z-index: 400) so resize handle is draggable */
 .terminal-panel {
     background-color: #1e1e1e;
     border-top: 1px solid #333;
     display: flex;
     flex-direction: column;
-    z-index: 100;
+    z-index: 450;
     position: relative;
 }
 
@@ -46,7 +47,12 @@
     height: 6px;
     cursor: ns-resize;
     background: transparent;
-    z-index: 101;
+    z-index: 500;
+}
+
+/* When resizing, ensure panel is above middle-section (z-index 400) */
+.terminal-panel.resizing {
+    z-index: 500;
 }
 
 .terminal-resize-handle::before {

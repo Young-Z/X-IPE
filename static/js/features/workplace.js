@@ -1230,6 +1230,8 @@ class WorkplaceManager {
      * Save the current content
      */
     async saveContent() {
+        // Don't auto-save in upload/compose view
+        if (this.currentView === 'upload') return;
         if (!this.currentPath || !this.hasUnsavedChanges) return;
         
         let content;
@@ -1272,7 +1274,13 @@ class WorkplaceManager {
         } catch (error) {
             console.error('Failed to save file:', error);
             this.updateStatus('error');
-            this._showToast('Failed to save file', 'error');
+            // Show more specific error message
+            const errorMsg = error.message || 'Failed to save file';
+            if (errorMsg.includes('not found') || errorMsg.includes('File not found')) {
+                this._showToast('File no longer exists. It may have been moved or deleted.', 'error');
+            } else {
+                this._showToast('Failed to save file: ' + errorMsg, 'error');
+            }
         }
     }
     
@@ -1361,7 +1369,7 @@ class WorkplaceManager {
                             <h5>Drag & Drop Files Here</h5>
                             <p class="text-muted mb-3">or click to browse</p>
                             <input type="file" id="workplace-file-input" multiple style="display: none;"
-                                   accept=".md,.txt,.json,.yaml,.yml,.xml,.csv,.py,.js,.ts,.jsx,.tsx,.html,.css,.sh,.sql,.java,.c,.cpp,.h,.go,.rs,.rb,.php,.swift,.kt,.png,.jpg,.jpeg,.gif,.svg,.webp,.bmp,.ico">
+                                   accept=".md,.txt,.json,.yaml,.yml,.xml,.csv,.py,.js,.ts,.jsx,.tsx,.html,.css,.sh,.sql,.java,.c,.cpp,.h,.go,.rs,.rb,.php,.swift,.kt,.png,.jpg,.jpeg,.gif,.svg,.webp,.bmp,.ico,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar">
                         </div>
                         <div class="workplace-supported-formats">
                             <p class="mb-2"><i class="bi bi-check-circle text-success me-1"></i><strong>Supported formats:</strong></p>
@@ -1427,7 +1435,7 @@ class WorkplaceManager {
             // Fix z-index when side-by-side is toggled and exit fullscreen when side-by-side is turned off
             const middleSection = document.getElementById('middle-section');
             let wasSideBySideActive = false;
-            ju
+            
             const observer = new MutationObserver(() => {
                 const container = this.easyMDE.element.closest('.EasyMDEContainer');
                 const isSideBySideActive = container && container.classList.contains('sided--no-fullscreen');
@@ -1857,29 +1865,43 @@ class WorkplaceManager {
      */
     async downloadFile(path, name) {
         try {
-            // Fetch file content via the existing API
-            const response = await fetch(`/api/file/content?path=${encodeURIComponent(path)}`);
+            // Determine if file is binary based on extension
+            const ext = name.split('.').pop()?.toLowerCase() || '';
+            const binaryExts = ['docx', 'doc', 'xlsx', 'xls', 'pptx', 'ppt', 'pdf', 'zip', 'rar',
+                               'mp3', 'mp4', 'wav', 'avi', 'mov', 'exe', 'dll', 'bin',
+                               'png', 'jpg', 'jpeg', 'gif', 'bmp', 'ico', 'svg', 'webp'];
+            const isBinary = binaryExts.includes(ext);
+            
+            // Use raw=true for binary files, which serves the file directly
+            const url = `/api/file/content?path=${encodeURIComponent(path)}${isBinary ? '&raw=true' : ''}`;
+            const response = await fetch(url);
             
             if (!response.ok) {
                 throw new Error('Failed to fetch file');
             }
             
-            const data = await response.json();
-            const content = data.content || '';
+            let blob;
+            if (isBinary) {
+                // For binary files, response is the raw file
+                blob = await response.blob();
+            } else {
+                // For text files, extract content from JSON response
+                const data = await response.json();
+                const content = data.content || '';
+                blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            }
             
-            // Create a blob and download link
-            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            
+            // Create download link
+            const blobUrl = URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = url;
+            link.href = blobUrl;
             link.download = name;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             
             // Clean up the URL object
-            URL.revokeObjectURL(url);
+            URL.revokeObjectURL(blobUrl);
             
             this._showToast(`Downloaded: ${name}`, 'success');
         } catch (error) {

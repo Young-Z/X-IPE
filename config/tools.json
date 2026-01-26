@@ -1,7 +1,7 @@
 {
   "selected-theme": {
-    "theme-folder-path": "docs/themes/theme-default",
-    "theme-name": "theme-default"
+    "theme-name": "theme-black-golden",
+    "theme-folder-path": "docs/themes/theme-black-golden"
   },
   "stages": {
     "feature": {
@@ -22,7 +22,7 @@
         "tool-draw-system-landscape": true
       },
       "ideation": {
-        "_extra_instruction": "- for infographic tool: just see its `Mind Map`, `list-grid`, `list-row`, `list-sector`, `sequence-ascending`, `sequence-color`, `sequence-horizontal`, `sequence-zigzag`, `sequence-funnel` or `sequence-pyramid` in suitable context.\n- for mermaid tool: just use it in workflow, sequence diagram\n- for Architecture DSL tool: embed ```architecture-dsl code blocks directly in markdown (IPE renders natively). Use for layered architecture, module views, and system landscapes.",
+        "_extra_instruction": "- for mermaid tool: just use it in workflow, sequence diagram\n- for Architecture DSL tool: embed ```architecture-dsl code blocks directly in markdown (IPE renders natively). Use for layered architecture, module views, and system landscapes.",
         "_order": 1,
         "antv-infographic": true,
         "mermaid": true,

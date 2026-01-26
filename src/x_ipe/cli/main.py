@@ -51,6 +51,10 @@ def status(ctx: click.Context) -> None:
     - Configuration status
     - Skill counts
     - Project structure status
+    
+    Exit codes:
+    - 0: Project is initialized
+    - 1: Project is not initialized
     """
     project_root = ctx.obj["project_root"]
     config = ctx.obj["config"]
@@ -58,23 +62,29 @@ def status(ctx: click.Context) -> None:
     click.echo(f"X-IPE Status for: {project_root}")
     click.echo("-" * 40)
     
+    # Track initialization status
+    is_initialized = True
+    
     # Config status
     if config.config_path:
         click.echo(f"✓ Config: {config.config_path.name}")
     else:
         click.echo("○ Config: Using defaults (no .x-ipe.yaml)")
+        is_initialized = False
     
     # Docs structure
     if config.docs_path.exists():
         click.echo(f"✓ Docs: {config.docs_path.relative_to(project_root)}")
     else:
         click.echo(f"○ Docs: Not initialized")
+        is_initialized = False
     
     # Runtime folder
     if config.runtime_path.exists():
         click.echo(f"✓ Runtime: {config.runtime_path.relative_to(project_root)}")
     else:
         click.echo(f"○ Runtime: Not initialized")
+        is_initialized = False
     
     # Skills
     skills_manager = SkillsManager(project_root)
@@ -88,6 +98,11 @@ def status(ctx: click.Context) -> None:
             click.echo(f"  ⚠ {len(modified)} modified from package")
     else:
         click.echo(f"○ Skills: Not initialized")
+        is_initialized = False
+    
+    # Exit with code 1 if not initialized
+    if not is_initialized:
+        ctx.exit(1)
 
 
 @cli.command()

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #FFFFFF; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #FFFFFF; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header {
+  background: #1C2833; padding: 16pt 30pt;
+}
+.header-title { color: #FFFFFF; font-size: 22pt; margin: 0; }
+.content {
+  padding: 20pt 30pt; flex: 1; display: flex; gap: 25pt;
+}
+.left-col { flex: 1; }
+.right-col { flex: 1; }
+.section-title { color: #9B59B6; font-size: 14pt; margin: 0 0 12pt 0; font-weight: bold; }
+.cost-table {
+  background: #F4F6F6; border-radius: 6pt; padding: 12pt; margin-bottom: 15pt;
+}
+.cost-row { display: flex; justify-content: space-between; padding: 4pt 0; border-bottom: 1pt solid #E5E7E9; }
+.cost-row:last-child { border-bottom: none; }
+.cost-item { color: #1C2833; font-size: 9pt; margin: 0; }
+.cost-value { color: #5D6D7E; font-size: 9pt; margin: 0; }
+.total-row { background: #E8DAEF; margin: 0 -12pt; padding: 8pt 12pt; border-radius: 0 0 6pt 6pt; }
+.total-item { color: #1C2833; font-size: 10pt; margin: 0; font-weight: bold; }
+.total-value { color: #9B59B6; font-size: 10pt; margin: 0; font-weight: bold; }
+.next-steps { background: #40695B; border-radius: 6pt; padding: 15pt; }
+.next-title { color: #FFFFFF; font-size: 12pt; margin: 0 0 10pt 0; font-weight: bold; }
+.next-list { margin: 0; padding-left: 15pt; }
+.next-list li { color: #FFFFFF; font-size: 9pt; margin-bottom: 6pt; }
+.success-box { background: #F4F6F6; border-radius: 6pt; padding: 12pt; border-left: 3pt solid #E74C3C; }
+.success-title { color: #1C2833; font-size: 11pt; margin: 0 0 8pt 0; font-weight: bold; }
+.success-list { margin: 0; padding-left: 15pt; }
+.success-list li { color: #5D6D7E; font-size: 8pt; margin-bottom: 4pt; }
+</style>
+</head>
+<body>
+<div class="header">
+  <p class="header-title">Cost Estimate & Next Steps</p>
+</div>
+<div class="content">
+  <div class="left-col">
+    <p class="section-title">Monthly Cost Estimate</p>
+    <div class="cost-table">
+      <div class="cost-row">
+        <p class="cost-item">LLM API (Qwen via DashScope)</p>
+        <p class="cost-value">¥10,000 - ¥15,000</p>
+      </div>
+      <div class="cost-row">
+        <p class="cost-item">Vector DB (AnalyticDB-PG)</p>
+        <p class="cost-value">¥2,000 - ¥3,000</p>
+      </div>
+      <div class="cost-row">
+        <p class="cost-item">Object Storage (OSS 1TB)</p>
+        <p class="cost-value">¥100 - ¥150</p>
+      </div>
+      <div class="cost-row">
+        <p class="cost-item">Metadata DB (RDS PostgreSQL)</p>
+        <p class="cost-value">¥800 - ¥1,200</p>
+      </div>
+      <div class="cost-row">
+        <p class="cost-item">Search (Elasticsearch 3-node)</p>
+        <p class="cost-value">¥3,000 - ¥5,000</p>
+      </div>
+      <div class="cost-row">
+        <p class="cost-item">Compute (ACK/ECS 4 nodes)</p>
+        <p class="cost-value">¥3,000 - ¥4,000</p>
+      </div>
+      <div class="cost-row">
+        <p class="cost-item">Other (API Gateway, Monitor)</p>
+        <p class="cost-value">¥1,000 - ¥2,000</p>
+      </div>
+      <div class="cost-row total-row">
+        <p class="total-item">Total Monthly</p>
+        <p class="total-value">¥20,000 - ¥30,000 (~$2.8K-$4.2K)</p>
+      </div>
+    </div>
+  </div>
+  <div class="right-col">
+    <p class="section-title">Immediate Next Steps</p>
+    <div class="next-steps">
+      <p class="next-title">Action Items</p>
+      <ul class="next-list">
+        <li>Vendor evaluation with Alibaba Cloud team</li>
+        <li>PoC: RAG API + AnalyticDB-PG + Qwen</li>
+        <li>MS Graph API integration prototype</li>
+        <li>Proceed to Technical Design phase</li>
+      </ul>
+    </div>
+    <p class="section-title" style="margin-top: 15pt;">Success Criteria</p>
+    <div class="success-box">
+      <ul class="success-list">
+        <li>Reduce average time-to-answer by 50%</li>
+        <li>85%+ retrieval accuracy on benchmarks</li>
+        <li>Consolidate 3+ existing knowledge tools</li>
+        <li>80% employee adoption within 6 months</li>
+        <li>&lt;500ms P95 latency (China region)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
+</html>

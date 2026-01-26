@@ -208,6 +208,15 @@ def register_routes(app):
                     '.ico': 'image/x-icon',
                     '.svg': 'image/svg+xml',
                     '.webp': 'image/webp',
+                    '.pdf': 'application/pdf',
+                    '.doc': 'application/msword',
+                    '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    '.xls': 'application/vnd.ms-excel',
+                    '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    '.ppt': 'application/vnd.ms-powerpoint',
+                    '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                    '.zip': 'application/zip',
+                    '.rar': 'application/vnd.rar',
                 }
                 mime_type = mime_types.get(ext, 'application/octet-stream')
                 

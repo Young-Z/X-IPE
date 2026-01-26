@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #FFFFFF; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #FFFFFF; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header {
+  background: #9B59B6; padding: 16pt 30pt;
+}
+.header-title { color: #FFFFFF; font-size: 22pt; margin: 0; }
+.content {
+  padding: 15pt 25pt; flex: 1; display: flex; gap: 12pt;
+}
+.user-card {
+  background: #F4F6F6; padding: 12pt; border-radius: 6pt; flex: 1;
+  border-top: 3pt solid #40695B;
+}
+.user-title { color: #1C2833; font-size: 12pt; margin: 0 0 6pt 0; font-weight: bold; }
+.user-desc { color: #5D6D7E; font-size: 9pt; margin: 0; line-height: 1.3; }
+.user-count { color: #9B59B6; font-size: 9pt; margin: 6pt 0 0 0; font-weight: bold; }
+</style>
+</head>
+<body>
+<div class="header">
+  <p class="header-title">Target Users</p>
+</div>
+<div class="content">
+  <div class="user-card">
+    <p class="user-title">AI Agents</p>
+    <p class="user-desc">Internal chatbots, Copilot integrations, automation agents, and customer-facing AI systems.</p>
+    <p class="user-count">Primary API consumers</p>
+  </div>
+  <div class="user-card">
+    <p class="user-title">Employees (500+)</p>
+    <p class="user-desc">Knowledge consumers who need quick access via natural language search (CN/EN).</p>
+    <p class="user-count">Daily active users</p>
+  </div>
+  <div class="user-card">
+    <p class="user-title">Knowledge Curators</p>
+    <p class="user-desc">SMEs who maintain, validate, and enrich content for accuracy.</p>
+    <p class="user-count">Content maintainers</p>
+  </div>
+  <div class="user-card">
+    <p class="user-title">IT / Platform Team</p>
+    <p class="user-desc">Admins responsible for deployment, monitoring, and connectors.</p>
+    <p class="user-count">System operators</p>
+  </div>
+</div>
+</body>
+</html>

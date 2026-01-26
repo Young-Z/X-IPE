@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #FFFFFF; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #FFFFFF; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header {
+  background: #FF6A00; padding: 16pt 30pt;
+}
+.header-title { color: #FFFFFF; font-size: 22pt; margin: 0; }
+.header-sub { color: #FFFFFF; font-size: 12pt; margin: 4pt 0 0 0; opacity: 0.9; }
+.content {
+  padding: 15pt 25pt; flex: 1; display: flex; gap: 15pt;
+}
+.column { flex: 1; display: flex; flex-direction: column; gap: 8pt; }
+.service-group {
+  background: #F4F6F6; border-radius: 6pt; padding: 10pt; flex: 1;
+}
+.group-title { color: #1C2833; font-size: 10pt; margin: 0 0 6pt 0; font-weight: bold; }
+.service {
+  background: #FFFFFF; border: 1pt solid #AAB7B8; border-radius: 4pt;
+  padding: 5pt 8pt; margin-bottom: 4pt;
+}
+.service-name { color: #9B59B6; font-size: 8pt; margin: 0; font-weight: bold; }
+.service-detail { color: #5D6D7E; font-size: 7pt; margin: 2pt 0 0 0; }
+</style>
+</head>
+<body>
+<div class="header">
+  <p class="header-title">Alibaba Cloud Technology Stack</p>
+  <p class="header-sub">Primary cloud infrastructure for China deployment</p>
+</div>
+<div class="content">
+  <div class="column">
+    <div class="service-group">
+      <p class="group-title">AI/ML Services</p>
+      <div class="service">
+        <p class="service-name">Qwen via Model Studio</p>
+        <p class="service-detail">LLM Provider (Qwen 2.5, Qwen-Max)</p>
+      </div>
+      <div class="service">
+        <p class="service-name">gte-Qwen2 via DashScope</p>
+        <p class="service-detail">Embedding Service (top MTEB)</p>
+      </div>
+      <div class="service">
+        <p class="service-name">gte-rerank via DashScope</p>
+        <p class="service-detail">Reranker for RAG optimization</p>
+      </div>
+    </div>
+    <div class="service-group">
+      <p class="group-title">Platform Services</p>
+      <div class="service">
+        <p class="service-name">API Gateway</p>
+        <p class="service-detail">Traffic control, OAuth2/OIDC</p>
+      </div>
+      <div class="service">
+        <p class="service-name">ACK (Container Service)</p>
+        <p class="service-detail">Kubernetes for custom services</p>
+      </div>
+    </div>
+  </div>
+  <div class="column">
+    <div class="service-group">
+      <p class="group-title">Data Services</p>
+      <div class="service">
+        <p class="service-name">AnalyticDB for PostgreSQL</p>
+        <p class="service-detail">Vector DB with FastANN engine</p>
+      </div>
+      <div class="service">
+        <p class="service-name">Alibaba Cloud OSS</p>
+        <p class="service-detail">Document storage (12 nines)</p>
+      </div>
+      <div class="service">
+        <p class="service-name">ApsaraDB RDS PostgreSQL</p>
+        <p class="service-detail">Metadata database</p>
+      </div>
+      <div class="service">
+        <p class="service-name">Elasticsearch</p>
+        <p class="service-detail">Hybrid semantic + keyword search</p>
+      </div>
+      <div class="service">
+        <p class="service-name">Alibaba Cloud GDB</p>
+        <p class="service-detail">Graph DB for relationships</p>
+      </div>
+    </div>
+  </div>
+  <div class="column">
+    <div class="service-group">
+      <p class="group-title">Integration Services</p>
+      <div class="service">
+        <p class="service-name">DataWorks</p>
+        <p class="service-detail">ETL platform with governance</p>
+      </div>
+      <div class="service">
+        <p class="service-name">MQ for Apache Kafka</p>
+        <p class="service-detail">Event-driven ingestion</p>
+      </div>
+    </div>
+    <div class="service-group" style="border-left: 3pt solid #0078D4;">
+      <p class="group-title">Microsoft (Retained)</p>
+      <div class="service">
+        <p class="service-name">Azure AD</p>
+        <p class="service-detail">SSO, Identity, RBAC source</p>
+      </div>
+      <div class="service">
+        <p class="service-name">MS Graph API</p>
+        <p class="service-detail">SharePoint, OneDrive, Outlook</p>
+      </div>
+      <div class="service">
+        <p class="service-name">Microsoft 365</p>
+        <p class="service-detail">Office productivity suite</p>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

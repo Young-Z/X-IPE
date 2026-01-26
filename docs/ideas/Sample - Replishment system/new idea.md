@@ -1,0 +1,1 @@
+I would like to create a product replishment system for boutique to order when it's needed. and I need to know how to implement step by step. please use brand theme

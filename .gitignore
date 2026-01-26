@@ -55,3 +55,4 @@ htmlcov/
 
 # Build
 *.log
+.pypirc

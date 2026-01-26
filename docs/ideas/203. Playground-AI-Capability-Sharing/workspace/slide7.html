@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #000000; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #000000; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header {
+  background: #D4AF37; height: 8pt; width: 100%;
+}
+.content {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 30pt 50pt;
+}
+h1 {
+  color: #FFFFFF; font-size: 32pt; margin: 0 0 25pt 0;
+  font-weight: bold;
+}
+.two-col {
+  display: flex; gap: 50pt; flex: 1;
+}
+.col {
+  flex: 1;
+}
+.col-header {
+  display: flex; align-items: center; gap: 10pt;
+  margin-bottom: 15pt; padding-bottom: 10pt;
+  border-bottom: 2pt solid;
+}
+.col-header.is {
+  border-color: #D4AF37;
+}
+.col-header.isnot {
+  border-color: #666666;
+}
+.col-title {
+  font-size: 16pt; font-weight: bold; margin: 0;
+}
+.col-title.is {
+  color: #D4AF37;
+}
+.col-title.isnot {
+  color: #666666;
+}
+ul {
+  margin: 0; padding-left: 0; list-style: none;
+}
+li {
+  font-size: 12pt; margin-bottom: 12pt; line-height: 1.5;
+  padding-left: 20pt; position: relative;
+}
+li.is {
+  color: #FFFFFF;
+}
+li.is::before {
+  content: "✓"; position: absolute; left: 0;
+  color: #D4AF37; font-weight: bold;
+}
+li.isnot {
+  color: #888888;
+}
+li.isnot::before {
+  content: "✗"; position: absolute; left: 0;
+  color: #666666;
+}
+</style>
+</head>
+<body>
+<div class="header"></div>
+<div class="content">
+  <h1>What Does This Demo Mean</h1>
+  
+  <div class="two-col">
+    <div class="col">
+      <div class="col-header is">
+        <p class="col-title is">What It IS</p>
+      </div>
+      <ul>
+        <li class="is">The ways of working in future 6-24 months</li>
+        <li class="is">Experience with AI capability</li>
+        <li class="is">A thinking driving my performance</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="col-header isnot">
+        <p class="col-title isnot">What It Is NOT</p>
+      </div>
+      <ul>
+        <li class="isnot">Not the capability industry average has adopted</li>
+        <li class="isnot">Not compliance or security reviewed</li>
+        <li class="isnot">Not team working scaling proven</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
+</html>

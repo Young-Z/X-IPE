@@ -1,0 +1,1 @@
+I would like to create a pos application for boutique sales. and I need to know how to implement step by step.

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #FFFFFF; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #F4F6F6; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header {
+  background: #9B59B6; padding: 16pt 30pt;
+}
+.header-title { color: #FFFFFF; font-size: 22pt; margin: 0; }
+.content {
+  padding: 20pt 30pt; flex: 1; display: flex; gap: 12pt;
+}
+.phase {
+  flex: 1; background: #FFFFFF; border-radius: 8pt; padding: 15pt;
+  border-top: 4pt solid #40695B; display: flex; flex-direction: column;
+}
+.phase-num { color: #9B59B6; font-size: 28pt; margin: 0; font-weight: bold; }
+.phase-title { color: #1C2833; font-size: 12pt; margin: 4pt 0 8pt 0; font-weight: bold; }
+.phase-time { color: #5D6D7E; font-size: 9pt; margin: 0 0 8pt 0; }
+.phase-items { margin: 0; padding-left: 12pt; flex: 1; }
+.phase-items li { color: #5D6D7E; font-size: 8pt; margin-bottom: 4pt; }
+</style>
+</head>
+<body>
+<div class="header">
+  <p class="header-title">Implementation Roadmap</p>
+</div>
+<div class="content">
+  <div class="phase">
+    <p class="phase-num">1</p>
+    <p class="phase-title">Foundation</p>
+    <p class="phase-time">Months 1-3</p>
+    <ul class="phase-items">
+      <li>AnalyticDB-PG vector database setup</li>
+      <li>SharePoint/Confluence connectors</li>
+      <li>Basic RAG API implementation</li>
+      <li>Prototype UI for testing</li>
+    </ul>
+  </div>
+  <div class="phase">
+    <p class="phase-num">2</p>
+    <p class="phase-title">Core Features</p>
+    <p class="phase-time">Months 4-6</p>
+    <ul class="phase-items">
+      <li>Hybrid search with Elasticsearch</li>
+      <li>Knowledge Portal v1 launch</li>
+      <li>Additional connector refinements</li>
+      <li>RBAC integration with Azure AD</li>
+    </ul>
+  </div>
+  <div class="phase">
+    <p class="phase-num">3</p>
+    <p class="phase-title">Enhancement</p>
+    <p class="phase-time">Months 7-9</p>
+    <ul class="phase-items">
+      <li>Knowledge graph (GDB) integration</li>
+      <li>Content freshness detection</li>
+      <li>Analytics via SLS</li>
+      <li>User feedback loop</li>
+    </ul>
+  </div>
+  <div class="phase">
+    <p class="phase-num">4</p>
+    <p class="phase-title">Optimization</p>
+    <p class="phase-time">Months 10-12</p>
+    <ul class="phase-items">
+      <li>AI maintenance agent</li>
+      <li>Performance tuning</li>
+      <li>Full legacy tool migration</li>
+      <li>Enterprise-wide rollout</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

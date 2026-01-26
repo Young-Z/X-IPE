@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #FFFFFF; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #FFFFFF; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header {
+  background: #40695B; padding: 18pt 30pt;
+}
+.header-title { color: #FFFFFF; font-size: 22pt; margin: 0; }
+.content {
+  padding: 15pt 25pt; flex: 1; display: flex; gap: 15pt;
+}
+.left-col { flex: 1; }
+.right-col { flex: 1; }
+.section-title { color: #1C2833; font-size: 12pt; margin: 0 0 8pt 0; font-weight: bold; }
+.solution-box {
+  background: #F4F6F6; padding: 10pt; border-radius: 6pt; margin-bottom: 8pt;
+}
+.solution-text { color: #1C2833; font-size: 10pt; margin: 0; line-height: 1.4; }
+.deployment-box {
+  background: #1C2833; padding: 10pt; border-radius: 6pt;
+}
+.deploy-title { color: #9B59B6; font-size: 10pt; margin: 0 0 6pt 0; font-weight: bold; }
+.deploy-list { margin: 0; padding-left: 12pt; }
+.deploy-list li { color: #FFFFFF; font-size: 9pt; margin-bottom: 3pt; }
+</style>
+</head>
+<body>
+<div class="header">
+  <p class="header-title">The Solution: Unified AI Knowledge Platform</p>
+</div>
+<div class="content">
+  <div class="left-col">
+    <p class="section-title">What We're Building</p>
+    <div class="solution-box">
+      <p class="solution-text">An <b>AI-Integrated Enterprise Knowledge Base</b> that serves as the unified knowledge layer for both <b>AI agents</b> and <b>employees</b>.</p>
+    </div>
+    <div class="solution-box">
+      <p class="solution-text">Consolidates fragmented knowledge tools into a single, intelligent platform powered by <b>RAG</b> (Retrieval-Augmented Generation) architecture.</p>
+    </div>
+    <div class="solution-box">
+      <p class="solution-text">Enables real-time, accurate knowledge retrieval with <b>hybrid search</b> (vector + keyword) and intelligent context building.</p>
+    </div>
+  </div>
+  <div class="right-col">
+    <p class="section-title">Deployment Strategy</p>
+    <div class="deployment-box">
+      <p class="deploy-title">Alibaba Cloud (China Region)</p>
+      <ul class="deploy-list">
+        <li>Primary cloud infrastructure</li>
+        <li>Qwen LLMs via Model Studio</li>
+        <li>AnalyticDB-PG for vectors</li>
+        <li>Data residency compliance</li>
+      </ul>
+    </div>
+    <div class="deployment-box" style="margin-top: 8pt; background: #2E4053;">
+      <p class="deploy-title">Microsoft Integration (Retained)</p>
+      <ul class="deploy-list">
+        <li>Azure AD for SSO/Identity</li>
+        <li>Microsoft 365 for Office</li>
+        <li>MS Graph API connectors</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
+</html>

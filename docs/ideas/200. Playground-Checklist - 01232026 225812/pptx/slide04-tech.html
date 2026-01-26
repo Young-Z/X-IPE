@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #FFFFFF; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #FFFFFF; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header { background: #16213e; padding: 14pt 25pt; }
+.header-title { color: #FFFFFF; font-size: 18pt; margin: 0; }
+.content { padding: 10pt 20pt; flex: 1; display: flex; gap: 12pt; }
+.col { flex: 1; }
+.section-title { color: #e94560; font-size: 10pt; margin: 0 0 6pt 0; font-weight: bold; }
+.stack-box { background: #f8f9fa; padding: 8pt; border-radius: 5pt; margin-bottom: 6pt; }
+.stack-title { color: #1a1a2e; font-size: 9pt; margin: 0 0 3pt 0; font-weight: bold; }
+.stack-desc { color: #6c757d; font-size: 8pt; margin: 0; }
+</style>
+</head>
+<body>
+<div class="header">
+  <p class="header-title">Technical Approach</p>
+</div>
+<div class="content">
+  <div class="col">
+    <p class="section-title">Technology Stack</p>
+    <div class="stack-box">
+      <p class="stack-title">Framework: React 18 + Vite</p>
+      <p class="stack-desc">Fast development with hot reload</p>
+    </div>
+    <div class="stack-box">
+      <p class="stack-title">Drag & Drop: react-beautiful-dnd</p>
+      <p class="stack-desc">Smooth task reordering</p>
+    </div>
+    <div class="stack-box">
+      <p class="stack-title">Styling: CSS Variables</p>
+      <p class="stack-desc">Theme toggle support</p>
+    </div>
+    <div class="stack-box">
+      <p class="stack-title">Storage: localStorage + JSON</p>
+      <p class="stack-desc">Export/import capability</p>
+    </div>
+  </div>
+  <div class="col">
+    <p class="section-title">Architecture Layers</p>
+    <div class="stack-box" style="background: #16213e;">
+      <p class="stack-title" style="color: #e94560;">Frontend: React + Vite SPA</p>
+      <p class="stack-desc" style="color: #FFFFFF;">useState/useReducer for state</p>
+    </div>
+    <div class="stack-box" style="background: #0f3460;">
+      <p class="stack-title" style="color: #e94560;">State: Local with sync</p>
+      <p class="stack-desc" style="color: #FFFFFF;">Auto-save to localStorage</p>
+    </div>
+    <div class="stack-box" style="background: #1a1a2e;">
+      <p class="stack-title" style="color: #e94560;">Data: Browser storage</p>
+      <p class="stack-desc" style="color: #FFFFFF;">No backend required</p>
+    </div>
+    <p class="section-title" style="margin-top: 8pt;">Keyboard Shortcuts</p>
+    <div class="stack-box">
+      <p class="stack-desc"><b>Enter</b>=Add | <b>Esc</b>=Cancel | <b>Ctrl+D</b>=Dark | <b>Ctrl+E</b>=Export</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

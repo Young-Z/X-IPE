@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReStock Pro - Smart Inventory Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Lato:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Theme: Chanel - Timeless luxury with black, white, and champagne gold */
+        :root {
+            --color-primary: #000000;
+            --color-secondary: #4a4a4a;
+            --color-accent: #D4AF37;
+            --color-accent-light: #f5f0e1;
+            --color-accent-dark: #B8960C;
+            --color-neutral: #f8f8f8;
+            --color-success: #22c55e;
+            --color-warning: #f59e0b;
+            --color-error: #ef4444;
+            --color-info: #3b82f6;
+            
+            --zinc-50: #fafafa;
+            --zinc-100: #f4f4f5;
+            --zinc-200: #e4e4e7;
+            --zinc-300: #d4d4d8;
+            --zinc-400: #a1a1aa;
+            --zinc-500: #71717a;
+            --zinc-600: #52525b;
+            --zinc-700: #3f3f46;
+            --zinc-800: #27272a;
+            --zinc-900: #18181b;
+            --zinc-950: #09090b;
+            
+            --font-heading: 'Cormorant Garamond', Georgia, serif;
+            --font-body: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+            
+            --radius-none: 0;
+            --radius-sm: 2px;
+            --radius-md: 4px;
+            --radius-lg: 6px;
+            --radius-full: 9999px;
+            
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+            --shadow-gold: 0 0 20px rgb(212 175 55 / 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--zinc-50);
+            color: var(--color-primary);
+            min-height: 100vh;
+            font-weight: 400;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 280px;
+            background: var(--color-primary);
+            padding: 32px 20px;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 0 12px;
+            margin-bottom: 48px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--color-accent);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .logo-text {
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 26px;
+            color: white;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-section {
+            margin-bottom: 32px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--zinc-500);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            padding: 0 16px;
+            margin-bottom: 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: var(--radius-sm);
+            color: var(--zinc-400);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: var(--zinc-900);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: var(--color-accent);
+            color: var(--color-primary);
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--color-error);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: var(--radius-full);
+            letter-spacing: 0.05em;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 20px 12px;
+            border-top: 1px solid var(--zinc-800);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-full);
+            background: var(--color-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-primary);
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.05em;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            color: white;
+            font-weight: 500;
+            font-size: 14px;
+            letter-spacing: 0.02em;
+        }
+
+        .user-role {
+            color: var(--zinc-500);
+            font-size: 12px;
+            letter-spacing: 0.02em;
+        }
+
+        /* Main Content */
+        .main {
+            margin-left: 280px;
+            min-height: 100vh;
+        }
+
+        /* Top Bar */
+        .topbar {
+            position: sticky;
+            top: 0;
+            background: rgba(250, 250, 250, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--zinc-200);
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 50;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .page-title {
+            font-family: var(--font-heading);
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--color-primary);
+            letter-spacing: 0.02em;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            border: 1px solid var(--zinc-200);
+            border-radius: var(--radius-sm);
+            padding: 12px 18px;
+            width: 340px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 2px rgb(212 175 55 / 0.15);
+        }
+
+        .search-box svg {
+            width: 18px;
+            height: 18px;
+            color: var(--zinc-400);
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            font-size: 14px;
+            color: var(--color-primary);
+            width: 100%;
+            background: transparent;
+            font-family: var(--font-body);
+        }
+
+        .search-box input::placeholder {
+            color: var(--zinc-400);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--zinc-200);
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .icon-btn:hover {
+            background: var(--zinc-100);
+            border-color: var(--zinc-300);
+        }
+
+        .icon-btn svg {
+            width: 20px;
+            height: 20px;
+            color: var(--zinc-600);
+        }
+
+        .notification-dot {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 8px;
+            height: 8px;
+            background: var(--color-accent);
+            border-radius: var(--radius-full);
+            border: 2px solid white;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 40px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius-sm);
+            padding: 28px;
+            border: 1px solid var(--zinc-200);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--card-accent, var(--color-accent));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-card:hover::after {
+            opacity: 1;
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .stat-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-icon svg {
+            width: 26px;
+            height: 26px;
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            letter-spacing: 0.02em;
+        }
+
+        .stat-trend.up {
+            color: var(--color-success);
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .stat-trend.down {
+            color: var(--color-error);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .stat-value {
+            font-family: var(--font-heading);
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 6px;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--zinc-500);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--zinc-200);
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--zinc-100);
+        }
+
+        .card-title {
+            font-family: var(--font-heading);
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--color-primary);
+            letter-spacing: 0.02em;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-family: var(--font-body);
+        }
+
+        .btn-primary {
+            background: var(--color-accent);
+            color: var(--color-primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--color-accent-dark);
+        }
+
+        .btn-secondary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: var(--zinc-800);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--color-primary);
+            border: 1px solid var(--zinc-300);
+        }
+
+        .btn-outline:hover {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Alerts Table */
+        .alerts-table {
+            width: 100%;
+        }
+
+        .alert-row {
+            display: grid;
+            grid-template-columns: 1fr 100px 130px 100px 90px;
+            align-items: center;
+            padding: 20px 28px;
+            border-bottom: 1px solid var(--zinc-100);
+            transition: background 0.2s ease;
+        }
+
+        .alert-row:hover {
+            background: var(--zinc-50);
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .product-img {
+            width: 52px;
+            height: 52px;
+            border-radius: var(--radius-sm);
+            background: var(--zinc-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 1px solid var(--zinc-200);
+        }
+
+        .product-name {
+            font-weight: 500;
+            color: var(--color-primary);
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .product-sku {
+            font-size: 12px;
+            color: var(--zinc-500);
+            letter-spacing: 0.05em;
+        }
+
+        .stock-level {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stock-bar {
+            width: 60px;
+            height: 4px;
+            background: var(--zinc-200);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+        }
+
+        .stock-fill {
+            height: 100%;
+            border-radius: var(--radius-full);
+            transition: width 0.3s ease;
+        }
+
+        .stock-fill.critical {
+            background: var(--color-error);
+        }
+
+        .stock-fill.low {
+            background: var(--color-warning);
+        }
+
+        .stock-fill.healthy {
+            background: var(--color-success);
+        }
+
+        .stock-text {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .prediction {
+            font-size: 13px;
+            color: var(--zinc-600);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-badge.urgent {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--color-error);
+        }
+
+        .status-badge.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--color-warning);
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: var(--radius-full);
+            background: currentColor;
+        }
+
+        .action-btn {
+            padding: 10px 16px;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-family: var(--font-body);
+        }
+
+        .action-btn:hover {
+            background: var(--color-accent);
+            color: var(--color-primary);
+        }
+
+        /* Pending Orders */
+        .orders-list {
+            padding: 8px;
+        }
+
+        .order-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 16px;
+            border-radius: var(--radius-sm);
+            transition: background 0.2s ease;
+            border-bottom: 1px solid var(--zinc-100);
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-item:hover {
+            background: var(--zinc-50);
+        }
+
+        .order-number {
+            font-family: var(--font-heading);
+            font-weight: 600;
+            color: var(--color-primary);
+            font-size: 15px;
+            letter-spacing: 0.02em;
+        }
+
+        .order-meta {
+            flex: 1;
+        }
+
+        .order-supplier {
+            font-size: 13px;
+            color: var(--zinc-600);
+            margin-bottom: 4px;
+        }
+
+        .order-items-count {
+            font-size: 12px;
+            color: var(--zinc-400);
+            letter-spacing: 0.02em;
+        }
+
+        .order-total {
+            text-align: right;
+        }
+
+        .order-amount {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            color: var(--color-primary);
+            font-size: 18px;
+        }
+
+        .order-date {
+            font-size: 11px;
+            color: var(--zinc-400);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            padding: 20px 24px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .quick-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 18px 16px;
+            background: var(--zinc-50);
+            border: 1px solid var(--zinc-200);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-action-btn:hover {
+            background: white;
+            border-color: var(--color-accent);
+            transform: translateX(4px);
+        }
+
+        .quick-action-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quick-action-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .quick-action-text {
+            flex: 1;
+        }
+
+        .quick-action-title {
+            font-weight: 500;
+            color: var(--color-primary);
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .quick-action-desc {
+            font-size: 12px;
+            color: var(--zinc-500);
+        }
+
+        .quick-action-btn svg.arrow {
+            width: 16px;
+            height: 16px;
+            color: var(--zinc-400);
+        }
+
+        /* Gold accent line */
+        .gold-accent {
+            width: 60px;
+            height: 2px;
+            background: var(--color-accent);
+            margin-bottom: 16px;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card, .card {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.15s; }
+        .stat-card:nth-child(3) { animation-delay: 0.2s; }
+        .stat-card:nth-child(4) { animation-delay: 0.25s; }
+
+        .main-grid .card:nth-child(1) { animation-delay: 0.3s; }
+        .main-grid .card:nth-child(2) { animation-delay: 0.35s; }
+
+        /* Pulse animation for alerts */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-badge.urgent::before {
+            animation: pulse 1.5s ease infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">◆</div>
+            <span class="logo-text">ReStock</span>
+        </div>
+
+        <nav class="nav-section">
+            <div class="nav-label">Main Menu</div>
+            <a href="#" class="nav-item active">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                </svg>
+                Dashboard
+            </a>
+            <a href="#" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                Inventory
+            </a>
+            <a href="#" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                Alerts
+                <span class="nav-badge">5</span>
+            </a>
+            <a href="#" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Purchase Orders
+            </a>
+        </nav>
+
+        <nav class="nav-section">
+            <div class="nav-label">Analytics</div>
+            <a href="#" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Reports
+            </a>
+            <a href="#" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                Forecasts
+            </a>
+        </nav>
+
+        <nav class="nav-section">
+            <div class="nav-label">Settings</div>
+            <a href="#" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                Suppliers
+            </a>
+            <a href="#" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Settings
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="avatar">JD</div>
+                <div class="user-info">
+                    <div class="user-name">Jane Doe</div>
+                    <div class="user-role">Store Owner</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <h1 class="page-title">Dashboard</h1>
+                <div class="search-box">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="text" placeholder="Search products, orders...">
+                </div>
+            </div>
+            <div class="topbar-right">
+                <button class="icon-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    <span class="notification-dot"></span>
+                </button>
+                <button class="icon-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card" style="--card-accent: var(--color-accent)">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background: var(--color-accent-light); color: var(--color-primary)">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg>
+                        </div>
+                        <span class="stat-trend up">↑ 12%</span>
+                    </div>
+                    <div class="stat-value">486</div>
+                    <div class="stat-label">Total Products</div>
+                </div>
+
+                <div class="stat-card" style="--card-accent: var(--color-warning)">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--color-warning)">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <span class="stat-trend down">↑ 3</span>
+                    </div>
+                    <div class="stat-value">23</div>
+                    <div class="stat-label">Low Stock Items</div>
+                </div>
+
+                <div class="stat-card" style="--card-accent: var(--color-primary)">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background: var(--zinc-100); color: var(--color-primary)">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <span class="stat-trend up">↑ 2</span>
+                    </div>
+                    <div class="stat-value">8</div>
+                    <div class="stat-label">Pending Orders</div>
+                </div>
+
+                <div class="stat-card" style="--card-accent: var(--color-accent)">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background: var(--color-accent-light); color: var(--color-primary)">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                        </div>
+                        <span class="stat-trend up">↑ 8%</span>
+                    </div>
+                    <div class="stat-value">92%</div>
+                    <div class="stat-label">Forecast Accuracy</div>
+                </div>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="main-grid">
+                <!-- Replenishment Alerts -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Replenishment Alerts</h2>
+                        <div class="card-actions">
+                            <button class="btn btn-outline">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                </svg>
+                                Filter
+                            </button>
+                            <button class="btn btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                Create Order
+                            </button>
+                        </div>
+                    </div>
+                    <div class="alerts-table">
+                        <div class="alert-row">
+                            <div class="product-info">
+                                <div class="product-img">👗</div>
+                                <div>
+                                    <div class="product-name">Silk Wrap Dress</div>
+                                    <div class="product-sku">SKU: DRS-2847</div>
+                                </div>
+                            </div>
+                            <div class="stock-level">
+                                <div class="stock-bar">
+                                    <div class="stock-fill critical" style="width: 15%"></div>
+                                </div>
+                                <span class="stock-text" style="color: var(--color-error)">3</span>
+                            </div>
+                            <div class="prediction">Stockout in 2 days</div>
+                            <span class="status-badge urgent">Urgent</span>
+                            <button class="action-btn">Reorder</button>
+                        </div>
+
+                        <div class="alert-row">
+                            <div class="product-info">
+                                <div class="product-img">👜</div>
+                                <div>
+                                    <div class="product-name">Leather Tote Bag</div>
+                                    <div class="product-sku">SKU: BAG-1923</div>
+                                </div>
+                            </div>
+                            <div class="stock-level">
+                                <div class="stock-bar">
+                                    <div class="stock-fill critical" style="width: 20%"></div>
+                                </div>
+                                <span class="stock-text" style="color: var(--color-error)">4</span>
+                            </div>
+                            <div class="prediction">Stockout in 3 days</div>
+                            <span class="status-badge urgent">Urgent</span>
+                            <button class="action-btn">Reorder</button>
+                        </div>
+
+                        <div class="alert-row">
+                            <div class="product-info">
+                                <div class="product-img">💍</div>
+                                <div>
+                                    <div class="product-name">Pearl Drop Earrings</div>
+                                    <div class="product-sku">SKU: JWL-0892</div>
+                                </div>
+                            </div>
+                            <div class="stock-level">
+                                <div class="stock-bar">
+                                    <div class="stock-fill low" style="width: 35%"></div>
+                                </div>
+                                <span class="stock-text" style="color: var(--color-warning)">7</span>
+                            </div>
+                            <div class="prediction">Stockout in 5 days</div>
+                            <span class="status-badge warning">Low</span>
+                            <button class="action-btn">Reorder</button>
+                        </div>
+
+                        <div class="alert-row">
+                            <div class="product-info">
+                                <div class="product-img">🧣</div>
+                                <div>
+                                    <div class="product-name">Cashmere Scarf</div>
+                                    <div class="product-sku">SKU: ACC-3341</div>
+                                </div>
+                            </div>
+                            <div class="stock-level">
+                                <div class="stock-bar">
+                                    <div class="stock-fill low" style="width: 40%"></div>
+                                </div>
+                                <span class="stock-text" style="color: var(--color-warning)">8</span>
+                            </div>
+                            <div class="prediction">Stockout in 6 days</div>
+                            <span class="status-badge warning">Low</span>
+                            <button class="action-btn">Reorder</button>
+                        </div>
+
+                        <div class="alert-row">
+                            <div class="product-info">
+                                <div class="product-img">👠</div>
+                                <div>
+                                    <div class="product-name">Suede Ankle Boots</div>
+                                    <div class="product-sku">SKU: SHO-5567</div>
+                                </div>
+                            </div>
+                            <div class="stock-level">
+                                <div class="stock-bar">
+                                    <div class="stock-fill low" style="width: 45%"></div>
+                                </div>
+                                <span class="stock-text" style="color: var(--color-warning)">9</span>
+                            </div>
+                            <div class="prediction">Stockout in 7 days</div>
+                            <span class="status-badge warning">Low</span>
+                            <button class="action-btn">Reorder</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <!-- Pending Orders -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Pending Orders</h2>
+                            <button class="btn btn-outline">View All</button>
+                        </div>
+                        <div class="orders-list">
+                            <div class="order-item">
+                                <div class="order-number">PO-2024-0847</div>
+                                <div class="order-meta">
+                                    <div class="order-supplier">Elegance Fabrics Co.</div>
+                                    <div class="order-items-count">12 items</div>
+                                </div>
+                                <div class="order-total">
+                                    <div class="order-amount">$2,340</div>
+                                    <div class="order-date">Due Jan 28</div>
+                                </div>
+                            </div>
+                            <div class="order-item">
+                                <div class="order-number">PO-2024-0846</div>
+                                <div class="order-meta">
+                                    <div class="order-supplier">Luxe Accessories</div>
+                                    <div class="order-items-count">8 items</div>
+                                </div>
+                                <div class="order-total">
+                                    <div class="order-amount">$1,890</div>
+                                    <div class="order-date">Due Jan 30</div>
+                                </div>
+                            </div>
+                            <div class="order-item">
+                                <div class="order-number">PO-2024-0845</div>
+                                <div class="order-meta">
+                                    <div class="order-supplier">Artisan Jewelry Ltd.</div>
+                                    <div class="order-items-count">5 items</div>
+                                </div>
+                                <div class="order-total">
+                                    <div class="order-amount">$956</div>
+                                    <div class="order-date">Due Feb 1</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Quick Actions</h2>
+                        </div>
+                        <div class="quick-actions">
+                            <div class="quick-action-btn">
+                                <div class="quick-action-icon" style="background: var(--color-accent-light); color: var(--color-primary)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <div class="quick-action-text">
+                                    <div class="quick-action-title">Generate Smart Order</div>
+                                    <div class="quick-action-desc">AI-optimized purchase order</div>
+                                </div>
+                                <svg class="arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                            <div class="quick-action-btn">
+                                <div class="quick-action-icon" style="background: var(--zinc-100); color: var(--color-primary)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                </div>
+                                <div class="quick-action-text">
+                                    <div class="quick-action-title">Export Inventory</div>
+                                    <div class="quick-action-desc">Download CSV report</div>
+                                </div>
+                                <svg class="arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                            <div class="quick-action-btn">
+                                <div class="quick-action-icon" style="background: var(--zinc-100); color: var(--color-primary)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                                    </svg>
+                                </div>
+                                <div class="quick-action-text">
+                                    <div class="quick-action-title">Adjust Settings</div>
+                                    <div class="quick-action-desc">Configure thresholds</div>
+                                </div>
+                                <svg class="arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

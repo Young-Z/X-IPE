@@ -637,16 +637,66 @@ Improvements include:
 ### Prerequisites
 
 - Python 3.12+
-- [uv](https://github.com/astral-sh/uv) package manager
 - VS Code with GitHub Copilot extension
 - AI model with skills/tools capability (Claude Sonnet 4.5+, Gemini 2.5 Flash+, etc.)
 
-### Installation & Running
+### Installation
+
+#### Option 1: Install from PyPI (Recommended)
 
 ```bash
-# Install dependencies
-uv sync
+# Install X-IPE using uv
+uv tool install x-ipe
 
+# Or using pip
+pip install x-ipe
+```
+
+#### Option 2: Install from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/pinkpixel-dev/X-IPE.git
+cd X-IPE
+
+# Install with uv
+uv sync
+```
+
+### Quick Start
+
+```bash
+# Initialize X-IPE in your project
+cd your-project
+x-ipe init
+
+# Check project status
+x-ipe status
+
+# Start the web server
+x-ipe serve
+
+# Start server and open browser
+x-ipe serve -o
+```
+
+### CLI Commands
+
+```bash
+x-ipe --help          # Show all available commands
+x-ipe --version       # Show version
+x-ipe init            # Initialize X-IPE in current project
+x-ipe init --dry-run  # Preview what would be created
+x-ipe status          # Show project initialization status
+x-ipe info            # Show X-IPE package information
+x-ipe serve           # Start the web server
+x-ipe serve -o        # Start server and open browser
+x-ipe upgrade         # Upgrade skills from package
+```
+
+### Running from Source
+
+```bash
 # Run the application
 uv run python -m src.app
 

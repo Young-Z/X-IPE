@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #FFFFFF; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #FFFFFF; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header { background: #1a1a2e; padding: 16pt 25pt; }
+.header-title { color: #FFFFFF; font-size: 20pt; margin: 0; }
+.content { padding: 15pt 25pt; flex: 1; display: flex; gap: 20pt; }
+.left-col { flex: 1; }
+.right-col { flex: 1; }
+.section-title { color: #e94560; font-size: 12pt; margin: 0 0 10pt 0; font-weight: bold; }
+.criteria-list { margin: 0; padding-left: 15pt; }
+.criteria-list li { color: #1a1a2e; font-size: 10pt; margin-bottom: 6pt; }
+.done { color: #28a745; }
+.pending { color: #6c757d; }
+.constraint-box {
+  background: #f8f9fa; padding: 10pt; border-radius: 6pt; margin-bottom: 8pt;
+  border-left: 3pt solid #0f3460;
+}
+.constraint-title { color: #1a1a2e; font-size: 10pt; margin: 0 0 4pt 0; font-weight: bold; }
+.constraint-desc { color: #6c757d; font-size: 9pt; margin: 0; }
+</style>
+</head>
+<body>
+<div class="header">
+  <p class="header-title">Success Criteria & Constraints</p>
+</div>
+<div class="content">
+  <div class="left-col">
+    <p class="section-title">Success Criteria</p>
+    <ul class="criteria-list">
+      <li class="done">Add, complete, delete tasks</li>
+      <li class="done">Due date visual indicators</li>
+      <li class="done">localStorage persistence</li>
+      <li class="pending">Drag tasks to reorder</li>
+      <li class="pending">Keyboard shortcuts work</li>
+      <li class="pending">Dark/light theme toggle</li>
+      <li class="pending">Export tasks to JSON</li>
+      <li class="pending">Import tasks from JSON</li>
+      <li class="pending">Load sample data button</li>
+      <li class="pending">App loads in less than 1 second</li>
+    </ul>
+  </div>
+  <div class="right-col">
+    <p class="section-title">Constraints</p>
+    <div class="constraint-box">
+      <p class="constraint-title">No Backend</p>
+      <p class="constraint-desc">Purely client-side application</p>
+    </div>
+    <div class="constraint-box">
+      <p class="constraint-title">Demo-Friendly</p>
+      <p class="constraint-desc">Sample data and quick reset capability</p>
+    </div>
+    <div class="constraint-box">
+      <p class="constraint-title">Single Device</p>
+      <p class="constraint-desc">localStorage is browser-specific</p>
+    </div>
+    <div class="constraint-box">
+      <p class="constraint-title">Keep It Simple</p>
+      <p class="constraint-desc">Features serve demo purposes only</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

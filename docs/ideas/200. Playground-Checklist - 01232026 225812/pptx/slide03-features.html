@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #FFFFFF; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #f8f9fa; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header { background: #e94560; padding: 16pt 25pt; }
+.header-title { color: #FFFFFF; font-size: 20pt; margin: 0; }
+.content { padding: 12pt 20pt; flex: 1; }
+.section-label { color: #1a1a2e; font-size: 10pt; margin: 0 0 6pt 0; font-weight: bold; }
+.features-grid { display: flex; flex-wrap: wrap; gap: 8pt; margin-bottom: 10pt; }
+.feature-card {
+  background: #FFFFFF; padding: 8pt 10pt; border-radius: 5pt;
+  width: 155pt; border-left: 3pt solid #e94560;
+}
+.feature-title { color: #1a1a2e; font-size: 9pt; margin: 0 0 3pt 0; font-weight: bold; }
+.feature-desc { color: #6c757d; font-size: 8pt; margin: 0; }
+.new-badge { color: #e94560; font-size: 7pt; font-weight: bold; }
+.v2-card { border-left-color: #0f3460; background: #e8f4f8; }
+</style>
+</head>
+<body>
+<div class="header">
+  <p class="header-title">Key Features</p>
+</div>
+<div class="content">
+  <p class="section-label">Core Features (Must Have)</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <p class="feature-title">Add Task</p>
+      <p class="feature-desc">Create task with title + optional due date</p>
+    </div>
+    <div class="feature-card">
+      <p class="feature-title">Task List</p>
+      <p class="feature-desc">Display all tasks in a flat list</p>
+    </div>
+    <div class="feature-card">
+      <p class="feature-title">Complete Task</p>
+      <p class="feature-desc">Toggle completion with strikethrough</p>
+    </div>
+    <div class="feature-card">
+      <p class="feature-title">Due Date Visual</p>
+      <p class="feature-desc">Overdue (red), due-today (yellow)</p>
+    </div>
+  </div>
+  <p class="section-label">New in v2 <span class="new-badge">ENHANCED</span></p>
+  <div class="features-grid">
+    <div class="feature-card v2-card">
+      <p class="feature-title">Drag Reorder</p>
+      <p class="feature-desc">Drag tasks to reorder priority</p>
+    </div>
+    <div class="feature-card v2-card">
+      <p class="feature-title">Keyboard Shortcuts</p>
+      <p class="feature-desc">Enter=add, Esc=cancel, Ctrl+D=dark</p>
+    </div>
+    <div class="feature-card v2-card">
+      <p class="feature-title">Dark Mode</p>
+      <p class="feature-desc">Toggle light/dark theme</p>
+    </div>
+    <div class="feature-card v2-card">
+      <p class="feature-title">Export/Import</p>
+      <p class="feature-desc">JSON file backup and restore</p>
+    </div>
+    <div class="feature-card v2-card">
+      <p class="feature-title">Sample Data</p>
+      <p class="feature-desc">One-click demo data loader</p>
+    </div>
+    <div class="feature-card v2-card">
+      <p class="feature-title">Clear Completed</p>
+      <p class="feature-desc">Bulk delete finished tasks</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

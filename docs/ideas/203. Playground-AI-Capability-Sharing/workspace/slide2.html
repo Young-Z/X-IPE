@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #000000; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #000000; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header {
+  background: #D4AF37; height: 8pt; width: 100%;
+}
+.content {
+  flex: 1; display: flex; padding: 25pt 40pt;
+}
+.left-panel {
+  width: 55%; display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  position: relative;
+}
+.right-panel {
+  width: 45%; padding-left: 30pt;
+  display: flex; flex-direction: column; justify-content: center;
+}
+h1 {
+  color: #FFFFFF; font-size: 24pt; margin: 0 0 20pt 0;
+  font-weight: bold;
+}
+/* Outer loop - Big Loop (Factory) */
+.big-loop {
+  width: 220pt; height: 220pt;
+  border: 4pt solid #D4AF37;
+  border-radius: 50%;
+  display: flex; justify-content: center; align-items: center;
+  position: relative;
+}
+.big-label {
+  position: absolute; top: -25pt; left: 50%;
+  transform: translateX(-50%);
+  background: #D4AF37;
+  padding: 5pt 15pt;
+}
+.big-label p {
+  color: #000000;
+  font-size: 11pt; font-weight: bold;
+  text-transform: uppercase; letter-spacing: 1pt;
+  margin: 0;
+}
+/* Inner loop - Small Loop (Robot) */
+.small-loop {
+  width: 120pt; height: 120pt;
+  border: 4pt solid #FFFFFF;
+  border-radius: 50%;
+  display: flex; justify-content: center; align-items: center;
+  position: relative;
+}
+.small-label {
+  position: absolute; bottom: -22pt; left: 50%;
+  transform: translateX(-50%);
+  background: #FFFFFF;
+  padding: 4pt 12pt;
+}
+.small-label p {
+  color: #000000;
+  font-size: 10pt; font-weight: bold;
+  text-transform: uppercase; letter-spacing: 1pt;
+  margin: 0;
+}
+.center-text {
+  color: #D4AF37; font-size: 10pt; text-align: center;
+  font-weight: bold;
+}
+/* Arrow indicators */
+.arrow-up {
+  position: absolute; right: 5pt; top: 50%;
+  transform: translateY(-50%);
+  color: #D4AF37; font-size: 18pt;
+}
+.arrow-down {
+  position: absolute; left: 5pt; top: 50%;
+  transform: translateY(-50%);
+  color: #FFFFFF; font-size: 18pt;
+}
+.loop-desc {
+  margin-bottom: 18pt;
+}
+.loop-title {
+  color: #D4AF37; font-size: 13pt; font-weight: bold;
+  margin: 0 0 6pt 0;
+}
+.loop-title-white {
+  color: #FFFFFF; font-size: 13pt; font-weight: bold;
+  margin: 0 0 6pt 0;
+}
+ul {
+  margin: 0; padding-left: 16pt; color: #AAAAAA;
+}
+li {
+  font-size: 10pt; margin-bottom: 4pt; line-height: 1.3;
+}
+.key-message {
+  background: #1a1a1a; border-left: 3pt solid #D4AF37;
+  padding: 10pt 12pt; margin-top: 15pt;
+}
+.key-message p {
+  color: #FFFFFF; font-size: 10pt; margin: 0;
+  font-style: italic; line-height: 1.4;
+}
+</style>
+</head>
+<body>
+<div class="header"></div>
+<div class="content">
+  <div class="left-panel">
+    <div class="big-loop">
+      <div class="big-label"><p>Big Loop</p></div>
+      <p class="arrow-up">↑</p>
+      <p class="arrow-down">↓</p>
+      <div class="small-loop">
+        <div class="small-label"><p>Small Loop</p></div>
+        <p class="center-text">Self<br/>Upgrade</p>
+      </div>
+    </div>
+  </div>
+  <div class="right-panel">
+    <h1>AI Adoption Mindset</h1>
+    
+    <div class="loop-desc">
+      <p class="loop-title">Big Loop: The Factory</p>
+      <ul>
+        <li>Robots make pipelines</li>
+        <li>Speed up product making</li>
+        <li>Business performance</li>
+      </ul>
+    </div>
+    
+    <div class="loop-desc">
+      <p class="loop-title-white">Small Loop: The Robot</p>
+      <ul>
+        <li>Full power enabled</li>
+        <li>Iterative self-upgrade</li>
+        <li>Evolves the pipeline</li>
+      </ul>
+    </div>
+    
+    <div class="key-message">
+      <p>"If we think AI is good, let's empower ourselves - IT department first."</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

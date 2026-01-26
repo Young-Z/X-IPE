@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boutique POS - Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Theme: theme-default - Boutique POS Edition */
+        :root {
+            --color-primary: #0f172a;
+            --color-secondary: #475569;
+            --color-accent: #10b981;
+            --color-accent-light: #d1fae5;
+            --color-accent-dark: #059669;
+            --color-neutral: #e2e8f0;
+            --color-success: #22c55e;
+            --color-warning: #f59e0b;
+            --color-error: #ef4444;
+            --color-info: #3b82f6;
+            
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            
+            --font-heading: 'DM Sans', system-ui, sans-serif;
+            --font-body: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'Space Mono', monospace;
+            
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--slate-100);
+            color: var(--color-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 80px;
+            background: var(--slate-900);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 0;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 12px rgb(16 185 129 / 0.3);
+        }
+
+        .logo svg {
+            width: 28px;
+            height: 28px;
+            fill: white;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .nav-item {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--slate-400);
+            transition: stroke 0.2s ease;
+        }
+
+        .nav-item:hover {
+            background: var(--slate-800);
+        }
+
+        .nav-item:hover svg {
+            stroke: white;
+        }
+
+        .nav-item.active {
+            background: var(--color-accent);
+        }
+
+        .nav-item.active svg {
+            stroke: white;
+        }
+
+        .nav-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 64px;
+            background: var(--slate-800);
+            color: white;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .nav-item:hover::after {
+            opacity: 1;
+        }
+
+        .nav-bottom {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            margin-left: 80px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Bar */
+        .topbar {
+            background: white;
+            border-bottom: 1px solid var(--slate-200);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 480px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 48px;
+            border: 2px solid var(--slate-200);
+            border-radius: var(--radius-lg);
+            font-size: 15px;
+            font-family: var(--font-body);
+            background: var(--slate-50);
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            background: white;
+            box-shadow: 0 0 0 4px rgb(16 185 129 / 0.1);
+        }
+
+        .search-input::placeholder {
+            color: var(--slate-400);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            stroke: var(--slate-400);
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            background: var(--slate-50);
+            border-radius: var(--radius-lg);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #818cf8, #6366f1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--slate-800);
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: var(--slate-500);
+        }
+
+        /* Content Area */
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 0;
+            flex: 1;
+        }
+
+        /* Products Section */
+        .products-section {
+            padding: 24px 32px;
+            overflow-y: auto;
+            max-height: calc(100vh - 72px);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--slate-900);
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .category-tab {
+            padding: 10px 20px;
+            border-radius: var(--radius-lg);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            border: 2px solid transparent;
+            background: white;
+            color: var(--slate-600);
+        }
+
+        .category-tab:hover {
+            border-color: var(--slate-200);
+            color: var(--slate-800);
+        }
+
+        .category-tab.active {
+            background: var(--color-accent);
+            color: white;
+            border-color: var(--color-accent);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: 2px solid transparent;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--color-accent);
+        }
+
+        .product-image {
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, var(--slate-100), var(--slate-200));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.03) 100%);
+        }
+
+        .product-emoji {
+            font-size: 48px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .product-stock {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+            font-family: var(--font-mono);
+        }
+
+        .stock-low {
+            background: #fef2f2;
+            color: var(--color-error);
+        }
+
+        .stock-ok {
+            background: var(--color-accent-light);
+            color: var(--color-accent-dark);
+        }
+
+        .product-info {
+            padding: 14px;
+        }
+
+        .product-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--slate-800);
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .product-variant {
+            font-size: 12px;
+            color: var(--slate-500);
+            margin-bottom: 8px;
+        }
+
+        .product-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--color-accent-dark);
+            font-family: var(--font-mono);
+        }
+
+        /* Cart Section */
+        .cart-section {
+            background: white;
+            border-left: 1px solid var(--slate-200);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 72px);
+            position: sticky;
+            top: 72px;
+        }
+
+        .cart-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--slate-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--slate-900);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cart-count {
+            background: var(--color-accent);
+            color: white;
+            padding: 2px 10px;
+            border-radius: var(--radius-lg);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .clear-cart {
+            font-size: 13px;
+            color: var(--slate-500);
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .clear-cart:hover {
+            color: var(--color-error);
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 24px;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--slate-100);
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item-image {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-md);
+            background: var(--slate-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .cart-item-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .cart-item-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--slate-800);
+            margin-bottom: 2px;
+        }
+
+        .cart-item-variant {
+            font-size: 12px;
+            color: var(--slate-500);
+            margin-bottom: 8px;
+        }
+
+        .cart-item-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            background: var(--slate-100);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .qty-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--slate-600);
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qty-btn:hover {
+            background: var(--slate-200);
+            color: var(--slate-800);
+        }
+
+        .qty-value {
+            width: 36px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--slate-800);
+            font-family: var(--font-mono);
+        }
+
+        .cart-item-price {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--slate-800);
+            font-family: var(--font-mono);
+        }
+
+        .cart-item-remove {
+            color: var(--slate-400);
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.15s ease;
+        }
+
+        .cart-item-remove:hover {
+            color: var(--color-error);
+        }
+
+        /* Cart Footer */
+        .cart-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--slate-200);
+            background: var(--slate-50);
+        }
+
+        .cart-summary {
+            margin-bottom: 16px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--slate-600);
+            margin-bottom: 8px;
+        }
+
+        .summary-row.total {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--slate-900);
+            padding-top: 12px;
+            border-top: 2px solid var(--slate-200);
+            margin-top: 12px;
+        }
+
+        .summary-row.total span:last-child {
+            font-family: var(--font-mono);
+            color: var(--color-accent-dark);
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 16px;
+            font-weight: 600;
+            font-family: var(--font-body);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgb(16 185 129 / 0.25);
+        }
+
+        .checkout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgb(16 185 129 / 0.35);
+        }
+
+        .checkout-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .payment-methods {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .payment-icon {
+            width: 40px;
+            height: 26px;
+            background: white;
+            border: 1px solid var(--slate-200);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--slate-500);
+        }
+
+        /* Empty Cart State */
+        .cart-empty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .cart-empty-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--slate-100);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .cart-empty-icon svg {
+            width: 36px;
+            height: 36px;
+            stroke: var(--slate-400);
+        }
+
+        .cart-empty-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--slate-700);
+            margin-bottom: 8px;
+        }
+
+        .cart-empty-text {
+            font-size: 14px;
+            color: var(--slate-500);
+        }
+
+        /* Quick Actions Badge */
+        .quick-actions {
+            position: fixed;
+            bottom: 24px;
+            left: 104px;
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .quick-action-btn {
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid var(--slate-200);
+            border-radius: var(--radius-lg);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--slate-700);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .quick-action-btn:hover {
+            border-color: var(--color-accent);
+            color: var(--color-accent-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .quick-action-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Keyboard shortcut hint */
+        .shortcut {
+            background: var(--slate-100);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--slate-500);
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .product-card {
+            animation: fadeInUp 0.3s ease forwards;
+        }
+
+        .product-card:nth-child(1) { animation-delay: 0.0s; }
+        .product-card:nth-child(2) { animation-delay: 0.05s; }
+        .product-card:nth-child(3) { animation-delay: 0.1s; }
+        .product-card:nth-child(4) { animation-delay: 0.15s; }
+        .product-card:nth-child(5) { animation-delay: 0.2s; }
+        .product-card:nth-child(6) { animation-delay: 0.25s; }
+        .product-card:nth-child(7) { animation-delay: 0.3s; }
+        .product-card:nth-child(8) { animation-delay: 0.35s; }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .content {
+                grid-template-columns: 1fr 360px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            .cart-section {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        
+        <div class="nav-items">
+            <div class="nav-item active" data-tooltip="Checkout">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            </div>
+            <div class="nav-item" data-tooltip="Inventory">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            </div>
+            <div class="nav-item" data-tooltip="Customers">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            </div>
+            <div class="nav-item" data-tooltip="Reports">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            </div>
+        </div>
+        
+        <div class="nav-bottom">
+            <div class="nav-item" data-tooltip="Settings">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="search-container">
+                <svg class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" class="search-input" placeholder="Search products by name, SKU, or barcode...">
+            </div>
+            
+            <div class="topbar-actions">
+                <div class="user-info">
+                    <div class="user-avatar">JD</div>
+                    <div class="user-details">
+                        <div class="user-name">Jane Doe</div>
+                        <div class="user-role">Cashier</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Products Section -->
+            <section class="products-section">
+                <div class="section-header">
+                    <h1 class="section-title">Products</h1>
+                </div>
+                
+                <div class="category-tabs">
+                    <div class="category-tab active">All Items</div>
+                    <div class="category-tab">Tops</div>
+                    <div class="category-tab">Dresses</div>
+                    <div class="category-tab">Bottoms</div>
+                    <div class="category-tab">Outerwear</div>
+                    <div class="category-tab">Accessories</div>
+                </div>
+                
+                <div class="products-grid">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <span class="product-emoji">👗</span>
+                            <span class="product-stock stock-ok">12</span>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">Summer Floral Dress</div>
+                            <div class="product-variant">S / M / L • Blue</div>
+                            <div class="product-price">$89.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <span class="product-emoji">👚</span>
+                            <span class="product-stock stock-low">3</span>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">Silk Blouse</div>
+                            <div class="product-variant">XS / S / M • Ivory</div>
+                            <div class="product-price">$65.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <span class="product-emoji">👖</span>
+                            <span class="product-stock stock-ok">18</span>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">High-Rise Jeans</div>
+                            <div class="product-variant">24-32 • Indigo</div>
+                            <div class="product-price">$78.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <span class="product-emoji">🧥</span>
+                            <span class="product-stock stock-ok">7</span>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">Linen Blazer</div>
+                            <div class="product-variant">S / M / L • Tan</div>
+                            <div class="product-price">$145.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <span class="product-emoji">👜</span>
+                            <span class="product-stock stock-low">2</span>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">Leather Tote</div>
+                            <div class="product-variant">One Size • Black</div>
+                            <div class="product-price">$195.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <span class="product-emoji">🧣</span>
+                            <span class="product-stock stock-ok">24</span>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">Cashmere Scarf</div>
+                            <div class="product-variant">One Size • Camel</div>
+                            <div class="product-price">$85.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <span class="product-emoji">👠</span>
+                            <span class="product-stock stock-ok">9</span>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">Strappy Heels</div>
+                            <div class="product-variant">35-41 • Nude</div>
+                            <div class="product-price">$128.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <span class="product-emoji">🎀</span>
+                            <span class="product-stock stock-ok">31</span>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">Hair Ribbon Set</div>
+                            <div class="product-variant">Pack of 3 • Multi</div>
+                            <div class="product-price">$22.00</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cart Section -->
+            <aside class="cart-section">
+                <div class="cart-header">
+                    <div class="cart-title">
+                        Current Sale
+                        <span class="cart-count">3</span>
+                    </div>
+                    <span class="clear-cart">Clear All</span>
+                </div>
+                
+                <div class="cart-items">
+                    <div class="cart-item">
+                        <div class="cart-item-image">👗</div>
+                        <div class="cart-item-details">
+                            <div class="cart-item-name">Summer Floral Dress</div>
+                            <div class="cart-item-variant">Size M • Blue</div>
+                            <div class="cart-item-actions">
+                                <div class="quantity-control">
+                                    <button class="qty-btn">−</button>
+                                    <span class="qty-value">1</span>
+                                    <button class="qty-btn">+</button>
+                                </div>
+                                <div class="cart-item-price">$89.00</div>
+                            </div>
+                        </div>
+                        <div class="cart-item-remove">
+                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </div>
+                    </div>
+                    
+                    <div class="cart-item">
+                        <div class="cart-item-image">👚</div>
+                        <div class="cart-item-details">
+                            <div class="cart-item-name">Silk Blouse</div>
+                            <div class="cart-item-variant">Size S • Ivory</div>
+                            <div class="cart-item-actions">
+                                <div class="quantity-control">
+                                    <button class="qty-btn">−</button>
+                                    <span class="qty-value">2</span>
+                                    <button class="qty-btn">+</button>
+                                </div>
+                                <div class="cart-item-price">$130.00</div>
+                            </div>
+                        </div>
+                        <div class="cart-item-remove">
+                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </div>
+                    </div>
+                    
+                    <div class="cart-item">
+                        <div class="cart-item-image">🧣</div>
+                        <div class="cart-item-details">
+                            <div class="cart-item-name">Cashmere Scarf</div>
+                            <div class="cart-item-variant">One Size • Camel</div>
+                            <div class="cart-item-actions">
+                                <div class="quantity-control">
+                                    <button class="qty-btn">−</button>
+                                    <span class="qty-value">1</span>
+                                    <button class="qty-btn">+</button>
+                                </div>
+                                <div class="cart-item-price">$85.00</div>
+                            </div>
+                        </div>
+                        <div class="cart-item-remove">
+                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="cart-footer">
+                    <div class="cart-summary">
+                        <div class="summary-row">
+                            <span>Subtotal (4 items)</span>
+                            <span>$304.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Tax (8.25%)</span>
+                            <span>$25.08</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total</span>
+                            <span>$329.08</span>
+                        </div>
+                    </div>
+                    
+                    <button class="checkout-btn">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                        Process Payment
+                    </button>
+                    
+                    <div class="payment-methods">
+                        <div class="payment-icon">VISA</div>
+                        <div class="payment-icon">MC</div>
+                        <div class="payment-icon">AMEX</div>
+                        <div class="payment-icon">💵</div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <button class="quick-action-btn">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+            Scan Barcode
+            <span class="shortcut">F2</span>
+        </button>
+        <button class="quick-action-btn">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            Open Drawer
+            <span class="shortcut">F4</span>
+        </button>
+    </div>
+
+    <script>
+        // Interactive behaviors
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('click', () => {
+                card.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    card.style.transform = '';
+                }, 150);
+            });
+        });
+
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F2') {
+                e.preventDefault();
+                alert('Barcode scanner activated');
+            }
+            if (e.key === 'F4') {
+                e.preventDefault();
+                alert('Cash drawer opened');
+            }
+        });
+    </script>
+</body>
+</html>

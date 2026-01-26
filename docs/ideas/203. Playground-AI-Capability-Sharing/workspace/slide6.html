@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #000000; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #000000; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header {
+  background: #D4AF37; height: 8pt; width: 100%;
+}
+.title-bar {
+  background: #1a1a1a; padding: 15pt 50pt;
+  display: flex; align-items: center; gap: 15pt;
+}
+.scenario-num {
+  background: #D4AF37; color: #000000;
+  font-size: 24pt; font-weight: bold;
+  width: 40pt; height: 40pt;
+  display: flex; justify-content: center; align-items: center;
+}
+h1 {
+  color: #FFFFFF; font-size: 24pt; margin: 0;
+  font-weight: bold;
+}
+.content {
+  flex: 1; display: flex; padding: 25pt 50pt; gap: 40pt;
+}
+.left-col {
+  flex: 1;
+}
+.right-col {
+  width: 200pt;
+}
+.section-title {
+  color: #D4AF37; font-size: 12pt; font-weight: bold;
+  margin: 0 0 15pt 0; text-transform: uppercase;
+  letter-spacing: 1pt;
+}
+.task-item {
+  background: #1a1a1a; padding: 20pt;
+  margin-bottom: 15pt;
+}
+.task-text {
+  color: #FFFFFF; font-size: 14pt; margin: 0;
+  line-height: 1.5;
+}
+.flow-visual {
+  margin-top: 20pt; display: flex; align-items: center;
+  justify-content: center; gap: 15pt;
+}
+.flow-box {
+  background: #1a1a1a; border: 2pt solid #D4AF37;
+  padding: 12pt 18pt; text-align: center;
+}
+.flow-text {
+  color: #FFFFFF; font-size: 10pt; margin: 0;
+}
+.flow-arrow {
+  color: #D4AF37; font-size: 18pt;
+}
+.capabilities-title {
+  color: #888888; font-size: 10pt; font-weight: bold;
+  margin: 0 0 10pt 0; text-transform: uppercase;
+  letter-spacing: 1pt;
+}
+.cap-list {
+  margin: 0; padding-left: 0; list-style: none;
+}
+.cap-list li {
+  color: #AAAAAA; font-size: 10pt; margin-bottom: 6pt;
+  padding-left: 12pt; position: relative;
+}
+.cap-list li::before {
+  content: "▸"; position: absolute; left: 0;
+  color: #D4AF37;
+}
+</style>
+</head>
+<body>
+<div class="header"></div>
+<div class="title-bar">
+  <div class="scenario-num"><p>4</p></div>
+  <h1>Ideation to Requirement Delivery</h1>
+</div>
+<div class="content">
+  <div class="left-col">
+    <p class="section-title">Task Demonstrated</p>
+    
+    <div class="task-item">
+      <p class="task-text">Voice control to start idea-to-requirement feature gathering process</p>
+    </div>
+    
+    <div class="flow-visual">
+      <div class="flow-box"><p class="flow-text">Voice<br/>Command</p></div>
+      <p class="flow-arrow">→</p>
+      <div class="flow-box"><p class="flow-text">Feature<br/>Gathering</p></div>
+      <p class="flow-arrow">→</p>
+      <div class="flow-box"><p class="flow-text">Rule-Based<br/>Delivery</p></div>
+    </div>
+  </div>
+  <div class="right-col">
+    <p class="capabilities-title">Capabilities Used</p>
+    <ul class="cap-list">
+      <li>Web Application Access</li>
+      <li>Rule Based Works</li>
+      <li>Voice to Text</li>
+      <li>Live Translation</li>
+      <li>Memory for AI</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

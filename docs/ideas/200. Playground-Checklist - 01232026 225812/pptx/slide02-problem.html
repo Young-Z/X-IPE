@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #FFFFFF; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #FFFFFF; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header { background: #1a1a2e; padding: 16pt 25pt; }
+.header-title { color: #FFFFFF; font-size: 20pt; margin: 0; }
+.content { padding: 15pt 25pt; flex: 1; display: flex; gap: 20pt; }
+.left-col { flex: 1; }
+.right-col { flex: 1; }
+.section-title { color: #e94560; font-size: 12pt; margin: 0 0 10pt 0; font-weight: bold; }
+.problem-box {
+  background: #f8f9fa; padding: 12pt; border-radius: 6pt;
+  border-left: 3pt solid #e94560; margin-bottom: 10pt;
+}
+.problem-text { color: #1a1a2e; font-size: 11pt; margin: 0; line-height: 1.4; }
+.users-box { background: #16213e; padding: 12pt; border-radius: 6pt; }
+.users-title { color: #e94560; font-size: 11pt; margin: 0 0 8pt 0; font-weight: bold; }
+.users-list { margin: 0; padding-left: 15pt; }
+.users-list li { color: #FFFFFF; font-size: 10pt; margin-bottom: 5pt; }
+</style>
+</head>
+<body>
+<div class="header">
+  <p class="header-title">Problem & Target Users</p>
+</div>
+<div class="content">
+  <div class="left-col">
+    <p class="section-title">The Problem</p>
+    <div class="problem-box">
+      <p class="problem-text">Need a <b>lightweight, local-only</b> task management tool that's polished enough for <b>quick demos</b> while remaining simple to implement.</p>
+    </div>
+    <div class="problem-box">
+      <p class="problem-text">Existing tools are either too complex for demos or too basic to showcase modern UI patterns.</p>
+    </div>
+    <div class="problem-box">
+      <p class="problem-text">No backend required - purely client-side with data portability.</p>
+    </div>
+  </div>
+  <div class="right-col">
+    <p class="section-title">Target Users</p>
+    <div class="users-box">
+      <p class="users-title">Primary Audience</p>
+      <ul class="users-list">
+        <li>Personal use (single user)</li>
+        <li>Demo/presentation scenarios</li>
+        <li>Quick prototyping showcase</li>
+        <li>Developers learning React patterns</li>
+      </ul>
+    </div>
+    <p class="section-title" style="margin-top: 12pt;">Use Cases</p>
+    <div class="users-box" style="background: #f8f9fa;">
+      <ul class="users-list" style="color: #1a1a2e;">
+        <li>Live coding demos</li>
+        <li>UI/UX pattern showcase</li>
+        <li>Personal task tracking</li>
+        <li>Portfolio project</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
+</html>

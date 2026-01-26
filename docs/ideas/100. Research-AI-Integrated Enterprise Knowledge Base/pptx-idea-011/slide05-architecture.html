@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #FFFFFF; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #F4F6F6; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header {
+  background: #1C2833; padding: 16pt 30pt;
+}
+.header-title { color: #FFFFFF; font-size: 22pt; margin: 0; }
+.content {
+  padding: 12pt 20pt; flex: 1; display: flex; flex-direction: column; gap: 6pt;
+}
+.layer {
+  display: flex; gap: 8pt; align-items: stretch;
+}
+.layer-label {
+  background: #40695B; color: #FFFFFF; font-size: 8pt; padding: 6pt 8pt;
+  border-radius: 4pt; width: 70pt; text-align: center;
+  display: flex; align-items: center; justify-content: center;
+}
+.layer-label p { margin: 0; }
+.modules { display: flex; gap: 6pt; flex: 1; }
+.module {
+  background: #FFFFFF; border: 1pt solid #AAB7B8; border-radius: 4pt;
+  padding: 6pt 8pt; flex: 1;
+}
+.module-title { color: #9B59B6; font-size: 9pt; margin: 0 0 4pt 0; font-weight: bold; }
+.components { display: flex; flex-wrap: wrap; gap: 3pt; }
+.comp {
+  background: #E8DAEF; color: #1C2833; font-size: 7pt; padding: 3pt 6pt;
+  border-radius: 3pt;
+}
+.comp p { margin: 0; }
+</style>
+</head>
+<body>
+<div class="header">
+  <p class="header-title">Functional Architecture</p>
+</div>
+<div class="content">
+  <div class="layer">
+    <div class="layer-label"><p>Knowledge<br/>Delivery</p></div>
+    <div class="modules">
+      <div class="module">
+        <p class="module-title">Consumer Interfaces</p>
+        <div class="components">
+          <div class="comp"><p>RAG API</p></div>
+          <div class="comp"><p>Knowledge Portal</p></div>
+          <div class="comp"><p>Chatbot SDK</p></div>
+          <div class="comp"><p>Copilot Plugin</p></div>
+        </div>
+      </div>
+      <div class="module" style="flex: 0.5;">
+        <p class="module-title">Access Control</p>
+        <div class="components">
+          <div class="comp"><p>AuthN/AuthZ</p></div>
+          <div class="comp"><p>RBAC Engine</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="layer">
+    <div class="layer-label"><p>Knowledge<br/>Retrieval</p></div>
+    <div class="modules">
+      <div class="module">
+        <p class="module-title">Query Processing</p>
+        <div class="components">
+          <div class="comp"><p>Query Parser</p></div>
+          <div class="comp"><p>Intent Classifier</p></div>
+        </div>
+      </div>
+      <div class="module">
+        <p class="module-title">Search Engine</p>
+        <div class="components">
+          <div class="comp"><p>Vector Search</p></div>
+          <div class="comp"><p>Keyword Search</p></div>
+        </div>
+      </div>
+      <div class="module">
+        <p class="module-title">Generation</p>
+        <div class="components">
+          <div class="comp"><p>Reranker</p></div>
+          <div class="comp"><p>Context Builder</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="layer">
+    <div class="layer-label"><p>Knowledge<br/>Storage</p></div>
+    <div class="modules">
+      <div class="module">
+        <p class="module-title">Vector Store</p>
+        <div class="components"><div class="comp"><p>Embeddings</p></div></div>
+      </div>
+      <div class="module">
+        <p class="module-title">Document Store</p>
+        <div class="components"><div class="comp"><p>Raw Content</p></div></div>
+      </div>
+      <div class="module">
+        <p class="module-title">Metadata Store</p>
+        <div class="components"><div class="comp"><p>Catalog</p></div></div>
+      </div>
+      <div class="module">
+        <p class="module-title">Graph Store</p>
+        <div class="components"><div class="comp"><p>Relationships</p></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="layer">
+    <div class="layer-label"><p>Knowledge<br/>Ingestion</p></div>
+    <div class="modules">
+      <div class="module">
+        <p class="module-title">Connectors</p>
+        <div class="components">
+          <div class="comp"><p>Confluence</p></div>
+          <div class="comp"><p>SharePoint</p></div>
+          <div class="comp"><p>OneDrive</p></div>
+          <div class="comp"><p>Email</p></div>
+        </div>
+      </div>
+      <div class="module">
+        <p class="module-title">Processing</p>
+        <div class="components">
+          <div class="comp"><p>ETL Pipeline</p></div>
+          <div class="comp"><p>Chunker</p></div>
+        </div>
+      </div>
+      <div class="module">
+        <p class="module-title">Enrichment</p>
+        <div class="components">
+          <div class="comp"><p>Embedding Service</p></div>
+          <div class="comp"><p>Tagger</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

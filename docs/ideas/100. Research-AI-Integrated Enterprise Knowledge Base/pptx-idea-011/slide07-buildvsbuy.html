@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #FFFFFF; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #FFFFFF; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header {
+  background: #1C2833; padding: 16pt 30pt;
+}
+.header-title { color: #FFFFFF; font-size: 22pt; margin: 0; }
+.content {
+  padding: 20pt 30pt; flex: 1; display: flex; gap: 25pt;
+}
+.left-col { flex: 1.2; }
+.right-col { flex: 0.8; display: flex; align-items: center; justify-content: center; }
+.section-title { color: #9B59B6; font-size: 14pt; margin: 0 0 12pt 0; font-weight: bold; }
+.list-section { margin-bottom: 15pt; }
+.list-title { color: #1C2833; font-size: 11pt; margin: 0 0 6pt 0; font-weight: bold; }
+.list-items { margin: 0; padding-left: 15pt; }
+.list-items li { color: #5D6D7E; font-size: 9pt; margin-bottom: 3pt; }
+.chart-placeholder {
+  width: 220pt; height: 220pt; background: #F4F6F6; border-radius: 8pt;
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <p class="header-title">Build vs Buy Analysis</p>
+</div>
+<div class="content">
+  <div class="left-col">
+    <p class="section-title">System Count: 24 Total</p>
+    <div class="list-section">
+      <p class="list-title">BUY - Alibaba Cloud Services (10)</p>
+      <ul class="list-items">
+        <li>LLM: Qwen via Model Studio / DashScope</li>
+        <li>Embedding: gte-Qwen2 via DashScope</li>
+        <li>Reranker: gte-rerank via DashScope</li>
+        <li>Vector DB: AnalyticDB for PostgreSQL</li>
+        <li>Storage: Alibaba Cloud OSS</li>
+        <li>Metadata: ApsaraDB RDS for PostgreSQL</li>
+        <li>Graph: Alibaba Cloud GDB</li>
+        <li>Search: Alibaba Cloud Elasticsearch</li>
+        <li>ETL: DataWorks</li>
+        <li>Queue: Message Queue for Apache Kafka</li>
+      </ul>
+    </div>
+    <div class="list-section">
+      <p class="list-title">BUILD - Custom Development (9)</p>
+      <ul class="list-items">
+        <li>RAG API Service (FastAPI on ACK/ECS)</li>
+        <li>Knowledge Portal (React/Next.js)</li>
+        <li>Admin Dashboard, Query Orchestrator</li>
+        <li>Ingestion Pipeline, RBAC Service</li>
+        <li>Chatbot SDK, SharePoint/Email Connectors</li>
+      </ul>
+    </div>
+  </div>
+  <div class="right-col">
+    <div id="chart" class="placeholder chart-placeholder"></div>
+  </div>
+</div>
+</body>
+</html>

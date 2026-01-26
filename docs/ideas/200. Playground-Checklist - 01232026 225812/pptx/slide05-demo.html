@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #FFFFFF; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #f8f9fa; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header { background: #0f3460; padding: 16pt 25pt; }
+.header-title { color: #FFFFFF; font-size: 20pt; margin: 0; }
+.content { padding: 15pt 25pt; flex: 1; }
+.section-title { color: #e94560; font-size: 12pt; margin: 0 0 10pt 0; font-weight: bold; }
+.steps { display: flex; gap: 10pt; }
+.step {
+  flex: 1; background: #FFFFFF; border-radius: 6pt; padding: 10pt;
+  border-top: 3pt solid #e94560;
+}
+.step-num { color: #e94560; font-size: 20pt; margin: 0; font-weight: bold; }
+.step-title { color: #1a1a2e; font-size: 10pt; margin: 4pt 0 6pt 0; font-weight: bold; }
+.step-desc { color: #6c757d; font-size: 8pt; margin: 0; line-height: 1.3; }
+</style>
+</head>
+<body>
+<div class="header">
+  <p class="header-title">Demo Script</p>
+</div>
+<div class="content">
+  <p class="section-title">7-Step Demo Flow</p>
+  <div class="steps">
+    <div class="step">
+      <p class="step-num">1</p>
+      <p class="step-title">Open App</p>
+      <p class="step-desc">Show empty state with welcome message</p>
+    </div>
+    <div class="step">
+      <p class="step-num">2</p>
+      <p class="step-title">Load Sample</p>
+      <p class="step-desc">Click "Load Sample Data" - tasks appear</p>
+    </div>
+    <div class="step">
+      <p class="step-num">3</p>
+      <p class="step-title">Dark Mode</p>
+      <p class="step-desc">Toggle theme - instant switch</p>
+    </div>
+    <div class="step">
+      <p class="step-num">4</p>
+      <p class="step-title">Drag Task</p>
+      <p class="step-desc">Reorder with drag and drop</p>
+    </div>
+    <div class="step">
+      <p class="step-num">5</p>
+      <p class="step-title">Keyboard</p>
+      <p class="step-desc">Add task with Enter key</p>
+    </div>
+    <div class="step">
+      <p class="step-num">6</p>
+      <p class="step-title">Export</p>
+      <p class="step-desc">Download JSON backup</p>
+    </div>
+    <div class="step">
+      <p class="step-num">7</p>
+      <p class="step-title">Import</p>
+      <p class="step-desc">Restore from JSON file</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>
