@@ -6,7 +6,6 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-184 | Code Refactor | Rename docs folder to x-ipe-docs and update all references | Flux | 🔄 in_progress | 01-26-2026 16:35:00 | - | - |
 | TASK-183 | Code Implementation | FEATURE-018: X-IPE CLI Tool - Status & Info Commands | Drift | ✅ completed | 01-26-2026 15:25:00 | src/x_ipe/cli/main.py | Human Playground |
 
 ---
@@ -15,6 +14,7 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-184 | Code Refactor | Rename docs folder to x-ipe-docs and update all references | Flux | 01-26-2026 16:40:00 | x-ipe-docs/ | Renamed docs → x-ipe-docs, updated ~106 files |
 | TASK-182 | Idea Mockup | IDEA-014: Replenishment System Dashboard Mockup | Spark | 01-26-2026 10:20:00 | x-ipe-docs/ideas/Sample - Replishment system/mockups/dashboard-v1.html | Mockup created |
 | TASK-181 | Ideation | IDEA-014: Product Replenishment System for Boutique | Spark | 01-26-2026 10:15:00 | x-ipe-docs/ideas/Sample - Replishment system/idea-summary-v1.md | Idea refined |
 | TASK-180 | Idea Mockup | IDEA-013: POS Home Page Mockup | Bolt | 01-26-2026 09:49:00 | mockups/pos-home-v1.html | Closed by request |
@@ -68,12 +68,12 @@
 
 ## Quick Stats
 
-- **Total Active:** 1
-- **In Progress:** 1
+- **Total Active:** 0
+- **In Progress:** 0
 - **Pending Review:** 0
 - **Blocked:** 0
 - **Deferred:** 0
-- **Completed (archived):** 149
+- **Completed (archived):** 150
 
 ---
 
