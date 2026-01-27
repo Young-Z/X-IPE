@@ -156,13 +156,13 @@ class ConfigService:
         if not paths.get('project_root'):
             self._error = "Missing required field: paths.project_root"
             return None
-        if not paths.get('x_ipe_app'):
-            self._error = "Missing required field: paths.x_ipe_app"
-            return None
         
         # Resolve paths relative to config file location
         project_root = (config_dir / paths['project_root']).resolve()
-        x_ipe_app = (config_dir / paths['x_ipe_app']).resolve()
+        
+        # x_ipe_app is optional, defaults to project_root
+        x_ipe_app_path = paths.get('x_ipe_app', paths['project_root'])
+        x_ipe_app = (config_dir / x_ipe_app_path).resolve()
         
         # Validate paths exist and are directories
         if not project_root.exists() or not project_root.is_dir():

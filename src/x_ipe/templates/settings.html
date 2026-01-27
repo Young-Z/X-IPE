@@ -611,7 +611,6 @@
                 this.statusBadge.textContent = 'Detected';
                 this.statusBadge.className = 'badge bg-success';
                 
-                const config = data.config;
                 this.configContent.innerHTML = `
                     <div class="mb-3">
                         <small class="text-muted">
@@ -623,23 +622,23 @@
                         <tbody>
                             <tr>
                                 <td class="text-muted" style="width: 150px;">Version</td>
-                                <td><code>${config.version}</code></td>
+                                <td><code>${data.version}</code></td>
                             </tr>
                             <tr>
                                 <td class="text-muted">Project Root</td>
-                                <td><code>${this.escapeHtml(config.project_root)}</code></td>
+                                <td><code>${this.escapeHtml(data.project_root)}</code></td>
                             </tr>
                             <tr>
                                 <td class="text-muted">X-IPE App</td>
-                                <td><code>${this.escapeHtml(config.x_ipe_app)}</code></td>
+                                <td><code>${this.escapeHtml(data.x_ipe_app)}</code></td>
                             </tr>
                             <tr>
                                 <td class="text-muted">File Tree Scope</td>
-                                <td><code>${config.file_tree_scope}</code></td>
+                                <td><code>${data.file_tree_scope}</code></td>
                             </tr>
                             <tr>
                                 <td class="text-muted">Terminal CWD</td>
-                                <td><code>${config.terminal_cwd}</code></td>
+                                <td><code>${data.terminal_cwd}</code></td>
                             </tr>
                         </tbody>
                     </table>

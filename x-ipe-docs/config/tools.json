@@ -1,7 +1,7 @@
 {
   "selected-theme": {
-    "theme-folder-path": "x-ipe-docs/themes/theme-black-golden",
-    "theme-name": "theme-black-golden"
+    "theme-folder-path": "x-ipe-docs/themes/theme-default",
+    "theme-name": "theme-default"
   },
   "stages": {
     "feature": {
@@ -26,7 +26,7 @@
         "_order": 1,
         "antv-infographic": false,
         "mermaid": false,
-        "tool-architecture-dsl": false,
+        "tool-architecture-dsl": true,
         "tool-draw-layered-architecture": false,
         "tool-draw-system-landscape": false
       },

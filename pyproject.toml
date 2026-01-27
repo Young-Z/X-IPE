@@ -1,6 +1,6 @@
 [project]
 name = "x-ipe"
-version = "1.0.6"
+version = "1.0.14"
 description = "X-IPE: AI-powered development framework"
 requires-python = ">=3.12"
 dependencies = [

@@ -13,6 +13,7 @@ class ScaffoldManager:
         "x-ipe-docs/planning",
         "x-ipe-docs/features",
         "x-ipe-docs/ideas",
+        "x-ipe-docs/config",
     ]
     
     GITIGNORE_ENTRIES = [
@@ -142,6 +143,33 @@ class ScaffoldManager:
             shutil.copy2(source, target)
         self.created.append(target)
     
+    def copy_config_files(self) -> None:
+        """Copy config files (copilot-prompt.json, tools.json, .env.example) to x-ipe-docs/config/."""
+        config_source = self._get_resource_path("config")
+        if config_source is None or not config_source.exists():
+            return
+        
+        target_dir = self.project_root / "x-ipe-docs" / "config"
+        
+        # Copy each config file individually (don't overwrite existing)
+        config_files = ["copilot-prompt.json", "tools.json", ".env.example"]
+        for filename in config_files:
+            source_file = config_source / filename
+            target_file = target_dir / filename
+            
+            if not source_file.exists():
+                continue
+                
+            if target_file.exists():
+                if not self.force:
+                    self.skipped.append(target_file)
+                    continue
+            
+            if not self.dry_run:
+                target_dir.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source_file, target_file)
+            self.created.append(target_file)
+    
     def create_config_file(self, config_content: Optional[str] = None) -> None:
         """Create .x-ipe.yaml with defaults.
         
@@ -160,13 +188,14 @@ version: 1
 
 paths:
   project_root: "."
-  docs: "docs"
+  x_ipe_app: "."
+  docs: "x-ipe-docs"
   skills: ".github/skills"
   runtime: ".x-ipe"
 
 server:
   host: "127.0.0.1"
-  port: 5000
+  port: 5959
   debug: false
 """
         
@@ -213,6 +242,7 @@ server:
         self.create_runtime_folder()
         self.copy_skills()
         self.copy_copilot_instructions()
+        self.copy_config_files()
         self.create_config_file()
         self.update_gitignore()
         return self.get_summary()

@@ -208,6 +208,9 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool) -> Non
     # Copy/merge copilot-instructions.md
     scaffold.copy_copilot_instructions()
     
+    # Copy config files (copilot-prompt.json, tools.json, .env.example)
+    scaffold.copy_config_files()
+    
     # Create config file
     scaffold.create_config_file()
     
@@ -255,7 +258,7 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool) -> Non
     "--port", "-P",  # Using -P because -p is already used for --project
     type=int,
     default=None,
-    help="Port to bind to (default: from config or 5000).",
+    help="Port to bind to (default: from config or 5959).",
 )
 @click.option(
     "--debug/--no-debug",

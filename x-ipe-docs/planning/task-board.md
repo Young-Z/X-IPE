@@ -6,7 +6,7 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-187 | Idea Mockup | IDEA-015: AI Chat Widget with Rich Widgets | Ember | 🔄 in_progress | 01-27-2026 14:32:00 | - | Requirement Gathering |
+| TASK-187 | Idea Mockup | IDEA-015: AI Chat Widget with Rich Widgets | Ember | ✅ completed | 01-27-2026 14:33:00 | mockups/chat-widget-v1.html | Requirement Gathering |
 
 ---
 
@@ -69,8 +69,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 1
-- **In Progress:** 1
+- **Total Active:** 0
+- **In Progress:** 0
 - **Pending Review:** 0
 - **Blocked:** 0
 - **Deferred:** 0

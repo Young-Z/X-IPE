@@ -106,16 +106,16 @@ def create_app(config=None):
         config_data = config_service.load()
         if config_data:
             app.config['X_IPE_CONFIG'] = config_data
-            # Use config paths if no explicit PROJECT_ROOT set
-            if not app.config.get('PROJECT_ROOT'):
-                app.config['PROJECT_ROOT'] = config_data.get_file_tree_path()
+            # Always use config's project_root when .x-ipe.yaml is detected
+            app.config['PROJECT_ROOT'] = config_data.get_file_tree_path()
     
-    # Apply project_root from settings if not overridden by config
-    saved_root = settings_service.get('project_root')
-    if saved_root and saved_root != '.' and not app.config.get('TESTING') and not app.config.get('X_IPE_CONFIG'):
-        # Only apply if it's a valid path and no .x-ipe.yaml detected
-        if os.path.exists(saved_root) and os.path.isdir(saved_root):
-            app.config['PROJECT_ROOT'] = saved_root
+    # Apply project_root from settings only if no .x-ipe.yaml detected
+    if not app.config.get('X_IPE_CONFIG'):
+        saved_root = settings_service.get('project_root')
+        if saved_root and saved_root != '.' and not app.config.get('TESTING'):
+            # Only apply if it's a valid path
+            if os.path.exists(saved_root) and os.path.isdir(saved_root):
+                app.config['PROJECT_ROOT'] = saved_root
     
     # Register routes
     register_routes(app)
@@ -831,7 +831,19 @@ def register_project_routes(app):
         if result['success']:
             # Update app config with new project root
             project = result['project']
-            app.config['PROJECT_ROOT'] = project['path']
+            project_path = project['path']
+            
+            # If config is detected, project folders are relative to config's project_root
+            config_data = app.config.get('X_IPE_CONFIG')
+            if config_data:
+                # Config always takes precedence - use its project_root
+                app.config['PROJECT_ROOT'] = config_data.project_root
+            elif project_path == '.':
+                # No config, default project folder - use cwd where x-ipe was run
+                app.config['PROJECT_ROOT'] = os.environ.get('X_IPE_PROJECT_ROOT', os.getcwd())
+            else:
+                # Absolute path from project folder
+                app.config['PROJECT_ROOT'] = project_path
             
             return jsonify(result)
         return jsonify(result), 400
@@ -1161,7 +1173,7 @@ def register_tools_config_routes(app):
         """
         try:
             project_root = app.config.get('PROJECT_ROOT', os.getcwd())
-            config_path = os.path.join(project_root, 'config', 'copilot-prompt.json')
+            config_path = os.path.join(project_root, 'x-ipe-docs', 'config', 'copilot-prompt.json')
             
             if os.path.exists(config_path):
                 with open(config_path, 'r', encoding='utf-8') as f:

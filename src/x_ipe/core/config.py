@@ -28,7 +28,7 @@ class XIPEConfig:
     skills_path: Path = field(default_factory=lambda: Path.cwd() / ".github" / "skills")
     runtime_path: Path = field(default_factory=lambda: Path.cwd() / ".x-ipe")
     server_host: str = "127.0.0.1"
-    server_port: int = 5000
+    server_port: int = 5959
     server_debug: bool = False
     
     @classmethod
@@ -80,7 +80,7 @@ class XIPEConfig:
             skills_path=project_root / ".github" / "skills",
             runtime_path=project_root / ".x-ipe",
             server_host="127.0.0.1",
-            server_port=5000,
+            server_port=5959,
             server_debug=False,
         )
     
@@ -134,7 +134,7 @@ class XIPEConfig:
         # Parse server settings
         server = raw.get('server', {})
         server_host = server.get('host', '127.0.0.1')
-        server_port = server.get('port', 5000)
+        server_port = server.get('port', 5959)
         server_debug = server.get('debug', False)
         
         return cls(
