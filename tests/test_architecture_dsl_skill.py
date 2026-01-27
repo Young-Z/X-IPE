@@ -397,7 +397,7 @@ class TestExampleFiles:
 # ============================================================================
 
 class TestConfigIntegration:
-    """Tests for config/tools.json integration"""
+    """Tests for x-ipe-docs/config/tools.json integration"""
     
     @pytest.fixture
     def config_content(self, config_file):
@@ -407,7 +407,7 @@ class TestConfigIntegration:
         return None
     
     def test_tools_json_exists(self, config_file):
-        """config/tools.json exists"""
+        """x-ipe-docs/config/tools.json exists"""
         assert config_file.exists(), f"tools.json not found at {config_file}"
     
     def test_architecture_dsl_registered(self, config_content):

@@ -391,7 +391,7 @@ project-root/           ← project_root (shown in file tree by default)
    - [ ] AC-4.3: No functional toggles in placeholder stages
 
 5. **Configuration**
-   - [ ] AC-5.1: Config stored in `config/tools.json`
+   - [ ] AC-5.1: Config stored in `x-ipe-docs/config/tools.json`
    - [ ] AC-5.2: Config uses nested 3-level structure (stage > phase > tool)
    - [ ] AC-5.3: Auto-create `config/` directory if not exists
    - [ ] AC-5.4: Auto-migrate from `.ideation-tools.json` if exists

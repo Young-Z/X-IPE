@@ -106,7 +106,7 @@ As an **architect**, I want to **align components within modules using nested gr
 - [x] AC-6.6: Skill can handle partial/incomplete DSL and suggest completions
 
 ### 7. Integration
-- [x] AC-7.1: Skill registered in `config/tools.json` under `stages.ideation.ideation.tool-architecture-dsl`
+- [x] AC-7.1: Skill registered in `x-ipe-docs/config/tools.json` under `stages.ideation.ideation.tool-architecture-dsl`
 - [x] AC-7.2: Skill can be enabled/disabled via Stage Toolbox modal
 - [x] AC-7.3: Skill works alongside other ideation tools (mermaid, antv-infographic)
 - [x] AC-7.4: DSL output can be embedded in markdown using ```architecture-dsl code blocks

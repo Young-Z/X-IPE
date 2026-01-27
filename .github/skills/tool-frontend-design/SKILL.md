@@ -16,18 +16,18 @@ The user provides frontend requirements: a component, page, application, or inte
 ### Step 1: Read Selected Theme
 ```bash
 # From config file - get theme name
-cat config/tools.json | jq '.["selected-theme"]["theme-name"]'
+cat x-ipe-docs/config/tools.json | jq '.["selected-theme"]["theme-name"]'
 # Returns: "theme-default" (or other selected theme)
 
 # Or get the full folder path directly
-cat config/tools.json | jq '.["selected-theme"]["theme-folder-path"]'
+cat x-ipe-docs/config/tools.json | jq '.["selected-theme"]["theme-folder-path"]'
 # Returns: "x-ipe-docs/themes/theme-default"
 ```
 
 ### Step 2: Load Design System
 ```bash
 # Using the theme-folder-path from config
-theme_path=$(cat config/tools.json | jq -r '.["selected-theme"]["theme-folder-path"]')
+theme_path=$(cat x-ipe-docs/config/tools.json | jq -r '.["selected-theme"]["theme-folder-path"]')
 cat "${theme_path}/design-system.md"
 ```
 

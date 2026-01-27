@@ -8,7 +8,7 @@
 
 **Scenario:** User uploads business plan draft to `x-ipe-docs/ideas/mobile-app-idea/files/`
 
-**Config File:** `config/tools.json`
+**Config File:** `x-ipe-docs/config/tools.json`
 ```json
 {
   "version": "2.0",
@@ -32,7 +32,7 @@
 1. Execute Task Flow from task-execution-guideline skill
 
 2. Load Toolbox Meta:
-   - Read config/tools.json
+   - Read x-ipe-docs/config/tools.json
    - Enabled tools:
      - stages.ideation.ideation.antv-infographic: true → will invoke infographic-syntax-creator
      - stages.ideation.ideation.mermaid: true → will use mermaid diagrams
@@ -87,7 +87,7 @@
 
 ## Example 2: Ideation WITHOUT Tools (All Disabled)
 
-**Config File:** `config/tools.json`
+**Config File:** `x-ipe-docs/config/tools.json`
 ```json
 {
   "version": "2.0",
@@ -133,11 +133,11 @@
 
 ## Example 3: Missing Config File
 
-**Scenario:** No `config/tools.json` exists
+**Scenario:** No `x-ipe-docs/config/tools.json` exists
 
 **Execution:**
 ```
-1. Check for config/tools.json
+1. Check for x-ipe-docs/config/tools.json
    → File NOT FOUND
 
 2. Create default config file:
@@ -158,7 +158,7 @@
    }
 
 3. Inform user:
-   "Created default config/tools.json with all tools disabled.
+   "Created default x-ipe-docs/config/tools.json with all tools disabled.
     To enable visualization tools, update the config file."
 
 4. Proceed with standard text-based ideation

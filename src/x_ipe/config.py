@@ -9,8 +9,8 @@ class Config:
     """Base configuration"""
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
     
-    # Project root to monitor - defaults to parent directory of this app
-    PROJECT_ROOT = os.environ.get('PROJECT_ROOT', str(Path(__file__).parent.parent))
+    # Project root to monitor - defaults to project root (3 levels up from src/x_ipe/config.py)
+    PROJECT_ROOT = os.environ.get('PROJECT_ROOT', str(Path(__file__).parent.parent.parent))
     
     # Section mappings
     SECTIONS = [

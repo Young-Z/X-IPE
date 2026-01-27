@@ -43,7 +43,7 @@ Convert refined idea summaries to human-readable shareable formats by:
 | Attribute | Default Value | Description |
 |-----------|---------------|-------------|
 | Auto Proceed | False | Auto-advance to next task |
-| Ideation Toolbox Meta | `{project_root}/config/tools.json` | Config file for enabled sharing tools |
+| Ideation Toolbox Meta | `{project_root}/x-ipe-docs/config/tools.json` | Config file for enabled sharing tools |
 | Current Idea Folder | N/A | **Required from context** - path to current idea folder |
 | Extra Instructions | N/A | Additional context or requirements for document sharing |
 
@@ -53,7 +53,7 @@ Convert refined idea summaries to human-readable shareable formats by:
 
 **Source:** This value can be obtained from:
 1. Human input (explicit instructions provided)
-2. `config/tools.json` → `stages.ideation.sharing._extra_instruction` field
+2. `x-ipe-docs/config/tools.json` → `stages.ideation.sharing._extra_instruction` field
 3. Default: N/A (no extra instructions)
 
 **Loading Logic:**
@@ -61,7 +61,7 @@ Convert refined idea summaries to human-readable shareable formats by:
 1. IF human provides explicit Extra Instructions:
    → Use human-provided value
 
-2. ELSE IF config/tools.json exists:
+2. ELSE IF x-ipe-docs/config/tools.json exists:
    a. Read stages.ideation.sharing._extra_instruction field
    b. IF field exists AND is not empty:
       → Use value from config
@@ -79,7 +79,7 @@ Convert refined idea summaries to human-readable shareable formats by:
 
 ### Ideation Toolbox Meta File
 
-**Location:** `config/tools.json` (relative to project root)
+**Location:** `x-ipe-docs/config/tools.json` (relative to project root)
 
 **Relevant Config Section:**
 ```json
@@ -132,7 +132,7 @@ Execute Share Idea by following these steps in order:
 
 | Step | Name | Action | Gate to Next |
 |------|------|--------|--------------|
-| 1 | Load Config | Read `config/tools.json` sharing section | Config loaded |
+| 1 | Load Config | Read `x-ipe-docs/config/tools.json` sharing section | Config loaded |
 | 2 | Identify Source | Locate latest `idea-summary-vN.md` file | Source file found |
 | 3 | Confirm Format | Ask human for target format(s) from enabled options | Format(s) confirmed |
 | 4 | Prepare Content | Restructure content for target format | Content ready |
@@ -163,10 +163,10 @@ Execute Share Idea by following these steps in order:
 
 **Action:** Read and parse the sharing section from tools config
 
-**Default Path:** `config/tools.json`
+**Default Path:** `x-ipe-docs/config/tools.json`
 
 ```
-1. Check if config/tools.json exists
+1. Check if x-ipe-docs/config/tools.json exists
 2. If exists:
    a. Parse JSON file
    b. Extract stages.ideation.sharing section configuration

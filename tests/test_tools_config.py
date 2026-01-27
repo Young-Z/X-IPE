@@ -142,7 +142,7 @@ class TestToolsConfigServiceInit:
         assert service.project_root == Path(temp_project_dir).resolve()
     
     def test_init_sets_config_path(self, temp_project_dir):
-        """ToolsConfigService sets config path to config/tools.json"""
+        """ToolsConfigService sets config path to x-ipe-docs/config/tools.json"""
         from src.services import ToolsConfigService
         service = ToolsConfigService(temp_project_dir)
         expected = Path(temp_project_dir).resolve() / 'config' / 'tools.json'
@@ -160,7 +160,7 @@ class TestToolsConfigServiceLoad:
     """Test ToolsConfigService.load() method"""
     
     def test_load_returns_existing_config(self, temp_project_with_config_dir, sample_config):
-        """load() returns existing config when config/tools.json exists"""
+        """load() returns existing config when x-ipe-docs/config/tools.json exists"""
         from src.services import ToolsConfigService
         
         # Create config file
@@ -254,7 +254,7 @@ class TestToolsConfigServiceMigration:
         assert not legacy_path.exists()
     
     def test_migration_creates_new_config_file(self, temp_project_with_legacy_config):
-        """load() creates config/tools.json after migration"""
+        """load() creates x-ipe-docs/config/tools.json after migration"""
         from src.services import ToolsConfigService
         
         project_root = temp_project_with_legacy_config['root']
@@ -315,7 +315,7 @@ class TestToolsConfigServiceSave:
     """Test ToolsConfigService.save() method"""
     
     def test_save_writes_config_to_file(self, temp_project_dir, sample_config):
-        """save() writes config to config/tools.json"""
+        """save() writes config to x-ipe-docs/config/tools.json"""
         from src.services import ToolsConfigService
         
         service = ToolsConfigService(temp_project_dir)
@@ -520,7 +520,7 @@ class TestToolsConfigIntegration:
         assert data['config']['stages']['ideation']['ideation']['mermaid'] == True
     
     def test_migration_preserves_existing_config(self, temp_project_with_legacy_config):
-        """Migration does not run if config/tools.json already exists"""
+        """Migration does not run if x-ipe-docs/config/tools.json already exists"""
         from src.services import ToolsConfigService
         
         project_root = temp_project_with_legacy_config['root']

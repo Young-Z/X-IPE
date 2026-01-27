@@ -698,7 +698,7 @@ x-ipe upgrade         # Upgrade skills from package
 
 ```bash
 # Run the application
-uv run python -m src.app
+uv run python -m x_ipe.app
 
 # Open in browser
 # http://localhost:5000
@@ -741,11 +741,11 @@ X-IPE can run as a subfolder within a larger project, allowing you to view your 
    ```bash
    # From project root
    cd my-project
-   uv run --directory x-ipe python -m src.app
+   uv run --directory x-ipe python -m x_ipe.app
 
    # Or from X-IPE folder
    cd my-project/x-ipe
-   uv run python -m src.app
+   uv run python -m x_ipe.app
    ```
 
 X-IPE will automatically discover `.x-ipe.yaml` by searching the current directory and up to 20 parent directories.

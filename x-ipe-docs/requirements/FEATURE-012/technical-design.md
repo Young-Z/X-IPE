@@ -25,7 +25,7 @@
 | `GET /api/themes` | List all themes with metadata | API endpoint | #themes #api #list |
 | `GET /api/themes/<name>` | Get single theme details | API endpoint | #themes #api #detail |
 | `ThemesSection` | Theme cards UI in Stage Toolbox | Frontend component | #themes #frontend #toolbox |
-| `themes.selected` | Theme selection in config/tools.json | Configuration | #themes #config #persistence |
+| `themes.selected` | Theme selection in x-ipe-docs/config/tools.json | Configuration | #themes #config #persistence |
 
 ### Scope & Boundaries
 
@@ -34,7 +34,7 @@
 - Color token parsing from design-system.md
 - Sidebar themes menu (folder tree navigation)
 - Toolbox modal themes section with visual cards
-- Theme selection persistence in config/tools.json
+- Theme selection persistence in x-ipe-docs/config/tools.json
 
 **Out of Scope:**
 - Theme editor UI (future v2.0)
@@ -45,7 +45,7 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `ToolsConfigService` | FEATURE-011 | [technical-design.md](../FEATURE-011/technical-design.md) | Store/load theme selection in config/tools.json |
+| `ToolsConfigService` | FEATURE-011 | [technical-design.md](../FEATURE-011/technical-design.md) | Store/load theme selection in x-ipe-docs/config/tools.json |
 | `FileService` | Foundation | [file_service.py](../../../src/services/file_service.py) | Folder scanning and file reading |
 | `StageToolboxModal` | FEATURE-011 | [stage-toolbox.js](../../../static/js/features/stage-toolbox.js) | Extend modal with themes section |
 | `ProjectSidebar` | FEATURE-001 | [index.html](../../../src/templates/index.html) | Add themes menu item |
@@ -56,7 +56,7 @@
 2. **Metadata Extraction:** Parse each `design-system.md` to extract color tokens and description
 3. **API Response:** `GET /api/themes` returns list with name, description, colors, files
 4. **Toolbox Display:** `ThemesSection` renders cards with auto-generated color swatches
-5. **Selection:** User clicks card → POST updates `config/tools.json` → UI shows checkmark
+5. **Selection:** User clicks card → POST updates `x-ipe-docs/config/tools.json` → UI shows checkmark
 6. **Sidebar Access:** Click "Themes" in sidebar → folder tree of `x-ipe-docs/themes/` → click file to view
 
 ### Usage Example
@@ -116,7 +116,7 @@ sequenceDiagram
     U->>TB: Click theme card
     TB->>API: POST /api/config/tools
     API->>TCS: save(config with themes.selected)
-    TCS->>FS: Write config/tools.json
+    TCS->>FS: Write x-ipe-docs/config/tools.json
     FS-->>TCS: Success
     TCS-->>API: True
     API-->>TB: 200 OK
@@ -187,7 +187,7 @@ class ThemeDetail:
 }
 ```
 
-### config/tools.json Schema Update
+### x-ipe-docs/config/tools.json Schema Update
 
 ```json
 {

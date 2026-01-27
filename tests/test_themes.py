@@ -531,7 +531,7 @@ class TestThemeSelectionIntegration:
     """Integration tests for theme selection with ToolsConfigService"""
     
     def test_theme_selection_persisted_in_config(self, temp_project_with_themes):
-        """Theme selection is saved to config/tools.json"""
+        """Theme selection is saved to x-ipe-docs/config/tools.json"""
         from src.services import ThemesService, ToolsConfigService
         
         root = temp_project_with_themes['root']

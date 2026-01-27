@@ -9,7 +9,6 @@ class ScaffoldManager:
     """Manages project structure creation."""
     
     DOCS_STRUCTURE = [
-        "docs",
         "x-ipe-docs/requirements",
         "x-ipe-docs/planning",
         "x-ipe-docs/features",
@@ -59,6 +58,31 @@ class ScaffoldManager:
             path.mkdir(parents=True, exist_ok=True)
         self.created.append(path)
     
+    def _get_resource_path(self, resource_name: str) -> Optional[Path]:
+        """Get path to a bundled resource.
+        
+        Args:
+            resource_name: Name of resource (e.g., 'skills', 'copilot-instructions.md')
+            
+        Returns:
+            Path to resource or None if not found.
+        """
+        # Try importlib.resources first (installed package)
+        try:
+            from importlib import resources
+            resource_ref = resources.files("x_ipe") / "resources" / resource_name
+            if resource_ref.is_file() or resource_ref.is_dir():
+                return Path(str(resource_ref))
+        except (ImportError, TypeError, AttributeError):
+            pass
+        
+        # Fall back to src layout for development
+        dev_path = Path(__file__).parent.parent / "resources" / resource_name
+        if dev_path.exists():
+            return dev_path
+        
+        return None
+    
     def copy_skills(self, skills_source: Optional[Path] = None) -> None:
         """Copy skills from source to .github/skills/.
         
@@ -68,16 +92,7 @@ class ScaffoldManager:
         target = self.project_root / ".github" / "skills"
         
         if skills_source is None:
-            # Use package bundled skills
-            try:
-                from importlib import resources
-                # Get package skills path
-                skills_ref = resources.files("x_ipe") / "skills"
-                if skills_ref.is_dir():
-                    skills_source = Path(str(skills_ref))
-            except (ImportError, TypeError, AttributeError):
-                # Fall back to src layout for development
-                skills_source = Path(__file__).parent.parent / "skills"
+            skills_source = self._get_resource_path("skills")
         
         if skills_source is None or not skills_source.exists():
             # No skills to copy
@@ -94,6 +109,37 @@ class ScaffoldManager:
             if target.exists() and self.force:
                 shutil.rmtree(target)
             shutil.copytree(skills_source, target, dirs_exist_ok=True)
+        self.created.append(target)
+    
+    def copy_copilot_instructions(self) -> None:
+        """Copy or merge copilot-instructions.md to .github/."""
+        source = self._get_resource_path("copilot-instructions.md")
+        if source is None or not source.exists():
+            return
+        
+        target = self.project_root / ".github" / "copilot-instructions.md"
+        
+        if target.exists():
+            if not self.force:
+                # Merge: append X-IPE instructions if not already present
+                if not self.dry_run:
+                    existing_content = target.read_text()
+                    xipe_content = source.read_text()
+                    
+                    # Check if X-IPE section already exists
+                    if "# Copilot Instructions" in existing_content and "## Before You Start" in existing_content:
+                        self.skipped.append(target)
+                        return
+                    
+                    # Merge by appending
+                    merged = existing_content.rstrip() + "\n\n" + xipe_content
+                    target.write_text(merged)
+                self.created.append(target)
+                return
+        
+        if not self.dry_run:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, target)
         self.created.append(target)
     
     def create_config_file(self, config_content: Optional[str] = None) -> None:
@@ -166,6 +212,7 @@ server:
         self.create_docs_structure()
         self.create_runtime_folder()
         self.copy_skills()
+        self.copy_copilot_instructions()
         self.create_config_file()
         self.update_gitignore()
         return self.get_summary()

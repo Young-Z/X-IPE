@@ -3,7 +3,7 @@
  * FEATURE-011: Comprehensive tool management modal
  * 
  * Provides a centralized UI for managing tools across all development stages.
- * Dynamically renders tools based on config/tools.json content.
+ * Dynamically renders tools based on x-ipe-docs/config/tools.json content.
  */
 class StageToolboxModal {
     constructor(options = {}) {

@@ -1,6 +1,6 @@
 ---
 name: task-type-idea-to-architecture
-description: Create architecture diagrams for refined ideas. Use after ideation when idea needs system architecture visualization. Generates architecture diagrams using tools from config/tools.json (mermaid, excalidraw). Triggers on requests like "create architecture", "design system", "architecture diagram", "system design".
+description: Create architecture diagrams for refined ideas. Use after ideation when idea needs system architecture visualization. Generates architecture diagrams using tools from x-ipe-docs/config/tools.json (mermaid, excalidraw). Triggers on requests like "create architecture", "design system", "architecture diagram", "system design".
 ---
 
 # Task Type: Idea to Architecture
@@ -9,7 +9,7 @@ description: Create architecture diagrams for refined ideas. Use after ideation 
 
 Create architecture diagrams and system design visualizations for refined ideas by:
 1. Reading the idea summary from ideation task
-2. Loading architecture tools from `config/tools.json` config
+2. Loading architecture tools from `x-ipe-docs/config/tools.json` config
 3. Creating architecture diagrams (system architecture, component diagrams, data flow)
 4. Saving artifacts to the idea folder
 5. Preparing for Requirement Gathering
@@ -74,7 +74,7 @@ Architecture should NOT include:
 | Attribute | Default Value | Description |
 |-----------|---------------|-------------|
 | Auto Proceed | False | Auto-advance to next task |
-| Ideation Toolbox Meta | `{project_root}/config/tools.json` | Config file for enabled tools |
+| Ideation Toolbox Meta | `{project_root}/x-ipe-docs/config/tools.json` | Config file for enabled tools |
 | Current Idea Folder | N/A | **Required from context** - path to current idea folder (e.g., `x-ipe-docs/ideas/mobile-app-idea`) |
 | Extra Instructions | N/A | Additional context or requirements for architecture diagram creation |
 
@@ -84,7 +84,7 @@ Architecture should NOT include:
 
 **Source:** This value can be obtained from:
 1. Human input (explicit instructions provided)
-2. `config/tools.json` → `stages.ideation.architecture._extra_instruction` field
+2. `x-ipe-docs/config/tools.json` → `stages.ideation.architecture._extra_instruction` field
 3. Default: N/A (no extra instructions)
 
 **Loading Logic:**
@@ -92,7 +92,7 @@ Architecture should NOT include:
 1. IF human provides explicit Extra Instructions:
    → Use human-provided value
 
-2. ELSE IF config/tools.json exists:
+2. ELSE IF x-ipe-docs/config/tools.json exists:
    a. Read stages.ideation.architecture._extra_instruction field
    b. IF field exists AND is not empty:
       → Use value from config
@@ -135,7 +135,7 @@ Architecture should NOT include:
 
 ### Ideation Toolbox Meta File
 
-**Location:** `config/tools.json` (relative to project root)
+**Location:** `x-ipe-docs/config/tools.json` (relative to project root)
 
 **Relevant Config Section:**
 ```json
@@ -168,7 +168,7 @@ Architecture should NOT include:
 |---|------------|----------|
 | 1 | `Current Idea Folder` is set (not N/A) | Yes |
 | 2 | Refined idea summary exists (`{Current Idea Folder}/idea-summary-vN.md`) | Yes |
-| 3 | `config/tools.json` accessible | Yes |
+| 3 | `x-ipe-docs/config/tools.json` accessible | Yes |
 | 4 | At least one architecture tool enabled OR manual mode accepted | Yes |
 
 ---
@@ -180,7 +180,7 @@ Execute Idea to Architecture by following these steps in order:
 | Step | Name | Action | Gate to Next |
 |------|------|--------|--------------|
 | 1 | Validate Folder | Verify Current Idea Folder exists | Folder validated |
-| 2 | Load Config | Read `config/tools.json` architecture section | Config loaded |
+| 2 | Load Config | Read `x-ipe-docs/config/tools.json` architecture section | Config loaded |
 | 3 | Read Idea Summary | Load latest idea-summary-vN.md from folder | Summary loaded |
 | 4 | Identify Architecture Needs | Extract system components from idea | Needs identified |
 | 5 | Create Diagrams | Generate diagrams using enabled tools | Diagrams created |
@@ -229,10 +229,10 @@ Execute Idea to Architecture by following these steps in order:
 
 **Action:** Read and parse the architecture section from tools config
 
-**Default Path:** `config/tools.json`
+**Default Path:** `x-ipe-docs/config/tools.json`
 
 ```
-1. Check if config/tools.json exists
+1. Check if x-ipe-docs/config/tools.json exists
 2. If exists:
    a. Parse JSON file
    b. Extract stages.ideation.architecture section configuration
@@ -438,7 +438,7 @@ Instead, create a new version: `{Current Idea Folder}/idea-summary-v{N+1}.md`
 | # | Checkpoint | Required |
 |---|------------|----------|
 | 1 | `Current Idea Folder` validated and exists | Yes |
-| 2 | `config/tools.json` loaded and architecture section parsed | Yes |
+| 2 | `x-ipe-docs/config/tools.json` loaded and architecture section parsed | Yes |
 | 3 | Idea summary read and analyzed | Yes |
 | 4 | Architecture needs identified and prioritized | Yes |
 | 5 | Diagrams created using enabled tools (or manual description) | Yes |
@@ -615,7 +615,7 @@ sequenceDiagram
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
 | Creating diagrams before reading idea | May miss requirements | Always analyze idea first |
-| Ignoring config/tools.json config | Inconsistent tool usage | Always check config |
+| Ignoring x-ipe-docs/config/tools.json config | Inconsistent tool usage | Always check config |
 | Too much detail in initial diagrams | Overwhelms review | Start with high-level, add detail if requested |
 | Skipping human review | May create wrong architecture | Always get approval |
 | Using disabled tools | Violates config rules | Only use enabled tools |

@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Flexbox utility classes: jc-*, ai-*, fd-*, gap-* for layout control
   - Status colors: healthy (#22c55e), warning (#f97316), critical (#ef4444)
   - Export capabilities: PNG (html2canvas), SVG (DOM serialization), standalone HTML
-  - Registered in `config/tools.json` under `stages.ideation.ideation.tool-architecture-draw`
+  - Registered in `x-ipe-docs/config/tools.json` under `stages.ideation.ideation.tool-architecture-draw`
   - 71 comprehensive tests validating structure, templates, CSS, rules, examples, and config
 
 - **FEATURE-015: Architecture DSL Skill** - Tool skill for architecture diagram DSL translation
@@ -39,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Supported style properties: justify-content, align-items, flex-direction, row-gap, column-gap
   - `text-align left|center|right` with inheritance (top → layer → module)
   - `virtual-box { }` for grouping with vertical stacking
-  - Registered in `config/tools.json` under `stages.ideation.ideation.tool-architecture-dsl`
+  - Registered in `x-ipe-docs/config/tools.json` under `stages.ideation.ideation.tool-architecture-dsl`
   - 52 comprehensive tests validating structure, grammar, examples, and config
 
 - **FEATURE-013: Default Theme Content** - Pre-built default theme for X-IPE
@@ -65,7 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Stage Toolbox integration: Themes section at top of modal
   - 4-column visual theme card grid with auto-generated color swatches
   - Click card to select theme (pink accent border, checkmark indicator)
-  - Theme selection persisted in `config/tools.json` under `themes.selected`
+  - Theme selection persisted in `x-ipe-docs/config/tools.json` under `themes.selected`
   - Scrollable grid when >8 themes (max-height: 280px)
   - 36 comprehensive tests covering service, API, and edge cases
 
@@ -75,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Ideation stage with 3 phases: Ideation (`antv-infographic`, `mermaid`), Mockup (`frontend-design`), Sharing
   - Toggle switches for enabling/disabling tools with immediate persistence
   - Active tool count badges per stage
-  - ToolsConfigService backend with `config/tools.json` storage
+  - ToolsConfigService backend with `x-ipe-docs/config/tools.json` storage
   - Auto-migration from legacy `.ideation-tools.json` (deletes old file after migration)
   - GET/POST `/api/config/tools` API endpoints
   - StageToolboxModal JavaScript class with full modal lifecycle

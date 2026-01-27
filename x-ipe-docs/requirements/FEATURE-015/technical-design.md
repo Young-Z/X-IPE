@@ -22,7 +22,7 @@
 - Tool skill at `.github/skills/tool-architecture-dsl/`
 - DSL grammar reference document (v2 grid syntax)
 - Example DSL files (Module View, Landscape View)
-- Integration with `config/tools.json`
+- Integration with `x-ipe-docs/config/tools.json`
 - Migration guide from v1 to v2
 
 **Out of Scope:**
@@ -45,7 +45,7 @@
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
 | `infographic-syntax-creator` | Existing Skill | [SKILL.md](../../.github/skills/infographic-syntax-creator/SKILL.md) | Reference for skill structure and DSL patterns |
-| `config/tools.json` | FEATURE-011 | [technical-design.md](../FEATURE-011/technical-design.md) | Tool toggle configuration |
+| `x-ipe-docs/config/tools.json` | FEATURE-011 | [technical-design.md](../FEATURE-011/technical-design.md) | Tool toggle configuration |
 | `tool-architecture-dsl-v1-backup` | v1 Backup | [SKILL.md](../../.github/skills/tool-architecture-dsl-v1-backup/SKILL.md) | Flexbox-based v1 for reference |
 
 ### Major Flow
@@ -296,7 +296,7 @@ description: Translate between natural language and Architecture DSL v2 (grid-ba
 
 ### Config Integration
 
-**Location:** `config/tools.json`
+**Location:** `x-ipe-docs/config/tools.json`
 
 ```json
 {

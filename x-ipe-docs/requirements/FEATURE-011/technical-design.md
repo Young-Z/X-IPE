@@ -42,7 +42,7 @@
 
 ### Major Flow
 
-1. **App Start:** `ToolsConfigService.load()` → Check `config/tools.json` → If missing, check legacy → Migrate or create default
+1. **App Start:** `ToolsConfigService.load()` → Check `x-ipe-docs/config/tools.json` → If missing, check legacy → Migrate or create default
 2. **Modal Open:** User clicks top bar icon → Frontend renders `StageToolboxModal` → `GET /api/config/tools` → Populate accordion state
 3. **Tool Toggle:** User toggles switch → `POST /api/config/tools` with updated config → Service writes to file → Badge updates
 
@@ -105,7 +105,7 @@ modal.open();  // Fetches config and renders
 │  ┌─────────────────────┐ │  ┌─────────────────────────────┐ │
 │  │ /api/config/tools   │─┤  │ load() → migrate → save()  │ │
 │  │   GET: get config   │ │  │                             │ │
-│  │   POST: save config │ │  │ config/tools.json           │ │
+│  │   POST: save config │ │  │ x-ipe-docs/config/tools.json           │ │
 │  └─────────────────────┘ │  └─────────────────────────────┘ │
 └──────────────────────────┴──────────────────────────────────┘
 ```
@@ -116,14 +116,14 @@ modal.open();  // Fetches config and renders
 
 ```mermaid
 flowchart TD
-    A[App Start] --> B{config/tools.json exists?}
-    B -->|Yes| C[Load config/tools.json]
+    A[App Start] --> B{x-ipe-docs/config/tools.json exists?}
+    B -->|Yes| C[Load x-ipe-docs/config/tools.json]
     B -->|No| D{Legacy .ideation-tools.json exists?}
     D -->|Yes| E[Migrate legacy config]
-    E --> F[Write config/tools.json]
+    E --> F[Write x-ipe-docs/config/tools.json]
     F --> G[Delete legacy file]
     D -->|No| H[Create default config]
-    H --> I[Write config/tools.json]
+    H --> I[Write x-ipe-docs/config/tools.json]
     C --> J[Return config]
     G --> J
     I --> J
@@ -144,7 +144,7 @@ sequenceDiagram
     TB->>M: open()
     M->>API: GET /api/config/tools
     API->>S: get_config()
-    S->>FS: Read config/tools.json
+    S->>FS: Read x-ipe-docs/config/tools.json
     FS-->>S: JSON content
     S-->>API: ToolsConfig
     API-->>M: 200 OK + config
@@ -153,7 +153,7 @@ sequenceDiagram
     U->>M: Toggle tool switch
     M->>API: POST /api/config/tools
     API->>S: save_config(config)
-    S->>FS: Write config/tools.json
+    S->>FS: Write x-ipe-docs/config/tools.json
     FS-->>S: Success
     S-->>API: OK
     API-->>M: 200 OK
@@ -162,7 +162,7 @@ sequenceDiagram
 
 ### Data Models
 
-#### Config File Schema (`config/tools.json`)
+#### Config File Schema (`x-ipe-docs/config/tools.json`)
 
 ```json
 {
@@ -655,8 +655,8 @@ Key styles matching mockup v2 (light theme, 680px width):
 
 | Scenario | Expected Behavior | Implementation |
 |----------|-------------------|----------------|
-| `config/` directory missing | Auto-create on first save | `mkdir(parents=True, exist_ok=True)` |
-| `config/tools.json` corrupted | Log warning, use defaults | Try/except in `_read_config()` |
+| `x-ipe-docs/config/` directory missing | Auto-create on first save | `mkdir(parents=True, exist_ok=True)` |
+| `x-ipe-docs/config/tools.json` corrupted | Log warning, use defaults | Try/except in `_read_config()` |
 | Legacy migration fails | Log warning, use defaults | Try/except in `_migrate_legacy()` |
 | API POST with invalid JSON | Return 400 error | Validate `'stages' in config` |
 | Network error on toggle | Show toast error, revert toggle | Catch fetch error, undo checkbox |

@@ -69,7 +69,7 @@ zone "Skills & Configuration" {
   
   app "Tools Config" as toolsconfig {
     tech: JSON
-    platform: config/
+    platform: x-ipe-docs/config/
     status: healthy
   }
   

@@ -1,6 +1,6 @@
 [project]
 name = "x-ipe"
-version = "1.0.0"
+version = "1.0.6"
 description = "X-IPE: AI-powered development framework"
 requires-python = ">=3.12"
 dependencies = [
@@ -28,6 +28,10 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/x_ipe"]
+
+[tool.hatch.build.targets.wheel.force-include]
+".github/skills" = "x_ipe/resources/skills"
+".github/copilot-instructions.md" = "x_ipe/resources/copilot-instructions.md"
 
 [dependency-groups]
 dev = [

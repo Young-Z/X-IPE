@@ -63,13 +63,13 @@ x-ipe-docs/themes/
 #### Toolbox Modal
 - **Themes section** at the top of modal
 - **Visual theme cards** with preview thumbnails
-- Selection saved to `config/tools.json` (reusing existing toolbox config pattern)
+- Selection saved to `x-ipe-docs/config/tools.json` (reusing existing toolbox config pattern)
 - Theme applies to current idea (per-idea persistence)
 
 ### 4. New Skill: `tool-frontend-design`
 
 - **Purpose**: Theme-aware frontend design skill
-- **Behavior**: Reads selected theme from `config/tools.json`, loads `design-system.md` and `component-visualization.html`, applies tokens to generated designs
+- **Behavior**: Reads selected theme from `x-ipe-docs/config/tools.json`, loads `design-system.md` and `component-visualization.html`, applies tokens to generated designs
 - **Relationship**: Separate from existing `frontend-design` skill (keeps original intact)
 
 ---
@@ -93,7 +93,7 @@ x-ipe-docs/themes/
 - `component-visualization.html` with visual + structured data
 - Default "neutral/system" theme shipped with X-IPE
 - Themes section in toolbox modal with visual cards
-- Theme selection persisted in `config/tools.json`
+- Theme selection persisted in `x-ipe-docs/config/tools.json`
 - Sidebar themes menu
 - New `tool-frontend-design` skill
 
@@ -108,7 +108,7 @@ x-ipe-docs/themes/
 
 ## Technical Considerations
 
-1. **Config Reuse**: Leverage existing `config/tools.json` pattern for theme persistence
+1. **Config Reuse**: Leverage existing `x-ipe-docs/config/tools.json` pattern for theme persistence
 2. **Skill Design**: `tool-frontend-design` should be invocable from ideation toolbox
 3. **Fallback**: If no theme selected, use `theme-default`
 4. **Discovery**: Scan `x-ipe-docs/themes/theme-*/` folders to list available themes

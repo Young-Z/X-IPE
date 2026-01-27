@@ -86,7 +86,7 @@ Users include designers defining brand tokens, developers selecting themes for p
 - [ ] AC-5.7: Thumbnails auto-generated from design-system.md color tokens
 
 ### Theme Selection Persistence
-- [ ] AC-6.1: Selected theme saved to `config/tools.json` under `themes.selected` key
+- [ ] AC-6.1: Selected theme saved to `x-ipe-docs/config/tools.json` under `themes.selected` key
 - [ ] AC-6.2: Theme selection is global (applies to all ideas)
 - [ ] AC-6.3: If no theme selected, default to `theme-default`
 - [ ] AC-6.4: Theme selection persists across browser refresh
@@ -151,7 +151,7 @@ Users include designers defining brand tokens, developers selecting themes for p
 **Details:**
 - Input: User clicks theme card
 - Process: 
-  - Update `config/tools.json` with `themes.selected: "theme-name"`
+  - Update `x-ipe-docs/config/tools.json` with `themes.selected: "theme-name"`
   - Update UI to show selected state
 - Output: Theme selection persists across sessions
 
@@ -315,7 +315,7 @@ See [themes-toolbox-modal.html](mockups/themes-toolbox-modal.html) for visual de
 - Use CSS Grid for 4-column layout
 
 ### Configuration
-- Add to existing `config/tools.json` schema:
+- Add to existing `x-ipe-docs/config/tools.json` schema:
 ```json
 {
   "themes": {
@@ -337,7 +337,7 @@ See [themes-toolbox-modal.html](mockups/themes-toolbox-modal.html) for visual de
 
 - [x] Q1: Should theme thumbnails be auto-generated? **Answer: Yes, from design-system.md tokens**
 - [x] Q2: Max themes before scrolling? **Answer: 8 themes**
-- [x] Q3: Theme persistence scope? **Answer: Global (config/tools.json)**
+- [x] Q3: Theme persistence scope? **Answer: Global (x-ipe-docs/config/tools.json)**
 - [x] Q4: Sidebar menu purpose? **Answer: Browse/edit raw theme files**
 
 ---

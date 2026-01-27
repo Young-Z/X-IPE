@@ -22,7 +22,7 @@ class WorkplaceManager {
         this.fileType = null; // markdown | code | text
         this.fileExtension = null;
         this.easyMDE = null; // EasyMDE editor instance for compose view
-        this.copilotPrompts = []; // Loaded from config/copilot-prompt.json
+        this.copilotPrompts = []; // Loaded from x-ipe-docs/config/copilot-prompt.json
         this._loadCopilotPrompts();
     }
     

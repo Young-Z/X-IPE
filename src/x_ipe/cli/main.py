@@ -205,6 +205,9 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool) -> Non
     if not no_skills:
         scaffold.copy_skills()
     
+    # Copy/merge copilot-instructions.md
+    scaffold.copy_copilot_instructions()
+    
     # Create config file
     scaffold.create_config_file()
     
@@ -307,7 +310,7 @@ def serve(ctx: click.Context, host: Optional[str], port: Optional[int],
         os.environ["FLASK_DEBUG"] = "1" if final_debug else "0"
         
         # Import the Flask app
-        from src.app import create_app, socketio
+        from x_ipe.app import create_app, socketio
         
         app = create_app()
         

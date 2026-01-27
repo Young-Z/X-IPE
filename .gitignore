@@ -41,7 +41,7 @@ instance/
 # Environment
 .env
 .env.local
-config/.env
+x-ipe-docs/config/.env
 
 # OS
 .DS_Store

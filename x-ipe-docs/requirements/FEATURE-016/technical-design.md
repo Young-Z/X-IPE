@@ -22,7 +22,7 @@
 - HTML/CSS templates for rendering diagrams
 - Rendering rules documentation
 - Example rendered outputs
-- Integration with `config/tools.json`
+- Integration with `x-ipe-docs/config/tools.json`
 
 **Out of Scope:**
 - DSL grammar definition (handled by FEATURE-015)
@@ -48,7 +48,7 @@
 |------------|--------|-------------|-------------------|
 | `tool-architecture-dsl` | FEATURE-015 | [SKILL.md](../../.github/skills/tool-architecture-dsl/SKILL.md) | Provides DSL grammar for parsing input |
 | `frontend-design` | Existing Skill | [SKILL.md](../../.github/skills/frontend-design/SKILL.md) | Reference for HTML rendering patterns |
-| `config/tools.json` | FEATURE-011 | [technical-design.md](../FEATURE-011/technical-design.md) | Tool toggle configuration |
+| `x-ipe-docs/config/tools.json` | FEATURE-011 | [technical-design.md](../FEATURE-011/technical-design.md) | Tool toggle configuration |
 
 ### Major Flow
 
@@ -205,7 +205,7 @@ flowchart TD
 #### Phase 6: Examples & Config
 1. Create rendered Module View example
 2. Create rendered Landscape View example
-3. Register in `config/tools.json`
+3. Register in `x-ipe-docs/config/tools.json`
 
 ### CSS Class Mapping
 
@@ -363,7 +363,7 @@ flowchart LR
 
 ### Config Integration
 
-**File:** `config/tools.json`
+**File:** `x-ipe-docs/config/tools.json`
 
 **Location:** `stages.ideation.ideation.tool-architecture-draw`
 

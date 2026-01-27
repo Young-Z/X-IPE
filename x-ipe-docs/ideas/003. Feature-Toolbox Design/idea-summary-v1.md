@@ -45,7 +45,7 @@ The current toolbox is limited to ideation stage only and uses a dropdown/inline
 
 #### File Location
 - **Old**: `x-ipe-docs/ideas/.ideation-tools.json`
-- **New**: `config/tools.json` (project root)
+- **New**: `x-ipe-docs/config/tools.json` (project root)
 
 #### Structure: Nested 3-Level Hierarchy
 ```json
@@ -84,13 +84,13 @@ The current toolbox is limited to ideation stage only and uses a dropdown/inline
 
 #### Scope
 - **Project-level**: Configuration applies to entire project
-- **Location**: `{project_root}/config/tools.json`
+- **Location**: `{project_root}/x-ipe-docs/config/tools.json`
 
 ### 3. Technical Considerations
 
 #### Backend Changes
 - New API endpoint: `GET/POST /api/config/tools`
-- Read/write `config/tools.json`
+- Read/write `x-ipe-docs/config/tools.json`
 - Migration from old `.ideation-tools.json` format
 
 #### Frontend Changes
@@ -102,7 +102,7 @@ The current toolbox is limited to ideation stage only and uses a dropdown/inline
 
 #### Migration Path
 1. Auto-detect old `.ideation-tools.json`
-2. Migrate to new `config/tools.json` format
+2. Migrate to new `x-ipe-docs/config/tools.json` format
 3. Preserve existing tool states
 
 ### 4. Future Extensibility
@@ -128,7 +128,7 @@ These placeholders allow the UI to be built now while tools are added incrementa
 2. ✅ All 5 stages visible as accordion sections
 3. ✅ Ideation stage tools functional (migrated from old config)
 4. ✅ Other stages show as placeholders
-5. ✅ Config saved to `config/tools.json`
+5. ✅ Config saved to `x-ipe-docs/config/tools.json`
 6. ✅ Existing functionality preserved
 
 ## Questions Resolved

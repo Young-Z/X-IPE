@@ -44,7 +44,7 @@ Learn and refine user ideas through collaborative brainstorming by:
 | Attribute | Default Value |
 |-----------|---------------|
 | Auto Proceed | False |
-| Ideation Toolbox Meta | `{project_root}/config/tools.json` |
+| Ideation Toolbox Meta | `{project_root}/x-ipe-docs/config/tools.json` |
 | Extra Instructions | N/A |
 
 ### Extra Instructions Attribute
@@ -53,7 +53,7 @@ Learn and refine user ideas through collaborative brainstorming by:
 
 **Source:** This value can be obtained from:
 1. Human input (explicit instructions provided)
-2. `config/tools.json` → `stages.ideation.ideation._extra_instruction` field
+2. `x-ipe-docs/config/tools.json` → `stages.ideation.ideation._extra_instruction` field
 3. Default: N/A (no extra instructions)
 
 **Loading Logic:**
@@ -61,7 +61,7 @@ Learn and refine user ideas through collaborative brainstorming by:
 1. IF human provides explicit Extra Instructions:
    → Use human-provided value
 
-2. ELSE IF config/tools.json exists:
+2. ELSE IF x-ipe-docs/config/tools.json exists:
    a. Read stages.ideation.ideation._extra_instruction field
    b. IF field exists AND is not empty:
       → Use value from config
@@ -79,7 +79,7 @@ Learn and refine user ideas through collaborative brainstorming by:
 
 ### Ideation Toolbox Meta File
 
-**Location:** `config/tools.json` (relative to project root)
+**Location:** `x-ipe-docs/config/tools.json` (relative to project root)
 
 **Purpose:** Defines which tools are enabled for ideation, mockup creation, and idea sharing.
 
@@ -115,7 +115,7 @@ Learn and refine user ideas through collaborative brainstorming by:
 1. **File exists:** Load and parse the JSON configuration
 2. **File missing:** 
    - Create default file with all tools set to `false`
-   - Inform user: "No ideation tools configured. Create `config/tools.json` to enable tools."
+   - Inform user: "No ideation tools configured. Create `x-ipe-docs/config/tools.json` to enable tools."
 3. **Tool enabled (`true`):** Attempt to use the tool during ideation
 4. **Tool disabled (`false`):** Skip the tool
 5. **Tool unavailable:** Log limitation and proceed without it
@@ -132,7 +132,7 @@ When tools are enabled in the meta file, the agent MUST attempt to use them duri
 | Prototyping Tools | Quick demos, proof of concepts | Code generation, no-code tools |
 
 **Usage Rules:**
-1. Read `config/tools.json` at start of ideation task
+1. Read `x-ipe-docs/config/tools.json` at start of ideation task
 2. For each section (`stages.ideation.ideation`, `stages.ideation.mockup`, `stages.ideation.sharing`), check enabled tools
 3. If tool is enabled (`true`) → Attempt to use during relevant steps
 4. If tool is unavailable or fails → Document the limitation and proceed manually
@@ -156,7 +156,7 @@ Execute Ideation by following these steps in order:
 
 | Step | Name | Action | Gate to Next |
 |------|------|--------|--------------|
-| 1 | Load Toolbox Meta | Read `config/tools.json` config | Config loaded |
+| 1 | Load Toolbox Meta | Read `x-ipe-docs/config/tools.json` config | Config loaded |
 | 2 | Analyze Files | Read all files in idea folder | Files analyzed |
 | 3 | Initialize Tools | Set up enabled tools from config | Tools ready (or skipped) |
 | 4 | Generate Summary | Create understanding summary for user | Summary shared |
@@ -178,10 +178,10 @@ Execute Ideation by following these steps in order:
 
 **Action:** Read and parse the ideation tools configuration file
 
-**Default Path:** `config/tools.json`
+**Default Path:** `x-ipe-docs/config/tools.json`
 
 ```
-1. Check if config/tools.json exists
+1. Check if x-ipe-docs/config/tools.json exists
 2. If exists:
    a. Parse JSON file
    b. Validate version and structure
@@ -189,7 +189,7 @@ Execute Ideation by following these steps in order:
    d. Extract _extra_instruction from stages.ideation.ideation section (if exists)
 3. If NOT exists:
    a. Create default config file with all tools disabled
-   b. Inform user: "Created default config/tools.json - configure tools to enable"
+   b. Inform user: "Created default x-ipe-docs/config/tools.json - configure tools to enable"
 4. Load Extra Instructions:
    a. IF human provided explicit Extra Instructions → Use human value
    b. ELSE IF _extra_instruction field exists and is not empty → Use config value
@@ -233,7 +233,7 @@ Execute Ideation by following these steps in order:
 
 ### Step 3: Initialize Ideation Tools (Based on Config)
 
-**Action:** Set up and test tools enabled in `config/tools.json`
+**Action:** Set up and test tools enabled in `x-ipe-docs/config/tools.json`
 
 **When:** Any tool is set to `true` in the config file
 
@@ -310,7 +310,7 @@ For each enabled tool in config:
 ### Questions & Ambiguities
 {What needs clarification?}
 
-### Enabled Tools (from config/tools.json)
+### Enabled Tools (from x-ipe-docs/config/tools.json)
 - Ideation: {list enabled ideation tools}
 - Mockup: {list enabled mockup tools}
 - Sharing: {list enabled sharing tools}
@@ -324,7 +324,7 @@ For each enabled tool in config:
 
 **Tool-Enhanced Brainstorming (Based on Config):**
 
-When tools are enabled in `config/tools.json`, invoke corresponding skills during brainstorming:
+When tools are enabled in `x-ipe-docs/config/tools.json`, invoke corresponding skills during brainstorming:
 
 | Config Enabled | Skill to Invoke | When to Use |
 |----------------|-----------------|-------------|
@@ -514,7 +514,7 @@ Location: x-ipe-docs/ideas/{folder}/mockup-vN.html (same folder as idea-summary)
 **Config-Driven Visualization:**
 
 ```
-When creating idea summary, check config/tools.json config:
+When creating idea summary, check x-ipe-docs/config/tools.json config:
 
 IF config.stages.ideation.ideation["antv-infographic"] == true:
   → Invoke `infographic-syntax-creator` skill
@@ -587,7 +587,7 @@ IF ALL are false:
 
 | # | Checkpoint | Required |
 |---|------------|----------|
-| 1 | `config/tools.json` loaded and parsed | Yes |
+| 1 | `x-ipe-docs/config/tools.json` loaded and parsed | Yes |
 | 2 | All idea files analyzed | Yes |
 | 3 | Enabled tools initialized (based on config) | If Tools Enabled |
 | 4 | Brainstorming session completed | Yes |
@@ -704,7 +704,7 @@ Your idea has been refined. What would you like to do next?
 | Accepting everything at face value | May miss issues | Challenge assumptions constructively |
 | Skipping to requirements | Idea not refined | Complete ideation first |
 | Being passive | Not collaborative | Offer suggestions actively |
-| Ignoring `config/tools.json` | Misses tool capabilities | Always check config first |
+| Ignoring `x-ipe-docs/config/tools.json` | Misses tool capabilities | Always check config first |
 | Using tools when disabled in config | Unexpected behavior | Respect config settings |
 | Plain text when visualization enabled | Harder to scan visually | Use configured tools (infographic/mermaid/architecture-dsl) |
 | Creating separate HTML for architecture | Unnecessary when DSL enabled | Embed `architecture-dsl` directly in markdown (IPE renders it) |

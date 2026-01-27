@@ -48,7 +48,7 @@ flowchart TB
     end
     
     subgraph Data["Data Layer"]
-        Filesystem["Filesystem (x-ipe-docs/, config/)"]
+        Filesystem["Filesystem (x-ipe-docs/)"]
         Instance["Instance (session data)"]
     end
     
@@ -74,7 +74,7 @@ flowchart LR
     
     subgraph Storage["Storage"]
         Docs["x-ipe-docs/"]
-        Config["config/"]
+        Config["x-ipe-docs/config/"]
     end
     
     Copilot -->|"executes"| App

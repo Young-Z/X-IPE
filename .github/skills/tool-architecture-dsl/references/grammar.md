@@ -716,7 +716,7 @@ layer "Data" {
     grid 1 x 2
     align center center
     gap 8px
-    component "config/tools.json" { cols 1, rows 1 } <<file>>
+    component "x-ipe-docs/config/tools.json" { cols 1, rows 1 } <<file>>
     component ".x-ipe.yaml" { cols 1, rows 1 } <<file>>
   }
   

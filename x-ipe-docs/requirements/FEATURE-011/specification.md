@@ -16,7 +16,7 @@
 
 The Stage Toolbox transforms the current Ideation Toolbox (limited to ideation stage only with dropdown/inline UI) into a comprehensive tool management modal that supports all development stages. The modal provides an organized, scalable interface using accordion sections for five development stages: Ideation, Requirement, Feature, Quality, and Refactoring.
 
-Each stage contains sub-phases with configurable tools that can be toggled on/off. The configuration is stored project-wide in `config/tools.json` with immediate persistence on every toggle change. The feature includes automatic migration from the legacy `.ideation-tools.json` format.
+Each stage contains sub-phases with configurable tools that can be toggled on/off. The configuration is stored project-wide in `x-ipe-docs/config/tools.json` with immediate persistence on every toggle change. The feature includes automatic migration from the legacy `.ideation-tools.json` format.
 
 This feature is designed for developers and project managers who need to configure which AI-assisted tools are available at each stage of the development lifecycle within X-IPE.
 
@@ -64,9 +64,9 @@ This feature is designed for developers and project managers who need to configu
 - [x] AC-4.3: No functional toggles in placeholder stages
 
 ### Configuration
-- [x] AC-5.1: Config stored in `config/tools.json`
+- [x] AC-5.1: Config stored in `x-ipe-docs/config/tools.json`
 - [x] AC-5.2: Config uses nested 3-level structure (stage > phase > tool)
-- [x] AC-5.3: Auto-create `config/` directory if not exists
+- [x] AC-5.3: Auto-create `x-ipe-docs/config/` directory if not exists
 - [x] AC-5.4: Auto-migrate from `.ideation-tools.json` if exists
 - [x] AC-5.5: Delete old `.ideation-tools.json` after successful migration
 
@@ -102,7 +102,7 @@ This feature is designed for developers and project managers who need to configu
 
 **Details:**
 - Input: Toggle switch click
-- Process: Update tool state in memory, persist to `config/tools.json`
+- Process: Update tool state in memory, persist to `x-ipe-docs/config/tools.json`
 - Output: Toggle visual state changes, badge count updates, file written
 
 ### FR-4: Configuration Loading
@@ -112,7 +112,7 @@ This feature is designed for developers and project managers who need to configu
 **Details:**
 - Input: Application initialization
 - Process: 
-  1. Check for `config/tools.json`
+  1. Check for `x-ipe-docs/config/tools.json`
   2. If not exists, check for `.ideation-tools.json` (legacy)
   3. If legacy exists, migrate and delete old file
   4. If neither exists, create default config
@@ -127,7 +127,7 @@ This feature is designed for developers and project managers who need to configu
 - Process:
   1. Read legacy JSON format
   2. Map to new 3-level structure under `stages.ideation`
-  3. Write to `config/tools.json`
+  3. Write to `x-ipe-docs/config/tools.json`
   4. Delete legacy file
 - Output: New config file created, legacy file removed
 
@@ -236,12 +236,12 @@ This feature is designed for developers and project managers who need to configu
 
 ### Edge Case 1: Missing config directory
 
-**Scenario:** `config/` directory does not exist  
+**Scenario:** `x-ipe-docs/config/` directory does not exist  
 **Expected Behavior:** Create directory automatically before writing config file
 
 ### Edge Case 2: Corrupted config file
 
-**Scenario:** `config/tools.json` contains invalid JSON  
+**Scenario:** `x-ipe-docs/config/tools.json` contains invalid JSON  
 **Expected Behavior:** Log warning, recreate with default config, preserve any readable values if possible
 
 ### Edge Case 3: Migration with partial data
@@ -256,7 +256,7 @@ This feature is designed for developers and project managers who need to configu
 
 ### Edge Case 5: Modal open during file change
 
-**Scenario:** External process modifies `config/tools.json` while modal is open  
+**Scenario:** External process modifies `x-ipe-docs/config/tools.json` while modal is open  
 **Expected Behavior:** Modal shows stale data until reopened (acceptable for v1.0)
 
 ## Out of Scope
@@ -275,7 +275,7 @@ This feature is designed for developers and project managers who need to configu
 - **Backend:** New `ToolsConfigService` class in `src/services/`
 - **API:** `GET/POST /api/config/tools` endpoint
 - **Frontend:** `StageToolboxModal` component (vanilla JS, no framework)
-- **Storage:** JSON file at `{project_root}/config/tools.json`
+- **Storage:** JSON file at `{project_root}/x-ipe-docs/config/tools.json`
 - **Migration:** One-time migration logic in config service initialization
 
 **Config File Schema:**

@@ -30,7 +30,7 @@ Create two architecture diagrams using the `tool-architecture-dsl` and `tool-arc
 Shows X-IPE's layered architecture with services as components:
 - **Presentation Layer:** Jinja2 Templates, Frontend JS modules (Workplace Manager, Terminal, Stage Toolbox, Content Renderer)
 - **Business Logic Layer:** Core Services (FileService, IdeasService, TerminalService), Configuration Services (ConfigService, SettingsService, ToolsConfigService), Extension Services (ThemesService, SkillsService)
-- **Data Layer:** Project Files (x-ipe-docs/, src/, static/), Configuration (config/tools.json, .x-ipe.yaml), Session Data (instance/)
+- **Data Layer:** Project Files (x-ipe-docs/, src/, static/), Configuration (x-ipe-docs/config/tools.json, .x-ipe.yaml), Session Data (instance/)
 
 ### 2. Landscape View (External Integrations)
 Shows X-IPE's connections to external systems:

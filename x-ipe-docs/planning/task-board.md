@@ -6,7 +6,7 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-183 | Code Implementation | FEATURE-018: X-IPE CLI Tool - Status & Info Commands | Drift | ✅ completed | 01-26-2026 15:25:00 | src/x_ipe/cli/main.py | Human Playground |
+| TASK-187 | Idea Mockup | IDEA-015: AI Chat Widget with Rich Widgets | Ember | 🔄 in_progress | 01-27-2026 14:32:00 | - | Requirement Gathering |
 
 ---
 
@@ -14,6 +14,7 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-183 | Code Implementation | FEATURE-018: X-IPE CLI Tool - Status & Info Commands | Drift | 01-26-2026 15:25:00 | src/x_ipe/cli/main.py | Commands implemented |
 | TASK-184 | Code Refactor | Rename docs folder to x-ipe-docs and update all references | Flux | 01-26-2026 16:40:00 | x-ipe-docs/ | Renamed docs → x-ipe-docs, updated ~106 files |
 | TASK-182 | Idea Mockup | IDEA-014: Replenishment System Dashboard Mockup | Spark | 01-26-2026 10:20:00 | x-ipe-docs/ideas/Sample - Replishment system/mockups/dashboard-v1.html | Mockup created |
 | TASK-181 | Ideation | IDEA-014: Product Replenishment System for Boutique | Spark | 01-26-2026 10:15:00 | x-ipe-docs/ideas/Sample - Replishment system/idea-summary-v1.md | Idea refined |
@@ -68,12 +69,12 @@
 
 ## Quick Stats
 
-- **Total Active:** 0
-- **In Progress:** 0
+- **Total Active:** 1
+- **In Progress:** 1
 - **Pending Review:** 0
 - **Blocked:** 0
 - **Deferred:** 0
-- **Completed (archived):** 150
+- **Completed (archived):** 151
 
 ---
 

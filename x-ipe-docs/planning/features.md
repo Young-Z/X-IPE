@@ -231,7 +231,7 @@ This board tracks all features across the project lifecycle.
 - 5-stage accordion (Ideation, Requirement, Feature, Quality, Refactoring)
 - Nested phases within each stage
 - Toggle switches for tool enable/disable
-- Config stored in `config/tools.json`
+- Config stored in `x-ipe-docs/config/tools.json`
 - Auto-migration from old `.ideation-tools.json`
 - Placeholder stages show "Coming soon"
 

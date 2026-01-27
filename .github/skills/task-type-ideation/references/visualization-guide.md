@@ -1,6 +1,6 @@
 # Visualization Guidelines
 
-Use visualization tools based on `config/tools.json` config.
+Use visualization tools based on `x-ipe-docs/config/tools.json` config.
 
 ---
 

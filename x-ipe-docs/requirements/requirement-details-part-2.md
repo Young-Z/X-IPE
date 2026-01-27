@@ -78,7 +78,7 @@
    - [ ] AC-5.7: Thumbnails auto-generated from design-system.md color tokens
 
 6. **Theme Selection Persistence**
-   - [ ] AC-6.1: Selected theme saved to `config/tools.json` under `themes.selected` key
+   - [ ] AC-6.1: Selected theme saved to `x-ipe-docs/config/tools.json` under `themes.selected` key
    - [ ] AC-6.2: Theme selection is global (applies to all ideas)
    - [ ] AC-6.3: If no theme selected, default to `theme-default`
    - [ ] AC-6.4: Theme selection persists across browser refresh
@@ -102,7 +102,7 @@
 |----------|--------|
 | Thumbnail generation? | Auto-generated from design-system.md color tokens |
 | Grid limit before scroll? | 8 themes max, then scrollable |
-| Persistence scope? | Global only (config/tools.json) |
+| Persistence scope? | Global only (x-ipe-docs/config/tools.json) |
 | Sidebar themes menu purpose? | Display raw theme files for viewing/editing |
 
 ---
@@ -160,7 +160,7 @@
    - [ ] AC-1.3: Registered in toolbox as a Mockup phase tool
 
 2. **Theme Loading**
-   - [ ] AC-2.1: Read selected theme from `config/tools.json` → `themes.selected`
+   - [ ] AC-2.1: Read selected theme from `x-ipe-docs/config/tools.json` → `themes.selected`
    - [ ] AC-2.2: Load `design-system.md` from selected theme folder
    - [ ] AC-2.3: Load `component-visualization.html` for reference
    - [ ] AC-2.4: Fall back to `theme-default` if selected theme missing
@@ -239,7 +239,7 @@
    - [ ] AC-6.4: DSL refinement (update existing DSL based on feedback)
 
 7. **Integration**
-   - [ ] AC-7.1: Configurable via `config/tools.json` under `stages.ideation.ideation.tool-architecture-dsl`
+   - [ ] AC-7.1: Configurable via `x-ipe-docs/config/tools.json` under `stages.ideation.ideation.tool-architecture-dsl`
    - [ ] AC-7.2: Can be enabled/disabled in Stage Toolbox modal
    - [ ] AC-7.3: Works alongside other ideation tools (mermaid, antv-infographic)
 
@@ -313,7 +313,7 @@
    - [ ] AC-6.4: White canvas background (matching reference samples)
 
 7. **Integration**
-   - [ ] AC-7.1: Configurable via `config/tools.json` under `stages.ideation.ideation.architecture-draw`
+   - [ ] AC-7.1: Configurable via `x-ipe-docs/config/tools.json` under `stages.ideation.ideation.architecture-draw`
    - [ ] AC-7.2: Can be enabled/disabled in Stage Toolbox modal
    - [ ] AC-7.3: Invoked automatically after DSL skill generates output
    - [ ] AC-7.4: Output files saved to idea folder

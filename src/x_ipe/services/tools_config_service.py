@@ -3,7 +3,7 @@ FEATURE-011: Stage Toolbox
 
 ToolsConfigService: CRUD operations for tools configuration
 
-Manages stage toolbox configuration stored in config/tools.json.
+Manages stage toolbox configuration stored in x-ipe-docs/config/tools.json.
 Supports migration from legacy .ideation-tools.json format.
 """
 import json
@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict, Any
 
 
-CONFIG_DIR = 'config'
+CONFIG_DIR = 'x-ipe-docs/config'
 CONFIG_FILE = 'tools.json'
 LEGACY_PATH = 'x-ipe-docs/ideas/.ideation-tools.json'
 
@@ -38,7 +38,7 @@ class ToolsConfigService:
     
     FEATURE-011: Stage Toolbox
     
-    Configuration is stored in config/tools.json with nested structure:
+    Configuration is stored in x-ipe-docs/config/tools.json with nested structure:
     stage > phase > tool: boolean
     
     Supports automatic migration from legacy .ideation-tools.json format.
@@ -61,7 +61,7 @@ class ToolsConfigService:
         Load config, migrating from legacy if needed.
         
         Order of operations:
-        1. If config/tools.json exists, load it
+        1. If x-ipe-docs/config/tools.json exists, load it
         2. Else if legacy .ideation-tools.json exists, migrate it
         3. Else create default config
         
@@ -80,7 +80,7 @@ class ToolsConfigService:
         """
         Save config to file.
         
-        Creates config/ directory if it doesn't exist.
+        Creates x-ipe-docs/config/ directory if it doesn't exist.
         
         Args:
             config: Configuration dictionary to save

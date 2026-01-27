@@ -24,7 +24,7 @@ class XIPEConfig:
     """
     config_path: Optional[Path] = None
     project_root: Path = field(default_factory=Path.cwd)
-    docs_path: Path = field(default_factory=lambda: Path.cwd() / "docs")
+    docs_path: Path = field(default_factory=lambda: Path.cwd() / "x-ipe-docs")
     skills_path: Path = field(default_factory=lambda: Path.cwd() / ".github" / "skills")
     runtime_path: Path = field(default_factory=lambda: Path.cwd() / ".x-ipe")
     server_host: str = "127.0.0.1"
@@ -76,7 +76,7 @@ class XIPEConfig:
         return cls(
             config_path=None,
             project_root=project_root,
-            docs_path=project_root / "docs",
+            docs_path=project_root / "x-ipe-docs",
             skills_path=project_root / ".github" / "skills",
             runtime_path=project_root / ".x-ipe",
             server_host="127.0.0.1",
@@ -127,7 +127,7 @@ class XIPEConfig:
         # Parse paths (relative to config file location)
         paths = raw.get('paths', {})
         project_root = cls._resolve_path(config_dir, paths.get('project_root', '.'))
-        docs_path = cls._resolve_path(config_dir, paths.get('docs', 'docs'))
+        docs_path = cls._resolve_path(config_dir, paths.get('docs', 'x-ipe-docs'))
         skills_path = cls._resolve_path(config_dir, paths.get('skills', '.github/skills'))
         runtime_path = cls._resolve_path(config_dir, paths.get('runtime', '.x-ipe'))
         

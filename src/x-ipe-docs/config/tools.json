@@ -1,0 +1,31 @@
+{
+  "stages": {
+    "feature": {
+      "design": {},
+      "implementation": {}
+    },
+    "ideation": {
+      "ideation": {
+        "antv-infographic": false,
+        "mermaid": false
+      },
+      "mockup": {
+        "frontend-design": true
+      },
+      "sharing": {}
+    },
+    "quality": {
+      "review": {},
+      "testing": {}
+    },
+    "refactoring": {
+      "analysis": {},
+      "execution": {}
+    },
+    "requirement": {
+      "analysis": {},
+      "gathering": {}
+    }
+  },
+  "version": "2.0"
+}

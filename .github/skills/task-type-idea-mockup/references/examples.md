@@ -11,7 +11,7 @@
 **Input:**
 - `Current Idea Folder`: `x-ipe-docs/ideas/mobile-app-idea` (from previous Ideation task)
 
-**Config:** `config/tools.json`
+**Config:** `x-ipe-docs/config/tools.json`
 ```json
 {
   "version": "2.0",
@@ -44,7 +44,7 @@
    - idea-summary-v1.md exists ✓
 
 3. Load Config:
-   - Read config/tools.json
+   - Read x-ipe-docs/config/tools.json
    - stages.ideation.mockup.frontend-design: true → enabled
    - stages.ideation.mockup.figma-mcp: false → disabled
 
@@ -90,7 +90,7 @@
 **Input:**
 - `Current Idea Folder`: `x-ipe-docs/ideas/simple-idea`
 
-**Config:** `config/tools.json`
+**Config:** `x-ipe-docs/config/tools.json`
 ```json
 {
   "version": "2.0",
