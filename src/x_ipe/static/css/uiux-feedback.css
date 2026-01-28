@@ -691,3 +691,133 @@
 .entry-description-input::placeholder {
     color: var(--uiux-slate-400);
 }
+
+
+/* ========================================
+   FEATURE-022-D: Entry Status & Submit
+   ======================================== */
+
+/* Entry Status Badge */
+.entry-status {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.status-draft .entry-status {
+    background: var(--uiux-slate-100);
+    color: var(--uiux-slate-500);
+}
+
+.status-submitting .entry-status {
+    background: #dbeafe;
+    color: #3b82f6;
+}
+
+.status-submitted .entry-status {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.status-failed .entry-status {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* Spin animation for submitting */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Entry Error Message */
+.entry-error {
+    background: #fef2f2;
+    color: #dc2626;
+    padding: 8px 12px;
+    border-radius: var(--uiux-radius-sm);
+    margin-bottom: 12px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Entry Actions Footer */
+.entry-actions-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 12px;
+    margin-top: 12px;
+    border-top: 1px solid var(--uiux-slate-100);
+}
+
+/* Submit Button */
+.btn-submit {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--uiux-accent);
+    color: white;
+    border: none;
+    border-radius: var(--uiux-radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-submit:hover:not(:disabled) {
+    background: var(--uiux-accent-dark);
+}
+
+.btn-submit:disabled {
+    background: var(--uiux-slate-300);
+    cursor: not-allowed;
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: var(--uiux-radius-md);
+    color: white;
+    font-size: 14px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast-success {
+    background: #10b981;
+}
+
+.toast-error {
+    background: #ef4444;
+}
+
+.toast-info {
+    background: #3b82f6;
+}
+

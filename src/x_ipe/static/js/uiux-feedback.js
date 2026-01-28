@@ -881,12 +881,32 @@ class UIUXFeedbackManager {
         const isExpanded = entry.id === this.expandedEntryId;
         const time = this._formatTime(entry.createdAt);
         
+        // Status styling
+        const statusClass = `status-${entry.status}`;
+        const statusIcon = {
+            'draft': 'bi-pencil',
+            'submitting': 'bi-arrow-repeat spin',
+            'submitted': 'bi-check-circle-fill',
+            'failed': 'bi-exclamation-circle-fill'
+        }[entry.status] || 'bi-pencil';
+        
+        const statusText = {
+            'draft': 'Draft',
+            'submitting': 'Submitting...',
+            'submitted': 'Submitted',
+            'failed': 'Failed'
+        }[entry.status] || 'Draft';
+        
+        // Disable submit button if not draft or failed
+        const canSubmit = entry.status === 'draft' || entry.status === 'failed';
+        
         return `
-            <div class="feedback-entry ${isExpanded ? 'expanded' : ''}" data-entry-id="${entry.id}">
+            <div class="feedback-entry ${isExpanded ? 'expanded' : ''} ${statusClass}" data-entry-id="${entry.id}">
                 <div class="feedback-entry-header">
                     <div class="entry-info">
                         <i class="bi bi-chevron-${isExpanded ? 'down' : 'right'} entry-chevron"></i>
                         <span class="entry-name">${entry.name}</span>
+                        <span class="entry-status"><i class="bi ${statusIcon}"></i> ${statusText}</span>
                     </div>
                     <div class="entry-actions">
                         <button class="entry-action-btn delete-entry" title="Delete">
@@ -917,6 +937,18 @@ class UIUXFeedbackManager {
                     <div class="entry-description">
                         <label>Description:</label>
                         <textarea class="entry-description-input" placeholder="Describe the feedback...">${entry.description}</textarea>
+                    </div>
+                    ${entry.status === 'failed' && entry.error ? `
+                        <div class="entry-error">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            ${entry.error}
+                        </div>
+                    ` : ''}
+                    <div class="entry-actions-footer">
+                        <button class="btn-submit" ${canSubmit ? '' : 'disabled'}>
+                            <i class="bi bi-send"></i>
+                            ${entry.status === 'submitting' ? 'Submitting...' : 'Submit'}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -960,6 +992,7 @@ class UIUXFeedbackManager {
             const header = entry.querySelector('.feedback-entry-header');
             const deleteBtn = entry.querySelector('.delete-entry');
             const descInput = entry.querySelector('.entry-description-input');
+            const submitBtn = entry.querySelector('.btn-submit');
             
             // Toggle expand on header click
             header.addEventListener('click', (e) => {
@@ -978,6 +1011,14 @@ class UIUXFeedbackManager {
             if (descInput) {
                 descInput.addEventListener('blur', () => {
                     this._updateEntryDescription(id, descInput.value);
+                });
+            }
+            
+            // Submit entry
+            if (submitBtn) {
+                submitBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this._submitEntry(id);
                 });
             }
         });
@@ -1030,6 +1071,100 @@ class UIUXFeedbackManager {
      */
     getFeedbackEntries() {
         return this.feedbackEntries;
+    }
+    
+    // ========================================
+    // FEATURE-022-D: Feedback Submission
+    // ========================================
+    
+    /**
+     * Submit feedback entry to backend
+     */
+    async _submitEntry(id) {
+        const entry = this.feedbackEntries.find(e => e.id === id);
+        if (!entry) return;
+        
+        // Update status
+        entry.status = 'submitting';
+        this._renderFeedbackPanel();
+        
+        try {
+            const response = await fetch('/api/uiux-feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: entry.name,
+                    url: entry.url,
+                    elements: entry.elements,
+                    screenshot: entry.screenshot,
+                    description: entry.description
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                entry.status = 'submitted';
+                entry.folder = result.folder;
+                this._showToast('Feedback saved successfully', 'success');
+                this._clearSelections();
+                this._typeTerminalCommand(result.folder);
+            } else {
+                entry.status = 'failed';
+                entry.error = result.error;
+                this._showToast(`Failed to save: ${result.error}`, 'error');
+            }
+        } catch (error) {
+            entry.status = 'failed';
+            entry.error = error.message;
+            this._showToast(`Network error: ${error.message}`, 'error');
+        }
+        
+        this._renderFeedbackPanel();
+    }
+    
+    /**
+     * Type command into terminal (without executing)
+     */
+    _typeTerminalCommand(folderPath) {
+        const command = `Get uiux feedback, please visit feedback folder ${folderPath} to get details.`;
+        
+        // Find active terminal and type command
+        // Note: This integrates with the terminal system if available
+        if (window.terminalManager && window.terminalManager.getActiveTerminal) {
+            const terminal = window.terminalManager.getActiveTerminal();
+            if (terminal && terminal.write) {
+                terminal.write(command);
+            }
+        }
+        
+        // Also log to console for debugging
+        console.log('Terminal command:', command);
+    }
+    
+    /**
+     * Show toast notification
+     */
+    _showToast(message, type = 'info') {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `
+            <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        `;
+        document.body.appendChild(toast);
+        
+        // Animate in
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+        });
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
     }
 }
 

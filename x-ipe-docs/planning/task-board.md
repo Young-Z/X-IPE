@@ -6,6 +6,11 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-219 | Feature Refinement | FEATURE-022-D: Feedback Storage & Submission Specification | Bolt | 🔄 in_progress | 01-28-2026 17:10:00 | - | Technical Design |
+| TASK-220 | Technical Design | FEATURE-022-D: Feedback Storage & Submission Design | Bolt | ⏳ pending | 01-28-2026 17:10:00 | - | Test Generation |
+| TASK-221 | Test Generation | FEATURE-022-D: Feedback Storage & Submission Tests | Bolt | ⏳ pending | 01-28-2026 17:10:00 | - | Code Implementation |
+| TASK-222 | Code Implementation | FEATURE-022-D: Feedback Storage & Submission Implementation | Bolt | ⏳ pending | 01-28-2026 17:10:00 | - | Feature Closing |
+| TASK-223 | Feature Closing | FEATURE-022-D: Feedback Storage & Submission PR | Bolt | ⏳ pending | 01-28-2026 17:10:00 | - | - |
 
 ---
 
