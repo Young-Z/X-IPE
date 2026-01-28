@@ -467,7 +467,7 @@ class UIUXFeedbackManager {
     _handleInspectorMessage(event) {
         if (!this.isActive || !this.inspector.enabled) return;
         
-        const { type, element, multiSelect } = event.data || {};
+        const { type, element, multiSelect, x, y, clientX, clientY } = event.data || {};
         
         switch (type) {
             case 'hover':
@@ -478,6 +478,19 @@ class UIUXFeedbackManager {
                 break;
             case 'select':
                 this._handleElementSelect(element, multiSelect);
+                break;
+            case 'contextmenu':
+                // Show context menu if elements are selected
+                if (this.inspector.selectedElements.length > 0) {
+                    // Calculate position relative to viewport
+                    const iframe = this.elements.iframe;
+                    if (iframe) {
+                        const iframeRect = iframe.getBoundingClientRect();
+                        const menuX = iframeRect.left + clientX;
+                        const menuY = iframeRect.top + clientY;
+                        this._showContextMenu(menuX, menuY);
+                    }
+                }
                 break;
         }
     }

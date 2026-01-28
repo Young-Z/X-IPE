@@ -74,6 +74,21 @@ INSPECTOR_SCRIPT = '''
         }, '*');
     }, true);
     
+    // FEATURE-022-C: Right-click context menu
+    document.addEventListener('contextmenu', function(e) {
+        if (!inspectEnabled) return;
+        e.preventDefault();
+        e.stopPropagation();
+        // Send coordinates to parent for showing context menu
+        window.parent.postMessage({
+            type: 'contextmenu',
+            x: e.screenX,
+            y: e.screenY,
+            clientX: e.clientX,
+            clientY: e.clientY
+        }, '*');
+    }, true);
+    
     function generateSelector(el) {
         if (el.id) return '#' + el.id;
         const tag = el.tagName.toLowerCase();
