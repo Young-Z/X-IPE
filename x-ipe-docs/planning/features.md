@@ -42,7 +42,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-020 | Skills Discovery & Override | v1.0 | Planned | - | 01-25-2026 | 01-25-2026 05:15:00 |
 | FEATURE-021 | Console Voice Input | v1.0 | Implemented | [specification.md](../requirements/FEATURE-021/specification.md), [technical-design.md](../requirements/FEATURE-021/technical-design.md) | 01-25-2026 | 01-25-2026 13:30:00 |
 | FEATURE-022-A | Browser Simulator & Proxy | v1.0 | Implemented | [specification.md](../requirements/FEATURE-022-A/specification.md) | 01-28-2026 | 01-28-2026 15:45:00 |
-| FEATURE-022-B | Element Inspector | v1.0 | Refined | [specification.md](../requirements/FEATURE-022-B/specification.md) | 01-28-2026 | 01-28-2026 16:10:00 |
+| FEATURE-022-B | Element Inspector | v1.0 | Designed | [specification.md](../requirements/FEATURE-022-B/specification.md) | 01-28-2026 | 01-28-2026 16:15:00 |
 | FEATURE-022-C | Feedback Capture & Panel | v1.0 | Planned | - | 01-28-2026 | 01-28-2026 15:05:00 |
 | FEATURE-022-D | Feedback Storage & Submission | v1.0 | Planned | - | 01-28-2026 | 01-28-2026 15:05:00 |
 
