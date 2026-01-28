@@ -235,20 +235,50 @@ class UIUXFeedbackManager {
         try {
             const encodedUrl = encodeURIComponent(url);
             const response = await fetch(`/api/proxy?url=${encodedUrl}`);
-            const data = await response.json();
+            const contentType = response.headers.get('Content-Type') || '';
             
-            if (data.success) {
-                this.renderContent(data.html);
-                this.state.currentUrl = url;
-                this.updateStatus(`Loaded: ${url}`);
+            // Check if response is JSON (HTML proxied content) or raw content
+            if (contentType.includes('application/json')) {
+                const data = await response.json();
+                
+                if (data.success) {
+                    this.renderContent(data.html);
+                    this.state.currentUrl = url;
+                    this.updateStatus(`Loaded: ${url}`);
+                } else {
+                    this.showError(data.error || 'Failed to load page');
+                }
             } else {
-                this.showError(data.error || 'Failed to load page');
+                // Non-HTML content - wrap in basic HTML to display
+                const text = await response.text();
+                const wrappedHtml = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: monospace; white-space: pre-wrap; padding: 20px; margin: 0; background: #f5f5f5; }
+    </style>
+</head>
+<body>${this._escapeHtml(text)}</body>
+</html>`;
+                this.renderContent(wrappedHtml);
+                this.state.currentUrl = url;
+                this.updateStatus(`Loaded (raw): ${url}`);
             }
         } catch (e) {
             this.showError(`Network error: ${e.message}`);
         } finally {
             this.setLoading(false);
         }
+    }
+    
+    /**
+     * Escape HTML special characters
+     */
+    _escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
     
     /**
