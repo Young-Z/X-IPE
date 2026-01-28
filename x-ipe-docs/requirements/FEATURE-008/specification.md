@@ -1,14 +1,15 @@
 # Feature Specification: Workplace (Idea Management)
 
 > Feature ID: FEATURE-008  
-> Version: v1.3  
+> Version: v1.4  
 > Status: Refined  
-> Last Updated: 01-23-2026
+> Last Updated: 01-28-2026
 
 ## Version History
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
+| v1.4 | 2026-01-28 | CR-004: Rename to Ideation, sidebar submenu, Copilot hover menu | [CR-004](./CR-004.md) |
 | v1.3 | 2026-01-23 | CR-003: Add Ideation Toolbox for skill configuration | [CR-003](./CR-003.md) |
 | v1.2 | 2026-01-23 | CR-002: Add drag-drop file upload to existing folders | [CR-002](./CR-002.md) |
 | v1.1 | 2026-01-22 | CR-001: Added Copilot button for idea refinement | [CR-001](./CR-001.md) |
@@ -16,7 +17,9 @@
 
 ## Overview
 
-The Workplace feature introduces a dedicated space for users to manage their ideas before they become formal requirements. Users can upload idea files (documents, notes, code snippets, images), organize them in folders, edit content with auto-save functionality, and rename folders as ideas evolve. The Workplace appears as the first item in the sidebar navigation, emphasizing its role as the starting point for the ideation workflow.
+The Ideation feature (formerly Workplace) introduces a dedicated space for users to manage their ideas before they become formal requirements. Users can upload idea files (documents, notes, code snippets, images), organize them in folders, edit content with auto-save functionality, and rename folders as ideas evolve. 
+
+**Navigation Structure (CR-004):** Ideation appears as a nested submenu item under "Workplace" in the sidebar. The Workplace parent menu item has no action (does not redirect). Submenu items are always visible as indented nested children.
 
 This feature integrates with a new agent skill (`task-type-ideation`) that analyzes uploaded ideas, brainstorms with users to refine concepts, and produces structured summaries ready for requirement gathering.
 
@@ -30,6 +33,8 @@ This feature integrates with a new agent skill (`task-type-ideation`) that analy
 - As a **user**, I want to **quickly refine my idea with Copilot CLI**, so that **I can get AI assistance without manually typing commands** (CR-001).
 - As a **user**, I want to **drag and drop files into existing idea folders**, so that **I can easily add new materials to ideas I'm already working on** (CR-002).
 - As a **user**, I want to **configure which AI skills are available for ideation**, so that **I can customize my workflow and enable/disable tools as needed** (CR-003).
+- As a **user**, I want to **see Ideation as a nested submenu item under Workplace**, so that **related pages are organized together** (CR-004).
+- As a **user**, I want to **access Copilot actions via a hover menu**, so that **I can choose specific actions like "Refine idea"** (CR-004).
 
 ## Acceptance Criteria
 
@@ -65,6 +70,15 @@ This feature integrates with a new agent skill (`task-type-ideation`) that analy
 - [ ] AC-30: `.ideation-tools.json` created in x-ipe-docs/ideas/ on first use (CR-003)
 - [ ] AC-31: Checkbox changes save immediately to JSON file (CR-003)
 - [ ] AC-32: UI state reflects JSON file state on page load (CR-003)
+- [ ] AC-33: Ideation appears as nested submenu item under Workplace parent (CR-004)
+- [ ] AC-34: Clicking Workplace parent does nothing (no redirect) (CR-004)
+- [ ] AC-35: Ideation submenu item has icon with label (CR-004)
+- [ ] AC-36: Copilot button is not directly clickable (CR-004)
+- [ ] AC-37: Hovering Copilot button reveals dropdown menu (CR-004)
+- [ ] AC-38: Copilot hover menu shows "Refine idea" as first option (CR-004)
+- [ ] AC-39: Copilot hover menu shows 3 existing options below "Refine idea" (CR-004)
+- [ ] AC-40: Clicking "Refine idea" triggers original Copilot button behavior (CR-004)
+- [ ] AC-41: All existing Workplace functions work after rename to Ideation (CR-004)
 
 ## Functional Requirements
 
@@ -247,6 +261,69 @@ This feature integrates with a new agent skill (`task-type-ideation`) that analy
 - Checkbox inputs with labels
 - Auto-save on checkbox change
 
+### FR-10: Sidebar Submenu Navigation (CR-004)
+
+**Description:** Restructure navigation to show Ideation as nested submenu under Workplace
+
+**Details:**
+- Input: Sidebar navigation structure
+- Process:
+  1. Add "Workplace" as parent menu item (no route/action)
+  2. Add "Ideation" as first nested child (routes to current Workplace page)
+  3. Add "UIUX Feedbacks" as second nested child (routes to FEATURE-022)
+  4. Always show nested items (no expand/collapse needed)
+  5. Indent nested items visually
+- Output: Hierarchical sidebar with submenu structure
+
+**Frontend Changes:**
+- Update sidebar component to support nested menu items
+- Add CSS for indented nested items
+- Parent item click handler returns early (no navigation)
+- Child items retain normal navigation behavior
+
+### FR-11: Copilot Hover Menu (CR-004)
+
+**Description:** Replace direct Copilot button click with hover dropdown menu
+
+**Details:**
+- Input: User hovers over Copilot button in content view header
+- Process:
+  1. Show dropdown menu on hover (or click to toggle)
+  2. Display 4 menu options:
+     - "Refine idea" (NEW - at top position)
+     - [Existing option 2]
+     - [Existing option 3]
+     - [Existing option 4]
+  3. On "Refine idea" click, execute original Copilot button behavior
+  4. Hide menu on outside click or menu item selection
+- Output: Dropdown menu with action options
+
+**Frontend Changes:**
+- Remove `onclick` from Copilot button
+- Add Bootstrap dropdown or custom hover menu
+- "Refine idea" option calls existing `handleCopilotClick()` function
+- Menu styling consistent with existing UI
+
+### FR-12: Page Rename to Ideation (CR-004)
+
+**Description:** Rename all instances of "Workplace" to "Ideation"
+
+**Details:**
+- Input: Existing UI with "Workplace" labels
+- Process:
+  1. Update sidebar submenu item label to "Ideation"
+  2. Update page title/header to "Ideation"
+  3. Update any breadcrumbs or navigation indicators
+  4. Maintain all existing functionality
+- Output: Consistent "Ideation" branding throughout UI
+
+**Verification:**
+All existing functions must continue working:
+- Idea upload/management
+- File preview with Copilot integration
+- Brainstorming history/sessions
+- Mockup gallery
+
 ## Non-Functional Requirements
 
 ### NFR-1: Performance
@@ -408,6 +485,7 @@ When Workplace selected:
 
 | CR ID | Date | Description | Impact |
 |-------|------|-------------|--------|
+| CR-004 | 01-28-2026 | Sidebar submenu, rename to Ideation, Copilot hover menu | Added US-8/9, AC-33 to AC-41, FR-10 to FR-12 |
 | CR-002 | 01-23-2026 | Drag-drop file upload to existing folders | Added US-7, AC-20 to AC-23, FR-8 |
 | CR-001 | 01-22-2026 | Add Copilot button for idea refinement | Added US-6, AC-15 to AC-19, FR-7 |
 

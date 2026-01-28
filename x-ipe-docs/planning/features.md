@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 01-25-2026 12:40:00
+> Last Updated: 01-28-2026 14:00:00
 
 ## Overview
 
@@ -41,17 +41,19 @@ This board tracks all features across the project lifecycle.
 | FEATURE-019 | Simplified Project Setup | v1.0 | Planned | - | 01-25-2026 | 01-25-2026 05:15:00 |
 | FEATURE-020 | Skills Discovery & Override | v1.0 | Planned | - | 01-25-2026 | 01-25-2026 05:15:00 |
 | FEATURE-021 | Console Voice Input | v1.0 | Implemented | [specification.md](../requirements/FEATURE-021/specification.md), [technical-design.md](../requirements/FEATURE-021/technical-design.md) | 01-25-2026 | 01-25-2026 13:30:00 |
+| FEATURE-022 | UIUX Feedbacks Page | v1.0 | Planned | - | 01-28-2026 | 01-28-2026 14:00:00 |
 
 ---
 
 ## Status Details
 
-### Planned (5)
+### Planned (6)
 - FEATURE-007: Git Integration
 - FEATURE-014: Theme-Aware Frontend Design Skill
 - FEATURE-017: Architecture DSL JavaScript Library
 - FEATURE-019: Simplified Project Setup
 - FEATURE-020: Skills Discovery & Override
+- FEATURE-022: UIUX Feedbacks Page
 
 ### Refined (0)
 - None
@@ -375,3 +377,22 @@ This board tracks all features across the project lifecycle.
 - API shows skill source (package vs local)
 
 ---
+
+### FEATURE-022: UIUX Feedbacks Page
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Placeholder page for UIUX feedback collection, accessible as second nested submenu item under Workplace parent in sidebar navigation.  
+**Dependencies:** FEATURE-008 (Ideation/Workplace restructure)  
+**Specification:** -  
+**Technical Design:** -  
+
+**Source:**
+- Change Request: `x-ipe-docs/requirements/FEATURE-008/CR-004.md`
+- Idea Summary: `x-ipe-docs/ideas/004. Change Request to Workplace/idea-summary-v1.md`
+
+**Key Capabilities:**
+- New route `/uiux-feedbacks` (placeholder)
+- Appears as second item under Workplace submenu
+- Simple "Work in Progress" banner display
+- Future expansion for feedback collection workflows

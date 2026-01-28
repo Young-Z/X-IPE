@@ -1,6 +1,6 @@
-# Technical Design: Workplace (Idea Management)
+# Technical Design: Ideation (formerly Workplace)
 
-> Feature ID: FEATURE-008 | Version: v1.3 | Last Updated: 01-23-2026
+> Feature ID: FEATURE-008 | Version: v1.4 | Last Updated: 01-28-2026
 
 ---
 
@@ -8,6 +8,7 @@
 
 | Version | Date | Description |
 |---------|------|-------------|
+| v1.4 | 01-28-2026 | CR-004: Sidebar submenu, rename to Ideation, Copilot hover menu |
 | v1.3 | 01-23-2026 | CR-003: Add Ideation Toolbox for skill configuration |
 | v1.2 | 01-23-2026 | CR-002: Add drag-drop file upload to existing folders |
 | v1.1 | 01-22-2026 | CR-001: Added Copilot button technical design |
@@ -48,6 +49,10 @@
 | `WorkplaceManager._initToolbox()` | Initialize toolbox dropdown UI (CR-003) | UI component | #ideas #frontend #toolbox |
 | `WorkplaceManager._loadToolboxState()` | Load toolbox state from backend (CR-003) | UI component | #ideas #frontend #toolbox |
 | `WorkplaceManager._saveToolboxState()` | Save toolbox state to backend (CR-003) | UI component | #ideas #frontend #toolbox |
+| `SidebarNav._renderSubmenu()` | Render nested submenu items (CR-004) | UI component | #sidebar #navigation #submenu |
+| `SidebarNav._setupSubmenuBehavior()` | Handle parent item no-action click (CR-004) | UI component | #sidebar #navigation |
+| `ContentRenderer._initCopilotHoverMenu()` | Initialize hover dropdown for Copilot button (CR-004) | UI component | #copilot #hover #menu |
+| `ContentRenderer._handleCopilotMenuAction()` | Handle Copilot menu item selection (CR-004) | UI component | #copilot #hover #menu |
 
 ### Dependencies
 
@@ -70,6 +75,8 @@
 7. **Copilot Refine (CR-001):** User clicks Copilot button → Expand terminal → Check if in Copilot mode → Create new terminal if needed → Send `copilot` command → Wait 1.5s → Send `refine the idea {path}` command
 8. **Toolbox Load (CR-003):** User clicks Workplace → Frontend calls `GET /api/ideas/toolbox` → `IdeasService.get_toolbox()` reads `.ideation-tools.json` → Returns config (or defaults) → Update checkbox states
 9. **Toolbox Save (CR-003):** User toggles checkbox → Frontend calls `POST /api/ideas/toolbox` with updated config → `IdeasService.save_toolbox()` writes JSON file → Returns success
+10. **Sidebar Submenu (CR-004):** User sees "Workplace" parent in sidebar → Click does nothing → Always-visible nested items "Ideation" and "UIUX Feedbacks" shown indented
+11. **Copilot Hover Menu (CR-004):** User hovers/clicks Copilot button → Dropdown menu appears → "Refine idea" at top + 3 existing options → Click "Refine idea" → Original Copilot behavior triggered
 
 ### Usage Example
 
@@ -1349,3 +1356,388 @@ async _saveToolboxState(config) {
 | Checkbox toggled rapidly | Each change triggers save (debounce optional) |
 | Network error on save | Log error, UI remains updated |
 | ideas folder doesn't exist | Create folder when saving config |
+
+---
+
+## CR-004: Sidebar Submenu, Rename to Ideation, Copilot Hover Menu
+
+> Added: 01-28-2026
+
+### Overview
+
+This change request restructures the navigation to use a submenu pattern:
+1. Workplace becomes a parent menu item (no action on click)
+2. Ideation appears as first nested child (existing Workplace functionality)
+3. UIUX Feedbacks appears as second nested child (new placeholder - FEATURE-022)
+4. Copilot button changes from direct click to hover menu with "Refine idea" as primary action
+
+### Components Modified
+
+| File | Component | Changes |
+|------|-----------|---------|
+| `src/x_ipe/templates/base.html` | Sidebar HTML | Add submenu structure with nested items |
+| `src/x_ipe/static/js/features/sidebar.js` | `SidebarNav` | Add submenu rendering and behavior handling |
+| `src/x_ipe/static/css/sidebar.css` | Submenu styles | Add CSS for nested items indentation |
+| `src/x_ipe/static/js/features/content-renderer.js` | `ContentRenderer` | Add Copilot hover menu initialization |
+| `src/x_ipe/templates/workplace.html` | Page template | Rename title/header to "Ideation" |
+| `src/x_ipe/app.py` | Route `/uiux-feedbacks` | Add new route for UIUX Feedbacks page (FEATURE-022) |
+| `src/x_ipe/templates/uiux-feedbacks.html` | New template | Simple WIP placeholder page |
+
+### Implementation Details
+
+#### Sidebar Submenu Structure (HTML)
+
+```html
+<!-- base.html sidebar -->
+<nav class="sidebar-nav">
+    <!-- Workplace Parent - No action on click -->
+    <div class="sidebar-item sidebar-parent" data-no-action="true">
+        <i class="bi bi-briefcase"></i>
+        <span>Workplace</span>
+        <i class="bi bi-chevron-down submenu-indicator"></i>
+    </div>
+    
+    <!-- Submenu Items - Always visible, indented -->
+    <div class="sidebar-submenu">
+        <a href="{{ url_for('workplace') }}" class="sidebar-item sidebar-child">
+            <i class="bi bi-lightbulb"></i>
+            <span>Ideation</span>
+        </a>
+        <a href="{{ url_for('uiux_feedbacks') }}" class="sidebar-item sidebar-child">
+            <i class="bi bi-chat-square-text"></i>
+            <span>UIUX Feedbacks</span>
+        </a>
+    </div>
+    
+    <!-- Existing sidebar items continue below -->
+    <a href="{{ url_for('planning') }}" class="sidebar-item">
+        <i class="bi bi-kanban"></i>
+        <span>Planning</span>
+    </a>
+    <!-- ... -->
+</nav>
+```
+
+#### Sidebar CSS (sidebar.css)
+
+```css
+/* CR-004: Submenu Styles */
+.sidebar-parent {
+    cursor: default; /* No pointer - not clickable */
+}
+
+.sidebar-parent[data-no-action="true"]:hover {
+    background-color: transparent; /* No hover effect */
+}
+
+.sidebar-submenu {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-child {
+    padding-left: 2.5rem; /* Indent nested items */
+    font-size: 0.9em;
+}
+
+.sidebar-child:hover {
+    background-color: var(--sidebar-hover-bg, #f5f5f5);
+}
+
+.submenu-indicator {
+    margin-left: auto;
+    font-size: 0.75em;
+    opacity: 0.6;
+}
+```
+
+#### Sidebar JavaScript (sidebar.js)
+
+```javascript
+/**
+ * CR-004: Setup submenu parent item behavior
+ */
+_setupSubmenuBehavior() {
+    const parentItems = document.querySelectorAll('.sidebar-parent[data-no-action="true"]');
+    
+    parentItems.forEach(item => {
+        // Prevent default click action
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            // Parent item does nothing - children are always visible
+        });
+    });
+}
+
+/**
+ * CR-004: Highlight active submenu item based on current URL
+ */
+_highlightActiveSubmenuItem() {
+    const currentPath = window.location.pathname;
+    const submenuItems = document.querySelectorAll('.sidebar-child');
+    
+    submenuItems.forEach(item => {
+        const href = item.getAttribute('href');
+        if (currentPath === href || currentPath.startsWith(href)) {
+            item.classList.add('active');
+            // Also mark parent as active-parent
+            const parent = item.closest('.sidebar-submenu').previousElementSibling;
+            if (parent && parent.classList.contains('sidebar-parent')) {
+                parent.classList.add('active-parent');
+            }
+        }
+    });
+}
+```
+
+#### Copilot Hover Menu (content-renderer.js)
+
+```javascript
+/**
+ * CR-004: Initialize Copilot button hover menu
+ */
+_initCopilotHoverMenu() {
+    const copilotBtn = document.getElementById('copilot-btn');
+    if (!copilotBtn) return;
+    
+    // Remove direct click handler
+    copilotBtn.removeAttribute('onclick');
+    
+    // Create dropdown menu
+    const menuHTML = `
+        <div class="copilot-hover-menu" id="copilot-menu">
+            <div class="copilot-menu-item" data-action="refine">
+                <i class="bi bi-stars"></i> Refine idea
+            </div>
+            <div class="copilot-menu-item" data-action="option2">
+                <i class="bi bi-chat-dots"></i> Chat with Copilot
+            </div>
+            <div class="copilot-menu-item" data-action="option3">
+                <i class="bi bi-code-slash"></i> Generate code
+            </div>
+            <div class="copilot-menu-item" data-action="option4">
+                <i class="bi bi-question-circle"></i> Ask a question
+            </div>
+        </div>
+    `;
+    
+    // Insert menu after button
+    copilotBtn.insertAdjacentHTML('afterend', menuHTML);
+    
+    // Setup hover behavior
+    const menu = document.getElementById('copilot-menu');
+    
+    copilotBtn.addEventListener('mouseenter', () => {
+        menu.classList.add('visible');
+    });
+    
+    copilotBtn.parentElement.addEventListener('mouseleave', () => {
+        menu.classList.remove('visible');
+    });
+    
+    // Setup menu item click handlers
+    menu.querySelectorAll('.copilot-menu-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            const action = e.currentTarget.dataset.action;
+            this._handleCopilotMenuAction(action);
+            menu.classList.remove('visible');
+        });
+    });
+}
+
+/**
+ * CR-004: Handle Copilot menu action selection
+ */
+_handleCopilotMenuAction(action) {
+    switch (action) {
+        case 'refine':
+            // Trigger original Copilot button behavior (FR-7)
+            this._handleCopilotClick();
+            break;
+        case 'option2':
+            // Chat with Copilot - expand terminal and send 'copilot' command only
+            this._expandTerminalWithCopilot();
+            break;
+        case 'option3':
+            // Generate code - placeholder for future
+            console.log('Generate code - coming soon');
+            break;
+        case 'option4':
+            // Ask a question - placeholder for future
+            console.log('Ask a question - coming soon');
+            break;
+    }
+}
+```
+
+#### Copilot Hover Menu CSS
+
+```css
+/* CR-004: Copilot Hover Menu */
+.copilot-hover-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 180px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
+}
+
+.copilot-hover-menu.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.copilot-menu-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #333;
+}
+
+.copilot-menu-item:first-child {
+    border-radius: 6px 6px 0 0;
+    font-weight: 600;
+    background-color: #f0f9ff;
+    color: #0ea5e9;
+}
+
+.copilot-menu-item:last-child {
+    border-radius: 0 0 6px 6px;
+}
+
+.copilot-menu-item:hover {
+    background-color: #f5f5f5;
+}
+
+.copilot-menu-item:first-child:hover {
+    background-color: #e0f2fe;
+}
+```
+
+#### UIUX Feedbacks Route (app.py)
+
+```python
+@app.route('/uiux-feedbacks')
+def uiux_feedbacks():
+    """FEATURE-022: UIUX Feedbacks placeholder page (CR-004)"""
+    return render_template('uiux-feedbacks.html')
+```
+
+#### UIUX Feedbacks Template (uiux-feedbacks.html)
+
+```html
+{% extends "base.html" %}
+
+{% block title %}UIUX Feedbacks - X-IPE{% endblock %}
+
+{% block content %}
+<div class="container-fluid h-100 d-flex align-items-center justify-content-center">
+    <div class="text-center">
+        <i class="bi bi-chat-square-text display-1 text-secondary mb-4"></i>
+        <h2 class="text-muted">Work in Progress</h2>
+        <p class="text-secondary">UIUX Feedback collection feature coming soon.</p>
+    </div>
+</div>
+{% endblock %}
+```
+
+#### Rename Workplace to Ideation
+
+**Files to update:**
+1. `workplace.html` - Update page title and header
+2. Sidebar labels - Change "Workplace" child to "Ideation"
+3. Route name can remain `/workplace` for backward compatibility (URL stays same)
+
+```html
+<!-- workplace.html -->
+{% block title %}Ideation - X-IPE{% endblock %}
+
+{% block content %}
+<div class="container-fluid h-100">
+    <div class="row h-100">
+        <div class="col-md-3 border-end p-3">
+            <h5 class="mb-3">
+                <i class="bi bi-lightbulb me-2"></i>Ideation
+            </h5>
+            <!-- ... rest of sidebar content ... -->
+        </div>
+        <!-- ... -->
+    </div>
+</div>
+{% endblock %}
+```
+
+### Workflow Diagram
+
+```mermaid
+flowchart TD
+    A[User Views Sidebar] --> B{Clicks Workplace Parent?}
+    B -->|Yes| C[No Action - Parent is passive]
+    B -->|No| D{Clicks Submenu Item?}
+    D -->|Ideation| E[Navigate to /workplace]
+    D -->|UIUX Feedbacks| F[Navigate to /uiux-feedbacks]
+    
+    E --> G[Ideation Page Loads]
+    G --> H[User Views File]
+    H --> I{Hovers Copilot Button?}
+    I -->|Yes| J[Show Hover Menu]
+    J --> K{Selects Action?}
+    K -->|Refine idea| L[Execute Original Copilot Behavior]
+    K -->|Other| M[Execute Selected Action]
+    I -->|No| N[Button Idle]
+    
+    F --> O[Show WIP Banner]
+```
+
+### Edge Cases
+
+| Scenario | Behavior |
+|----------|----------|
+| Click on Workplace parent | Nothing happens (event prevented) |
+| Keyboard navigation on parent | Skip to first child item |
+| Active page in submenu | Both child and parent get active styling |
+| Copilot menu open, click outside | Menu closes |
+| Copilot menu open, hover out | Menu closes after small delay |
+| No file selected, hover Copilot | Menu shows but "Refine idea" is disabled |
+| Mobile touch on parent | Same as click - no action |
+| Mobile touch on Copilot | Menu toggles visibility |
+
+### Verification Checklist
+
+| Check | Description |
+|-------|-------------|
+| ✅ | Workplace parent click does nothing |
+| ✅ | Ideation and UIUX Feedbacks visible as nested items |
+| ✅ | Submenu items properly indented |
+| ✅ | Clicking Ideation navigates to /workplace |
+| ✅ | Clicking UIUX Feedbacks navigates to /uiux-feedbacks |
+| ✅ | UIUX Feedbacks shows WIP banner |
+| ✅ | Copilot button not directly clickable |
+| ✅ | Hover shows dropdown menu |
+| ✅ | "Refine idea" is first option with highlight |
+| ✅ | "Refine idea" triggers original behavior |
+| ✅ | All existing Workplace/Ideation functions work |
+
+---
+
+## Design Change Log
+
+| Date | Phase | Change Summary |
+|------|-------|----------------|
+| 01-28-2026 | Technical Design | CR-004: Added sidebar submenu with passive parent, Copilot hover menu with 4 options, UIUX Feedbacks route, page rename to Ideation |
+| 01-23-2026 | Technical Design | CR-003: Added Ideation Toolbox configuration with stages, API endpoints, and checkbox UI |
+| 01-23-2026 | Technical Design | CR-002: Added drag-drop upload to existing folders with folder highlighting |
+| 01-22-2026 | Technical Design | CR-001: Added Copilot button with terminal integration and typing simulation |
+| 01-22-2026 | Initial Design | Initial technical design for Workplace/Idea Management feature |

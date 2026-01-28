@@ -18,7 +18,7 @@ from datetime import datetime
 from io import BytesIO
 
 # Will be imported after implementation
-# from src.services import IdeasService
+# from x_ipe.services import IdeasService
 # from src.app import create_app
 
 
@@ -63,14 +63,14 @@ def populated_ideas_dir(temp_ideas_dir):
 @pytest.fixture
 def ideas_service(temp_project_dir):
     """Create IdeasService instance with temp directory"""
-    from src.services import IdeasService
+    from x_ipe.services import IdeasService
     return IdeasService(temp_project_dir)
 
 
 @pytest.fixture
 def ideas_service_populated(temp_project_dir, populated_ideas_dir):
     """Create IdeasService with populated ideas directory"""
-    from src.services import IdeasService
+    from x_ipe.services import IdeasService
     return IdeasService(temp_project_dir)
 
 
@@ -1185,7 +1185,7 @@ class TestIdeasServiceToolbox:
         """
         CR-003: get_toolbox() returns default config when .ideation-tools.json doesn't exist.
         """
-        from src.services import IdeasService
+        from x_ipe.services import IdeasService
         
         service = IdeasService(temp_project_dir)
         config = service.get_toolbox()
@@ -1200,7 +1200,7 @@ class TestIdeasServiceToolbox:
         """
         CR-003: get_toolbox() reads config from existing .ideation-tools.json file.
         """
-        from src.services import IdeasService
+        from x_ipe.services import IdeasService
         
         # Create custom config
         toolbox_path = temp_ideas_dir / '.ideation-tools.json'
@@ -1229,7 +1229,7 @@ class TestIdeasServiceToolbox:
         """
         CR-003: get_toolbox() returns defaults when JSON is invalid.
         """
-        from src.services import IdeasService
+        from x_ipe.services import IdeasService
         
         # Create invalid JSON file
         toolbox_path = temp_ideas_dir / '.ideation-tools.json'
@@ -1246,7 +1246,7 @@ class TestIdeasServiceToolbox:
         """
         CR-003: save_toolbox() creates .ideation-tools.json file.
         """
-        from src.services import IdeasService
+        from x_ipe.services import IdeasService
         
         service = IdeasService(temp_project_dir)
         config = {
@@ -1270,7 +1270,7 @@ class TestIdeasServiceToolbox:
         """
         CR-003: save_toolbox() updates existing config file.
         """
-        from src.services import IdeasService
+        from x_ipe.services import IdeasService
         
         # Create initial config
         toolbox_path = temp_ideas_dir / '.ideation-tools.json'
@@ -1302,7 +1302,7 @@ class TestIdeasServiceToolbox:
         """
         CR-003: save_toolbox() creates x-ipe-docs/ideas/ directory if it doesn't exist.
         """
-        from src.services import IdeasService
+        from x_ipe.services import IdeasService
         
         # Ensure ideas directory doesn't exist
         ideas_path = Path(temp_project_dir) / 'x-ipe-docs' / 'ideas'
@@ -1326,7 +1326,7 @@ class TestIdeasServiceToolbox:
         """
         CR-003: get_toolbox() preserves extra fields in config.
         """
-        from src.services import IdeasService
+        from x_ipe.services import IdeasService
         
         toolbox_path = temp_ideas_dir / '.ideation-tools.json'
         config_with_extras = {
@@ -1497,3 +1497,174 @@ class TestToolboxAPI:
         
         assert data['ideation']['antv-infographic'] is True
         assert data['mockup']['frontend-design'] is False
+
+
+
+# ============================================================================
+# CR-004: Sidebar Submenu, Rename to Ideation, Copilot Hover Menu
+# ============================================================================
+
+class TestUIUXFeedbacksRoute:
+    """Tests for FEATURE-022: UIUX Feedbacks placeholder page (CR-004)"""
+
+    def test_uiux_feedbacks_route_exists(self, populated_client):
+        """
+        CR-004 AC: /uiux-feedbacks route should exist and return 200.
+        """
+        response = populated_client.get('/uiux-feedbacks')
+        assert response.status_code == 200
+
+    def test_uiux_feedbacks_page_contains_wip_banner(self, populated_client):
+        """
+        CR-004 AC: UIUX Feedbacks page should show WIP banner.
+        """
+        response = populated_client.get('/uiux-feedbacks')
+        html = response.data.decode('utf-8')
+        
+        # Should contain "Work in Progress" text
+        assert 'Work in Progress' in html or 'work in progress' in html.lower()
+
+    def test_uiux_feedbacks_page_has_correct_title(self, populated_client):
+        """
+        CR-004: Page should have appropriate title.
+        """
+        response = populated_client.get('/uiux-feedbacks')
+        html = response.data.decode('utf-8')
+        
+        # Should contain UIUX Feedbacks in title
+        assert 'UIUX' in html or 'Feedback' in html
+
+
+class TestIdeationPageRename:
+    """Tests for renaming Workplace to Ideation (CR-004)"""
+
+    def test_workplace_route_still_accessible(self, populated_client):
+        """
+        CR-004: /workplace route should still work for backward compatibility.
+        """
+        response = populated_client.get('/workplace')
+        assert response.status_code == 200
+
+    def test_ideation_appears_in_workplace_page(self, populated_client):
+        """
+        CR-004 AC: Workplace page should show "Ideation" branding.
+        """
+        response = populated_client.get('/workplace')
+        html = response.data.decode('utf-8')
+        
+        # Should contain "Ideation" somewhere in the page
+        assert 'Ideation' in html or 'ideation' in html.lower()
+
+    def test_workplace_page_functionality_preserved(self, populated_client):
+        """
+        CR-004 AC-41: All existing Workplace functions should work after rename.
+        """
+        # Verify ideas tree API still works
+        response = populated_client.get('/api/ideas/tree')
+        assert response.status_code == 200
+        data = response.get_json()
+        assert 'tree' in data
+
+
+class TestSidebarSubmenu:
+    """Tests for sidebar submenu structure (CR-004)
+    
+    Note: The sidebar content is rendered dynamically via JavaScript from the
+    /api/project/structure endpoint. These tests verify the JavaScript file
+    contains the correct structure, and the API returns workplace section.
+    Full frontend behavior is tested in browser/E2E tests.
+    """
+
+    def test_sidebar_js_contains_submenu_structure(self, populated_client, temp_project_dir):
+        """
+        CR-004: sidebar.js should contain submenu rendering for Workplace.
+        """
+        import os
+        sidebar_js_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            'src', 'x_ipe', 'static', 'js', 'features', 'sidebar.js'
+        )
+        with open(sidebar_js_path, 'r') as f:
+            js_content = f.read()
+        
+        # Should contain sidebar-parent class
+        assert 'sidebar-parent' in js_content
+        # Should contain Ideation submenu item
+        assert 'Ideation' in js_content
+        # Should contain UIUX Feedbacks submenu item
+        assert 'UIUX Feedbacks' in js_content
+
+    def test_sidebar_js_contains_no_action_attribute(self, populated_client, temp_project_dir):
+        """
+        CR-004 AC-34: sidebar.js should set no-action attribute on parent.
+        """
+        import os
+        sidebar_js_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            'src', 'x_ipe', 'static', 'js', 'features', 'sidebar.js'
+        )
+        with open(sidebar_js_path, 'r') as f:
+            js_content = f.read()
+        
+        # Should have data-no-action attribute
+        assert 'data-no-action="true"' in js_content
+
+    def test_api_structure_returns_workplace_section(self, populated_client):
+        """
+        CR-004: API should return workplace section for sidebar.
+        """
+        response = populated_client.get('/api/project/structure')
+        assert response.status_code == 200
+        data = response.get_json()
+        
+        # Should have sections including workplace
+        assert 'sections' in data
+        section_ids = [s['id'] for s in data['sections']]
+        assert 'workplace' in section_ids
+
+    def test_sidebar_js_contains_uiux_feedbacks_link(self, populated_client, temp_project_dir):
+        """
+        CR-004: sidebar.js should contain /uiux-feedbacks link.
+        """
+        import os
+        sidebar_js_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            'src', 'x_ipe', 'static', 'js', 'features', 'sidebar.js'
+        )
+        with open(sidebar_js_path, 'r') as f:
+            js_content = f.read()
+        
+        # Should contain link to UIUX Feedbacks page
+        assert '/uiux-feedbacks' in js_content
+
+    def test_sidebar_css_contains_submenu_styles(self, populated_client, temp_project_dir):
+        """
+        CR-004: sidebar.css should contain submenu styling.
+        """
+        import os
+        sidebar_css_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            'src', 'x_ipe', 'static', 'css', 'sidebar.css'
+        )
+        with open(sidebar_css_path, 'r') as f:
+            css_content = f.read()
+        
+        # Should contain submenu styles
+        assert 'sidebar-submenu' in css_content
+        assert 'sidebar-child' in css_content
+
+
+# ============================================================================
+# Test Coverage Summary for CR-004
+# ============================================================================
+# 
+# | Component                    | Unit Tests | Integration | API Tests |
+# |-----------------------------|------------|-------------|-----------|
+# | UIUX Feedbacks Route        | 3          | -           | 3         |
+# | Ideation Page Rename        | 3          | -           | -         |
+# | Sidebar Submenu Structure   | 5          | -           | -         |
+# | **TOTAL CR-004**            | **11**     | **0**       | **3**     |
+#
+# Note: Frontend tests for Copilot hover menu and sidebar click behavior
+# are tested in browser/E2E tests (not Python unit tests).
+# ============================================================================

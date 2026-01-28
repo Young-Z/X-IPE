@@ -6,7 +6,10 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-187 | Idea Mockup | IDEA-015: AI Chat Widget with Rich Widgets | Ember | ✅ completed | 01-27-2026 14:33:00 | mockups/chat-widget-v1.html | Requirement Gathering |
+| TASK-201 | Feature Closing | FEATURE-008 v1.4 CR-004 PR | Sage | 🔄 in_progress | 01-28-2026 14:38:00 | - | - |
+| TASK-197 | Idea Mockup | IDEA-017: UI/UX Feedback View Mockup | Zephyr | 🔄 in_progress | 01-28-2026 14:20:00 | mockups/uiux-feedback-v1.html | Requirement Gathering |
+| TASK-194 | Code Refactor V2 | Split app.py into route modules using Flask Blueprints | Nova | 🔄 in_progress | 01-28-2026 13:20:00 | - | - |
+| TASK-191 | Code Refactor | Refactor src/x_ipe/app.py (1312 lines) | Ember | 🔄 in_progress | 01-28-2026 12:40:00 | - | - |
 
 ---
 
@@ -14,6 +17,17 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-200 | Code Implementation | FEATURE-008 v1.4 CR-004 Implementation | Sage | 01-28-2026 14:35:00 | src/x_ipe/app.py, templates/, static/ | 11/11 tests passing |
+| TASK-199 | Test Generation | FEATURE-008 v1.4 CR-004 Tests | Sage | 01-28-2026 14:25:00 | tests/test_ideas.py | 9 failing, 2 passing (TDD ready) |
+| TASK-198 | Technical Design | FEATURE-008 v1.4 Technical Design | Sage | 01-28-2026 14:20:00 | x-ipe-docs/requirements/FEATURE-008/technical-design.md | Approved |
+| TASK-197 | Feature Refinement | FEATURE-008 v1.4 Specification | Sage | 01-28-2026 14:15:00 | x-ipe-docs/requirements/FEATURE-008/specification.md | Approved |
+| TASK-195 | Ideation + CR | IDEA-016: Change Request to Workplace | Sage | 01-28-2026 14:12:00 | x-ipe-docs/ideas/004. Change Request to Workplace/idea-summary-v1.md, x-ipe-docs/requirements/FEATURE-008/CR-004.md | Approved, next: Feature Refinement |
+| TASK-193 | Improve Code Quality | Fix test imports before refactoring | Nova | 01-28-2026 13:20:00 | x-ipe-docs/refactoring/validation-TASK-193.md | Approved |
+| TASK-192 | Refactoring Analysis | Analyze codebase for refactoring | Nova | 01-28-2026 12:56:00 | x-ipe-docs/refactoring/analysis-TASK-192.md | Approved |
+| TASK-190 | Quality Report | Generate project quality evaluation report | Flux | 01-28-2026 08:38:00 | x-ipe-docs/planning/quality-evaluation-latest.md | - |
+| TASK-189 | Code Refactor | Rename auto advance to auto proceed across all skills | Frost | 01-28-2026 13:20:00 | .github/skills/ | Renamed term in guidelines and templates |
+| TASK-187 | Idea Mockup | IDEA-015: AI Chat Widget with Rich Widgets | Ember | 01-27-2026 14:33:00 | mockups/chat-widget-v1.html | Requirement Gathering |
+| TASK-188 | Bug Fix | Fix task execution auto proceed behavior | Frost | 01-28-2026 13:05:00 | .github/skills/task-execution-guideline/SKILL.md | Updated Step 6 to check Global Auto-Advance |
 | TASK-183 | Code Implementation | FEATURE-018: X-IPE CLI Tool - Status & Info Commands | Drift | 01-26-2026 15:25:00 | src/x_ipe/cli/main.py | Commands implemented |
 | TASK-184 | Code Refactor | Rename docs folder to x-ipe-docs and update all references | Flux | 01-26-2026 16:40:00 | x-ipe-docs/ | Renamed docs → x-ipe-docs, updated ~106 files |
 | TASK-182 | Idea Mockup | IDEA-014: Replenishment System Dashboard Mockup | Spark | 01-26-2026 10:20:00 | x-ipe-docs/ideas/Sample - Replishment system/mockups/dashboard-v1.html | Mockup created |
@@ -69,17 +83,17 @@
 
 ## Quick Stats
 
-- **Total Active:** 0
-- **In Progress:** 0
+- **Total Active:** 4
+- **In Progress:** 4
 - **Pending Review:** 0
 - **Blocked:** 0
 - **Deferred:** 0
-- **Completed (archived):** 151
+- **Completed (archived):** 163
 
 ---
 
 ## Global Settings
 
 ```yaml
-auto_advance: true  # Change to false for manual control
+auto_proceed: true  # Change to false for manual control
 ```

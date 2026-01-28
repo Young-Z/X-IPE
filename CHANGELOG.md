@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-008 v1.4 (CR-004): Workplace Submenu Navigation**
+  - Sidebar submenu structure: Workplace parent with nested Ideation and UIUX Feedbacks children
+  - `/workplace` route serving dedicated Ideation page with existing functionality
+  - `/uiux-feedbacks` route serving WIP placeholder page
+  - Submenu CSS styles for parent/child indentation in sidebar
+  - JavaScript handling for parent no-action click behavior
+  - 11 new tests validating CR-004 implementation
+  - Note: Copilot hover menu (AC-36 to AC-40) deferred to future CR
+
 - **FEATURE-016: Architecture Diagram Renderer** - Tool skill for rendering Architecture DSL as visual diagrams
   - `.github/skills/tool-architecture-draw/` folder with complete skill structure
   - `SKILL.md`: Main skill definition with rendering workflow and capabilities

@@ -281,3 +281,48 @@
     background-color: #28a745;
     border-color: #28a745;
 }
+
+/* =================================================================
+ * CR-004: Sidebar Submenu Styles
+ * ================================================================= */
+.sidebar-parent {
+    cursor: default;
+}
+
+.sidebar-parent[data-no-action="true"]:hover {
+    background-color: transparent;
+}
+
+.submenu-indicator {
+    margin-left: auto;
+    font-size: 0.75em;
+    opacity: 0.6;
+}
+
+.sidebar-submenu {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-child {
+    padding-left: 2rem;
+    font-size: 0.9em;
+}
+
+.sidebar-child:hover {
+    background-color: var(--sidebar-hover, #2a2a3a);
+}
+
+.nav-link-item {
+    text-decoration: none;
+    color: inherit;
+}
+
+.nav-link-item:hover {
+    color: inherit;
+}
+
+.sidebar-child.active,
+.sidebar-parent.active-parent {
+    background-color: var(--sidebar-active, #3a3a4a);
+}

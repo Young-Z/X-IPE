@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Ideation - X-IPE{% endblock %}
+
+{% block body %}
+<div class="app-container">
+    <!-- ROW 1: Top Bar -->
+    <header class="top-bar">
+        <div class="d-flex align-items-center gap-3">
+            <a href="/" class="top-bar-brand text-decoration-none">
+                <i class="bi bi-journal-code me-2"></i>X-IPE
+            </a>
+            <nav aria-label="breadcrumb" class="top-bar-breadcrumb">
+                <ol class="breadcrumb mb-0" id="breadcrumb">
+                    <li class="breadcrumb-item active">Ideation</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <!-- FEATURE-008: Workplace Create Idea Button -->
+            <button class="btn btn-sm btn-primary" id="btn-create-idea" title="Create new idea">
+                <i class="bi bi-plus-lg"></i> Create Idea
+            </button>
+            <!-- FEATURE-011: Stage Toolbox Button -->
+            <button class="btn btn-sm btn-outline-secondary" id="btn-stage-toolbox" title="Stage Toolbox">
+                <i class="bi bi-tools"></i>
+            </button>
+            <a href="/settings" class="btn btn-link text-light" title="Settings">
+                <i class="bi bi-gear-fill"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- ROW 2: Middle Section (sidebar + content) -->
+    <div class="middle-section" id="middle-section">
+        <!-- LEFT: Sidebar Navigation -->
+        <nav class="sidebar" id="sidebar">
+            <!-- Project Switcher (FEATURE-006 v2.0) -->
+            <div class="project-switcher">
+                <select id="project-select" title="Switch project folder">
+                    <option value="" selected>Loading projects...</option>
+                </select>
+            </div>
+            <!-- Dynamic content loaded via JavaScript -->
+            <div class="sidebar-content" id="sidebar-content">
+                <div class="loading-spinner">
+                    <div class="spinner-border spinner-border-sm text-light" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Resize Handle -->
+        <div class="sidebar-resize-handle" id="sidebar-resize-handle"></div>
+    
+        <!-- RIGHT: Content Area -->
+        <main class="content-area">
+            <div class="content-view" id="content-view">
+                <div class="content-header d-flex justify-content-between align-items-center" id="content-header">
+                    <h5 class="mb-0" id="content-title">Ideation</h5>
+                </div>
+                <div class="content-body" id="content-body">
+                    <!-- Workplace/Ideation content loaded here -->
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- ROW 3: Footer Terminal Panel (FEATURE-005) -->
+    <div class="terminal-panel" id="terminal-panel">
+        <div class="terminal-header">
+            <div class="terminal-tabs" id="terminal-tabs">
+                <!-- Tabs rendered by JavaScript -->
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-light" id="btn-new-terminal" title="New Terminal">
+                    <i class="bi bi-plus"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-light terminal-toggle" id="terminal-toggle" title="Toggle Terminal">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+            </div>
+        </div>
+        <div class="terminal-body" id="terminal-body">
+            <!-- xterm.js terminals rendered here -->
+        </div>
+    </div>
+</div>
+
+<!-- FEATURE-011: Stage Toolbox Modal -->
+<div class="stage-toolbox-modal" id="stage-toolbox-modal">
+    <div class="stage-toolbox-content">
+        <div class="stage-toolbox-header">
+            <h5><i class="bi bi-tools me-2"></i>Stage Toolbox</h5>
+            <button class="btn-close btn-close-white" id="stage-toolbox-close"></button>
+        </div>
+        <div class="stage-toolbox-body" id="stage-toolbox-body">
+            <!-- Stages loaded via JavaScript -->
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-initialize workplace view when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait for workplace manager to initialize
+    if (window.workplaceManager) {
+        const container = document.getElementById('content-body');
+        window.workplaceManager.render(container);
+    }
+});
+</script>
+{% endblock %}

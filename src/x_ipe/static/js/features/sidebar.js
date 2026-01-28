@@ -242,13 +242,24 @@ class ProjectSidebar {
         const icon = section.icon || 'bi-folder';
         const hasChildren = section.children && section.children.length > 0;
         
-        // Special handling for Workplace section - no expandable content
+        // CR-004: Special handling for Workplace section - show submenu with Ideation and UIUX Feedbacks
         if (section.id === 'workplace') {
             return `
                 <div class="nav-section" data-section-id="${section.id}">
-                    <div class="nav-section-header nav-workplace-header" data-section-id="${section.id}">
-                        <i class="bi ${icon}"></i>
-                        <span>${section.label}</span>
+                    <div class="nav-section-header sidebar-parent" data-section-id="${section.id}" data-no-action="true">
+                        <i class="bi bi-briefcase"></i>
+                        <span>Workplace</span>
+                        <i class="bi bi-chevron-down submenu-indicator"></i>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <div class="nav-section-header sidebar-child nav-workplace-header" data-section-id="ideation">
+                            <i class="bi ${icon}"></i>
+                            <span>Ideation</span>
+                        </div>
+                        <a href="/uiux-feedbacks" class="nav-section-header sidebar-child nav-link-item" data-section-id="uiux-feedbacks">
+                            <i class="bi bi-chat-square-text"></i>
+                            <span>UIUX Feedbacks</span>
+                        </a>
                     </div>
                 </div>
             `;
@@ -417,7 +428,7 @@ class ProjectSidebar {
             });
         });
         
-        // Workplace section click handler
+        // Workplace section click handler - CR-004: Now Ideation submenu item
         const workplaceHeader = this.container.querySelector('.nav-workplace-header');
         if (workplaceHeader) {
             workplaceHeader.addEventListener('click', () => {
@@ -431,9 +442,9 @@ class ProjectSidebar {
                     window.contentRenderer.currentPath = null;
                 }
                 
-                // Update breadcrumb
+                // Update breadcrumb - CR-004: Show "Ideation" instead of "Workplace"
                 const breadcrumb = document.getElementById('breadcrumb');
-                breadcrumb.innerHTML = '<li class="breadcrumb-item active">Workplace</li>';
+                breadcrumb.innerHTML = '<li class="breadcrumb-item active">Ideation</li>';
                 
                 // Show Create Idea button in top bar
                 const createIdeaBtn = document.getElementById('btn-create-idea');
@@ -449,8 +460,18 @@ class ProjectSidebar {
             });
         }
         
-        // Section header collapse tracking
-        const sectionHeaders = this.container.querySelectorAll('.nav-section-header:not(.nav-workplace-header)');
+        // CR-004: Prevent parent item click action
+        const parentItems = this.container.querySelectorAll('.sidebar-parent[data-no-action="true"]');
+        parentItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Parent item does nothing - children are always visible
+            });
+        });
+        
+        // Section header collapse tracking - CR-004: Exclude sidebar-parent and sidebar-child
+        const sectionHeaders = this.container.querySelectorAll('.nav-section-header:not(.nav-workplace-header):not(.sidebar-parent):not(.sidebar-child)');
         sectionHeaders.forEach(header => {
             const target = document.querySelector(header.dataset.bsTarget);
             if (target) {
@@ -473,8 +494,8 @@ class ProjectSidebar {
      * Click pins the item (won't auto-collapse)
      */
     _bindHoverExpand() {
-        // Section headers (not workplace)
-        const sectionHeaders = this.container.querySelectorAll('.nav-section-header:not(.nav-workplace-header)');
+        // Section headers (not workplace, sidebar-parent, or sidebar-child) - CR-004
+        const sectionHeaders = this.container.querySelectorAll('.nav-section-header:not(.nav-workplace-header):not(.sidebar-parent):not(.sidebar-child)');
         sectionHeaders.forEach(header => {
             const targetSelector = header.dataset.bsTarget;
             const target = document.querySelector(targetSelector);
