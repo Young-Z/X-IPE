@@ -3,14 +3,17 @@ Proxy Service for FEATURE-022-A
 
 Provides localhost URL proxying with asset path rewriting.
 """
+import mimetypes
+import os
 import re
 import requests
-from urllib.parse import urlparse, urljoin, quote
+from urllib.parse import urlparse, urljoin, quote, unquote
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
 from typing import Tuple
 
 ALLOWED_HOSTS = {'localhost', '127.0.0.1'}
+ALLOWED_SCHEMES = {'http', 'https', 'file'}
 PROXY_TIMEOUT = 10  # seconds
 REWRITE_ATTRIBUTES = {
     'script': 'src',
@@ -38,7 +41,7 @@ class ProxyService:
     
     def validate_url(self, url: str) -> Tuple[bool, str]:
         """
-        Validate URL is localhost only.
+        Validate URL is localhost or local file.
         
         Args:
             url: URL string to validate
@@ -53,11 +56,19 @@ class ProxyService:
             parsed = urlparse(url)
             
             if not parsed.scheme:
-                return False, "URL must include protocol (http:// or https://)"
+                return False, "URL must include protocol (http://, https://, or file://)"
             
-            if parsed.scheme not in ('http', 'https'):
-                return False, "Only http:// and https:// protocols are supported"
+            if parsed.scheme not in ALLOWED_SCHEMES:
+                return False, "Only http://, https://, and file:// protocols are supported"
             
+            # For file:// URLs, validate path exists
+            if parsed.scheme == 'file':
+                file_path = unquote(parsed.path)
+                if not os.path.isfile(file_path):
+                    return False, f"File not found: {file_path}"
+                return True, ""
+            
+            # For http/https, validate localhost
             if not parsed.hostname:
                 return False, "Invalid URL format"
             
@@ -83,7 +94,13 @@ class ProxyService:
         if not valid:
             return ProxyResult(success=False, error=error, status_code=400)
         
-        # Fetch
+        parsed = urlparse(url)
+        
+        # Handle file:// URLs
+        if parsed.scheme == 'file':
+            return self._fetch_local_file(url)
+        
+        # Fetch HTTP/HTTPS
         try:
             response = requests.get(url, timeout=PROXY_TIMEOUT)
             response.raise_for_status()
@@ -124,6 +141,46 @@ class ProxyService:
                 html=content,
                 content_type=content_type
             )
+    
+    def _fetch_local_file(self, url: str) -> ProxyResult:
+        """
+        Read a local file for file:// URLs.
+        
+        Args:
+            url: file:// URL
+            
+        Returns:
+            ProxyResult with file content
+        """
+        parsed = urlparse(url)
+        file_path = unquote(parsed.path)
+        
+        try:
+            # Determine content type from file extension
+            content_type, _ = mimetypes.guess_type(file_path)
+            content_type = content_type or 'text/html'
+            
+            # Read file
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Only rewrite HTML
+            if 'text/html' in content_type or file_path.endswith('.html'):
+                html = self._rewrite_html(content, url)
+                return ProxyResult(success=True, html=html, content_type='text/html')
+            else:
+                return ProxyResult(success=True, html=content, content_type=content_type)
+                
+        except UnicodeDecodeError:
+            # Binary file - read as bytes
+            try:
+                with open(file_path, 'rb') as f:
+                    content = f.read().decode('utf-8', errors='replace')
+                return ProxyResult(success=True, html=content, content_type=content_type)
+            except Exception as e:
+                return ProxyResult(success=False, error=f"Failed to read file: {str(e)}", status_code=500)
+        except Exception as e:
+            return ProxyResult(success=False, error=f"Failed to read file: {str(e)}", status_code=500)
     
     def _rewrite_html(self, html: str, base_url: str) -> str:
         """
