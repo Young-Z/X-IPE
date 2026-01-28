@@ -193,6 +193,7 @@ class VoiceInputManager {
      */
     handleKeyUp(e) {
         // Check for Ctrl+Shift+V release
+        if (!e.key) return;
         if (e.key.toLowerCase() === 'v' || e.key === 'Control' || e.key === 'Shift') {
             if (this.isRecording) {
                 // Check if the combination is still held
