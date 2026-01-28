@@ -46,9 +46,9 @@ Break user requests into high-level features by:
 ```yaml
 mockup_list:
   - mockup_name: "Description of what function the mockup is for"
-    mockup_link: "URL to the mockup"
+    mockup_list: "URL to the mockup"
   - mockup_name: "Another mockup description"
-    mockup_link: "URL to the mockup"
+    mockup_list: "URL to the mockup"
 ```
 
 ---
@@ -94,7 +94,7 @@ Execute Feature Breakdown by following these steps in order:
 |------|------|--------|--------------|
 | 1 | Analyze | Read requirement-details.md (or current active part) or user request | Requirements understood |
 | 2 | Identify Features | Extract features using MVP-first criteria | Features identified |
-| 2.5 | Process Mockups | Copy mockups to feature folders if mockup_list provided | Mockups processed |
+| 2.5 | Process Mockups | **Auto-detect** mockups from idea folder, copy to feature folders | Mockups processed |
 | 3 | Create Summary | Create/update requirement-details.md (or current active part) with feature list | Summary written |
 | 4 | Update Board | Call feature-board-management to create features | Board updated |
 | 5 | Update Index | If parts exist, update requirement-details-index.md | Index updated |
@@ -103,6 +103,7 @@ Execute Feature Breakdown by following these steps in order:
 **⛔ BLOCKING RULES:**
 - Step 1: If parts exist, work with the CURRENT ACTIVE PART (highest part number)
 - Step 2: First feature MUST be "Minimum Runnable Feature" (MVP)
+- **Step 2.5: MUST scan idea folder for mockups before skipping** (auto-detection required)
 - Step 3: Feature List goes into the PART FILE, NOT the index
 - Step 4: MUST use feature-board-management skill (not manual file editing)
 - Step 6 → Human Review: Human MUST approve feature list before refinement
@@ -150,18 +151,35 @@ Execute Feature Breakdown by following these steps in order:
 
 ---
 
-### Step 2.5: Process Mockups (if mockup_list provided)
+### Step 2.5: Process Mockups
+
+**⚠️ MANDATORY CHECK - Auto-detect mockups if not provided:**
+
+```
+BEFORE processing mockup_list:
+
+1. IF mockup_list is NOT provided or empty:
+   a. Check if requirement came from an Idea (look for idea folder reference)
+   b. IF idea folder exists:
+      - Scan: x-ipe-docs/ideas/{idea-folder}/mockups/
+      - IF mockups found → Auto-populate mockup_list from found files
+      - Notify: "Found {N} mockups in idea folder, processing..."
+   
+2. IF mockup_list is STILL empty after auto-detection:
+   - Log: "No mockups found - skipping mockup processing"
+   - Proceed to Step 3
+```
 
 **Action:** Copy mockups from source to feature folder and link them
 
-**When mockup_list is provided in input:**
+**When mockup_list is provided (or auto-detected):**
 
 ```
 FOR EACH feature in identified_features:
   1. Create mockups folder: x-ipe-docs/requirements/{FEATURE-ID}/mockups/
   
   2. FOR EACH mockup in mockup_list (that relates to this feature):
-     - Copy mockup file from mockup_link source
+     - Copy mockup file from mockup_list source
      - Rename to: {mockup_name}.{original_extension}
      - Save to: x-ipe-docs/requirements/{FEATURE-ID}/mockups/{mockup_name}.{ext}
   
@@ -173,9 +191,9 @@ FOR EACH feature in identified_features:
 # Example: Input mockup_list
 mockup_list:
   - mockup_name: "main-dashboard"
-    mockup_link: "x-ipe-docs/ideas/Draft Idea - 01232026/mockup.html"
+    mockup_list: "x-ipe-docs/ideas/Draft Idea - 01232026/mockup.html"
   - mockup_name: "settings-panel"
-    mockup_link: "x-ipe-docs/ideas/Draft Idea - 01232026/mockups/settings.html"
+    mockup_list: "x-ipe-docs/ideas/Draft Idea - 01232026/mockups/settings.html"
 
 # Result: Files created
 x-ipe-docs/requirements/FEATURE-001/mockups/main-dashboard.html
@@ -186,11 +204,11 @@ x-ipe-docs/requirements/FEATURE-001/mockups/settings-panel.html
 1. Add mockup links to `x-ipe-docs/requirements/requirement-details.md` in "Linked Mockups" table
 2. Add mockup links to each `x-ipe-docs/requirements/{FEATURE-ID}/specification.md` in "Linked Mockups" table
 
-**Mockup Link Format:**
+**Mockup List Format:**
 ```markdown
 ## Linked Mockups
 
-| Mockup Function Name | Mockup Link |
+| Mockup Function Name | Mockup List |
 |---------------------|-------------|
 | main-dashboard | [main-dashboard.html](FEATURE-001/mockups/main-dashboard.html) |
 | settings-panel | [settings-panel.html](FEATURE-001/mockups/settings-panel.html) |
@@ -263,7 +281,7 @@ ELSE:
 
 ## Linked Mockups
 
-| Mockup Function Name | Feature | Mockup Link |
+| Mockup Function Name | Feature | Mockup List |
 |---------------------|---------|-------------|
 | themes-toolbox | FEATURE-012 | [themes-toolbox.html](FEATURE-012/mockups/themes-toolbox.html) |
 
