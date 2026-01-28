@@ -405,10 +405,14 @@ class ProjectSidebar {
         const fileItems = this.container.querySelectorAll('.nav-file');
         fileItems.forEach(item => {
             item.addEventListener('click', (e) => {
-                // Remove active from all
+                // Remove active from all files
                 fileItems.forEach(f => f.classList.remove('active'));
                 // Add active to clicked
                 item.classList.add('active');
+                
+                // FEATURE-022-A: Clear sidebar-child active state when selecting a file
+                const sidebarChildren = this.container.querySelectorAll('.sidebar-child');
+                sidebarChildren.forEach(child => child.classList.remove('active'));
                 
                 const path = item.dataset.path;
                 this.selectedFile = path;
@@ -435,6 +439,11 @@ class ProjectSidebar {
                 // Clear file selection
                 fileItems.forEach(f => f.classList.remove('active'));
                 this.selectedFile = null;
+                
+                // FEATURE-022-A: Update sidebar-child active state
+                const sidebarChildren = this.container.querySelectorAll('.sidebar-child');
+                sidebarChildren.forEach(child => child.classList.remove('active'));
+                workplaceHeader.classList.add('active');
                 
                 // BUGFIX: Clear contentRenderer.currentPath to prevent auto-refresh
                 // from redirecting back to previously viewed file when on Workplace
@@ -467,6 +476,11 @@ class ProjectSidebar {
                 // Clear file selection
                 fileItems.forEach(f => f.classList.remove('active'));
                 this.selectedFile = null;
+                
+                // Update sidebar-child active state
+                const sidebarChildren = this.container.querySelectorAll('.sidebar-child');
+                sidebarChildren.forEach(child => child.classList.remove('active'));
+                uiuxFeedbacksHeader.classList.add('active');
                 
                 // Clear contentRenderer.currentPath to prevent auto-refresh
                 if (window.contentRenderer) {
