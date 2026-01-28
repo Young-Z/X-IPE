@@ -10,7 +10,10 @@
 | Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
 |------------|---------------|---------|-------------------|-------------------|
 | FEATURE-021 | Console Voice Input | v1.0 | Push-to-talk voice input for terminal with Alibaba Cloud speech recognition | FEATURE-005 |
-| FEATURE-022 | UI/UX Feedback System | v1.0 | Browser simulator with element inspector for capturing contextual UI/UX feedback | FEATURE-008 (Workplace) |
+| FEATURE-022-A | Browser Simulator & Proxy | v1.0 | Localhost proxy backend and browser simulator UI for viewing local web pages | FEATURE-008 |
+| FEATURE-022-B | Element Inspector | v1.0 | Hover highlighting and multi-select element inspection within browser simulator | FEATURE-022-A |
+| FEATURE-022-C | Feedback Capture & Panel | v1.0 | Right-click context menu and feedback entry panel with screenshot capture | FEATURE-022-B |
+| FEATURE-022-D | Feedback Storage & Submission | v1.0 | Save feedback to structured folders and generate terminal command for agent | FEATURE-022-C |
 
 ---
 
@@ -178,116 +181,135 @@ The following are explicitly out of scope for the initial version:
 
 ---
 
-### FEATURE-022: UI/UX Feedback System
+### FEATURE-022-A: Browser Simulator & Proxy (MVP)
 
 **Version:** v1.0  
-**Brief Description:** An integrated UI/UX feedback tool within X-IPE Workplace that enables developers to browse web pages in a simulated browser environment, inspect HTML elements, and submit contextual feedback with screenshots—all without leaving the X-IPE interface.
+**Brief Description:** Localhost proxy backend and browser simulator UI that enables viewing local web pages within X-IPE Workplace. This is the minimum runnable feature - users can load and view their localhost dev server.
 
 **Source:** [Idea Summary v2 - UI/UX Feedback System](../ideas/005.%20Feature-UIUX%20Feedback/idea-summary-v2.md)  
 **Mockup:** [UI/UX Feedback View Mockup](../ideas/005.%20Feature-UIUX%20Feedback/mockups/uiux-feedback-v1.html)
 
-#### Problem Statement
+#### Acceptance Criteria
 
-Currently, providing UI/UX feedback requires:
-- Switching between development environment and browser
-- Taking manual screenshots
-- Writing feedback in separate documents
-- Losing context about which elements were being reviewed
+| # | Acceptance Criteria | Priority |
+|---|---------------------|----------|
+| AC-A.1 | UI/UX Feedback view accessible from Workplace sub-menu | Must |
+| AC-A.2 | 3-column layout: sidebar, browser simulator, feedback panel (empty initially) | Must |
+| AC-A.3 | Browser simulator with URL bar (text input + "Go" button) | Must |
+| AC-A.4 | Backend proxy route: `GET /api/proxy?url=<localhost-url>` | Must |
+| AC-A.5 | Proxy only accepts 127.0.0.1 and localhost targets | Must |
+| AC-A.6 | Proxy fetches HTML and returns to frontend | Must |
+| AC-A.7 | Proxy handles relative asset paths (CSS, JS, images) | Must |
+| AC-A.8 | Simulator viewport responsive to panel size | Must |
+| AC-A.9 | Refresh button in toolbar | Must |
+| AC-A.10 | Loading indicator while page loads | Should |
+| AC-A.11 | Block external URLs with clear error message | Must |
+| AC-A.12 | Show "Connection refused" error when dev server not running | Must |
 
-This fragmented workflow slows down the feedback loop between design review and implementation.
+#### Dependencies
 
-#### Clarifications Summary
+- **FEATURE-008 (Workplace):** Required for sub-menu integration
 
-| Question | Answer |
-|----------|--------|
-| Device support? | Desktop only (mouse required for inspector) |
-| Localhost proxy ports? | Allow any localhost port |
-| Proxy security? | No auth needed - localhost targets only |
-| Feedback storage location? | `x-ipe/uiux-feedback/` relative to configured project root |
-| External URL support? | Localhost only for v1 (full DOM access) |
-| Element selection after submit? | Clear selection (clean slate) |
-| Terminal command execution? | Always wait for human to run command |
+#### Technical Considerations
+
+- Proxy must strip/modify CSP headers to allow inspection
+- Consider URL rewriting for relative paths in proxied content
+- Use iframe with srcdoc for rendering proxied HTML
+
+---
+
+### FEATURE-022-B: Element Inspector
+
+**Version:** v1.0  
+**Brief Description:** Hover highlighting and multi-select element inspection capability within the browser simulator, allowing users to identify and select UI elements for feedback.
 
 #### Acceptance Criteria
 
-**1. Workplace Integration**
+| # | Acceptance Criteria | Priority |
+|---|---------------------|----------|
+| AC-B.1 | "Inspect" toggle button in toolbar | Must |
+| AC-B.2 | Hovering elements shows highlight border (blue/orange) | Must |
+| AC-B.3 | Tooltip shows element tag (e.g., `<button.submit>`) | Must |
+| AC-B.4 | Click element to select (persistent highlight) | Must |
+| AC-B.5 | Ctrl/Cmd + click for multi-select | Must |
+| AC-B.6 | Click elsewhere clears selection | Must |
+| AC-B.7 | Toolbar shows selected element count | Should |
+| AC-B.8 | "Select All" button for visible elements | Could |
+
+#### Dependencies
+
+- **FEATURE-022-A:** Requires browser simulator to be loaded
+
+#### Technical Considerations
+
+- Inject inspector script via proxy
+- Use CSS outline for non-intrusive highlighting
+- Store selected elements as CSS selectors array
+
+---
+
+### FEATURE-022-C: Feedback Capture & Panel
+
+**Version:** v1.0  
+**Brief Description:** Right-click context menu for initiating feedback capture and a feedback entry panel showing pending feedback items with screenshot thumbnails.
+
+#### Acceptance Criteria
 
 | # | Acceptance Criteria | Priority |
 |---|---------------------|----------|
-| AC-1.1 | UI/UX Feedback view MUST be accessible from Workplace sub-menu | Must |
-| AC-1.2 | View MUST use 3-column layout: sidebar, browser simulator, feedback panel | Must |
-| AC-1.3 | View MUST integrate with existing Workplace navigation structure | Must |
+| AC-C.1 | Right-click on selected element(s) shows context menu | Must |
+| AC-C.2 | Menu option: "Provide Feedback" (element info only) | Must |
+| AC-C.3 | Menu option: "Provide Feedback with Screenshot" | Must |
+| AC-C.4 | Screenshot crops to selected element(s) bounding box | Must |
+| AC-C.5 | Use html2canvas or equivalent for screenshot | Should |
+| AC-C.6 | Feedback panel shows expandable entry list | Must |
+| AC-C.7 | Entry name auto-generates: `Feedback-YYYYMMDD-HHMMSS` | Must |
+| AC-C.8 | Entry displays: URL, selected elements list | Must |
+| AC-C.9 | Entry displays screenshot thumbnail (if captured) | Must |
+| AC-C.10 | Entry has text area for feedback description | Must |
+| AC-C.11 | Entry has Delete button | Must |
+| AC-C.12 | Entry has Submit button | Must |
+| AC-C.13 | New entry auto-expands and receives focus | Must |
+| AC-C.14 | Context menu disabled when no elements selected | Must |
 
-**2. Browser Simulator**
+#### Dependencies
 
-| # | Acceptance Criteria | Priority |
-|---|---------------------|----------|
-| AC-2.1 | Simulator MUST have URL bar with text input and "Go" button | Must |
-| AC-2.2 | Simulator MUST support localhost URLs (127.0.0.1 and localhost) | Must |
-| AC-2.3 | Simulator MUST allow any localhost port (e.g., :3000, :5173, :8080) | Must |
-| AC-2.4 | Simulator viewport MUST be responsive to panel size | Must |
-| AC-2.5 | Simulator MUST have Refresh button in toolbar | Must |
-| AC-2.6 | External URLs (non-localhost) MUST be blocked with clear message | Must |
-| AC-2.7 | Simulator MUST show loading indicator while page loads | Should |
+- **FEATURE-022-B:** Requires element selection capability
 
-**3. Localhost Proxy**
+#### Technical Considerations
 
-| # | Acceptance Criteria | Priority |
-|---|---------------------|----------|
-| AC-3.1 | Backend MUST provide proxy route: `GET /api/proxy?url=<localhost-url>` | Must |
-| AC-3.2 | Proxy MUST only accept 127.0.0.1 and localhost targets (security) | Must |
-| AC-3.3 | Proxy MUST fetch HTML from target URL and return to frontend | Must |
-| AC-3.4 | Proxy MUST inject inspector script into returned HTML | Must |
-| AC-3.5 | Proxy MUST handle relative asset paths (CSS, JS, images) | Must |
-| AC-3.6 | Proxy MUST NOT require authentication (localhost only) | Must |
-| AC-3.7 | Proxy MUST return appropriate error for non-localhost URLs | Must |
+- html2canvas may have cross-origin limitations
+- Consider fallback to full-page screenshot if element capture fails
+- Store feedback entries in memory until submitted
 
-**4. Element Inspector**
+---
 
-| # | Acceptance Criteria | Priority |
-|---|---------------------|----------|
-| AC-4.1 | Inspector MUST be activated via "Inspect" toggle button in toolbar | Must |
-| AC-4.2 | When active, hovering elements MUST show highlight border (blue/orange) | Must |
-| AC-4.3 | Hovering MUST show tooltip with element tag (e.g., `<button.submit>`) | Must |
-| AC-4.4 | Clicking element MUST select it (persistent highlight) | Must |
-| AC-4.5 | Ctrl/Cmd + click MUST add element to selection (multi-select) | Must |
-| AC-4.6 | Clicking elsewhere (non-element area) MUST clear selection | Must |
-| AC-4.7 | Toolbar MUST show count of selected elements | Should |
-| AC-4.8 | "Select All" button SHOULD select all visible elements | Could |
+### FEATURE-022-D: Feedback Storage & Submission
 
-**5. Feedback Capture (Right-Click Menu)**
+**Version:** v1.0  
+**Brief Description:** Backend API for saving feedback to structured folder format and frontend workflow for submission with terminal command generation.
+
+#### Acceptance Criteria
 
 | # | Acceptance Criteria | Priority |
 |---|---------------------|----------|
-| AC-5.1 | Right-click on selected element(s) MUST show context menu | Must |
-| AC-5.2 | Menu MUST have "Provide Feedback" option (element info only) | Must |
-| AC-5.3 | Menu MUST have "Provide Feedback with Screenshot" option | Must |
-| AC-5.4 | Screenshot capture MUST crop to selected element(s) bounding box | Must |
-| AC-5.5 | Screenshot capture SHOULD use html2canvas or equivalent library | Should |
-| AC-5.6 | After capture, feedback entry MUST be created in feedback panel | Must |
+| AC-D.1 | Backend route: `POST /api/uiux-feedback` | Must |
+| AC-D.2 | Creates folder: `{project_root}/x-ipe/uiux-feedback/{entry-name}/` | Must |
+| AC-D.3 | Saves `feedback.md` with structured content | Must |
+| AC-D.4 | Saves `page-screenshot.png` if screenshot captured | Must |
+| AC-D.5 | On success: toast notification "Saved" | Must |
+| AC-D.6 | On success: entry status changes to "Reported" | Must |
+| AC-D.7 | On success: terminal command typed (not executed) | Must |
+| AC-D.8 | On failure: entry status "Failed" with error | Must |
+| AC-D.9 | Clear element selection after successful submit | Must |
+| AC-D.10 | Handle duplicate entry names (append suffix) | Must |
+| AC-D.11 | Allow submit with empty feedback text | Must |
+| AC-D.12 | Allow submit if screenshot capture failed | Must |
 
-**6. Feedback Entry Panel**
-
-| # | Acceptance Criteria | Priority |
-|---|---------------------|----------|
-| AC-6.1 | Panel MUST show list of feedback entries (expandable/collapsible) | Must |
-| AC-6.2 | Entry name MUST auto-generate with timestamp: `Feedback-YYYYMMDD-HHMMSS` | Must |
-| AC-6.3 | Entry MUST display: URL, selected elements list | Must |
-| AC-6.4 | Entry MUST display screenshot thumbnail (if captured) | Must |
-| AC-6.5 | Entry MUST have text area for feedback description | Must |
-| AC-6.6 | Entry MUST have Delete button to remove entry | Must |
-| AC-6.7 | Entry MUST have Submit button | Must |
-| AC-6.8 | Newly created entry MUST auto-expand and receive focus | Must |
-
-**7. Feedback Storage**
-
-| # | Acceptance Criteria | Priority |
-|---|---------------------|----------|
-| AC-7.1 | Feedback MUST be saved to: `{project_root}/x-ipe/uiux-feedback/{entry-name}/` | Must |
-| AC-7.2 | Folder MUST contain `feedback.md` with structured content | Must |
-| AC-7.3 | Folder MUST contain `page-screenshot.png` if screenshot captured | Must |
-| AC-7.4 | `feedback.md` MUST include: ID, URL, date, elements, feedback text | Must |
-| AC-7.5 | `feedback.md` MUST include relative link to screenshot if exists | Must |
+**Terminal Command Format:**
+```
+Get uiux feedback, please visit feedback folder x-ipe/uiux-feedback/Feedback-YYYYMMDD-HHMMSS to get details.
+```
 
 **Feedback.md Template:**
 ```markdown
@@ -311,87 +333,30 @@ This fragmented workflow slows down the feedback loop between design review and 
 ![Screenshot](./page-screenshot.png)
 ```
 
-**8. Submission Workflow**
-
-| # | Acceptance Criteria | Priority |
-|---|---------------------|----------|
-| AC-8.1 | Submit MUST call backend: `POST /api/uiux-feedback` | Must |
-| AC-8.2 | Backend MUST create folder structure and save files | Must |
-| AC-8.3 | On success, toast notification MUST show "Saved" | Must |
-| AC-8.4 | On success, entry status MUST change to "Reported" | Must |
-| AC-8.5 | On success, terminal command MUST be typed (not executed) | Must |
-| AC-8.6 | On failure, entry status MUST change to "Failed" with error | Must |
-| AC-8.7 | Selected elements MUST be cleared after successful submit | Must |
-
-**Terminal Command (typed but NOT executed):**
-```
-Get uiux feedback, please visit feedback folder x-ipe/uiux-feedback/Feedback-YYYYMMDD-HHMMSS to get details.
-```
-
-**9. Error Handling**
-
-| # | Acceptance Criteria | Priority |
-|---|---------------------|----------|
-| AC-9.1 | Invalid URL format MUST show error in URL bar | Must |
-| AC-9.2 | Non-localhost URL MUST show "Only localhost URLs supported" message | Must |
-| AC-9.3 | Connection refused (dev server not running) MUST show clear error | Must |
-| AC-9.4 | Screenshot capture failure MUST allow submit without screenshot | Must |
-| AC-9.5 | Save failure MUST show error toast with reason | Must |
-
-#### Functional Requirements
-
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-1 | System SHALL provide browser simulator in Workplace sub-menu | Must |
-| FR-2 | System SHALL proxy localhost URLs for full DOM access | Must |
-| FR-3 | System SHALL provide element inspector with hover highlighting | Must |
-| FR-4 | System SHALL support multi-select elements via Ctrl/Cmd+click | Must |
-| FR-5 | System SHALL capture element screenshots on demand | Must |
-| FR-6 | System SHALL save feedback to structured folder format | Must |
-| FR-7 | System SHALL generate terminal command for agent processing | Must |
-| FR-8 | System SHALL NOT auto-execute terminal commands | Must |
-
-#### Non-Functional Requirements
-
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-1 | Page load time (via proxy) | < 3 seconds for typical localhost page |
-| NFR-2 | Screenshot capture time | < 2 seconds |
-| NFR-3 | Inspector responsiveness | < 100ms highlight on hover |
-| NFR-4 | Device support | Desktop only (mouse required) |
-| NFR-5 | Browser support | Chrome, Firefox, Edge (latest) |
-
-#### Edge Cases
-
-| # | Scenario | Expected Behavior |
-|---|----------|-------------------|
-| EC-1 | Dev server not running | Show "Connection refused" error, suggest starting server |
-| EC-2 | Page has iframes | Inspector works on main document only (v1) |
-| EC-3 | Page has shadow DOM | Best effort - may not inspect shadow roots |
-| EC-4 | Very large page (many elements) | Performance may degrade - no specific handling v1 |
-| EC-5 | Page uses CSP headers | Proxy strips restrictive CSP for inspection |
-| EC-6 | No elements selected, right-click | Context menu disabled or hidden |
-| EC-7 | Submit with empty feedback text | Allow submit (screenshot may be sufficient) |
-| EC-8 | Duplicate entry names (same second) | Append suffix: `Feedback-YYYYMMDD-HHMMSS-2` |
-
-#### Out of Scope (v1)
-
-The following are explicitly out of scope for the initial version:
-
-- Responsive/mobile view simulation
-- Video recording of interactions
-- Collaborative feedback (multiple users)
-- Feedback status tracking (open/resolved)
-- Integration with issue trackers (GitHub, Jira)
-- Annotation drawing tools on screenshots
-- External URL viewing (iframe mode)
-- Tablet/touch device support
-
 #### Dependencies
 
-| Feature | Depends On | Reason |
-|---------|------------|--------|
-| FEATURE-022 | FEATURE-008 (Workplace) | UI/UX Feedback is a Workplace sub-menu item |
+- **FEATURE-022-C:** Requires feedback entries to submit
+
+#### Technical Considerations
+
+- Use configured project_root for storage path
+- Terminal command injection via existing Console API
+- Consider async file operations for large screenshots
+
+---
+
+## FEATURE-022 Summary
+
+**UI/UX Feedback System** is broken down into 4 sequential features:
+
+| Feature | Title | MVP? | Dependencies |
+|---------|-------|------|--------------|
+| FEATURE-022-A | Browser Simulator & Proxy | ✅ Yes | FEATURE-008 |
+| FEATURE-022-B | Element Inspector | No | FEATURE-022-A |
+| FEATURE-022-C | Feedback Capture & Panel | No | FEATURE-022-B |
+| FEATURE-022-D | Feedback Storage & Submission | No | FEATURE-022-C |
+
+**Total Acceptance Criteria:** 46 (across all sub-features)
 
 ---
 
@@ -400,7 +365,10 @@ The following are explicitly out of scope for the initial version:
 | Feature | Depends On | Reason |
 |---------|------------|--------|
 | FEATURE-021 | FEATURE-005 (Interactive Console) | Voice input requires existing console/terminal infrastructure |
-| FEATURE-022 | FEATURE-008 (Workplace) | UI/UX Feedback is a Workplace sub-menu item |
+| FEATURE-022-A | FEATURE-008 (Workplace) | Browser simulator is a Workplace sub-menu item |
+| FEATURE-022-B | FEATURE-022-A | Inspector requires loaded browser simulator |
+| FEATURE-022-C | FEATURE-022-B | Feedback capture requires element selection |
+| FEATURE-022-D | FEATURE-022-C | Submission requires feedback entries |
 
 ---
 

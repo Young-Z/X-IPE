@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 01-28-2026 14:00:00
+> Last Updated: 01-28-2026 15:05:00
 
 ## Overview
 
@@ -27,7 +27,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-005 | Interactive Console | v2.0 | Designed | [specification.md](../requirements/FEATURE-005/specification.md) | 01-18-2026 | 01-22-2026 10:30:00 |
 | FEATURE-006 | Settings & Configuration | v1.0 | Implemented | [specification.md](../requirements/FEATURE-006/specification.md) | 01-18-2026 | 01-19-2026 14:30:00 |
 | FEATURE-007 | Git Integration | v1.0 | Planned | - | 01-18-2026 | 01-18-2026 00:10:00 |
-| FEATURE-008 | Workplace (Idea Management) | v1.3 | Implemented | [specification.md](../requirements/FEATURE-008/specification.md) | 01-22-2026 | 01-23-2026 14:35:00 |
+| FEATURE-008 | Workplace (Idea Management) | v1.4 | Implemented | [specification.md](../requirements/FEATURE-008/specification.md) | 01-22-2026 | 01-28-2026 14:45:00 |
 | FEATURE-009 | File Change Indicator | v1.0 | Completed | [specification.md](../requirements/FEATURE-009/specification.md) | 01-22-2026 | 01-22-2026 11:21:00 |
 | FEATURE-010 | Project Root Configuration | v1.0 | Completed | [specification.md](../requirements/FEATURE-010/specification.md) | 01-23-2026 | 01-23-2026 05:58:00 |
 | FEATURE-011 | Stage Toolbox | v1.0 | Completed | [specification.md](../requirements/FEATURE-011/specification.md) | 01-24-2026 | 01-24-2026 06:48:00 |
@@ -41,19 +41,25 @@ This board tracks all features across the project lifecycle.
 | FEATURE-019 | Simplified Project Setup | v1.0 | Planned | - | 01-25-2026 | 01-25-2026 05:15:00 |
 | FEATURE-020 | Skills Discovery & Override | v1.0 | Planned | - | 01-25-2026 | 01-25-2026 05:15:00 |
 | FEATURE-021 | Console Voice Input | v1.0 | Implemented | [specification.md](../requirements/FEATURE-021/specification.md), [technical-design.md](../requirements/FEATURE-021/technical-design.md) | 01-25-2026 | 01-25-2026 13:30:00 |
-| FEATURE-022 | UIUX Feedbacks Page | v1.0 | Planned | - | 01-28-2026 | 01-28-2026 14:00:00 |
+| FEATURE-022-A | Browser Simulator & Proxy | v1.0 | Planned | - | 01-28-2026 | 01-28-2026 15:05:00 |
+| FEATURE-022-B | Element Inspector | v1.0 | Planned | - | 01-28-2026 | 01-28-2026 15:05:00 |
+| FEATURE-022-C | Feedback Capture & Panel | v1.0 | Planned | - | 01-28-2026 | 01-28-2026 15:05:00 |
+| FEATURE-022-D | Feedback Storage & Submission | v1.0 | Planned | - | 01-28-2026 | 01-28-2026 15:05:00 |
 
 ---
 
 ## Status Details
 
-### Planned (6)
+### Planned (8)
 - FEATURE-007: Git Integration
 - FEATURE-014: Theme-Aware Frontend Design Skill
 - FEATURE-017: Architecture DSL JavaScript Library
 - FEATURE-019: Simplified Project Setup
 - FEATURE-020: Skills Discovery & Override
-- FEATURE-022: UIUX Feedbacks Page
+- FEATURE-022-A: Browser Simulator & Proxy (MVP)
+- FEATURE-022-B: Element Inspector
+- FEATURE-022-C: Feedback Capture & Panel
+- FEATURE-022-D: Feedback Storage & Submission
 
 ### Refined (0)
 - None
@@ -378,21 +384,80 @@ This board tracks all features across the project lifecycle.
 
 ---
 
-### FEATURE-022: UIUX Feedbacks Page
+### FEATURE-022-A: Browser Simulator & Proxy (MVP)
 
 **Version:** v1.0  
 **Status:** Planned  
-**Description:** Placeholder page for UIUX feedback collection, accessible as second nested submenu item under Workplace parent in sidebar navigation.  
-**Dependencies:** FEATURE-008 (Ideation/Workplace restructure)  
+**Description:** Localhost proxy backend and browser simulator UI that enables viewing local web pages within X-IPE Workplace. Minimum runnable feature - users can load and view their localhost dev server.  
+**Dependencies:** FEATURE-008 (Workplace)  
 **Specification:** -  
 **Technical Design:** -  
 
 **Source:**
-- Change Request: `x-ipe-docs/requirements/FEATURE-008/CR-004.md`
-- Idea Summary: `x-ipe-docs/ideas/004. Change Request to Workplace/idea-summary-v1.md`
+- Idea Summary: `x-ipe-docs/ideas/005. Feature-UIUX Feedback/idea-summary-v2.md`
+- Mockup: `x-ipe-docs/ideas/005. Feature-UIUX Feedback/mockups/uiux-feedback-v1.html`
+- Requirements: `x-ipe-docs/requirements/requirement-details-part-3.md`
 
 **Key Capabilities:**
-- New route `/uiux-feedbacks` (placeholder)
-- Appears as second item under Workplace submenu
-- Simple "Work in Progress" banner display
-- Future expansion for feedback collection workflows
+- Workplace sub-menu integration (3-column layout)
+- URL bar with text input and "Go" button
+- Backend proxy route: `GET /api/proxy?url=<localhost-url>`
+- Only allows localhost/127.0.0.1 targets
+- Handles relative asset paths (CSS, JS, images)
+- Refresh button and loading indicator
+
+---
+
+### FEATURE-022-B: Element Inspector
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Hover highlighting and multi-select element inspection within the browser simulator, allowing users to identify and select UI elements for feedback.  
+**Dependencies:** FEATURE-022-A  
+**Specification:** -  
+**Technical Design:** -  
+
+**Key Capabilities:**
+- "Inspect" toggle button in toolbar
+- Hover highlighting with element tag tooltip
+- Click to select, Ctrl/Cmd+click for multi-select
+- Click elsewhere to clear selection
+- Selected element count display
+
+---
+
+### FEATURE-022-C: Feedback Capture & Panel
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Right-click context menu for initiating feedback capture and feedback entry panel showing pending feedback items with screenshot thumbnails.  
+**Dependencies:** FEATURE-022-B  
+**Specification:** -  
+**Technical Design:** -  
+
+**Key Capabilities:**
+- Right-click context menu on selected elements
+- "Provide Feedback" and "Feedback with Screenshot" options
+- Screenshot cropped to element bounding box (html2canvas)
+- Expandable feedback entry list
+- Auto-generated entry names with timestamp
+- Text area for feedback description
+
+---
+
+### FEATURE-022-D: Feedback Storage & Submission
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Backend API for saving feedback to structured folder format and frontend workflow for submission with terminal command generation.  
+**Dependencies:** FEATURE-022-C  
+**Specification:** -  
+**Technical Design:** -  
+
+**Key Capabilities:**
+- Backend route: `POST /api/uiux-feedback`
+- Saves to `{project_root}/x-ipe/uiux-feedback/{entry-name}/`
+- Creates `feedback.md` and `page-screenshot.png`
+- Toast notification on success/failure
+- Generates terminal command (typed, not executed)
+- Clears element selection after submit
