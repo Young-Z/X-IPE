@@ -373,7 +373,7 @@ def temp_project(tmp_path):
 @pytest.fixture
 def content_service(temp_project):
     """Create ContentService instance"""
-    from src.services import ContentService
+    from x_ipe.services import ContentService
     return ContentService(str(temp_project))
 
 

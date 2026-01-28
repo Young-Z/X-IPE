@@ -39,9 +39,48 @@ Create technical design for a single feature by:
 
 ## Task Type Required Input Attributes
 
-| Attribute | Default Value |
-|-----------|---------------|
-| Auto Proceed | False |
+| Attribute | Default Value | Description |
+|-----------|---------------|-------------|
+| Auto Proceed | False | Whether to auto-proceed to next task |
+| Mockup List | N/A | Path to mockup file(s) from previous Idea Mockup task or context |
+
+### Mockup List Attribute
+
+**Purpose:** Provides UI/UX mockup reference for frontend-related technical designs.
+
+**Source:** This value can be obtained from:
+1. Previous task output (Idea Mockup task's `task_output_links`)
+2. Human input (explicit mockup path provided)
+3. Feature specification's "Linked Mockups" section
+4. Idea summary document's "Mockups & Prototypes" section
+5. Default: N/A (no mockup available)
+
+**Loading Logic:**
+```
+1. IF previous task was "Idea Mockup":
+   → Extract mockup path from previous task's task_output_links
+   → Set Mockup List = extracted path
+
+2. ELSE IF human provides explicit Mockup List:
+   → Use human-provided value
+
+3. ELSE IF specification.md has "Linked Mockups" section:
+   → Extract mockup paths from specification
+   → Set Mockup List = extracted paths
+
+4. ELSE IF idea-summary-vN.md has "Mockups & Prototypes" section:
+   → Extract mockup paths from idea summary
+   → Set Mockup List = extracted paths
+
+5. ELSE:
+   → Set Mockup List = N/A
+```
+
+**Usage:** When Mockup List is provided AND Technical Scope includes [Frontend] or [Full Stack], the agent MUST:
+1. Open and analyze the mockup file(s)
+2. Extract UI component requirements from mockup
+3. Design frontend components based on mockup layout
+4. Reference mockup in Part 2 Implementation Guide
 
 ---
 
@@ -56,6 +95,7 @@ Output:
   next_task_type: Code Implementation
   require_human_review: Yes
   auto_proceed: {from input Auto Proceed}
+  mockup_list: {from input Mockup List, pass to next task if applicable}
   task_output_links: [x-ipe-docs/requirements/FEATURE-XXX/technical-design.md]
   feature_id: FEATURE-XXX
   feature_title: {title}
@@ -174,20 +214,25 @@ Technical design documents MUST use this two-part structure. Adapt content based
 
 ### Mockup Reference (Conditional)
 
-**🎨 When to Reference Mockups:**
+**🎨 When to Use Mockup List:**
 ```
-IF Technical Scope in specification.md includes [Frontend] OR [Full Stack]:
-  1. MUST review "Linked Mockups" section in specification.md
-  2. Open and analyze each linked mockup file
-  3. Design frontend components based on mockup:
+IF Mockup List != N/A AND Technical Scope in specification.md includes [Frontend] OR [Full Stack]:
+  1. OPEN and analyze the Mockup List file(s)
+  2. Extract UI requirements from mockup:
      - Component hierarchy and structure
      - State management requirements
      - Event handlers and user interactions
      - CSS/styling approach
+  3. Design frontend components based on mockup
   4. Include mockup-derived requirements in Part 2 Implementation Guide
   5. Reference mockup filenames in design decisions
 
-ELSE (Backend/API Only/Database/Infrastructure):
+ELSE IF Mockup List == N/A AND specification.md has "Linked Mockups" section:
+  1. MUST review "Linked Mockups" section in specification.md
+  2. Open and analyze each linked mockup file
+  3. Follow same extraction process as above
+
+ELSE (Backend/API Only/Database/Infrastructure OR no mockups available):
   - Skip mockup reference
   - Focus on service architecture, data models, APIs
 ```
@@ -467,6 +512,8 @@ When the technical design needs to be updated (during implementation, bug fix, o
 | 4 | Part 2 has workflow diagrams (Mermaid) | Recommended |
 | 5 | Part 2 adapted to implementation type | Yes |
 | 6 | KISS/YAGNI/DRY principles followed | Yes |
+| 7 | Mockup List analyzed (if provided AND frontend scope) | If Applicable |
+| 8 | UI components derived from mockup (if frontend scope) | If Applicable |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
 

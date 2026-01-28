@@ -252,6 +252,14 @@
     background-color: rgba(220, 53, 69, 0.1);
 }
 
+.workplace-tree-add-btn {
+    color: #198754;
+}
+
+.workplace-tree-add-btn:hover {
+    background-color: rgba(25, 135, 84, 0.1);
+}
+
 .workplace-rename-input {
     border: 1px solid #007bff;
     border-radius: 3px;
@@ -498,6 +506,38 @@
     flex-direction: column;
     height: 100%;
     padding: 1rem;
+}
+
+.workplace-target-folder {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.75rem;
+    background-color: #e7f3ff;
+    border: 1px solid #b6d4fe;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #0a58ca;
+}
+
+.workplace-target-folder i {
+    color: #0d6efd;
+}
+
+.workplace-target-folder strong {
+    font-weight: 600;
+}
+
+.workplace-clear-target {
+    margin-left: auto;
+    padding: 0;
+    color: #6c757d;
+    text-decoration: none;
+}
+
+.workplace-clear-target:hover {
+    color: #dc3545;
 }
 
 .workplace-tabs {

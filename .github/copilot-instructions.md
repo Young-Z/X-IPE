@@ -63,8 +63,8 @@
 
 ## Task Types Registry
 
-| Task Type | Skill | Category | Next Task | Human Review |
-|-----------|-------|----------|-----------|--------------|
+| Task Type | Skill | Category | Next Task | Human Review (default) |
+|-----------|-------|----------|-----------|------------------------|
 | Ideation | `task-type-ideation` | ideation-stage | Idea Mockup OR Idea to Architecture | No |
 | Idea Mockup | `task-type-idea-mockup` | ideation-stage | Requirement Gathering | No |
 | Idea to Architecture | `task-type-idea-to-architecture` | ideation-stage | Requirement Gathering | No |
@@ -78,9 +78,13 @@
 | Human Playground | `task-type-human-playground` | Standalone | - | Yes |
 | Feature Closing | `task-type-feature-closing` | feature-stage | User Manual | No |
 | Bug Fix | `task-type-bug-fix` | Standalone | - | Yes |
-| Code Refactor | `task-type-code-refactor` | Standalone | - | Yes |
+| Refactoring Analysis | `task-type-refactoring-analysis` | code-refactoring-stage | Improve Code Quality Before Refactoring | Yes |
+| Improve Code Quality Before Refactoring | `task-type-improve-code-quality-before-refactoring` | code-refactoring-stage | Code Refactor V2 | Yes |
+| Code Refactor V2 | `task-type-code-refactor-v2` | code-refactoring-stage | - | Yes |
 | Change Request | `task-type-change-request` | Standalone | Feature Refinement OR Feature Breakdown | Yes |
 | Project Initialization | `task-type-project-init` | Standalone | Dev Environment | No |
+
+> **Note:** "Human Review (default)" is the default behavior. When **Auto-Proceed is enabled** (global or task-level), human review is **skipped** regardless of this setting.
 | Dev Environment | `task-type-dev-environment` | Standalone | - | No |
 | User Manual | `task-type-user-manual` | Standalone | - | Yes |
 

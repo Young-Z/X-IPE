@@ -91,7 +91,7 @@ def temp_dir_no_config():
 @pytest.fixture
 def config_service(temp_project_structure):
     """Create ConfigService with temp project"""
-    from src.services import ConfigService
+    from x_ipe.services import ConfigService
     return ConfigService(str(temp_project_structure['x_ipe_app']))
 
 
@@ -104,7 +104,7 @@ class TestConfigDataUnit:
 
     def test_config_data_stores_all_fields(self, temp_project_structure):
         """ConfigData stores all configuration fields"""
-        from src.services import ConfigData
+        from x_ipe.services import ConfigData
         
         config = ConfigData(
             config_file_path=str(temp_project_structure['config_file']),
@@ -124,7 +124,7 @@ class TestConfigDataUnit:
 
     def test_get_file_tree_path_returns_project_root(self, temp_project_structure):
         """get_file_tree_path() returns project_root when file_tree_scope is 'project_root'"""
-        from src.services import ConfigData
+        from x_ipe.services import ConfigData
         
         config = ConfigData(
             config_file_path=str(temp_project_structure['config_file']),
@@ -139,7 +139,7 @@ class TestConfigDataUnit:
 
     def test_get_file_tree_path_returns_x_ipe_app(self, temp_project_structure):
         """get_file_tree_path() returns x_ipe_app when file_tree_scope is 'x_ipe_app'"""
-        from src.services import ConfigData
+        from x_ipe.services import ConfigData
         
         config = ConfigData(
             config_file_path=str(temp_project_structure['config_file']),
@@ -154,7 +154,7 @@ class TestConfigDataUnit:
 
     def test_get_terminal_cwd_returns_project_root(self, temp_project_structure):
         """get_terminal_cwd() returns project_root when terminal_cwd is 'project_root'"""
-        from src.services import ConfigData
+        from x_ipe.services import ConfigData
         
         config = ConfigData(
             config_file_path=str(temp_project_structure['config_file']),
@@ -169,7 +169,7 @@ class TestConfigDataUnit:
 
     def test_get_terminal_cwd_returns_x_ipe_app(self, temp_project_structure):
         """get_terminal_cwd() returns x_ipe_app when terminal_cwd is 'x_ipe_app'"""
-        from src.services import ConfigData
+        from x_ipe.services import ConfigData
         
         config = ConfigData(
             config_file_path=str(temp_project_structure['config_file']),
@@ -184,7 +184,7 @@ class TestConfigDataUnit:
 
     def test_to_dict_returns_complete_dict(self, temp_project_structure):
         """to_dict() returns dictionary with all fields"""
-        from src.services import ConfigData
+        from x_ipe.services import ConfigData
         
         config = ConfigData(
             config_file_path=str(temp_project_structure['config_file']),
@@ -215,7 +215,7 @@ class TestConfigServiceDiscovery:
 
     def test_discover_finds_config_in_cwd(self, temp_project_structure):
         """_discover() finds .x-ipe.yaml in current directory"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_project_structure['root']))
         config_path = service._discover()
@@ -225,7 +225,7 @@ class TestConfigServiceDiscovery:
 
     def test_discover_finds_config_in_parent(self, temp_nested_structure):
         """_discover() finds .x-ipe.yaml in parent directory"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         # Start from subdir, should find config in project root
         service = ConfigService(str(temp_nested_structure['subdir']))
@@ -237,7 +237,7 @@ class TestConfigServiceDiscovery:
 
     def test_discover_returns_none_when_not_found(self, temp_dir_no_config):
         """_discover() returns None when no config file exists"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_dir_no_config))
         config_path = service._discover()
@@ -246,7 +246,7 @@ class TestConfigServiceDiscovery:
 
     def test_discover_stops_at_20_levels(self):
         """_discover() stops searching after 20 parent levels"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create deeply nested structure (25 levels)
@@ -264,7 +264,7 @@ class TestConfigServiceDiscovery:
 
     def test_discover_stops_at_filesystem_root(self, temp_dir_no_config):
         """_discover() stops at filesystem root"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_dir_no_config))
         # Should complete without infinite loop
@@ -283,7 +283,7 @@ class TestConfigServiceParsing:
 
     def test_parse_valid_yaml_returns_dict(self, temp_project_structure):
         """_parse() returns parsed dict for valid YAML"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_project_structure['root']))
         result = service._parse(temp_project_structure['config_file'])
@@ -295,7 +295,7 @@ class TestConfigServiceParsing:
 
     def test_parse_invalid_yaml_returns_none(self):
         """_parse() returns None for invalid YAML"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         with tempfile.TemporaryDirectory() as tmpdir:
             config_file = Path(tmpdir) / ".x-ipe.yaml"
@@ -309,7 +309,7 @@ class TestConfigServiceParsing:
 
     def test_parse_nonexistent_file_returns_none(self, temp_dir_no_config):
         """_parse() returns None for non-existent file"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_dir_no_config))
         fake_path = temp_dir_no_config / "nonexistent.yaml"
@@ -320,7 +320,7 @@ class TestConfigServiceParsing:
 
     def test_parse_empty_file_returns_none(self):
         """_parse() handles empty YAML file"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         with tempfile.TemporaryDirectory() as tmpdir:
             config_file = Path(tmpdir) / ".x-ipe.yaml"
@@ -342,7 +342,7 @@ class TestConfigServiceValidation:
 
     def test_validate_valid_config_returns_config_data(self, temp_project_structure):
         """_validate() returns ConfigData for valid config"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_project_structure['root']))
         raw = {
@@ -364,7 +364,7 @@ class TestConfigServiceValidation:
 
     def test_validate_missing_version_fails(self, temp_project_structure):
         """_validate() fails when version is missing"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_project_structure['root']))
         raw = {
@@ -381,7 +381,7 @@ class TestConfigServiceValidation:
 
     def test_validate_wrong_version_fails(self, temp_project_structure):
         """_validate() fails when version is not 1"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_project_structure['root']))
         raw = {
@@ -399,7 +399,7 @@ class TestConfigServiceValidation:
 
     def test_validate_missing_project_root_fails(self, temp_project_structure):
         """_validate() fails when paths.project_root is missing"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_project_structure['root']))
         raw = {
@@ -416,7 +416,7 @@ class TestConfigServiceValidation:
 
     def test_validate_missing_x_ipe_app_fails(self, temp_project_structure):
         """_validate() fails when paths.x_ipe_app is missing"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_project_structure['root']))
         raw = {
@@ -433,7 +433,7 @@ class TestConfigServiceValidation:
 
     def test_validate_nonexistent_project_root_fails(self, temp_project_structure):
         """_validate() fails when project_root path doesn't exist"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_project_structure['root']))
         raw = {
@@ -451,7 +451,7 @@ class TestConfigServiceValidation:
 
     def test_validate_nonexistent_x_ipe_app_fails(self, temp_project_structure):
         """_validate() fails when x_ipe_app path doesn't exist"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_project_structure['root']))
         raw = {
@@ -469,7 +469,7 @@ class TestConfigServiceValidation:
 
     def test_validate_file_instead_of_dir_fails(self, temp_project_structure):
         """_validate() fails when path is file instead of directory"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         # Create a file instead of directory
         file_path = temp_project_structure['root'] / "not_a_dir"
@@ -490,7 +490,7 @@ class TestConfigServiceValidation:
 
     def test_validate_invalid_file_tree_scope_fails(self, temp_project_structure):
         """_validate() fails when file_tree_scope is invalid"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_project_structure['root']))
         raw = {
@@ -511,7 +511,7 @@ class TestConfigServiceValidation:
 
     def test_validate_invalid_terminal_cwd_fails(self, temp_project_structure):
         """_validate() fails when terminal_cwd is invalid"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_project_structure['root']))
         raw = {
@@ -533,7 +533,7 @@ class TestConfigServiceValidation:
 
     def test_validate_resolves_relative_paths(self, temp_project_structure):
         """_validate() resolves relative paths to absolute"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_project_structure['root']))
         raw = {
@@ -552,7 +552,7 @@ class TestConfigServiceValidation:
 
     def test_validate_defaults_optional_fields(self, temp_project_structure):
         """_validate() uses defaults for optional fields"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_project_structure['root']))
         raw = {
@@ -580,7 +580,7 @@ class TestConfigServiceLoad:
 
     def test_load_returns_config_data_when_valid(self, temp_project_structure):
         """load() returns ConfigData when config is valid"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_project_structure['root']))
         result = service.load()
@@ -591,7 +591,7 @@ class TestConfigServiceLoad:
 
     def test_load_returns_none_when_no_config(self, temp_dir_no_config):
         """load() returns None when no config file exists"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_dir_no_config))
         result = service.load()
@@ -600,7 +600,7 @@ class TestConfigServiceLoad:
 
     def test_load_stores_config_in_property(self, temp_project_structure):
         """load() stores result in config property"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_project_structure['root']))
         result = service.load()
@@ -609,7 +609,7 @@ class TestConfigServiceLoad:
 
     def test_load_from_nested_directory(self, temp_nested_structure):
         """load() finds config when started from nested directory"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         # Start from x-ipe subdir
         service = ConfigService(str(temp_nested_structure['subdir']))
@@ -620,7 +620,7 @@ class TestConfigServiceLoad:
 
     def test_error_property_contains_message_on_failure(self):
         """error property contains error message on validation failure"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create invalid config
@@ -646,7 +646,7 @@ class TestConfigAPIEndpoint:
     def app_with_config(self, temp_project_structure):
         """Create Flask app with config loaded"""
         from src.app import create_app
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         app = create_app()
         app.config['TESTING'] = True
@@ -726,7 +726,7 @@ class TestConfigIntegration:
 
     def test_project_service_uses_config_path(self, temp_project_structure):
         """ProjectService uses configured project_root path"""
-        from src.services import ConfigService, ProjectService
+        from x_ipe.services import ConfigService, ProjectService
         
         config_service = ConfigService(str(temp_project_structure['x_ipe_app']))
         config_data = config_service.load()
@@ -739,7 +739,7 @@ class TestConfigIntegration:
 
     def test_backward_compatibility_without_config(self, temp_dir_no_config):
         """App works normally without config file (backward compatible)"""
-        from src.services import ConfigService, ProjectService
+        from x_ipe.services import ConfigService, ProjectService
         
         config_service = ConfigService(str(temp_dir_no_config))
         config_data = config_service.load()
@@ -760,7 +760,7 @@ class TestConfigEdgeCases:
 
     def test_config_with_spaces_in_path(self):
         """Config handles paths with spaces correctly"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         with tempfile.TemporaryDirectory() as tmpdir:
             project_root = Path(tmpdir) / "My Project"
@@ -784,7 +784,7 @@ paths:
 
     def test_config_with_symlinked_directory(self):
         """Config handles symlinked directories"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         with tempfile.TemporaryDirectory() as tmpdir:
             project_root = Path(tmpdir)
@@ -813,7 +813,7 @@ paths:
 
     def test_config_missing_defaults_section(self, temp_project_structure):
         """Config works when defaults section is missing"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         config_content = """version: 1
 paths:
@@ -831,7 +831,7 @@ paths:
 
     def test_config_partial_defaults_section(self, temp_project_structure):
         """Config works when defaults section has only some values"""
-        from src.services import ConfigService
+        from x_ipe.services import ConfigService
         
         config_content = """version: 1
 paths:

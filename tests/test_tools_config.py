@@ -18,7 +18,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 # Will be imported after implementation
-# from src.services import ToolsConfigService
+# from x_ipe.services import ToolsConfigService
 # from src.app import create_app
 
 
@@ -112,7 +112,7 @@ def sample_config():
 @pytest.fixture
 def tools_config_service(temp_project_dir):
     """Create ToolsConfigService instance"""
-    from src.services import ToolsConfigService
+    from x_ipe.services import ToolsConfigService
     return ToolsConfigService(temp_project_dir)
 
 
@@ -137,20 +137,20 @@ class TestToolsConfigServiceInit:
     
     def test_init_sets_project_root(self, temp_project_dir):
         """ToolsConfigService stores project root as absolute path"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         service = ToolsConfigService(temp_project_dir)
         assert service.project_root == Path(temp_project_dir).resolve()
     
     def test_init_sets_config_path(self, temp_project_dir):
         """ToolsConfigService sets config path to x-ipe-docs/config/tools.json"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         service = ToolsConfigService(temp_project_dir)
         expected = Path(temp_project_dir).resolve() / 'config' / 'tools.json'
         assert service.config_path == expected
     
     def test_init_sets_legacy_path(self, temp_project_dir):
         """ToolsConfigService sets legacy path to x-ipe-docs/ideas/.ideation-tools.json"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         service = ToolsConfigService(temp_project_dir)
         expected = Path(temp_project_dir).resolve() / 'x-ipe-docs' / 'ideas' / '.ideation-tools.json'
         assert service.legacy_path == expected
@@ -161,7 +161,7 @@ class TestToolsConfigServiceLoad:
     
     def test_load_returns_existing_config(self, temp_project_with_config_dir, sample_config):
         """load() returns existing config when x-ipe-docs/config/tools.json exists"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         # Create config file
         config_path = Path(temp_project_with_config_dir) / 'config' / 'tools.json'
@@ -176,7 +176,7 @@ class TestToolsConfigServiceLoad:
     
     def test_load_creates_default_when_no_config_exists(self, temp_project_dir, default_config):
         """load() creates default config when neither config nor legacy exists"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         service = ToolsConfigService(temp_project_dir)
         config = service.load()
@@ -191,7 +191,7 @@ class TestToolsConfigServiceLoad:
     
     def test_load_creates_config_directory_if_missing(self, temp_project_dir):
         """load() creates config/ directory if it doesn't exist"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         config_dir = Path(temp_project_dir) / 'config'
         assert not config_dir.exists()
@@ -203,7 +203,7 @@ class TestToolsConfigServiceLoad:
     
     def test_load_handles_corrupted_config(self, temp_project_with_config_dir):
         """load() returns default config when config file is corrupted"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         # Create corrupted config file
         config_path = Path(temp_project_with_config_dir) / 'config' / 'tools.json'
@@ -222,7 +222,7 @@ class TestToolsConfigServiceMigration:
     
     def test_load_migrates_from_legacy_config(self, temp_project_with_legacy_config):
         """load() migrates from .ideation-tools.json when no new config exists"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         project_root = temp_project_with_legacy_config['root']
         legacy_config = temp_project_with_legacy_config['legacy_config']
@@ -240,7 +240,7 @@ class TestToolsConfigServiceMigration:
     
     def test_migration_deletes_legacy_file(self, temp_project_with_legacy_config):
         """load() deletes legacy .ideation-tools.json after migration"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         project_root = temp_project_with_legacy_config['root']
         legacy_path = temp_project_with_legacy_config['legacy_path']
@@ -255,7 +255,7 @@ class TestToolsConfigServiceMigration:
     
     def test_migration_creates_new_config_file(self, temp_project_with_legacy_config):
         """load() creates x-ipe-docs/config/tools.json after migration"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         project_root = temp_project_with_legacy_config['root']
         
@@ -268,7 +268,7 @@ class TestToolsConfigServiceMigration:
     
     def test_migration_handles_partial_legacy_config(self, temp_project_dir):
         """load() handles legacy config with missing sections"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         # Create legacy config with only ideation section
         ideas_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'ideas'
@@ -295,7 +295,7 @@ class TestToolsConfigServiceMigration:
     
     def test_migration_handles_corrupted_legacy_config(self, temp_project_dir):
         """load() returns default config when legacy file is corrupted"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         # Create corrupted legacy config
         ideas_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'ideas'
@@ -316,7 +316,7 @@ class TestToolsConfigServiceSave:
     
     def test_save_writes_config_to_file(self, temp_project_dir, sample_config):
         """save() writes config to x-ipe-docs/config/tools.json"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         service = ToolsConfigService(temp_project_dir)
         service.save(sample_config)
@@ -330,7 +330,7 @@ class TestToolsConfigServiceSave:
     
     def test_save_creates_config_directory(self, temp_project_dir, sample_config):
         """save() creates config/ directory if missing"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         config_dir = Path(temp_project_dir) / 'config'
         assert not config_dir.exists()
@@ -342,7 +342,7 @@ class TestToolsConfigServiceSave:
     
     def test_save_returns_true_on_success(self, temp_project_dir, sample_config):
         """save() returns True on successful save"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         service = ToolsConfigService(temp_project_dir)
         result = service.save(sample_config)
@@ -351,7 +351,7 @@ class TestToolsConfigServiceSave:
     
     def test_save_overwrites_existing_config(self, temp_project_with_config_dir, sample_config, default_config):
         """save() overwrites existing config file"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         config_path = Path(temp_project_with_config_dir) / 'config' / 'tools.json'
         
@@ -483,7 +483,7 @@ class TestToolsConfigIntegration:
     
     def test_full_flow_load_modify_save(self, temp_project_dir):
         """Full flow: load default → modify → save → reload"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         service = ToolsConfigService(temp_project_dir)
         
@@ -521,7 +521,7 @@ class TestToolsConfigIntegration:
     
     def test_migration_preserves_existing_config(self, temp_project_with_legacy_config):
         """Migration does not run if x-ipe-docs/config/tools.json already exists"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         project_root = temp_project_with_legacy_config['root']
         
@@ -569,7 +569,7 @@ class TestToolsConfigEdgeCases:
     
     def test_concurrent_save_last_write_wins(self, temp_project_dir, sample_config, default_config):
         """Concurrent saves: last write wins (acceptable for single-user)"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         service1 = ToolsConfigService(temp_project_dir)
         service2 = ToolsConfigService(temp_project_dir)
@@ -594,7 +594,7 @@ class TestToolsConfigEdgeCases:
     
     def test_load_with_extra_fields_preserves_them(self, temp_project_with_config_dir):
         """load() preserves extra/unknown fields in config"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         config_with_extra = {
             "version": "2.0",
@@ -624,7 +624,7 @@ class TestToolsConfigEdgeCases:
     
     def test_save_with_unicode_content(self, temp_project_dir):
         """save() handles unicode content correctly"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         config_with_unicode = {
             "version": "2.0",

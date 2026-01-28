@@ -69,6 +69,6 @@
 ## Global Settings
 
 ```yaml
-auto_advance: true  # Change to false for manual control
+auto_proceed: true  # Change to false for manual control
 ```
 

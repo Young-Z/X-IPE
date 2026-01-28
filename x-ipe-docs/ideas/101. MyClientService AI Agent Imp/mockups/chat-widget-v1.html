@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Chat Widget - MyClientService</title>
+  <style>
+    /* ============================================
+       CSS Variables - Modern/Friendly Theme
+       ============================================ */
+    :root {
+      --primary: #6366f1;
+      --primary-light: #818cf8;
+      --primary-dark: #4f46e5;
+      --secondary: #10b981;
+      --accent: #f59e0b;
+      --danger: #ef4444;
+      --bg-light: #f8fafc;
+      --bg-white: #ffffff;
+      --bg-chat: #f1f5f9;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --border: #e2e8f0;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* ============================================
+       Base Styles - Simulated App Background
+       ============================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Simulated App Background */
+    .app-container {
+      width: 100%;
+      height: 100vh;
+      background: var(--bg-light);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app-header {
+      background: var(--bg-white);
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .app-logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .app-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .app-content {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .app-card {
+      background: var(--bg-white);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+    }
+
+    .app-card h3 {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .app-card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* ============================================
+       Chat Widget - Floating Button
+       ============================================ */
+    .chat-trigger {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .chat-trigger:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .chat-trigger svg {
+      width: 28px;
+      height: 28px;
+      fill: white;
+    }
+
+    .chat-trigger.hidden {
+      transform: scale(0);
+      opacity: 0;
+    }
+
+    /* Notification Badge */
+    .chat-trigger .badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 20px;
+      height: 20px;
+      background: var(--danger);
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ============================================
+       Chat Widget - Main Container
+       ============================================ */
+    .chat-widget {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 400px;
+      height: 600px;
+      background: var(--bg-white);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xl);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 1001;
+      transform: scale(0.9);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-origin: bottom right;
+    }
+
+    .chat-widget.open {
+      transform: scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ============================================
+       Chat Header
+       ============================================ */
+    .chat-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chat-avatar {
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chat-avatar svg {
+      width: 24px;
+      height: 24px;
+      fill: white;
+    }
+
+    .chat-header-info {
+      flex: 1;
+    }
+
+    .chat-header-title {
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .chat-header-status {
+      color: rgba(255,255,255,0.8);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #4ade80;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .chat-header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-header-btn {
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .chat-header-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .chat-header-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: white;
+    }
+
+    /* ============================================
+       Chat Messages Area
+       ============================================ */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      background: var(--bg-chat);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .message {
+      max-width: 85%;
+      animation: messageIn 0.3s ease;
+    }
+
+    @keyframes messageIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.ai {
+      align-self: flex-start;
+    }
+
+    .message.user {
+      align-self: flex-end;
+    }
+
+    .message-bubble {
+      padding: 12px 16px;
+      border-radius: var(--radius-lg);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .message.ai .message-bubble {
+      background: var(--bg-white);
+      color: var(--text-primary);
+      border-bottom-left-radius: 4px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .message.user .message-bubble {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      padding: 0 4px;
+    }
+
+    .message.user .message-time {
+      text-align: right;
+    }
+
+    /* Typing Indicator */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 12px 16px;
+      background: var(--bg-white);
+      border-radius: var(--radius-lg);
+      border-bottom-left-radius: 4px;
+      width: fit-content;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .typing-indicator span {
+      width: 8px;
+      height: 8px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out;
+    }
+
+    .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ============================================
+       Rich Widgets
+       ============================================ */
+    
+    /* Multi-Choice Widget */
+    .widget-multi-choice {
+      background: var(--bg-white);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .widget-multi-choice .widget-question {
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .widget-multi-choice .options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .widget-multi-choice .option-btn {
+      padding: 10px 16px;
+      background: var(--bg-light);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    .widget-multi-choice .option-btn:hover {
+      border-color: var(--primary);
+      background: #eef2ff;
+    }
+
+    .widget-multi-choice .option-btn.selected {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Customer Card Widget */
+    .widget-customer-card {
+      background: var(--bg-white);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .widget-customer-card .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .widget-customer-card .customer-avatar {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .widget-customer-card .customer-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 16px;
+    }
+
+    .widget-customer-card .customer-id {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .widget-customer-card .card-details {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+
+    .widget-customer-card .detail-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .widget-customer-card .detail-row svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--text-muted);
+    }
+
+    .widget-customer-card .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .widget-customer-card .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .widget-customer-card .status-badge.active {
+      color: var(--secondary);
+    }
+
+    .widget-customer-card .status-badge .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--secondary);
+      border-radius: 50%;
+    }
+
+    .widget-customer-card .card-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .widget-customer-card .action-btn {
+      padding: 6px 12px;
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .widget-customer-card .action-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* Order Summary Widget */
+    .widget-order-summary {
+      background: var(--bg-white);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .widget-order-summary .order-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .widget-order-summary .order-id {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .widget-order-summary .order-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: #dcfce7;
+      color: #16a34a;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .widget-order-summary .order-status .dot {
+      width: 6px;
+      height: 6px;
+      background: #16a34a;
+      border-radius: 50%;
+    }
+
+    .widget-order-summary .order-meta {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .widget-order-summary .order-items {
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+      margin-bottom: 12px;
+    }
+
+    .widget-order-summary .order-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-secondary);
+      padding: 4px 0;
+    }
+
+    .widget-order-summary .order-total {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+      color: var(--text-primary);
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Data Table Widget */
+    .widget-data-table {
+      background: var(--bg-white);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .widget-data-table .table-header {
+      padding: 12px 16px;
+      background: var(--bg-light);
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .widget-data-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .widget-data-table th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: var(--bg-light);
+    }
+
+    .widget-data-table td {
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      border-top: 1px solid var(--border);
+    }
+
+    .widget-data-table tr:hover td {
+      background: var(--bg-light);
+    }
+
+    .widget-data-table .load-more {
+      padding: 10px;
+      text-align: center;
+    }
+
+    .widget-data-table .load-more-btn {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .widget-data-table .load-more-btn:hover {
+      background: var(--bg-light);
+    }
+
+    /* Confirmation Dialog Widget */
+    .widget-confirm {
+      background: var(--bg-white);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+      border-left: 4px solid var(--accent);
+    }
+
+    .widget-confirm .confirm-icon {
+      width: 40px;
+      height: 40px;
+      background: #fef3c7;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .widget-confirm .confirm-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: var(--accent);
+    }
+
+    .widget-confirm .confirm-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .widget-confirm .confirm-message {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .widget-confirm .confirm-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .widget-confirm .btn-cancel {
+      padding: 8px 16px;
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .widget-confirm .btn-cancel:hover {
+      background: var(--border);
+    }
+
+    .widget-confirm .btn-confirm {
+      padding: 8px 16px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .widget-confirm .btn-confirm:hover {
+      background: var(--primary-dark);
+    }
+
+    /* Progress Widget */
+    .widget-progress {
+      background: var(--bg-white);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .widget-progress .progress-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .widget-progress .progress-steps {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .widget-progress .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      position: relative;
+    }
+
+    .widget-progress .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      width: 100%;
+      height: 2px;
+      background: var(--border);
+    }
+
+    .widget-progress .step.completed:not(:last-child)::after {
+      background: var(--secondary);
+    }
+
+    .widget-progress .step-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--border);
+      position: relative;
+      z-index: 1;
+    }
+
+    .widget-progress .step.completed .step-icon {
+      background: var(--secondary);
+    }
+
+    .widget-progress .step.current .step-icon {
+      background: var(--primary);
+      animation: pulse 2s infinite;
+    }
+
+    .widget-progress .step-icon svg {
+      width: 12px;
+      height: 12px;
+      fill: white;
+    }
+
+    .widget-progress .step-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .widget-progress .step.completed .step-label,
+    .widget-progress .step.current .step-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .widget-progress .progress-status {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: center;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Form Widget */
+    .widget-form {
+      background: var(--bg-white);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .widget-form .form-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .widget-form .form-group {
+      margin-bottom: 12px;
+    }
+
+    .widget-form label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .widget-form input,
+    .widget-form select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text-primary);
+      background: var(--bg-white);
+      transition: border-color 0.2s;
+    }
+
+    .widget-form input:focus,
+    .widget-form select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .widget-form .form-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+
+    /* ============================================
+       Quick Actions
+       ============================================ */
+    .quick-actions {
+      padding: 12px 16px;
+      background: var(--bg-white);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+    }
+
+    .quick-action-btn {
+      padding: 8px 14px;
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .quick-action-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* ============================================
+       Chat Input Area
+       ============================================ */
+    .chat-input-area {
+      padding: 16px;
+      background: var(--bg-white);
+      border-top: 1px solid var(--border);
+    }
+
+    .chat-input-container {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      background: var(--bg-light);
+      border-radius: var(--radius-lg);
+      padding: 8px 12px;
+    }
+
+    .chat-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 14px;
+      color: var(--text-primary);
+      resize: none;
+      max-height: 100px;
+      line-height: 1.5;
+    }
+
+    .chat-input:focus {
+      outline: none;
+    }
+
+    .chat-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .chat-send-btn {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+
+    .chat-send-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .chat-send-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: white;
+    }
+
+    /* ============================================
+       Demo Controls
+       ============================================ */
+    .demo-controls {
+      position: fixed;
+      top: 80px;
+      left: 24px;
+      background: var(--bg-white);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: var(--shadow-lg);
+      z-index: 100;
+      max-width: 280px;
+    }
+
+    .demo-controls h3 {
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .demo-controls .demo-btn {
+      display: block;
+      width: 100%;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .demo-controls .demo-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .demo-controls .demo-btn:last-child {
+      margin-bottom: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Simulated App Background -->
+  <div class="app-container">
+    <header class="app-header">
+      <div class="app-logo">MC</div>
+      <h1 class="app-title">My Client Service</h1>
+    </header>
+    <div class="app-content">
+      <div class="app-card">
+        <h3>Active Clients</h3>
+        <div class="value">1,234</div>
+      </div>
+      <div class="app-card">
+        <h3>Pending Orders</h3>
+        <div class="value">56</div>
+      </div>
+      <div class="app-card">
+        <h3>Today's Revenue</h3>
+        <div class="value">$12,456</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Demo Controls Panel -->
+  <div class="demo-controls">
+    <h3>🎮 Widget Demo</h3>
+    <button class="demo-btn" onclick="showMultiChoice()">Multi-Choice Buttons</button>
+    <button class="demo-btn" onclick="showCustomerCard()">Customer Info Card</button>
+    <button class="demo-btn" onclick="showOrderSummary()">Order Summary</button>
+    <button class="demo-btn" onclick="showDataTable()">Data Table</button>
+    <button class="demo-btn" onclick="showConfirmDialog()">Confirmation Dialog</button>
+    <button class="demo-btn" onclick="showProgress()">Progress Indicator</button>
+    <button class="demo-btn" onclick="showForm()">Form Input</button>
+    <button class="demo-btn" onclick="clearChat()">Clear Chat</button>
+  </div>
+
+  <!-- Chat Trigger Button -->
+  <button class="chat-trigger" onclick="toggleChat()">
+    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+    <span class="badge">1</span>
+  </button>
+
+  <!-- Chat Widget -->
+  <div class="chat-widget" id="chatWidget">
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="chat-avatar">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+      </div>
+      <div class="chat-header-info">
+        <div class="chat-header-title">AI Assistant</div>
+        <div class="chat-header-status">
+          <span class="status-dot"></span>
+          Online • Ready to help
+        </div>
+      </div>
+      <div class="chat-header-actions">
+        <button class="chat-header-btn" title="Minimize">
+          <svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
+        </button>
+        <button class="chat-header-btn" onclick="toggleChat()" title="Close">
+          <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages Area -->
+    <div class="chat-messages" id="chatMessages">
+      <!-- Welcome Message -->
+      <div class="message ai">
+        <div class="message-bubble">
+          👋 Hi! I'm your AI assistant for My Client Service. I can help you with client management, orders, and more. What would you like to do today?
+        </div>
+        <div class="message-time">Just now</div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <button class="quick-action-btn" onclick="sendMessage('Find client')">🔍 Find Client</button>
+      <button class="quick-action-btn" onclick="sendMessage('New order')">📦 New Order</button>
+      <button class="quick-action-btn" onclick="sendMessage('Check status')">📋 Check Status</button>
+      <button class="quick-action-btn" onclick="sendMessage('Generate report')">📊 Report</button>
+    </div>
+
+    <!-- Input Area -->
+    <div class="chat-input-area">
+      <div class="chat-input-container">
+        <textarea class="chat-input" placeholder="Type your message..." rows="1" onkeydown="handleKeyDown(event)"></textarea>
+        <button class="chat-send-btn" onclick="sendMessage()">
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Toggle chat widget
+    function toggleChat() {
+      const widget = document.getElementById('chatWidget');
+      const trigger = document.querySelector('.chat-trigger');
+      widget.classList.toggle('open');
+      trigger.classList.toggle('hidden');
+      
+      // Hide badge when opened
+      if (widget.classList.contains('open')) {
+        trigger.querySelector('.badge').style.display = 'none';
+      }
+    }
+
+    // Open chat by default for demo
+    setTimeout(() => toggleChat(), 500);
+
+    // Handle keyboard
+    function handleKeyDown(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    }
+
+    // Send message
+    function sendMessage(text) {
+      const input = document.querySelector('.chat-input');
+      const message = text || input.value.trim();
+      if (!message) return;
+
+      addMessage(message, 'user');
+      input.value = '';
+
+      // Show typing indicator
+      showTyping();
+
+      // Simulate AI response
+      setTimeout(() => {
+        hideTyping();
+        addMessage("I'll help you with that. Let me check the system...", 'ai');
+      }, 1500);
+    }
+
+    // Add message to chat
+    function addMessage(content, type, isWidget = false) {
+      const container = document.getElementById('chatMessages');
+      const message = document.createElement('div');
+      message.className = `message ${type}`;
+      
+      if (isWidget) {
+        message.innerHTML = content;
+      } else {
+        message.innerHTML = `
+          <div class="message-bubble">${content}</div>
+          <div class="message-time">Just now</div>
+        `;
+      }
+      
+      container.appendChild(message);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // Show/hide typing indicator
+    function showTyping() {
+      const container = document.getElementById('chatMessages');
+      const typing = document.createElement('div');
+      typing.className = 'message ai';
+      typing.id = 'typingIndicator';
+      typing.innerHTML = `
+        <div class="typing-indicator">
+          <span></span><span></span><span></span>
+        </div>
+      `;
+      container.appendChild(typing);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function hideTyping() {
+      const typing = document.getElementById('typingIndicator');
+      if (typing) typing.remove();
+    }
+
+    // Clear chat
+    function clearChat() {
+      const container = document.getElementById('chatMessages');
+      container.innerHTML = `
+        <div class="message ai">
+          <div class="message-bubble">
+            👋 Hi! I'm your AI assistant for My Client Service. I can help you with client management, orders, and more. What would you like to do today?
+          </div>
+          <div class="message-time">Just now</div>
+        </div>
+      `;
+    }
+
+    // Demo: Multi-Choice Widget
+    function showMultiChoice() {
+      addMessage("Which client would you like to update?", 'user');
+      showTyping();
+      setTimeout(() => {
+        hideTyping();
+        const widget = `
+          <div class="widget-multi-choice">
+            <div class="widget-question">Please select a client:</div>
+            <div class="options">
+              <button class="option-btn" onclick="selectOption(this, 'John Smith')">John Smith - #C001</button>
+              <button class="option-btn" onclick="selectOption(this, 'Jane Doe')">Jane Doe - #C002</button>
+              <button class="option-btn" onclick="selectOption(this, 'Bob Wilson')">Bob Wilson - #C003</button>
+              <button class="option-btn" onclick="selectOption(this, 'Alice Brown')">Alice Brown - #C004</button>
+            </div>
+          </div>
+        `;
+        addMessage(widget, 'ai', true);
+      }, 1000);
+    }
+
+    function selectOption(btn, value) {
+      // Remove previous selection
+      btn.parentElement.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      
+      // Send selection as message after short delay
+      setTimeout(() => {
+        addMessage(`Selected: ${value}`, 'user');
+        showTyping();
+        setTimeout(() => {
+          hideTyping();
+          addMessage(`Great! I've selected ${value}. What would you like to do with this client?`, 'ai');
+        }, 800);
+      }, 300);
+    }
+
+    // Demo: Customer Card Widget
+    function showCustomerCard() {
+      addMessage("Show me John Smith's details", 'user');
+      showTyping();
+      setTimeout(() => {
+        hideTyping();
+        const widget = `
+          <div class="widget-customer-card">
+            <div class="card-header">
+              <div class="customer-avatar">JS</div>
+              <div>
+                <div class="customer-name">John Smith</div>
+                <div class="customer-id">Customer #C001</div>
+              </div>
+            </div>
+            <div class="card-details">
+              <div class="detail-row">
+                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                john.smith@email.com
+              </div>
+              <div class="detail-row">
+                <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                +1 555-0123
+              </div>
+              <div class="detail-row">
+                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                New York, NY
+              </div>
+            </div>
+            <div class="card-footer">
+              <div class="status-badge active">
+                <span class="dot"></span>
+                Active since Jan 2024
+              </div>
+              <div class="card-actions">
+                <button class="action-btn">Edit</button>
+                <button class="action-btn">Contact</button>
+              </div>
+            </div>
+          </div>
+        `;
+        addMessage(widget, 'ai', true);
+      }, 1200);
+    }
+
+    // Demo: Order Summary Widget
+    function showOrderSummary() {
+      addMessage("Show latest order for John Smith", 'user');
+      showTyping();
+      setTimeout(() => {
+        hideTyping();
+        const widget = `
+          <div class="widget-order-summary">
+            <div class="order-header">
+              <span class="order-id">Order #ORD-2026-0142</span>
+              <span class="order-status"><span class="dot"></span>Confirmed</span>
+            </div>
+            <div class="order-meta">
+              Customer: John Smith • Date: Jan 27, 2026
+            </div>
+            <div class="order-items">
+              <div class="order-item">
+                <span>• Product A × 2</span>
+                <span>$199.00</span>
+              </div>
+              <div class="order-item">
+                <span>• Service B × 1</span>
+                <span>$50.00</span>
+              </div>
+            </div>
+            <div class="order-total">
+              <span>Total</span>
+              <span>$249.00</span>
+            </div>
+          </div>
+        `;
+        addMessage(widget, 'ai', true);
+      }, 1000);
+    }
+
+    // Demo: Data Table Widget
+    function showDataTable() {
+      addMessage("List recent clients", 'user');
+      showTyping();
+      setTimeout(() => {
+        hideTyping();
+        const widget = `
+          <div class="widget-data-table">
+            <div class="table-header">Recent Clients (5 of 23)</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Status</th>
+                  <th>Last Active</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>John Smith</td><td>Active</td><td>Today</td></tr>
+                <tr><td>Jane Doe</td><td>Active</td><td>Yesterday</td></tr>
+                <tr><td>Bob Wilson</td><td>Pending</td><td>3 days ago</td></tr>
+                <tr><td>Alice Brown</td><td>Active</td><td>1 week ago</td></tr>
+                <tr><td>Charlie Lee</td><td>Inactive</td><td>2 weeks ago</td></tr>
+              </tbody>
+            </table>
+            <div class="load-more">
+              <button class="load-more-btn">Load More</button>
+            </div>
+          </div>
+        `;
+        addMessage(widget, 'ai', true);
+      }, 1000);
+    }
+
+    // Demo: Confirmation Dialog Widget
+    function showConfirmDialog() {
+      addMessage("Deactivate client Bob Wilson", 'user');
+      showTyping();
+      setTimeout(() => {
+        hideTyping();
+        const widget = `
+          <div class="widget-confirm">
+            <div class="confirm-icon">
+              <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+            </div>
+            <div class="confirm-title">Confirm Action</div>
+            <div class="confirm-message">
+              Are you sure you want to deactivate <strong>Bob Wilson</strong>?<br>
+              This will affect 3 pending orders.
+            </div>
+            <div class="confirm-actions">
+              <button class="btn-cancel" onclick="handleConfirm(false)">Cancel</button>
+              <button class="btn-confirm" onclick="handleConfirm(true)">Confirm</button>
+            </div>
+          </div>
+        `;
+        addMessage(widget, 'ai', true);
+      }, 1000);
+    }
+
+    function handleConfirm(confirmed) {
+      if (confirmed) {
+        addMessage("Yes, deactivate the client", 'user');
+        showTyping();
+        setTimeout(() => {
+          hideTyping();
+          addMessage("✅ Done! Bob Wilson has been deactivated. All pending orders have been cancelled.", 'ai');
+        }, 800);
+      } else {
+        addMessage("Cancel", 'user');
+        showTyping();
+        setTimeout(() => {
+          hideTyping();
+          addMessage("No problem! The action has been cancelled. Is there anything else I can help with?", 'ai');
+        }, 500);
+      }
+    }
+
+    // Demo: Progress Widget
+    function showProgress() {
+      addMessage("What's the status of order #142?", 'user');
+      showTyping();
+      setTimeout(() => {
+        hideTyping();
+        const widget = `
+          <div class="widget-progress">
+            <div class="progress-title">Order #ORD-2026-0142 Processing</div>
+            <div class="progress-steps">
+              <div class="step completed">
+                <div class="step-icon">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                </div>
+                <span class="step-label">Received</span>
+              </div>
+              <div class="step completed">
+                <div class="step-icon">
+                  <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                </div>
+                <span class="step-label">Validated</span>
+              </div>
+              <div class="step current">
+                <div class="step-icon">
+                  <svg viewBox="0 0 24 24"><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <span class="step-label">Processing</span>
+              </div>
+              <div class="step">
+                <div class="step-icon"></div>
+                <span class="step-label">Complete</span>
+              </div>
+            </div>
+            <div class="progress-status">Current: Verifying inventory...</div>
+          </div>
+        `;
+        addMessage(widget, 'ai', true);
+      }, 1000);
+    }
+
+    // Demo: Form Widget
+    function showForm() {
+      addMessage("Update John Smith's contact info", 'user');
+      showTyping();
+      setTimeout(() => {
+        hideTyping();
+        const widget = `
+          <div class="widget-form">
+            <div class="form-title">Update Client Information</div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" value="john.smith@email.com">
+            </div>
+            <div class="form-group">
+              <label>Phone</label>
+              <input type="tel" value="+1 555-0123">
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select>
+                <option selected>Active</option>
+                <option>Pending</option>
+                <option>Inactive</option>
+              </select>
+            </div>
+            <div class="form-actions">
+              <button class="btn-cancel" onclick="handleFormSubmit(false)">Cancel</button>
+              <button class="btn-confirm" onclick="handleFormSubmit(true)">Submit</button>
+            </div>
+          </div>
+        `;
+        addMessage(widget, 'ai', true);
+      }, 1000);
+    }
+
+    function handleFormSubmit(submitted) {
+      if (submitted) {
+        addMessage("Submit changes", 'user');
+        showTyping();
+        setTimeout(() => {
+          hideTyping();
+          addMessage("✅ Client information updated successfully!", 'ai');
+        }, 800);
+      } else {
+        addMessage("Cancel", 'user');
+        showTyping();
+        setTimeout(() => {
+          hideTyping();
+          addMessage("Changes discarded. What else can I help with?", 'ai');
+        }, 500);
+      }
+    }
+  </script>
+</body>
+</html>

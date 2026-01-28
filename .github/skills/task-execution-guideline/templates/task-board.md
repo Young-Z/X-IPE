@@ -5,7 +5,7 @@
 ## Global Settings
 
 ```yaml
-auto_advance: false  # Set to true for automatic task chaining
+auto_proceed: false  # Set to true for automatic task chaining
 ```
 
 ---

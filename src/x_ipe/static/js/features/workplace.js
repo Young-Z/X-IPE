@@ -23,6 +23,7 @@ class WorkplaceManager {
         this.fileExtension = null;
         this.easyMDE = null; // EasyMDE editor instance for compose view
         this.copilotPrompts = []; // Loaded from x-ipe-docs/config/copilot-prompt.json
+        this.targetFolderPath = null; // Target folder for compose/upload (null = create new folder)
         this._loadCopilotPrompts();
     }
     
@@ -282,6 +283,19 @@ class WorkplaceManager {
             const actionBtns = document.createElement('div');
             actionBtns.className = 'workplace-tree-actions';
             
+            // Add button (for folders - to add files to folder)
+            if (node.type === 'folder') {
+                const addBtn = document.createElement('button');
+                addBtn.className = 'workplace-tree-action-btn workplace-tree-add-btn';
+                addBtn.innerHTML = '<i class="bi bi-plus-lg"></i>';
+                addBtn.title = 'Add to folder';
+                addBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.showUploadView(node.path);
+                });
+                actionBtns.appendChild(addBtn);
+            }
+            
             // Rename button (only for top-level folders)
             if (node.type === 'folder' && level === 0) {
                 const renameBtn = document.createElement('button');
@@ -306,6 +320,17 @@ class WorkplaceManager {
                     this.downloadFile(node.path, node.name);
                 });
                 actionBtns.appendChild(downloadBtn);
+                
+                // Rename button for files
+                const renameBtn = document.createElement('button');
+                renameBtn.className = 'workplace-tree-action-btn workplace-tree-rename-btn';
+                renameBtn.innerHTML = '<i class="bi bi-pencil"></i>';
+                renameBtn.title = 'Rename file';
+                renameBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.startFileRename(li, node.path, node.name);
+                });
+                actionBtns.appendChild(renameBtn);
             }
             
             // Delete button
@@ -486,6 +511,21 @@ class WorkplaceManager {
                     const result = await response.json();
                     if (result.success) {
                         this._showToast('Folder renamed successfully', 'success');
+                        
+                        // Update currentPath if viewing a file inside the renamed folder
+                        if (this.currentPath) {
+                            const oldSegment = '/' + originalName + '/';
+                            const newSegment = '/' + newName + '/';
+                            if (this.currentPath.includes(oldSegment)) {
+                                this.currentPath = this.currentPath.replace(oldSegment, newSegment);
+                                // Update the path display in the editor header
+                                const pathSpan = document.querySelector('.workplace-editor-path');
+                                if (pathSpan) {
+                                    pathSpan.textContent = this.currentPath;
+                                }
+                            }
+                        }
+                        
                         await this.loadTree();
                     } else {
                         this._showToast(result.error || 'Failed to rename folder', 'error');
@@ -498,6 +538,91 @@ class WorkplaceManager {
                 } catch (error) {
                     console.error('Failed to rename folder:', error);
                     this._showToast('Failed to rename folder', 'error');
+                    const newSpan = document.createElement('span');
+                    newSpan.className = 'workplace-tree-name';
+                    newSpan.textContent = originalName;
+                    input.replaceWith(newSpan);
+                }
+            } else {
+                const newSpan = document.createElement('span');
+                newSpan.className = 'workplace-tree-name';
+                newSpan.textContent = originalName;
+                input.replaceWith(newSpan);
+            }
+        };
+        
+        input.addEventListener('blur', () => finishRename(true));
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                finishRename(true);
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                finishRename(false);
+            }
+        });
+    }
+    
+    /**
+     * Start inline file rename
+     */
+    startFileRename(li, filePath, currentName) {
+        if (this.renamingFolder) return;
+        
+        this.renamingFolder = li; // Reuse the same flag
+        const nameSpan = li.querySelector('.workplace-tree-name');
+        const originalName = currentName;
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'workplace-rename-input';
+        input.value = currentName;
+        
+        nameSpan.replaceWith(input);
+        input.focus();
+        input.select();
+        
+        const finishRename = async (save) => {
+            if (!this.renamingFolder) return;
+            
+            const newName = input.value.trim();
+            this.renamingFolder = null;
+            
+            if (save && newName && newName !== originalName) {
+                try {
+                    const response = await fetch('/api/ideas/rename-file', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            path: filePath,
+                            new_name: newName
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        this._showToast('File renamed successfully', 'success');
+                        
+                        // Update currentPath if viewing this file
+                        if (this.currentPath === filePath) {
+                            this.currentPath = result.new_path;
+                            const pathSpan = document.querySelector('.workplace-editor-path');
+                            if (pathSpan) {
+                                pathSpan.textContent = result.new_path;
+                            }
+                        }
+                        
+                        await this.loadTree();
+                    } else {
+                        this._showToast(result.error || 'Failed to rename file', 'error');
+                        const newSpan = document.createElement('span');
+                        newSpan.className = 'workplace-tree-name';
+                        newSpan.textContent = originalName;
+                        input.replaceWith(newSpan);
+                    }
+                } catch (error) {
+                    console.error('Failed to rename file:', error);
+                    this._showToast('Failed to rename file', 'error');
                     const newSpan = document.createElement('span');
                     newSpan.className = 'workplace-tree-name';
                     newSpan.textContent = originalName;
@@ -569,11 +694,17 @@ class WorkplaceManager {
         `;
         
         try {
-            const response = await fetch(`/api/file/content?path=${encodeURIComponent(path)}`);
-            const data = await response.json();
-            
-            this.originalContent = data.content || '';
-            this.renderContent(contentArea, data.content || '');
+            // For images and binary files, skip JSON parsing and render directly
+            if (this.fileType === 'image' || this.fileType === 'binary') {
+                this.originalContent = '';
+                this.renderContent(contentArea, '');
+            } else {
+                const response = await fetch(`/api/file/content?path=${encodeURIComponent(path)}`);
+                const data = await response.json();
+                
+                this.originalContent = data.content || '';
+                this.renderContent(contentArea, data.content || '');
+            }
         } catch (error) {
             console.error('Failed to load file:', error);
             contentArea.innerHTML = `
@@ -618,6 +749,9 @@ class WorkplaceManager {
                 <span class="workplace-editor-path">${this._escapeHtml(this.currentPath)}</span>
                 <div class="workplace-editor-actions">
                     <span class="workplace-editor-status" id="workplace-editor-status"></span>
+                    <button class="btn btn-sm btn-outline-secondary workplace-copy-url-btn" id="workplace-copy-url-btn" title="Copy file URL">
+                        <i class="bi bi-link-45deg"></i>
+                    </button>
                     ${isEditable ? `
                     <button class="btn btn-sm btn-outline-secondary workplace-edit-btn" id="workplace-edit-btn" title="Edit file">
                         <i class="bi bi-pencil"></i> Edit
@@ -658,6 +792,12 @@ class WorkplaceManager {
         const editBtn = document.getElementById('workplace-edit-btn');
         if (editBtn) {
             editBtn.addEventListener('click', () => this.enterEditMode());
+        }
+        
+        // Bind copy URL button (CR-005)
+        const copyUrlBtn = document.getElementById('workplace-copy-url-btn');
+        if (copyUrlBtn) {
+            copyUrlBtn.addEventListener('click', () => this._copyFileUrl());
         }
         
         // Bind copilot button with hover dropdown
@@ -1311,8 +1451,9 @@ class WorkplaceManager {
     
     /**
      * Show upload/compose view
+     * @param {string|null} targetFolder - Optional folder path to save files to (null = create new folder)
      */
-    showUploadView() {
+    showUploadView(targetFolder = null) {
         // Check for unsaved changes
         if (this.hasUnsavedChanges) {
             if (!window.confirm('You have unsaved changes. Do you want to discard them?')) {
@@ -1329,10 +1470,24 @@ class WorkplaceManager {
         this.currentView = 'upload';
         this.currentPath = null;
         this.hasUnsavedChanges = false;
+        this.targetFolderPath = targetFolder;
+        
+        // Build target folder indicator
+        const folderName = targetFolder ? targetFolder.split('/').pop() : null;
+        const targetIndicator = targetFolder ? `
+            <div class="workplace-target-folder">
+                <i class="bi bi-folder-fill"></i>
+                <span>Saving to: <strong>${this._escapeHtml(folderName)}</strong></span>
+                <button class="btn btn-sm btn-link workplace-clear-target" title="Create new folder instead">
+                    <i class="bi bi-x-circle"></i>
+                </button>
+            </div>
+        ` : '';
         
         const contentArea = document.getElementById('workplace-content');
         contentArea.innerHTML = `
             <div class="workplace-uploader">
+                ${targetIndicator}
                 <!-- Tab Navigation -->
                 <ul class="nav nav-tabs workplace-tabs" id="ideaTabs" role="tablist">
                     <li class="nav-item" role="presentation">
@@ -1398,6 +1553,25 @@ class WorkplaceManager {
         
         this.setupUploader();
         this.setupComposer();
+        this._setupClearTargetButton();
+    }
+    
+    /**
+     * Setup clear target folder button handler
+     */
+    _setupClearTargetButton() {
+        const clearBtn = document.querySelector('.workplace-clear-target');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.targetFolderPath = null;
+                const indicator = document.querySelector('.workplace-target-folder');
+                if (indicator) {
+                    indicator.remove();
+                }
+                this._showToast('Will create a new folder instead', 'info');
+            });
+        }
     }
     
     /**
@@ -1514,6 +1688,11 @@ class WorkplaceManager {
             const formData = new FormData();
             formData.append('files', file);
             
+            // If target folder is set, add it to the form data
+            if (this.targetFolderPath) {
+                formData.append('target_folder', this.targetFolderPath);
+            }
+            
             const response = await fetch('/api/ideas/upload', {
                 method: 'POST',
                 body: formData
@@ -1524,6 +1703,9 @@ class WorkplaceManager {
             if (result.success) {
                 this._showToast(`Idea created in ${result.folder_name}`, 'success');
                 await this.loadTree();
+                
+                // Reset target folder after successful submit
+                this.targetFolderPath = null;
                 
                 // Show success message
                 const contentArea = document.getElementById('workplace-content');
@@ -1602,6 +1784,11 @@ class WorkplaceManager {
                 formData.append('files', file);
             }
             
+            // If target folder is set, add it to the form data
+            if (this.targetFolderPath) {
+                formData.append('target_folder', this.targetFolderPath);
+            }
+            
             const response = await fetch('/api/ideas/upload', {
                 method: 'POST',
                 body: formData
@@ -1612,6 +1799,9 @@ class WorkplaceManager {
             if (result.success) {
                 this._showToast(`Uploaded ${result.files_uploaded.length} file(s) to ${result.folder_name}`, 'success');
                 await this.loadTree();
+                
+                // Reset target folder after successful upload
+                this.targetFolderPath = null;
                 
                 // Show placeholder after successful upload
                 const contentArea = document.getElementById('workplace-content');
@@ -1707,6 +1897,36 @@ class WorkplaceManager {
         } catch (error) {
             console.error('Upload to folder failed:', error);
             this._showToast('Upload failed: ' + error.message, 'error');
+        }
+    }
+    
+    /**
+     * Copy file URL to clipboard (CR-005)
+     */
+    async _copyFileUrl() {
+        if (!this.currentPath) return;
+        
+        const url = `${window.location.origin}/api/file/content?path=${encodeURIComponent(this.currentPath)}&raw=true`;
+        
+        try {
+            await navigator.clipboard.writeText(url);
+            this._showToast('URL copied to clipboard', 'success');
+        } catch (error) {
+            console.error('Failed to copy URL:', error);
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = url;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                this._showToast('URL copied to clipboard', 'success');
+            } catch (e) {
+                this._showToast('Failed to copy URL', 'error');
+            }
+            document.body.removeChild(textArea);
         }
     }
     

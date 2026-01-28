@@ -449,6 +449,9 @@ mockups_created:
     path: {Current Idea Folder}/mockups/dashboard-v1.html
   - type: form
     path: {Current Idea Folder}/mockups/user-form-v1.html
+mockup_list:   # List of all mockup paths - passed to next tasks in chain
+  - {Current Idea Folder}/mockups/dashboard-v1.html
+  - {Current Idea Folder}/mockups/user-form-v1.html
 idea_summary_version: vN+1
 next_task_type: Requirement Gathering
 require_human_review: true
@@ -461,6 +464,12 @@ task_output_links:
 **Output Links:** All paths in `task_output_links` are clickable/viewable:
 - HTML mockups can be opened in browser
 - Idea summary is markdown viewable in editor
+
+**Mockup List Flow:** The `mockup_list` attribute is passed through the task chain:
+```
+Idea Mockup → Requirement Gathering → Feature Breakdown → Feature Refinement → Technical Design
+```
+Each subsequent task receives and passes the mockup_list to ensure mockups are referenced throughout the development lifecycle.
 
 ---
 

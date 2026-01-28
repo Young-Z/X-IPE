@@ -1,7 +1,7 @@
 # Feature Specification: Workplace (Idea Management)
 
 > Feature ID: FEATURE-008  
-> Version: v1.4  
+> Version: v1.5  
 > Status: Refined  
 > Last Updated: 01-28-2026
 
@@ -9,6 +9,7 @@
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
+| v1.5 | 2026-01-28 | CR-005: Copy URL button for file access | [CR-005](./CR-005.md) |
 | v1.4 | 2026-01-28 | CR-004: Rename to Ideation, sidebar submenu, Copilot hover menu | [CR-004](./CR-004.md) |
 | v1.3 | 2026-01-23 | CR-003: Add Ideation Toolbox for skill configuration | [CR-003](./CR-003.md) |
 | v1.2 | 2026-01-23 | CR-002: Add drag-drop file upload to existing folders | [CR-002](./CR-002.md) |

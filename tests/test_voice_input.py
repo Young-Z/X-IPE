@@ -29,7 +29,7 @@ class TestVoiceSession:
 
     def test_voice_session_init(self):
         """VoiceSession initializes with required attributes."""
-        from src.services.voice_input_service_v2 import VoiceSession
+        from x_ipe.services.voice_input_service_v2 import VoiceSession
         
         session = VoiceSession(
             session_id="voice-123",
@@ -46,7 +46,7 @@ class TestVoiceSession:
 
     def test_voice_session_state_transitions(self):
         """VoiceSession state transitions: idle -> recording -> processing -> idle."""
-        from src.services.voice_input_service_v2 import VoiceSession
+        from x_ipe.services.voice_input_service_v2 import VoiceSession
         
         session = VoiceSession(session_id="test", socket_sid="test")
         
@@ -63,7 +63,7 @@ class TestVoiceSession:
 
     def test_voice_session_callbacks(self):
         """VoiceSession can have callbacks for events."""
-        from src.services.voice_input_service_v2 import VoiceSession
+        from x_ipe.services.voice_input_service_v2 import VoiceSession
         
         partial_called = []
         complete_called = []
@@ -88,7 +88,7 @@ class TestVoiceInputService:
 
     def test_voice_input_service_init(self):
         """VoiceInputService initializes with API key."""
-        from src.services.voice_input_service_v2 import VoiceInputService
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         service = VoiceInputService(api_key="test-api-key")
         
@@ -96,7 +96,7 @@ class TestVoiceInputService:
 
     def test_voice_input_service_init_no_api_key(self):
         """VoiceInputService can initialize without API key (uses env var)."""
-        from src.services.voice_input_service_v2 import VoiceInputService
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         # Should not raise - will use env var or be empty
         service = VoiceInputService(api_key=None)
@@ -104,7 +104,7 @@ class TestVoiceInputService:
 
     def test_create_session(self):
         """VoiceInputService.create_session() creates new VoiceSession."""
-        from src.services.voice_input_service_v2 import VoiceInputService
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         service = VoiceInputService(api_key="test-key")
         
@@ -117,7 +117,7 @@ class TestVoiceInputService:
 
     def test_create_session_unique_ids(self):
         """VoiceInputService.create_session() generates unique session IDs."""
-        from src.services.voice_input_service_v2 import VoiceInputService
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         service = VoiceInputService(api_key="test-key")
         
@@ -130,7 +130,7 @@ class TestVoiceInputService:
 
     def test_get_session(self):
         """VoiceInputService.get_session() returns session by ID."""
-        from src.services.voice_input_service_v2 import VoiceInputService
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         service = VoiceInputService(api_key="test-key")
         session_id = service.create_session(socket_sid="socket-123")
@@ -142,7 +142,7 @@ class TestVoiceInputService:
 
     def test_get_session_not_found(self):
         """VoiceInputService.get_session() returns None for unknown ID."""
-        from src.services.voice_input_service_v2 import VoiceInputService
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         service = VoiceInputService(api_key="test-key")
         
@@ -152,7 +152,7 @@ class TestVoiceInputService:
 
     def test_remove_session(self):
         """VoiceInputService.remove_session() removes session."""
-        from src.services.voice_input_service_v2 import VoiceInputService
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         service = VoiceInputService(api_key="test-key")
         session_id = service.create_session(socket_sid="socket-123")
@@ -165,7 +165,7 @@ class TestVoiceInputService:
 
     def test_session_existence_check(self):
         """VoiceInputService.get_session() can check session existence."""
-        from src.services.voice_input_service_v2 import VoiceInputService
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         service = VoiceInputService(api_key="test-key")
         session_id = service.create_session(socket_sid="socket-123")
@@ -184,7 +184,7 @@ class TestDashscopeIntegration:
 
     def test_start_recognition_creates_recognizer(self):
         """VoiceInputService.start_recognition() creates TranslationRecognizerRealtime."""
-        from src.services.voice_input_service_v2 import VoiceInputService
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         service = VoiceInputService(api_key="test-key")
         session_id = service.create_session(socket_sid="socket-123")
@@ -201,7 +201,7 @@ class TestDashscopeIntegration:
 
     def test_send_audio_forwards_to_recognizer(self):
         """VoiceInputService.send_audio() forwards audio to recognizer."""
-        from src.services.voice_input_service_v2 import VoiceInputService
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         service = VoiceInputService(api_key="test-key")
         session_id = service.create_session(socket_sid="socket-123")
@@ -218,7 +218,7 @@ class TestDashscopeIntegration:
 
     def test_send_audio_ignores_idle_session(self):
         """VoiceInputService.send_audio() ignores audio when session is idle."""
-        from src.services.voice_input_service_v2 import VoiceInputService
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         service = VoiceInputService(api_key="test-key")
         session_id = service.create_session(socket_sid="socket-123")
@@ -233,7 +233,7 @@ class TestDashscopeIntegration:
 
     def test_stop_recognition_returns_text(self):
         """VoiceInputService.stop_recognition() stops and returns text."""
-        from src.services.voice_input_service_v2 import VoiceInputService
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         service = VoiceInputService(api_key="test-key")
         session_id = service.create_session(socket_sid="socket-123")
@@ -251,7 +251,7 @@ class TestDashscopeIntegration:
 
     def test_cancel_recognition_clears_text(self):
         """VoiceInputService.cancel_recognition() cancels without returning text."""
-        from src.services.voice_input_service_v2 import VoiceInputService
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         service = VoiceInputService(api_key="test-key")
         session_id = service.create_session(socket_sid="socket-123")
@@ -269,7 +269,7 @@ class TestDashscopeIntegration:
 
     def test_callback_receives_partial_results(self):
         """VoiceRecognizerCallback calls on_partial for partial results."""
-        from src.services.voice_input_service_v2 import VoiceSession, VoiceRecognizerCallback
+        from x_ipe.services.voice_input_service_v2 import VoiceSession, VoiceRecognizerCallback
         
         partial_results = []
         session = VoiceSession(
@@ -300,7 +300,7 @@ class TestVoiceCommands:
 
     def test_is_voice_command_close_mic_english(self):
         """is_voice_command() recognizes 'close mic' command."""
-        from src.services.voice_input_service_v2 import is_voice_command
+        from x_ipe.services.voice_input_service_v2 import is_voice_command
         
         assert is_voice_command("close mic") == "close_mic"
         assert is_voice_command("Close Mic") == "close_mic"
@@ -309,14 +309,14 @@ class TestVoiceCommands:
 
     def test_is_voice_command_close_mic_chinese(self):
         """is_voice_command() recognizes Chinese '关闭麦克风' command."""
-        from src.services.voice_input_service_v2 import is_voice_command
+        from x_ipe.services.voice_input_service_v2 import is_voice_command
         
         assert is_voice_command("关闭麦克风") == "close_mic"
         assert is_voice_command("  关闭麦克风  ") == "close_mic"
 
     def test_is_voice_command_not_command(self):
         """is_voice_command() returns None for non-command text."""
-        from src.services.voice_input_service_v2 import is_voice_command
+        from x_ipe.services.voice_input_service_v2 import is_voice_command
         
         assert is_voice_command("git status") is None
         assert is_voice_command("npm install") is None
@@ -325,7 +325,7 @@ class TestVoiceCommands:
 
     def test_is_voice_command_empty(self):
         """is_voice_command() returns None for empty text."""
-        from src.services.voice_input_service_v2 import is_voice_command
+        from x_ipe.services.voice_input_service_v2 import is_voice_command
         
         assert is_voice_command("") is None
         assert is_voice_command("   ") is None
@@ -482,7 +482,7 @@ class TestVoiceErrorHandling:
 
     def test_handle_network_disconnect(self):
         """VoiceInputService handles network disconnect gracefully."""
-        from src.services.voice_input_service_v2 import VoiceInputService
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         service = VoiceInputService(api_key="test-key")
         session_id = service.create_session(socket_sid="socket-123")
@@ -500,7 +500,7 @@ class TestVoiceErrorHandling:
 
     def test_handle_api_error_via_callback(self):
         """VoiceInputService handles API error via callback."""
-        from src.services.voice_input_service_v2 import VoiceSession, VoiceRecognizerCallback
+        from x_ipe.services.voice_input_service_v2 import VoiceSession, VoiceRecognizerCallback
         
         errors = []
         session = VoiceSession(
@@ -519,7 +519,7 @@ class TestVoiceErrorHandling:
 
     def test_handle_empty_audio(self):
         """VoiceInputService handles empty/silent audio."""
-        from src.services.voice_input_service_v2 import VoiceInputService
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         service = VoiceInputService(api_key="test-key")
         session_id = service.create_session(socket_sid="socket-123")
@@ -531,7 +531,7 @@ class TestVoiceErrorHandling:
 
     def test_handle_session_timeout(self):
         """VoiceInputService handles session timeout (30s max)."""
-        from src.services.voice_input_service_v2 import VoiceInputService, VOICE_MAX_DURATION
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService, VOICE_MAX_DURATION
         
         assert VOICE_MAX_DURATION == 30  # 30 seconds
         
@@ -722,7 +722,7 @@ class TestVoiceInputEdgeCases:
 
     def test_recording_auto_stops_at_30_seconds(self):
         """Recording auto-stops at 30 second limit."""
-        from src.services.voice_input_service_v2 import VoiceInputService
+        from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         service = VoiceInputService(api_key="test-key")
         session_id = service.create_session(socket_sid="socket-123")

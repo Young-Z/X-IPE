@@ -277,7 +277,7 @@ class TestSettingsPersistence:
 
     def test_settings_persist_after_service_restart(self, temp_db_path):
         """AC-7: Settings persist across application restarts"""
-        from src.services import SettingsService
+        from x_ipe.services import SettingsService
         
         # First session: save setting
         service1 = SettingsService(temp_db_path)
@@ -292,7 +292,7 @@ class TestSettingsPersistence:
 
     def test_settings_survive_database_reopen(self, temp_db_path):
         """Settings survive database connection close/reopen"""
-        from src.services import SettingsService
+        from x_ipe.services import SettingsService
         
         service = SettingsService(temp_db_path)
         service.set('project_root', '/test/path')
@@ -396,7 +396,7 @@ def temp_db_path(tmp_path):
 @pytest.fixture
 def settings_service(temp_db_path):
     """Create SettingsService instance with temp database"""
-    from src.services import SettingsService
+    from x_ipe.services import SettingsService
     return SettingsService(temp_db_path)
 
 

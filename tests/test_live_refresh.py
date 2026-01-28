@@ -25,7 +25,7 @@ class TestFileWatcherContentChangedEmission:
 
     def test_file_modified_emits_content_changed(self, temp_project, mock_socketio):
         """AC-1: FileWatcher emits content_changed when file is modified"""
-        from src.services import FileWatcher
+        from x_ipe.services import FileWatcher
         
         watcher = FileWatcher(
             project_root=str(temp_project),
@@ -59,7 +59,7 @@ class TestFileWatcherContentChangedEmission:
 
     def test_file_deleted_emits_content_changed_with_deleted_action(self, temp_project, mock_socketio):
         """AC-5: FileWatcher emits content_changed with action='deleted' when file is deleted"""
-        from src.services import FileWatcher
+        from x_ipe.services import FileWatcher
         
         watcher = FileWatcher(
             project_root=str(temp_project),
@@ -95,7 +95,7 @@ class TestFileWatcherContentChangedEmission:
 
     def test_content_changed_path_is_relative(self, temp_project, mock_socketio):
         """Content path in event should be relative to project root"""
-        from src.services import FileWatcher
+        from x_ipe.services import FileWatcher
         
         watcher = FileWatcher(
             project_root=str(temp_project),
@@ -131,7 +131,7 @@ class TestFileWatcherContentChangedEmission:
 
     def test_ignored_files_do_not_emit_content_changed(self, temp_project, mock_socketio):
         """Files matching gitignore patterns should not emit content_changed"""
-        from src.services import FileWatcher
+        from x_ipe.services import FileWatcher
         
         # Create .gitignore with directory patterns (current implementation)
         gitignore = temp_project / ".gitignore"
@@ -172,7 +172,7 @@ class TestFileWatcherDebounce:
 
     def test_rapid_changes_debounced(self, temp_project, mock_socketio):
         """AC-6: Rapid successive changes are debounced"""
-        from src.services import FileWatcher
+        from x_ipe.services import FileWatcher
         
         watcher = FileWatcher(
             project_root=str(temp_project),
@@ -222,7 +222,7 @@ class TestWebSocketContentChangedDelivery:
 
     def test_client_receives_content_changed_event(self, app, socketio_test_client, temp_project):
         """WebSocket client receives content_changed event when file is modified"""
-        from src.services import FileWatcher
+        from x_ipe.services import FileWatcher
         from src.app import socketio
         
         # Start file watcher with real socketio
@@ -254,7 +254,7 @@ class TestWebSocketContentChangedDelivery:
 
     def test_content_changed_within_2_seconds(self, temp_project, mock_socketio):
         """AC-2: Content change event occurs within 2 seconds of file modification"""
-        from src.services import FileWatcher
+        from x_ipe.services import FileWatcher
         
         watcher = FileWatcher(
             project_root=str(temp_project),
@@ -386,7 +386,7 @@ class TestFullRefreshFlow:
 
     def test_file_modify_to_content_refresh(self, app, temp_project, mock_socketio):
         """Full flow: file modified → event emitted → (frontend would refresh)"""
-        from src.services import FileWatcher
+        from x_ipe.services import FileWatcher
         
         watcher = FileWatcher(
             project_root=str(temp_project),
@@ -452,7 +452,7 @@ class TestFileDeletionHandling:
 
     def test_deletion_detected_and_reported(self, temp_project, mock_socketio):
         """AC-5: File deletion emits appropriate event"""
-        from src.services import FileWatcher
+        from x_ipe.services import FileWatcher
         
         # Create file first
         test_file = temp_project / "will_delete.md"
@@ -491,7 +491,7 @@ class TestWebSocketReconnection:
 
     def test_watcher_continues_after_disconnect(self, temp_project, mock_socketio):
         """AC-10: FileWatcher continues working, ready for reconnection"""
-        from src.services import FileWatcher
+        from x_ipe.services import FileWatcher
         
         watcher = FileWatcher(
             project_root=str(temp_project),
@@ -530,7 +530,7 @@ class TestAllFileTypesSupported:
     ])
     def test_all_file_types_trigger_refresh(self, temp_project, mock_socketio, filename, expected_type):
         """AC-9: All supported file types trigger content_changed"""
-        from src.services import FileWatcher
+        from x_ipe.services import FileWatcher
         
         watcher = FileWatcher(
             project_root=str(temp_project),

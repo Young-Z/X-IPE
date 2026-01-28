@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "prompts": [
+    {
+      "id": "generate-architecture",
+      "label": "Generate Architecture",
+      "icon": "bi-diagram-3",
+      "command": "Base on <current-idea-file> to generate layered architecture"
+    },
+    {
+      "id": "generate-mockup",
+      "label": "Generate Mockup",
+      "icon": "bi-palette",
+      "command": "Base on <current-idea-file> to generate mockups"
+    },
+    {
+      "id": "free-question",
+      "label": "Free Collaboration",
+      "icon": "bi-chat-dots",
+      "command": "Let's base on <current-idea-file> to collaborate, wait for my instructions."
+    }
+  ],
+  "placeholder": {
+    "current-idea-file": "Replaced with currently open file path"
+  }
+}

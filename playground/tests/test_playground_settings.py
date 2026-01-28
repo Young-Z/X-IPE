@@ -16,7 +16,7 @@ import tempfile
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, project_root)
 
-from src.services import SettingsService
+from x_ipe.services import SettingsService
 
 
 class Colors:

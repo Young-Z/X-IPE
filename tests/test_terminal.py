@@ -25,7 +25,7 @@ class TestOutputBuffer:
 
     def test_output_buffer_init(self):
         """OutputBuffer initializes with empty buffer and default max_chars."""
-        from src.services import OutputBuffer, BUFFER_MAX_CHARS
+        from x_ipe.services import OutputBuffer, BUFFER_MAX_CHARS
         
         buffer = OutputBuffer()
         
@@ -35,7 +35,7 @@ class TestOutputBuffer:
 
     def test_output_buffer_init_custom_size(self):
         """OutputBuffer accepts custom max_chars."""
-        from src.services import OutputBuffer
+        from x_ipe.services import OutputBuffer
         
         buffer = OutputBuffer(max_chars=100)
         
@@ -50,7 +50,7 @@ class TestOutputBuffer:
 
     def test_output_buffer_append_string(self):
         """OutputBuffer.append() adds string data."""
-        from src.services import OutputBuffer
+        from x_ipe.services import OutputBuffer
         
         buffer = OutputBuffer()
         buffer.append("hello")
@@ -60,7 +60,7 @@ class TestOutputBuffer:
 
     def test_output_buffer_append_multiple(self):
         """OutputBuffer.append() accumulates multiple appends."""
-        from src.services import OutputBuffer
+        from x_ipe.services import OutputBuffer
         
         buffer = OutputBuffer()
         buffer.append("hello")
@@ -71,7 +71,7 @@ class TestOutputBuffer:
 
     def test_output_buffer_append_special_chars(self):
         """OutputBuffer handles ANSI escape sequences and special chars."""
-        from src.services import OutputBuffer
+        from x_ipe.services import OutputBuffer
         
         buffer = OutputBuffer()
         ansi_output = "\x1b[32mgreen\x1b[0m\r\n"
@@ -81,7 +81,7 @@ class TestOutputBuffer:
 
     def test_output_buffer_circular_limit(self):
         """OutputBuffer enforces 10KB limit (circular behavior)."""
-        from src.services import OutputBuffer, BUFFER_MAX_CHARS
+        from x_ipe.services import OutputBuffer, BUFFER_MAX_CHARS
         
         buffer = OutputBuffer()
         
@@ -100,7 +100,7 @@ class TestOutputBuffer:
 
     def test_output_buffer_circular_exact_overflow(self):
         """OutputBuffer drops exactly the right amount on overflow."""
-        from src.services import OutputBuffer
+        from x_ipe.services import OutputBuffer
         
         buffer = OutputBuffer(max_chars=10)
         buffer.append("0123456789")  # Exactly full
@@ -112,7 +112,7 @@ class TestOutputBuffer:
 
     def test_output_buffer_clear(self):
         """OutputBuffer.clear() empties the buffer."""
-        from src.services import OutputBuffer
+        from x_ipe.services import OutputBuffer
         
         buffer = OutputBuffer()
         buffer.append("test data")
@@ -123,7 +123,7 @@ class TestOutputBuffer:
 
     def test_output_buffer_len(self):
         """OutputBuffer.__len__() returns current size."""
-        from src.services import OutputBuffer
+        from x_ipe.services import OutputBuffer
         
         buffer = OutputBuffer()
         assert len(buffer) == 0
@@ -141,7 +141,7 @@ class TestPersistentSession:
 
     def test_persistent_session_init(self):
         """PersistentSession initializes with correct defaults."""
-        from src.services import PersistentSession
+        from x_ipe.services import PersistentSession
         
         session_id = "test-session-123"
         session = PersistentSession(session_id)
@@ -156,7 +156,7 @@ class TestPersistentSession:
 
     def test_persistent_session_has_output_buffer(self):
         """PersistentSession has an OutputBuffer instance."""
-        from src.services import PersistentSession, OutputBuffer
+        from x_ipe.services import PersistentSession, OutputBuffer
         
         session = PersistentSession("test")
         
@@ -164,7 +164,7 @@ class TestPersistentSession:
 
     def test_persistent_session_attach(self):
         """attach() sets socket_sid, callback, and state."""
-        from src.services import PersistentSession
+        from x_ipe.services import PersistentSession
         
         session = PersistentSession("test")
         emit_fn = Mock()
@@ -178,7 +178,7 @@ class TestPersistentSession:
 
     def test_persistent_session_detach(self):
         """detach() clears socket but keeps PTY alive."""
-        from src.services import PersistentSession
+        from x_ipe.services import PersistentSession
         
         session = PersistentSession("test")
         session.attach("socket-123", Mock())
@@ -192,7 +192,7 @@ class TestPersistentSession:
 
     def test_persistent_session_get_buffer(self):
         """get_buffer() returns buffered output."""
-        from src.services import PersistentSession
+        from x_ipe.services import PersistentSession
         
         session = PersistentSession("test")
         session.output_buffer.append("buffered content")
@@ -203,7 +203,7 @@ class TestPersistentSession:
 
     def test_persistent_session_write_no_pty(self):
         """write() does nothing if PTY not started."""
-        from src.services import PersistentSession
+        from x_ipe.services import PersistentSession
         
         session = PersistentSession("test")
         # Should not raise
@@ -211,7 +211,7 @@ class TestPersistentSession:
 
     def test_persistent_session_is_expired_when_connected(self):
         """is_expired() returns False when connected."""
-        from src.services import PersistentSession
+        from x_ipe.services import PersistentSession
         
         session = PersistentSession("test")
         session.attach("socket", Mock())
@@ -220,7 +220,7 @@ class TestPersistentSession:
 
     def test_persistent_session_is_expired_not_yet(self):
         """is_expired() returns False within timeout period."""
-        from src.services import PersistentSession
+        from x_ipe.services import PersistentSession
         
         session = PersistentSession("test")
         session.attach("socket", Mock())
@@ -231,7 +231,7 @@ class TestPersistentSession:
 
     def test_persistent_session_is_expired_after_timeout(self):
         """is_expired() returns True after 1 hour."""
-        from src.services import PersistentSession, SESSION_TIMEOUT
+        from x_ipe.services import PersistentSession, SESSION_TIMEOUT
         
         session = PersistentSession("test")
         session.attach("socket", Mock())
@@ -244,7 +244,7 @@ class TestPersistentSession:
 
     def test_persistent_session_is_expired_custom_timeout(self):
         """is_expired() accepts custom timeout."""
-        from src.services import PersistentSession
+        from x_ipe.services import PersistentSession
         
         session = PersistentSession("test")
         session.detach()
@@ -263,7 +263,7 @@ class TestSessionManager:
 
     def test_session_manager_init(self):
         """SessionManager initializes with empty sessions."""
-        from src.services import SessionManager
+        from x_ipe.services import SessionManager
         
         manager = SessionManager()
         
@@ -272,7 +272,7 @@ class TestSessionManager:
 
     def test_session_manager_get_session_not_found(self):
         """get_session() returns None for unknown ID."""
-        from src.services import SessionManager
+        from x_ipe.services import SessionManager
         
         manager = SessionManager()
         
@@ -282,7 +282,7 @@ class TestSessionManager:
 
     def test_session_manager_has_session_false(self):
         """has_session() returns False for unknown ID."""
-        from src.services import SessionManager
+        from x_ipe.services import SessionManager
         
         manager = SessionManager()
         
@@ -290,7 +290,7 @@ class TestSessionManager:
 
     def test_session_manager_remove_session_nonexistent(self):
         """remove_session() handles nonexistent session gracefully."""
-        from src.services import SessionManager
+        from x_ipe.services import SessionManager
         
         manager = SessionManager()
         
@@ -299,7 +299,7 @@ class TestSessionManager:
 
     def test_session_manager_start_cleanup_task(self):
         """start_cleanup_task() sets _running and schedules timer."""
-        from src.services import SessionManager
+        from x_ipe.services import SessionManager
         
         manager = SessionManager()
         
@@ -311,7 +311,7 @@ class TestSessionManager:
 
     def test_session_manager_stop_cleanup_task(self):
         """stop_cleanup_task() stops the cleanup timer."""
-        from src.services import SessionManager
+        from x_ipe.services import SessionManager
         
         manager = SessionManager()
         manager._running = True
@@ -333,19 +333,19 @@ class TestConstants:
 
     def test_buffer_max_chars_constant(self):
         """BUFFER_MAX_CHARS is 10KB (10240)."""
-        from src.services import BUFFER_MAX_CHARS
+        from x_ipe.services import BUFFER_MAX_CHARS
         
         assert BUFFER_MAX_CHARS == 10240
 
     def test_session_timeout_constant(self):
         """SESSION_TIMEOUT is 1 hour (3600 seconds)."""
-        from src.services import SESSION_TIMEOUT
+        from x_ipe.services import SESSION_TIMEOUT
         
         assert SESSION_TIMEOUT == 3600
 
     def test_cleanup_interval_constant(self):
         """CLEANUP_INTERVAL is 5 minutes (300 seconds)."""
-        from src.services import CLEANUP_INTERVAL
+        from x_ipe.services import CLEANUP_INTERVAL
         
         assert CLEANUP_INTERVAL == 300
 
@@ -485,8 +485,8 @@ class TestGlobalSessionManager:
 
     def test_session_manager_singleton_exists(self):
         """Global session_manager singleton is available."""
-        from src.services import session_manager
-        from src.services import SessionManager
+        from x_ipe.services import session_manager
+        from x_ipe.services import SessionManager
         
         assert session_manager is not None
         assert isinstance(session_manager, SessionManager)

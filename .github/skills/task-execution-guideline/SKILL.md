@@ -47,7 +47,7 @@ Task:
   # Execution fields (set by task type skill)
   next_task_type: <Task Type> | null
   require_human_review: true | false
-  auto_proceed: true | false  # From task type skill input, flows to auto_advance
+  auto_proceed: true | false  # From task type skill input, flows to auto_proceed
   task_output_links: [<links>] | null
   {Dynamic Attributes}: <from task type skill>   # Fully dynamic per task type
   
@@ -55,7 +55,7 @@ Task:
   category_level_change_summary: <≤100 words> | null
   
   # Control fields
-  auto_advance: true | false  # Set from auto_proceed output
+  auto_proceed: true | false  # Set from auto_proceed output
 ```
 
 ### Category Derivation
@@ -65,7 +65,8 @@ Task:
 | `task-type-feature-refinement`, `task-type-technical-design`, `task-type-test-generation`, `task-type-code-implementation`, `task-type-feature-closing` | feature-stage |
 | `task-type-ideation`, `task-type-idea-mockup`, `task-type-idea-to-architecture` | ideation-stage |
 | `task-type-requirement-gathering`, `task-type-feature-breakdown` | requirement-stage |
-| `task-type-bug-fix`, `task-type-code-refactor`, `task-type-change-request`, `task-type-project-init`, `task-type-dev-environment`, `task-type-user-manual`, `task-type-human-playground`, `task-type-share-idea` | Standalone |
+| `task-type-bug-fix`, `task-type-change-request`, `task-type-project-init`, `task-type-dev-environment`, `task-type-user-manual`, `task-type-human-playground`, `task-type-share-idea` | Standalone |
+| `task-type-refactoring-analysis`, `task-type-improve-code-quality-before-refactoring`, `task-type-code-refactor-v2` | code-refactoring-stage |
 
 ### Task States
 
@@ -100,7 +101,7 @@ Execute tasks by following these 6 steps in order:
 | 3 | Execute | Load task-type skill → Do work | Skill output collected | → Step 4 |
 | 4 | Closing | Load category level skills → Update boards | Boards updated | → Step 5 |
 | 5 | Global DoD | Validate → Output summary | Summary displayed | → Step 6 (pass) or STOP (review) |
-| 6 | Routing | Check auto_advance → Next task or STOP | Next action decided | → Step 2 (next task) or END |
+| 6 | Routing | Check auto_proceed → Next task or STOP | Next action decided | → Step 2 (next task) or END |
 
 **⛔ BLOCKING RULES:**
 - Step 1 → Step 2: BLOCKED if task not created on task-board.md
@@ -256,6 +257,7 @@ Output:
 | feature-stage | `feature-stage+feature-board-management` | Yes (must exist) |
 | ideation-stage | `ideation-stage+ideation-board-management` | No (optional) |
 | requirement-stage | `requirement-stage+requirement-board-management` | No (optional, disabled) |
+| code-refactoring-stage | `project-quality-board-management` | No (optional) |
 
 **Notes:**
 - If category skill not found, execution continues without error
@@ -300,8 +302,10 @@ OPTIONAL - Push to remote (based on project settings or human preference):
 
 **Human Review Check:**
 ```
-IF require_human_review = true AND auto_proceed = false:
+IF require_human_review = true AND auto_proceed = false AND global_auto_proceed = false:
    → Output summary and STOP for human review
+ELSE:
+   → Skip human review (auto-proceed overrides)
 ```
 
 **Agent Output (Standard Summary):**
@@ -328,9 +332,11 @@ IF require_human_review = true AND auto_proceed = false:
 
 **Process:**
 ```
-Set auto_advance = auto_proceed  # Map from task type skill output
+1. Read Global Auto-Proceed setting from task-board.md (Global Settings section)
+   → Default to false if not found
+2. Set effective_auto_proceed = auto_proceed OR global_auto_proceed
 
-IF auto_advance = true AND next_task_type EXISTS:
+IF effective_auto_proceed = true AND next_task_type EXISTS:
    → Find next task on board (already created in Step 1)
    → Start execution from Step 2
 ELSE:
@@ -341,8 +347,8 @@ ELSE:
 
 ## Task Types Registry
 
-| Task Type | Skill | Category | Next Task | Human Review |
-|-----------|-------|----------|-----------|--------------|
+| Task Type | Skill | Category | Next Task | Human Review (default) |
+|-----------|-------|----------|-----------|------------------------|
 | Ideation | `task-type-ideation` | ideation-stage | Idea Mockup OR Idea to Architecture | No |
 | Idea Mockup | `task-type-idea-mockup` | ideation-stage | Requirement Gathering | No |
 | Idea to Architecture | `task-type-idea-to-architecture` | ideation-stage | Requirement Gathering | No |
@@ -356,11 +362,15 @@ ELSE:
 | Human Playground | `task-type-human-playground` | Standalone | - | Yes |
 | Feature Closing | `task-type-feature-closing` | feature-stage | User Manual | No |
 | Bug Fix | `task-type-bug-fix` | Standalone | - | Yes |
-| Code Refactor | `task-type-code-refactor` | Standalone | - | Yes |
+| Refactoring Analysis | `task-type-refactoring-analysis` | code-refactoring-stage | Improve Code Quality Before Refactoring | Yes |
+| Improve Code Quality Before Refactoring | `task-type-improve-code-quality-before-refactoring` | code-refactoring-stage | Code Refactor V2 | Yes |
+| Code Refactor V2 | `task-type-code-refactor-v2` | code-refactoring-stage | - | Yes |
 | Change Request | `task-type-change-request` | Standalone | Feature Refinement OR Feature Breakdown | Yes |
 | Project Initialization | `task-type-project-init` | Standalone | Dev Environment | No |
 | Dev Environment | `task-type-dev-environment` | Standalone | - | No |
 | User Manual | `task-type-user-manual` | Standalone | - | Yes |
+
+> **Note:** "Human Review (default)" is the default behavior. When **Auto-Proceed is enabled** (global or task-level), human review is **skipped** regardless of this setting.
 
 ---
 
@@ -420,7 +430,7 @@ Output standard summary
 
 **Step 6: Routing**
 ```
-auto_advance = true, next_task_type = Feature Closing
+auto_proceed = true, next_task_type = Feature Closing
 → Start TASK-002 from Step 2
 ```
 

@@ -207,6 +207,93 @@ class IdeasService:
             'new_path': f'{self.IDEAS_PATH}/{final_name}'
         }
     
+    def rename_file(self, file_path: str, new_name: str) -> Dict[str, Any]:
+        """
+        Rename a file within x-ipe-docs/ideas/.
+        
+        Args:
+            file_path: Relative path from project root (e.g., 'x-ipe-docs/ideas/folder/file.md')
+            new_name: New file name (with extension)
+        
+        Returns:
+            Dict with success, old_path, new_path, new_name or error
+        """
+        new_name = new_name.strip()
+        
+        if not new_name:
+            return {
+                'success': False,
+                'error': 'File name is required'
+            }
+        
+        if len(new_name) > self.MAX_NAME_LENGTH:
+            return {
+                'success': False,
+                'error': f'File name too long (max {self.MAX_NAME_LENGTH} characters)'
+            }
+        
+        if re.search(self.INVALID_CHARS, new_name):
+            return {
+                'success': False,
+                'error': 'File name contains invalid characters'
+            }
+        
+        # Validate path is within ideas directory
+        full_path = self.project_root / file_path
+        try:
+            full_path = full_path.resolve()
+            ideas_root = self.ideas_root.resolve()
+            if not str(full_path).startswith(str(ideas_root)):
+                return {
+                    'success': False,
+                    'error': 'Access denied: path outside ideas directory'
+                }
+        except Exception:
+            return {
+                'success': False,
+                'error': 'Invalid path'
+            }
+        
+        if not full_path.exists():
+            return {
+                'success': False,
+                'error': 'File not found'
+            }
+        
+        if not full_path.is_file():
+            return {
+                'success': False,
+                'error': 'Path is not a file'
+            }
+        
+        # Build new path
+        new_path = full_path.parent / new_name
+        
+        # Check if new name already exists
+        if new_path.exists() and new_path != full_path:
+            return {
+                'success': False,
+                'error': f'A file named "{new_name}" already exists'
+            }
+        
+        try:
+            full_path.rename(new_path)
+        except OSError as e:
+            return {
+                'success': False,
+                'error': f'Failed to rename file: {str(e)}'
+            }
+        
+        # Build relative path for response
+        relative_new_path = str(new_path.relative_to(self.project_root))
+        
+        return {
+            'success': True,
+            'old_path': file_path,
+            'new_path': relative_new_path,
+            'new_name': new_name
+        }
+    
     def _validate_folder_name(self, name: str) -> tuple:
         """
         Validate folder name for filesystem.

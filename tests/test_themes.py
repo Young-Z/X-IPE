@@ -19,7 +19,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 # Will be imported after implementation
-# from src.services import ThemesService
+# from x_ipe.services import ThemesService
 # from src.app import create_app
 
 
@@ -180,7 +180,7 @@ class TestThemesServiceInit:
     
     def test_init_creates_service_with_project_root(self, temp_project_dir):
         """ThemesService initializes with project root path"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_dir)
         
@@ -189,7 +189,7 @@ class TestThemesServiceInit:
     
     def test_init_handles_relative_path(self, temp_project_dir):
         """ThemesService handles relative path correctly"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         # Use relative path
         original_cwd = os.getcwd()
@@ -206,7 +206,7 @@ class TestThemesServiceListThemes:
     
     def test_list_themes_returns_all_valid_themes(self, temp_project_with_themes):
         """list_themes returns all valid themes with metadata"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_with_themes['root'])
         themes = service.list_themes()
@@ -218,7 +218,7 @@ class TestThemesServiceListThemes:
     
     def test_list_themes_returns_empty_when_no_themes_dir(self, temp_project_no_themes):
         """list_themes returns empty list when x-ipe-docs/themes/ doesn't exist"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_no_themes)
         themes = service.list_themes()
@@ -227,7 +227,7 @@ class TestThemesServiceListThemes:
     
     def test_list_themes_excludes_invalid_themes(self, temp_project_with_invalid_theme):
         """list_themes excludes themes missing required design-system.md file"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_with_invalid_theme['root'])
         themes = service.list_themes()
@@ -237,7 +237,7 @@ class TestThemesServiceListThemes:
     
     def test_list_themes_returns_metadata_structure(self, temp_project_with_themes):
         """list_themes returns proper metadata structure"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_with_themes['root'])
         themes = service.list_themes()
@@ -252,7 +252,7 @@ class TestThemesServiceListThemes:
     
     def test_list_themes_extracts_description(self, temp_project_with_themes):
         """list_themes extracts description from first paragraph"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_with_themes['root'])
         themes = service.list_themes()
@@ -263,7 +263,7 @@ class TestThemesServiceListThemes:
     
     def test_list_themes_extracts_color_tokens(self, temp_project_with_themes):
         """list_themes extracts color tokens from design-system.md"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_with_themes['root'])
         themes = service.list_themes()
@@ -277,7 +277,7 @@ class TestThemesServiceListThemes:
     
     def test_list_themes_lists_files(self, temp_project_with_themes):
         """list_themes includes list of files in theme"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_with_themes['root'])
         themes = service.list_themes()
@@ -289,7 +289,7 @@ class TestThemesServiceListThemes:
     
     def test_list_themes_only_scans_theme_prefixed_folders(self, temp_project_with_themes):
         """list_themes only includes folders starting with 'theme-'"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         # Create a non-theme folder
         other_dir = temp_project_with_themes['themes_dir'] / 'other-folder'
@@ -309,7 +309,7 @@ class TestThemesServiceGetTheme:
     
     def test_get_theme_returns_theme_details(self, temp_project_with_themes):
         """get_theme returns full theme details including file content"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_with_themes['root'])
         theme = service.get_theme('theme-default')
@@ -321,7 +321,7 @@ class TestThemesServiceGetTheme:
     
     def test_get_theme_includes_design_system_content(self, temp_project_with_themes):
         """get_theme includes full design-system.md content"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_with_themes['root'])
         theme = service.get_theme('theme-default')
@@ -331,7 +331,7 @@ class TestThemesServiceGetTheme:
     
     def test_get_theme_returns_none_for_missing_theme(self, temp_project_with_themes):
         """get_theme returns None for non-existent theme"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_with_themes['root'])
         theme = service.get_theme('theme-nonexistent')
@@ -340,7 +340,7 @@ class TestThemesServiceGetTheme:
     
     def test_get_theme_returns_none_for_invalid_theme(self, temp_project_with_invalid_theme):
         """get_theme returns None for theme missing required files"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_with_invalid_theme['root'])
         theme = service.get_theme('theme-incomplete')
@@ -353,7 +353,7 @@ class TestThemesServiceParseColorTokens:
     
     def test_parse_color_tokens_extracts_hex_colors(self, temp_project_dir):
         """_parse_color_tokens extracts hex colors from content"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_dir)
         content = """
@@ -372,7 +372,7 @@ class TestThemesServiceParseColorTokens:
     
     def test_parse_color_tokens_handles_3digit_hex(self, temp_project_dir):
         """_parse_color_tokens handles 3-digit hex colors"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_dir)
         content = "#fff #000 #abc #def"
@@ -384,7 +384,7 @@ class TestThemesServiceParseColorTokens:
     
     def test_parse_color_tokens_uses_fallback_when_no_colors(self, temp_project_dir):
         """_parse_color_tokens uses fallback colors when none found"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_dir)
         content = "No colors here, just text."
@@ -399,7 +399,7 @@ class TestThemesServiceParseColorTokens:
     
     def test_parse_color_tokens_handles_less_than_4_colors(self, temp_project_dir):
         """_parse_color_tokens handles content with fewer than 4 colors"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_dir)
         content = "Only one color: #123456"
@@ -416,7 +416,7 @@ class TestThemesServiceExtractDescription:
     
     def test_extract_description_gets_first_paragraph(self, temp_project_dir):
         """_extract_description extracts first non-heading paragraph"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_dir)
         content = """# Title
@@ -434,7 +434,7 @@ More content here.
     
     def test_extract_description_handles_empty_content(self, temp_project_dir):
         """_extract_description handles empty content gracefully"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         service = ThemesService(temp_project_dir)
         description = service._extract_description('')
@@ -532,7 +532,7 @@ class TestThemeSelectionIntegration:
     
     def test_theme_selection_persisted_in_config(self, temp_project_with_themes):
         """Theme selection is saved to x-ipe-docs/config/tools.json"""
-        from src.services import ThemesService, ToolsConfigService
+        from x_ipe.services import ThemesService, ToolsConfigService
         
         root = temp_project_with_themes['root']
         tools_service = ToolsConfigService(root)
@@ -553,7 +553,7 @@ class TestThemeSelectionIntegration:
     
     def test_default_theme_selected_when_none_specified(self, temp_project_with_themes):
         """No theme is selected when none specified in config"""
-        from src.services import ToolsConfigService
+        from x_ipe.services import ToolsConfigService
         
         root = temp_project_with_themes['root']
         tools_service = ToolsConfigService(root)
@@ -566,7 +566,7 @@ class TestThemeSelectionIntegration:
     
     def test_fallback_to_default_when_selected_missing(self, temp_project_with_themes):
         """Themes still list when selected theme doesn't exist"""
-        from src.services import ThemesService, ToolsConfigService
+        from x_ipe.services import ThemesService, ToolsConfigService
         
         root = temp_project_with_themes['root']
         tools_service = ToolsConfigService(root)
@@ -595,7 +595,7 @@ class TestThemesEdgeCases:
     
     def test_theme_with_special_characters_in_name(self, temp_project_dir):
         """Themes with unusual names are handled correctly"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         themes_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'themes'
         special_dir = themes_dir / 'theme-my-brand-2024'
@@ -610,7 +610,7 @@ class TestThemesEdgeCases:
     
     def test_large_design_system_file(self, temp_project_dir):
         """Large design-system.md files are handled"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         themes_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'themes'
         large_dir = themes_dir / 'theme-large'
@@ -629,7 +629,7 @@ class TestThemesEdgeCases:
     
     def test_many_themes_performance(self, temp_project_dir):
         """Service handles many themes without performance issues"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         import time
         
         themes_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'themes'
@@ -652,7 +652,7 @@ class TestThemesEdgeCases:
     
     def test_utf8_content_in_design_system(self, temp_project_dir):
         """UTF-8 content in design-system.md is handled correctly"""
-        from src.services import ThemesService
+        from x_ipe.services import ThemesService
         
         themes_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'themes'
         utf8_dir = themes_dir / 'theme-utf8'

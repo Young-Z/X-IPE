@@ -701,7 +701,7 @@ x-ipe upgrade         # Upgrade skills from package
 uv run python -m x_ipe.app
 
 # Open in browser
-# http://localhost:5000
+# http://localhost:5858
 
 # Run tests
 uv run pytest tests/ -v

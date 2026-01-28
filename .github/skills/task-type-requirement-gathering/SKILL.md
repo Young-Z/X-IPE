@@ -46,9 +46,9 @@ Gather and document requirements from user requests by:
 ```yaml
 mockup_list:
   - mockup_name: "Description of what function the mockup is for"
-    mockup_link: "URL to the mockup"
+    mockup_list: "URL to the mockup"
   - mockup_name: "Another mockup description"
-    mockup_link: "URL to the mockup"
+    mockup_list: "URL to the mockup"
 ```
 
 ---
@@ -201,7 +201,7 @@ Use web search capability to research:
 
 ## Linked Mockups
 
-| Mockup Function Name | Feature | Mockup Link |
+| Mockup Function Name | Feature | Mockup List |
 |---------------------|---------|-------------|
 
 ---

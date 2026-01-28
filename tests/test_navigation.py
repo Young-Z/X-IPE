@@ -215,7 +215,7 @@ class TestFileWatcherGitignore:
 
     def test_filewatcher_ignores_venv_directory(self, temp_project):
         """BUG FIX: FileWatcher should not monitor .venv/ folder"""
-        from src.services import FileWatcher
+        from x_ipe.services import FileWatcher
         import time
         
         # Create .gitignore with .venv
@@ -249,7 +249,7 @@ class TestFileWatcherGitignore:
 
     def test_filewatcher_ignores_pycache_directory(self, temp_project):
         """BUG FIX: FileWatcher should not monitor __pycache__/ folder"""
-        from src.services import FileWatcher
+        from x_ipe.services import FileWatcher
         import time
         
         # Create .gitignore
@@ -283,7 +283,7 @@ class TestFileWatcherGitignore:
 
     def test_filewatcher_still_monitors_normal_files(self, temp_project):
         """FileWatcher should still monitor non-ignored files"""
-        from src.services import FileWatcher
+        from x_ipe.services import FileWatcher
         import time
         
         # Create .gitignore
@@ -346,5 +346,5 @@ def client(app):
 @pytest.fixture
 def project_service(app, temp_project):
     """Create ProjectService instance"""
-    from src.services import ProjectService
+    from x_ipe.services import ProjectService
     return ProjectService(str(temp_project))

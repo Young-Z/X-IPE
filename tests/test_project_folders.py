@@ -46,7 +46,7 @@ class TestProjectFoldersServiceInit:
 
     def test_init_does_not_duplicate_default_project(self, temp_db_path):
         """Re-initializing service doesn't create duplicate default project"""
-        from src.services import ProjectFoldersService
+        from x_ipe.services import ProjectFoldersService
         
         # Initialize twice
         service1 = ProjectFoldersService(temp_db_path)
@@ -342,7 +342,7 @@ class TestProjectFoldersServiceActiveProject:
 
     def test_active_project_persists(self, temp_db_path, temp_project):
         """Active project ID persists across service instances"""
-        from src.services import ProjectFoldersService
+        from x_ipe.services import ProjectFoldersService
         
         service1 = ProjectFoldersService(temp_db_path)
         add_result = service1.add('Persistent Project', str(temp_project))
@@ -728,7 +728,7 @@ def temp_db_path(tmp_path):
 @pytest.fixture
 def project_folders_service(temp_db_path):
     """Create ProjectFoldersService instance with temp database"""
-    from src.services import ProjectFoldersService
+    from x_ipe.services import ProjectFoldersService
     return ProjectFoldersService(temp_db_path)
 
 

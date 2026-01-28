@@ -27,7 +27,7 @@ class TestIdeationToolboxHumanScenarios(unittest.TestCase):
         self.ideas_dir = Path(self.temp_dir) / 'docs' / 'ideas'
         self.ideas_dir.mkdir(parents=True, exist_ok=True)
         
-        from src.services import IdeasService
+        from x_ipe.services import IdeasService
         self.service = IdeasService(self.temp_dir)
     
     def tearDown(self):
@@ -154,7 +154,7 @@ class TestIdeationToolboxHumanScenarios(unittest.TestCase):
         self.service.save_toolbox(config)
         
         # Simulate close and reopen (new service instance)
-        from src.services import IdeasService
+        from x_ipe.services import IdeasService
         new_service = IdeasService(self.temp_dir)
         reloaded = new_service.get_toolbox()
         

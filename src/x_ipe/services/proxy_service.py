@@ -1,7 +1,7 @@
 """
-Proxy Service for FEATURE-022-A
+Proxy Service for FEATURE-022-A and FEATURE-022-B
 
-Provides localhost URL proxying with asset path rewriting.
+Provides localhost URL proxying with asset path rewriting and inspector script injection.
 """
 import mimetypes
 import os
@@ -24,6 +24,73 @@ REWRITE_ATTRIBUTES = {
     'video': 'src',
     'audio': 'src',
 }
+
+# FEATURE-022-B: Inspector script injected into proxied HTML
+INSPECTOR_SCRIPT = '''
+<script data-x-ipe-inspector="true">
+(function() {
+    let inspectEnabled = false;
+    
+    window.addEventListener('message', function(e) {
+        if (e.data && e.data.type === 'inspect-mode') {
+            inspectEnabled = e.data.enabled;
+        }
+    });
+    
+    document.addEventListener('mousemove', function(e) {
+        if (!inspectEnabled) return;
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        if (!el || el === document.body || el === document.documentElement) {
+            window.parent.postMessage({type: 'hover-leave'}, '*');
+            return;
+        }
+        window.parent.postMessage({
+            type: 'hover',
+            element: {
+                tag: el.tagName.toLowerCase(),
+                className: (el.className || '').toString().split(' ')[0] || '',
+                id: el.id || '',
+                selector: generateSelector(el),
+                rect: el.getBoundingClientRect()
+            }
+        }, '*');
+    }, true);
+    
+    document.addEventListener('click', function(e) {
+        if (!inspectEnabled) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const el = e.target;
+        window.parent.postMessage({
+            type: 'select',
+            element: {
+                tag: el.tagName.toLowerCase(),
+                className: (el.className || '').toString().split(' ')[0] || '',
+                id: el.id || '',
+                selector: generateSelector(el),
+                rect: el.getBoundingClientRect()
+            },
+            multiSelect: e.ctrlKey || e.metaKey
+        }, '*');
+    }, true);
+    
+    function generateSelector(el) {
+        if (el.id) return '#' + el.id;
+        const tag = el.tagName.toLowerCase();
+        const cls = (el.className || '').toString().split(' ')[0];
+        if (cls) {
+            const siblings = el.parentElement ? el.parentElement.querySelectorAll(tag + '.' + cls) : [];
+            if (siblings.length === 1) return tag + '.' + cls;
+            const idx = Array.from(siblings).indexOf(el);
+            return tag + '.' + cls + ':nth-of-type(' + (idx + 1) + ')';
+        }
+        const siblings = el.parentElement ? el.parentElement.children : [];
+        const idx = Array.from(siblings).indexOf(el);
+        return tag + ':nth-child(' + (idx + 1) + ')';
+    }
+})();
+</script>
+'''
 
 
 @dataclass
@@ -211,6 +278,12 @@ class ProxyService:
         # Strip CSP headers via meta tag
         for meta in soup.find_all('meta', attrs={'http-equiv': 'Content-Security-Policy'}):
             meta.decompose()
+        
+        # FEATURE-022-B: Inject inspector script into body (if not already present)
+        body = soup.find('body')
+        if body and not soup.find('script', attrs={'data-x-ipe-inspector': 'true'}):
+            inspector_soup = BeautifulSoup(INSPECTOR_SCRIPT, 'html.parser')
+            body.append(inspector_soup)
         
         return str(soup)
     

@@ -40,7 +40,7 @@ category_level_change_summary: ""    # Summary of category-level changes (≤100
 # CONTROL FIELDS
 # =============================================================================
 
-auto_advance: false                  # Whether to auto-advance to next task
+auto_proceed: false                  # Whether to auto-proceed to next task
 
 # =============================================================================
 # EXAMPLE: Feature-stage task (Code Implementation)
@@ -59,4 +59,4 @@ auto_advance: false                  # Whether to auto-advance to next task
 # feature_id: FEATURE-001
 # feature_phase: Code Implementation
 # category_level_change_summary: "FEATURE-001 updated to Done Code Implementation"
-# auto_advance: true
+# auto_proceed: true

@@ -159,7 +159,7 @@ def demo_update_config(service):
 
 def run_demo():
     """Run all demo scenarios."""
-    from src.services import IdeasService
+    from x_ipe.services import IdeasService
     
     print("="*60)
     print("CR-003: Ideation Toolbox Demo")
@@ -203,7 +203,7 @@ def run_demo():
 
 def run_interactive():
     """Run interactive mode."""
-    from src.services import IdeasService
+    from x_ipe.services import IdeasService
     
     print("="*60)
     print("CR-003: Ideation Toolbox - Interactive Mode")

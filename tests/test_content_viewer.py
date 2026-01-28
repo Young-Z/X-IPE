@@ -136,37 +136,37 @@ class TestFileTypeDetection:
 
     def test_detect_markdown(self, app):
         """Detect .md as markdown"""
-        from src.services import ContentService
+        from x_ipe.services import ContentService
         service = ContentService('')
         assert service.detect_file_type('.md') == 'markdown'
 
     def test_detect_python(self, app):
         """Detect .py as python"""
-        from src.services import ContentService
+        from x_ipe.services import ContentService
         service = ContentService('')
         assert service.detect_file_type('.py') == 'python'
 
     def test_detect_javascript(self, app):
         """Detect .js as javascript"""
-        from src.services import ContentService
+        from x_ipe.services import ContentService
         service = ContentService('')
         assert service.detect_file_type('.js') == 'javascript'
 
     def test_detect_html(self, app):
         """Detect .html as html"""
-        from src.services import ContentService
+        from x_ipe.services import ContentService
         service = ContentService('')
         assert service.detect_file_type('.html') == 'html'
 
     def test_detect_css(self, app):
         """Detect .css as css"""
-        from src.services import ContentService
+        from x_ipe.services import ContentService
         service = ContentService('')
         assert service.detect_file_type('.css') == 'css'
 
     def test_detect_unknown_as_text(self, app):
         """Detect unknown extension as text"""
-        from src.services import ContentService
+        from x_ipe.services import ContentService
         service = ContentService('')
         assert service.detect_file_type('.xyz') == 'text'
 

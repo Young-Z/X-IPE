@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def get_service():
     """Get ProjectFoldersService with temporary database."""
-    from src.services import ProjectFoldersService
+    from x_ipe.services import ProjectFoldersService
     
     # Use temp database for playground
     temp_dir = tempfile.mkdtemp()

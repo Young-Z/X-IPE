@@ -61,7 +61,7 @@ class HumanSimulationTest:
 
 def get_service(temp_dir):
     """Get ProjectFoldersService with temp database."""
-    from src.services import ProjectFoldersService
+    from x_ipe.services import ProjectFoldersService
     db_path = os.path.join(temp_dir, 'test_projects.db')
     return ProjectFoldersService(db_path)
 
@@ -419,7 +419,7 @@ def test_scenario_project_persistence():
     test = HumanSimulationTest()
     
     try:
-        from src.services import ProjectFoldersService
+        from x_ipe.services import ProjectFoldersService
         db_path = os.path.join(temp_dir, 'persist_test.db')
         
         # Create projects

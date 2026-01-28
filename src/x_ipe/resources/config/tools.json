@@ -1,0 +1,27 @@
+{
+  "version": "2.0",
+  "stages": {
+    "ideation": {
+      "ideation": {"_order": 1},
+      "mockup": {"_order": 2, "tool-frontend-design": true},
+      "architecture": {"_order": 3},
+      "sharing": {"_order": 4}
+    },
+    "requirement": {
+      "gathering": {"_order": 1},
+      "analysis": {"_order": 2}
+    },
+    "feature": {
+      "design": {"_order": 1},
+      "implementation": {"_order": 2}
+    },
+    "quality": {
+      "testing": {"_order": 1},
+      "review": {"_order": 2}
+    },
+    "refactoring": {
+      "analysis": {"_order": 1},
+      "execution": {"_order": 2}
+    }
+  }
+}

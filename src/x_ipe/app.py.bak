@@ -1,0 +1,1333 @@
+"""
+Flask Application for Document Viewer
+
+FEATURE-001: Project Navigation
+- Provides API for project structure
+- HTTP polling for real-time updates (no WebSocket)
+- Serves frontend with sidebar navigation
+
+FEATURE-005: Interactive Console v4.0
+- WebSocket handlers for terminal I/O
+- Session persistence with automatic reconnection
+- xterm.js frontend integration
+"""
+import os
+import sys
+import json
+from pathlib import Path
+from flask import Flask, render_template, jsonify, request, current_app, send_file
+from flask_socketio import SocketIO, emit
+
+# Load .env from config folder if it exists
+def load_env_file():
+    """Load environment variables from x-ipe-docs/config/.env file."""
+    env_path = Path(__file__).parent.parent.parent / 'x-ipe-docs' / 'config' / '.env'
+    if env_path.exists():
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, value = line.split('=', 1)
+                    key = key.strip()
+                    value = value.strip()
+                    if value and key not in os.environ:  # Don't override existing env vars
+                        os.environ[key] = value
+
+load_env_file()
+
+from x_ipe.services import ProjectService, ContentService, SettingsService, ProjectFoldersService, IdeasService, ConfigService, SkillsService, ToolsConfigService, ThemesService
+from x_ipe.services import session_manager
+from x_ipe.config import config_by_name
+
+# Global settings service instance
+settings_service = None
+
+# Global ideas service instance (FEATURE-008)
+ideas_service = None
+
+# Global project folders service instance (FEATURE-006 v2.0)
+project_folders_service = None
+
+# Global config service instance (FEATURE-010)
+config_service = None
+
+# Global tools config service instance (FEATURE-011)
+tools_config_service = None
+
+# Socket.IO instance with ping/pong for keep-alive
+# Increased timeouts for stability - session stays open for 1 hour regardless of focus
+socketio = SocketIO(
+    cors_allowed_origins="*",
+    async_mode='threading',
+    ping_timeout=300,        # Wait 5 minutes for pong response (was 60s)
+    ping_interval=60,        # Send ping every 60s (was 25s)
+    max_http_buffer_size=1e8,  # 100MB max message size
+    always_connect=True,     # Always emit connect even on reconnect
+    logger=False,
+    engineio_logger=False,
+    # Improved stability settings
+    http_compression=True,   # Compress HTTP responses
+    manage_session=True,     # Let Socket.IO manage sessions
+)
+
+# Socket SID to Session ID mapping
+socket_to_session = {}
+
+
+def create_app(config=None):
+    """
+    Application factory for creating Flask app.
+    
+    Args:
+        config: Configuration dict or config class name
+    """
+    app = Flask(__name__, 
+                static_folder='static',
+                template_folder='templates')
+    
+    # Load configuration
+    if config is None:
+        config_name = os.environ.get('FLASK_ENV', 'development')
+        app.config.from_object(config_by_name.get(config_name, config_by_name['default']))
+    elif isinstance(config, dict):
+        app.config.update(config)
+    else:
+        app.config.from_object(config)
+    
+    # Initialize settings service
+    global settings_service, project_folders_service, ideas_service, config_service, tools_config_service
+    db_path = app.config.get('SETTINGS_DB_PATH', app.config.get('SETTINGS_DB', os.path.join(app.instance_path, 'settings.db')))
+    settings_service = SettingsService(db_path)
+    project_folders_service = ProjectFoldersService(db_path)
+    
+    # Initialize config service and load .x-ipe.yaml (FEATURE-010)
+    if not app.config.get('TESTING'):
+        config_service = ConfigService()
+        config_data = config_service.load()
+        if config_data:
+            app.config['X_IPE_CONFIG'] = config_data
+            # Always use config's project_root when .x-ipe.yaml is detected
+            app.config['PROJECT_ROOT'] = config_data.get_file_tree_path()
+    
+    # Apply project_root from settings only if no .x-ipe.yaml detected
+    if not app.config.get('X_IPE_CONFIG'):
+        saved_root = settings_service.get('project_root')
+        if saved_root and saved_root != '.' and not app.config.get('TESTING'):
+            # Only apply if it's a valid path
+            if os.path.exists(saved_root) and os.path.isdir(saved_root):
+                app.config['PROJECT_ROOT'] = saved_root
+    
+    # Register routes
+    register_routes(app)
+    register_settings_routes(app)
+    register_project_routes(app)
+    register_ideas_routes(app)  # FEATURE-008
+    register_tools_config_routes(app)  # FEATURE-011
+    
+    # Initialize Socket.IO with the app
+    socketio.init_app(app)
+    
+    # Register WebSocket handlers for terminal
+    register_terminal_handlers()
+    
+    # Register WebSocket handlers for voice input (FEATURE-021)
+    register_voice_handlers()
+    
+    return app
+
+
+def register_routes(app):
+    """Register all application routes"""
+    
+    @app.route('/')
+    def index():
+        """Serve main page with sidebar navigation"""
+        return render_template('index.html')
+    
+    @app.route('/uiux-feedbacks')
+    def uiux_feedbacks():
+        """
+        GET /uiux-feedbacks
+        
+        FEATURE-022: UIUX Feedbacks placeholder page (CR-004)
+        Shows Work in Progress banner.
+        """
+        return render_template('uiux-feedbacks.html')
+    
+    @app.route('/workplace')
+    def workplace():
+        """
+        GET /workplace
+        
+        FEATURE-008: Workplace/Ideation page
+        CR-004: Route preserved for backward compatibility, page renamed to Ideation.
+        """
+        return render_template('workplace.html')
+    
+    @app.route('/api/project/structure')
+    def get_project_structure():
+        """
+        GET /api/project/structure
+        
+        Returns the project folder structure for sidebar navigation.
+        """
+        project_root = app.config.get('PROJECT_ROOT')
+        
+        if not project_root or not os.path.exists(project_root):
+            return jsonify({
+                'error': 'Project root not configured or does not exist',
+                'project_root': project_root
+            }), 400
+        
+        service = ProjectService(project_root)
+        structure = service.get_structure()
+        
+        return jsonify(structure)
+    
+    @app.route('/api/file/content')
+    def get_file_content():
+        """
+        GET /api/file/content?path=<relative_path>&raw=<true/false>
+        
+        Returns the content of a file with metadata for rendering.
+        If raw=true or file is binary (images, etc.), serves the raw file content.
+        """
+        from pathlib import Path
+        
+        file_path = request.args.get('path')
+        raw = request.args.get('raw', 'false').lower() == 'true'
+        
+        if not file_path:
+            return jsonify({'error': 'Path parameter required'}), 400
+        
+        project_root = app.config.get('PROJECT_ROOT')
+        
+        # Binary file extensions that should always be served raw
+        binary_extensions = {
+            '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.ico', '.svg', '.webp',
+            '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
+            '.zip', '.rar', '.tar', '.gz', '.7z',
+            '.mp3', '.mp4', '.wav', '.avi', '.mov',
+            '.exe', '.dll', '.so', '.dylib',
+        }
+        
+        try:
+            # Resolve path
+            full_path = (Path(project_root) / file_path).resolve()
+            
+            # Security check: ensure path is within project root
+            if not str(full_path).startswith(str(Path(project_root).resolve())):
+                return jsonify({'error': 'Access denied'}), 403
+            
+            if not full_path.exists():
+                return jsonify({'error': 'File not found'}), 404
+            
+            ext = full_path.suffix.lower()
+            
+            # Auto-detect binary files or use raw parameter
+            if raw or ext in binary_extensions:
+                # Determine MIME type
+                mime_types = {
+                    '.png': 'image/png',
+                    '.jpg': 'image/jpeg',
+                    '.jpeg': 'image/jpeg',
+                    '.gif': 'image/gif',
+                    '.bmp': 'image/bmp',
+                    '.ico': 'image/x-icon',
+                    '.svg': 'image/svg+xml',
+                    '.webp': 'image/webp',
+                    '.pdf': 'application/pdf',
+                    '.doc': 'application/msword',
+                    '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    '.xls': 'application/vnd.ms-excel',
+                    '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    '.ppt': 'application/vnd.ms-powerpoint',
+                    '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                    '.zip': 'application/zip',
+                    '.rar': 'application/vnd.rar',
+                }
+                mime_type = mime_types.get(ext, 'application/octet-stream')
+                
+                return send_file(full_path, mimetype=mime_type)
+            
+            service = ContentService(project_root)
+            result = service.get_content(file_path)
+            return jsonify(result)
+        except FileNotFoundError:
+            return jsonify({'error': 'File not found'}), 404
+        except PermissionError:
+            return jsonify({'error': 'Access denied'}), 403
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    @app.route('/api/file/save', methods=['POST'])
+    def save_file():
+        """
+        POST /api/file/save
+        
+        Save content to a file. Request body: {path: string, content: string}
+        
+        FEATURE-003: Content Editor
+        """
+        # Check for JSON body
+        if not request.is_json:
+            return jsonify({'success': False, 'error': 'JSON body required'}), 400
+        
+        data = request.get_json()
+        
+        # Validate required fields
+        if not data:
+            return jsonify({'success': False, 'error': 'Request body required'}), 400
+        
+        if 'path' not in data:
+            return jsonify({'success': False, 'error': 'Path is required'}), 400
+        
+        if 'content' not in data:
+            return jsonify({'success': False, 'error': 'Content is required'}), 400
+        
+        project_root = app.config.get('PROJECT_ROOT')
+        
+        if not project_root or not os.path.exists(project_root):
+            return jsonify({'success': False, 'error': 'Project root not configured'}), 400
+        
+        service = ContentService(project_root)
+        result = service.save_content(data['path'], data['content'])
+        
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 400
+
+
+# =============================================================================
+# FEATURE-005: Interactive Console v4.0 - WebSocket Handlers
+# =============================================================================
+
+def register_terminal_handlers():
+    """Register WebSocket event handlers for terminal."""
+    
+    @socketio.on('connect')
+    def handle_connect():
+        """Handle new WebSocket connection."""
+        sid = request.sid
+        print(f"[Terminal] Client connected: {sid}")
+    
+    @socketio.on('attach')
+    def handle_attach(data):
+        """
+        Handle session attachment.
+        Creates new session or reconnects to existing one.
+        """
+        try:
+            sid = request.sid
+            requested_session_id = data.get('session_id') if data else None
+            # Ensure rows/cols are valid integers with defaults
+            rows = data.get('rows') if data else None
+            cols = data.get('cols') if data else None
+            rows = int(rows) if rows is not None else 24
+            cols = int(cols) if cols is not None else 80
+            
+            def emit_output(output_data):
+                socketio.emit('output', output_data, room=sid)
+            
+            # Try to reconnect to existing session
+            if requested_session_id and session_manager.has_session(requested_session_id):
+                session = session_manager.get_session(requested_session_id)
+                
+                if session.is_expired():
+                    session_manager.remove_session(requested_session_id)
+                else:
+                    # Reconnect to existing session
+                    session.attach(sid, emit_output)
+                    socket_to_session[sid] = requested_session_id
+                    
+                    # Replay buffered output
+                    buffer = session.get_buffer()
+                    if buffer:
+                        socketio.emit('output', buffer, room=sid)
+                    
+                    socketio.emit('reconnected', {'session_id': requested_session_id}, room=sid)
+                    return
+            
+            # Create new session
+            session_id = session_manager.create_session(emit_output, rows, cols)
+            session = session_manager.get_session(session_id)
+            session.attach(sid, emit_output)
+            socket_to_session[sid] = session_id
+            
+            socketio.emit('session_id', session_id, room=sid)
+            socketio.emit('new_session', {'session_id': session_id}, room=sid)
+        except Exception as e:
+            print(f"[Terminal] Error in attach handler: {e}")
+            socketio.emit('error', {'message': 'Failed to attach terminal session'}, room=sid)
+    
+    @socketio.on('disconnect')
+    def handle_disconnect():
+        """Handle WebSocket disconnection - keep session alive."""
+        try:
+            sid = request.sid
+            session_id = socket_to_session.pop(sid, None)
+            
+            if session_id:
+                session = session_manager.get_session(session_id)
+                if session:
+                    session.detach()  # Keep PTY alive for reconnection
+            
+            print(f"[Terminal] Client disconnected: {sid}")
+        except Exception as e:
+            print(f"[Terminal] Error in disconnect handler: {e}")
+    
+    @socketio.on('input')
+    def handle_input(data):
+        """Forward input to PTY."""
+        try:
+            sid = request.sid
+            session_id = socket_to_session.get(sid)
+            
+            if session_id:
+                session = session_manager.get_session(session_id)
+                if session:
+                    session.write(data)
+        except Exception as e:
+            print(f"[Terminal] Error in input handler: {e}")
+    
+    @socketio.on('resize')
+    def handle_resize(data):
+        """Handle terminal resize."""
+        try:
+            sid = request.sid
+            session_id = socket_to_session.get(sid)
+            
+            if session_id:
+                session = session_manager.get_session(session_id)
+                if session:
+                    rows = data.get('rows', 24)
+                    cols = data.get('cols', 80)
+                    session.resize(rows, cols)
+        except Exception as e:
+            print(f"[Terminal] Error in resize handler: {e}")
+
+
+# =============================================================================
+# FEATURE-021: Console Voice Input - Socket.IO Handlers
+# =============================================================================
+
+# Global voice service instance
+voice_service = None
+
+# Mapping: socket_sid -> voice_session_id
+socket_to_voice_session = {}
+
+def register_voice_handlers():
+    """Register WebSocket event handlers for voice input."""
+    from x_ipe.services.voice_input_service_v2 import VoiceInputService, is_voice_command
+    
+    global voice_service
+    
+    # Initialize voice service with API key from environment
+    api_key = os.environ.get('ALIBABA_SPEECH_API_KEY', '')
+    if api_key:
+        voice_service = VoiceInputService(api_key=api_key)
+        print("[Voice] Voice service initialized with API key")
+    else:
+        print("[Voice] No ALIBABA_SPEECH_API_KEY found, voice input disabled")
+    
+    @socketio.on('voice_start')
+    def handle_voice_start(data=None):
+        """Handle voice recording start request."""
+        global voice_service
+        sid = request.sid
+        
+        print(f"[Voice] 🎬 voice_start received from {sid}")
+        print(f"[Voice]    data: {data}")
+        
+        if not voice_service:
+            print(f"[Voice] ❌ Voice service not configured!")
+            emit('voice_error', {'message': 'Voice service not configured. Set ALIBABA_SPEECH_API_KEY in x-ipe-docs/config/.env'})
+            return
+        
+        try:
+            # Create voice session with callbacks for partial results
+            def on_partial(text):
+                print(f"[Voice] 📤 Emitting voice_partial: '{text}'")
+                socketio.emit('voice_partial', {'text': text}, room=sid)
+            
+            session_id = voice_service.create_session(
+                socket_sid=sid,
+                on_partial=on_partial,
+            )
+            socket_to_voice_session[sid] = session_id
+            
+            # Start recognition
+            print(f"[Voice]    Starting recognition...")
+            if voice_service.start_recognition(session_id):
+                print(f"[Voice] ✅ Emitting voice_ready for session {session_id}")
+                emit('voice_ready', {'session_id': session_id})
+            else:
+                print(f"[Voice] ❌ Failed to start recognition")
+                emit('voice_error', {'message': 'Failed to start recognition'})
+                voice_service.remove_session(session_id)
+                del socket_to_voice_session[sid]
+        except Exception as e:
+            print(f"[Voice] ❌ Exception in voice_start: {e}")
+            import traceback
+            traceback.print_exc()
+            emit('voice_error', {'message': str(e)})
+    
+    @socketio.on('voice_audio')
+    def handle_voice_audio(data):
+        """Handle incoming audio chunk from client."""
+        global voice_service
+        sid = request.sid
+        
+        if not voice_service:
+            return
+        
+        session_id = socket_to_voice_session.get(sid)
+        if not session_id:
+            print(f"[Voice] ⚠️ voice_audio received but no session for {sid}")
+            return
+        
+        try:
+            # Get audio data from message
+            audio_chunk = data.get('audio', b'') if isinstance(data, dict) else data
+            if isinstance(audio_chunk, list):
+                audio_chunk = bytes(audio_chunk)
+            
+            # Forward to voice service (sync now with dashscope SDK)
+            voice_service.send_audio(session_id, audio_chunk)
+        except Exception as e:
+            print(f"[Voice] ❌ Exception in voice_audio: {e}")
+            emit('voice_error', {'message': f'Audio error: {e}'})
+    
+    @socketio.on('voice_stop')
+    def handle_voice_stop(data=None):
+        """Handle voice recording stop request - finalize and get transcription."""
+        global voice_service
+        sid = request.sid
+        
+        print(f"[Voice] 🛑 voice_stop received from {sid}")
+        
+        if not voice_service:
+            print(f"[Voice] ❌ Voice service not available")
+            emit('voice_error', {'message': 'Voice service not available'})
+            return
+        
+        session_id = socket_to_voice_session.get(sid)
+        if not session_id:
+            print(f"[Voice] ❌ No active voice session for {sid}")
+            emit('voice_error', {'message': 'No active voice session'})
+            return
+        
+        try:
+            print(f"[Voice]    Stopping recognition for session {session_id}...")
+            # Stop recognition and get result (sync with dashscope SDK)
+            result = voice_service.stop_recognition(session_id)
+            
+            print(f"[Voice]    Result: '{result}'")
+            
+            # Check if result is a voice command
+            command = is_voice_command(result)
+            
+            if command:
+                print(f"[Voice] 📤 Emitting voice_command: {command}")
+                emit('voice_command', {'command': command, 'text': result})
+            else:
+                print(f"[Voice] 📤 Emitting voice_result: '{result}'")
+                emit('voice_result', {'text': result})
+            
+            # Cleanup session
+            voice_service.remove_session(session_id)
+            if sid in socket_to_voice_session:
+                del socket_to_voice_session[sid]
+            
+            print(f"[Voice] ✅ Session completed: {session_id}")
+        except Exception as e:
+            print(f"[Voice] ❌ Exception in voice_stop: {e}")
+            import traceback
+            traceback.print_exc()
+            emit('voice_error', {'message': str(e)})
+    
+    @socketio.on('voice_cancel')
+    def handle_voice_cancel(data=None):
+        """Handle voice recording cancel request - abort without transcription."""
+        global voice_service
+        sid = request.sid
+        
+        print(f"[Voice] ⚠️ voice_cancel received from {sid}")
+        
+        session_id = socket_to_voice_session.get(sid)
+        if not session_id:
+            print(f"[Voice]    No session to cancel")
+            return
+        
+        try:
+            # Cancel recognition (sync with dashscope SDK)
+            if voice_service:
+                voice_service.cancel_recognition(session_id)
+                voice_service.remove_session(session_id)
+            
+            if sid in socket_to_voice_session:
+                del socket_to_voice_session[sid]
+            
+            emit('voice_cancelled', {})
+            print(f"[Voice] ✅ Session cancelled: {session_id}")
+        except Exception as e:
+            print(f"[Voice] ❌ Exception in voice_cancel: {e}")
+            emit('voice_error', {'message': f'Cancel error: {e}'})
+
+
+# =============================================================================
+# FEATURE-006: Settings & Configuration - Routes
+# =============================================================================
+
+def register_settings_routes(app):
+    """Register settings API and page routes."""
+    
+    @app.route('/settings')
+    def settings_page():
+        """
+        GET /settings
+        
+        Render the settings page.
+        """
+        global settings_service
+        current_settings = settings_service.get_all() if settings_service else {'project_root': '.'}
+        return render_template('settings.html', settings=current_settings)
+    
+    @app.route('/api/settings', methods=['GET'])
+    def get_settings():
+        """
+        GET /api/settings
+        
+        Get all current settings.
+        
+        Response:
+            - project_root: string - Current project root path
+        """
+        global settings_service
+        if not settings_service:
+            return jsonify({'project_root': app.config.get('PROJECT_ROOT', '.')}), 200
+        
+        return jsonify(settings_service.get_all())
+    
+    @app.route('/api/settings', methods=['POST'])
+    def save_settings():
+        """
+        POST /api/settings
+        
+        Save settings.
+        
+        Request body:
+            - project_root: string (optional) - New project root path
+        
+        Response (success):
+            - success: true
+            - message: string
+        
+        Response (error):
+            - success: false
+            - errors: object with field-specific error messages
+        """
+        global settings_service, file_watcher
+        
+        data = request.get_json() or {}
+        errors = {}
+        
+        # Validate project_root if provided
+        if 'project_root' in data:
+            path = data['project_root']
+            path_errors = settings_service.validate_project_root(path)
+            errors.update(path_errors)
+        
+        # Return errors if any
+        if errors:
+            return jsonify({'success': False, 'errors': errors}), 400
+        
+        # Save settings
+        for key, value in data.items():
+            if key in ['project_root']:  # Allowed settings
+                settings_service.set(key, value)
+        
+        # Apply project_root change
+        if 'project_root' in data:
+            new_path = data['project_root']
+            app.config['PROJECT_ROOT'] = new_path
+        
+        return jsonify({'success': True, 'message': 'Settings saved successfully'})
+    
+    @app.route('/api/config', methods=['GET'])
+    def get_config():
+        """
+        GET /api/config
+        
+        Get current project configuration from .x-ipe.yaml.
+        
+        FEATURE-010: Project Root Configuration
+        
+        Response (config detected):
+            - detected: true
+            - config_file: string - Path to .x-ipe.yaml
+            - version: int
+            - project_root: string
+            - x_ipe_app: string
+            - file_tree_scope: string
+            - terminal_cwd: string
+        
+        Response (no config):
+            - detected: false
+            - config_file: null
+            - using_defaults: true
+            - project_root: string - Current project root
+            - message: string
+        """
+        config_data = app.config.get('X_IPE_CONFIG')
+        
+        if config_data:
+            return jsonify({
+                'detected': True,
+                **config_data.to_dict()
+            })
+        else:
+            return jsonify({
+                'detected': False,
+                'config_file': None,
+                'using_defaults': True,
+                'project_root': app.config.get('PROJECT_ROOT', os.getcwd()),
+                'message': 'No .x-ipe.yaml found. Using default paths.'
+            })
+
+
+def register_project_routes(app):
+    """
+    Register project folder management routes.
+    
+    FEATURE-006 v2.0: Multi-Project Folder Support
+    """
+    
+    @app.route('/api/projects', methods=['GET'])
+    def get_projects():
+        """
+        GET /api/projects
+        
+        Get all project folders and active project ID.
+        
+        Response:
+            - projects: array of {id, name, path}
+            - active_project_id: number
+        """
+        global project_folders_service
+        if not project_folders_service:
+            return jsonify({'projects': [], 'active_project_id': 1}), 200
+        
+        return jsonify({
+            'projects': project_folders_service.get_all(),
+            'active_project_id': project_folders_service.get_active_id()
+        })
+    
+    @app.route('/api/projects', methods=['POST'])
+    def add_project():
+        """
+        POST /api/projects
+        
+        Add a new project folder.
+        
+        Request body:
+            - name: string - Project name
+            - path: string - Project path
+        
+        Response (success):
+            - success: true
+            - project: {id, name, path}
+        
+        Response (error):
+            - success: false
+            - errors: object with field-specific error messages
+        """
+        global project_folders_service
+        
+        if not request.is_json:
+            return jsonify({'success': False, 'error': 'JSON required'}), 400
+        
+        data = request.get_json()
+        name = data.get('name', '').strip()
+        path = data.get('path', '').strip()
+        
+        result = project_folders_service.add(name, path)
+        
+        if result['success']:
+            return jsonify(result), 201
+        return jsonify(result), 400
+    
+    @app.route('/api/projects/<int:project_id>', methods=['PUT'])
+    def update_project(project_id):
+        """
+        PUT /api/projects/<id>
+        
+        Update an existing project folder.
+        
+        Request body:
+            - name: string (optional) - New project name
+            - path: string (optional) - New project path
+        
+        Response (success):
+            - success: true
+            - project: {id, name, path}
+        
+        Response (error):
+            - success: false
+            - errors: object with field-specific error messages
+        """
+        global project_folders_service
+        
+        if not request.is_json:
+            return jsonify({'success': False, 'error': 'JSON required'}), 400
+        
+        data = request.get_json()
+        name = data.get('name')
+        path = data.get('path')
+        
+        result = project_folders_service.update(project_id, name=name, path=path)
+        
+        if result['success']:
+            return jsonify(result)
+        return jsonify(result), 400
+    
+    @app.route('/api/projects/<int:project_id>', methods=['DELETE'])
+    def delete_project(project_id):
+        """
+        DELETE /api/projects/<id>
+        
+        Delete a project folder.
+        
+        Response (success):
+            - success: true
+        
+        Response (error):
+            - success: false
+            - error: string error message
+        """
+        global project_folders_service
+        
+        active_id = project_folders_service.get_active_id()
+        result = project_folders_service.delete(project_id, active_project_id=active_id)
+        
+        if result['success']:
+            return jsonify(result)
+        return jsonify(result), 400
+    
+    @app.route('/api/projects/switch', methods=['POST'])
+    def switch_project():
+        """
+        POST /api/projects/switch
+        
+        Switch the active project.
+        
+        Request body:
+            - project_id: number - Project ID to switch to
+        
+        Response (success):
+            - success: true
+            - active_project_id: number
+            - project: {id, name, path}
+        
+        Response (error):
+            - success: false
+            - error: string error message
+        """
+        global project_folders_service
+        
+        if not request.is_json:
+            return jsonify({'success': False, 'error': 'JSON required'}), 400
+        
+        data = request.get_json()
+        project_id = data.get('project_id')
+        
+        if not project_id:
+            return jsonify({'success': False, 'error': 'project_id required'}), 400
+        
+        result = project_folders_service.set_active(project_id)
+        
+        if result['success']:
+            # Update app config with new project root
+            project = result['project']
+            project_path = project['path']
+            
+            # If config is detected, project folders are relative to config's project_root
+            config_data = app.config.get('X_IPE_CONFIG')
+            if config_data:
+                # Config always takes precedence - use its project_root
+                app.config['PROJECT_ROOT'] = config_data.project_root
+            elif project_path == '.':
+                # No config, default project folder - use cwd where x-ipe was run
+                app.config['PROJECT_ROOT'] = os.environ.get('X_IPE_PROJECT_ROOT', os.getcwd())
+            else:
+                # Absolute path from project folder
+                app.config['PROJECT_ROOT'] = project_path
+            
+            return jsonify(result)
+        return jsonify(result), 400
+
+
+def register_ideas_routes(app):
+    """
+    Register idea management routes.
+    
+    FEATURE-008: Workplace (Idea Management)
+    """
+    
+    @app.route('/api/ideas/tree', methods=['GET'])
+    def get_ideas_tree():
+        """
+        GET /api/ideas/tree
+        
+        Get tree structure of x-ipe-docs/ideas/ directory.
+        
+        Response:
+            - success: true
+            - tree: array of folder/file objects
+        """
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        service = IdeasService(project_root)
+        
+        try:
+            tree = service.get_tree()
+            return jsonify({
+                'success': True,
+                'tree': tree
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @app.route('/api/ideas/upload', methods=['POST'])
+    def upload_ideas():
+        """
+        POST /api/ideas/upload
+        
+        Upload files to a new or existing idea folder.
+        
+        Request: multipart/form-data with 'files' field
+        Optional: 'target_folder' field to upload to existing folder (CR-002)
+        
+        Response:
+            - success: true/false
+            - folder_name: string
+            - folder_path: string
+            - files_uploaded: array of filenames
+        """
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        service = IdeasService(project_root)
+        
+        if 'files' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No files provided'
+            }), 400
+        
+        uploaded_files = request.files.getlist('files')
+        if not uploaded_files or all(f.filename == '' for f in uploaded_files):
+            return jsonify({
+                'success': False,
+                'error': 'No files provided'
+            }), 400
+        
+        # CR-002: Get optional target_folder from form data
+        target_folder = request.form.get('target_folder', None)
+        
+        # Convert to (filename, content) tuples
+        files = [(f.filename, f.read()) for f in uploaded_files if f.filename]
+        
+        result = service.upload(files, target_folder=target_folder)
+        
+        if result['success']:
+            return jsonify(result)
+        return jsonify(result), 400
+    
+    @app.route('/api/ideas/rename', methods=['POST'])
+    def rename_idea_folder():
+        """
+        POST /api/ideas/rename
+        
+        Rename an idea folder.
+        
+        Request body:
+            - old_name: string - Current folder name
+            - new_name: string - New folder name
+        
+        Response:
+            - success: true/false
+            - old_name: string
+            - new_name: string
+            - new_path: string
+        """
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        service = IdeasService(project_root)
+        
+        if not request.is_json:
+            return jsonify({
+                'success': False,
+                'error': 'JSON required'
+            }), 400
+        
+        data = request.get_json()
+        old_name = data.get('old_name')
+        new_name = data.get('new_name')
+        
+        if not old_name or not new_name:
+            return jsonify({
+                'success': False,
+                'error': 'old_name and new_name are required'
+            }), 400
+        
+        result = service.rename_folder(old_name, new_name)
+        
+        if result['success']:
+            return jsonify(result)
+        return jsonify(result), 400
+    
+    @app.route('/api/ideas/rename-file', methods=['POST'])
+    def rename_idea_file():
+        """
+        POST /api/ideas/rename-file
+        
+        Rename a file within x-ipe-docs/ideas/.
+        
+        Request body:
+            - path: string - Current file path (relative to project root)
+            - new_name: string - New file name (with extension)
+        
+        Response:
+            - success: true/false
+            - old_path: string
+            - new_path: string
+            - new_name: string
+        """
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        service = IdeasService(project_root)
+        
+        if not request.is_json:
+            return jsonify({
+                'success': False,
+                'error': 'JSON required'
+            }), 400
+        
+        data = request.get_json()
+        path = data.get('path')
+        new_name = data.get('new_name')
+        
+        if not path or not new_name:
+            return jsonify({
+                'success': False,
+                'error': 'path and new_name are required'
+            }), 400
+        
+        result = service.rename_file(path, new_name)
+        
+        if result['success']:
+            return jsonify(result)
+        return jsonify(result), 400
+    
+    @app.route('/api/ideas/delete', methods=['POST'])
+    def delete_idea_item():
+        """
+        POST /api/ideas/delete
+        
+        Delete an idea file or folder.
+        
+        Request body:
+            - path: string - Relative path to file/folder within x-ipe-docs/ideas/
+        
+        Response:
+            - success: true/false
+            - path: string
+            - type: 'file' | 'folder'
+        """
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        service = IdeasService(project_root)
+        
+        if not request.is_json:
+            return jsonify({
+                'success': False,
+                'error': 'JSON required'
+            }), 400
+        
+        data = request.get_json()
+        path = data.get('path')
+        
+        if not path:
+            return jsonify({
+                'success': False,
+                'error': 'path is required'
+            }), 400
+        
+        result = service.delete_item(path)
+        
+        if result['success']:
+            return jsonify(result)
+        return jsonify(result), 400
+    
+    @app.route('/api/ideas/toolbox', methods=['GET'])
+    def get_ideas_toolbox():
+        """
+        GET /api/ideas/toolbox
+        
+        Get ideation toolbox configuration.
+        
+        Response:
+            - version: string
+            - ideation: {antv-infographic: bool, mermaid: bool}
+            - mockup: {frontend-design: bool}
+            - sharing: {}
+        """
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        service = IdeasService(project_root)
+        
+        config = service.get_toolbox()
+        return jsonify(config)
+    
+    @app.route('/api/ideas/toolbox', methods=['POST'])
+    def save_ideas_toolbox():
+        """
+        POST /api/ideas/toolbox
+        
+        Save ideation toolbox configuration.
+        
+        Request body:
+            - version: string
+            - ideation: {antv-infographic: bool, mermaid: bool}
+            - mockup: {frontend-design: bool}
+            - sharing: {}
+        
+        Response:
+            - success: true/false
+        """
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        service = IdeasService(project_root)
+        
+        config = request.get_json()
+        result = service.save_toolbox(config)
+        
+        if result['success']:
+            return jsonify(result)
+        return jsonify(result), 400
+    
+    """
+    ==========================================================================
+    SKILLS API
+    
+    Read-only API for skills defined in .github/skills/
+    ==========================================================================
+    """
+    
+    @app.route('/api/skills', methods=['GET'])
+    def get_skills():
+        """
+        GET /api/skills
+        
+        Get list of all skills with name and description.
+        
+        Response:
+            - success: true
+            - skills: array of {name, description}
+        """
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        service = SkillsService(project_root)
+        
+        try:
+            skills = service.get_all()
+            return jsonify({
+                'success': True,
+                'skills': skills
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+
+
+# Entry point for running with `python -m src.app`
+def register_tools_config_routes(app):
+    """
+    Register tools configuration routes.
+    
+    FEATURE-011: Stage Toolbox
+    """
+    
+    def _get_tools_service():
+        """Get ToolsConfigService instance for current project root."""
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        return ToolsConfigService(project_root)
+    
+    @app.route('/api/config/tools', methods=['GET'])
+    def get_tools_config():
+        """
+        GET /api/config/tools
+        
+        Get current tools configuration.
+        
+        Response:
+            - success: true
+            - config: tools configuration object
+        """
+        try:
+            service = _get_tools_service()
+            config = service.load()
+            return jsonify({
+                'success': True,
+                'config': config
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @app.route('/api/config/tools', methods=['POST'])
+    def save_tools_config():
+        """
+        POST /api/config/tools
+        
+        Save tools configuration.
+        
+        Request Body: JSON with 'stages' key
+        
+        Response:
+            - success: true/false
+            - error: string (on failure)
+        """
+        try:
+            config = request.get_json(force=True, silent=True)
+            if config is None:
+                return jsonify({
+                    'success': False,
+                    'error': 'Invalid JSON or empty body'
+                }), 400
+            
+            if 'stages' not in config:
+                return jsonify({
+                    'success': False,
+                    'error': 'Invalid config format: missing stages key'
+                }), 400
+            
+            service = _get_tools_service()
+            service.save(config)
+            return jsonify({'success': True})
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @app.route('/api/config/copilot-prompt', methods=['GET'])
+    def get_copilot_prompt_config():
+        """
+        GET /api/config/copilot-prompt
+        
+        Get Copilot prompt configuration for the Copilot button dropdown.
+        
+        Response:
+            - prompts: List of prompt objects with id, label, icon, command
+            - placeholder: Dictionary of placeholder descriptions
+        """
+        try:
+            project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+            config_path = os.path.join(project_root, 'x-ipe-docs', 'config', 'copilot-prompt.json')
+            
+            if os.path.exists(config_path):
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                return jsonify(config)
+            else:
+                # Return empty prompts if config doesn't exist
+                return jsonify({
+                    'version': '1.0',
+                    'prompts': [],
+                    'placeholder': {}
+                })
+        except Exception as e:
+            return jsonify({
+                'prompts': [],
+                'error': str(e)
+            }), 500
+    
+    # ============================================================
+    # FEATURE-012: Design Themes API
+    # ============================================================
+    
+    def _get_themes_service():
+        """Get ThemesService instance for current project root."""
+        project_root = app.config.get('PROJECT_ROOT', os.getcwd())
+        return ThemesService(project_root)
+    
+    @app.route('/api/themes', methods=['GET'])
+    def list_themes():
+        """
+        GET /api/themes
+        
+        List all themes with metadata.
+        
+        Response:
+            - themes: List of theme objects with name, description, colors, files, path
+            - selected: Currently selected theme name from config (null if none)
+        """
+        try:
+            themes_service = _get_themes_service()
+            themes = themes_service.list_themes()
+            
+            # Get selected theme from tools config (new format)
+            tools_service = _get_tools_service()
+            config = tools_service.load()
+            selected_theme_config = config.get('selected-theme', {})
+            selected = selected_theme_config.get('theme-name') if selected_theme_config else None
+            
+            return jsonify({
+                'themes': themes,
+                'selected': selected
+            })
+        except Exception as e:
+            return jsonify({
+                'themes': [],
+                'selected': 'theme-default',
+                'error': str(e)
+            }), 500
+    
+    @app.route('/api/themes/<name>', methods=['GET'])
+    def get_theme_detail(name):
+        """
+        GET /api/themes/<name>
+        
+        Get detailed information about a specific theme.
+        
+        Args:
+            name: Theme folder name (e.g., "theme-default")
+            
+        Response:
+            - Theme detail object with design_system content
+            - 404 if theme not found
+        """
+        try:
+            themes_service = _get_themes_service()
+            theme = themes_service.get_theme(name)
+            
+            if theme is None:
+                return jsonify({
+                    'error': f'Theme not found: {name}'
+                }), 404
+            
+            return jsonify(theme)
+        except Exception as e:
+            return jsonify({
+                'error': str(e)
+            }), 500
+
+
+if __name__ == '__main__':
+    app = create_app()
+    # Start session cleanup task
+    session_manager.start_cleanup_task()
+    # Use socketio.run for WebSocket support
+    socketio.run(app, debug=True, host='0.0.0.0', port=5858)

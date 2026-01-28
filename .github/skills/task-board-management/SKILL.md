@@ -47,7 +47,7 @@ Task:
   {Dynamic Attributes}: <from task type skill>
   
   # Control fields
-  auto_advance: true | false
+  auto_proceed: true | false
 ```
 
 ---
@@ -85,7 +85,7 @@ deferred → in_progress
 1. Use template from `templates/task-board.md`
 2. Create at `x-ipe-docs/planning/task-board.md`
 3. Initialize with default settings:
-    - auto_advance: false
+    - auto_proceed: false
     - Empty task lists
 4. Return board location
 ```
@@ -177,18 +177,18 @@ Query Types:
 Return: Matching task(s) or empty if none found
 ```
 
-### Operation 6: Update Auto-Advance
+### Operation 6: Update Auto-Proceed
 
 **When:** Changing advance behavior
 **Then:** Update board setting
 
 ```
 Input:
-  - auto_advance: true | false
+  - auto_proceed: true | false
 
 Process:
 1. Locate task board
-2. Update auto_advance in Global Settings
+2. Update auto_proceed in Global Settings
 3. Confirm change
 ```
 
@@ -240,7 +240,7 @@ The task board has these sections:
 
 ### Global Settings
 ```yaml
-auto_advance: false  # Controls task chaining
+auto_proceed: false  # Controls task chaining
 ```
 
 ### Active Tasks
