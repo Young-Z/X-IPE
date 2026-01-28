@@ -61,6 +61,9 @@ from .voice_input_service_v2 import (
     VOICE_MAX_DURATION,
 )
 
+# Proxy Service (FEATURE-022-A)
+from .proxy_service import ProxyService, ProxyResult
+
 
 __all__ = [
     # Config
@@ -100,4 +103,7 @@ __all__ = [
     'VoiceInputService',
     'is_voice_command',
     'VOICE_MAX_DURATION',
+    # Proxy
+    'ProxyService',
+    'ProxyResult',
 ]

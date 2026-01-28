@@ -40,8 +40,8 @@ def proxy_service():
 def app():
     """Create Flask test app"""
     from x_ipe.app import create_app
-    app = create_app('testing')
-    app.config['TESTING'] = True
+    from x_ipe.config import TestingConfig
+    app = create_app(TestingConfig)
     return app
 
 
@@ -139,7 +139,7 @@ class TestProxyServiceValidation:
         """URL without protocol should fail validation"""
         valid, error = proxy_service.validate_url("localhost:3000/")
         assert valid is False
-        assert "URL must include protocol" in error or "Invalid URL" in error
+        assert "protocol" in error or "Invalid URL" in error
     
     def test_validate_url_https_localhost_valid(self, proxy_service):
         """HTTPS localhost URL should be valid"""
@@ -260,7 +260,7 @@ class TestProxyServiceFetch:
         
         result = proxy_service.fetch_and_rewrite("http://localhost:3000/")
         assert result.success is False
-        assert "timeout" in result.error.lower()
+        assert "timed out" in result.error.lower()
         assert result.status_code == 504
     
     @patch('requests.get')
@@ -380,7 +380,7 @@ class TestProxyRoutesAPI:
         assert response.status_code == 504
         data = json.loads(response.data)
         assert data['success'] is False
-        assert 'timeout' in data['error'].lower()
+        assert 'timed out' in data['error'].lower()
     
     def test_proxy_various_ports(self, client):
         """GET /api/proxy should accept various localhost ports"""

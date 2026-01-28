@@ -1,9 +1,10 @@
 [project]
 name = "x-ipe"
-version = "1.0.14"
+version = "1.0.16"
 description = "X-IPE: AI-powered development framework"
 requires-python = ">=3.12"
 dependencies = [
+    "beautifulsoup4>=4.14.3",
     "click>=8.1.0",
     "dashscope>=1.25.9",
     "eventlet>=0.40.4",
@@ -36,5 +37,6 @@ packages = ["src/x_ipe"]
 [dependency-groups]
 dev = [
     "pytest>=9.0.2",
+    "pytest-cov>=6.0.0",
     "pytest-flask>=1.3.0",
 ]
