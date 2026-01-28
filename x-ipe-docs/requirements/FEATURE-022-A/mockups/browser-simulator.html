@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI/UX Feedback - X-IPE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Theme: theme-default - Professional Developer Tool Aesthetic */
+        :root {
+            --color-primary: #0f172a;
+            --color-secondary: #475569;
+            --color-accent: #10b981;
+            --color-accent-light: #d1fae5;
+            --color-accent-dark: #059669;
+            --color-neutral: #e2e8f0;
+            --color-success: #22c55e;
+            --color-warning: #f59e0b;
+            --color-error: #ef4444;
+            --color-info: #3b82f6;
+            
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            
+            --font-heading: 'Inter', system-ui, sans-serif;
+            --font-body: 'Inter', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--slate-100);
+            color: var(--color-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Main Layout */
+        .app-container {
+            display: grid;
+            grid-template-columns: 260px 1fr 380px;
+            height: 100vh;
+        }
+
+        /* Sidebar - Workplace Navigation */
+        .sidebar {
+            background: var(--slate-900);
+            color: white;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px 16px;
+            border-bottom: 1px solid var(--slate-700);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 18px;
+            color: white;
+        }
+
+        .sidebar-logo svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px 8px;
+            overflow-y: auto;
+        }
+
+        .nav-section {
+            margin-bottom: 8px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--slate-500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 8px 12px 4px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: var(--radius-md);
+            color: var(--slate-400);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: var(--slate-800);
+            color: var(--slate-200);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .nav-submenu {
+            margin-left: 28px;
+            border-left: 1px solid var(--slate-700);
+            padding-left: 0;
+        }
+
+        .nav-submenu .nav-item {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+
+        /* Main Content - Browser Simulator */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            background: var(--slate-200);
+            position: relative;
+        }
+
+        /* Browser Chrome */
+        .browser-chrome {
+            background: var(--slate-800);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .browser-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .browser-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .browser-dot.red { background: #ff5f57; }
+        .browser-dot.yellow { background: #febc2e; }
+        .browser-dot.green { background: #28c840; }
+
+        .url-bar {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: var(--slate-700);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .url-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 10px 14px;
+            color: white;
+            font-family: var(--font-mono);
+            font-size: 13px;
+        }
+
+        .url-input::placeholder {
+            color: var(--slate-500);
+        }
+
+        .url-input:focus {
+            outline: none;
+        }
+
+        .go-btn {
+            background: var(--color-accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .go-btn:hover {
+            background: var(--color-accent-dark);
+        }
+
+        /* Browser Toolbar */
+        .browser-toolbar {
+            background: var(--slate-100);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--slate-300);
+        }
+
+        .toolbar-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border: 1px solid var(--slate-300);
+            border-radius: var(--radius-md);
+            background: white;
+            color: var(--slate-600);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .toolbar-btn:hover {
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+        }
+
+        .toolbar-btn.active {
+            background: var(--color-accent);
+            border-color: var(--color-accent);
+            color: white;
+        }
+
+        .toolbar-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--slate-300);
+            margin: 0 4px;
+        }
+
+        .toolbar-info {
+            margin-left: auto;
+            font-size: 12px;
+            color: var(--slate-500);
+            font-family: var(--font-mono);
+        }
+
+        /* Browser Viewport */
+        .browser-viewport {
+            flex: 1;
+            background: white;
+            margin: 16px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Simulated Page Content */
+        .simulated-page {
+            padding: 24px;
+            height: 100%;
+            overflow: auto;
+        }
+
+        .sim-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--slate-200);
+            margin-bottom: 24px;
+        }
+
+        .sim-logo {
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--slate-800);
+        }
+
+        .sim-nav {
+            display: flex;
+            gap: 24px;
+        }
+
+        .sim-nav a {
+            color: var(--slate-600);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .sim-hero {
+            padding: 48px 0;
+            text-align: center;
+        }
+
+        .sim-hero h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--slate-900);
+            margin-bottom: 16px;
+        }
+
+        .sim-hero p {
+            font-size: 18px;
+            color: var(--slate-500);
+            max-width: 500px;
+            margin: 0 auto 24px;
+        }
+
+        /* Element being hovered */
+        .sim-btn {
+            display: inline-block;
+            background: var(--color-info);
+            color: white;
+            padding: 14px 32px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 15px;
+            text-decoration: none;
+        }
+
+        /* Inspect Highlight Overlay */
+        .inspect-highlight {
+            position: absolute;
+            top: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 170px;
+            height: 52px;
+            border: 2px solid var(--color-info);
+            background: rgba(59, 130, 246, 0.08);
+            border-radius: var(--radius-md);
+            pointer-events: none;
+        }
+
+        .inspect-tag {
+            position: absolute;
+            top: -28px;
+            left: 0;
+            background: var(--color-info);
+            color: white;
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* Context Menu */
+        .context-menu {
+            position: absolute;
+            top: 240px;
+            left: calc(50% + 40px);
+            background: white;
+            border: 1px solid var(--slate-200);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            min-width: 240px;
+            overflow: hidden;
+            z-index: 100;
+            animation: menuFadeIn 0.2s ease;
+        }
+
+        @keyframes menuFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .context-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.1s ease;
+        }
+
+        .context-menu-item:hover {
+            background: var(--slate-50);
+        }
+
+        .context-menu-item svg {
+            width: 18px;
+            height: 18px;
+            color: var(--slate-500);
+        }
+
+        .context-menu-item span {
+            font-size: 14px;
+            color: var(--slate-700);
+        }
+
+        .context-menu-divider {
+            height: 1px;
+            background: var(--slate-200);
+            margin: 4px 0;
+        }
+
+        .context-menu-item.highlight {
+            background: var(--color-accent-light);
+        }
+
+        .context-menu-item.highlight svg {
+            color: var(--color-accent);
+        }
+
+        .context-menu-item.highlight span {
+            color: var(--color-accent-dark);
+            font-weight: 500;
+        }
+
+        /* Right Panel - Feedback List */
+        .feedback-panel {
+            background: white;
+            border-left: 1px solid var(--slate-200);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--slate-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--slate-800);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-title svg {
+            width: 20px;
+            height: 20px;
+            color: var(--color-accent);
+        }
+
+        .panel-subtitle {
+            font-size: 12px;
+            color: var(--slate-500);
+            margin-top: 2px;
+        }
+
+        .panel-badge {
+            background: var(--color-accent);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+        }
+
+        /* Feedback List */
+        .feedback-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .feedback-entry {
+            background: var(--slate-50);
+            border: 1px solid var(--slate-200);
+            border-radius: var(--radius-lg);
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .feedback-entry.expanded {
+            background: white;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px var(--color-accent-light);
+        }
+
+        .feedback-entry-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            cursor: pointer;
+        }
+
+        .feedback-entry-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feedback-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--slate-200);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feedback-entry.expanded .feedback-icon {
+            background: var(--color-accent);
+        }
+
+        .feedback-icon svg {
+            width: 16px;
+            height: 16px;
+            color: var(--slate-500);
+        }
+
+        .feedback-entry.expanded .feedback-icon svg {
+            color: white;
+        }
+
+        .feedback-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--slate-800);
+            font-family: var(--font-mono);
+        }
+
+        .feedback-time {
+            font-size: 11px;
+            color: var(--slate-500);
+        }
+
+        .feedback-status {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: var(--radius-full);
+            font-weight: 500;
+        }
+
+        .feedback-status.draft {
+            background: var(--slate-200);
+            color: var(--slate-600);
+        }
+
+        .feedback-status.reported {
+            background: var(--color-accent-light);
+            color: var(--color-accent-dark);
+        }
+
+        .feedback-delete {
+            background: none;
+            border: none;
+            padding: 6px;
+            cursor: pointer;
+            color: var(--slate-400);
+            border-radius: var(--radius-sm);
+            transition: all 0.15s ease;
+        }
+
+        .feedback-delete:hover {
+            background: var(--color-error);
+            color: white;
+        }
+
+        /* Expanded Feedback Content */
+        .feedback-content {
+            padding: 0 14px 14px;
+            display: none;
+        }
+
+        .feedback-entry.expanded .feedback-content {
+            display: block;
+        }
+
+        .feedback-info {
+            background: var(--slate-100);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .feedback-info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .feedback-info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .feedback-info-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--slate-500);
+            text-transform: uppercase;
+            min-width: 60px;
+        }
+
+        .feedback-info-value {
+            font-size: 12px;
+            color: var(--slate-700);
+            font-family: var(--font-mono);
+            word-break: break-all;
+        }
+
+        .feedback-screenshot {
+            margin-bottom: 12px;
+        }
+
+        .screenshot-thumb {
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(135deg, var(--slate-200) 0%, var(--slate-300) 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screenshot-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .screenshot-badge {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: var(--radius-sm);
+        }
+
+        .feedback-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 1px solid var(--slate-300);
+            border-radius: var(--radius-md);
+            font-family: var(--font-body);
+            font-size: 13px;
+            resize: vertical;
+            margin-bottom: 12px;
+        }
+
+        .feedback-textarea:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px var(--color-accent-light);
+        }
+
+        .feedback-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .submit-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--color-accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .submit-btn:hover {
+            background: var(--color-accent-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .submit-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--slate-800);
+            color: white;
+            padding: 14px 20px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: toastSlide 0.3s ease;
+            z-index: 1000;
+        }
+
+        @keyframes toastSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--color-success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-icon svg {
+            width: 14px;
+            height: 14px;
+            color: white;
+        }
+
+        .toast-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Terminal Preview */
+        .terminal-preview {
+            background: var(--slate-900);
+            padding: 16px 20px;
+            border-top: 1px solid var(--slate-200);
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .terminal-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--slate-500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .terminal-content {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--color-accent);
+            line-height: 1.6;
+        }
+
+        .terminal-prompt {
+            color: var(--slate-500);
+        }
+
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: var(--color-accent);
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* Collapsed Entry (reported) */
+        .feedback-entry.collapsed {
+            opacity: 0.7;
+        }
+
+        .feedback-entry.collapsed:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                    X-IPE
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Workplace</div>
+                    <div class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        </svg>
+                        Dashboard
+                    </div>
+                    <div class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                        Documents
+                    </div>
+                    <div class="nav-item active">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                        </svg>
+                        UI/UX Feedback
+                    </div>
+                    <div class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2"/>
+                            <path d="M8 21h8M12 17v4"/>
+                        </svg>
+                        Mockups
+                    </div>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Project</div>
+                    <div class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                        Ideas
+                    </div>
+                    <div class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        Requirements
+                    </div>
+                    <div class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="16 18 22 12 16 6"/>
+                            <polyline points="8 6 2 12 8 18"/>
+                        </svg>
+                        Features
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content - Browser Simulator -->
+        <main class="main-content">
+            <div class="browser-chrome">
+                <div class="browser-dots">
+                    <div class="browser-dot red"></div>
+                    <div class="browser-dot yellow"></div>
+                    <div class="browser-dot green"></div>
+                </div>
+                <div class="url-bar">
+                    <input type="text" class="url-input" value="http://localhost:3000/dashboard" placeholder="Enter URL...">
+                    <button class="go-btn">Go</button>
+                </div>
+            </div>
+
+            <div class="browser-toolbar">
+                <button class="toolbar-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12h18M3 6h18M3 18h18"/>
+                    </svg>
+                    Refresh
+                </button>
+                <div class="toolbar-divider"></div>
+                <button class="toolbar-btn active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                    </svg>
+                    Inspect
+                </button>
+                <button class="toolbar-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <path d="M3 9h18"/>
+                    </svg>
+                    Select All
+                </button>
+                <span class="toolbar-info">2 elements selected</span>
+            </div>
+
+            <div class="browser-viewport">
+                <div class="simulated-page">
+                    <header class="sim-header">
+                        <div class="sim-logo">MyApp</div>
+                        <nav class="sim-nav">
+                            <a href="#">Home</a>
+                            <a href="#">Features</a>
+                            <a href="#">Pricing</a>
+                            <a href="#">Contact</a>
+                        </nav>
+                    </header>
+                    <section class="sim-hero">
+                        <h1>Build Better Products</h1>
+                        <p>The all-in-one platform for teams who ship fast and iterate often.</p>
+                        <a href="#" class="sim-btn">Get Started Free</a>
+                    </section>
+                </div>
+
+                <!-- Inspect highlight on button -->
+                <div class="inspect-highlight">
+                    <div class="inspect-tag">&lt;a.sim-btn&gt;</div>
+                </div>
+
+                <!-- Context Menu -->
+                <div class="context-menu">
+                    <div class="context-menu-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        <span>Provide Feedback</span>
+                    </div>
+                    <div class="context-menu-item highlight">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <path d="M21 15l-5-5L5 21"/>
+                        </svg>
+                        <span>Feedback with Screenshot</span>
+                    </div>
+                    <div class="context-menu-divider"></div>
+                    <div class="context-menu-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                        <span>Copy Element Selector</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Panel - Feedback -->
+        <aside class="feedback-panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        Feedback
+                    </div>
+                    <div class="panel-subtitle">Today's feedback entries</div>
+                </div>
+                <span class="panel-badge">3</span>
+            </div>
+
+            <div class="feedback-list">
+                <!-- Expanded Entry (Active) -->
+                <div class="feedback-entry expanded">
+                    <div class="feedback-entry-header">
+                        <div class="feedback-entry-title">
+                            <div class="feedback-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="feedback-name">Feedback-20260128-141930</div>
+                                <div class="feedback-time">Just now</div>
+                            </div>
+                        </div>
+                        <button class="feedback-delete">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="feedback-content">
+                        <div class="feedback-info">
+                            <div class="feedback-info-row">
+                                <span class="feedback-info-label">URL</span>
+                                <span class="feedback-info-value">http://localhost:3000/dashboard</span>
+                            </div>
+                            <div class="feedback-info-row">
+                                <span class="feedback-info-label">Elements</span>
+                                <span class="feedback-info-value">&lt;a.sim-btn&gt;</span>
+                            </div>
+                        </div>
+                        <div class="feedback-screenshot">
+                            <div class="screenshot-thumb">
+                                <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 12px 28px; border-radius: 8px; font-weight: 600; font-size: 14px;">Get Started Free</div>
+                                <span class="screenshot-badge">170 × 52</span>
+                            </div>
+                        </div>
+                        <textarea class="feedback-textarea" placeholder="Enter your feedback here...">The CTA button needs better contrast. Consider using a more vibrant color and adding a subtle shadow for depth.</textarea>
+                        <div class="feedback-actions">
+                            <button class="submit-btn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                                </svg>
+                                Submit Feedback
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Collapsed Entry (Reported) -->
+                <div class="feedback-entry collapsed">
+                    <div class="feedback-entry-header">
+                        <div class="feedback-entry-title">
+                            <div class="feedback-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="feedback-name">Feedback-20260128-140512</div>
+                                <div class="feedback-time">14 min ago</div>
+                            </div>
+                        </div>
+                        <span class="feedback-status reported">Reported</span>
+                    </div>
+                </div>
+
+                <!-- Collapsed Entry (Reported) -->
+                <div class="feedback-entry collapsed">
+                    <div class="feedback-entry-header">
+                        <div class="feedback-entry-title">
+                            <div class="feedback-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="feedback-name">Feedback-20260128-135847</div>
+                                <div class="feedback-time">21 min ago</div>
+                            </div>
+                        </div>
+                        <span class="feedback-status reported">Reported</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Preview -->
+            <div class="terminal-preview">
+                <div class="terminal-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" style="color: var(--slate-500)">
+                        <polyline points="4 17 10 11 4 5"/>
+                        <line x1="12" y1="19" x2="20" y2="19"/>
+                    </svg>
+                    <span class="terminal-title">Terminal Output</span>
+                </div>
+                <div class="terminal-content">
+                    <span class="terminal-prompt">$ </span>Get uiux feedback, please visit feedback folder x-ipe/uiux-feedback/Feedback-20260128-141930 to get details.<span class="terminal-cursor"></span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Toast Notification (positioned fixed) -->
+    <div class="toast">
+        <div class="toast-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+        </div>
+        <span class="toast-text">Feedback saved successfully!</span>
+    </div>
+</body>
+</html>

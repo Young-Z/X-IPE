@@ -15,7 +15,8 @@
 
 | Mockup | Type | Path | Description |
 |--------|------|------|-------------|
-| UI/UX Feedback View | HTML | [uiux-feedback-v1.html](../../ideas/005.%20Feature-UIUX%20Feedback/mockups/uiux-feedback-v1.html) | Full mockup showing browser simulator with URL bar, toolbar, and viewport |
+| Browser Simulator | HTML | [browser-simulator.html](mockups/browser-simulator.html) | Full mockup showing browser simulator with URL bar, toolbar, and viewport |
+| Original (Ideas) | HTML | [uiux-feedback-v1.html](../../ideas/005.%20Feature-UIUX%20Feedback/mockups/uiux-feedback-v1.html) | Source mockup in ideas folder |
 
 > **Note:** UI/UX requirements below are derived from this mockup. This is the MVP feature - browser simulator and proxy only. Element inspector and feedback panel are separate features (FEATURE-022-B, C, D).
 
