@@ -256,10 +256,10 @@ class ProjectSidebar {
                             <i class="bi ${icon}"></i>
                             <span>Ideation</span>
                         </div>
-                        <a href="/uiux-feedbacks" class="nav-section-header sidebar-child nav-link-item" data-section-id="uiux-feedbacks">
+                        <div class="nav-section-header sidebar-child nav-uiux-feedbacks" data-section-id="uiux-feedbacks">
                             <i class="bi bi-chat-square-text"></i>
                             <span>UIUX Feedbacks</span>
-                        </a>
+                        </div>
                     </div>
                 </div>
             `;
@@ -456,6 +456,37 @@ class ProjectSidebar {
                 const container = document.getElementById('content-body');
                 if (window.workplaceManager) {
                     window.workplaceManager.render(container);
+                }
+            });
+        }
+        
+        // FEATURE-022-A: UIUX Feedbacks click handler - render browser simulator in content area
+        const uiuxFeedbacksHeader = this.container.querySelector('.nav-uiux-feedbacks');
+        if (uiuxFeedbacksHeader) {
+            uiuxFeedbacksHeader.addEventListener('click', () => {
+                // Clear file selection
+                fileItems.forEach(f => f.classList.remove('active'));
+                this.selectedFile = null;
+                
+                // Clear contentRenderer.currentPath to prevent auto-refresh
+                if (window.contentRenderer) {
+                    window.contentRenderer.currentPath = null;
+                }
+                
+                // Hide Create Idea button
+                const createIdeaBtn = document.getElementById('btn-create-idea');
+                if (createIdeaBtn) {
+                    createIdeaBtn.classList.add('d-none');
+                }
+                
+                // Update breadcrumb
+                const breadcrumb = document.getElementById('breadcrumb');
+                breadcrumb.innerHTML = '<li class="breadcrumb-item active">UI/UX Feedbacks</li>';
+                
+                // Render Browser Simulator in content area
+                const container = document.getElementById('content-body');
+                if (window.uiuxFeedbackManager) {
+                    window.uiuxFeedbackManager.render(container);
                 }
             });
         }

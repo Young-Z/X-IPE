@@ -1,18 +1,87 @@
 /**
  * FEATURE-022-A: Browser Simulator & Proxy
  * 
- * JavaScript for the browser simulator functionality.
+ * UIUXFeedbackManager - Renders browser simulator in content area.
  * Handles URL input, proxy requests, and viewport rendering.
  */
 
-class BrowserSimulator {
+class UIUXFeedbackManager {
     constructor() {
         this.state = {
             currentUrl: null,
             isLoading: false,
             error: null
         };
+        this.elements = {};
+        this.isActive = false;
+    }
+    
+    /**
+     * Render the browser simulator UI into the given container
+     */
+    render(container) {
+        this.isActive = true;
         
+        container.innerHTML = `
+            <div class="uiux-container">
+                <!-- Browser Chrome -->
+                <div class="browser-chrome">
+                    <div class="browser-dots">
+                        <span class="browser-dot red"></span>
+                        <span class="browser-dot yellow"></span>
+                        <span class="browser-dot green"></span>
+                    </div>
+                    <div class="url-bar">
+                        <input type="text" id="url-input" class="url-input" placeholder="http://localhost:3000" />
+                        <button id="go-btn" class="go-btn">Go</button>
+                    </div>
+                </div>
+
+                <!-- Browser Viewport -->
+                <div class="browser-viewport-container">
+                    <div class="browser-viewport" id="browser-viewport">
+                        <!-- Iframe for proxied content -->
+                        <iframe id="viewport-iframe" class="viewport-iframe"></iframe>
+                        
+                        <!-- Empty State -->
+                        <div class="empty-state" id="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="bi bi-globe2"></i>
+                            </div>
+                            <div class="empty-state-title">Browser Simulator</div>
+                            <div class="empty-state-description">
+                                Enter a localhost URL above to preview your application.
+                                <br><br>
+                                <small class="text-muted">Supported: localhost, 127.0.0.1</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Loading Overlay -->
+                        <div class="loading-overlay" id="loading-overlay">
+                            <div class="loading-spinner"></div>
+                            <div class="loading-text">Loading page...</div>
+                        </div>
+                        
+                        <!-- Error Overlay -->
+                        <div class="error-overlay" id="error-overlay">
+                            <div class="error-icon">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                            </div>
+                            <div class="error-message" id="error-message">Connection failed</div>
+                            <div class="error-hint">Click to dismiss</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Bar -->
+                <div class="browser-status">
+                    <div class="status-indicator"></div>
+                    <div class="status-text" id="status-text">Ready - Enter a localhost URL to begin</div>
+                </div>
+            </div>
+        `;
+        
+        // Cache element references
         this.elements = {
             urlInput: document.getElementById('url-input'),
             goBtn: document.getElementById('go-btn'),
@@ -25,12 +94,22 @@ class BrowserSimulator {
             emptyState: document.getElementById('empty-state')
         };
         
-        this.init();
+        this._bindEvents();
+        
+        // Restore previous URL if exists
+        if (this.state.currentUrl) {
+            this.elements.urlInput.value = this.state.currentUrl;
+        }
     }
     
-    init() {
-        // Bind event listeners
+    /**
+     * Bind event listeners
+     */
+    _bindEvents() {
+        // Go button click
         this.elements.goBtn.addEventListener('click', () => this.loadUrl());
+        
+        // Enter key in URL input
         this.elements.urlInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 this.loadUrl();
@@ -43,9 +122,6 @@ class BrowserSimulator {
                 this.hideError();
             });
         }
-        
-        // Set placeholder
-        this.elements.urlInput.placeholder = 'http://localhost:3000';
     }
     
     /**
@@ -137,8 +213,10 @@ class BrowserSimulator {
             this.elements.loadingOverlay.style.display = isLoading ? 'flex' : 'none';
         }
         
-        this.elements.goBtn.disabled = isLoading;
-        this.elements.goBtn.textContent = isLoading ? 'Loading...' : 'Go';
+        if (this.elements.goBtn) {
+            this.elements.goBtn.disabled = isLoading;
+            this.elements.goBtn.textContent = isLoading ? 'Loading...' : 'Go';
+        }
     }
     
     /**
@@ -174,9 +252,14 @@ class BrowserSimulator {
             this.elements.statusText.textContent = text;
         }
     }
+    
+    /**
+     * Deactivate the manager (called when switching to another view)
+     */
+    deactivate() {
+        this.isActive = false;
+    }
 }
 
-// Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    window.browserSimulator = new BrowserSimulator();
-});
+// Create global instance
+window.uiuxFeedbackManager = new UIUXFeedbackManager();
