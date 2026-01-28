@@ -132,7 +132,12 @@ class UIUXFeedbackManager {
             return { valid: false, error: 'Please enter a URL' };
         }
         
-        // Add protocol if missing
+        // Handle file:// URLs
+        if (url.startsWith('file://')) {
+            return { valid: true, url: url };
+        }
+        
+        // Add protocol if missing (for http/https)
         if (!url.startsWith('http://') && !url.startsWith('https://')) {
             url = 'http://' + url;
         }
@@ -140,7 +145,7 @@ class UIUXFeedbackManager {
         try {
             const parsed = new URL(url);
             
-            // Only allow localhost
+            // Only allow localhost for http/https
             if (parsed.hostname !== 'localhost' && parsed.hostname !== '127.0.0.1') {
                 return { valid: false, error: 'Only localhost URLs are supported in this version' };
             }
