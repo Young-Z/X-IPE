@@ -6,8 +6,7 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-216 | Test Generation | FEATURE-022-C: Feedback Capture & Panel Tests | Bolt | 🔄 in_progress | 01-28-2026 16:40:00 | - | Code Implementation |
-| TASK-217 | Code Implementation | FEATURE-022-C: Feedback Capture & Panel Implementation | Bolt | ⏳ pending | 01-28-2026 16:30:00 | - | Feature Closing |
+| TASK-217 | Code Implementation | FEATURE-022-C: Feedback Capture & Panel Implementation | Bolt | 🔄 in_progress | 01-28-2026 16:45:00 | - | Feature Closing |
 | TASK-218 | Feature Closing | FEATURE-022-C: Feedback Capture & Panel PR | Bolt | ⏳ pending | 01-28-2026 16:30:00 | - | - |
 
 ---
@@ -19,6 +18,7 @@
 | TASK-197 | Idea Mockup | IDEA-017: UI/UX Feedback View Mockup | Zephyr | 01-28-2026 16:16:00 | mockups/uiux-feedback-v1.html | Mockup completed |
 | TASK-191 | Code Refactor | Refactor src/x_ipe/app.py (1312 lines) | Ember | 01-28-2026 16:16:00 | src/x_ipe/routes/ | Refactoring completed via TASK-194 |
 | TASK-213 | Change Request | CR-005: File rename UI & copy URL for FEATURE-008 | Flux | 01-28-2026 16:12:00 | x-ipe-docs/requirements/FEATURE-008/CR-005.md | Copy URL button added |
+| TASK-216 | Test Generation | FEATURE-022-C: Feedback Capture & Panel Tests | Bolt | 01-28-2026 16:45:00 | tests/test_feedback_panel.py | 20 tests passing |
 | TASK-215 | Technical Design | FEATURE-022-C: Feedback Capture & Panel Design | Bolt | 01-28-2026 16:40:00 | x-ipe-docs/requirements/FEATURE-022-C/technical-design.md | ContextMenu, Screenshot, Panel |
 | TASK-214 | Feature Refinement | FEATURE-022-C: Feedback Capture & Panel Specification | Bolt | 01-28-2026 16:35:00 | x-ipe-docs/requirements/FEATURE-022-C/specification.md | 34 ACs |
 | TASK-212 | Feature Closing | FEATURE-022-B: Element Inspector PR | Bolt | 01-28-2026 16:35:00 | commit 08b87ea | Feature implemented |
