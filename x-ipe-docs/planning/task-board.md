@@ -6,6 +6,11 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-208 | Feature Refinement | FEATURE-022-B: Element Inspector Specification | Bolt | 🔄 in_progress | 01-28-2026 16:05:00 | - | Technical Design |
+| TASK-209 | Technical Design | FEATURE-022-B: Element Inspector Design | Bolt | ⏳ pending | 01-28-2026 16:05:00 | - | Test Generation |
+| TASK-210 | Test Generation | FEATURE-022-B: Element Inspector Tests | Bolt | ⏳ pending | 01-28-2026 16:05:00 | - | Code Implementation |
+| TASK-211 | Code Implementation | FEATURE-022-B: Element Inspector Implementation | Bolt | ⏳ pending | 01-28-2026 16:05:00 | - | Feature Closing |
+| TASK-212 | Feature Closing | FEATURE-022-B: Element Inspector PR | Bolt | ⏳ pending | 01-28-2026 16:05:00 | - | - |
 | TASK-197 | Idea Mockup | IDEA-017: UI/UX Feedback View Mockup | Zephyr | 🔄 in_progress | 01-28-2026 14:20:00 | mockups/uiux-feedback-v1.html | Requirement Gathering |
 | TASK-191 | Code Refactor | Refactor src/x_ipe/app.py (1312 lines) | Ember | 🔄 in_progress | 01-28-2026 12:40:00 | - | - |
 
@@ -89,9 +94,9 @@
 
 ## Quick Stats
 
-- **Total Active:** 3
+- **Total Active:** 7
 - **In Progress:** 3
-- **Pending:** 0
+- **Pending:** 4
 - **Pending Review:** 0
 - **Blocked:** 0
 - **Deferred:** 0
