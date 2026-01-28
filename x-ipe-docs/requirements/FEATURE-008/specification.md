@@ -36,6 +36,7 @@ This feature integrates with a new agent skill (`task-type-ideation`) that analy
 - As a **user**, I want to **configure which AI skills are available for ideation**, so that **I can customize my workflow and enable/disable tools as needed** (CR-003).
 - As a **user**, I want to **see Ideation as a nested submenu item under Workplace**, so that **related pages are organized together** (CR-004).
 - As a **user**, I want to **access Copilot actions via a hover menu**, so that **I can choose specific actions like "Refine idea"** (CR-004).
+- As a **user**, I want to **copy a file's access URL**, so that **I can share direct links to idea files** (CR-005).
 
 ## Acceptance Criteria
 
@@ -80,6 +81,10 @@ This feature integrates with a new agent skill (`task-type-ideation`) that analy
 - [ ] AC-39: Copilot hover menu shows 3 existing options below "Refine idea" (CR-004)
 - [ ] AC-40: Clicking "Refine idea" triggers original Copilot button behavior (CR-004)
 - [ ] AC-41: All existing Workplace functions work after rename to Ideation (CR-004)
+- [x] AC-42: Copy URL icon appears next to Edit button in editor header (CR-005)
+- [x] AC-43: Clicking copy URL copies file access URL to clipboard (CR-005)
+- [x] AC-44: Toast notification confirms URL copied (CR-005)
+- [x] AC-45: File rename button works in tree view for files (CR-005)
 
 ## Functional Requirements
 
@@ -486,6 +491,7 @@ When Workplace selected:
 
 | CR ID | Date | Description | Impact |
 |-------|------|-------------|--------|
+| CR-005 | 01-28-2026 | Copy URL button for file access | Added US-10, AC-42 to AC-45 |
 | CR-004 | 01-28-2026 | Sidebar submenu, rename to Ideation, Copilot hover menu | Added US-8/9, AC-33 to AC-41, FR-10 to FR-12 |
 | CR-002 | 01-23-2026 | Drag-drop file upload to existing folders | Added US-7, AC-20 to AC-23, FR-8 |
 | CR-001 | 01-22-2026 | Add Copilot button for idea refinement | Added US-6, AC-15 to AC-19, FR-7 |

@@ -1906,11 +1906,13 @@ class WorkplaceManager {
     async _copyFileUrl() {
         if (!this.currentPath) return;
         
+        // Build direct access URL with raw=true for browser rendering
         const url = `${window.location.origin}/api/file/content?path=${encodeURIComponent(this.currentPath)}&raw=true`;
+        const fileName = this.currentPath.split('/').pop();
         
         try {
             await navigator.clipboard.writeText(url);
-            this._showToast('URL copied to clipboard', 'success');
+            this._showToast(`Link copied: ${fileName}`, 'success');
         } catch (error) {
             console.error('Failed to copy URL:', error);
             // Fallback for older browsers
@@ -1922,9 +1924,9 @@ class WorkplaceManager {
             textArea.select();
             try {
                 document.execCommand('copy');
-                this._showToast('URL copied to clipboard', 'success');
+                this._showToast(`Link copied: ${fileName}`, 'success');
             } catch (e) {
-                this._showToast('Failed to copy URL', 'error');
+                this._showToast('Failed to copy link', 'error');
             }
             document.body.removeChild(textArea);
         }
