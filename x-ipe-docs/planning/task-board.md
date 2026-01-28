@@ -6,9 +6,7 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-201 | Feature Closing | FEATURE-008 v1.4 CR-004 PR | Sage | 🔄 in_progress | 01-28-2026 14:38:00 | - | - |
 | TASK-197 | Idea Mockup | IDEA-017: UI/UX Feedback View Mockup | Zephyr | 🔄 in_progress | 01-28-2026 14:20:00 | mockups/uiux-feedback-v1.html | Requirement Gathering |
-| TASK-194 | Code Refactor V2 | Split app.py into route modules using Flask Blueprints | Nova | 🔄 in_progress | 01-28-2026 13:20:00 | - | - |
 | TASK-191 | Code Refactor | Refactor src/x_ipe/app.py (1312 lines) | Ember | 🔄 in_progress | 01-28-2026 12:40:00 | - | - |
 
 ---
@@ -17,6 +15,9 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-202 | Requirement Gathering | IDEA-017: UI/UX Feedback System Requirements | Bolt | 01-28-2026 14:50:00 | x-ipe-docs/requirements/requirement-details-part-3.md | FEATURE-022 documented |
+| TASK-201 | Feature Closing | FEATURE-008 v1.4 CR-004 PR | Sage | 01-28-2026 14:45:00 | commit 021e319 | PR ready for merge |
+| TASK-194 | Code Refactor V2 | Split app.py into route modules using Flask Blueprints | Nova | 01-28-2026 15:00:00 | src/x_ipe/routes/, src/x_ipe/handlers/ | 1332→154 lines (88% reduction) |
 | TASK-200 | Code Implementation | FEATURE-008 v1.4 CR-004 Implementation | Sage | 01-28-2026 14:35:00 | src/x_ipe/app.py, templates/, static/ | 11/11 tests passing |
 | TASK-199 | Test Generation | FEATURE-008 v1.4 CR-004 Tests | Sage | 01-28-2026 14:25:00 | tests/test_ideas.py | 9 failing, 2 passing (TDD ready) |
 | TASK-198 | Technical Design | FEATURE-008 v1.4 Technical Design | Sage | 01-28-2026 14:20:00 | x-ipe-docs/requirements/FEATURE-008/technical-design.md | Approved |
@@ -83,12 +84,13 @@
 
 ## Quick Stats
 
-- **Total Active:** 4
-- **In Progress:** 4
+- **Total Active:** 2
+- **In Progress:** 2
+- **Pending:** 0
 - **Pending Review:** 0
 - **Blocked:** 0
 - **Deferred:** 0
-- **Completed (archived):** 163
+- **Completed (archived):** 165
 
 ---
 
