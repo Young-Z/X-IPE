@@ -465,9 +465,28 @@ class UIUXFeedbackManager {
      * Handle messages from iframe inspector script
      */
     _handleInspectorMessage(event) {
-        if (!this.isActive || !this.inspector.enabled) return;
+        if (!this.isActive) return;
         
         const { type, element, multiSelect, x, y, clientX, clientY } = event.data || {};
+        
+        // Context menu works even when inspector is disabled (if elements are already selected)
+        if (type === 'contextmenu') {
+            console.log('[UIUXFeedback] contextmenu message received', { clientX, clientY, selectedCount: this.inspector.selectedElements.length });
+            if (this.inspector.selectedElements.length > 0) {
+                const iframe = this.elements.iframe;
+                if (iframe) {
+                    const iframeRect = iframe.getBoundingClientRect();
+                    const menuX = iframeRect.left + clientX;
+                    const menuY = iframeRect.top + clientY;
+                    console.log('[UIUXFeedback] showing context menu at', { menuX, menuY });
+                    this._showContextMenu(menuX, menuY);
+                }
+            }
+            return;
+        }
+        
+        // Other messages require inspector to be enabled
+        if (!this.inspector.enabled) return;
         
         switch (type) {
             case 'hover':
@@ -478,19 +497,6 @@ class UIUXFeedbackManager {
                 break;
             case 'select':
                 this._handleElementSelect(element, multiSelect);
-                break;
-            case 'contextmenu':
-                // Show context menu if elements are selected
-                if (this.inspector.selectedElements.length > 0) {
-                    // Calculate position relative to viewport
-                    const iframe = this.elements.iframe;
-                    if (iframe) {
-                        const iframeRect = iframe.getBoundingClientRect();
-                        const menuX = iframeRect.left + clientX;
-                        const menuY = iframeRect.top + clientY;
-                        this._showContextMenu(menuX, menuY);
-                    }
-                }
                 break;
         }
     }
@@ -688,10 +694,14 @@ class UIUXFeedbackManager {
      */
     _showContextMenu(x, y) {
         const menu = this.elements.contextMenu;
-        if (!menu) return;
+        if (!menu) {
+            console.error('[UIUXFeedback] Context menu element not found!');
+            return;
+        }
+        
+        console.log('[UIUXFeedback] _showContextMenu called', { x, y, menu });
         
         // Position menu ensuring it stays on screen
-        const menuRect = menu.getBoundingClientRect();
         const maxX = window.innerWidth - 200;  // menu width
         const maxY = window.innerHeight - 150; // menu height
         
@@ -699,6 +709,8 @@ class UIUXFeedbackManager {
         menu.style.top = `${Math.min(y, maxY)}px`;
         menu.style.display = 'block';
         this.contextMenu.visible = true;
+        
+        console.log('[UIUXFeedback] Menu display set to block');
     }
     
     /**

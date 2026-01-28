@@ -76,9 +76,11 @@ INSPECTOR_SCRIPT = '''
     
     // FEATURE-022-C: Right-click context menu
     document.addEventListener('contextmenu', function(e) {
+        console.log('[X-IPE Inspector] contextmenu event, inspectEnabled:', inspectEnabled);
         if (!inspectEnabled) return;
         e.preventDefault();
         e.stopPropagation();
+        console.log('[X-IPE Inspector] sending contextmenu postMessage');
         // Send coordinates to parent for showing context menu
         window.parent.postMessage({
             type: 'contextmenu',
