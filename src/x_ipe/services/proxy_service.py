@@ -113,10 +113,15 @@ class ProxyService:
             html = self._rewrite_html(response.text, url)
             return ProxyResult(success=True, html=html, content_type=content_type)
         else:
-            # Return non-HTML content as-is
+            # Return non-HTML content as-is (use response.content for binary safety)
+            # For text content, decode; for binary, return bytes as string (will be raw in Response)
+            try:
+                content = response.text
+            except Exception:
+                content = response.content.decode('utf-8', errors='replace')
             return ProxyResult(
                 success=True,
-                html=response.text,
+                html=content,
                 content_type=content_type
             )
     
