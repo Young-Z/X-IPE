@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 01-28-2026 15:15:00
+> Last Updated: 01-28-2026 15:25:00
 
 ## Overview
 
@@ -41,7 +41,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-019 | Simplified Project Setup | v1.0 | Planned | - | 01-25-2026 | 01-25-2026 05:15:00 |
 | FEATURE-020 | Skills Discovery & Override | v1.0 | Planned | - | 01-25-2026 | 01-25-2026 05:15:00 |
 | FEATURE-021 | Console Voice Input | v1.0 | Implemented | [specification.md](../requirements/FEATURE-021/specification.md), [technical-design.md](../requirements/FEATURE-021/technical-design.md) | 01-25-2026 | 01-25-2026 13:30:00 |
-| FEATURE-022-A | Browser Simulator & Proxy | v1.0 | Refined | [specification.md](../requirements/FEATURE-022-A/specification.md) | 01-28-2026 | 01-28-2026 15:15:00 |
+| FEATURE-022-A | Browser Simulator & Proxy | v1.0 | Designed | [specification.md](../requirements/FEATURE-022-A/specification.md) | 01-28-2026 | 01-28-2026 15:25:00 |
 | FEATURE-022-B | Element Inspector | v1.0 | Planned | - | 01-28-2026 | 01-28-2026 15:05:00 |
 | FEATURE-022-C | Feedback Capture & Panel | v1.0 | Planned | - | 01-28-2026 | 01-28-2026 15:05:00 |
 | FEATURE-022-D | Feedback Storage & Submission | v1.0 | Planned | - | 01-28-2026 | 01-28-2026 15:05:00 |
@@ -60,12 +60,13 @@ This board tracks all features across the project lifecycle.
 - FEATURE-022-C: Feedback Capture & Panel
 - FEATURE-022-D: Feedback Storage & Submission
 
-### Refined (1)
-- FEATURE-022-A: Browser Simulator & Proxy (MVP)
+### Refined (0)
+- None
 
-### Designed (2)
+### Designed (3)
 - FEATURE-005: Interactive Console v2.0
 - FEATURE-018: X-IPE CLI Tool
+- FEATURE-022-A: Browser Simulator & Proxy (MVP)
 
 ### Implemented (6)
 - FEATURE-001: Project Navigation
@@ -386,11 +387,11 @@ This board tracks all features across the project lifecycle.
 ### FEATURE-022-A: Browser Simulator & Proxy (MVP)
 
 **Version:** v1.0  
-**Status:** Refined  
+**Status:** Designed  
 **Description:** Localhost proxy backend and browser simulator UI that enables viewing local web pages within X-IPE Workplace. Minimum runnable feature - users can load and view their localhost dev server.  
 **Dependencies:** FEATURE-008 (Workplace)  
 **Specification:** [specification.md](../requirements/FEATURE-022-A/specification.md)  
-**Technical Design:** -  
+**Technical Design:** [technical-design.md](../requirements/FEATURE-022-A/technical-design.md)  
 
 **Source:**
 - Idea Summary: `x-ipe-docs/ideas/005. Feature-UIUX Feedback/idea-summary-v2.md`
@@ -407,6 +408,7 @@ This board tracks all features across the project lifecycle.
 
 **Tasks:**
 - TASK-204 (Feature Refinement) - Completed on 01-28-2026
+- TASK-205 (Technical Design) - Completed on 01-28-2026
 
 ---
 

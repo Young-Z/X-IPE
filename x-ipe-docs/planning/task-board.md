@@ -15,6 +15,7 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-205 | Technical Design | FEATURE-022-A: Browser Simulator & Proxy Design | Bolt | 01-28-2026 15:25:00 | x-ipe-docs/requirements/FEATURE-022-A/technical-design.md | ProxyService, proxy_routes, BrowserSimulator |
 | TASK-204 | Feature Refinement | FEATURE-022-A: Browser Simulator & Proxy Specification | Bolt | 01-28-2026 15:15:00 | x-ipe-docs/requirements/FEATURE-022-A/specification.md | 30 ACs, 8 FRs |
 | TASK-203 | Feature Breakdown | FEATURE-022: UI/UX Feedback System Breakdown | Bolt | 01-28-2026 15:07:00 | x-ipe-docs/requirements/requirement-details-part-3.md, x-ipe-docs/planning/features.md | 4 sub-features: 022-A to 022-D |
 | TASK-202 | Requirement Gathering | IDEA-017: UI/UX Feedback System Requirements | Bolt | 01-28-2026 14:50:00 | x-ipe-docs/requirements/requirement-details-part-3.md | FEATURE-022 documented |
@@ -92,7 +93,7 @@
 - **Pending Review:** 0
 - **Blocked:** 0
 - **Deferred:** 0
-- **Completed (archived):** 167
+- **Completed (archived):** 168
 
 ---
 
