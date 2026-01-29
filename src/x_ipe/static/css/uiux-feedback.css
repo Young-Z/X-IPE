@@ -28,12 +28,19 @@
     --uiux-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
+/* Override content-body padding for browser simulator page */
+.content-body:has(.uiux-container) {
+    padding: 0;
+}
+
 /* Main Layout */
 .uiux-container {
     display: flex;
     flex-direction: row;
-    height: calc(90vh - 56px);
+    height: calc(93vh - 56px);
     background: var(--uiux-slate-200);
+    position: relative;
+    overflow: hidden;
 }
 
 /* Browser Main Area (left side) */
@@ -42,6 +49,7 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+    margin-right: 32px; /* Space for collapsed feedback tab */
 }
 
 /* Browser Chrome */
@@ -419,13 +427,74 @@
 
 /* Feedback Panel */
 .feedback-panel {
-    width: 320px;
-    min-width: 280px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 570px;
     background: white;
     border-left: 1px solid var(--uiux-slate-200);
     display: flex;
     flex-direction: column;
-    flex-shrink: 0;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+    z-index: 1500;
+    transition: transform 0.3s ease, width 0.3s ease;
+}
+
+/* Collapsed state */
+.feedback-panel.collapsed {
+    transform: translateX(calc(100% - 28px));
+    cursor: pointer;
+}
+
+.feedback-panel.collapsed:hover {
+    transform: translateX(calc(100% - 32px));
+}
+
+/* Collapsed tab indicator */
+.panel-collapse-tab {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 100px;
+    background: var(--uiux-accent);
+    border-radius: 6px 0 0 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
+    transition: width 0.2s ease, background 0.2s ease;
+}
+
+.panel-collapse-tab:hover {
+    width: 32px;
+    background: var(--uiux-accent-dark);
+}
+
+.panel-collapse-tab i {
+    color: white;
+    font-size: 14px;
+}
+
+.panel-collapse-tab .tab-badge {
+    background: white;
+    color: var(--uiux-accent-dark);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 8px;
+    min-width: 16px;
+    text-align: center;
+}
+
+/* Hide tab when expanded */
+.feedback-panel:not(.collapsed) .panel-collapse-tab {
+    display: none;
 }
 
 .panel-header {
@@ -435,6 +504,29 @@
     justify-content: space-between;
     align-items: flex-start;
     background: var(--uiux-slate-50);
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.panel-header:hover {
+    background: var(--uiux-slate-100);
+}
+
+/* Collapse button in header */
+.panel-collapse-btn {
+    background: none;
+    border: none;
+    color: var(--uiux-slate-400);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    margin-left: 8px;
+}
+
+.panel-collapse-btn:hover {
+    background: var(--uiux-slate-200);
+    color: var(--uiux-slate-600);
 }
 
 .panel-title {
@@ -465,6 +557,11 @@
     border-radius: 12px;
     min-width: 20px;
     text-align: center;
+}
+
+.panel-header-right {
+    display: flex;
+    align-items: center;
 }
 
 /* Feedback List */
@@ -648,6 +745,7 @@
 
 .entry-selectors li {
     margin-bottom: 4px;
+    line-height: 1.6;
 }
 
 .entry-selectors code {
@@ -657,6 +755,18 @@
     padding: 2px 6px;
     border-radius: 3px;
     color: var(--uiux-slate-700);
+}
+
+.entry-selectors code.selected-el {
+    background: var(--uiux-accent-light);
+    color: var(--uiux-accent-dark);
+    font-weight: 600;
+}
+
+.entry-selectors .parent-chain {
+    color: var(--uiux-slate-400);
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 10px;
 }
 
 .entry-description {

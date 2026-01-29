@@ -141,8 +141,13 @@ class UIUXFeedbackManager {
                 </div>
 
                 <!-- FEATURE-022-C: Feedback Panel -->
-                <aside class="feedback-panel" id="feedback-panel">
-                    <div class="panel-header">
+                <aside class="feedback-panel collapsed" id="feedback-panel">
+                    <div class="panel-collapse-tab" id="panel-collapse-tab">
+                        <i class="bi bi-chat-square-text"></i>
+                        <span class="tab-badge" id="tab-badge">0</span>
+                        <i class="bi bi-chevron-left"></i>
+                    </div>
+                    <div class="panel-header" id="panel-header">
                         <div>
                             <div class="panel-title">
                                 <i class="bi bi-chat-square-text"></i>
@@ -150,7 +155,12 @@ class UIUXFeedbackManager {
                             </div>
                             <div class="panel-subtitle">Session feedback entries</div>
                         </div>
-                        <span class="panel-badge" id="panel-badge">0</span>
+                        <div class="panel-header-right">
+                            <span class="panel-badge" id="panel-badge">0</span>
+                            <button class="panel-collapse-btn" id="panel-collapse-btn" title="Collapse panel">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="feedback-list" id="feedback-list">
                         <div class="empty-feedback">
@@ -184,13 +194,18 @@ class UIUXFeedbackManager {
             // FEATURE-022-C: Feedback panel elements
             feedbackPanel: document.getElementById('feedback-panel'),
             feedbackList: document.getElementById('feedback-list'),
-            panelBadge: document.getElementById('panel-badge')
+            panelBadge: document.getElementById('panel-badge'),
+            tabBadge: document.getElementById('tab-badge'),
+            panelCollapseTab: document.getElementById('panel-collapse-tab'),
+            panelCollapseBtn: document.getElementById('panel-collapse-btn'),
+            panelHeader: document.getElementById('panel-header')
         };
         
         // Add context menu to DOM
         this._createContextMenu();
         
         this._bindEvents();
+        this._bindPanelEvents();
         
         // Restore previous URL if exists
         if (this.state.currentUrl) {
@@ -232,6 +247,77 @@ class UIUXFeedbackManager {
             this.elements.iframe.addEventListener('load', () => {
                 this._clearSelections();
             });
+        }
+    }
+    
+    /**
+     * Bind panel collapse/expand events
+     */
+    _bindPanelEvents() {
+        // Click on collapsed tab to expand
+        if (this.elements.panelCollapseTab) {
+            this.elements.panelCollapseTab.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this._expandPanel();
+            });
+        }
+        
+        // Click collapse button to collapse
+        if (this.elements.panelCollapseBtn) {
+            this.elements.panelCollapseBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this._collapsePanel();
+            });
+        }
+        
+        // Click header to collapse when expanded
+        if (this.elements.panelHeader) {
+            this.elements.panelHeader.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!this.elements.feedbackPanel.classList.contains('collapsed')) {
+                    this._collapsePanel();
+                }
+            });
+        }
+        
+        // Click anywhere on collapsed panel to expand
+        if (this.elements.feedbackPanel) {
+            this.elements.feedbackPanel.addEventListener('click', (e) => {
+                if (this.elements.feedbackPanel.classList.contains('collapsed')) {
+                    e.stopPropagation();
+                    this._expandPanel();
+                } else {
+                    // Prevent clicks inside expanded panel from collapsing
+                    e.stopPropagation();
+                }
+            });
+        }
+        
+        // Click outside panel to collapse
+        document.addEventListener('click', (e) => {
+            if (this.elements.feedbackPanel && 
+                !this.elements.feedbackPanel.classList.contains('collapsed') &&
+                !this.elements.feedbackPanel.contains(e.target)) {
+                this._collapsePanel();
+            }
+        });
+    }
+    
+    /**
+     * Expand the feedback panel
+     */
+    _expandPanel() {
+        if (this.elements.feedbackPanel) {
+            this.elements.feedbackPanel.classList.remove('collapsed');
+        }
+    }
+    
+    /**
+     * Collapse the feedback panel
+     */
+    _collapsePanel() {
+        if (this.elements.feedbackPanel) {
+            this.elements.feedbackPanel.classList.add('collapsed');
         }
     }
     
@@ -730,7 +816,8 @@ class UIUXFeedbackManager {
     _handleContextMenuAction(action) {
         switch (action) {
             case 'capture':
-                this._captureScreenshot();
+                // Capture screenshot also creates a feedback entry
+                this._createFeedbackEntry();
                 break;
             case 'feedback':
                 this._createFeedbackEntry();
@@ -746,46 +833,48 @@ class UIUXFeedbackManager {
      */
     async _captureScreenshot() {
         if (this.inspector.selectedElements.length === 0) {
-            this.setStatus('error', 'No elements selected');
+            this.updateStatus('No elements selected');
             return null;
         }
         
         try {
-            // Get iframe content document
-            const iframe = this.elements.iframe;
-            if (!iframe || !iframe.contentDocument) {
-                throw new Error('Cannot access iframe content');
-            }
-            
-            // Calculate combined bounding box of all selected elements
-            const boundingBox = this._getCombinedBoundingBox();
-            if (!boundingBox) {
-                throw new Error('Cannot determine element bounds');
-            }
-            
             // Check if html2canvas is available
             if (typeof html2canvas === 'undefined') {
                 throw new Error('html2canvas library not loaded');
             }
             
-            // Capture the iframe content
+            // Get iframe and its content document
+            const iframe = this.elements.iframe;
+            if (!iframe || !iframe.contentDocument || !iframe.contentDocument.body) {
+                throw new Error('Cannot access iframe content');
+            }
+            
+            console.log('[UIUXFeedback] Capturing iframe content screenshot...');
+            
+            // Capture the entire iframe body
             const canvas = await html2canvas(iframe.contentDocument.body, {
-                x: boundingBox.x,
-                y: boundingBox.y,
-                width: boundingBox.width,
-                height: boundingBox.height,
                 useCORS: true,
                 allowTaint: true,
-                logging: false
+                logging: false,
+                backgroundColor: '#ffffff',
+                width: iframe.contentDocument.body.scrollWidth,
+                height: iframe.contentDocument.body.scrollHeight
             });
             
             const dataUrl = canvas.toDataURL('image/png');
-            this.setStatus('success', 'Screenshot captured');
-            return dataUrl;
+            console.log('[UIUXFeedback] Screenshot captured, length:', dataUrl.length);
+            
+            if (dataUrl && dataUrl.length > 1000) {
+                this.updateStatus('Screenshot captured');
+                return dataUrl;
+            } else {
+                console.warn('[UIUXFeedback] Screenshot appears empty');
+                return null;
+            }
             
         } catch (error) {
             console.error('Screenshot capture failed:', error);
-            this.setStatus('error', `Screenshot failed: ${error.message}`);
+            this.updateStatus('Screenshot unavailable');
             return null;
         }
     }
@@ -828,42 +917,119 @@ class UIUXFeedbackManager {
     }
     
     /**
+     * Get element with parent context (up to 4 levels)
+     * Returns an object with selector and parent chain
+     */
+    _getElementWithContext(selector) {
+        const iframe = this.elements.iframe;
+        if (!iframe || !iframe.contentDocument) return { selector, parents: [] };
+        
+        try {
+            const el = iframe.contentDocument.querySelector(selector);
+            if (!el) return { selector, parents: [] };
+            
+            const parents = [];
+            let current = el.parentElement;
+            let level = 0;
+            
+            while (current && level < 4 && current !== iframe.contentDocument.body) {
+                const parentSelector = this._generateSelector(current);
+                if (parentSelector) {
+                    parents.push(parentSelector);
+                }
+                current = current.parentElement;
+                level++;
+            }
+            
+            return { selector, parents };
+        } catch (e) {
+            return { selector, parents: [] };
+        }
+    }
+    
+    /**
+     * Generate a readable selector for an element
+     */
+    _generateSelector(el) {
+        if (!el || el.nodeType !== 1) return null;
+        
+        let selector = el.tagName.toLowerCase();
+        
+        if (el.id) {
+            selector += `#${el.id}`;
+        } else if (el.className && typeof el.className === 'string') {
+            const classes = el.className.trim().split(/\s+/).filter(c => c).slice(0, 2);
+            if (classes.length > 0) {
+                selector += '.' + classes.join('.');
+            }
+        }
+        
+        return selector;
+    }
+    
+    /**
      * Create a new feedback entry
      */
     async _createFeedbackEntry() {
         if (this.inspector.selectedElements.length === 0) {
-            this.setStatus('error', 'No elements selected');
+            this.updateStatus('No elements selected');
             return;
         }
         
-        // Generate unique ID and name
-        const now = new Date();
-        const id = `fb-${Date.now()}`;
-        const name = `Feedback-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
-        
-        // Capture screenshot
-        const screenshot = await this._captureScreenshot();
-        
-        // Create entry
-        const entry = {
-            id,
-            name,
-            url: this.state.currentUrl,
-            elements: [...this.inspector.selectedElements],
-            screenshot,
-            description: '',
-            createdAt: now.toISOString(),
-            status: 'draft'
-        };
-        
-        this.feedbackEntries.push(entry);
-        this._renderFeedbackPanel();
-        
-        // Expand the new entry
-        this.expandedEntryId = id;
-        this._updateExpandedEntry();
-        
-        this.setStatus('success', `Feedback entry created: ${name}`);
+        try {
+            // Generate unique ID and name
+            const now = new Date();
+            const id = `fb-${Date.now()}`;
+            const name = `Feedback-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+            
+            // Capture screenshot (may fail due to CORS, continue without it)
+            let screenshot = null;
+            try {
+                screenshot = await this._captureScreenshot();
+                console.log('[UIUXFeedback] Screenshot result:', screenshot ? `${screenshot.length} chars` : 'null');
+            } catch (screenshotError) {
+                console.warn('[UIUXFeedback] Screenshot capture failed:', screenshotError);
+            }
+            
+            // Debug: log if screenshot will be shown
+            if (screenshot) {
+                console.log('[UIUXFeedback] Screenshot will be included in entry');
+            } else {
+                console.log('[UIUXFeedback] No screenshot to include');
+            }
+            
+            // Get elements with parent context (4 levels)
+            const elementsWithContext = this.inspector.selectedElements.map(sel => 
+                this._getElementWithContext(sel)
+            );
+            
+            // Create entry
+            const entry = {
+                id,
+                name,
+                url: this.state.currentUrl,
+                elements: elementsWithContext,
+                screenshot,
+                description: '',
+                createdAt: now.toISOString(),
+                status: 'draft'
+            };
+            
+            this.feedbackEntries.push(entry);
+            this._renderFeedbackPanel();
+            
+            // Auto-expand panel when adding feedback
+            this._expandPanel();
+            
+            // Expand the new entry
+            this.expandedEntryId = id;
+            this._updateExpandedEntry();
+            
+            this.updateStatus(`Feedback entry created: ${name}`);
+        } catch (error) {
+            console.error('[UIUXFeedback] Failed to create feedback entry:', error);
+            this.updateStatus(`Failed to create feedback: ${error.message}`);
+        }
     }
     
     /**
@@ -872,12 +1038,17 @@ class UIUXFeedbackManager {
     _renderFeedbackPanel() {
         const list = this.elements.feedbackList;
         const badge = this.elements.panelBadge;
+        const tabBadge = this.elements.tabBadge;
         
         if (!list) return;
         
-        // Update badge count
+        // Update badge counts
+        const count = this.feedbackEntries.length;
         if (badge) {
-            badge.textContent = this.feedbackEntries.length;
+            badge.textContent = count;
+        }
+        if (tabBadge) {
+            tabBadge.textContent = count;
         }
         
         // Render empty state or entries
@@ -956,7 +1127,16 @@ class UIUXFeedbackManager {
                     <div class="entry-selectors">
                         <strong>Elements:</strong>
                         <ul>
-                            ${entry.elements.map(sel => `<li><code>${sel}</code></li>`).join('')}
+                            ${entry.elements.map(el => {
+                                // Handle both old format (string) and new format (object with parents)
+                                if (typeof el === 'string') {
+                                    return `<li><code>${el}</code></li>`;
+                                }
+                                const parentChain = el.parents && el.parents.length > 0 
+                                    ? `<span class="parent-chain">${el.parents.reverse().join(' > ')} > </span>` 
+                                    : '';
+                                return `<li>${parentChain}<code class="selected-el">${el.selector}</code></li>`;
+                            }).join('')}
                         </ul>
                     </div>
                     <div class="entry-description">
@@ -1077,7 +1257,7 @@ class UIUXFeedbackManager {
             const name = this.feedbackEntries[index].name;
             this.feedbackEntries.splice(index, 1);
             this._renderFeedbackPanel();
-            this.setStatus('info', `Deleted: ${name}`);
+            this.updateStatus(`Deleted: ${name}`);
         }
     }
     

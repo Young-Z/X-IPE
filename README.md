@@ -21,12 +21,12 @@
 ## 📑 Contents
 
 - [💡 What is X-IPE?](#-what-is-x-ipe)
+- [🚀 Getting Started](#-getting-started)
 - [🎯 The Vision](#-the-vision)
 - [📚 Part of a Larger Journey](#-part-of-a-larger-journey)
 - [🔄 How I Build This Application, How We Build Others](#-how-i-build-this-application-how-we-build-others)
 - [✨ Features](#-features)
 - [🛠️ Technology Stack](#️-technology-stack)
-- [🚀 Getting Started](#-getting-started)
 - [📁 Project Structure](#-project-structure)
 - [📖 Documentation](#-documentation)
 - [📸 Screenshots](#-screenshots)
@@ -127,6 +127,138 @@
 5. **End-to-End Orchestration** — Manage the complete journey from idea to delivery
 
 * I will share more details in the upcoming blog series on mindset shifts, process changes, and tool evolution needed to thrive in the AI age of software delivery.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python 3.12+
+- VS Code with GitHub Copilot extension
+- AI model with skills/tools capability (Claude Sonnet 4.5+, Gemini 2.5 Flash+, etc.)
+
+### Installation
+
+#### Option 1: Install from PyPI (Recommended)
+
+```bash
+# Install X-IPE using uv
+uv tool install x-ipe
+
+# Or using pip
+pip install x-ipe
+```
+
+#### Option 2: Install from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/pinkpixel-dev/X-IPE.git
+cd X-IPE
+
+# Install with uv
+uv sync
+```
+
+### Quick Start
+
+```bash
+# Initialize X-IPE in your project
+cd your-project
+x-ipe init
+
+# Check project status
+x-ipe status
+
+# Start the web server
+x-ipe serve
+
+# Start server and open browser
+x-ipe serve -o
+```
+
+### CLI Commands
+
+```bash
+x-ipe --help          # Show all available commands
+x-ipe --version       # Show version
+x-ipe init            # Initialize X-IPE in current project
+x-ipe init --dry-run  # Preview what would be created
+x-ipe status          # Show project initialization status
+x-ipe info            # Show X-IPE package information
+x-ipe serve           # Start the web server
+x-ipe serve -o        # Start server and open browser
+x-ipe upgrade         # Upgrade skills from package
+```
+
+### Running from Source
+
+```bash
+# Run the application
+uv run python -m x_ipe.app
+
+# Open in browser
+# http://localhost:5858
+
+# Run tests
+uv run pytest tests/ -v
+```
+
+### Running as a Subfolder in Your Project
+
+X-IPE can run as a subfolder within a larger project, allowing you to view your entire project structure while keeping X-IPE isolated. This is useful when X-IPE is a tool within a bigger codebase.
+
+**Setup:**
+
+1. Place X-IPE in a subfolder of your project:
+   ```
+   my-project/
+   ├── .x-ipe.yaml          # Config file at project root
+   ├── src/                  # Your project source
+   ├── x-ipe-docs/                 # Your project docs
+   └── x-ipe/                # X-IPE application folder
+       ├── src/
+       ├── x-ipe-docs/
+       └── ...
+   ```
+
+2. Create `.x-ipe.yaml` at your project root:
+   ```yaml
+   # .x-ipe.yaml
+   version: 1
+   paths:
+     project_root: "."       # Relative to this config file
+     x_ipe_app: "./x-ipe"    # Path to X-IPE folder
+   defaults:
+     file_tree_scope: "project_root"   # Show entire project in file tree
+     terminal_cwd: "project_root"      # Terminal starts at project root
+   ```
+
+3. Run X-IPE from **anywhere** in your project:
+   ```bash
+   # From project root
+   cd my-project
+   uv run --directory x-ipe python -m x_ipe.app
+
+   # Or from X-IPE folder
+   cd my-project/x-ipe
+   uv run python -m x_ipe.app
+   ```
+
+X-IPE will automatically discover `.x-ipe.yaml` by searching the current directory and up to 20 parent directories.
+
+**Config Options:**
+
+| Field | Description | Required |
+|-------|-------------|----------|
+| `version` | Config version (always `1`) | Yes |
+| `paths.project_root` | Path to your project root (relative to config) | Yes |
+| `paths.x_ipe_app` | Path to X-IPE folder (relative to config) | Yes |
+| `defaults.file_tree_scope` | `"project_root"` or `"x_ipe_app"` (default: `"project_root"`) | No |
+| `defaults.terminal_cwd` | `"project_root"` or `"x_ipe_app"` (default: `"project_root"`) | No |
+
+**Without `.x-ipe.yaml`:** X-IPE works exactly as before—file tree shows the X-IPE folder, terminal starts in the X-IPE directory.
 
 ---
 
@@ -629,138 +761,6 @@ Improvements include:
 | **Real-time** | WebSocket (Socket.IO), watchdog (file monitoring) |
 | **Testing** | pytest, pytest-flask |
 | **Package Manager** | uv |
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Python 3.12+
-- VS Code with GitHub Copilot extension
-- AI model with skills/tools capability (Claude Sonnet 4.5+, Gemini 2.5 Flash+, etc.)
-
-### Installation
-
-#### Option 1: Install from PyPI (Recommended)
-
-```bash
-# Install X-IPE using uv
-uv tool install x-ipe
-
-# Or using pip
-pip install x-ipe
-```
-
-#### Option 2: Install from Source
-
-```bash
-# Clone the repository
-git clone https://github.com/pinkpixel-dev/X-IPE.git
-cd X-IPE
-
-# Install with uv
-uv sync
-```
-
-### Quick Start
-
-```bash
-# Initialize X-IPE in your project
-cd your-project
-x-ipe init
-
-# Check project status
-x-ipe status
-
-# Start the web server
-x-ipe serve
-
-# Start server and open browser
-x-ipe serve -o
-```
-
-### CLI Commands
-
-```bash
-x-ipe --help          # Show all available commands
-x-ipe --version       # Show version
-x-ipe init            # Initialize X-IPE in current project
-x-ipe init --dry-run  # Preview what would be created
-x-ipe status          # Show project initialization status
-x-ipe info            # Show X-IPE package information
-x-ipe serve           # Start the web server
-x-ipe serve -o        # Start server and open browser
-x-ipe upgrade         # Upgrade skills from package
-```
-
-### Running from Source
-
-```bash
-# Run the application
-uv run python -m x_ipe.app
-
-# Open in browser
-# http://localhost:5858
-
-# Run tests
-uv run pytest tests/ -v
-```
-
-### Running as a Subfolder in Your Project
-
-X-IPE can run as a subfolder within a larger project, allowing you to view your entire project structure while keeping X-IPE isolated. This is useful when X-IPE is a tool within a bigger codebase.
-
-**Setup:**
-
-1. Place X-IPE in a subfolder of your project:
-   ```
-   my-project/
-   ├── .x-ipe.yaml          # Config file at project root
-   ├── src/                  # Your project source
-   ├── x-ipe-docs/                 # Your project docs
-   └── x-ipe/                # X-IPE application folder
-       ├── src/
-       ├── x-ipe-docs/
-       └── ...
-   ```
-
-2. Create `.x-ipe.yaml` at your project root:
-   ```yaml
-   # .x-ipe.yaml
-   version: 1
-   paths:
-     project_root: "."       # Relative to this config file
-     x_ipe_app: "./x-ipe"    # Path to X-IPE folder
-   defaults:
-     file_tree_scope: "project_root"   # Show entire project in file tree
-     terminal_cwd: "project_root"      # Terminal starts at project root
-   ```
-
-3. Run X-IPE from **anywhere** in your project:
-   ```bash
-   # From project root
-   cd my-project
-   uv run --directory x-ipe python -m x_ipe.app
-
-   # Or from X-IPE folder
-   cd my-project/x-ipe
-   uv run python -m x_ipe.app
-   ```
-
-X-IPE will automatically discover `.x-ipe.yaml` by searching the current directory and up to 20 parent directories.
-
-**Config Options:**
-
-| Field | Description | Required |
-|-------|-------------|----------|
-| `version` | Config version (always `1`) | Yes |
-| `paths.project_root` | Path to your project root (relative to config) | Yes |
-| `paths.x_ipe_app` | Path to X-IPE folder (relative to config) | Yes |
-| `defaults.file_tree_scope` | `"project_root"` or `"x_ipe_app"` (default: `"project_root"`) | No |
-| `defaults.terminal_cwd` | `"project_root"` or `"x_ipe_app"` (default: `"project_root"`) | No |
-
-**Without `.x-ipe.yaml`:** X-IPE works exactly as before—file tree shows the X-IPE folder, terminal starts in the X-IPE directory.
 
 ---
 
