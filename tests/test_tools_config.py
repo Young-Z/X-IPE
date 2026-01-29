@@ -36,8 +36,8 @@ def temp_project_dir():
 
 @pytest.fixture
 def temp_project_with_config_dir(temp_project_dir):
-    """Create temporary project with config/ directory"""
-    config_dir = Path(temp_project_dir) / 'config'
+    """Create temporary project with x-ipe-docs/config/ directory"""
+    config_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'config'
     config_dir.mkdir(parents=True, exist_ok=True)
     return temp_project_dir
 
@@ -145,7 +145,7 @@ class TestToolsConfigServiceInit:
         """ToolsConfigService sets config path to x-ipe-docs/config/tools.json"""
         from x_ipe.services import ToolsConfigService
         service = ToolsConfigService(temp_project_dir)
-        expected = Path(temp_project_dir).resolve() / 'config' / 'tools.json'
+        expected = Path(temp_project_dir).resolve() / 'x-ipe-docs' / 'config' / 'tools.json'
         assert service.config_path == expected
     
     def test_init_sets_legacy_path(self, temp_project_dir):
@@ -164,7 +164,7 @@ class TestToolsConfigServiceLoad:
         from x_ipe.services import ToolsConfigService
         
         # Create config file
-        config_path = Path(temp_project_with_config_dir) / 'config' / 'tools.json'
+        config_path = Path(temp_project_with_config_dir) / 'x-ipe-docs' / 'config' / 'tools.json'
         config_path.write_text(json.dumps(sample_config, indent=2))
         
         service = ToolsConfigService(temp_project_with_config_dir)
@@ -186,14 +186,14 @@ class TestToolsConfigServiceLoad:
         assert config['stages']['ideation']['mockup']['frontend-design'] == True
         
         # Verify file was created
-        config_path = Path(temp_project_dir) / 'config' / 'tools.json'
+        config_path = Path(temp_project_dir) / 'x-ipe-docs' / 'config' / 'tools.json'
         assert config_path.exists()
     
     def test_load_creates_config_directory_if_missing(self, temp_project_dir):
-        """load() creates config/ directory if it doesn't exist"""
+        """load() creates x-ipe-docs/config/ directory if it doesn't exist"""
         from x_ipe.services import ToolsConfigService
         
-        config_dir = Path(temp_project_dir) / 'config'
+        config_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'config'
         assert not config_dir.exists()
         
         service = ToolsConfigService(temp_project_dir)
@@ -206,7 +206,7 @@ class TestToolsConfigServiceLoad:
         from x_ipe.services import ToolsConfigService
         
         # Create corrupted config file
-        config_path = Path(temp_project_with_config_dir) / 'config' / 'tools.json'
+        config_path = Path(temp_project_with_config_dir) / 'x-ipe-docs' / 'config' / 'tools.json'
         config_path.write_text('{ invalid json }}}')
         
         service = ToolsConfigService(temp_project_with_config_dir)
@@ -263,7 +263,7 @@ class TestToolsConfigServiceMigration:
         service.load()
         
         # New config file should exist
-        new_config_path = Path(project_root) / 'config' / 'tools.json'
+        new_config_path = Path(project_root) / 'x-ipe-docs' / 'config' / 'tools.json'
         assert new_config_path.exists()
     
     def test_migration_handles_partial_legacy_config(self, temp_project_dir):
@@ -321,7 +321,7 @@ class TestToolsConfigServiceSave:
         service = ToolsConfigService(temp_project_dir)
         service.save(sample_config)
         
-        config_path = Path(temp_project_dir) / 'config' / 'tools.json'
+        config_path = Path(temp_project_dir) / 'x-ipe-docs' / 'config' / 'tools.json'
         assert config_path.exists()
         
         saved = json.loads(config_path.read_text())
@@ -329,10 +329,10 @@ class TestToolsConfigServiceSave:
         assert saved['stages']['ideation']['ideation']['antv-infographic'] == True
     
     def test_save_creates_config_directory(self, temp_project_dir, sample_config):
-        """save() creates config/ directory if missing"""
+        """save() creates x-ipe-docs/config/ directory if missing"""
         from x_ipe.services import ToolsConfigService
         
-        config_dir = Path(temp_project_dir) / 'config'
+        config_dir = Path(temp_project_dir) / 'x-ipe-docs' / 'config'
         assert not config_dir.exists()
         
         service = ToolsConfigService(temp_project_dir)
@@ -353,7 +353,7 @@ class TestToolsConfigServiceSave:
         """save() overwrites existing config file"""
         from x_ipe.services import ToolsConfigService
         
-        config_path = Path(temp_project_with_config_dir) / 'config' / 'tools.json'
+        config_path = Path(temp_project_with_config_dir) / 'x-ipe-docs' / 'config' / 'tools.json'
         
         # Write initial config
         config_path.write_text(json.dumps(default_config, indent=2))
@@ -377,7 +377,7 @@ class TestGetToolsConfigAPI:
     def test_get_returns_config(self, test_client, temp_project_dir, sample_config):
         """GET /api/config/tools returns current config"""
         # Setup: create config file
-        config_path = Path(temp_project_dir) / 'config' / 'tools.json'
+        config_path = Path(temp_project_dir) / 'x-ipe-docs' / 'config' / 'tools.json'
         config_path.parent.mkdir(parents=True, exist_ok=True)
         config_path.write_text(json.dumps(sample_config, indent=2))
         
@@ -435,7 +435,7 @@ class TestPostToolsConfigAPI:
         assert data['success'] == True
         
         # Verify file was written
-        config_path = Path(temp_project_dir) / 'config' / 'tools.json'
+        config_path = Path(temp_project_dir) / 'x-ipe-docs' / 'config' / 'tools.json'
         assert config_path.exists()
     
     def test_post_returns_error_for_invalid_json(self, test_client):
@@ -526,7 +526,7 @@ class TestToolsConfigIntegration:
         project_root = temp_project_with_legacy_config['root']
         
         # Create new config file first
-        config_dir = Path(project_root) / 'config'
+        config_dir = Path(project_root) / 'x-ipe-docs' / 'config'
         config_dir.mkdir(parents=True, exist_ok=True)
         
         new_config = {
@@ -585,7 +585,7 @@ class TestToolsConfigEdgeCases:
         service2.save(default_config)
         
         # Verify last write wins
-        config_path = Path(temp_project_dir) / 'config' / 'tools.json'
+        config_path = Path(temp_project_dir) / 'x-ipe-docs' / 'config' / 'tools.json'
         saved = json.loads(config_path.read_text())
         
         # default_config has mermaid=False, sample_config has mermaid=True
@@ -612,7 +612,7 @@ class TestToolsConfigEdgeCases:
             }
         }
         
-        config_path = Path(temp_project_with_config_dir) / 'config' / 'tools.json'
+        config_path = Path(temp_project_with_config_dir) / 'x-ipe-docs' / 'config' / 'tools.json'
         config_path.write_text(json.dumps(config_with_extra, indent=2))
         
         service = ToolsConfigService(temp_project_with_config_dir)

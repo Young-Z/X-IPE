@@ -68,8 +68,9 @@ class UIUXFeedbackManager {
                             <span class="browser-dot green"></span>
                         </div>
                         <div class="url-bar">
-                            <input type="text" id="url-input" class="url-input" placeholder="http://localhost:3000" list="url-hints" />
+                            <input type="text" id="url-input" class="url-input" placeholder="http://localhost:3000 or idea://folder/file.html" list="url-hints" />
                             <datalist id="url-hints">
+                                <option value="idea://">
                                 <option value="http://localhost:3000">
                                 <option value="http://localhost:5173">
                                 <option value="http://localhost:8080">
@@ -91,6 +92,11 @@ class UIUXFeedbackManager {
                             <span>Inspect</span>
                         </button>
                         <span id="selection-count" class="toolbar-info"></span>
+                        <div class="toolbar-divider"></div>
+                        <button id="feedback-btn" class="toolbar-btn toolbar-btn-primary" title="Quick feedback with screenshot">
+                            <i class="bi bi-chat-square-text"></i>
+                            <span>Feedback</span>
+                        </button>
                     </div>
 
                     <!-- Browser Viewport -->
@@ -112,7 +118,7 @@ class UIUXFeedbackManager {
                                 <div class="empty-state-description">
                                     Enter a localhost URL above to preview your application.
                                     <br><br>
-                                    <small class="text-muted">Supported: localhost, 127.0.0.1</small>
+                                    <small class="text-muted">Supported: localhost, 127.0.0.1, idea://</small>
                                 </div>
                             </div>
                             
@@ -188,6 +194,7 @@ class UIUXFeedbackManager {
             toolbar: document.getElementById('browser-toolbar'),
             refreshBtn: document.getElementById('refresh-btn'),
             inspectBtn: document.getElementById('inspect-btn'),
+            feedbackBtn: document.getElementById('feedback-btn'),
             selectionCount: document.getElementById('selection-count'),
             inspectorHighlight: document.getElementById('inspector-highlight'),
             inspectorTooltip: document.getElementById('inspector-tooltip'),
@@ -240,6 +247,9 @@ class UIUXFeedbackManager {
         }
         if (this.elements.inspectBtn) {
             this.elements.inspectBtn.addEventListener('click', () => this.toggleInspect());
+        }
+        if (this.elements.feedbackBtn) {
+            this.elements.feedbackBtn.addEventListener('click', () => this._quickFeedback());
         }
         
         // Clear selections when loading new URL
@@ -329,6 +339,11 @@ class UIUXFeedbackManager {
             return { valid: false, error: 'Please enter a URL' };
         }
         
+        // Handle idea:// URLs (for x-ipe-docs/ideas files)
+        if (url.startsWith('idea://')) {
+            return { valid: true, url: url, isIdea: true };
+        }
+        
         // Handle file:// URLs
         if (url.startsWith('file://')) {
             return { valid: true, url: url };
@@ -373,6 +388,12 @@ class UIUXFeedbackManager {
         this.hideError();
         
         try {
+            // Handle idea:// protocol - fetch from x-ipe-docs/ideas
+            if (validation.isIdea) {
+                await this._loadIdeaUrl(url);
+                return;
+            }
+            
             const encodedUrl = encodeURIComponent(url);
             const response = await fetch(`/api/proxy?url=${encodedUrl}`);
             const contentType = response.headers.get('Content-Type') || '';
@@ -409,6 +430,139 @@ class UIUXFeedbackManager {
             this.showError(`Network error: ${e.message}`);
         } finally {
             this.setLoading(false);
+        }
+    }
+    
+    /**
+     * Load an idea:// URL from x-ipe-docs/ideas folder
+     * @param {string} ideaUrl - URL in format idea://folder/file.html
+     */
+    async _loadIdeaUrl(ideaUrl) {
+        try {
+            // Parse idea:// URL to get path
+            // idea://folder/file.html -> x-ipe-docs/ideas/folder/file.html
+            const ideaPath = ideaUrl.replace('idea://', '');
+            const filePath = `x-ipe-docs/ideas/${ideaPath}`;
+            
+            // Fetch file content with raw=true to get HTML directly
+            const response = await fetch(`/api/file/content?path=${encodeURIComponent(filePath)}&raw=true`);
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                this.showError(errorData.error || `Failed to load idea file: ${response.status}`);
+                return;
+            }
+            
+            let html = await response.text();
+            
+            // Inject inspector script for element inspection support
+            html = this._injectInspectorScript(html);
+            
+            this.renderContent(html);
+            this.state.currentUrl = ideaUrl;
+            this.updateStatus(`Loaded: ${ideaUrl}`);
+        } catch (e) {
+            this.showError(`Failed to load idea: ${e.message}`);
+        } finally {
+            this.setLoading(false);
+        }
+    }
+    
+    /**
+     * Inject inspector script into HTML for element inspection
+     * @param {string} html - Raw HTML content
+     * @returns {string} - HTML with inspector script injected
+     */
+    _injectInspectorScript(html) {
+        // Inspector script for element hover, selection, and context menu
+        const inspectorScript = `
+<script data-x-ipe-inspector="true">
+(function() {
+    let inspectEnabled = false;
+    
+    window.addEventListener('message', function(e) {
+        if (e.data && e.data.type === 'inspect-mode') {
+            inspectEnabled = e.data.enabled;
+        }
+    });
+    
+    document.addEventListener('mousemove', function(e) {
+        if (!inspectEnabled) return;
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        if (!el || el === document.body || el === document.documentElement) {
+            window.parent.postMessage({type: 'hover-leave'}, '*');
+            return;
+        }
+        window.parent.postMessage({
+            type: 'hover',
+            element: {
+                tag: el.tagName.toLowerCase(),
+                className: (el.className || '').toString().split(' ')[0] || '',
+                id: el.id || '',
+                selector: generateSelector(el),
+                rect: el.getBoundingClientRect()
+            }
+        }, '*');
+    }, true);
+    
+    document.addEventListener('click', function(e) {
+        if (!inspectEnabled) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const el = e.target;
+        window.parent.postMessage({
+            type: 'select',
+            element: {
+                tag: el.tagName.toLowerCase(),
+                className: (el.className || '').toString().split(' ')[0] || '',
+                id: el.id || '',
+                selector: generateSelector(el),
+                rect: el.getBoundingClientRect()
+            },
+            multiSelect: e.ctrlKey || e.metaKey
+        }, '*');
+    }, true);
+    
+    document.addEventListener('contextmenu', function(e) {
+        if (!inspectEnabled) return;
+        e.preventDefault();
+        e.stopPropagation();
+        window.parent.postMessage({
+            type: 'contextmenu',
+            x: e.screenX,
+            y: e.screenY,
+            clientX: e.clientX,
+            clientY: e.clientY
+        }, '*');
+    }, true);
+    
+    function generateSelector(el) {
+        if (el.id) return '#' + el.id;
+        const tag = el.tagName.toLowerCase();
+        const cls = (el.className || '').toString().split(' ')[0];
+        if (cls) {
+            const siblings = el.parentElement ? el.parentElement.querySelectorAll(tag + '.' + cls) : [];
+            if (siblings.length === 1) return tag + '.' + cls;
+            const idx = Array.from(siblings).indexOf(el);
+            return tag + '.' + cls + ':nth-of-type(' + (idx + 1) + ')';
+        }
+        const siblings = el.parentElement ? el.parentElement.children : [];
+        const idx = Array.from(siblings).indexOf(el);
+        return tag + ':nth-child(' + (idx + 1) + ')';
+    }
+})();
+</script>`;
+
+        // Check if inspector script already present
+        if (html.includes('data-x-ipe-inspector')) {
+            return html;
+        }
+        
+        // Inject before </body> if present, otherwise append
+        if (html.includes('</body>')) {
+            return html.replace('</body>', inspectorScript + '</body>');
+        } else {
+            return html + inspectorScript;
         }
     }
     
@@ -627,12 +781,14 @@ class UIUXFeedbackManager {
         }
         
         if (tooltip) {
-            // Format: <tag.class> or <tag>
+            // Format: <tag.class> or <tag> with dimensions
             const tagText = element.className 
                 ? `<${element.tag}.${element.className}>`
                 : `<${element.tag}>`;
+            const width = Math.round(element.rect.width);
+            const height = Math.round(element.rect.height);
             
-            tooltip.textContent = tagText;
+            tooltip.textContent = `${tagText} ${width} × ${height}`;
             tooltip.style.display = 'block';
             tooltip.style.left = `${element.rect.x}px`;
             tooltip.style.top = `${element.rect.y - 28}px`;
@@ -1033,6 +1189,84 @@ class UIUXFeedbackManager {
     }
     
     /**
+     * Quick feedback - captures full page screenshot without element selection
+     */
+    async _quickFeedback() {
+        if (!this.state.currentUrl) {
+            this.updateStatus('Load a page first');
+            return;
+        }
+        
+        try {
+            // Generate unique ID and name
+            const now = new Date();
+            const id = `fb-${Date.now()}`;
+            const name = `Feedback-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+            
+            // Capture full page screenshot
+            let screenshot = null;
+            try {
+                screenshot = await this._captureFullPageScreenshot();
+                console.log('[UIUXFeedback] Full page screenshot result:', screenshot ? `${screenshot.length} chars` : 'null');
+            } catch (screenshotError) {
+                console.warn('[UIUXFeedback] Full page screenshot capture failed:', screenshotError);
+            }
+            
+            // Create entry without element selection
+            const entry = {
+                id,
+                name,
+                url: this.state.currentUrl,
+                elements: [],  // No elements selected
+                screenshot,
+                description: '',
+                createdAt: now.toISOString(),
+                status: 'draft'
+            };
+            
+            this.feedbackEntries.push(entry);
+            this._renderFeedbackPanel();
+            
+            // Auto-expand panel when adding feedback
+            this._expandPanel();
+            
+            // Expand the new entry
+            this.expandedEntryId = id;
+            this._updateExpandedEntry();
+            
+            this.updateStatus(`Quick feedback created: ${name}`);
+        } catch (error) {
+            console.error('[UIUXFeedback] Failed to create quick feedback:', error);
+            this.updateStatus(`Failed to create feedback: ${error.message}`);
+        }
+    }
+    
+    /**
+     * Capture full page screenshot (no element bounding box)
+     */
+    async _captureFullPageScreenshot() {
+        const iframe = this.elements.iframe;
+        if (!iframe || !iframe.contentDocument) {
+            throw new Error('Cannot access iframe content');
+        }
+        
+        // Check if html2canvas is available
+        if (typeof html2canvas === 'undefined') {
+            throw new Error('html2canvas library not loaded');
+        }
+        
+        // Capture the entire iframe content
+        const canvas = await html2canvas(iframe.contentDocument.body, {
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            backgroundColor: '#ffffff'
+        });
+        
+        return canvas.toDataURL('image/png');
+    }
+    
+    /**
      * Render the feedback panel
      */
     _renderFeedbackPanel() {
@@ -1150,10 +1384,17 @@ class UIUXFeedbackManager {
                         </div>
                     ` : ''}
                     <div class="entry-actions-footer">
-                        <button class="btn-submit" ${canSubmit ? '' : 'disabled'}>
-                            <i class="bi bi-send"></i>
-                            ${entry.status === 'submitting' ? 'Submitting...' : 'Submit'}
-                        </button>
+                        ${entry.status === 'submitted' && entry.folder ? `
+                            <button class="btn-copilot" data-folder="${entry.folder}">
+                                <i class="bi bi-robot"></i>
+                                Copilot
+                            </button>
+                        ` : `
+                            <button class="btn-submit" ${canSubmit ? '' : 'disabled'}>
+                                <i class="bi bi-send"></i>
+                                ${entry.status === 'submitting' ? 'Submitting...' : 'Submit'}
+                            </button>
+                        `}
                     </div>
                 </div>
             </div>
@@ -1198,6 +1439,7 @@ class UIUXFeedbackManager {
             const deleteBtn = entry.querySelector('.delete-entry');
             const descInput = entry.querySelector('.entry-description-input');
             const submitBtn = entry.querySelector('.btn-submit');
+            const copilotBtn = entry.querySelector('.btn-copilot');
             
             // Toggle expand on header click
             header.addEventListener('click', (e) => {
@@ -1224,6 +1466,15 @@ class UIUXFeedbackManager {
                 submitBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     this._submitEntry(id);
+                });
+            }
+            
+            // Copilot button - open terminal and type command
+            if (copilotBtn) {
+                copilotBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const folderPath = copilotBtn.dataset.folder;
+                    this._openTerminalWithCommand(folderPath);
                 });
             }
         });
@@ -1313,7 +1564,7 @@ class UIUXFeedbackManager {
                 entry.folder = result.folder;
                 this._showToast('Feedback saved successfully', 'success');
                 this._clearSelections();
-                this._typeTerminalCommand(result.folder);
+                // Note: Copilot button now shown in entry footer instead of auto-typing
             } else {
                 entry.status = 'failed';
                 entry.error = result.error;
@@ -1329,24 +1580,28 @@ class UIUXFeedbackManager {
     }
     
     /**
-     * Type command into terminal (without executing)
+     * Open terminal, start copilot, and type command (without executing)
      */
-    _typeTerminalCommand(folderPath) {
+    _openTerminalWithCommand(folderPath) {
         const command = `Get uiux feedback, please visit feedback folder ${folderPath} to get details.`;
         
-        // Find active terminal and type command
-        // Note: This integrates with the terminal system if available
-        if (window.terminalManager && window.terminalManager.getActiveTerminal) {
-            const terminal = window.terminalManager.getActiveTerminal();
-            if (terminal && terminal.write) {
-                terminal.write(command);
-            }
+        // Expand terminal panel first
+        if (window.terminalPanel) {
+            window.terminalPanel.expand();
         }
         
-        // Also log to console for debugging
-        console.log('Terminal command:', command);
+        // Use terminalManager's sendCopilotPromptCommandNoEnter which:
+        // 1. Creates terminal if needed
+        // 2. Types 'copilot' and presses Enter
+        // 3. Waits for Copilot CLI to be ready
+        // 4. Types the command WITHOUT pressing Enter (user can review/edit)
+        if (window.terminalManager && window.terminalManager.sendCopilotPromptCommandNoEnter) {
+            window.terminalManager.sendCopilotPromptCommandNoEnter(command);
+        } else {
+            console.warn('Terminal manager not available');
+        }
     }
-    
+
     /**
      * Show toast notification
      */

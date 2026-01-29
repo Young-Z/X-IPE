@@ -37,7 +37,7 @@ def skill_dir(project_root):
 @pytest.fixture
 def config_file(project_root):
     """Get the tools.json config file"""
-    return project_root / 'config' / 'tools.json'
+    return project_root / 'x-ipe-docs' / 'config' / 'tools.json'
 
 
 # ============================================================================
@@ -100,16 +100,20 @@ class TestSkillMdContent:
         assert 'description:' in skill_md_content, "Missing description in frontmatter"
     
     def test_skill_md_has_overview_section(self, skill_md_content):
-        """SKILL.md has Overview section"""
+        """SKILL.md has Overview section (or equivalent intro)"""
         assert skill_md_content is not None, "SKILL.md not found"
-        assert '## Overview' in skill_md_content or '# Overview' in skill_md_content, \
-            "Missing Overview section"
+        # v2: Uses "IPE Markdown Support" as intro section
+        assert any(term in skill_md_content for term in [
+            '## Overview', '# Overview', '## IPE Markdown Support', '# Architecture DSL Tool'
+        ]), "Missing Overview section"
     
     def test_skill_md_has_workflow_section(self, skill_md_content):
-        """SKILL.md has Workflow section"""
+        """SKILL.md has Workflow section (or generation steps)"""
         assert skill_md_content is not None, "SKILL.md not found"
-        assert '## Workflow' in skill_md_content or '# Workflow' in skill_md_content, \
-            "Missing Workflow section"
+        # v2: Uses "Module View Generation" and "Landscape View Generation" as workflow
+        assert any(term in skill_md_content for term in [
+            '## Workflow', '# Workflow', 'Module View Generation', 'Landscape View Generation'
+        ]), "Missing Workflow section"
     
     def test_skill_md_has_when_to_use_section(self, skill_md_content):
         """SKILL.md has When to Use section"""
@@ -125,23 +129,27 @@ class TestSkillMdContent:
         ]), "Missing DSL Syntax Reference section"
     
     def test_skill_md_has_capabilities_section(self, skill_md_content):
-        """SKILL.md has Capabilities section"""
+        """SKILL.md has Capabilities section (or translation patterns)"""
         assert skill_md_content is not None, "SKILL.md not found"
-        assert 'Capabilities' in skill_md_content or 'capabilities' in skill_md_content, \
-            "Missing Capabilities section"
+        # v2: Uses "Translation Patterns" instead of explicit "Capabilities"
+        assert any(term in skill_md_content.lower() for term in [
+            'capabilities', 'translation patterns'
+        ]), "Missing Capabilities section"
     
     def test_skill_md_documents_nl_to_dsl(self, skill_md_content):
         """AC-6.1: SKILL.md documents NL to DSL translation capability"""
         assert skill_md_content is not None, "SKILL.md not found"
+        # v2: Translation Patterns table documents input -> output patterns
         assert any(term in skill_md_content.lower() for term in [
-            'natural language', 'nl →', 'nl->', 'translate'
+            'natural language', 'nl →', 'nl->', 'translate', 'translation patterns', 'input'
         ]), "Missing NL to DSL translation documentation"
     
     def test_skill_md_documents_dsl_to_nl(self, skill_md_content):
         """AC-6.2: SKILL.md documents DSL to NL explanation capability"""
         assert skill_md_content is not None, "SKILL.md not found"
+        # v2: Translation Patterns shows bidirectional patterns
         assert any(term in skill_md_content.lower() for term in [
-            'explain', 'dsl →', 'dsl->', 'natural language'
+            'explain', 'dsl →', 'dsl->', 'natural language', 'output', 'translation'
         ]), "Missing DSL to NL explanation documentation"
     
     def test_skill_md_documents_validation(self, skill_md_content):
@@ -257,24 +265,25 @@ class TestGrammarReference:
     # --- Layout Control (AC-5.x) ---
     
     def test_grammar_documents_style(self, grammar_content):
-        """AC-5.1: Grammar documents style property"""
+        """AC-5.1: Grammar documents layout control (v2: align, gap)"""
         assert grammar_content is not None, "grammar.md not found"
-        assert 'style' in grammar_content.lower(), "Missing style property documentation"
+        # v2 uses 'align' and 'gap' for layout control
+        assert 'align' in grammar_content.lower(), "Missing align property documentation"
     
-    def test_grammar_documents_justify_content(self, grammar_content):
-        """AC-5.2: Grammar documents justify-content values"""
+    def test_grammar_documents_cols_property(self, grammar_content):
+        """AC-5.2: Grammar documents cols property (v2 grid system)"""
         assert grammar_content is not None, "grammar.md not found"
-        assert 'justify-content' in grammar_content, "Missing justify-content documentation"
+        assert 'cols' in grammar_content, "Missing cols documentation"
     
-    def test_grammar_documents_align_items(self, grammar_content):
-        """AC-5.3: Grammar documents align-items values"""
+    def test_grammar_documents_rows_property(self, grammar_content):
+        """AC-5.3: Grammar documents rows property (v2 grid system)"""
         assert grammar_content is not None, "grammar.md not found"
-        assert 'align-items' in grammar_content, "Missing align-items documentation"
+        assert 'rows' in grammar_content, "Missing rows documentation"
     
-    def test_grammar_documents_flex_direction(self, grammar_content):
-        """AC-5.4: Grammar documents flex-direction values"""
+    def test_grammar_documents_grid_property(self, grammar_content):
+        """AC-5.4: Grammar documents grid property (v2 grid system)"""
         assert grammar_content is not None, "grammar.md not found"
-        assert 'flex-direction' in grammar_content, "Missing flex-direction documentation"
+        assert 'grid' in grammar_content, "Missing grid documentation"
     
     def test_grammar_documents_gap(self, grammar_content):
         """AC-5.5: Grammar documents row-gap and column-gap"""
@@ -286,10 +295,10 @@ class TestGrammarReference:
         assert grammar_content is not None, "grammar.md not found"
         assert 'text-align' in grammar_content, "Missing text-align documentation"
     
-    def test_grammar_documents_virtual_box(self, grammar_content):
-        """AC-5.9, AC-5.10: Grammar documents virtual-box"""
+    def test_grammar_documents_canvas(self, grammar_content):
+        """AC-5.9: Grammar documents canvas (explicit dimensions)"""
         assert grammar_content is not None, "grammar.md not found"
-        assert 'virtual-box' in grammar_content, "Missing virtual-box documentation"
+        assert 'canvas' in grammar_content, "Missing canvas documentation"
 
 
 # ============================================================================

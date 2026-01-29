@@ -334,6 +334,17 @@
     cursor: not-allowed;
 }
 
+.toolbar-btn-primary {
+    background: var(--uiux-accent);
+    border-color: var(--uiux-accent);
+    color: white;
+}
+
+.toolbar-btn-primary:hover {
+    background: var(--uiux-accent-dark);
+    border-color: var(--uiux-accent-dark);
+}
+
 .toolbar-btn i {
     font-size: 14px;
 }
@@ -893,6 +904,30 @@
 .btn-submit:disabled {
     background: var(--uiux-slate-300);
     cursor: not-allowed;
+}
+
+/* Copilot Button */
+.btn-copilot {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #6e40c9;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-copilot:hover {
+    background: #553098;
+}
+
+.btn-copilot i {
+    font-size: 14px;
 }
 
 /* Toast Notifications */

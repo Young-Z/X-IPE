@@ -553,16 +553,25 @@
         }
 
         /**
-         * Send Copilot prompt command
+         * Send Copilot prompt command (executes with Enter)
          */
         sendCopilotPromptCommand(promptCommand) {
-            this._sendCopilotCommand(promptCommand);
+            this._sendCopilotCommand(promptCommand, true);
+        }
+
+        /**
+         * Send Copilot prompt command without pressing Enter (for review before execution)
+         */
+        sendCopilotPromptCommandNoEnter(promptCommand) {
+            this._sendCopilotCommand(promptCommand, false);
         }
 
         /**
          * Internal: Send copilot command with typing effect
+         * @param {string} command - Command to type
+         * @param {boolean} pressEnter - Whether to press Enter after command (default: true)
          */
-        _sendCopilotCommand(command) {
+        _sendCopilotCommand(command, pressEnter = true) {
             let targetIndex = this.activeIndex >= 0 ? this.activeIndex : 0;
 
             if (this.terminals.length === 0) {
@@ -577,15 +586,19 @@
             // Type 'copilot' then wait and type command
             this._typeWithEffect(instance.socket, 'copilot', () => {
                 this._waitForCopilotReady(instance, () => {
-                    this._typeWithEffect(instance.socket, command);
+                    this._typeWithEffect(instance.socket, command, null, pressEnter);
                 });
             });
         }
 
         /**
          * Type text with realistic delay
+         * @param {Object} socket - Socket connection
+         * @param {string} text - Text to type
+         * @param {Function} callback - Optional callback after typing
+         * @param {boolean} pressEnter - Whether to press Enter after typing (default: true)
          */
-        _typeWithEffect(socket, text, callback) {
+        _typeWithEffect(socket, text, callback, pressEnter = true) {
             const chars = text.split('');
             let i = 0;
 
@@ -595,7 +608,9 @@
                     setTimeout(typeNext, 30 + Math.random() * 50);
                 } else {
                     setTimeout(() => {
-                        socket.emit('input', '\r');
+                        if (pressEnter) {
+                            socket.emit('input', '\r');
+                        }
                         if (callback) callback();
                     }, 100);
                 }
@@ -921,6 +936,10 @@
 
         sendCopilotPromptCommand(promptCommand) {
             this.paneManager.sendCopilotPromptCommand(promptCommand);
+        }
+
+        sendCopilotPromptCommandNoEnter(promptCommand) {
+            this.paneManager.sendCopilotPromptCommandNoEnter(promptCommand);
         }
 
         /**

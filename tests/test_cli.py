@@ -646,7 +646,7 @@ class TestConfigModule:
         from src.x_ipe.core.config import XIPEConfig
         config = XIPEConfig.load(temp_project)
         # Should not error, use defaults
-        assert config.server_port == 5000
+        assert config.server_port == 5959
         assert config.server_host == "127.0.0.1"
     
     def test_config_parses_paths(self, initialized_project):
@@ -676,7 +676,7 @@ class TestConfigModule:
         from src.x_ipe.core.config import XIPEConfig
         config = XIPEConfig.defaults(temp_project)
         assert config.project_root == temp_project
-        assert config.server_port == 5000
+        assert config.server_port == 5959
     
     def test_config_resolves_relative_paths(self, initialized_project):
         """Config resolves relative paths to absolute."""

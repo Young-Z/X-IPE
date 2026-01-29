@@ -752,6 +752,11 @@ class WorkplaceManager {
                     <button class="btn btn-sm btn-outline-secondary workplace-copy-url-btn" id="workplace-copy-url-btn" title="Copy file URL">
                         <i class="bi bi-link-45deg"></i>
                     </button>
+                    ${isHtmlFile ? `
+                    <button class="btn btn-sm btn-outline-secondary workplace-feedback-btn" id="workplace-feedback-btn" title="Open in UIUX Feedback">
+                        <i class="bi bi-chat-square-text"></i>
+                    </button>
+                    ` : ''}
                     ${isEditable ? `
                     <button class="btn btn-sm btn-outline-secondary workplace-edit-btn" id="workplace-edit-btn" title="Edit file">
                         <i class="bi bi-pencil"></i> Edit
@@ -798,6 +803,12 @@ class WorkplaceManager {
         const copyUrlBtn = document.getElementById('workplace-copy-url-btn');
         if (copyUrlBtn) {
             copyUrlBtn.addEventListener('click', () => this._copyFileUrl());
+        }
+        
+        // Bind feedback button for HTML files
+        const feedbackBtn = document.getElementById('workplace-feedback-btn');
+        if (feedbackBtn) {
+            feedbackBtn.addEventListener('click', () => this._openInFeedback());
         }
         
         // Bind copilot button with hover dropdown
@@ -1929,6 +1940,38 @@ class WorkplaceManager {
                 this._showToast('Failed to copy link', 'error');
             }
             document.body.removeChild(textArea);
+        }
+    }
+    
+    /**
+     * Open current HTML file in UIUX Feedback view with idea:// protocol
+     */
+    _openInFeedback() {
+        if (!this.currentPath) return;
+        
+        // Build idea:// URL from current path
+        // Path format: x-ipe-docs/ideas/folder/file.html -> idea://folder/file.html
+        let ideaPath = this.currentPath;
+        if (ideaPath.startsWith('x-ipe-docs/ideas/')) {
+            ideaPath = ideaPath.replace('x-ipe-docs/ideas/', '');
+        }
+        const ideaUrl = `idea://${ideaPath}`;
+        
+        // Navigate to UIUX Feedback view and set URL
+        const uiuxFeedbacksHeader = document.querySelector('.nav-uiux-feedbacks');
+        if (uiuxFeedbacksHeader) {
+            uiuxFeedbacksHeader.click();
+            
+            // Wait for view to render, then set URL and load
+            setTimeout(() => {
+                if (window.uiuxFeedbackManager) {
+                    const urlInput = document.getElementById('url-input');
+                    if (urlInput) {
+                        urlInput.value = ideaUrl;
+                        window.uiuxFeedbackManager.loadUrl();
+                    }
+                }
+            }, 100);
         }
     }
     

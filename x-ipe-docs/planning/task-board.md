@@ -6,6 +6,7 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-225 | Bug Fix | UIUX Feedback: Themes menu always expanded | Spark | 🔄 in_progress | 01-29-2026 14:15:00 | sidebar.js | - |
 
 ---
 
@@ -13,6 +14,7 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-224 | Code Implementation | Add MCP config merge to X-IPE init/upgrade | Cipher | 01-29-2026 07:35:00 | src/x_ipe/core/scaffold.py, cli/main.py | commit 7482406 |
 | TASK-223 | Feature Closing | FEATURE-022-D: Feedback Storage & Submission PR | Bolt | 01-28-2026 17:30:00 | commit 34c7d11 | Feature implemented |
 | TASK-222 | Code Implementation | FEATURE-022-D: Feedback Storage & Submission Implementation | Bolt | 01-28-2026 17:25:00 | src/x_ipe/services/uiux_feedback_service.py, uiux_feedback_routes.py | 20/20 tests passing |
 | TASK-221 | Test Generation | FEATURE-022-D: Feedback Storage & Submission Tests | Bolt | 01-28-2026 17:20:00 | tests/test_uiux_feedback_storage.py | 20 TDD tests |

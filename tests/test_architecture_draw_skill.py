@@ -16,7 +16,7 @@ import pytest
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LAYERED_SKILL_PATH = os.path.join(PROJECT_ROOT, ".github", "skills", "tool-draw-layered-architecture")
 LANDSCAPE_SKILL_PATH = os.path.join(PROJECT_ROOT, ".github", "skills", "tool-draw-system-landscape")
-CONFIG_PATH = os.path.join(PROJECT_ROOT, "config", "tools.json")
+CONFIG_PATH = os.path.join(PROJECT_ROOT, "x-ipe-docs", "config", "tools.json")
 
 
 class TestLayeredArchitectureSkillStructure:
