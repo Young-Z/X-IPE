@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List, Tuple, Optional
 import shutil
 import os
+import json
 
 
 class ScaffoldManager:
@@ -143,6 +144,66 @@ class ScaffoldManager:
             shutil.copy2(source, target)
         self.created.append(target)
     
+    def merge_mcp_config(self) -> None:
+        """Merge project's .github/copilot/mcp-config.json into global ~/.copilot/mcp-config.json.
+        
+        This allows project-specific MCP servers to be available globally.
+        Deep-merges mcpServers objects, with project servers added to global config.
+        Existing global servers are preserved unless --force is used for conflicts.
+        """
+        # Source: project's .github/copilot/mcp-config.json
+        project_mcp = self.project_root / ".github" / "copilot" / "mcp-config.json"
+        if not project_mcp.exists():
+            return
+        
+        # Target: global ~/.copilot/mcp-config.json
+        global_copilot_dir = Path.home() / ".copilot"
+        global_mcp = global_copilot_dir / "mcp-config.json"
+        
+        if self.dry_run:
+            self.created.append(global_mcp)
+            return
+        
+        try:
+            project_config = json.loads(project_mcp.read_text())
+        except (json.JSONDecodeError, IOError):
+            return
+        
+        project_servers = project_config.get("mcpServers", {})
+        if not project_servers:
+            return
+        
+        # Load or create global config
+        global_config = {"mcpServers": {}}
+        if global_mcp.exists():
+            try:
+                global_config = json.loads(global_mcp.read_text())
+                if "mcpServers" not in global_config:
+                    global_config["mcpServers"] = {}
+            except (json.JSONDecodeError, IOError):
+                global_config = {"mcpServers": {}}
+        
+        # Merge: add project servers to global
+        merged_count = 0
+        skipped_count = 0
+        for server_name, server_config in project_servers.items():
+            if server_name in global_config["mcpServers"]:
+                if self.force:
+                    global_config["mcpServers"][server_name] = server_config
+                    merged_count += 1
+                else:
+                    skipped_count += 1
+            else:
+                global_config["mcpServers"][server_name] = server_config
+                merged_count += 1
+        
+        if merged_count > 0:
+            global_copilot_dir.mkdir(parents=True, exist_ok=True)
+            global_mcp.write_text(json.dumps(global_config, indent=2) + "\n")
+            self.created.append(global_mcp)
+        elif skipped_count > 0:
+            self.skipped.append(global_mcp)
+    
     def copy_config_files(self) -> None:
         """Copy config files (copilot-prompt.json, tools.json, .env.example) to x-ipe-docs/config/."""
         config_source = self._get_resource_path("config")
@@ -245,6 +306,7 @@ server:
         self.copy_config_files()
         self.create_config_file()
         self.update_gitignore()
+        self.merge_mcp_config()
         return self.get_summary()
     
     def get_summary(self) -> Tuple[List[Path], List[Path]]:
