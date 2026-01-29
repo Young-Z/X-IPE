@@ -144,33 +144,57 @@ class ScaffoldManager:
             shutil.copy2(source, target)
         self.created.append(target)
     
-    def merge_mcp_config(self) -> None:
-        """Merge project's .github/copilot/mcp-config.json into global ~/.copilot/mcp-config.json.
+    def get_project_mcp_servers(self) -> dict:
+        """Get MCP servers from project's .github/copilot/mcp-config.json.
+        
+        Returns:
+            Dict of server_name -> server_config, or empty dict if not found.
+        """
+        project_mcp = self.project_root / ".github" / "copilot" / "mcp-config.json"
+        if not project_mcp.exists():
+            return {}
+        
+        try:
+            project_config = json.loads(project_mcp.read_text())
+            return project_config.get("mcpServers", {})
+        except (json.JSONDecodeError, IOError):
+            return {}
+    
+    def merge_mcp_config(
+        self,
+        servers_to_merge: Optional[List[str]] = None,
+        target_path: Optional[Path] = None
+    ) -> None:
+        """Merge project's MCP servers into global config.
+        
+        Args:
+            servers_to_merge: List of server names to merge. If None, merges all.
+            target_path: Path to target mcp-config.json. Defaults to ~/.copilot/mcp-config.json.
         
         This allows project-specific MCP servers to be available globally.
         Deep-merges mcpServers objects, with project servers added to global config.
         Existing global servers are preserved unless --force is used for conflicts.
         """
-        # Source: project's .github/copilot/mcp-config.json
-        project_mcp = self.project_root / ".github" / "copilot" / "mcp-config.json"
-        if not project_mcp.exists():
+        project_servers = self.get_project_mcp_servers()
+        if not project_servers:
             return
         
-        # Target: global ~/.copilot/mcp-config.json
-        global_copilot_dir = Path.home() / ".copilot"
-        global_mcp = global_copilot_dir / "mcp-config.json"
+        # Filter to requested servers if specified
+        if servers_to_merge is not None:
+            project_servers = {k: v for k, v in project_servers.items() if k in servers_to_merge}
+            if not project_servers:
+                return
+        
+        # Target: configurable or default to ~/.copilot/mcp-config.json
+        if target_path is None:
+            global_copilot_dir = Path.home() / ".copilot"
+            global_mcp = global_copilot_dir / "mcp-config.json"
+        else:
+            global_mcp = Path(target_path)
+            global_copilot_dir = global_mcp.parent
         
         if self.dry_run:
             self.created.append(global_mcp)
-            return
-        
-        try:
-            project_config = json.loads(project_mcp.read_text())
-        except (json.JSONDecodeError, IOError):
-            return
-        
-        project_servers = project_config.get("mcpServers", {})
-        if not project_servers:
             return
         
         # Load or create global config

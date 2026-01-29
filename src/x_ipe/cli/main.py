@@ -218,6 +218,39 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool) -> Non
     if (project_root / ".git").exists():
         scaffold.update_gitignore()
     
+    # MCP config merge with user confirmation
+    mcp_servers = scaffold.get_project_mcp_servers()
+    if mcp_servers and not dry_run:
+        click.echo("\n" + "-" * 40)
+        click.echo("MCP Server Configuration")
+        click.echo("-" * 40)
+        
+        # Show available servers
+        click.echo(f"\nFound {len(mcp_servers)} MCP server(s) in project config:")
+        for name in mcp_servers:
+            click.echo(f"  • {name}")
+        
+        # Confirm each server
+        servers_to_merge = []
+        for name in mcp_servers:
+            if click.confirm(f"\nAdd '{name}' to global MCP config?", default=True):
+                servers_to_merge.append(name)
+        
+        if servers_to_merge:
+            # Confirm target path
+            default_path = Path.home() / ".copilot" / "mcp-config.json"
+            target_path = click.prompt(
+                "\nTarget MCP config path",
+                default=str(default_path),
+                type=click.Path(dir_okay=False, path_type=Path)
+            )
+            
+            scaffold.merge_mcp_config(
+                servers_to_merge=servers_to_merge,
+                target_path=target_path
+            )
+            click.echo(f"\n✓ Merged {len(servers_to_merge)} MCP server(s) to {target_path}")
+    
     # Show summary
     created, skipped = scaffold.get_summary()
     
