@@ -265,6 +265,236 @@ def save_ideas_toolbox():
 
 
 # ==========================================================================
+# CR-006: Folder Tree UX Enhancement API Endpoints
+# ==========================================================================
+
+@ideas_bp.route('/api/ideas/move', methods=['POST'])
+def move_idea_item():
+    """
+    POST /api/ideas/move
+    
+    Move a file or folder to a new location.
+    
+    Request body:
+        - source_path: string - Path of item to move
+        - target_folder: string - Destination folder path
+    
+    Response:
+        - success: true/false
+        - new_path: string
+    """
+    project_root = current_app.config.get('PROJECT_ROOT', os.getcwd())
+    service = IdeasService(project_root)
+    
+    if not request.is_json:
+        return jsonify({'success': False, 'error': 'JSON required'}), 400
+    
+    data = request.get_json()
+    source_path = data.get('source_path')
+    target_folder = data.get('target_folder')
+    
+    if source_path is None:
+        return jsonify({'success': False, 'error': 'source_path is required'}), 400
+    
+    if target_folder is None:
+        return jsonify({'success': False, 'error': 'target_folder is required'}), 400
+    
+    result = service.move_item(source_path, target_folder)
+    
+    if result['success']:
+        return jsonify(result)
+    return jsonify(result), 400
+
+
+@ideas_bp.route('/api/ideas/duplicate', methods=['POST'])
+def duplicate_idea_item():
+    """
+    POST /api/ideas/duplicate
+    
+    Duplicate a file or folder with -copy suffix.
+    
+    Request body:
+        - path: string - Path of item to duplicate
+    
+    Response:
+        - success: true/false
+        - new_path: string
+    """
+    project_root = current_app.config.get('PROJECT_ROOT', os.getcwd())
+    service = IdeasService(project_root)
+    
+    if not request.is_json:
+        return jsonify({'success': False, 'error': 'JSON required'}), 400
+    
+    data = request.get_json()
+    path = data.get('path')
+    
+    if not path:
+        return jsonify({'success': False, 'error': 'path is required'}), 400
+    
+    result = service.duplicate_item(path)
+    
+    if result['success']:
+        return jsonify(result)
+    return jsonify(result), 400
+
+
+@ideas_bp.route('/api/ideas/download', methods=['GET'])
+def download_idea_file():
+    """
+    GET /api/ideas/download?path=...
+    
+    Download a file from ideas folder.
+    
+    Query params:
+        - path: string - Path of file to download
+    
+    Response:
+        File download with appropriate Content-Type
+    """
+    from flask import send_file
+    import io
+    
+    project_root = current_app.config.get('PROJECT_ROOT', os.getcwd())
+    service = IdeasService(project_root)
+    
+    path = request.args.get('path')
+    
+    if not path:
+        return jsonify({'success': False, 'error': 'path is required'}), 400
+    
+    result = service.get_download_info(path)
+    
+    if not result['success']:
+        # Return 404 for file not found
+        status_code = 404 if 'not found' in result['error'].lower() else 400
+        return jsonify(result), status_code
+    
+    # Handle both string and bytes content
+    content = result['content']
+    if isinstance(content, str):
+        content = content.encode('utf-8')
+    
+    return send_file(
+        io.BytesIO(content),
+        mimetype=result['mime_type'],
+        as_attachment=True,
+        download_name=result['filename']
+    )
+
+
+@ideas_bp.route('/api/ideas/folder-contents', methods=['GET'])
+def get_folder_contents():
+    """
+    GET /api/ideas/folder-contents?path=...
+    
+    Get contents of a specific folder.
+    
+    Query params:
+        - path: string - Folder path (optional, defaults to ideas root)
+    
+    Response:
+        - success: true/false
+        - items: array of file/folder objects
+    """
+    project_root = current_app.config.get('PROJECT_ROOT', os.getcwd())
+    service = IdeasService(project_root)
+    
+    path = request.args.get('path', '')
+    
+    result = service.get_folder_contents(path)
+    
+    if result['success']:
+        return jsonify(result)
+    return jsonify(result), 400
+
+
+@ideas_bp.route('/api/ideas/search', methods=['GET'])
+def search_ideas():
+    """
+    GET /api/ideas/search?q=...
+    
+    Search/filter ideas tree by query.
+    
+    Query params:
+        - q: string - Search query
+    
+    Response:
+        - success: true/false
+        - tree: filtered tree structure
+    """
+    project_root = current_app.config.get('PROJECT_ROOT', os.getcwd())
+    service = IdeasService(project_root)
+    
+    query = request.args.get('q', '')
+    
+    try:
+        tree = service.filter_tree(query)
+        return jsonify({'success': True, 'tree': tree})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@ideas_bp.route('/api/ideas/delete-info', methods=['GET'])
+def get_delete_info():
+    """
+    GET /api/ideas/delete-info?path=...
+    
+    Get item info for delete confirmation dialog.
+    
+    Query params:
+        - path: string - Path of item to delete
+    
+    Response:
+        - success: true/false
+        - name: string
+        - type: 'file' | 'folder'
+        - item_count: number (for folders)
+    """
+    project_root = current_app.config.get('PROJECT_ROOT', os.getcwd())
+    service = IdeasService(project_root)
+    
+    path = request.args.get('path')
+    
+    if not path:
+        return jsonify({'success': False, 'error': 'path is required'}), 400
+    
+    result = service.get_delete_info(path)
+    
+    if result['success']:
+        return jsonify(result)
+    return jsonify(result), 400
+
+
+@ideas_bp.route('/api/ideas/validate-drop', methods=['POST'])
+def validate_drop_target():
+    """
+    POST /api/ideas/validate-drop
+    
+    Validate if drop target is valid for drag source.
+    
+    Request body:
+        - source_path: string - Path being dragged
+        - target_folder: string - Drop target folder
+    
+    Response:
+        - valid: true/false
+    """
+    project_root = current_app.config.get('PROJECT_ROOT', os.getcwd())
+    service = IdeasService(project_root)
+    
+    if not request.is_json:
+        return jsonify({'valid': False}), 400
+    
+    data = request.get_json()
+    source_path = data.get('source_path')
+    target_folder = data.get('target_folder', '')
+    
+    valid = service.is_valid_drop_target(source_path, target_folder)
+    return jsonify({'valid': valid})
+
+
+# ==========================================================================
 # SKILLS API
 # 
 # Read-only API for skills defined in .github/skills/

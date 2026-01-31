@@ -14,6 +14,14 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-233 | Code Implementation | FEATURE-008 v1.5 CR-006 Implementation | Ember | 01-31-2026 06:15:00 | src/x_ipe/services/ideas_service.py, src/x_ipe/routes/ideas_routes.py | 49/49 tests pass |
+| TASK-232 | Test Generation | FEATURE-008 v1.5 CR-006 Tests | Ember | 01-31-2026 05:50:00 | tests/test_ideas_cr006.py | 49 tests, 48 failing (TDD ready) |
+| TASK-231 | Technical Design | FEATURE-008 v1.5 CR-006 Technical Design | Ember | 01-31-2026 05:45:00 | x-ipe-docs/requirements/FEATURE-008/technical-design.md | 4 new modules, 4 new API endpoints |
+| TASK-230 | Change Request | CR-006: Ideas Folder Tree UX Enhancement | Ember | 01-31-2026 05:35:00 | x-ipe-docs/requirements/FEATURE-008/CR-006.md | Classification: Modification |
+| TASK-229 | Ideation | CR-006: Ideas Folder Tree UX Enhancement | Ember | 01-31-2026 05:10:00 | idea-summary-v1.md, mockup-v1.html | Idea refined with interactive mockup |
+| TASK-228 | Bug Fix | Missing file rename button in nested idea tree | Flux | 01-31-2026 03:56:00 | src/x_ipe/static/js/features/workplace.js | Added rename button to _buildTreeList method |
+| TASK-227 | Feature Acceptance Test | FEATURE-001: Project Navigation UI Tests | Zephyr | 01-30-2026 08:15:00 | x-ipe-docs/requirements/FEATURE-001/acceptance-test-cases.md | 8/8 tests passed (100%) |
+| TASK-226 | Skill Creation | Create task-type-feature-acceptance-test skill | Cipher | 01-30-2026 06:58:00 | .github/skills/task-type-feature-acceptance-test/ | New feature-stage skill with template |
 | TASK-224 | Code Implementation | Add MCP config merge to X-IPE init/upgrade | Cipher | 01-29-2026 07:35:00 | src/x_ipe/core/scaffold.py, cli/main.py | commit 7482406 |
 | TASK-223 | Feature Closing | FEATURE-022-D: Feedback Storage & Submission PR | Bolt | 01-28-2026 17:30:00 | commit 34c7d11 | Feature implemented |
 | TASK-222 | Code Implementation | FEATURE-022-D: Feedback Storage & Submission Implementation | Bolt | 01-28-2026 17:25:00 | src/x_ipe/services/uiux_feedback_service.py, uiux_feedback_routes.py | 20/20 tests passing |
@@ -95,7 +103,8 @@
 | Feature Breakdown | task-type-feature-breakdown | Technical Design |
 | Technical Design | task-type-technical-design | Test Generation |
 | Test Generation | task-type-test-generation | Code Implementation |
-| Code Implementation | task-type-code-implementation | Human Playground |
+| Code Implementation | task-type-code-implementation | Feature Acceptance Test |
+| Feature Acceptance Test | task-type-feature-acceptance-test | Feature Closing |
 | Human Playground | task-type-human-playground | Feature Closing |
 | Feature Closing | task-type-feature-closing | - |
 | Code Refactor | task-type-code-refactor | - |
@@ -106,8 +115,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 0
-- **In Progress:** 0
+- **Total Active:** 2
+- **In Progress:** 2
 - **Pending:** 0
 - **Pending Review:** 0
 - **Blocked:** 0

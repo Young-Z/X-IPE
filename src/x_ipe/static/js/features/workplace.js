@@ -4,10 +4,12 @@
  * 
  * Two-column view for managing ideas with upload, tree navigation,
  * inline editing with auto-save, and folder rename.
+ * 
+ * CR-006: Added folder view panel, drag-drop, and search functionality.
  */
 class WorkplaceManager {
     constructor() {
-        this.currentView = 'tree'; // tree | upload | editor
+        this.currentView = 'tree'; // tree | upload | editor | folderView
         this.currentPath = null;
         this.saveTimer = null;
         this.saveDelay = 5000; // 5 seconds auto-save delay
@@ -24,6 +26,13 @@ class WorkplaceManager {
         this.easyMDE = null; // EasyMDE editor instance for compose view
         this.copilotPrompts = []; // Loaded from x-ipe-docs/config/copilot-prompt.json
         this.targetFolderPath = null; // Target folder for compose/upload (null = create new folder)
+        
+        // CR-006: New managers
+        this.folderViewManager = null;
+        this.treeSearchManager = null;
+        this.treeDragManager = null;
+        this.confirmDialog = null;
+        
         this._loadCopilotPrompts();
     }
     
@@ -111,6 +120,187 @@ class WorkplaceManager {
         // Load tree and start polling
         await this.loadTree();
         this._startPolling();
+        
+        // CR-006: Initialize new managers
+        this._initCR006Managers();
+    }
+    
+    /**
+     * CR-006: Initialize folder view, search, and drag-drop managers
+     */
+    _initCR006Managers() {
+        const treeContainer = document.getElementById('workplace-tree');
+        const contentContainer = document.getElementById('workplace-content');
+        
+        if (!treeContainer || !contentContainer) return;
+        
+        // Initialize confirm dialog
+        if (typeof ConfirmDialog !== 'undefined') {
+            this.confirmDialog = new ConfirmDialog();
+        }
+        
+        // Initialize folder view manager
+        if (typeof FolderViewManager !== 'undefined') {
+            this.folderViewManager = new FolderViewManager({
+                container: contentContainer,
+                onAction: async (action, path, data) => {
+                    return await this._handleFolderViewAction(action, path, data);
+                },
+                onNavigate: (path) => {
+                    this.openFile(path);
+                },
+                onClose: () => {
+                    this._closeFolderView();
+                }
+            });
+            this.folderViewManager.init();
+        }
+        
+        // Initialize search manager
+        if (typeof TreeSearchManager !== 'undefined') {
+            this.treeSearchManager = new TreeSearchManager({
+                treeContainer: treeContainer
+            });
+            this.treeSearchManager.init();
+        }
+        
+        // Initialize drag manager
+        if (typeof TreeDragManager !== 'undefined') {
+            this.treeDragManager = new TreeDragManager({
+                treeContainer: treeContainer,
+                onMove: async (sourcePath, targetPath) => {
+                    return await this._handleMoveItem(sourcePath, targetPath);
+                },
+                onMoveComplete: () => {
+                    this.loadTree();
+                }
+            });
+            this.treeDragManager.init();
+        }
+    }
+    
+    /**
+     * CR-006: Handle folder view actions
+     */
+    async _handleFolderViewAction(action, path, data) {
+        try {
+            switch (action) {
+                case 'add-file':
+                    this.showUploadView(path);
+                    return true;
+                    
+                case 'add-folder':
+                    // For now, prompt for folder name
+                    const folderName = prompt('Enter folder name:');
+                    if (folderName) {
+                        // Create folder via upload with empty file (will create folder structure)
+                        const response = await fetch('/api/ideas/upload', {
+                            method: 'POST',
+                            body: this._createFormData(path, folderName)
+                        });
+                        return response.ok;
+                    }
+                    return false;
+                    
+                case 'rename':
+                    const newName = prompt(`Rename "${data.name || path.split('/').pop()}" to:`, data.name || path.split('/').pop());
+                    if (newName && newName !== data.name) {
+                        if (data.type === 'folder') {
+                            const result = await this._renameFolder(path, newName);
+                            return result.success;
+                        } else {
+                            const result = await this._renameFile(path, newName);
+                            return result.success;
+                        }
+                    }
+                    return false;
+                    
+                case 'delete':
+                    const deleteResult = await this._deleteItem(path);
+                    if (deleteResult.success) {
+                        this.loadTree();
+                    }
+                    return deleteResult.success;
+                    
+                case 'duplicate':
+                    const dupResponse = await fetch('/api/ideas/duplicate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ path: path })
+                    });
+                    const dupResult = await dupResponse.json();
+                    if (dupResult.success) {
+                        this._showToast('Item duplicated', 'success');
+                        this.loadTree();
+                    }
+                    return dupResult.success;
+                    
+                default:
+                    console.warn('Unknown folder view action:', action);
+                    return false;
+            }
+        } catch (error) {
+            console.error('Folder view action failed:', error);
+            this._showToast('Action failed', 'error');
+            return false;
+        }
+    }
+    
+    /**
+     * CR-006: Handle move item via drag-drop
+     */
+    async _handleMoveItem(sourcePath, targetPath) {
+        try {
+            const response = await fetch('/api/ideas/move', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    source_path: sourcePath,
+                    target_folder: targetPath
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this._showToast('Item moved', 'success');
+                return true;
+            } else {
+                this._showToast(result.error || 'Move failed', 'error');
+                return false;
+            }
+        } catch (error) {
+            console.error('Move failed:', error);
+            this._showToast('Move failed', 'error');
+            return false;
+        }
+    }
+    
+    /**
+     * CR-006: Open folder view for a folder
+     */
+    openFolderView(folderPath) {
+        if (this.folderViewManager) {
+            this.currentView = 'folderView';
+            this.folderViewManager.render(folderPath);
+        }
+    }
+    
+    /**
+     * CR-006: Close folder view and return to placeholder
+     */
+    _closeFolderView() {
+        this.currentView = 'tree';
+        const contentContainer = document.getElementById('workplace-content');
+        if (contentContainer) {
+            contentContainer.innerHTML = `
+                <div class="workplace-placeholder">
+                    <i class="bi bi-lightbulb"></i>
+                    <h5>Welcome to Workplace</h5>
+                    <p class="text-muted">Click a file to preview, or click the folder arrow to browse contents</p>
+                </div>
+            `;
+        }
     }
     
     /**
@@ -257,10 +447,14 @@ class WorkplaceManager {
         
         for (const node of nodes) {
             const li = document.createElement('li');
-            li.className = 'workplace-tree-item';
+            li.className = 'workplace-tree-item tree-item'; // CR-006: Added tree-item for drag-drop
             li.dataset.path = node.path;
             li.dataset.type = node.type;
             li.dataset.name = node.name;
+            
+            // CR-006: Enable drag-drop
+            li.setAttribute('draggable', 'true');
+            li.dataset.draggable = 'true';
             
             const itemContent = document.createElement('div');
             itemContent.className = 'workplace-tree-item-content';
@@ -275,13 +469,27 @@ class WorkplaceManager {
             const icon = document.createElement('i');
             icon.className = node.type === 'folder' ? 'bi bi-folder' : 'bi bi-file-earmark';
             
+            // CR-006: Add tree-label class for search matching
             const nameSpan = document.createElement('span');
-            nameSpan.className = 'workplace-tree-name';
+            nameSpan.className = 'workplace-tree-name tree-label';
             nameSpan.textContent = node.name;
             
             // Action buttons container
             const actionBtns = document.createElement('div');
             actionBtns.className = 'workplace-tree-actions';
+            
+            // CR-006: Folder view button (">") for folders
+            if (node.type === 'folder') {
+                const folderViewBtn = document.createElement('button');
+                folderViewBtn.className = 'workplace-tree-action-btn tree-folder-view-btn';
+                folderViewBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
+                folderViewBtn.title = 'Open folder view';
+                folderViewBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.openFolderView(node.path);
+                });
+                actionBtns.appendChild(folderViewBtn);
+            }
             
             // Add button (for folders - to add files to folder)
             if (node.type === 'folder') {
@@ -393,10 +601,14 @@ class WorkplaceManager {
         
         for (const node of nodes) {
             const li = document.createElement('li');
-            li.className = 'workplace-tree-item';
+            li.className = 'workplace-tree-item tree-item'; // CR-006: Added tree-item for drag-drop
             li.dataset.path = node.path;
             li.dataset.type = node.type;
             li.dataset.name = node.name;
+            
+            // CR-006: Enable drag-drop
+            li.setAttribute('draggable', 'true');
+            li.dataset.draggable = 'true';
             
             const itemContent = document.createElement('div');
             itemContent.className = 'workplace-tree-item-content';
@@ -411,13 +623,27 @@ class WorkplaceManager {
             const icon = document.createElement('i');
             icon.className = node.type === 'folder' ? 'bi bi-folder' : 'bi bi-file-earmark';
             
+            // CR-006: Add tree-label class for search matching
             const nameSpan = document.createElement('span');
-            nameSpan.className = 'workplace-tree-name';
+            nameSpan.className = 'workplace-tree-name tree-label';
             nameSpan.textContent = node.name;
             
             // Action buttons container
             const actionBtns = document.createElement('div');
             actionBtns.className = 'workplace-tree-actions';
+            
+            // CR-006: Folder view button for nested folders
+            if (node.type === 'folder') {
+                const folderViewBtn = document.createElement('button');
+                folderViewBtn.className = 'workplace-tree-action-btn tree-folder-view-btn';
+                folderViewBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
+                folderViewBtn.title = 'Open folder view';
+                folderViewBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.openFolderView(node.path);
+                });
+                actionBtns.appendChild(folderViewBtn);
+            }
             
             // Download button (only for files)
             if (node.type === 'file') {
@@ -430,6 +656,17 @@ class WorkplaceManager {
                     this.downloadFile(node.path, node.name);
                 });
                 actionBtns.appendChild(downloadBtn);
+                
+                // Rename button for files
+                const renameBtn = document.createElement('button');
+                renameBtn.className = 'workplace-tree-action-btn workplace-tree-rename-btn';
+                renameBtn.innerHTML = '<i class="bi bi-pencil"></i>';
+                renameBtn.title = 'Rename file';
+                renameBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.startFileRename(li, node.path, node.name);
+                });
+                actionBtns.appendChild(renameBtn);
             }
             
             // Delete button

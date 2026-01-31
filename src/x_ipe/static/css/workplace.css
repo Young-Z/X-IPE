@@ -910,3 +910,552 @@
     font-size: 12px;
     margin-left: 8px;
 }
+
+
+/* =================================================================
+ * CR-006: FOLDER TREE UX ENHANCEMENT STYLES
+ * ================================================================= */
+
+/* Design system variables for CR-006 */
+:root {
+    --cr006-color-primary: #0f172a;
+    --cr006-color-secondary: #475569;
+    --cr006-color-accent: #10b981;
+    --cr006-color-accent-light: #d1fae5;
+    --cr006-color-border: #e2e8f0;
+    --cr006-color-bg: #f8fafc;
+    --cr006-color-error: #ef4444;
+    --cr006-color-error-light: #fee2e2;
+    --cr006-radius-sm: 4px;
+    --cr006-radius-md: 8px;
+    --cr006-radius-lg: 12px;
+}
+
+/* =================================================================
+ * TREE SEARCH BAR
+ * ================================================================= */
+.tree-search-container {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--cr006-color-border);
+}
+
+.tree-search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.tree-search-icon {
+    position: absolute;
+    left: 10px;
+    color: var(--cr006-color-secondary);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.tree-search-input {
+    width: 100%;
+    padding: 6px 32px 6px 32px;
+    border: 1px solid var(--cr006-color-border);
+    border-radius: var(--cr006-radius-md);
+    font-size: 13px;
+    background: white;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tree-search-input:focus {
+    outline: none;
+    border-color: var(--cr006-color-accent);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.tree-search-input::placeholder {
+    color: #94a3b8;
+}
+
+.tree-search-clear {
+    position: absolute;
+    right: 6px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--cr006-color-secondary);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.tree-search-clear:hover {
+    background: var(--cr006-color-border);
+    color: var(--cr006-color-primary);
+}
+
+/* Search result highlighting */
+.tree-item.search-match .tree-label {
+    background: linear-gradient(transparent 60%, #fef08a 60%);
+}
+
+.tree-item.search-parent {
+    opacity: 0.7;
+}
+
+/* =================================================================
+ * DRAG-DROP STATES
+ * ================================================================= */
+.tree-item.dragging {
+    opacity: 0.5;
+}
+
+.tree-item.drag-over {
+    background: var(--cr006-color-accent-light) !important;
+    border: 2px dashed var(--cr006-color-accent) !important;
+    border-radius: var(--cr006-radius-md);
+}
+
+.tree-item.drag-invalid {
+    background: var(--cr006-color-error-light) !important;
+    border: 2px solid var(--cr006-color-error) !important;
+    border-radius: var(--cr006-radius-md);
+}
+
+.tree-item.moving {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-4px); }
+    40%, 80% { transform: translateX(4px); }
+}
+
+/* =================================================================
+ * FOLDER VIEW BUTTON ON TREE ITEMS
+ * ================================================================= */
+.tree-folder-view-btn {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--cr006-color-secondary);
+    border-radius: var(--cr006-radius-sm);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.tree-item:hover .tree-folder-view-btn {
+    opacity: 1;
+}
+
+.tree-folder-view-btn:hover {
+    background: var(--cr006-color-accent);
+    color: white;
+}
+
+/* =================================================================
+ * FOLDER VIEW PANEL
+ * ================================================================= */
+.folder-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: white;
+}
+
+.folder-view-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--cr006-color-border);
+    background: var(--cr006-color-bg);
+}
+
+.folder-view-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.folder-view-close {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--cr006-color-secondary);
+    border-radius: var(--cr006-radius-sm);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.folder-view-close:hover {
+    background: var(--cr006-color-border);
+}
+
+/* Breadcrumb */
+.folder-view-breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    font-size: 14px;
+}
+
+.breadcrumb-item {
+    color: var(--cr006-color-secondary);
+    padding: 2px 4px;
+    border-radius: var(--cr006-radius-sm);
+}
+
+.breadcrumb-item.clickable {
+    cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.breadcrumb-item.clickable:hover {
+    color: var(--cr006-color-accent);
+    background: var(--cr006-color-accent-light);
+}
+
+.breadcrumb-item.current {
+    color: var(--cr006-color-primary);
+    font-weight: 500;
+}
+
+.breadcrumb-sep {
+    color: #cbd5e1;
+    font-size: 12px;
+}
+
+/* Action bar */
+.folder-view-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.folder-view-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--cr006-color-border);
+    background: white;
+    color: var(--cr006-color-primary);
+    border-radius: var(--cr006-radius-md);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.folder-view-action-btn:hover {
+    border-color: var(--cr006-color-accent);
+    color: var(--cr006-color-accent);
+}
+
+.folder-view-action-btn.danger:hover {
+    border-color: var(--cr006-color-error);
+    color: var(--cr006-color-error);
+}
+
+.folder-view-action-btn i {
+    font-size: 14px;
+}
+
+/* Content area */
+.folder-view-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
+}
+
+.folder-view-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 20px;
+    color: var(--cr006-color-secondary);
+    text-align: center;
+}
+
+.folder-view-empty i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #cbd5e1;
+}
+
+.folder-view-empty p {
+    margin: 0 0 8px 0;
+}
+
+/* Item list */
+.folder-view-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.folder-view-item {
+    border-radius: var(--cr006-radius-md);
+    transition: background 0.15s ease;
+}
+
+.folder-view-item-main {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    gap: 10px;
+    cursor: pointer;
+    border-radius: var(--cr006-radius-md);
+}
+
+.folder-view-item-main:hover {
+    background: var(--cr006-color-bg);
+}
+
+.folder-view-item-toggle {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--cr006-color-secondary);
+    border-radius: var(--cr006-radius-sm);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.folder-view-item.expanded .folder-view-item-toggle {
+    transform: rotate(90deg);
+}
+
+.folder-view-item-spacer {
+    width: 20px;
+}
+
+.folder-view-item-icon {
+    font-size: 18px;
+    color: var(--cr006-color-secondary);
+    flex-shrink: 0;
+}
+
+.folder-view-item-icon.folder-icon {
+    color: #f59e0b;
+}
+
+.folder-view-item-name {
+    flex: 1;
+    font-size: 14px;
+    color: var(--cr006-color-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.folder-view-item-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.folder-view-item-main:hover .folder-view-item-actions {
+    opacity: 1;
+}
+
+.folder-view-item-action {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--cr006-color-secondary);
+    border-radius: var(--cr006-radius-sm);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.folder-view-item-action:hover {
+    background: var(--cr006-color-border);
+    color: var(--cr006-color-primary);
+}
+
+.folder-view-item-action.danger:hover {
+    background: var(--cr006-color-error-light);
+    color: var(--cr006-color-error);
+}
+
+/* Nested children */
+.folder-view-item-children {
+    display: none;
+    padding-left: 24px;
+}
+
+.folder-view-item.expanded > .folder-view-item-children {
+    display: block;
+}
+
+/* Error state */
+.folder-view-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--cr006-color-error);
+    text-align: center;
+}
+
+.folder-view-error i {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+/* =================================================================
+ * CONFIRM DIALOG
+ * ================================================================= */
+.confirm-dialog-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.confirm-dialog-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.confirm-dialog {
+    background: white;
+    border-radius: var(--cr006-radius-lg);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    max-width: 400px;
+    width: 90%;
+    transform: scale(0.95);
+    transition: transform 0.2s ease;
+}
+
+.confirm-dialog-overlay.visible .confirm-dialog {
+    transform: scale(1);
+}
+
+.confirm-dialog-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--cr006-color-border);
+}
+
+.confirm-dialog-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--cr006-color-primary);
+}
+
+.confirm-dialog-body {
+    padding: 20px;
+}
+
+.confirm-dialog-message {
+    margin: 0;
+    font-size: 14px;
+    color: var(--cr006-color-secondary);
+    line-height: 1.5;
+}
+
+.confirm-dialog-details {
+    margin-top: 12px;
+}
+
+.confirm-dialog-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #fef3c7;
+    border-radius: var(--cr006-radius-md);
+    color: #92400e;
+    font-size: 13px;
+    margin: 0;
+}
+
+.confirm-dialog-warning i {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.confirm-dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--cr006-color-border);
+}
+
+.confirm-dialog-btn {
+    padding: 8px 16px;
+    border-radius: var(--cr006-radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.confirm-dialog-btn.cancel-btn {
+    border: 1px solid var(--cr006-color-border);
+    background: white;
+    color: var(--cr006-color-secondary);
+}
+
+.confirm-dialog-btn.cancel-btn:hover {
+    background: var(--cr006-color-bg);
+}
+
+.confirm-dialog-btn.confirm-btn {
+    border: none;
+    background: var(--cr006-color-accent);
+    color: white;
+}
+
+.confirm-dialog-btn.confirm-btn:hover {
+    background: #059669;
+}
+
+.confirm-dialog-btn.confirm-btn.danger {
+    background: var(--cr006-color-error);
+}
+
+.confirm-dialog-btn.confirm-btn.danger:hover {
+    background: #dc2626;
+}
+
+.confirm-dialog-btn.confirm-btn.primary {
+    background: #3b82f6;
+}
+
+.confirm-dialog-btn.confirm-btn.primary:hover {
+    background: #2563eb;
+}

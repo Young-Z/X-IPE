@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-008 v1.5 (CR-006): Ideas Folder Tree UX Enhancement**
+  - Drag-and-drop reorganization: move files/folders between locations with visual feedback
+  - Folder view panel: dedicated panel with breadcrumb navigation, action bar, and file grid
+  - Search/filter: real-time tree filtering with parent context preservation
+  - Confirmation dialogs: reusable modal for delete/move operations with item counts
+  - 7 new backend API endpoints: move, duplicate, download, folder-contents, search, delete-info, validate-drop
+  - 4 new JavaScript modules: confirm-dialog.js, tree-search.js, tree-drag.js, folder-view.js
+  - ~400 lines of new CSS for drag states, folder view, search bar, and confirmation dialogs
+  - Design system: DM Sans font, Slate/Emerald color scheme, consistent 8px spacing
+  - 49 new tests validating CR-006 implementation
+
 - **FEATURE-008 v1.4 (CR-004): Workplace Submenu Navigation**
   - Sidebar submenu structure: Workplace parent with nested Ideation and UIUX Feedbacks children
   - `/workplace` route serving dedicated Ideation page with existing functionality

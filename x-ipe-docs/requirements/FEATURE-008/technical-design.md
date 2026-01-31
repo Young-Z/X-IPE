@@ -1,6 +1,6 @@
 # Technical Design: Ideation (formerly Workplace)
 
-> Feature ID: FEATURE-008 | Version: v1.4 | Last Updated: 01-28-2026
+> Feature ID: FEATURE-008 | Version: v1.5 | Last Updated: 01-31-2026
 
 ---
 
@@ -8,6 +8,7 @@
 
 | Version | Date | Description |
 |---------|------|-------------|
+| v1.5 | 01-31-2026 | CR-006: Folder tree UX - drag-drop move, folder view panel, search, UI upgrade |
 | v1.4 | 01-28-2026 | CR-004: Sidebar submenu, rename to Ideation, Copilot hover menu |
 | v1.3 | 01-23-2026 | CR-003: Add Ideation Toolbox for skill configuration |
 | v1.2 | 01-23-2026 | CR-002: Add drag-drop file upload to existing folders |
@@ -53,6 +54,28 @@
 | `SidebarNav._setupSubmenuBehavior()` | Handle parent item no-action click (CR-004) | UI component | #sidebar #navigation |
 | `ContentRenderer._initCopilotHoverMenu()` | Initialize hover dropdown for Copilot button (CR-004) | UI component | #copilot #hover #menu |
 | `ContentRenderer._handleCopilotMenuAction()` | Handle Copilot menu item selection (CR-004) | UI component | #copilot #hover #menu |
+| `FolderViewManager` | **NEW MODULE** - Detailed folder view panel (CR-006) | Standalone module ~400 lines | #ideas #frontend #folderview |
+| `FolderViewManager.render()` | Render folder view with path bar + contents (CR-006) | UI component | #ideas #folderview |
+| `FolderViewManager._renderPathBar()` | Breadcrumb path bar at top (CR-006) | UI component | #ideas #folderview #pathbar |
+| `FolderViewManager._renderActionBar()` | Add File/Folder, Rename, Delete buttons (CR-006) | UI component | #ideas #folderview #actions |
+| `FolderViewManager._renderContents()` | File/folder list with actions (CR-006) | UI component | #ideas #folderview #contents |
+| `FolderViewManager._handleItemAction()` | Rename/delete/duplicate/download actions (CR-006) | UI component | #ideas #folderview #actions |
+| `TreeDragManager` | **NEW MODULE** - Drag-drop file/folder reorganization (CR-006) | Standalone module ~250 lines | #ideas #frontend #dragdrop |
+| `TreeDragManager.init()` | Setup drag handlers on tree items (CR-006) | UI component | #ideas #dragdrop |
+| `TreeDragManager._validateDrop()` | Check if drop target is valid (CR-006) | UI component | #ideas #dragdrop #validation |
+| `TreeDragManager._showInvalidFeedback()` | Red border + shake animation (CR-006) | UI component | #ideas #dragdrop #feedback |
+| `TreeSearchManager` | **NEW MODULE** - Search/filter tree (CR-006) | Standalone module ~150 lines | #ideas #frontend #search |
+| `TreeSearchManager.init()` | Setup search bar and filter logic (CR-006) | UI component | #ideas #search |
+| `TreeSearchManager._filterTree()` | Filter tree items showing matches + parents (CR-006) | UI component | #ideas #search #filter |
+| `IdeasService.move_item()` | Move file/folder to new location (CR-006) | Backend service | #ideas #service #move |
+| `IdeasService.duplicate_item()` | Duplicate file/folder with -copy suffix (CR-006) | Backend service | #ideas #service #duplicate |
+| `IdeasService.delete_item()` | Delete file/folder with confirmation (CR-006) | Backend service | #ideas #service #delete |
+| `IdeasService.download_file()` | Generate download response for file (CR-006) | Backend service | #ideas #service #download |
+| `POST /api/ideas/move` | API endpoint for moving items (CR-006) | REST API | #ideas #api #move |
+| `POST /api/ideas/duplicate` | API endpoint for duplicating items (CR-006) | REST API | #ideas #api #duplicate |
+| `DELETE /api/ideas/item` | API endpoint for deleting items (CR-006) | REST API | #ideas #api #delete |
+| `GET /api/ideas/download` | API endpoint for file download (CR-006) | REST API | #ideas #api #download |
+| `ConfirmDialog` | Reusable confirmation modal component (CR-006) | UI component | #ideas #frontend #dialog |
 
 ### Dependencies
 
@@ -77,6 +100,12 @@
 9. **Toolbox Save (CR-003):** User toggles checkbox → Frontend calls `POST /api/ideas/toolbox` with updated config → `IdeasService.save_toolbox()` writes JSON file → Returns success
 10. **Sidebar Submenu (CR-004):** User sees "Workplace" parent in sidebar → Click does nothing → Always-visible nested items "Ideation" and "UIUX Feedbacks" shown indented
 11. **Copilot Hover Menu (CR-004):** User hovers/clicks Copilot button → Dropdown menu appears → "Refine idea" at top + 3 existing options → Click "Refine idea" → Original Copilot behavior triggered
+12. **Drag-Drop Move (CR-006):** User drags file/folder → Target folder highlights green → Drop triggers `POST /api/ideas/move` → `IdeasService.move_item()` moves on disk → Refresh tree
+13. **Invalid Drag (CR-006):** User drags folder into itself/child → Target shows red border + shake → Drop ignored
+14. **Open Folder View (CR-006):** User clicks ">" on folder → `FolderViewManager.render()` replaces preview panel → Shows path bar + action bar + contents list
+15. **Folder View Actions (CR-006):** User clicks action icon (rename/delete/duplicate/download) → `FolderViewManager._handleItemAction()` → Backend API call → Refresh view
+16. **Search Filter (CR-006):** User types in search bar → `TreeSearchManager._filterTree()` → Shows matching items + parent folders → Empty input restores full tree
+17. **Delete Confirmation (CR-006):** User clicks delete → `ConfirmDialog.show()` → User confirms → Backend DELETE call → Refresh tree/view
 
 ### Usage Example
 
@@ -121,6 +150,33 @@ const uploader = new IdeaUploader({
         files.forEach(f => formData.append('files', f));
         await fetch('/api/ideas/upload', { method: 'POST', body: formData });
     }
+});
+
+// 4. Drag-drop move (CR-006)
+const dragManager = new TreeDragManager({
+    onMove: async (sourcePath, targetFolder) => {
+        await fetch('/api/ideas/move', {
+            method: 'POST',
+            body: JSON.stringify({ source_path: sourcePath, target_folder: targetFolder })
+        });
+    }
+});
+
+// 5. Open folder view (CR-006)
+const folderView = new FolderViewManager({
+    onAction: (action, path) => {
+        switch(action) {
+            case 'delete': return fetch(`/api/ideas/item?path=${path}`, { method: 'DELETE' });
+            case 'duplicate': return fetch('/api/ideas/duplicate', { method: 'POST', body: JSON.stringify({ path }) });
+            case 'download': return window.location.href = `/api/ideas/download?path=${path}`;
+        }
+    }
+});
+
+// 6. Search filter (CR-006)
+const searchManager = new TreeSearchManager({
+    treeContainer: document.getElementById('workplace-tree'),
+    onFilter: (query) => { /* filter tree items */ }
 });
 ```
 
@@ -1072,10 +1128,524 @@ async _uploadToFolder(files, folderName) {
 
 ---
 
+## CR-006: Folder Tree UX Enhancement (v1.5)
+
+### Overview
+
+Major UX upgrade to the Ideas folder tree, adding drag-drop reorganization, detailed folder view panel, search/filter, and UI styling refresh.
+
+### Architecture Decision: New Standalone Modules
+
+**Rationale:** `workplace.js` is currently ~2200 lines. Per the 800-line threshold rule, new CR-006 functionality is implemented as standalone modules:
+
+| Module | Est. Lines | Responsibility |
+|--------|-----------|----------------|
+| `folder-view.js` | ~400 | Folder view panel component |
+| `tree-drag.js` | ~250 | Drag-drop reorganization |
+| `tree-search.js` | ~150 | Search/filter functionality |
+| `confirm-dialog.js` | ~100 | Reusable confirmation modal |
+
+### Drag-Drop Move Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant TDM as TreeDragManager
+    participant API as Flask API
+    participant IS as IdeasService
+    participant FS as FileSystem
+
+    U->>TDM: dragstart on file/folder
+    TDM->>TDM: Store dragged item, set opacity 0.5
+    U->>TDM: dragover on folder
+    TDM->>TDM: Validate drop target
+    alt Valid Target
+        TDM->>TDM: Show green dashed border
+        U->>TDM: drop
+        TDM->>API: POST /api/ideas/move
+        API->>IS: move_item(source, target)
+        IS->>FS: shutil.move()
+        FS-->>IS: Success
+        IS-->>API: {success: true}
+        API-->>TDM: 200 OK
+        TDM->>TDM: Refresh tree
+    else Invalid Target (self/child)
+        TDM->>TDM: Show red border + shake
+        U->>TDM: drop
+        TDM->>TDM: Ignore drop
+    end
+```
+
+### Folder View Panel Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant Tree as IdeaTree
+    participant FVM as FolderViewManager
+    participant API as Flask API
+
+    U->>Tree: Click ">" on folder
+    Tree->>FVM: render(folderPath)
+    FVM->>FVM: Hide preview panel
+    FVM->>API: GET /api/ideas/tree?path={folder}
+    API-->>FVM: Folder contents
+    FVM->>FVM: Render path bar + action bar + contents
+    U->>FVM: Hover file row
+    FVM->>FVM: Show action icons
+    U->>FVM: Click action (rename/delete/etc)
+    FVM->>API: Corresponding API call
+    API-->>FVM: Result
+    FVM->>FVM: Refresh contents
+```
+
+### Search Filter Logic
+
+```mermaid
+flowchart TB
+    Input["User types 'design'"] --> Filter["TreeSearchManager._filterTree()"]
+    Filter --> Check{"For each tree item"}
+    Check -->|Name matches| Show["Show item"]
+    Check -->|Name doesn't match| CheckParent{"Has matching child?"}
+    CheckParent -->|Yes| ShowAsParent["Show as context parent"]
+    CheckParent -->|No| Hide["Hide item"]
+    Show --> Render["Update tree display"]
+    ShowAsParent --> Render
+```
+
+### Backend API Endpoints (CR-006)
+
+| Endpoint | Method | Request Body | Response |
+|----------|--------|--------------|----------|
+| `/api/ideas/move` | POST | `{source_path, target_folder}` | `{success, new_path}` |
+| `/api/ideas/duplicate` | POST | `{path}` | `{success, new_path}` |
+| `/api/ideas/item` | DELETE | `?path=...` | `{success}` |
+| `/api/ideas/download` | GET | `?path=...` | File download |
+
+### IdeasService New Methods (CR-006)
+
+```python
+class IdeasService:
+    def move_item(self, source_path: str, target_folder: str) -> dict:
+        """Move file or folder to target folder.
+        
+        Args:
+            source_path: Relative path from ideas root
+            target_folder: Target folder relative path
+            
+        Returns:
+            {success: bool, new_path: str, error?: str}
+            
+        Validation:
+            - source must exist
+            - target must be folder
+            - target cannot be source or child of source
+        """
+        pass
+    
+    def duplicate_item(self, path: str) -> dict:
+        """Duplicate file or folder with -copy suffix.
+        
+        Creates: filename-copy.ext or foldername-copy/
+        If exists: filename-copy-2.ext, etc.
+        """
+        pass
+    
+    def delete_item(self, path: str) -> dict:
+        """Delete file or folder.
+        
+        For folders: recursively deletes contents.
+        Returns error if path doesn't exist.
+        """
+        pass
+```
+
+### Frontend Module: FolderViewManager
+
+```javascript
+/**
+ * FolderViewManager - Detailed folder view panel
+ * Location: src/x_ipe/static/js/features/folder-view.js
+ */
+class FolderViewManager {
+    constructor(options) {
+        this.container = options.container;
+        this.onAction = options.onAction; // Callback for actions
+        this.onNavigate = options.onNavigate; // Callback for navigation
+        this.currentPath = null;
+        this.expandedFolders = new Set();
+    }
+    
+    /**
+     * Render folder view for given path
+     */
+    async render(folderPath) {
+        this.currentPath = folderPath;
+        const contents = await this._loadContents(folderPath);
+        
+        this.container.innerHTML = `
+            <div class="folder-view">
+                <header class="panel-header">
+                    ${this._renderPathBar(folderPath)}
+                    ${this._renderActionBar()}
+                </header>
+                <div class="folder-view-content">
+                    ${this._renderContents(contents)}
+                </div>
+            </div>
+        `;
+        
+        this._bindEvents();
+    }
+    
+    _renderPathBar(path) {
+        const parts = path.split('/').filter(Boolean);
+        const breadcrumbs = parts.map((part, i) => {
+            const fullPath = parts.slice(0, i + 1).join('/');
+            const isLast = i === parts.length - 1;
+            return `<span class="breadcrumb-item ${isLast ? 'current' : ''}" 
+                         data-path="${fullPath}">${part}</span>`;
+        }).join('<span class="breadcrumb-sep">/</span>');
+        
+        return `<nav class="breadcrumb">
+            <span class="breadcrumb-item" data-path="">Ideas</span>
+            <span class="breadcrumb-sep">/</span>
+            ${breadcrumbs}
+        </nav>`;
+    }
+    
+    _renderActionBar() {
+        return `<div class="panel-actions">
+            <button class="action-btn" data-action="add-file">
+                <i class="bi bi-file-earmark-plus"></i> Add File
+            </button>
+            <button class="action-btn" data-action="add-folder">
+                <i class="bi bi-folder-plus"></i> Add Folder
+            </button>
+            <button class="action-btn" data-action="rename">
+                <i class="bi bi-pencil"></i> Rename
+            </button>
+            <button class="action-btn" data-action="delete">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+        </div>`;
+    }
+    
+    _renderContents(items) {
+        return `<div class="folder-list">
+            ${items.map(item => this._renderItem(item)).join('')}
+        </div>`;
+    }
+    
+    _renderItem(item) {
+        const isFolder = item.type === 'folder';
+        const icon = isFolder ? 'bi-folder-fill' : this._getFileIcon(item.name);
+        const actions = isFolder 
+            ? ['rename', 'delete', 'duplicate']
+            : ['rename', 'delete', 'duplicate', 'download'];
+        
+        return `<div class="folder-item" data-path="${item.path}" data-type="${item.type}">
+            <div class="drag-handle"><i class="bi bi-grip-vertical"></i></div>
+            <i class="item-icon ${icon}"></i>
+            <span class="item-name">${item.name}</span>
+            <span class="item-meta">${item.meta || ''}</span>
+            <div class="item-actions">
+                ${actions.map(a => `
+                    <button class="item-action ${a === 'delete' ? 'delete' : ''}" 
+                            data-action="${a}" title="${a}">
+                        <i class="bi bi-${this._getActionIcon(a)}"></i>
+                    </button>
+                `).join('')}
+            </div>
+        </div>`;
+    }
+}
+```
+
+### Frontend Module: TreeDragManager
+
+```javascript
+/**
+ * TreeDragManager - Drag-drop file/folder reorganization
+ * Location: src/x_ipe/static/js/features/tree-drag.js
+ */
+class TreeDragManager {
+    constructor(options) {
+        this.treeContainer = options.treeContainer;
+        this.onMove = options.onMove; // Callback for move operation
+        this.draggedItem = null;
+    }
+    
+    init() {
+        this.treeContainer.querySelectorAll('[data-draggable="true"]').forEach(item => {
+            item.addEventListener('dragstart', this._onDragStart.bind(this));
+            item.addEventListener('dragend', this._onDragEnd.bind(this));
+            item.addEventListener('dragover', this._onDragOver.bind(this));
+            item.addEventListener('dragleave', this._onDragLeave.bind(this));
+            item.addEventListener('drop', this._onDrop.bind(this));
+        });
+    }
+    
+    _onDragStart(e) {
+        this.draggedItem = e.target.closest('[data-path]');
+        this.draggedItem.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+    }
+    
+    _onDragOver(e) {
+        e.preventDefault();
+        const target = e.target.closest('[data-type="folder"]');
+        if (!target || target === this.draggedItem) return;
+        
+        if (this._isValidDrop(target)) {
+            target.classList.add('drag-over');
+            target.classList.remove('drag-invalid');
+        } else {
+            target.classList.add('drag-invalid');
+            target.classList.remove('drag-over');
+        }
+    }
+    
+    _onDrop(e) {
+        e.preventDefault();
+        const target = e.target.closest('[data-type="folder"]');
+        if (!target || !this._isValidDrop(target)) {
+            this._showInvalidFeedback(target);
+            return;
+        }
+        
+        const sourcePath = this.draggedItem.dataset.path;
+        const targetPath = target.dataset.path;
+        
+        this.onMove(sourcePath, targetPath);
+    }
+    
+    _isValidDrop(target) {
+        if (!this.draggedItem) return false;
+        const sourcePath = this.draggedItem.dataset.path;
+        const targetPath = target.dataset.path;
+        
+        // Cannot drop into self
+        if (sourcePath === targetPath) return false;
+        
+        // Cannot drop into child folder
+        if (targetPath.startsWith(sourcePath + '/')) return false;
+        
+        return true;
+    }
+    
+    _showInvalidFeedback(target) {
+        if (!target) return;
+        target.classList.add('drag-invalid');
+        target.style.animation = 'shake 0.3s ease';
+        setTimeout(() => {
+            target.classList.remove('drag-invalid');
+            target.style.animation = '';
+        }, 300);
+    }
+}
+```
+
+### Frontend Module: TreeSearchManager
+
+```javascript
+/**
+ * TreeSearchManager - Search/filter tree
+ * Location: src/x_ipe/static/js/features/tree-search.js
+ */
+class TreeSearchManager {
+    constructor(options) {
+        this.treeContainer = options.treeContainer;
+        this.searchInput = null;
+    }
+    
+    init() {
+        this._createSearchBar();
+        this.searchInput.addEventListener('input', 
+            this._debounce(this._filterTree.bind(this), 150));
+    }
+    
+    _createSearchBar() {
+        const header = this.treeContainer.closest('.workplace-sidebar-content')
+            .querySelector('.workplace-sidebar-header');
+        
+        const searchHtml = `
+            <div class="search-container">
+                <div class="search-wrapper">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" class="search-input" 
+                           placeholder="Filter files and folders...">
+                </div>
+            </div>
+        `;
+        header.insertAdjacentHTML('afterend', searchHtml);
+        this.searchInput = header.nextElementSibling.querySelector('.search-input');
+    }
+    
+    _filterTree() {
+        const query = this.searchInput.value.toLowerCase().trim();
+        const items = this.treeContainer.querySelectorAll('.tree-item');
+        
+        if (!query) {
+            items.forEach(item => item.style.display = '');
+            return;
+        }
+        
+        const matchingPaths = new Set();
+        
+        // Find all matching items and their parent paths
+        items.forEach(item => {
+            const name = item.querySelector('.tree-label')?.textContent.toLowerCase();
+            const path = item.dataset.path;
+            
+            if (name?.includes(query)) {
+                matchingPaths.add(path);
+                // Add all parent paths
+                const parts = path.split('/');
+                for (let i = 1; i < parts.length; i++) {
+                    matchingPaths.add(parts.slice(0, i).join('/'));
+                }
+            }
+        });
+        
+        // Show/hide based on matching paths
+        items.forEach(item => {
+            const path = item.dataset.path;
+            item.style.display = matchingPaths.has(path) ? '' : 'none';
+        });
+    }
+}
+```
+
+### CSS Updates (CR-006)
+
+```css
+/* Design system variables */
+:root {
+    --color-primary: #0f172a;
+    --color-secondary: #475569;
+    --color-accent: #10b981;
+    --color-accent-light: #d1fae5;
+    --color-border: #e2e8f0;
+    --color-bg: #f8fafc;
+    --color-error: #ef4444;
+    --color-error-light: #fee2e2;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+/* Drag-drop states */
+.tree-item.dragging {
+    opacity: 0.5;
+}
+
+.tree-item.drag-over {
+    background: var(--color-accent-light);
+    border: 2px dashed var(--color-accent);
+    border-radius: var(--radius-md);
+}
+
+.tree-item.drag-invalid {
+    background: var(--color-error-light);
+    border: 2px solid var(--color-error);
+    border-radius: var(--radius-md);
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-4px); }
+    40%, 80% { transform: translateX(4px); }
+}
+
+/* Folder view button */
+.tree-folder-view-btn {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.tree-item:hover .tree-folder-view-btn {
+    opacity: 1;
+}
+
+.tree-folder-view-btn:hover {
+    background: var(--color-accent);
+    color: white;
+}
+
+/* Folder view panel */
+.folder-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.panel-header {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.folder-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin-bottom: 2px;
+}
+
+.folder-item:hover .item-actions {
+    opacity: 1;
+}
+
+.item-actions {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+/* Search bar */
+.search-container {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.search-input {
+    width: 100%;
+    padding: 8px 12px 8px 36px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+}
+
+.search-input:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgb(16 185 129 / 0.15);
+}
+```
+
+### Edge Cases (CR-006)
+
+| Scenario | Expected Behavior |
+|----------|-------------------|
+| Drag folder into itself | Red border + shake, drop ignored |
+| Drag folder into child | Red border + shake, drop ignored |
+| Drag file onto file | Drop ignored (only folders accept) |
+| Delete folder with contents | Confirmation shows content count |
+| Duplicate name exists | Append -2, -3, etc. |
+| Search with no matches | Show empty state message |
+| Network error on move | Error toast, tree unchanged |
+
+---
+
 ## Design Change Log
 
 | Date | Phase | Change Summary |
 |------|-------|----------------|
+| 01-31-2026 | CR-006 | Major UX upgrade: Added FolderViewManager, TreeDragManager, TreeSearchManager as standalone modules (~800 lines total). New backend endpoints for move/duplicate/delete/download. UI refresh with new design system variables. |
 | 01-23-2026 | CR-003 | Added Ideation Toolbox: IdeasService.get_toolbox() and save_toolbox() for config persistence, /api/ideas/toolbox endpoints, WorkplaceManager toolbox dropdown with sections and checkboxes, bidirectional state sync with .ideation-tools.json |
 | 01-23-2026 | CR-002 | Added drag-drop upload to existing folders: IdeasService.upload() accepts target_folder, API extracts from form data, frontend handles dragover/drop on folder nodes with visual feedback |
 | 01-22-2026 | CR-001 | Added Copilot button integration: terminal panel expand, Copilot mode detection, typing simulation, refine command automation |

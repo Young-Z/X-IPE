@@ -1,14 +1,15 @@
 # Feature Specification: Workplace (Idea Management)
 
 > Feature ID: FEATURE-008  
-> Version: v1.5  
+> Version: v1.6  
 > Status: Refined  
-> Last Updated: 01-28-2026
+> Last Updated: 01-31-2026
 
 ## Version History
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
+| v1.6 | 2026-01-31 | CR-006: Folder tree UX enhancement - drag-drop, folder view, search, UI upgrade | [CR-006](./CR-006.md) |
 | v1.5 | 2026-01-28 | CR-005: Copy URL button for file access | [CR-005](./CR-005.md) |
 | v1.4 | 2026-01-28 | CR-004: Rename to Ideation, sidebar submenu, Copilot hover menu | [CR-004](./CR-004.md) |
 | v1.3 | 2026-01-23 | CR-003: Add Ideation Toolbox for skill configuration | [CR-003](./CR-003.md) |
@@ -37,6 +38,10 @@ This feature integrates with a new agent skill (`task-type-ideation`) that analy
 - As a **user**, I want to **see Ideation as a nested submenu item under Workplace**, so that **related pages are organized together** (CR-004).
 - As a **user**, I want to **access Copilot actions via a hover menu**, so that **I can choose specific actions like "Refine idea"** (CR-004).
 - As a **user**, I want to **copy a file's access URL**, so that **I can share direct links to idea files** (CR-005).
+- As a **user**, I want to **drag files and folders to reorganize them**, so that **I can easily move items between folders without file manager operations** (CR-006).
+- As a **user**, I want to **see a detailed folder view panel**, so that **I can manage folder contents with full actions available** (CR-006).
+- As a **user**, I want to **search/filter the folder tree**, so that **I can quickly find files and folders by name** (CR-006).
+- As a **user**, I want to **perform file actions via explicit icons**, so that **I can rename, delete, duplicate, and download files efficiently** (CR-006).
 
 ## Acceptance Criteria
 
@@ -85,6 +90,22 @@ This feature integrates with a new agent skill (`task-type-ideation`) that analy
 - [x] AC-43: Clicking copy URL copies file access URL to clipboard (CR-005)
 - [x] AC-44: Toast notification confirms URL copied (CR-005)
 - [x] AC-45: File rename button works in tree view for files (CR-005)
+- [ ] AC-46: Drag-and-drop moves single file/folder to target folder (CR-006)
+- [ ] AC-47: Invalid drag operations (folder into self/child) show red border + shake animation (CR-006)
+- [ ] AC-48: Valid drag targets highlight with green dashed border (CR-006)
+- [ ] AC-49: ">" icon appears on right side of folder rows in tree on hover (CR-006)
+- [ ] AC-50: Clicking ">" replaces preview panel with folder view (CR-006)
+- [ ] AC-51: Folder view shows path bar at top with folder breadcrumb (CR-006)
+- [ ] AC-52: Folder view action bar shows Add File, Add Folder, Rename, Delete buttons (CR-006)
+- [ ] AC-53: Files/folders in folder view show hover action icons (rename, delete, duplicate, download) (CR-006)
+- [ ] AC-54: Subfolders in folder view expand in place (nested list) (CR-006)
+- [ ] AC-55: Clicking file in tree while in folder view returns to file preview (CR-006)
+- [ ] AC-56: Clicking ">" on another folder refreshes folder view with new folder contents (CR-006)
+- [ ] AC-57: Delete actions show confirmation dialog (CR-006)
+- [ ] AC-58: Search bar appears next to pin button in tree header (CR-006)
+- [ ] AC-59: Search filters tree to show matching items + parent folders for context (CR-006)
+- [ ] AC-60: Folder delete icon removed from tree (now in folder view only) (CR-006)
+- [ ] AC-61: UI styling updated to match mockup design (DM Sans font, Slate/Emerald colors) (CR-006)
 
 ## Functional Requirements
 
@@ -330,6 +351,156 @@ All existing functions must continue working:
 - Brainstorming history/sessions
 - Mockup gallery
 
+### FR-13: Drag-and-Drop File/Folder Reorganization (CR-006)
+
+**Description:** Move files and folders between directories via drag-and-drop
+
+**Details:**
+- Input: User drags a file or folder in the idea tree
+- Process:
+  1. Track dragged item via HTML5 drag API
+  2. Show dragging state on source item (opacity: 0.5)
+  3. On dragover folder target, show valid drop state (green dashed border)
+  4. Validate drop: folder cannot be dropped into itself or child
+  5. If invalid, show error state (red border + shake animation)
+  6. On valid drop, call backend API to move item
+  7. Refresh tree view
+- Output: File/folder moved to target location
+
+**Constraints:**
+- Single item drag only (no multi-select)
+- Folder cannot be dropped into itself or any of its children
+- Files cannot be drop targets (only folders)
+
+**Backend Endpoint:**
+- `POST /api/ideas/move` with `source_path`, `target_folder`
+
+### FR-14: Detailed Folder View Panel (CR-006)
+
+**Description:** Full folder management interface replacing preview panel
+
+**Details:**
+- Input: User clicks ">" icon on folder row in tree
+- Process:
+  1. Hide preview panel, show folder view panel
+  2. Render path bar with folder breadcrumb
+  3. Render action bar: Add File, Add Folder, Rename Folder, Delete Folder
+  4. List all files and subfolders in folder
+  5. Each item shows hover action icons
+  6. Subfolders can expand in place (nested list)
+- Output: Full folder management interface
+
+**Navigation Behavior:**
+- Click file in tree → Return to file preview mode
+- Click ">" on another folder → Refresh folder view with new folder
+
+**Components:**
+| Component | Location | Contents |
+|-----------|----------|----------|
+| Path Bar | Top | Breadcrumb path (e.g., Ideas / Project A / Designs) |
+| Action Bar | Top-right | Add File, Add Folder, Rename, Delete buttons |
+| Contents List | Body | Files and subfolders with actions |
+
+### FR-15: File/Folder Actions in Folder View (CR-006)
+
+**Description:** Inline action icons for files and folders
+
+**Details:**
+- Input: User hovers over file/folder row in folder view
+- Process:
+  1. Show action icons on hover
+  2. Handle action clicks
+- Output: Action executed
+
+**Actions for Files:**
+| Action | Icon | Behavior |
+|--------|------|----------|
+| Rename | ✏️ | Inline text edit, save on Enter/blur |
+| Delete | 🗑️ | Show confirmation dialog, then delete |
+| Duplicate | 📋 | Create copy with "-copy" suffix |
+| Download | ⬇️ | Trigger browser download |
+| Drag Handle | ⋮⋮ | Drag to move (same as tree drag) |
+
+**Actions for Folders:**
+| Action | Icon | Behavior |
+|--------|------|----------|
+| Rename | ✏️ | Inline text edit |
+| Delete | 🗑️ | Confirmation dialog (warns about contents) |
+| Duplicate | 📋 | Copy folder and all contents |
+
+### FR-16: Search/Filter Bar (CR-006)
+
+**Description:** Filter tree by file/folder name
+
+**Details:**
+- Input: User types in search bar next to pin button
+- Process:
+  1. On input, filter tree items by name (case-insensitive)
+  2. Show matching files with their parent folders for context
+  3. Matching folders shown with their contents
+  4. Empty search restores full tree
+- Output: Filtered tree view
+
+**Filter Logic:**
+- Match against file and folder names
+- If file matches, show file + parent folder path
+- If folder matches, show folder (collapsed by default)
+- Parent folders always visible to provide context
+
+### FR-17: Confirmation Dialogs (CR-006)
+
+**Description:** Require confirmation for destructive actions
+
+**Details:**
+- Input: User clicks delete on file or folder
+- Process:
+  1. Show modal dialog with warning
+  2. For files: "Delete 'filename'? This cannot be undone."
+  3. For folders: "Delete 'folder' and all contents? This cannot be undone."
+  4. Cancel button closes dialog
+  5. Delete button executes deletion
+- Output: Item deleted or action cancelled
+
+### FR-18: UI Styling Upgrade (CR-006)
+
+**Description:** Update ideation page styling to match mockup
+
+**Details:**
+- Input: Existing ideation page CSS
+- Process: Apply new design system
+- Output: Refreshed visual design
+
+**Design System Updates:**
+| Element | Old | New |
+|---------|-----|-----|
+| Font | System default | DM Sans / system-ui |
+| Colors | Bootstrap defaults | Slate (gray) + Emerald (accent) |
+| Border Radius | 4px | 8-12px |
+| Shadows | None | Subtle box-shadows |
+| Spacing | Mixed | 4px base unit, 8px increments |
+
+**CSS Variables to Add:**
+```css
+:root {
+  --color-primary: #0f172a;
+  --color-secondary: #475569;
+  --color-accent: #10b981;
+  --color-border: #e2e8f0;
+  --color-bg: #f8fafc;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+```
+
+### FR-19: Remove Tree Delete Icon (CR-006)
+
+**Description:** Remove folder delete icon from tree (now in folder view)
+
+**Details:**
+- Input: Existing folder row in tree with delete icon
+- Process: Remove delete icon from folder row
+- Output: Cleaner tree UI, deletion via folder view
+
 ## Non-Functional Requirements
 
 ### NFR-1: Performance
@@ -465,11 +636,12 @@ When Workplace selected:
 ## Out of Scope
 
 - Multiple file upload progress tracking (show only success/failure)
-- File deletion from UI (use filesystem directly for now)
-- Drag-and-drop reordering of files/folders
-- Search within ideas
+- ~~File deletion from UI (use filesystem directly for now)~~ (Now in scope via CR-006)
+- ~~Drag-and-drop reordering of files/folders~~ (Now in scope via CR-006)
+- ~~Search within ideas~~ (Now in scope via CR-006)
 - Version history for idea files
 - Sharing ideas between users
+- Multi-select drag-and-drop (only single item)
 
 ## Technical Considerations
 
@@ -491,6 +663,7 @@ When Workplace selected:
 
 | CR ID | Date | Description | Impact |
 |-------|------|-------------|--------|
+| CR-006 | 01-31-2026 | Folder tree UX: drag-drop, folder view, search, UI upgrade | Added US-11 to US-14, AC-46 to AC-61, FR-13 to FR-19 |
 | CR-005 | 01-28-2026 | Copy URL button for file access | Added US-10, AC-42 to AC-45 |
 | CR-004 | 01-28-2026 | Sidebar submenu, rename to Ideation, Copilot hover menu | Added US-8/9, AC-33 to AC-41, FR-10 to FR-12 |
 | CR-002 | 01-23-2026 | Drag-drop file upload to existing folders | Added US-7, AC-20 to AC-23, FR-8 |
