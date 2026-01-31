@@ -183,20 +183,24 @@ class TestDashscopeIntegration:
     """Tests for dashscope SDK integration (v2 service)."""
 
     def test_start_recognition_creates_recognizer(self):
-        """VoiceInputService.start_recognition() creates TranslationRecognizerRealtime."""
+        """VoiceInputService.start_recognition() creates recognizer."""
         from x_ipe.services.voice_input_service_v2 import VoiceInputService
         
         service = VoiceInputService(api_key="test-key")
         session_id = service.create_session(socket_sid="socket-123")
         
-        with patch('src.services.voice_input_service_v2.TranslationRecognizerRealtime') as MockRecognizer:
+        # Mock both recognizer types (service chooses based on translation_enabled)
+        with patch('x_ipe.services.voice_input_service_v2.TranslationRecognizerRealtime') as MockRealtime, \
+             patch('x_ipe.services.voice_input_service_v2.TranslationRecognizerChat') as MockChat:
             mock_recognizer = MagicMock()
-            MockRecognizer.return_value = mock_recognizer
+            MockRealtime.return_value = mock_recognizer
+            MockChat.return_value = mock_recognizer
             
             result = service.start_recognition(session_id)
             
             assert result is True
-            MockRecognizer.assert_called_once()
+            # One of them should be called
+            assert MockRealtime.called or MockChat.called
             mock_recognizer.start.assert_called_once()
 
     def test_send_audio_forwards_to_recognizer(self):
@@ -346,7 +350,7 @@ class TestVoiceSocketHandlers:
         
         app = create_app({'TESTING': True})
         
-        with patch('src.app.voice_service') as mock_service:
+        with patch('x_ipe.handlers.voice_handlers.voice_service') as mock_service:
             mock_service.create_session.return_value = "voice-session-123"
             
             client = SocketIOTestClient(app, socketio)
@@ -366,7 +370,7 @@ class TestVoiceSocketHandlers:
         
         app = create_app({'TESTING': True})
         
-        with patch('src.app.voice_service') as mock_service:
+        with patch('x_ipe.handlers.voice_handlers.voice_service') as mock_service:
             mock_service.create_session.return_value = "voice-session-123"
             client = SocketIOTestClient(app, socketio)
             
@@ -381,12 +385,13 @@ class TestVoiceSocketHandlers:
 
     def test_handle_voice_stop_returns_transcription(self):
         """voice_stop handler returns transcription."""
-        from src.app import create_app, socketio, socket_to_voice_session
+        from src.app import create_app, socketio
+        from x_ipe.handlers.voice_handlers import socket_to_voice_session
         from flask_socketio import SocketIOTestClient
         
         app = create_app({'TESTING': True})
         
-        with patch('src.app.voice_service') as mock_service:
+        with patch('x_ipe.handlers.voice_handlers.voice_service') as mock_service:
             mock_service.create_session.return_value = "voice-session-123"
             mock_service.start_recognition.return_value = True
             mock_service.stop_recognition.return_value = "git status"
@@ -410,7 +415,7 @@ class TestVoiceSocketHandlers:
         
         app = create_app({'TESTING': True})
         
-        with patch('src.app.voice_service') as mock_service:
+        with patch('x_ipe.handlers.voice_handlers.voice_service') as mock_service:
             mock_service.create_session.return_value = "voice-session-123"
             mock_service.start_recognition.return_value = True
             mock_service.stop_recognition.return_value = "close mic"
@@ -434,7 +439,7 @@ class TestVoiceSocketHandlers:
         
         app = create_app({'TESTING': True})
         
-        with patch('src.app.voice_service') as mock_service:
+        with patch('x_ipe.handlers.voice_handlers.voice_service') as mock_service:
             mock_service.create_session.return_value = "voice-session-123"
             mock_service.start_recognition.return_value = True
             mock_service.cancel_recognition = Mock()
@@ -455,7 +460,7 @@ class TestVoiceSocketHandlers:
         
         app = create_app({'TESTING': True})
         
-        with patch('src.app.voice_service') as mock_service:
+        with patch('x_ipe.handlers.voice_handlers.voice_service') as mock_service:
             mock_service.create_session.return_value = "voice-session-123"
             async def mock_finish(sid):
                 raise Exception("API error")
@@ -487,10 +492,13 @@ class TestVoiceErrorHandling:
         service = VoiceInputService(api_key="test-key")
         session_id = service.create_session(socket_sid="socket-123")
         
-        with patch('src.services.voice_input_service_v2.TranslationRecognizerRealtime') as MockRecognizer:
+        # Mock both recognizer types to raise exception
+        with patch('x_ipe.services.voice_input_service_v2.TranslationRecognizerRealtime') as MockRealtime, \
+             patch('x_ipe.services.voice_input_service_v2.TranslationRecognizerChat') as MockChat:
             mock_recognizer = MagicMock()
             mock_recognizer.start.side_effect = Exception("Connection failed")
-            MockRecognizer.return_value = mock_recognizer
+            MockRealtime.return_value = mock_recognizer
+            MockChat.return_value = mock_recognizer
             
             result = service.start_recognition(session_id)
             
@@ -559,7 +567,7 @@ class TestVoiceInputIntegration:
         
         app = create_app({'TESTING': True})
         
-        with patch('src.app.voice_service') as mock_service:
+        with patch('x_ipe.handlers.voice_handlers.voice_service') as mock_service:
             mock_service.create_session.return_value = "voice-123"
             mock_service.stop_recognition.return_value = "git status"
             mock_service.start_recognition.return_value = True
@@ -594,7 +602,7 @@ class TestVoiceInputIntegration:
         
         app = create_app({'TESTING': True})
         
-        with patch('src.app.voice_service') as mock_service:
+        with patch('x_ipe.handlers.voice_handlers.voice_service') as mock_service:
             mock_service.create_session.return_value = "voice-123"
             mock_service.stop_recognition.return_value = "close mic"
             mock_service.start_recognition.return_value = True
@@ -618,7 +626,7 @@ class TestVoiceInputIntegration:
         
         app = create_app({'TESTING': True})
         
-        with patch('src.app.voice_service') as mock_service:
+        with patch('x_ipe.handlers.voice_handlers.voice_service') as mock_service:
             mock_service.create_session.return_value = "voice-123"
             mock_service.start_recognition.return_value = True
             mock_service.cancel_recognition = Mock()

@@ -4,8 +4,10 @@ FEATURE-022-D: UI/UX Feedback Service
 Handles saving feedback entries to the file system.
 """
 import base64
+import shutil
+import re
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class UiuxFeedbackService:
@@ -14,6 +16,119 @@ class UiuxFeedbackService:
     def __init__(self, project_root: str):
         self.project_root = Path(project_root)
         self.feedback_dir = self.project_root / 'x-ipe-docs' / 'uiux-feedback'
+    
+    def list_feedback(self, days: int = 2) -> list:
+        """
+        List feedback entries from the last N days.
+        
+        Args:
+            days: Number of days to look back (default 2)
+        
+        Returns:
+            List of feedback entries sorted by date descending
+        """
+        entries = []
+        cutoff = datetime.now() - timedelta(days=days)
+        
+        if not self.feedback_dir.exists():
+            return entries
+        
+        for folder in self.feedback_dir.iterdir():
+            if not folder.is_dir():
+                continue
+            
+            # Check folder modification time
+            mtime = datetime.fromtimestamp(folder.stat().st_mtime)
+            if mtime < cutoff:
+                continue
+            
+            # Parse feedback.md to extract details
+            feedback_md = folder / 'feedback.md'
+            if not feedback_md.exists():
+                continue
+            
+            entry = self._parse_feedback_md(folder.name, feedback_md)
+            if entry:
+                entry['mtime'] = mtime
+                entries.append(entry)
+        
+        # Sort by date descending (newest first)
+        entries.sort(key=lambda x: x['mtime'], reverse=True)
+        
+        # Remove mtime from output (internal use only)
+        for entry in entries:
+            del entry['mtime']
+        
+        return entries
+    
+    def _parse_feedback_md(self, folder_name: str, feedback_md: Path) -> dict:
+        """
+        Parse feedback.md file to extract entry details.
+        
+        Args:
+            folder_name: Name of the feedback folder
+            feedback_md: Path to feedback.md file
+        
+        Returns:
+            Dict with id, name, url, description, date
+        """
+        try:
+            content = feedback_md.read_text(encoding='utf-8')
+            
+            # Extract URL
+            url_match = re.search(r'\*\*URL:\*\*\s*(.+)', content)
+            url = url_match.group(1).strip() if url_match else ''
+            
+            # Extract date
+            date_match = re.search(r'\*\*Date:\*\*\s*(.+)', content)
+            date = date_match.group(1).strip() if date_match else ''
+            
+            # Extract description (between ## Feedback and ## Screenshot or end)
+            desc_match = re.search(r'## Feedback\s*\n\n(.+?)(?=\n## Screenshot|\Z)', content, re.DOTALL)
+            description = desc_match.group(1).strip() if desc_match else ''
+            if description == '_No description provided_':
+                description = ''
+            
+            return {
+                'id': folder_name,
+                'name': folder_name,
+                'url': url,
+                'description': description,
+                'date': date
+            }
+        except Exception:
+            return None
+    
+    def cleanup_old_feedback(self, days: int = 7) -> int:
+        """
+        Delete feedback folders older than N days.
+        
+        Args:
+            days: Retention period in days (default 7)
+        
+        Returns:
+            Number of folders deleted
+        """
+        deleted = 0
+        cutoff = datetime.now() - timedelta(days=days)
+        
+        if not self.feedback_dir.exists():
+            return deleted
+        
+        for folder in list(self.feedback_dir.iterdir()):
+            if not folder.is_dir():
+                continue
+            
+            # Check folder modification time
+            mtime = datetime.fromtimestamp(folder.stat().st_mtime)
+            if mtime < cutoff:
+                try:
+                    shutil.rmtree(folder)
+                    deleted += 1
+                except Exception:
+                    pass
+        
+        return deleted
     
     def save_feedback(self, data: dict) -> dict:
         """

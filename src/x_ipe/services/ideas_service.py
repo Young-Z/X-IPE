@@ -155,6 +155,71 @@ class IdeasService:
             'files_uploaded': uploaded_files
         }
     
+    def create_folder(self, folder_name: str, parent_folder: str = None) -> Dict[str, Any]:
+        """
+        Create an empty folder in ideas directory.
+        
+        Args:
+            folder_name: Name for the new folder
+            parent_folder: Optional parent folder path (relative to ideas root)
+        
+        Returns:
+            Dict with success, folder_name, folder_path or error
+        """
+        # Validate folder name
+        folder_name = folder_name.strip()
+        is_valid, error = self._validate_folder_name(folder_name)
+        if not is_valid:
+            return {
+                'success': False,
+                'error': error
+            }
+        
+        # Determine base path
+        if parent_folder:
+            # Strip 'x-ipe-docs/ideas/' prefix if present
+            if parent_folder.startswith(self.IDEAS_PATH + '/'):
+                parent_folder = parent_folder[len(self.IDEAS_PATH) + 1:]
+            elif parent_folder.startswith(self.IDEAS_PATH):
+                parent_folder = parent_folder[len(self.IDEAS_PATH):]
+            
+            base_path = self.ideas_root / parent_folder
+            if not base_path.exists():
+                return {
+                    'success': False,
+                    'error': f"Parent folder '{parent_folder}' does not exist"
+                }
+        else:
+            base_path = self.ideas_root
+        
+        # Ensure ideas root exists
+        self.ideas_root.mkdir(parents=True, exist_ok=True)
+        
+        # Generate unique name if folder exists
+        final_name = self._generate_unique_name(folder_name, base_path)
+        
+        # Create the folder
+        folder_path = base_path / final_name
+        try:
+            folder_path.mkdir(parents=True, exist_ok=True)
+        except OSError as e:
+            return {
+                'success': False,
+                'error': f'Failed to create folder: {str(e)}'
+            }
+        
+        # Build relative path for response
+        if parent_folder:
+            relative_path = f'{self.IDEAS_PATH}/{parent_folder}/{final_name}'
+        else:
+            relative_path = f'{self.IDEAS_PATH}/{final_name}'
+        
+        return {
+            'success': True,
+            'folder_name': final_name,
+            'folder_path': relative_path
+        }
+    
     def rename_folder(self, old_name: str, new_name: str) -> Dict[str, Any]:
         """
         Rename an idea folder.
@@ -312,15 +377,22 @@ class IdeasService:
         
         return (True, None)
     
-    def _generate_unique_name(self, base_name: str) -> str:
+    def _generate_unique_name(self, base_name: str, base_path: Path = None) -> str:
         """
         Generate unique folder name if base_name exists.
         Appends (2), (3), etc. until unique.
+        
+        Args:
+            base_name: Base name for the folder
+            base_path: Optional base path to check existence (defaults to ideas_root)
         """
+        if base_path is None:
+            base_path = self.ideas_root
+        
         name = base_name
         counter = 2
         
-        while (self.ideas_root / name).exists():
+        while (base_path / name).exists():
             name = f'{base_name} ({counter})'
             counter += 1
         
@@ -704,8 +776,8 @@ class IdeasService:
                 if entry.name.startswith('.'):
                     continue
                 
-                # Return path relative to ideas root
-                relative_path = str(entry.relative_to(self.ideas_root))
+                # Return path relative to project root (consistent with get_tree)
+                relative_path = str(entry.relative_to(self.project_root))
                 item = {
                     'name': entry.name,
                     'type': 'folder' if entry.is_dir() else 'file',
@@ -717,8 +789,8 @@ class IdeasService:
         except PermissionError:
             return {'success': False, 'error': 'Permission denied'}
         
-        # Return folder_path relative to ideas root
-        folder_path_result = str(full_path.relative_to(self.ideas_root)) if full_path != self.ideas_root else ''
+        # Return folder_path relative to project root
+        folder_path_result = str(full_path.relative_to(self.project_root)) if full_path != self.ideas_root else self.IDEAS_PATH
         return {'success': True, 'items': items, 'folder_path': folder_path_result}
     
     def is_valid_drop_target(self, source_path: str, target_folder: str) -> bool:

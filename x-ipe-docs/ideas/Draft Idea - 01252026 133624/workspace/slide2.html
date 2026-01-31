@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #FFFFFF; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #FFFFFF; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header { background: #292929; padding: 15pt 30pt; }
+.header h1 { color: #FFFFFF; font-size: 22pt; margin: 0; }
+.header-accent { color: #E33737; font-size: 12pt; margin-top: 4pt; }
+.content { display: flex; flex: 1; padding: 18pt 30pt; gap: 20pt; }
+.left { flex: 1; }
+.right { width: 170pt; display: flex; flex-direction: column; gap: 12pt; }
+.point { margin-bottom: 12pt; }
+.point-title { color: #E33737; font-size: 12pt; font-weight: bold; margin-bottom: 3pt; }
+.point-desc { color: #292929; font-size: 10pt; }
+.time-tag { color: #CCCBCB; font-size: 9pt; margin-top: 2pt; }
+.stat-box { background: #F5F5F5; border-left: 4pt solid #E33737; padding: 10pt; }
+.stat-num { color: #E33737; font-size: 26pt; font-weight: bold; }
+.stat-label { color: #292929; font-size: 9pt; margin-top: 2pt; }
+.example { background: #292929; padding: 10pt; margin-top: 8pt; }
+.example p { color: #CCCBCB; font-size: 9pt; margin: 0; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Dify工作流的挑战</h1>
+  <p class="header-accent">Slide 1 - 主要痛点分析</p>
+</div>
+<div class="content">
+  <div class="left">
+    <div class="point">
+      <p class="point-title">调试诊断复杂</p>
+      <p class="point-desc">Agent处理未达预期时的调试诊断特别复杂，且不直观</p>
+      <p class="time-tag">耗时影响: ++</p>
+    </div>
+    <div class="point">
+      <p class="point-title">AI无法高效接管</p>
+      <p class="point-desc">Dify并非能让AI码代码，需要人工拖拉拽，功能越复杂边际成本越高</p>
+      <p class="time-tag">耗时影响: +++</p>
+    </div>
+    <div class="point">
+      <p class="point-title">高阶用法学习成本高</p>
+      <p class="point-desc">需查找各类文档，向AI提问也不直观，且不一定有效</p>
+      <p class="time-tag">耗时影响: ++</p>
+    </div>
+  </div>
+  <div class="right">
+    <div class="stat-box">
+      <p class="stat-num">70%</p>
+      <p class="stat-label">后期调优时间占比</p>
+    </div>
+    <div class="example">
+      <p>实际案例：70%时间都在后期调优Agent输出结果稳定性</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

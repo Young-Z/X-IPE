@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #FFFFFF; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #FFFFFF; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header { background: #292929; padding: 15pt 30pt; }
+.header h1 { color: #FFFFFF; font-size: 22pt; margin: 0; }
+.header-accent { color: #E33737; font-size: 12pt; margin-top: 4pt; }
+.content { display: flex; flex: 1; padding: 18pt 30pt; gap: 25pt; }
+.section { flex: 1; }
+.section-header { border-bottom: 2pt solid #E33737; padding-bottom: 6pt; margin-bottom: 12pt; }
+.section-title { color: #292929; font-size: 12pt; font-weight: bold; }
+.item { margin-bottom: 10pt; }
+.item-label { color: #E33737; font-size: 10pt; font-weight: bold; }
+.item-desc { color: #292929; font-size: 10pt; margin-top: 2pt; }
+.time-tag { color: #CCCBCB; font-size: 9pt; margin-top: 2pt; }
+.key-insight { background: #292929; padding: 12pt; margin-top: 10pt; }
+.key-insight p { color: #FFFFFF; font-size: 10pt; margin: 0; }
+.key-insight .accent { color: #E33737; }
+.timeline { background: #F5F5F5; padding: 12pt; margin-top: 8pt; }
+.timeline p { color: #292929; font-size: 10pt; margin: 0; }
+.timeline .highlight { color: #E33737; font-weight: bold; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>前端开发与需求等待</h1>
+  <p class="header-accent">Slide 3 - 开发效率与瓶颈分析</p>
+</div>
+<div class="content">
+  <div class="section">
+    <div class="section-header">
+      <p class="section-title">前端开发</p>
+    </div>
+    <div class="item">
+      <p class="item-label">代码实现</p>
+      <p class="item-desc">如果对实现方法、代码结构没有太高要求，基本没啥成本</p>
+      <p class="time-tag">耗时影响: +</p>
+    </div>
+    <div class="item">
+      <p class="item-label">设计稿确认</p>
+      <p class="item-desc">简单设计基本没成本，复杂功能需要更频繁沟通</p>
+      <p class="time-tag">耗时影响: +</p>
+    </div>
+    <div class="item">
+      <p class="item-label">精细化设计 (To C)</p>
+      <p class="item-desc">面向消费者的精细化设计稿</p>
+      <p class="time-tag">耗时影响: ++</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header">
+      <p class="section-title">需求等待</p>
+    </div>
+    <div class="key-insight">
+      <p>开发确实简单很多，更多是<span class="accent">等待需求输入</span>、确认设计稿并验收调优</p>
+    </div>
+    <div class="timeline">
+      <p><b>实际案例：</b>Mark和Fred在接到需求后<span class="highlight">2-3天</span>完成开发</p>
+      <p style="margin-top: 6pt; color: #CCCBCB; font-size: 9pt;">注：并非最优开发模式，demo复杂度也较低</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

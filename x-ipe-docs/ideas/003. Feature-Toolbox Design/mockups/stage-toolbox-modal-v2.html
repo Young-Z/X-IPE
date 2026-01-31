@@ -26,6 +26,7 @@
       --accent-feature: #10b981;
       --accent-quality: #8b5cf6;
       --accent-refactoring: #ef4444;
+      --accent-pentest: #ec4899;
       --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
       --radius-sm: 6px;
       --radius-md: 10px;
@@ -309,6 +310,11 @@
     .accordion-item[data-stage="refactoring"] .accordion-icon {
       background: rgba(239, 68, 68, 0.12);
       color: var(--accent-refactoring);
+    }
+
+    .accordion-item[data-stage="pentest"] .accordion-icon {
+      background: rgba(236, 72, 153, 0.12);
+      color: var(--accent-pentest);
     }
 
     .accordion-info {
@@ -729,6 +735,33 @@
             </div>
           </div>
 
+          <!-- Pentest Stage -->
+          <div class="accordion-item" data-stage="pentest">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div class="accordion-icon">🔐</div>
+              <div class="accordion-info">
+                <div class="accordion-title">Pentest Stage <span class="placeholder-badge">placeholder</span></div>
+                <div class="accordion-subtitle">Security testing & vulnerability assessment</div>
+              </div>
+              <span class="accordion-badge">0 active</span>
+              <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+            <div class="accordion-content">
+              <div class="accordion-body">
+                <div class="phase-group">
+                  <div class="phase-label">Security Scanning</div>
+                  <div class="empty-phase">Coming soon...</div>
+                </div>
+                <div class="phase-group">
+                  <div class="phase-label">Vulnerability Assessment</div>
+                  <div class="empty-phase">Coming soon...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Quality Stage -->
           <div class="accordion-item" data-stage="quality">
             <div class="accordion-header" onclick="toggleAccordion(this)">
@@ -794,7 +827,7 @@
     <ul>
       <li>Light theme with clean white backgrounds</li>
       <li>Wider modal (680px vs 480px)</li>
-      <li>Accordion sections for 5 stages</li>
+      <li>Accordion sections for 6 stages</li>
       <li>Grid layout for phases inside expanded stage</li>
       <li>Tools stack vertically within each phase</li>
       <li>Simple on/off toggle switches</li>

@@ -494,6 +494,111 @@ class TestProxyEdgeCases:
 
 
 # ============================================================================
+# Bug Fix Tests - TASK-235: CSS Font URL Rewriting
+# ============================================================================
+
+class TestProxyCSSFontUrlRewriting:
+    """
+    Tests for TASK-235: Icons not loading in browser simulator.
+    
+    Bug: External CSS files (like bootstrap-icons.css) have @font-face url() 
+    references that are not rewritten by the proxy, causing fonts to fail loading.
+    
+    Fix: When proxying CSS files, rewrite url() references to use proxy.
+    """
+    
+    @patch('requests.get')
+    def test_css_font_face_url_rewritten(self, mock_get, proxy_service):
+        """External CSS @font-face url() should be rewritten to proxy URL"""
+        # This is the content of bootstrap-icons.css (simplified)
+        css_content = '''
+@font-face {
+  font-family: "bootstrap-icons";
+  src: url("../fonts/bootstrap-icons.woff2") format("woff2"),
+       url("../fonts/bootstrap-icons.woff") format("woff");
+}
+
+.bi::before {
+  font-family: bootstrap-icons !important;
+}
+'''
+        mock_response = Mock()
+        mock_response.text = css_content
+        mock_response.headers = {'Content-Type': 'text/css'}
+        mock_response.raise_for_status = Mock()
+        mock_get.return_value = mock_response
+        
+        result = proxy_service.fetch_and_rewrite(
+            "http://localhost:5858/static/3rdparty/css/bootstrap-icons.css"
+        )
+        
+        assert result.success is True
+        assert 'text/css' in result.content_type
+        # The url() references should be rewritten to use proxy
+        assert '/api/proxy?url=' in result.html
+        # Should contain proxied font URL
+        assert 'fonts%2Fbootstrap-icons.woff2' in result.html or 'fonts/bootstrap-icons.woff2' in result.html
+    
+    @patch('requests.get')
+    def test_css_url_with_quotes_rewritten(self, mock_get, proxy_service):
+        """CSS url() with different quote styles should all be rewritten"""
+        css_content = '''
+.a { background: url('/images/a.png'); }
+.b { background: url("/images/b.png"); }
+.c { background: url(/images/c.png); }
+'''
+        mock_response = Mock()
+        mock_response.text = css_content
+        mock_response.headers = {'Content-Type': 'text/css; charset=utf-8'}
+        mock_response.raise_for_status = Mock()
+        mock_get.return_value = mock_response
+        
+        result = proxy_service.fetch_and_rewrite("http://localhost:3000/styles.css")
+        
+        assert result.success is True
+        # All three url() references should be rewritten
+        assert result.html.count('/api/proxy?url=') == 3
+    
+    @patch('requests.get')
+    def test_css_data_url_not_rewritten(self, mock_get, proxy_service):
+        """CSS data: URLs should not be rewritten"""
+        css_content = '''
+.icon { background: url(data:image/svg+xml,...); }
+'''
+        mock_response = Mock()
+        mock_response.text = css_content
+        mock_response.headers = {'Content-Type': 'text/css'}
+        mock_response.raise_for_status = Mock()
+        mock_get.return_value = mock_response
+        
+        result = proxy_service.fetch_and_rewrite("http://localhost:3000/styles.css")
+        
+        assert result.success is True
+        # Data URLs should not be proxied
+        assert '/api/proxy?url=' not in result.html
+        assert 'data:image/svg+xml' in result.html
+    
+    @patch('requests.get')
+    def test_css_external_url_not_rewritten(self, mock_get, proxy_service):
+        """CSS external (non-localhost) URLs should not be rewritten"""
+        css_content = '''
+.icon { background: url(https://cdn.example.com/image.png); }
+'''
+        mock_response = Mock()
+        mock_response.text = css_content
+        mock_response.headers = {'Content-Type': 'text/css'}
+        mock_response.raise_for_status = Mock()
+        mock_get.return_value = mock_response
+        
+        result = proxy_service.fetch_and_rewrite("http://localhost:3000/styles.css")
+        
+        assert result.success is True
+        # External URLs should not be proxied
+        assert '/api/proxy?url=' not in result.html
+        assert 'https://cdn.example.com/image.png' in result.html
+
+
+# ============================================================================
 # Test Coverage Summary
 # ============================================================================
 

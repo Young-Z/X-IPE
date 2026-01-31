@@ -353,3 +353,232 @@ class TestTerminalCommandGeneration:
         # Command should not end with newline
         assert not command.endswith('\n')
         assert not command.endswith('\r')
+
+
+class TestListFeedback:
+    """Tests for listing feedback entries (TASK-237)"""
+    
+    def test_list_feedback_returns_recent_entries(self, tmp_path):
+        """Should return feedback entries from last 2 days"""
+        from x_ipe.services.uiux_feedback_service import UiuxFeedbackService
+        from datetime import datetime, timedelta
+        import os
+        
+        service = UiuxFeedbackService(str(tmp_path))
+        
+        # Create feedback entry
+        data = {
+            'name': 'Feedback-Recent',
+            'url': 'http://localhost:3000',
+            'elements': ['button.submit'],
+            'description': 'Recent feedback'
+        }
+        service.save_feedback(data)
+        
+        # List feedback (within 2 days)
+        entries = service.list_feedback(days=2)
+        
+        assert len(entries) == 1
+        assert entries[0]['name'] == 'Feedback-Recent'
+    
+    def test_list_feedback_sorted_desc_by_time(self, tmp_path):
+        """Feedback should be sorted descending by creation time"""
+        from x_ipe.services.uiux_feedback_service import UiuxFeedbackService
+        import time
+        
+        service = UiuxFeedbackService(str(tmp_path))
+        
+        # Create first entry
+        service.save_feedback({
+            'name': 'Feedback-First',
+            'url': 'http://localhost:3000',
+            'elements': ['button']
+        })
+        
+        time.sleep(0.1)  # Small delay to ensure different timestamps
+        
+        # Create second entry
+        service.save_feedback({
+            'name': 'Feedback-Second',
+            'url': 'http://localhost:3000',
+            'elements': ['button']
+        })
+        
+        entries = service.list_feedback(days=2)
+        
+        assert len(entries) == 2
+        # Second (newer) should be first
+        assert entries[0]['name'] == 'Feedback-Second'
+        assert entries[1]['name'] == 'Feedback-First'
+    
+    def test_list_feedback_excludes_old_entries(self, tmp_path):
+        """Entries older than specified days should not be listed"""
+        from x_ipe.services.uiux_feedback_service import UiuxFeedbackService
+        from datetime import datetime, timedelta
+        import os
+        
+        service = UiuxFeedbackService(str(tmp_path))
+        
+        # Create feedback entry
+        data = {
+            'name': 'Feedback-Old',
+            'url': 'http://localhost:3000',
+            'elements': ['button.submit']
+        }
+        service.save_feedback(data)
+        
+        # Modify folder mtime to be 3 days old
+        folder_path = tmp_path / 'x-ipe-docs' / 'uiux-feedback' / 'Feedback-Old'
+        old_time = (datetime.now() - timedelta(days=3)).timestamp()
+        os.utime(folder_path, (old_time, old_time))
+        
+        entries = service.list_feedback(days=2)
+        
+        assert len(entries) == 0
+    
+    def test_list_feedback_returns_entry_details(self, tmp_path):
+        """Entries should include id, name, url, description, date"""
+        from x_ipe.services.uiux_feedback_service import UiuxFeedbackService
+        
+        service = UiuxFeedbackService(str(tmp_path))
+        
+        service.save_feedback({
+            'name': 'Feedback-Details',
+            'url': 'http://localhost:3000/page',
+            'elements': ['button.submit'],
+            'description': 'Test description'
+        })
+        
+        entries = service.list_feedback(days=2)
+        
+        assert len(entries) == 1
+        entry = entries[0]
+        assert 'id' in entry
+        assert entry['name'] == 'Feedback-Details'
+        assert entry['url'] == 'http://localhost:3000/page'
+        assert entry['description'] == 'Test description'
+        assert 'date' in entry
+
+
+class TestCleanupOldFeedback:
+    """Tests for cleaning up old feedback (TASK-237)"""
+    
+    def test_cleanup_removes_old_feedback(self, tmp_path):
+        """Should delete feedback older than 1 week"""
+        from x_ipe.services.uiux_feedback_service import UiuxFeedbackService
+        from datetime import datetime, timedelta
+        import os
+        
+        service = UiuxFeedbackService(str(tmp_path))
+        
+        # Create old feedback
+        service.save_feedback({
+            'name': 'Feedback-Old',
+            'url': 'http://localhost:3000',
+            'elements': ['button']
+        })
+        
+        # Modify folder mtime to be 8 days old
+        folder_path = tmp_path / 'x-ipe-docs' / 'uiux-feedback' / 'Feedback-Old'
+        old_time = (datetime.now() - timedelta(days=8)).timestamp()
+        os.utime(folder_path, (old_time, old_time))
+        
+        # Run cleanup (default 7 days)
+        deleted = service.cleanup_old_feedback(days=7)
+        
+        assert deleted == 1
+        assert not folder_path.exists()
+    
+    def test_cleanup_preserves_recent_feedback(self, tmp_path):
+        """Should NOT delete feedback within the retention period"""
+        from x_ipe.services.uiux_feedback_service import UiuxFeedbackService
+        
+        service = UiuxFeedbackService(str(tmp_path))
+        
+        # Create recent feedback
+        service.save_feedback({
+            'name': 'Feedback-Recent',
+            'url': 'http://localhost:3000',
+            'elements': ['button']
+        })
+        
+        folder_path = tmp_path / 'x-ipe-docs' / 'uiux-feedback' / 'Feedback-Recent'
+        
+        # Run cleanup
+        deleted = service.cleanup_old_feedback(days=7)
+        
+        assert deleted == 0
+        assert folder_path.exists()
+    
+    def test_cleanup_returns_count_of_deleted(self, tmp_path):
+        """Should return count of deleted folders"""
+        from x_ipe.services.uiux_feedback_service import UiuxFeedbackService
+        from datetime import datetime, timedelta
+        import os
+        
+        service = UiuxFeedbackService(str(tmp_path))
+        
+        # Create 3 old feedback entries
+        for i in range(3):
+            service.save_feedback({
+                'name': f'Feedback-Old-{i}',
+                'url': 'http://localhost:3000',
+                'elements': ['button']
+            })
+            folder = tmp_path / 'x-ipe-docs' / 'uiux-feedback' / f'Feedback-Old-{i}'
+            old_time = (datetime.now() - timedelta(days=10)).timestamp()
+            os.utime(folder, (old_time, old_time))
+        
+        # Create 1 recent
+        service.save_feedback({
+            'name': 'Feedback-Recent',
+            'url': 'http://localhost:3000',
+            'elements': ['button']
+        })
+        
+        deleted = service.cleanup_old_feedback(days=7)
+        
+        assert deleted == 3
+
+
+class TestListFeedbackRoute:
+    """Tests for GET /api/uiux-feedback endpoint (TASK-237)"""
+    
+    @pytest.fixture
+    def client(self, tmp_path):
+        """Create test client with temp project root"""
+        from x_ipe.app import create_app
+        
+        app = create_app()
+        app.config['TESTING'] = True
+        app.config['PROJECT_ROOT'] = str(tmp_path)
+        
+        with app.test_client() as client:
+            yield client
+    
+    def test_get_feedback_returns_200(self, client, tmp_path):
+        """GET should return 200 OK"""
+        response = client.get('/api/uiux-feedback')
+        
+        assert response.status_code == 200
+        data = response.get_json()
+        assert 'entries' in data
+    
+    def test_get_feedback_returns_entries(self, client, tmp_path):
+        """GET should return saved entries"""
+        # Create a feedback entry
+        client.post('/api/uiux-feedback',
+            data=json.dumps({
+                'name': 'Feedback-Test',
+                'url': 'http://localhost:3000',
+                'elements': ['button'],
+                'description': 'Test'
+            }),
+            content_type='application/json'
+        )
+        
+        response = client.get('/api/uiux-feedback')
+        
+        data = response.get_json()
+        assert len(data['entries']) == 1
+        assert data['entries'][0]['name'] == 'Feedback-Test'

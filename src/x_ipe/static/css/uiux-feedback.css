@@ -876,6 +876,7 @@
 .entry-actions-footer {
     display: flex;
     justify-content: flex-end;
+    gap: 8px;
     padding-top: 12px;
     margin-top: 12px;
     border-top: 1px solid var(--uiux-slate-100);
@@ -922,8 +923,13 @@
     transition: background 0.2s;
 }
 
-.btn-copilot:hover {
+.btn-copilot:hover:not(:disabled) {
     background: #553098;
+}
+
+.btn-copilot:disabled {
+    background: var(--uiux-slate-300);
+    cursor: not-allowed;
 }
 
 .btn-copilot i {

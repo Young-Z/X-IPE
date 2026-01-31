@@ -126,6 +126,15 @@ def _init_services(app):
         if saved_root and saved_root != '.' and not app.config.get('TESTING'):
             if os.path.exists(saved_root) and os.path.isdir(saved_root):
                 app.config['PROJECT_ROOT'] = saved_root
+    
+    # Cleanup old UIUX feedback on startup (TASK-237)
+    if not app.config.get('TESTING'):
+        project_root = app.config.get('PROJECT_ROOT', '.')
+        from x_ipe.services.uiux_feedback_service import UiuxFeedbackService
+        feedback_service = UiuxFeedbackService(project_root)
+        deleted = feedback_service.cleanup_old_feedback(days=7)
+        if deleted > 0:
+            print(f"[X-IPE] Cleaned up {deleted} old feedback entries")
 
 
 def _register_blueprints(app):

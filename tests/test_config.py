@@ -414,8 +414,8 @@ class TestConfigServiceValidation:
         assert result is None
         assert 'project_root' in service.error.lower()
 
-    def test_validate_missing_x_ipe_app_fails(self, temp_project_structure):
-        """_validate() fails when paths.x_ipe_app is missing"""
+    def test_validate_missing_x_ipe_app_uses_default(self, temp_project_structure):
+        """_validate() uses project_root as default when paths.x_ipe_app is missing"""
         from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_project_structure['root']))
@@ -428,8 +428,9 @@ class TestConfigServiceValidation:
         
         result = service._validate(temp_project_structure['config_file'], raw)
         
-        assert result is None
-        assert 'x_ipe_app' in service.error.lower()
+        # x_ipe_app is now optional - defaults to project_root
+        assert result is not None
+        assert result.x_ipe_app == result.project_root
 
     def test_validate_nonexistent_project_root_fails(self, temp_project_structure):
         """_validate() fails when project_root path doesn't exist"""

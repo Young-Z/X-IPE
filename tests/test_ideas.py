@@ -1016,18 +1016,16 @@ class TestCopilotButtonBehavior:
         """
         CR-001: Verify the command format sent to terminal.
         
-        Expected commands:
-        1. "copilot" - to start Copilot CLI
-        2. "refine the idea {file_path}" - to trigger refinement
+        Expected command format:
+        copilot -i "refine the idea {file_path}"
         """
         test_file_path = 'x-ipe-docs/ideas/test-idea/Project Proposal'
         
-        expected_init_command = 'copilot'
-        expected_refine_command = f'refine the idea {test_file_path}'
+        prompt = f'refine the idea {test_file_path}'
+        expected_command = f'copilot -i "{prompt}"'
         
-        assert expected_init_command == 'copilot'
-        assert expected_refine_command == f'refine the idea {test_file_path}'
-        assert test_file_path in expected_refine_command
+        assert expected_command == f'copilot -i "refine the idea {test_file_path}"'
+        assert test_file_path in expected_command
     
     def test_copilot_mode_detection_patterns(self):
         """
@@ -1155,7 +1153,7 @@ class TestCopilotButtonEdgeCases:
             # Would send characters
             return True
         
-        result = send_with_typing_effect(socket_connected, 'copilot')
+        result = send_with_typing_effect(socket_connected, 'copilot --allow-all-tools')
         assert result is False
     
     def test_special_characters_in_file_path(self):
@@ -1514,15 +1512,16 @@ class TestUIUXFeedbacksRoute:
         response = populated_client.get('/uiux-feedbacks')
         assert response.status_code == 200
 
-    def test_uiux_feedbacks_page_contains_wip_banner(self, populated_client):
+    def test_uiux_feedbacks_page_contains_browser_simulator(self, populated_client):
         """
-        CR-004 AC: UIUX Feedbacks page should show WIP banner.
+        CR-004 AC: UIUX Feedbacks page should have browser simulator.
+        (Previously WIP banner test - feature now fully implemented)
         """
         response = populated_client.get('/uiux-feedbacks')
         html = response.data.decode('utf-8')
         
-        # Should contain "Work in Progress" text
-        assert 'Work in Progress' in html or 'work in progress' in html.lower()
+        # Should contain browser simulator elements (feature is complete)
+        assert 'browser-viewport' in html or 'viewport' in html.lower() or 'url-bar' in html
 
     def test_uiux_feedbacks_page_has_correct_title(self, populated_client):
         """
@@ -1624,7 +1623,7 @@ class TestSidebarSubmenu:
 
     def test_sidebar_js_contains_uiux_feedbacks_link(self, populated_client, temp_project_dir):
         """
-        CR-004: sidebar.js should contain /uiux-feedbacks link.
+        CR-004: sidebar.js should contain UIUX Feedbacks navigation.
         """
         import os
         sidebar_js_path = os.path.join(
@@ -1634,8 +1633,8 @@ class TestSidebarSubmenu:
         with open(sidebar_js_path, 'r') as f:
             js_content = f.read()
         
-        # Should contain link to UIUX Feedbacks page
-        assert '/uiux-feedbacks' in js_content
+        # Should contain UIUX Feedbacks navigation element (uses data-section-id, not URL)
+        assert 'uiux-feedbacks' in js_content or 'nav-uiux-feedbacks' in js_content
 
     def test_sidebar_css_contains_submenu_styles(self, populated_client, temp_project_dir):
         """

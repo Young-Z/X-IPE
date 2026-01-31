@@ -91,6 +91,48 @@ def upload_ideas():
     return jsonify(result), 400
 
 
+@ideas_bp.route('/api/ideas/create-folder', methods=['POST'])
+def create_idea_folder():
+    """
+    POST /api/ideas/create-folder
+    
+    Create a new empty folder in ideas directory.
+    
+    Request body:
+        - folder_name: string - Name for the new folder
+        - parent_folder: string (optional) - Parent folder path
+    
+    Response:
+        - success: true/false
+        - folder_name: string
+        - folder_path: string
+    """
+    project_root = current_app.config.get('PROJECT_ROOT', os.getcwd())
+    service = IdeasService(project_root)
+    
+    if not request.is_json:
+        return jsonify({
+            'success': False,
+            'error': 'JSON required'
+        }), 400
+    
+    data = request.get_json()
+    folder_name = data.get('folder_name')
+    parent_folder = data.get('parent_folder')
+    
+    if not folder_name:
+        return jsonify({
+            'success': False,
+            'error': 'folder_name is required'
+        }), 400
+    
+    result = service.create_folder(folder_name, parent_folder)
+    
+    if result['success']:
+        return jsonify(result)
+    return jsonify(result), 400
+
+
 @ideas_bp.route('/api/ideas/rename', methods=['POST'])
 def rename_idea_folder():
     """

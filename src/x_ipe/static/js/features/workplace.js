@@ -68,9 +68,14 @@ class WorkplaceManager {
                     <div class="workplace-sidebar-content">
                         <div class="workplace-sidebar-header">
                             <span class="workplace-sidebar-title">Ideas</span>
-                            <button class="workplace-pin-btn" title="Unpin sidebar" id="workplace-pin-btn">
-                                <i class="bi bi-pin-angle-fill"></i>
-                            </button>
+                            <div class="workplace-sidebar-header-actions">
+                                <button class="workplace-create-folder-btn" title="Create new folder" id="workplace-create-folder-btn">
+                                    <i class="bi bi-folder-plus"></i>
+                                </button>
+                                <button class="workplace-pin-btn" title="Unpin sidebar" id="workplace-pin-btn">
+                                    <i class="bi bi-pin-angle-fill"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="workplace-tree" id="workplace-tree">
                             <div class="loading-spinner">
@@ -115,6 +120,11 @@ class WorkplaceManager {
                 icon.classList.add('bi-pin-angle');
                 pinBtn.title = 'Pin sidebar';
             }
+        });
+        
+        // Bind create folder button
+        document.getElementById('workplace-create-folder-btn').addEventListener('click', () => {
+            this._createFolder(); // Create new folder at root level
         });
         
         // Load tree and start polling
@@ -190,15 +200,27 @@ class WorkplaceManager {
                     return true;
                     
                 case 'add-folder':
-                    // For now, prompt for folder name
+                    // Prompt for folder name and create via API
                     const folderName = prompt('Enter folder name:');
-                    if (folderName) {
-                        // Create folder via upload with empty file (will create folder structure)
-                        const response = await fetch('/api/ideas/upload', {
+                    if (folderName && folderName.trim()) {
+                        const response = await fetch('/api/ideas/create-folder', {
                             method: 'POST',
-                            body: this._createFormData(path, folderName)
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                folder_name: folderName.trim(),
+                                parent_folder: path
+                            })
                         });
-                        return response.ok;
+                        const result = await response.json();
+                        if (result.success) {
+                            this._showToast(`Folder "${result.folder_name}" created`, 'success');
+                            await this.loadTree();
+                        } else {
+                            this._showToast(result.error || 'Failed to create folder', 'error');
+                        }
+                        return result.success;
                     }
                     return false;
                     
@@ -234,6 +256,14 @@ class WorkplaceManager {
                         this.loadTree();
                     }
                     return dupResult.success;
+                
+                // TASK-241: Handle move action from folder view drag-drop
+                case 'move':
+                    const moveResult = await this._handleMoveItem(path, data.targetPath);
+                    if (moveResult) {
+                        this.loadTree();
+                    }
+                    return moveResult;
                     
                 default:
                     console.warn('Unknown folder view action:', action);
@@ -478,19 +508,6 @@ class WorkplaceManager {
             const actionBtns = document.createElement('div');
             actionBtns.className = 'workplace-tree-actions';
             
-            // CR-006: Folder view button (">") for folders
-            if (node.type === 'folder') {
-                const folderViewBtn = document.createElement('button');
-                folderViewBtn.className = 'workplace-tree-action-btn tree-folder-view-btn';
-                folderViewBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
-                folderViewBtn.title = 'Open folder view';
-                folderViewBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.openFolderView(node.path);
-                });
-                actionBtns.appendChild(folderViewBtn);
-            }
-            
             // Add button (for folders - to add files to folder)
             if (node.type === 'folder') {
                 const addBtn = document.createElement('button');
@@ -541,16 +558,31 @@ class WorkplaceManager {
                 actionBtns.appendChild(renameBtn);
             }
             
-            // Delete button
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'workplace-tree-action-btn workplace-tree-delete-btn';
-            deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
-            deleteBtn.title = `Delete ${node.type}`;
-            deleteBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.confirmDelete(node.path, node.name, node.type);
-            });
-            actionBtns.appendChild(deleteBtn);
+            // Delete button (only for files - folders can be deleted in folder view)
+            if (node.type === 'file') {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'workplace-tree-action-btn workplace-tree-delete-btn';
+                deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
+                deleteBtn.title = `Delete ${node.type}`;
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.confirmDelete(node.path, node.name, node.type);
+                });
+                actionBtns.appendChild(deleteBtn);
+            }
+            
+            // CR-006: Folder view button (">") for folders - positioned at right
+            if (node.type === 'folder') {
+                const folderViewBtn = document.createElement('button');
+                folderViewBtn.className = 'workplace-tree-action-btn tree-folder-view-btn';
+                folderViewBtn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i>';
+                folderViewBtn.title = 'Enter folder view';
+                folderViewBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.openFolderView(node.path);
+                });
+                actionBtns.appendChild(folderViewBtn);
+            }
             
             itemContent.appendChild(icon);
             itemContent.appendChild(nameSpan);
@@ -632,19 +664,6 @@ class WorkplaceManager {
             const actionBtns = document.createElement('div');
             actionBtns.className = 'workplace-tree-actions';
             
-            // CR-006: Folder view button for nested folders
-            if (node.type === 'folder') {
-                const folderViewBtn = document.createElement('button');
-                folderViewBtn.className = 'workplace-tree-action-btn tree-folder-view-btn';
-                folderViewBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
-                folderViewBtn.title = 'Open folder view';
-                folderViewBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.openFolderView(node.path);
-                });
-                actionBtns.appendChild(folderViewBtn);
-            }
-            
             // Download button (only for files)
             if (node.type === 'file') {
                 const downloadBtn = document.createElement('button');
@@ -669,16 +688,31 @@ class WorkplaceManager {
                 actionBtns.appendChild(renameBtn);
             }
             
-            // Delete button
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'workplace-tree-action-btn workplace-tree-delete-btn';
-            deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
-            deleteBtn.title = `Delete ${node.type}`;
-            deleteBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.confirmDelete(node.path, node.name, node.type);
-            });
-            actionBtns.appendChild(deleteBtn);
+            // Delete button (only for files - folders can be deleted in folder view)
+            if (node.type === 'file') {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'workplace-tree-action-btn workplace-tree-delete-btn';
+                deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
+                deleteBtn.title = `Delete ${node.type}`;
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.confirmDelete(node.path, node.name, node.type);
+                });
+                actionBtns.appendChild(deleteBtn);
+            }
+            
+            // CR-006: Folder view button for nested folders - positioned at right
+            if (node.type === 'folder') {
+                const folderViewBtn = document.createElement('button');
+                folderViewBtn.className = 'workplace-tree-action-btn tree-folder-view-btn';
+                folderViewBtn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i>';
+                folderViewBtn.title = 'Enter folder view';
+                folderViewBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.openFolderView(node.path);
+                });
+                actionBtns.appendChild(folderViewBtn);
+            }
             
             itemContent.appendChild(icon);
             itemContent.appendChild(nameSpan);
@@ -719,6 +753,9 @@ class WorkplaceManager {
         const nameSpan = li.querySelector('.workplace-tree-name');
         const originalName = currentName;
         
+        // Disable drag during editing to allow text selection
+        li.setAttribute('draggable', 'false');
+        
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'workplace-rename-input';
@@ -732,7 +769,11 @@ class WorkplaceManager {
             if (!this.renamingFolder) return;
             
             const newName = input.value.trim();
+            const liElement = this.renamingFolder;
             this.renamingFolder = null;
+            
+            // Re-enable drag after editing
+            liElement.setAttribute('draggable', 'true');
             
             if (save && newName && newName !== originalName) {
                 try {
@@ -810,6 +851,9 @@ class WorkplaceManager {
         const nameSpan = li.querySelector('.workplace-tree-name');
         const originalName = currentName;
         
+        // Disable drag during editing to allow text selection
+        li.setAttribute('draggable', 'false');
+        
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'workplace-rename-input';
@@ -823,7 +867,11 @@ class WorkplaceManager {
             if (!this.renamingFolder) return;
             
             const newName = input.value.trim();
+            const liElement = this.renamingFolder;
             this.renamingFolder = null;
+            
+            // Re-enable drag after editing
+            liElement.setAttribute('draggable', 'true');
             
             if (save && newName && newName !== originalName) {
                 try {
@@ -2359,6 +2407,166 @@ class WorkplaceManager {
         } catch (error) {
             console.error('Failed to delete:', error);
             this._showToast('Failed to delete', 'error');
+        }
+    }
+    
+    /**
+     * CR-006 Fix: Delete item wrapper for folder view (calls deleteItem API)
+     * @param {string} path - Path to delete
+     * @returns {Object} Result with success boolean
+     */
+    async _deleteItem(path) {
+        try {
+            const response = await fetch('/api/ideas/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: path })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                const name = path.split('/').pop();
+                this._showToast(`Deleted: ${name}`, 'success');
+                
+                // If currently viewing the deleted file, clear the editor
+                if (this.currentPath && (this.currentPath === path || this.currentPath.startsWith(path + '/'))) {
+                    this.currentPath = null;
+                    this.hasUnsavedChanges = false;
+                }
+            } else {
+                this._showToast(result.error || 'Failed to delete', 'error');
+            }
+            
+            return result;
+        } catch (error) {
+            console.error('Failed to delete:', error);
+            this._showToast('Failed to delete', 'error');
+            return { success: false, error: error.message };
+        }
+    }
+    
+    /**
+     * CR-006 Fix: Rename file via API
+     * @param {string} path - File path
+     * @param {string} newName - New file name
+     * @returns {Object} Result with success boolean
+     */
+    async _renameFile(path, newName) {
+        try {
+            const response = await fetch('/api/ideas/rename-file', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    path: path,
+                    new_name: newName
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this._showToast('File renamed successfully', 'success');
+                
+                // Update currentPath if viewing this file
+                if (this.currentPath === path) {
+                    this.currentPath = result.new_path;
+                }
+                
+                await this.loadTree();
+            } else {
+                this._showToast(result.error || 'Failed to rename file', 'error');
+            }
+            
+            return result;
+        } catch (error) {
+            console.error('Failed to rename file:', error);
+            this._showToast('Failed to rename file', 'error');
+            return { success: false, error: error.message };
+        }
+    }
+    
+    /**
+     * CR-006 Fix: Rename folder via API
+     * @param {string} path - Folder path
+     * @param {string} newName - New folder name
+     * @returns {Object} Result with success boolean
+     */
+    async _renameFolder(path, newName) {
+        try {
+            // Extract the old folder name from path
+            const parts = path.split('/');
+            const oldName = parts.pop();
+            
+            const response = await fetch('/api/ideas/rename', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    old_name: oldName,
+                    new_name: newName
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this._showToast('Folder renamed successfully', 'success');
+                
+                // Update currentPath if viewing a file inside the renamed folder
+                if (this.currentPath) {
+                    const oldSegment = '/' + oldName + '/';
+                    const newSegment = '/' + newName + '/';
+                    if (this.currentPath.includes(oldSegment)) {
+                        this.currentPath = this.currentPath.replace(oldSegment, newSegment);
+                    }
+                }
+                
+                await this.loadTree();
+            } else {
+                this._showToast(result.error || 'Failed to rename folder', 'error');
+            }
+            
+            return result;
+        } catch (error) {
+            console.error('Failed to rename folder:', error);
+            this._showToast('Failed to rename folder', 'error');
+            return { success: false, error: error.message };
+        }
+    }
+    
+    /**
+     * Create a new empty folder at the root level or inside a parent folder
+     * @param {string|null} parentFolder - Optional parent folder path
+     */
+    async _createFolder(parentFolder = null) {
+        const folderName = prompt('Enter folder name:');
+        if (!folderName || !folderName.trim()) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/ideas/create-folder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    folder_name: folderName.trim(),
+                    parent_folder: parentFolder
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this._showToast(`Folder "${result.folder_name}" created`, 'success');
+                await this.loadTree();
+            } else {
+                this._showToast(result.error || 'Failed to create folder', 'error');
+            }
+        } catch (error) {
+            console.error('Failed to create folder:', error);
+            this._showToast('Failed to create folder', 'error');
         }
     }
     

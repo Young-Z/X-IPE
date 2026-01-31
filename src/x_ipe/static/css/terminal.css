@@ -319,6 +319,28 @@
     margin-right: 10px;
 }
 
+/* Copilot command button */
+.copilot-cmd-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: #3c3c3c;
+    color: #888;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    margin-right: 8px;
+}
+
+.copilot-cmd-btn:hover {
+    background: #0e639c;
+    color: #fff;
+}
+
 /* Mic toggle button */
 .mic-toggle {
     width: 32px;

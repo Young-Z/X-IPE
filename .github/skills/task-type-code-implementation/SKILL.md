@@ -31,7 +31,7 @@ Implement code for a single feature by:
 |-----------|-------|
 | Task Type | Code Implementation |
 | Category | feature-stage |
-| Next Task Type | Feature Closing |
+| Next Task Type | Feature Acceptance Test |
 | Require Human Review | No |
 | Feature Phase | Code Implementation |
 
@@ -53,7 +53,7 @@ This skill MUST return these attributes to the Task Data Model upon task complet
 Output:
   category: feature-stage
   status: completed | blocked
-  next_task_type: Feature Closing
+  next_task_type: Feature Acceptance Test
   require_human_review: No
   auto_proceed: {from input Auto Proceed}
   task_output_links: [src/, tests/]

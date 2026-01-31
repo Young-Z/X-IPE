@@ -104,6 +104,13 @@
     color: #495057;
 }
 
+.workplace-sidebar-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.workplace-create-folder-btn,
 .workplace-pin-btn {
     width: 28px;
     height: 28px;
@@ -118,6 +125,7 @@
     transition: all 0.15s;
 }
 
+.workplace-create-folder-btn:hover,
 .workplace-pin-btn:hover {
     background-color: #e9ecef;
     color: #0d6efd;
@@ -1301,6 +1309,16 @@
     color: var(--cr006-color-error);
 }
 
+/* TASK-240: Into folder button - always visible with primary color */
+.folder-view-item-action.into-btn {
+    color: var(--cr006-color-accent);
+}
+
+.folder-view-item-action.into-btn:hover {
+    background: var(--cr006-color-accent);
+    color: white;
+}
+
 /* Nested children */
 .folder-view-item-children {
     display: none;
@@ -1309,6 +1327,23 @@
 
 .folder-view-item.expanded > .folder-view-item-children {
     display: block;
+}
+
+/* TASK-241: Drag and drop styles */
+.folder-view-item.dragging {
+    opacity: 0.5;
+}
+
+.folder-view-item.drop-target > .folder-view-item-main {
+    background: var(--cr006-color-accent-light, rgba(59, 130, 246, 0.1));
+    border: 2px dashed var(--cr006-color-accent);
+    border-radius: var(--cr006-radius-sm);
+}
+
+.folder-view-content.drop-target-zone {
+    background: var(--cr006-color-accent-light, rgba(59, 130, 246, 0.05));
+    border: 2px dashed var(--cr006-color-accent);
+    border-radius: var(--cr006-radius-sm);
 }
 
 /* Error state */
@@ -1325,6 +1360,38 @@
 .folder-view-error i {
     font-size: 48px;
     margin-bottom: 16px;
+}
+
+/* TASK-241: Drag and drop styles for folder view */
+.folder-view-item.dragging {
+    opacity: 0.5;
+    background-color: #e3f2fd;
+}
+
+.folder-view-item.drop-target {
+    background-color: #e8f5e9;
+    border: 2px dashed #4caf50;
+    border-radius: 6px;
+}
+
+.folder-view-item.drop-target > .folder-view-item-main {
+    background-color: transparent;
+}
+
+.folder-view-content.drop-target-zone {
+    background-color: #e8f5e9;
+    border: 2px dashed #4caf50;
+    border-radius: 6px;
+}
+
+/* TASK-240: "Into" button styling */
+.folder-view-item-action.into-btn {
+    color: #0d6efd;
+}
+
+.folder-view-item-action.into-btn:hover {
+    background-color: #e7f1ff;
+    color: #0a58ca;
 }
 
 /* =================================================================

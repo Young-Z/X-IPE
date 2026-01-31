@@ -546,32 +546,33 @@
         }
 
         /**
-         * Send Copilot refine command
+         * Send Copilot refine command (types command, no Enter - user can review)
          */
         sendCopilotRefineCommand(filePath) {
             this._sendCopilotCommand(`refine the idea ${filePath}`);
         }
 
         /**
-         * Send Copilot prompt command (executes with Enter)
+         * Send Copilot prompt command (types command, no Enter - user can review)
          */
         sendCopilotPromptCommand(promptCommand) {
-            this._sendCopilotCommand(promptCommand, true);
+            this._sendCopilotCommand(promptCommand);
         }
 
         /**
-         * Send Copilot prompt command without pressing Enter (for review before execution)
+         * Send Copilot prompt command without pressing Enter (alias for sendCopilotPromptCommand)
          */
         sendCopilotPromptCommandNoEnter(promptCommand) {
-            this._sendCopilotCommand(promptCommand, false);
+            this._sendCopilotCommand(promptCommand);
         }
 
         /**
          * Internal: Send copilot command with typing effect
-         * @param {string} command - Command to type
-         * @param {boolean} pressEnter - Whether to press Enter after command (default: true)
+         * Uses `copilot -i "{prompt}"` to pass prompt directly
+         * Types command without pressing Enter - user can review before executing
+         * @param {string} command - Command/prompt to send to copilot
          */
-        _sendCopilotCommand(command, pressEnter = true) {
+        _sendCopilotCommand(command) {
             let targetIndex = this.activeIndex >= 0 ? this.activeIndex : 0;
 
             if (this.terminals.length === 0) {
@@ -583,12 +584,10 @@
             const instance = this.terminals[targetIndex];
             if (!instance?.socket?.connected) return;
 
-            // Type 'copilot' then wait and type command
-            this._typeWithEffect(instance.socket, 'copilot', () => {
-                this._waitForCopilotReady(instance, () => {
-                    this._typeWithEffect(instance.socket, command, null, pressEnter);
-                });
-            });
+            // Use copilot with all permissions and -i to pass prompt directly, no Enter (user reviews first)
+            const escapedCommand = command.replace(/"/g, '\\"');
+            const copilotCommand = `copilot --allow-all-tools --allow-all-paths --allow-all-urls -i "${escapedCommand}"`;
+            this._typeWithEffect(instance.socket, copilotCommand, null, false);
         }
 
         /**
@@ -669,6 +668,7 @@
             this.toggleBtn = document.getElementById('terminal-toggle');
             this.zenBtn = document.getElementById('terminal-zen-btn');
             this.addBtn = document.getElementById('add-terminal-btn');
+            this.copilotCmdBtn = document.getElementById('copilot-cmd-btn');
             this.resizeHandle = document.getElementById('terminal-resize-handle');
             this.statusIndicator = document.getElementById('terminal-status-indicator');
             this.statusText = document.getElementById('terminal-status-text');
@@ -710,6 +710,14 @@
                     e.stopPropagation();
                     this.paneManager.addTerminal();
                     this._updateAddButton();
+                });
+            }
+
+            // Copilot command button - insert command without triggering expand/collapse
+            if (this.copilotCmdBtn) {
+                this.copilotCmdBtn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    this._insertCopilotCommand();
                 });
             }
 
@@ -863,6 +871,29 @@
             if (this.addBtn) {
                 this.addBtn.disabled = this.paneManager.terminals.length >= CONFIG.maxTerminals;
             }
+        }
+
+        /**
+         * Insert copilot command into active terminal (no Enter)
+         */
+        _insertCopilotCommand() {
+            const copilotCommand = 'copilot --allow-all-tools --allow-all-paths --allow-all-urls';
+            
+            // Ensure we have a terminal
+            let targetIndex = this.paneManager.activeIndex;
+            if (this.paneManager.terminals.length === 0) {
+                targetIndex = this.paneManager.addTerminal();
+            } else if (targetIndex < 0) {
+                targetIndex = 0;
+            }
+            
+            this.paneManager.setFocus(targetIndex);
+            
+            const instance = this.paneManager.terminals[targetIndex];
+            if (!instance?.socket?.connected) return;
+            
+            // Type command without pressing Enter
+            this.paneManager._typeWithEffect(instance.socket, copilotCommand, null, false);
         }
 
         _reconnectAll() {

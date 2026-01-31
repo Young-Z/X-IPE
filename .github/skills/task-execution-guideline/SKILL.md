@@ -62,11 +62,13 @@ Task:
 
 | Task Type | Category |
 |-----------|----------|
-| `task-type-feature-refinement`, `task-type-technical-design`, `task-type-test-generation`, `task-type-code-implementation`, `task-type-feature-closing` | feature-stage |
+| `task-type-feature-refinement`, `task-type-technical-design`, `task-type-test-generation`, `task-type-code-implementation`, `task-type-feature-acceptance-test`, `task-type-feature-closing` | feature-stage |
 | `task-type-ideation`, `task-type-idea-mockup`, `task-type-idea-to-architecture` | ideation-stage |
 | `task-type-requirement-gathering`, `task-type-feature-breakdown` | requirement-stage |
-| `task-type-bug-fix`, `task-type-change-request`, `task-type-project-init`, `task-type-dev-environment`, `task-type-user-manual`, `task-type-human-playground`, `task-type-share-idea` | Standalone |
+| `task-type-bug-fix`, `task-type-change-request`, `task-type-project-init`, `task-type-dev-environment`, `task-type-user-manual`, `task-type-human-playground`, `task-type-share-idea`, `task-type-feature-acceptance-test` | Standalone |
 | `task-type-refactoring-analysis`, `task-type-improve-code-quality-before-refactoring`, `task-type-code-refactor-v2` | code-refactoring-stage |
+
+> **Note:** `task-type-feature-acceptance-test` can be either feature-stage (in workflow) or Standalone (called directly).
 
 ### Task States
 

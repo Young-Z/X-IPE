@@ -173,15 +173,18 @@ class FolderViewManager {
         const icon = isFolder ? 'bi-folder-fill folder-icon' : this._getFileIcon(item.name);
         const isExpanded = this.expandedFolders.has(item.path);
         
+        // TASK-240: Add 'into' action for folders (enter folder view)
         const actions = isFolder 
-            ? ['rename', 'delete', 'duplicate']
+            ? ['into', 'rename', 'delete', 'duplicate']
             : ['rename', 'delete', 'duplicate', 'download'];
 
+        // TASK-241: Add draggable support
         return `
             <div class="folder-view-item ${isFolder ? 'is-folder' : 'is-file'} ${isExpanded ? 'expanded' : ''}" 
                  data-path="${item.path}" 
                  data-type="${item.type}"
-                 data-name="${this._escapeHtml(item.name)}">
+                 data-name="${this._escapeHtml(item.name)}"
+                 draggable="true">
                 <div class="folder-view-item-main">
                     ${isFolder ? `
                         <button class="folder-view-item-toggle" title="Expand folder">
@@ -192,7 +195,7 @@ class FolderViewManager {
                     <span class="folder-view-item-name">${this._escapeHtml(item.name)}</span>
                     <div class="folder-view-item-actions">
                         ${actions.map(action => `
-                            <button class="folder-view-item-action ${action === 'delete' ? 'danger' : ''}" 
+                            <button class="folder-view-item-action ${action === 'delete' ? 'danger' : ''} ${action === 'into' ? 'into-btn' : ''}" 
                                     data-action="${action}" 
                                     title="${this._getActionTitle(action)}">
                                 <i class="bi bi-${this._getActionIcon(action)}"></i>
@@ -237,6 +240,7 @@ class FolderViewManager {
      */
     _getActionIcon(action) {
         const icons = {
+            'into': 'box-arrow-in-right',  // TASK-240: Enter folder icon
             'rename': 'pencil',
             'delete': 'trash',
             'duplicate': 'copy',
@@ -252,6 +256,7 @@ class FolderViewManager {
      */
     _getActionTitle(action) {
         const titles = {
+            'into': 'Enter folder',  // TASK-240: Enter folder tooltip
             'rename': 'Rename',
             'delete': 'Delete',
             'duplicate': 'Duplicate',
@@ -337,7 +342,164 @@ class FolderViewManager {
                     this._handleItemAction(action, path, name, type);
                 });
             });
+            
+            // TASK-241: Drag and drop events
+            this._bindDragEvents(item);
         });
+        
+        // TASK-241: Allow dropping on the folder view content area (move to current folder)
+        const contentArea = container.querySelector('.folder-view-content');
+        if (contentArea) {
+            this._bindDropZone(contentArea);
+        }
+    }
+    
+    /**
+     * TASK-241: Bind drag events to an item
+     * @param {HTMLElement} item 
+     */
+    _bindDragEvents(item) {
+        item.addEventListener('dragstart', (e) => {
+            e.stopPropagation();
+            const path = item.dataset.path;
+            const type = item.dataset.type;
+            const name = item.dataset.name;
+            
+            e.dataTransfer.setData('text/plain', JSON.stringify({ path, type, name }));
+            e.dataTransfer.effectAllowed = 'move';
+            item.classList.add('dragging');
+            
+            // Store reference for drop validation
+            this._draggingItem = { path, type, name };
+        });
+        
+        item.addEventListener('dragend', (e) => {
+            item.classList.remove('dragging');
+            this._draggingItem = null;
+            
+            // Clean up any drop-target classes
+            this.container.querySelectorAll('.drop-target').forEach(el => {
+                el.classList.remove('drop-target');
+            });
+        });
+        
+        // Only folders can be drop targets
+        if (item.dataset.type === 'folder') {
+            item.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Validate drop is allowed
+                if (this._canDropOn(item.dataset.path)) {
+                    e.dataTransfer.dropEffect = 'move';
+                    item.classList.add('drop-target');
+                } else {
+                    e.dataTransfer.dropEffect = 'none';
+                }
+            });
+            
+            item.addEventListener('dragleave', (e) => {
+                // Only remove if actually leaving this element
+                if (!item.contains(e.relatedTarget)) {
+                    item.classList.remove('drop-target');
+                }
+            });
+            
+            item.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                item.classList.remove('drop-target');
+                
+                const targetPath = item.dataset.path;
+                await this._handleDrop(e, targetPath);
+            });
+        }
+    }
+    
+    /**
+     * TASK-241: Bind drop zone events (for dropping into current folder)
+     * @param {HTMLElement} zone 
+     */
+    _bindDropZone(zone) {
+        zone.addEventListener('dragover', (e) => {
+            // Only handle if not over a folder item
+            if (!e.target.closest('.folder-view-item.is-folder')) {
+                e.preventDefault();
+                if (this._canDropOn(this.currentPath)) {
+                    e.dataTransfer.dropEffect = 'move';
+                    zone.classList.add('drop-target-zone');
+                }
+            }
+        });
+        
+        zone.addEventListener('dragleave', (e) => {
+            if (!zone.contains(e.relatedTarget)) {
+                zone.classList.remove('drop-target-zone');
+            }
+        });
+        
+        zone.addEventListener('drop', async (e) => {
+            // Only handle if not over a folder item
+            if (!e.target.closest('.folder-view-item.is-folder')) {
+                e.preventDefault();
+                zone.classList.remove('drop-target-zone');
+                await this._handleDrop(e, this.currentPath);
+            }
+        });
+    }
+    
+    /**
+     * TASK-241: Check if item can be dropped on target
+     * @param {string} targetPath 
+     * @returns {boolean}
+     */
+    _canDropOn(targetPath) {
+        if (!this._draggingItem) return false;
+        
+        const sourcePath = this._draggingItem.path;
+        
+        // Can't drop on self
+        if (sourcePath === targetPath) return false;
+        
+        // Can't drop parent into child
+        if (targetPath.startsWith(sourcePath + '/')) return false;
+        
+        // Can't drop into same parent (already there)
+        const sourceParent = sourcePath.substring(0, sourcePath.lastIndexOf('/'));
+        if (sourceParent === targetPath) return false;
+        
+        return true;
+    }
+    
+    /**
+     * TASK-241: Handle drop event
+     * @param {DragEvent} e 
+     * @param {string} targetPath 
+     */
+    async _handleDrop(e, targetPath) {
+        try {
+            const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+            const sourcePath = data.path;
+            
+            if (!this._canDropOn(targetPath)) {
+                return;
+            }
+            
+            // Call move action through onAction callback
+            if (this.onAction) {
+                const success = await this.onAction('move', sourcePath, { 
+                    targetPath,
+                    name: data.name,
+                    type: data.type 
+                });
+                
+                if (success) {
+                    await this.refresh();
+                }
+            }
+        } catch (error) {
+            console.error('Drop failed:', error);
+        }
     }
 
     /**
@@ -376,6 +538,11 @@ class FolderViewManager {
      */
     async _handleItemAction(action, path, name, type) {
         switch (action) {
+            case 'into':  // TASK-240: Navigate into folder
+                if (type === 'folder') {
+                    await this.render(path);
+                }
+                break;
             case 'rename':
                 if (this.onAction) {
                     await this.onAction('rename', path, { name, type });
@@ -533,6 +700,9 @@ class FolderViewManager {
                     this._handleItemAction(action, path, name, type);
                 });
             });
+            
+            // TASK-241: Bind drag events for dynamically loaded children
+            this._bindDragEvents(item);
         });
     }
 

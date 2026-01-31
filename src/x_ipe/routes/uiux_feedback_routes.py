@@ -10,6 +10,26 @@ from ..services.uiux_feedback_service import UiuxFeedbackService
 uiux_feedback_bp = Blueprint('uiux_feedback', __name__)
 
 
+@uiux_feedback_bp.route('/api/uiux-feedback', methods=['GET'])
+def list_feedback():
+    """
+    List recent feedback entries.
+    
+    Query params:
+        days: Number of days to look back (default 2)
+    
+    Returns:
+        200: {"entries": [...]}
+    """
+    project_root = current_app.config.get('PROJECT_ROOT', '.')
+    days = request.args.get('days', 2, type=int)
+    
+    service = UiuxFeedbackService(project_root)
+    entries = service.list_feedback(days=days)
+    
+    return jsonify({'entries': entries}), 200
+
+
 @uiux_feedback_bp.route('/api/uiux-feedback', methods=['POST'])
 def submit_feedback():
     """

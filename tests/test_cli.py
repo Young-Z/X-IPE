@@ -192,31 +192,32 @@ class TestInitCommand:
     def test_init_creates_docs_folder(self, runner, temp_project):
         """Init creates x-ipe-docs/ folder."""
         from src.x_ipe.cli.main import cli
-        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills"])
+        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills", "--no-mcp"])
         assert result.exit_code == 0
         assert (temp_project / "x-ipe-docs").exists()
     
     def test_init_creates_docs_subfolders(self, runner, temp_project):
         """Init creates x-ipe-docs/ideas, x-ipe-docs/planning, x-ipe-docs/requirements."""
         from src.x_ipe.cli.main import cli
-        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills"])
+        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills", "--no-mcp"])
         assert result.exit_code == 0
         assert (temp_project / "x-ipe-docs" / "planning").exists()
         assert (temp_project / "x-ipe-docs" / "requirements").exists()
     
     def test_init_creates_runtime_folder(self, runner, temp_project):
-        """Init creates .x-ipe/ hidden folder."""
+        """Init does not create .x-ipe/ folder (removed from init)."""
         from src.x_ipe.cli.main import cli
-        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills"])
+        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills", "--no-mcp"])
         assert result.exit_code == 0
-        assert (temp_project / ".x-ipe").exists()
+        # .x-ipe folder is no longer created by init
+        assert not (temp_project / ".x-ipe").exists()
     
     def test_init_creates_github_skills(self, runner, temp_project):
         """Init creates .github/skills/ folder."""
         from src.x_ipe.cli.main import cli
         # Note: Without package skills set up, this may not create skills
         # Just test the command runs without error
-        result = runner.invoke(cli, ["-p", str(temp_project), "init"])
+        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-mcp"])
         assert result.exit_code == 0
     
     def test_init_creates_copilot_instructions(self, runner, temp_project):
@@ -227,7 +228,7 @@ class TestInitCommand:
     def test_init_creates_config_file(self, runner, temp_project):
         """Init creates .x-ipe.yaml config file."""
         from src.x_ipe.cli.main import cli
-        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills"])
+        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills", "--no-mcp"])
         assert result.exit_code == 0
         assert (temp_project / ".x-ipe.yaml").exists()
     
@@ -235,24 +236,25 @@ class TestInitCommand:
         """Init creates valid YAML config."""
         import yaml
         from src.x_ipe.cli.main import cli
-        runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills"])
+        runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills", "--no-mcp"])
         config = yaml.safe_load((temp_project / ".x-ipe.yaml").read_text())
         assert config["version"] == 1
         assert "paths" in config
     
     def test_init_updates_gitignore_in_git_repo(self, runner, git_project):
-        """Init updates .gitignore in git repository."""
+        """Init does not update .gitignore (no X-IPE specific entries)."""
         from src.x_ipe.cli.main import cli
-        result = runner.invoke(cli, ["-p", str(git_project), "init", "--no-skills"])
+        result = runner.invoke(cli, ["-p", str(git_project), "init", "--no-skills", "--no-mcp"])
         assert result.exit_code == 0
         gitignore = git_project / ".gitignore"
         assert gitignore.exists()
-        assert ".x-ipe/" in gitignore.read_text()
+        # .gitignore should be unchanged (no X-IPE entries added)
+        assert "node_modules/" in gitignore.read_text()
     
     def test_init_skips_gitignore_without_git(self, runner, temp_project):
         """Init does not create .gitignore without git."""
         from src.x_ipe.cli.main import cli
-        runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills"])
+        runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills", "--no-mcp"])
         # If .gitignore was not there before and not created, test passes
         # Or if it's empty/minimal, test passes
         if (temp_project / ".gitignore").exists():
@@ -267,7 +269,7 @@ class TestInitCommand:
         (temp_project / "x-ipe-docs").mkdir()
         (temp_project / ".x-ipe.yaml").write_text("version: 1\n")
         
-        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills"])
+        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills", "--no-mcp"])
         assert result.exit_code == 0
         assert "Skipped" in result.output
     
@@ -277,7 +279,7 @@ class TestInitCommand:
         # Create existing config with custom content
         (temp_project / ".x-ipe.yaml").write_text("version: 1\ncustom: true\n")
         
-        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills", "-f"])
+        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills", "--no-mcp", "-f"])
         assert result.exit_code == 0
         # Config should be overwritten
         content = (temp_project / ".x-ipe.yaml").read_text()
@@ -286,7 +288,7 @@ class TestInitCommand:
     def test_init_dry_run_shows_preview(self, runner, temp_project):
         """Init --dry-run shows changes without writing."""
         from src.x_ipe.cli.main import cli
-        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills", "--dry-run"])
+        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills", "--no-mcp", "--dry-run"])
         assert result.exit_code == 0
         assert "Dry run" in result.output
         # Files should NOT be created
@@ -295,7 +297,7 @@ class TestInitCommand:
     def test_init_shows_summary(self, runner, temp_project):
         """Init shows summary of created items."""
         from src.x_ipe.cli.main import cli
-        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills"])
+        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-skills", "--no-mcp"])
         assert result.exit_code == 0
         assert "Created:" in result.output or "✓" in result.output
     
@@ -306,7 +308,7 @@ class TestInitCommand:
         (temp_project / ".github").mkdir()
         (temp_project / ".github" / "FUNDING.yml").write_text("github: [user]")
         
-        result = runner.invoke(cli, ["-p", str(temp_project), "init"])
+        result = runner.invoke(cli, ["-p", str(temp_project), "init", "--no-mcp"])
         assert result.exit_code == 0
         # Existing file should still be there
         assert (temp_project / ".github" / "FUNDING.yml").exists()
@@ -505,7 +507,8 @@ class TestUpgradeCommand:
     def test_upgrade_without_init_shows_error(self, runner, temp_project):
         """Upgrade in non-initialized project works with warning."""
         from src.x_ipe.cli.main import cli
-        result = runner.invoke(cli, ["-p", str(temp_project), "upgrade"])
+        # Use --no-mcp to avoid interactive prompt
+        result = runner.invoke(cli, ["-p", str(temp_project), "upgrade", "--no-mcp"])
         # Should complete (may show no skills available)
         assert result.exit_code == 0
 
@@ -806,7 +809,7 @@ class TestScaffoldModule:
         assert config_path in created
     
     def test_scaffold_updates_gitignore(self, git_project):
-        """ScaffoldManager updates .gitignore."""
+        """ScaffoldManager update_gitignore is a no-op (no X-IPE entries needed)."""
         from src.x_ipe.core.scaffold import ScaffoldManager
         
         scaffold = ScaffoldManager(git_project)
@@ -815,7 +818,8 @@ class TestScaffoldModule:
         gitignore = git_project / ".gitignore"
         assert gitignore.exists()
         content = gitignore.read_text()
-        assert ".x-ipe/" in content
+        # No X-IPE entries should be added (GITIGNORE_ENTRIES is empty)
+        assert "node_modules/" in content  # Original content preserved
 
 
 # =============================================================================

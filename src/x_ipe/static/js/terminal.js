@@ -813,48 +813,29 @@
 
         /**
          * Send Copilot refine command with typing simulation
+         * Uses `copilot -i "{prompt}"` - types command, no Enter (user can review)
          * @param {string} filePath - Path to the idea file to refine
          */
         sendCopilotRefineCommand(filePath) {
-            // Check if we need a new terminal (if current one is in copilot mode)
-            let targetIndex = this.activeIndex;
-            
-            // If no terminals exist, create one
-            if (this.terminals.length === 0) {
-                targetIndex = this.addTerminal();
-            } else if (targetIndex < 0) {
-                targetIndex = 0;
-            }
-            
-            // Check if current terminal appears to be in copilot CLI mode
-            // We detect this by checking if a new terminal is needed
-            const needsNewTerminal = this._isInCopilotMode(targetIndex);
-            
-            if (needsNewTerminal && this.terminals.length < MAX_TERMINALS) {
-                targetIndex = this.addTerminal();
-            }
-            
-            this.setFocus(targetIndex);
-            
-            // Build the command sequence
-            const copilotCommand = 'copilot';
             const refineCommand = `refine the idea ${filePath}`;
-            
-            // Send commands with typing simulation
-            this._sendWithTypingEffect(targetIndex, copilotCommand, () => {
-                // After copilot command, wait for CLI to be ready before sending refine command
-                this._waitForCopilotReady(targetIndex, () => {
-                    this._sendWithTypingEffect(targetIndex, refineCommand);
-                });
-            });
+            this._sendCopilotWithPrompt(refineCommand);
         }
 
         /**
          * Send a custom Copilot prompt command with typing simulation
+         * Uses `copilot -i "{prompt}"` - types command, no Enter (user can review)
          * @param {string} promptCommand - The command to send (with placeholders already replaced)
          */
         sendCopilotPromptCommand(promptCommand) {
-            // Check if we need a new terminal (if current one is in copilot mode)
+            this._sendCopilotWithPrompt(promptCommand);
+        }
+
+        /**
+         * Internal: Send copilot command with -i flag
+         * Types command without pressing Enter - user can review before executing
+         * @param {string} prompt - The prompt to pass to copilot
+         */
+        _sendCopilotWithPrompt(prompt) {
             let targetIndex = this.activeIndex;
             
             // If no terminals exist, create one
@@ -864,25 +845,14 @@
                 targetIndex = 0;
             }
             
-            // Check if current terminal appears to be in copilot CLI mode
-            const needsNewTerminal = this._isInCopilotMode(targetIndex);
-            
-            if (needsNewTerminal && this.terminals.length < MAX_TERMINALS) {
-                targetIndex = this.addTerminal();
-            }
-            
             this.setFocus(targetIndex);
             
-            // Build the command sequence
-            const copilotCommand = 'copilot';
+            // Use copilot with all permissions and -i to pass prompt directly, no Enter (user reviews first)
+            const escapedPrompt = prompt.replace(/"/g, '\\"');
+            const copilotCommand = `copilot --allow-all-tools --allow-all-paths --allow-all-urls -i "${escapedPrompt}"`;
             
-            // Send commands with typing simulation
-            this._sendWithTypingEffect(targetIndex, copilotCommand, () => {
-                // After copilot command, wait for CLI to be ready before sending the prompt
-                this._waitForCopilotReady(targetIndex, () => {
-                    this._sendWithTypingEffect(targetIndex, promptCommand);
-                });
-            });
+            // Send command with typing simulation, no Enter
+            this._sendWithTypingEffect(targetIndex, copilotCommand, null, false);
         }
 
         /**
@@ -1018,6 +988,7 @@
             this.header = document.getElementById('terminal-header');
             this.toggleBtn = document.getElementById('terminal-toggle');
             this.zenBtn = document.getElementById('terminal-zen-btn');
+            this.copilotCmdBtn = document.getElementById('copilot-cmd-btn');
             this.resizeHandle = document.getElementById('terminal-resize-handle');
             this.terminalManager = terminalManager;
 
@@ -1029,9 +1000,11 @@
         }
 
         _bindEvents() {
-            // Header click to toggle (except on buttons/status)
+            // Header click to toggle (except on buttons/status/center controls)
             this.header.addEventListener('click', (e) => {
-                if (e.target.closest('.terminal-actions') || e.target.closest('.terminal-status')) return;
+                if (e.target.closest('.terminal-actions') || 
+                    e.target.closest('.terminal-status') ||
+                    e.target.closest('.terminal-header-center')) return;
                 this.toggle();
             });
 
@@ -1044,6 +1017,14 @@
                 this.zenBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     this.toggleZenMode();
+                });
+            }
+
+            // Copilot command button - insert command without triggering expand/collapse
+            if (this.copilotCmdBtn) {
+                this.copilotCmdBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this._insertCopilotCommand();
                 });
             }
 
@@ -1165,6 +1146,26 @@
             if (this.appContainer) this.appContainer.style.display = '';
 
             this.terminalManager.fitAll();
+        }
+
+        /**
+         * Insert copilot command into active terminal (no Enter)
+         */
+        _insertCopilotCommand() {
+            const copilotCommand = 'copilot --allow-all-tools --allow-all-paths --allow-all-urls';
+            
+            // Ensure we have a terminal
+            let targetIndex = this.terminalManager.activeIndex;
+            if (this.terminalManager.terminals.length === 0) {
+                targetIndex = this.terminalManager.addTerminal();
+            } else if (targetIndex < 0) {
+                targetIndex = 0;
+            }
+            
+            this.terminalManager.setFocus(targetIndex);
+            
+            // Type command without pressing Enter
+            this.terminalManager._sendWithTypingEffect(targetIndex, copilotCommand, null, false);
         }
     }
 

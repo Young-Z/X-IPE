@@ -428,19 +428,16 @@ class TestFullRefreshFlow:
         test_file = temp_project / "refresh_test.md"
         test_file.write_text("# Original Content")
         
-        # First request
-        with patch('src.app.current_app') as mock_app:
-            mock_app.config = {'PROJECT_ROOT': str(temp_project)}
-            
-            # Note: This test depends on FEATURE-002's content API
-            # The test verifies that re-fetching returns new content
-            
-            # Modify file
-            test_file.write_text("# Updated Content")
-            
-            # Content should now be updated
-            content = test_file.read_text()
-            assert "Updated Content" in content
+        # Verify initial content
+        content = test_file.read_text()
+        assert "Original Content" in content
+        
+        # Modify file
+        test_file.write_text("# Updated Content")
+        
+        # Content should now be updated (file system level)
+        content = test_file.read_text()
+        assert "Updated Content" in content
 
 
 # =============================================================================

@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Default Theme - Component Visualization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Colors */
+            --color-primary: #0f172a;
+            --color-secondary: #475569;
+            --color-accent: #10b981;
+            --color-neutral: #e2e8f0;
+            --color-success: #22c55e;
+            --color-warning: #f59e0b;
+            --color-error: #ef4444;
+            --color-info: #3b82f6;
+            
+            /* Neutrals */
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            
+            /* Typography */
+            --font-heading: 'Inter', system-ui, sans-serif;
+            --font-body: system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            
+            /* Border Radius */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-full: 9999px;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--slate-50);
+            color: var(--color-primary);
+            line-height: 1.5;
+            padding: 48px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-family: var(--font-heading);
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            color: var(--color-secondary);
+            margin-bottom: 48px;
+        }
+        
+        .section {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--slate-200);
+        }
+        
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-sm);
+            border-bottom: 1px solid var(--slate-200);
+        }
+        
+        /* Color Swatches */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: var(--space-md);
+        }
+        
+        .color-swatch {
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--slate-200);
+        }
+        
+        .color-swatch-preview {
+            height: 80px;
+        }
+        
+        .color-swatch-info {
+            padding: var(--space-sm) var(--space-md);
+            background: white;
+        }
+        
+        .color-swatch-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+        
+        .color-swatch-value {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--color-secondary);
+        }
+        
+        /* Typography Samples */
+        .typography-grid {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+        
+        .type-sample {
+            display: flex;
+            align-items: baseline;
+            gap: var(--space-lg);
+        }
+        
+        .type-label {
+            width: 100px;
+            flex-shrink: 0;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--color-secondary);
+        }
+        
+        .text-xs { font-size: 12px; }
+        .text-sm { font-size: 14px; }
+        .text-base { font-size: 16px; }
+        .text-lg { font-size: 18px; }
+        .text-xl { font-size: 20px; }
+        .text-2xl { font-size: 24px; }
+        .text-3xl { font-size: 30px; }
+        .text-4xl { font-size: 36px; }
+        
+        /* Spacing Visualization */
+        .spacing-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-lg);
+            align-items: flex-end;
+        }
+        
+        .spacing-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+        
+        .spacing-bar {
+            background: var(--color-accent);
+            border-radius: var(--radius-sm);
+        }
+        
+        .spacing-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--color-secondary);
+        }
+        
+        /* Component Samples */
+        .component-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-lg);
+            align-items: flex-start;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: var(--color-accent);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .btn-primary:hover {
+            background: #059669;
+        }
+        
+        .btn-secondary {
+            background: var(--slate-100);
+            color: var(--slate-700);
+            border: 1px solid var(--slate-200);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--slate-200);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: var(--color-accent);
+            border: 1px solid var(--color-accent);
+        }
+        
+        .btn-outline:hover {
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        /* Cards */
+        .sample-card {
+            width: 280px;
+            background: white;
+            border: 1px solid var(--slate-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .sample-card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+        
+        .sample-card-body {
+            font-size: 14px;
+            color: var(--color-secondary);
+            line-height: 1.5;
+        }
+        
+        /* Form Input */
+        .sample-input {
+            width: 280px;
+        }
+        
+        .input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 14px;
+            border: 1px solid var(--slate-200);
+            border-radius: var(--radius-md);
+            background: white;
+            color: var(--color-primary);
+        }
+        
+        .input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+        
+        .input::placeholder {
+            color: var(--slate-400);
+        }
+        
+        .input-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--color-primary);
+            margin-bottom: 6px;
+        }
+        
+        /* Border Radius Demo */
+        .radius-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-lg);
+        }
+        
+        .radius-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .radius-box {
+            width: 64px;
+            height: 64px;
+            background: var(--color-accent);
+        }
+        
+        .radius-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--color-secondary);
+        }
+        
+        /* Shadow Demo */
+        .shadow-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-xl);
+        }
+        
+        .shadow-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .shadow-box {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: var(--radius-md);
+        }
+        
+        .shadow-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--color-secondary);
+        }
+    </style>
+    
+    <!-- JSON-LD Structured Data for AI Parsing -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "DesignSystem",
+        "name": "Default Theme",
+        "description": "A clean, neutral design system for X-IPE mockups",
+        "version": "1.0",
+        "tokens": {
+            "colors": {
+                "primary": "#0f172a",
+                "secondary": "#475569",
+                "accent": "#10b981",
+                "neutral": "#e2e8f0",
+                "success": "#22c55e",
+                "warning": "#f59e0b",
+                "error": "#ef4444",
+                "info": "#3b82f6"
+            },
+            "neutralScale": {
+                "slate-50": "#f8fafc",
+                "slate-100": "#f1f5f9",
+                "slate-200": "#e2e8f0",
+                "slate-300": "#cbd5e1",
+                "slate-400": "#94a3b8",
+                "slate-500": "#64748b",
+                "slate-600": "#475569",
+                "slate-700": "#334155",
+                "slate-800": "#1e293b",
+                "slate-900": "#0f172a"
+            },
+            "typography": {
+                "fontHeading": "Inter, system-ui, sans-serif",
+                "fontBody": "system-ui, -apple-system, sans-serif",
+                "fontMono": "JetBrains Mono, monospace",
+                "sizes": {
+                    "xs": "12px",
+                    "sm": "14px",
+                    "base": "16px",
+                    "lg": "18px",
+                    "xl": "20px",
+                    "2xl": "24px",
+                    "3xl": "30px",
+                    "4xl": "36px"
+                }
+            },
+            "spacing": {
+                "xs": "4px",
+                "sm": "8px",
+                "md": "16px",
+                "lg": "24px",
+                "xl": "32px",
+                "2xl": "48px",
+                "3xl": "64px"
+            },
+            "borderRadius": {
+                "sm": "4px",
+                "md": "8px",
+                "lg": "12px",
+                "xl": "16px",
+                "2xl": "24px",
+                "full": "9999px"
+            }
+        }
+    }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Default Theme</h1>
+        <p class="subtitle">Component Visualization & Design Token Reference</p>
+        
+        <!-- Color Palette -->
+        <div class="section">
+            <h2 class="section-title">Color Palette</h2>
+            <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--color-secondary);">Core Colors</h3>
+            <div class="color-grid" style="margin-bottom: 24px;">
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #0f172a;" data-color="primary"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Primary</div>
+                        <div class="color-swatch-value">#0f172a</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #475569;" data-color="secondary"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Secondary</div>
+                        <div class="color-swatch-value">#475569</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #10b981;" data-color="accent"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Accent</div>
+                        <div class="color-swatch-value">#10b981</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #e2e8f0;" data-color="neutral"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Neutral</div>
+                        <div class="color-swatch-value">#e2e8f0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--color-secondary);">Semantic Colors</h3>
+            <div class="color-grid" style="margin-bottom: 24px;">
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #22c55e;" data-color="success"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Success</div>
+                        <div class="color-swatch-value">#22c55e</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #f59e0b;" data-color="warning"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Warning</div>
+                        <div class="color-swatch-value">#f59e0b</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #ef4444;" data-color="error"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Error</div>
+                        <div class="color-swatch-value">#ef4444</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #3b82f6;" data-color="info"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Info</div>
+                        <div class="color-swatch-value">#3b82f6</div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--color-secondary);">Neutral Scale (Slate)</h3>
+            <div class="color-grid">
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #f8fafc;"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Slate 50</div>
+                        <div class="color-swatch-value">#f8fafc</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #f1f5f9;"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Slate 100</div>
+                        <div class="color-swatch-value">#f1f5f9</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #e2e8f0;"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Slate 200</div>
+                        <div class="color-swatch-value">#e2e8f0</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #cbd5e1;"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Slate 300</div>
+                        <div class="color-swatch-value">#cbd5e1</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #94a3b8;"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Slate 400</div>
+                        <div class="color-swatch-value">#94a3b8</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #64748b;"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Slate 500</div>
+                        <div class="color-swatch-value">#64748b</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #475569;"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Slate 600</div>
+                        <div class="color-swatch-value">#475569</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #334155;"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Slate 700</div>
+                        <div class="color-swatch-value">#334155</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #1e293b;"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Slate 800</div>
+                        <div class="color-swatch-value">#1e293b</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background: #0f172a;"></div>
+                    <div class="color-swatch-info">
+                        <div class="color-swatch-name">Slate 900</div>
+                        <div class="color-swatch-value">#0f172a</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Typography -->
+        <div class="section">
+            <h2 class="section-title">Typography</h2>
+            <div class="typography-grid">
+                <div class="type-sample">
+                    <span class="type-label">text-4xl</span>
+                    <span class="text-4xl" style="font-family: var(--font-heading); font-weight: 700;">The quick brown fox</span>
+                </div>
+                <div class="type-sample">
+                    <span class="type-label">text-3xl</span>
+                    <span class="text-3xl" style="font-family: var(--font-heading); font-weight: 600;">The quick brown fox</span>
+                </div>
+                <div class="type-sample">
+                    <span class="type-label">text-2xl</span>
+                    <span class="text-2xl" style="font-family: var(--font-heading); font-weight: 600;">The quick brown fox</span>
+                </div>
+                <div class="type-sample">
+                    <span class="type-label">text-xl</span>
+                    <span class="text-xl" style="font-family: var(--font-heading); font-weight: 600;">The quick brown fox</span>
+                </div>
+                <div class="type-sample">
+                    <span class="type-label">text-lg</span>
+                    <span class="text-lg">The quick brown fox jumps over the lazy dog</span>
+                </div>
+                <div class="type-sample">
+                    <span class="type-label">text-base</span>
+                    <span class="text-base">The quick brown fox jumps over the lazy dog</span>
+                </div>
+                <div class="type-sample">
+                    <span class="type-label">text-sm</span>
+                    <span class="text-sm">The quick brown fox jumps over the lazy dog</span>
+                </div>
+                <div class="type-sample">
+                    <span class="type-label">text-xs</span>
+                    <span class="text-xs">The quick brown fox jumps over the lazy dog</span>
+                </div>
+                <div class="type-sample">
+                    <span class="type-label">mono</span>
+                    <span style="font-family: var(--font-mono); font-size: 14px;">const theme = 'default';</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Spacing -->
+        <div class="section">
+            <h2 class="section-title">Spacing Scale</h2>
+            <div class="spacing-grid">
+                <div class="spacing-item">
+                    <div class="spacing-bar" style="width: 4px; height: 40px;"></div>
+                    <span class="spacing-label">4px</span>
+                </div>
+                <div class="spacing-item">
+                    <div class="spacing-bar" style="width: 8px; height: 40px;"></div>
+                    <span class="spacing-label">8px</span>
+                </div>
+                <div class="spacing-item">
+                    <div class="spacing-bar" style="width: 12px; height: 40px;"></div>
+                    <span class="spacing-label">12px</span>
+                </div>
+                <div class="spacing-item">
+                    <div class="spacing-bar" style="width: 16px; height: 40px;"></div>
+                    <span class="spacing-label">16px</span>
+                </div>
+                <div class="spacing-item">
+                    <div class="spacing-bar" style="width: 24px; height: 40px;"></div>
+                    <span class="spacing-label">24px</span>
+                </div>
+                <div class="spacing-item">
+                    <div class="spacing-bar" style="width: 32px; height: 40px;"></div>
+                    <span class="spacing-label">32px</span>
+                </div>
+                <div class="spacing-item">
+                    <div class="spacing-bar" style="width: 48px; height: 40px;"></div>
+                    <span class="spacing-label">48px</span>
+                </div>
+                <div class="spacing-item">
+                    <div class="spacing-bar" style="width: 64px; height: 40px;"></div>
+                    <span class="spacing-label">64px</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Border Radius -->
+        <div class="section">
+            <h2 class="section-title">Border Radius</h2>
+            <div class="radius-grid">
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: 4px;"></div>
+                    <span class="radius-label">4px (sm)</span>
+                </div>
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: 8px;"></div>
+                    <span class="radius-label">8px (md)</span>
+                </div>
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: 12px;"></div>
+                    <span class="radius-label">12px (lg)</span>
+                </div>
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: 16px;"></div>
+                    <span class="radius-label">16px (xl)</span>
+                </div>
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: 9999px;"></div>
+                    <span class="radius-label">full</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Shadows -->
+        <div class="section">
+            <h2 class="section-title">Shadows</h2>
+            <div class="shadow-grid">
+                <div class="shadow-item">
+                    <div class="shadow-box" style="box-shadow: var(--shadow-sm);"></div>
+                    <span class="shadow-label">shadow-sm</span>
+                </div>
+                <div class="shadow-item">
+                    <div class="shadow-box" style="box-shadow: var(--shadow-md);"></div>
+                    <span class="shadow-label">shadow-md</span>
+                </div>
+                <div class="shadow-item">
+                    <div class="shadow-box" style="box-shadow: var(--shadow-lg);"></div>
+                    <span class="shadow-label">shadow-lg</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Components -->
+        <div class="section">
+            <h2 class="section-title">Components</h2>
+            <div class="component-grid">
+                <!-- Buttons -->
+                <div>
+                    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--color-secondary);">Buttons</h3>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn btn-primary">Primary</button>
+                        <button class="btn btn-secondary">Secondary</button>
+                        <button class="btn btn-outline">Outline</button>
+                    </div>
+                </div>
+                
+                <!-- Card -->
+                <div>
+                    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--color-secondary);">Card</h3>
+                    <div class="sample-card">
+                        <h4 class="sample-card-title">Card Title</h4>
+                        <p class="sample-card-body">This is a sample card component with the default theme styling applied.</p>
+                    </div>
+                </div>
+                
+                <!-- Input -->
+                <div>
+                    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--color-secondary);">Form Input</h3>
+                    <div class="sample-input">
+                        <label class="input-label">Email Address</label>
+                        <input type="email" class="input" placeholder="you@example.com">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -46,15 +46,21 @@ def proxy_url():
     result = service.fetch_and_rewrite(url)
     
     if result.success:
+        # TASK-235: Handle binary content (fonts, images, etc.)
+        if result.binary_content is not None:
+            return Response(
+                result.binary_content,
+                mimetype=result.content_type.split(';')[0].strip()
+            )
         # For HTML, return JSON (used by frontend to set iframe.srcdoc)
-        if 'text/html' in result.content_type:
+        elif 'text/html' in result.content_type:
             return jsonify({
                 'success': True,
                 'html': result.html,
                 'content_type': result.content_type
             })
         else:
-            # For non-HTML (JS, CSS, images, etc.), return raw content
+            # For non-HTML text (JS, CSS, etc.), return raw content
             return Response(
                 result.html,  # Contains raw content for non-HTML
                 mimetype=result.content_type.split(';')[0].strip()

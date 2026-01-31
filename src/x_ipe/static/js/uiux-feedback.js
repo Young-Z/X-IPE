@@ -218,6 +218,42 @@ class UIUXFeedbackManager {
         if (this.state.currentUrl) {
             this.elements.urlInput.value = this.state.currentUrl;
         }
+        
+        // Load saved feedback entries (TASK-237)
+        this._loadSavedFeedback();
+    }
+    
+    /**
+     * Load saved feedback entries from backend (TASK-237)
+     */
+    async _loadSavedFeedback() {
+        try {
+            const response = await fetch('/api/uiux-feedback?days=2');
+            if (!response.ok) {
+                console.warn('[UIUXFeedback] Failed to load saved feedback');
+                return;
+            }
+            
+            const data = await response.json();
+            if (data.entries && data.entries.length > 0) {
+                // Convert saved entries to internal format
+                for (const entry of data.entries) {
+                    this.feedbackEntries.push({
+                        id: entry.id,
+                        name: entry.name,
+                        url: entry.url,
+                        elements: [],  // Not stored in feedback.md
+                        screenshot: null,  // Would need to load from file
+                        description: entry.description || '',
+                        createdAt: entry.date ? new Date(entry.date) : new Date(),
+                        status: 'submitted'  // Already saved
+                    });
+                }
+                this._renderFeedbackPanel();
+            }
+        } catch (error) {
+            console.warn('[UIUXFeedback] Error loading saved feedback:', error);
+        }
     }
     
     /**
@@ -1384,17 +1420,14 @@ class UIUXFeedbackManager {
                         </div>
                     ` : ''}
                     <div class="entry-actions-footer">
-                        ${entry.status === 'submitted' && entry.folder ? `
-                            <button class="btn-copilot" data-folder="${entry.folder}">
-                                <i class="bi bi-robot"></i>
-                                Copilot
-                            </button>
-                        ` : `
-                            <button class="btn-submit" ${canSubmit ? '' : 'disabled'}>
-                                <i class="bi bi-send"></i>
-                                ${entry.status === 'submitting' ? 'Submitting...' : 'Submit'}
-                            </button>
-                        `}
+                        <button class="btn-submit" ${canSubmit && entry.status !== 'submitted' ? '' : 'disabled'}>
+                            <i class="bi bi-send"></i>
+                            ${entry.status === 'submitting' ? 'Submitting...' : 'Submit'}
+                        </button>
+                        <button class="btn-copilot" data-folder="${entry.folder || ''}" ${entry.folder ? '' : 'disabled'}>
+                            <i class="bi bi-robot"></i>
+                            Copilot
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1458,6 +1491,18 @@ class UIUXFeedbackManager {
             if (descInput) {
                 descInput.addEventListener('blur', () => {
                     this._updateEntryDescription(id, descInput.value);
+                });
+                
+                // Re-enable submit button when description changes
+                descInput.addEventListener('input', () => {
+                    if (submitBtn && submitBtn.disabled) {
+                        // Re-enable submit if user modifies description
+                        const entryData = this.feedbackEntries.find(e => e.id === id);
+                        if (entryData && entryData.status === 'submitted') {
+                            entryData.status = 'pending'; // Mark as pending for resubmit
+                            submitBtn.disabled = false;
+                        }
+                    }
                 });
             }
             
@@ -1592,9 +1637,7 @@ class UIUXFeedbackManager {
         
         // Use terminalManager's sendCopilotPromptCommandNoEnter which:
         // 1. Creates terminal if needed
-        // 2. Types 'copilot' and presses Enter
-        // 3. Waits for Copilot CLI to be ready
-        // 4. Types the command WITHOUT pressing Enter (user can review/edit)
+        // 2. Types 'copilot -i "{prompt}"' (user can review/edit before pressing Enter)
         if (window.terminalManager && window.terminalManager.sendCopilotPromptCommandNoEnter) {
             window.terminalManager.sendCopilotPromptCommandNoEnter(command);
         } else {

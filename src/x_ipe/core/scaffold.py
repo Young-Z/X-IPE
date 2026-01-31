@@ -12,16 +12,12 @@ class ScaffoldManager:
     DOCS_STRUCTURE = [
         "x-ipe-docs/requirements",
         "x-ipe-docs/planning",
-        "x-ipe-docs/features",
         "x-ipe-docs/ideas",
         "x-ipe-docs/config",
+        "x-ipe-docs/themes",
     ]
     
-    GITIGNORE_ENTRIES = [
-        "# X-IPE Runtime (managed by x-ipe)",
-        ".x-ipe/",
-        "",
-    ]
+    GITIGNORE_ENTRIES: list = []  # No X-IPE specific gitignore entries needed
     
     def __init__(self, project_root: Path, dry_run: bool = False, force: bool = False):
         """Initialize ScaffoldManager.
@@ -144,6 +140,28 @@ class ScaffoldManager:
             shutil.copy2(source, target)
         self.created.append(target)
     
+    def copy_mcp_config(self) -> None:
+        """Copy mcp-config.json to .github/copilot/."""
+        source = self._get_resource_path("copilot")
+        if source is None or not source.exists():
+            return
+        
+        source_file = source / "mcp-config.json"
+        if not source_file.exists():
+            return
+        
+        target = self.project_root / ".github" / "copilot" / "mcp-config.json"
+        
+        if target.exists():
+            if not self.force:
+                self.skipped.append(target)
+                return
+        
+        if not self.dry_run:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source_file, target)
+        self.created.append(target)
+    
     def get_project_mcp_servers(self) -> dict:
         """Get MCP servers from project's .github/copilot/mcp-config.json.
         
@@ -255,6 +273,60 @@ class ScaffoldManager:
                 shutil.copy2(source_file, target_file)
             self.created.append(target_file)
     
+    def copy_planning_templates(self) -> None:
+        """Copy planning templates (features.md, task-board.md) to x-ipe-docs/planning/."""
+        planning_source = self._get_resource_path("planning")
+        if planning_source is None or not planning_source.exists():
+            return
+        
+        target_dir = self.project_root / "x-ipe-docs" / "planning"
+        
+        # Copy each planning file individually (don't overwrite existing)
+        planning_files = ["features.md", "task-board.md"]
+        for filename in planning_files:
+            source_file = planning_source / filename
+            target_file = target_dir / filename
+            
+            if not source_file.exists():
+                continue
+                
+            if target_file.exists():
+                if not self.force:
+                    self.skipped.append(target_file)
+                    continue
+            
+            if not self.dry_run:
+                target_dir.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source_file, target_file)
+            self.created.append(target_file)
+    
+    def copy_themes(self) -> None:
+        """Copy default theme to x-ipe-docs/themes/."""
+        themes_source = self._get_resource_path("themes")
+        if themes_source is None or not themes_source.exists():
+            return
+        
+        target_dir = self.project_root / "x-ipe-docs" / "themes"
+        
+        # Copy entire theme-default folder
+        theme_source = themes_source / "theme-default"
+        theme_target = target_dir / "theme-default"
+        
+        if not theme_source.exists():
+            return
+        
+        if theme_target.exists():
+            if not self.force:
+                self.skipped.append(theme_target)
+                return
+        
+        if not self.dry_run:
+            target_dir.mkdir(parents=True, exist_ok=True)
+            if theme_target.exists() and self.force:
+                shutil.rmtree(theme_target)
+            shutil.copytree(theme_source, theme_target, dirs_exist_ok=True)
+        self.created.append(theme_target)
+    
     def create_config_file(self, config_content: Optional[str] = None) -> None:
         """Create .x-ipe.yaml with defaults.
         
@@ -311,11 +383,12 @@ server:
             return
         
         # Append X-IPE entries
-        if not content.endswith("\n"):
-            content += "\n"
-        content += "\n".join(self.GITIGNORE_ENTRIES)
-        gitignore_path.write_text(content)
-        self.created.append(gitignore_path)
+        if self.GITIGNORE_ENTRIES:
+            if not content.endswith("\n"):
+                content += "\n"
+            content += "\n".join(self.GITIGNORE_ENTRIES)
+            gitignore_path.write_text(content)
+            self.created.append(gitignore_path)
     
     def scaffold_all(self) -> Tuple[List[Path], List[Path]]:
         """Run all scaffolding operations.
@@ -324,12 +397,13 @@ server:
             Tuple of (created_paths, skipped_paths).
         """
         self.create_docs_structure()
-        self.create_runtime_folder()
         self.copy_skills()
         self.copy_copilot_instructions()
+        self.copy_mcp_config()
         self.copy_config_files()
+        self.copy_planning_templates()
+        self.copy_themes()
         self.create_config_file()
-        self.update_gitignore()
         self.merge_mcp_config()
         return self.get_summary()
     

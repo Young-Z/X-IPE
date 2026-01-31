@@ -118,6 +118,25 @@ class ProxyResult:
     content_type: str = "text/html"
     error: str = ""
     status_code: int = 200
+    binary_content: bytes = None  # TASK-235: For binary files like fonts
+
+
+# TASK-235: Binary content types that should not be decoded as text
+BINARY_CONTENT_TYPES = {
+    'font/', 'image/', 'audio/', 'video/',
+    'application/octet-stream', 'application/font', 'application/x-font',
+}
+
+
+def _is_binary_content_type(content_type: str) -> bool:
+    """Check if content type represents binary data."""
+    if not content_type:
+        return False
+    content_type = content_type.lower()
+    for binary_type in BINARY_CONTENT_TYPES:
+        if binary_type in content_type:
+            return True
+    return False
 
 
 class ProxyService:
@@ -209,20 +228,27 @@ class ProxyService:
         
         content_type = response.headers.get('Content-Type', 'text/html')
         
+        # TASK-235: Handle binary content (fonts, images, etc.) without decoding
+        if _is_binary_content_type(content_type):
+            return ProxyResult(
+                success=True,
+                binary_content=response.content,
+                content_type=content_type
+            )
+        
         # Only rewrite HTML
         if 'text/html' in content_type:
             html = self._rewrite_html(response.text, url)
             return ProxyResult(success=True, html=html, content_type=content_type)
+        # TASK-235: Rewrite CSS url() references for font files
+        elif 'text/css' in content_type:
+            css = self._rewrite_css_urls(response.text, url)
+            return ProxyResult(success=True, html=css, content_type=content_type)
         else:
-            # Return non-HTML content as-is (use response.content for binary safety)
-            # For text content, decode; for binary, return bytes as string (will be raw in Response)
-            try:
-                content = response.text
-            except Exception:
-                content = response.content.decode('utf-8', errors='replace')
+            # Return text content as-is
             return ProxyResult(
                 success=True,
-                html=content,
+                html=response.text,
                 content_type=content_type
             )
     

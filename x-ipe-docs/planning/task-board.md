@@ -6,6 +6,8 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-243 | Bug Fix | UIUX Feedback: Create folder button opens compose view instead | Cipher | 🔄 in_progress | 01-31-2026 14:08:00 | - | - |
+| TASK-237 | Bug Fix | UIUX Feedback: List not loading, sorting, cleanup on startup | Pulse | 🔄 in_progress | 01-31-2026 06:58:00 | - | - |
 | TASK-225 | Bug Fix | UIUX Feedback: Themes menu always expanded | Spark | 🔄 in_progress | 01-29-2026 14:15:00 | sidebar.js | - |
 
 ---
@@ -14,6 +16,15 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-244 | Bug Fix | UIUX Feedback: Submit/Copilot buttons behavior fix | Echo | 01-31-2026 14:18:00 | uiux-feedback.js, uiux-feedback.css | Both buttons always visible, Submit disabled after submit, re-enabled on edit |
+| TASK-242 | Bug Fix | UIUX Feedback: Delete file in folder view causes error | Cipher | 01-31-2026 07:19:00 | ideas_service.py | Fixed path format in get_folder_contents |
+| TASK-241 | Feature Request | UIUX Feedback: Add drag and drop for folders/files in folder view | Cipher | 01-31-2026 07:18:00 | folder-view.js, workplace.css | Drag-drop CSS visual feedback |
+| TASK-240 | Feature Request | UIUX Feedback: Add "into" icon on folder hover to enter folder view | Cipher | 01-31-2026 07:18:00 | workplace.js, workplace.css | Changed to box-arrow-in-right icon |
+| TASK-239 | Feature Request | UIUX Feedback: Add folder creation icon beside pin in Ideas header | Cipher | 01-31-2026 07:17:00 | workplace.js, workplace.css | Added folder-plus icon in header |
+| TASK-238 | Bug Fix | UIUX Feedback: Disable drag during folder/file name editing | Cipher | 01-31-2026 07:12:00 | workplace.js | Disabled draggable during rename input |
+| TASK-236 | Bug Fix | UIUX Feedback: Move folder ">" to right, remove trash icon | Spark | 01-31-2026 06:56:00 | workplace.js | Moved chevron to right, removed folder trash |
+| TASK-235 | Bug Fix | UIUX Feedback: Icons not loading (square shapes) | Nova | 01-31-2026 06:45:00 | proxy_service.py, proxy_routes.py | CSS url() rewriting + binary font handling |
+| TASK-234 | Feature Closing | FEATURE-008 v1.5 CR-006 Feature Closing | Ember | 01-31-2026 06:30:00 | commit ce70f77 | 18 files, 5840 insertions |
 | TASK-233 | Code Implementation | FEATURE-008 v1.5 CR-006 Implementation | Ember | 01-31-2026 06:15:00 | src/x_ipe/services/ideas_service.py, src/x_ipe/routes/ideas_routes.py | 49/49 tests pass |
 | TASK-232 | Test Generation | FEATURE-008 v1.5 CR-006 Tests | Ember | 01-31-2026 05:50:00 | tests/test_ideas_cr006.py | 49 tests, 48 failing (TDD ready) |
 | TASK-231 | Technical Design | FEATURE-008 v1.5 CR-006 Technical Design | Ember | 01-31-2026 05:45:00 | x-ipe-docs/requirements/FEATURE-008/technical-design.md | 4 new modules, 4 new API endpoints |
@@ -115,13 +126,13 @@
 
 ## Quick Stats
 
-- **Total Active:** 2
-- **In Progress:** 2
+- **Total Active:** 3
+- **In Progress:** 3
 - **Pending:** 0
 - **Pending Review:** 0
 - **Blocked:** 0
 - **Deferred:** 0
-- **Completed (archived):** 170
+- **Completed (archived):** 180
 
 ---
 

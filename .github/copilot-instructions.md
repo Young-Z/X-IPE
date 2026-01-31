@@ -74,7 +74,8 @@
 | Feature Refinement | `task-type-feature-refinement` | feature-stage | Technical Design | Yes |
 | Technical Design | `task-type-technical-design` | feature-stage | Test Generation | Yes |
 | Test Generation | `task-type-test-generation` | feature-stage | Code Implementation | No |
-| Code Implementation | `task-type-code-implementation` | feature-stage | Feature Closing | No |
+| Code Implementation | `task-type-code-implementation` | feature-stage | Feature Acceptance Test | No |
+| Feature Acceptance Test | `task-type-feature-acceptance-test` | Standalone OR feature-stage | Feature Closing | No |
 | Human Playground | `task-type-human-playground` | Standalone | - | Yes |
 | Feature Closing | `task-type-feature-closing` | feature-stage | User Manual | No |
 | Bug Fix | `task-type-bug-fix` | Standalone | - | Yes |

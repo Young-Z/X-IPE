@@ -753,7 +753,7 @@ class TestGetFolderContents:
         assert types.get('mockups') == 'folder'
     
     def test_get_folder_contents_includes_path(self, ideas_service_populated):
-        """Folder contents include full path for each item"""
+        """Folder contents include full path for each item (relative to project root)"""
         # ARRANGE
         folder_path = 'project-alpha'
         
@@ -764,7 +764,8 @@ class TestGetFolderContents:
         items = result['items']
         for item in items:
             assert 'path' in item
-            assert item['path'].startswith('project-alpha/')
+            # Paths should be relative to project root, including x-ipe-docs/ideas prefix
+            assert item['path'].startswith('x-ipe-docs/ideas/project-alpha/')
     
     def test_get_folder_contents_empty_folder(self, ideas_service_populated, populated_ideas_dir):
         """Empty folder returns empty items list"""
