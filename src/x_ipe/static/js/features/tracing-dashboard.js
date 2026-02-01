@@ -1,8 +1,6 @@
 /**
  * FEATURE-023-B: Tracing Dashboard UI
- * 
- * Dashboard component for managing application action tracing.
- * Provides controls for start/stop, countdown timer, and trace list.
+ * Matches mockup tracing-dashboard-v4.html
  */
 
 // =============================================================================
@@ -17,6 +15,9 @@ class TracingDashboard {
         this.selectedTraceId = null;
         this.stopAt = null;
         this.config = {};
+        this.currentFilter = 'all';
+        this.searchQuery = '';
+        this.traces = [];
     }
 
     // -------------------------------------------------------------------------
@@ -98,8 +99,8 @@ class TracingDashboard {
             const response = await fetch('/api/tracing/logs');
             if (!response.ok) throw new Error('Failed to fetch trace logs');
             
-            const traces = await response.json();
-            this.renderTraceList(traces);
+            this.traces = await response.json();
+            this.renderTraceList();
         } catch (error) {
             console.error('Error fetching trace logs:', error);
         }
@@ -112,27 +113,66 @@ class TracingDashboard {
     render() {
         this.container.innerHTML = `
             <div class="tracing-dashboard">
+                <!-- Header -->
                 <div class="tracing-header">
-                    <h2>📊 Tracing</h2>
-                    <div class="tracing-controls">
-                        <button class="btn-config" title="Configuration">⚙️ Config</button>
-                        <button class="btn-ignored" title="Ignored APIs">🚫 Ignored APIs</button>
+                    <div class="tracing-header-left">
+                        <h2>
+                            <i class="bi bi-graph-up"></i>
+                            Application Tracing
+                        </h2>
                     </div>
-                    <div class="tracing-duration-buttons">
-                        <button class="btn-duration" data-minutes="3">3 min</button>
-                        <button class="btn-duration" data-minutes="15">15 min</button>
-                        <button class="btn-duration" data-minutes="30">30 min</button>
-                    </div>
-                    <div class="tracing-timer">
-                        <span class="timer-display inactive">00:00</span>
-                        <button class="btn-stop" style="display: none;">Stop</button>
+                    <div class="tracing-header-controls">
+                        <div class="tracing-control">
+                            <span class="tracing-label">Duration</span>
+                            <div class="duration-toggle">
+                                <button class="duration-option" data-minutes="3">3 min</button>
+                                <button class="duration-option" data-minutes="15">15 min</button>
+                                <button class="duration-option" data-minutes="30">30 min</button>
+                            </div>
+                        </div>
+                        
+                        <div class="countdown-container inactive">
+                            <svg class="countdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            <span class="countdown-text">00:00</span>
+                            <span class="countdown-label">remaining</span>
+                        </div>
+                        
+                        <button class="stop-btn hidden">Stop</button>
+                        
+                        <button class="icon-btn btn-config" title="Configuration">
+                            <i class="bi bi-gear"></i>
+                        </button>
+                        <button class="icon-btn btn-ignored" title="Ignored APIs">
+                            <i class="bi bi-slash-circle"></i>
+                        </button>
                     </div>
                 </div>
+                
+                <!-- Main Content -->
                 <div class="tracing-content">
+                    <!-- Sidebar -->
                     <div class="trace-list-sidebar">
                         <div class="trace-list-header">
-                            <span>Traces</span>
-                            <button class="btn-refresh" title="Refresh">🔄</button>
+                            <div class="trace-list-title">Trace Logs</div>
+                            <div class="trace-search-box">
+                                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="m21 21-4.35-4.35"/>
+                                </svg>
+                                <input type="text" placeholder="Search traces..." id="trace-search">
+                            </div>
+                        </div>
+                        <div class="filter-row">
+                            <button class="filter-chip active" data-filter="all">All</button>
+                            <button class="filter-chip" data-filter="success">
+                                <span class="dot success"></span>Success
+                            </button>
+                            <button class="filter-chip" data-filter="error">
+                                <span class="dot error"></span>Errors
+                            </button>
                         </div>
                         <div class="trace-list-items">
                             <div class="trace-list-empty">
@@ -142,9 +182,15 @@ class TracingDashboard {
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Detail Panel -->
                     <div class="trace-detail-panel">
                         <div class="trace-detail-placeholder">
-                            Select a trace to view details
+                            <i class="bi bi-diagram-3"></i>
+                            <div>Select a trace to view details</div>
+                            <div style="font-size: 12px; opacity: 0.6; margin-top: 4px;">
+                                DAG visualization coming in FEATURE-023-C
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -152,34 +198,54 @@ class TracingDashboard {
         `;
     }
 
-    renderTraceList(traces) {
+    renderTraceList() {
         const listContainer = this.container.querySelector('.trace-list-items');
         
-        if (!traces || traces.length === 0) {
+        // Filter traces
+        let filteredTraces = this.traces;
+        if (this.currentFilter === 'success') {
+            filteredTraces = this.traces.filter(t => !t.has_error);
+        } else if (this.currentFilter === 'error') {
+            filteredTraces = this.traces.filter(t => t.has_error);
+        }
+        
+        // Search filter
+        if (this.searchQuery) {
+            const query = this.searchQuery.toLowerCase();
+            filteredTraces = filteredTraces.filter(t => 
+                (t.api || t.path || '').toLowerCase().includes(query) ||
+                (t.trace_id || '').toLowerCase().includes(query)
+            );
+        }
+        
+        if (!filteredTraces || filteredTraces.length === 0) {
             listContainer.innerHTML = `
                 <div class="trace-list-empty">
                     <div class="trace-list-empty-icon">📭</div>
-                    <div>No traces captured</div>
-                    <div>Start tracing to begin</div>
+                    <div>${this.searchQuery || this.currentFilter !== 'all' ? 'No matching traces' : 'No traces captured'}</div>
+                    <div>${!this.searchQuery && this.currentFilter === 'all' ? 'Start tracing to begin' : 'Try adjusting your filters'}</div>
                 </div>
             `;
             return;
         }
 
         // Sort by timestamp descending (newest first)
-        traces.sort((a, b) => {
+        filteredTraces.sort((a, b) => {
             const timeA = new Date(a.timestamp || a.created || 0);
             const timeB = new Date(b.timestamp || b.created || 0);
             return timeB - timeA;
         });
 
-        listContainer.innerHTML = traces.map(trace => {
+        listContainer.innerHTML = filteredTraces.map(trace => {
             const traceId = trace.trace_id || trace.id || 'unknown';
-            const api = trace.api || trace.path || trace.name || 'Unknown API';
+            const api = trace.api || trace.path || trace.name || '/unknown';
             const timestamp = trace.timestamp || trace.created || '';
             const hasError = trace.has_error || trace.status === 'error';
             const statusClass = hasError ? 'error' : 'success';
             const isSelected = traceId === this.selectedTraceId;
+            const method = trace.method || 'GET';
+            const duration = trace.duration_ms || trace.duration || 0;
+            const nestedCount = trace.nested_count || trace.spans || 0;
             
             // Format timestamp
             let formattedTime = '';
@@ -194,10 +260,24 @@ class TracingDashboard {
             return `
                 <div class="trace-item ${statusClass} ${isSelected ? 'selected' : ''}" 
                      data-trace-id="${traceId}">
-                    <div class="trace-item-api">${this.escapeHtml(api)}</div>
-                    <div class="trace-item-meta">
-                        <span class="trace-item-id">${shortId}...</span>
-                        <span class="trace-item-time">${formattedTime}</span>
+                    <div class="trace-id-row">
+                        <span class="trace-id">${shortId}...</span>
+                        <span class="trace-status-dot ${statusClass}"></span>
+                    </div>
+                    <div class="trace-entry-api">
+                        <span class="method-badge ${method.toLowerCase()}">${method}</span>
+                        <span class="trace-path">${this.escapeHtml(api)}</span>
+                        ${nestedCount > 0 ? `<span class="trace-nested">+${nestedCount}</span>` : ''}
+                    </div>
+                    <div class="trace-meta">
+                        <span>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            ${formattedTime}
+                        </span>
+                        ${duration > 0 ? `<span>${duration}ms</span>` : ''}
                     </div>
                 </div>
             `;
@@ -233,8 +313,8 @@ class TracingDashboard {
         }, 1000);
         
         // Show stop button
-        const stopBtn = this.container.querySelector('.btn-stop');
-        if (stopBtn) stopBtn.style.display = 'inline-block';
+        const stopBtn = this.container.querySelector('.stop-btn');
+        if (stopBtn) stopBtn.classList.remove('hidden');
     }
 
     stopCountdown() {
@@ -244,17 +324,19 @@ class TracingDashboard {
         }
         
         // Hide stop button
-        const stopBtn = this.container.querySelector('.btn-stop');
-        if (stopBtn) stopBtn.style.display = 'none';
+        const stopBtn = this.container.querySelector('.stop-btn');
+        if (stopBtn) stopBtn.classList.add('hidden');
     }
 
     updateTimerDisplay() {
-        const timerEl = this.container.querySelector('.timer-display');
-        if (!timerEl) return;
+        const container = this.container.querySelector('.countdown-container');
+        const timerText = this.container.querySelector('.countdown-text');
+        if (!container || !timerText) return;
         
         if (!this.stopAt) {
-            timerEl.textContent = '00:00';
-            timerEl.className = 'timer-display inactive';
+            timerText.textContent = '00:00';
+            container.classList.remove('warning');
+            container.classList.add('inactive');
             return;
         }
         
@@ -263,20 +345,19 @@ class TracingDashboard {
         
         const minutes = Math.floor(remaining / 60);
         const seconds = remaining % 60;
-        timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        timerText.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         
-        // Color based on remaining time
-        if (remaining <= 0) {
-            timerEl.className = 'timer-display inactive';
-        } else if (remaining < 60) {
-            timerEl.className = 'timer-display warning';
+        container.classList.remove('inactive');
+        
+        // Warning state when < 1 minute
+        if (remaining < 60 && remaining > 0) {
+            container.classList.add('warning');
         } else {
-            timerEl.className = 'timer-display active';
+            container.classList.remove('warning');
         }
     }
 
     updateUIFromStatus() {
-        // Check if there's an active tracing session
         const stopAtStr = this.config.stop_at;
         if (stopAtStr && this.config.active) {
             this.stopAt = new Date(stopAtStr);
@@ -295,7 +376,7 @@ class TracingDashboard {
     }
 
     updateDurationButtons(activeMinutes) {
-        this.container.querySelectorAll('.btn-duration').forEach(btn => {
+        this.container.querySelectorAll('.duration-option').forEach(btn => {
             const minutes = parseInt(btn.dataset.minutes);
             btn.classList.toggle('active', minutes === activeMinutes);
         });
@@ -326,7 +407,7 @@ class TracingDashboard {
 
     bindEvents() {
         // Duration buttons
-        this.container.querySelectorAll('.btn-duration').forEach(btn => {
+        this.container.querySelectorAll('.duration-option').forEach(btn => {
             btn.addEventListener('click', () => {
                 const minutes = parseInt(btn.dataset.minutes);
                 this.startTracing(minutes);
@@ -334,15 +415,9 @@ class TracingDashboard {
         });
 
         // Stop button
-        const stopBtn = this.container.querySelector('.btn-stop');
+        const stopBtn = this.container.querySelector('.stop-btn');
         if (stopBtn) {
             stopBtn.addEventListener('click', () => this.stopTracing());
-        }
-
-        // Refresh button
-        const refreshBtn = this.container.querySelector('.btn-refresh');
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => this.refreshTraceList());
         }
 
         // Config button
@@ -355,6 +430,25 @@ class TracingDashboard {
         const ignoredBtn = this.container.querySelector('.btn-ignored');
         if (ignoredBtn) {
             ignoredBtn.addEventListener('click', () => this.openIgnoredModal());
+        }
+        
+        // Filter chips
+        this.container.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                this.container.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                this.currentFilter = chip.dataset.filter;
+                this.renderTraceList();
+            });
+        });
+        
+        // Search
+        const searchInput = this.container.querySelector('#trace-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                this.searchQuery = e.target.value;
+                this.renderTraceList();
+            });
         }
     }
 
@@ -371,8 +465,9 @@ class TracingDashboard {
         if (detailPanel) {
             detailPanel.innerHTML = `
                 <div class="trace-detail-placeholder">
-                    <div>Trace ID: ${traceId}</div>
-                    <div style="margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.6;">
+                    <i class="bi bi-diagram-3"></i>
+                    <div>Trace: ${traceId.substring(0, 12)}...</div>
+                    <div style="font-size: 12px; opacity: 0.6; margin-top: 4px;">
                         DAG visualization coming in FEATURE-023-C
                     </div>
                 </div>
@@ -558,7 +653,7 @@ class TracingIgnoredModal {
                     <button class="tracing-modal-close">&times;</button>
                 </div>
                 <div class="tracing-modal-body">
-                    <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">
+                    <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">
                         API patterns that will be excluded from tracing.
                     </p>
                     <div class="ignored-apis-list">
