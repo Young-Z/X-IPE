@@ -6,7 +6,6 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-260 | Feature Closing | FEATURE-023-B: Tracing Dashboard UI Feature Closing | Drift | 🔄 in_progress | 02-01-2026 04:25:00 | - | User Manual |
 | TASK-243 | Bug Fix | UIUX Feedback: Create folder button opens compose view instead | Cipher | 🔄 in_progress | 01-31-2026 14:08:00 | - | - |
 | TASK-237 | Bug Fix | UIUX Feedback: List not loading, sorting, cleanup on startup | Pulse | 🔄 in_progress | 01-31-2026 06:58:00 | - | - |
 
@@ -16,6 +15,8 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-261 | User Manual | FEATURE-023-B: Update README with Dashboard docs | Drift | 02-01-2026 04:30:00 | README.md | Added dashboard UI section |
+| TASK-260 | Feature Closing | FEATURE-023-B: Tracing Dashboard UI Feature Closing | Drift | 02-01-2026 04:28:00 | commit 0cd0798 | 15 files, 7288 insertions |
 | TASK-259 | Code Implementation | FEATURE-023-B: Tracing Dashboard UI Implementation | Drift | 02-01-2026 04:25:00 | tracing-dashboard.js, tracing-dashboard.css, workplace.js | 24/27 tests pass, UI integrated |
 | TASK-258 | Test Generation | FEATURE-023-B: Tracing Dashboard UI Tests | Drift | 02-01-2026 04:18:00 | test_tracing_dashboard.py | 27 tests, 24 pass, 3 skip (TDD ready) |
 | TASK-257 | Technical Design | FEATURE-023-B: Tracing Dashboard UI Design | Drift | 02-01-2026 04:15:00 | technical-design.md | 7 components, ~660 lines new code |

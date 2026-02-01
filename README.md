@@ -262,6 +262,69 @@ X-IPE will automatically discover `.x-ipe.yaml` by searching the current directo
 
 ---
 
+### Application Action Tracing
+
+X-IPE includes a built-in tracing system to monitor function calls, parameters, return values, and execution times.
+
+**Using the Decorator:**
+
+```python
+from x_ipe.tracing import x_ipe_tracing
+
+@x_ipe_tracing(name="process_order", level="info")
+def process_order(order_id: str, items: list):
+    # Your function logic
+    return {"status": "completed", "order_id": order_id}
+
+# Async functions are also supported
+@x_ipe_tracing(name="fetch_data", redact=["api_key"])
+async def fetch_data(api_key: str, endpoint: str):
+    # Sensitive fields are automatically redacted
+    pass
+```
+
+**Tracing API Endpoints:**
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/tracing/status` | GET | Get current tracing configuration |
+| `/api/tracing/start` | POST | Start tracing for 3, 15, or 30 minutes |
+| `/api/tracing/stop` | POST | Stop tracing immediately |
+| `/api/tracing/logs` | GET | List all trace log files |
+| `/api/tracing/logs` | DELETE | Delete all trace logs |
+
+**Starting Tracing via API:**
+
+```bash
+# Start 15-minute tracing session
+curl -X POST http://localhost:5858/api/tracing/start \
+  -H "Content-Type: application/json" \
+  -d '{"duration_minutes": 15}'
+
+# Check status
+curl http://localhost:5858/api/tracing/status
+```
+
+**Features:**
+- Automatic sensitive data redaction (passwords, tokens, credit cards, JWTs)
+- Async-safe context propagation
+- Duration-based tracing (3/15/30 minutes)
+- JSON log files with automatic 24-hour cleanup
+
+**Tracing Dashboard UI:**
+
+The Tracing Dashboard provides a visual interface for managing tracing sessions directly from the X-IPE Workplace:
+
+1. **Access:** Click the 📊 graph icon in the Workplace sidebar to open the Tracing Dashboard
+2. **Start Tracing:** Click duration buttons (3 min, 15 min, or 30 min) to start a tracing session
+3. **Monitor:** Watch the live countdown timer (green = active, yellow = <1 min remaining)
+4. **Stop:** Click "Stop" button to end tracing early, or let it auto-stop when timer reaches 0
+5. **Browse Traces:** View captured traces in the sidebar list (green = success, red = error)
+6. **Configure:** Use ⚙️ Config button to set retention hours and log path
+7. **Ignore APIs:** Use 🚫 Ignored APIs button to exclude noisy endpoints (e.g., `/api/health/*`)
+
+---
+
 ## 🎯 The Vision
 
 ### Rethinking Software Engineering in the AI Age
@@ -740,6 +803,7 @@ Improvements include:
 | **Workplace (Ideas)** | Upload, organize, and refine ideas with tree view and inline editing | ✅ Completed |
 | **File Change Indicator** | Visual indicator showing unsaved changes in navigation | ✅ Completed |
 | **Interactive Console v2** | Full xterm.js terminal with session persistence, auto-reconnection, split-pane support | ✅ Completed |
+| **Application Action Tracing** | Python function tracing with @x_ipe_tracing decorator, sensitive data redaction, duration-based control, dashboard UI | ✅ Completed |
 
 ### 🔜 Planned
 
