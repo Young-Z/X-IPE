@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-IPE Application Action Tracing</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Dark observability theme */
+            --bg-primary: #0a0e14;
+            --bg-secondary: #111822;
+            --bg-tertiary: #1a2332;
+            --bg-elevated: #212d3b;
+            --bg-hover: #2a3a4d;
+            
+            /* Text hierarchy */
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #5c6670;
+            
+            /* Status colors - vibrant for dark bg */
+            --status-success: #3fb950;
+            --status-success-glow: rgba(63, 185, 80, 0.3);
+            --status-error: #f85149;
+            --status-error-glow: rgba(248, 81, 73, 0.3);
+            --status-warning: #d29922;
+            --status-warning-glow: rgba(210, 153, 34, 0.3);
+            --status-processing: #58a6ff;
+            --status-processing-glow: rgba(88, 166, 255, 0.3);
+            
+            /* Accent */
+            --accent-primary: #7c3aed;
+            --accent-secondary: #a78bfa;
+            --accent-glow: rgba(124, 58, 237, 0.25);
+            
+            /* Borders */
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-default: rgba(255, 255, 255, 0.1);
+            --border-accent: rgba(124, 58, 237, 0.5);
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+            --shadow-glow: 0 0 20px var(--accent-glow);
+            
+            /* Timing */
+            --timing-fast: 150ms;
+            --timing-normal: 250ms;
+            --timing-slow: 400ms;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* ===== LAYOUT ===== */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            height: 64px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-subtle);
+            flex-shrink: 0;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 18px;
+            letter-spacing: -0.02em;
+        }
+        
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-tertiary);
+            padding: 4px;
+            border-radius: 10px;
+        }
+        
+        .nav-tab {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--timing-fast);
+            border: none;
+            background: none;
+        }
+        
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+        
+        .nav-tab.active {
+            color: var(--text-primary);
+            background: var(--bg-elevated);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        /* Toggle Switch */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .toggle-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .toggle-switch {
+            display: flex;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 3px;
+            gap: 2px;
+        }
+        
+        .toggle-option {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all var(--timing-fast);
+        }
+        
+        .toggle-option:hover {
+            color: var(--text-secondary);
+        }
+        
+        .toggle-option.active {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+        }
+        
+        /* Icon Buttons */
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--timing-fast);
+        }
+        
+        .icon-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--border-default);
+        }
+        
+        .icon-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 320px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        .sidebar-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: inherit;
+            transition: all var(--timing-fast);
+        }
+        
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        
+        .search-box svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--text-muted);
+        }
+        
+        .filter-chips {
+            display: flex;
+            gap: 8px;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        .filter-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--timing-fast);
+        }
+        
+        .filter-chip:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-default);
+        }
+        
+        .filter-chip.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+        
+        .filter-chip .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .filter-chip .dot.success { background: var(--status-success); }
+        .filter-chip .dot.error { background: var(--status-error); }
+        .filter-chip .dot.processing { background: var(--status-processing); }
+        
+        /* Trace List */
+        .trace-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        
+        .trace-item {
+            padding: 14px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all var(--timing-fast);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .trace-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--status-success);
+            opacity: 0;
+            transition: opacity var(--timing-fast);
+        }
+        
+        .trace-item.success::before { background: var(--status-success); }
+        .trace-item.error::before { background: var(--status-error); }
+        .trace-item.processing::before { background: var(--status-processing); }
+        
+        .trace-item:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-default);
+        }
+        
+        .trace-item:hover::before {
+            opacity: 1;
+        }
+        
+        .trace-item.active {
+            background: var(--bg-elevated);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        
+        .trace-item.active::before {
+            opacity: 1;
+        }
+        
+        .trace-item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .trace-method {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .method-badge {
+            padding: 3px 8px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--status-processing);
+        }
+        
+        .method-badge.post { color: var(--status-success); }
+        .method-badge.delete { color: var(--status-error); }
+        .method-badge.put { color: var(--status-warning); }
+        
+        .trace-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 8px currentColor;
+        }
+        
+        .trace-status.success { 
+            background: var(--status-success); 
+            color: var(--status-success);
+        }
+        .trace-status.error { 
+            background: var(--status-error); 
+            color: var(--status-error);
+        }
+        .trace-status.processing { 
+            background: var(--status-processing);
+            color: var(--status-processing);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .trace-path {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .trace-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .trace-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .trace-meta svg {
+            width: 12px;
+            height: 12px;
+        }
+        
+        /* ===== DETAIL PANEL ===== */
+        .detail-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+            overflow: hidden;
+        }
+        
+        .detail-header {
+            padding: 20px 24px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        .detail-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .detail-title h2 {
+            font-size: 18px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .detail-badge {
+            padding: 4px 10px;
+            background: var(--status-success-glow);
+            color: var(--status-success);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .detail-badge.error {
+            background: var(--status-error-glow);
+            color: var(--status-error);
+        }
+        
+        .detail-stats {
+            display: flex;
+            gap: 24px;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .stat-value {
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        /* Trace Diagram */
+        .trace-diagram {
+            flex: 1;
+            padding: 32px;
+            overflow: auto;
+            position: relative;
+        }
+        
+        .trace-diagram::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(124, 58, 237, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(88, 166, 255, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .diagram-container {
+            position: relative;
+            min-height: 400px;
+        }
+        
+        /* API Container Box */
+        .api-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: 16px;
+            padding: 32px;
+            position: relative;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .api-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px dashed var(--border-subtle);
+        }
+        
+        .api-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .api-title .method {
+            padding: 6px 12px;
+            background: linear-gradient(135deg, var(--status-success), #2ea043);
+            color: white;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .api-title .path {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .api-timing {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--accent-secondary);
+        }
+        
+        /* Function Nodes Grid */
+        .nodes-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        
+        .nodes-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+        
+        .nodes-row.main {
+            justify-content: flex-start;
+        }
+        
+        .nodes-row.nested {
+            padding-left: 80px;
+        }
+        
+        /* Function Node */
+        .function-node {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-default);
+            border-radius: 12px;
+            padding: 16px 20px;
+            min-width: 180px;
+            position: relative;
+            transition: all var(--timing-normal);
+            cursor: pointer;
+        }
+        
+        .function-node:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+        
+        .function-node.success {
+            border-color: var(--status-success);
+        }
+        
+        .function-node.success::after {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 12px;
+            background: var(--status-success);
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        
+        .function-node.error {
+            border-color: var(--status-error);
+        }
+        
+        .function-node.error::after {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 12px;
+            background: var(--status-error);
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        
+        .node-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .node-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .node-status.success { 
+            background: var(--status-success);
+            box-shadow: 0 0 8px var(--status-success);
+        }
+        
+        .node-status.error { 
+            background: var(--status-error);
+            box-shadow: 0 0 8px var(--status-error);
+        }
+        
+        .node-level {
+            padding: 2px 8px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        
+        .node-level.info { color: var(--status-processing); }
+        .node-level.debug { color: var(--text-muted); }
+        
+        .node-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        
+        .node-timing {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+        
+        .node-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .node-action {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 10px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--timing-fast);
+        }
+        
+        .node-action:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-primary);
+            color: var(--accent-secondary);
+        }
+        
+        .node-action svg {
+            width: 14px;
+            height: 14px;
+        }
+        
+        /* Connector Arrows */
+        .connector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            flex-shrink: 0;
+        }
+        
+        .connector svg {
+            width: 24px;
+            height: 24px;
+            color: var(--text-muted);
+        }
+        
+        .connector.vertical {
+            width: 100%;
+            height: 30px;
+            justify-content: flex-start;
+            padding-left: 100px;
+        }
+        
+        .connector.vertical svg {
+            transform: rotate(90deg);
+        }
+        
+        /* Nested indicator */
+        .nested-indicator {
+            position: absolute;
+            left: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 2px;
+            background: var(--border-default);
+        }
+        
+        .nested-indicator::before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: -10px;
+            width: 2px;
+            height: 22px;
+            background: var(--border-default);
+        }
+        
+        /* Legend */
+        .diagram-legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 16px;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+        }
+        
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .legend-dot.success { background: var(--status-success); }
+        .legend-dot.error { background: var(--status-error); }
+        .legend-dot.nested { 
+            background: transparent;
+            border: 2px dashed var(--text-muted);
+        }
+        
+        /* ===== ANIMATIONS ===== */
+        .trace-item {
+            animation: slideIn 0.3s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .trace-item:nth-child(1) { animation-delay: 0.05s; }
+        .trace-item:nth-child(2) { animation-delay: 0.1s; }
+        .trace-item:nth-child(3) { animation-delay: 0.15s; }
+        .trace-item:nth-child(4) { animation-delay: 0.2s; }
+        .trace-item:nth-child(5) { animation-delay: 0.25s; }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .function-node {
+            animation: nodeAppear 0.4s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .nodes-row:nth-child(1) .function-node:nth-child(1) { animation-delay: 0.1s; }
+        .nodes-row:nth-child(1) .function-node:nth-child(2) { animation-delay: 0.2s; }
+        .nodes-row:nth-child(1) .function-node:nth-child(3) { animation-delay: 0.3s; }
+        .nodes-row:nth-child(1) .function-node:nth-child(4) { animation-delay: 0.4s; }
+        .nodes-row:nth-child(2) .function-node { animation-delay: 0.5s; }
+        
+        @keyframes nodeAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-elevated);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--bg-hover);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <div class="logo-icon">X</div>
+                    <span>X-IPE Tracing</span>
+                </div>
+                <nav class="nav-tabs">
+                    <button class="nav-tab active">Traces</button>
+                    <button class="nav-tab">Logs</button>
+                    <button class="nav-tab">Metrics</button>
+                </nav>
+            </div>
+            <div class="header-controls">
+                <div class="toggle-group">
+                    <span class="toggle-label">Tracing</span>
+                    <div class="toggle-switch">
+                        <button class="toggle-option">Off</button>
+                        <button class="toggle-option">Console</button>
+                        <button class="toggle-option active">File</button>
+                    </div>
+                </div>
+                <button class="icon-btn" title="Configuration">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                    </svg>
+                </button>
+                <button class="icon-btn" title="Ignored APIs">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18.36 6.64A9 9 0 0 1 20.77 15M5.64 5.64A9 9 0 0 0 3.23 15"/>
+                        <path d="M21 21L3 3"/>
+                        <circle cx="12" cy="12" r="9" stroke-dasharray="4 2"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-title">Recent Traces</div>
+                    <div class="search-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                        <input type="text" placeholder="Search traces...">
+                    </div>
+                </div>
+                
+                <div class="filter-chips">
+                    <button class="filter-chip active">
+                        <span class="dot success"></span>
+                        Success
+                    </button>
+                    <button class="filter-chip">
+                        <span class="dot error"></span>
+                        Error
+                    </button>
+                    <button class="filter-chip">
+                        <span class="dot processing"></span>
+                        Processing
+                    </button>
+                </div>
+                
+                <div class="trace-list">
+                    <div class="trace-item success active">
+                        <div class="trace-item-header">
+                            <div class="trace-method">
+                                <span class="method-badge post">POST</span>
+                            </div>
+                            <div class="trace-status success"></div>
+                        </div>
+                        <div class="trace-path">/api/orders</div>
+                        <div class="trace-meta">
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                287ms
+                            </span>
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                                    <path d="M16 2v4M8 2v4M3 10h18"/>
+                                </svg>
+                                2 min ago
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="trace-item error">
+                        <div class="trace-item-header">
+                            <div class="trace-method">
+                                <span class="method-badge post">POST</span>
+                            </div>
+                            <div class="trace-status error"></div>
+                        </div>
+                        <div class="trace-path">/api/payments/charge</div>
+                        <div class="trace-meta">
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                1.2s
+                            </span>
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                                    <path d="M16 2v4M8 2v4M3 10h18"/>
+                                </svg>
+                                5 min ago
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="trace-item success">
+                        <div class="trace-item-header">
+                            <div class="trace-method">
+                                <span class="method-badge">GET</span>
+                            </div>
+                            <div class="trace-status success"></div>
+                        </div>
+                        <div class="trace-path">/api/users/profile</div>
+                        <div class="trace-meta">
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                45ms
+                            </span>
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                                    <path d="M16 2v4M8 2v4M3 10h18"/>
+                                </svg>
+                                8 min ago
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="trace-item processing">
+                        <div class="trace-item-header">
+                            <div class="trace-method">
+                                <span class="method-badge put">PUT</span>
+                            </div>
+                            <div class="trace-status processing"></div>
+                        </div>
+                        <div class="trace-path">/api/inventory/update</div>
+                        <div class="trace-meta">
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                --
+                            </span>
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                                    <path d="M16 2v4M8 2v4M3 10h18"/>
+                                </svg>
+                                now
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="trace-item success">
+                        <div class="trace-item-header">
+                            <div class="trace-method">
+                                <span class="method-badge delete">DELETE</span>
+                            </div>
+                            <div class="trace-status success"></div>
+                        </div>
+                        <div class="trace-path">/api/cart/items/123</div>
+                        <div class="trace-meta">
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                32ms
+                            </span>
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                                    <path d="M16 2v4M8 2v4M3 10h18"/>
+                                </svg>
+                                12 min ago
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- Detail Panel -->
+            <section class="detail-panel">
+                <div class="detail-header">
+                    <div class="detail-title">
+                        <h2>POST /api/orders</h2>
+                        <span class="detail-badge">SUCCESS</span>
+                    </div>
+                    <div class="detail-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Trace ID</span>
+                            <span class="stat-value">550e8400-e29b</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Time</span>
+                            <span class="stat-value">287ms</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Functions</span>
+                            <span class="stat-value">5</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Timestamp</span>
+                            <span class="stat-value">14:32:05.234</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="trace-diagram">
+                    <div class="diagram-container">
+                        <div class="api-container">
+                            <div class="api-header">
+                                <div class="api-title">
+                                    <span class="method">POST</span>
+                                    <span class="path">/api/orders</span>
+                                </div>
+                                <div class="api-timing">287ms</div>
+                            </div>
+                            
+                            <div class="nodes-grid">
+                                <!-- Main execution flow -->
+                                <div class="nodes-row main">
+                                    <div class="function-node success">
+                                        <div class="node-header">
+                                            <div class="node-status success"></div>
+                                            <span class="node-level info">INFO</span>
+                                        </div>
+                                        <div class="node-name">validate_order</div>
+                                        <div class="node-timing">45ms</div>
+                                        <div class="node-actions">
+                                            <button class="node-action">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                    <polyline points="7 10 12 15 17 10"/>
+                                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                                </svg>
+                                                Input
+                                            </button>
+                                            <button class="node-action">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                    <polyline points="17 8 12 3 7 8"/>
+                                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                                </svg>
+                                                Output
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="connector">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                                        </svg>
+                                    </div>
+                                    
+                                    <div class="function-node success">
+                                        <div class="node-header">
+                                            <div class="node-status success"></div>
+                                            <span class="node-level info">INFO</span>
+                                        </div>
+                                        <div class="node-name">process_payment</div>
+                                        <div class="node-timing">230ms</div>
+                                        <div class="node-actions">
+                                            <button class="node-action">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                    <polyline points="7 10 12 15 17 10"/>
+                                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                                </svg>
+                                                Input
+                                            </button>
+                                            <button class="node-action">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                    <polyline points="17 8 12 3 7 8"/>
+                                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                                </svg>
+                                                Output
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="connector">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                                        </svg>
+                                    </div>
+                                    
+                                    <div class="function-node success">
+                                        <div class="node-header">
+                                            <div class="node-status success"></div>
+                                            <span class="node-level info">INFO</span>
+                                        </div>
+                                        <div class="node-name">send_notification</div>
+                                        <div class="node-timing">12ms</div>
+                                        <div class="node-actions">
+                                            <button class="node-action">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                    <polyline points="7 10 12 15 17 10"/>
+                                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                                </svg>
+                                                Input
+                                            </button>
+                                            <button class="node-action">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                    <polyline points="17 8 12 3 7 8"/>
+                                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                                </svg>
+                                                Output
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Nested function (below validate_order) -->
+                                <div class="nodes-row nested">
+                                    <div class="function-node success" style="position: relative;">
+                                        <div class="nested-indicator"></div>
+                                        <div class="node-header">
+                                            <div class="node-status success"></div>
+                                            <span class="node-level debug">DEBUG</span>
+                                        </div>
+                                        <div class="node-name">check_inventory</div>
+                                        <div class="node-timing">12ms</div>
+                                        <div class="node-actions">
+                                            <button class="node-action">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                    <polyline points="7 10 12 15 17 10"/>
+                                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                                </svg>
+                                                Input
+                                            </button>
+                                            <button class="node-action">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                    <polyline points="17 8 12 3 7 8"/>
+                                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                                </svg>
+                                                Output
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="diagram-legend">
+                        <div class="legend-item">
+                            <div class="legend-dot success"></div>
+                            Success
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot error"></div>
+                            Error
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot nested"></div>
+                            Nested Call
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script>
+        // Interactive behaviors for mockup demonstration
+        document.querySelectorAll('.trace-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.trace-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+        
+        document.querySelectorAll('.toggle-option').forEach(option => {
+            option.addEventListener('click', () => {
+                option.parentElement.querySelectorAll('.toggle-option').forEach(o => o.classList.remove('active'));
+                option.classList.add('active');
+            });
+        });
+        
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                chip.classList.toggle('active');
+            });
+        });
+        
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+        
+        // Node hover effects
+        document.querySelectorAll('.function-node').forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                node.style.zIndex = '10';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.zIndex = '1';
+            });
+        });
+    </script>
+</body>
+</html>

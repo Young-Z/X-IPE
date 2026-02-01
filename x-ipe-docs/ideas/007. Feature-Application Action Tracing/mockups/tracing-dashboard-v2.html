@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-IPE Application Action Tracing</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- G6 by AntV - Canvas-based graph visualization -->
+    <script src="https://unpkg.com/@antv/g6@4.8.24/dist/g6.min.js"></script>
+    <style>
+        :root {
+            /* Light theme */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --bg-elevated: #ffffff;
+            --bg-hover: #e2e8f0;
+            
+            /* Text hierarchy */
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            
+            /* Status colors */
+            --status-success: #10b981;
+            --status-success-light: #d1fae5;
+            --status-error: #ef4444;
+            --status-error-light: #fee2e2;
+            --status-warning: #f59e0b;
+            --status-warning-light: #fef3c7;
+            --status-processing: #3b82f6;
+            --status-processing-light: #dbeafe;
+            
+            /* Accent */
+            --accent-primary: #6366f1;
+            --accent-secondary: #818cf8;
+            --accent-light: #e0e7ff;
+            
+            /* Borders */
+            --border-subtle: #e2e8f0;
+            --border-default: #cbd5e1;
+            --border-accent: #6366f1;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            
+            --timing-fast: 150ms;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* ===== LAYOUT ===== */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            height: 56px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-subtle);
+            flex-shrink: 0;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        /* Toggle Switch */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .toggle-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .toggle-switch {
+            display: flex;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 3px;
+            gap: 2px;
+        }
+        
+        .toggle-option {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all var(--timing-fast);
+        }
+        
+        .toggle-option:hover {
+            color: var(--text-secondary);
+        }
+        
+        .toggle-option.active {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        /* Icon Buttons */
+        .icon-btn {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--timing-fast);
+        }
+        
+        .icon-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--border-default);
+        }
+        
+        .icon-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 340px;
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        .sidebar-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: inherit;
+            transition: all var(--timing-fast);
+        }
+        
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+        
+        .search-box svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            color: var(--text-muted);
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        .filter-chip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--timing-fast);
+        }
+        
+        .filter-chip:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-default);
+        }
+        
+        .filter-chip.active {
+            background: var(--accent-light);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+        
+        .filter-chip .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        
+        .filter-chip .dot.success { background: var(--status-success); }
+        .filter-chip .dot.error { background: var(--status-error); }
+        .filter-chip .dot.processing { background: var(--status-processing); }
+        
+        /* Trace List - Now at Trace ID level */
+        .trace-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        
+        .trace-item {
+            padding: 12px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all var(--timing-fast);
+            position: relative;
+        }
+        
+        .trace-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            border-radius: 10px 0 0 10px;
+            opacity: 0;
+            transition: opacity var(--timing-fast);
+        }
+        
+        .trace-item.success::before { background: var(--status-success); }
+        .trace-item.error::before { background: var(--status-error); }
+        .trace-item.processing::before { background: var(--status-processing); }
+        
+        .trace-item:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-default);
+        }
+        
+        .trace-item:hover::before,
+        .trace-item.active::before {
+            opacity: 1;
+        }
+        
+        .trace-item.active {
+            background: var(--accent-light);
+            border-color: var(--accent-primary);
+        }
+        
+        /* Trace ID Header */
+        .trace-id-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .trace-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            background: var(--bg-tertiary);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        
+        .trace-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .trace-status-dot.success { background: var(--status-success); }
+        .trace-status-dot.error { background: var(--status-error); }
+        .trace-status-dot.processing { 
+            background: var(--status-processing);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        
+        /* Entry API */
+        .trace-entry-api {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        
+        .method-badge {
+            padding: 2px 6px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--status-processing);
+        }
+        
+        .method-badge.post { color: var(--status-success); }
+        .method-badge.delete { color: var(--status-error); }
+        .method-badge.put { color: var(--status-warning); }
+        
+        .trace-path {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-primary);
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Nested API calls indicator */
+        .trace-nested {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+        
+        .trace-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .trace-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .trace-meta svg {
+            width: 11px;
+            height: 11px;
+        }
+        
+        /* ===== DETAIL PANEL ===== */
+        .detail-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-secondary);
+            overflow: hidden;
+        }
+        
+        .detail-header {
+            padding: 16px 20px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        .detail-title-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .detail-title-row h2 {
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .detail-badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .detail-badge.success {
+            background: var(--status-success-light);
+            color: var(--status-success);
+        }
+        
+        .detail-badge.error {
+            background: var(--status-error-light);
+            color: var(--status-error);
+        }
+        
+        .detail-stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .stat-value {
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        /* Diagram Container with Canvas */
+        .diagram-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #traceGraph {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Zoom Controls */
+        .zoom-controls {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 4px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .zoom-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--timing-fast);
+        }
+        
+        .zoom-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .zoom-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .zoom-divider {
+            height: 1px;
+            background: var(--border-subtle);
+            margin: 2px 4px;
+        }
+        
+        /* Tooltip for hover (input/output preview) */
+        .g6-tooltip {
+            background: var(--bg-primary) !important;
+            border: 1px solid var(--border-default) !important;
+            border-radius: 8px !important;
+            box-shadow: var(--shadow-lg) !important;
+            padding: 12px 14px !important;
+            max-width: 320px !important;
+            font-family: 'JetBrains Mono', monospace !important;
+            font-size: 11px !important;
+        }
+        
+        .tooltip-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-subtle);
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        .tooltip-content {
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .tooltip-content .key { color: var(--accent-primary); }
+        .tooltip-content .string { color: var(--status-success); }
+        .tooltip-content .number { color: var(--status-warning); }
+        
+        /* Legend */
+        .diagram-legend {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            display: flex;
+            gap: 16px;
+            padding: 10px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            font-size: 11px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+        }
+        
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .legend-dot.success { background: var(--status-success); }
+        .legend-dot.error { background: var(--status-error); }
+        
+        /* Help text */
+        .help-text {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-default);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header - Simplified -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <div class="logo-icon">X</div>
+                    <span>Action Tracing</span>
+                </div>
+            </div>
+            <div class="header-controls">
+                <div class="toggle-group">
+                    <span class="toggle-label">Tracing</span>
+                    <div class="toggle-switch">
+                        <button class="toggle-option">Off</button>
+                        <button class="toggle-option">Console</button>
+                        <button class="toggle-option active">File</button>
+                    </div>
+                </div>
+                <button class="icon-btn" title="Configuration">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                    </svg>
+                </button>
+                <button class="icon-btn" title="Ignored APIs">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M4.93 4.93l14.14 14.14"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar - Trace ID level -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-title">Traces</div>
+                    <div class="search-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                        <input type="text" placeholder="Search by trace ID or path...">
+                    </div>
+                </div>
+                
+                <div class="filter-row">
+                    <button class="filter-chip active">
+                        <span class="dot success"></span>
+                        Success
+                    </button>
+                    <button class="filter-chip">
+                        <span class="dot error"></span>
+                        Error
+                    </button>
+                    <button class="filter-chip">
+                        <span class="dot processing"></span>
+                        Active
+                    </button>
+                </div>
+                
+                <div class="trace-list">
+                    <!-- Trace at ID level - shows entry API + nested count -->
+                    <div class="trace-item success active">
+                        <div class="trace-id-row">
+                            <span class="trace-id">550e8400-e29b</span>
+                            <div class="trace-status-dot success"></div>
+                        </div>
+                        <div class="trace-entry-api">
+                            <span class="method-badge post">POST</span>
+                            <span class="trace-path">/api/orders</span>
+                            <span class="trace-nested">+4 calls</span>
+                        </div>
+                        <div class="trace-meta">
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                287ms
+                            </span>
+                            <span>2 min ago</span>
+                        </div>
+                    </div>
+                    
+                    <div class="trace-item error">
+                        <div class="trace-id-row">
+                            <span class="trace-id">7f3e2a1b-9c4d</span>
+                            <div class="trace-status-dot error"></div>
+                        </div>
+                        <div class="trace-entry-api">
+                            <span class="method-badge post">POST</span>
+                            <span class="trace-path">/api/payments/charge</span>
+                            <span class="trace-nested">+2 calls</span>
+                        </div>
+                        <div class="trace-meta">
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                1.2s
+                            </span>
+                            <span>5 min ago</span>
+                        </div>
+                    </div>
+                    
+                    <div class="trace-item success">
+                        <div class="trace-id-row">
+                            <span class="trace-id">a1b2c3d4-5e6f</span>
+                            <div class="trace-status-dot success"></div>
+                        </div>
+                        <div class="trace-entry-api">
+                            <span class="method-badge">GET</span>
+                            <span class="trace-path">/api/users/profile</span>
+                            <span class="trace-nested">+1 call</span>
+                        </div>
+                        <div class="trace-meta">
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                45ms
+                            </span>
+                            <span>8 min ago</span>
+                        </div>
+                    </div>
+                    
+                    <div class="trace-item processing">
+                        <div class="trace-id-row">
+                            <span class="trace-id">x9y8z7w6-v5u4</span>
+                            <div class="trace-status-dot processing"></div>
+                        </div>
+                        <div class="trace-entry-api">
+                            <span class="method-badge put">PUT</span>
+                            <span class="trace-path">/api/inventory/sync</span>
+                            <span class="trace-nested">+6 calls</span>
+                        </div>
+                        <div class="trace-meta">
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                --
+                            </span>
+                            <span>now</span>
+                        </div>
+                    </div>
+                    
+                    <div class="trace-item success">
+                        <div class="trace-id-row">
+                            <span class="trace-id">m3n4o5p6-q7r8</span>
+                            <div class="trace-status-dot success"></div>
+                        </div>
+                        <div class="trace-entry-api">
+                            <span class="method-badge delete">DELETE</span>
+                            <span class="trace-path">/api/cart/items/123</span>
+                        </div>
+                        <div class="trace-meta">
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                32ms
+                            </span>
+                            <span>12 min ago</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- Detail Panel with Canvas Graph -->
+            <section class="detail-panel">
+                <div class="detail-header">
+                    <div class="detail-title-row">
+                        <span class="trace-id" style="font-size: 12px;">550e8400-e29b-41d4-a716</span>
+                        <span class="detail-badge success">SUCCESS</span>
+                    </div>
+                    <div class="detail-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Entry:</span>
+                            <span class="stat-value">POST /api/orders</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total:</span>
+                            <span class="stat-value">287ms</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Functions:</span>
+                            <span class="stat-value">5</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Time:</span>
+                            <span class="stat-value">14:32:05</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="diagram-container">
+                    <div id="traceGraph"></div>
+                    
+                    <div class="help-text">
+                        Scroll to zoom • Drag to pan • Hover nodes to see input/output
+                    </div>
+                    
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" id="zoomIn" title="Zoom In">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/>
+                            </svg>
+                        </button>
+                        <div class="zoom-divider"></div>
+                        <button class="zoom-btn" id="zoomOut" title="Zoom Out">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="M21 21l-4.35-4.35M8 11h6"/>
+                            </svg>
+                        </button>
+                        <div class="zoom-divider"></div>
+                        <button class="zoom-btn" id="zoomFit" title="Fit to View">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="diagram-legend">
+                        <div class="legend-item">
+                            <div class="legend-dot success"></div>
+                            Success
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot error"></div>
+                            Error
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script>
+        // G6 Graph Configuration
+        const container = document.getElementById('traceGraph');
+        const width = container.clientWidth || 800;
+        const height = container.clientHeight || 600;
+        
+        // Custom compact node
+        G6.registerNode('trace-node', {
+            draw(cfg, group) {
+                const isSuccess = cfg.status === 'success';
+                const isError = cfg.status === 'error';
+                const statusColor = isError ? '#ef4444' : '#10b981';
+                const bgColor = isError ? '#fef2f2' : '#f0fdf4';
+                
+                // Node container - compact size
+                const rect = group.addShape('rect', {
+                    attrs: {
+                        x: -70,
+                        y: -28,
+                        width: 140,
+                        height: 56,
+                        fill: '#ffffff',
+                        stroke: statusColor,
+                        lineWidth: 2,
+                        radius: 8,
+                        shadowColor: 'rgba(0,0,0,0.08)',
+                        shadowBlur: 8,
+                        shadowOffsetY: 2,
+                        cursor: 'pointer'
+                    },
+                    name: 'node-rect'
+                });
+                
+                // Status dot
+                group.addShape('circle', {
+                    attrs: {
+                        x: -55,
+                        y: -12,
+                        r: 4,
+                        fill: statusColor
+                    },
+                    name: 'status-dot'
+                });
+                
+                // Level badge
+                const levelText = cfg.level || 'INFO';
+                const levelColor = levelText === 'DEBUG' ? '#94a3b8' : '#3b82f6';
+                group.addShape('rect', {
+                    attrs: {
+                        x: 20,
+                        y: -20,
+                        width: 40,
+                        height: 16,
+                        fill: '#f1f5f9',
+                        radius: 3
+                    },
+                    name: 'level-bg'
+                });
+                group.addShape('text', {
+                    attrs: {
+                        x: 40,
+                        y: -12,
+                        text: levelText,
+                        fontSize: 9,
+                        fontWeight: 600,
+                        fontFamily: 'JetBrains Mono, monospace',
+                        fill: levelColor,
+                        textAlign: 'center',
+                        textBaseline: 'middle'
+                    },
+                    name: 'level-text'
+                });
+                
+                // Function name
+                group.addShape('text', {
+                    attrs: {
+                        x: 0,
+                        y: 2,
+                        text: cfg.label,
+                        fontSize: 12,
+                        fontWeight: 500,
+                        fontFamily: 'JetBrains Mono, monospace',
+                        fill: '#0f172a',
+                        textAlign: 'center',
+                        textBaseline: 'middle'
+                    },
+                    name: 'name-text'
+                });
+                
+                // Timing
+                group.addShape('text', {
+                    attrs: {
+                        x: 0,
+                        y: 18,
+                        text: cfg.timing || '--',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        fontFamily: 'JetBrains Mono, monospace',
+                        fill: '#64748b',
+                        textAlign: 'center',
+                        textBaseline: 'middle'
+                    },
+                    name: 'timing-text'
+                });
+                
+                return rect;
+            },
+            setState(name, value, item) {
+                const group = item.getContainer();
+                const rect = group.find(e => e.get('name') === 'node-rect');
+                if (name === 'hover') {
+                    rect.attr('shadowBlur', value ? 16 : 8);
+                    rect.attr('shadowColor', value ? 'rgba(99, 102, 241, 0.3)' : 'rgba(0,0,0,0.08)');
+                }
+            }
+        }, 'single-node');
+        
+        // Graph data
+        const data = {
+            nodes: [
+                { 
+                    id: 'api', 
+                    label: 'POST /api/orders', 
+                    timing: '287ms',
+                    status: 'success',
+                    level: 'API',
+                    input: '{\n  "customer_id": "C001",\n  "items": [\n    {"id": "I1", "qty": 2},\n    {"id": "I2", "qty": 1}\n  ]\n}',
+                    output: '{\n  "order_id": "ORD-789",\n  "status": "created"\n}'
+                },
+                { 
+                    id: 'validate', 
+                    label: 'validate_order', 
+                    timing: '45ms',
+                    status: 'success',
+                    level: 'INFO',
+                    input: '{\n  "order_data": {...}\n}',
+                    output: '{\n  "valid": true\n}'
+                },
+                { 
+                    id: 'inventory', 
+                    label: 'check_inventory', 
+                    timing: '12ms',
+                    status: 'success',
+                    level: 'DEBUG',
+                    input: '{\n  "item_ids": ["I1", "I2"]\n}',
+                    output: '{\n  "available": true\n}'
+                },
+                { 
+                    id: 'payment', 
+                    label: 'process_payment', 
+                    timing: '230ms',
+                    status: 'success',
+                    level: 'INFO',
+                    input: '{\n  "amount": 99.99,\n  "card": "[CARD]"\n}',
+                    output: '{\n  "status": "success",\n  "txn_id": "TXN-456"\n}'
+                },
+                { 
+                    id: 'notify', 
+                    label: 'send_notification', 
+                    timing: '12ms',
+                    status: 'success',
+                    level: 'INFO',
+                    input: '{\n  "email": "[EMAIL]",\n  "template": "order_confirm"\n}',
+                    output: '{\n  "sent": true\n}'
+                }
+            ],
+            edges: [
+                { source: 'api', target: 'validate' },
+                { source: 'validate', target: 'inventory' },
+                { source: 'validate', target: 'payment' },
+                { source: 'payment', target: 'notify' }
+            ]
+        };
+        
+        // Create graph
+        const graph = new G6.Graph({
+            container: 'traceGraph',
+            width,
+            height,
+            fitView: true,
+            fitViewPadding: 60,
+            animate: true,
+            modes: {
+                default: ['drag-canvas', 'zoom-canvas']
+            },
+            layout: {
+                type: 'dagre',
+                rankdir: 'LR',
+                nodesep: 40,
+                ranksep: 80
+            },
+            defaultNode: {
+                type: 'trace-node'
+            },
+            defaultEdge: {
+                type: 'polyline',
+                style: {
+                    stroke: '#cbd5e1',
+                    lineWidth: 2,
+                    endArrow: {
+                        path: G6.Arrow.triangle(8, 10, 0),
+                        fill: '#cbd5e1'
+                    },
+                    radius: 8
+                }
+            }
+        });
+        
+        // Tooltip for hover
+        const tooltip = new G6.Tooltip({
+            offsetX: 10,
+            offsetY: 10,
+            fixToNode: [0.5, 1],
+            itemTypes: ['node'],
+            getContent: (e) => {
+                const model = e.item.getModel();
+                const inputPreview = model.input || 'No input data';
+                const outputPreview = model.output || 'No output data';
+                
+                return `
+                    <div style="padding: 4px;">
+                        <div style="font-weight: 600; color: #475569; margin-bottom: 8px; font-size: 12px;">
+                            📥 Input
+                        </div>
+                        <pre style="margin: 0 0 12px 0; font-size: 11px; color: #0f172a; background: #f8fafc; padding: 8px; border-radius: 4px; max-height: 100px; overflow: auto;">${inputPreview}</pre>
+                        <div style="font-weight: 600; color: #475569; margin-bottom: 8px; font-size: 12px;">
+                            📤 Output
+                        </div>
+                        <pre style="margin: 0; font-size: 11px; color: #0f172a; background: #f8fafc; padding: 8px; border-radius: 4px; max-height: 100px; overflow: auto;">${outputPreview}</pre>
+                    </div>
+                `;
+            }
+        });
+        
+        graph.addPlugin(tooltip);
+        
+        // Node hover effects
+        graph.on('node:mouseenter', (e) => {
+            graph.setItemState(e.item, 'hover', true);
+        });
+        
+        graph.on('node:mouseleave', (e) => {
+            graph.setItemState(e.item, 'hover', false);
+        });
+        
+        // Render
+        graph.data(data);
+        graph.render();
+        
+        // Zoom controls
+        document.getElementById('zoomIn').onclick = () => {
+            const zoom = graph.getZoom();
+            graph.zoomTo(zoom * 1.2, { x: width / 2, y: height / 2 });
+        };
+        
+        document.getElementById('zoomOut').onclick = () => {
+            const zoom = graph.getZoom();
+            graph.zoomTo(zoom / 1.2, { x: width / 2, y: height / 2 });
+        };
+        
+        document.getElementById('zoomFit').onclick = () => {
+            graph.fitView(60);
+        };
+        
+        // Resize handling
+        window.addEventListener('resize', () => {
+            const newWidth = container.clientWidth;
+            const newHeight = container.clientHeight;
+            graph.changeSize(newWidth, newHeight);
+            graph.fitView(60);
+        });
+        
+        // Sidebar interactions
+        document.querySelectorAll('.trace-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.trace-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+        
+        document.querySelectorAll('.toggle-option').forEach(option => {
+            option.addEventListener('click', () => {
+                option.parentElement.querySelectorAll('.toggle-option').forEach(o => o.classList.remove('active'));
+                option.classList.add('active');
+            });
+        });
+        
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                chip.classList.toggle('active');
+            });
+        });
+    </script>
+</body>
+</html>

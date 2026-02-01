@@ -14,6 +14,7 @@
 | FEATURE-022-B | Element Inspector | v1.0 | Hover highlighting and multi-select element inspection within browser simulator | FEATURE-022-A |
 | FEATURE-022-C | Feedback Capture & Panel | v1.0 | Right-click context menu and feedback entry panel with screenshot capture | FEATURE-022-B |
 | FEATURE-022-D | Feedback Storage & Submission | v1.0 | Save feedback to structured folders and generate terminal command for agent | FEATURE-022-C |
+| FEATURE-023 | Application Action Tracing - Core | v1.0 | Decorator-based tracing framework for Python & TypeScript with log storage | None |
 
 ---
 
@@ -23,6 +24,7 @@
 |---------------------|---------|-------------|
 | voice-input-console | FEATURE-021 | [mockup.html](../ideas/Console%20Voice%20Input%20-%2001242026%20000728/mockup.html) |
 | uiux-feedback-view | FEATURE-022 | [uiux-feedback-v1.html](../ideas/005.%20Feature-UIUX%20Feedback/mockups/uiux-feedback-v1.html) |
+| tracing-dashboard | FEATURE-023 | [tracing-dashboard-v4.html](../ideas/007.%20Feature-Application%20Action%20Tracing/mockups/tracing-dashboard-v4.html) |
 
 ---
 
@@ -369,6 +371,181 @@ Get uiux feedback, please visit feedback folder x-ipe/uiux-feedback/Feedback-YYY
 | FEATURE-022-B | FEATURE-022-A | Inspector requires loaded browser simulator |
 | FEATURE-022-C | FEATURE-022-B | Feedback capture requires element selection |
 | FEATURE-022-D | FEATURE-022-C | Submission requires feedback entries |
+
+---
+
+### FEATURE-023: Application Action Tracing - Core
+
+**Version:** v1.0  
+**Brief Description:** Decorator-based tracing framework for Python and TypeScript that automatically logs function calls, parameters, return values, and execution times with structured log files.
+
+**Source:** [Idea Summary v1 - Application Action Tracing](../ideas/007.%20Feature-Application%20Action%20Tracing/idea-summary-v1.md)  
+**Mockup:** [Tracing Dashboard v4](../ideas/007.%20Feature-Application%20Action%20Tracing/mockups/tracing-dashboard-v4.html)
+
+#### Problem Statement
+
+As applications grow in complexity, understanding execution flow becomes challenging:
+- Debugging requires manually adding log statements
+- No standardized way to trace function calls across the codebase
+- Errors lack context about what led to the failure
+- Code reviews cannot easily verify logging coverage
+- Different developers implement logging inconsistently
+
+#### Scope Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Phase Priority | Phase 1 (Core) first | Backend before UI |
+| Language Support | Python + TypeScript together | Both from start |
+| Log Storage | Configurable via tools.json | Flexibility |
+| Trace Retention | Keep files, cleanup on reboot based on config (default 24h) | Balance storage vs utility |
+| Error Logs | Same file with error markers | Simpler implementation |
+| Sensitive Data | Built-in redaction patterns | Security by default |
+| Decorator Config | level + redact fields | Basic but sufficient |
+| Trace ID Format | UUID | Guaranteed unique |
+
+#### Acceptance Criteria
+
+**1. Python Tracing Decorator**
+
+| # | Acceptance Criteria | Priority |
+|---|---------------------|----------|
+| AC-1.1 | System MUST provide `@x_ipe_tracing` decorator in `x_ipe.tracing` module | Must |
+| AC-1.2 | Decorator MUST accept `level` parameter with values: "INFO", "DEBUG", "SKIP" | Must |
+| AC-1.3 | Decorator MUST accept optional `redact` parameter as list of field names to redact | Must |
+| AC-1.4 | Decorator MUST log function entry with: function name, parameters (redacted as needed) | Must |
+| AC-1.5 | Decorator MUST log function exit with: return value (redacted as needed), execution time in ms | Must |
+| AC-1.6 | Decorator MUST log exceptions with: exception type, message, stack trace | Must |
+| AC-1.7 | Decorator MUST work with sync and async functions | Must |
+| AC-1.8 | Decorator SHOULD NOT significantly impact performance (<5ms overhead per call) | Should |
+
+**2. TypeScript Tracing Decorator**
+
+| # | Acceptance Criteria | Priority |
+|---|---------------------|----------|
+| AC-2.1 | System MUST provide `@xIpeTracing` decorator in `@x-ipe/tracing` package | Must |
+| AC-2.2 | Decorator MUST accept `level` option with values: "INFO", "DEBUG", "SKIP" | Must |
+| AC-2.3 | Decorator MUST accept optional `redact` option as array of field names | Must |
+| AC-2.4 | Decorator MUST log function entry with: function name, parameters (redacted) | Must |
+| AC-2.5 | Decorator MUST log function exit with: return value (redacted), execution time | Must |
+| AC-2.6 | Decorator MUST log exceptions with: error type, message, stack trace | Must |
+| AC-2.7 | Decorator MUST work with sync and async methods | Must |
+| AC-2.8 | Decorator MUST work with class methods and standalone functions | Must |
+
+**3. Trace Context Management**
+
+| # | Acceptance Criteria | Priority |
+|---|---------------------|----------|
+| AC-3.1 | System MUST generate unique UUID trace ID for each root request | Must |
+| AC-3.2 | System MUST propagate trace ID to all nested function calls within same request | Must |
+| AC-3.3 | System MUST track parent-child relationships between function calls | Must |
+| AC-3.4 | System MUST maintain call depth/nesting level for each function | Must |
+| AC-3.5 | System MUST use in-memory buffer during request execution | Must |
+| AC-3.6 | System MUST flush buffer to file on request completion | Must |
+
+**4. Log Format & Storage**
+
+| # | Acceptance Criteria | Priority |
+|---|---------------------|----------|
+| AC-4.1 | Log file MUST be named: `{timestamp}-{root-api-name}-{trace-id}.log` | Must |
+| AC-4.2 | Log file path MUST be configurable via `tools.json` field `tracing_log_path` | Must |
+| AC-4.3 | Default log path MUST be `instance/traces/` | Must |
+| AC-4.4 | Log format MUST include: `[TRACE-START]`, `[TRACE-END]`, `[INFO]`, `[DEBUG]`, `[ERROR]` markers | Must |
+| AC-4.5 | Each log entry MUST include: timestamp, trace ID, function name, direction (→/←), data | Must |
+| AC-4.6 | Error entries MUST be marked with `[ERROR]` in same file (not separate file) | Must |
+| AC-4.7 | Log files older than retention period MUST be deleted on backend startup | Must |
+| AC-4.8 | Retention period MUST be configurable via `tools.json` field `tracing_retention_hours` (default: 24) | Must |
+
+**5. Sensitive Data Redaction**
+
+| # | Acceptance Criteria | Priority |
+|---|---------------------|----------|
+| AC-5.1 | System MUST auto-redact fields containing "password" (case-insensitive) | Must |
+| AC-5.2 | System MUST auto-redact fields containing "secret" (case-insensitive) | Must |
+| AC-5.3 | System MUST auto-redact fields containing "token" (case-insensitive) | Must |
+| AC-5.4 | System MUST auto-redact fields containing "api_key" or "apiKey" | Must |
+| AC-5.5 | System MUST redact values matching credit card pattern (16 digits) | Must |
+| AC-5.6 | System MUST redact values matching JWT pattern (eyJ...) | Must |
+| AC-5.7 | Redacted values MUST be replaced with `[REDACTED]` | Must |
+| AC-5.8 | Custom redact fields from decorator MUST be honored in addition to built-in patterns | Must |
+
+**6. Tracing Configuration (tools.json)**
+
+| # | Acceptance Criteria | Priority |
+|---|---------------------|----------|
+| AC-6.1 | `tools.json` MUST support `tracing_enabled` field (boolean, default: false) | Must |
+| AC-6.2 | `tools.json` MUST support `tracing_stop_at` field (ISO timestamp or null) | Must |
+| AC-6.3 | `tools.json` MUST support `tracing_log_path` field (string, default: "instance/traces/") | Must |
+| AC-6.4 | `tools.json` MUST support `tracing_retention_hours` field (number, default: 24) | Must |
+| AC-6.5 | `tools.json` MUST support `tracing_ignored_apis` field (array of API path patterns) | Should |
+| AC-6.6 | Backend MUST check `tracing_stop_at` on each request; if now > stop_at, disable tracing | Must |
+| AC-6.7 | Backend MUST cleanup old logs on startup based on `tracing_retention_hours` | Must |
+
+**7. API Endpoints**
+
+| # | Acceptance Criteria | Priority |
+|---|---------------------|----------|
+| AC-7.1 | `GET /api/tracing/status` MUST return current tracing state (enabled, stop_at, retention) | Must |
+| AC-7.2 | `POST /api/tracing/start` MUST accept `duration_minutes` (3, 15, or 30) and set `tracing_stop_at` | Must |
+| AC-7.3 | `POST /api/tracing/stop` MUST set `tracing_stop_at` to null and disable tracing | Must |
+| AC-7.4 | `GET /api/tracing/logs` MUST return list of trace log files with metadata | Should |
+| AC-7.5 | `GET /api/tracing/logs/{trace_id}` MUST return parsed trace data for visualization | Should |
+| AC-7.6 | `DELETE /api/tracing/logs` MUST delete all trace logs | Should |
+
+#### Data Models
+
+**Trace Log Entry:**
+```
+[{marker}] {direction} {function}: {function_name} | {description} | {data_json} | {duration_ms}
+```
+
+**Example Log File:**
+```
+[TRACE-START] 550e8400-e29b-41d4-a716-446655440000 | POST /api/orders | 2026-02-01T03:10:00Z
+  [INFO] → start_function: validate_order | {"order_id": "O001", "items": [...]}
+  [DEBUG] → start_function: check_inventory | {"item_ids": ["I1"]}
+  [DEBUG] ← return_function: check_inventory | {"available": true} | 12ms
+  [INFO] ← return_function: validate_order | {"valid": true} | 45ms
+  [ERROR] → start_function: process_payment | {"amount": 99.99}
+  [ERROR] ← exception: process_payment | PaymentError: Card declined | 230ms
+    at process_payment (payment.py:42)
+    at handle_order (orders.py:15)
+[TRACE-END] 550e8400-e29b-41d4-a716-446655440000 | 287ms | ERROR
+```
+
+**tools.json Schema Addition:**
+```json
+{
+  "tracing_enabled": false,
+  "tracing_stop_at": "2026-02-01T03:30:00.000Z",
+  "tracing_log_path": "instance/traces/",
+  "tracing_retention_hours": 24,
+  "tracing_ignored_apis": ["/api/health", "/api/ping"]
+}
+```
+
+#### Non-Functional Requirements
+
+| # | Requirement | Target |
+|---|-------------|--------|
+| NFR-1 | Decorator overhead per call | < 5ms |
+| NFR-2 | Memory buffer size limit | 10MB per request |
+| NFR-3 | Log file write latency | < 50ms |
+| NFR-4 | Startup cleanup time | < 5s for 1000 files |
+
+#### Out of Scope (Phase 1)
+
+- UI dashboard (Phase 2)
+- Skill integration (Phase 3)
+- Distributed tracing across services
+- Real-time log streaming
+- Log aggregation/analytics
+
+#### Feature Dependencies
+
+| Feature | Depends On | Reason |
+|---------|------------|--------|
+| FEATURE-023 | None | Core infrastructure feature |
 
 ---
 

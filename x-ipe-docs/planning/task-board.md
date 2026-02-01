@@ -6,6 +6,8 @@
 
 | Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-254 | Feature Closing | FEATURE-023: Application Action Tracing - Core Closing | Drift | 🔄 in_progress | 02-01-2026 03:55:00 | - | User Manual |
+| TASK-246 | Bug Fix | UIUX: Highlight parent folder when previewing file | Zephyr | ✅ completed | 01-31-2026 17:25:00 | workplace.js, workplace.css | - |
 | TASK-243 | Bug Fix | UIUX Feedback: Create folder button opens compose view instead | Cipher | 🔄 in_progress | 01-31-2026 14:08:00 | - | - |
 | TASK-237 | Bug Fix | UIUX Feedback: List not loading, sorting, cleanup on startup | Pulse | 🔄 in_progress | 01-31-2026 06:58:00 | - | - |
 | TASK-225 | Bug Fix | UIUX Feedback: Themes menu always expanded | Spark | 🔄 in_progress | 01-29-2026 14:15:00 | sidebar.js | - |
@@ -16,6 +18,14 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-253 | Code Implementation | FEATURE-023: Application Action Tracing - Core Implementation | Drift | 02-01-2026 03:55:00 | src/x_ipe/tracing/, tracing_service.py, tracing_routes.py | 61/61 tests passing |
+| TASK-252 | Test Generation | FEATURE-023: Application Action Tracing - Core Tests | Drift | 02-01-2026 03:40:00 | test_tracing.py | 61 tests, TDD ready |
+| TASK-251 | Technical Design | FEATURE-023: Application Action Tracing - Core Design | Drift | 02-01-2026 03:25:00 | technical-design.md | 7 modules, full implementation guide |
+| TASK-250 | Feature Refinement | FEATURE-023: Application Action Tracing - Core Specification | Drift | 02-01-2026 03:20:00 | specification.md, mockups/ | 7 AC categories, full spec with edge cases |
+| TASK-249 | Feature Breakdown | FEATURE-023: Application Action Tracing - Core | Drift | 02-01-2026 03:18:00 | features.md, requirement-details-part-3.md | Added to feature board |
+| TASK-248 | Requirement Gathering | IDEA-007: Application Action Tracing Requirements | Drift | 02-01-2026 03:15:00 | requirement-details-part-3.md | FEATURE-023, 7 AC categories, 40+ ACs |
+| TASK-247 | Idea Mockup | IDEA-007: Application Action Tracing UI Mockup | Drift | 02-01-2026 03:08:00 | tracing-dashboard-v4.html, idea-summary-v2.md | G6 canvas DAG, click-modal, duration toggle, countdown timer |
+| TASK-245 | Ideation | IDEA-007: Feature-Application Action Tracing | Nova | 01-31-2026 17:26:00 | idea-summary-v1.md | 7 features, 3 phases |
 | TASK-244 | Bug Fix | UIUX Feedback: Submit/Copilot buttons behavior fix | Echo | 01-31-2026 14:18:00 | uiux-feedback.js, uiux-feedback.css | Both buttons always visible, Submit disabled after submit, re-enabled on edit |
 | TASK-242 | Bug Fix | UIUX Feedback: Delete file in folder view causes error | Cipher | 01-31-2026 07:19:00 | ideas_service.py | Fixed path format in get_folder_contents |
 | TASK-241 | Feature Request | UIUX Feedback: Add drag and drop for folders/files in folder view | Cipher | 01-31-2026 07:18:00 | folder-view.js, workplace.css | Drag-drop CSS visual feedback |
@@ -126,8 +136,10 @@
 
 ## Quick Stats
 
-- **Total Active:** 3
-- **In Progress:** 3
+- **Total Active:** 5
+- **In Progress:** 4
+- **Deferred:** 0
+- **Completed (archived):** 182
 - **Pending:** 0
 - **Pending Review:** 0
 - **Blocked:** 0
