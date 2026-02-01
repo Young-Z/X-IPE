@@ -123,24 +123,25 @@ class TracingDashboard {
                     </div>
                     <div class="tracing-header-controls">
                         <div class="tracing-control">
-                            <span class="tracing-label">Duration</span>
+                            <!-- Countdown Timer (left side like mockup) -->
+                            <div class="countdown-container inactive">
+                                <svg class="countdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                <span class="countdown-text">--:--</span>
+                                <span class="countdown-label">Inactive</span>
+                            </div>
+                            
+                            <button class="stop-btn hidden">Stop</button>
+                            
+                            <span class="tracing-label">Start Tracing</span>
                             <div class="duration-toggle">
                                 <button class="duration-option" data-minutes="3">3 min</button>
                                 <button class="duration-option" data-minutes="15">15 min</button>
                                 <button class="duration-option" data-minutes="30">30 min</button>
                             </div>
                         </div>
-                        
-                        <div class="countdown-container inactive">
-                            <svg class="countdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"/>
-                                <polyline points="12 6 12 12 16 14"/>
-                            </svg>
-                            <span class="countdown-text">00:00</span>
-                            <span class="countdown-label">remaining</span>
-                        </div>
-                        
-                        <button class="stop-btn hidden">Stop</button>
                         
                         <button class="icon-btn btn-config" title="Configuration">
                             <i class="bi bi-gear"></i>
@@ -331,10 +332,12 @@ class TracingDashboard {
     updateTimerDisplay() {
         const container = this.container.querySelector('.countdown-container');
         const timerText = this.container.querySelector('.countdown-text');
+        const timerLabel = this.container.querySelector('.countdown-label');
         if (!container || !timerText) return;
         
         if (!this.stopAt) {
-            timerText.textContent = '00:00';
+            timerText.textContent = '--:--';
+            if (timerLabel) timerLabel.textContent = 'Inactive';
             container.classList.remove('warning');
             container.classList.add('inactive');
             return;
@@ -346,6 +349,7 @@ class TracingDashboard {
         const minutes = Math.floor(remaining / 60);
         const seconds = remaining % 60;
         timerText.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        if (timerLabel) timerLabel.textContent = 'remaining';
         
         container.classList.remove('inactive');
         
