@@ -263,7 +263,7 @@ class ProjectSidebar {
                         </div>
                         <div class="nav-section-header sidebar-child nav-tracing" data-section-id="tracing">
                             <i class="bi bi-graph-up"></i>
-                            <span>Tracing</span>
+                            <span>Application Tracing</span>
                         </div>
                     </div>
                 </div>
@@ -536,7 +536,7 @@ class ProjectSidebar {
                 
                 // Update breadcrumb
                 const breadcrumb = document.getElementById('breadcrumb');
-                breadcrumb.innerHTML = '<li class="breadcrumb-item active">Tracing</li>';
+                breadcrumb.innerHTML = '<li class="breadcrumb-item active">Application Tracing</li>';
                 
                 // Render Tracing Dashboard in content area
                 const container = document.getElementById('content-body');
