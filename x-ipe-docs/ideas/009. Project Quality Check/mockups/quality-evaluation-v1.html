@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Quality Evaluation - X-IPE Mockup</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================================
+         * DESIGN DIRECTION: Professional Developer Tool Aesthetic
+         * Tone: Clean, confident, utilitarian with subtle elegance
+         * Key element: Teal accent color for quality/health metrics
+         * ============================================================ */
+        
+        :root {
+            --top-menu-height: 36px;
+            --sidebar-width: 280px;
+            --sidebar-bg: #1e1e2e;
+            --sidebar-text: #cdd6f4;
+            --sidebar-hover: #313244;
+            --sidebar-active: #45475a;
+            --content-bg: #ffffff;
+            
+            /* Quality theme - teal accent */
+            --quality-primary: #0d9488;
+            --quality-primary-light: #14b8a6;
+            --quality-primary-dark: #0f766e;
+            --quality-bg: #f0fdfa;
+            --quality-border: #99f6e4;
+            
+            /* Status colors */
+            --status-good: #22c55e;
+            --status-warn: #f59e0b;
+            --status-bad: #ef4444;
+            
+            /* UI colors */
+            --border-color: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+        }
+        
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        /* ============================================================
+         * PAGE LAYOUT
+         * ============================================================ */
+        .page-root {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Top Menu */
+        .top-menu {
+            flex: 0 0 var(--top-menu-height);
+            background: #1e1e1e;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+            z-index: 300;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #fff;
+            text-decoration: none;
+        }
+        
+        .brand-name {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        .brand-subtitle {
+            font-size: 0.65rem;
+            color: #888;
+            margin-left: 0.5rem;
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        /* ============================================================
+         * SIDEBAR
+         * ============================================================ */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .sidebar-section {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #313244;
+        }
+        
+        .sidebar-section-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6c7086;
+            padding: 0.5rem 1rem;
+        }
+        
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.625rem 1rem;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+        
+        .sidebar-item:hover {
+            background: var(--sidebar-hover);
+        }
+        
+        .sidebar-item.active {
+            background: var(--sidebar-active);
+            color: #fff;
+            border-left: 3px solid var(--quality-primary);
+        }
+        
+        .sidebar-item i {
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-item.active i {
+            color: var(--quality-primary-light);
+        }
+        
+        /* ============================================================
+         * CONTENT AREA
+         * ============================================================ */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--content-bg);
+            overflow: hidden;
+        }
+        
+        /* ============================================================
+         * ACTION BAR
+         * ============================================================ */
+        .action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1.5rem;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border-color);
+            gap: 1rem;
+        }
+        
+        .action-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .action-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        /* Refactoring Dropdown */
+        .dropdown {
+            position: relative;
+        }
+        
+        .dropdown-trigger {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+        
+        .dropdown-trigger:hover {
+            border-color: var(--quality-primary);
+            background: var(--quality-bg);
+        }
+        
+        .dropdown-trigger i {
+            font-size: 0.75rem;
+            transition: transform 0.2s;
+        }
+        
+        .dropdown:hover .dropdown-trigger i.bi-chevron-down {
+            transform: rotate(180deg);
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 4px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+            min-width: 280px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+        
+        .dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .dropdown-item:first-child {
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .dropdown-item:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .dropdown-item:hover {
+            background: var(--quality-bg);
+            color: var(--quality-primary-dark);
+        }
+        
+        .dropdown-item i {
+            font-size: 1rem;
+            width: 20px;
+            color: var(--text-muted);
+        }
+        
+        .dropdown-item:hover i {
+            color: var(--quality-primary);
+        }
+        
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 0.25rem 0;
+        }
+        
+        /* Evaluate Button */
+        .btn-evaluate {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.25rem;
+            background: var(--quality-primary);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+        
+        .btn-evaluate:hover {
+            background: var(--quality-primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+        }
+        
+        .btn-evaluate i {
+            font-size: 1rem;
+        }
+        
+        /* ============================================================
+         * VERSION TIMELINE
+         * ============================================================ */
+        .version-timeline {
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            gap: 0;
+        }
+        
+        .version-tab {
+            position: relative;
+            padding: 0.875rem 1.25rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+            border: none;
+            background: none;
+            font-family: inherit;
+        }
+        
+        .version-tab:hover {
+            color: var(--text-primary);
+            background: #f8fafc;
+        }
+        
+        .version-tab.active {
+            color: var(--quality-primary);
+            font-weight: 600;
+        }
+        
+        .version-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--quality-primary);
+            border-radius: 2px 2px 0 0;
+        }
+        
+        .version-tab .version-date {
+            font-size: 0.6875rem;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 2px;
+        }
+        
+        .version-tab.active .version-date {
+            color: var(--quality-primary-light);
+        }
+        
+        /* ============================================================
+         * MARKDOWN PREVIEW
+         * ============================================================ */
+        .markdown-preview {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem 3rem;
+            background: #fff;
+        }
+        
+        .markdown-content {
+            max-width: 900px;
+            margin: 0 auto;
+            font-size: 0.9375rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+        }
+        
+        .markdown-content h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .markdown-content h1 .status-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            background: linear-gradient(135deg, var(--status-good), #16a34a);
+            color: #fff;
+        }
+        
+        .markdown-content h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            color: #334155;
+        }
+        
+        .markdown-content h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #475569;
+        }
+        
+        .markdown-content p {
+            margin-bottom: 1rem;
+        }
+        
+        .markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.875rem;
+        }
+        
+        .markdown-content th {
+            background: #f8fafc;
+            font-weight: 600;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .markdown-content td {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .markdown-content tr:hover td {
+            background: #fafafa;
+        }
+        
+        /* Quality Metrics Card */
+        .quality-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+        
+        .metric-card.good {
+            border-color: var(--status-good);
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        }
+        
+        .metric-card.warn {
+            border-color: var(--status-warn);
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        }
+        
+        .metric-card.bad {
+            border-color: var(--status-bad);
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .metric-card.good .metric-value { color: var(--status-good); }
+        .metric-card.warn .metric-value { color: var(--status-warn); }
+        .metric-card.bad .metric-value { color: var(--status-bad); }
+        
+        .metric-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+        
+        /* Gap List */
+        .gap-list {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+        
+        .gap-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            background: #fafafa;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid var(--status-warn);
+        }
+        
+        .gap-item.critical {
+            border-left-color: var(--status-bad);
+            background: #fef2f2;
+        }
+        
+        .gap-item i {
+            font-size: 1rem;
+            margin-top: 2px;
+        }
+        
+        .gap-item.critical i { color: var(--status-bad); }
+        .gap-item i { color: var(--status-warn); }
+        
+        .gap-content {
+            flex: 1;
+        }
+        
+        .gap-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .gap-desc {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Code block */
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        /* ============================================================
+         * EMPTY STATE
+         * ============================================================ */
+        .empty-state {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            text-align: center;
+        }
+        
+        .empty-state.active {
+            display: flex;
+        }
+        
+        .empty-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--quality-bg) 0%, #ccfbf1 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .empty-icon i {
+            font-size: 3rem;
+            color: var(--quality-primary);
+        }
+        
+        .empty-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-desc {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            max-width: 400px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn-empty-action {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--quality-primary);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        
+        .btn-empty-action:hover {
+            background: var(--quality-primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(13, 148, 136, 0.3);
+        }
+        
+        /* ============================================================
+         * CONSOLE SIMULATION (for demo)
+         * ============================================================ */
+        .console-overlay {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 300px;
+            background: #1e1e1e;
+            border-top: 1px solid #333;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 400;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .console-overlay.open {
+            transform: translateY(0);
+        }
+        
+        .console-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: #252526;
+            border-bottom: 1px solid #333;
+        }
+        
+        .console-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .console-close {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+        
+        .console-close:hover {
+            color: #fff;
+        }
+        
+        .console-content {
+            flex: 1;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            color: #ccc;
+            overflow-y: auto;
+        }
+        
+        .console-prompt {
+            color: var(--quality-primary-light);
+        }
+        
+        .console-input {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: #252526;
+            border-top: 1px solid #333;
+        }
+        
+        .console-input input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            outline: none;
+        }
+        
+        .console-input .send-btn {
+            background: var(--quality-primary);
+            border: none;
+            color: #fff;
+            padding: 0.375rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        
+        /* ============================================================
+         * VIEW TOGGLE (for mockup demo)
+         * ============================================================ */
+        .view-toggle {
+            position: fixed;
+            top: 50px;
+            right: 20px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 500;
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .view-toggle-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: none;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-family: inherit;
+        }
+        
+        .view-toggle-btn.active {
+            background: var(--quality-primary);
+            color: #fff;
+        }
+        
+        /* Content states */
+        .content-with-data {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .content-with-data.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- View Toggle for Demo -->
+    <div class="view-toggle">
+        <button class="view-toggle-btn active" onclick="showView('with-data')">With Evaluation</button>
+        <button class="view-toggle-btn" onclick="showView('empty')">Empty State</button>
+    </div>
+    
+    <div class="page-root">
+        <!-- Top Menu -->
+        <header class="top-menu">
+            <a href="#" class="brand">
+                <span class="brand-name">X-IPE</span>
+                <span class="brand-subtitle">Intelligent Project Environment</span>
+            </a>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Workplace</div>
+                    <div class="sidebar-item">
+                        <i class="bi bi-lightbulb"></i>
+                        <span>Ideas</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>Requirements</span>
+                    </div>
+                    <div class="sidebar-item active">
+                        <i class="bi bi-clipboard-check"></i>
+                        <span>Project Quality Evaluation</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <i class="bi bi-activity"></i>
+                        <span>Tracing</span>
+                    </div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Planning</div>
+                    <div class="sidebar-item">
+                        <i class="bi bi-kanban"></i>
+                        <span>Task Board</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <i class="bi bi-list-check"></i>
+                        <span>Features</span>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- With Data View -->
+                <div class="content-with-data" id="view-with-data">
+                    <!-- Action Bar -->
+                    <div class="action-bar">
+                        <div class="action-bar-left">
+                            <!-- Empty - version timeline below serves as left content -->
+                        </div>
+                        
+                        <div class="action-bar-right">
+                            <!-- Refactoring Dropdown -->
+                            <div class="dropdown">
+                                <button class="dropdown-trigger">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                    Refactoring
+                                    <i class="bi bi-chevron-down"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <button class="dropdown-item" onclick="openConsole('Refactor all gaps identified in project-quality-evaluation.md with reference to its code')">
+                                        <i class="bi bi-arrow-repeat"></i>
+                                        Refactor All
+                                    </button>
+                                    <div class="dropdown-divider"></div>
+                                    <button class="dropdown-item" onclick="openConsole('Refactor requirement gaps identified in project-quality-evaluation.md with reference to its code')">
+                                        <i class="bi bi-file-text"></i>
+                                        Refactor Requirements
+                                    </button>
+                                    <button class="dropdown-item" onclick="openConsole('Refactor feature gaps identified in project-quality-evaluation.md with reference to its code')">
+                                        <i class="bi bi-puzzle"></i>
+                                        Refactor Features
+                                    </button>
+                                    <button class="dropdown-item" onclick="openConsole('Refactor test gaps identified in project-quality-evaluation.md with reference to its code')">
+                                        <i class="bi bi-check2-square"></i>
+                                        Refactor Tests
+                                    </button>
+                                    <div class="dropdown-divider"></div>
+                                    <button class="dropdown-item" onclick="openConsole('Refactor tracing decorator gaps identified in project-quality-evaluation.md with reference to its feature')">
+                                        <i class="bi bi-graph-up"></i>
+                                        Refactor Tracing Decorators + Tests
+                                    </button>
+                                    <button class="dropdown-item" onclick="openConsole('Refactor code gaps identified in project-quality-evaluation.md with reference to its feature')">
+                                        <i class="bi bi-code-square"></i>
+                                        Refactor Code + Tests
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <button class="btn-evaluate" onclick="openConsole('Evaluate project quality and generate report to x-ipe-docs/quality-evaluation/project-quality-evaluation.md')">
+                                <i class="bi bi-clipboard-check"></i>
+                                Evaluate
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Version Timeline -->
+                    <div class="version-timeline">
+                        <button class="version-tab active">
+                            v5
+                            <span class="version-date">Feb 1</span>
+                        </button>
+                        <button class="version-tab">
+                            v4
+                            <span class="version-date">Jan 31</span>
+                        </button>
+                        <button class="version-tab">
+                            v3
+                            <span class="version-date">Jan 30</span>
+                        </button>
+                        <button class="version-tab">
+                            v2
+                            <span class="version-date">Jan 29</span>
+                        </button>
+                        <button class="version-tab">
+                            v1
+                            <span class="version-date">Jan 28</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Markdown Preview -->
+                    <div class="markdown-preview">
+                        <div class="markdown-content">
+                            <h1>
+                                Project Quality Evaluation
+                                <span class="status-badge">86% Healthy</span>
+                            </h1>
+                            <p style="color: var(--text-secondary); font-size: 0.875rem;">
+                                Generated on February 1, 2026 at 09:30 AM • v5
+                            </p>
+                            
+                            <h2>📊 Quality Metrics</h2>
+                            <div class="quality-metrics">
+                                <div class="metric-card good">
+                                    <div class="metric-value">92%</div>
+                                    <div class="metric-label">Requirements</div>
+                                </div>
+                                <div class="metric-card good">
+                                    <div class="metric-value">88%</div>
+                                    <div class="metric-label">Features</div>
+                                </div>
+                                <div class="metric-card warn">
+                                    <div class="metric-value">78%</div>
+                                    <div class="metric-label">Test Coverage</div>
+                                </div>
+                                <div class="metric-card good">
+                                    <div class="metric-value">85%</div>
+                                    <div class="metric-label">Tracing</div>
+                                </div>
+                            </div>
+                            
+                            <h2>🔍 Identified Gaps</h2>
+                            
+                            <h3>Requirements Gaps</h3>
+                            <ul class="gap-list">
+                                <li class="gap-item">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    <div class="gap-content">
+                                        <div class="gap-title">FEATURE-024 missing acceptance criteria</div>
+                                        <div class="gap-desc">No acceptance criteria defined for Browser Simulator feature.</div>
+                                    </div>
+                                </li>
+                            </ul>
+                            
+                            <h3>Test Gaps</h3>
+                            <ul class="gap-list">
+                                <li class="gap-item critical">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    <div class="gap-content">
+                                        <div class="gap-title">Low test coverage in proxy_service.py</div>
+                                        <div class="gap-desc">Only 45% line coverage. Critical authentication paths untested.</div>
+                                    </div>
+                                </li>
+                                <li class="gap-item">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    <div class="gap-content">
+                                        <div class="gap-title">Missing integration tests for tracing module</div>
+                                        <div class="gap-desc">Unit tests exist but no integration tests for trace export.</div>
+                                    </div>
+                                </li>
+                            </ul>
+                            
+                            <h3>Tracing Gaps</h3>
+                            <ul class="gap-list">
+                                <li class="gap-item">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    <div class="gap-content">
+                                        <div class="gap-title">Missing @trace decorator on 3 route handlers</div>
+                                        <div class="gap-desc">ideas_routes.py: create_folder, rename_item, delete_item</div>
+                                    </div>
+                                </li>
+                            </ul>
+                            
+                            <h2>📋 Summary</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Total Items</th>
+                                        <th>Aligned</th>
+                                        <th>Gaps</th>
+                                        <th>Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Requirements</td>
+                                        <td>24</td>
+                                        <td>22</td>
+                                        <td>2</td>
+                                        <td>92%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Features</td>
+                                        <td>18</td>
+                                        <td>16</td>
+                                        <td>2</td>
+                                        <td>88%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tests</td>
+                                        <td>156</td>
+                                        <td>122</td>
+                                        <td>34</td>
+                                        <td>78%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tracing</td>
+                                        <td>47</td>
+                                        <td>40</td>
+                                        <td>7</td>
+                                        <td>85%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <h2>🛠️ Recommended Actions</h2>
+                            <div class="code-block">
+                                <span style="color: #888;"># Priority 1: Fix critical test coverage</span><br>
+                                copilot "Refactor test gaps in project-quality-evaluation.md"<br><br>
+                                <span style="color: #888;"># Priority 2: Add missing tracing</span><br>
+                                copilot "Refactor tracing decorator gaps in project-quality-evaluation.md"
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Empty State View -->
+                <div class="empty-state" id="view-empty">
+                    <div class="empty-icon">
+                        <i class="bi bi-clipboard-check"></i>
+                    </div>
+                    <div class="empty-title">No Evaluation Yet</div>
+                    <div class="empty-desc">
+                        Run your first project quality evaluation to identify gaps in requirements, features, tests, and tracing.
+                    </div>
+                    <button class="btn-empty-action" onclick="openConsole('Evaluate project quality and generate report to x-ipe-docs/quality-evaluation/project-quality-evaluation.md')">
+                        <i class="bi bi-clipboard-check"></i>
+                        Evaluate Project Quality
+                    </button>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Console Overlay -->
+        <div class="console-overlay" id="console">
+            <div class="console-header">
+                <span class="console-title">Copilot Console</span>
+                <button class="console-close" onclick="closeConsole()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="console-content">
+                <span class="console-prompt">→</span> <span id="console-command"></span>
+                <div style="margin-top: 1rem; color: #888;">
+                    Waiting for Copilot response...
+                </div>
+            </div>
+            <div class="console-input">
+                <span style="color: var(--quality-primary-light);">$</span>
+                <input type="text" placeholder="Type your command..." readonly>
+                <button class="send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showView(view) {
+            const withData = document.getElementById('view-with-data');
+            const empty = document.getElementById('view-empty');
+            const buttons = document.querySelectorAll('.view-toggle-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            if (view === 'with-data') {
+                withData.classList.remove('hidden');
+                empty.classList.remove('active');
+                buttons[0].classList.add('active');
+            } else {
+                withData.classList.add('hidden');
+                empty.classList.add('active');
+                buttons[1].classList.add('active');
+            }
+        }
+        
+        function openConsole(command) {
+            document.getElementById('console-command').textContent = command;
+            document.getElementById('console').classList.add('open');
+        }
+        
+        function closeConsole() {
+            document.getElementById('console').classList.remove('open');
+        }
+        
+        // Close console on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeConsole();
+            }
+        });
+    </script>
+</body>
+</html>

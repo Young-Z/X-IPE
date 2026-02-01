@@ -131,10 +131,23 @@ def _init_services(app):
     if not app.config.get('TESTING'):
         project_root = app.config.get('PROJECT_ROOT', '.')
         from x_ipe.services.uiux_feedback_service import UiuxFeedbackService
+        
+        # Read retention days from tools.json (default 7)
+        retention_days = 7
+        tools_json_path = Path(project_root) / 'x-ipe-docs' / 'config' / 'tools.json'
+        if tools_json_path.exists():
+            try:
+                import json
+                with open(tools_json_path) as f:
+                    tools_config = json.load(f)
+                    retention_days = tools_config.get('feedback_retention_days', 7)
+            except (json.JSONDecodeError, IOError):
+                pass
+        
         feedback_service = UiuxFeedbackService(project_root)
-        deleted = feedback_service.cleanup_old_feedback(days=7)
+        deleted = feedback_service.cleanup_old_feedback(days=retention_days)
         if deleted > 0:
-            print(f"[X-IPE] Cleaned up {deleted} old feedback entries")
+            print(f"[X-IPE] Cleaned up {deleted} old feedback entries (retention: {retention_days} days)")
 
 
 def _register_blueprints(app):
@@ -142,6 +155,7 @@ def _register_blueprints(app):
     from x_ipe.routes import main_bp, settings_bp, project_bp, ideas_bp, tools_bp, proxy_bp
     from x_ipe.routes.uiux_feedback_routes import uiux_feedback_bp
     from x_ipe.routes.tracing_routes import tracing_bp
+    from x_ipe.routes.quality_evaluation_routes import quality_evaluation_bp
     
     app.register_blueprint(main_bp)
     app.register_blueprint(settings_bp)
@@ -151,6 +165,7 @@ def _register_blueprints(app):
     app.register_blueprint(proxy_bp)
     app.register_blueprint(uiux_feedback_bp)
     app.register_blueprint(tracing_bp)
+    app.register_blueprint(quality_evaluation_bp)
 
 
 def _register_handlers():

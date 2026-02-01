@@ -8,4 +8,5 @@
 |------|------|------------------|-------|
 | 1 | [Part 1](requirement-details-part-1.md) | FEATURE-001 to FEATURE-011 | ~420 |
 | 2 | [Part 2](requirement-details-part-2.md) | FEATURE-012 to FEATURE-020 | ~611 |
-| 3 | [Part 3](requirement-details-part-3.md) | FEATURE-021, FEATURE-022-A to D, FEATURE-023 | ~552 |
+| 3 | [Part 3](requirement-details-part-3.md) | FEATURE-021, FEATURE-022-A to D, FEATURE-023 | ~667 |
+| 4 | [Part 4](requirement-details-part-4.md) | FEATURE-024 | ~230 |

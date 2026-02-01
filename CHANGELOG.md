@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-024: Project Quality Evaluation UI**
+  - Quality evaluation view integrated into Workplace sidebar with clipboard-check icon
+  - Action bar with Evaluate button and Refactoring dropdown (hover-triggered)
+  - Version timeline showing up to 5 historical evaluation versions (newest on left)
+  - Markdown preview with styled rendering (tables, lists, code blocks)
+  - Empty state UI with CTA when no evaluation exists
+  - 2 new REST API endpoints: `/api/quality-evaluation/status`, `/api/quality-evaluation/content`
+  - Config v2.0 structure: `copilot-prompt.json` with `ideation` and `evaluation` sections
+  - 6 refactoring options configurable via JSON
+  - Console integration for command execution
+  - Tracing decorators on all API routes
+  - CSS styles in quality-evaluation.css (~250 lines)
+  - JavaScript module in quality-evaluation.js (~370 lines)
+  - 28 tests validating quality evaluation functionality
+
 - **FEATURE-023-B: Tracing Dashboard UI**
   - Dashboard view integrated into Workplace sidebar with graph icon
   - Duration toggle buttons (3/15/30 minutes) to start tracing sessions

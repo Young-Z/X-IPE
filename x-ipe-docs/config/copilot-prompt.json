@@ -1,26 +1,74 @@
 {
-  "version": "1.0",
-  "prompts": [
-    {
-      "id": "generate-architecture",
-      "label": "Generate Architecture",
-      "icon": "bi-diagram-3",
-      "command": "Base on <current-idea-file> to generate layered architecture"
+  "version": "2.0",
+  "ideation": {
+    "prompts": [
+      {
+        "id": "generate-architecture",
+        "label": "Generate Architecture",
+        "icon": "bi-diagram-3",
+        "command": "Base on <current-idea-file> to generate layered architecture"
+      },
+      {
+        "id": "generate-mockup",
+        "label": "Generate Mockup",
+        "icon": "bi-palette",
+        "command": "Base on <current-idea-file> to generate mockups"
+      },
+      {
+        "id": "free-question",
+        "label": "Free Collaboration",
+        "icon": "bi-chat-dots",
+        "command": "Let's base on <current-idea-file> to collaborate, wait for my instructions."
+      }
+    ]
+  },
+  "evaluation": {
+    "evaluate": {
+      "label": "Evaluate Project Quality",
+      "icon": "bi-clipboard-check",
+      "command": "Evaluate project quality and generate report to <evaluation-file>"
     },
-    {
-      "id": "generate-mockup",
-      "label": "Generate Mockup",
-      "icon": "bi-palette",
-      "command": "Base on <current-idea-file> to generate mockups"
-    },
-    {
-      "id": "free-question",
-      "label": "Free Collaboration",
-      "icon": "bi-chat-dots",
-      "command": "Let's base on <current-idea-file> to collaborate, wait for my instructions."
-    }
-  ],
+    "refactoring": [
+      {
+        "id": "refactor-all",
+        "label": "Refactor All",
+        "icon": "bi-arrow-repeat",
+        "command": "Refactor all with reference to its code"
+      },
+      {
+        "id": "refactor-requirements",
+        "label": "Refactor Requirements",
+        "icon": "bi-file-text",
+        "command": "Refactor requirements with reference to its code"
+      },
+      {
+        "id": "refactor-features",
+        "label": "Refactor Features",
+        "icon": "bi-list-check",
+        "command": "Refactor features with reference to its code"
+      },
+      {
+        "id": "refactor-tests",
+        "label": "Refactor Tests",
+        "icon": "bi-bug",
+        "command": "Refactor tests with reference to its code"
+      },
+      {
+        "id": "refactor-tracing-tests",
+        "label": "Refactor Tracing + Tests",
+        "icon": "bi-graph-up",
+        "command": "Refactor tracing decorators and tests with reference to its feature"
+      },
+      {
+        "id": "refactor-code-tests",
+        "label": "Refactor Code + Tests",
+        "icon": "bi-code-slash",
+        "command": "Refactor code and tests with reference to its feature"
+      }
+    ]
+  },
   "placeholder": {
-    "current-idea-file": "Replaced with currently open file path"
+    "current-idea-file": "Replaced with currently open file path",
+    "evaluation-file": "x-ipe-docs/quality-evaluation/project-quality-evaluation.md"
   }
 }
