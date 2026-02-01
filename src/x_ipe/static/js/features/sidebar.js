@@ -243,6 +243,7 @@ class ProjectSidebar {
         const hasChildren = section.children && section.children.length > 0;
         
         // CR-004: Special handling for Workplace section - show submenu with Ideation and UIUX Feedbacks
+        // FEATURE-023-B: Added Tracing submenu item
         if (section.id === 'workplace') {
             return `
                 <div class="nav-section" data-section-id="${section.id}">
@@ -259,6 +260,10 @@ class ProjectSidebar {
                         <div class="nav-section-header sidebar-child nav-uiux-feedbacks" data-section-id="uiux-feedbacks">
                             <i class="bi bi-chat-square-text"></i>
                             <span>UIUX Feedbacks</span>
+                        </div>
+                        <div class="nav-section-header sidebar-child nav-tracing" data-section-id="tracing">
+                            <i class="bi bi-graph-up"></i>
+                            <span>Tracing</span>
                         </div>
                     </div>
                 </div>
@@ -501,6 +506,47 @@ class ProjectSidebar {
                 const container = document.getElementById('content-body');
                 if (window.uiuxFeedbackManager) {
                     window.uiuxFeedbackManager.render(container);
+                }
+            });
+        }
+        
+        // FEATURE-023-B: Tracing click handler - render Tracing Dashboard in content area
+        const tracingHeader = this.container.querySelector('.nav-tracing');
+        if (tracingHeader) {
+            tracingHeader.addEventListener('click', () => {
+                // Clear file selection
+                fileItems.forEach(f => f.classList.remove('active'));
+                this.selectedFile = null;
+                
+                // Update sidebar-child active state
+                const sidebarChildren = this.container.querySelectorAll('.sidebar-child');
+                sidebarChildren.forEach(child => child.classList.remove('active'));
+                tracingHeader.classList.add('active');
+                
+                // Clear contentRenderer.currentPath to prevent auto-refresh
+                if (window.contentRenderer) {
+                    window.contentRenderer.currentPath = null;
+                }
+                
+                // Hide Create Idea button
+                const createIdeaBtn = document.getElementById('btn-create-idea');
+                if (createIdeaBtn) {
+                    createIdeaBtn.classList.add('d-none');
+                }
+                
+                // Update breadcrumb
+                const breadcrumb = document.getElementById('breadcrumb');
+                breadcrumb.innerHTML = '<li class="breadcrumb-item active">Tracing</li>';
+                
+                // Render Tracing Dashboard in content area
+                const container = document.getElementById('content-body');
+                if (window.TracingDashboard) {
+                    // Clean up any existing dashboard
+                    if (window._tracingDashboardInstance) {
+                        window._tracingDashboardInstance.destroy();
+                    }
+                    window._tracingDashboardInstance = new window.TracingDashboard(container);
+                    window._tracingDashboardInstance.init();
                 }
             });
         }
