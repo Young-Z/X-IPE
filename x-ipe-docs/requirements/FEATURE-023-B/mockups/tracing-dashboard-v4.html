@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-IPE Application Action Tracing</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@antv/g6@4.8.24/dist/g6.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --bg-elevated: #ffffff;
+            --bg-hover: #e2e8f0;
+            
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            
+            --status-success: #10b981;
+            --status-success-light: #d1fae5;
+            --status-error: #ef4444;
+            --status-error-light: #fee2e2;
+            --status-warning: #f59e0b;
+            --status-warning-light: #fef3c7;
+            --status-processing: #3b82f6;
+            --status-processing-light: #dbeafe;
+            
+            --accent-primary: #6366f1;
+            --accent-secondary: #818cf8;
+            --accent-light: #e0e7ff;
+            
+            --border-subtle: #e2e8f0;
+            --border-default: #cbd5e1;
+            
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            
+            --timing-fast: 150ms;
+            --timing-normal: 250ms;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            height: 56px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-subtle);
+            flex-shrink: 0;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        /* Tracing Duration Toggle */
+        .tracing-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .tracing-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .duration-toggle {
+            display: flex;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 3px;
+            gap: 2px;
+        }
+        
+        .duration-option {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all var(--timing-fast);
+        }
+        
+        .duration-option:hover {
+            color: var(--text-secondary);
+        }
+        
+        .duration-option.active {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        /* Countdown Timer */
+        .countdown-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: var(--status-success-light);
+            border: 1px solid var(--status-success);
+            border-radius: 8px;
+            transition: all var(--timing-normal);
+        }
+        
+        .countdown-container.inactive {
+            background: var(--bg-tertiary);
+            border-color: var(--border-subtle);
+        }
+        
+        .countdown-container.warning {
+            background: var(--status-warning-light);
+            border-color: var(--status-warning);
+        }
+        
+        .countdown-icon {
+            width: 16px;
+            height: 16px;
+            color: var(--status-success);
+            animation: pulse 2s infinite;
+        }
+        
+        .countdown-container.inactive .countdown-icon {
+            color: var(--text-muted);
+            animation: none;
+        }
+        
+        .countdown-container.warning .countdown-icon {
+            color: var(--status-warning);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .countdown-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--status-success);
+            min-width: 50px;
+        }
+        
+        .countdown-container.inactive .countdown-text {
+            color: var(--text-muted);
+        }
+        
+        .countdown-container.warning .countdown-text {
+            color: var(--status-warning);
+        }
+        
+        .countdown-label {
+            font-size: 11px;
+            color: var(--status-success);
+            font-weight: 500;
+        }
+        
+        .countdown-container.inactive .countdown-label {
+            color: var(--text-muted);
+        }
+        
+        .countdown-container.warning .countdown-label {
+            color: var(--status-warning);
+        }
+        
+        /* Stop Button */
+        .stop-btn {
+            padding: 6px 12px;
+            background: var(--status-error-light);
+            border: 1px solid var(--status-error);
+            border-radius: 6px;
+            color: var(--status-error);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--timing-fast);
+        }
+        
+        .stop-btn:hover {
+            background: var(--status-error);
+            color: white;
+        }
+        
+        .stop-btn.hidden {
+            display: none;
+        }
+        
+        /* Icon Buttons */
+        .icon-btn {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--timing-fast);
+        }
+        
+        .icon-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--border-default);
+        }
+        
+        .icon-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 340px;
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        .sidebar-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: inherit;
+            transition: all var(--timing-fast);
+        }
+        
+        .search-box input::placeholder { color: var(--text-muted); }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+        
+        .search-box svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            color: var(--text-muted);
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        .filter-chip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--timing-fast);
+        }
+        
+        .filter-chip:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-default);
+        }
+        
+        .filter-chip.active {
+            background: var(--accent-light);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+        
+        .filter-chip .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        
+        .filter-chip .dot.success { background: var(--status-success); }
+        .filter-chip .dot.error { background: var(--status-error); }
+        .filter-chip .dot.processing { background: var(--status-processing); }
+        
+        /* Trace List */
+        .trace-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        
+        .trace-item {
+            padding: 12px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all var(--timing-fast);
+            position: relative;
+        }
+        
+        .trace-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            border-radius: 10px 0 0 10px;
+            opacity: 0;
+            transition: opacity var(--timing-fast);
+        }
+        
+        .trace-item.success::before { background: var(--status-success); }
+        .trace-item.error::before { background: var(--status-error); }
+        .trace-item.processing::before { background: var(--status-processing); }
+        
+        .trace-item:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-default);
+        }
+        
+        .trace-item:hover::before,
+        .trace-item.active::before {
+            opacity: 1;
+        }
+        
+        .trace-item.active {
+            background: var(--accent-light);
+            border-color: var(--accent-primary);
+        }
+        
+        .trace-id-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .trace-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            background: var(--bg-tertiary);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        
+        .trace-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .trace-status-dot.success { background: var(--status-success); }
+        .trace-status-dot.error { background: var(--status-error); }
+        .trace-status-dot.processing { 
+            background: var(--status-processing);
+            animation: pulse 2s infinite;
+        }
+        
+        .trace-entry-api {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        
+        .method-badge {
+            padding: 2px 6px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--status-processing);
+        }
+        
+        .method-badge.post { color: var(--status-success); }
+        .method-badge.delete { color: var(--status-error); }
+        .method-badge.put { color: var(--status-warning); }
+        
+        .trace-path {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-primary);
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .trace-nested {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+        
+        .trace-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .trace-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .trace-meta svg {
+            width: 11px;
+            height: 11px;
+        }
+        
+        /* ===== DETAIL PANEL ===== */
+        .detail-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-secondary);
+            overflow: hidden;
+        }
+        
+        .detail-header {
+            padding: 16px 20px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        .detail-title-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .detail-badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .detail-badge.success {
+            background: var(--status-success-light);
+            color: var(--status-success);
+        }
+        
+        .detail-badge.error {
+            background: var(--status-error-light);
+            color: var(--status-error);
+        }
+        
+        .detail-stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .stat-value {
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        /* Diagram Container */
+        .diagram-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #traceGraph {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+        
+        #traceGraph:active { cursor: grabbing; }
+        
+        /* Zoom Controls */
+        .zoom-controls {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 4px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .zoom-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--timing-fast);
+        }
+        
+        .zoom-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .zoom-btn svg { width: 16px; height: 16px; }
+        
+        .zoom-divider {
+            height: 1px;
+            background: var(--border-subtle);
+            margin: 2px 4px;
+        }
+        
+        /* Legend */
+        .diagram-legend {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            display: flex;
+            gap: 16px;
+            padding: 10px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            font-size: 11px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+        }
+        
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .legend-dot.success { background: var(--status-success); }
+        .legend-dot.error { background: var(--status-error); }
+        
+        .help-text {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        /* ===== NODE DETAIL MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--timing-normal);
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            box-shadow: var(--shadow-xl);
+            width: 90%;
+            max-width: 640px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.95) translateY(10px);
+            transition: transform var(--timing-normal);
+            overflow: hidden;
+        }
+        
+        .modal-overlay.active .modal {
+            transform: scale(1) translateY(0);
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-subtle);
+            flex-shrink: 0;
+        }
+        
+        .modal-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .modal-title h3 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .modal-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .modal-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .modal-status-dot.success { background: var(--status-success); }
+        .modal-status-dot.error { background: var(--status-error); }
+        
+        .modal-latency {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border: none;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--timing-fast);
+        }
+        
+        .modal-close:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+        
+        .modal-close svg { width: 18px; height: 18px; }
+        
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+        
+        .modal-section {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        .modal-section:last-child { border-bottom: none; }
+        
+        .modal-section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .modal-section-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+        
+        .modal-section-icon svg { width: 16px; height: 16px; }
+        
+        .modal-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        
+        .code-block {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .code-block pre {
+            padding: 16px;
+            margin: 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .code-block .key { color: var(--accent-primary); }
+        .code-block .string { color: var(--status-success); }
+        .code-block .number { color: var(--status-warning); }
+        .code-block .boolean { color: var(--status-processing); }
+        .code-block .null { color: var(--text-muted); }
+        
+        .modal-section.error {
+            background: var(--status-error-light);
+        }
+        
+        .modal-section.error .modal-section-icon { color: var(--status-error); }
+        .modal-section.error .modal-section-title { color: var(--status-error); }
+        
+        .error-block {
+            background: var(--bg-primary);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .error-message {
+            padding: 16px;
+            border-bottom: 1px solid rgba(239, 68, 68, 0.1);
+        }
+        
+        .error-type {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--status-error);
+            margin-bottom: 6px;
+        }
+        
+        .error-text {
+            font-size: 13px;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+        
+        .error-stack {
+            padding: 16px;
+            background: var(--bg-tertiary);
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        
+        .error-stack-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-bottom: 10px;
+        }
+        
+        .stack-line {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-secondary);
+            padding: 4px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        .stack-line:last-child { border-bottom: none; }
+        
+        .stack-line:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+            margin: 0 -16px;
+            padding: 4px 16px;
+        }
+        
+        .stack-file { color: var(--accent-primary); }
+        .stack-func { color: var(--status-warning); }
+        
+        .no-error {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px;
+            background: var(--status-success-light);
+            border-radius: 10px;
+            color: var(--status-success);
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .no-error svg { width: 18px; height: 18px; }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-tertiary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header with Duration Toggle & Countdown -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <div class="logo-icon">X</div>
+                    <span>Action Tracing</span>
+                </div>
+            </div>
+            <div class="header-controls">
+                <div class="tracing-control">
+                    <!-- Countdown Timer (left side) -->
+                    <div class="countdown-container inactive" id="countdownContainer">
+                        <svg class="countdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                        <span class="countdown-text" id="countdownText">--:--</span>
+                        <span class="countdown-label" id="countdownLabel">Inactive</span>
+                    </div>
+                    
+                    <button class="stop-btn hidden" id="stopBtn">Stop</button>
+                    
+                    <span class="tracing-label">Start Tracing</span>
+                    <div class="duration-toggle">
+                        <button class="duration-option" data-minutes="3">3 min</button>
+                        <button class="duration-option" data-minutes="15">15 min</button>
+                        <button class="duration-option" data-minutes="30">30 min</button>
+                    </div>
+                </div>
+                
+                <button class="icon-btn" title="Configuration">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                    </svg>
+                </button>
+                <button class="icon-btn" title="Ignored APIs">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M4.93 4.93l14.14 14.14"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-title">Traces</div>
+                    <div class="search-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                        <input type="text" placeholder="Search by trace ID or path...">
+                    </div>
+                </div>
+                
+                <div class="filter-row">
+                    <button class="filter-chip active">
+                        <span class="dot success"></span>
+                        Success
+                    </button>
+                    <button class="filter-chip">
+                        <span class="dot error"></span>
+                        Error
+                    </button>
+                    <button class="filter-chip">
+                        <span class="dot processing"></span>
+                        Active
+                    </button>
+                </div>
+                
+                <div class="trace-list">
+                    <div class="trace-item success active">
+                        <div class="trace-id-row">
+                            <span class="trace-id">550e8400-e29b</span>
+                            <div class="trace-status-dot success"></div>
+                        </div>
+                        <div class="trace-entry-api">
+                            <span class="method-badge post">POST</span>
+                            <span class="trace-path">/api/orders</span>
+                            <span class="trace-nested">+4 calls</span>
+                        </div>
+                        <div class="trace-meta">
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                287ms
+                            </span>
+                            <span>2 min ago</span>
+                        </div>
+                    </div>
+                    
+                    <div class="trace-item error">
+                        <div class="trace-id-row">
+                            <span class="trace-id">7f3e2a1b-9c4d</span>
+                            <div class="trace-status-dot error"></div>
+                        </div>
+                        <div class="trace-entry-api">
+                            <span class="method-badge post">POST</span>
+                            <span class="trace-path">/api/payments/charge</span>
+                            <span class="trace-nested">+2 calls</span>
+                        </div>
+                        <div class="trace-meta">
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                1.2s
+                            </span>
+                            <span>5 min ago</span>
+                        </div>
+                    </div>
+                    
+                    <div class="trace-item success">
+                        <div class="trace-id-row">
+                            <span class="trace-id">a1b2c3d4-5e6f</span>
+                            <div class="trace-status-dot success"></div>
+                        </div>
+                        <div class="trace-entry-api">
+                            <span class="method-badge">GET</span>
+                            <span class="trace-path">/api/users/profile</span>
+                            <span class="trace-nested">+1 call</span>
+                        </div>
+                        <div class="trace-meta">
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                45ms
+                            </span>
+                            <span>8 min ago</span>
+                        </div>
+                    </div>
+                    
+                    <div class="trace-item processing">
+                        <div class="trace-id-row">
+                            <span class="trace-id">x9y8z7w6-v5u4</span>
+                            <div class="trace-status-dot processing"></div>
+                        </div>
+                        <div class="trace-entry-api">
+                            <span class="method-badge put">PUT</span>
+                            <span class="trace-path">/api/inventory/sync</span>
+                            <span class="trace-nested">+6 calls</span>
+                        </div>
+                        <div class="trace-meta">
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                --
+                            </span>
+                            <span>now</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- Detail Panel -->
+            <section class="detail-panel">
+                <div class="detail-header">
+                    <div class="detail-title-row">
+                        <span class="trace-id" style="font-size: 12px;">550e8400-e29b-41d4-a716</span>
+                        <span class="detail-badge success">SUCCESS</span>
+                    </div>
+                    <div class="detail-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Entry:</span>
+                            <span class="stat-value">POST /api/orders</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total:</span>
+                            <span class="stat-value">287ms</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Functions:</span>
+                            <span class="stat-value">5</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Time:</span>
+                            <span class="stat-value">14:32:05</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="diagram-container">
+                    <div id="traceGraph"></div>
+                    
+                    <div class="help-text">
+                        Scroll to zoom • Drag to pan • Click node to see details
+                    </div>
+                    
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" id="zoomIn" title="Zoom In">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/>
+                            </svg>
+                        </button>
+                        <div class="zoom-divider"></div>
+                        <button class="zoom-btn" id="zoomOut" title="Zoom Out">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="M21 21l-4.35-4.35M8 11h6"/>
+                            </svg>
+                        </button>
+                        <div class="zoom-divider"></div>
+                        <button class="zoom-btn" id="zoomFit" title="Fit to View">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="diagram-legend">
+                        <div class="legend-item">
+                            <div class="legend-dot success"></div>
+                            Success
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot error"></div>
+                            Error
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- Node Detail Modal -->
+    <div class="modal-overlay" id="nodeModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <div class="modal-status">
+                        <div class="modal-status-dot success" id="modalStatusDot"></div>
+                    </div>
+                    <h3 id="modalNodeName">validate_order</h3>
+                </div>
+                <div class="modal-latency" id="modalLatency">45ms</div>
+                <button class="modal-close" id="modalClose">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="modal-section">
+                    <div class="modal-section-header">
+                        <div class="modal-section-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                        </div>
+                        <span class="modal-section-title">Input Parameters</span>
+                    </div>
+                    <div class="code-block">
+                        <pre id="modalInput"></pre>
+                    </div>
+                </div>
+                
+                <div class="modal-section">
+                    <div class="modal-section-header">
+                        <div class="modal-section-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                        </div>
+                        <span class="modal-section-title">Output / Return Value</span>
+                    </div>
+                    <div class="code-block">
+                        <pre id="modalOutput"></pre>
+                    </div>
+                </div>
+                
+                <div class="modal-section" id="modalErrorSection">
+                    <div class="modal-section-header">
+                        <div class="modal-section-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                        </div>
+                        <span class="modal-section-title">Errors</span>
+                    </div>
+                    <div class="no-error" id="modalNoError">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        No errors occurred
+                    </div>
+                    <div class="error-block" id="modalErrorBlock" style="display: none;">
+                        <div class="error-message">
+                            <div class="error-type" id="modalErrorType"></div>
+                            <div class="error-text" id="modalErrorText"></div>
+                        </div>
+                        <div class="error-stack">
+                            <div class="error-stack-title">Stack Trace</div>
+                            <div id="modalStackTrace"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ===== TRACING COUNTDOWN TIMER =====
+        
+        // Simulated tools.json storage (in real implementation, this would be API calls)
+        let toolsConfig = {
+            tracing_stop_at: null  // ISO timestamp or null
+        };
+        
+        const countdownContainer = document.getElementById('countdownContainer');
+        const countdownText = document.getElementById('countdownText');
+        const countdownLabel = document.getElementById('countdownLabel');
+        const stopBtn = document.getElementById('stopBtn');
+        const durationOptions = document.querySelectorAll('.duration-option');
+        
+        let countdownInterval = null;
+        
+        // Load config on page load (simulates fetching from tools.json)
+        function loadTracingConfig() {
+            // In real implementation: fetch('/api/config/tools.json')
+            const storedStopAt = localStorage.getItem('tracing_stop_at');
+            if (storedStopAt) {
+                toolsConfig.tracing_stop_at = storedStopAt;
+                const stopTime = new Date(storedStopAt);
+                if (stopTime > new Date()) {
+                    startCountdown(stopTime);
+                } else {
+                    // Expired
+                    stopTracing();
+                }
+            }
+        }
+        
+        // Save config (simulates updating tools.json)
+        function saveTracingConfig() {
+            // In real implementation: PUT /api/config/tools.json
+            localStorage.setItem('tracing_stop_at', toolsConfig.tracing_stop_at || '');
+            console.log('tools.json updated:', { tracing_stop_at: toolsConfig.tracing_stop_at });
+        }
+        
+        // Start tracing for X minutes
+        function startTracing(minutes) {
+            const stopAt = new Date(Date.now() + minutes * 60 * 1000);
+            toolsConfig.tracing_stop_at = stopAt.toISOString();
+            saveTracingConfig();
+            startCountdown(stopAt);
+            
+            // Update button states
+            durationOptions.forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.minutes) === minutes);
+            });
+        }
+        
+        // Stop tracing
+        function stopTracing() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            
+            toolsConfig.tracing_stop_at = null;
+            saveTracingConfig();
+            
+            countdownContainer.className = 'countdown-container inactive';
+            countdownText.textContent = '--:--';
+            countdownLabel.textContent = 'Inactive';
+            stopBtn.classList.add('hidden');
+            
+            durationOptions.forEach(btn => btn.classList.remove('active'));
+        }
+        
+        // Start countdown display
+        function startCountdown(stopTime) {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            stopBtn.classList.remove('hidden');
+            
+            function updateCountdown() {
+                const now = new Date();
+                const diff = stopTime - now;
+                
+                if (diff <= 0) {
+                    stopTracing();
+                    return;
+                }
+                
+                const minutes = Math.floor(diff / 60000);
+                const seconds = Math.floor((diff % 60000) / 1000);
+                
+                countdownText.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                countdownLabel.textContent = 'remaining';
+                
+                // Warning state when < 1 minute
+                if (diff < 60000) {
+                    countdownContainer.className = 'countdown-container warning';
+                } else {
+                    countdownContainer.className = 'countdown-container';
+                }
+            }
+            
+            updateCountdown();
+            countdownInterval = setInterval(updateCountdown, 1000);
+        }
+        
+        // Event listeners
+        durationOptions.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const minutes = parseInt(btn.dataset.minutes);
+                startTracing(minutes);
+            });
+        });
+        
+        stopBtn.addEventListener('click', stopTracing);
+        
+        // Load config on page load
+        loadTracingConfig();
+        
+        // ===== MODAL MANAGEMENT =====
+        
+        const modal = document.getElementById('nodeModal');
+        const modalClose = document.getElementById('modalClose');
+        
+        function openModal(nodeData) {
+            document.getElementById('modalNodeName').textContent = nodeData.label;
+            document.getElementById('modalLatency').textContent = nodeData.timing || '--';
+            
+            const statusDot = document.getElementById('modalStatusDot');
+            statusDot.className = 'modal-status-dot ' + (nodeData.status || 'success');
+            
+            document.getElementById('modalInput').innerHTML = formatJSON(nodeData.input || '{}');
+            document.getElementById('modalOutput').innerHTML = formatJSON(nodeData.output || '{}');
+            
+            const errorSection = document.getElementById('modalErrorSection');
+            const noError = document.getElementById('modalNoError');
+            const errorBlock = document.getElementById('modalErrorBlock');
+            
+            if (nodeData.error) {
+                errorSection.className = 'modal-section error';
+                noError.style.display = 'none';
+                errorBlock.style.display = 'block';
+                document.getElementById('modalErrorType').textContent = nodeData.error.type;
+                document.getElementById('modalErrorText').textContent = nodeData.error.message;
+                
+                const stackHTML = nodeData.error.stack.map(line => 
+                    `<div class="stack-line">at <span class="stack-func">${line.func}</span> (<span class="stack-file">${line.file}</span>)</div>`
+                ).join('');
+                document.getElementById('modalStackTrace').innerHTML = stackHTML;
+            } else {
+                errorSection.className = 'modal-section';
+                noError.style.display = 'flex';
+                errorBlock.style.display = 'none';
+            }
+            
+            modal.classList.add('active');
+        }
+        
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+        
+        function formatJSON(jsonStr) {
+            return jsonStr
+                .replace(/"([^"]+)":/g, '<span class="key">"$1"</span>:')
+                .replace(/: "([^"]+)"/g, ': <span class="string">"$1"</span>')
+                .replace(/: (\d+\.?\d*)/g, ': <span class="number">$1</span>')
+                .replace(/: (true|false)/g, ': <span class="boolean">$1</span>')
+                .replace(/: (null)/g, ': <span class="null">$1</span>');
+        }
+        
+        modalClose.onclick = closeModal;
+        modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+        
+        // ===== G6 GRAPH =====
+        
+        const container = document.getElementById('traceGraph');
+        const width = container.clientWidth || 800;
+        const height = container.clientHeight || 600;
+        
+        G6.registerNode('trace-node', {
+            draw(cfg, group) {
+                const isError = cfg.status === 'error';
+                const statusColor = isError ? '#ef4444' : '#10b981';
+                
+                const rect = group.addShape('rect', {
+                    attrs: {
+                        x: -70, y: -28, width: 140, height: 56,
+                        fill: '#ffffff',
+                        stroke: statusColor,
+                        lineWidth: 2,
+                        radius: 8,
+                        shadowColor: 'rgba(0,0,0,0.08)',
+                        shadowBlur: 8,
+                        shadowOffsetY: 2,
+                        cursor: 'pointer'
+                    },
+                    name: 'node-rect'
+                });
+                
+                group.addShape('circle', {
+                    attrs: { x: -55, y: -12, r: 4, fill: statusColor },
+                    name: 'status-dot'
+                });
+                
+                const levelText = cfg.level || 'INFO';
+                const levelColor = levelText === 'DEBUG' ? '#94a3b8' : '#3b82f6';
+                group.addShape('rect', {
+                    attrs: { x: 20, y: -20, width: 40, height: 16, fill: '#f1f5f9', radius: 3 },
+                    name: 'level-bg'
+                });
+                group.addShape('text', {
+                    attrs: {
+                        x: 40, y: -12, text: levelText,
+                        fontSize: 9, fontWeight: 600, fontFamily: 'JetBrains Mono, monospace',
+                        fill: levelColor, textAlign: 'center', textBaseline: 'middle'
+                    },
+                    name: 'level-text'
+                });
+                
+                group.addShape('text', {
+                    attrs: {
+                        x: 0, y: 2, text: cfg.label,
+                        fontSize: 12, fontWeight: 500, fontFamily: 'JetBrains Mono, monospace',
+                        fill: '#0f172a', textAlign: 'center', textBaseline: 'middle'
+                    },
+                    name: 'name-text'
+                });
+                
+                group.addShape('text', {
+                    attrs: {
+                        x: 0, y: 18, text: cfg.timing || '--',
+                        fontSize: 11, fontWeight: 600, fontFamily: 'JetBrains Mono, monospace',
+                        fill: '#64748b', textAlign: 'center', textBaseline: 'middle'
+                    },
+                    name: 'timing-text'
+                });
+                
+                return rect;
+            },
+            setState(name, value, item) {
+                const group = item.getContainer();
+                const rect = group.find(e => e.get('name') === 'node-rect');
+                if (name === 'hover') {
+                    rect.attr('shadowBlur', value ? 16 : 8);
+                    rect.attr('shadowColor', value ? 'rgba(99, 102, 241, 0.3)' : 'rgba(0,0,0,0.08)');
+                }
+            }
+        }, 'single-node');
+        
+        const data = {
+            nodes: [
+                { id: 'api', label: 'POST /api/orders', timing: '287ms', status: 'success', level: 'API',
+                  input: '{\n  "customer_id": "C001",\n  "items": [\n    { "id": "I1", "qty": 2 },\n    { "id": "I2", "qty": 1 }\n  ]\n}',
+                  output: '{\n  "order_id": "ORD-789",\n  "status": "created"\n}' },
+                { id: 'validate', label: 'validate_order', timing: '45ms', status: 'success', level: 'INFO',
+                  input: '{\n  "order_data": {...}\n}', output: '{\n  "valid": true\n}' },
+                { id: 'inventory', label: 'check_inventory', timing: '12ms', status: 'success', level: 'DEBUG',
+                  input: '{\n  "item_ids": ["I1", "I2"]\n}', output: '{\n  "available": true\n}' },
+                { id: 'payment', label: 'process_payment', timing: '230ms', status: 'success', level: 'INFO',
+                  input: '{\n  "amount": 99.99,\n  "card": "[REDACTED]"\n}', output: '{\n  "status": "success"\n}' },
+                { id: 'notify', label: 'send_notification', timing: '12ms', status: 'success', level: 'INFO',
+                  input: '{\n  "email": "[REDACTED]",\n  "template": "order_confirm"\n}', output: '{\n  "sent": true\n}' }
+            ],
+            edges: [
+                { source: 'api', target: 'validate' },
+                { source: 'validate', target: 'inventory' },
+                { source: 'validate', target: 'payment' },
+                { source: 'payment', target: 'notify' }
+            ]
+        };
+        
+        const graph = new G6.Graph({
+            container: 'traceGraph',
+            width, height,
+            fitView: true,
+            fitViewPadding: 60,
+            animate: true,
+            modes: { default: ['drag-canvas', 'zoom-canvas'] },
+            layout: { type: 'dagre', rankdir: 'LR', nodesep: 40, ranksep: 80 },
+            defaultNode: { type: 'trace-node' },
+            defaultEdge: {
+                type: 'polyline',
+                style: {
+                    stroke: '#cbd5e1', lineWidth: 2,
+                    endArrow: { path: G6.Arrow.triangle(8, 10, 0), fill: '#cbd5e1' },
+                    radius: 8
+                }
+            }
+        });
+        
+        graph.on('node:click', (e) => openModal(e.item.getModel()));
+        graph.on('node:mouseenter', (e) => {
+            graph.setItemState(e.item, 'hover', true);
+            container.style.cursor = 'pointer';
+        });
+        graph.on('node:mouseleave', (e) => {
+            graph.setItemState(e.item, 'hover', false);
+            container.style.cursor = 'grab';
+        });
+        
+        graph.data(data);
+        graph.render();
+        
+        document.getElementById('zoomIn').onclick = () => graph.zoomTo(graph.getZoom() * 1.2, { x: width/2, y: height/2 });
+        document.getElementById('zoomOut').onclick = () => graph.zoomTo(graph.getZoom() / 1.2, { x: width/2, y: height/2 });
+        document.getElementById('zoomFit').onclick = () => graph.fitView(60);
+        
+        window.addEventListener('resize', () => {
+            graph.changeSize(container.clientWidth, container.clientHeight);
+            graph.fitView(60);
+        });
+        
+        // Sidebar interactions
+        document.querySelectorAll('.trace-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.trace-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+        
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => chip.classList.toggle('active'));
+        });
+    </script>
+</body>
+</html>

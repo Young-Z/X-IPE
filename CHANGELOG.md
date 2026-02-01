@@ -8,6 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-023-B: Tracing Dashboard UI**
+  - Dashboard view integrated into Workplace sidebar with graph icon
+  - Duration toggle buttons (3/15/30 minutes) to start tracing sessions
+  - Live countdown timer with color states (green active, yellow warning, gray inactive)
+  - Trace list sidebar with status indicators (green=success, red=error)
+  - Config modal for retention hours and log path settings
+  - Ignored APIs modal for pattern-based API exclusions
+  - Auto-polling trace list every 5 seconds during active tracing
+  - Session persistence across page refresh via tools.json
+  - Toast notifications for operation feedback
+  - CSS styles in tracing-dashboard.css (~300 lines)
+  - JavaScript module in tracing-dashboard.js (~600 lines)
+  - 27 tests validating dashboard API integration
+
+- **FEATURE-023-A: Application Action Tracing - Core**
+  - Decorator-based trace capture: `@trace_scope('name')` for actions, tools, agents
+  - LLM observability: input/output capture with automatic context linking
+  - Trace file storage in JSON format (instance/traces/{trace_id}.json)
+  - 4 REST API endpoints: status, start, stop, logs
+  - Tracing service with configurable retention and ignored API patterns
+  - Integration with tools.json for config persistence
+  - Context variable-based span linking for nested traces
+  - 61 tests validating core tracing functionality
+
 - **FEATURE-008 v1.5 (CR-006): Ideas Folder Tree UX Enhancement**
   - Drag-and-drop reorganization: move files/folders between locations with visual feedback
   - Folder view panel: dedicated panel with breadcrumb navigation, action bar, and file grid

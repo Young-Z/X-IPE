@@ -45,13 +45,16 @@ This board tracks all features across the project lifecycle.
 | FEATURE-022-B | Element Inspector | v1.0 | Implemented | [specification.md](../requirements/FEATURE-022-B/specification.md) | 01-28-2026 | 01-28-2026 16:30:00 |
 | FEATURE-022-C | Feedback Capture & Panel | v1.0 | Implemented | [specification.md](../requirements/FEATURE-022-C/specification.md) | 01-28-2026 | 01-28-2026 17:00:00 |
 | FEATURE-022-D | Feedback Storage & Submission | v1.0 | Implemented | [specification.md](../requirements/FEATURE-022-D/specification.md) | 01-28-2026 | 01-28-2026 17:30:00 |
-| FEATURE-023 | Application Action Tracing - Core | v1.0 | Implemented | [specification.md](../requirements/FEATURE-023/specification.md), [technical-design.md](../requirements/FEATURE-023/technical-design.md) | 02-01-2026 | 02-01-2026 03:55:00 |
+| FEATURE-023-A | Application Action Tracing - Core | v1.0 | Completed | [specification.md](../requirements/FEATURE-023-A/specification.md), [technical-design.md](../requirements/FEATURE-023-A/technical-design.md) | 02-01-2026 | 02-01-2026 04:00:00 |
+| FEATURE-023-B | Tracing Dashboard UI | v1.0 | Implemented | [specification.md](../requirements/FEATURE-023-B/specification.md), [technical-design.md](../requirements/FEATURE-023-B/technical-design.md) | 02-01-2026 | 02-01-2026 04:25:00 |
+| FEATURE-023-C | Trace Viewer & DAG Visualization | v1.0 | Planned | - | 02-01-2026 | 02-01-2026 04:01:00 |
+| FEATURE-023-D | Tracing Skill Integration | v1.0 | Planned | - | 02-01-2026 | 02-01-2026 04:01:00 |
 
 ---
 
 ## Status Details
 
-### Planned (8)
+### Planned (11)
 - FEATURE-007: Git Integration
 - FEATURE-014: Theme-Aware Frontend Design Skill
 - FEATURE-017: Architecture DSL JavaScript Library
@@ -60,6 +63,9 @@ This board tracks all features across the project lifecycle.
 - FEATURE-022-B: Element Inspector
 - FEATURE-022-C: Feedback Capture & Panel
 - FEATURE-022-D: Feedback Storage & Submission
+- FEATURE-023-B: Tracing Dashboard UI
+- FEATURE-023-C: Trace Viewer & DAG Visualization
+- FEATURE-023-D: Tracing Skill Integration
 
 ### Refined (0)
 - None
@@ -80,7 +86,7 @@ This board tracks all features across the project lifecycle.
 ### Tested (0)
 - None
 
-### Completed (8)
+### Completed (9)
 - FEATURE-008: Workplace (Idea Management) ✅
 - FEATURE-009: File Change Indicator ✅
 - FEATURE-010: Project Root Configuration ✅
@@ -89,6 +95,7 @@ This board tracks all features across the project lifecycle.
 - FEATURE-013: Default Theme Content ✅
 - FEATURE-015: Architecture DSL Skill ✅
 - FEATURE-016: Architecture Diagram Renderer ✅
+- FEATURE-023-A: Application Action Tracing - Core ✅
 
 ---
 
@@ -466,3 +473,83 @@ This board tracks all features across the project lifecycle.
 - Toast notification on success/failure
 - Generates terminal command (typed, not executed)
 - Clears element selection after submit
+
+---
+
+### FEATURE-023-A: Application Action Tracing - Core
+
+**Version:** v1.0  
+**Status:** Completed  
+**Description:** Decorator-based tracing framework for Python and TypeScript that automatically logs function calls, parameters, return values, execution times, and errors. Backend infrastructure with API endpoints.  
+**Dependencies:** None (Core infrastructure feature)  
+**Specification:** [specification.md](../requirements/FEATURE-023-A/specification.md)  
+**Technical Design:** [technical-design.md](../requirements/FEATURE-023-A/technical-design.md)  
+
+**Key Capabilities:**
+- `@x_ipe_tracing` decorator for Python functions
+- Automatic parameter/return capture with redaction
+- UUID-based trace identification
+- Configurable duration-based tracing (3/15/30 min)
+- REST API: `/api/tracing/status`, `/api/tracing/start`, `/api/tracing/stop`
+- Automatic cleanup of old trace files
+
+---
+
+### FEATURE-023-B: Tracing Dashboard UI
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Web-based dashboard for viewing tracing status, managing trace sessions (start/stop), browsing trace logs, and monitoring active traces.  
+**Dependencies:** FEATURE-023-A  
+**Specification:** -  
+**Technical Design:** -  
+
+**Source:**
+- Mockup: [tracing-dashboard-v4.html](../ideas/007.%20Feature-Application%20Action%20Tracing/mockups/tracing-dashboard-v4.html)
+
+**Key Capabilities:**
+- Tracing on/off toggle with duration selector (3/15/30 min)
+- Countdown timer showing remaining trace time
+- Trace log list with filtering and search
+- Session management (start, stop, clear logs)
+- Integration with Workplace sidebar
+
+---
+
+### FEATURE-023-C: Trace Viewer & DAG Visualization
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Interactive DAG (Directed Acyclic Graph) visualization of traced function calls, showing call hierarchy, timing, and parameters with click-to-expand details.  
+**Dependencies:** FEATURE-023-B  
+**Specification:** -  
+**Technical Design:** -  
+
+**Source:**
+- Mockup: [tracing-dashboard-v4.html](../ideas/007.%20Feature-Application%20Action%20Tracing/mockups/tracing-dashboard-v4.html)
+
+**Key Capabilities:**
+- G6 canvas-based DAG rendering
+- Node colors by execution status (success/error)
+- Click node to view parameters, return value, duration
+- Duration toggle (show/hide timing on nodes)
+- Pan/zoom navigation
+- Export trace as image
+
+---
+
+### FEATURE-023-D: Tracing Skill Integration
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** AI skill that automatically adds `@x_ipe_tracing` decorators to functions based on code analysis, respecting existing patterns and configuration.  
+**Dependencies:** FEATURE-023-A  
+**Specification:** -  
+**Technical Design:** -  
+
+**Key Capabilities:**
+- Analyze codebase for traceable functions
+- Suggest tracing decorator placements
+- Auto-detect sensitive parameters for redaction
+- Batch apply tracing to module/class
+- Respect .x-ipe.yaml tracing configuration

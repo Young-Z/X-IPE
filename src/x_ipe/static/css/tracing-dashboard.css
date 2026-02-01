@@ -1,0 +1,508 @@
+/**
+ * FEATURE-023-B: Tracing Dashboard UI Styles
+ * 
+ * Styles for the tracing dashboard view in Workplace.
+ * Follows X-IPE design system.
+ */
+
+/* Color variables */
+:root {
+    --tracing-active: #22c55e;
+    --tracing-warning: #eab308;
+    --tracing-inactive: #9ca3af;
+    --tracing-error: #ef4444;
+    --tracing-selected: #3b82f6;
+    --tracing-bg: #f9fafb;
+    --tracing-border: #e5e7eb;
+    --tracing-text: #374151;
+    --tracing-text-muted: #6b7280;
+}
+
+/* Main container */
+.tracing-dashboard {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--tracing-bg);
+    color: var(--tracing-text);
+}
+
+/* Header */
+.tracing-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: white;
+    border-bottom: 1px solid var(--tracing-border);
+    flex-wrap: wrap;
+}
+
+.tracing-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--tracing-text);
+}
+
+.tracing-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tracing-controls button {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border: 1px solid var(--tracing-border);
+    border-radius: 0.375rem;
+    background: white;
+    color: var(--tracing-text);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.tracing-controls button:hover {
+    background: var(--tracing-bg);
+    border-color: var(--tracing-text-muted);
+}
+
+/* Duration buttons */
+.tracing-duration-buttons {
+    display: flex;
+    gap: 0.25rem;
+    margin-left: auto;
+}
+
+.btn-duration {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border: 1px solid var(--tracing-border);
+    border-radius: 0.375rem;
+    background: white;
+    color: var(--tracing-text);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-duration:hover {
+    background: var(--tracing-bg);
+    border-color: var(--tracing-active);
+}
+
+.btn-duration.active {
+    background: var(--tracing-active);
+    border-color: var(--tracing-active);
+    color: white;
+}
+
+/* Timer section */
+.tracing-timer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 1rem;
+}
+
+.timer-display {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 1.125rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    min-width: 4rem;
+    text-align: center;
+}
+
+.timer-display.active {
+    color: var(--tracing-active);
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.timer-display.warning {
+    color: var(--tracing-warning);
+    background: rgba(234, 179, 8, 0.1);
+    animation: pulse-warning 1s infinite;
+}
+
+.timer-display.inactive {
+    color: var(--tracing-inactive);
+    background: rgba(156, 163, 175, 0.1);
+}
+
+@keyframes pulse-warning {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.btn-stop {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border: 1px solid var(--tracing-error);
+    border-radius: 0.375rem;
+    background: white;
+    color: var(--tracing-error);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-stop:hover {
+    background: var(--tracing-error);
+    color: white;
+}
+
+/* Main content area */
+.tracing-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Trace list sidebar */
+.trace-list-sidebar {
+    width: 280px;
+    min-width: 200px;
+    background: white;
+    border-right: 1px solid var(--tracing-border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.trace-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--tracing-border);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.trace-list-header .btn-refresh {
+    padding: 0.25rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1rem;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+}
+
+.trace-list-header .btn-refresh:hover {
+    opacity: 1;
+}
+
+.trace-list-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+/* Trace item */
+.trace-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+    margin-bottom: 0.25rem;
+    border: 1px solid transparent;
+}
+
+.trace-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 60%;
+    border-radius: 2px;
+}
+
+.trace-item.success::before {
+    background: var(--tracing-active);
+}
+
+.trace-item.error::before {
+    background: var(--tracing-error);
+}
+
+.trace-item:hover {
+    background: var(--tracing-bg);
+}
+
+.trace-item.selected {
+    background: var(--tracing-selected);
+    color: white;
+    border-color: var(--tracing-selected);
+}
+
+.trace-item.selected::before {
+    background: white;
+}
+
+.trace-item-api {
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 0.5rem;
+}
+
+.trace-item-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--tracing-text-muted);
+    padding-left: 0.5rem;
+}
+
+.trace-item.selected .trace-item-meta {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.trace-item-id {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+}
+
+/* Detail panel */
+.trace-detail-panel {
+    flex: 1;
+    background: white;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.trace-detail-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--tracing-text-muted);
+    font-size: 0.875rem;
+}
+
+/* Empty state */
+.trace-list-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    color: var(--tracing-text-muted);
+    font-size: 0.875rem;
+}
+
+.trace-list-empty-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.5;
+}
+
+/* Modal styles */
+.tracing-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.tracing-modal {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.tracing-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--tracing-border);
+}
+
+.tracing-modal-header h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.tracing-modal-close {
+    padding: 0.25rem;
+    border: none;
+    background: transparent;
+    font-size: 1.25rem;
+    cursor: pointer;
+    opacity: 0.5;
+}
+
+.tracing-modal-close:hover {
+    opacity: 1;
+}
+
+.tracing-modal-body {
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.tracing-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-top: 1px solid var(--tracing-border);
+}
+
+/* Form elements */
+.tracing-form-group {
+    margin-bottom: 1rem;
+}
+
+.tracing-form-group label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.tracing-form-group input,
+.tracing-form-group select {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    border: 1px solid var(--tracing-border);
+    border-radius: 0.375rem;
+}
+
+.tracing-form-group input:focus,
+.tracing-form-group select:focus {
+    outline: none;
+    border-color: var(--tracing-selected);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Buttons */
+.btn-primary {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border: none;
+    border-radius: 0.375rem;
+    background: var(--tracing-selected);
+    color: white;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+}
+
+.btn-secondary {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border: 1px solid var(--tracing-border);
+    border-radius: 0.375rem;
+    background: white;
+    color: var(--tracing-text);
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: var(--tracing-bg);
+}
+
+/* Loading state */
+.tracing-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    color: var(--tracing-text-muted);
+}
+
+/* Toast notification */
+.tracing-toast {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    color: white;
+    font-size: 0.875rem;
+    z-index: 1100;
+    animation: slideIn 0.3s ease;
+}
+
+.tracing-toast.success {
+    background: var(--tracing-active);
+}
+
+.tracing-toast.error {
+    background: var(--tracing-error);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Ignored APIs list */
+.ignored-apis-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ignored-api-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background: var(--tracing-bg);
+    border-radius: 0.25rem;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 0.875rem;
+}
+
+.ignored-api-item button {
+    padding: 0.125rem 0.5rem;
+    border: none;
+    background: transparent;
+    color: var(--tracing-error);
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.add-ignored-api {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.add-ignored-api input {
+    flex: 1;
+}

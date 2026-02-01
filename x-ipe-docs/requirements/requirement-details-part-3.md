@@ -14,7 +14,10 @@
 | FEATURE-022-B | Element Inspector | v1.0 | Hover highlighting and multi-select element inspection within browser simulator | FEATURE-022-A |
 | FEATURE-022-C | Feedback Capture & Panel | v1.0 | Right-click context menu and feedback entry panel with screenshot capture | FEATURE-022-B |
 | FEATURE-022-D | Feedback Storage & Submission | v1.0 | Save feedback to structured folders and generate terminal command for agent | FEATURE-022-C |
-| FEATURE-023 | Application Action Tracing - Core | v1.0 | Decorator-based tracing framework for Python & TypeScript with log storage | None |
+| FEATURE-023-A | Application Action Tracing - Core | v1.0 | Decorator-based tracing framework for Python & TypeScript with log storage | None |
+| FEATURE-023-B | Tracing Dashboard UI | v1.0 | Web UI for viewing and managing trace sessions | FEATURE-023-A |
+| FEATURE-023-C | Trace Viewer & DAG Visualization | v1.0 | DAG-based call graph visualization with drill-down | FEATURE-023-B |
+| FEATURE-023-D | Tracing Skill Integration | v1.0 | Auto-instrumentation skill for adding tracing to code | FEATURE-023-A |
 
 ---
 
@@ -24,7 +27,7 @@
 |---------------------|---------|-------------|
 | voice-input-console | FEATURE-021 | [mockup.html](../ideas/Console%20Voice%20Input%20-%2001242026%20000728/mockup.html) |
 | uiux-feedback-view | FEATURE-022 | [uiux-feedback-v1.html](../ideas/005.%20Feature-UIUX%20Feedback/mockups/uiux-feedback-v1.html) |
-| tracing-dashboard | FEATURE-023 | [tracing-dashboard-v4.html](../ideas/007.%20Feature-Application%20Action%20Tracing/mockups/tracing-dashboard-v4.html) |
+| tracing-dashboard | FEATURE-023-B/C | [tracing-dashboard-v4.html](../ideas/007.%20Feature-Application%20Action%20Tracing/mockups/tracing-dashboard-v4.html) |
 
 ---
 
@@ -374,7 +377,7 @@ Get uiux feedback, please visit feedback folder x-ipe/uiux-feedback/Feedback-YYY
 
 ---
 
-### FEATURE-023: Application Action Tracing - Core
+### FEATURE-023-A: Application Action Tracing - Core
 
 **Version:** v1.0  
 **Brief Description:** Decorator-based tracing framework for Python and TypeScript that automatically logs function calls, parameters, return values, and execution times with structured log files.
@@ -545,7 +548,64 @@ As applications grow in complexity, understanding execution flow becomes challen
 
 | Feature | Depends On | Reason |
 |---------|------------|--------|
-| FEATURE-023 | None | Core infrastructure feature |
+| FEATURE-023-A | None | Core infrastructure feature |
+| FEATURE-023-B | FEATURE-023-A | Needs tracing API to display |
+| FEATURE-023-C | FEATURE-023-B | Extends dashboard with visualization |
+| FEATURE-023-D | FEATURE-023-A | Uses tracing decorators |
+
+---
+
+### FEATURE-023-B: Tracing Dashboard UI (Planned)
+
+**Version:** v1.0  
+**Brief Description:** Web-based dashboard for viewing tracing status, managing trace sessions (start/stop), browsing trace logs, and monitoring active traces.
+
+**Dependencies:** FEATURE-023-A  
+**Mockup:** [Tracing Dashboard v4](../ideas/007.%20Feature-Application%20Action%20Tracing/mockups/tracing-dashboard-v4.html)
+
+#### Key Capabilities
+
+- Tracing on/off toggle with duration selector (3/15/30 min)
+- Countdown timer showing remaining trace time
+- Trace log list with filtering and search
+- Session management (start, stop, clear logs)
+- Integration with Workplace sidebar
+
+---
+
+### FEATURE-023-C: Trace Viewer & DAG Visualization (Planned)
+
+**Version:** v1.0  
+**Brief Description:** Interactive DAG (Directed Acyclic Graph) visualization of traced function calls, showing call hierarchy, timing, and parameters with click-to-expand details.
+
+**Dependencies:** FEATURE-023-B  
+**Mockup:** [Tracing Dashboard v4](../ideas/007.%20Feature-Application%20Action%20Tracing/mockups/tracing-dashboard-v4.html)
+
+#### Key Capabilities
+
+- G6 canvas-based DAG rendering
+- Node colors by execution status (success/error)
+- Click node to view parameters, return value, duration
+- Duration toggle (show/hide timing on nodes)
+- Pan/zoom navigation
+- Export trace as image
+
+---
+
+### FEATURE-023-D: Tracing Skill Integration (Planned)
+
+**Version:** v1.0  
+**Brief Description:** AI skill that automatically adds `@x_ipe_tracing` decorators to functions based on code analysis, respecting existing patterns and configuration.
+
+**Dependencies:** FEATURE-023-A  
+
+#### Key Capabilities
+
+- Analyze codebase for traceable functions
+- Suggest tracing decorator placements
+- Auto-detect sensitive parameters for redaction
+- Batch apply tracing to module/class
+- Respect .x-ipe.yaml tracing configuration
 
 ---
 

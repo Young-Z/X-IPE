@@ -9,7 +9,7 @@
  */
 class WorkplaceManager {
     constructor() {
-        this.currentView = 'tree'; // tree | upload | editor | folderView
+        this.currentView = 'tree'; // tree | upload | editor | folderView | tracing
         this.currentPath = null;
         this.saveTimer = null;
         this.saveDelay = 5000; // 5 seconds auto-save delay
@@ -32,6 +32,9 @@ class WorkplaceManager {
         this.treeSearchManager = null;
         this.treeDragManager = null;
         this.confirmDialog = null;
+        
+        // FEATURE-023-B: Tracing Dashboard
+        this.tracingDashboard = null;
         
         this._loadCopilotPrompts();
     }
@@ -61,8 +64,11 @@ class WorkplaceManager {
             <div class="workplace-container">
                 <div class="workplace-sidebar pinned" id="workplace-sidebar">
                     <div class="workplace-sidebar-icons">
-                        <button class="workplace-sidebar-icon" title="Browse Ideas" id="workplace-icon-browse">
+                        <button class="workplace-sidebar-icon active" title="Browse Ideas" id="workplace-icon-browse">
                             <i class="bi bi-folder2"></i>
+                        </button>
+                        <button class="workplace-sidebar-icon" title="Tracing Dashboard" id="workplace-icon-tracing">
+                            <i class="bi bi-graph-up"></i>
                         </button>
                     </div>
                     <div class="workplace-sidebar-content">
@@ -98,9 +104,12 @@ class WorkplaceManager {
         
         // Bind sidebar icon events
         document.getElementById('workplace-icon-browse').addEventListener('click', () => {
-            // Toggle expanded state on mobile/touch
-            const sidebar = document.getElementById('workplace-sidebar');
-            sidebar.classList.toggle('expanded');
+            this._switchToIdeasView();
+        });
+        
+        // FEATURE-023-B: Tracing icon event
+        document.getElementById('workplace-icon-tracing').addEventListener('click', () => {
+            this._switchToTracingView();
         });
         
         // Bind pin button
@@ -955,6 +964,9 @@ class WorkplaceManager {
         this.hasUnsavedChanges = false;
         this.isEditing = false;
         
+        // Highlight parent folder in tree
+        this._highlightParentFolder(path);
+        
         // Detect file type
         const ext = path.split('.').pop().toLowerCase();
         this.fileExtension = ext;
@@ -1767,6 +1779,9 @@ class WorkplaceManager {
         this.currentPath = null;
         this.hasUnsavedChanges = false;
         this.targetFolderPath = targetFolder;
+        
+        // Clear folder highlight when leaving file view
+        this._highlightParentFolder(null);
         
         // Build target folder indicator
         const folderName = targetFolder ? targetFolder.split('/').pop() : null;
@@ -2621,11 +2636,137 @@ class WorkplaceManager {
     }
     
     /**
+     * Highlight the parent folder of the currently previewed file
+     * Changes folder icon to yellow to indicate active file location
+     */
+    _highlightParentFolder(filePath) {
+        // Remove previous highlight
+        const previousHighlight = document.querySelectorAll('.workplace-tree-item.folder-highlighted');
+        previousHighlight.forEach(el => {
+            el.classList.remove('folder-highlighted');
+            const icon = el.querySelector('.workplace-tree-item-content > i.bi-folder, .workplace-tree-item-content > i.bi-folder-fill');
+            if (icon) {
+                icon.classList.remove('bi-folder-fill');
+                icon.classList.add('bi-folder');
+            }
+        });
+        
+        if (!filePath) return;
+        
+        // Get parent folder path
+        const pathParts = filePath.split('/');
+        pathParts.pop(); // Remove file name
+        const parentFolderPath = pathParts.join('/');
+        
+        if (!parentFolderPath) return;
+        
+        // Find and highlight the parent folder
+        const treeItems = document.querySelectorAll('.workplace-tree-item[data-type="folder"]');
+        for (const item of treeItems) {
+            if (item.dataset.path === parentFolderPath) {
+                item.classList.add('folder-highlighted');
+                const icon = item.querySelector('.workplace-tree-item-content > i.bi-folder');
+                if (icon) {
+                    icon.classList.remove('bi-folder');
+                    icon.classList.add('bi-folder-fill');
+                }
+                
+                // Expand parent folders to make highlighted folder visible
+                let parent = item.parentElement?.closest('.workplace-tree-item.has-children');
+                while (parent) {
+                    parent.classList.add('expanded');
+                    parent = parent.parentElement?.closest('.workplace-tree-item.has-children');
+                }
+                break;
+            }
+        }
+    }
+    
+    /**
      * Escape HTML special characters
      */
     _escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text || '';
         return div.innerHTML;
+    }
+    
+    // =========================================================================
+    // FEATURE-023-B: Tracing Dashboard View
+    // =========================================================================
+    
+    /**
+     * Switch to Ideas view (tree navigation)
+     */
+    _switchToIdeasView() {
+        // Update active icon
+        document.querySelectorAll('.workplace-sidebar-icon').forEach(icon => {
+            icon.classList.remove('active');
+        });
+        document.getElementById('workplace-icon-browse').classList.add('active');
+        
+        // Show sidebar content, hide tracing
+        const sidebarContent = document.querySelector('.workplace-sidebar-content');
+        if (sidebarContent) {
+            sidebarContent.style.display = '';
+        }
+        
+        // Destroy tracing dashboard if active
+        if (this.tracingDashboard) {
+            this.tracingDashboard.destroy();
+            this.tracingDashboard = null;
+        }
+        
+        // Restore content to placeholder or current view
+        const contentContainer = document.getElementById('workplace-content');
+        if (contentContainer && this.currentView === 'tracing') {
+            contentContainer.innerHTML = `
+                <div class="workplace-placeholder">
+                    <i class="bi bi-lightbulb"></i>
+                    <h5>Welcome to Workplace</h5>
+                    <p class="text-muted">Hover sidebar to browse ideas, or click pin to keep it open</p>
+                </div>
+            `;
+            this.currentView = 'tree';
+        }
+    }
+    
+    /**
+     * Switch to Tracing Dashboard view
+     */
+    _switchToTracingView() {
+        // Update active icon
+        document.querySelectorAll('.workplace-sidebar-icon').forEach(icon => {
+            icon.classList.remove('active');
+        });
+        document.getElementById('workplace-icon-tracing').classList.add('active');
+        
+        // Hide sidebar content (tree)
+        const sidebarContent = document.querySelector('.workplace-sidebar-content');
+        if (sidebarContent) {
+            sidebarContent.style.display = 'none';
+        }
+        
+        // Collapse sidebar to icons only
+        const sidebar = document.getElementById('workplace-sidebar');
+        if (sidebar) {
+            sidebar.classList.remove('pinned', 'expanded');
+        }
+        
+        // Initialize tracing dashboard
+        this.currentView = 'tracing';
+        const contentContainer = document.getElementById('workplace-content');
+        if (contentContainer && window.TracingDashboard) {
+            this.tracingDashboard = new window.TracingDashboard(contentContainer);
+            this.tracingDashboard.init();
+        } else if (contentContainer) {
+            contentContainer.innerHTML = `
+                <div class="workplace-placeholder">
+                    <i class="bi bi-graph-up"></i>
+                    <h5>Tracing Dashboard</h5>
+                    <p class="text-muted">Tracing module not loaded</p>
+                </div>
+            `;
+        }
     }
 }
