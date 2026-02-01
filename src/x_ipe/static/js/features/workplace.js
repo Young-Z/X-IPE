@@ -9,7 +9,7 @@
  */
 class WorkplaceManager {
     constructor() {
-        this.currentView = 'tree'; // tree | upload | editor | folderView | tracing | qualityEvaluation
+        this.currentView = 'tree'; // tree | upload | editor | folderView | tracing
         this.currentPath = null;
         this.saveTimer = null;
         this.saveDelay = 5000; // 5 seconds auto-save delay
@@ -35,9 +35,6 @@ class WorkplaceManager {
         
         // FEATURE-023-B: Tracing Dashboard
         this.tracingDashboard = null;
-        
-        // FEATURE-024: Quality Evaluation
-        this.qualityEvaluationView = null;
         
         this._loadCopilotPrompts();
     }
@@ -72,9 +69,6 @@ class WorkplaceManager {
                         </button>
                         <button class="workplace-sidebar-icon" title="Tracing Dashboard" id="workplace-icon-tracing">
                             <i class="bi bi-graph-up"></i>
-                        </button>
-                        <button class="workplace-sidebar-icon" title="Project Quality Evaluation" id="workplace-icon-quality">
-                            <i class="bi bi-clipboard-check"></i>
                         </button>
                     </div>
                     <div class="workplace-sidebar-content">
@@ -116,11 +110,6 @@ class WorkplaceManager {
         // FEATURE-023-B: Tracing icon event
         document.getElementById('workplace-icon-tracing').addEventListener('click', () => {
             this._switchToTracingView();
-        });
-        
-        // FEATURE-024: Quality Evaluation icon event
-        document.getElementById('workplace-icon-quality').addEventListener('click', () => {
-            this._switchToQualityEvaluationView();
         });
         
         // Bind pin button
@@ -2776,47 +2765,6 @@ class WorkplaceManager {
                     <i class="bi bi-graph-up"></i>
                     <h5>Tracing Dashboard</h5>
                     <p class="text-muted">Tracing module not loaded</p>
-                </div>
-            `;
-        }
-    }
-    
-    /**
-     * FEATURE-024: Switch to Quality Evaluation view
-     */
-    _switchToQualityEvaluationView() {
-        // Update active icon
-        document.querySelectorAll('.workplace-sidebar-icon').forEach(icon => {
-            icon.classList.remove('active');
-        });
-        document.getElementById('workplace-icon-quality').classList.add('active');
-        
-        // Hide sidebar content (tree)
-        const sidebarContent = document.querySelector('.workplace-sidebar-content');
-        if (sidebarContent) {
-            sidebarContent.style.display = 'none';
-        }
-        
-        // Collapse sidebar to icons only
-        const sidebar = document.getElementById('workplace-sidebar');
-        if (sidebar) {
-            sidebar.classList.remove('pinned', 'expanded');
-        }
-        
-        // Initialize quality evaluation view
-        this.currentView = 'qualityEvaluation';
-        const contentContainer = document.getElementById('workplace-content');
-        if (contentContainer && window.QualityEvaluationView) {
-            this.qualityEvaluationView = new window.QualityEvaluationView(contentContainer);
-            this.qualityEvaluationView.init();
-            // Store reference for console integration
-            window.qualityEvaluationView = this.qualityEvaluationView;
-        } else if (contentContainer) {
-            contentContainer.innerHTML = `
-                <div class="workplace-placeholder">
-                    <i class="bi bi-clipboard-check"></i>
-                    <h5>Project Quality Evaluation</h5>
-                    <p class="text-muted">Quality evaluation module not loaded</p>
                 </div>
             `;
         }

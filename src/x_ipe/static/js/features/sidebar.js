@@ -244,6 +244,7 @@ class ProjectSidebar {
         
         // CR-004: Special handling for Workplace section - show submenu with Ideation and UIUX Feedbacks
         // FEATURE-023-B: Added Tracing submenu item
+        // FEATURE-024: Added Quality Evaluation submenu item
         if (section.id === 'workplace') {
             return `
                 <div class="nav-section" data-section-id="${section.id}">
@@ -264,6 +265,10 @@ class ProjectSidebar {
                         <div class="nav-section-header sidebar-child nav-tracing" data-section-id="tracing">
                             <i class="bi bi-graph-up"></i>
                             <span>Application Tracing</span>
+                        </div>
+                        <div class="nav-section-header sidebar-child nav-quality-evaluation" data-section-id="quality-evaluation">
+                            <i class="bi bi-clipboard-check"></i>
+                            <span>Quality Evaluation</span>
                         </div>
                     </div>
                 </div>
@@ -547,6 +552,47 @@ class ProjectSidebar {
                     }
                     window._tracingDashboardInstance = new window.TracingDashboard(container);
                     window._tracingDashboardInstance.init();
+                }
+            });
+        }
+        
+        // FEATURE-024: Quality Evaluation submenu click handler
+        const qualityEvalHeader = this.container.querySelector('.nav-quality-evaluation');
+        if (qualityEvalHeader) {
+            qualityEvalHeader.addEventListener('click', () => {
+                // Clear file selection
+                fileItems.forEach(f => f.classList.remove('active'));
+                this.selectedFile = null;
+                
+                // Update sidebar-child active state
+                const sidebarChildren = this.container.querySelectorAll('.sidebar-child');
+                sidebarChildren.forEach(child => child.classList.remove('active'));
+                qualityEvalHeader.classList.add('active');
+                
+                // Clear contentRenderer.currentPath to prevent auto-refresh
+                if (window.contentRenderer) {
+                    window.contentRenderer.currentPath = null;
+                }
+                
+                // Hide Create Idea button
+                const createIdeaBtn = document.getElementById('btn-create-idea');
+                if (createIdeaBtn) {
+                    createIdeaBtn.classList.add('d-none');
+                }
+                
+                // Update breadcrumb
+                const breadcrumb = document.getElementById('breadcrumb');
+                breadcrumb.innerHTML = '<li class="breadcrumb-item active">Quality Evaluation</li>';
+                
+                // Render Quality Evaluation view in content area
+                const container = document.getElementById('content-body');
+                if (window.QualityEvaluationView) {
+                    // Clean up any existing view
+                    if (window._qualityEvaluationInstance) {
+                        window._qualityEvaluationInstance.destroy();
+                    }
+                    window._qualityEvaluationInstance = new window.QualityEvaluationView(container);
+                    window._qualityEvaluationInstance.init();
                 }
             });
         }
