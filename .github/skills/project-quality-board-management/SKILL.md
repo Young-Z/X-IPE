@@ -1,6 +1,6 @@
 ---
 name: project-quality-board-management
-description: Generate and manage project quality evaluation reports from feature perspective. Evaluates requirements, features, test coverage, and code alignment status with gap analysis. Generates consistent markdown reports to x-ipe-docs/planning folder. Triggers on requests like "evaluate project quality", "generate quality report", "assess code alignment".
+description: Generate and manage project quality evaluation reports from feature perspective. Evaluates requirements, features, test coverage, and code alignment status with gap analysis. Generates consistent markdown reports to x-ipe-docs/quality-evaluation folder. Triggers on requests like "evaluate project quality", "generate quality report", "assess code alignment".
 ---
 
 # Project Quality Board Management
@@ -34,9 +34,60 @@ AI Agents follow this skill to generate and manage project-wide quality evaluati
 
 ## Report Output Location
 
-Quality evaluation report is stored in:
+Quality evaluation reports are stored in:
 ```
-x-ipe-docs/planning/project-quality-evaluation.md
+x-ipe-docs/quality-evaluation/
+```
+
+### File Naming Convention (FEATURE-024 Integration)
+
+The quality evaluation UI displays up to **5 most recent versions** with a timeline interface.
+
+| File | Description |
+|------|-------------|
+| `project-quality-evaluation.md` | **Current/Latest** evaluation report |
+| `project-quality-evaluation-v{N}.md` | Historical version N (v1, v2, v3, etc.) |
+
+**Version Number Calculation:**
+- Current version = `max(existing version numbers) + 1`
+- Example: If v1, v2, v3 exist → current file displays as "v4"
+
+### Versioning Workflow
+
+When generating a **new report**, follow this workflow:
+
+```
+1. CHECK if x-ipe-docs/quality-evaluation/ folder exists
+   - IF NOT: Create folder
+
+2. CHECK if project-quality-evaluation.md exists
+   - IF YES:
+     a. SCAN for existing versioned files (project-quality-evaluation-v*.md)
+     b. FIND max version number among existing files
+     c. RENAME current file to project-quality-evaluation-v{max+1}.md
+     d. IF more than 4 versioned files exist:
+        - DELETE the oldest versioned file (lowest version number)
+        - Keep only 4 historical + 1 current = 5 total
+
+3. CREATE new project-quality-evaluation.md with fresh evaluation
+
+4. VERIFY: Folder should contain at most:
+   - 1 current file: project-quality-evaluation.md
+   - Up to 4 historical: project-quality-evaluation-v{N}.md
+```
+
+**Example:**
+```
+Before generating new report:
+  project-quality-evaluation.md      (current, displayed as v3)
+  project-quality-evaluation-v2.md   (previous)
+  project-quality-evaluation-v1.md   (oldest)
+
+After generating new report:
+  project-quality-evaluation.md      (NEW, displayed as v4)
+  project-quality-evaluation-v3.md   (was current, now versioned)
+  project-quality-evaluation-v2.md   (unchanged)
+  project-quality-evaluation-v1.md   (unchanged)
 ```
 
 Report header includes:
@@ -183,14 +234,21 @@ QualityEvaluation:
         - Specification Violations section
         - Test Coverage Violations section
         - Code Alignment Violations section
+        - Tracing Coverage Violations section (FEATURE-023-D)
    e. Files Approaching Threshold
    f. Priority Gaps Summary
    g. Recommendations
    h. Appendix (detailed metrics)
 
-6. SAVE report:
-   - Save to x-ipe-docs/planning/project-quality-evaluation.md
-   - Update version and evaluated date in header
+6. SAVE report (with versioning):
+   a. ENSURE x-ipe-docs/quality-evaluation/ folder exists
+   b. IF project-quality-evaluation.md exists:
+      - SCAN for existing project-quality-evaluation-v*.md files
+      - FIND max version number N
+      - RENAME current to project-quality-evaluation-v{N+1}.md
+      - IF more than 4 versioned files: DELETE oldest (lowest version)
+   c. SAVE new report to x-ipe-docs/quality-evaluation/project-quality-evaluation.md
+   d. UPDATE evaluated date in header
 
 7. RETURN evaluation summary
 ```
@@ -205,17 +263,24 @@ RULE 1: Evaluation Principles section
 
 RULE 2: Violation Details section
   - MUST be organized by feature
-  - EACH feature section MUST have 4 subsections:
+  - EACH feature section MUST have 5 subsections:
     - Requirements Violations
     - Specification Violations
     - Test Coverage Violations
     - Code Alignment Violations
+    - Tracing Coverage Violations (FEATURE-023-D)
   - ONLY show features that have violations
   - Show "No violations" if a category is clean
 
 RULE 3: Separation of concerns
   - Principles = WHAT we evaluate and HOW (thresholds)
   - Violations = RESULTS of evaluation per feature
+
+RULE 4: Tracing Coverage Evaluation (FEATURE-023-D)
+  - Threshold: ≥90% of public functions must have @x_ipe_tracing decorator
+  - Check: All sensitive parameters (password, token, secret, key) have redact=[]
+  - Levels: API endpoints = INFO, Business logic = INFO, Utilities = DEBUG
+  - Report: List untraced functions and unredacted sensitive params
 ```
 
 ### Operation 2: Update Existing Report
@@ -224,14 +289,13 @@ RULE 3: Separation of concerns
 **Input:** feature_ids to re-evaluate
 
 ```
-1. LOAD latest report from quality-evaluation-latest.md
+1. LOAD latest report from x-ipe-docs/quality-evaluation/project-quality-evaluation.md
 2. FOR EACH feature_id:
    - RE-EVALUATE all 4 perspectives
    - UPDATE feature entry in report
 3. RE-CALCULATE aggregates (overall_score, health_status)
 4. UPDATE priority_gaps and recommendations
-5. SAVE as new timestamped report
-6. UPDATE quality-evaluation-latest.md
+5. SAVE using versioning workflow (see "Versioning Workflow" section above)
 ```
 
 ### Operation 3: Query Quality Status
@@ -240,7 +304,7 @@ RULE 3: Separation of concerns
 **Input:** feature_ids or query criteria
 
 ```
-1. LOAD latest report
+1. LOAD latest report from x-ipe-docs/quality-evaluation/project-quality-evaluation.md
 2. FILTER features by criteria
 3. RETURN filtered evaluation data
 ```
@@ -248,10 +312,12 @@ RULE 3: Separation of concerns
 ### Operation 4: Compare Evaluations
 
 **When:** Need to track quality changes over time
-**Input:** Two evaluation_ids or "latest vs previous"
+**Input:** Two version numbers (e.g., "v3 vs v4") or "latest vs previous"
 
 ```
-1. LOAD both evaluation reports
+1. LOAD both evaluation reports:
+   - Latest: project-quality-evaluation.md
+   - Previous: project-quality-evaluation-v{N}.md
 2. FOR EACH feature in both:
    - COMPARE status changes
    - CALCULATE score deltas
