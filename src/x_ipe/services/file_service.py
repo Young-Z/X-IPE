@@ -1,5 +1,7 @@
 """
 FEATURE-001: Project Navigation
+FEATURE-002: Content Viewer
+FEATURE-003: Content Editor
 
 FileNode: Represents a file or folder in the project structure
 Section: Represents a top-level section in the sidebar
@@ -15,6 +17,8 @@ from dataclasses import dataclass
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
+
+from x_ipe.tracing import x_ipe_tracing
 
 
 @dataclass
@@ -121,6 +125,7 @@ class ProjectService:
         self.project_root = Path(project_root).resolve()
         self.sections_config = sections or self.DEFAULT_SECTIONS
 
+    @x_ipe_tracing(level="INFO")
     def get_structure(self) -> Dict[str, Any]:
         """
         Get the complete project structure for sidebar navigation.
@@ -155,6 +160,7 @@ class ProjectService:
             'sections': sections
         }
 
+    @x_ipe_tracing(level="DEBUG")
     def _scan_directory(self, directory: Path, relative_base: str) -> List[FileNode]:
         """
         Recursively scan a directory and build file tree.
@@ -323,6 +329,7 @@ class FileWatcher:
         self._running = False
         self.ignore_patterns = self._load_gitignore()
 
+    @x_ipe_tracing(level="DEBUG")
     def _load_gitignore(self) -> List[str]:
         """Load and parse .gitignore patterns."""
         gitignore_path = self.project_root / '.gitignore'
@@ -341,6 +348,7 @@ class FileWatcher:
         
         return patterns
 
+    @x_ipe_tracing(level="DEBUG")
     def _emit_event(self, event_data: Dict):
         """Emit file system event via WebSocket"""
         if self.socketio:
@@ -363,6 +371,7 @@ class FileWatcher:
             }
             self.socketio.emit('content_changed', content_event)
 
+    @x_ipe_tracing(level="INFO")
     def start(self):
         """Start watching project directories"""
         if self._running:
@@ -381,6 +390,7 @@ class FileWatcher:
         self.observer.start()
         self._running = True
 
+    @x_ipe_tracing(level="INFO")
     def stop(self):
         """Stop watching"""
         if self.observer and self._running:
@@ -433,6 +443,7 @@ class ContentService:
         """
         self.project_root = Path(project_root).resolve()
 
+    @x_ipe_tracing(level="DEBUG")
     def detect_file_type(self, extension: str) -> str:
         """
         Detect file type from extension.
@@ -445,6 +456,7 @@ class ContentService:
         """
         return self.FILE_TYPES.get(extension.lower(), 'text')
 
+    @x_ipe_tracing(level="INFO")
     def get_content(self, relative_path: str) -> Dict[str, Any]:
         """
         Get file content with metadata.
@@ -487,6 +499,7 @@ class ContentService:
             'size': size
         }
 
+    @x_ipe_tracing(level="DEBUG")
     def _validate_path_for_write(self, relative_path: str) -> tuple:
         """
         Validate a path for write operations.
@@ -543,6 +556,7 @@ class ContentService:
         
         return (True, full_path)
 
+    @x_ipe_tracing(level="INFO")
     def save_content(self, relative_path: str, content: str) -> Dict[str, Any]:
         """
         Save content to a file.

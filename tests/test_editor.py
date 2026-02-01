@@ -360,6 +360,85 @@ class TestSpecialContent:
         assert len(test_file.read_text()) == 100000
 
 
+class TestContentServiceReadWrite:
+    """Tests for read/write consistency"""
+
+    def test_save_content_with_special_characters(self, content_service, temp_project):
+        """Content with special markdown characters preserved"""
+        test_file = temp_project / 'special.md'
+        test_file.write_text('original')
+        
+        content = '# Heading\n\n```python\ndef foo():\n    return "bar"\n```\n\n- List item\n- **Bold** and *italic*'
+        result = content_service.save_content('special.md', content)
+        
+        assert result['success'] is True
+        assert test_file.read_text() == content
+
+    def test_save_content_with_json(self, content_service, temp_project):
+        """JSON content preserved correctly"""
+        test_file = temp_project / 'config.json'
+        test_file.write_text('{}')
+        
+        content = '{\n  "key": "value",\n  "nested": {\n    "array": [1, 2, 3]\n  }\n}'
+        result = content_service.save_content('config.json', content)
+        
+        assert result['success'] is True
+        assert test_file.read_text() == content
+
+    def test_roundtrip_read_write_preserves_content(self, content_service, temp_project):
+        """Reading and writing back preserves content exactly"""
+        test_file = temp_project / 'roundtrip.md'
+        original_content = '# Title\n\nParagraph with émojis 🎉\n\n```\ncode block\n```'
+        test_file.write_text(original_content, encoding='utf-8')
+        
+        # Read
+        read_result = content_service.get_content('roundtrip.md')
+        assert read_result['content'] == original_content
+        
+        # Write back unchanged
+        save_result = content_service.save_content('roundtrip.md', read_result['content'])
+        assert save_result['success'] is True
+        
+        # Verify still same
+        assert test_file.read_text(encoding='utf-8') == original_content
+
+
+class TestEditorErrorHandling:
+    """Tests for error handling in editor operations"""
+
+    def test_save_readonly_file_fails(self, content_service, temp_project):
+        """Saving to read-only file returns appropriate error"""
+        import os
+        import stat
+        
+        test_file = temp_project / 'readonly.md'
+        test_file.write_text('original')
+        
+        # Make file read-only
+        os.chmod(test_file, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+        
+        try:
+            result = content_service.save_content('readonly.md', 'new content')
+            
+            assert result['success'] is False
+            assert 'permission' in result['error'].lower() or 'denied' in result['error'].lower()
+        finally:
+            # Restore write permission for cleanup
+            os.chmod(test_file, stat.S_IWUSR | stat.S_IRUSR)
+
+    def test_save_with_windows_line_endings(self, content_service, temp_project):
+        """Windows line endings (CRLF) are preserved"""
+        test_file = temp_project / 'windows.txt'
+        test_file.write_text('original')
+        
+        content_crlf = 'line1\r\nline2\r\nline3'
+        result = content_service.save_content('windows.txt', content_crlf)
+        
+        assert result['success'] is True
+        # Read in binary mode to check exact bytes
+        assert test_file.read_bytes() == content_crlf.encode('utf-8')
+
+
 # Fixtures
 
 @pytest.fixture
@@ -393,3 +472,53 @@ def app(temp_project):
 def client(app):
     """Create test client"""
     return app.test_client()
+
+
+class TestContentEditorTracing:
+    """Tests for tracing decorator integration in ContentService editor methods (FEATURE-003)"""
+
+    def test_save_content_has_tracing_decorator(self, temp_project):
+        """AC: save_content should have @x_ipe_tracing decorator"""
+        from x_ipe.services import ContentService
+        from x_ipe.tracing.context import TraceContext
+        
+        # Create test file
+        test_file = temp_project / 'test.md'
+        test_file.write_text('original content')
+        
+        service = ContentService(str(temp_project))
+        ctx = TraceContext.start_trace("TEST save_content")
+        
+        try:
+            result = service.save_content('test.md', 'new content')
+            # Verify function executed correctly
+            assert result['success'] is True
+            
+            # Verify tracing recorded entries
+            assert len(ctx.buffer.entries) > 0
+            func_names = [e.function_name for e in ctx.buffer.entries]
+            assert 'save_content' in func_names
+        finally:
+            TraceContext.end_trace()
+
+    def test_validate_path_for_write_has_tracing_decorator(self, temp_project):
+        """AC: _validate_path_for_write should have @x_ipe_tracing decorator"""
+        from x_ipe.services import ContentService
+        from x_ipe.tracing.context import TraceContext
+        
+        # Create test file
+        test_file = temp_project / 'test.md'
+        test_file.write_text('original content')
+        
+        service = ContentService(str(temp_project))
+        ctx = TraceContext.start_trace("TEST validate_path")
+        
+        try:
+            result = service.save_content('test.md', 'updated')
+            assert result['success'] is True
+            
+            # Verify tracing recorded _validate_path_for_write
+            func_names = [e.function_name for e in ctx.buffer.entries]
+            assert '_validate_path_for_write' in func_names
+        finally:
+            TraceContext.end_trace()

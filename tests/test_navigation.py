@@ -147,6 +147,38 @@ class TestProjectService:
         assert code_section.get('children', []) == []
         assert code_section.get('exists', True) is False
 
+    def test_get_structure_files_include_mtime(self, app, project_service, temp_project):
+        """AC-12: File modification time (mtime) tracked for change indicators"""
+        # Create a test file
+        planning_dir = temp_project / 'x-ipe-docs' / 'planning'
+        planning_dir.mkdir(parents=True, exist_ok=True)
+        test_file = planning_dir / 'test.md'
+        test_file.write_text('# Test')
+        
+        structure = project_service.get_structure()
+        
+        planning_section = next(s for s in structure['sections'] if s['id'] == 'planning')
+        file_item = next((c for c in planning_section.get('children', []) if c['name'] == 'test.md'), None)
+        
+        assert file_item is not None
+        assert 'mtime' in file_item
+        assert isinstance(file_item['mtime'], float)
+        assert file_item['mtime'] > 0
+
+    def test_get_structure_workplace_section_has_correct_path(self, app, project_service, temp_project):
+        """AC-3: Workplace section maps to x-ipe-docs/ideas folder"""
+        # Create ideas folder
+        ideas_dir = temp_project / 'x-ipe-docs' / 'ideas'
+        ideas_dir.mkdir(parents=True, exist_ok=True)
+        (ideas_dir / 'idea1.md').write_text('# Idea 1')
+        
+        structure = project_service.get_structure()
+        
+        workplace_section = next(s for s in structure['sections'] if s['id'] == 'workplace')
+        assert workplace_section['path'] == 'x-ipe-docs/ideas'
+        assert workplace_section['label'] == 'Workplace'
+        assert workplace_section['icon'] == 'bi-lightbulb'
+
 
 class TestProjectStructureAPI:
     """API tests for GET /api/project/structure"""
@@ -348,3 +380,50 @@ def project_service(app, temp_project):
     """Create ProjectService instance"""
     from x_ipe.services import ProjectService
     return ProjectService(str(temp_project))
+
+
+class TestProjectServiceTracing:
+    """Tests for tracing decorator integration in ProjectService (FEATURE-001)"""
+
+    def test_get_structure_has_tracing_decorator(self, app, temp_project):
+        """AC: get_structure should have @x_ipe_tracing decorator"""
+        from x_ipe.services import ProjectService
+        from x_ipe.tracing.context import TraceContext
+        
+        service = ProjectService(str(temp_project))
+        ctx = TraceContext.start_trace("TEST get_structure")
+        
+        try:
+            result = service.get_structure()
+            # Verify function executed correctly
+            assert 'sections' in result
+            
+            # Verify tracing recorded entries
+            assert len(ctx.buffer.entries) > 0
+            func_names = [e.function_name for e in ctx.buffer.entries]
+            assert 'get_structure' in func_names
+        finally:
+            TraceContext.end_trace()
+
+    def test_scan_directory_has_tracing_decorator(self, app, temp_project):
+        """AC: _scan_directory should have @x_ipe_tracing decorator"""
+        from x_ipe.services import ProjectService
+        from x_ipe.tracing.context import TraceContext
+        
+        # Create test directory with files
+        planning_dir = temp_project / 'x-ipe-docs' / 'planning'
+        planning_dir.mkdir(parents=True, exist_ok=True)
+        (planning_dir / 'test.md').write_text('# Test')
+        
+        service = ProjectService(str(temp_project))
+        ctx = TraceContext.start_trace("TEST scan_directory")
+        
+        try:
+            result = service.get_structure()
+            assert 'sections' in result
+            
+            # Verify tracing recorded _scan_directory calls
+            func_names = [e.function_name for e in ctx.buffer.entries]
+            assert '_scan_directory' in func_names
+        finally:
+            TraceContext.end_trace()
