@@ -297,7 +297,10 @@ class HomepageInfinity {
                 <span class="color-picker-title">Pick Color</span>
                 <button class="color-picker-close">&times;</button>
             </div>
-            <input type="color" class="color-picker-input" value="#6935c0">
+            <div class="color-picker-row">
+                <input type="color" class="color-picker-input" value="#6935c0">
+                <button class="color-picker-eyedropper" title="Pick color from screen">💧</button>
+            </div>
             <div class="color-picker-presets">
                 <button class="color-preset" data-color="rgb(105, 53, 192)" style="background: rgb(105, 53, 192)"></button>
                 <button class="color-preset" data-color="rgb(45, 158, 235)" style="background: rgb(45, 158, 235)"></button>
@@ -320,6 +323,7 @@ class HomepageInfinity {
         picker.querySelector('.color-picker-apply').addEventListener('click', () => this._applyColor());
         picker.querySelector('.color-picker-reset').addEventListener('click', () => this._resetButtonColor());
         picker.querySelector('.color-picker-input').addEventListener('input', (e) => this._previewColor(e.target.value));
+        picker.querySelector('.color-picker-eyedropper').addEventListener('click', () => this._openEyeDropper());
         
         picker.querySelectorAll('.color-preset').forEach(preset => {
             preset.addEventListener('click', () => {
@@ -391,7 +395,7 @@ class HomepageInfinity {
     }
 
     /**
-     * Apply color and save
+      * Apply color and save
      */
     static _applyColor() {
         this._saveColors();
@@ -406,6 +410,33 @@ class HomepageInfinity {
             this.activeColorPicker.style.background = '';
             this._saveColors();
             this._hideColorPicker();
+        }
+    }
+
+    /**
+     * Open EyeDropper to pick color from screen
+     */
+    static async _openEyeDropper() {
+        // Check if EyeDropper API is supported
+        if (!window.EyeDropper) {
+            alert('EyeDropper is not supported in this browser. Please use Chrome 95+.');
+            return;
+        }
+
+        try {
+            const eyeDropper = new EyeDropper();
+            const result = await eyeDropper.open();
+            const color = result.sRGBHex;
+            
+            // Update color picker input and preview
+            const picker = document.getElementById('homepage-color-picker');
+            if (picker) {
+                picker.querySelector('.color-picker-input').value = color;
+            }
+            this._previewColor(color);
+        } catch (e) {
+            // User cancelled or error
+            console.log('EyeDropper cancelled or error:', e);
         }
     }
 
