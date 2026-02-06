@@ -95,7 +95,7 @@ class HomepageInfinity {
 <div class="homepage-infinity-container">
     <header class="homepage-header">
         <h1>X-IPE</h1>
-        <p>AI-Powered Development Lifecycle</p>
+        <p>An AI native integrated project environment for end to end business value delivery</p>
     </header>
     
     <div class="infinity-loop-container">
