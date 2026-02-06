@@ -1,0 +1,36 @@
+# Example: Task Input/Output (Code Implementation)
+
+Demonstrates Task Input and Task Completion Output patterns for Code Implementation task type.
+
+## Task Input
+
+```yaml
+task_input:
+  task_id: "TASK-042"
+  task_type: "Code Implementation"
+  
+  # Context
+  feature_id: "F-003"
+  feature_folder: "x-ipe-docs/features/F-003-user-auth/"
+  technical_design: "x-ipe-docs/features/F-003-user-auth/technical-design.md"
+  
+  # From previous task (Test Generation)
+  test_file: "tests/test_user_auth.py"
+  acceptance_criteria_count: 5
+```
+
+## Task Completion Output
+
+```yaml
+task_completion_output:
+  category: "feature-stage"
+  status: "completed"
+  next_task_type: "Feature Acceptance Test"
+  require_human_review: "no"
+  task_output_links:
+    - "src/auth/user_auth.py"
+    - "src/auth/validators.py"
+  # Dynamic attributes
+  tests_passed: 12
+  coverage: "87%"
+```

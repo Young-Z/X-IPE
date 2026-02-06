@@ -56,138 +56,18 @@ initial_refactoring_scope:
 
 ## Skill/Task Completion Output Attributes
 
-This skill MUST return these attributes to the Task Data Model upon task completion:
+This skill MUST return these attributes to the Task Data Model upon task completion.
 
-```yaml
-Output:
-  category: code-refactoring-stage
-  status: completed | blocked
-  next_task_type: Improve Code Quality Before Refactoring
-  require_human_review: Yes
-  auto_proceed: {from input Auto Proceed}
-  task_output_links: [<path to analysis report>]
-  
-  # Dynamic attributes - MUST be passed to next task
-  quality_baseline:
-    exists: true | false
-    evaluated_date: <date from report if exists>
-    overall_score: <1-10 if exists>
-    code_violations:
-      file_size: [<files exceeding 800 lines>]
-      approaching_threshold: [<files 500-800 lines>]
-    feature_gaps: [<features with violations>]
-    test_coverage: <percentage if available>
-  
-  refactoring_scope:
-    files: [<expanded list of files>]
-    modules: [<expanded list of modules>]
-    dependencies: [<identified dependencies>]
-    scope_expansion_log: [<log of scope expansions>]
-    
-  code_quality_evaluated:
-    requirements_alignment:
-      status: aligned | needs_update | not_found
-      gaps: [<list of gaps>]
-      related_docs: [<paths to requirement docs>]
-      
-    specification_alignment:
-      status: aligned | needs_update | not_found
-      gaps: [<list of gaps>]
-      feature_ids: [<FEATURE-XXX>]
-      spec_docs: [<paths to tech design docs>]
-      
-    test_coverage:
-      status: sufficient | insufficient | no_tests
-      line_coverage: <XX%>
-      branch_coverage: <XX%>
-      target_percentage: 80
-      critical_gaps: [<untested areas>]
-      external_api_mocked: true | false
-      
-    code_alignment:
-      status: aligned | needs_attention | critical
-      
-      # File Size Analysis (threshold: ≤800 lines)
-      file_size_violations:
-        - file: <path>
-          lines: <count>
-          severity: high | medium
-          recommendation: "<split suggestion>"
-      files_approaching_threshold:
-        - file: <path>
-          lines: <count>
-          buffer: <lines remaining>
-      
-      # SOLID Principles Assessment
-      solid_assessment:
-        srp: { status: good | partial | violation, notes: "<details>" }
-        ocp: { status: good | partial | violation, notes: "<details>" }
-        lsp: { status: good | partial | violation, notes: "<details>" }
-        isp: { status: good | partial | violation, notes: "<details>" }
-        dip: { status: good | partial | violation, notes: "<details>" }
-      
-      # KISS Principle Assessment
-      kiss_assessment:
-        over_engineering: { status: good | violation, notes: "<details>" }
-        straightforward_logic: { status: good | violation, notes: "<details>" }
-        minimal_dependencies: { status: good | violation, notes: "<details>" }
-        clear_intent: { status: good | violation, notes: "<details>" }
-      
-      # Modular Design Assessment
-      modular_design_assessment:
-        module_cohesion: { status: good | partial | violation, notes: "<details>" }
-        module_coupling: { status: good | partial | violation, notes: "<details>" }
-        single_entry_point: { status: good | partial | violation, notes: "<details>" }
-        folder_structure: { status: good | partial | violation, notes: "<details>" }
-        reusability: { status: good | partial | violation, notes: "<details>" }
-        testability: { status: good | partial | violation, notes: "<details>" }
-      
-      # Code Smell Detection
-      code_smells:
-        - smell: god_class | long_method | large_file | deep_nesting | too_many_params | duplicate_code
-          file: <path>
-          severity: high | medium | low
-          details: "<description>"
-      
-    overall_quality_score: <1-10>
-    
-  refactoring_suggestion:
-    summary: "<high-level description of suggested refactoring>"
-    goals:
-      - goal: "<specific improvement goal>"
-        priority: high | medium | low
-        rationale: "<why this goal matters>"
-        principle: "<SOLID | DRY | KISS | YAGNI | Modular Design | etc.>"
-    target_structure: "<description of desired structure after refactoring>"
-    
-  refactoring_principle:
-    primary_principles:
-      - principle: <SOLID | DRY | KISS | YAGNI | SoC | Modular Design | etc.>
-        rationale: "<why this principle applies>"
-        applications:
-          - area: "<code area>"
-            action: "<specific application>"
-    secondary_principles:
-      - principle: <name>
-        rationale: "<supporting rationale>"
-    constraints:
-      - constraint: "<what to avoid or preserve>"
-        reason: "<why this constraint exists>"
-```
+See [references/output-schema.md](references/output-schema.md) for the complete output data model schema.
 
-### Evaluation Thresholds Reference
+**Key Output Data Models:**
+- `quality_baseline` - Existing quality report data if available
+- `refactoring_scope` - Expanded file/module scope with dependencies
+- `code_quality_evaluated` - Evaluation across all perspectives
+- `refactoring_suggestion` - Goals and target structure
+- `refactoring_principle` - Primary/secondary principles with applications
 
-> These thresholds align with `project-quality-board-management` skill.
-
-| Category | Principle | Threshold |
-|----------|-----------|-----------|
-| Test | Line Coverage | ≥ 80% |
-| Test | Branch Coverage | ≥ 70% |
-| Test | Mock External APIs | Required |
-| Code | File Size | ≤ 800 lines |
-| Code | Function Size | ≤ 50 lines |
-| Code | Class Size | ≤ 500 lines |
-| Code | Cyclomatic Complexity | ≤ 10 |
+**Evaluation Thresholds:** Line Coverage ≥80%, File Size ≤800 lines, Function Size ≤50 lines
 
 ---
 
@@ -357,7 +237,7 @@ IF iteration > 10:
 
 ### Steps 3-6: Evaluate Quality Perspectives
 
-**Action:** Evaluate code quality across 4 perspectives
+**Action:** Evaluate code quality across 5 perspectives
 
 **Step 3 - Requirements Alignment:**
 ```
@@ -388,11 +268,35 @@ IF iteration > 10:
 4. COMPILE test_coverage: {status, current_percentage, critical_gaps[]}
 ```
 
+**Step 6b - Tracing Coverage (FEATURE-023-D):**
+```
+1. SCAN code files for @x_ipe_tracing decorator usage:
+   - grep -r "@x_ipe_tracing" src/
+   - Count decorated vs total public functions
+
+2. FOR EACH file in scope:
+   - List public functions (def/async def at module level, class methods)
+   - Check if decorated with @x_ipe_tracing
+   - Flag missing decorators
+
+3. CHECK sensitive parameter redaction:
+   - Search for password, token, secret, key, auth parameters
+   - Verify redact=[] is specified for these
+
+4. COMPILE tracing_coverage: {
+     status: passed|warning|failed,
+     coverage_percentage: X%,
+     untraced_functions: [],
+     unredacted_params: []
+   }
+```
+
 **Gap Types by Perspective:**
 - Requirements: undocumented | unimplemented | deviated
 - Features: missing | extra | deviated
 - Tech Spec: structure | interface | data_model | pattern
 - Test Coverage: business_logic | error_handling | edge_case
+- Tracing Coverage: untraced | unredacted | wrong_level
 
 ---
 
@@ -470,14 +374,31 @@ IF iteration > 10:
 **Action:** Compile final analysis and request human review
 
 ```
-1. CALCULATE overall_quality_score:
-   scores = []
-   - requirements_alignment: aligned=10, needs_update=5, not_found=3
-   - feature_alignment: aligned=10, needs_update=5, not_found=3
-   - technical_spec_alignment: aligned=10, needs_update=5, not_found=3
-   - test_coverage: sufficient=10, insufficient=5, no_tests=2
+1. CALCULATE dimension scores (1-10 each):
+   FOR EACH dimension (requirements, features, tech_spec, test_coverage, tracing):
+     score = 10 - SUM(violations × importance_weights)
+     score = MAX(1, MIN(10, score))  # Clamp to 1-10
+     
+     # Derive status from score
+     IF score >= 8: status = "aligned"
+     ELSE IF score >= 6: status = "needs_attention"  
+     ELSE: status = "critical"
    
-   overall_quality_score = average(scores)
+   Importance weights:
+   - Critical (no tests, hardcoded secrets): 3
+   - High (missing coverage, SRP/DRY violations): 2
+   - Medium (outdated specs, missing docs): 1
+   - Low (minor style issues): 0.5
+   
+2. CALCULATE overall_quality_score:
+   overall_quality_score = weighted_average(
+     requirements_score × 0.20,
+     features_score × 0.20,
+     tech_spec_score × 0.20,
+     test_coverage_score × 0.20,
+     tracing_score × 0.10,
+     code_alignment_score × 0.10
+   )
 
 2. GENERATE analysis report:
    - Save to x-ipe-docs/refactoring/analysis-{task_id}.md
@@ -486,17 +407,33 @@ IF iteration > 10:
    - Include full refactoring_suggestion
    - Include full refactoring_principle
 
-3. PRESENT to human:
+3. SELF-REVIEW report:
+   a. READ the generated report completely
+   b. CHECK for:
+      - Missing content or sections
+      - Inconsistencies between summary and details
+      - Scope items not evaluated
+      - Gaps without proper severity assignment
+      - Suggestions that don't match identified gaps
+      - Principles without clear applications
+   c. IF problems found:
+      - FIX the issues in the report
+      - Note corrections made
+
+4. PRESENT to human:
    "Refactoring Analysis Complete
    
    Scope: {file_count} files, {module_count} modules
    Expansions: {expansion_count} iterations
    
-   Quality Assessment:
-   - Requirements: {status}
-   - Features: {status}
-   - Tech Spec: {status}
-   - Test Coverage: {current}% (target: 80%)
+   Quality Assessment (Score → Status):
+   - Requirements: {req_score}/10 → {status}
+   - Features: {feature_score}/10 → {status}
+   - Tech Spec: {tech_score}/10 → {status}
+   - Test Coverage: {test_score}/10 ({current}%)
+   - Tracing: {tracing_score}/10
+   
+   Score-to-Status: 8-10 aligned, 6-7 needs_attention, 1-5 critical
    
    Overall Score: {score}/10
    
@@ -507,7 +444,7 @@ IF iteration > 10:
    
    Approve to proceed to Improve Code Quality Before Refactoring?"
 
-4. WAIT for human approval
+5. WAIT for human approval
 ```
 
 ---
@@ -525,7 +462,8 @@ IF iteration > 10:
 | 7 | Refactoring suggestions generated | Yes |
 | 8 | Refactoring principles identified | Yes |
 | 9 | Analysis report generated | Yes |
-| 10 | Human review approved | Yes |
+| 10 | Report self-review completed (check for problems or missing content) | Yes |
+| 11 | Human review approved | Yes |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
 

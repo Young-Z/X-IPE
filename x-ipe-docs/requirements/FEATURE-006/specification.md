@@ -1,14 +1,15 @@
 # Feature Specification: Settings & Configuration
 
 > Feature ID: FEATURE-006  
-> Version: v2.0  
-> Status: Refined  
-> Last Updated: 01-20-2026
+> Version: v2.1  
+> Status: Implemented  
+> Last Updated: 02-02-2026
 
 ## Version History
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
+| v2.1 | 02-02-2026 | Updated AC status - all criteria implemented | - |
 | v2.0 | 01-20-2026 | Multiple project folders, project switcher, auto-refresh | - |
 | v1.0 | 01-18-2026 | Initial specification | - |
 
@@ -40,27 +41,27 @@ Settings are persisted across browser sessions using SQLite storage. The UI foll
 ## Acceptance Criteria
 
 ### Settings Page - Project Folder Management
-- [ ] AC-1: Settings page displays a list of project folders with name and path
-- [ ] AC-2: Default project "Default Project Folder" with path "." exists on first run
-- [ ] AC-3: User can add a new project folder (name + path)
-- [ ] AC-4: User can edit an existing project folder's name and path
-- [ ] AC-5: User can remove a project folder (with confirmation)
-- [ ] AC-6: Cannot remove the last remaining project folder
-- [ ] AC-7: Path validation occurs when adding/editing (exists, is directory, readable)
-- [ ] AC-8: Project names must be non-empty and unique
-- [ ] AC-9: Project folders list persists to SQLite database
+- [x] AC-1: Settings page displays a list of project folders with name and path
+- [x] AC-2: Default project "Default Project Folder" with path "." exists on first run
+- [x] AC-3: User can add a new project folder (name + path)
+- [x] AC-4: User can edit an existing project folder's name and path
+- [x] AC-5: User can remove a project folder (with confirmation)
+- [x] AC-6: Cannot remove the last remaining project folder
+- [x] AC-7: Path validation occurs when adding/editing (exists, is directory, readable)
+- [x] AC-8: Project names must be non-empty and unique
+- [x] AC-9: Project folders list persists to SQLite database
 
 ### Doc Viewer Page - Project Switcher
-- [ ] AC-10: Dropdown selector in doc viewer header shows all project folders by name
-- [ ] AC-11: Currently active project is highlighted in dropdown
-- [ ] AC-12: Selecting a different project switches the active project
-- [ ] AC-13: Switching project auto-refreshes the sidebar navigation tree
-- [ ] AC-14: Switching project clears current content view (or shows placeholder)
-- [ ] AC-15: Active project persists across page refreshes
+- [x] AC-10: Dropdown selector in doc viewer header shows all project folders by name
+- [x] AC-11: Currently active project is highlighted in dropdown
+- [x] AC-12: Selecting a different project switches the active project
+- [x] AC-13: Switching project auto-refreshes the sidebar navigation tree
+- [x] AC-14: Switching project clears current content view (or shows placeholder)
+- [x] AC-15: Active project persists across page refreshes
 
 ### General
-- [ ] AC-16: Settings page accessible via Settings icon in UI header
-- [ ] AC-17: Bootstrap 5 styling consistent with rest of application
+- [x] AC-16: Settings page accessible via Settings icon in UI header
+- [x] AC-17: Bootstrap 5 styling consistent with rest of application
 
 ## Functional Requirements
 

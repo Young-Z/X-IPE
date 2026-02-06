@@ -1,0 +1,4 @@
+=== TC-005: DoD XML ===
+definition_of_done count: 1
+step_output count: 12
+PASS

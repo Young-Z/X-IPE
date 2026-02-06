@@ -1,0 +1,9 @@
+=== TC-008: BLOCKING Guidelines Reference ===
+
+Search result in Important Notes section:
+"BLOCKING: Read [skill-general-guidelines-v2.md](references/skill-general-guidelines-v2.md) for core principles and patterns before creating skills."
+
+Criteria:
+- BLOCKING keyword present: YES
+- Reference to skill-general-guidelines-v2.md: YES
+- In Important Notes section: YES

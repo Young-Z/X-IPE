@@ -11,6 +11,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any
 
+from x_ipe.tracing import x_ipe_tracing
+
 
 class IdeasService:
     """
@@ -48,6 +50,7 @@ class IdeasService:
         self.project_root = Path(project_root).resolve()
         self.ideas_root = self.project_root / self.IDEAS_PATH
     
+    @x_ipe_tracing()
     def get_tree(self) -> List[Dict]:
         """
         Scan x-ipe-docs/ideas/ and return tree structure.
@@ -93,6 +96,7 @@ class IdeasService:
         
         return items
     
+    @x_ipe_tracing()
     def upload(self, files: List[tuple], date: str = None, target_folder: str = None) -> Dict[str, Any]:
         """
         Upload files to a new or existing idea folder.
@@ -155,6 +159,7 @@ class IdeasService:
             'files_uploaded': uploaded_files
         }
     
+    @x_ipe_tracing()
     def create_folder(self, folder_name: str, parent_folder: str = None) -> Dict[str, Any]:
         """
         Create an empty folder in ideas directory.
@@ -220,6 +225,7 @@ class IdeasService:
             'folder_path': relative_path
         }
     
+    @x_ipe_tracing()
     def rename_folder(self, old_name: str, new_name: str) -> Dict[str, Any]:
         """
         Rename an idea folder.
@@ -272,6 +278,7 @@ class IdeasService:
             'new_path': f'{self.IDEAS_PATH}/{final_name}'
         }
     
+    @x_ipe_tracing()
     def rename_file(self, file_path: str, new_name: str) -> Dict[str, Any]:
         """
         Rename a file within x-ipe-docs/ideas/.
@@ -398,6 +405,7 @@ class IdeasService:
         
         return name
     
+    @x_ipe_tracing()
     def delete_item(self, path: str) -> Dict[str, Any]:
         """
         Delete a file or folder within x-ipe-docs/ideas/.
@@ -458,6 +466,7 @@ class IdeasService:
                 'error': f'Failed to delete: {str(e)}'
             }
     
+    @x_ipe_tracing()
     def get_next_version_number(self, folder_path: str, base_name: str = 'idea-summary') -> int:
         """
         Get the next version number for a versioned file.
@@ -486,6 +495,7 @@ class IdeasService:
         
         return max_version + 1
     
+    @x_ipe_tracing()
     def create_versioned_summary(self, folder_path: str, content: str, base_name: str = 'idea-summary') -> Dict[str, Any]:
         """
         Create a new versioned idea summary file.
@@ -544,6 +554,7 @@ class IdeasService:
                 'error': f'Failed to create file: {str(e)}'
             }
     
+    @x_ipe_tracing()
     def get_toolbox(self) -> Dict:
         """
         Read toolbox configuration from JSON file.
@@ -561,6 +572,7 @@ class IdeasService:
                 return copy.deepcopy(self.DEFAULT_TOOLBOX)
         return copy.deepcopy(self.DEFAULT_TOOLBOX)
     
+    @x_ipe_tracing()
     def save_toolbox(self, config: Dict) -> Dict:
         """
         Save toolbox configuration to JSON file.
@@ -587,6 +599,7 @@ class IdeasService:
     # CR-006: Folder Tree UX Enhancement
     # =========================================================================
     
+    @x_ipe_tracing()
     def move_item(self, source_path: str, target_folder: str) -> Dict[str, Any]:
         """
         Move file or folder to target folder.
@@ -657,6 +670,7 @@ class IdeasService:
         except OSError as e:
             return {'success': False, 'error': f'Failed to move: {str(e)}'}
     
+    @x_ipe_tracing()
     def duplicate_item(self, path: str) -> Dict[str, Any]:
         """
         Duplicate file or folder with -copy suffix.
@@ -729,6 +743,7 @@ class IdeasService:
         new_path = str(copy_path.relative_to(self.ideas_root))
         return {'success': True, 'new_path': new_path}
     
+    @x_ipe_tracing()
     def get_folder_contents(self, folder_path: str) -> Dict[str, Any]:
         """
         Get contents of a specific folder for folder view panel.
@@ -793,6 +808,7 @@ class IdeasService:
         folder_path_result = str(full_path.relative_to(self.project_root)) if full_path != self.ideas_root else self.IDEAS_PATH
         return {'success': True, 'items': items, 'folder_path': folder_path_result}
     
+    @x_ipe_tracing()
     def is_valid_drop_target(self, source_path: str, target_folder: str) -> bool:
         """
         Validate that target is not source or child of source.
@@ -837,6 +853,7 @@ class IdeasService:
         
         return True
     
+    @x_ipe_tracing()
     def filter_tree(self, query: str) -> List[Dict]:
         """
         Filter tree by search query, returning matching items with parent context.
@@ -890,6 +907,7 @@ class IdeasService:
         
         return any_match
     
+    @x_ipe_tracing()
     def get_download_info(self, path: str) -> Dict[str, Any]:
         """
         Get file content and mime type for download.
@@ -962,6 +980,7 @@ class IdeasService:
         except OSError as e:
             return {'success': False, 'error': f'Failed to read file: {str(e)}'}
     
+    @x_ipe_tracing()
     def get_delete_info(self, path: str) -> Dict[str, Any]:
         """
         Get item info for delete confirmation dialog.

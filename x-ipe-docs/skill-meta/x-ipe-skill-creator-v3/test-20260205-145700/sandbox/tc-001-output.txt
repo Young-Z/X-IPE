@@ -1,0 +1,10 @@
+=== TC-001: Template Files Check ===
+Files found in candidate/templates/:
+- task-type-skill.md (6455 bytes)
+- tool-skill.md (7743 bytes)
+- workflow-skill.md (8841 bytes)
+- meta-skill.md (7207 bytes)
+
+Expected: 4 template files
+Actual: 4 template files
+All files present: YES

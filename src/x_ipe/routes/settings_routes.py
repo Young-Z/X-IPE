@@ -12,6 +12,8 @@ Provides:
 import os
 from flask import Blueprint, render_template, jsonify, request, current_app
 
+from x_ipe.tracing import x_ipe_tracing
+
 settings_bp = Blueprint('settings', __name__)
 
 
@@ -21,6 +23,7 @@ def get_settings_service():
 
 
 @settings_bp.route('/settings')
+@x_ipe_tracing()
 def settings_page():
     """
     GET /settings
@@ -33,6 +36,7 @@ def settings_page():
 
 
 @settings_bp.route('/api/settings', methods=['GET'])
+@x_ipe_tracing()
 def get_settings():
     """
     GET /api/settings
@@ -50,6 +54,7 @@ def get_settings():
 
 
 @settings_bp.route('/api/settings', methods=['POST'])
+@x_ipe_tracing()
 def save_settings():
     """
     POST /api/settings
@@ -96,6 +101,7 @@ def save_settings():
 
 
 @settings_bp.route('/api/config', methods=['GET'])
+@x_ipe_tracing()
 def get_config():
     """
     GET /api/config

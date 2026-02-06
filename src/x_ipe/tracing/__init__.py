@@ -24,6 +24,7 @@ from .context import TraceContext
 from .buffer import TraceBuffer, TraceEntry
 from .writer import TraceLogWriter
 from .redactor import Redactor
+from .middleware import init_tracing_middleware
 
 __all__ = [
     'x_ipe_tracing',
@@ -32,4 +33,5 @@ __all__ = [
     'TraceEntry',
     'TraceLogWriter',
     'Redactor',
+    'init_tracing_middleware',
 ]

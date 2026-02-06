@@ -111,42 +111,53 @@ QualityEvaluation:
   health_status: healthy | attention_needed | critical
   
   # Feature-Level Evaluations
+  # Each dimension scored 1-10 based on principle violations and importance
+  # Status derived: 8-10 = aligned, 6-7 = needs_attention, 1-5 = critical
   features:
     - feature_id: FEATURE-XXX
       feature_name: "<name>"
-      status: aligned | needs_attention | critical | planned | not_evaluated
+      feature_score: <1-10>
+      status: aligned | needs_attention | critical | planned
       
       requirements_alignment:
-        status: aligned | needs_update | not_found | planned
+        score: <1-10>  # Calculated from violations × importance weights
+        status: aligned | needs_attention | critical | planned
         requirement_docs: [<paths>]
         gaps:
           - type: undocumented | unimplemented | deviated
             description: "<gap description>"
             severity: high | medium | low
+            importance_weight: <0.5-3>  # Based on principle importance
       
       specification_alignment:
-        status: aligned | needs_update | not_found | planned
+        score: <1-10>
+        status: aligned | needs_attention | critical | planned
         spec_doc: "<path>"
         gaps:
           - type: missing | outdated | incorrect
             description: "<gap description>"
             severity: high | medium | low
+            importance_weight: <0.5-3>
       
       test_coverage:
-        status: sufficient | insufficient | no_tests
+        score: <1-10>
+        status: aligned | needs_attention | critical
         line_coverage: <XX%>
         branch_coverage: <XX%>
         critical_untested:
           - area: "<untested area>"
             risk: high | medium | low
+            importance_weight: <0.5-3>
       
       code_alignment:
-        status: aligned | drifted | major_drift
+        score: <1-10>
+        status: aligned | needs_attention | critical
         implementation_files: [<paths>]
         gaps:
           - type: structure | behavior | interface
             description: "<gap description>"
             severity: high | medium | low
+            importance_weight: <0.5-3>
   
   # Aggregated Gaps
   priority_gaps:
@@ -235,6 +246,7 @@ QualityEvaluation:
         - Test Coverage Violations section
         - Code Alignment Violations section
         - Tracing Coverage Violations section (FEATURE-023-D)
+        - Security Violations section
    e. Files Approaching Threshold
    f. Priority Gaps Summary
    g. Recommendations
@@ -250,7 +262,19 @@ QualityEvaluation:
    c. SAVE new report to x-ipe-docs/quality-evaluation/project-quality-evaluation.md
    d. UPDATE evaluated date in header
 
-7. RETURN evaluation summary
+7. SELF-REVIEW report:
+   a. READ the generated report completely
+   b. CHECK for:
+      - Missing content or sections
+      - Inconsistencies between summary and details
+      - Features mentioned but not evaluated
+      - Gaps without proper severity assignment
+      - Recommendations that don't match identified gaps
+   c. IF problems found:
+      - FIX the issues in the report
+      - Note corrections made
+
+8. RETURN evaluation summary
 ```
 
 ### Report Structure Rules
@@ -263,12 +287,13 @@ RULE 1: Evaluation Principles section
 
 RULE 2: Violation Details section
   - MUST be organized by feature
-  - EACH feature section MUST have 5 subsections:
+  - EACH feature section MUST have 6 subsections:
     - Requirements Violations
     - Specification Violations
     - Test Coverage Violations
     - Code Alignment Violations
     - Tracing Coverage Violations (FEATURE-023-D)
+    - Security Violations
   - ONLY show features that have violations
   - Show "No violations" if a category is clean
 
@@ -281,6 +306,14 @@ RULE 4: Tracing Coverage Evaluation (FEATURE-023-D)
   - Check: All sensitive parameters (password, token, secret, key) have redact=[]
   - Levels: API endpoints = INFO, Business logic = INFO, Utilities = DEBUG
   - Report: List untraced functions and unredacted sensitive params
+
+RULE 5: Security Coverage Evaluation
+  - Check: Input validation on all user-facing endpoints
+  - Check: No hardcoded secrets, tokens, or credentials in code
+  - Check: Proper authentication/authorization on protected routes
+  - Check: SQL injection and XSS prevention measures
+  - Check: Secure handling of sensitive data (encryption, hashing)
+  - Report: List security violations with severity
 ```
 
 ### Operation 2: Update Existing Report
@@ -334,289 +367,26 @@ RULE 4: Tracing Coverage Evaluation (FEATURE-023-D)
 
 ## Evaluation Principles
 
-### Requirements Evaluation Principles
+See [references/evaluation-principles.md](references/evaluation-principles.md) for complete evaluation principles, thresholds, and score calculation formulas.
 
-| Principle | Threshold | Description |
-|-----------|-----------|-------------|
-| Completeness | 100% | Every implemented feature must have documented requirements |
-| Traceability | Required | Requirements should trace to features and code |
-| Clarity | No ambiguity | Requirements should be specific and testable |
-| Currency | < 30 days | Requirements updated within 30 days of code changes |
-
-### Specification Evaluation Principles
-
-| Principle | Threshold | Description |
-|-----------|-----------|-------------|
-| API Documentation | Required | All public APIs must be documented |
-| Behavior Specification | Required | Expected behaviors clearly defined |
-| Edge Cases | Documented | Error handling and edge cases specified |
-| Version Alignment | Match | Spec version should match implementation version |
-
-### Test Coverage Evaluation Principles
-
-| Principle | Threshold | Description |
-|-----------|-----------|-------------|
-| Line Coverage | ≥ 80% | Minimum line coverage for production code |
-| Branch Coverage | ≥ 70% | Minimum branch/decision coverage |
-| Critical Path Coverage | 100% | Core business logic must be fully tested |
-| Error Handler Coverage | ≥ 90% | Exception and error paths tested |
-| Test Isolation | Required | Tests should not depend on external services |
-| Mock External APIs | Required | External API calls must be mocked in tests |
-
-### Code Alignment Evaluation Principles
-
-| Principle | Threshold | Description |
-|-----------|-----------|-------------|
-| **File Size** | ≤ 800 lines | Single file should not exceed 800 lines |
-| **Function Size** | ≤ 50 lines | Single function should not exceed 50 lines |
-| **Class Size** | ≤ 500 lines | Single class should not exceed 500 lines |
-| **Cyclomatic Complexity** | ≤ 10 | Function complexity should be manageable |
-| **SRP (Single Responsibility)** | 1 reason to change | Each module/class has one responsibility |
-| **OCP (Open/Closed)** | Extensible | Open for extension, closed for modification |
-| **LSP (Liskov Substitution)** | Substitutable | Subtypes must be substitutable for base types |
-| **ISP (Interface Segregation)** | Focused | Clients shouldn't depend on unused interfaces |
-| **DIP (Dependency Inversion)** | Abstracted | Depend on abstractions, not concretions |
-| **DRY (Don't Repeat Yourself)** | No duplication | Avoid code duplication across modules |
-| **KISS (Keep It Simple)** | Simple solutions | Prefer simple over complex implementations |
-| **YAGNI** | No unused code | Don't implement features until needed |
-| **Modular Design** | Cohesive modules | Code organized into focused, reusable modules |
-| **Naming Conventions** | Consistent | Follow language-specific naming conventions |
-| **Import Organization** | Grouped | Imports organized by type (stdlib, external, internal) |
-
-### KISS Principle Assessment
-
-| Check | Threshold | Description |
-|-------|-----------|-------------|
-| Avoid Over-Engineering | No unnecessary abstractions | Don't add layers without clear benefit |
-| Straightforward Logic | Linear flow preferred | Avoid convoluted control flow |
-| Minimal Dependencies | Only necessary imports | Don't import unused libraries |
-| Clear Intent | Self-documenting code | Code should express intent without excessive comments |
-| Simple Data Structures | Use built-in types | Avoid custom types when built-ins suffice |
-
-### Modular Design Assessment
-
-| Check | Threshold | Description |
-|-------|-----------|-------------|
-| **Module Cohesion** | High cohesion | Related functions grouped in same module |
-| **Module Coupling** | Loose coupling | Modules minimize dependencies on each other |
-| **Single Entry Point** | One public API | Each module has clear public interface |
-| **Folder Structure** | Logical grouping | Files organized by feature or layer |
-| **Reusability** | Portable modules | Modules can be reused in different contexts |
-| **Testability** | Independently testable | Each module can be tested in isolation |
-
-**Modular Design Patterns:**
-
-| Pattern | When to Apply | Example |
-|---------|---------------|---------|
-| Feature Modules | Large files > 800 lines | Split `app.py` → `routes/api.py`, `routes/views.py` |
-| Service Layer | Business logic mixed with routes | Extract to `services/` folder |
-| Component Split | UI file > 500 lines | Split into sub-components |
-| Utility Extraction | Repeated helper functions | Create `utils/` or `lib/` folder |
-
-### Code Smell Detection
-
-| Smell | Detection Rule | Severity |
-|-------|----------------|----------|
-| God Class | Class > 500 lines OR > 20 methods | High |
-| Long Method | Function > 50 lines | Medium |
-| Large File | File > 800 lines | Medium |
-| Deep Nesting | > 4 levels of indentation | Medium |
-| Too Many Parameters | Function > 5 parameters | Low |
-| Magic Numbers | Hardcoded values without constants | Low |
-| Dead Code | Unused functions/variables | Low |
-| Duplicate Code | Similar code blocks > 10 lines | Medium |
+**Key Thresholds:**
+- Test Line Coverage: ≥ 80%
+- File Size: ≤ 800 lines
+- Function Size: ≤ 50 lines
+- Tracing Coverage: ≥ 90%
 
 ---
 
 ## Evaluation Procedures
 
-### Procedure: Evaluate Requirements Alignment
-
-```
-1. LOCATE requirement docs:
-   - x-ipe-docs/requirements/requirement-summary.md
-   - x-ipe-docs/requirements/requirement-details.md
-   - Any docs referencing feature
-
-2. FOR EACH requirement related to feature:
-   a. CHECK if requirement is documented
-   b. CHECK if requirement is implemented in code
-   c. IDENTIFY deviations between doc and implementation
-
-3. CLASSIFY gaps:
-   - undocumented: Implemented but not in requirements
-   - unimplemented: In requirements but not implemented
-   - deviated: Implementation differs from requirement
-
-4. ASSIGN severity:
-   - high: Core functionality affected
-   - medium: Secondary functionality affected
-   - low: Minor/edge cases
-```
-
-### Procedure: Evaluate Specification Alignment
-
-```
-1. LOCATE specification:
-   - x-ipe-docs/requirements/FEATURE-XXX/specification.md
-
-2. IF specification exists:
-   a. EXTRACT expected behaviors
-   b. COMPARE with actual implementation
-   c. IDENTIFY gaps (missing | outdated | incorrect)
-   
-3. IF specification missing (empty feature folder):
-   a. CHECK if any related implementation exists in codebase
-   b. IF no implementation found:
-      - status: planned
-      - NOT a gap - just indicates future work needed
-      - Do NOT count as critical or high priority gap
-   c. IF implementation exists without specification:
-      - status: not_found
-      - Add gap: "Implementation exists but specification missing"
-      - severity: medium (documentation debt)
-```
-
-### Procedure: Evaluate Test Coverage
-
-```
-1. IDENTIFY test files for feature:
-   - tests/**/test_*{feature_name}*
-   - tests/**/*{feature_name}*_test.*
-
-2. RUN coverage analysis:
-   - Python: pytest --cov
-   - Node.js: npm test -- --coverage
-   - Go: go test -cover
-
-3. EXTRACT metrics:
-   - Line coverage %
-   - Branch coverage %
-   - Untested functions/areas
-
-4. IDENTIFY critical untested areas:
-   - Business logic paths
-   - Error handlers
-   - Edge cases
-
-5. DETERMINE status:
-   - sufficient: ≥80% line coverage, no critical gaps
-   - insufficient: <80% or has critical gaps
-   - no_tests: No test files found
-```
-
-### Procedure: Evaluate Code Alignment
-
-```
-1. LOCATE technical design:
-   - x-ipe-docs/requirements/FEATURE-XXX/technical-design.md
-
-2. IF technical design exists:
-   a. EXTRACT expected:
-      - File structure
-      - Component interfaces
-      - Data models
-   b. COMPARE with actual implementation
-   c. IDENTIFY gaps:
-      - structure: File/folder organization differs
-      - behavior: Logic differs from design
-      - interface: API/interface differs
-
-3. DETERMINE status:
-   - aligned: No significant gaps
-   - drifted: Minor gaps exist
-   - major_drift: Critical gaps exist
-```
-
-### Procedure: Generate Refactoring Suggestions
-
-**Integrates with:** `task-type-refactoring-analysis` skill
-
-```
-1. ANALYZE gaps from all 4 perspectives:
-   - Collect all gaps with severity high/medium
-   - Group gaps by feature
-
-2. FOR EACH feature with gaps:
-   a. IDENTIFY applicable principles (from task-type-refactoring-analysis):
-      - Large files/classes → SRP, SOLID
-      - Duplicated code → DRY
-      - Complex logic → KISS
-      - Unused code → YAGNI
-      - Mixed concerns → SoC (Separation of Concerns)
-   
-   b. FORMULATE goals based on gaps:
-      - requirements gaps → Suggest documentation sync or code alignment
-      - specification gaps → Suggest spec update or implementation fix
-      - test coverage gaps → Suggest test-first approach
-      - code alignment gaps → Suggest structural refactoring
-   
-   c. DEFINE target structure:
-      - Describe desired code organization after fixes
-      - Note key structural changes needed
-   
-   d. IDENTIFY constraints:
-      - Backward compatibility requirements
-      - API stability requirements
-      - Dependencies to preserve
-
-3. COMPILE refactoring_suggestion for feature:
-   summary: "<derived from gap analysis>"
-   goals:
-     - goal: "<specific goal from gap>"
-       priority: <based on gap severity>
-       rationale: "<from gap description>"
-   target_structure: "<desired end state>"
-   
-   principles:
-     primary: [<principles with applications>]
-     secondary: [<supporting principles>]
-     constraints: [<identified constraints>]
-
-4. IF no gaps found for feature:
-   - Set has_suggestions: false for that feature
-   - Skip suggestion generation
-```
-
----
-
-## Score Calculation
-
-### Feature Score (1-10)
-
-```
-feature_score = weighted_average(
-  requirements_alignment: weight=0.25,
-  specification_alignment: weight=0.25,
-  test_coverage: weight=0.25,
-  code_alignment: weight=0.25
-)
-
-Status to score mapping:
-- aligned/sufficient: 10
-- planned: N/A (exclude from scoring - future work)
-- needs_update/insufficient: 5
-- not_found/no_tests/major_drift: 2
-- critical: 1
-
-Note: Features with status "planned" (empty folder, no implementation) 
-are EXCLUDED from overall score calculation as they represent future 
-work, not quality issues.
-```
-
-### Overall Score (1-10)
-
-```
-overall_score = average(all feature_scores WHERE status != "planned")
-```
-
-### Health Status
-
-```
-IF overall_score >= 8: healthy
-ELSE IF overall_score >= 5: attention_needed
-ELSE: critical
-```
+See [references/evaluation-procedures.md](references/evaluation-procedures.md) for detailed step-by-step procedures for each evaluation perspective:
+- Requirements Alignment
+- Specification Alignment
+- Test Coverage
+- Code Alignment
+- Tracing Coverage
+- Security Evaluation
+- Refactoring Suggestions
 
 ---
 
@@ -644,6 +414,7 @@ Template structure:
 | 4 | Overall score calculated | Yes |
 | 5 | Report generated in correct location | Yes |
 | 6 | Latest report link updated | Yes |
+| 7 | Report self-review completed (check for problems or missing content) | Yes |
 
 ---
 

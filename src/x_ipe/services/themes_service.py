@@ -10,6 +10,8 @@ import re
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
+from x_ipe.tracing import x_ipe_tracing
+
 
 THEMES_DIR = 'x-ipe-docs/themes'
 THEME_PREFIX = 'theme-'
@@ -45,6 +47,7 @@ class ThemesService:
         self.project_root = Path(project_root).resolve()
         self.themes_dir = self.project_root / THEMES_DIR
     
+    @x_ipe_tracing()
     def list_themes(self) -> List[Dict[str, Any]]:
         """
         List all valid themes with metadata.
@@ -92,6 +95,7 @@ class ThemesService:
         
         return themes
     
+    @x_ipe_tracing()
     def get_theme(self, name: str) -> Optional[Dict[str, Any]]:
         """
         Get detailed information about a specific theme.

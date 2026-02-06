@@ -197,88 +197,23 @@ Execute Technical Design by following these steps in order:
 
 Technical design documents MUST use this two-part structure. Adapt content based on implementation type (API, CLI, frontend, backend, etc.).
 
-### Part 1: Agent-Facing Summary
-
-> **Purpose:** Enable AI agents to quickly understand and reference designs across large projects.
-> 
-> **📌 Note for AI Coders:** Focus primarily on Part 1 for implementation. Part 2 is supplementary for complex scenarios.
-
-**Required Elements:**
-- **Key Components Implemented:** What modules/classes/services were created or modified
-- **Scope & Boundaries:** What this design covers and what it doesn't
-- **Dependencies:** Components from other features/foundation this feature relies on
-- **Major Flow:** High-level description of how components interact
-- **Usage Example:** Code snippet showing how to use the implemented feature
-
----
-
-### Mockup Reference (Conditional)
-
-**🎨 When to Use Mockup List:**
-```
-IF Mockup List != N/A AND Technical Scope in specification.md includes [Frontend] OR [Full Stack]:
-  1. OPEN and analyze the Mockup List file(s)
-  2. Extract UI requirements from mockup:
-     - Component hierarchy and structure
-     - State management requirements
-     - Event handlers and user interactions
-     - CSS/styling approach
-  3. Design frontend components based on mockup
-  4. Include mockup-derived requirements in Part 2 Implementation Guide
-  5. Reference mockup filenames in design decisions
-
-ELSE IF Mockup List == N/A AND specification.md has "Linked Mockups" section:
-  1. MUST review "Linked Mockups" section in specification.md
-  2. Open and analyze each linked mockup file
-  3. Follow same extraction process as above
-
-ELSE (Backend/API Only/Database/Infrastructure OR no mockups available):
-  - Skip mockup reference
-  - Focus on service architecture, data models, APIs
-```
-
-**Design Document Note:**
-When Technical Scope includes frontend, Part 2 SHOULD include:
-- UI Component breakdown
-- State management strategy
-- Mockup-to-component mapping
+| Part | Purpose | Focus |
+|------|---------|-------|
+| Part 1: Agent-Facing Summary | Quick reference for AI agents | Key components, dependencies, major flow, usage example |
+| Part 2: Implementation Guide | Human-readable details | Workflow diagrams, data models, API specs, implementation steps |
 
 **Format Guidelines:**
-- Use tables for component listings (Component | Responsibility | Scope/Impact | Tags)
-- Use dependency table for cross-feature/foundation dependencies
-- Tags enable semantic search across project designs
-- Keep concise - this is a reference summary, not documentation
+- Use tables for component listings with Tags for semantic search
+- Include dependency table linking to other feature/foundation designs
+- Prioritize Mermaid diagrams for visual comprehension
 
-**Dependency Table Format:**
-| Dependency | Source | Design Link | Usage Description (≤50 words) |
-|------------|--------|-------------|-------------------------------|
-| `AuthService` | FEATURE-001 | [technical-design.md](../FEATURE-001/technical-design.md) | Used for user authentication before accessing protected endpoints |
-| `DatabaseManager` | Foundation | [database.md](../../architecture/technical-designs/database.md) | Provides connection pooling and query execution |
-
-### Part 2: Human-Readable Implementation Guide
-
-> **Purpose:** Detailed guide for developers to understand and implement the design.
-> 
-> **📌 Note:** This section emphasizes visual diagrams and step-by-step guidance for human comprehension.
-
-**Include as needed based on implementation type:**
-- **Workflow Diagrams:** Mermaid sequence/flow diagrams for visual understanding (REQUIRED for complex flows)
-- **Data Models:** Schema definitions, type structures
-- **API/Interface Specs:** Endpoints, CLI commands, function signatures
-- **Implementation Steps:** Ordered tasks to build the feature
-- **Edge Cases:** Error handling, boundary conditions
-
-**Format Guidelines:**
-- **Prioritize visualization** - Use Mermaid diagrams liberally for:
-  - Sequence diagrams for API/service interactions
-  - Flowcharts for decision logic
-  - Entity-relationship diagrams for data models
-  - State diagrams for stateful components
-- Adapt sections to implementation type:
-  - API-based: Focus on endpoints, request/response, auth
-  - CLI-based: Focus on commands, flags, output formats
-  - Frontend: Focus on components, state, user interactions
-  - Backend: Focus on services, data flow, integrations
+> 📚 **See [references/design-templates.md](references/design-templates.md) for:**
+> - Full document template with examples
+> - Part 1 & Part 2 detailed guidelines
+> - Dependency table format
+> - Mockup reference guidelines
+> - API/Data model examples
+> - Mermaid diagram examples
 
 ---
 
@@ -291,34 +226,13 @@ When Technical Scope includes frontend, Part 2 SHOULD include:
 
 ---
 
-## ⚠️ Single File with Version History (IMPORTANT)
+## ⚠️ Single File with Version History
 
 **Rule:** Maintain ONE technical design file per feature with version history inside.
 
-**DO NOT create versioned files like:**
-- ❌ `technical-design-v2.md`
-- ❌ `technical-design-v1.md`
-
-**Instead:**
-- ✅ Keep single `technical-design.md` file
-- ✅ Add/update Version History table at the top
-- ✅ Update content in place with new version
-
-**Version History Format (add at top of document after header):**
-```markdown
-## Version History
-
-| Version | Date | Description |
-|---------|------|-------------|
-| v2.0 | 01-22-2026 | Major upgrade: xterm.js, session persistence, split-pane |
-| v1.0 | 01-18-2026 | Initial design with VanillaTerminal |
-```
-
-**When updating existing design:**
-1. Increment version in document header (v1.0 → v2.0)
-2. Add new row to Version History table
-3. Update design content in place
-4. Keep the same filename: `technical-design.md`
+- ❌ Do NOT create versioned files like `technical-design-v2.md`
+- ✅ Keep single `technical-design.md` with Version History table at top
+- ✅ Update content in place, increment version header
 
 ---
 
@@ -394,111 +308,10 @@ DOCUMENT findings for design decisions
 
 **Adapt structure based on implementation type** (API, CLI, frontend, backend, etc.)
 
-**Example Structure:**
-
-```markdown
-# Technical Design: {Feature Title}
-
-> Feature ID: FEATURE-XXX | Version: v1.0 | Last Updated: YYYY-MM-DD
-
----
-
-## Part 1: Agent-Facing Summary
-
-> **Purpose:** Quick reference for AI agents navigating large projects.
-> **📌 AI Coders:** Focus on this section for implementation context.
-
-### Key Components Implemented
-
-| Component | Responsibility | Scope/Impact | Tags |
-|-----------|----------------|--------------|------|
-| `AuthService` | User authentication | Login flow across apps | #auth #security #core |
-| `TokenManager` | JWT generation/validation | Session management | #auth #jwt |
-
-### Dependencies
-
-| Dependency | Source | Design Link | Usage Description |
-|------------|--------|-------------|-------------------|
-| `UserRepository` | FEATURE-001 | [technical-design.md](../FEATURE-001/technical-design.md) | Query user records for credential validation |
-| `ConfigManager` | Foundation | [config.md](../../architecture/technical-designs/config.md) | Load JWT secret and token expiry settings |
-
-### Major Flow
-
-1. Client submits credentials → AuthService validates → TokenManager generates JWT → Response returned
-2. Subsequent requests include JWT → TokenManager validates → Access granted/denied
-
-### Usage Example
-
-```python
-# Authentication flow
-auth = AuthService()
-token = auth.login(email="user@test.com", password="secure")
-
-# Using the token
-api.set_auth_header(token.access_token)
-response = api.get("/protected-resource")
-```
-
----
-
-## Part 2: Implementation Guide
-
-> **Purpose:** Human-readable details for developers.
-> **📌 Emphasis on visual diagrams for comprehension.
-
-### Workflow Diagram
-
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant A as AuthAPI
-    participant S as AuthService
-    participant T as TokenManager
-    
-    C->>A: POST /login
-    A->>S: authenticate(email, password)
-    S->>T: generate_tokens(user)
-    T-->>S: TokenPair
-    S-->>A: Token
-    A-->>C: 200 OK + Token
-```
-
-### [Data Models / API Specs / CLI Commands - adapt to implementation type]
-
-(Content varies based on whether this is API, CLI, frontend, etc.)
-
-### Implementation Steps
-
-1. **{Layer}:** [Tasks]
-2. **{Layer}:** [Tasks]
-
-### Edge Cases & Error Handling
-
-| Scenario | Expected Behavior |
-|----------|-------------------|
-| Invalid password | 401 Unauthorized |
-| Rate limit exceeded | 429 Too Many Requests |
-
----
-
-## Design Change Log
-
-| Date | Phase | Change Summary |
-|------|-------|----------------|
-| {YYYY-MM-DD} | Initial Design | Initial technical design created. |
-```
-
----
-
-## Design Change Log Format
-
-When the technical design needs to be updated (during implementation, bug fix, or feature extension), add an entry:
-
-| Date | Phase | Change Summary |
-|------|-------|----------------|
-| YYYY-MM-DD | {Phase where change occurred} | {Summary in ~100 words: what changed, why it changed, impact on components} |
-
-**Valid Phases:** Technical Design, Test Generation, Code Implementation, Bug Fix, Feature Extension
+> 📚 **Use templates from [references/design-templates.md](references/design-templates.md)** for:
+> - Full document template structure
+> - API/CLI/Frontend adaptations
+> - Mockup integration guidelines
 
 ---
 
@@ -510,10 +323,11 @@ When the technical design needs to be updated (during implementation, bug fix, o
 | 2 | Part 1 has component table with tags | Yes |
 | 3 | Part 1 has usage example | Yes |
 | 4 | Part 2 has workflow diagrams (Mermaid) | Recommended |
-| 5 | Part 2 adapted to implementation type | Yes |
-| 6 | KISS/YAGNI/DRY principles followed | Yes |
-| 7 | Mockup List analyzed (if provided AND frontend scope) | If Applicable |
-| 8 | UI components derived from mockup (if frontend scope) | If Applicable |
+| 5 | Part 2 has class diagram (Mermaid) | Recommended |
+| 6 | Part 2 adapted to implementation type | Yes |
+| 7 | KISS/YAGNI/DRY principles followed | Yes |
+| 8 | Mockup List analyzed (if provided AND frontend scope) | If Applicable |
+| 9 | UI components derived from mockup (if frontend scope) | If Applicable |
 
 **Important:** After completing this skill, always return to `task-execution-guideline` skill to continue the task execution flow and validate the DoD defined there.
 

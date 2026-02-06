@@ -9,6 +9,12 @@
         "command": "Base on <current-idea-file> to generate layered architecture"
       },
       {
+        "id": "idea-reflection",
+        "label": "Idea Reflection",
+        "icon": "bi-diagram-3",
+        "command": "Extra key points in <current-idea-file>, then create a sub-agent that uses these key points to learn from the project and give feedback to the idea file (the feedback should be critical but constructive), then you use the feedback to improve the idea."
+      },
+      {
         "id": "generate-mockup",
         "label": "Generate Mockup",
         "icon": "bi-palette",
@@ -26,44 +32,44 @@
     "evaluate": {
       "label": "Evaluate Project Quality",
       "icon": "bi-clipboard-check",
-      "command": "Evaluate project quality and generate report to <evaluation-file>"
+      "command": "Evaluate project quality and generate report"
     },
     "refactoring": [
       {
         "id": "refactor-all",
         "label": "Refactor All",
         "icon": "bi-arrow-repeat",
-        "command": "Refactor all with reference to its code"
+        "command": "Refactor all with reference to its code and <evaluation-file>"
       },
       {
         "id": "refactor-requirements",
-        "label": "Refactor Requirements",
+        "label": "Align Requirements to Features",
         "icon": "bi-file-text",
-        "command": "Refactor requirements with reference to its code"
+        "command": "Update requirement docs to match current feature specification"
       },
       {
         "id": "refactor-features",
-        "label": "Refactor Features",
+        "label": "Align Features to Code",
         "icon": "bi-list-check",
-        "command": "Refactor features with reference to its code"
+        "command": "Update feature specification docs to match current code implementation"
       },
       {
         "id": "refactor-tests",
-        "label": "Refactor Tests",
+        "label": "Align Tests to Code",
         "icon": "bi-bug",
-        "command": "Refactor tests with reference to its code"
+        "command": "Update test cases to match current code implementation and reference <evaluation-file>"
       },
       {
         "id": "refactor-tracing-tests",
-        "label": "Refactor Tracing + Tests",
+        "label": "Align Tracing + Tests to Features",
         "icon": "bi-graph-up",
-        "command": "Refactor tracing decorators and tests with reference to its feature"
+        "command": "Update tracing decorators and tests to match current feature specification"
       },
       {
         "id": "refactor-code-tests",
-        "label": "Refactor Code + Tests",
+        "label": "Refactor Code + Tracing + Tests",
         "icon": "bi-code-slash",
-        "command": "Refactor code and tests with reference to its feature"
+        "command": "Refactor code and tests to match current feature specification and reference <evaluation-file>"
       }
     ]
   },

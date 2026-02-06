@@ -1,14 +1,15 @@
 # Feature Specification: Application Action Tracing - Core
 
 > Feature ID: FEATURE-023-A  
-> Version: v1.0  
-> Status: Refined  
-> Last Updated: 02-01-2026
+> Version: v1.1  
+> Status: Implemented  
+> Last Updated: 02-02-2026
 
 ## Version History
 
 | Version | Date | Description |
 |---------|------|-------------|
+| v1.1 | 02-02-2026 | Updated AC status - all core tracing implemented |
 | v1.0 | 02-01-2026 | Initial specification - Phase 1 Core Tracing |
 
 ## Linked Mockups

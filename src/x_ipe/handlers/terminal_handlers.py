@@ -11,6 +11,7 @@ Provides WebSocket handlers for:
 from flask import request
 
 from x_ipe.services import session_manager
+from x_ipe.tracing import x_ipe_tracing
 
 # Socket SID to Session ID mapping
 socket_to_session = {}
@@ -20,12 +21,14 @@ def register_terminal_handlers(socketio):
     """Register WebSocket event handlers for terminal."""
     
     @socketio.on('connect')
+    @x_ipe_tracing()
     def handle_connect():
         """Handle new WebSocket connection."""
         sid = request.sid
         print(f"[Terminal] Client connected: {sid}")
     
     @socketio.on('attach')
+    @x_ipe_tracing()
     def handle_attach(data):
         """
         Handle session attachment.
@@ -75,6 +78,7 @@ def register_terminal_handlers(socketio):
             socketio.emit('error', {'message': 'Failed to attach terminal session'}, room=sid)
     
     @socketio.on('disconnect')
+    @x_ipe_tracing()
     def handle_disconnect():
         """Handle WebSocket disconnection - keep session alive."""
         try:
@@ -91,6 +95,7 @@ def register_terminal_handlers(socketio):
             print(f"[Terminal] Error in disconnect handler: {e}")
     
     @socketio.on('input')
+    @x_ipe_tracing()
     def handle_input(data):
         """Forward input to PTY."""
         try:
@@ -105,6 +110,7 @@ def register_terminal_handlers(socketio):
             print(f"[Terminal] Error in input handler: {e}")
     
     @socketio.on('resize')
+    @x_ipe_tracing()
     def handle_resize(data):
         """Handle terminal resize."""
         try:

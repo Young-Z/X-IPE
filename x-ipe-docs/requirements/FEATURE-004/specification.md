@@ -1,14 +1,15 @@
 # Feature Specification: Live Refresh
 
 > Feature ID: FEATURE-004  
-> Version: v1.0  
-> Status: Refined  
-> Last Updated: 01-19-2026
+> Version: v1.1  
+> Status: Partially Implemented  
+> Last Updated: 02-02-2026
 
 ## Version History
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
+| v1.1 | 02-02-2026 | Updated AC status to match implementation - 7/11 complete | - |
 | v1.0 | 01-19-2026 | Initial specification | - |
 
 ## Overview
@@ -33,17 +34,17 @@ The experience is designed to be non-intrusive: content updates smoothly, a subt
 
 ## Acceptance Criteria
 
-- [ ] AC-1: Content viewer automatically refreshes when the currently viewed file is modified on disk
-- [ ] AC-2: Refresh occurs within 2 seconds of file modification (including debounce)
+- [x] AC-1: Content viewer automatically refreshes when the currently viewed file is modified on disk
+- [x] AC-2: Refresh occurs within 2 seconds of file modification (including debounce)
 - [ ] AC-3: A subtle visual indicator (e.g., fade animation, toast notification) confirms content was refreshed
 - [ ] AC-4: User's scroll position is preserved after refresh (when content length allows)
-- [ ] AC-5: If the currently viewed file is deleted, display a "File not found" message with navigation prompt
-- [ ] AC-6: Rapid successive file changes are debounced (only last state is rendered)
+- [x] AC-5: If the currently viewed file is deleted, display a "File not found" message with navigation prompt
+- [x] AC-6: Rapid successive file changes are debounced (only last state is rendered)
 - [ ] AC-7: Live refresh can be toggled on/off via UI control (default: on)
 - [ ] AC-8: Refresh does not interrupt user if they are actively scrolling (brief delay)
-- [ ] AC-9: Works for all supported file types (Markdown, code files, JSON, YAML, etc.)
-- [ ] AC-10: WebSocket reconnection automatically restores live refresh capability
-- [ ] AC-11: No full page reload required - only content area updates
+- [x] AC-9: Works for all supported file types (Markdown, code files, JSON, YAML, etc.)
+- [x] AC-10: WebSocket reconnection automatically restores live refresh capability
+- [x] AC-11: No full page reload required - only content area updates
 
 ## Functional Requirements
 

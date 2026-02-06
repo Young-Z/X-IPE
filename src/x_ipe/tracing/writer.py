@@ -8,7 +8,7 @@ and cleanup of old log files.
 """
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -56,7 +56,7 @@ class TraceLogWriter:
             self.log_path.mkdir(parents=True, exist_ok=True)
             
             # Calculate total duration
-            total_ms = (datetime.utcnow() - buffer.started_at).total_seconds() * 1000
+            total_ms = (datetime.now(timezone.utc) - buffer.started_at).total_seconds() * 1000
             content = buffer.to_log_string(status, total_ms)
             
             # Generate filename
@@ -92,7 +92,7 @@ class TraceLogWriter:
             return 0
         
         deleted = 0
-        cutoff = datetime.utcnow().timestamp() - (retention_hours * 3600)
+        cutoff = datetime.now(timezone.utc).timestamp() - (retention_hours * 3600)
         
         for filepath in self.log_path.glob("*.log"):
             try:

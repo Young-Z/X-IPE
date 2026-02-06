@@ -1,14 +1,15 @@
 # FEATURE-009: File Change Indicator
 
-> Version: v1.0  
-> Status: Refined  
+> Version: v1.1  
+> Status: Partially Implemented  
 > Created: 01-22-2026  
-> Last Updated: 01-22-2026
+> Last Updated: 02-02-2026
 
 ## Version History
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
+| v1.1 | 02-02-2026 | Updated status - backend mtime tracking implemented | - |
 | v1.0 | 01-22-2026 | Initial specification | - |
 
 ## Overview

@@ -1,0 +1,15 @@
+=== TC-003: Example Count ===
+
+File: references/examples.md
+Example headers found: 5
+
+Examples:
+1. Example 1: Create Task Type Skill
+2. Example 2: Create Tool Skill
+3. Example 3: Create Workflow Orchestration Skill
+4. Example 4: Update Skill from Lessons
+5. Example 5: Skill Creation Failure and Iteration
+
+Required minimum: 3
+Actual count: 5
+Criteria met: YES

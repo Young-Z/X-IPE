@@ -11,6 +11,8 @@ import copy
 from pathlib import Path
 from typing import Dict, Any
 
+from x_ipe.tracing import x_ipe_tracing
+
 
 CONFIG_DIR = 'x-ipe-docs/config'
 CONFIG_FILE = 'tools.json'
@@ -56,6 +58,7 @@ class ToolsConfigService:
         self.config_path = self.config_dir / CONFIG_FILE
         self.legacy_path = self.project_root / LEGACY_PATH
     
+    @x_ipe_tracing()
     def load(self) -> Dict[str, Any]:
         """
         Load config, migrating from legacy if needed.
@@ -76,6 +79,7 @@ class ToolsConfigService:
         
         return self._create_default()
     
+    @x_ipe_tracing()
     def save(self, config: Dict[str, Any]) -> bool:
         """
         Save config to file.

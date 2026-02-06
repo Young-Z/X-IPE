@@ -12,6 +12,8 @@ from bs4 import BeautifulSoup
 from dataclasses import dataclass
 from typing import Tuple
 
+from x_ipe.tracing import x_ipe_tracing
+
 ALLOWED_HOSTS = {'localhost', '127.0.0.1'}
 ALLOWED_SCHEMES = {'http', 'https', 'file'}
 PROXY_TIMEOUT = 10  # seconds
@@ -142,6 +144,7 @@ def _is_binary_content_type(content_type: str) -> bool:
 class ProxyService:
     """Service for proxying localhost URLs."""
     
+    @x_ipe_tracing()
     def validate_url(self, url: str) -> Tuple[bool, str]:
         """
         Validate URL is localhost or local file.
@@ -182,6 +185,7 @@ class ProxyService:
         except Exception as e:
             return False, f"Invalid URL format: {str(e)}"
     
+    @x_ipe_tracing()
     def fetch_and_rewrite(self, url: str) -> ProxyResult:
         """
         Fetch URL and rewrite asset paths for proxy.

@@ -119,10 +119,14 @@ class TreeSearchManager {
         const items = this.treeContainer.querySelectorAll('.tree-item');
         
         if (!normalizedQuery) {
-            // Show all items
+            // Show all items and collapse folders
             items.forEach(item => {
                 item.style.display = '';
-                item.classList.remove('search-match', 'search-parent');
+                item.classList.remove('search-match', 'search-parent', 'expanded');
+                const childContainer = item.querySelector('.tree-children');
+                if (childContainer) {
+                    childContainer.style.display = 'none';
+                }
             });
             return;
         }

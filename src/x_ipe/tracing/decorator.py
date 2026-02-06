@@ -10,7 +10,7 @@ import functools
 import time
 import asyncio
 import inspect
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Callable, List, Optional, Any, Dict
 
 from .context import TraceContext
@@ -154,7 +154,7 @@ def _trace_call(
     
     # Log entry
     ctx.buffer.add(TraceEntry(
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         trace_id=ctx.trace_id,
         level=level,
         direction="→",
@@ -174,7 +174,7 @@ def _trace_call(
         
         # Log success
         ctx.buffer.add(TraceEntry(
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             trace_id=ctx.trace_id,
             level=level,
             direction="←",
@@ -191,7 +191,7 @@ def _trace_call(
         
         # Log error
         ctx.buffer.add(TraceEntry(
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             trace_id=ctx.trace_id,
             level="ERROR",
             direction="←",
@@ -232,7 +232,7 @@ async def _trace_call_async(
     
     # Log entry
     ctx.buffer.add(TraceEntry(
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         trace_id=ctx.trace_id,
         level=level,
         direction="→",
@@ -252,7 +252,7 @@ async def _trace_call_async(
         
         # Log success
         ctx.buffer.add(TraceEntry(
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             trace_id=ctx.trace_id,
             level=level,
             direction="←",
@@ -269,7 +269,7 @@ async def _trace_call_async(
         
         # Log error
         ctx.buffer.add(TraceEntry(
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             trace_id=ctx.trace_id,
             level="ERROR",
             direction="←",

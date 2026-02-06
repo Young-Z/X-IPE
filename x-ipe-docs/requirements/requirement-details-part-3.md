@@ -374,6 +374,10 @@ Get uiux feedback, please visit feedback folder x-ipe/uiux-feedback/Feedback-YYY
 | FEATURE-022-B | FEATURE-022-A | Inspector requires loaded browser simulator |
 | FEATURE-022-C | FEATURE-022-B | Feedback capture requires element selection |
 | FEATURE-022-D | FEATURE-022-C | Submission requires feedback entries |
+| FEATURE-023-A | None | Core infrastructure feature |
+| FEATURE-023-B | FEATURE-023-A | Needs tracing API endpoints |
+| FEATURE-023-C | FEATURE-023-B | Extends dashboard with visualization |
+| FEATURE-023-D | FEATURE-023-A | Uses tracing decorators |
 
 ---
 
@@ -555,57 +559,108 @@ As applications grow in complexity, understanding execution flow becomes challen
 
 ---
 
-### FEATURE-023-B: Tracing Dashboard UI (Planned)
+### FEATURE-023-B: Tracing Dashboard UI
 
 **Version:** v1.0  
 **Brief Description:** Web-based dashboard for viewing tracing status, managing trace sessions (start/stop), browsing trace logs, and monitoring active traces.
 
 **Dependencies:** FEATURE-023-A  
-**Mockup:** [Tracing Dashboard v4](../ideas/007.%20Feature-Application%20Action%20Tracing/mockups/tracing-dashboard-v4.html)
+**Mockup:** [Tracing Dashboard v4](../ideas/007.%20Feature-Application%20Action%20Tracing/mockups/tracing-dashboard-v4.html)  
+**Full Specification:** [specification.md](FEATURE-023-B/specification.md)
 
-#### Key Capabilities
+#### Acceptance Criteria Summary
 
-- Tracing on/off toggle with duration selector (3/15/30 min)
-- Countdown timer showing remaining trace time
-- Trace log list with filtering and search
-- Session management (start, stop, clear logs)
-- Integration with Workplace sidebar
+| Category | Count | Key Requirements |
+|----------|-------|------------------|
+| 1. Workplace Integration | 4 AC | Sidebar access, main content display, X-IPE design system |
+| 2. Header Controls | 7 AC | Title, Config button, Ignored APIs, duration buttons (3/15/30 min) |
+| 3. Countdown Timer | 8 AC | MM:SS format, live updates, color coding, stop button |
+| 4. Trace Session Persistence | 5 AC | Persist across refresh via tools.json, resume countdown |
+| 5. Trace List Sidebar | 9 AC | File list, sorting, filtering, selection highlight |
+| 6. Config Modal | 6 AC | Log path, retention settings, save/cancel |
+| 7. Ignored APIs Modal | 6 AC | Add/remove patterns, wildcard support |
+| 8. API Integration | 5 AC | GET /status, POST /start, POST /stop endpoints |
+
+**Total Acceptance Criteria:** ~50
 
 ---
 
-### FEATURE-023-C: Trace Viewer & DAG Visualization (Planned)
+### FEATURE-023-C: Trace Viewer & DAG Visualization
 
 **Version:** v1.0  
 **Brief Description:** Interactive DAG (Directed Acyclic Graph) visualization of traced function calls, showing call hierarchy, timing, and parameters with click-to-expand details.
 
 **Dependencies:** FEATURE-023-B  
-**Mockup:** [Tracing Dashboard v4](../ideas/007.%20Feature-Application%20Action%20Tracing/mockups/tracing-dashboard-v4.html)
+**Mockup:** [Tracing Dashboard v4](../ideas/007.%20Feature-Application%20Action%20Tracing/mockups/tracing-dashboard-v4.html)  
+**Full Specification:** [specification.md](FEATURE-023-C/specification.md)
 
-#### Key Capabilities
+#### Acceptance Criteria Summary
 
-- G6 canvas-based DAG rendering
-- Node colors by execution status (success/error)
-- Click node to view parameters, return value, duration
-- Duration toggle (show/hide timing on nodes)
-- Pan/zoom navigation
-- Export trace as image
+| Category | Count | Key Requirements |
+|----------|-------|------------------|
+| 1. Trace Selection & Loading | 6 AC | Click to load, header with trace ID/status/stats |
+| 2. DAG Graph Rendering | 6 AC | G6 library, dagre layout, auto-fit, empty state |
+| 3. Trace Node Design | 8 AC | Function name, status dot, level badge, timing |
+| 4. Edge Design | 5 AC | Polyline edges, arrows, gray color |
+| 5. Node Detail Modal | 10 AC | Click-to-open, input/output JSON, error details |
+| 6. Zoom/Pan Controls | 5 AC | Zoom buttons, drag pan, fit-to-view, wheel zoom |
+| 7. Duration Toggle | 4 AC | Show/hide timing, persist preference |
+| 8. Error Visualization | 5 AC | Red error nodes, stack trace display |
+| 9. Log File Parsing | 7 AC | Parse TRACE-START/END, function calls, exceptions |
+| 10. Performance | 4 AC | Handle 100+ nodes, lazy rendering, smooth zoom |
+
+**Total Acceptance Criteria:** ~60
 
 ---
 
-### FEATURE-023-D: Tracing Skill Integration (Planned)
+### FEATURE-023-D: Tracing Skill Integration
 
 **Version:** v1.0  
-**Brief Description:** AI skill that automatically adds `@x_ipe_tracing` decorators to functions based on code analysis, respecting existing patterns and configuration.
+**Brief Description:** AI skills for auto-instrumenting code with `@x_ipe_tracing` decorators and integrating tracing into existing X-IPE workflow skills.
 
 **Dependencies:** FEATURE-023-A  
+**Full Specification:** [specification.md](FEATURE-023-D/specification.md)
 
-#### Key Capabilities
+#### Acceptance Criteria Summary
 
-- Analyze codebase for traceable functions
-- Suggest tracing decorator placements
-- Auto-detect sensitive parameters for redaction
-- Batch apply tracing to module/class
-- Respect .x-ipe.yaml tracing configuration
+| Category | Count | Key Requirements |
+|----------|-------|------------------|
+| 1. Skill Definition | 4 AC | SKILL.md at correct path, trigger patterns, procedure |
+| 2. Code Analysis | 7 AC | Analyze files/modules, detect async, skip traced/private |
+| 3. Level Assignment | 5 AC | INFO for public, DEBUG for utils, path-based rules |
+| 4. Sensitive Param Detection | 5 AC | Detect password/token/secret/key, auto-redact |
+| 5. Decorator Application | 5 AC | Correct syntax, add imports, preserve decorators |
+| 6. Batch Operations | 4 AC | Multi-file, summary, exclusions, reporting |
+| 7. Configuration Respect | 3 AC | Read tools.json, respect ignored APIs |
+| 8. Skill Integration Updates | 25 AC | Update 5 existing skills with tracing checks |
+
+**Skills Created:**
+- `tool-tracing-instrumentation` - Add decorators to existing code
+- `tool-tracing-creator` - Create tracing infrastructure for projects
+
+**Skills Updated:**
+- `task-type-code-implementation` - DoR/DoD tracing checks
+- `task-type-test-generation` - Tracing test assertions
+- `task-type-code-refactor-v2` - Preserve tracing during refactor
+- `task-type-refactoring-analysis` - Tracing as 5th quality dimension
+- `project-quality-board-management` - Tracing gap reporting
+
+**Total Acceptance Criteria:** ~58
+
+---
+
+## FEATURE-023 Summary
+
+**Application Action Tracing System** is broken down into 4 sequential features:
+
+| Feature | Title | Status | Dependencies |
+|---------|-------|--------|--------------|
+| FEATURE-023-A | Application Action Tracing - Core | ✅ Completed | None |
+| FEATURE-023-B | Tracing Dashboard UI | ✅ Completed | FEATURE-023-A |
+| FEATURE-023-C | Trace Viewer & DAG Visualization | ✅ Completed | FEATURE-023-B |
+| FEATURE-023-D | Tracing Skill Integration | ✅ Completed | FEATURE-023-A |
+
+**Total Acceptance Criteria:** ~235 (across all sub-features)
 
 ---
 

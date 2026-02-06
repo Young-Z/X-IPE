@@ -1,0 +1,19 @@
+=== TC-004: Emoji and Keyword Check ===
+
+Emoji search (⚠️, ⛔, 🔴, 🟢):
+Count found: 0
+Expected: 0
+Criteria met: YES (no emojis)
+
+BLOCKING/CRITICAL/MANDATORY keywords found:
+1. BLOCKING: Read [skill-general-guidelines-v2.md]...
+2. CRITICAL: SKILL.md body must stay under 500 lines...
+3. MANDATORY: All 4 skill types have complete templates...
+4. CRITICAL: Skip only if patterns already clearly understood
+5. BLOCKING: Both sub-agents must complete before Round 2
+6. MANDATORY: Task type skills must be registered...
+7. CRITICAL: Use a sub-agent to validate DoD checkpoints...
+
+Keyword count: 7+
+Expected: >= 1
+Criteria met: YES (keywords present, no emoji)

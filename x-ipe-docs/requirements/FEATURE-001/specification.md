@@ -1,23 +1,24 @@
 # Feature Specification: Project Navigation
 
 > Feature ID: FEATURE-001  
-> Version: v1.0  
-> Status: Refined  
-> Last Updated: 01-18-2026
+> Version: v1.1  
+> Status: Implemented  
+> Last Updated: 02-01-2026
 
 ## Version History
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
 | v1.0 | 01-18-2026 | Initial specification | - |
+| v1.1 | 02-01-2026 | Synced with implementation: 5 sections, mtime tracking, polling fallback | - |
 
 ## Overview
 
-The Project Navigation feature provides a dynamic sidebar that displays the folder structure of an AI agent-created project. Users can browse through the project hierarchy using an expandable/collapsible tree view, with three predefined top-level sections mapping to standard project folders: Project Plan, Requirements/Technical Design, and Code Repository.
+The Project Navigation feature provides a dynamic sidebar that displays the folder structure of an AI agent-created project. Users can browse through the project hierarchy using an expandable/collapsible tree view, with five predefined top-level sections mapping to standard project folders: Workplace, Themes, Project Plan, Requirements/Technical Design, and Code Repository.
 
 This is the MVP (Minimum Viable Product) feature that establishes the core application structure and enables users to discover and select files for viewing. Without navigation, users cannot access any project content, making this the foundational feature for the entire application.
 
-The sidebar will automatically detect changes to the project structure (new files, renamed folders, deletions) and update the tree view without requiring a page refresh, providing a seamless experience as AI agents modify project files.
+The sidebar uses HTTP polling (every 5 seconds) to detect changes to the project structure (new files, renamed folders, deletions) and update the tree view without requiring a page refresh. WebSocket infrastructure exists but is currently inactive; polling provides reliable fallback behavior.
 
 ## User Stories
 
@@ -33,17 +34,19 @@ The sidebar will automatically detect changes to the project structure (new file
 
 ## Acceptance Criteria
 
-- [ ] AC-1: Left sidebar displays project folder structure as a tree view
-- [ ] AC-2: Three top-level menu sections exist: "Project Plan", "Requirements", "Code"
-- [ ] AC-3: "Project Plan" section maps to `x-ipe-docs/planning/` folder
-- [ ] AC-4: "Requirements" section maps to `x-ipe-docs/requirements/` folder
-- [ ] AC-5: "Code" section maps to `src/` folder
-- [ ] AC-6: Folders can be expanded/collapsed by clicking
-- [ ] AC-7: Clicking a file triggers content loading (emits event/callback)
-- [ ] AC-8: File system changes are detected within 2 seconds
-- [ ] AC-9: Tree view updates automatically when files are added/removed
-- [ ] AC-10: UI placeholder exists for project root path switching
-- [ ] AC-11: Sidebar is responsive and works on tablet+ screen sizes
+- [x] AC-1: Left sidebar displays project folder structure as a tree view
+- [x] AC-2: Five top-level menu sections exist: "Workplace", "Themes", "Project Plan", "Requirements", "Code"
+- [x] AC-3: "Workplace" section maps to `x-ipe-docs/` with submenu (Ideation, UIUX Feedbacks, Tracing, Quality Evaluation)
+- [x] AC-4: "Themes" section maps to `x-ipe-docs/themes/` folder
+- [x] AC-5: "Project Plan" section maps to `x-ipe-docs/planning/` folder
+- [x] AC-6: "Requirements" section maps to `x-ipe-docs/requirements/` folder
+- [x] AC-7: "Code" section maps to `src/` folder
+- [x] AC-8: Folders can be expanded/collapsed by clicking
+- [x] AC-9: Clicking a file triggers content loading (emits event/callback)
+- [x] AC-10: File system changes are detected via HTTP polling (every 5 seconds)
+- [x] AC-11: Tree view updates automatically when files are added/removed
+- [x] AC-12: File modification time (mtime) tracked for change indicators
+- [x] AC-13: Sidebar is responsive and works on tablet+ screen sizes
 
 ## Functional Requirements
 
@@ -105,10 +108,16 @@ The sidebar will automatically detect changes to the project structure (new file
 
 **Details:**
 - Input: File system events (create, modify, delete)
-- Process: Backend monitors file system, pushes updates via WebSocket
+- Process: HTTP polling every 5 seconds compares structure + mtime values
 - Output: Frontend receives update, refreshes tree
 
-**WebSocket Event:**
+**Polling Mechanism:**
+- Sidebar fetches `/api/project/structure` every 5 seconds
+- Response includes `mtime` field for each file
+- JSON hash comparison detects structural changes
+- mtime comparison detects content modifications
+
+**WebSocket Infrastructure (inactive):**
 ```json
 {
   "type": "structure_changed",
@@ -116,6 +125,7 @@ The sidebar will automatically detect changes to the project structure (new file
   "path": "x-ipe-docs/planning/new-file.md"
 }
 ```
+Note: WebSocket code exists in `FileWatcher` class but is not currently activated. HTTP polling provides reliable fallback.
 
 ### FR-5: Project Root Configuration
 
@@ -131,7 +141,7 @@ The sidebar will automatically detect changes to the project structure (new file
 ### NFR-1: Performance
 
 - Tree structure API response: < 200ms for projects with up to 500 files
-- File system change detection latency: < 2 seconds
+- File system change detection latency: ~5 seconds (polling interval)
 - Expand/collapse animation: 60fps smooth
 
 ### NFR-2: Usability
@@ -209,6 +219,8 @@ The sidebar will automatically detect changes to the project structure (new file
 ### BR-1: Section Mapping
 
 **Rule:** Top-level sections always map to these paths:
+- "Workplace" → `x-ipe-docs/` (with submenu: Ideation→ideas/, UIUX Feedbacks→uiux-feedback/, Tracing→tracing/, Quality Evaluation→quality-evaluation/)
+- "Themes" → `x-ipe-docs/themes/`
 - "Project Plan" → `x-ipe-docs/planning/`
 - "Requirements" → `x-ipe-docs/requirements/`
 - "Code" → `src/`

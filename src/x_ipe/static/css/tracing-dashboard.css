@@ -405,6 +405,7 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: 8px;
+    gap: 6px;
 }
 
 .trace-id {
@@ -414,6 +415,35 @@
     background: var(--tracing-bg-tertiary);
     padding: 3px 8px;
     border-radius: 4px;
+}
+
+.trace-block-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--tracing-text-muted);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin-left: auto;
+}
+
+.trace-item:hover .trace-block-btn {
+    display: flex;
+}
+
+.trace-block-btn:hover {
+    background: var(--tracing-status-error-light);
+    color: var(--tracing-status-error);
+}
+
+.trace-block-btn i {
+    font-size: 12px;
 }
 
 .trace-status-dot {
@@ -738,4 +768,29 @@
         transform: translateX(0);
         opacity: 1;
     }
+}
+
+/* ==========================================================================
+   FEATURE-023-C: DAG Graph Visualization
+   ========================================================================== */
+
+.trace-graph-container {
+    width: 100%;
+    height: 100%;
+    min-height: 350px;
+    position: relative;
+    background: #ffffff;
+    border-radius: 8px;
+}
+
+/* Zoom controls positioning */
+.trace-detail-panel {
+    position: relative;
+}
+
+.trace-detail-panel .trace-graph-zoom-controls {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    z-index: 100;
 }

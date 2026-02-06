@@ -1547,10 +1547,26 @@ class UIUXFeedbackManager {
     /**
      * Delete a feedback entry
      */
-    _deleteEntry(id) {
+    async _deleteEntry(id) {
         const index = this.feedbackEntries.findIndex(e => e.id === id);
         if (index >= 0) {
-            const name = this.feedbackEntries[index].name;
+            const entry = this.feedbackEntries[index];
+            const name = entry.name;
+            
+            // If submitted, delete from filesystem too
+            if (entry.status === 'submitted') {
+                try {
+                    const response = await fetch(`/api/uiux-feedback/${encodeURIComponent(name)}`, {
+                        method: 'DELETE'
+                    });
+                    if (!response.ok) {
+                        console.warn('[UIUXFeedback] Failed to delete from filesystem');
+                    }
+                } catch (err) {
+                    console.warn('[UIUXFeedback] Delete API error:', err);
+                }
+            }
+            
             this.feedbackEntries.splice(index, 1);
             this._renderFeedbackPanel();
             this.updateStatus(`Deleted: ${name}`);

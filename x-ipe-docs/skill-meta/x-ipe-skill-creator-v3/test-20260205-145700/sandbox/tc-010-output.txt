@@ -1,0 +1,22 @@
+=== TC-010: Progressive Disclosure Check ===
+
+References folder contents:
+- examples.md
+- skill-creation-procedure.md
+- skill-general-guidelines-v2.md
+- sub-agent-workflow.md
+
+Code blocks in SKILL.md with line counts:
+- Block at lines 53-59: 6 lines (Input Parameters YAML)
+- Block at lines 65-84: 19 lines (DoR XML)
+- Block at lines 106-256: 150 lines (Execution Procedure XML)
+- Block at lines 262-275: 13 lines (Output Result YAML)
+- Block at lines 283-314: 31 lines (DoD XML)
+
+Structural observations:
+- Main procedure block is 150 lines (exceeds 20-line threshold)
+- Complex details ARE referenced to references/ folder
+- Examples delegated to references/examples.md
+- Sub-agent workflow delegated to references/sub-agent-workflow.md
+
+Note: This requires judge_agent evaluation to assess if procedure block should be shortened.

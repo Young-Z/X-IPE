@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-IPE Tracing - Error Trace Detail</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e14;
+            --bg-secondary: #111822;
+            --bg-tertiary: #1a2332;
+            --bg-elevated: #212d3b;
+            --bg-hover: #2a3a4d;
+            
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #5c6670;
+            
+            --status-success: #3fb950;
+            --status-success-glow: rgba(63, 185, 80, 0.3);
+            --status-error: #f85149;
+            --status-error-glow: rgba(248, 81, 73, 0.3);
+            --status-warning: #d29922;
+            --status-warning-glow: rgba(210, 153, 34, 0.3);
+            --status-processing: #58a6ff;
+            
+            --accent-primary: #7c3aed;
+            --accent-secondary: #a78bfa;
+            --accent-glow: rgba(124, 58, 237, 0.25);
+            
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-default: rgba(255, 255, 255, 0.1);
+            
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+            
+            --timing-fast: 150ms;
+            --timing-normal: 250ms;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 40px;
+        }
+        
+        .mockup-title {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .mockup-title h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--status-error), #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .mockup-title p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        /* Detail Panel */
+        .detail-panel {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid var(--border-default);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .detail-header {
+            padding: 24px 32px;
+            background: linear-gradient(135deg, rgba(248, 81, 73, 0.1), transparent);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        .detail-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .detail-title h2 {
+            font-size: 20px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .detail-badge {
+            padding: 6px 14px;
+            background: var(--status-error-glow);
+            color: var(--status-error);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .detail-badge svg {
+            width: 14px;
+            height: 14px;
+        }
+        
+        .detail-stats {
+            display: flex;
+            gap: 32px;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .stat-value {
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        /* Trace Flow */
+        .trace-flow {
+            padding: 40px;
+        }
+        
+        .api-container {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--status-error);
+            border-radius: 16px;
+            padding: 32px;
+            position: relative;
+            box-shadow: 0 0 40px var(--status-error-glow);
+        }
+        
+        .api-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(248, 81, 73, 0.05), transparent);
+            border-radius: 14px;
+            pointer-events: none;
+        }
+        
+        .api-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed var(--border-subtle);
+        }
+        
+        .api-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .api-title .method {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, var(--status-success), #2ea043);
+            color: white;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .api-title .path {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .api-timing {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--status-error);
+        }
+        
+        /* Nodes Flow */
+        .nodes-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .nodes-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+        
+        /* Function Node */
+        .function-node {
+            background: var(--bg-elevated);
+            border: 2px solid var(--border-default);
+            border-radius: 12px;
+            padding: 18px 22px;
+            min-width: 200px;
+            position: relative;
+            transition: all var(--timing-normal);
+        }
+        
+        .function-node.success {
+            border-color: var(--status-success);
+        }
+        
+        .function-node.success::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--status-success);
+            opacity: 0.05;
+            border-radius: 10px;
+            pointer-events: none;
+        }
+        
+        .function-node.error {
+            border-color: var(--status-error);
+            animation: errorPulse 2s infinite;
+        }
+        
+        @keyframes errorPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.4); }
+            50% { box-shadow: 0 0 20px 4px rgba(248, 81, 73, 0.2); }
+        }
+        
+        .function-node.error::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--status-error);
+            opacity: 0.08;
+            border-radius: 10px;
+            pointer-events: none;
+        }
+        
+        .function-node.warning {
+            border-color: var(--status-warning);
+        }
+        
+        .function-node.warning::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--status-warning);
+            opacity: 0.05;
+            border-radius: 10px;
+            pointer-events: none;
+        }
+        
+        .node-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .node-status {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+        }
+        
+        .node-status.success { 
+            background: var(--status-success);
+            box-shadow: 0 0 10px var(--status-success);
+        }
+        
+        .node-status.error { 
+            background: var(--status-error);
+            box-shadow: 0 0 10px var(--status-error);
+        }
+        
+        .node-status.warning { 
+            background: var(--status-warning);
+            box-shadow: 0 0 10px var(--status-warning);
+        }
+        
+        .node-level {
+            padding: 3px 10px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .node-level.info { color: var(--status-processing); }
+        .node-level.debug { color: var(--text-muted); }
+        
+        .node-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .node-timing {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+        }
+        
+        .node-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .node-action {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--timing-fast);
+        }
+        
+        .node-action:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-primary);
+            color: var(--accent-secondary);
+        }
+        
+        .node-action.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+        
+        .node-action svg {
+            width: 14px;
+            height: 14px;
+        }
+        
+        /* Connector */
+        .connector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            flex-shrink: 0;
+            align-self: center;
+        }
+        
+        .connector svg {
+            width: 20px;
+            height: 20px;
+            color: var(--text-muted);
+        }
+        
+        /* Expanded Panel */
+        .expanded-panel {
+            margin-top: 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        
+        .panel-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .panel-content {
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .panel-content pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .json-key { color: var(--accent-secondary); }
+        .json-string { color: var(--status-success); }
+        .json-number { color: var(--status-warning); }
+        .json-boolean { color: var(--status-processing); }
+        
+        /* Error Panel */
+        .error-panel {
+            background: rgba(248, 81, 73, 0.05);
+            border-color: rgba(248, 81, 73, 0.2);
+        }
+        
+        .error-panel .panel-header {
+            background: rgba(248, 81, 73, 0.1);
+        }
+        
+        .error-panel .panel-title {
+            color: var(--status-error);
+        }
+        
+        .error-content {
+            color: var(--status-error);
+        }
+        
+        .stack-trace {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+        
+        .stack-line {
+            padding: 2px 0;
+        }
+        
+        .stack-line:hover {
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+        }
+        
+        /* Annotations */
+        .annotation {
+            position: absolute;
+            background: var(--bg-primary);
+            border: 1px solid var(--accent-primary);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 11px;
+            color: var(--accent-secondary);
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .annotation::before {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--bg-primary);
+            border-left: 1px solid var(--accent-primary);
+            border-bottom: 1px solid var(--accent-primary);
+            transform: rotate(45deg);
+        }
+        
+        /* Legend */
+        .mockup-footer {
+            max-width: 1200px;
+            margin: 32px auto 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 24px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .legend-dot.success { background: var(--status-success); }
+        .legend-dot.error { background: var(--status-error); }
+        .legend-dot.warning { background: var(--status-warning); }
+        
+        .mockup-note {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        
+        /* Animations */
+        .function-node {
+            animation: nodeSlide 0.5s ease-out both;
+        }
+        
+        .function-node:nth-child(1) { animation-delay: 0.1s; }
+        .function-node:nth-child(2) { animation-delay: 0.2s; }
+        .function-node:nth-child(3) { animation-delay: 0.3s; }
+        
+        @keyframes nodeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .expanded-panel {
+            animation: panelExpand 0.3s ease-out;
+        }
+        
+        @keyframes panelExpand {
+            from {
+                opacity: 0;
+                transform: scaleY(0.8);
+                transform-origin: top;
+            }
+            to {
+                opacity: 1;
+                transform: scaleY(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mockup-title">
+        <h1>Error Trace Detail View</h1>
+        <p>Expanded input/output panels with error visualization and stack trace</p>
+    </div>
+    
+    <div class="detail-panel">
+        <div class="detail-header">
+            <div class="detail-title">
+                <h2>POST /api/payments/charge</h2>
+                <span class="detail-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    ERROR
+                </span>
+            </div>
+            <div class="detail-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Trace ID</span>
+                    <span class="stat-value">7f3e2a1b-9c4d</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Time</span>
+                    <span class="stat-value" style="color: var(--status-error);">1.2s</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Error At</span>
+                    <span class="stat-value">process_payment</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Timestamp</span>
+                    <span class="stat-value">14:28:33.891</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="trace-flow">
+            <div class="api-container">
+                <div class="api-header">
+                    <div class="api-title">
+                        <span class="method">POST</span>
+                        <span class="path">/api/payments/charge</span>
+                    </div>
+                    <div class="api-timing">1.2s</div>
+                </div>
+                
+                <div class="nodes-flow">
+                    <div class="nodes-row">
+                        <!-- validate_payment - success with expanded input -->
+                        <div class="function-node success" style="flex: 1; max-width: 350px;">
+                            <div class="node-header">
+                                <div class="node-status success"></div>
+                                <span class="node-level info">INFO</span>
+                            </div>
+                            <div class="node-name">validate_payment</div>
+                            <div class="node-timing">32ms</div>
+                            <div class="node-actions">
+                                <button class="node-action active">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7 10 12 15 17 10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                    Input
+                                </button>
+                                <button class="node-action">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="17 8 12 3 7 8"/>
+                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                    </svg>
+                                    Output
+                                </button>
+                            </div>
+                            
+                            <!-- Expanded Input Panel -->
+                            <div class="expanded-panel">
+                                <div class="panel-header">
+                                    <span class="panel-title">📥 Input Parameters</span>
+                                </div>
+                                <div class="panel-content">
+<pre>{
+  <span class="json-key">"amount"</span>: <span class="json-number">99.99</span>,
+  <span class="json-key">"currency"</span>: <span class="json-string">"USD"</span>,
+  <span class="json-key">"customer_id"</span>: <span class="json-string">"cust_ABC123"</span>,
+  <span class="json-key">"card"</span>: <span class="json-string">"[CARD]"</span>,
+  <span class="json-key">"metadata"</span>: {
+    <span class="json-key">"order_id"</span>: <span class="json-string">"ORD-789"</span>
+  }
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="connector">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </div>
+                        
+                        <!-- process_payment - ERROR with expanded error panel -->
+                        <div class="function-node error" style="flex: 1; max-width: 450px;">
+                            <div class="node-header">
+                                <div class="node-status error"></div>
+                                <span class="node-level info">INFO</span>
+                            </div>
+                            <div class="node-name">process_payment</div>
+                            <div class="node-timing" style="color: var(--status-error);">1.1s</div>
+                            <div class="node-actions">
+                                <button class="node-action">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7 10 12 15 17 10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                    Input
+                                </button>
+                                <button class="node-action active" style="background: var(--status-error); border-color: var(--status-error);">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="8" x2="12" y2="12"/>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg>
+                                    Error
+                                </button>
+                            </div>
+                            
+                            <!-- Expanded Error Panel -->
+                            <div class="expanded-panel error-panel">
+                                <div class="panel-header">
+                                    <span class="panel-title">⚠️ Exception Details</span>
+                                </div>
+                                <div class="panel-content">
+                                    <div class="error-content">
+<pre><strong>PaymentGatewayError:</strong> Connection timeout after 1000ms
+Card processor did not respond in time.</pre>
+                                    </div>
+                                    <div class="stack-trace">
+                                        <div class="stack-line">at PaymentService.process_payment (services/payment.py:142)</div>
+                                        <div class="stack-line">at GatewayClient.charge (gateways/stripe.py:87)</div>
+                                        <div class="stack-line">at HttpClient.post (utils/http.py:56)</div>
+                                        <div class="stack-line">at asyncio.wait_for (asyncio/tasks.py:442)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="connector" style="opacity: 0.3;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </div>
+                        
+                        <!-- send_receipt - skipped due to error -->
+                        <div class="function-node" style="opacity: 0.4; border-style: dashed;">
+                            <div class="node-header">
+                                <div class="node-status" style="background: var(--text-muted);"></div>
+                                <span class="node-level">SKIPPED</span>
+                            </div>
+                            <div class="node-name">send_receipt</div>
+                            <div class="node-timing">--</div>
+                            <div class="node-actions" style="opacity: 0.5;">
+                                <button class="node-action" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7 10 12 15 17 10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                    Input
+                                </button>
+                                <button class="node-action" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="17 8 12 3 7 8"/>
+                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                    </svg>
+                                    Output
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="mockup-footer">
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-dot success"></div>
+                Completed Successfully
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot error"></div>
+                Error Occurred
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot warning"></div>
+                Error in Child
+            </div>
+        </div>
+        <div class="mockup-note">
+            Click Input/Output buttons to expand parameter details • Sensitive data automatically redacted
+        </div>
+    </footer>
+</body>
+</html>

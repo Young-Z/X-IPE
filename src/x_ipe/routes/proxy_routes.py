@@ -8,11 +8,13 @@ Provides localhost URL proxying endpoint.
 from flask import Blueprint, jsonify, request, Response
 
 from x_ipe.services import ProxyService
+from x_ipe.tracing import x_ipe_tracing
 
 proxy_bp = Blueprint('proxy', __name__)
 
 
 @proxy_bp.route('/api/proxy', methods=['GET'])
+@x_ipe_tracing()
 def proxy_url():
     """
     GET /api/proxy?url=<encoded_url>

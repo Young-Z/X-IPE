@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass
 
+from x_ipe.tracing import x_ipe_tracing
+
 
 CONFIG_FILE_NAME = '.x-ipe.yaml'
 MAX_PARENT_LEVELS = 20
@@ -31,14 +33,17 @@ class ConfigData:
     file_tree_scope: str
     terminal_cwd: str
     
+    @x_ipe_tracing()
     def get_file_tree_path(self) -> str:
         """Return the path for file tree based on file_tree_scope."""
         return self.project_root if self.file_tree_scope == "project_root" else self.x_ipe_app
     
+    @x_ipe_tracing()
     def get_terminal_cwd(self) -> str:
         """Return the path for terminal cwd based on terminal_cwd setting."""
         return self.project_root if self.terminal_cwd == "project_root" else self.x_ipe_app
     
+    @x_ipe_tracing()
     def to_dict(self) -> dict:
         """Convert to dictionary for API response."""
         return {
@@ -74,6 +79,7 @@ class ConfigService:
         self._config_data: Optional[ConfigData] = None
         self._error: Optional[str] = None
     
+    @x_ipe_tracing()
     def load(self) -> Optional[ConfigData]:
         """
         Discover, parse, and validate config file.

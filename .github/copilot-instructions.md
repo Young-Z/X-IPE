@@ -65,7 +65,7 @@
 
 | Task Type | Skill | Category | Next Task | Human Review (default) |
 |-----------|-------|----------|-----------|------------------------|
-| Ideation | `task-type-ideation` | ideation-stage | Idea Mockup OR Idea to Architecture | No |
+| Ideation | `task-type-ideation-v2` | ideation-stage | Idea Mockup OR Idea to Architecture | No |
 | Idea Mockup | `task-type-idea-mockup` | ideation-stage | Requirement Gathering | No |
 | Idea to Architecture | `task-type-idea-to-architecture` | ideation-stage | Requirement Gathering | No |
 | Share Idea | `task-type-share-idea` | Standalone | - | Yes |
@@ -161,5 +161,17 @@ Always follow:
    - Skill Category → templates/skill-category-skill.md
    - Tool Skill → TBD
 4. Validate against skill-creator checklist before completing
+```
+
+### Capturing Lessons for Skill Improvement
+
+**When:** A skill execution has problems, human provides feedback, or agent observes suboptimal behavior
+**Then:** Use the `lesson-learned` skill
+
+```
+1. Load skill: `lesson-learned`
+2. Follow the lesson capture process
+3. Lessons are stored in x-ipe-docs/skill-meta/{skill}/lesson-learned.md
+4. Next time skill is updated, lessons will be incorporated
 ```
 

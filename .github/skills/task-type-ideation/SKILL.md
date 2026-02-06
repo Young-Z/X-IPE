@@ -120,23 +120,7 @@ Learn and refine user ideas through collaborative brainstorming by:
 4. **Tool disabled (`false`):** Skip the tool
 5. **Tool unavailable:** Log limitation and proceed without it
 
-### Tool Behavior by Section
-
-When tools are enabled in the meta file, the agent MUST attempt to use them during the ideation process:
-
-| Tool Type | When to Use | Example Tools |
-|-----------|-------------|---------------|
-| Design Tools | Visual mockups, wireframes | `frontend-design`, Figma MCP |
-| Diagram Tools | Flowcharts, architecture diagrams | `mermaid`, `antv-infographic` |
-| Research Tools | Market analysis, competitor research | Web search, databases |
-| Prototyping Tools | Quick demos, proof of concepts | Code generation, no-code tools |
-
-**Usage Rules:**
-1. Read `x-ipe-docs/config/tools.json` at start of ideation task
-2. For each section (`stages.ideation.ideation`, `stages.ideation.mockup`, `stages.ideation.sharing`), check enabled tools
-3. If tool is enabled (`true`) → Attempt to use during relevant steps
-4. If tool is unavailable or fails → Document the limitation and proceed manually
-5. Always inform user which tools are active based on config
+See [references/tool-usage-guide.md](references/tool-usage-guide.md) for detailed tool behavior, mapping, and usage examples.
 
 ---
 
@@ -237,56 +221,9 @@ Execute Ideation by following these steps in order:
 
 **When:** Any tool is set to `true` in the config file
 
-```
-1. For each section in config (stages.ideation.ideation, stages.ideation.mockup, stages.ideation.sharing):
-   a. Identify tools with value = true
-   b. For each enabled tool:
-      - Check if tool is available (skill, MCP, API)
-      - Test basic connectivity/functionality
-      - Document tool capabilities and limitations
-2. If tool unavailable:
-   a. Log the issue
-   b. Inform user of limitation
-   c. Proceed with manual alternatives
-```
+**Process:** Check tool availability and test connectivity for each enabled tool in config sections.
 
-**Tool Mapping & Skill Invocation:**
-
-| Config Key | Skill/Capability | How to Invoke |
-|------------|------------------|---------------|
-| `stages.ideation.ideation.antv-infographic` | `infographic-syntax-creator` skill | Call skill to generate infographic DSL syntax |
-| `stages.ideation.ideation.mermaid` | Mermaid code blocks | Generate mermaid diagrams directly in markdown |
-| `stages.ideation.ideation.tool-architecture-dsl` | `tool-architecture-dsl` skill | Generate Architecture DSL directly in markdown (IPE renders it) |
-| `stages.ideation.mockup.frontend-design` | `frontend-design` skill | Call skill to create HTML/CSS mockups |
-| `stages.ideation.mockup.figma-mcp` | Figma MCP server | Use MCP tools for Figma integration |
-
-**Skill Invocation Rules:**
-
-```
-For each enabled tool in config:
-  IF config.stages.ideation.ideation["antv-infographic"] == true:
-    → Load and invoke `infographic-syntax-creator` skill for visual summaries
-    → Use infographic DSL in idea-summary document
-    
-  IF config.stages.ideation.ideation["mermaid"] == true:
-    → Generate mermaid diagrams for flowcharts, sequences
-    → Embed as ```mermaid code blocks in documents
-    
-  IF config.stages.ideation.ideation["tool-architecture-dsl"] == true:
-    → Load `tool-architecture-dsl` skill for layered architecture diagrams
-    → Generate Architecture DSL directly in markdown
-    → Embed as ```architecture-dsl code blocks (IPE renders natively)
-    → Use for: module view (layers, services), landscape view (integrations)
-    
-  IF config.stages.ideation.mockup["frontend-design"] == true:
-    → Load and invoke `frontend-design` skill during brainstorming
-    → Create interactive HTML mockups when discussing UI concepts
-    → Save mockups to x-ipe-docs/ideas/{folder}/mockup-vN.html (version aligned with idea-summary)
-    
-  IF config.stages.ideation.mockup["figma-mcp"] == true:
-    → Use Figma MCP tools if available
-    → Create/update designs in connected Figma files
-```
+See [references/tool-usage-guide.md](references/tool-usage-guide.md) for tool mapping tables and skill invocation rules.
 
 **Output:** Tools status report (enabled/disabled/unavailable)
 
@@ -322,104 +259,7 @@ For each enabled tool in config:
 
 **Action:** Engage user with clarifying questions to refine the idea
 
-**Tool-Enhanced Brainstorming (Based on Config):**
-
-When tools are enabled in `x-ipe-docs/config/tools.json`, invoke corresponding skills during brainstorming:
-
-| Config Enabled | Skill to Invoke | When to Use |
-|----------------|-----------------|-------------|
-| `stages.ideation.mockup.frontend-design: true` | `frontend-design` skill | User describes UI → Create HTML mockup |
-| `stages.ideation.ideation.mermaid: true` | Mermaid syntax | User describes flow → Generate diagram |
-| `stages.ideation.ideation.antv-infographic: true` | `infographic-syntax-creator` skill | Visualize lists, comparisons |
-| `stages.ideation.ideation.tool-architecture-dsl: true` | `tool-architecture-dsl` skill | User describes layers/services → Generate architecture DSL |
-
-**Example: Config-Driven Tool Usage:**
-```
-Config: { "stages": { "ideation": { "mockup": { "frontend-design": true } } } }
-
-User: "I want a dashboard with charts and filters"
-Agent Action:
-  1. Ask clarifying questions about chart types, layout preferences
-  2. IF stages.ideation.mockup.frontend-design == true:
-     → Invoke `frontend-design` skill
-     → Create interactive HTML mockup
-     → Save to x-ipe-docs/ideas/{folder}/mockup-vN.html (aligned with idea-summary version)
-  3. Share mockup: "I've created a mockup - does this match your vision?"
-  4. Iterate based on feedback
-```
-
-**Example: Mermaid Diagram Generation:**
-```
-Config: { "stages": { "ideation": { "ideation": { "mermaid": true } } } }
-
-User: "The user flow goes from login to dashboard to settings"
-Agent Action:
-  1. IF stages.ideation.ideation.mermaid == true:
-     → Generate mermaid flowchart
-     → Share in conversation:
-     
-     ```mermaid
-     flowchart LR
-       Login --> Dashboard --> Settings
-     ```
-  2. Ask: "Does this capture the flow correctly?"
-```
-
-**Example: Architecture DSL Generation:**
-```
-Config: { "stages": { "ideation": { "ideation": { "tool-architecture-dsl": true } } } }
-
-User: "The system has 3 layers: frontend, backend services, and database"
-Agent Action:
-  1. IF stages.ideation.ideation.tool-architecture-dsl == true:
-     → Load `tool-architecture-dsl` skill
-     → Generate Architecture DSL directly in markdown
-     → Embed in idea-summary as:
-     
-     ```architecture-dsl
-     @startuml module-view
-     title "System Architecture"
-     theme "theme-default"
-     direction top-to-bottom
-     grid 12 x 6
-     
-     layer "Frontend" {
-       color "#fce7f3"
-       border-color "#ec4899"
-       rows 2
-       module "Web" { cols 12, rows 2, grid 1 x 1, component "React App" { cols 1, rows 1 } }
-     }
-     
-     layer "Backend" {
-       color "#dbeafe"
-       border-color "#3b82f6"
-       rows 2
-       module "Services" { cols 12, rows 2, grid 2 x 1, component "API" { cols 1, rows 1 }, component "Workers" { cols 1, rows 1 } }
-     }
-     
-     layer "Data" {
-       color "#dcfce7"
-       border-color "#22c55e"
-       rows 2
-       module "Storage" { cols 12, rows 2, grid 1 x 1, component "PostgreSQL" { cols 1, rows 1 } }
-     }
-     
-     @enduml
-     ```
-  2. IPE renders this as interactive diagram in the browser
-  3. Ask: "Does this architecture structure match your vision?"
-```
-
-**Question Categories:**
-
-| Category | Example Questions |
-|----------|-------------------|
-| Problem Space | "What problem does this solve?" |
-| Target Users | "Who will benefit from this?" |
-| Scope | "What should be included in v1?" |
-| Constraints | "Are there any technical limitations?" |
-| Success Criteria | "How will we know it's successful?" |
-| Alternatives | "Have you considered approach X?" |
+**Tool-Enhanced Brainstorming:** When tools are enabled, invoke corresponding skills during brainstorming. See [references/tool-usage-guide.md](references/tool-usage-guide.md) for detailed examples.
 
 **Rules:**
 - Ask questions in batches (3-5 at a time)
@@ -443,32 +283,8 @@ Agent Action:
 **When to Research:**
 - The idea touches well-known domains (e.g., authentication, e-commerce, data pipelines)
 - Industry best practices exist for the problem space
-- Established patterns or frameworks are relevant
-- The idea could benefit from proven approaches
 
-**Research Process:**
-```
-1. Identify if topic is common/established
-2. Use web_search tool to research:
-   - Industry best practices
-   - Common design patterns
-   - Established principles
-   - Reference implementations
-3. Document findings as "Common Principles"
-4. Note authoritative sources for references
-```
-
-**Example Common Topics & Principles:**
-
-| Topic | Common Principles to Research |
-|-------|------------------------------|
-| Authentication | OAuth 2.0, JWT best practices, MFA patterns |
-| API Design | REST conventions, OpenAPI, rate limiting |
-| Data Storage | ACID properties, CAP theorem, data modeling |
-| UI/UX | Nielsen heuristics, accessibility (WCAG), mobile-first |
-| Security | OWASP Top 10, zero-trust, encryption standards |
-| Scalability | Horizontal scaling, caching strategies, CDN usage |
-| DevOps | CI/CD pipelines, IaC, observability |
+See [references/tool-usage-guide.md](references/tool-usage-guide.md#research-common-principles) for detailed research process and example topics.
 
 **Output:** List of relevant principles with sources to include in idea summary
 
@@ -485,52 +301,11 @@ Agent Action:
 - **Use visualization tools based on config** (see `references/visualization-guide.md`)
 - **If tools were used:** Include artifacts created (mockups, prototypes) in the summary
 
-**Mockup Versioning:**
+**Mockup Versioning:** When creating mockups, version aligns with idea-summary (e.g., `idea-summary-v1.md` → `mockup-v1.html`). Save to `x-ipe-docs/ideas/{folder}/mockup-vN.html`.
 
-When creating mockups, the version MUST align with the idea-summary version:
+**Config-Driven Visualization:** Check `x-ipe-docs/config/tools.json` and use enabled tools (infographic, mermaid, architecture-dsl) for visualizations. If all disabled, use standard markdown.
 
-```
-Naming Convention: mockup-vN.html (where N matches idea-summary-vN.md)
-
-Examples:
-- idea-summary-v1.md → mockup-v1.html
-- idea-summary-v2.md → mockup-v2.html
-- idea-summary-v3.md → mockup-v3.html
-
-Location: x-ipe-docs/ideas/{folder}/mockup-vN.html (same folder as idea-summary)
-```
-
-**Versioning Logic:**
-```
-1. Determine current idea-summary version (N)
-2. If creating mockup during this ideation session:
-   → Name it mockup-vN.html to match the idea-summary version
-3. If mockup-vN.html already exists:
-   → Overwrite it (mockup is tied to that idea version)
-4. Reference mockup in idea-summary-vN.md:
-   → Link: [View Mockup](./mockup-vN.html)
-```
-
-**Config-Driven Visualization:**
-
-```
-When creating idea summary, check x-ipe-docs/config/tools.json config:
-
-IF config.stages.ideation.ideation["antv-infographic"] == true:
-  → Invoke `infographic-syntax-creator` skill
-  → Use infographic DSL for: feature lists, roadmaps, comparisons
-
-IF config.stages.ideation.ideation["mermaid"] == true:
-  → Use mermaid syntax for: flowcharts, sequences, state diagrams
-
-IF config.stages.ideation.ideation["tool-architecture-dsl"] == true:
-  → Use Architecture DSL for: layered architecture, module views, landscape views
-  → Embed directly in markdown as ```architecture-dsl code blocks
-  → IPE renders these natively as interactive diagrams
-
-IF ALL are false:
-  → Use standard markdown (bullet lists, tables)
-```
+See [references/tool-usage-guide.md](references/tool-usage-guide.md#config-driven-visualization-for-idea-summary) for detailed config-driven visualization rules.
 
 **Template:** See `templates/idea-summary.md`
 
@@ -544,40 +319,9 @@ IF ALL are false:
 
 **Action:** If the idea folder has the default "Draft Idea" name, rename it based on the refined idea content
 
-**When to Rename:**
-- Folder name matches pattern: `Draft Idea - MMDDYYYY HHMMSS`
-- Idea has been refined and has a clear identity
+**When:** Folder name matches pattern `Draft Idea - MMDDYYYY HHMMSS` and idea has a clear identity.
 
-**Naming Logic:**
-```
-1. Check if folder name starts with "Draft Idea - "
-2. If YES:
-   a. Extract timestamp suffix (MMDDYYYY HHMMSS)
-   b. Generate idea name from:
-      - Core concept identified in brainstorming
-      - Main theme from idea summary
-      - Keep it concise (2-5 words)
-   c. Format new name: "{Idea Name} - {timestamp}"
-   d. Rename folder using filesystem/API
-   e. Update any internal references if needed
-3. If NO (already has custom name):
-   a. Skip renaming
-   b. Log: "Folder already has custom name"
-```
-
-**Naming Guidelines:**
-- Use Title Case for idea name
-- Keep name concise but descriptive (2-5 words)
-- Avoid special characters (use only alphanumeric, spaces, hyphens)
-- Preserve the original timestamp suffix
-
-**Examples:**
-
-| Original Folder | Idea Content | New Folder Name |
-|-----------------|--------------|-----------------|
-| `Draft Idea - 01232026 143500` | Mobile app for task management | `Task Manager App - 01232026 143500` |
-| `Draft Idea - 01222026 091200` | AI-powered code review tool | `AI Code Reviewer - 01222026 091200` |
-| `Draft Idea - 01212026 160000` | E-commerce checkout optimization | `Checkout Optimizer - 01212026 160000` |
+See [references/folder-naming-guide.md](references/folder-naming-guide.md) for detailed naming logic, guidelines, and examples.
 
 **Output:** Folder renamed (or skipped if already named)
 

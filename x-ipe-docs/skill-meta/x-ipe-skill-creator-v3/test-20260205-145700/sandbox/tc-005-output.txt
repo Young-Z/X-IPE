@@ -1,0 +1,8 @@
+=== TC-005: Line Count ===
+
+File: SKILL.md
+Total lines: 353
+
+Maximum allowed: 500
+Actual: 353
+Under limit: YES (147 lines to spare)

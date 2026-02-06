@@ -3,6 +3,7 @@
     "theme-folder-path": "x-ipe-docs/themes/theme-default",
     "theme-name": "theme-default"
   },
+  "feedback_retention_days": 7,
   "stages": {
     "feature": {
       "design": {
@@ -63,5 +64,13 @@
       }
     }
   },
-  "version": "2.0"
+  "version": "2.0",
+  "tracing_stop_at": null,
+  "tracing_enabled": false,
+  "tracing_ignored_apis": [
+    "/api/project/structure",
+    "/api/config/copilot/prompt",
+    "/api/ideas/tree",
+    "/api/proxy"
+  ]
 }

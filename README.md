@@ -323,6 +323,34 @@ The Tracing Dashboard provides a visual interface for managing tracing sessions 
 6. **Configure:** Use ⚙️ Config button to set retention hours and log path
 7. **Ignore APIs:** Use 🚫 Ignored APIs button to exclude noisy endpoints (e.g., `/api/health/*`)
 
+**DAG Visualization (FEATURE-023-C):**
+
+Click on any trace in the list to view its execution flow as an interactive DAG (Directed Acyclic Graph):
+
+- **Node Types:** API calls (blue), INFO-level functions (green badges), DEBUG-level functions (purple badges)
+- **Error Highlighting:** Failed functions show red borders and ⚠ warning icons
+- **Timing Info:** Each node displays its execution duration
+- **Node Details:** Click any node to open a modal with:
+  - Input/output JSON data (pretty-printed)
+  - Error details with stack trace (for failed functions)
+  - Execution timing and level
+- **Navigation:** Pan (drag canvas), zoom (scroll/buttons), fit-to-view (fullscreen button)
+
+**Tracing Instrumentation Skill (FEATURE-023-D):**
+
+Ask the AI agent to automatically add tracing decorators to your code:
+
+```
+"Add tracing to src/x_ipe/services/ideas_service.py"
+```
+
+The skill will:
+1. Analyze the file for traceable functions
+2. Assign levels (INFO for public, DEBUG for private)
+3. Detect sensitive parameters for redaction (password, token, etc.)
+4. Show you a proposal for review
+5. Apply decorators after your approval
+
 ---
 
 ## 🎯 The Vision

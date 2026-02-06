@@ -153,72 +153,17 @@ Execute Feature Breakdown by following these steps in order:
 
 ### Step 2.5: Process Mockups
 
-**⚠️ MANDATORY CHECK - Auto-detect mockups if not provided:**
+**⚠️ MANDATORY CHECK - Auto-detect mockups if not provided**
 
-```
-BEFORE processing mockup_list:
+**Action:** Auto-detect mockups from idea folder, then copy to feature folders and link them.
 
-1. IF mockup_list is NOT provided or empty:
-   a. Check if requirement came from an Idea (look for idea folder reference)
-   b. IF idea folder exists:
-      - Scan: x-ipe-docs/ideas/{idea-folder}/mockups/
-      - IF mockups found → Auto-populate mockup_list from found files
-      - Notify: "Found {N} mockups in idea folder, processing..."
-   
-2. IF mockup_list is STILL empty after auto-detection:
-   - Log: "No mockups found - skipping mockup processing"
-   - Proceed to Step 3
-```
+**Procedure:**
+1. If mockup_list empty → scan `x-ipe-docs/ideas/{idea-folder}/mockups/`
+2. If still empty → skip to Step 3
+3. Create `x-ipe-docs/requirements/{FEATURE-ID}/mockups/` for each feature
+4. Copy mockups, link in requirement-details.md and specification.md
 
-**Action:** Copy mockups from source to feature folder and link them
-
-**When mockup_list is provided (or auto-detected):**
-
-```
-FOR EACH feature in identified_features:
-  1. Create mockups folder: x-ipe-docs/requirements/{FEATURE-ID}/mockups/
-  
-  2. FOR EACH mockup in mockup_list (that relates to this feature):
-     - Copy mockup file from mockup_list source
-     - Rename to: {mockup_name}.{original_extension}
-     - Save to: x-ipe-docs/requirements/{FEATURE-ID}/mockups/{mockup_name}.{ext}
-  
-  3. Record linked mockups for output
-```
-
-**File Operations:**
-```yaml
-# Example: Input mockup_list
-mockup_list:
-  - mockup_name: "main-dashboard"
-    mockup_list: "x-ipe-docs/ideas/Draft Idea - 01232026/mockup.html"
-  - mockup_name: "settings-panel"
-    mockup_list: "x-ipe-docs/ideas/Draft Idea - 01232026/mockups/settings.html"
-
-# Result: Files created
-x-ipe-docs/requirements/FEATURE-001/mockups/main-dashboard.html
-x-ipe-docs/requirements/FEATURE-001/mockups/settings-panel.html
-```
-
-**Linking Mockups:**
-1. Add mockup links to `x-ipe-docs/requirements/requirement-details.md` in "Linked Mockups" table
-2. Add mockup links to each `x-ipe-docs/requirements/{FEATURE-ID}/specification.md` in "Linked Mockups" table
-
-**Mockup List Format:**
-```markdown
-## Linked Mockups
-
-| Mockup Function Name | Mockup List |
-|---------------------|-------------|
-| main-dashboard | [main-dashboard.html](FEATURE-001/mockups/main-dashboard.html) |
-| settings-panel | [settings-panel.html](FEATURE-001/mockups/settings-panel.html) |
-```
-
-**Rules:**
-- If mockup_list is N/A or empty, skip this step
-- Use relative paths from the document location
-- Preserve original file extension when copying
-- Create mockups folder only if mockup_list has items
+**See:** [references/breakdown-guidelines.md](references/breakdown-guidelines.md) for detailed mockup processing procedures and examples.
 
 ---
 
@@ -227,101 +172,23 @@ x-ipe-docs/requirements/FEATURE-001/mockups/settings-panel.html
 **Action:** Create or update requirement-details file (or current active part)
 
 **Target File Determination:**
-```
-IF requirement-details-part-X.md files exist:
-  → Update the CURRENT ACTIVE PART (highest part number)
-  → Add Feature List section to that part
-ELSE:
-  → Update x-ipe-docs/requirements/requirement-details.md
-```
+- IF parts exist → Update CURRENT ACTIVE PART (highest part number)
+- ELSE → Update x-ipe-docs/requirements/requirement-details.md
 
-**Single File Structure (requirement-details.md):**
+**Feature List Table Format:**
 ```markdown
-# Requirement Summary
-
-> Requirement ID: REQ-XXX  
-> Created: MM-DD-YYYY  
-> Last Updated: MM-DD-YYYY
-
-## Overview
-[Brief description of the requirement/epic, 2-3 paragraphs]
-
-## Feature List
-
 | Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
 |------------|---------------|---------|-------------------|-------------------|
-| FEATURE-001 | User Authentication | v1.0 | JWT-based user authentication with login, logout, token refresh | None |
-| FEATURE-002 | User Profile | v1.0 | User profile management and settings | FEATURE-001 |
-
----
-
-## Feature Details
-
-### FEATURE-001: User Authentication
-[Feature details...]
+| FEATURE-001 | User Authentication | v1.0 | JWT-based auth | None |
+| FEATURE-002 | User Profile | v1.0 | Profile management | FEATURE-001 |
 ```
 
-**Part File Structure (requirement-details-part-X.md):**
-```markdown
-# Requirement Details - Part {X}
+**⚠️ IMPORTANT:** Each part file has its OWN Feature List section. Index does NOT contain a Feature List.
 
-> Continued from: [requirement-details-part-{X-1}.md](requirement-details-part-{X-1}.md)  
-> Created: MM-DD-YYYY
-
----
-
-## Feature List
-
-| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
-|------------|---------------|---------|-------------------|-------------------|
-| FEATURE-012 | Design Themes | v1.0 | Theme folder structure and toolbox integration | FEATURE-011 |
-| FEATURE-013 | Default Theme | v1.0 | Pre-built default theme with design tokens | FEATURE-012 |
-
----
-
-## Linked Mockups
-
-| Mockup Function Name | Feature | Mockup List |
-|---------------------|---------|-------------|
-| themes-toolbox | FEATURE-012 | [themes-toolbox.html](FEATURE-012/mockups/themes-toolbox.html) |
-
----
-
-## Feature Details (Continued)
-
-### FEATURE-012: Design Themes
-[Feature details...]
-```
-
-**⚠️ IMPORTANT:** Each part file has its OWN Feature List section containing ONLY the features in that part. The index file does NOT contain a Feature List.
-
-**Feature Details Template (for each feature):**
-```markdown
-### {FEATURE-ID}: {Feature Title}
-
-**Version:** v{X.Y}  
-**Brief Description:** [1-2 sentence description]
-
-**Acceptance Criteria:**
-- [ ] Criterion 1
-- [ ] Criterion 2
-- [ ] Criterion 3
-
-**Dependencies:**
-- {FEATURE-ID}: [Why needed]
-- None (if no dependencies)
-
-**Technical Considerations:**
-- [Key technical decisions or constraints]
-- [Performance requirements]
-- [Security considerations]
-```
-
-**Rules:**
-- Keep brief description under 50 words
-- List 3-7 acceptance criteria per feature
-- Note dependencies using Feature IDs
-- Technical considerations are hints for design
+**See:** [references/breakdown-guidelines.md](references/breakdown-guidelines.md) for:
+- Full file structure templates (single file and part files)
+- Feature Details template
+- Part file management rules
 
 ---
 
@@ -357,30 +224,11 @@ CALL feature-stage+feature-board-management skill:
 **When to execute:** Only if requirement-details-part-X.md files exist
 
 **Procedure:**
-```
-1. Check if parts exist (requirement-details-part-X.md files)
-2. IF parts exist:
-   a. Open x-ipe-docs/requirements/requirement-details-index.md
-   b. Update "Parts Overview" table with new feature range
-   c. Update "Lines" column with approximate line count
-   d. Save file
-```
+1. Open x-ipe-docs/requirements/requirement-details-index.md
+2. Update "Parts Overview" table with new feature range
+3. Update "Lines" column with approximate line count
 
-**Index File Structure:**
-```markdown
-# Requirement Details Index
-
-> Last Updated: MM-DD-YYYY
-
-## Parts Overview
-
-| Part | File | Features Covered | Lines |
-|------|------|------------------|-------|
-| 1 | [Part 1](requirement-details-part-1.md) | FEATURE-001 to FEATURE-011 | ~420 |
-| 2 | [Part 2](requirement-details-part-2.md) | FEATURE-012 to FEATURE-017 | ~415 |
-```
-
-**⚠️ IMPORTANT:** Index file contains ONLY Parts Overview table. NO Feature List in index - each part has its own.
+**See:** [references/breakdown-guidelines.md](references/breakdown-guidelines.md) for index file structure.
 
 ---
 
@@ -462,86 +310,26 @@ See [references/examples.md](references/examples.md) for detailed execution exam
 
 ## Feature Dependency Guidelines
 
-### Common Dependency Patterns
-
-**Sequential Dependencies:**
-```
-FEATURE-001: User Authentication (no deps)
-FEATURE-002: User Profile (depends on FEATURE-001)
-FEATURE-003: User Settings (depends on FEATURE-002)
-```
-
-**Parallel with Shared Dependency:**
-```
-FEATURE-001: Database Layer (no deps)
-FEATURE-002: User Service (depends on FEATURE-001)
-FEATURE-003: Product Service (depends on FEATURE-001)
-```
-
-**Multiple Dependencies:**
-```
-FEATURE-001: Authentication (no deps)
-FEATURE-002: Authorization (no deps)
-FEATURE-003: Admin Panel (depends on FEATURE-001, FEATURE-002)
-```
-
-### Dependency Rules
-
-1. **No Circular Dependencies** - A cannot depend on B if B depends on A
-2. **Foundation First** - Core/shared features have no dependencies
-3. **Clear Reason** - Document why dependency exists
-4. **Minimal Dependencies** - Only list direct dependencies
+See [references/breakdown-guidelines.md](references/breakdown-guidelines.md) for:
+- Common dependency patterns (sequential, parallel, multiple)
+- Dependency rules (no cycles, foundation first, minimal deps)
 
 ---
 
 ## Best Practices
 
-### Feature Sizing
-
-**Too Large (Split):**
-- "Complete E-Commerce System" → Split into Cart, Payment, Shipping, etc.
-- "User Management" → Split into Registration, Profile, Settings, etc.
-
-**Good Size:**
-- "Shopping Cart Management"
-- "Payment Processing with Stripe"
-- "Email Notification System"
-
-**Too Small (Combine):**
-- "Add to Cart Button" → Part of Shopping Cart feature
-- "Validate Email Format" → Part of User Registration feature
-
-### Feature Naming
-
-**Good Names:**
-- Specific: "JWT Authentication" not "Login"
-- Action-oriented: "User Profile Management" not "User Profile"
-- Technology-agnostic (usually): "Payment Processing" not "Stripe Integration"
-
-**Bad Names:**
-- Too vague: "User Stuff", "Main Feature"
-- Too technical: "REST API Controller Layer"
-- Too broad: "Everything Users Need"
-
-### Version Numbering
-
-- Start with v1.0 for new features
-- Use v1.1, v1.2 for minor enhancements
-- Use v2.0 for major redesigns
-- Most breakdown features will be v1.0
+See [references/breakdown-guidelines.md](references/breakdown-guidelines.md) for:
+- Feature sizing guidelines (too large, good size, too small)
+- Feature naming conventions (good vs bad names)
+- Version numbering rules
 
 ---
 
 ## Integration with Feature Board Management
 
-This skill **MUST** call the feature-board-management skill to create features on the board. This integration:
+This skill **MUST** call the feature-board-management skill to create features on the board.
 
-1. **Creates centralized tracking** - Single source of truth at x-ipe-docs/requirements/features.md
-2. **Initializes status** - All features start with status "Planned"
-3. **Enables queries** - Other skills can query feature board for Feature Data Model
-4. **Supports lifecycle** - Board tracks features through all phases
-
-**See:** `skills/feature-stage+feature-board-management/SKILL.md` for operation details
+See [references/breakdown-guidelines.md](references/breakdown-guidelines.md) for integration details and call format.
 
 ---
 

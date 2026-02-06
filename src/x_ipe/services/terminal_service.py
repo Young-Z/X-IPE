@@ -13,6 +13,8 @@ from collections import deque
 from datetime import datetime
 from typing import Dict, Optional, Any, Callable
 
+from x_ipe.tracing import x_ipe_tracing
+
 
 # Constants for session management
 BUFFER_MAX_CHARS = 10240  # 10KB limit for output buffer
@@ -30,15 +32,18 @@ class OutputBuffer:
     def __init__(self, max_chars: int = BUFFER_MAX_CHARS):
         self._buffer: deque = deque(maxlen=max_chars)
     
+    @x_ipe_tracing()
     def append(self, data: str) -> None:
         """Append data character by character to maintain limit."""
         for char in data:
             self._buffer.append(char)
     
+    @x_ipe_tracing()
     def get_contents(self) -> str:
         """Get all buffered content as string."""
         return ''.join(self._buffer)
     
+    @x_ipe_tracing()
     def clear(self) -> None:
         """Clear the buffer."""
         self._buffer.clear()
@@ -68,6 +73,7 @@ class PersistentSession:
         self.created_at = datetime.now()
         self._lock = threading.Lock()
     
+    @x_ipe_tracing()
     def start_pty(self, rows: int = 24, cols: int = 80) -> None:
         """Start the underlying PTY process."""
         def buffered_emit(data: str) -> None:
@@ -80,6 +86,7 @@ class PersistentSession:
         self.pty_session = PTYSession(self.session_id, buffered_emit)
         self.pty_session.start(rows, cols)
     
+    @x_ipe_tracing()
     def attach(self, socket_sid: str, emit_callback: Callable[[str], None]) -> None:
         """Attach a WebSocket connection to this session."""
         with self._lock:
@@ -88,6 +95,7 @@ class PersistentSession:
             self.state = 'connected'
             self.disconnect_time = None
     
+    @x_ipe_tracing()
     def detach(self) -> None:
         """Detach WebSocket, keeping PTY alive for reconnection."""
         with self._lock:
@@ -96,20 +104,24 @@ class PersistentSession:
             self.state = 'disconnected'
             self.disconnect_time = datetime.now()
     
+    @x_ipe_tracing()
     def get_buffer(self) -> str:
         """Get buffered output for replay."""
         return self.output_buffer.get_contents()
     
+    @x_ipe_tracing()
     def write(self, data: str) -> None:
         """Write input to PTY."""
         if self.pty_session:
             self.pty_session.write(data)
     
+    @x_ipe_tracing()
     def resize(self, rows: int, cols: int) -> None:
         """Resize the PTY."""
         if self.pty_session:
             self.pty_session._set_size(rows, cols)
     
+    @x_ipe_tracing()
     def is_expired(self, timeout_seconds: int = SESSION_TIMEOUT) -> bool:
         """Check if session has expired (1hr after disconnect)."""
         if self.state == 'connected':
@@ -119,6 +131,7 @@ class PersistentSession:
         elapsed = datetime.now() - self.disconnect_time
         return elapsed.total_seconds() > timeout_seconds
     
+    @x_ipe_tracing()
     def close(self) -> None:
         """Close session and cleanup resources."""
         if self.pty_session:
@@ -139,6 +152,7 @@ class SessionManager:
         self._cleanup_timer: Optional[threading.Timer] = None
         self._running = False
     
+    @x_ipe_tracing()
     def create_session(self, emit_callback: Callable[[str], None],
                        rows: int = 24, cols: int = 80) -> str:
         """Create new persistent session, returns session_id."""
@@ -152,16 +166,19 @@ class SessionManager:
         
         return session_id
     
+    @x_ipe_tracing()
     def get_session(self, session_id: str) -> Optional[PersistentSession]:
         """Get session by ID."""
         with self._lock:
             return self.sessions.get(session_id)
     
+    @x_ipe_tracing()
     def has_session(self, session_id: str) -> bool:
         """Check if session exists."""
         with self._lock:
             return session_id in self.sessions
     
+    @x_ipe_tracing()
     def remove_session(self, session_id: str) -> None:
         """Remove and close a session."""
         with self._lock:
@@ -169,6 +186,7 @@ class SessionManager:
         if session:
             session.close()
     
+    @x_ipe_tracing()
     def cleanup_expired(self) -> int:
         """Remove expired sessions. Returns count removed."""
         expired_ids = []
@@ -182,11 +200,13 @@ class SessionManager:
         
         return len(expired_ids)
     
+    @x_ipe_tracing()
     def start_cleanup_task(self) -> None:
         """Start background cleanup task (every 5 minutes)."""
         self._running = True
         self._schedule_cleanup()
     
+    @x_ipe_tracing()
     def stop_cleanup_task(self) -> None:
         """Stop the cleanup task."""
         self._running = False
@@ -230,6 +250,7 @@ class PTYSession:
         self.rows = 24
         self.cols = 80
     
+    @x_ipe_tracing()
     def start(self, rows: int = 24, cols: int = 80) -> None:
         """Spawn PTY with shell and start output reader."""
         import pty
@@ -310,6 +331,7 @@ class PTYSession:
         except Exception:
             pass
     
+    @x_ipe_tracing()
     def write(self, data: str) -> None:
         """Write input to PTY."""
         if self.fd is not None:
@@ -328,6 +350,7 @@ class PTYSession:
             winsize = struct.pack('HHHH', self.rows, self.cols, 0, 0)
             fcntl.ioctl(self.fd, termios.TIOCSWINSZ, winsize)
     
+    @x_ipe_tracing()
     def close(self) -> None:
         """Terminate PTY session and cleanup."""
         import signal
@@ -351,6 +374,7 @@ class PTYSession:
                 pass
             self.pid = None
     
+    @x_ipe_tracing()
     def isalive(self) -> bool:
         """Check if the PTY process is still running."""
         return self._running and self.fd is not None

@@ -7,7 +7,7 @@ Traces are collected in-memory during request execution and flushed
 to log files upon request completion.
 """
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional, Any
 import json
 
@@ -64,7 +64,7 @@ class TraceBuffer:
         """
         self.trace_id = trace_id
         self.root_api = root_api
-        self.started_at = datetime.utcnow()
+        self.started_at = datetime.now(timezone.utc)
         self.entries: List[TraceEntry] = []
         self._size = 0
     

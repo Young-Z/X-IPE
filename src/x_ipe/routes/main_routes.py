@@ -15,17 +15,20 @@ from pathlib import Path
 from flask import Blueprint, render_template, jsonify, request, current_app, send_file
 
 from x_ipe.services import ProjectService, ContentService
+from x_ipe.tracing import x_ipe_tracing
 
 main_bp = Blueprint('main', __name__)
 
 
 @main_bp.route('/')
+@x_ipe_tracing()
 def index():
     """Serve main page with sidebar navigation"""
     return render_template('index.html')
 
 
 @main_bp.route('/uiux-feedbacks')
+@x_ipe_tracing()
 def uiux_feedbacks():
     """
     GET /uiux-feedbacks
@@ -36,6 +39,7 @@ def uiux_feedbacks():
 
 
 @main_bp.route('/workplace')
+@x_ipe_tracing()
 def workplace():
     """
     GET /workplace
@@ -46,7 +50,19 @@ def workplace():
     return render_template('workplace.html')
 
 
+@main_bp.route('/knowledge-base')
+@x_ipe_tracing()
+def knowledge_base():
+    """
+    GET /knowledge-base
+    
+    FEATURE-025-A: Knowledge Base page
+    """
+    return render_template('knowledge-base.html')
+
+
 @main_bp.route('/api/project/structure')
+@x_ipe_tracing()
 def get_project_structure():
     """
     GET /api/project/structure
@@ -68,6 +84,7 @@ def get_project_structure():
 
 
 @main_bp.route('/api/file/content')
+@x_ipe_tracing()
 def get_file_content():
     """
     GET /api/file/content?path=<relative_path>&raw=<true/false>
@@ -148,6 +165,7 @@ def get_file_content():
 
 
 @main_bp.route('/api/file/save', methods=['POST'])
+@x_ipe_tracing()
 def save_file():
     """
     POST /api/file/save

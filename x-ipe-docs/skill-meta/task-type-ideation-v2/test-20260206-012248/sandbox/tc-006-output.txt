@@ -1,0 +1,4 @@
+=== TC-006: Procedure XML ===
+procedure tag: 1
+step tags: 23
+PASS

@@ -1,14 +1,15 @@
 # Feature Specification: Console Voice Input
 
 > Feature ID: FEATURE-021  
-> Version: v1.0  
-> Status: Refined  
-> Last Updated: 01-25-2026
+> Version: v1.1  
+> Status: Implemented  
+> Last Updated: 02-02-2026
 
 ## Version History
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
+| v1.1 | 02-02-2026 | Updated AC status - full implementation with Alibaba Cloud integration | - |
 | v1.0 | 01-25-2026 | Initial specification - push-to-talk voice input for console | - |
 
 ---

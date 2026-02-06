@@ -650,6 +650,42 @@ class TestToolsConfigEdgeCases:
 
 
 # ============================================================================
+# COPILOT PROMPT API TESTS
+# ============================================================================
+
+class TestCopilotPromptAPI:
+    """Test GET /api/config/copilot-prompt endpoint"""
+    
+    def test_get_copilot_prompt_returns_ideation_prompts(self, test_client, temp_project_dir):
+        """GET /api/config/copilot-prompt returns prompts at data.ideation.prompts path"""
+        # Setup: create copilot-prompt.json with ideation prompts
+        config_path = Path(temp_project_dir) / 'x-ipe-docs' / 'config' / 'copilot-prompt.json'
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        copilot_config = {
+            "version": "2.0",
+            "ideation": {
+                "prompts": [
+                    {"id": "test-prompt", "label": "Test Prompt", "command": "test"}
+                ]
+            }
+        }
+        config_path.write_text(json.dumps(copilot_config, indent=2))
+        
+        response = test_client.get('/api/config/copilot-prompt')
+        
+        assert response.status_code == 200
+        data = response.get_json()
+        
+        # Bug TASK-196: Frontend expects data.ideation.prompts, not data.prompts
+        # This test verifies the API returns the correct structure
+        assert 'ideation' in data
+        assert 'prompts' in data['ideation']
+        assert len(data['ideation']['prompts']) == 1
+        assert data['ideation']['prompts'][0]['id'] == 'test-prompt'
+
+
+# ============================================================================
 # TEST COVERAGE SUMMARY
 # ============================================================================
 """

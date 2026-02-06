@@ -14,6 +14,7 @@ import json
 from flask import Blueprint, jsonify, request, current_app
 
 from x_ipe.services import ToolsConfigService, ThemesService
+from x_ipe.tracing import x_ipe_tracing
 
 tools_bp = Blueprint('tools', __name__)
 
@@ -31,6 +32,7 @@ def _get_themes_service():
 
 
 @tools_bp.route('/api/config/tools', methods=['GET'])
+@x_ipe_tracing()
 def get_tools_config():
     """
     GET /api/config/tools
@@ -56,6 +58,7 @@ def get_tools_config():
 
 
 @tools_bp.route('/api/config/tools', methods=['POST'])
+@x_ipe_tracing()
 def save_tools_config():
     """
     POST /api/config/tools
@@ -93,6 +96,7 @@ def save_tools_config():
 
 
 @tools_bp.route('/api/config/copilot-prompt', methods=['GET'])
+@x_ipe_tracing()
 def get_copilot_prompt_config():
     """
     GET /api/config/copilot-prompt
@@ -130,6 +134,7 @@ def get_copilot_prompt_config():
 # ============================================================
 
 @tools_bp.route('/api/themes', methods=['GET'])
+@x_ipe_tracing()
 def list_themes():
     """
     GET /api/themes
@@ -163,6 +168,7 @@ def list_themes():
 
 
 @tools_bp.route('/api/themes/<name>', methods=['GET'])
+@x_ipe_tracing()
 def get_theme_detail(name):
     """
     GET /api/themes/<name>

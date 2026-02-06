@@ -14,6 +14,7 @@ from flask import Blueprint, request, jsonify, current_app
 from pathlib import Path
 
 from x_ipe.services.tracing_service import TracingService
+from x_ipe.tracing import x_ipe_tracing
 
 
 tracing_bp = Blueprint('tracing', __name__, url_prefix='/api/tracing')
@@ -26,6 +27,7 @@ def get_service() -> TracingService:
 
 
 @tracing_bp.route('/status', methods=['GET'])
+@x_ipe_tracing()
 def get_status():
     """
     GET /api/tracing/status
@@ -49,6 +51,7 @@ def get_status():
 
 
 @tracing_bp.route('/start', methods=['POST'])
+@x_ipe_tracing()
 def start_tracing():
     """
     POST /api/tracing/start
@@ -81,6 +84,7 @@ def start_tracing():
 
 
 @tracing_bp.route('/stop', methods=['POST'])
+@x_ipe_tracing()
 def stop_tracing():
     """
     POST /api/tracing/stop
@@ -98,6 +102,7 @@ def stop_tracing():
 
 
 @tracing_bp.route('/logs', methods=['GET'])
+@x_ipe_tracing()
 def list_logs():
     """
     GET /api/tracing/logs
@@ -120,6 +125,7 @@ def list_logs():
 
 
 @tracing_bp.route('/logs', methods=['DELETE'])
+@x_ipe_tracing()
 def delete_logs():
     """
     DELETE /api/tracing/logs
@@ -134,3 +140,93 @@ def delete_logs():
     service = get_service()
     deleted = service.delete_all_logs()
     return jsonify({"deleted": deleted})
+
+
+@tracing_bp.route('/logs/<trace_id>', methods=['GET'])
+@x_ipe_tracing()
+def get_trace(trace_id):
+    """
+    GET /api/tracing/logs/<trace_id>
+    
+    Get parsed trace data for DAG visualization.
+    
+    Response:
+        {
+            "trace_id": "abc-123",
+            "api": "POST /api/orders",
+            "timestamp": "2026-02-01T03:30:00",
+            "total_time_ms": 245,
+            "status": "success",
+            "nodes": [
+                {
+                    "id": "node-0",
+                    "label": "POST /api/orders",
+                    "timing": "245ms",
+                    "status": "success",
+                    "level": "API",
+                    "input": "{}",
+                    "output": "{}",
+                    "error": null
+                }
+            ],
+            "edges": [
+                {"source": "node-0", "target": "node-1"}
+            ],
+            "filename": "20260201-post-api-orders-abc123.log"
+        }
+        
+    Errors:
+        404 - Trace not found
+    """
+    service = get_service()
+    result = service.get_trace(trace_id)
+    
+    if result is None:
+        return jsonify({"error": f"Trace not found: {trace_id}"}), 404
+    
+    return jsonify(result)
+
+
+@tracing_bp.route('/ignored', methods=['GET'])
+@x_ipe_tracing()
+def get_ignored_apis():
+    """
+    GET /api/tracing/ignored
+    
+    Get list of ignored API patterns.
+    
+    Response:
+        {
+            "patterns": ["/api/health/*", "/api/status"]
+        }
+    """
+    service = get_service()
+    config = service.get_config()
+    return jsonify({"patterns": config.get("ignored_apis", [])})
+
+
+@tracing_bp.route('/ignored', methods=['POST'])
+@x_ipe_tracing()
+def update_ignored_apis():
+    """
+    POST /api/tracing/ignored
+    
+    Update list of ignored API patterns.
+    
+    Request:
+        {
+            "patterns": ["/api/health/*", "/api/status"]
+        }
+    
+    Response:
+        {
+            "success": true
+        }
+    """
+    data = request.get_json() or {}
+    patterns = data.get('patterns', [])
+    
+    service = get_service()
+    service.update_ignored_apis(patterns)
+    
+    return jsonify({"success": True})

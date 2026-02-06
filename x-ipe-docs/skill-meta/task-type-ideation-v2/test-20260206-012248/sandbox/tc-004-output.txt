@@ -1,0 +1,3 @@
+=== TC-004: DoR XML ===
+definition_of_ready count: 1
+PASS

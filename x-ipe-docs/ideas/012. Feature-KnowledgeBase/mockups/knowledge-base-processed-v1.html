@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Base - Processed View - X-IPE Mockup</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =================================================================
+         * DESIGN SYSTEM - Knowledge Base Processed View
+         * ================================================================= */
+        
+        :root {
+            --top-bar-height: 44px;
+            --sidebar-width: 280px;
+            --terminal-height: 36px;
+            
+            --bg-primary: #1a1b1e;
+            --bg-secondary: #212226;
+            --bg-tertiary: #2a2b30;
+            --bg-elevated: #323338;
+            --bg-hover: #3a3b42;
+            --bg-active: #4a4b54;
+            
+            --accent-primary: #7c6aef;
+            --accent-secondary: #a78bfa;
+            --accent-warm: #f59e0b;
+            --accent-success: #10b981;
+            --accent-info: #3b82f6;
+            --accent-danger: #ef4444;
+            
+            --text-primary: #e4e5e9;
+            --text-secondary: #9ca3af;
+            --text-tertiary: #6b7280;
+            --text-muted: #4b5563;
+            
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-default: rgba(255, 255, 255, 0.1);
+            --border-strong: rgba(255, 255, 255, 0.15);
+            
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+            
+            --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: var(--font-sans);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        .app-root {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* TOP BAR */
+        .top-bar {
+            height: var(--top-bar-height);
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-default);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            flex-shrink: 0;
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .brand i { color: var(--accent-primary); font-size: 18px; }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb-sep { color: var(--text-tertiary); }
+        .breadcrumb-current { color: var(--accent-success); font-weight: 500; }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: var(--accent-success);
+            color: white;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-default);
+        }
+
+        .btn-ghost:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--border-strong);
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-icon:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-default);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-tertiary);
+        }
+
+        .sidebar-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .sidebar-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background: transparent;
+            border: none;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+
+        .sidebar-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        /* TOPIC LIST */
+        .topic-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .topic-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+
+        .topic-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .topic-item.active {
+            background: var(--bg-active);
+            border-left: 3px solid var(--accent-success);
+        }
+
+        .topic-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: var(--bg-elevated);
+            font-size: 16px;
+        }
+
+        .topic-icon.ml { color: #f59e0b; background: rgba(245, 158, 11, 0.12); }
+        .topic-icon.api { color: #3b82f6; background: rgba(59, 130, 246, 0.12); }
+        .topic-icon.best { color: #10b981; background: rgba(16, 185, 129, 0.12); }
+        .topic-icon.arch { color: #a78bfa; background: rgba(167, 139, 250, 0.12); }
+
+        .topic-info {
+            flex: 1;
+        }
+
+        .topic-name {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .topic-meta {
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        .topic-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: var(--bg-elevated);
+            color: var(--text-tertiary);
+        }
+
+        /* CONTENT PANEL */
+        .content-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+            overflow: hidden;
+        }
+
+        .content-header {
+            padding: 16px 24px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-default);
+        }
+
+        .content-header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .content-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .content-title h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .content-title .topic-badge-lg {
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .topic-badge-lg.success {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-success);
+        }
+
+        .content-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* TOPIC STATS */
+        .topic-stats {
+            display: flex;
+            gap: 24px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        /* CONTENT BODY */
+        .content-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        /* SUMMARY CARD */
+        .summary-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .summary-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .summary-card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-card-title i {
+            color: var(--accent-success);
+            font-size: 18px;
+        }
+
+        .summary-card-title h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .summary-version {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: var(--bg-elevated);
+            color: var(--text-tertiary);
+        }
+
+        .summary-card-body {
+            padding: 20px;
+        }
+
+        /* MARKDOWN CONTENT */
+        .markdown-content {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .markdown-content h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 20px 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .markdown-content h4:first-child {
+            margin-top: 0;
+        }
+
+        .markdown-content h4 i {
+            color: var(--accent-primary);
+            font-size: 14px;
+        }
+
+        .markdown-content p {
+            margin-bottom: 12px;
+        }
+
+        .markdown-content ul {
+            margin: 0 0 12px 20px;
+        }
+
+        .markdown-content li {
+            margin-bottom: 6px;
+        }
+
+        .markdown-content code {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            padding: 2px 6px;
+            background: var(--bg-elevated);
+            border-radius: 4px;
+            color: var(--accent-warm);
+        }
+
+        .markdown-content blockquote {
+            border-left: 3px solid var(--accent-primary);
+            padding-left: 16px;
+            margin: 16px 0;
+            color: var(--text-tertiary);
+            font-style: italic;
+        }
+
+        .markdown-content .highlight {
+            background: rgba(245, 158, 11, 0.15);
+            padding: 0 3px;
+            border-radius: 3px;
+        }
+
+        /* SOURCE REFERENCE */
+        .source-reference {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 12px;
+        }
+
+        .source-reference i {
+            color: var(--text-tertiary);
+        }
+
+        .source-reference a {
+            color: var(--accent-info);
+            text-decoration: none;
+        }
+
+        .source-reference a:hover {
+            text-decoration: underline;
+        }
+
+        /* RAW FILES SECTION */
+        .raw-files-section {
+            margin-top: 24px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-tertiary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .raw-file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .raw-file-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            gap: 12px;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+
+        .raw-file-item:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-strong);
+        }
+
+        .raw-file-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .raw-file-icon.pdf { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+        .raw-file-icon.md { background: rgba(124, 106, 239, 0.12); color: var(--accent-primary); }
+        .raw-file-icon.code { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+
+        .raw-file-info {
+            flex: 1;
+        }
+
+        .raw-file-name {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .raw-file-meta {
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        .raw-file-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        /* TERMINAL */
+        .terminal-panel {
+            height: var(--terminal-height);
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-default);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 12px;
+        }
+
+        .terminal-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .terminal-tab {
+            padding: 4px 12px;
+            border-radius: 4px;
+            background: transparent;
+            border: none;
+            color: var(--text-tertiary);
+            font-size: 12px;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .terminal-tab:hover {
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+        }
+
+        .terminal-tab.active {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+        }
+
+        .terminal-spacer { flex: 1; }
+
+        /* VERSION HISTORY */
+        .version-history {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .version-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+
+        .version-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .version-item.current {
+            background: rgba(124, 106, 239, 0.1);
+            border: 1px solid rgba(124, 106, 239, 0.3);
+        }
+
+        .version-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-tertiary);
+        }
+
+        .version-item.current .version-dot {
+            background: var(--accent-primary);
+        }
+
+        .version-info {
+            flex: 1;
+        }
+
+        .version-label {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .version-date {
+            color: var(--text-tertiary);
+            font-size: 11px;
+        }
+
+        /* KNOWLEDGE GRAPH PREVIEW */
+        .graph-preview {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+
+        .graph-preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .graph-preview-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .graph-preview-title i {
+            color: var(--accent-info);
+        }
+
+        .graph-canvas {
+            height: 200px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Graph nodes visualization */
+        .graph-node {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.2s;
+        }
+
+        .graph-node:hover {
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .graph-node.center {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+        }
+
+        .graph-node.n1 {
+            background: rgba(245, 158, 11, 0.2);
+            border: 2px solid var(--accent-warm);
+            color: var(--accent-warm);
+            left: 20%;
+            top: 30%;
+        }
+
+        .graph-node.n2 {
+            background: rgba(16, 185, 129, 0.2);
+            border: 2px solid var(--accent-success);
+            color: var(--accent-success);
+            left: 75%;
+            top: 25%;
+        }
+
+        .graph-node.n3 {
+            background: rgba(59, 130, 246, 0.2);
+            border: 2px solid var(--accent-info);
+            color: var(--accent-info);
+            left: 15%;
+            top: 70%;
+        }
+
+        .graph-node.n4 {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid var(--accent-danger);
+            color: var(--accent-danger);
+            left: 80%;
+            top: 65%;
+        }
+
+        /* Lines connecting nodes (simplified SVG approach) */
+        .graph-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .graph-lines line {
+            stroke: var(--border-strong);
+            stroke-width: 1;
+            stroke-dasharray: 4;
+        }
+
+        @media (max-width: 1200px) {
+            .content-body { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-root">
+        <!-- TOP BAR -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <a href="#" class="brand">
+                    <i class="bi bi-journal-code"></i>
+                    X-IPE
+                </a>
+                <div class="breadcrumb">
+                    <span>Workplace</span>
+                    <span class="breadcrumb-sep">/</span>
+                    <span>Knowledge Base</span>
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-current">machine-learning</span>
+                </div>
+            </div>
+            <div class="top-bar-right">
+                <button class="btn btn-ghost" title="Search knowledge">
+                    <i class="bi bi-search"></i>
+                    Search
+                </button>
+                <button class="btn-icon" title="Stage Toolbox">
+                    <i class="bi bi-tools"></i>
+                </button>
+                <button class="btn-icon" title="Settings">
+                    <i class="bi bi-gear"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- SIDEBAR - Topic List -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <span class="sidebar-title">Topics</span>
+                    <div class="sidebar-actions">
+                        <button class="sidebar-btn" title="Add topic">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="topic-list">
+                    <div class="topic-item active">
+                        <div class="topic-icon ml"><i class="bi bi-cpu"></i></div>
+                        <div class="topic-info">
+                            <div class="topic-name">machine-learning</div>
+                            <div class="topic-meta">8 items • 2 summaries</div>
+                        </div>
+                        <span class="topic-badge">8</span>
+                    </div>
+                    <div class="topic-item">
+                        <div class="topic-icon api"><i class="bi bi-braces"></i></div>
+                        <div class="topic-info">
+                            <div class="topic-name">api-design</div>
+                            <div class="topic-meta">3 items • 1 summary</div>
+                        </div>
+                        <span class="topic-badge">3</span>
+                    </div>
+                    <div class="topic-item">
+                        <div class="topic-icon best"><i class="bi bi-trophy"></i></div>
+                        <div class="topic-info">
+                            <div class="topic-name">best-practices</div>
+                            <div class="topic-meta">6 items • 3 summaries</div>
+                        </div>
+                        <span class="topic-badge">6</span>
+                    </div>
+                    <div class="topic-item">
+                        <div class="topic-icon arch"><i class="bi bi-diagram-3"></i></div>
+                        <div class="topic-info">
+                            <div class="topic-name">architecture</div>
+                            <div class="topic-meta">4 items • 2 summaries</div>
+                        </div>
+                        <span class="topic-badge">4</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- CONTENT PANEL -->
+            <main class="content-panel">
+                <div class="content-header">
+                    <div class="content-header-top">
+                        <div class="content-title">
+                            <h2><i class="bi bi-cpu" style="color: var(--accent-warm);"></i> Machine Learning</h2>
+                            <span class="topic-badge-lg success">
+                                <i class="bi bi-check-circle"></i> Processed
+                            </span>
+                        </div>
+                        <div class="content-actions">
+                            <button class="btn btn-ghost">
+                                <i class="bi bi-arrow-clockwise"></i>
+                                Reprocess
+                            </button>
+                            <button class="btn btn-primary">
+                                <i class="bi bi-plus-lg"></i>
+                                Add Knowledge
+                            </button>
+                        </div>
+                    </div>
+                    <div class="topic-stats">
+                        <div class="stat-item">
+                            <div class="stat-icon"><i class="bi bi-files"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value">8</span>
+                                <span class="stat-label">Raw Files</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon"><i class="bi bi-file-text"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value">2</span>
+                                <span class="stat-label">Summaries</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value">2 days ago</span>
+                                <span class="stat-label">Last Updated</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon"><i class="bi bi-link-45deg"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value">4</span>
+                                <span class="stat-label">Related Topics</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-body">
+                    <!-- AI-Generated Summary -->
+                    <div class="summary-card">
+                        <div class="summary-card-header">
+                            <div class="summary-card-title">
+                                <i class="bi bi-stars"></i>
+                                <h3>AI-Generated Summary</h3>
+                            </div>
+                            <span class="summary-version">v2 • Feb 5, 2026</span>
+                        </div>
+                        <div class="summary-card-body">
+                            <div class="markdown-content">
+                                <h4><i class="bi bi-lightbulb"></i> Overview</h4>
+                                <p>This knowledge collection covers <span class="highlight">neural network architectures</span>, training methodologies, and practical implementation patterns for machine learning systems. The materials emphasize production-ready approaches with a focus on scalability and maintainability.</p>
+
+                                <h4><i class="bi bi-key"></i> Key Concepts</h4>
+                                <ul>
+                                    <li><strong>Transformer Architecture:</strong> Attention mechanisms, positional encoding, and multi-head attention patterns</li>
+                                    <li><strong>Training Optimization:</strong> Learning rate scheduling, gradient clipping, and batch normalization strategies</li>
+                                    <li><strong>Model Evaluation:</strong> Cross-validation techniques, metrics selection, and A/B testing frameworks</li>
+                                    <li><strong>Deployment Patterns:</strong> Model serving with <code>TorchServe</code>, containerization, and scaling strategies</li>
+                                </ul>
+
+                                <h4><i class="bi bi-code-square"></i> Code Patterns</h4>
+                                <p>The code samples demonstrate PyTorch-based implementations with emphasis on:</p>
+                                <ul>
+                                    <li>Custom dataset loaders with efficient memory management</li>
+                                    <li>Training loops with checkpoint saving and early stopping</li>
+                                    <li>Inference optimization using <code>torch.jit</code> compilation</li>
+                                </ul>
+
+                                <blockquote>
+                                    "The most impactful improvement came from implementing mixed-precision training, reducing training time by 40% while maintaining model accuracy."
+                                </blockquote>
+
+                                <div class="source-reference">
+                                    <i class="bi bi-link-45deg"></i>
+                                    <span>Sources:</span>
+                                    <a href="#">research-paper-v2.pdf</a>,
+                                    <a href="#">neural-networks-guide.md</a>,
+                                    <a href="#">training-scripts/</a>
+                                </div>
+                            </div>
+
+                            <!-- Version History -->
+                            <div class="version-history">
+                                <div class="section-title">
+                                    <i class="bi bi-clock-history"></i>
+                                    Version History
+                                </div>
+                                <div class="version-item current">
+                                    <span class="version-dot"></span>
+                                    <div class="version-info">
+                                        <span class="version-label">v2 (Current)</span>
+                                        <span class="version-date">Feb 5, 2026 • Added deployment patterns</span>
+                                    </div>
+                                </div>
+                                <div class="version-item">
+                                    <span class="version-dot"></span>
+                                    <div class="version-info">
+                                        <span class="version-label">v1</span>
+                                        <span class="version-date">Feb 3, 2026 • Initial summary</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Knowledge Graph Preview -->
+                    <div class="graph-preview">
+                        <div class="graph-preview-header">
+                            <div class="graph-preview-title">
+                                <i class="bi bi-diagram-3"></i>
+                                Related Knowledge Graph
+                            </div>
+                            <button class="btn btn-ghost" style="padding: 4px 10px; font-size: 12px;">
+                                <i class="bi bi-arrows-fullscreen"></i>
+                                Expand
+                            </button>
+                        </div>
+                        <div class="graph-canvas">
+                            <svg class="graph-lines" viewBox="0 0 400 200">
+                                <line x1="200" y1="100" x2="80" y2="60"/>
+                                <line x1="200" y1="100" x2="300" y2="50"/>
+                                <line x1="200" y1="100" x2="60" y2="140"/>
+                                <line x1="200" y1="100" x2="320" y2="130"/>
+                            </svg>
+                            <div class="graph-node center"><i class="bi bi-cpu"></i></div>
+                            <div class="graph-node n1"><i class="bi bi-braces"></i></div>
+                            <div class="graph-node n2"><i class="bi bi-graph-up"></i></div>
+                            <div class="graph-node n3"><i class="bi bi-database"></i></div>
+                            <div class="graph-node n4"><i class="bi bi-cloud"></i></div>
+                        </div>
+                    </div>
+
+                    <!-- Raw Files Section -->
+                    <div class="raw-files-section">
+                        <div class="section-title">
+                            <i class="bi bi-folder2-open"></i>
+                            Source Files (8)
+                        </div>
+                        <div class="raw-file-list">
+                            <div class="raw-file-item">
+                                <div class="raw-file-icon pdf"><i class="bi bi-file-pdf"></i></div>
+                                <div class="raw-file-info">
+                                    <div class="raw-file-name">research-paper-v2.pdf</div>
+                                    <div class="raw-file-meta">2.4 MB • Neural Network Architecture Deep Dive</div>
+                                </div>
+                                <div class="raw-file-actions">
+                                    <button class="btn-icon" title="View"><i class="bi bi-eye"></i></button>
+                                    <button class="btn-icon" title="Download"><i class="bi bi-download"></i></button>
+                                </div>
+                            </div>
+                            <div class="raw-file-item">
+                                <div class="raw-file-icon md"><i class="bi bi-markdown"></i></div>
+                                <div class="raw-file-info">
+                                    <div class="raw-file-name">neural-networks-guide.md</div>
+                                    <div class="raw-file-meta">156 KB • Comprehensive training guide</div>
+                                </div>
+                                <div class="raw-file-actions">
+                                    <button class="btn-icon" title="View"><i class="bi bi-eye"></i></button>
+                                    <button class="btn-icon" title="Download"><i class="bi bi-download"></i></button>
+                                </div>
+                            </div>
+                            <div class="raw-file-item">
+                                <div class="raw-file-icon code"><i class="bi bi-folder-fill"></i></div>
+                                <div class="raw-file-info">
+                                    <div class="raw-file-name">training-scripts/</div>
+                                    <div class="raw-file-meta">5 files • PyTorch training implementations</div>
+                                </div>
+                                <div class="raw-file-actions">
+                                    <button class="btn-icon" title="Browse"><i class="bi bi-folder2-open"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- TERMINAL PANEL -->
+        <footer class="terminal-panel">
+            <div class="terminal-tabs">
+                <button class="terminal-tab active">Console</button>
+                <button class="terminal-tab">KB Manager Logs</button>
+            </div>
+            <div class="terminal-spacer"></div>
+            <button class="btn-icon" title="Expand terminal">
+                <i class="bi bi-chevron-up"></i>
+            </button>
+        </footer>
+    </div>
+</body>
+</html>

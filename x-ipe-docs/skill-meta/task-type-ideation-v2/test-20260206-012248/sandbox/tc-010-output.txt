@@ -1,0 +1,4 @@
+=== TC-010: Step Outputs in DoD ===
+Procedure outputs: 11
+DoD step_outputs: 12
+PASS

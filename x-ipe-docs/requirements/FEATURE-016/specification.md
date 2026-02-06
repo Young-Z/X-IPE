@@ -1,14 +1,15 @@
 # Feature Specification: Architecture Diagram Renderer
 
 > Feature ID: FEATURE-016  
-> Version: v1.0  
-> Status: Refined  
-> Last Updated: 01-24-2026
+> Version: v1.2  
+> Status: Implemented  
+> Last Updated: 02-02-2026
 
 ## Version History
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
+| v1.2 | 02-02-2026 | Verified implementation - skill fully available, live preview deferred | - |
 | v1.1 | 01-24-2026 | CR-001: JS Library for Canvas rendering → spawned FEATURE-017 | [CR-001](./CR-001.md) |
 | v1.0 | 01-24-2026 | Initial specification | - |
 

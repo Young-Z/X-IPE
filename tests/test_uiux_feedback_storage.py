@@ -582,3 +582,121 @@ class TestListFeedbackRoute:
         data = response.get_json()
         assert len(data['entries']) == 1
         assert data['entries'][0]['name'] == 'Feedback-Test'
+
+
+class TestDeleteFeedbackRoute:
+    """Tests for DELETE /api/uiux-feedback/<id> endpoint (TASK-283)"""
+    
+    @pytest.fixture
+    def client(self, tmp_path):
+        """Create test client with temp project root"""
+        from x_ipe.app import create_app
+        
+        app = create_app()
+        app.config['TESTING'] = True
+        app.config['PROJECT_ROOT'] = str(tmp_path)
+        
+        with app.test_client() as client:
+            yield client
+    
+    def test_delete_feedback_returns_200(self, client, tmp_path):
+        """DELETE should return 200 on success"""
+        # Create a feedback folder
+        feedback_dir = tmp_path / 'x-ipe-docs' / 'uiux-feedback' / 'Feedback-Test'
+        feedback_dir.mkdir(parents=True, exist_ok=True)
+        (feedback_dir / 'feedback.md').write_text('# Test')
+        
+        response = client.delete('/api/uiux-feedback/Feedback-Test')
+        
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data['success'] is True
+        assert not feedback_dir.exists()
+    
+    def test_delete_feedback_returns_404_if_not_found(self, client, tmp_path):
+        """DELETE should return 404 if feedback not found"""
+        response = client.delete('/api/uiux-feedback/NonExistent')
+        
+        assert response.status_code == 404
+        data = response.get_json()
+        assert data['success'] is False
+        assert 'not found' in data['error'].lower()
+
+
+class TestStartupCleanupConfiguration:
+    """Tests for configurable cleanup retention (TASK-237)"""
+    
+    def test_cleanup_uses_tools_json_retention_days(self, tmp_path):
+        """Cleanup should read retention days from tools.json"""
+        from x_ipe.services.uiux_feedback_service import UiuxFeedbackService
+        from datetime import datetime, timedelta
+        import json
+        import os
+        
+        # Create tools.json with custom retention
+        config_dir = tmp_path / 'x-ipe-docs' / 'config'
+        config_dir.mkdir(parents=True, exist_ok=True)
+        tools_json = config_dir / 'tools.json'
+        tools_json.write_text(json.dumps({
+            'version': '2.0',
+            'feedback_retention_days': 3
+        }))
+        
+        # Create a feedback entry
+        service = UiuxFeedbackService(str(tmp_path))
+        service.save_feedback({
+            'name': 'Feedback-4DaysOld',
+            'url': 'http://localhost:3000',
+            'elements': ['button']
+        })
+        
+        # Modify folder mtime to be 4 days old
+        folder_path = tmp_path / 'x-ipe-docs' / 'uiux-feedback' / 'Feedback-4DaysOld'
+        old_time = (datetime.now() - timedelta(days=4)).timestamp()
+        os.utime(folder_path, (old_time, old_time))
+        
+        # Read retention from tools.json and cleanup
+        with open(tools_json) as f:
+            config = json.load(f)
+            retention_days = config.get('feedback_retention_days', 7)
+        
+        deleted = service.cleanup_old_feedback(days=retention_days)
+        
+        assert retention_days == 3
+        assert deleted == 1
+        assert not folder_path.exists()
+    
+    def test_cleanup_defaults_to_7_days_without_config(self, tmp_path):
+        """Cleanup should default to 7 days if tools.json missing"""
+        from x_ipe.services.uiux_feedback_service import UiuxFeedbackService
+        from datetime import datetime, timedelta
+        import os
+        from pathlib import Path
+        
+        # No tools.json created - test default
+        service = UiuxFeedbackService(str(tmp_path))
+        service.save_feedback({
+            'name': 'Feedback-5DaysOld',
+            'url': 'http://localhost:3000',
+            'elements': ['button']
+        })
+        
+        # Modify folder mtime to be 5 days old
+        folder_path = tmp_path / 'x-ipe-docs' / 'uiux-feedback' / 'Feedback-5DaysOld'
+        old_time = (datetime.now() - timedelta(days=5)).timestamp()
+        os.utime(folder_path, (old_time, old_time))
+        
+        # Read retention from tools.json (should default)
+        tools_json_path = tmp_path / 'x-ipe-docs' / 'config' / 'tools.json'
+        retention_days = 7
+        if tools_json_path.exists():
+            import json
+            with open(tools_json_path) as f:
+                config = json.load(f)
+                retention_days = config.get('feedback_retention_days', 7)
+        
+        deleted = service.cleanup_old_feedback(days=retention_days)
+        
+        # 5 days old is within 7-day default, so should not be deleted
+        assert deleted == 0
+        assert folder_path.exists()

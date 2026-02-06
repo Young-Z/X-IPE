@@ -1,0 +1,18 @@
+=== TC-012: Variable Syntax Check ===
+
+{variable_name} patterns found:
+- {name}
+- {category}
+- {operation}
+- {outputs}
+- {skill_type}
+- {percentage}
+- {skill-name}
+
+Alternative patterns checked:
+- <PLACEHOLDER> style: 0 found
+- $VAR style: 0 found
+- [[var]] style: 0 found
+
+Consistent {variable_name} syntax: YES
+No alternative patterns: YES

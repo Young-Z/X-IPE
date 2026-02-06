@@ -356,11 +356,14 @@ class QualityEvaluationView {
     }
 
     sendToConsole(command) {
-        // Try to use the global terminal/console if available
-        if (window.terminal && typeof window.terminal.sendCommand === 'function') {
-            window.terminal.sendCommand(command);
-        } else if (window.consolePopup && typeof window.consolePopup.show === 'function') {
-            window.consolePopup.show(command);
+        // Expand terminal panel first
+        if (window.terminalPanel) {
+            window.terminalPanel.expand();
+        }
+        
+        // Use terminalManager to type command (user can review/edit before pressing Enter)
+        if (window.terminalManager && window.terminalManager.sendCopilotPromptCommandNoEnter) {
+            window.terminalManager.sendCopilotPromptCommandNoEnter(command);
         } else {
             // Fallback: copy to clipboard and show alert
             navigator.clipboard.writeText(command).then(() => {

@@ -1,0 +1,9 @@
+=== TC-003: Frontmatter ===
+---
+name: task-type-ideation-v2
+description: Learn and refine user ideas through brainstorming. Use when user uploads idea files to Workplace. Analyzes content, asks clarifying questions, and produces structured idea summary. Triggers on "ideate", "brainstorm", "refine idea", "analyze my idea".
+---
+
+Name length:       22
+Description exists: yes
+PASS

@@ -25,6 +25,7 @@
 /* Expanded state */
 .terminal-panel.expanded {
     height: 300px;
+    flex-shrink: 0; /* Prevent flex container from shrinking panel below set height */
 }
 
 /* Zen mode - full screen overlay */

@@ -5,6 +5,8 @@ import yaml
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from x_ipe.tracing import x_ipe_tracing
+
 
 class SkillsService:
     """
@@ -16,6 +18,7 @@ class SkillsService:
     
     SKILLS_PATH = '.github/skills'
     
+    @x_ipe_tracing()
     def __init__(self, project_root: str):
         """
         Initialize SkillsService.
@@ -26,6 +29,7 @@ class SkillsService:
         self.project_root = Path(project_root).resolve()
         self.skills_dir = self.project_root / self.SKILLS_PATH
     
+    @x_ipe_tracing()
     def get_all(self) -> List[Dict[str, str]]:
         """
         Get all skills with their name and description.

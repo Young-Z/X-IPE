@@ -1,0 +1,4 @@
+=== TC-013: Folder Rename ===
+Draft Idea pattern: 2
+folder-naming-guide.md: yes
+PASS

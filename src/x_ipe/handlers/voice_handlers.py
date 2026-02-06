@@ -14,6 +14,7 @@ from flask import request
 from flask_socketio import emit
 
 from x_ipe.services.voice_input_service_v2 import VoiceInputService, is_voice_command
+from x_ipe.tracing import x_ipe_tracing
 
 # Global voice service instance
 voice_service = None
@@ -35,6 +36,7 @@ def register_voice_handlers(socketio):
         print("[Voice] No ALIBABA_SPEECH_API_KEY found, voice input disabled")
     
     @socketio.on('voice_start')
+    @x_ipe_tracing()
     def handle_voice_start(data=None):
         """Handle voice recording start request."""
         global voice_service
@@ -77,6 +79,7 @@ def register_voice_handlers(socketio):
             emit('voice_error', {'message': str(e)})
     
     @socketio.on('voice_audio')
+    @x_ipe_tracing()
     def handle_voice_audio(data):
         """Handle incoming audio chunk from client."""
         global voice_service
@@ -103,6 +106,7 @@ def register_voice_handlers(socketio):
             emit('voice_error', {'message': f'Audio error: {e}'})
     
     @socketio.on('voice_stop')
+    @x_ipe_tracing()
     def handle_voice_stop(data=None):
         """Handle voice recording stop request - finalize and get transcription."""
         global voice_service
@@ -151,6 +155,7 @@ def register_voice_handlers(socketio):
             emit('voice_error', {'message': str(e)})
     
     @socketio.on('voice_cancel')
+    @x_ipe_tracing()
     def handle_voice_cancel(data=None):
         """Handle voice recording cancel request - abort without transcription."""
         global voice_service

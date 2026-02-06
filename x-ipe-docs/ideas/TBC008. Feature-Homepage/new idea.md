@@ -1,0 +1,1 @@
+X-IPE when click on the name, I would like the right content view to show a infinity shape as DevOps.png. and just like DevOps, it has different stages. But the stage is different. what I can come up for the stages are Ideation, Requirement, Implemention, Deployment, Validation,  Monitroing, Feedback, Planning

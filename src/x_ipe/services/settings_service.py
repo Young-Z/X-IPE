@@ -8,6 +8,8 @@ import os
 import sqlite3
 from typing import Dict, List, Optional, Any
 
+from x_ipe.tracing import x_ipe_tracing
+
 
 class SettingsService:
     """
@@ -74,6 +76,7 @@ class SettingsService:
         finally:
             conn.close()
     
+    @x_ipe_tracing()
     def get(self, key: str, default: Any = None) -> Optional[str]:
         """
         Get a single setting value.
@@ -94,6 +97,7 @@ class SettingsService:
         finally:
             conn.close()
     
+    @x_ipe_tracing()
     def get_all(self) -> Dict[str, str]:
         """
         Get all settings as dictionary.
@@ -109,6 +113,7 @@ class SettingsService:
         finally:
             conn.close()
     
+    @x_ipe_tracing()
     def set(self, key: str, value: str) -> None:
         """
         Set a single setting value.
@@ -133,6 +138,7 @@ class SettingsService:
         finally:
             conn.close()
     
+    @x_ipe_tracing()
     def validate_project_root(self, path: str) -> Dict[str, str]:
         """
         Validate project root path.
@@ -265,6 +271,7 @@ class ProjectFoldersService:
         finally:
             conn.close()
     
+    @x_ipe_tracing()
     def get_all(self) -> List[Dict]:
         """
         Get all project folders.
@@ -280,6 +287,7 @@ class ProjectFoldersService:
         finally:
             conn.close()
     
+    @x_ipe_tracing()
     def get_by_id(self, project_id: int) -> Optional[Dict]:
         """
         Get project folder by ID.
@@ -299,6 +307,7 @@ class ProjectFoldersService:
         finally:
             conn.close()
     
+    @x_ipe_tracing()
     def add(self, name: str, path: str) -> Dict:
         """
         Add a new project folder.
@@ -333,6 +342,7 @@ class ProjectFoldersService:
         finally:
             conn.close()
     
+    @x_ipe_tracing()
     def update(self, project_id: int, name: str = None, path: str = None) -> Dict:
         """
         Update an existing project folder.
@@ -374,6 +384,7 @@ class ProjectFoldersService:
         finally:
             conn.close()
     
+    @x_ipe_tracing()
     def delete(self, project_id: int, active_project_id: int = None) -> Dict:
         """
         Delete a project folder.
@@ -437,6 +448,7 @@ class ProjectFoldersService:
         
         return errors
     
+    @x_ipe_tracing()
     def get_active_id(self) -> int:
         """
         Get the active project ID from settings.
@@ -453,6 +465,7 @@ class ProjectFoldersService:
         finally:
             conn.close()
     
+    @x_ipe_tracing()
     def set_active(self, project_id: int) -> Dict:
         """
         Set the active project ID.

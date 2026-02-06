@@ -152,10 +152,14 @@ def _init_services(app):
 
 def _register_blueprints(app):
     """Register all Flask Blueprints."""
-    from x_ipe.routes import main_bp, settings_bp, project_bp, ideas_bp, tools_bp, proxy_bp
+    from x_ipe.routes import main_bp, settings_bp, project_bp, ideas_bp, tools_bp, proxy_bp, kb_bp
     from x_ipe.routes.uiux_feedback_routes import uiux_feedback_bp
     from x_ipe.routes.tracing_routes import tracing_bp
     from x_ipe.routes.quality_evaluation_routes import quality_evaluation_bp
+    
+    # Initialize tracing middleware (FEATURE-023)
+    from x_ipe.tracing.middleware import init_tracing_middleware
+    init_tracing_middleware(app)
     
     app.register_blueprint(main_bp)
     app.register_blueprint(settings_bp)
@@ -166,6 +170,7 @@ def _register_blueprints(app):
     app.register_blueprint(uiux_feedback_bp)
     app.register_blueprint(tracing_bp)
     app.register_blueprint(quality_evaluation_bp)
+    app.register_blueprint(kb_bp)
 
 
 def _register_handlers():

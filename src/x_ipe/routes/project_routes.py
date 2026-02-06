@@ -13,6 +13,8 @@ Provides:
 import os
 from flask import Blueprint, jsonify, request, current_app
 
+from x_ipe.tracing import x_ipe_tracing
+
 project_bp = Blueprint('project', __name__)
 
 
@@ -22,6 +24,7 @@ def get_project_folders_service():
 
 
 @project_bp.route('/api/projects', methods=['GET'])
+@x_ipe_tracing()
 def get_projects():
     """
     GET /api/projects
@@ -43,6 +46,7 @@ def get_projects():
 
 
 @project_bp.route('/api/projects', methods=['POST'])
+@x_ipe_tracing()
 def add_project():
     """
     POST /api/projects
@@ -78,6 +82,7 @@ def add_project():
 
 
 @project_bp.route('/api/projects/<int:project_id>', methods=['PUT'])
+@x_ipe_tracing()
 def update_project(project_id):
     """
     PUT /api/projects/<id>
@@ -113,6 +118,7 @@ def update_project(project_id):
 
 
 @project_bp.route('/api/projects/<int:project_id>', methods=['DELETE'])
+@x_ipe_tracing()
 def delete_project(project_id):
     """
     DELETE /api/projects/<id>
@@ -137,6 +143,7 @@ def delete_project(project_id):
 
 
 @project_bp.route('/api/projects/switch', methods=['POST'])
+@x_ipe_tracing()
 def switch_project():
     """
     POST /api/projects/switch

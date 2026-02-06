@@ -18,6 +18,7 @@ class TracingDashboard {
         this.currentFilter = 'all';
         this.searchQuery = '';
         this.traces = [];
+        this.graphView = null;  // FEATURE-023-C: DAG visualization
     }
 
     // -------------------------------------------------------------------------
@@ -30,11 +31,25 @@ class TracingDashboard {
         await this.fetchStatus();
         await this.refreshTraceList();
         this.startPolling();
+        this.initGraphView();  // FEATURE-023-C: Initialize graph view
+    }
+
+    // FEATURE-023-C: Initialize graph view
+    initGraphView() {
+        const graphContainer = this.container.querySelector('.trace-graph-container');
+        if (graphContainer && typeof TracingGraphView !== 'undefined') {
+            this.graphView = new TracingGraphView(graphContainer);
+            this.graphView.showEmpty();
+        }
     }
 
     destroy() {
         this.stopCountdown();
         this.stopPolling();
+        if (this.graphView) {
+            this.graphView.destroy();
+            this.graphView = null;
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -149,6 +164,9 @@ class TracingDashboard {
                         <button class="icon-btn btn-ignored" title="Ignored APIs">
                             <i class="bi bi-slash-circle"></i>
                         </button>
+                        <button class="icon-btn btn-clear" title="Clear All Traces">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </div>
                 </div>
                 
@@ -184,14 +202,21 @@ class TracingDashboard {
                         </div>
                     </div>
                     
-                    <!-- Detail Panel -->
+                    <!-- Detail Panel / Graph Container (FEATURE-023-C) -->
                     <div class="trace-detail-panel">
-                        <div class="trace-detail-placeholder">
-                            <i class="bi bi-diagram-3"></i>
-                            <div>Select a trace to view details</div>
-                            <div style="font-size: 12px; opacity: 0.6; margin-top: 4px;">
-                                DAG visualization coming in FEATURE-023-C
-                            </div>
+                        <div class="trace-graph-container">
+                            <!-- Graph will be initialized here by TracingGraphView -->
+                        </div>
+                        <div class="trace-graph-zoom-controls">
+                            <button class="trace-graph-zoom-btn" data-action="zoom-in" title="Zoom In">
+                                <i class="bi bi-zoom-in"></i>
+                            </button>
+                            <button class="trace-graph-zoom-btn" data-action="zoom-out" title="Zoom Out">
+                                <i class="bi bi-zoom-out"></i>
+                            </button>
+                            <button class="trace-graph-zoom-btn" data-action="zoom-reset" title="Fit to View">
+                                <i class="bi bi-arrows-fullscreen"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -258,11 +283,17 @@ class TracingDashboard {
             // Truncate trace ID
             const shortId = traceId.substring(0, 8);
             
+            // Extract just the path from API (e.g., "GET /api/projects" -> "/api/projects")
+            const apiPath = api.includes(' ') ? api.split(' ').slice(1).join(' ') : api;
+            
             return `
                 <div class="trace-item ${statusClass} ${isSelected ? 'selected' : ''}" 
-                     data-trace-id="${traceId}">
+                     data-trace-id="${traceId}" data-api-path="${this.escapeHtml(apiPath)}">
                     <div class="trace-id-row">
                         <span class="trace-id">${shortId}...</span>
+                        <button class="trace-block-btn" title="Add to ignored APIs" data-api="${this.escapeHtml(apiPath)}">
+                            <i class="bi bi-slash-circle"></i>
+                        </button>
                         <span class="trace-status-dot ${statusClass}"></span>
                     </div>
                     <div class="trace-entry-api">
@@ -286,8 +317,19 @@ class TracingDashboard {
 
         // Rebind click events
         listContainer.querySelectorAll('.trace-item').forEach(item => {
-            item.addEventListener('click', () => {
+            item.addEventListener('click', (e) => {
+                // Don't select trace if clicking the block button
+                if (e.target.closest('.trace-block-btn')) return;
                 this.selectTrace(item.dataset.traceId);
+            });
+        });
+        
+        // Bind block button events
+        listContainer.querySelectorAll('.trace-block-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const apiPath = btn.dataset.api;
+                this.addToIgnoredApis(apiPath);
             });
         });
     }
@@ -436,6 +478,12 @@ class TracingDashboard {
             ignoredBtn.addEventListener('click', () => this.openIgnoredModal());
         }
         
+        // Clear all traces button
+        const clearBtn = this.container.querySelector('.btn-clear');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => this.clearAllTraces());
+        }
+        
         // Filter chips
         this.container.querySelectorAll('.filter-chip').forEach(chip => {
             chip.addEventListener('click', () => {
@@ -454,6 +502,17 @@ class TracingDashboard {
                 this.renderTraceList();
             });
         }
+        
+        // FEATURE-023-C: Zoom controls
+        this.container.querySelectorAll('.trace-graph-zoom-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!this.graphView) return;
+                const action = btn.dataset.action;
+                if (action === 'zoom-in') this.graphView.zoomIn();
+                else if (action === 'zoom-out') this.graphView.zoomOut();
+                else if (action === 'zoom-reset') this.graphView.resetZoom();
+            });
+        });
     }
 
     selectTrace(traceId) {
@@ -464,18 +523,20 @@ class TracingDashboard {
             item.classList.toggle('selected', item.dataset.traceId === traceId);
         });
 
-        // Update detail panel (placeholder for FEATURE-023-C)
-        const detailPanel = this.container.querySelector('.trace-detail-panel');
-        if (detailPanel) {
-            detailPanel.innerHTML = `
-                <div class="trace-detail-placeholder">
-                    <i class="bi bi-diagram-3"></i>
-                    <div>Trace: ${traceId.substring(0, 12)}...</div>
-                    <div style="font-size: 12px; opacity: 0.6; margin-top: 4px;">
-                        DAG visualization coming in FEATURE-023-C
+        // FEATURE-023-C: Load trace into graph view
+        if (this.graphView) {
+            this.graphView.loadTrace(traceId);
+        } else {
+            // Fallback if graph view not initialized
+            const graphContainer = this.container.querySelector('.trace-graph-container');
+            if (graphContainer) {
+                graphContainer.innerHTML = `
+                    <div class="trace-graph-loading">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                        <span>Loading trace: ${traceId.substring(0, 12)}...</span>
                     </div>
-                </div>
-            `;
+                `;
+            }
         }
     }
 
@@ -534,6 +595,47 @@ class TracingDashboard {
         } catch (error) {
             console.error('Error updating ignored APIs:', error);
             this.showToast('Failed to update ignored APIs', 'error');
+        }
+    }
+    
+    async addToIgnoredApis(apiPath) {
+        if (!apiPath) return;
+        
+        // Get current ignored APIs
+        const currentIgnored = this.config.ignored_apis || [];
+        
+        // Check if already in list
+        if (currentIgnored.includes(apiPath)) {
+            this.showToast('API already in ignored list', 'info');
+            return;
+        }
+        
+        // Add to list and save
+        const newIgnored = [...currentIgnored, apiPath];
+        await this.updateIgnoredApis(newIgnored);
+    }
+    
+    async clearAllTraces() {
+        if (!confirm('Are you sure you want to delete all trace logs? This cannot be undone.')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/tracing/logs', {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                this.traces = [];
+                this.renderTraceList();
+                this.graph.showEmpty();
+                this.showToast('All traces cleared', 'success');
+            } else {
+                this.showToast('Failed to clear traces', 'error');
+            }
+        } catch (error) {
+            console.error('Error clearing traces:', error);
+            this.showToast('Failed to clear traces', 'error');
         }
     }
 

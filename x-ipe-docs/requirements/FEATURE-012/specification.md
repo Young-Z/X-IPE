@@ -1,14 +1,15 @@
 # Feature Specification: Design Themes
 
 > Feature ID: FEATURE-012  
-> Version: v1.0  
-> Status: Completed  
-> Last Updated: 01-24-2026
+> Version: v1.1  
+> Status: Partially Implemented  
+> Last Updated: 02-02-2026
 
 ## Version History
 
 | Version | Date | Description |
 |---------|------|-------------|
+| v1.1 | 02-02-2026 | Updated status - backend ThemesService exists, frontend/API routes pending |
 | v1.0 | 01-24-2026 | Initial specification |
 
 ---

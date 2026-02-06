@@ -9,7 +9,7 @@ Run with: pytest tests/test_tracing.py -v
 import pytest
 import json
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
 import tempfile
@@ -187,7 +187,7 @@ class TestTraceBuffer:
         
         buffer = TraceBuffer("abc-123", "POST /api/orders")
         entry = TraceEntry(
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             trace_id="abc-123",
             level="INFO",
             direction="→",
@@ -213,7 +213,7 @@ class TestTraceBuffer:
         large_data = {"data": "x" * 500}
         for i in range(10):
             entry = TraceEntry(
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 trace_id="abc-123",
                 level="INFO",
                 direction="→",
@@ -233,7 +233,7 @@ class TestTraceBuffer:
         
         buffer = TraceBuffer("abc-123", "POST /api/orders")
         buffer.add(TraceEntry(
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             trace_id="abc-123",
             level="INFO",
             direction="→",
@@ -256,7 +256,7 @@ class TestTraceBuffer:
         
         buffer = TraceBuffer("abc-123", "POST /api/orders")
         buffer.add(TraceEntry(
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             trace_id="abc-123",
             level="INFO",
             direction="→",
@@ -266,7 +266,7 @@ class TestTraceBuffer:
             depth=0
         ))
         buffer.add(TraceEntry(
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             trace_id="abc-123",
             level="DEBUG",
             direction="→",
@@ -738,7 +738,7 @@ class TestTracingService:
             config_dir = os.path.join(tmpdir, "x-ipe-docs", "config")
             os.makedirs(config_dir)
             
-            future_time = (datetime.utcnow() + timedelta(hours=1)).isoformat() + "Z"
+            future_time = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat().replace("+00:00", "Z")
             with open(os.path.join(config_dir, "tools.json"), "w") as f:
                 json.dump({"version": "2.0", "tracing_stop_at": future_time}, f)
             
@@ -754,7 +754,7 @@ class TestTracingService:
             config_dir = os.path.join(tmpdir, "x-ipe-docs", "config")
             os.makedirs(config_dir)
             
-            past_time = (datetime.utcnow() - timedelta(hours=1)).isoformat() + "Z"
+            past_time = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat().replace("+00:00", "Z")
             with open(os.path.join(config_dir, "tools.json"), "w") as f:
                 json.dump({"version": "2.0", "tracing_stop_at": past_time}, f)
             
@@ -802,7 +802,7 @@ class TestTracingService:
             config_dir = os.path.join(tmpdir, "x-ipe-docs", "config")
             os.makedirs(config_dir)
             
-            future_time = (datetime.utcnow() + timedelta(hours=1)).isoformat() + "Z"
+            future_time = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat().replace("+00:00", "Z")
             with open(os.path.join(config_dir, "tools.json"), "w") as f:
                 json.dump({"version": "2.0", "tracing_stop_at": future_time}, f)
             
@@ -847,6 +847,33 @@ class TestTracingService:
             
             assert len(logs) == 1
             assert "test-trace" in logs[0]["trace_id"] or "test-trace" in logs[0]["filename"]
+
+    def test_list_logs_extracts_api_and_trace_id(self):
+        """list_logs should extract API and full trace_id from filename."""
+        from x_ipe.services.tracing_service import TracingService
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config_dir = os.path.join(tmpdir, "x-ipe-docs", "config")
+            os.makedirs(config_dir)
+            with open(os.path.join(config_dir, "tools.json"), "w") as f:
+                json.dump({"version": "2.0", "tracing_log_path": "traces/"}, f)
+            
+            # Create log file with proper naming format
+            traces_dir = os.path.join(tmpdir, "traces")
+            os.makedirs(traces_dir)
+            filename = "20260202-072505-get-api-project-structure-a649c048-3d73.log"
+            with open(os.path.join(traces_dir, filename), "w") as f:
+                f.write("[TRACE-START] a649c048-3d73 | GET /api/project/structure | 2026-02-02T07:25:05Z\n")
+            
+            service = TracingService(tmpdir)
+            logs = service.list_logs()
+            
+            assert len(logs) == 1
+            # Should extract full trace_id (last 2 UUID segments)
+            assert logs[0]["trace_id"] == "a649c048-3d73"
+            # Should extract and convert API name
+            assert logs[0]["api"] == "GET /api/project/structure"
+            assert logs[0]["filename"] == filename
 
 
 # =============================================================================
@@ -1020,10 +1047,142 @@ class TestTracingAPI:
 
 
 # =============================================================================
+# MIDDLEWARE TESTS
+# =============================================================================
+
+class TestTracingMiddleware:
+    """Tests for tracing middleware that creates TraceContext per request."""
+    
+    @pytest.fixture
+    def client_with_tracing(self, tmp_path):
+        """Create test client with tracing enabled."""
+        from x_ipe.app import create_app
+        
+        # Create tools.json with tracing enabled
+        config_dir = tmp_path / "x-ipe-docs" / "config"
+        config_dir.mkdir(parents=True)
+        
+        # Set tracing to be active (stop_at in future)
+        stop_at = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat().replace("+00:00", "Z")
+        tools_config = {"tracing_stop_at": stop_at}
+        (config_dir / "tools.json").write_text(json.dumps(tools_config))
+        
+        # Create traces directory
+        traces_dir = tmp_path / "instance" / "traces"
+        traces_dir.mkdir(parents=True)
+        
+        app = create_app()
+        app.config['TESTING'] = True
+        app.config['PROJECT_ROOT'] = str(tmp_path)
+        
+        with app.test_client() as client:
+            yield client, tmp_path
+    
+    def test_middleware_creates_trace_file_when_active(self, client_with_tracing):
+        """BUG FIX: When tracing is active, API calls should create trace log files."""
+        client, tmp_path = client_with_tracing
+        traces_dir = tmp_path / "instance" / "traces"
+        
+        # Verify no traces initially
+        initial_logs = list(traces_dir.glob("*.log"))
+        initial_count = len(initial_logs)
+        
+        # Make an API call that should be traced
+        response = client.get('/api/settings/all')
+        
+        # The middleware should have created a trace file
+        final_logs = list(traces_dir.glob("*.log"))
+        
+        assert len(final_logs) > initial_count, \
+            f"Expected trace log file to be created. Initial: {initial_count}, Final: {len(final_logs)}"
+    
+    def test_middleware_ignores_tracing_apis(self, client_with_tracing):
+        """Tracing API endpoints should not create their own trace files (avoid loops)."""
+        client, tmp_path = client_with_tracing
+        traces_dir = tmp_path / "instance" / "traces"
+        
+        # Get initial count
+        initial_logs = list(traces_dir.glob("*.log"))
+        initial_count = len(initial_logs)
+        
+        # Call the tracing status endpoint - should be ignored
+        response = client.get('/api/tracing/status')
+        
+        # The trace file count should remain the same
+        final_logs = list(traces_dir.glob("*.log"))
+        
+        assert len(final_logs) == initial_count, \
+            f"Tracing APIs should not create trace files. Initial: {initial_count}, Final: {len(final_logs)}"
+    
+    def test_middleware_ignores_user_configured_apis(self, tmp_path):
+        """BUG FIX: APIs in tracing_ignored_apis config should not be traced."""
+        from x_ipe.app import create_app
+        
+        # Create tools.json with tracing enabled AND custom ignored API
+        config_dir = tmp_path / "x-ipe-docs" / "config"
+        config_dir.mkdir(parents=True)
+        
+        stop_at = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat().replace("+00:00", "Z")
+        tools_config = {
+            "tracing_stop_at": stop_at,
+            "tracing_ignored_apis": ["/api/project/structure"]
+        }
+        (config_dir / "tools.json").write_text(json.dumps(tools_config))
+        
+        # Create traces directory
+        traces_dir = tmp_path / "instance" / "traces"
+        traces_dir.mkdir(parents=True)
+        
+        app = create_app()
+        app.config['TESTING'] = True
+        app.config['PROJECT_ROOT'] = str(tmp_path)
+        
+        with app.test_client() as client:
+            # Get initial count
+            initial_logs = list(traces_dir.glob("*.log"))
+            initial_count = len(initial_logs)
+            
+            # Call the ignored API endpoint
+            response = client.get('/api/project/structure')
+            
+            # The trace file count should remain the same - API is ignored
+            final_logs = list(traces_dir.glob("*.log"))
+            
+            assert len(final_logs) == initial_count, \
+                f"User-configured ignored APIs should not create trace files. Initial: {initial_count}, Final: {len(final_logs)}"
+    
+    def test_middleware_does_not_trace_when_inactive(self, tmp_path):
+        """When tracing is not active, no trace files should be created."""
+        from x_ipe.app import create_app
+        
+        # Create tools.json with tracing disabled
+        config_dir = tmp_path / "x-ipe-docs" / "config"
+        config_dir.mkdir(parents=True)
+        (config_dir / "tools.json").write_text('{"tracing_enabled": false}')
+        
+        # Create traces directory
+        traces_dir = tmp_path / "instance" / "traces"
+        traces_dir.mkdir(parents=True)
+        
+        app = create_app()
+        app.config['TESTING'] = True
+        app.config['PROJECT_ROOT'] = str(tmp_path)
+        
+        with app.test_client() as client:
+            # Make API call
+            response = client.get('/api/settings/all')
+            
+            # No trace file should be created
+            logs = list(traces_dir.glob("*.log"))
+            assert len(logs) == 0, \
+                f"No trace files should be created when tracing is inactive. Found: {len(logs)}"
+
+
+# =============================================================================
 # TEST SUMMARY
 # =============================================================================
 # 
-# Total Tests: 62
+# Total Tests: 65
 # - Unit Tests (Redactor): 14
 # - Unit Tests (TraceBuffer): 5
 # - Unit Tests (TraceContext): 9
@@ -1032,6 +1191,7 @@ class TestTracingAPI:
 # - Unit Tests (TracingService): 11
 # - Integration Tests: 3
 # - API Tests: 6
+# - Middleware Tests: 3
 #
-# Expected: ALL 62 tests FAIL (TDD ready state)
+# Expected: ALL tests pass after middleware implementation
 # =============================================================================

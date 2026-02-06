@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Knowledge Base - X-IPE{% endblock %}
+
+{% block body %}
+<div class="app-container">
+    <!-- ROW 1: Top Bar -->
+    <header class="top-bar">
+        <div class="d-flex align-items-center gap-3">
+            <a href="/" class="top-bar-brand text-decoration-none">
+                <i class="bi bi-journal-code me-2"></i>X-IPE
+            </a>
+            <nav aria-label="breadcrumb" class="top-bar-breadcrumb">
+                <ol class="breadcrumb mb-0" id="breadcrumb">
+                    <li class="breadcrumb-item active">Knowledge Base</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm btn-primary" id="btn-refresh-index" title="Refresh index">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+            <a href="/settings" class="btn btn-link text-light" title="Settings">
+                <i class="bi bi-gear-fill"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- ROW 2: Middle Section (sidebar + content) -->
+    <div class="middle-section" id="middle-section">
+        <!-- LEFT: Sidebar Navigation -->
+        <nav class="sidebar" id="sidebar">
+            <!-- Search Box -->
+            <div class="kb-sidebar-search p-2">
+                <input type="text" class="form-control form-control-sm" id="kb-search" 
+                       placeholder="Search files..." aria-label="Search knowledge base">
+            </div>
+            <!-- File Tree -->
+            <div class="sidebar-content" id="sidebar-content">
+                <div class="loading-spinner">
+                    <div class="spinner-border spinner-border-sm text-light" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Resize Handle -->
+        <div class="sidebar-resize-handle" id="sidebar-resize-handle"></div>
+    
+        <!-- RIGHT: Content Area -->
+        <main class="content-area">
+            <div class="content-view" id="content-view">
+                <div class="content-header d-flex justify-content-between align-items-center" id="content-header">
+                    <h5 class="mb-0" id="content-title">Knowledge Base</h5>
+                    <div class="kb-stats" id="kb-stats">
+                        <!-- File count, topic count loaded here -->
+                    </div>
+                </div>
+                <div class="content-body" id="content-body">
+                    <!-- KB content loaded here -->
+                    <div class="kb-landing-view" id="kb-landing-view">
+                        <div class="kb-section">
+                            <h6><i class="bi bi-inbox me-2"></i>Landing (Unprocessed)</h6>
+                            <div class="kb-file-list" id="landing-files">
+                                <p class="text-muted small">No files in landing folder</p>
+                            </div>
+                        </div>
+                        <div class="kb-section mt-4">
+                            <h6><i class="bi bi-folder me-2"></i>Topics</h6>
+                            <div class="kb-topics-grid" id="topics-grid">
+                                <p class="text-muted small">No topics created yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- ROW 3: Footer Terminal Panel -->
+    <div class="terminal-panel" id="terminal-panel">
+        <div class="terminal-header">
+            <div class="terminal-tabs" id="terminal-tabs">
+                <!-- Tabs rendered by JavaScript -->
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-light" id="btn-new-terminal" title="New Terminal">
+                    <i class="bi bi-plus"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-light terminal-toggle" id="terminal-toggle" title="Toggle Terminal">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+            </div>
+        </div>
+        <div class="terminal-body" id="terminal-body">
+            <!-- xterm.js terminals rendered here -->
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-initialize KB view when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.kbCore) {
+        window.kbCore.init();
+    }
+});
+</script>
+{% endblock %}

@@ -1,9 +1,16 @@
 # Feature Specification: X-IPE CLI Tool
 
 > Feature ID: FEATURE-018  
-> Version: v1.0  
-> Status: Refined  
-> Last Updated: 01-25-2026
+> Version: v1.1  
+> Status: Partially Implemented  
+> Last Updated: 02-02-2026
+
+## Version History
+
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| v1.1 | 02-02-2026 | Updated AC status - CLI implemented locally, PyPI publish pending | - |
+| v1.0 | 01-25-2026 | Initial specification | - |
 
 ## Overview
 
@@ -26,72 +33,72 @@ This is the foundation feature that enables FEATURE-019 (Simplified Project Setu
 
 ### 1. Package Distribution
 - [ ] AC-1.1: X-IPE published to PyPI as `x-ipe` package
-- [ ] AC-1.2: Installable via `pip install x-ipe`
-- [ ] AC-1.3: Package includes all skills as package data under `x_ipe/skills/`
-- [ ] AC-1.4: Package includes static files (CSS, JS, templates) under `x_ipe/static/` and `x_ipe/templates/`
-- [ ] AC-1.5: Package includes `.github/` templates for copilot instructions
-- [ ] AC-1.6: Version follows semantic versioning (e.g., 1.0.0)
-- [ ] AC-1.7: Package has minimal dependencies (Flask, Flask-SocketIO, click, PyYAML)
+- [x] AC-1.2: Installable via `pip install x-ipe` (locally via `pip install -e .`)
+- [x] AC-1.3: Package includes all skills as package data under `x_ipe/skills/`
+- [x] AC-1.4: Package includes static files (CSS, JS, templates) under `x_ipe/static/` and `x_ipe/templates/`
+- [x] AC-1.5: Package includes `.github/` templates for copilot instructions
+- [x] AC-1.6: Version follows semantic versioning (e.g., 1.0.0)
+- [x] AC-1.7: Package has minimal dependencies (Flask, Flask-SocketIO, click, PyYAML)
 
 ### 2. CLI Entry Point
-- [ ] AC-2.1: `x-ipe` command available after installation
-- [ ] AC-2.2: Running `x-ipe` without arguments shows help text
-- [ ] AC-2.3: `x-ipe --version` shows package version
-- [ ] AC-2.4: `x-ipe --help` shows all available commands with descriptions
-- [ ] AC-2.5: Uses `click` library for CLI parsing
+- [x] AC-2.1: `x-ipe` command available after installation
+- [x] AC-2.2: Running `x-ipe` without arguments shows help text
+- [x] AC-2.3: `x-ipe --version` shows package version
+- [x] AC-2.4: `x-ipe --help` shows all available commands with descriptions
+- [x] AC-2.5: Uses `click` library for CLI parsing
 
 ### 3. Init Command
-- [ ] AC-3.1: `x-ipe init` creates project structure in current directory
-- [ ] AC-3.2: Creates `x-ipe-docs/` folder with subfolders (ideas, planning, requirements, themes)
-- [ ] AC-3.3: Creates `.x-ipe/` hidden folder for runtime data
-- [ ] AC-3.4: Creates/merges `.github/skills/` with skills from package
-- [ ] AC-3.5: Creates `.github/copilot-instructions.md` from package template
-- [ ] AC-3.6: Creates `.x-ipe.yaml` config file with sensible defaults
-- [ ] AC-3.7: Auto-detects git repository (checks for `.git/` folder)
-- [ ] AC-3.8: If git detected, creates/updates `.gitignore` with X-IPE patterns
-- [ ] AC-3.9: Adds `.x-ipe/` and `.x-ipe.yaml` to `.gitignore`
-- [ ] AC-3.10: Non-destructive: skips existing files/folders with warning message
-- [ ] AC-3.11: Shows summary of created/skipped items on completion
-- [ ] AC-3.12: `--force` flag to overwrite existing files
-- [ ] AC-3.13: `--dry-run` flag to preview changes without writing
+- [x] AC-3.1: `x-ipe init` creates project structure in current directory
+- [x] AC-3.2: Creates `x-ipe-docs/` folder with subfolders (ideas, planning, requirements, themes)
+- [x] AC-3.3: Creates `.x-ipe/` hidden folder for runtime data
+- [x] AC-3.4: Creates/merges `.github/skills/` with skills from package
+- [x] AC-3.5: Creates `.github/copilot-instructions.md` from package template
+- [x] AC-3.6: Creates `.x-ipe.yaml` config file with sensible defaults
+- [x] AC-3.7: Auto-detects git repository (checks for `.git/` folder)
+- [x] AC-3.8: If git detected, creates/updates `.gitignore` with X-IPE patterns
+- [x] AC-3.9: Adds `.x-ipe/` and `.x-ipe.yaml` to `.gitignore`
+- [x] AC-3.10: Non-destructive: skips existing files/folders with warning message
+- [x] AC-3.11: Shows summary of created/skipped items on completion
+- [x] AC-3.12: `--force` flag to overwrite existing files
+- [x] AC-3.13: `--dry-run` flag to preview changes without writing
 
 ### 4. Serve Command
-- [ ] AC-4.1: `x-ipe serve` starts web server in current directory
-- [ ] AC-4.2: Default port is 5000
-- [ ] AC-4.3: `--port` flag to specify custom port (e.g., `x-ipe serve --port 8080`)
-- [ ] AC-4.4: `--open` flag to auto-open browser after server starts
-- [ ] AC-4.5: `--host` flag to specify bind address (default: 127.0.0.1)
-- [ ] AC-4.6: Server discovers and uses `.x-ipe.yaml` if present
-- [ ] AC-4.7: Falls back to sensible defaults without config file
-- [ ] AC-4.8: `--debug` flag enables Flask debug mode with hot reload
-- [ ] AC-4.9: Ctrl+C gracefully stops the server
-- [ ] AC-4.10: Shows server URL on startup
+- [x] AC-4.1: `x-ipe serve` starts web server in current directory
+- [x] AC-4.2: Default port is 5000
+- [x] AC-4.3: `--port` flag to specify custom port (e.g., `x-ipe serve --port 8080`)
+- [x] AC-4.4: `--open` flag to auto-open browser after server starts
+- [x] AC-4.5: `--host` flag to specify bind address (default: 127.0.0.1)
+- [x] AC-4.6: Server discovers and uses `.x-ipe.yaml` if present
+- [x] AC-4.7: Falls back to sensible defaults without config file
+- [x] AC-4.8: `--debug` flag enables Flask debug mode with hot reload
+- [x] AC-4.9: Ctrl+C gracefully stops the server
+- [x] AC-4.10: Shows server URL on startup
 
 ### 5. Upgrade Command
-- [ ] AC-5.1: `x-ipe upgrade` updates skills from package to local `.github/skills/`
-- [ ] AC-5.2: Detects locally modified skills via hash comparison
-- [ ] AC-5.3: Lists modified skills and prompts for confirmation before overwriting
-- [ ] AC-5.4: `--force` flag to overwrite without confirmation
-- [ ] AC-5.5: Creates backup of modified skills in `.x-ipe/backups/skills-{timestamp}/`
-- [ ] AC-5.6: Updates `.github/copilot-instructions.md` from package
-- [ ] AC-5.7: Shows summary of updated/skipped/backed-up items
-- [ ] AC-5.8: `--dry-run` flag to preview changes
+- [x] AC-5.1: `x-ipe upgrade` updates skills from package to local `.github/skills/`
+- [x] AC-5.2: Detects locally modified skills via hash comparison
+- [x] AC-5.3: Lists modified skills and prompts for confirmation before overwriting
+- [x] AC-5.4: `--force` flag to overwrite without confirmation
+- [x] AC-5.5: Creates backup of modified skills in `.x-ipe/backups/skills-{timestamp}/`
+- [x] AC-5.6: Updates `.github/copilot-instructions.md` from package
+- [x] AC-5.7: Shows summary of updated/skipped/backed-up items
+- [x] AC-5.8: `--dry-run` flag to preview changes
 
 ### 6. Status Command
-- [ ] AC-6.1: `x-ipe status` shows project X-IPE status
-- [ ] AC-6.2: Shows "Initialized" or "Not initialized" state
-- [ ] AC-6.3: Shows skills count (package skills vs local overrides)
-- [ ] AC-6.4: Shows if `.x-ipe.yaml` config exists
-- [ ] AC-6.5: Shows if X-IPE server is currently running (checks port)
-- [ ] AC-6.6: Exit code 0 if initialized, 1 if not
+- [x] AC-6.1: `x-ipe status` shows project X-IPE status
+- [x] AC-6.2: Shows "Initialized" or "Not initialized" state
+- [x] AC-6.3: Shows skills count (package skills vs local overrides)
+- [x] AC-6.4: Shows if `.x-ipe.yaml` config exists
+- [x] AC-6.5: Shows if X-IPE server is currently running (checks port)
+- [x] AC-6.6: Exit code 0 if initialized, 1 if not
 
 ### 7. Info Command
-- [ ] AC-7.1: `x-ipe info` shows detailed diagnostics
-- [ ] AC-7.2: Shows X-IPE package version
-- [ ] AC-7.3: Shows Python version and interpreter path
-- [ ] AC-7.4: Shows config file path and parsed contents (if exists)
-- [ ] AC-7.5: Shows paths: skills, docs, .x-ipe folder, static files
-- [ ] AC-7.6: Shows package installation path
+- [x] AC-7.1: `x-ipe info` shows detailed diagnostics
+- [x] AC-7.2: Shows X-IPE package version
+- [x] AC-7.3: Shows Python version and interpreter path
+- [x] AC-7.4: Shows config file path and parsed contents (if exists)
+- [x] AC-7.5: Shows paths: skills, docs, .x-ipe folder, static files
+- [x] AC-7.6: Shows package installation path
 - [ ] AC-7.7: `--json` flag outputs machine-readable JSON
 
 ## Functional Requirements

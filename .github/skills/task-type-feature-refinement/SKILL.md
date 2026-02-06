@@ -181,50 +181,15 @@ RECEIVE Feature Data Model:
 ```
 
 **🌐 Web Search (Recommended):**
-Use web search capability to research:
-- Domain-specific business rules and edge cases
-- Industry compliance requirements (GDPR, PCI-DSS, HIPAA, etc.)
-- User experience best practices for similar features
-- Common pitfalls and edge cases in similar implementations
-- Accessibility requirements and standards (WCAG)
+Use web search for: domain rules, compliance (GDPR, PCI-DSS, HIPAA), UX best practices, common pitfalls, accessibility (WCAG).
 
 **🎨 Mockup Analysis (When Mockup List Provided):**
-```
-IF Mockup List != N/A:
-  1. OPEN and analyze the Mockup List file(s)
-  2. EXTRACT UI/UX requirements from mockup:
-     - Layout structure and component hierarchy
-     - User interaction patterns (clicks, hovers, inputs)
-     - Visual design elements (colors, spacing, typography)
-     - Form fields, validation rules, error states
-     - Navigation flows and page transitions
-     - Responsive behavior hints
-  3. DOCUMENT extracted requirements:
-     - Add to "UI/UX Requirements" section in specification
-     - Create acceptance criteria for UI elements
-     - Note any UI-specific edge cases
-  4. IDENTIFY gaps between mockup and requirements:
-     - Missing interactions not shown in mockup
-     - Backend data requirements for UI elements
-     - Loading states, empty states, error states
-  5. ASK human about mockup ambiguities if needed
+- Analyze mockup file(s) and extract UI/UX requirements
+- Document in "UI/UX Requirements" section with acceptance criteria
+- Identify gaps: missing interactions, loading/empty/error states
+- Ask human about ambiguities if needed
 
-ELSE IF Mockup List == N/A:
-  - Check if idea-summary has mockup references
-  - If frontend feature, note that mockup may be needed
-  - Focus on functional requirements
-```
-
-**Mockup-to-Specification Mapping:**
-
-| Mockup Element | Specification Section |
-|----------------|----------------------|
-| Layout/Components | UI/UX Requirements → UI Elements |
-| Forms/Inputs | Functional Requirements + Validation Rules |
-| Buttons/Actions | User Stories + Acceptance Criteria |
-| Navigation | User Flows |
-| Error States | Edge Cases & Constraints |
-| Data Display | Functional Requirements → Output |
+> See [references/specification-writing-guide.md](references/specification-writing-guide.md) for mockup-to-specification mapping.
 
 ---
 
@@ -295,30 +260,10 @@ Target: x-ipe-docs/requirements/FEATURE-012/mockups/home-page-v1.html
 
 **Rule:** Maintain ONE specification file per feature with version history inside.
 
-**DO NOT create versioned files like:**
-- ❌ `specification-v2.md`
-- ❌ `specification-v1.md`
+- ✅ Keep single `specification.md` file with Version History table
+- ❌ Do NOT create versioned files like `specification-v2.md`
 
-**Instead:**
-- ✅ Keep single `specification.md` file
-- ✅ Add/update Version History table after the header
-- ✅ Update content in place with new version
-
-**Version History Format (add after document header):**
-```markdown
-## Version History
-
-| Version | Date | Description |
-|---------|------|-------------|
-| v2.0 | 01-22-2026 | Major upgrade: xterm.js, session persistence, split-pane |
-| v1.0 | 01-18-2026 | Initial specification |
-```
-
-**When updating existing specification:**
-1. Increment version in document header (v1.0 → v2.0)
-2. Add new row to Version History table
-3. Update specification content in place
-4. Keep the same filename: `specification.md`
+> See [references/specification-writing-guide.md](references/specification-writing-guide.md) for version history format.
 
 ---
 
@@ -331,148 +276,50 @@ Target: x-ipe-docs/requirements/FEATURE-012/mockups/home-page-v1.html
 > Status: Refined  
 > Last Updated: MM-DD-YYYY
 
+## Version History
+[Version table - see guide]
+
 ## Linked Mockups
-
-| Mockup | Type | Path | Description |
-|--------|------|------|-------------|
-| {Mockup Name} | HTML | [path/to/mockup.html](path/to/mockup.html) | {Brief description} |
-
-> **Note:** UI/UX requirements below are derived from these mockups.
+[Mockup table if applicable - see guide]
 
 ## Overview
-
-[2-3 paragraph detailed description of what this feature does, why it's needed, and who will use it]
+[2-3 paragraph description: what, why, who]
 
 ## User Stories
-
-As a [user type], I want to [action/goal], so that [benefit/value].
-
-**Examples:**
-- As a **customer**, I want to **save items to my cart**, so that **I can purchase them later**.
-- As an **admin**, I want to **view all user orders**, so that **I can track sales and resolve issues**.
+[As a [user], I want to [action], so that [benefit]]
 
 ## Acceptance Criteria
-
-- [ ] Criterion 1: [Specific, measurable condition]
-- [ ] Criterion 2: [Specific, measurable condition]
-- [ ] Criterion 3: [Specific, measurable condition]
-- [ ] Criterion 4: [Specific, measurable condition]
-- [ ] Criterion 5: [Specific, measurable condition]
+[Testable, measurable conditions]
 
 ## Functional Requirements
-
-### FR-1: [Requirement Name]
-
-**Description:** [What the system must do]
-
-**Details:**
-- Input: [What data is provided]
-- Process: [What happens]
-- Output: [What result is produced]
-
-### FR-2: [Requirement Name]
-[Repeat for each functional requirement]
+[FR-N: Requirement with Input/Process/Output]
 
 ## Non-Functional Requirements
-
-### NFR-1: Performance
-
-- Response time: [X seconds/milliseconds]
-- Throughput: [X requests per second]
-- Concurrent users: [X users]
-
-### NFR-2: Security
-
-- Authentication required: [Yes/No]
-- Authorization level: [Role/permission required]
-- Data encryption: [What data, how encrypted]
-
-### NFR-3: Scalability
-
-- Expected growth: [User/data growth projections]
-- Scaling strategy: [Horizontal/vertical]
+[Performance, Security, Scalability]
 
 ## UI/UX Requirements
-
-[If applicable]
-
-**Wireframes/Mockups:** [Link or embed]
-
-**User Flows:**
-1. User navigates to [page/screen]
-2. User performs [action]
-3. System displays [result]
-
-**UI Elements:**
-- Button: [Label, action]
-- Form fields: [List with validation rules]
-- Error messages: [List with conditions]
+[Wireframes, User Flows, UI Elements]
 
 ## Dependencies
-
-### Internal Dependencies
-
-- **FEATURE-XXX:** [Why this feature is needed, what it provides]
-- **FEATURE-YYY:** [Why this feature is needed, what it provides]
-
-### External Dependencies
-
-- **Library/Service Name:** [Purpose, version if known]
-- **Third-party API:** [What functionality it provides]
+[Internal and External]
 
 ## Business Rules
-
-### BR-1: [Rule Name]
-
-**Rule:** [Clear statement of business rule]
-
-**Example:** 
-- Only authenticated users can add items to cart
-- Prices must be positive numbers
-- Discounts cannot exceed 90%
-
-### BR-2: [Rule Name]
-[Repeat for each business rule]
+[BR-N: Clear rule statements]
 
 ## Edge Cases & Constraints
-
-### Edge Case 1: [Scenario]
-
-**Scenario:** [Describe unusual or boundary condition]  
-**Expected Behavior:** [How system should respond]
-
-**Examples:**
-- User session expires during checkout → Redirect to login, preserve cart
-- Database connection lost → Show error, queue for retry
-- Invalid input format → Return validation error with details
+[Scenarios with expected behavior]
 
 ## Out of Scope
-
-- [Explicitly list what this feature does NOT include]
-- [Helps prevent scope creep]
-
-**Examples:**
-- Social media login (only email/password for v1.0)
-- Multi-factor authentication (planned for v2.0)
-- Mobile app support (web only for v1.0)
+[What is NOT included]
 
 ## Technical Considerations
-
-[Hints for technical design - not detailed design, just considerations]
-
-- Suggested technology/framework
-- Known performance requirements
-- Security considerations
-- Integration points
+[Hints for technical design - WHAT not HOW]
 
 ## Open Questions
-
-- [ ] Question 1: [What needs clarification]
-- [ ] Question 2: [What needs decision]
-- [ ] Question 3: [What needs stakeholder input]
-
----
+[What needs clarification]
 ```
+
+> **Full templates and examples:** See [references/specification-writing-guide.md](references/specification-writing-guide.md)
 
 **Specification Quality Checklist:**
 - [ ] All acceptance criteria are testable

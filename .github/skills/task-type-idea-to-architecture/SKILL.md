@@ -311,100 +311,23 @@ Execute Idea to Architecture by following these steps in order:
 
 **Action:** Generate diagrams using enabled architecture tools
 
-**IF `stages.ideation.architecture.mermaid: true`:**
+| Tool Config | Action |
+|-------------|--------|
+| `mermaid: true` | Generate C4 Context/Container diagrams in markdown |
+| `excalidraw: true` | Create hand-drawn style diagrams, export as .excalidraw |
+| No tools enabled | Create manual architecture-description.md |
 
-Generate Mermaid diagrams embedded in markdown files:
-
-```markdown
-# System Architecture
-
-## Context Diagram (C4 Level 1)
-
-```mermaid
-C4Context
-    title System Context Diagram
-    Person(user, "User", "End user of the system")
-    System(system, "Our System", "Main application")
-    System_Ext(external, "External Service", "Third-party integration")
-    
-    Rel(user, system, "Uses")
-    Rel(system, external, "Integrates with")
-```
-
-## Container Diagram (C4 Level 2)
-
-```mermaid
-C4Container
-    title Container Diagram
-    Person(user, "User")
-    
-    Container_Boundary(system, "System") {
-        Container(web, "Web App", "React", "User interface")
-        Container(api, "API", "Node.js", "Business logic")
-        ContainerDb(db, "Database", "PostgreSQL", "Data storage")
-    }
-    
-    Rel(user, web, "Uses", "HTTPS")
-    Rel(web, api, "Calls", "REST/JSON")
-    Rel(api, db, "Reads/Writes", "SQL")
-```
-
-## Data Flow
-
-```mermaid
-flowchart LR
-    A[Input] --> B[Processing]
-    B --> C[Output]
-    B --> D[(Storage)]
-```
-```
-
-**IF `stages.ideation.architecture.excalidraw: true`:**
-```
-1. Check Excalidraw integration availability
-2. Create architecture diagram using Excalidraw
-3. Export as .excalidraw file and/or PNG
-4. Save to architecture folder
-```
-
-**IF no tools enabled (Manual Mode):**
-```
-1. Create detailed architecture description in markdown
-2. Include text-based component listing
-3. Document relationships and data flow
-4. Save as architecture-description.md in {Current Idea Folder}/architecture/
-```
+**Templates & Examples:** See [references/architecture-patterns.md](references/architecture-patterns.md#mermaid-diagram-templates)
 
 **Output:** Generated diagram files
 
 ### Step 6: Save Artifacts
 
-**Action:** Store all architecture artifacts in the Current Idea Folder
+**Action:** Store all architecture artifacts in `{Current Idea Folder}/architecture/`
 
-**Directory Structure:**
-```
-{Current Idea Folder}/
-├── idea-summary-vN.md
-├── architecture/
-│   ├── system-architecture-v1.md    (mermaid diagrams in markdown)
-│   ├── data-flow-v1.md              (data flow diagrams)
-│   ├── sequence-v1.md               (sequence diagrams)
-│   ├── architecture.excalidraw      (if excalidraw used)
-│   └── architecture-description.md  (if manual mode)
-└── files/
-    └── (original idea files)
-```
+**Naming:** `{diagram-type}-v{version}.{extension}` (e.g., `system-architecture-v1.md`)
 
-**Naming Convention:**
-```
-{diagram-type}-v{version}.{extension}
-
-Examples:
-- system-architecture-v1.md
-- data-flow-v1.md
-- sequence-v1.md
-- integration-v1.md
-```
+**Directory Structure:** See [references/architecture-patterns.md](references/architecture-patterns.md#output-artifact-structure)
 
 **Output:** List of saved artifact paths (relative to Current Idea Folder)
 
@@ -415,19 +338,7 @@ Examples:
 **DO NOT modify existing idea-summary files.**
 Instead, create a new version: `{Current Idea Folder}/idea-summary-v{N+1}.md`
 
-**Add to Summary:**
-```markdown
-## Architecture Diagrams
-
-| Diagram | Type | Path | Tool Used |
-|---------|------|------|-----------|
-| System Architecture | C4 Context/Container | architecture/system-architecture-v1.md | mermaid |
-| Data Flow | Flowchart | architecture/data-flow-v1.md | mermaid |
-
-### Viewing Instructions
-- Open .md files to view mermaid diagrams (renders in most markdown viewers)
-- Excalidraw files can be opened at excalidraw.com
-```
+**Template:** See [references/architecture-patterns.md](references/architecture-patterns.md#summary-update-template)
 
 **Output:** Updated idea summary version
 
@@ -483,130 +394,21 @@ task_output_links:
 
 ## Mermaid Diagram Templates
 
-### System Architecture (C4 Context)
-
-```mermaid
-C4Context
-    title System Context Diagram - {System Name}
-    
-    Person(user, "User", "Description of user")
-    System(system, "System Name", "What the system does")
-    System_Ext(ext1, "External System", "What it provides")
-    
-    Rel(user, system, "Uses")
-    Rel(system, ext1, "Integrates with")
-```
-
-### Container Diagram (C4 Container)
-
-```mermaid
-C4Container
-    title Container Diagram - {System Name}
-    
-    Person(user, "User")
-    
-    Container_Boundary(system, "System Name") {
-        Container(frontend, "Frontend", "Technology", "Description")
-        Container(backend, "Backend", "Technology", "Description")
-        ContainerDb(db, "Database", "Technology", "Description")
-    }
-    
-    Rel(user, frontend, "Uses")
-    Rel(frontend, backend, "API calls")
-    Rel(backend, db, "Reads/Writes")
-```
-
-### Data Flow Diagram
-
-```mermaid
-flowchart TD
-    subgraph Input
-        A[Data Source 1]
-        B[Data Source 2]
-    end
-    
-    subgraph Processing
-        C[Processor]
-        D[Transformer]
-    end
-    
-    subgraph Output
-        E[Result]
-        F[(Storage)]
-    end
-    
-    A --> C
-    B --> C
-    C --> D
-    D --> E
-    D --> F
-```
-
-### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant F as Frontend
-    participant B as Backend
-    participant D as Database
-    
-    U->>F: Action
-    F->>B: API Request
-    B->>D: Query
-    D-->>B: Data
-    B-->>F: Response
-    F-->>U: Display
-```
+See [references/architecture-patterns.md](references/architecture-patterns.md#mermaid-diagram-templates) for:
+- System Architecture (C4 Context)
+- Container Diagram (C4 Container)
+- Data Flow Diagram
+- Sequence Diagram
 
 ---
 
 ## Patterns
 
-### Pattern: Microservices Architecture
-
-**When:** Idea describes multiple independent services
-**Then:**
-```
-1. Create C4 Context showing all services
-2. Create Container diagram for each service
-3. Show inter-service communication
-4. Document API boundaries
-5. Include message queue if async communication mentioned
-```
-
-### Pattern: Simple Web Application
-
-**When:** Idea is a straightforward web app
-**Then:**
-```
-1. Create simple 3-tier architecture (Frontend, Backend, Database)
-2. Add external integrations if mentioned
-3. Keep diagram minimal and clear
-4. Focus on main data flows
-```
-
-### Pattern: Data Pipeline
-
-**When:** Idea focuses on data processing
-**Then:**
-```
-1. Create data flow diagram as primary
-2. Show data sources, transformations, and destinations
-3. Include storage components
-4. Document data formats at each stage
-```
-
-### Pattern: No Technical Details in Idea
-
-**When:** Idea summary lacks technical information
-**Then:**
-```
-1. Ask clarifying questions about system needs
-2. Suggest common architecture patterns
-3. Create minimal viable architecture
-4. Request feedback before expanding
-```
+See [references/architecture-patterns.md](references/architecture-patterns.md#architecture-patterns) for:
+- Microservices Architecture
+- Simple Web Application
+- Data Pipeline
+- No Technical Details in Idea
 
 ---
 

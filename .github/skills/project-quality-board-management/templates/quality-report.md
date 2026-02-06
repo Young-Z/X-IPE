@@ -53,11 +53,15 @@
 
 ### Overview Table
 
-| Feature ID | Feature Name | Status | Score | Req | Spec | Test | Code | Gaps |
-|------------|--------------|--------|-------|-----|------|------|------|------|
-| {feature_id} | {feature_name} | {status_icon} | {score}/10 | {req_icon} | {spec_icon} | {test_icon} | {code_icon} | {gap_count} |
+| Feature ID | Feature Name | Score | Status | Req | Spec | Test | Code | Tracing | Security | Gaps |
+|------------|--------------|-------|--------|-----|------|------|------|---------|----------|------|
+| {feature_id} | {feature_name} | {score}/10 | {status_icon} | {req_score}/10 | {spec_score}/10 | {test_score}/10 | {code_score}/10 | {tracing_score}/10 | {security_score}/10 | {gap_count} |
 
-**Status Icons:** ✅ aligned | ⚠️ needs_attention | ❌ critical | 📋 planned
+**Score-to-Status Mapping:**
+- 8-10: ✅ aligned (green)
+- 6-7: ⚠️ needs_attention (yellow)
+- 1-5: ❌ critical (red)
+- N/A: 📋 planned (gray)
 
 ---
 
@@ -92,6 +96,22 @@
 *No violations* (if none)
 
 #### Code Alignment Violations
+
+| Violation | Severity | Details |
+|-----------|----------|---------|
+| {violation_type} | {severity} | {details} |
+
+*No violations* (if none)
+
+#### Tracing Coverage Violations
+
+| Violation | Severity | Details |
+|-----------|----------|---------|
+| {violation_type} | {severity} | {details} |
+
+*No violations* (if none)
+
+#### Security Violations
 
 | Violation | Severity | Details |
 |-----------|----------|---------|
@@ -149,9 +169,14 @@
 
 ### Coverage by Feature
 
-| Feature | Requirements | Specification | Test Coverage | Code Alignment | Overall |
-|---------|--------------|---------------|---------------|----------------|---------|
-| {feature_id} | {req_score} | {spec_score} | {test_score} | {code_score} | {overall} |
+| Feature | Requirements | Specification | Test Coverage | Code Alignment | Tracing | Security | Overall |
+|---------|--------------|---------------|---------------|----------------|---------|----------|---------|
+| {feature_id} | {req_score}/10 | {spec_score}/10 | {test_score}/10 | {code_score}/10 | {tracing_score}/10 | {security_score}/10 | {overall}/10 |
+
+**Score-to-Status Mapping:**
+- 8-10: ✅ aligned
+- 6-7: ⚠️ needs_attention
+- 1-5: ❌ critical
 
 ### Gap Distribution by Feature
 
@@ -245,21 +270,48 @@
 | Too Many Parameters | Function > 5 parameters | Low |
 | Duplicate Code | Similar code blocks > 10 lines | Medium |
 
+### Tracing Coverage Evaluation
+
+| Principle | Threshold | Description |
+|-----------|-----------|-------------|
+| Decorator Coverage | ≥ 90% | Public functions must have @x_ipe_tracing decorator |
+| Sensitive Param Redaction | Required | password, token, secret, key params must use redact=[] |
+| Logging Levels | Correct | API=INFO, Business logic=INFO, Utilities=DEBUG |
+
+### Security Evaluation
+
+| Principle | Threshold | Description |
+|-----------|-----------|-------------|
+| Input Validation | Required | All user-facing endpoints must validate input |
+| No Hardcoded Secrets | Required | No secrets, tokens, or credentials in code |
+| Auth/Authz | Required | Protected routes must have proper authentication/authorization |
+| Injection Prevention | Required | SQL injection and XSS prevention measures in place |
+| Sensitive Data Handling | Required | Encryption/hashing for sensitive data |
+
 ---
 
 ## Status Legend
 
-| Status | Description |
-|--------|-------------|
-| aligned | Fully aligned with documentation |
-| planned | Future feature - empty folder with no implementation (not a gap) |
-| needs_update | Minor updates needed |
-| needs_attention | Significant gaps exist |
-| not_found | Documentation missing but implementation exists |
-| critical | Major issues requiring immediate action |
-| sufficient | Test coverage ≥80% |
-| insufficient | Test coverage <80% |
-| no_tests | No tests found |
+| Score Range | Status | Description |
+|-------------|--------|-------------|
+| 8-10 | ✅ aligned | Fully aligned, meets quality standards |
+| 6-7 | ⚠️ needs_attention | Minor gaps exist, should be addressed |
+| 1-5 | ❌ critical | Major issues requiring immediate action |
+| N/A | 📋 planned | Future feature - not yet implemented |
+
+### Dimension Score Calculation
+
+Each dimension (Requirements, Specification, Test, Code, Tracing, Security) is scored 1-10 based on:
+
+```
+dimension_score = 10 - SUM(violation_count × importance_weight)
+```
+
+**Importance Weights:**
+- Critical violations: ×3 (e.g., no tests, hardcoded secrets)
+- High violations: ×2 (e.g., missing coverage, SRP violations)
+- Medium violations: ×1 (e.g., outdated specs, missing docs)
+- Low violations: ×0.5 (e.g., minor style issues)
 
 ## Health Status Definitions
 

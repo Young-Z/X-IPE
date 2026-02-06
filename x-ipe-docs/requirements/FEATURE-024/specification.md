@@ -1,14 +1,15 @@
 # Feature Specification: Project Quality Evaluation UI
 
 > Feature ID: FEATURE-024  
-> Version: v1.0  
-> Status: Refined  
-> Last Updated: 02-01-2026
+> Version: v1.1  
+> Status: Implemented  
+> Last Updated: 02-02-2026
 
 ## Version History
 
 | Version | Date | Description |
 |---------|------|-------------|
+| v1.1 | 02-02-2026 | Updated AC status - backend implemented, version timeline UI complete |
 | v1.0 | 02-01-2026 | Initial specification |
 
 ## Linked Mockups

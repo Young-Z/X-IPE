@@ -111,6 +111,7 @@
 }
 
 .workplace-create-folder-btn,
+.workplace-collapse-all-btn,
 .workplace-pin-btn {
     width: 28px;
     height: 28px;
@@ -126,6 +127,7 @@
 }
 
 .workplace-create-folder-btn:hover,
+.workplace-collapse-all-btn:hover,
 .workplace-pin-btn:hover {
     background-color: #e9ecef;
     color: #0d6efd;
@@ -204,6 +206,15 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     flex: 1;
+}
+
+/* Highlighted parent folder when file is being previewed */
+.workplace-tree-item.folder-highlighted > .workplace-tree-item-content {
+    background-color: rgba(255, 193, 7, 0.15);
+}
+
+.workplace-tree-item.folder-highlighted > .workplace-tree-item-content > i.bi-folder-fill {
+    color: #ffc107 !important;
 }
 
 /* =================================================================
@@ -419,6 +430,15 @@
     flex: 1;
     overflow-y: auto;
     padding: 16px;
+}
+
+/* When content body contains HTML/image preview, make it flex and remove padding */
+.workplace-content-body:has(.workplace-preview),
+.workplace-content-body:has(.workplace-image-preview) {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
 }
 
 .workplace-markdown-content {

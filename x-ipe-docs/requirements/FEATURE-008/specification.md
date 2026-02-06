@@ -1,14 +1,15 @@
 # Feature Specification: Workplace (Idea Management)
 
 > Feature ID: FEATURE-008  
-> Version: v1.6  
-> Status: Refined  
-> Last Updated: 01-31-2026
+> Version: v1.7  
+> Status: Partially Implemented  
+> Last Updated: 02-02-2026
 
 ## Version History
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
+| v1.7 | 2026-02-02 | Updated AC status - core + CR-001 through CR-005 implemented, CR-006 pending | - |
 | v1.6 | 2026-01-31 | CR-006: Folder tree UX enhancement - drag-drop, folder view, search, UI upgrade | [CR-006](./CR-006.md) |
 | v1.5 | 2026-01-28 | CR-005: Copy URL button for file access | [CR-005](./CR-005.md) |
 | v1.4 | 2026-01-28 | CR-004: Rename to Ideation, sidebar submenu, Copilot hover menu | [CR-004](./CR-004.md) |

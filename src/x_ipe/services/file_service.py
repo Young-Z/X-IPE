@@ -101,6 +101,12 @@ class ProjectService:
             'icon': 'bi-file-text'
         },
         {
+            'id': 'skill-meta',
+            'label': 'Skill Meta',
+            'path': 'x-ipe-docs/skill-meta',
+            'icon': 'bi-stars'
+        },
+        {
             'id': 'code',
             'label': 'Code',
             'path': 'src',

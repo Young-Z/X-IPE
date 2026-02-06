@@ -9,6 +9,8 @@ import re
 from pathlib import Path
 from datetime import datetime, timedelta
 
+from x_ipe.tracing import x_ipe_tracing
+
 
 class UiuxFeedbackService:
     """Service for saving UI/UX feedback to file system"""
@@ -17,6 +19,7 @@ class UiuxFeedbackService:
         self.project_root = Path(project_root)
         self.feedback_dir = self.project_root / 'x-ipe-docs' / 'uiux-feedback'
     
+    @x_ipe_tracing()
     def list_feedback(self, days: int = 2) -> list:
         """
         List feedback entries from the last N days.
@@ -99,6 +102,34 @@ class UiuxFeedbackService:
         except Exception:
             return None
     
+    @x_ipe_tracing()
+    def delete_feedback(self, feedback_id: str) -> dict:
+        """
+        Delete a feedback folder by ID.
+        
+        Args:
+            feedback_id: The feedback folder name/ID
+        
+        Returns:
+            dict with success (or error on failure)
+        """
+        try:
+            folder_path = self.feedback_dir / feedback_id
+            
+            if not folder_path.exists():
+                return {'success': False, 'error': 'Feedback not found'}
+            
+            if not folder_path.is_dir():
+                return {'success': False, 'error': 'Invalid feedback ID'}
+            
+            # Delete the folder
+            shutil.rmtree(folder_path)
+            
+            return {'success': True}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+    
+    @x_ipe_tracing()
     def cleanup_old_feedback(self, days: int = 7) -> int:
         """
         Delete feedback folders older than N days.
@@ -130,6 +161,7 @@ class UiuxFeedbackService:
         
         return deleted
     
+    @x_ipe_tracing()
     def save_feedback(self, data: dict) -> dict:
         """
         Save feedback entry to file system.

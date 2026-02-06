@@ -15,11 +15,13 @@ import os
 from flask import Blueprint, jsonify, request, current_app
 
 from x_ipe.services import IdeasService, SkillsService
+from x_ipe.tracing import x_ipe_tracing
 
 ideas_bp = Blueprint('ideas', __name__)
 
 
 @ideas_bp.route('/api/ideas/tree', methods=['GET'])
+@x_ipe_tracing()
 def get_ideas_tree():
     """
     GET /api/ideas/tree
@@ -47,6 +49,7 @@ def get_ideas_tree():
 
 
 @ideas_bp.route('/api/ideas/upload', methods=['POST'])
+@x_ipe_tracing()
 def upload_ideas():
     """
     POST /api/ideas/upload
@@ -92,6 +95,7 @@ def upload_ideas():
 
 
 @ideas_bp.route('/api/ideas/create-folder', methods=['POST'])
+@x_ipe_tracing()
 def create_idea_folder():
     """
     POST /api/ideas/create-folder
@@ -134,6 +138,7 @@ def create_idea_folder():
 
 
 @ideas_bp.route('/api/ideas/rename', methods=['POST'])
+@x_ipe_tracing()
 def rename_idea_folder():
     """
     POST /api/ideas/rename
@@ -177,6 +182,7 @@ def rename_idea_folder():
 
 
 @ideas_bp.route('/api/ideas/rename-file', methods=['POST'])
+@x_ipe_tracing()
 def rename_idea_file():
     """
     POST /api/ideas/rename-file
@@ -220,6 +226,7 @@ def rename_idea_file():
 
 
 @ideas_bp.route('/api/ideas/delete', methods=['POST'])
+@x_ipe_tracing()
 def delete_idea_item():
     """
     POST /api/ideas/delete
@@ -260,6 +267,7 @@ def delete_idea_item():
 
 
 @ideas_bp.route('/api/ideas/toolbox', methods=['GET'])
+@x_ipe_tracing()
 def get_ideas_toolbox():
     """
     GET /api/ideas/toolbox
@@ -280,6 +288,7 @@ def get_ideas_toolbox():
 
 
 @ideas_bp.route('/api/ideas/toolbox', methods=['POST'])
+@x_ipe_tracing()
 def save_ideas_toolbox():
     """
     POST /api/ideas/toolbox
@@ -311,6 +320,7 @@ def save_ideas_toolbox():
 # ==========================================================================
 
 @ideas_bp.route('/api/ideas/move', methods=['POST'])
+@x_ipe_tracing()
 def move_idea_item():
     """
     POST /api/ideas/move
@@ -349,6 +359,7 @@ def move_idea_item():
 
 
 @ideas_bp.route('/api/ideas/duplicate', methods=['POST'])
+@x_ipe_tracing()
 def duplicate_idea_item():
     """
     POST /api/ideas/duplicate
@@ -382,6 +393,7 @@ def duplicate_idea_item():
 
 
 @ideas_bp.route('/api/ideas/download', methods=['GET'])
+@x_ipe_tracing()
 def download_idea_file():
     """
     GET /api/ideas/download?path=...
@@ -426,6 +438,7 @@ def download_idea_file():
 
 
 @ideas_bp.route('/api/ideas/folder-contents', methods=['GET'])
+@x_ipe_tracing()
 def get_folder_contents():
     """
     GET /api/ideas/folder-contents?path=...
@@ -452,6 +465,7 @@ def get_folder_contents():
 
 
 @ideas_bp.route('/api/ideas/search', methods=['GET'])
+@x_ipe_tracing()
 def search_ideas():
     """
     GET /api/ideas/search?q=...
@@ -478,6 +492,7 @@ def search_ideas():
 
 
 @ideas_bp.route('/api/ideas/delete-info', methods=['GET'])
+@x_ipe_tracing()
 def get_delete_info():
     """
     GET /api/ideas/delete-info?path=...
@@ -509,6 +524,7 @@ def get_delete_info():
 
 
 @ideas_bp.route('/api/ideas/validate-drop', methods=['POST'])
+@x_ipe_tracing()
 def validate_drop_target():
     """
     POST /api/ideas/validate-drop
@@ -543,6 +559,7 @@ def validate_drop_target():
 # ==========================================================================
 
 @ideas_bp.route('/api/skills', methods=['GET'])
+@x_ipe_tracing()
 def get_skills():
     """
     GET /api/skills

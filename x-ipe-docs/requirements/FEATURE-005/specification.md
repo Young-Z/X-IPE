@@ -1,14 +1,15 @@
 # Feature Specification: Interactive Console
 
 > Feature ID: FEATURE-005  
-> Version: v2.0  
-> Status: Refined  
-> Last Updated: 01-22-2026
+> Version: v2.1  
+> Status: Implemented  
+> Last Updated: 02-02-2026
 
 ## Version History
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
+| v2.1 | 02-02-2026 | Updated AC status to match implementation - Phase 1 & 2 complete, Phase 3 partial | - |
 | v2.0 | 01-22-2026 | Major upgrade: xterm.js integration, session persistence (1hr/10KB buffer), auto-reconnection, connection status, split-pane (up to 2 terminals), debounced resize | - |
 | v1.0 | 01-18-2026 | Initial specification with VanillaTerminal, basic PTY, WebSocket communication | - |
 
@@ -42,35 +43,35 @@ The Interactive Console v2.0 is a major upgrade that brings enterprise-grade ter
 
 ### Phase 1: Core Upgrade (P1)
 
-- [ ] AC-1.1: Terminal uses xterm.js 5.x for rendering (not VanillaTerminal)
-- [ ] AC-1.2: Terminal displays 256-color ANSI output correctly
-- [ ] AC-1.3: Cursor positioning and movement works (vim, htop-lite)
-- [ ] AC-1.4: Arrow keys navigate shell history (zsh/bash native)
-- [ ] AC-1.5: PTY session persists for 1 hour after WebSocket disconnect
-- [ ] AC-1.6: Output buffer (10KB) replays on reconnection
-- [ ] AC-1.7: Session ID stored in localStorage for reconnection
-- [ ] AC-1.8: Socket.IO auto-reconnects with exponential backoff
-- [ ] AC-1.9: Reconnection automatically reattaches to existing session
+- [x] AC-1.1: Terminal uses xterm.js 5.x for rendering (not VanillaTerminal)
+- [x] AC-1.2: Terminal displays 256-color ANSI output correctly
+- [x] AC-1.3: Cursor positioning and movement works (vim, htop-lite)
+- [x] AC-1.4: Arrow keys navigate shell history (zsh/bash native)
+- [x] AC-1.5: PTY session persists for 1 hour after WebSocket disconnect
+- [x] AC-1.6: Output buffer (10KB) replays on reconnection
+- [x] AC-1.7: Session ID stored in localStorage for reconnection
+- [x] AC-1.8: Socket.IO auto-reconnects with exponential backoff
+- [x] AC-1.9: Reconnection automatically reattaches to existing session
 
 ### Phase 2: UX Polish (P2)
 
-- [ ] AC-2.1: Connection status indicator visible in terminal header (green/red dot)
-- [ ] AC-2.2: Status shows "Connected", "Disconnected", or "Reconnecting..."
-- [ ] AC-2.3: Terminal resize uses debounce (150ms) to prevent excessive PTY signals
-- [ ] AC-2.4: Resize sends SIGWINCH to PTY with correct dimensions
-- [ ] AC-2.5: Panel height persists in localStorage
-- [ ] AC-2.6: "Reconnected to session" message shown on successful reconnection
+- [x] AC-2.1: Connection status indicator visible in terminal header (green/red dot)
+- [x] AC-2.2: Status shows "Connected", "Disconnected", or "Reconnecting..."
+- [x] AC-2.3: Terminal resize uses debounce (150ms) to prevent excessive PTY signals
+- [x] AC-2.4: Resize sends SIGWINCH to PTY with correct dimensions
+- [x] AC-2.5: Panel height persists in localStorage
+- [x] AC-2.6: "Reconnected to session" message shown on successful reconnection
 
 ### Phase 3: Advanced (P3)
 
-- [ ] AC-3.1: "Add Terminal" button creates second terminal pane
-- [ ] AC-3.2: Maximum of 2 terminals supported
-- [ ] AC-3.3: Terminals display side-by-side with equal width
-- [ ] AC-3.4: Each terminal has independent PTY session
+- [x] AC-3.1: "Add Terminal" button creates second terminal pane
+- [x] AC-3.2: Maximum of 2 terminals supported
+- [x] AC-3.3: Terminals display side-by-side with equal width
+- [x] AC-3.4: Each terminal has independent PTY session
 - [ ] AC-3.5: Close button removes terminal pane
-- [ ] AC-3.6: Focus border indicates active terminal
-- [ ] AC-3.7: Click on terminal pane sets focus
-- [ ] AC-3.8: All session IDs stored in localStorage array
+- [x] AC-3.6: Focus border indicates active terminal
+- [x] AC-3.7: Click on terminal pane sets focus
+- [x] AC-3.8: All session IDs stored in localStorage array
 
 ## Functional Requirements
 

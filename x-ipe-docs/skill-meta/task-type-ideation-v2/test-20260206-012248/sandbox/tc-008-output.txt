@@ -1,0 +1,4 @@
+=== TC-008: Examples ===
+examples.md exists: yes
+example count: 7
+PASS

@@ -1,0 +1,67 @@
+# Evaluation Report for task-type-ideation-v2
+# Generated: 2026-02-06
+
+skill_name: task-type-ideation-v2
+skill_type: task_type
+test_date: 2026-02-06
+evaluator: Nova (AI Agent)
+
+## Summary
+
+| Category | Total | Passed | Failed | Pass Rate |
+|----------|-------|--------|--------|-----------|
+| MUST     | 10    | 10     | 0      | 100%      |
+| SHOULD   | 5     | 5      | 0      | 100%      |
+| Overall  | 15    | 15     | 0      | 100%      |
+
+## Pass Criteria
+
+| Criteria | Required | Actual | Status |
+|----------|----------|--------|--------|
+| MUST Pass Rate | 100% | 100% | ✅ PASS |
+| SHOULD Pass Rate | 80% | 100% | ✅ PASS |
+
+## Test Results
+
+### MUST Pass Tests
+
+| TC ID | AC ID | Test Name | Result | Notes |
+|-------|-------|-----------|--------|-------|
+| tc-001 | AC-M1 | Section Order Correct | PASS | 10 sections in correct order |
+| tc-002 | AC-M2 | Line Count Under 500 | PASS | 488 lines |
+| tc-003 | AC-M3 | Frontmatter Valid | PASS | name: 22 chars, description present |
+| tc-004 | AC-M4 | DoR Uses XML Format | PASS | definition_of_ready tag found |
+| tc-005 | AC-M5 | DoD Uses XML Format | PASS | 12 step_output tags |
+| tc-006 | AC-M6 | Execution Procedure Uses XML Format | PASS | procedure tag + 23 step tags |
+| tc-007 | AC-M7 | Keywords Used for Importance | PASS | 18 keywords, 0 emoji |
+| tc-008 | AC-M8 | Examples in References | PASS | 7 examples in examples.md |
+| tc-009 | AC-M9 | Draft-Critique-Improve Flow | PASS | Steps 7, 8, 9 found |
+| tc-010 | AC-M10 | Step Outputs Covered in DoD | PASS | 11 outputs, 12 step_outputs |
+
+### SHOULD Pass Tests
+
+| TC ID | AC ID | Test Name | Result | Notes |
+|-------|-------|-----------|--------|-------|
+| tc-011 | AC-S1 | Config Loading Documented | PASS | 6 tools.json refs, Load Toolbox step |
+| tc-012 | AC-S2 | Brainstorming Rules Clear | PASS | 3-5 rule mentioned 4 times |
+| tc-013 | AC-S3 | Folder Rename Logic Documented | PASS | Draft Idea pattern + guide exists |
+| tc-014 | AC-S4 | Next Task Selection Documented | PASS | Both options documented |
+| tc-015 | AC-S5 | Critique Sub-Agent Defined | PASS | sub_agent spec with model_hint |
+
+## Decision
+
+**RECOMMENDATION: MERGE**
+
+The candidate skill passes all acceptance criteria and is ready for merge to .github/skills/task-type-ideation-v2/
+
+## Artifacts
+
+- test-cases.yaml: Test case definitions
+- sandbox/tc-*-output.txt: Individual test outputs
+
+## Notes
+
+- SKILL.md is 488 lines (12 below 500 limit)
+- Draft-Critique-Improve flow properly implemented in steps 7-9
+- All 11 procedure outputs have corresponding DoD checkpoints
+- Sub-agent specification includes role (idea-critic) and model_hint (sonnet)

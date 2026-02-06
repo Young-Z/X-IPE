@@ -168,3 +168,124 @@
 - Total archived tasks: 142
 - Date range: 01-18-2026 to 01-25-2026
 - Archived on: 01-26-2026
+
+---
+
+## Archived 02-01-2026
+
+| Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
+|---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-284 | Quality Report | Generate project quality evaluation report | Ember | 02-01-2026 11:22:00 | project-quality-evaluation.md | Score 8.2/10, 1017 tests, 77% coverage |
+| TASK-283 | Bug Fix | UIUX: Delete feedback should remove from filesystem, list in desc order | Sage | 02-01-2026 11:08:00 | uiux_feedback_service.py, uiux_feedback_routes.py, uiux-feedback.js | Added DELETE API + JS async delete |
+| TASK-282 | Bug Fix | UIUX: Evaluate button should expand console and type prompt | Zephyr | 02-01-2026 11:03:00 | quality-evaluation.js | Fixed sendToConsole to expand panel and use sendCopilotPromptCommandNoEnter |
+| TASK-281 | Feature Closing | FEATURE-024: Project Quality Evaluation UI Closing | Pulse | 02-01-2026 11:20:00 | commit 6ec95a1 | 20 files, 5534 insertions |
+| TASK-280 | Code Implementation | FEATURE-024: Project Quality Evaluation UI Implementation | Pulse | 02-01-2026 11:10:00 | quality_evaluation_routes.py, quality-evaluation.js/css, workplace.js | 28/28 tests pass, 926 total tests pass |
+| TASK-279 | Test Generation | FEATURE-024: Project Quality Evaluation UI Tests | Pulse | 02-01-2026 10:50:00 | test_quality_evaluation.py | 28 tests, 17 fail, 10 pass, 1 skip (TDD ready) |
+| TASK-278 | Technical Design | FEATURE-024: Project Quality Evaluation UI Design | Pulse | 02-01-2026 10:35:00 | technical-design.md | Standalone module, 2 APIs, ~630 lines new code |
+| TASK-277 | Feature Refinement | FEATURE-024: Project Quality Evaluation UI Specification | Pulse | 02-01-2026 10:26:00 | specification.md | 45 acceptance criteria, 9 functional requirements |
+| TASK-276 | Feature Breakdown | IDEA-009: Project Quality Evaluation Feature Breakdown | Pulse | 02-01-2026 10:22:00 | features.md, FEATURE-024 folder | FEATURE-024 added to board |
+| TASK-275 | Requirement Gathering | IDEA-009: Project Quality Evaluation Requirements | Pulse | 02-01-2026 10:18:00 | requirement-details-part-4.md | FEATURE-024 documented |
+| TASK-274 | Idea Mockup | IDEA-009: Project Quality Evaluation UI Mockup | Pulse | 02-01-2026 10:15:00 | mockups/quality-evaluation-v1.html, idea-summary-v2.md | Mockup approved |
+| TASK-273 | Ideation | IDEA-009: Project Quality Evaluation UI Feature | Pulse | 02-01-2026 10:06:00 | idea-summary-v1.md | Idea refined, approved |
+| TASK-272 | Feature Extension | FEATURE-023-D: Add Tracing Steps to Skills | Drift | 02-01-2026 10:38:00 | 3 SKILL.md files, technical-design.md | Added Step 7/11/6 for tracing instrumentation |
+| TASK-271 | Feature Extension | FEATURE-023-D: Skill Integration Updates | Drift | 02-01-2026 10:30:00 | 5 SKILL.md files, specification.md, technical-design.md | Updated 5 skills + 2 new skills + docs |
+| TASK-270 | Feature Closing | FEATURE-023-D: Tracing Skill Closing | Drift | 02-01-2026 09:22:00 | README.md | Full tracing system complete |
+| TASK-269 | Code Implementation | FEATURE-023-D: Tracing Skill Implementation | Drift | 02-01-2026 09:18:00 | SKILL.md, examples.md | Skill created with 7-step procedure |
+| TASK-268 | Technical Design | FEATURE-023-D: Tracing Skill Design | Drift | 02-01-2026 09:15:00 | technical-design.md | Skill-only implementation |
+| TASK-267 | Feature Refinement | FEATURE-023-D: Tracing Skill Specification | Drift | 02-01-2026 09:12:00 | specification.md | 7 AC categories, 30+ criteria |
+| TASK-266 | Feature Closing | FEATURE-023-C: Trace Viewer & DAG Closing | Drift | 02-01-2026 09:05:00 | README.md, features.md | Feature complete, 117 tests passing |
+| TASK-265 | Code Implementation | FEATURE-023-C: Trace Viewer & DAG Implementation | Drift | 02-01-2026 09:00:00 | parser.py, tracing-graph.js, base.html | 117 tests passing |
+| TASK-243 | Bug Fix | UIUX Feedback: Create folder button opens compose view instead | Onyx | 02-01-2026 05:15:00 | - | Already fixed, verified |
+| TASK-237 | Bug Fix | UIUX Feedback: List not loading, sorting, cleanup on startup | Onyx | 02-01-2026 05:15:00 | app.py, tools.json, test_uiux_feedback_storage.py | Desc sort works, retention days now configurable |
+| TASK-264 | Test Generation | FEATURE-023-C: Trace Viewer & DAG Tests | Drift | 02-01-2026 08:50:00 | test_tracing_graph.py | 32 tests, 30 failing (TDD ready) |
+| TASK-263 | Technical Design | FEATURE-023-C: Trace Viewer & DAG Design | Drift | 02-01-2026 08:45:00 | technical-design.md | ~940 lines, 7 impl steps |
+| TASK-262 | Feature Refinement | FEATURE-023-C: Trace Viewer & DAG Specification | Drift | 02-01-2026 08:40:00 | specification.md | 50+ ACs, 10 categories |
+| TASK-261 | User Manual | FEATURE-023-B: Update README with Dashboard docs | Drift | 02-01-2026 04:30:00 | README.md | Added dashboard UI section |
+| TASK-260 | Feature Closing | FEATURE-023-B: Tracing Dashboard UI Feature Closing | Drift | 02-01-2026 04:28:00 | commit 0cd0798 | 15 files, 7288 insertions |
+| TASK-259 | Code Implementation | FEATURE-023-B: Tracing Dashboard UI Implementation | Drift | 02-01-2026 04:25:00 | tracing-dashboard.js, tracing-dashboard.css, workplace.js | 24/27 tests pass, UI integrated |
+| TASK-258 | Test Generation | FEATURE-023-B: Tracing Dashboard UI Tests | Drift | 02-01-2026 04:18:00 | test_tracing_dashboard.py | 27 tests, 24 pass, 3 skip (TDD ready) |
+| TASK-257 | Technical Design | FEATURE-023-B: Tracing Dashboard UI Design | Drift | 02-01-2026 04:15:00 | technical-design.md | 7 components, ~660 lines new code |
+| TASK-256 | Feature Refinement | FEATURE-023-B: Tracing Dashboard UI Specification | Drift | 02-01-2026 04:12:00 | specification.md | 8 AC categories, full UI spec |
+| TASK-246 | Bug Fix | UIUX: Highlight parent folder when previewing file | Zephyr | 01-31-2026 17:25:00 | workplace.js, workplace.css | Fixed parent highlight on preview |
+| TASK-255 | User Manual | FEATURE-023-A: Update README with Tracing docs | Drift | 02-01-2026 04:10:00 | README.md | Added tracing section, API docs, decorator usage |
+| TASK-225 | Bug Fix | UIUX Feedback: Themes menu always expanded | Spark | 02-01-2026 03:56:00 | sidebar.js | Closed by request |
+| TASK-254 | Feature Closing | FEATURE-023-A: Application Action Tracing - Core Closing | Drift | 02-01-2026 04:00:00 | commit 5120deb | 25 files, 12923 insertions |
+| TASK-253 | Code Implementation | FEATURE-023-A: Application Action Tracing - Core Implementation | Drift | 02-01-2026 03:55:00 | src/x_ipe/tracing/, tracing_service.py, tracing_routes.py | 61/61 tests passing |
+| TASK-252 | Test Generation | FEATURE-023-A: Application Action Tracing - Core Tests | Drift | 02-01-2026 03:40:00 | test_tracing.py | 61 tests, TDD ready |
+| TASK-251 | Technical Design | FEATURE-023-A: Application Action Tracing - Core Design | Drift | 02-01-2026 03:25:00 | technical-design.md | 7 modules, full implementation guide |
+| TASK-250 | Feature Refinement | FEATURE-023-A: Application Action Tracing - Core Specification | Drift | 02-01-2026 03:20:00 | specification.md, mockups/ | 7 AC categories, full spec with edge cases |
+| TASK-249 | Feature Breakdown | FEATURE-023-A: Application Action Tracing - Core | Drift | 02-01-2026 03:18:00 | features.md, requirement-details-part-3.md | Added to feature board |
+| TASK-248 | Requirement Gathering | IDEA-007: Application Action Tracing Requirements | Drift | 02-01-2026 03:15:00 | requirement-details-part-3.md | FEATURE-023-A/B/C/D, 7 AC categories, 40+ ACs |
+| TASK-247 | Idea Mockup | IDEA-007: Application Action Tracing UI Mockup | Drift | 02-01-2026 03:08:00 | tracing-dashboard-v4.html, idea-summary-v2.md | G6 canvas DAG, click-modal, duration toggle, countdown timer |
+| TASK-245 | Ideation | IDEA-007: Feature-Application Action Tracing | Nova | 01-31-2026 17:26:00 | idea-summary-v1.md | 7 features, 3 phases |
+| TASK-244 | Bug Fix | UIUX Feedback: Submit/Copilot buttons behavior fix | Echo | 01-31-2026 14:18:00 | uiux-feedback.js, uiux-feedback.css | Both buttons always visible, Submit disabled after submit, re-enabled on edit |
+| TASK-242 | Bug Fix | UIUX Feedback: Delete file in folder view causes error | Cipher | 01-31-2026 07:19:00 | ideas_service.py | Fixed path format in get_folder_contents |
+| TASK-241 | Feature Request | UIUX Feedback: Add drag and drop for folders/files in folder view | Cipher | 01-31-2026 07:18:00 | folder-view.js, workplace.css | Drag-drop CSS visual feedback |
+| TASK-240 | Feature Request | UIUX Feedback: Add "into" icon on folder hover to enter folder view | Cipher | 01-31-2026 07:18:00 | workplace.js, workplace.css | Changed to box-arrow-in-right icon |
+| TASK-239 | Feature Request | UIUX Feedback: Add folder creation icon beside pin in Ideas header | Cipher | 01-31-2026 07:17:00 | workplace.js, workplace.css | Added folder-plus icon in header |
+| TASK-238 | Bug Fix | UIUX Feedback: Disable drag during folder/file name editing | Cipher | 01-31-2026 07:12:00 | workplace.js | Disabled draggable during rename input |
+| TASK-236 | Bug Fix | UIUX Feedback: Move folder ">" to right, remove trash icon | Spark | 01-31-2026 06:56:00 | workplace.js | Moved chevron to right, removed folder trash |
+| TASK-235 | Bug Fix | UIUX Feedback: Icons not loading (square shapes) | Nova | 01-31-2026 06:45:00 | proxy_service.py, proxy_routes.py | CSS url() rewriting + binary font handling |
+| TASK-234 | Feature Closing | FEATURE-008 v1.5 CR-006 Feature Closing | Ember | 01-31-2026 06:30:00 | commit ce70f77 | 18 files, 5840 insertions |
+| TASK-233 | Code Implementation | FEATURE-008 v1.5 CR-006 Implementation | Ember | 01-31-2026 06:15:00 | src/x_ipe/services/ideas_service.py, src/x_ipe/routes/ideas_routes.py | 49/49 tests pass |
+| TASK-232 | Test Generation | FEATURE-008 v1.5 CR-006 Tests | Ember | 01-31-2026 05:50:00 | tests/test_ideas_cr006.py | 49 tests, 48 failing (TDD ready) |
+| TASK-231 | Technical Design | FEATURE-008 v1.5 CR-006 Technical Design | Ember | 01-31-2026 05:45:00 | x-ipe-docs/requirements/FEATURE-008/technical-design.md | 4 new modules, 4 new API endpoints |
+| TASK-230 | Change Request | CR-006: Ideas Folder Tree UX Enhancement | Ember | 01-31-2026 05:35:00 | x-ipe-docs/requirements/FEATURE-008/CR-006.md | Classification: Modification |
+| TASK-229 | Ideation | CR-006: Ideas Folder Tree UX Enhancement | Ember | 01-31-2026 05:10:00 | idea-summary-v1.md, mockup-v1.html | Idea refined with interactive mockup |
+| TASK-228 | Bug Fix | Missing file rename button in nested idea tree | Flux | 01-31-2026 03:56:00 | src/x_ipe/static/js/features/workplace.js | Added rename button to _buildTreeList method |
+| TASK-227 | Feature Acceptance Test | FEATURE-001: Project Navigation UI Tests | Zephyr | 01-30-2026 08:15:00 | x-ipe-docs/requirements/FEATURE-001/acceptance-test-cases.md | 8/8 tests passed (100%) |
+| TASK-226 | Skill Creation | Create task-type-feature-acceptance-test skill | Cipher | 01-30-2026 06:58:00 | .github/skills/task-type-feature-acceptance-test/ | New feature-stage skill with template |
+| TASK-224 | Code Implementation | Add MCP config merge to X-IPE init/upgrade | Cipher | 01-29-2026 07:35:00 | src/x_ipe/core/scaffold.py, cli/main.py | commit 7482406 |
+| TASK-223 | Feature Closing | FEATURE-022-D: Feedback Storage & Submission PR | Bolt | 01-28-2026 17:30:00 | commit 34c7d11 | Feature implemented |
+| TASK-222 | Code Implementation | FEATURE-022-D: Feedback Storage & Submission Implementation | Bolt | 01-28-2026 17:25:00 | src/x_ipe/services/uiux_feedback_service.py, uiux_feedback_routes.py | 20/20 tests passing |
+| TASK-221 | Test Generation | FEATURE-022-D: Feedback Storage & Submission Tests | Bolt | 01-28-2026 17:20:00 | tests/test_uiux_feedback_storage.py | 20 TDD tests |
+| TASK-220 | Technical Design | FEATURE-022-D: Feedback Storage & Submission Design | Bolt | 01-28-2026 17:15:00 | x-ipe-docs/requirements/FEATURE-022-D/technical-design.md | API, service, frontend |
+| TASK-219 | Feature Refinement | FEATURE-022-D: Feedback Storage & Submission Specification | Bolt | 01-28-2026 17:10:00 | x-ipe-docs/requirements/FEATURE-022-D/specification.md | 30 ACs |
+| TASK-218 | Feature Closing | FEATURE-022-C: Feedback Capture & Panel PR | Bolt | 01-28-2026 17:05:00 | commit 97a51e1, 4f0f04d | Feature implemented |
+| TASK-217 | Code Implementation | FEATURE-022-C: Feedback Capture & Panel Implementation | Bolt | 01-28-2026 17:00:00 | src/x_ipe/static/js/uiux-feedback.js, uiux-feedback.css | 20/20 tests passing |
+| TASK-197 | Idea Mockup | IDEA-017: UI/UX Feedback View Mockup | Zephyr | 01-28-2026 16:16:00 | mockups/uiux-feedback-v1.html | Mockup completed |
+| TASK-191 | Code Refactor | Refactor src/x_ipe/app.py (1312 lines) | Ember | 01-28-2026 16:16:00 | src/x_ipe/routes/ | Refactoring completed via TASK-194 |
+| TASK-213 | Change Request | CR-005: File rename UI & copy URL for FEATURE-008 | Flux | 01-28-2026 16:12:00 | x-ipe-docs/requirements/FEATURE-008/CR-005.md | Copy URL button added |
+| TASK-216 | Test Generation | FEATURE-022-C: Feedback Capture & Panel Tests | Bolt | 01-28-2026 16:45:00 | tests/test_feedback_panel.py | 20 tests passing |
+| TASK-215 | Technical Design | FEATURE-022-C: Feedback Capture & Panel Design | Bolt | 01-28-2026 16:40:00 | x-ipe-docs/requirements/FEATURE-022-C/technical-design.md | ContextMenu, Screenshot, Panel |
+| TASK-214 | Feature Refinement | FEATURE-022-C: Feedback Capture & Panel Specification | Bolt | 01-28-2026 16:35:00 | x-ipe-docs/requirements/FEATURE-022-C/specification.md | 34 ACs |
+| TASK-212 | Feature Closing | FEATURE-022-B: Element Inspector PR | Bolt | 01-28-2026 16:35:00 | commit 08b87ea | Feature implemented |
+| TASK-211 | Code Implementation | FEATURE-022-B: Element Inspector Implementation | Bolt | 01-28-2026 16:30:00 | src/x_ipe/services/proxy_service.py, src/x_ipe/static/js/uiux-feedback.js | 62/62 tests passing |
+| TASK-210 | Test Generation | FEATURE-022-B: Element Inspector Tests | Bolt | 01-28-2026 16:20:00 | tests/test_inspector.py | 20 TDD tests (18 failing) |
+| TASK-209 | Technical Design | FEATURE-022-B: Element Inspector Design | Bolt | 01-28-2026 16:15:00 | x-ipe-docs/requirements/FEATURE-022-B/technical-design.md | InspectorScript, InspectorManager |
+| TASK-208 | Feature Refinement | FEATURE-022-B: Element Inspector Specification | Bolt | 01-28-2026 16:10:00 | x-ipe-docs/requirements/FEATURE-022-B/specification.md | 31 ACs |
+| TASK-206 | Test Generation | FEATURE-022-A: Browser Simulator & Proxy Tests | Bolt | 01-28-2026 15:32:00 | tests/test_proxy.py | 42 TDD tests ready |
+| TASK-205 | Technical Design | FEATURE-022-A: Browser Simulator & Proxy Design | Bolt | 01-28-2026 15:25:00 | x-ipe-docs/requirements/FEATURE-022-A/technical-design.md | ProxyService, proxy_routes, BrowserSimulator |
+| TASK-204 | Feature Refinement | FEATURE-022-A: Browser Simulator & Proxy Specification | Bolt | 01-28-2026 15:15:00 | x-ipe-docs/requirements/FEATURE-022-A/specification.md | 30 ACs, 8 FRs |
+| TASK-203 | Feature Breakdown | FEATURE-022: UI/UX Feedback System Breakdown | Bolt | 01-28-2026 15:07:00 | x-ipe-docs/requirements/requirement-details-part-3.md, x-ipe-docs/planning/features.md | 4 sub-features: 022-A to 022-D |
+| TASK-202 | Requirement Gathering | IDEA-017: UI/UX Feedback System Requirements | Bolt | 01-28-2026 14:50:00 | x-ipe-docs/requirements/requirement-details-part-3.md | FEATURE-022 documented |
+| TASK-201 | Feature Closing | FEATURE-008 v1.4 CR-004 PR | Sage | 01-28-2026 14:45:00 | commit 021e319 | PR ready for merge |
+| TASK-194 | Code Refactor V2 | Split app.py into route modules using Flask Blueprints | Nova | 01-28-2026 15:00:00 | src/x_ipe/routes/, src/x_ipe/handlers/ | 1332→154 lines (88% reduction) |
+| TASK-200 | Code Implementation | FEATURE-008 v1.4 CR-004 Implementation | Sage | 01-28-2026 14:35:00 | src/x_ipe/app.py, templates/, static/ | 11/11 tests passing |
+| TASK-199 | Test Generation | FEATURE-008 v1.4 CR-004 Tests | Sage | 01-28-2026 14:25:00 | tests/test_ideas.py | 9 failing, 2 passing (TDD ready) |
+| TASK-198 | Technical Design | FEATURE-008 v1.4 Technical Design | Sage | 01-28-2026 14:20:00 | x-ipe-docs/requirements/FEATURE-008/technical-design.md | Approved |
+| TASK-197 | Feature Refinement | FEATURE-008 v1.4 Specification | Sage | 01-28-2026 14:15:00 | x-ipe-docs/requirements/FEATURE-008/specification.md | Approved |
+| TASK-195 | Ideation + CR | IDEA-016: Change Request to Workplace | Sage | 01-28-2026 14:12:00 | x-ipe-docs/ideas/004. Change Request to Workplace/idea-summary-v1.md, x-ipe-docs/requirements/FEATURE-008/CR-004.md | Approved, next: Feature Refinement |
+| TASK-193 | Improve Code Quality | Fix test imports before refactoring | Nova | 01-28-2026 13:20:00 | x-ipe-docs/refactoring/validation-TASK-193.md | Approved |
+| TASK-192 | Refactoring Analysis | Analyze codebase for refactoring | Nova | 01-28-2026 12:56:00 | x-ipe-docs/refactoring/analysis-TASK-192.md | Approved |
+| TASK-190 | Quality Report | Generate project quality evaluation report | Flux | 01-28-2026 08:38:00 | x-ipe-docs/planning/quality-evaluation-latest.md | - |
+| TASK-189 | Code Refactor | Rename auto advance to auto proceed across all skills | Frost | 01-28-2026 13:20:00 | .github/skills/ | Renamed term in guidelines and templates |
+| TASK-187 | Idea Mockup | IDEA-015: AI Chat Widget with Rich Widgets | Ember | 01-27-2026 14:33:00 | mockups/chat-widget-v1.html | Requirement Gathering |
+| TASK-188 | Bug Fix | Fix task execution auto proceed behavior | Frost | 01-28-2026 13:05:00 | .github/skills/task-execution-guideline/SKILL.md | Updated Step 6 to check Global Auto-Advance |
+| TASK-183 | Code Implementation | FEATURE-018: X-IPE CLI Tool - Status & Info Commands | Drift | 01-26-2026 15:25:00 | src/x_ipe/cli/main.py | Commands implemented |
+| TASK-184 | Code Refactor | Rename docs folder to x-ipe-docs and update all references | Flux | 01-26-2026 16:40:00 | x-ipe-docs/ | Renamed docs → x-ipe-docs, updated ~106 files |
+| TASK-182 | Idea Mockup | IDEA-014: Replenishment System Dashboard Mockup | Spark | 01-26-2026 10:20:00 | x-ipe-docs/ideas/Sample - Replishment system/mockups/dashboard-v1.html | Mockup created |
+| TASK-181 | Ideation | IDEA-014: Product Replenishment System for Boutique | Spark | 01-26-2026 10:15:00 | x-ipe-docs/ideas/Sample - Replishment system/idea-summary-v1.md | Idea refined |
+| TASK-180 | Idea Mockup | IDEA-013: POS Home Page Mockup | Bolt | 01-26-2026 09:49:00 | mockups/pos-home-v1.html | Closed by request |
+| TASK-179 | Ideation | IDEA-013: POS Application for Boutique Sales | Bolt | 01-26-2026 08:52:00 | x-ipe-docs/ideas/Sample/idea-summary-v1.md | Idea refined |
+| TASK-178 | Ideation | IDEA-012: AI Capability Sharing Presentation | Nova | 01-26-2026 09:49:00 | - | Closed by request |
+| TASK-177 | Requirement Gathering | IDEA-011: AI-Integrated Enterprise Knowledge Base requirements | Spark | 01-26-2026 09:49:00 | - | Closed by request |
+| TASK-170 | Bug Fix | QA Verification for TASK-169 side-by-side toggle bug | Drift | 01-26-2026 09:49:00 | - | Closed by request |
+| TASK-169 | Bug Fix | Fix toggle side by side behavior in markdown editor | Spark | 01-26-2026 09:49:00 | - | Closed by request |
+
+---
+
+**Archive Info:**
+- Total archived tasks in this batch: 100
+- Date range: 01-26-2026 to 02-01-2026
+- Archived on: 02-01-2026

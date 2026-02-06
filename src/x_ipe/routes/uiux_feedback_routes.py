@@ -5,12 +5,14 @@ API routes for submitting UI/UX feedback.
 """
 from flask import Blueprint, request, jsonify, current_app
 from ..services.uiux_feedback_service import UiuxFeedbackService
+from x_ipe.tracing import x_ipe_tracing
 
 
 uiux_feedback_bp = Blueprint('uiux_feedback', __name__)
 
 
 @uiux_feedback_bp.route('/api/uiux-feedback', methods=['GET'])
+@x_ipe_tracing()
 def list_feedback():
     """
     List recent feedback entries.
@@ -30,7 +32,35 @@ def list_feedback():
     return jsonify({'entries': entries}), 200
 
 
+@uiux_feedback_bp.route('/api/uiux-feedback/<feedback_id>', methods=['DELETE'])
+@x_ipe_tracing()
+def delete_feedback(feedback_id):
+    """
+    Delete a feedback entry by ID.
+    
+    Path params:
+        feedback_id: The feedback folder name/ID
+    
+    Returns:
+        200: {"success": true}
+        404: {"success": false, "error": "Feedback not found"}
+        500: {"success": false, "error": "..."}
+    """
+    project_root = current_app.config.get('PROJECT_ROOT', '.')
+    
+    service = UiuxFeedbackService(project_root)
+    result = service.delete_feedback(feedback_id)
+    
+    if result['success']:
+        return jsonify(result), 200
+    elif 'not found' in result.get('error', '').lower():
+        return jsonify(result), 404
+    else:
+        return jsonify(result), 500
+
+
 @uiux_feedback_bp.route('/api/uiux-feedback', methods=['POST'])
+@x_ipe_tracing()
 def submit_feedback():
     """
     Submit UI/UX feedback entry.

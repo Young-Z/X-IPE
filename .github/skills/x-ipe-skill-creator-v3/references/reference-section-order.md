@@ -1,0 +1,106 @@
+# Section Order Reference
+
+BLOCKING: Section order follows agent cognitive flow aligned with Anthropic's Progressive Disclosure principle.
+
+```yaml
+# ═══════════════════════════════════════════════════════════════════════════════
+# UNIVERSAL SECTION ORDER PRINCIPLE (Anthropic Agent Skills Best Practice)
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Progressive Disclosure (3 Levels):
+#   Level 1: METADATA   - name + description in frontmatter (~100 tokens)
+#   Level 2: BODY       - Main SKILL.md content (<5000 tokens recommended)
+#   Level 3: RESOURCES  - scripts/, references/, assets/ (loaded on demand)
+#
+# Cognitive Flow for SKILL.md Body:
+#   1. CONTEXT    - What is this? When to use? (Early exit if not applicable)
+#   2. DECISION   - Can I proceed? What inputs needed? (Gate check)
+#   3. ACTION     - How to execute? (Core procedure)
+#   4. VERIFY     - How to confirm success? (Completion criteria)
+#   5. REFERENCE  - Where to find details? (Deep dive on demand)
+#
+# Key Constraints (from agentskills.io spec):
+#   - SKILL.md < 500 lines (move details to references/)
+#   - name: lowercase, hyphens, 1-64 chars
+#   - description: 1-1024 chars, include trigger keywords
+# ═══════════════════════════════════════════════════════════════════════════════
+
+task_type_skills:
+  section_order:
+    # CONTEXT
+    1: Purpose
+    2: Important Notes
+    # DECISION
+    3: Input Parameters
+    4: Definition of Ready (DoR)
+    # ACTION
+    5: Execution Flow Summary (DAG/Sub-agent)
+    6: Execution Procedure (Steps)
+    # VERIFY
+    7: Output Result
+    8: Definition of Done (DoD)
+    # REFERENCE
+    9: Patterns & Anti-Patterns
+    10: Examples
+
+tool_skills:
+  # Includes utility tools, integrations, and category management (board skills)
+  section_order:
+    # CONTEXT
+    1: Purpose
+    2: Important Notes
+    3: About (Domain Concepts)
+    4: When to Use
+    # DECISION
+    5: Input Parameters
+    6: Definition of Ready (DoR)
+    # ACTION
+    7: Operations
+    # VERIFY
+    8: Output Result
+    9: Definition of Done (DoD)
+    # REFERENCE
+    10: Error Handling
+    11: Templates
+    12: Examples
+
+workflow_orchestration_skills:
+  section_order:
+    # CONTEXT
+    1: Purpose
+    2: Important Notes
+    # DECISION
+    3: Input Parameters
+    4: Definition of Ready (DoR)
+    # ACTION
+    5: Execution Flow Summary (DAG/Sub-agent)
+    6: Execution Procedure (Steps)
+    # VERIFY
+    7: Output Result
+    8: Definition of Done (DoD)
+    # REFERENCE
+    9: Registry (Task Types / Skill Mapping)
+    10: Error Handling
+    11: Templates
+    12: Examples
+
+meta_skills:
+  # Skills for creating/managing other skills (x-ipe-skill-creator)
+  section_order:
+    # CONTEXT
+    1: Purpose
+    2: About (Domain Concepts)
+    3: Important Notes
+    # DECISION
+    4: Input Parameters
+    5: Definition of Ready (DoR)
+    # ACTION
+    6: Execution Flow Summary (DAG/Sub-agent)
+    7: Execution Procedure (Steps)
+    # VERIFY
+    8: Output Result
+    9: Definition of Done (DoD)
+    # REFERENCE
+    10: Templates
+    11: Examples
+```

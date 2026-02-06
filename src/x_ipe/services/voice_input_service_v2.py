@@ -24,6 +24,8 @@ from dashscope.audio.asr import (
     TranslationResult,
 )
 
+from x_ipe.tracing import x_ipe_tracing
+
 
 # Constants
 VOICE_MAX_DURATION = 30  # Maximum recording duration in seconds
@@ -225,6 +227,7 @@ class VoiceInputService:
         self.sessions: Dict[str, VoiceSession] = {}
         print(f"[Voice] VoiceInputService initialized")
     
+    @x_ipe_tracing()
     def create_session(
         self, 
         socket_sid: str,
@@ -260,10 +263,12 @@ class VoiceInputService:
         print(f"[Voice] 📦 Session created: {session_id} for socket {socket_sid}")
         return session_id
     
+    @x_ipe_tracing()
     def get_session(self, session_id: str) -> Optional[VoiceSession]:
         """Get session by ID."""
         return self.sessions.get(session_id)
     
+    @x_ipe_tracing()
     def start_recognition(self, session_id: str) -> bool:
         """
         Start speech recognition for a session.
@@ -333,6 +338,7 @@ class VoiceInputService:
                 session.on_error(str(e))
             return False
     
+    @x_ipe_tracing()
     def send_audio(self, session_id: str, audio_data: bytes) -> None:
         """
         Send audio data to recognizer.
@@ -366,6 +372,7 @@ class VoiceInputService:
         else:
             print(f"[Voice] ⚠️ send_audio: no recognizer for session {session_id}")
     
+    @x_ipe_tracing()
     def stop_recognition(self, session_id: str) -> str:
         """
         Stop recognition and get final result.
@@ -409,6 +416,7 @@ class VoiceInputService:
             print(f"[Voice] ✅ Recognition stopped, transcription result: '{result}'")
         return result
     
+    @x_ipe_tracing()
     def cancel_recognition(self, session_id: str) -> None:
         """
         Cancel recognition without getting result.
@@ -434,6 +442,7 @@ class VoiceInputService:
         session.partial_text = ""
         session.translation_text = ""
     
+    @x_ipe_tracing()
     def remove_session(self, session_id: str) -> None:
         """
         Remove a session.
@@ -448,6 +457,7 @@ class VoiceInputService:
             except Exception:
                 pass
     
+    @x_ipe_tracing()
     def is_session_expired(self, session_id: str) -> bool:
         """
         Check if session has exceeded max duration.
@@ -465,6 +475,7 @@ class VoiceInputService:
         elapsed = (datetime.now() - session.created_at).total_seconds()
         return elapsed > VOICE_MAX_DURATION
     
+    @x_ipe_tracing()
     def process_transcription(self, session_id: str, text: str) -> Optional[str]:
         """
         Process transcription result.

@@ -1,0 +1,261 @@
+skill_name: x-ipe-skill-creator-v3
+generated_date: 2026-02-05T14:57:00
+version: 1.0.0
+config:
+  sandbox_path: "x-ipe-docs/skill-meta/x-ipe-skill-creator-v3/test-20260205-145700/sandbox/"
+  timeout_seconds: 300
+  skill_path: ".github/skills/x-ipe-skill-creator-v3/"
+
+test_cases:
+  # ============================================================
+  # MUST Criteria Tests (AC-M01 to AC-M08)
+  # ============================================================
+
+  - id: TC-001
+    source_ac: AC-M01
+    priority: must
+    test_type: structural
+    evaluator: self_check
+    setup:
+      description: "Verify all 4 template files exist in templates/ folder"
+    execution:
+      skill_invocation: "Check template file existence"
+      inputs: { templates_path: ".github/skills/x-ipe-skill-creator-v3/templates/" }
+      expected_outputs:
+        - { path: "templates/task-type-skill.md" }
+        - { path: "templates/tool-skill.md" }
+        - { path: "templates/workflow-skill.md" }
+        - { path: "templates/meta-skill.md" }
+    validation:
+      method: structural_check
+      checks:
+        - { type: file_exists, path: "templates/task-type-skill.md" }
+        - { type: file_exists, path: "templates/tool-skill.md" }
+        - { type: file_exists, path: "templates/workflow-skill.md" }
+        - { type: file_exists, path: "templates/meta-skill.md" }
+    result: { status: pending }
+    expected: { pass_criteria: "All 4 template files present: task-type-skill.md, tool-skill.md, workflow-skill.md, meta-skill.md" }
+
+  - id: TC-002
+    source_ac: AC-M02
+    priority: must
+    test_type: content
+    evaluator: judge_agent
+    setup:
+      description: "Verify each template follows skill-general-guidelines-v2.md section order"
+    execution:
+      skill_invocation: "Validate template structure against guidelines"
+      inputs: { guidelines_path: "x-ipe-docs/skill-meta/skill-general-guidelines-v2.md" }
+    validation:
+      method: judge_evaluation
+      rubric:
+        - { criterion: "task-type-skill.md follows cognitive flow", weight: 0.25 }
+        - { criterion: "tool-skill.md follows cognitive flow", weight: 0.25 }
+        - { criterion: "workflow-skill.md follows cognitive flow", weight: 0.25 }
+        - { criterion: "meta-skill.md follows cognitive flow", weight: 0.25 }
+      pass_threshold: 4.0
+    result: { status: pending, score: null, feedback: null }
+    expected: { pass_criteria: "Each template follows cognitive flow: CONTEXT → DECISION → ACTION → VERIFY → REFERENCE" }
+
+  - id: TC-003
+    source_ac: AC-M03
+    priority: must
+    test_type: content
+    evaluator: self_check
+    setup:
+      description: "Verify at least 3 concrete usage examples in references/examples.md"
+    execution:
+      skill_invocation: "Count examples in references/examples.md"
+      inputs: { examples_path: ".github/skills/x-ipe-skill-creator-v3/references/examples.md" }
+    validation:
+      method: structural_check
+      checks:
+        - { type: file_exists, path: "references/examples.md" }
+        - { type: content_contains, file: "references/examples.md", patterns: ["## Example", "###.*Example"], min_count: 3 }
+    result: { status: pending }
+    expected: { pass_criteria: "At least 3 distinct examples documented (headers containing 'Example')" }
+
+  - id: TC-004
+    source_ac: AC-M04
+    priority: must
+    test_type: content
+    evaluator: self_check
+    setup:
+      description: "Verify SKILL.md uses BLOCKING/CRITICAL/MANDATORY keywords (not emoji)"
+    execution:
+      skill_invocation: "Check keyword usage in SKILL.md"
+      inputs: { skill_path: ".github/skills/x-ipe-skill-creator-v3/SKILL.md" }
+    validation:
+      method: structural_check
+      checks:
+        - { type: content_contains, file: "SKILL.md", patterns: ["BLOCKING", "CRITICAL", "MANDATORY"], min_count: 1 }
+        - { type: content_not_contains, file: "SKILL.md", patterns: ["⚠️", "⛔", "🔴", "🟢"] }
+    result: { status: pending }
+    expected: { pass_criteria: "Uses keywords (BLOCKING/CRITICAL/MANDATORY), not emoji, for importance signals" }
+
+  - id: TC-005
+    source_ac: AC-M05
+    priority: must
+    test_type: structural
+    evaluator: self_check
+    setup:
+      description: "Verify SKILL.md body stays under 500 lines"
+    execution:
+      skill_invocation: "Count lines in SKILL.md (excluding frontmatter)"
+      inputs: { skill_path: ".github/skills/x-ipe-skill-creator-v3/SKILL.md" }
+    validation:
+      method: structural_check
+      checks:
+        - { type: line_count, file: "SKILL.md", max_lines: 500, exclude_frontmatter: true }
+    result: { status: pending }
+    expected: { pass_criteria: "SKILL.md body under 500 lines (excluding frontmatter)" }
+
+  - id: TC-006
+    source_ac: AC-M06
+    priority: must
+    test_type: structural
+    evaluator: self_check
+    setup:
+      description: "Verify YAML frontmatter has valid name and description fields"
+    execution:
+      skill_invocation: "Validate YAML frontmatter in SKILL.md"
+      inputs: { skill_path: ".github/skills/x-ipe-skill-creator-v3/SKILL.md" }
+    validation:
+      method: structural_check
+      checks:
+        - { type: yaml_valid, file: "SKILL.md" }
+        - { type: frontmatter_field, file: "SKILL.md", field: "name", min_length: 1, max_length: 64 }
+        - { type: frontmatter_field, file: "SKILL.md", field: "description", contains_trigger: true }
+    result: { status: pending }
+    expected: { pass_criteria: "Valid frontmatter with name (1-64 chars) and description (includes trigger phrases)" }
+
+  - id: TC-007
+    source_ac: AC-M07
+    priority: must
+    test_type: content
+    evaluator: judge_agent
+    setup:
+      description: "Verify execution procedure defines sub-agent DAG with parallel groups and model hints"
+    execution:
+      skill_invocation: "Check for sub-agent DAG definition in execution procedure"
+      inputs: { skill_path: ".github/skills/x-ipe-skill-creator-v3/SKILL.md" }
+    validation:
+      method: judge_evaluation
+      rubric:
+        - { criterion: "Parallel groups defined (parallel_ or sub_agents)", weight: 0.4 }
+        - { criterion: "Merge points specified (merge_to or 'both complete')", weight: 0.3 }
+        - { criterion: "Model hints present (haiku/sonnet references)", weight: 0.3 }
+      pass_threshold: 3.5
+    result: { status: pending, score: null, feedback: null }
+    expected: { pass_criteria: "DAG workflow with parallel groups, merge points, and model hints" }
+
+  - id: TC-008
+    source_ac: AC-M08
+    priority: must
+    test_type: content
+    evaluator: self_check
+    setup:
+      description: "Verify BLOCKING reference to skill-general-guidelines-v2.md in Important Notes"
+    execution:
+      skill_invocation: "Check for BLOCKING guidelines reference"
+      inputs: { skill_path: ".github/skills/x-ipe-skill-creator-v3/SKILL.md" }
+    validation:
+      method: structural_check
+      checks:
+        - { type: content_contains, file: "SKILL.md", patterns: ["BLOCKING.*skill-general-guidelines", "skill-general-guidelines.*BLOCKING"], min_count: 1 }
+    result: { status: pending }
+    expected: { pass_criteria: "BLOCKING reference to skill-general-guidelines-v2.md in Important Notes section" }
+
+  # ============================================================
+  # SHOULD Criteria Tests (AC-S01 to AC-S04)
+  # ============================================================
+
+  - id: TC-009
+    source_ac: AC-S01
+    priority: should
+    test_type: content
+    evaluator: judge_agent
+    setup:
+      description: "Verify SKILL.md follows cognitive flow section order"
+    execution:
+      skill_invocation: "Validate section order in SKILL.md"
+      inputs: { skill_path: ".github/skills/x-ipe-skill-creator-v3/SKILL.md" }
+    validation:
+      method: judge_evaluation
+      rubric:
+        - { criterion: "CONTEXT sections appear before DECISION", weight: 0.25 }
+        - { criterion: "DECISION sections appear before ACTION", weight: 0.25 }
+        - { criterion: "ACTION sections appear before VERIFY", weight: 0.25 }
+        - { criterion: "VERIFY sections appear before REFERENCE", weight: 0.25 }
+      pass_threshold: 3.5
+    result: { status: pending, score: null, feedback: null }
+    expected: { pass_criteria: "SKILL.md follows cognitive flow: CONTEXT → DECISION → ACTION → VERIFY → REFERENCE" }
+
+  - id: TC-010
+    source_ac: AC-S02
+    priority: should
+    test_type: content
+    evaluator: judge_agent
+    setup:
+      description: "Verify complex details are delegated to references/ folder"
+    execution:
+      skill_invocation: "Check progressive disclosure pattern"
+      inputs: 
+        skill_path: ".github/skills/x-ipe-skill-creator-v3/SKILL.md"
+        references_path: ".github/skills/x-ipe-skill-creator-v3/references/"
+    validation:
+      method: judge_evaluation
+      rubric:
+        - { criterion: "SKILL.md does not contain inline code blocks > 20 lines", weight: 0.5 }
+        - { criterion: "Complex examples/details referenced to files in references/", weight: 0.5 }
+      pass_threshold: 3.5
+    result: { status: pending, score: null, feedback: null }
+    expected: { pass_criteria: "Complex details delegated to references/ folder, not inline in SKILL.md" }
+
+  - id: TC-011
+    source_ac: AC-S03
+    priority: should
+    test_type: content
+    evaluator: self_check
+    setup:
+      description: "Verify DoR and DoD use XML checkpoint format"
+    execution:
+      skill_invocation: "Check XML format for DoR/DoD sections"
+      inputs: { skill_path: ".github/skills/x-ipe-skill-creator-v3/SKILL.md" }
+    validation:
+      method: structural_check
+      checks:
+        - { type: content_contains, file: "SKILL.md", patterns: ["<definition_of_ready>", "</definition_of_ready>"], min_count: 1 }
+        - { type: content_contains, file: "SKILL.md", patterns: ["<definition_of_done>", "</definition_of_done>"], min_count: 1 }
+    result: { status: pending }
+    expected: { pass_criteria: "Definition of Ready and Definition of Done use XML checkpoint format" }
+
+  - id: TC-012
+    source_ac: AC-S04
+    priority: should
+    test_type: content
+    evaluator: self_check
+    setup:
+      description: "Verify consistent {variable_name} syntax throughout procedures"
+    execution:
+      skill_invocation: "Check variable syntax pattern"
+      inputs: { skill_path: ".github/skills/x-ipe-skill-creator-v3/SKILL.md" }
+    validation:
+      method: structural_check
+      checks:
+        - { type: content_contains, file: "SKILL.md", patterns: ["\\{[a-z_]+\\}"], min_count: 1 }
+        - { type: content_not_contains, file: "SKILL.md", patterns: ["<[A-Z_]+>", "\\$[A-Z_]+", "\\[\\[.*\\]\\]"] }
+    result: { status: pending }
+    expected: { pass_criteria: "Uses {variable_name} pattern, not <PLACEHOLDER>, $VAR, or [[var]]" }
+
+summary:
+  total: 12
+  by_priority:
+    must: 8
+    should: 4
+  by_evaluator:
+    self_check: 8
+    judge_agent: 4
+  passed: 0
+  failed: 0
+  pending: 12

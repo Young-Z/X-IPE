@@ -1,0 +1,29 @@
+=== TC-002: Template Section Check ===
+
+Each template checked for: Purpose, Input Parameters, Definition of Ready, Definition of Done
+
+task-type-skill.md:
+  - Purpose: YES (1 occurrence)
+  - Input Parameters: YES (1 occurrence)
+  - Definition of Ready: YES (1 occurrence)
+  - Definition of Done: YES (1 occurrence)
+
+tool-skill.md:
+  - Purpose: YES (1 occurrence)
+  - Input Parameters: YES (1 occurrence)
+  - Definition of Ready: YES (1 occurrence)
+  - Definition of Done: YES (1 occurrence)
+
+workflow-skill.md:
+  - Purpose: YES (1 occurrence)
+  - Input Parameters: YES (1 occurrence)
+  - Definition of Ready: YES (1 occurrence)
+  - Definition of Done: YES (1 occurrence)
+
+meta-skill.md:
+  - Purpose: YES (1 occurrence)
+  - Input Parameters: YES (1 occurrence)
+  - Definition of Ready: YES (1 occurrence)
+  - Definition of Done: YES (1 occurrence)
+
+All 4 templates have all required sections.

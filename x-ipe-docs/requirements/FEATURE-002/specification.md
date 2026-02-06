@@ -1,15 +1,16 @@
 # Feature Specification: Content Viewer
 
 > Feature ID: FEATURE-002  
-> Version: v1.0  
-> Status: Refined  
-> Last Updated: 01-18-2026
+> Version: v1.1  
+> Status: Implemented  
+> Last Updated: 02-01-2026
 
 ## Version History
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
 | v1.0 | 01-18-2026 | Initial specification | - |
+| v1.1 | 02-01-2026 | Synced with implementation: added DSL diagram support, HTML preview | - |
 
 ## Overview
 
@@ -31,17 +32,20 @@ The viewer integrates with FEATURE-001 (Project Navigation) by listening for fil
 
 ## Acceptance Criteria
 
-- [ ] AC-1: Markdown files (.md) render as styled HTML
-- [ ] AC-2: Headings, lists, tables, code blocks render correctly
-- [ ] AC-3: Mermaid code blocks render as diagrams
-- [ ] AC-4: Code files display with syntax highlighting
-- [ ] AC-5: Python (.py) files have proper highlighting
-- [ ] AC-6: JavaScript (.js) files have proper highlighting
-- [ ] AC-7: HTML/CSS files have proper highlighting
-- [ ] AC-8: JSON/YAML files have proper highlighting
-- [ ] AC-9: Content area shows loading state while fetching
-- [ ] AC-10: Error state displayed if file cannot be loaded
-- [ ] AC-11: Clean typography with readable font sizes
+- [x] AC-1: Markdown files (.md) render as styled HTML
+- [x] AC-2: Headings, lists, tables, code blocks render correctly
+- [x] AC-3: Mermaid code blocks render as diagrams
+- [x] AC-4: Code files display with syntax highlighting
+- [x] AC-5: Python (.py) files have proper highlighting
+- [x] AC-6: JavaScript (.js) files have proper highlighting
+- [x] AC-7: HTML/CSS files have proper highlighting
+- [x] AC-8: JSON/YAML files have proper highlighting
+- [x] AC-9: Content area shows loading state while fetching
+- [x] AC-10: Error state displayed if file cannot be loaded
+- [x] AC-11: Clean typography with readable font sizes
+- [x] AC-12: Architecture DSL code blocks render as diagrams
+- [x] AC-13: Infographic DSL code blocks render as visualizations
+- [x] AC-14: HTML files render in sandboxed iframe preview
 
 ## Functional Requirements
 
@@ -104,6 +108,28 @@ The viewer integrates with FEATURE-001 (Project Navigation) by listening for fil
 - State diagrams
 - Entity relationship diagrams
 
+### FR-3a: Architecture DSL Rendering
+
+**Description:** Render Architecture DSL code blocks as diagrams
+
+**Details:**
+- Input: Code block with language `architecture-dsl`
+- Process: Parse Architecture DSL syntax, render layered or landscape diagram
+- Output: Visual architecture diagram
+
+**Supported Diagram Types:**
+- Module View (layered architecture)
+- Landscape View (system integration)
+
+### FR-3b: Infographic DSL Rendering
+
+**Description:** Render Infographic DSL code blocks as data visualizations
+
+**Details:**
+- Input: Code block with language `infographic`
+- Process: Parse Infographic DSL syntax, render chart/infographic
+- Output: Visual data infographic
+
 ### FR-4: Code Syntax Highlighting
 
 **Description:** Display code files with syntax highlighting
@@ -122,6 +148,10 @@ The viewer integrates with FEATURE-001 (Project Navigation) by listening for fil
 - JSON (.json)
 - YAML (.yaml, .yml)
 - Markdown (.md) - for code blocks within
+- SQL (.sql)
+- Bash (.sh)
+- SCSS (.scss)
+- XML (.xml)
 
 ### FR-5: Content Area Integration
 
