@@ -17,7 +17,7 @@ class HomepageInfinity {
             status: 'ready',
             section: 'workplace',
             selector: '[data-path="x-ipe-docs/ideas"]',
-            position: { left: '8.5%', top: '66.5%' }
+            position: { left: '8.5%', top: '68%' }
         },
         requirement: {
             icon: '📋',
@@ -26,7 +26,7 @@ class HomepageInfinity {
             status: 'ready',
             section: 'project',
             selector: '[data-path="x-ipe-docs/requirements"]',
-            position: { left: '16%', top: '19%' }
+            position: { left: '16%', top: '20.5%' }
         },
         implementation: {
             icon: '⚙️',
@@ -35,7 +35,7 @@ class HomepageInfinity {
             status: 'ready',
             section: 'project',
             selector: '[data-path="x-ipe-docs/requirements"]',
-            position: { left: '34%', top: '80%' }
+            position: { left: '34%', top: '81.5%' }
         },
         deployment: {
             icon: '🚀',
@@ -44,7 +44,7 @@ class HomepageInfinity {
             status: 'tbd',
             section: 'management',
             selector: null,
-            position: { left: '60%', top: '26%' }
+            position: { left: '60%', top: '27.5%' }
         },
         validation: {
             icon: '✅',
@@ -53,7 +53,7 @@ class HomepageInfinity {
             status: 'ready',
             section: 'quality',
             selector: '[data-section="quality-report"]',
-            position: { left: '83.8%', top: '19.5%' }
+            position: { left: '83.8%', top: '21%' }
         },
         monitoring: {
             icon: '📊',
@@ -62,7 +62,7 @@ class HomepageInfinity {
             status: 'ready',
             section: 'quality',
             selector: '[data-section="behavior-tracing"]',
-            position: { left: '88.7%', top: '72%' }
+            position: { left: '88.7%', top: '73.5%' }
         },
         feedback: {
             icon: '💬',
@@ -71,7 +71,7 @@ class HomepageInfinity {
             status: 'ready',
             section: 'feedback',
             selector: '[data-section="uiux-feedback"]',
-            position: { left: '62%', top: '76.5%' }
+            position: { left: '62%', top: '78%' }
         },
         planning: {
             icon: '📅',
@@ -80,7 +80,7 @@ class HomepageInfinity {
             status: 'ready',
             section: 'management',
             selector: '[data-path="x-ipe-docs/planning"]',
-            position: { left: '42%', top: '32%' }
+            position: { left: '42%', top: '33.5%' }
         }
     };
 
