@@ -227,19 +227,63 @@
     border-bottom: 6px solid #1f2937;
 }
 
-/* Sidebar Highlight */
+/* Sidebar Highlight - Cool glow effect */
 .homepage-highlight {
-    background-color: rgba(59, 130, 246, 0.3) !important;
-    border-left: 3px solid #3b82f6 !important;
-    animation: homepage-highlight-pulse 0.5s ease-in-out;
+    position: relative;
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0.3) 0%, rgba(168, 85, 247, 0.15) 100%) !important;
+    border-left: 3px solid #8b5cf6 !important;
+    box-shadow: 
+        0 0 20px rgba(139, 92, 246, 0.4),
+        0 0 40px rgba(139, 92, 246, 0.2),
+        inset 0 0 20px rgba(139, 92, 246, 0.1);
+    animation: homepage-highlight-glow 2s ease-in-out infinite;
+    border-radius: 4px;
+    margin: 2px 4px;
+    padding-left: 8px !important;
 }
 
-@keyframes homepage-highlight-pulse {
+.homepage-highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, 
+        rgba(139, 92, 246, 0.2) 0%, 
+        transparent 50%,
+        rgba(139, 92, 246, 0.1) 100%);
+    animation: homepage-highlight-shimmer 1.5s ease-in-out infinite;
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+@keyframes homepage-highlight-glow {
+    0%, 100% {
+        box-shadow: 
+            0 0 20px rgba(139, 92, 246, 0.4),
+            0 0 40px rgba(139, 92, 246, 0.2),
+            inset 0 0 20px rgba(139, 92, 246, 0.1);
+    }
+    50% {
+        box-shadow: 
+            0 0 30px rgba(139, 92, 246, 0.6),
+            0 0 60px rgba(139, 92, 246, 0.3),
+            inset 0 0 30px rgba(139, 92, 246, 0.15);
+    }
+}
+
+@keyframes homepage-highlight-shimmer {
     0% {
-        background-color: rgba(59, 130, 246, 0.5);
+        opacity: 0.5;
+        transform: translateX(-100%);
+    }
+    50% {
+        opacity: 1;
     }
     100% {
-        background-color: rgba(59, 130, 246, 0.3);
+        opacity: 0.5;
+        transform: translateX(100%);
     }
 }
 
