@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 02-01-2026 10:20:00
+> Last Updated: 02-05-2026 14:58:00
 
 ## Overview
 
@@ -49,13 +49,20 @@ This board tracks all features across the project lifecycle.
 | FEATURE-023-B | Tracing Dashboard UI | v1.0 | Completed | [specification.md](../requirements/FEATURE-023-B/specification.md), [technical-design.md](../requirements/FEATURE-023-B/technical-design.md) | 02-01-2026 | 02-01-2026 04:28:00 |
 | FEATURE-023-C | Trace Viewer & DAG Visualization | v1.0 | Completed | [specification.md](../requirements/FEATURE-023-C/specification.md), [technical-design.md](../requirements/FEATURE-023-C/technical-design.md) | 02-01-2026 | 02-01-2026 09:00:00 |
 | FEATURE-023-D | Tracing Skill Integration | v1.0 | Completed | [specification.md](../requirements/FEATURE-023-D/specification.md), [technical-design.md](../requirements/FEATURE-023-D/technical-design.md) | 02-01-2026 | 02-01-2026 09:20:00 |
-| FEATURE-024 | Project Quality Evaluation UI | v1.0 | Done Code Implementation | [specification.md](../requirements/FEATURE-024/specification.md), [technical-design.md](../requirements/FEATURE-024/technical-design.md) | 02-01-2026 | 02-01-2026 11:10:00 |
+| FEATURE-024 | Project Quality Evaluation UI | v1.0 | Completed | [specification.md](../requirements/FEATURE-024/specification.md), [technical-design.md](../requirements/FEATURE-024/technical-design.md) | 02-01-2026 | 02-01-2026 11:20:00 |
+| FEATURE-025-A | KB Core Infrastructure | v1.0 | Completed | [specification.md](../requirements/FEATURE-025-A/specification.md), [technical-design.md](../requirements/FEATURE-025-A/technical-design.md), [acceptance-test-cases.md](../requirements/FEATURE-025-A/acceptance-test-cases.md) | 02-05-2026 | 02-05-2026 16:15:00 |
+| FEATURE-025-B | KB Landing Zone | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
+| FEATURE-025-C | KB Manager Skill | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
+| FEATURE-025-D | KB Topics & Summaries | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
+| FEATURE-025-E | KB Search & Preview | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
+| FEATURE-025-F | KB Navigation & Polish | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
+| FEATURE-026 | Homepage Infinity Loop | v1.0 | Completed | [specification.md](../requirements/FEATURE-026/specification.md), [technical-design.md](../requirements/FEATURE-026/technical-design.md), [acceptance-test-cases.md](../requirements/FEATURE-026/acceptance-test-cases.md) | 02-05-2026 | 02-06-2026 02:50:00 |
 
 ---
 
 ## Status Details
 
-### Planned (11)
+### Planned (17)
 - FEATURE-007: Git Integration
 - FEATURE-014: Theme-Aware Frontend Design Skill
 - FEATURE-017: Architecture DSL JavaScript Library
@@ -67,14 +74,21 @@ This board tracks all features across the project lifecycle.
 - FEATURE-023-B: Tracing Dashboard UI
 - FEATURE-023-C: Trace Viewer & DAG Visualization
 - FEATURE-023-D: Tracing Skill Integration
+- FEATURE-025-B: KB Landing Zone
+- FEATURE-025-C: KB Manager Skill
+- FEATURE-025-D: KB Topics & Summaries
+- FEATURE-025-E: KB Search & Preview
+- FEATURE-025-F: KB Navigation & Polish
+- FEATURE-026: Homepage Infinity Loop
 
 ### Refined (1)
 - FEATURE-024: Project Quality Evaluation UI
 
-### Designed (3)
+### Designed (4)
 - FEATURE-005: Interactive Console v2.0
 - FEATURE-018: X-IPE CLI Tool
 - FEATURE-022-A: Browser Simulator & Proxy (MVP)
+- FEATURE-025-A: KB Core Infrastructure
 
 ### Implemented (6)
 - FEATURE-001: Project Navigation
@@ -554,3 +568,125 @@ This board tracks all features across the project lifecycle.
 - Auto-detect sensitive parameters for redaction
 - Batch apply tracing to module/class
 - Respect .x-ipe.yaml tracing configuration
+
+---
+
+### FEATURE-025-A: KB Core Infrastructure
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Core folder structure, file index, metadata management, and sidebar integration for the Knowledge Base.  
+**Dependencies:** FEATURE-008  
+**Specification:** -  
+**Technical Design:** -  
+
+**Source:**
+- Idea: [idea-summary-v2.md](../ideas/012.%20Feature-KnowledgeBase/idea-summary-v2.md)
+- Mockup: [knowledge-base-v1.html](../ideas/012.%20Feature-KnowledgeBase/mockups/knowledge-base-v1.html)
+
+**Key Capabilities:**
+- Sidebar integration with "Knowledge Base" submenu under Workplace
+- Folder structure: landing/, topics/, processed/, index/
+- File index (file-index.json) with path, name, type, size, topic, keywords
+- Topic metadata (metadata.json) per topic folder
+- Index refresh/rebuild functionality
+
+---
+
+### FEATURE-025-B: KB Landing Zone
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** File upload, drag-drop support, landing view grid, and landing actions (delete, move, process trigger).  
+**Dependencies:** FEATURE-025-A  
+**Specification:** -  
+**Technical Design:** -  
+
+**Source:**
+- Mockup: [knowledge-base-v1.html](../ideas/012.%20Feature-KnowledgeBase/mockups/knowledge-base-v1.html)
+
+**Key Capabilities:**
+- File upload (PDF, MD, TXT, DOCX, XLSX, code files, images)
+- 50MB max file size, folder upload with recursive support
+- Landing view file grid with selection
+- Drag-drop upload zone
+- Delete, Move to Topic, Process Selected actions
+- Duplicate detection (warn and skip)
+
+---
+
+### FEATURE-025-C: KB Manager Skill
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** AI-powered skill for knowledge processing: classify items, generate summaries, reorganize topics, and search commands.  
+**Dependencies:** FEATURE-025-A  
+**Specification:** -  
+**Technical Design:** -  
+
+**Key Capabilities:**
+- Commands: classify, process, reorganize, search
+- AI topic classification with user confirmation
+- Markdown summary generation with versioning (v1, v2, v3...)
+- Index updates on file operations
+- Trigger phrases: "organize knowledge base", "process knowledge in landing", etc.
+
+---
+
+### FEATURE-025-D: KB Topics & Summaries
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Topics view, AI-generated summary cards with version history, topic detail display and management.  
+**Dependencies:** FEATURE-025-B, FEATURE-025-C  
+**Specification:** -  
+**Technical Design:** -  
+
+**Source:**
+- Mockup: [knowledge-base-processed-v1.html](../ideas/012.%20Feature-KnowledgeBase/mockups/knowledge-base-processed-v1.html)
+
+**Key Capabilities:**
+- Topics list view in sidebar with item count and last updated
+- Topic detail view with AI summary card
+- Summary version selector (last 5 versions)
+- Source files list
+- Reprocess and Add Knowledge actions
+
+---
+
+### FEATURE-025-E: KB Search & Preview
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Inline sidebar search bar, filter options, and preview panel for selected knowledge items.  
+**Dependencies:** FEATURE-025-A  
+**Specification:** -  
+**Technical Design:** -  
+
+**Source:**
+- Mockup: [knowledge-base-v1.html](../ideas/012.%20Feature-KnowledgeBase/mockups/knowledge-base-v1.html)
+
+**Key Capabilities:**
+- Inline search bar in sidebar (below section tabs)
+- Search across file names, topic names, content (text-based Phase 1)
+- Filter by file type, topic, date range
+- Preview panel with file info, thumbnail, tags
+- Process and Open action buttons in preview
+
+---
+
+### FEATURE-025-F: KB Navigation & Polish
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Section tabs (Landing/Topics), badges, tree views, and UX refinements for polished navigation.  
+**Dependencies:** FEATURE-025-D, FEATURE-025-E  
+**Specification:** -  
+**Technical Design:** -  
+
+**Key Capabilities:**
+- Landing and Topics tabs in sidebar
+- Badge with item count on Landing tab
+- Tree view switching between tabs
+- Active tab visual indicator
+- UX polish and consistency with X-IPE design system

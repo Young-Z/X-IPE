@@ -9,7 +9,7 @@
  */
 class WorkplaceManager {
     constructor() {
-        this.currentView = 'tree'; // tree | upload | editor | folderView | tracing
+        this.currentView = 'tree'; // tree | upload | editor | folderView | tracing | homepage
         this.currentPath = null;
         this.saveTimer = null;
         this.saveDelay = 5000; // 5 seconds auto-save delay
@@ -36,6 +36,9 @@ class WorkplaceManager {
         // FEATURE-023-B: Tracing Dashboard
         this.tracingDashboard = null;
         
+        // FEATURE-026: Homepage reference
+        this.sidebarRef = null;
+        
         this._loadCopilotPrompts();
     }
     
@@ -47,7 +50,8 @@ class WorkplaceManager {
             const response = await fetch('/api/config/copilot-prompt');
             if (response.ok) {
                 const data = await response.json();
-                this.copilotPrompts = data.prompts || [];
+                // TASK-196: Config structure is data.ideation.prompts, not data.prompts
+                this.copilotPrompts = data.ideation?.prompts || [];
             }
         } catch (error) {
             console.warn('Failed to load copilot prompts:', error);
@@ -77,6 +81,9 @@ class WorkplaceManager {
                             <div class="workplace-sidebar-header-actions">
                                 <button class="workplace-create-folder-btn" title="Create new folder" id="workplace-create-folder-btn">
                                     <i class="bi bi-folder-plus"></i>
+                                </button>
+                                <button class="workplace-collapse-all-btn" title="Collapse all folders" id="workplace-collapse-all-btn">
+                                    <i class="bi bi-arrows-collapse"></i>
                                 </button>
                                 <button class="workplace-pin-btn" title="Unpin sidebar" id="workplace-pin-btn">
                                     <i class="bi bi-pin-angle-fill"></i>
@@ -134,6 +141,11 @@ class WorkplaceManager {
         // Bind create folder button
         document.getElementById('workplace-create-folder-btn').addEventListener('click', () => {
             this._createFolder(); // Create new folder at root level
+        });
+        
+        // Bind collapse all button
+        document.getElementById('workplace-collapse-all-btn').addEventListener('click', () => {
+            this._collapseAllFolders();
         });
         
         // Load tree and start polling
@@ -443,6 +455,18 @@ class WorkplaceManager {
             }
         });
         return expanded;
+    }
+    
+    /**
+     * Collapse all expanded folders in the tree
+     */
+    _collapseAllFolders() {
+        const container = document.getElementById('workplace-tree');
+        if (!container) return;
+        const expandedItems = container.querySelectorAll('.workplace-tree-item.expanded');
+        expandedItems.forEach(item => {
+            item.classList.remove('expanded');
+        });
     }
     
     /**
@@ -2765,6 +2789,35 @@ class WorkplaceManager {
                     <i class="bi bi-graph-up"></i>
                     <h5>Tracing Dashboard</h5>
                     <p class="text-muted">Tracing module not loaded</p>
+                </div>
+            `;
+        }
+    }
+    
+    /**
+     * FEATURE-026: Show Homepage Infinity Loop
+     * Called when X-IPE logo is clicked or no file selected
+     */
+    showHomepage() {
+        this.currentView = 'homepage';
+        this.currentPath = null;
+        
+        // Try workplace-content first (workplace two-column view), then content-body (main app)
+        const contentContainer = document.getElementById('workplace-content') || 
+                                 document.getElementById('content-body');
+        if (!contentContainer) return;
+        
+        // Check if HomepageInfinity is available
+        if (typeof window.HomepageInfinity !== 'undefined') {
+            contentContainer.innerHTML = window.HomepageInfinity.getTemplate();
+            window.HomepageInfinity.init(this.sidebarRef);
+        } else {
+            // Fallback placeholder
+            contentContainer.innerHTML = `
+                <div class="workplace-placeholder">
+                    <i class="bi bi-infinity"></i>
+                    <h5>X-IPE</h5>
+                    <p class="text-muted">AI-Powered Development Lifecycle</p>
                 </div>
             `;
         }

@@ -16,6 +16,12 @@ class ProjectSidebar {
         this.changedPaths = new Set();
         this.previousPathMtimes = new Map();  // Map<path, mtime> for content change detection
         
+        // Track expanded/pinned state to preserve across re-renders
+        this.pinnedSections = new Set();  // Set of section IDs
+        this.pinnedFolders = new Set();   // Set of folder paths
+        this.expandedSections = new Set(); // Set of section IDs
+        this.expandedFolders = new Set();  // Set of folder paths
+        
         this._startPolling();
     }
     
@@ -225,6 +231,9 @@ class ProjectSidebar {
             return;
         }
         
+        // Save current expanded/pinned state before re-rendering
+        this._saveExpandedState();
+        
         let html = '';
         
         for (const section of this.sections) {
@@ -233,6 +242,95 @@ class ProjectSidebar {
         
         this.container.innerHTML = html;
         this.bindEvents();
+        
+        // Restore expanded/pinned state after re-rendering
+        this._restoreExpandedState();
+    }
+    
+    /**
+     * Save current expanded and pinned state from DOM
+     */
+    _saveExpandedState() {
+        // Save expanded sections
+        this.container.querySelectorAll('.nav-section-content.show').forEach(content => {
+            const sectionId = content.id.replace('section-', '');
+            this.expandedSections.add(sectionId);
+        });
+        
+        // Save pinned sections
+        this.container.querySelectorAll('.nav-section-header.pinned').forEach(header => {
+            const target = header.dataset.bsTarget;
+            if (target) {
+                const sectionId = target.replace('#section-', '');
+                this.pinnedSections.add(sectionId);
+            }
+        });
+        
+        // Save expanded folders
+        this.container.querySelectorAll('.nav-folder-content.show').forEach(content => {
+            const folderHeader = this.container.querySelector(`[data-bs-target="#${content.id}"]`);
+            if (folderHeader && folderHeader.dataset.path) {
+                this.expandedFolders.add(folderHeader.dataset.path);
+            }
+        });
+        
+        // Save pinned folders
+        this.container.querySelectorAll('.nav-folder.pinned').forEach(folder => {
+            if (folder.dataset.path) {
+                this.pinnedFolders.add(folder.dataset.path);
+            }
+        });
+    }
+    
+    /**
+     * Restore expanded and pinned state after render
+     */
+    _restoreExpandedState() {
+        // Restore expanded sections
+        this.expandedSections.forEach(sectionId => {
+            const content = document.getElementById(`section-${sectionId}`);
+            const header = this.container.querySelector(`[data-bs-target="#section-${sectionId}"]`);
+            if (content && header) {
+                content.classList.add('show');
+                header.classList.remove('collapsed');
+            }
+        });
+        
+        // Restore pinned sections (also expand them)
+        this.pinnedSections.forEach(sectionId => {
+            const content = document.getElementById(`section-${sectionId}`);
+            const header = this.container.querySelector(`[data-bs-target="#section-${sectionId}"]`);
+            if (content && header) {
+                content.classList.add('show');
+                header.classList.remove('collapsed');
+                header.classList.add('pinned');
+            }
+        });
+        
+        // Restore expanded folders
+        this.expandedFolders.forEach(folderPath => {
+            const folder = this.container.querySelector(`.nav-folder[data-path="${folderPath}"]`);
+            if (folder) {
+                const targetSelector = folder.dataset.bsTarget;
+                const content = document.querySelector(targetSelector);
+                if (content) {
+                    content.classList.add('show');
+                }
+            }
+        });
+        
+        // Restore pinned folders (also expand them)
+        this.pinnedFolders.forEach(folderPath => {
+            const folder = this.container.querySelector(`.nav-folder[data-path="${folderPath}"]`);
+            if (folder) {
+                folder.classList.add('pinned');
+                const targetSelector = folder.dataset.bsTarget;
+                const content = document.querySelector(targetSelector);
+                if (content) {
+                    content.classList.add('show');
+                }
+            }
+        });
     }
     
     /**
@@ -277,7 +375,7 @@ class ProjectSidebar {
         
         let html = `
             <div class="nav-section" data-section-id="${section.id}">
-                <div class="nav-section-header collapsed" data-bs-toggle="collapse" data-bs-target="#section-${section.id}">
+                <div class="nav-section-header collapsed" data-bs-target="#section-${section.id}">
                     <i class="bi ${icon}"></i>
                     <span>${section.label}</span>
                     <i class="bi bi-chevron-down chevron"></i>
@@ -338,7 +436,6 @@ class ProjectSidebar {
         let html = `
             <div class="nav-item nav-folder${isChanged ? ' has-changes' : ''}" 
                  style="padding-left: ${paddingLeft}rem"
-                 data-bs-toggle="collapse" 
                  data-bs-target="#folder-${folderId}"
                  data-path="${folder.path}">
                 ${isChanged ? '<span class="change-indicator"></span>' : ''}
@@ -640,7 +737,9 @@ class ProjectSidebar {
             
             let collapseTimeout = null;
             let expandTimeout = null;
-            let isPinned = false;
+            // Initialize isPinned from persisted state
+            const sectionId = targetSelector.replace('#section-', '');
+            let isPinned = this.pinnedSections.has(sectionId);
             const section = header.closest('.nav-section');
             
             // Click to pin/unpin
@@ -660,15 +759,17 @@ class ProjectSidebar {
                 if (isPinned) {
                     // Unpin and collapse
                     isPinned = false;
+                    this.pinnedSections.delete(sectionId);
+                    this.expandedSections.delete(sectionId);
                     header.classList.remove('pinned');
                     bootstrap.Collapse.getOrCreateInstance(target).hide();
                 } else {
-                    // Pin and expand
+                    // Pin and expand - always show to ensure it stays open
                     isPinned = true;
+                    this.pinnedSections.add(sectionId);
+                    this.expandedSections.add(sectionId);
                     header.classList.add('pinned');
-                    if (!target.classList.contains('show')) {
-                        bootstrap.Collapse.getOrCreateInstance(target).show();
-                    }
+                    bootstrap.Collapse.getOrCreateInstance(target).show();
                 }
             });
             
@@ -725,7 +826,9 @@ class ProjectSidebar {
             
             let collapseTimeout = null;
             let expandTimeout = null;
-            let isPinned = false;
+            // Initialize isPinned from persisted state
+            const folderPath = folder.dataset.path;
+            let isPinned = this.pinnedFolders.has(folderPath);
             
             // Click to pin/unpin
             folder.addEventListener('click', (e) => {
@@ -744,15 +847,17 @@ class ProjectSidebar {
                 if (isPinned) {
                     // Unpin and collapse
                     isPinned = false;
+                    this.pinnedFolders.delete(folderPath);
+                    this.expandedFolders.delete(folderPath);
                     folder.classList.remove('pinned');
                     bootstrap.Collapse.getOrCreateInstance(target).hide();
                 } else {
-                    // Pin and expand
+                    // Pin and expand - always show to ensure it stays open
                     isPinned = true;
+                    this.pinnedFolders.add(folderPath);
+                    this.expandedFolders.add(folderPath);
                     folder.classList.add('pinned');
-                    if (!target.classList.contains('show')) {
-                        bootstrap.Collapse.getOrCreateInstance(target).show();
-                    }
+                    bootstrap.Collapse.getOrCreateInstance(target).show();
                 }
             });
             
@@ -863,6 +968,52 @@ class ProjectSidebar {
         // Emit custom event for other components
         const event = new CustomEvent('fileSelected', { detail: { path } });
         document.dispatchEvent(event);
+    }
+    
+    /**
+     * FEATURE-026: Expand a sidebar section by ID
+     * @param {string} sectionId - Section ID to expand
+     */
+    expandSection(sectionId) {
+        const sectionHeader = document.querySelector(`[data-section="${sectionId}"] .section-header`);
+        if (sectionHeader) {
+            const section = sectionHeader.closest('.sidebar-section');
+            if (section && !section.classList.contains('expanded')) {
+                sectionHeader.click();
+            }
+        }
+    }
+    
+    /**
+     * FEATURE-026: Highlight a sidebar item
+     * @param {string} selector - CSS selector for target item
+     * @param {Object} options - Highlight options
+     * @param {number} options.duration - Highlight duration in ms (default 3000)
+     */
+    highlightItem(selector, options = {}) {
+        const duration = options.duration || 3000;
+        const item = document.querySelector(selector);
+        
+        if (!item) {
+            console.warn(`Sidebar item not found: ${selector}`);
+            return;
+        }
+        
+        // Remove any existing highlights
+        document.querySelectorAll('.homepage-highlight').forEach(el => {
+            el.classList.remove('homepage-highlight');
+        });
+        
+        // Add highlight class
+        item.classList.add('homepage-highlight');
+        
+        // Scroll into view
+        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Remove highlight after delay
+        setTimeout(() => {
+            item.classList.remove('homepage-highlight');
+        }, duration);
     }
     
     /**

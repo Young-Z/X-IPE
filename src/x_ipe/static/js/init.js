@@ -81,6 +81,41 @@ function initializeApp() {
         });
     }
     
+    // FEATURE-026: X-IPE Logo click handler - show homepage
+    // Support both workplace.html (.top-bar-brand) and index.html (#brand-home-link)
+    const logoBrand = document.querySelector('.top-bar-brand') || document.getElementById('brand-home-link');
+    if (logoBrand) {
+        logoBrand.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent navigation
+            
+            // Store sidebar reference for homepage navigation
+            if (window.workplaceManager) {
+                window.workplaceManager.sidebarRef = window.projectSidebar;
+            }
+            
+            // Show homepage in content area
+            const contentBody = document.getElementById('content-body');
+            if (contentBody && typeof window.HomepageInfinity !== 'undefined') {
+                contentBody.innerHTML = window.HomepageInfinity.getTemplate();
+                window.HomepageInfinity.init(window.projectSidebar);
+                
+                // Update breadcrumb
+                const breadcrumb = document.getElementById('breadcrumb');
+                if (breadcrumb) {
+                    breadcrumb.innerHTML = '<li class="breadcrumb-item active">Home</li>';
+                }
+            } else if (window.workplaceManager) {
+                window.workplaceManager.showHomepage();
+                
+                // Update breadcrumb
+                const breadcrumb = document.getElementById('breadcrumb');
+                if (breadcrumb) {
+                    breadcrumb.innerHTML = '<li class="breadcrumb-item active">Home</li>';
+                }
+            }
+        });
+    }
+    
     // FEATURE-011: Initialize Stage Toolbox Modal
     if (typeof StageToolboxModal !== 'undefined') {
         window.stageToolboxModal = new StageToolboxModal();
@@ -90,6 +125,34 @@ function initializeApp() {
                 window.stageToolboxModal.open();
             });
         }
+    }
+    
+    // FEATURE-025-A: Knowledge Base button click handler
+    const kbBtn = document.getElementById('btn-knowledge-base');
+    if (kbBtn) {
+        kbBtn.addEventListener('click', () => {
+            console.log('[KB] Knowledge Base button clicked');
+            
+            // Update breadcrumb
+            const breadcrumb = document.getElementById('breadcrumb');
+            if (breadcrumb) {
+                breadcrumb.innerHTML = '<li class="breadcrumb-item active">Knowledge Base</li>';
+            }
+            
+            // Hide Create Idea button
+            const createIdeaBtn = document.getElementById('btn-create-idea');
+            if (createIdeaBtn) {
+                createIdeaBtn.classList.add('d-none');
+            }
+            
+            // Render Knowledge Base view in content area (two-column layout like Ideation)
+            const container = document.getElementById('content-body');
+            if (container && window.kbCore) {
+                window.kbCore.render(container);
+            } else if (container) {
+                container.innerHTML = '<div class="p-4 text-muted">Knowledge Base module not loaded</div>';
+            }
+        });
     }
     
     // Initialize terminal panel (FEATURE-005)

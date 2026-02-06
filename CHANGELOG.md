@@ -8,6 +8,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-026: Homepage Infinity Loop**
+  - Interactive homepage visualization displaying 8 development lifecycle stages on an infinity loop (∞)
+  - Entry point: Click "X IPE" logo in header to display homepage
+  - Stage buttons: Ideation, Requirement, Implementation, Deployment, Validation, Monitoring, Feedback, Planning
+  - Control loop (left): Blue theme (#3b82f6) for "What we decide" stages
+  - Transparency loop (right): Purple theme (#8b5cf6) for "What we see" stages
+  - Click behavior: Stage buttons highlight corresponding sidebar section
+  - TBD handling: Deployment stage shows "Coming Soon" tooltip
+  - Backend: HomepageService class (`homepage_service.py`) with stage mapping configuration
+  - Frontend: `homepage-infinity.js` (260 lines) + `homepage-infinity.css` (180 lines)
+  - Integration with sidebar.js (expandSection, highlightItem methods)
+  - Responsive: Hidden on mobile screens < 768px
+  - 26 unit tests validating stage mapping and template generation
+  - 13 acceptance test cases (10 pass, 3 partial)
+
+- **FEATURE-025-A: Knowledge Base Core Infrastructure**
+  - New Knowledge Base page accessible at `/knowledge-base` route
+  - KBService class (`kb_service.py`) for folder structure and index management
+  - REST API endpoints: `/api/kb/index`, `/api/kb/index/refresh`, `/api/kb/topics`, `/api/kb/topics/<name>`
+  - Automatic folder structure initialization: `landing/`, `topics/`, `processed/`, `index/`
+  - File index management with `file-index.json` containing path, name, type, size, topic, created_date, keywords
+  - Topic metadata management with `metadata.json` per topic
+  - File type detection for 20+ extensions (pdf, markdown, python, javascript, etc.)
+  - Keyword extraction from filenames (splits on `-`, `_`, spaces)
+  - Frontend JS module (`kb-core.js`) with sidebar file tree and search filtering
+  - CSS styles in `kb-core.css` (~120 lines)
+  - Tracing decorators on all service methods and API routes
+  - 54 tests validating KB core functionality
+
 - **FEATURE-024: Project Quality Evaluation UI**
   - Quality evaluation view integrated into Workplace sidebar with clipboard-check icon
   - Action bar with Evaluate button and Refactoring dropdown (hover-triggered)

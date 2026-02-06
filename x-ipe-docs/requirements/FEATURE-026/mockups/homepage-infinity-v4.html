@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X-IPE Homepage - Infinity Loop v4</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Colors extracted from the image */
+      --control-blue: #4facfe;
+      --control-blue-dark: #00c6fb;
+      --transparency-purple: #a855f7;
+      --transparency-purple-dark: #7c3aed;
+      
+      /* Neutral colors */
+      --slate-100: #f1f5f9;
+      --slate-400: #94a3b8;
+      --slate-500: #64748b;
+      --slate-600: #475569;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+      --white: #ffffff;
+      
+      /* Animation */
+      --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    
+    .container {
+      max-width: 1000px;
+      width: 100%;
+      text-align: center;
+    }
+    
+    .header {
+      margin-bottom: 2rem;
+    }
+    
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--control-blue) 0%, var(--transparency-purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+    
+    .subtitle {
+      font-size: 1rem;
+      color: var(--slate-500);
+      font-weight: 500;
+    }
+    
+    /* Infinity Loop Container */
+    .infinity-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .infinity-bg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    
+    /* Loop Labels - hardcoded positions */
+    .loop-label {
+      position: absolute;
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .loop-label.control {
+      left: 19.22%;
+      top: 49.28%;
+      color: var(--control-blue-dark);
+    }
+    
+    .loop-label.transparency {
+      left: 63.93%;
+      top: 48.89%;
+      color: var(--transparency-purple);
+    }
+    
+    /* Stage Buttons */
+    .stage-btn {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s var(--transition-smooth);
+      z-index: 10;
+      box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.15),
+        0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stage-btn::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      background: inherit;
+      opacity: 0;
+      z-index: -1;
+      transition: all 0.3s var(--transition-smooth);
+    }
+    
+    .stage-btn:hover {
+      transform: scale(1.12);
+      box-shadow: 
+        0 8px 30px rgba(0, 0, 0, 0.2),
+        0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stage-btn:hover::before {
+      opacity: 0.3;
+      transform: scale(1.3);
+      filter: blur(8px);
+    }
+    
+    .stage-btn.active {
+      transform: scale(1.15);
+    }
+    
+    .stage-btn.active::before {
+      opacity: 0.5;
+      animation: pulse-glow 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% { transform: scale(1.2); opacity: 0.4; }
+      50% { transform: scale(1.5); opacity: 0.2; }
+    }
+    
+    /* Control Side Buttons - custom colors from saved layout */
+    .stage-btn[data-stage="ideation"] {
+      background: rgb(105, 53, 192);
+      color: var(--white);
+    }
+    
+    .stage-btn[data-stage="requirement"] {
+      background: rgb(45, 158, 235);
+      color: var(--white);
+    }
+    
+    .stage-btn[data-stage="implementation"] {
+      background: rgb(108, 42, 193);
+      color: var(--white);
+    }
+    
+    /* Transparency Side Buttons - custom colors from saved layout */
+    .stage-btn[data-stage="validation"] {
+      background: rgb(79, 100, 210);
+      color: var(--white);
+    }
+    
+    .stage-btn[data-stage="monitoring"] {
+      background: rgb(142, 45, 198);
+      color: var(--white);
+    }
+    
+    .stage-btn[data-stage="feedback"] {
+      background: rgb(105, 71, 221);
+      color: var(--white);
+    }
+    
+    .stage-btn[data-stage="planning"] {
+      background: rgb(76, 68, 200);
+      color: var(--white);
+    }
+    
+    .stage-btn[data-stage="deployment"] {
+      background: rgb(67, 161, 231);
+      color: var(--white);
+    }
+    
+    /* TBD State */
+    .stage-btn.tbd {
+      background: linear-gradient(135deg, #94a3b8 0%, #cbd5e1 100%) !important;
+      opacity: 0.8;
+    }
+    
+    .stage-icon {
+      font-size: 1.4rem;
+      margin-bottom: 2px;
+    }
+    
+    .stage-name {
+      font-size: 0.6rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      line-height: 1.1;
+      text-align: center;
+    }
+    
+    /* Stage Positions - hardcoded from saved layout */
+    .stage-btn[data-stage="ideation"]       { left: 4.47%;  top: 59.58%; }
+    .stage-btn[data-stage="requirement"]    { left: 11.91%; top: 12.25%; }
+    .stage-btn[data-stage="implementation"] { left: 30.13%; top: 73.49%; }
+    .stage-btn[data-stage="deployment"]     { left: 55.91%; top: 19.16%; }
+    
+    .stage-btn[data-stage="validation"]     { left: 79.80%; top: 12.54%; }
+    .stage-btn[data-stage="monitoring"]     { left: 84.69%; top: 65.25%; }
+    .stage-btn[data-stage="feedback"]       { left: 58.24%; top: 69.84%; }
+    .stage-btn[data-stage="planning"]       { left: 37.58%; top: 25.12%; }
+    
+    /* Tooltip */
+    .tooltip {
+      position: fixed;
+      background: var(--white);
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 
+        0 25px 80px rgba(0, 0, 0, 0.15),
+        0 10px 30px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px) scale(0.95);
+      transition: all 0.3s var(--transition-smooth);
+      pointer-events: none;
+      min-width: 260px;
+      text-align: left;
+    }
+    
+    .tooltip.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+    
+    .tooltip-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .tooltip-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    
+    .tooltip-icon.control {
+      background: linear-gradient(135deg, #00c6fb 0%, #4facfe 100%);
+    }
+    
+    .tooltip-icon.transparency {
+      background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    }
+    
+    .tooltip-icon.tbd {
+      background: linear-gradient(135deg, #94a3b8 0%, #cbd5e1 100%);
+    }
+    
+    .tooltip-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--slate-900);
+    }
+    
+    .tooltip-desc {
+      font-size: 0.9rem;
+      color: var(--slate-600);
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+    
+    .tooltip-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    
+    .tooltip-link.control {
+      color: var(--control-blue-dark);
+      background: rgba(79, 172, 254, 0.1);
+    }
+    
+    .tooltip-link.control:hover {
+      background: rgba(79, 172, 254, 0.2);
+    }
+    
+    .tooltip-link.transparency {
+      color: var(--transparency-purple);
+      background: rgba(168, 85, 247, 0.1);
+    }
+    
+    .tooltip-link.transparency:hover {
+      background: rgba(168, 85, 247, 0.2);
+    }
+    
+    .tooltip-link.tbd {
+      color: var(--slate-500);
+      background: rgba(148, 163, 184, 0.1);
+      cursor: not-allowed;
+    }
+    
+    /* Legend */
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-top: 2rem;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .legend-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .legend-dot.control {
+      background: linear-gradient(135deg, #00c6fb 0%, #4facfe 100%);
+    }
+    
+    .legend-dot.transparency {
+      background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    }
+    
+    .legend-text {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--slate-600);
+    }
+    
+    /* Instructions */
+    .instructions {
+      margin-top: 1.5rem;
+      padding: 1rem 1.5rem;
+      background: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+      display: inline-block;
+    }
+    
+    .instructions p {
+      font-size: 0.9rem;
+      color: var(--slate-500);
+    }
+    
+    .instructions strong {
+      color: var(--slate-800);
+    }
+    
+    /* ========== OVERLAY SYSTEM ========== */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 500;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s var(--transition-smooth);
+    }
+    
+    .overlay.visible { opacity: 1; visibility: visible; }
+    
+    /* Simulated Sidebar */
+    .sidebar-preview {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 280px;
+      background: var(--slate-900);
+      z-index: 600;
+      padding: 1.5rem 0;
+      transform: translateX(-100%);
+      transition: transform 0.4s var(--transition-smooth);
+      overflow-y: auto;
+    }
+    
+    .sidebar-preview.visible { transform: translateX(0); }
+    
+    .sidebar-header { 
+      padding: 0 1.25rem 1.25rem; 
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+      margin-bottom: 1rem; 
+    }
+    
+    .sidebar-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--control-blue) 0%, var(--transparency-purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .sidebar-section { padding: 0.5rem 0; }
+    .sidebar-section-title { 
+      font-size: 0.7rem; 
+      font-weight: 600; 
+      color: var(--slate-500); 
+      text-transform: uppercase; 
+      letter-spacing: 0.08em; 
+      padding: 0.5rem 1.25rem; 
+    }
+    
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      color: var(--slate-400);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .sidebar-item:hover { 
+      background: rgba(255, 255, 255, 0.05); 
+      color: var(--white); 
+    }
+    
+    .sidebar-item.highlighted {
+      background: linear-gradient(90deg, rgba(79, 172, 254, 0.25) 0%, rgba(168, 85, 247, 0.25) 100%);
+      color: var(--white);
+    }
+    
+    .sidebar-item.highlighted::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--control-blue) 0%, var(--transparency-purple) 100%);
+    }
+    
+    .sidebar-item.highlighted::after {
+      content: '←';
+      position: absolute;
+      right: 1rem;
+      font-size: 1.2rem;
+      animation: bounce-arrow 1s ease-in-out infinite;
+    }
+    
+    @keyframes bounce-arrow {
+      0%, 100% { transform: translateX(0); opacity: 1; }
+      50% { transform: translateX(5px); opacity: 0.7; }
+    }
+    
+    .sidebar-icon { font-size: 1.1rem; width: 24px; text-align: center; }
+    
+    /* Info Panel */
+    .info-panel {
+      position: fixed;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%) translateX(30px);
+      background: var(--white);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 380px;
+      z-index: 700;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.4s var(--transition-smooth);
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+    }
+    
+    .info-panel.visible { 
+      opacity: 1; 
+      visibility: visible; 
+      transform: translateY(-50%) translateX(0); 
+    }
+    
+    .info-panel-header { 
+      display: flex; 
+      align-items: center; 
+      gap: 1rem; 
+      margin-bottom: 1.25rem; 
+    }
+    
+    .info-panel-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+    }
+    
+    .info-panel-icon.control { background: linear-gradient(135deg, #00c6fb 0%, #4facfe 100%); }
+    .info-panel-icon.transparency { background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); }
+    .info-panel-icon.tbd { background: linear-gradient(135deg, #94a3b8 0%, #cbd5e1 100%); }
+    
+    .info-panel-title { 
+      font-family: 'Syne', sans-serif; 
+      font-size: 1.5rem; 
+      font-weight: 700; 
+      color: var(--slate-900); 
+    }
+    .info-panel-subtitle { 
+      font-size: 0.85rem; 
+      color: var(--slate-500); 
+      margin-top: 0.25rem; 
+    }
+    .info-panel-desc { 
+      font-size: 1rem; 
+      color: var(--slate-600); 
+      line-height: 1.6; 
+      margin-bottom: 1.5rem; 
+    }
+    
+    .info-panel-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 0.875rem 1.5rem;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .info-panel-btn.control { 
+      background: linear-gradient(135deg, #00c6fb 0%, #4facfe 100%); 
+      color: var(--white); 
+    }
+    .info-panel-btn.control:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4); 
+    }
+    .info-panel-btn.transparency { 
+      background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); 
+      color: var(--white); 
+    }
+    .info-panel-btn.transparency:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 8px 20px rgba(168, 85, 247, 0.4); 
+    }
+    .info-panel-btn.tbd { 
+      background: var(--slate-400); 
+      color: var(--white); 
+      cursor: not-allowed; 
+    }
+    
+    .close-hint {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--white);
+      font-size: 0.9rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 550;
+      background: rgba(0,0,0,0.5);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+    }
+    
+    .close-hint.visible { opacity: 0.9; visibility: visible; }
+    
+    /* Active button stays on top of overlay */
+    .stage-btn.active { z-index: 800; }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .stage-btn {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .stage-icon {
+        font-size: 1.1rem;
+      }
+      
+      .stage-name {
+        font-size: 0.5rem;
+      }
+      
+      .loop-label {
+        font-size: 0.9rem;
+      }
+      
+      .legend {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .stage-btn {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .stage-icon {
+        font-size: 0.9rem;
+      }
+      
+      .stage-name {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 class="logo">X-IPE</h1>
+      <p class="subtitle">AI-Powered Development Lifecycle</p>
+    </header>
+    
+    <div class="infinity-wrapper">
+      <!-- PNG Background - using X-IPE API path -->
+      <img src="http://127.0.0.1:5858/api/file/content?path=x-ipe-docs%2Fideas%2FTBC008.%20Feature-Homepage%2FControl%26Transparency.png&raw=true" alt="Infinity Loop" class="infinity-bg">
+      
+      <!-- Loop Labels -->
+      <span class="loop-label control">Control</span>
+      <span class="loop-label transparency">Transparency</span>
+      
+      <!-- Control Side Stages (Blue) -->
+      <button class="stage-btn control" data-stage="ideation" data-type="control">
+        <span class="stage-icon">💡</span>
+        <span class="stage-name">Ideation</span>
+      </button>
+      
+      <button class="stage-btn control" data-stage="requirement" data-type="control">
+        <span class="stage-icon">📋</span>
+        <span class="stage-name">Requirement</span>
+      </button>
+      
+      <button class="stage-btn control" data-stage="implementation" data-type="control">
+        <span class="stage-icon">⚙️</span>
+        <span class="stage-name">Implement</span>
+      </button>
+      
+      <button class="stage-btn control tbd" data-stage="deployment" data-type="tbd">
+        <span class="stage-icon">🚀</span>
+        <span class="stage-name">Deploy</span>
+      </button>
+      
+      <!-- Transparency Side Stages (Purple) -->
+      <button class="stage-btn transparency" data-stage="validation" data-type="transparency">
+        <span class="stage-icon">✅</span>
+        <span class="stage-name">Validation</span>
+      </button>
+      
+      <button class="stage-btn transparency" data-stage="monitoring" data-type="transparency">
+        <span class="stage-icon">📊</span>
+        <span class="stage-name">Monitoring</span>
+      </button>
+      
+      <button class="stage-btn transparency" data-stage="feedback" data-type="transparency">
+        <span class="stage-icon">💬</span>
+        <span class="stage-name">Feedback</span>
+      </button>
+      
+      <button class="stage-btn transparency" data-stage="planning" data-type="transparency">
+        <span class="stage-icon">📅</span>
+        <span class="stage-name">Planning</span>
+      </button>
+    </div>
+    
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-dot control"></div>
+        <span class="legend-text">Control (What we decide)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot transparency"></div>
+        <span class="legend-text">Transparency (What we see)</span>
+      </div>
+    </div>
+    
+    <!-- Instructions -->
+    <div class="instructions">
+      <p><strong>Click any stage</strong> to see overlay with sidebar highlight</p>
+    </div>
+  </div>
+  
+  <!-- Overlay System -->
+  <div class="overlay" id="overlay"></div>
+  
+  <nav class="sidebar-preview" id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo">X-IPE</span>
+    </div>
+    
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Workplace</div>
+      <div class="sidebar-item" data-menu="ideation">
+        <span class="sidebar-icon">💡</span>
+        <span>Ideation</span>
+      </div>
+    </div>
+    
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Project</div>
+      <div class="sidebar-item" data-menu="requirement">
+        <span class="sidebar-icon">📋</span>
+        <span>Requirements</span>
+      </div>
+      <div class="sidebar-item" data-menu="implementation">
+        <span class="sidebar-icon">⚙️</span>
+        <span>Features</span>
+      </div>
+      <div class="sidebar-item" data-menu="implementation-code">
+        <span class="sidebar-icon">💻</span>
+        <span>Code (src/)</span>
+      </div>
+    </div>
+    
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Quality</div>
+      <div class="sidebar-item" data-menu="validation">
+        <span class="sidebar-icon">✅</span>
+        <span>Project Quality Report</span>
+      </div>
+      <div class="sidebar-item" data-menu="monitoring">
+        <span class="sidebar-icon">📊</span>
+        <span>Behavior Tracing</span>
+      </div>
+    </div>
+    
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Feedback</div>
+      <div class="sidebar-item" data-menu="feedback">
+        <span class="sidebar-icon">💬</span>
+        <span>UI/UX Feedback</span>
+      </div>
+    </div>
+    
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Management</div>
+      <div class="sidebar-item" data-menu="planning">
+        <span class="sidebar-icon">📅</span>
+        <span>Planning</span>
+      </div>
+      <div class="sidebar-item" data-menu="deployment">
+        <span class="sidebar-icon">🚀</span>
+        <span>Deployment (TBD)</span>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="info-panel" id="infoPanel">
+    <div class="info-panel-header">
+      <div class="info-panel-icon" id="infoIcon"></div>
+      <div>
+        <div class="info-panel-title" id="infoTitle"></div>
+        <div class="info-panel-subtitle" id="infoSubtitle"></div>
+      </div>
+    </div>
+    <p class="info-panel-desc" id="infoDesc"></p>
+    <button class="info-panel-btn" id="infoBtn">
+      <span>→</span>
+      <span id="infoBtnText"></span>
+    </button>
+  </div>
+  
+  <div class="close-hint" id="closeHint">Click anywhere to close</div>
+  
+  <script>
+    const stageData = {
+      ideation: {
+        name: 'Ideation',
+        icon: '💡',
+        subtitle: 'Control Stage',
+        desc: 'Brainstorm and refine your ideas with AI assistance. Upload concept files and collaborate to shape your vision.',
+        link: 'Workplace → Ideation',
+        menuKey: 'ideation',
+        tbd: false,
+        type: 'control'
+      },
+      requirement: {
+        name: 'Requirement',
+        icon: '📋',
+        subtitle: 'Control Stage',
+        desc: 'Define what you need to build. Capture user stories, acceptance criteria, and feature specifications.',
+        link: 'Requirements folder',
+        menuKey: 'requirement',
+        tbd: false,
+        type: 'control'
+      },
+      implementation: {
+        name: 'Implementation',
+        icon: '⚙️',
+        subtitle: 'Control Stage',
+        desc: 'Build and code your features. View technical designs, write code, and track progress.',
+        link: 'Features + Code',
+        menuKey: 'implementation',
+        tbd: false,
+        type: 'control'
+      },
+      deployment: {
+        name: 'Deployment',
+        icon: '🚀',
+        subtitle: 'Coming Soon',
+        desc: 'Release your application to production. Configure environments and manage releases.',
+        link: 'Coming Soon',
+        menuKey: 'deployment',
+        tbd: true,
+        type: 'tbd'
+      },
+      validation: {
+        name: 'Validation',
+        icon: '✅',
+        subtitle: 'Transparency Stage',
+        desc: 'Verify quality and test coverage. Review project health metrics and quality reports.',
+        link: 'Project Quality Report',
+        menuKey: 'validation',
+        tbd: false,
+        type: 'transparency'
+      },
+      monitoring: {
+        name: 'Monitoring',
+        icon: '📊',
+        subtitle: 'Transparency Stage',
+        desc: 'Track application behavior and system health. Analyze traces and debug issues.',
+        link: 'Behavior Tracing',
+        menuKey: 'monitoring',
+        tbd: false,
+        type: 'transparency'
+      },
+      feedback: {
+        name: 'Feedback',
+        icon: '💬',
+        subtitle: 'Transparency Stage',
+        desc: 'Collect and manage UI/UX feedback. Review user input and prioritize improvements.',
+        link: 'UI/UX Feedback',
+        menuKey: 'feedback',
+        tbd: false,
+        type: 'transparency'
+      },
+      planning: {
+        name: 'Planning',
+        icon: '📅',
+        subtitle: 'Transparency Stage',
+        desc: 'Plan your next iteration. Manage tasks, track progress, and coordinate work.',
+        link: 'Planning',
+        menuKey: 'planning',
+        tbd: false,
+        type: 'transparency'
+      }
+    };
+    
+    const overlay = document.getElementById('overlay');
+    const sidebar = document.getElementById('sidebar');
+    const infoPanel = document.getElementById('infoPanel');
+    const closeHint = document.getElementById('closeHint');
+    const stages = document.querySelectorAll('.stage-btn');
+    const menuItems = document.querySelectorAll('.sidebar-item');
+    
+    let activeStage = null;
+    
+    function openOverlay(stageName) {
+      const data = stageData[stageName];
+      activeStage = stageName;
+      
+      // Update info panel
+      document.getElementById('infoIcon').className = 'info-panel-icon ' + data.type;
+      document.getElementById('infoIcon').textContent = data.icon;
+      document.getElementById('infoTitle').textContent = data.name;
+      document.getElementById('infoSubtitle').textContent = data.subtitle;
+      document.getElementById('infoDesc').textContent = data.desc;
+      document.getElementById('infoBtn').className = 'info-panel-btn ' + data.type;
+      document.getElementById('infoBtnText').textContent = data.tbd ? 'Coming Soon' : `Go to ${data.link}`;
+      
+      // Highlight sidebar item(s)
+      menuItems.forEach(item => {
+        item.classList.remove('highlighted');
+        if (item.dataset.menu === data.menuKey) {
+          item.classList.add('highlighted');
+        }
+        // Also highlight code for implementation
+        if (stageName === 'implementation' && item.dataset.menu === 'implementation-code') {
+          item.classList.add('highlighted');
+        }
+      });
+      
+      // Mark button active
+      stages.forEach(s => s.classList.remove('active'));
+      document.querySelector(`[data-stage="${stageName}"]`).classList.add('active');
+      
+      // Show overlay elements
+      overlay.classList.add('visible');
+      sidebar.classList.add('visible');
+      infoPanel.classList.add('visible');
+      closeHint.classList.add('visible');
+    }
+    
+    function closeOverlay() {
+      activeStage = null;
+      overlay.classList.remove('visible');
+      sidebar.classList.remove('visible');
+      infoPanel.classList.remove('visible');
+      closeHint.classList.remove('visible');
+      stages.forEach(s => s.classList.remove('active'));
+      menuItems.forEach(item => item.classList.remove('highlighted'));
+    }
+    
+    // Stage button clicks
+    stages.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const stageName = btn.dataset.stage;
+        
+        if (activeStage === stageName) {
+          closeOverlay();
+        } else {
+          openOverlay(stageName);
+        }
+      });
+    });
+    
+    // Close on overlay click
+    overlay.addEventListener('click', closeOverlay);
+    
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && activeStage) {
+        closeOverlay();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -8,10 +8,16 @@
     <!-- ROW 1: Top Menu Bar -->
     <header class="top-menu">
         <div class="brand">
-            <span class="brand-name">X IPE</span>
+            <!-- FEATURE-026: Make brand clickable to show homepage -->
+            <a href="#" class="brand-name" id="brand-home-link" title="Go to Homepage">X IPE</a>
             <span class="brand-subtitle">An AI native integrated project environment for end to end business value delivery</span>
         </div>
         <div class="menu-actions">
+            <!-- FEATURE-025-A: Knowledge Base Button -->
+            <button class="menu-link" id="btn-knowledge-base" title="Knowledge Base - Manage project knowledge">
+                <i class="bi bi-archive"></i>
+                <span>Knowledge</span>
+            </button>
             <!-- FEATURE-011: Stage Toolbox Button -->
             <button class="menu-link" id="btn-stage-toolbox" title="Stage Toolbox - Manage development tools">
                 <i class="bi bi-tools"></i>
