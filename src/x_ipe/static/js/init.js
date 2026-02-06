@@ -56,6 +56,19 @@ function initializeApp() {
     window.projectSidebar = new ProjectSidebar('sidebar-content');
     window.projectSidebar.load();
     
+    // FEATURE-026: Show homepage by default on page load
+    const contentBody = document.getElementById('content-body');
+    if (contentBody && typeof window.HomepageInfinity !== 'undefined') {
+        contentBody.innerHTML = window.HomepageInfinity.getTemplate();
+        window.HomepageInfinity.init(window.projectSidebar);
+        
+        // Update breadcrumb
+        const breadcrumb = document.getElementById('breadcrumb');
+        if (breadcrumb) {
+            breadcrumb.innerHTML = '<li class="breadcrumb-item active">Home</li>';
+        }
+    }
+    
     // Project switcher with callback to refresh sidebar
     window.projectSwitcher = new ProjectSwitcher('project-select', (project) => {
         window.projectSidebar.load();
