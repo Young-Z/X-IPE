@@ -11,21 +11,21 @@ class HomepageInfinity {
     
     static STAGE_MAPPING = {
         ideation: {
-            icon: '💡',
-            label: 'IDEATION',
-            theme: 'control',
-            status: 'ready',
-            section: 'ideation',
-            selector: '[data-section-id="ideation"]',
-            position: { left: '7.33%', top: '68.37%' }
-        },
-        requirement: {
             icon: '📋',
             label: 'REQUIREMENT',
             theme: 'control',
             status: 'ready',
             section: 'requirements',
             selector: '[data-section-id="requirements"]',
+            position: { left: '7.33%', top: '68.37%' }
+        },
+        requirement: {
+            icon: '💡',
+            label: 'IDEATION',
+            theme: 'control',
+            status: 'ready',
+            section: 'ideation',
+            selector: '[data-section-id="ideation"]',
             position: { left: '15%', top: '17.6%' }
         },
         implementation: {

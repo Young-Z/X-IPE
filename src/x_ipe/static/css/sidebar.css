@@ -135,11 +135,11 @@
     background-color: var(--sidebar-hover);
 }
 
-/* Child items under sections - same subtle background */
+/* Child items under sections - no background */
 .nav-section-header.sidebar-child {
-    background-color: rgba(49, 50, 68, 0.35);
-    border-radius: 6px;
-    margin: 2px 8px;
+    background-color: transparent;
+    border-radius: 0;
+    margin: 0;
 }
 
 .nav-section-header i {
@@ -156,9 +156,9 @@
     transform: rotate(-90deg);
 }
 
-/* Workplace header - subtle styling matching other menu items */
+/* Workplace header */
 .nav-workplace-header {
-    background-color: rgba(49, 50, 68, 0.35);
+    background-color: transparent;
     border-left: none;
 }
 
