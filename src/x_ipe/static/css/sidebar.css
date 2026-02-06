@@ -126,10 +126,20 @@
     cursor: pointer;
     user-select: none;
     transition: background-color 0.15s;
+    background-color: rgba(49, 50, 68, 0.35);
+    border-radius: 6px;
+    margin: 2px 8px;
 }
 
 .nav-section-header:hover {
     background-color: var(--sidebar-hover);
+}
+
+/* Child items under sections - same subtle background */
+.nav-section-header.sidebar-child {
+    background-color: rgba(49, 50, 68, 0.35);
+    border-radius: 6px;
+    margin: 2px 8px;
 }
 
 .nav-section-header i {
@@ -146,14 +156,14 @@
     transform: rotate(-90deg);
 }
 
-/* Workplace header - special styling */
+/* Workplace header - subtle styling matching other menu items */
 .nav-workplace-header {
-    background-color: rgba(255, 193, 7, 0.1);
-    border-left: 3px solid #ffc107;
+    background-color: rgba(49, 50, 68, 0.35);
+    border-left: none;
 }
 
 .nav-workplace-header:hover {
-    background-color: rgba(255, 193, 7, 0.2);
+    background-color: var(--sidebar-hover);
 }
 
 .nav-section-content {
