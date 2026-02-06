@@ -114,7 +114,7 @@ class HomepageInfinity {
     
     <footer class="homepage-legend">
         <span class="legend-control">● Control (What AI Does)</span>
-        <span class="legend-transparency">● Transparency (What we see)</span>
+        <span class="legend-transparency">● Transparency (What We See)</span>
     </footer>
     
     <div class="homepage-tooltip" id="homepage-tooltip" style="display: none;">
