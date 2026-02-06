@@ -15,8 +15,8 @@ class HomepageInfinity {
             label: 'IDEATION',
             theme: 'control',
             status: 'ready',
-            section: 'workplace',
-            selector: '[data-path="x-ipe-docs/ideas"]',
+            section: 'ideation',
+            selector: '[data-section-id="ideation"]',
             position: { left: '7.33%', top: '68.37%' }
         },
         requirement: {
@@ -24,8 +24,8 @@ class HomepageInfinity {
             label: 'REQUIREMENT',
             theme: 'control',
             status: 'ready',
-            section: 'project',
-            selector: '[data-path="x-ipe-docs/requirements"]',
+            section: 'requirements',
+            selector: '[data-section-id="requirements"]',
             position: { left: '15%', top: '17.6%' }
         },
         implementation: {
@@ -33,8 +33,8 @@ class HomepageInfinity {
             label: 'IMPLEMENT',
             theme: 'control',
             status: 'ready',
-            section: 'project',
-            selector: '[data-path="x-ipe-docs/requirements"]',
+            section: 'code',
+            selector: '[data-section-id="code"]',
             position: { left: '34.44%', top: '82%' }
         },
         deployment: {
@@ -51,8 +51,8 @@ class HomepageInfinity {
             label: 'VALIDATION',
             theme: 'transparency',
             status: 'ready',
-            section: 'quality',
-            selector: '[data-section="quality-report"]',
+            section: 'quality-evaluation',
+            selector: '[data-section-id="quality-evaluation"]',
             position: { left: '87.11%', top: '19.78%' }
         },
         monitoring: {
@@ -60,8 +60,8 @@ class HomepageInfinity {
             label: 'MONITORING',
             theme: 'transparency',
             status: 'ready',
-            section: 'quality',
-            selector: '[data-section="behavior-tracing"]',
+            section: 'tracing',
+            selector: '[data-section-id="tracing"]',
             position: { left: '90.67%', top: '73.9%' }
         },
         feedback: {
@@ -69,8 +69,8 @@ class HomepageInfinity {
             label: 'FEEDBACK',
             theme: 'transparency',
             status: 'ready',
-            section: 'feedback',
-            selector: '[data-section="uiux-feedback"]',
+            section: 'uiux-feedbacks',
+            selector: '[data-section-id="uiux-feedbacks"]',
             position: { left: '63.33%', top: '79.04%' }
         },
         planning: {
@@ -78,8 +78,8 @@ class HomepageInfinity {
             label: 'PLANNING',
             theme: 'transparency',
             status: 'ready',
-            section: 'management',
-            selector: '[data-path="x-ipe-docs/planning"]',
+            section: 'planning',
+            selector: '[data-section-id="planning"]',
             position: { left: '41.56%', top: '30.25%' }
         }
     };
