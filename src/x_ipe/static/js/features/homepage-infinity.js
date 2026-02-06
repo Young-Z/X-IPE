@@ -113,7 +113,7 @@ class HomepageInfinity {
     </div>
     
     <footer class="homepage-legend">
-        <span class="legend-control">● Control (What we decide)</span>
+        <span class="legend-control">● Control (What AI Does)</span>
         <span class="legend-transparency">● Transparency (What we see)</span>
     </footer>
     
