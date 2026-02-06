@@ -100,7 +100,7 @@ class HomepageInfinity {
     
     <div class="infinity-loop-container">
         <div class="infinity-loop">
-            <img src="/api/file/content?path=x-ipe-docs%2Fideas%2FTBC008.%20Feature-Homepage%2FControl%26Transparency.png&raw=true" 
+            <img src="/static/img/homepage-infinity-loop.png" 
                  alt="Development Lifecycle" 
                  class="infinity-bg"
                  onerror="this.style.display='none'">
