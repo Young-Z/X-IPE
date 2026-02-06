@@ -2,7 +2,7 @@
  * Homepage Infinity Loop Styles - FEATURE-026
  */
 
-/* Container */
+/* Container - transparent background to match mockup */
 .homepage-infinity-container {
     display: flex;
     flex-direction: column;
@@ -10,8 +10,8 @@
     justify-content: center;
     min-height: 100%;
     padding: 2rem;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
-    color: #fff;
+    background: transparent;
+    color: var(--bs-body-color, #212529);
 }
 
 /* Header */
@@ -23,7 +23,7 @@
 .homepage-header h1 {
     font-size: 3rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    background: linear-gradient(135deg, #4facfe, #a855f7);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -32,7 +32,7 @@
 
 .homepage-header p {
     font-size: 1.25rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--bs-secondary-color, #6c757d);
     margin: 0;
 }
 
@@ -60,63 +60,96 @@
 /* Loop Labels */
 .loop-label {
     position: absolute;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 700;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    opacity: 0.6;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .loop-label.control {
-    left: 15%;
-    top: 45%;
-    color: #3b82f6;
+    left: 19%;
+    top: 49%;
+    color: #00c6fb;
 }
 
 .loop-label.transparency {
-    right: 10%;
-    top: 45%;
-    color: #8b5cf6;
+    left: 64%;
+    top: 49%;
+    color: #a855f7;
 }
 
-/* Stage Buttons */
+/* Stage Buttons - Circular like mockup */
 .stage-btn {
     position: absolute;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0.75rem 1rem;
+    width: 80px;
+    height: 80px;
     border: none;
-    border-radius: 12px;
+    border-radius: 50%;
     cursor: pointer;
-    transition: all 0.3s ease;
-    min-width: 100px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     transform: translate(-50%, -50%);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.15),
+        0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
 }
 
-.stage-btn.control {
-    background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+/* Individual button colors from mockup */
+.stage-btn[data-stage="ideation"] {
+    background: rgb(105, 53, 192);
     color: #fff;
 }
 
-.stage-btn.transparency {
-    background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+.stage-btn[data-stage="requirement"] {
+    background: rgb(45, 158, 235);
+    color: #fff;
+}
+
+.stage-btn[data-stage="implementation"] {
+    background: rgb(108, 42, 193);
+    color: #fff;
+}
+
+.stage-btn[data-stage="deployment"] {
+    background: rgb(67, 161, 231);
+    color: #fff;
+}
+
+.stage-btn[data-stage="validation"] {
+    background: rgb(79, 100, 210);
+    color: #fff;
+}
+
+.stage-btn[data-stage="monitoring"] {
+    background: rgb(142, 45, 198);
+    color: #fff;
+}
+
+.stage-btn[data-stage="feedback"] {
+    background: rgb(105, 71, 221);
+    color: #fff;
+}
+
+.stage-btn[data-stage="planning"] {
+    background: rgb(76, 68, 200);
     color: #fff;
 }
 
 .stage-btn:hover {
-    transform: translate(-50%, -50%) scale(1.1);
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
-}
-
-.stage-btn.transparency:hover {
-    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
+    transform: translate(-50%, -50%) scale(1.12);
+    box-shadow: 
+        0 8px 30px rgba(0, 0, 0, 0.2),
+        0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .stage-btn.tbd {
-    opacity: 0.6;
+    background: linear-gradient(135deg, #94a3b8 0%, #cbd5e1 100%) !important;
+    opacity: 0.8;
     cursor: not-allowed;
 }
 
@@ -126,15 +159,17 @@
 
 /* Stage Icon & Label */
 .stage-icon {
-    font-size: 1.5rem;
-    margin-bottom: 0.25rem;
+    font-size: 1.4rem;
+    margin-bottom: 2px;
 }
 
 .stage-label {
-    font-size: 0.75rem;
+    font-size: 0.6rem;
     font-weight: 600;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.03em;
     text-transform: uppercase;
+    line-height: 1.1;
+    text-align: center;
 }
 
 /* TBD Badge */
@@ -156,15 +191,15 @@
     gap: 2rem;
     margin-top: 2rem;
     font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--bs-secondary-color, #6c757d);
 }
 
 .legend-control::before {
-    color: #3b82f6;
+    color: #4facfe;
 }
 
 .legend-transparency::before {
-    color: #8b5cf6;
+    color: #a855f7;
 }
 
 /* Tooltip */
