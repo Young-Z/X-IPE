@@ -99,19 +99,19 @@
     z-index: 10;
 }
 
-/* Individual button colors from mockup */
+/* Individual button colors - customized */
 .stage-btn[data-stage="ideation"] {
-    background: rgb(105, 53, 192);
+    background: rgb(123, 68, 174);
     color: #fff;
 }
 
 .stage-btn[data-stage="requirement"] {
-    background: rgb(45, 158, 235);
+    background: rgb(165, 87, 194);
     color: #fff;
 }
 
 .stage-btn[data-stage="implementation"] {
-    background: rgb(108, 42, 193);
+    background: rgb(110, 99, 206);
     color: #fff;
 }
 
@@ -121,22 +121,22 @@
 }
 
 .stage-btn[data-stage="validation"] {
-    background: rgb(79, 100, 210);
+    background: rgb(66, 112, 203);
     color: #fff;
 }
 
 .stage-btn[data-stage="monitoring"] {
-    background: rgb(142, 45, 198);
+    background: rgb(62, 157, 226);
     color: #fff;
 }
 
 .stage-btn[data-stage="feedback"] {
-    background: rgb(105, 71, 221);
+    background: rgb(69, 124, 213);
     color: #fff;
 }
 
 .stage-btn[data-stage="planning"] {
-    background: rgb(76, 68, 200);
+    background: rgb(125, 72, 184);
     color: #fff;
 }
 
