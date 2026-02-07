@@ -377,7 +377,7 @@ class TestConfigRouteFields:
         adapter.display_name = "OpenCode CLI"
         adapter.command = "opencode"
         adapter.run_args = ""
-        adapter.inline_prompt_flag = "run"
+        adapter.inline_prompt_flag = "--prompt"
         adapter.prompt_format = '{command} {inline_prompt_flag} "{escaped_prompt}"'
         mock_service.get_active_adapter.return_value = adapter
         mock_service.is_installed.return_value = True
@@ -389,5 +389,5 @@ class TestConfigRouteFields:
             assert data['success'] is True
             assert 'run_args' in data
             assert 'inline_prompt_flag' in data
-            assert data['inline_prompt_flag'] == 'run'
+            assert data['inline_prompt_flag'] == '--prompt'
             assert data['command'] == 'opencode'

@@ -54,7 +54,7 @@ def temp_adapters_yaml():
     display_name: "OpenCode CLI"
     command: "opencode"
     run_args: ""
-    inline_prompt_flag: "run"
+    inline_prompt_flag: "--prompt"
     prompt_format: '{command} {inline_prompt_flag} "{escaped_prompt}"'
     instructions_file: ".opencode/instructions.md"
     skills_folder: ".opencode/skills/"
