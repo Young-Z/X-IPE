@@ -369,8 +369,8 @@ def _handle_cli_migration(project_root: Path, cli_name: str, dry_run: bool, forc
             shutil.copy2(old_instructions, backup_dir / old_instructions.name)
             backed_up.append(str(old_instructions))
 
-        # Back up project-scoped MCP config
-        if old_adapter.mcp_config_format == "project":
+        # Back up project-scoped or nested MCP config
+        if old_adapter.mcp_config_format in ("project", "nested"):
             old_mcp = project_root / old_adapter.mcp_config_path
             if old_mcp.exists():
                 shutil.copy2(old_mcp, backup_dir / old_mcp.name)
@@ -393,13 +393,36 @@ def _handle_cli_migration(project_root: Path, cli_name: str, dry_run: bool, forc
         click.echo(f"Updated .x-ipe.yaml: cli → {cli_name}")
         click.echo(f"Updated .x-ipe.yaml: skills → {new_adapter.skills_folder}")
 
-    # 3. Deploy MCP config for new CLI
+    # 3. Migrate skills to new CLI folder
+    new_skills = project_root / new_adapter.skills_folder
+    if old_skills.exists() and not new_skills.exists():
+        if not dry_run:
+            shutil.copytree(old_skills, new_skills, dirs_exist_ok=True)
+            click.echo(f"Copied skills: {old_adapter.skills_folder} → {new_adapter.skills_folder}")
+        else:
+            click.echo(f"Would copy skills: {old_adapter.skills_folder} → {new_adapter.skills_folder}")
+    elif old_skills.exists() and new_skills.exists():
+        click.echo(f"Skills folder already exists: {new_adapter.skills_folder} (skipped)")
+
+    # 4. Migrate instructions file
+    new_instructions = project_root / new_adapter.instructions_file
+    if old_instructions.exists() and not new_instructions.exists():
+        if not dry_run:
+            new_instructions.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(old_instructions, new_instructions)
+            click.echo(f"Copied instructions: {old_adapter.instructions_file} → {new_adapter.instructions_file}")
+        else:
+            click.echo(f"Would copy instructions: {old_adapter.instructions_file} → {new_adapter.instructions_file}")
+    elif old_instructions.exists() and new_instructions.exists():
+        click.echo(f"Instructions file already exists: {new_adapter.instructions_file} (skipped)")
+
+    # 5. Deploy MCP config for new CLI
     deployer = MCPDeployerService(project_root)
     result = deployer.deploy(new_adapter, force=force, dry_run=dry_run)
     if result.merged_count > 0:
         click.echo(f"Deployed {result.merged_count} MCP server(s) for {cli_name}")
 
-    # 4. Summary
+    # 6. Summary
     if dry_run:
         click.echo("\nDry run - no changes made.")
     else:

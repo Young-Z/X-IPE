@@ -145,6 +145,62 @@ class TestBackup:
             assert not backup_dir.exists()
 
 
+class TestSkillsMigration:
+    """Skills and instructions are copied to new CLI folder during migration."""
+
+    def _make_adapters(self):
+        old = MagicMock()
+        old.name = "copilot"
+        old.skills_folder = ".github/skills/"
+        old.instructions_file = ".github/copilot-instructions.md"
+        old.mcp_config_path = "~/.copilot/mcp-config.json"
+        old.mcp_config_format = "global"
+        new = MagicMock()
+        new.name = "opencode"
+        new.mcp_config_path = ".opencode.json"
+        new.mcp_config_format = "nested"
+        new.skills_folder = ".opencode/skills/"
+        new.instructions_file = ".opencode/instructions.md"
+        return old, new
+
+    def test_skills_copied_to_new_folder(self, runner, temp_project):
+        from src.x_ipe.cli.main import cli
+        old, new = self._make_adapters()
+        with patch("x_ipe.cli.main.CLIAdapterService") as MockService:
+            mock_svc = MockService.return_value
+            mock_svc.get_adapter.side_effect = lambda n: new if n == "opencode" else old
+            mock_svc.list_adapters.return_value = [old, new]
+            result = runner.invoke(cli, ["-p", str(temp_project), "upgrade", "--cli", "opencode", "--no-mcp"])
+            assert result.exit_code == 0
+            new_skills = temp_project / ".opencode" / "skills" / "test-skill" / "SKILL.md"
+            assert new_skills.exists()
+            assert new_skills.read_text() == "# Test Skill"
+
+    def test_instructions_copied_to_new_location(self, runner, temp_project):
+        from src.x_ipe.cli.main import cli
+        old, new = self._make_adapters()
+        with patch("x_ipe.cli.main.CLIAdapterService") as MockService:
+            mock_svc = MockService.return_value
+            mock_svc.get_adapter.side_effect = lambda n: new if n == "opencode" else old
+            mock_svc.list_adapters.return_value = [old, new]
+            result = runner.invoke(cli, ["-p", str(temp_project), "upgrade", "--cli", "opencode", "--no-mcp"])
+            assert result.exit_code == 0
+            new_instructions = temp_project / ".opencode" / "instructions.md"
+            assert new_instructions.exists()
+            assert new_instructions.read_text() == "# Instructions"
+
+    def test_dry_run_no_copy(self, runner, temp_project):
+        from src.x_ipe.cli.main import cli
+        old, new = self._make_adapters()
+        with patch("x_ipe.cli.main.CLIAdapterService") as MockService:
+            mock_svc = MockService.return_value
+            mock_svc.get_adapter.side_effect = lambda n: new if n == "opencode" else old
+            mock_svc.list_adapters.return_value = [old, new]
+            result = runner.invoke(cli, ["-p", str(temp_project), "upgrade", "--cli", "opencode", "--dry-run", "--no-mcp"])
+            assert result.exit_code == 0
+            assert not (temp_project / ".opencode" / "skills").exists()
+
+
 class TestConfigUpdate:
     """AC-3: Config Update."""
 

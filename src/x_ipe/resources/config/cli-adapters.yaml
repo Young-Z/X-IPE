@@ -15,12 +15,12 @@ adapters:
     display_name: "OpenCode CLI"
     command: "opencode"
     run_args: ""
-    inline_prompt_flag: "run"
+    inline_prompt_flag: "-p"
     prompt_format: '{command} {inline_prompt_flag} "{escaped_prompt}"'
     instructions_file: ".opencode/instructions.md"
     skills_folder: ".opencode/skills/"
-    mcp_config_path: "opencode.json"
-    mcp_config_format: "project"
+    mcp_config_path: ".opencode.json"
+    mcp_config_format: "nested"
     detection_command: "opencode"
 
   claude-code:

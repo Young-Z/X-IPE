@@ -58,7 +58,13 @@ class MCPDeployerService:
         force: bool = False,
         dry_run: bool = False,
     ) -> MCPDeployResult:
-        """Merge MCP servers into the target CLI's config file."""
+        """Merge MCP servers into the target CLI's config file.
+
+        Handles three MCP config formats:
+        - "global": Standalone file with {"mcpServers": {...}} (copilot)
+        - "project": Standalone file with {"mcpServers": {...}} (claude-code)
+        - "nested": mcpServers key inside a larger config file (opencode)
+        """
         source_servers = self.get_source_servers()
         if not source_servers:
             return MCPDeployResult()
