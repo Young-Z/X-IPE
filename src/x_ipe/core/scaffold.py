@@ -359,6 +359,16 @@ server:
         
         content = config_content or default_content
         if cli_name and not config_content:
+            # Resolve skills folder from CLI adapter config
+            skills_folder = '.github/skills'
+            try:
+                from x_ipe.services.cli_adapter_service import CLIAdapterService
+                adapter = CLIAdapterService().get_adapter(cli_name)
+                if adapter:
+                    skills_folder = adapter.skills_folder.rstrip('/')
+            except Exception:
+                pass
+            content = content.replace('skills: ".github/skills"', f'skills: "{skills_folder}"')
             content = content.rstrip() + f'\n\ncli: "{cli_name}"\n'
         
         if not self.dry_run:

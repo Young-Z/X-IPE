@@ -894,11 +894,9 @@
         }
 
         /**
-         * Insert copilot command into active terminal (no Enter)
+         * Insert CLI command into active terminal (no Enter)
          */
         _insertCopilotCommand() {
-            const copilotCommand = 'copilot --allow-all-tools --allow-all-paths --allow-all-urls';
-            
             // Ensure we have a terminal
             let targetIndex = this.paneManager.activeIndex;
             if (this.paneManager.terminals.length === 0) {
@@ -912,8 +910,24 @@
             const instance = this.paneManager.terminals[targetIndex];
             if (!instance?.socket?.connected) return;
             
-            // Type command without pressing Enter
-            this.paneManager._typeWithEffect(instance.socket, copilotCommand, null, false);
+            // Fetch active CLI adapter and build command dynamically
+            fetch('/api/config/cli-adapter')
+                .then(r => r.json())
+                .then(data => {
+                    let cliCommand;
+                    if (data.success && data.command) {
+                        const parts = [data.command];
+                        if (data.run_args) parts.push(data.run_args);
+                        cliCommand = parts.join(' ');
+                    } else {
+                        cliCommand = 'copilot --allow-all-tools --allow-all-paths --allow-all-urls';
+                    }
+                    this.paneManager._typeWithEffect(instance.socket, cliCommand, null, false);
+                })
+                .catch(() => {
+                    const cliCommand = 'copilot --allow-all-tools --allow-all-paths --allow-all-urls';
+                    this.paneManager._typeWithEffect(instance.socket, cliCommand, null, false);
+                });
         }
 
         _reconnectAll() {

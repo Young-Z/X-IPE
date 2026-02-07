@@ -312,6 +312,18 @@ class TestScaffoldConfigFile:
             config = yaml.safe_load(f)
         assert config.get('cli') == 'opencode'
 
+    def test_config_file_opencode_has_correct_skills_path(self, temp_project):
+        """create_config_file(cli_name='opencode') sets skills to .opencode/skills."""
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        scaffold = ScaffoldManager(temp_project)
+        scaffold.create_config_file(cli_name='opencode')
+
+        config_path = temp_project / '.x-ipe.yaml'
+        with open(config_path) as f:
+            config = yaml.safe_load(f)
+        assert config['paths']['skills'] == '.opencode/skills'
+
     def test_config_file_without_cli_name(self, temp_project):
         """create_config_file() without cli_name has no cli key."""
         from x_ipe.core.scaffold import ScaffoldManager

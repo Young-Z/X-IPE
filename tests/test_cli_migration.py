@@ -172,6 +172,34 @@ class TestConfigUpdate:
             config = yaml.safe_load((temp_project / ".x-ipe.yaml").read_text())
             assert config["cli"] == "opencode"
 
+    def test_ac_3_3_migration_updates_skills_path(self, runner, temp_project):
+        """Migration to opencode updates paths.skills to .opencode/skills."""
+        import yaml
+        # Set up config with paths.skills
+        config = {"project_name": "test", "cli": "copilot", "paths": {"skills": ".github/skills"}}
+        (temp_project / ".x-ipe.yaml").write_text(yaml.dump(config))
+        from src.x_ipe.cli.main import cli
+        with patch("x_ipe.cli.main.CLIAdapterService") as MockService:
+            mock_svc = MockService.return_value
+            old_adapter = MagicMock()
+            old_adapter.name = "copilot"
+            old_adapter.skills_folder = ".github/skills/"
+            old_adapter.instructions_file = ".github/copilot-instructions.md"
+            old_adapter.mcp_config_path = "~/.copilot/mcp-config.json"
+            old_adapter.mcp_config_format = "global"
+            new_adapter = MagicMock()
+            new_adapter.name = "opencode"
+            new_adapter.mcp_config_path = "opencode.json"
+            new_adapter.mcp_config_format = "project"
+            new_adapter.skills_folder = ".opencode/skills/"
+            new_adapter.instructions_file = ".opencode/instructions.md"
+            mock_svc.get_adapter.side_effect = lambda n: new_adapter if n == "opencode" else old_adapter
+            mock_svc.list_adapters.return_value = [old_adapter, new_adapter]
+            result = runner.invoke(cli, ["-p", str(temp_project), "upgrade", "--cli", "opencode", "--no-mcp"])
+            assert result.exit_code == 0
+            config = yaml.safe_load((temp_project / ".x-ipe.yaml").read_text())
+            assert config["paths"]["skills"] == ".opencode/skills"
+
     def test_ac_3_2_dry_run_no_config_write(self, runner, temp_project):
         import yaml
         from src.x_ipe.cli.main import cli
@@ -230,6 +258,30 @@ class TestNoCLIFlag:
             mock_migrate.assert_called_once()
             call_args = mock_migrate.call_args
             assert call_args[0][1] == "opencode"  # new cli name
+
+    def test_upgrade_continues_after_migration(self, runner, temp_project):
+        """After CLI migration, upgrade continues with skills sync (no early return)."""
+        from src.x_ipe.cli.main import cli
+        with patch("x_ipe.cli.main.CLIAdapterService") as MockService:
+            mock_svc = MockService.return_value
+            old_adapter = MagicMock()
+            old_adapter.name = "copilot"
+            old_adapter.skills_folder = ".github/skills/"
+            old_adapter.instructions_file = ".github/copilot-instructions.md"
+            old_adapter.mcp_config_path = "~/.copilot/mcp-config.json"
+            old_adapter.mcp_config_format = "global"
+            new_adapter = MagicMock()
+            new_adapter.name = "opencode"
+            new_adapter.mcp_config_path = "opencode.json"
+            new_adapter.mcp_config_format = "project"
+            new_adapter.skills_folder = ".opencode/skills/"
+            new_adapter.instructions_file = ".opencode/instructions.md"
+            mock_svc.get_adapter.side_effect = lambda n: new_adapter if n == "opencode" else old_adapter
+            mock_svc.list_adapters.return_value = [old_adapter, new_adapter]
+            result = runner.invoke(cli, ["-p", str(temp_project), "upgrade", "--cli", "opencode", "--no-mcp"])
+            assert result.exit_code == 0
+            # After migration, the normal upgrade flow should continue
+            assert "upgrading x-ipe skills" in result.output.lower()
 
 
 class TestConfigRouteFields:

@@ -384,9 +384,14 @@ def _handle_cli_migration(project_root: Path, cli_name: str, dry_run: bool, forc
     # 2. Update .x-ipe.yaml
     if not dry_run:
         config['cli'] = cli_name
+        # Update skills path to match new CLI adapter
+        if 'paths' not in config:
+            config['paths'] = {}
+        config['paths']['skills'] = new_adapter.skills_folder.rstrip('/')
         with open(config_path, 'w') as f:
             yaml.dump(config, f, default_flow_style=False)
         click.echo(f"Updated .x-ipe.yaml: cli → {cli_name}")
+        click.echo(f"Updated .x-ipe.yaml: skills → {new_adapter.skills_folder}")
 
     # 3. Deploy MCP config for new CLI
     deployer = MCPDeployerService(project_root)
@@ -618,7 +623,6 @@ def upgrade(ctx: click.Context, force: bool, dry_run: bool,
 
     if cli_name:
         _handle_cli_migration(project_root, cli_name, dry_run, force)
-        return
     
     click.echo(f"Upgrading X-IPE skills in: {project_root}")
     click.echo("-" * 40)
