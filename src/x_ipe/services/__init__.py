@@ -67,6 +67,15 @@ from .voice_input_service_v2 import (
 # Proxy Service (FEATURE-022-A)
 from .proxy_service import ProxyService, ProxyResult
 
+# CLI Adapter Service (FEATURE-027-A)
+from .cli_adapter_service import CLIAdapterData, CLIAdapterService
+
+# Skill Translator Service (FEATURE-027-C)
+from .skill_translator import SkillTranslator, TranslationResult
+
+# MCP Deployer Service (FEATURE-027-D)
+from .mcp_deployer_service import MCPDeployerService, MCPDeployResult
+
 
 __all__ = [
     # Config
@@ -111,4 +120,13 @@ __all__ = [
     # Proxy
     'ProxyService',
     'ProxyResult',
+    # CLI Adapter
+    'CLIAdapterData',
+    'CLIAdapterService',
+    # Skill Translator
+    'SkillTranslator',
+    'TranslationResult',
+    # MCP Deployer
+    'MCPDeployerService',
+    'MCPDeployResult',
 ]

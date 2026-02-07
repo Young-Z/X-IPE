@@ -20,6 +20,7 @@
 |---------|-----------|-------------|------|--------------|--------------|-------|
 | TASK-228 | Code Implementation | Implement FEATURE-027-D MCP Configuration Deployment (spec→design→tests→code) | Rune | 02-07-2026 15:25:00 | [specification.md](../requirements/FEATURE-027-D/specification.md), [technical-design.md](../requirements/FEATURE-027-D/technical-design.md), [test_mcp_deployer.py](../../tests/test_mcp_deployer.py), [mcp_deployer_service.py](../../src/x_ipe/services/mcp_deployer_service.py) | 20/20 tests pass. CLI-agnostic MCP deployment with path resolution, merge, preserve, dry-run. 0 regressions. |
 | TASK-226 | Code Implementation | Implement FEATURE-027-B CLI Init & Selection (spec→design→tests→code) | Rune | 02-07-2026 15:10:00 | [specification.md](../requirements/FEATURE-027-B/specification.md), [technical-design.md](../requirements/FEATURE-027-B/technical-design.md), [test_cli_init_selection.py](../../tests/test_cli_init_selection.py) | 11/11 tests pass. --cli flag, auto-detect, config storage. Graceful non-interactive fallback. 0 regressions. |
+| TASK-230 | Code Implementation | Implement FEATURE-027-C Skill & Instruction Translation | Bolt | 02-07-2026 16:05:00 | [skill_translator.py](../../src/x_ipe/services/skill_translator.py), [instructions-template.md](../../src/x_ipe/resources/templates/instructions-template.md) | 35/35 tests pass. SkillTranslator + TranslationResult + instructions-template. 0 regressions (5 pre-existing). |
 | TASK-229 | Test Generation | Generate tests for FEATURE-027-C Skill & Instruction Translation | Bolt | 02-07-2026 14:43:00 | [test_skill_translator.py](../../tests/test_skill_translator.py) | 35 tests across 8 classes. All fail (TDD ready). Covers all 24 ACs + edge cases + tracing. |
 | TASK-228 | Technical Design | Design FEATURE-027-C Skill & Instruction Translation | Bolt | 02-07-2026 14:43:00 | [technical-design.md](../requirements/FEATURE-027-C/technical-design.md) | 3 components: SkillTranslator, TranslationResult, instructions-template. Strategy pattern. All 7 DoD pass. |
 | TASK-227 | Feature Refinement | Refine FEATURE-027-C Skill & Instruction Translation | Bolt | 02-07-2026 14:43:00 | [specification.md](../requirements/FEATURE-027-C/specification.md) | 24 ACs across 6 groups. 7 user stories. 6 FRs, 5 NFRs, 7 BRs, 13 edge cases. All DoD pass. |
@@ -122,7 +123,7 @@
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 269
+- **Completed (archived):** 270
 - **Pending Review:** 0
 - **Blocked:** 0
 
