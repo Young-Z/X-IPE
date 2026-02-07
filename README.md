@@ -135,7 +135,10 @@
 ### Prerequisites
 
 - Python 3.12+
-- VS Code with GitHub Copilot extension
+- A supported AI coding CLI (at least one):
+  - [GitHub Copilot CLI](https://docs.github.com/en/copilot) (`copilot`)
+  - [OpenCode](https://opencode.ai) (`opencode`)
+  - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (`claude`)
 - AI model with skills/tools capability (Claude Sonnet 4.5+, Gemini 2.5 Flash+, etc.)
 
 ### Installation
@@ -183,14 +186,39 @@ x-ipe serve -o
 ```bash
 x-ipe --help          # Show all available commands
 x-ipe --version       # Show version
-x-ipe init            # Initialize X-IPE in current project
+x-ipe init            # Initialize X-IPE (auto-detects CLI, prompts for selection)
+x-ipe init --cli copilot  # Initialize with a specific CLI
 x-ipe init --dry-run  # Preview what would be created
 x-ipe status          # Show project initialization status
 x-ipe info            # Show X-IPE package information
 x-ipe serve           # Start the web server
 x-ipe serve -o        # Start server and open browser
-x-ipe upgrade         # Upgrade skills from package
+x-ipe upgrade         # Upgrade skills (prompts for CLI selection)
+x-ipe upgrade --cli opencode  # Switch to a different CLI (backs up old, deploys new)
 ```
+
+### Multi-CLI Support
+
+X-IPE supports multiple AI coding CLIs. During `init` and `upgrade`, you'll be prompted to select your CLI:
+
+```bash
+# Initialize — auto-detects installed CLIs, prompts for selection
+x-ipe init
+# > Detected CLI(s): copilot, opencode
+# > Select CLI (copilot, opencode, claude-code) [copilot]:
+
+# Switch CLI — backs up old artifacts, deploys for new CLI
+x-ipe upgrade --cli opencode
+# > Migrating from 'copilot' to 'opencode'
+# > Backed up 2 artifact(s) to .x-ipe/backup/copilot-20260207-153300/
+# > Updated .x-ipe.yaml: cli → opencode
+# > ✓ Migration complete: copilot → opencode
+```
+
+Each CLI gets its own:
+- **Skills folder** — `.github/skills/` (Copilot), `.opencode/skills/` (OpenCode), `.claude/skills/` (Claude Code)
+- **Instructions file** — `copilot-instructions.md`, `.opencode/instructions.md`, `.claude/instructions.md`
+- **MCP config** — `~/.copilot/mcp-config.json` (global), `opencode.json` (project), `.mcp.json` (project)
 
 ### Running from Source
 

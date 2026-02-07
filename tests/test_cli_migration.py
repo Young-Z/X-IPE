@@ -214,9 +214,54 @@ class TestNoCLIFlag:
     """AC-5: No-CLI-Flag Behavior."""
 
     def test_ac_5_1_no_cli_flag_runs_normal_upgrade(self, runner, temp_project):
-        """Without --cli, upgrade runs the normal skills sync flow."""
+        """Without --cli, upgrade runs the normal skills sync flow when CLI unchanged."""
         from src.x_ipe.cli.main import cli
         result = runner.invoke(cli, ["-p", str(temp_project), "upgrade", "--no-mcp"])
         assert result.exit_code == 0
-        # No migration messages
+        # No migration messages (same CLI selected = no migration)
         assert "migrat" not in result.output.lower()
+
+    def test_upgrade_prompts_cli_selection_triggers_migration(self, runner, temp_project):
+        """Without --cli, if user selects different CLI via prompt, migration triggers."""
+        from src.x_ipe.cli.main import cli
+        with patch("src.x_ipe.cli.main._resolve_cli_selection", return_value="opencode"), \
+             patch("src.x_ipe.cli.main._handle_cli_migration") as mock_migrate:
+            result = runner.invoke(cli, ["-p", str(temp_project), "upgrade", "--no-mcp"])
+            mock_migrate.assert_called_once()
+            call_args = mock_migrate.call_args
+            assert call_args[0][1] == "opencode"  # new cli name
+
+
+class TestConfigRouteFields:
+    """Bug fix: /api/config/cli-adapter returns run_args and inline_prompt_flag."""
+
+    def test_api_returns_run_args_and_prompt_flag(self):
+        """Config route includes run_args and inline_prompt_flag in response."""
+        import importlib
+        from unittest.mock import MagicMock
+        from flask import Flask
+
+        app = Flask(__name__)
+        from x_ipe.routes.config_routes import config_bp
+        app.register_blueprint(config_bp)
+
+        mock_service = MagicMock()
+        adapter = MagicMock()
+        adapter.name = "opencode"
+        adapter.display_name = "OpenCode CLI"
+        adapter.command = "opencode"
+        adapter.run_args = ""
+        adapter.inline_prompt_flag = "run"
+        adapter.prompt_format = '{command} {inline_prompt_flag} "{escaped_prompt}"'
+        mock_service.get_active_adapter.return_value = adapter
+        mock_service.is_installed.return_value = True
+        app.config['CLI_ADAPTER_SERVICE'] = mock_service
+
+        with app.test_client() as client:
+            resp = client.get('/api/config/cli-adapter')
+            data = resp.get_json()
+            assert data['success'] is True
+            assert 'run_args' in data
+            assert 'inline_prompt_flag' in data
+            assert data['inline_prompt_flag'] == 'run'
+            assert data['command'] == 'opencode'

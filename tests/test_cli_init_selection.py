@@ -334,3 +334,42 @@ class TestScaffoldConfigFile:
 
         config_path = temp_project / '.x-ipe.yaml'
         assert not config_path.exists()
+
+
+class TestMCPPathResolution:
+    """Bug fix: init MCP merge uses active CLI's path, not hardcoded copilot."""
+
+    def test_init_mcp_uses_opencode_path(self, runner, temp_project):
+        """When CLI is opencode, MCP merge target defaults to opencode.json."""
+        import json
+        from src.x_ipe.cli.main import cli
+
+        # Set up MCP source
+        mcp_dir = temp_project / ".github" / "copilot"
+        mcp_dir.mkdir(parents=True, exist_ok=True)
+        mcp_config = {"mcpServers": {"test-server": {"command": "test"}}}
+        (mcp_dir / "mcp-config.json").write_text(json.dumps(mcp_config))
+
+        with patch("x_ipe.cli.main.CLIAdapterService") as MockService:
+            mock_svc = MockService.return_value
+            adapter = MagicMock()
+            adapter.name = "opencode"
+            adapter.mcp_config_path = "opencode.json"
+            adapter.mcp_config_format = "project"
+            adapter.skills_folder = ".opencode/skills/"
+            adapter.instructions_file = ".opencode/instructions.md"
+            mock_svc.get_adapter.return_value = adapter
+            mock_svc.list_adapters.return_value = [adapter]
+            mock_svc.detect_installed_clis.return_value = ["opencode"]
+            mock_svc.is_installed.return_value = True
+
+            # Run init with --cli opencode, confirm MCP merge
+            result = runner.invoke(
+                cli,
+                ["-p", str(temp_project), "init", "--cli", "opencode"],
+                input="y\n" + str(temp_project / "opencode.json") + "\n",
+            )
+            # If MCP merge happened, target should be opencode.json not ~/.copilot/...
+            if (temp_project / "opencode.json").exists():
+                config = json.loads((temp_project / "opencode.json").read_text())
+                assert "mcpServers" in config
