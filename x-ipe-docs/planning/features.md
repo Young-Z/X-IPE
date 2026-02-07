@@ -59,7 +59,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-026 | Homepage Infinity Loop | v1.0 | Completed | [specification.md](../requirements/FEATURE-026/specification.md), [technical-design.md](../requirements/FEATURE-026/technical-design.md), [acceptance-test-cases.md](../requirements/FEATURE-026/acceptance-test-cases.md) | 02-05-2026 | 02-06-2026 02:50:00 |
 | FEATURE-027-A | CLI Adapter Registry & Service | v1.0 | Implemented | [specification.md](../requirements/FEATURE-027-A/specification.md), [technical-design.md](../requirements/FEATURE-027-A/technical-design.md) | 02-07-2026 | 02-07-2026 14:12:00 |
 | FEATURE-027-B | CLI Init & Selection | v1.0 | Implemented | [specification.md](../requirements/FEATURE-027-B/specification.md), [test_cli_init_selection.py](../../tests/test_cli_init_selection.py) | 02-07-2026 | 02-07-2026 15:10:00 |
-| FEATURE-027-C | Skill & Instruction Translation | v1.0 | Refined | [specification.md](../requirements/FEATURE-027-C/specification.md) | 02-07-2026 | 02-07-2026 14:43:00 |
+| FEATURE-027-C | Skill & Instruction Translation | v1.0 | Designed | [specification.md](../requirements/FEATURE-027-C/specification.md), [technical-design.md](../requirements/FEATURE-027-C/technical-design.md) | 02-07-2026 | 02-07-2026 14:43:00 |
 | FEATURE-027-D | MCP Configuration Deployment | v1.0 | Implemented | [specification.md](../requirements/FEATURE-027-D/specification.md), [test_mcp_deployer.py](../../tests/test_mcp_deployer.py), [mcp_deployer_service.py](../../src/x_ipe/services/mcp_deployer_service.py) | 02-07-2026 | 02-07-2026 15:25:00 |
 | FEATURE-027-E | CLI Migration & Upgrade | v1.0 | Planned | - | 02-07-2026 | 02-07-2026 13:20:00 |
 
@@ -87,12 +87,12 @@ This board tracks all features across the project lifecycle.
 - FEATURE-026: Homepage Infinity Loop
 - FEATURE-027-E: CLI Migration & Upgrade
 
-### Refined (3)
+### Refined (2)
 - FEATURE-024: Project Quality Evaluation UI
 - FEATURE-027-B: CLI Init & Selection
-- FEATURE-027-C: Skill & Instruction Translation
 
-### Designed (0)
+### Designed (1)
+- FEATURE-027-C: Skill & Instruction Translation
 
 ### Implemented (2)
 - FEATURE-027-A: CLI Adapter Registry & Service
@@ -747,11 +747,11 @@ This board tracks all features across the project lifecycle.
 ### FEATURE-027-C: Skill & Instruction Translation
 
 **Version:** v1.0  
-**Status:** Refined  
+**Status:** Designed  
 **Description:** Translate canonical X-IPE skills to each CLI's native format. Copilot = no-op, OpenCode = frontmatter filter, Claude Code = frontmatter remap.  
 **Dependencies:** FEATURE-027-A  
 **Specification:** [specification.md](../requirements/FEATURE-027-C/specification.md)  
-**Technical Design:** -  
+**Technical Design:** [technical-design.md](../requirements/FEATURE-027-C/technical-design.md)  
 
 **Key Capabilities:**
 - `SkillTranslator` service with per-adapter strategies

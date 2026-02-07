@@ -20,6 +20,7 @@
 |---------|-----------|-------------|------|--------------|--------------|-------|
 | TASK-228 | Code Implementation | Implement FEATURE-027-D MCP Configuration Deployment (spec→design→tests→code) | Rune | 02-07-2026 15:25:00 | [specification.md](../requirements/FEATURE-027-D/specification.md), [technical-design.md](../requirements/FEATURE-027-D/technical-design.md), [test_mcp_deployer.py](../../tests/test_mcp_deployer.py), [mcp_deployer_service.py](../../src/x_ipe/services/mcp_deployer_service.py) | 20/20 tests pass. CLI-agnostic MCP deployment with path resolution, merge, preserve, dry-run. 0 regressions. |
 | TASK-226 | Code Implementation | Implement FEATURE-027-B CLI Init & Selection (spec→design→tests→code) | Rune | 02-07-2026 15:10:00 | [specification.md](../requirements/FEATURE-027-B/specification.md), [technical-design.md](../requirements/FEATURE-027-B/technical-design.md), [test_cli_init_selection.py](../../tests/test_cli_init_selection.py) | 11/11 tests pass. --cli flag, auto-detect, config storage. Graceful non-interactive fallback. 0 regressions. |
+| TASK-228 | Technical Design | Design FEATURE-027-C Skill & Instruction Translation | Bolt | 02-07-2026 14:43:00 | [technical-design.md](../requirements/FEATURE-027-C/technical-design.md) | 3 components: SkillTranslator, TranslationResult, instructions-template. Strategy pattern. All 7 DoD pass. |
 | TASK-227 | Feature Refinement | Refine FEATURE-027-C Skill & Instruction Translation | Bolt | 02-07-2026 14:43:00 | [specification.md](../requirements/FEATURE-027-C/specification.md) | 24 ACs across 6 groups. 7 user stories. 6 FRs, 5 NFRs, 7 BRs, 13 edge cases. All DoD pass. |
 | TASK-225 | Code Implementation | Implement FEATURE-027-A CLI Adapter Registry & Service | Rune | 02-07-2026 14:12:00 | [cli_adapter_service.py](../../src/x_ipe/services/cli_adapter_service.py), [config_routes.py](../../src/x_ipe/routes/config_routes.py), [cli-adapters.yaml](../../src/x_ipe/resources/config/cli-adapters.yaml) | 31/31 tests pass. 3 files created, 3 files modified. No regressions (1152 passed, 5 pre-existing failures). |
 | TASK-224 | Test Generation | Generate tests for FEATURE-027-A CLI Adapter Registry & Service | Rune | 02-07-2026 14:08:00 | [test_cli_adapter.py](../../tests/test_cli_adapter.py) | 31 tests across 8 classes. All fail (TDD ready). Covers AC-1 to AC-6 + edge cases + integration. |
@@ -120,7 +121,7 @@
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 267
+- **Completed (archived):** 268
 - **Pending Review:** 0
 - **Blocked:** 0
 
