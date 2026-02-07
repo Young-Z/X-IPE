@@ -1,3 +1,0 @@
-=== TC-002: Line Count ===
-Line count:      488
-PASS

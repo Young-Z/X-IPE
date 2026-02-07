@@ -1,221 +1,386 @@
----
-skill_name: x-ipe-skill-creator-v3
-skill_type: meta_skill
-version: 1.0.0
-created_date: 2026-02-05
-upgraded_from: x-ipe-skill-creator-v2
----
-
-# Skill Meta: x-ipe-skill-creator-v3
-
-## Overview
-
-Guide for creating effective X-IPE skills with complete template coverage, sub-agent DAG workflow, and validation against skill-general-guidelines-v2. V3 adds workflow-orchestration and meta-skill templates (v2 only had 2 of 4 templates implemented), enforces >= 3 concrete examples, and strengthens keyword usage compliance.
-
-## Key Improvements Over v2
-
-| Area | v2 Issue | v3 Fix |
-|------|----------|--------|
-| Templates | 4 mentioned, only 2 exist | All 4 templates must exist and be validated |
-| Examples | >= 2 examples | >= 3 concrete usage examples required |
-| Keywords | Mentioned but not enforced | BLOCKING/CRITICAL/MANDATORY validation |
-| Sub-agent workflow | Basic | Full DAG with model hints (haiku/sonnet) |
-
-## Acceptance Criteria
-
-### MUST (Required for pass)
-
-- AC-M01: **Templates Complete** - All 4 template files exist in templates/ folder: task-type-skill.md, tool-skill.md, workflow-skill.md, meta-skill.md
-- AC-M02: **Template Structure Valid** - Each template follows skill-general-guidelines-v2.md section order for its skill type
-- AC-M03: **Examples Minimum** - At least 3 concrete usage examples documented in references/examples.md
-- AC-M04: **Keyword Enforcement** - SKILL.md uses BLOCKING/CRITICAL/MANDATORY keywords (not emoji) for importance signals
-- AC-M05: **Line Count Limit** - SKILL.md body stays under 500 lines
-- AC-M06: **Frontmatter Valid** - YAML frontmatter has name (1-64 chars) and description (includes trigger phrases)
-- AC-M07: **Sub-Agent DAG Defined** - Execution procedure defines parallel groups with merge points and model hints (haiku/sonnet)
-- AC-M08: **Guidelines Reference** - BLOCKING reference to skill-general-guidelines-v2.md in Important Notes section
-- AC-M09: **DoD Step Output Coverage** - Every step output in Execution Procedure has corresponding DoD checkpoint with `<step_output>` tag
-- AC-M10: **Created Skill Step Output Coverage** - Every step output in created skill's Execution Procedure has corresponding DoD checkpoint
-
-### SHOULD (80% pass rate needed)
-
-- AC-S01: **Section Order Compliant** - SKILL.md follows cognitive flow: CONTEXT → DECISION → ACTION → VERIFY → REFERENCE
-- AC-S02: **Progressive Disclosure** - Complex details delegated to references/ folder, not inline in SKILL.md
-- AC-S03: **DoR/DoD XML Format** - Definition of Ready and Definition of Done use XML checkpoint format
-- AC-S04: **Variable Syntax Consistent** - Uses {variable_name} pattern throughout procedures
-
-### COULD (Optional)
-
-- AC-C01: **Cross-Reference Validation** - Step 11 validates bidirectional references for task_type skills
-- AC-C02: **Lesson Integration** - Skill update workflow checks lesson-learned.md for accumulated feedback
-- AC-C03: **Cost Efficiency** - Sub-agent model hints prefer haiku for simple tasks, sonnet for complex
-
-## Test Scenarios
-
-### AC-M01: Templates Complete
-
 ```yaml
-test:
-  name: verify_all_templates_exist
-  type: file_existence
-  steps:
-    - glob: ".github/skills/x-ipe-skill-creator-v3/templates/*.md"
-    - assert: count == 4
-    - assert: contains ["task-type-skill.md", "tool-skill.md", "workflow-skill.md", "meta-skill.md"]
-  expected: All 4 template files present
-```
+# ═══════════════════════════════════════════════════════════
+# SKILL META - x-ipe-meta-skill-creator-v3
+# ═══════════════════════════════════════════════════════════
 
-### AC-M02: Template Structure Valid
+# ─────────────────────────────────────────────────────────────
+# IDENTITY
+# ─────────────────────────────────────────────────────────────
+skill_name: x-ipe-meta-skill-creator-v3
+skill_type: x-ipe-meta
+version: "1.0.0"
+status: candidate
+created: 2026-02-05
+updated: 2026-02-06
+implementation_path: .github/skills/x-ipe-skill-creator-v3/
 
-```yaml
-test:
-  name: verify_template_section_order
-  type: content_validation
-  for_each_template:
-    - read: template content
-    - extract: section headers
-    - validate: matches skill type section order from guidelines
-  expected: Each template follows cognitive flow for its skill type
-```
+# ─────────────────────────────────────────────────────────────
+# PURPOSE
+# ─────────────────────────────────────────────────────────────
+purpose: |
+  Guide for creating effective X-IPE skills with complete template coverage, 
+  sub-agent DAG workflow, and validation against skill-general-guidelines-v2.
 
-### AC-M03: Examples Minimum
+target_skill_types:
+  - x-ipe-task-based
+  - x-ipe-tool
+  - x-ipe-workflow-orchestration
+  - x-ipe-meta
+  - x-ipe-task-category
 
-```yaml
-test:
-  name: verify_examples_count
-  type: content_validation
-  steps:
-    - read: "references/examples.md"
-    - count: "## Example" headers or equivalent
-    - assert: count >= 3
-  expected: At least 3 distinct examples documented
-```
+triggers:
+  - "create a new skill"
+  - "build a skill for {task}"
+  - "generate skill template"
 
-### AC-M04: Keyword Enforcement
+not_for:
+  - "lesson-learned: for capturing feedback on existing skills"
+  - "task-execution-guideline: for executing tasks, not creating skills"
 
-```yaml
-test:
-  name: verify_keyword_usage
-  type: content_validation
-  steps:
-    - read: "SKILL.md"
-    - grep: "BLOCKING:|CRITICAL:|MANDATORY:"
-    - assert: count >= 1
-    - grep: "⚠️|⛔|🔴|🟢"
-    - assert: count == 0
-  expected: Uses keywords, not emoji, for importance signals
-```
+# ─────────────────────────────────────────────────────────────
+# VERSION HISTORY
+# ─────────────────────────────────────────────────────────────
+upgraded_from: x-ipe-meta-skill-creator-v2
 
-### AC-M05: Line Count Limit
+improvements_over_v2:
+  - area: Templates
+    v2_issue: "4 mentioned, only 2 exist"
+    v3_fix: "All 5 templates exist and validated (added task-category)"
+  - area: Examples
+    v2_issue: ">= 2 examples"
+    v3_fix: ">= 3 concrete usage examples required"
+  - area: Keywords
+    v2_issue: "Mentioned but not enforced"
+    v3_fix: "BLOCKING/CRITICAL/MANDATORY validation (no emoji)"
+  - area: Sub-agent workflow
+    v2_issue: "Basic"
+    v3_fix: "Full DAG with model hints (haiku/sonnet)"
 
-```yaml
-test:
-  name: verify_line_count
-  type: file_metric
-  steps:
-    - read: "SKILL.md"
-    - count: lines (excluding frontmatter)
-    - assert: lines < 500
-  expected: SKILL.md body under 500 lines
-```
+# ─────────────────────────────────────────────────────────────
+# INTERFACE
+# ─────────────────────────────────────────────────────────────
+inputs:
+  required:
+    - name: skill_name
+      type: string
+      description: Name of skill to create/manage
+      validation: "lowercase, hyphens, 1-64 chars"
+    - name: skill_type
+      type: string
+      description: Type of skill
+      validation: "x-ipe-task-based | x-ipe-tool | x-ipe-workflow-orchestration | x-ipe-meta | x-ipe-task-category"
+    - name: user_request
+      type: string
+      description: Description of what the skill should do
 
-### AC-M06: Frontmatter Valid
+  optional:
+    - name: examples
+      type: array
+      default: null
+      description: Concrete usage examples provided by user
 
-```yaml
-test:
-  name: verify_frontmatter
-  type: yaml_validation
-  steps:
-    - extract: YAML frontmatter from SKILL.md
-    - assert: name field exists AND length 1-64 chars
-    - assert: description field exists AND contains trigger phrase
-  expected: Valid frontmatter with name and description
-```
+outputs:
+  artifacts:
+    - name: skill_package
+      type: directory
+      path: ".github/skills/{skill_name}/"
+      description: Complete skill with SKILL.md and bundled resources
+      created_from: "candidate/templates/{skill_type}.md"
+    - name: skill_meta
+      type: file
+      path: "x-ipe-docs/skill-meta/{skill_name}/skill-meta.md"
+      description: Skill specification with acceptance criteria
+      created_from: "candidate/templates/skill-meta-{skill_type}.md"
 
-### AC-M07: Sub-Agent DAG Defined
+  state:
+    - name: status
+      value: completed | blocked
+    - name: templates_validated
+      value: true | false
 
-```yaml
-test:
-  name: verify_subagent_dag
-  type: content_validation
-  steps:
-    - read: "SKILL.md" execution procedure section
-    - find: parallel_groups OR sub_agents definition
-    - assert: contains merge_to OR "both complete"
-    - find: model_hint OR "haiku|sonnet" reference
-  expected: DAG workflow with parallel groups and model hints
-```
+# ─────────────────────────────────────────────────────────────
+# ACCEPTANCE CRITERIA (MoSCoW)
+# ─────────────────────────────────────────────────────────────
+acceptance_criteria:
+  must:
+    # STRUCTURE - File organization
+    - id: AC-M01
+      category: structure
+      criterion: All 5 template files exist in templates/ folder
+      test: file_exists
+      expected: |
+        x-ipe-task-based.md, x-ipe-tool.md, x-ipe-workflow-orchestration.md, 
+        x-ipe-meta.md, skill-meta-x-ipe-task-based.md (and others)
+    
+    - id: AC-M02
+      category: structure
+      criterion: Each template follows skill-general-guidelines-v2.md section order
+      test: structure_validation
+      expected: Section order matches cognitive flow per skill type
 
-### AC-M08: Guidelines Reference
+    - id: AC-M03
+      category: structure
+      criterion: SKILL.md body under 500 lines
+      test: line_count
+      expected: "wc -l < 500"
 
-```yaml
-test:
-  name: verify_guidelines_reference
-  type: content_validation
-  steps:
-    - read: "SKILL.md"
-    - grep: "BLOCKING.*skill-general-guidelines"
-    - assert: count >= 1
-  expected: BLOCKING reference to guidelines in Important Notes
-```
+    # CONTENT - Required sections and quality
+    - id: AC-M04
+      category: content
+      criterion: At least 3 concrete usage examples in references/examples.md
+      test: content_check
+      expected: ">= 3 examples with ## Example headers"
 
-### AC-M09: DoD Step Output Coverage
+    - id: AC-M05
+      category: content
+      criterion: Importance signals use keywords (BLOCKING, CRITICAL, MANDATORY)
+      test: content_check
+      expected: "No emoji importance signals (⛔, ⚠️, 🔴, 🟢)"
 
-```yaml
-test:
-  name: verify_dod_step_output_coverage
-  type: content_validation
-  steps:
-    - read: "SKILL.md"
-    - extract: all <output> tags from Execution Procedure
-    - extract: all <step_output> tags from DoD
-    - compare: every step output has matching DoD checkpoint
-    - assert: unmatched_outputs == 0
-  expected: Every step output mapped to DoD checkpoint
-```
+    - id: AC-M06
+      category: content
+      criterion: YAML frontmatter has name (1-64 chars) and description (includes triggers)
+      test: yaml_parse
+      expected: "name and description fields present with trigger phrases"
 
-### AC-M10: Created Skill Step Output Coverage
+    - id: AC-M07
+      category: content
+      criterion: BLOCKING reference to skill-general-guidelines-v2.md in Important Notes
+      test: content_check
+      expected: "BLOCKING.*skill-general-guidelines pattern found"
 
-```yaml
-test:
-  name: verify_created_skill_step_output_coverage
-  type: content_validation
-  context: Run on skill being created, not skill-creator itself
-  steps:
-    - read: created skill SKILL.md
-    - extract: all <output> tags from Execution Procedure
-    - extract: all <step_output> tags from DoD
-    - compare: every step output has matching DoD checkpoint
-    - assert: unmatched_outputs == 0
-  expected: Created skill has complete step output coverage in DoD
-```
+    # BEHAVIOR - Execution produces correct results
+    - id: AC-M08
+      category: behavior
+      criterion: Sub-agent DAG defined with parallel groups and model hints
+      test: structure_validation
+      expected: "parallel_groups with merge points and haiku/sonnet hints"
 
-## Validation Matrix
+    - id: AC-M09
+      category: behavior
+      criterion: Every step output has corresponding DoD checkpoint
+      test: content_comparison
+      expected: "<output> tags map to <step_output> tags in DoD"
 
-| Criterion | Test Type | Automated | Human Review |
-|-----------|-----------|-----------|--------------|
-| AC-M01 | File existence | ✅ | - |
-| AC-M02 | Structure validation | ✅ | - |
-| AC-M03 | Content count | ✅ | - |
-| AC-M04 | Pattern matching | ✅ | - |
-| AC-M05 | Line count | ✅ | - |
-| AC-M06 | YAML parsing | ✅ | - |
-| AC-M07 | Pattern matching | ✅ | Quality review |
-| AC-M08 | Pattern matching | ✅ | - |
-| AC-M09 | Content comparison | ✅ | - |
-| AC-M10 | Content comparison | ✅ | - |
-| AC-S01-S04 | Content analysis | Partial | Quality review |
-| AC-C01-C03 | Manual review | - | ✅ |
+    - id: AC-M10
+      category: behavior
+      criterion: Created skill has complete step output coverage in DoD
+      test: content_comparison
+      expected: "Created skill's outputs all have DoD checkpoints"
 
-## Pass Criteria
+  should:
+    - id: AC-S01
+      category: content
+      criterion: Section order follows cognitive flow (CONTEXT → DECISION → ACTION → VERIFY → REFERENCE)
+      test: section_parse
+      expected: "Sections in correct order"
 
-```yaml
+    - id: AC-S02
+      category: structure
+      criterion: Complex details delegated to references/ folder
+      test: content_check
+      expected: "Progressive disclosure applied"
+
+    - id: AC-S03
+      category: content
+      criterion: DoR/DoD use XML checkpoint format
+      test: structure_validation
+      expected: "<definition_of_ready> and <definition_of_done> tags"
+
+    - id: AC-S04
+      category: content
+      criterion: Uses {variable_name} pattern throughout procedures
+      test: content_check
+      expected: "Consistent variable syntax"
+
+  could:
+    - id: AC-C01
+      category: content
+      criterion: Cross-reference validation for x-ipe-task-based skills
+      test: custom
+      expected: "Bidirectional references validated"
+
+    - id: AC-C02
+      category: behavior
+      criterion: Skill update workflow checks lesson-learned.md
+      test: content_check
+      expected: "Lesson integration documented"
+
+    - id: AC-C03
+      category: behavior
+      criterion: Sub-agent model hints prefer haiku for simple, sonnet for complex
+      test: content_check
+      expected: "Cost efficiency applied"
+
+  wont:
+    - id: AC-W01
+      criterion: Runtime code generation
+      reason: "Skills provide guidance, not executable code"
+
+# ─────────────────────────────────────────────────────────────
+# DEPENDENCIES
+# ─────────────────────────────────────────────────────────────
+dependencies:
+  skills:
+    - name: lesson-learned
+      relationship: integration
+      description: Check for accumulated feedback before updates
+
+  artifacts:
+    - path: "x-ipe-docs/skill-meta/.templates/skill-creation-best-practice/references/"
+      description: "Guideline v2 and reference files"
+
+  # ═══════════════════════════════════════════════════════════
+  # TEMPLATE MAPPING
+  # ═══════════════════════════════════════════════════════════
+  # CRITICAL: Use these templates instead of creating from scratch
+  # Location: x-ipe-docs/skill-meta/x-ipe-skill-creator-v3/candidate/templates/
+  # ═══════════════════════════════════════════════════════════
+  
+  skill_templates:
+    description: "SKILL.md templates - use to create skill implementation"
+    mapping:
+      x-ipe-task-based: x-ipe-task-based.md
+      x-ipe-tool: x-ipe-tool.md
+      x-ipe-workflow-orchestration: x-ipe-workflow-orchestration.md
+      x-ipe-meta: x-ipe-meta.md
+      x-ipe-task-category: x-ipe-workflow-orchestration.md  # Same structure
+
+  skill_meta_templates:
+    description: "skill-meta.md templates - use to create acceptance criteria"
+    mapping:
+      x-ipe-task-based: skill-meta-x-ipe-task-based.md
+      x-ipe-tool: skill-meta-x-ipe-tool.md
+      x-ipe-task-category: skill-meta-x-ipe-task-category.md
+      x-ipe-meta: skill-meta-x-ipe-meta.md
+      x-ipe-workflow-orchestration: skill-meta-x-ipe-task-based.md  # Same structure
+
+# ─────────────────────────────────────────────────────────────
+# TEMPLATE USAGE PROCEDURE
+# ─────────────────────────────────────────────────────────────
+template_usage:
+  step_1:
+    action: "Identify skill_type from user request"
+    output: "skill_type value"
+  
+  step_2:
+    action: "Load SKILL.md template"
+    source: "candidate/templates/{skill_templates.mapping[skill_type]}"
+    output: "SKILL.md scaffold"
+  
+  step_3:
+    action: "Load skill-meta.md template"  
+    source: "candidate/templates/{skill_meta_templates.mapping[skill_type]}"
+    output: "skill-meta.md scaffold"
+  
+  step_4:
+    action: "Fill templates with skill-specific content"
+    inputs: [user_request, skill_name, examples]
+    output: "Complete SKILL.md and skill-meta.md"
+  
+  step_5:
+    action: "Validate against guideline-v2"
+    reference: "references/1. skill-general-guidelines-v2.md"
+    output: "Validation result"
+
+# ─────────────────────────────────────────────────────────────
+# TESTING
+# ─────────────────────────────────────────────────────────────
+test_scenarios:
+  happy_path:
+    - name: "Create task-type skill from template"
+      given: "User request for task-type skill"
+      when: "Load x-ipe-task-based.md and skill-meta-x-ipe-task-based.md templates"
+      then: "Valid SKILL.md and skill-meta.md produced from templates"
+
+    - name: "Create tool skill from template"
+      given: "User request for utility tool"
+      when: "Load x-ipe-tool.md and skill-meta-x-ipe-tool.md templates"
+      then: "Valid SKILL.md and skill-meta.md produced from templates"
+
+    - name: "Create meta skill from template"
+      given: "User request for meta skill"
+      when: "Load x-ipe-meta.md and skill-meta-x-ipe-meta.md templates"
+      then: "Valid SKILL.md and skill-meta.md produced from templates"
+
+    - name: "Validate template structure"
+      given: "Draft skill created from template"
+      when: "Run validation against guideline-v2"
+      then: "Section order matches template structure"
+
+  edge_cases:
+    - name: "Complex skill requires sub-agents"
+      given: "5+ step skill request"
+      when: "Execute skill creator"
+      then: "DAG workflow applied"
+
+  error_cases:
+    - name: "Invalid skill type"
+      given: "Unknown skill_type parameter"
+      when: "Execute skill creator"
+      then: "Error: unsupported skill type"
+
+  blocking:
+    - name: "Missing guideline reference"
+      given: "SKILL.md without BLOCKING guideline reference"
+      when: "Run validation"
+      then: "BLOCKED: AC-M07 failed"
+
+# ─────────────────────────────────────────────────────────────
+# EVALUATION
+# ─────────────────────────────────────────────────────────────
+evaluation:
+  self_check:
+    - "All template files exist"
+    - "Line count < 500"
+    - "Section order validated"
+    - "Keyword vs emoji check passed"
+    - "DoD covers all step outputs"
+
+  judge_agent:
+    - criterion: "Quality of execution procedure clarity"
+      rubric: |
+        5: Crystal clear, unambiguous steps
+        4: Clear with minor ambiguities
+        3: Acceptable, some gaps
+        2: Confusing, significant issues
+        1: Unusable
+
+    - criterion: "Acceptance criteria completeness"
+      rubric: |
+        5: All behaviors covered with tests
+        4: Most behaviors covered
+        3: Core behaviors covered
+        2: Major gaps
+        1: Insufficient
+
+# ─────────────────────────────────────────────────────────────
+# PASS CRITERIA
+# ─────────────────────────────────────────────────────────────
 pass_criteria:
-  must_pass_rate: 100%  # All 10 MUST criteria pass
-  should_pass_rate: 80%  # At least 3 of 4 SHOULD criteria pass
-  could_pass_rate: 0%   # Optional, no minimum
+  must_pass_rate: 100%   # All 10 MUST criteria pass
+  should_pass_rate: 80%  # At least 4 of 4 SHOULD criteria pass
+  could_pass_rate: 0%    # Optional, no minimum
   
   overall_pass:
     condition: "must_pass_rate == 100% AND should_pass_rate >= 80%"
     then: "Merge to production"
     else: "Iterate (max 3 attempts) or escalate"
+
+# ─────────────────────────────────────────────────────────────
+# VALIDATION MATRIX
+# ─────────────────────────────────────────────────────────────
+validation_matrix:
+  - { criterion: AC-M01, test_type: file_existence, automated: true, human_review: false }
+  - { criterion: AC-M02, test_type: structure_validation, automated: true, human_review: false }
+  - { criterion: AC-M03, test_type: line_count, automated: true, human_review: false }
+  - { criterion: AC-M04, test_type: content_check, automated: true, human_review: false }
+  - { criterion: AC-M05, test_type: pattern_match, automated: true, human_review: false }
+  - { criterion: AC-M06, test_type: yaml_parse, automated: true, human_review: false }
+  - { criterion: AC-M07, test_type: pattern_match, automated: true, human_review: false }
+  - { criterion: AC-M08, test_type: structure_validation, automated: true, human_review: true }
+  - { criterion: AC-M09, test_type: content_comparison, automated: true, human_review: false }
+  - { criterion: AC-M10, test_type: content_comparison, automated: true, human_review: false }
+  - { criterion: AC-S01-S04, test_type: content_analysis, automated: partial, human_review: true }
+  - { criterion: AC-C01-C03, test_type: manual_review, automated: false, human_review: true }
 ```

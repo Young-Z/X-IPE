@@ -1,4 +1,0 @@
-=== TC-007: Keywords ===
-Keywords used:       18
-Emoji used:        0
-PASS

@@ -1,5 +1,0 @@
-=== TC-014: Next Task Selection ===
-Idea Mockup mentions: 4
-Idea to Architecture mentions: 4
-next options mentions: 1
-PASS

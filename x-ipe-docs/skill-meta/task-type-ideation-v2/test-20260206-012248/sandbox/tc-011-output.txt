@@ -1,4 +1,0 @@
-=== TC-011: Config Loading ===
-tools.json mentioned: 6
-Load Toolbox step: 1
-PASS

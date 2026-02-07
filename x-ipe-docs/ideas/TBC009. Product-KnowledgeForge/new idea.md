@@ -1,0 +1,1 @@
+I would like to create an knowledge base, please design the product with me and technical stack

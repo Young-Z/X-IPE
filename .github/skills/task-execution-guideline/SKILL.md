@@ -63,7 +63,7 @@ Task:
 | Task Type | Category |
 |-----------|----------|
 | `task-type-feature-refinement`, `task-type-technical-design`, `task-type-test-generation`, `task-type-code-implementation`, `task-type-feature-acceptance-test`, `task-type-feature-closing` | feature-stage |
-| `task-type-ideation`, `task-type-idea-mockup`, `task-type-idea-to-architecture` | ideation-stage |
+| `x-ipe-task-based-ideation`, `task-type-idea-mockup`, `task-type-idea-to-architecture` | ideation-stage |
 | `task-type-requirement-gathering`, `task-type-feature-breakdown` | requirement-stage |
 | `task-type-bug-fix`, `task-type-change-request`, `task-type-project-init`, `task-type-dev-environment`, `task-type-user-manual`, `task-type-human-playground`, `task-type-share-idea`, `task-type-feature-acceptance-test` | Standalone |
 | `task-type-refactoring-analysis`, `task-type-improve-code-quality-before-refactoring`, `task-type-code-refactor-v2` | code-refactoring-stage |
@@ -351,7 +351,7 @@ ELSE:
 
 | Task Type | Skill | Category | Next Task | Human Review (default) |
 |-----------|-------|----------|-----------|------------------------|
-| Ideation | `task-type-ideation` | ideation-stage | Idea Mockup OR Idea to Architecture | No |
+| Ideation | `x-ipe-task-based-ideation` | ideation-stage | Idea Mockup OR Idea to Architecture | No |
 | Idea Mockup | `task-type-idea-mockup` | ideation-stage | Requirement Gathering | No |
 | Idea to Architecture | `task-type-idea-to-architecture` | ideation-stage | Requirement Gathering | No |
 | Share Idea | `task-type-share-idea` | Standalone | - | Yes |

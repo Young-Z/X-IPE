@@ -9,7 +9,7 @@ task_id: TASK-XXX                    # Unique identifier (format: TASK-001, TASK
 task_type: ""                        # From Task Types Registry in SKILL.md
 category: ""                         # Derived from task type:
                                      # - feature-stage (task-type-feature-*, task-type-human-playground, task-type-technical-design)
-                                     # - requirement-stage (task-type-ideation, task-type-requirement-gathering, task-type-feature-breakdown)
+                                     # - requirement-stage (x-ipe-task-based-ideation, task-type-requirement-gathering, task-type-feature-breakdown)
                                      # - Standalone (no category)
 role_assigned: ""                    # Who performs the work (e.g., Nova, Claude, Human)
 status: pending                      # Task status: pending | in_progress | blocked | deferred | completed | cancelled

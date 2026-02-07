@@ -16,7 +16,7 @@ input:
   analysis: "Development lifecycle workflow"
   
 output:
-  skill_type: task_type
+  skill_type: x-ipe-task-based
   template: templates/task-type-skill.md
 ```
 
@@ -41,7 +41,7 @@ trigger_patterns:
 resources_plan:
   templates: null
   references:
-    - examples.md  # REQUIRED for task_type
+    - examples.md  # REQUIRED for x-ipe-task-based
   scripts: null
 ```
 
@@ -51,7 +51,7 @@ resources_plan:
 
 ```yaml
 skill_name: task-type-bug-fix
-skill_type: task_type
+skill_type: x-ipe-task-based
 acceptance_criteria:
   must:
     - id: AC-M01

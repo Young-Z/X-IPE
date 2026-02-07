@@ -158,59 +158,52 @@ gate_format:
 
 ## Principle 5: Sub-Agent Decomposition
 
-For complex skills with 5+ steps, decompose into parallelizable sub-agents.
+Delegate specific concerns to isolated sub-agents when the main agent benefits from separation of concerns.
 
 ```yaml
 principle:
   name: Sub-Agent Decomposition
-  pattern: DAG (Directed Acyclic Graph) Workflow
+  rationale: Some tasks benefit from isolated execution with fresh context
 
 when_to_apply:
-  consider: 5+ execution steps
-  yes_parallelize: Independent steps (no data dependencies)
-  yes_specialize: Different expertise per step
-  yes_isolate: DoD validation is complex
-  no_keep_linear: All steps sequential with tight coupling
+  validation:
+    use_when: DoD checking, quality gates, or acceptance criteria need unbiased evaluation
+    why: Validator should not be influenced by the builder's context
+    example: "Spawn sub-agent to validate DoD after implementation"
 
-workflow_definition:
-  type: dag
-  parallel_groups:
-    - name: "{phase_name}"
-      steps: [step_1, step_2]
-      merge_to: step_3
-  sequential:
-    - step_3
-    - step_4
-  dod_validator:
-    runs_after: final_step
-    agent: dod-checker
-    isolated: true
+  feedback_and_reflection:
+    use_when: Output benefits from critique-and-revise cycle
+    why: Reviewer with fresh eyes catches what the author misses
+    example: "Spawn sub-agent to review technical design, main agent revises based on feedback"
 
-step_definition:
-  step_id:
-    name: "{step_name}"
-    agent_role: "{role}"
-    specialization: "{expertise}"
-    model_hint: haiku | sonnet  # haiku for simple, sonnet for complex
-    inputs: ["{input_variables}"]
-    outputs: ["{output_names}"]
-    tools: ["{tool_list}"]
-    parallelizable_with: ["{other_step_ids}"]  # optional
+  parallel_work:
+    use_when: Independent work items have no data dependencies
+    why: Multiple sub-agents can work concurrently on separate concerns
+    example: "Spawn sub-agents to analyze 3 independent modules simultaneously"
+
+  no_decompose:
+    when: Steps are sequential with tight data coupling
+    when: Task is simple enough for single agent
+    when: Overhead of coordination exceeds benefit
 
 sub_agent_definition:
   agent_id:
     role: "{role_name}"
-    goal: "{agent_goal}"
-    model: haiku | sonnet
+    goal: "{what_agent_should_accomplish}"
+    inputs: ["{input_variables}"]
+    outputs: ["{output_names}"]
     tools: ["{tool_list}"]
-    isolated: true | false  # true for DoD checker
+    isolated: true | false  # true = fresh context, no builder bias
 
-benefits:
-  parallelization: Independent steps run concurrently
-  specialization: Each sub-agent optimized for specific role
-  modularity: DoD checker reusable across skills
-  cost_efficiency: Use cheaper models (haiku) for simple tasks
-  reliability: Isolated validation improves quality gate accuracy
+usage_in_skills:
+  format: |
+    sub_agents:
+      - id: "{agent_id}"
+        role: "{role}"
+        goal: "{goal}"
+        trigger: "{when_to_spawn}"
+        isolated: true | false
+  note: "Model is NOT specified here — each skill defines its own default model"
 ```
 
 ---
@@ -221,28 +214,40 @@ benefits:
 
 ```yaml
 skill_types:
-  task_type:
+  x-ipe-task-based:
     purpose: Development lifecycle workflows
-    naming_convention: "task-type-{name}"
+    naming_convention: "x-ipe-task-based-{name}"
     examples:
-      - task-type-ideation
-      - task-type-code-implementation
-      - task-type-bug-fix
+      - x-ipe-task-based-ideation
+      - x-ipe-task-based-code-implementation
+      - x-ipe-task-based-bug-fix
       
-  skill_category:
-    purpose: Board management and category-level operations
-    naming_convention: "{category}+{operation-name}"
+  x-ipe-task-category:
+    purpose: Orchestration skill that is called when all related task-based skills in a category finish their work
+    naming_convention: "x-ipe-{category}-{operation-name}"
     examples:
-      - task-board-management
-      - feature-board-management
+      - x-ipe-task-board-management
+      - x-ipe-feature-board-management
       
-  tool_skill:
+  x-ipe-tool:
     purpose: Utility functions and tool integrations
-    naming_convention: "{tool-name}"
+    naming_convention: "x-ipe-tool-{name}"
     examples:
-      - pdf
-      - pptx
-      - frontend-design
+      - x-ipe-tool-pdf
+      - x-ipe-tool-pptx
+      - x-ipe-tool-frontend-design
+
+  x-ipe-workflow-orchestration:
+    purpose: Multi-step workflow coordination across skill types
+    naming_convention: "x-ipe-workflow-{name}"
+    examples:
+      - x-ipe-workflow-task-execution-guideline
+
+  x-ipe-meta:
+    purpose: Skills used to create, validate, or manage other skills
+    naming_convention: "x-ipe-meta-{name}"
+    examples:
+      - x-ipe-meta-skill-creator-v3
 ```
 
 ## Skill Anatomy
@@ -287,17 +292,7 @@ directory_structure: |
 
 ## Section Order Reference
 
-See [reference-section-order.md](reference-section-order.md) for full section order by skill type.
-
-**Quick Reference - Cognitive Flow:**
-1. CONTEXT → 2. DECISION → 3. ACTION → 4. VERIFY → 5. REFERENCE
-
-| Skill Type | Key Sections |
-|------------|--------------|
-| task_type_skills | Purpose, Input Parameters, DoR, Execution Flow, Execution Procedure, Output Result, DoD |
-| tool_skills | Purpose, About, When to Use, Input Parameters, Operations, Output Result, DoD |
-| workflow_orchestration_skills | Purpose, Input Parameters, DoR, Execution Flow, Execution Procedure, Registry |
-| meta_skills | Purpose, About, Important Notes, Execution Flow, Execution Procedure |
+See [2. reference-section-order.md](2.%20reference-section-order.md) for full section order by skill type.
 
 ---
 
@@ -305,63 +300,26 @@ See [reference-section-order.md](reference-section-order.md) for full section or
 
 ## Pattern Selection Guide
 
-| Pattern | Best For | Complexity | When to Use |
-|---------|----------|------------|-------------|
-| Simple Workflow (YAML) | Complex branching logic | Medium | If/else, switch cases, multi-path decisions |
-| Complex Procedure (XML) | Linear multi-component steps | Low-Medium | Steps need distinct constraints/outputs, no complex branching |
-| Long Workflow (Phase Blocks) | Multi-phase processes | High | 5+ phases, domain transitions; nests Pattern 1 or 2 inside |
+| Pattern | Best For | When to Use |
+|---------|----------|-------------|
+| Step-Based Workflow (XML) | Linear execution following exact steps | Task must be executed in specific order, steps have distinct constraints/outputs/success criteria |
+| Function-Based Workflow (XML) | Caller selects functions as needed | Skill provides library of capabilities, caller decides which to use and when |
 
 ---
 
-## Pattern 1: Simple Workflow (YAML Format)
+## Pattern 1: Step-Based Workflow (XML-Tagged)
 
-**Use for:** Steps with complex branching logic (if/else, switch cases, multi-path decisions).
+**Use for:** Procedures that must be executed in exact step order.
 
-### Template
-
-```yaml
-workflow:
-  name: "{workflow_name}"
-  steps:
-    - step: 1
-      name: "{step_name}"
-      action: "{what to do}"
-      gate: "{condition to proceed}"
-      
-    - step: 2
-      name: "{step_name}"
-      action: "{what to do}"
-      branch:
-        if: "{condition}"
-        then: "{action_a}"
-        else: "{action_b}"
-      gate: "{condition to proceed}"
-
-  blocking_rules:
-    - "{rule that must not be skipped}"
-  
-  critical_notes:
-    - "{important caution}"
-```
-
-### Examples
-
-See examples in this folder:
-- [example-pattern1-file-validation.md](example-pattern1-file-validation.md) - File validation with parser branching
-- [example-pattern1-task-status.md](example-pattern1-task-status.md) - Task status update with transition validation
-
----
-
-## Pattern 2: Complex Procedure (XML-Tagged)
-
-**Use for:** Procedures with no or very simple branching logic, but requiring distinct constraints, outputs, and success criteria per step.
-
-CRITICAL: Claude is fine-tuned to recognize XML tags. Use this pattern when steps have multiple components that must be clearly separated. Avoid for complex branching - use Pattern 1 (YAML) instead.
+CRITICAL: Only XML elements defined in the template below are allowed. Do NOT introduce custom XML tags or modify the structure.
 
 ### Template
 
 ```xml
 <procedure name="{procedure_name}">
+  <!-- CRITICAL: Both DoR/DoD check elements below are MANDATORY -->
+  <execute_dor_checks_before_starting/>
+  <schedule_dod_checks_with_sub_agent_before_starting/>
   
   <step_1>
     <name>{Step Name}</name>
@@ -395,110 +353,124 @@ CRITICAL: Claude is fine-tuned to recognize XML tags. Use this pattern when step
     <output>{output}</output>
   </step_2>
 
+  <step_3>
+    ...
+  </step_3>
+
+  <sub-agent-planning>
+    <sub_agent_1>
+      <sub_agent_definition>
+        <role>{role_name}</role>
+        <prompt>{context, goal}</prompt>
+      </sub_agent_definition>
+      <workflow_step_reference>step_1, step_2</workflow_step_reference>
+    </sub_agent_1>
+    <sub_agent_2>
+      <sub_agent_definition>
+        <role>{role_name}</role>
+        <prompt>{context, goal}</prompt>
+      </sub_agent_definition>
+      <workflow_step_reference>step_3</workflow_step_reference>
+      <starting_condition>
+        - "START sub-agent after sub-agent_1 completes"
+      </starting_condition>
+    </sub_agent_2>
 </procedure>
 ```
 
 ### Examples
 
 See examples in this folder:
-- [example-pattern2-code-review.md](example-pattern2-code-review.md) - Code review with multi-component steps
-- [example-pattern2-feature-implementation.md](example-pattern2-feature-implementation.md) - TDD-based feature implementation
+- [3. example-step-based-code-review.md](3.%20example-step-based-code-review.md) - Code review with multi-component steps
+- [4. example-step-based-feature-implementation.md](4.%20example-step-based-feature-implementation.md) - TDD-based feature implementation
 
 ---
 
-## Pattern 3: Long Workflow (Phase Blocks)
+## Pattern 2: Function-Based Workflow (XML-Tagged)
 
-**Use for:** Workflows with 5+ distinct phases or multi-domain processes.
+**Use for:** Skills that provide a library of capabilities where the caller decides which functions to use and when.
 
-Use `## Phase N` headers to organize long workflows. Each phase should have clear entry/exit criteria.
+CRITICAL: This pattern defines available functions but does NOT prescribe execution order. Caller invokes functions based on their specific needs.
 
-**Nesting Rule:** Within each phase, nest Pattern 1 (YAML) or Pattern 2 (XML) based on the phase's internal complexity:
-- If phase has complex branching logic → use Pattern 1 (YAML) inside the phase
-- If phase has linear steps with distinct constraints/outputs → use Pattern 2 (XML) inside the phase
-- If phase is simple → use plain markdown numbered list
+CRITICAL: Only XML elements defined in the template below are allowed. Do NOT introduce custom XML tags or modify the structure.
 
 ### Template
 
-```markdown
-## Phase 1: {Phase Name} (Simple - Plain List)
-
-**Entry Criteria:** {what must be true to start this phase}
-
-Perform the following:
-1. {action_1}
-2. {action_2}
-3. {action_3}
-
-CRITICAL: {important constraint for this phase}
-
-**Exit Criteria:** {what must be true to complete this phase}
-
----
-
-## Phase 2: {Phase Name} (Complex Branching - Nested YAML)
-
-**Entry Criteria:** Phase 1 complete + {additional requirements}
-
-{yaml}
-workflow:
-  name: "{phase_workflow_name}"
-  steps:
-    - step: 1
-      name: "{step_name}"
-      action: "{what to do}"
-      branch:
-        if: "{condition_a}"
-        then: "{action_if_true}"
-        else_if: "{condition_b}"
-        then: "{action_if_b}"
-        else: "{default_action}"
-      gate: "{condition to proceed}"
-      
-    - step: 2
-      name: "{step_name}"
-      action: "{what to do}"
-      gate: "{condition to proceed}"
-{/yaml}
-
-BLOCKING: {rule that must not be violated}
-
-**Exit Criteria:** {completion criteria}
-
----
-
-## Phase 3: {Phase Name} (Linear with Constraints - Nested XML)
-
-**Entry Criteria:** Phase 2 complete + {additional requirements}
-
-{xml}
-<procedure name="{phase_procedure_name}">
-  <step_1>
-    <name>{Step Name}</name>
+```xml
+<functions>
+  <!-- CRITICAL: Both DoR/DoD check elements below are MANDATORY -->
+  <execute_dor_checks_before_starting/>
+  <schedule_dod_checks_with_sub_agent_before_starting/>
+  
+  <function name="{function_name_1}">
+    <purpose>{what this function accomplishes}</purpose>
+    <when_to_use>{scenarios where this function is appropriate}</when_to_use>
+    <inputs>
+      - {input_parameter_1}: {description}
+      - {input_parameter_2}: {description}
+    </inputs>
     <action>
-      1. {sub_action_1}
-      2. {sub_action_2}
+      1. {step_1}
+      2. {step_2}
+      3. {step_3}
     </action>
     <constraints>
       - BLOCKING: {must_not_violate}
+      - CRITICAL: {important_consideration}
     </constraints>
-    <success_criteria>
-      - {criterion_1}
-    </success_criteria>
-    <output>{what_this_step_produces}</output>
-  </step_1>
-</procedure>
-{/xml}
+    <outputs>
+      - {output_1}: {description}
+      - {output_2}: {description}
+    </outputs>
+  </function>
 
-**Exit Criteria:** {completion criteria}
+  <function name="{function_name_2}">
+    <purpose>{what this function accomplishes}</purpose>
+    <when_to_use>{scenarios where this function is appropriate}</when_to_use>
+    <inputs>
+      - {input_parameter}: {description}
+    </inputs>
+    <action>
+      1. {step_1}
+      2. {step_2}
+    </action>
+    <constraints>
+      - {constraint}
+    </constraints>
+    <outputs>
+      - {output}: {description}
+    </outputs>
+  </function>
+
+  <function name="{function_name_3}">
+    <purpose>{what this function accomplishes}</purpose>
+    <when_to_use>{scenarios where this function is appropriate}</when_to_use>
+    <inputs>
+      - {input_parameter}: {description}
+    </inputs>
+    <action>
+      1. {step}
+    </action>
+    <outputs>
+      - {output}: {description}
+    </outputs>
+  </function>
+
+</functions>
 ```
 
-**Note:** Replace `{yaml}` with triple backticks + yaml, and `{xml}` with triple backticks + xml when using in actual skills.
+### Usage Notes
+
+- Functions are **independent** - caller can invoke any function without prerequisites (unless explicitly stated in `<requires>` tag)
+- Functions can be invoked **multiple times** if needed
+- Functions can be invoked in **any order** based on caller's needs
+- If a function requires output from another function, add `<requires>{function_name} output</requires>` tag
 
 ### Examples
 
 See examples in this folder:
-- [example-pattern3-requirement-gathering.md](example-pattern3-requirement-gathering.md) - 5-phase workflow with nested YAML and XML
-- [example-pattern3-refactoring-analysis.md](example-pattern3-refactoring-analysis.md) - 6-phase analysis workflow with mixed patterns
+- [5. example-function-based-validation.md](5.%20example-function-based-validation.md) - Validation utilities library
+- [6. example-function-based-analysis.md](6.%20example-function-based-analysis.md) - Code analysis toolkit
 
 ---
 
@@ -535,7 +507,7 @@ task_completion_output:
   "{attr_name}": "{value}"
 ```
 
-See [example-task-io-code-implementation.md](example-task-io-code-implementation.md) for complete input/output example.
+See [7. example-task-io-code-implementation.md](7.%20example-task-io-code-implementation.md) for complete input/output example.
 
 ## Structured Summary
 
@@ -549,7 +521,7 @@ Use markdown table for skill outputs that summarize multiple items with consiste
 | {value}   | {value}   | {value}   | {value}   |
 ```
 
-See [example-structured-summary.md](example-structured-summary.md) for examples (Feature, Dependency, Requirement, Test Coverage).
+See [8. example-structured-summary.md](8.%20example-structured-summary.md) for examples (Feature, Dependency, Requirement, Test Coverage).
 
 ## DoR/DoD Pattern
 
@@ -583,7 +555,7 @@ Use XML format for Definition of Ready (DoR) and Definition of Done (DoD) sectio
 </definition_of_done>
 ```
 
-See [example-dor-dod.md](example-dor-dod.md) for examples (Code Implementation, Feature Refinement).
+See [9. example-dor-dod.md](9.%20example-dor-dod.md) for examples (Code Implementation, Feature Refinement).
 
 ## Gate Conditions
 
@@ -619,7 +591,7 @@ gate:
   on_fail: "{action_if_fail}"
 ```
 
-See [example-gate-conditions.md](example-gate-conditions.md) for examples (Quality Gate, Approval Gate, Release Gate).
+See [10. example-gate-conditions.md](10.%20example-gate-conditions.md) for examples (Quality Gate, Approval Gate, Release Gate).
 
 ---
 
@@ -633,7 +605,7 @@ CRITICAL: Use keywords (BLOCKING, CRITICAL, MANDATORY) for importance signals in
 | `CRITICAL:` | High priority, affects correctness |
 | `MANDATORY:` | Required, continue with warning if missing |
 
-See [reference-quality-standards.md](reference-quality-standards.md) for:
+See [11. reference-quality-standards.md](11.%20reference-quality-standards.md) for:
 - Full importance keywords reference
 - Common mistakes (anti-patterns)
 - What NOT to include in skills

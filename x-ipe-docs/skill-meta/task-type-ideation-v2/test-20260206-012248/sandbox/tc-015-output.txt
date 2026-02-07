@@ -1,5 +1,0 @@
-=== TC-015: Critique Sub-Agent ===
-sub_agent refs: 3
-model_hint refs: 1
-critic refs: 1
-PASS

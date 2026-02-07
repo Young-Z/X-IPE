@@ -16,6 +16,10 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-212 | Ideation | Refine knowledge base idea (KnowledgeForge) from draft | Cipher | 02-06-2026 13:39:00 | [idea-summary-v1.md](../ideas/TBC009.%20Product-KnowledgeForge/idea-summary-v1.md) | AI-powered team KB product. Engineering beachhead. Decision Journal in MVP. Sub-agent critique applied. |
+| TASK-211 | Skill Creation | Create x-ipe-task-based-ideation skill using v3 template | Spark | 02-06-2026 13:10:00 | [skill-meta.md](../skill-meta/x-ipe-task-based-ideation/skill-meta.md), [SKILL.md](../../.github/skills/x-ipe-task-based-ideation/SKILL.md) | v3 naming. 487 lines. XML procedure, 11 steps, sub-agent critique, 4 references. All MUST/SHOULD ACs pass. |
+| TASK-210 | Skill Creation | Create x-ipe-task-based-ideation skill using v3 template | Spark | 02-06-2026 12:30:00 | [skill-meta.md](../skill-meta/x-ipe-task-based-ideation/skill-meta.md), [SKILL.md](../skill-meta/x-ipe-task-based-ideation/candidate/SKILL.md) | v3 naming convention. 407 lines. XML procedure, 10 sections, 5 references. |
+| TASK-213 | Dev Environment Setup | Publish package to PyPI using ~/.pypirc | Nova | 02-06-2026 14:28:00 | https://pypi.org/project/x-ipe/1.0.25/ | Published x-ipe 1.0.25 to PyPI. |
 | TASK-209 | Bug Fix | Style sidebar nav-section-header backgrounds to match UIUX Feedback design | Zephyr | 02-06-2026 10:00:00 | [sidebar.css](../../src/x_ipe/static/css/sidebar.css) | Applied subtle background to all menu items including children. Removed Ideation yellow tint. |
 | TASK-208 | Feature Closing | Close FEATURE-026 Homepage Infinity Loop | Echo | 02-06-2026 02:55:00 | [CHANGELOG.md](../../CHANGELOG.md), commit 512dbf6 | 16/18 ACs met. PR commit created. Feature complete. |
 | TASK-207 | Feature Acceptance Test | Execute acceptance tests for FEATURE-026 Homepage Infinity Loop | Echo | 02-06-2026 02:45:00 | [acceptance-test-cases.md](../requirements/FEATURE-026/acceptance-test-cases.md) | 13 test cases: 10 PASS, 3 PARTIAL. Pass rate 77%. Logo click, 8 stage buttons, TBD tooltip working. |
@@ -94,13 +98,20 @@
 
 ## Quick Stats
 
-- **Total Active:** 2
-- **In Progress:** 2
+- **Total Active:** 1
+- **In Progress:** 1
 - **Deferred:** 0
-- **Completed (archived):** 260
+- **Completed (archived):** 263
 - **Pending:** 0
 - **Pending Review:** 0
 - **Blocked:** 0
+ - **Total Active:** 1
+ - **In Progress:** 1
+ - **Deferred:** 0
+ - **Completed (archived):** 264
+ - **Pending:** 0
+ - **Pending Review:** 0
+ - **Blocked:** 0
 
 ---
 

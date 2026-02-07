@@ -65,7 +65,7 @@
 
 | Task Type | Skill | Category | Next Task | Human Review (default) |
 |-----------|-------|----------|-----------|------------------------|
-| Ideation | `task-type-ideation-v2` | ideation-stage | Idea Mockup OR Idea to Architecture | No |
+| Ideation | `x-ipe-task-based-ideation` | ideation-stage | Idea Mockup OR Idea to Architecture | No |
 | Idea Mockup | `task-type-idea-mockup` | ideation-stage | Requirement Gathering | No |
 | Idea to Architecture | `task-type-idea-to-architecture` | ideation-stage | Requirement Gathering | No |
 | Share Idea | `task-type-share-idea` | Standalone | - | Yes |
@@ -151,15 +151,16 @@ Always follow:
 ### Creating, Updating, or Validating X-IPE Skills
 
 **When:** Creating a new skill, updating an existing skill, or validating skill structure
-**Then:** Always use the `x-ipe-skill-creator` skill
+**Then:** Always use the `x-ipe-skill-creator-v3` skill
 
 ```
-1. Load skill: `x-ipe-skill-creator`
+1. Load skill: `x-ipe-skill-creator-v3`
 2. Follow the skill creation process defined in the skill
 3. Use appropriate template based on skill type:
-   - Task Type → templates/task-type-skill.md
-   - Skill Category → templates/skill-category-skill.md
-   - Tool Skill → TBD
+   - Task Type → templates/x-ipe-task-based.md
+   - Tool Skill → templates/x-ipe-tool.md
+   - Workflow Orchestration → templates/x-ipe-workflow-orchestration.md
+   - Meta Skill → templates/x-ipe-meta.md
 4. Validate against skill-creator checklist before completing
 ```
 

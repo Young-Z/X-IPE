@@ -1,5 +1,0 @@
-=== TC-009: Draft-Critique-Improve ===
-Draft step: 1
-Critique step: 1
-Improve step: 1
-PASS

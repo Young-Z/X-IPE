@@ -1,3 +1,0 @@
-=== TC-012: Brainstorming Rules ===
-3-5 questions rule: 4
-PASS
