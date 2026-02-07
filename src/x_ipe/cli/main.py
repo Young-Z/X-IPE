@@ -340,46 +340,50 @@ def _handle_cli_migration(project_root: Path, cli_name: str, dry_run: bool, forc
         config = yaml.safe_load(f) or {}
     current_cli = config.get('cli', 'copilot')
 
-    if current_cli == cli_name:
+    if current_cli == cli_name and not force:
         click.echo(f"Already using '{cli_name}'. No migration needed.")
+        click.echo("Use --force to re-run migration (e.g. to copy missing skills).")
         return
 
-    click.echo(f"Migrating from '{current_cli}' to '{cli_name}'")
+    same_cli = (current_cli == cli_name)
+
+    click.echo(f"Migrating {'(re-run)' if same_cli else f'from {current_cli!r}'} to '{cli_name}'")
     click.echo("-" * 40)
 
-    old_adapter = service.get_adapter(current_cli)
+    old_adapter = service.get_adapter(current_cli) if not same_cli else None
     new_adapter = service.get_adapter(cli_name)
 
-    # 1. Backup old artifacts
-    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    backup_dir = project_root / ".x-ipe" / "backup" / f"{current_cli}-{timestamp}"
-    backed_up = []
+    # 1. Backup old artifacts (skip when re-running same CLI)
+    old_skills = project_root / old_adapter.skills_folder if old_adapter else None
+    old_instructions = project_root / old_adapter.instructions_file if old_adapter else None
 
-    old_skills = project_root / old_adapter.skills_folder
-    old_instructions = project_root / old_adapter.instructions_file
+    if not same_cli:
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        backup_dir = project_root / ".x-ipe" / "backup" / f"{current_cli}-{timestamp}"
+        backed_up = []
 
-    if not dry_run:
-        backup_dir.mkdir(parents=True, exist_ok=True)
+        if not dry_run:
+            backup_dir.mkdir(parents=True, exist_ok=True)
 
-        if old_skills.exists():
-            shutil.copytree(old_skills, backup_dir / "skills", dirs_exist_ok=True)
-            backed_up.append(str(old_skills))
+            if old_skills and old_skills.exists():
+                shutil.copytree(old_skills, backup_dir / "skills", dirs_exist_ok=True)
+                backed_up.append(str(old_skills))
 
-        if old_instructions.exists():
-            shutil.copy2(old_instructions, backup_dir / old_instructions.name)
-            backed_up.append(str(old_instructions))
+            if old_instructions and old_instructions.exists():
+                shutil.copy2(old_instructions, backup_dir / old_instructions.name)
+                backed_up.append(str(old_instructions))
 
-        # Back up project-scoped or nested MCP config
-        if old_adapter.mcp_config_format in ("project", "nested"):
-            old_mcp = project_root / old_adapter.mcp_config_path
-            if old_mcp.exists():
-                shutil.copy2(old_mcp, backup_dir / old_mcp.name)
-                backed_up.append(str(old_mcp))
+            # Back up project-scoped or nested MCP config
+            if old_adapter.mcp_config_format in ("project", "nested"):
+                old_mcp = project_root / old_adapter.mcp_config_path
+                if old_mcp.exists():
+                    shutil.copy2(old_mcp, backup_dir / old_mcp.name)
+                    backed_up.append(str(old_mcp))
 
-    if backed_up:
-        click.echo(f"Backed up {len(backed_up)} artifact(s) to {backup_dir}")
-    elif not dry_run:
-        click.echo("No artifacts to back up.")
+        if backed_up:
+            click.echo(f"Backed up {len(backed_up)} artifact(s) to {backup_dir}")
+        elif not dry_run:
+            click.echo("No artifacts to back up.")
 
     # 2. Update .x-ipe.yaml
     if not dry_run:
@@ -395,25 +399,58 @@ def _handle_cli_migration(project_root: Path, cli_name: str, dry_run: bool, forc
 
     # 3. Migrate skills to new CLI folder
     new_skills = project_root / new_adapter.skills_folder
-    if old_skills.exists() and not new_skills.exists():
-        if not dry_run:
-            shutil.copytree(old_skills, new_skills, dirs_exist_ok=True)
-            click.echo(f"Copied skills: {old_adapter.skills_folder} → {new_adapter.skills_folder}")
+    if not new_skills.exists() or (force and old_skills and old_skills.exists()):
+        # Find source: explicit old adapter, or scan all known CLI skill folders
+        source_skills = None
+        if old_skills and old_skills.exists():
+            source_skills = old_skills
+            source_label = old_adapter.skills_folder
         else:
-            click.echo(f"Would copy skills: {old_adapter.skills_folder} → {new_adapter.skills_folder}")
-    elif old_skills.exists() and new_skills.exists():
+            # Scan all adapters to find where skills actually live
+            for adapter in service.list_adapters():
+                candidate = project_root / adapter.skills_folder
+                if candidate.exists() and adapter.name != cli_name and any(candidate.iterdir()):
+                    source_skills = candidate
+                    source_label = adapter.skills_folder
+                    break
+
+        if source_skills:
+            if not dry_run:
+                new_skills.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(source_skills, new_skills, dirs_exist_ok=True)
+                click.echo(f"Copied skills: {source_label} → {new_adapter.skills_folder}")
+            else:
+                click.echo(f"Would copy skills: {source_label} → {new_adapter.skills_folder}")
+        elif not new_skills.exists():
+            click.echo(f"No source skills found to copy to {new_adapter.skills_folder}")
+    else:
         click.echo(f"Skills folder already exists: {new_adapter.skills_folder} (skipped)")
 
     # 4. Migrate instructions file
     new_instructions = project_root / new_adapter.instructions_file
-    if old_instructions.exists() and not new_instructions.exists():
-        if not dry_run:
-            new_instructions.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(old_instructions, new_instructions)
-            click.echo(f"Copied instructions: {old_adapter.instructions_file} → {new_adapter.instructions_file}")
+    if not new_instructions.exists() or (force and old_instructions and old_instructions.exists()):
+        source_instructions = None
+        if old_instructions and old_instructions.exists():
+            source_instructions = old_instructions
+            source_instr_label = old_adapter.instructions_file
         else:
-            click.echo(f"Would copy instructions: {old_adapter.instructions_file} → {new_adapter.instructions_file}")
-    elif old_instructions.exists() and new_instructions.exists():
+            for adapter in service.list_adapters():
+                candidate = project_root / adapter.instructions_file
+                if candidate.exists() and adapter.name != cli_name:
+                    source_instructions = candidate
+                    source_instr_label = adapter.instructions_file
+                    break
+
+        if source_instructions:
+            if not dry_run:
+                new_instructions.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source_instructions, new_instructions)
+                click.echo(f"Copied instructions: {source_instr_label} → {new_adapter.instructions_file}")
+            else:
+                click.echo(f"Would copy instructions: {source_instr_label} → {new_adapter.instructions_file}")
+        elif not new_instructions.exists():
+            click.echo(f"No source instructions found to copy to {new_adapter.instructions_file}")
+    else:
         click.echo(f"Instructions file already exists: {new_adapter.instructions_file} (skipped)")
 
     # 5. Deploy MCP config for new CLI

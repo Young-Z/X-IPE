@@ -200,6 +200,24 @@ class TestSkillsMigration:
             assert result.exit_code == 0
             assert not (temp_project / ".opencode" / "skills").exists()
 
+    def test_force_rerun_scans_other_cli_folders(self, runner, temp_project):
+        """When config already says opencode but skills are in .github/skills, --force copies them."""
+        import yaml
+        # Simulate v1.0.29 state: cli=opencode but skills still in .github/skills
+        config = {"project_name": "test", "cli": "opencode", "paths": {"skills": ".opencode/skills"}}
+        (temp_project / ".x-ipe.yaml").write_text(yaml.dump(config))
+        from src.x_ipe.cli.main import cli
+        old, new = self._make_adapters()
+        with patch("x_ipe.cli.main.CLIAdapterService") as MockService:
+            mock_svc = MockService.return_value
+            mock_svc.get_adapter.side_effect = lambda n: new if n == "opencode" else old
+            mock_svc.list_adapters.return_value = [old, new]
+            result = runner.invoke(cli, ["-p", str(temp_project), "upgrade", "--cli", "opencode", "--force", "--no-mcp"])
+            assert result.exit_code == 0
+            new_skills = temp_project / ".opencode" / "skills" / "test-skill" / "SKILL.md"
+            assert new_skills.exists()
+            assert new_skills.read_text() == "# Test Skill"
+
 
 class TestConfigUpdate:
     """AC-3: Config Update."""
