@@ -16,6 +16,7 @@
 
 | Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-214 | Ideation | Refine idea for adding multi-CLI support (Copilot, OpenCode, Claude Code) | Zephyr | 02-07-2026 07:30:00 | [idea-summary-v1.md](../ideas/013.%20Feature-Adding%20Support%20to%20OpenCode%20CLI/idea-summary-v1.md) | Multi-CLI adapter architecture. All 3 CLIs share SKILL.md convention. Human approved → Requirement Gathering. |
 | TASK-212 | Ideation | Refine knowledge base idea (KnowledgeForge) from draft | Cipher | 02-06-2026 13:39:00 | [idea-summary-v1.md](../ideas/TBC009.%20Product-KnowledgeForge/idea-summary-v1.md) | AI-powered team KB product. Engineering beachhead. Decision Journal in MVP. Sub-agent critique applied. |
 | TASK-211 | Skill Creation | Create x-ipe-task-based-ideation skill using v3 template | Spark | 02-06-2026 13:10:00 | [skill-meta.md](../skill-meta/x-ipe-task-based-ideation/skill-meta.md), [SKILL.md](../../.github/skills/x-ipe-task-based-ideation/SKILL.md) | v3 naming. 487 lines. XML procedure, 11 steps, sub-agent critique, 4 references. All MUST/SHOULD ACs pass. |
 | TASK-210 | Skill Creation | Create x-ipe-task-based-ideation skill using v3 template | Spark | 02-06-2026 12:30:00 | [skill-meta.md](../skill-meta/x-ipe-task-based-ideation/skill-meta.md), [SKILL.md](../skill-meta/x-ipe-task-based-ideation/candidate/SKILL.md) | v3 naming convention. 407 lines. XML procedure, 10 sections, 5 references. |
@@ -101,17 +102,10 @@
 - **Total Active:** 1
 - **In Progress:** 1
 - **Deferred:** 0
-- **Completed (archived):** 263
+- **Completed (archived):** 265
 - **Pending:** 0
 - **Pending Review:** 0
 - **Blocked:** 0
- - **Total Active:** 1
- - **In Progress:** 1
- - **Deferred:** 0
- - **Completed (archived):** 264
- - **Pending:** 0
- - **Pending Review:** 0
- - **Blocked:** 0
 
 ---
 
