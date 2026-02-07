@@ -4,9 +4,11 @@
 
 ## Active Tasks
 
-| Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
+| Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-183 | Feature Acceptance Test | Execute UIUX acceptance tests for FEATURE-001 | Bolt | 🔄 in_progress | 02-05-2026 07:45:00 | - | Feature Closing |
+
+
+
 
 
 
@@ -14,8 +16,23 @@
 
 ## Completed Tasks
 
-| Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
+| Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-228 | Code Implementation | Implement FEATURE-027-D MCP Configuration Deployment (spec→design→tests→code) | Rune | 02-07-2026 15:25:00 | [specification.md](../requirements/FEATURE-027-D/specification.md), [technical-design.md](../requirements/FEATURE-027-D/technical-design.md), [test_mcp_deployer.py](../../tests/test_mcp_deployer.py), [mcp_deployer_service.py](../../src/x_ipe/services/mcp_deployer_service.py) | 20/20 tests pass. CLI-agnostic MCP deployment with path resolution, merge, preserve, dry-run. 0 regressions. |
+| TASK-226 | Code Implementation | Implement FEATURE-027-B CLI Init & Selection (spec→design→tests→code) | Rune | 02-07-2026 15:10:00 | [specification.md](../requirements/FEATURE-027-B/specification.md), [technical-design.md](../requirements/FEATURE-027-B/technical-design.md), [test_cli_init_selection.py](../../tests/test_cli_init_selection.py) | 11/11 tests pass. --cli flag, auto-detect, config storage. Graceful non-interactive fallback. 0 regressions. |
+| TASK-227 | Feature Refinement | Refine FEATURE-027-C Skill & Instruction Translation | Bolt | 02-07-2026 14:43:00 | [specification.md](../requirements/FEATURE-027-C/specification.md) | 24 ACs across 6 groups. 7 user stories. 6 FRs, 5 NFRs, 7 BRs, 13 edge cases. All DoD pass. |
+| TASK-225 | Code Implementation | Implement FEATURE-027-A CLI Adapter Registry & Service | Rune | 02-07-2026 14:12:00 | [cli_adapter_service.py](../../src/x_ipe/services/cli_adapter_service.py), [config_routes.py](../../src/x_ipe/routes/config_routes.py), [cli-adapters.yaml](../../src/x_ipe/resources/config/cli-adapters.yaml) | 31/31 tests pass. 3 files created, 3 files modified. No regressions (1152 passed, 5 pre-existing failures). |
+| TASK-224 | Test Generation | Generate tests for FEATURE-027-A CLI Adapter Registry & Service | Rune | 02-07-2026 14:08:00 | [test_cli_adapter.py](../../tests/test_cli_adapter.py) | 31 tests across 8 classes. All fail (TDD ready). Covers AC-1 to AC-6 + edge cases + integration. |
+| TASK-223 | Technical Design | Design FEATURE-027-A CLI Adapter Registry & Service | Rune | 02-07-2026 13:55:00 | [technical-design.md](../requirements/FEATURE-027-A/technical-design.md) | 4 components: CLIAdapterData, CLIAdapterService, cli-adapters.yaml, config_routes.py. Follows ConfigService pattern. All DoD pass. |
+| TASK-222 | Feature Refinement | Refine FEATURE-027-A CLI Adapter Registry & Service | Rune | 02-07-2026 13:45:00 | [specification.md](../requirements/FEATURE-027-A/specification.md) | 18 ACs across 6 groups. 5 user stories. 6 FRs, 4 NFRs, 5 BRs, 9 edge cases. All DoD pass. |
+| TASK-221 | Feature Breakdown | Break down FEATURE-027 Multi-CLI Adapter into 5 sub-features (A-E) | Rune | 02-07-2026 13:25:00 | [requirement-details-part-6.md](../requirements/requirement-details-part-6.md), [features.md](features.md) | 5 sub-features: A (Registry), B (Init), C (Translation), D (MCP), E (Migration). Dependency DAG: A→B,C,D→E. All DoD pass. |
+| TASK-215 | Requirement Gathering | Gather requirements for multi-CLI adapter support (IDEA-013) | Rune | 02-07-2026 13:20:00 | [requirement-details-part-6.md](../requirements/requirement-details-part-6.md) | FEATURE-027 documented. 42 ACs, 4 NFRs. Human approved. |
+| TASK-183 | Feature Acceptance Test | Execute UIUX acceptance tests for FEATURE-001 | Bolt | 02-07-2026 08:42:00 | - | Closed by human request. |
+| TASK-220 | Code Refactor V2 | Rename all 38 skill folders to v3 naming convention + update 150+ reference files | Ember | 02-07-2026 09:55:00 | - | 38 folders renamed, 150 files updated, 748+ replacements. All references validated. |
+| TASK-219 | Code Refactor V2 | Update all 37 skills to v3 standards (Batches 3-8: 28 skills) | Ember | 02-07-2026 09:00:00 | - | All 37 skills refactored to v3. Line counts 207-407 (all under 500). Section counts match template types (10/11/12). Zero emoji importance signals. |
+| TASK-218 | Code Refactor V2 | Refactor x-ipe-task-based-feature-breakdown SKILL.md to v3 task-based template | Ember | 02-07-2026 08:05:00 | [SKILL.md](../../.github/skills/x-ipe-task-based-feature-breakdown/SKILL.md) | 16 sections consolidated to 10. XML procedure, YAML I/O, no emojis. 365 lines. |
+| TASK-217 | Code Refactor V2 | Update skills to v3 standards (Batch 2: Feature Stage - 8 skills) | Ember | 02-07-2026 07:40:00 | - | All 8 feature-stage skills restructured to v3 format. |
+| TASK-216 | Code Refactor V2 | Update skills to v3 standards (Batch 1: x-ipe-workflow-task-execution, x-ipe+all+task-board-management) | Ember | 02-07-2026 07:35:00 | [x-ipe-workflow-task-execution/SKILL.md](../../.github/skills/x-ipe-workflow-task-execution/SKILL.md), [x-ipe+all+task-board-management/SKILL.md](../../.github/skills/x-ipe+all+task-board-management/SKILL.md) | Batch 1 complete. Both skills restructured to v3: XML procedures, DoR/DoD, YAML I/O, no emojis. 391 + 304 lines. |
 | TASK-214 | Ideation | Refine idea for adding multi-CLI support (Copilot, OpenCode, Claude Code) | Zephyr | 02-07-2026 07:30:00 | [idea-summary-v1.md](../ideas/013.%20Feature-Adding%20Support%20to%20OpenCode%20CLI/idea-summary-v1.md) | Multi-CLI adapter architecture. All 3 CLIs share SKILL.md convention. Human approved → Requirement Gathering. |
 | TASK-212 | Ideation | Refine knowledge base idea (KnowledgeForge) from draft | Cipher | 02-06-2026 13:39:00 | [idea-summary-v1.md](../ideas/TBC009.%20Product-KnowledgeForge/idea-summary-v1.md) | AI-powered team KB product. Engineering beachhead. Decision Journal in MVP. Sub-agent critique applied. |
 | TASK-211 | Skill Creation | Create x-ipe-task-based-ideation skill using v3 template | Spark | 02-06-2026 13:10:00 | [skill-meta.md](../skill-meta/x-ipe-task-based-ideation/skill-meta.md), [SKILL.md](../../.github/skills/x-ipe-task-based-ideation/SKILL.md) | v3 naming. 487 lines. XML procedure, 11 steps, sub-agent critique, 4 references. All MUST/SHOULD ACs pass. |
@@ -27,7 +44,7 @@
 | TASK-206 | Code Implementation | Implement FEATURE-026 Homepage Infinity Loop | Echo | 02-05-2026 16:30:00 | [homepage_service.py](../../src/x_ipe/services/homepage_service.py), [homepage-infinity.js](../../src/x_ipe/static/js/features/homepage-infinity.js), [homepage-infinity.css](../../src/x_ipe/static/css/homepage-infinity.css) | Full implementation: Backend service + Frontend JS/CSS + Integration with workplace.js, sidebar.js, init.js. 26 tests passing. |
 | TASK-203 | Test Generation | Generate tests for FEATURE-026 Homepage Infinity Loop | Echo | 02-05-2026 15:42:00 | [test_homepage_infinity.py](../../tests/test_homepage_infinity.py) | 28 tests: stage mapping (7), template (6), API (2), stage details (8), positions (3), tracing (2). TDD ready: 28 errors, 0 passing. |
 | TASK-205 | Code Implementation | Refine skill-meta-tool.md based on x-ipe-skill-creator-v3 guidelines | Drift | 02-06-2026 10:15:00 | [skill-meta-tool.md](../skill-meta/templates/tool-skill/skill-meta-tool.md) | Refined structure to match V3 standard: 12 defined sections, XML operations, structured ACs. |
-| TASK-204 | Code Implementation | Refine skill-meta-task-type.md based on x-ipe-skill-creator-v3 guidelines | Drift | 02-06-2026 10:05:00 | [skill-meta-task-type.md](../skill-meta/templates/task-type-skill/skill-meta-task-type.md) | Refined ACs to match v3 section order (10 sections) and frontmatter requirements. |
+| TASK-204 | Code Implementation | Refine skill-meta-task-type.md based on x-ipe-skill-creator-v3 guidelines | Drift | 02-06-2026 10:05:00 | [skill-meta-task-type.md](../skill-meta/templates/x-ipe-task-based-skill/skill-meta-task-type.md) | Refined ACs to match v3 section order (10 sections) and frontmatter requirements. |
 | TASK-202 | Technical Design | Design FEATURE-026 Homepage Infinity Loop | Echo | 02-05-2026 15:36:00 | [technical-design.md](../requirements/FEATURE-026/technical-design.md) | Standalone homepage-infinity.js (800-line rule). SVG/CSS with PNG fallback. Sidebar highlight API added. |
 | TASK-201 | Feature Closing | Close FEATURE-025-A KB Core Infrastructure | Flux | 02-05-2026 16:15:00 | [CHANGELOG.md](../../CHANGELOG.md) | Feature complete. All 6 ACs verified. Changelog updated. Status: Completed. |
 | TASK-200 | Feature Refinement | Refine FEATURE-026 Homepage Infinity Loop | Echo | 02-05-2026 15:32:00 | [specification.md](../requirements/FEATURE-026/specification.md) | 18 AC, 3 FR, 5 NFR. Entry points, stage mapping, sidebar integration. Mockup analyzed. |
@@ -59,7 +76,7 @@
 
 ## Cancelled Tasks
 
-| Task ID | Task Type | Description | Reason | Last Updated | Output Links |
+| Task ID | Task | Description | Reason | Last Updated | Output Links |
 |---------|-----------|-------------|--------|--------------|--------------|
 | TASK-042 | Human Playground | Interactive testing for FEATURE-003: Content Editor | No longer needed | 01-23-2026 04:52:00 | - |
 | TASK-032 | Human Playground | Create interactive playground for FEATURE-005: Interactive Console | No longer needed | 01-23-2026 04:52:00 | - |
@@ -79,31 +96,31 @@
 
 ---
 
-## Task Type Quick Reference
+## Task-Based Skills Quick Reference
 
-| Task Type | Skill | Default Next |
+| Task | Skill | Default Next |
 |-----------|-------|--------------|
-| Requirement Gathering | task-type-requirement-gathering | Feature Breakdown |
-| Feature Breakdown | task-type-feature-breakdown | Technical Design |
-| Technical Design | task-type-technical-design | Test Generation |
-| Test Generation | task-type-test-generation | Code Implementation |
-| Code Implementation | task-type-code-implementation | Feature Acceptance Test |
-| Feature Acceptance Test | task-type-feature-acceptance-test | Feature Closing |
-| Human Playground | task-type-human-playground | Feature Closing |
-| Feature Closing | task-type-feature-closing | - |
-| Code Refactor | task-type-code-refactor | - |
-| Project Initialization | task-type-project-init | Dev Environment Setup |
-| Dev Environment Setup | task-type-dev-environment | - |
+| Requirement Gathering | x-ipe-task-based-requirement-gathering | Feature Breakdown |
+| Feature Breakdown | x-ipe-task-based-feature-breakdown | Technical Design |
+| Technical Design | x-ipe-task-based-technical-design | Test Generation |
+| Test Generation | x-ipe-task-based-test-generation | Code Implementation |
+| Code Implementation | x-ipe-task-based-code-implementation | Feature Acceptance Test |
+| Feature Acceptance Test | x-ipe-task-based-feature-acceptance-test | Feature Closing |
+| Human Playground | x-ipe-task-based-human-playground | Feature Closing |
+| Feature Closing | x-ipe-task-based-feature-closing | - |
+| Code Refactor | x-ipe-task-based-code-refactor | - |
+| Project Initialization | x-ipe-task-based-project-init | Dev Environment Setup |
+| Dev Environment Setup | x-ipe-task-based-dev-environment | - |
 
 ---
 
 ## Quick Stats
 
-- **Total Active:** 1
-- **In Progress:** 1
-- **Deferred:** 0
-- **Completed (archived):** 265
+- **Total Active:** 0
+- **In Progress:** 0
 - **Pending:** 0
+- **Deferred:** 0
+- **Completed (archived):** 267
 - **Pending Review:** 0
 - **Blocked:** 0
 

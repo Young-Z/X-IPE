@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 02-05-2026 14:58:00
+> Last Updated: 02-07-2026 13:20:00
 
 ## Overview
 
@@ -57,12 +57,17 @@ This board tracks all features across the project lifecycle.
 | FEATURE-025-E | KB Search & Preview | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
 | FEATURE-025-F | KB Navigation & Polish | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
 | FEATURE-026 | Homepage Infinity Loop | v1.0 | Completed | [specification.md](../requirements/FEATURE-026/specification.md), [technical-design.md](../requirements/FEATURE-026/technical-design.md), [acceptance-test-cases.md](../requirements/FEATURE-026/acceptance-test-cases.md) | 02-05-2026 | 02-06-2026 02:50:00 |
+| FEATURE-027-A | CLI Adapter Registry & Service | v1.0 | Implemented | [specification.md](../requirements/FEATURE-027-A/specification.md), [technical-design.md](../requirements/FEATURE-027-A/technical-design.md) | 02-07-2026 | 02-07-2026 14:12:00 |
+| FEATURE-027-B | CLI Init & Selection | v1.0 | Implemented | [specification.md](../requirements/FEATURE-027-B/specification.md), [test_cli_init_selection.py](../../tests/test_cli_init_selection.py) | 02-07-2026 | 02-07-2026 15:10:00 |
+| FEATURE-027-C | Skill & Instruction Translation | v1.0 | Refined | [specification.md](../requirements/FEATURE-027-C/specification.md) | 02-07-2026 | 02-07-2026 14:43:00 |
+| FEATURE-027-D | MCP Configuration Deployment | v1.0 | Implemented | [specification.md](../requirements/FEATURE-027-D/specification.md), [test_mcp_deployer.py](../../tests/test_mcp_deployer.py), [mcp_deployer_service.py](../../src/x_ipe/services/mcp_deployer_service.py) | 02-07-2026 | 02-07-2026 15:25:00 |
+| FEATURE-027-E | CLI Migration & Upgrade | v1.0 | Planned | - | 02-07-2026 | 02-07-2026 13:20:00 |
 
 ---
 
 ## Status Details
 
-### Planned (17)
+### Planned (18)
 - FEATURE-007: Git Integration
 - FEATURE-014: Theme-Aware Frontend Design Skill
 - FEATURE-017: Architecture DSL JavaScript Library
@@ -80,9 +85,18 @@ This board tracks all features across the project lifecycle.
 - FEATURE-025-E: KB Search & Preview
 - FEATURE-025-F: KB Navigation & Polish
 - FEATURE-026: Homepage Infinity Loop
+- FEATURE-027-E: CLI Migration & Upgrade
 
-### Refined (1)
+### Refined (3)
 - FEATURE-024: Project Quality Evaluation UI
+- FEATURE-027-B: CLI Init & Selection
+- FEATURE-027-C: Skill & Instruction Translation
+
+### Designed (0)
+
+### Implemented (2)
+- FEATURE-027-A: CLI Adapter Registry & Service
+- FEATURE-027-D: MCP Configuration Deployment
 
 ### Designed (4)
 - FEATURE-005: Interactive Console v2.0
@@ -690,3 +704,95 @@ This board tracks all features across the project lifecycle.
 - Tree view switching between tabs
 - Active tab visual indicator
 - UX polish and consistency with X-IPE design system
+
+---
+
+### FEATURE-027-A: CLI Adapter Registry & Service
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Core adapter registry with YAML config, service layer, API endpoint, CLI auto-detection, and backward compatibility. Foundation for all multi-CLI features.  
+**Dependencies:** FEATURE-018 (X-IPE CLI Tool)  
+**Specification:** -  
+**Technical Design:** -  
+
+**Key Capabilities:**
+- `cli-adapters.yaml` config defining Copilot, OpenCode, Claude Code adapters
+- `CLIAdapterService` with get/list/detect/switch methods
+- Active CLI stored in `.x-ipe.yaml` under `cli` key
+- Auto-detection with priority: Copilot > OpenCode > Claude Code
+- API endpoint `/api/config/cli-adapter`
+- Prompt escaping for shell safety
+
+---
+
+### FEATURE-027-B: CLI Init & Selection
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Update `x-ipe init` to auto-detect installed CLIs, present selection to user, and deploy CLI-specific artifacts.  
+**Dependencies:** FEATURE-027-A, FEATURE-019  
+**Specification:** -  
+**Technical Design:** -  
+
+**Key Capabilities:**
+- Auto-detect installed CLIs during init
+- Interactive CLI selection with pre-selected default
+- Warning (not error) when selected CLI not installed
+- Store selection in `.x-ipe.yaml`
+- Deploy CLI-specific artifacts (instructions, skills, MCP)
+
+---
+
+### FEATURE-027-C: Skill & Instruction Translation
+
+**Version:** v1.0  
+**Status:** Refined  
+**Description:** Translate canonical X-IPE skills to each CLI's native format. Copilot = no-op, OpenCode = frontmatter filter, Claude Code = frontmatter remap.  
+**Dependencies:** FEATURE-027-A  
+**Specification:** [specification.md](../requirements/FEATURE-027-C/specification.md)  
+**Technical Design:** -  
+
+**Key Capabilities:**
+- `SkillTranslator` service with per-adapter strategies
+- Copilot: no-op (native `.github/skills/`)
+- OpenCode: copy to `.opencode/skills/`, generate `AGENTS.md`
+- Claude Code: copy to `.claude/skills/`, generate `CLAUDE.md`
+- Idempotent translation, subdirectory handling
+- Graceful per-skill error handling
+
+---
+
+### FEATURE-027-D: MCP Configuration Deployment
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** Deploy MCP server configuration in each CLI's native format and location, preserving existing non-X-IPE entries.  
+**Dependencies:** FEATURE-027-A  
+**Specification:** -  
+**Technical Design:** -  
+
+**Key Capabilities:**
+- Copilot: merge into `~/.copilot/mcp-config.json` (global)
+- OpenCode: embed in `opencode.json` under `mcpServers` (project)
+- Claude Code: write to `.mcp.json` (project)
+- Preserve non-X-IPE MCP entries during merge
+- Graceful handling of malformed JSON
+
+---
+
+### FEATURE-027-E: CLI Migration & Upgrade
+
+**Version:** v1.0  
+**Status:** Planned  
+**Description:** `x-ipe upgrade --cli <name>` command to switch CLIs with non-destructive backup and redeployment.  
+**Dependencies:** FEATURE-027-B, FEATURE-027-C, FEATURE-027-D  
+**Specification:** -  
+**Technical Design:** -  
+
+**Key Capabilities:**
+- `--cli <name>` flag on `x-ipe upgrade`
+- Backup old artifacts to `.x-ipe/backup/{cli}-{timestamp}/`
+- Deploy new CLI artifacts via translation + MCP
+- Report backed up and created files
+- Skip migration if target CLI equals current CLI
