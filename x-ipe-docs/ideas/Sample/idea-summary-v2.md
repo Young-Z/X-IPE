@@ -104,7 +104,7 @@ layer "Data & External" {
 
 | Mockup | Type | Path | Tool Used |
 |--------|------|------|-----------|
-| POS Home Page | HTML | [mockups/pos-home-v1.html](mockups/pos-home-v1.html) | tool-frontend-design |
+| POS Home Page | HTML | [mockups/pos-home-v1.html](mockups/pos-home-v1.html) | x-ipe-tool-frontend-design |
 
 ### Preview Instructions
 - Open HTML files in browser to view interactive mockups

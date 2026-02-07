@@ -11,7 +11,7 @@
 |------------|---------------|---------|-------------------|-------------------|
 | FEATURE-012 | Design Themes | v1.0 | Theme folder structure, sidebar menu, toolbox integration with visual theme cards | FEATURE-011 |
 | FEATURE-013 | Default Theme Content | v1.0 | Pre-built default theme with design-system.md and component-visualization.html | FEATURE-012 |
-| FEATURE-014 | Theme-Aware Frontend Design Skill | v1.0 | New tool-frontend-design skill that reads selected theme and applies design tokens | FEATURE-012 |
+| FEATURE-014 | Theme-Aware Frontend Design Skill | v1.0 | New x-ipe-tool-frontend-design skill that reads selected theme and applies design tokens | FEATURE-012 |
 | FEATURE-015 | Architecture DSL Skill | v1.0 | Tool skill for NL ↔ DSL translation of architecture descriptions | FEATURE-011 |
 | FEATURE-016 | Architecture Diagram Renderer | v1.0 | Tool skill that renders Architecture DSL into visual HTML canvas diagrams | FEATURE-015 |
 | FEATURE-017 | Architecture DSL JavaScript Library | v1.0 | Standalone JS library that parses Architecture DSL and renders to Canvas | FEATURE-015, FEATURE-016 |
@@ -150,12 +150,12 @@
 ### FEATURE-014: Theme-Aware Frontend Design Skill
 
 **Version:** v1.0  
-**Brief Description:** New `tool-frontend-design` skill that reads the selected theme from config, loads design tokens, and applies them when generating frontend mockups.
+**Brief Description:** New `x-ipe-tool-frontend-design` skill that reads the selected theme from config, loads design tokens, and applies them when generating frontend mockups.
 
 **Acceptance Criteria:**
 
 1. **Skill Structure**
-   - [ ] AC-1.1: Skill folder at `.github/skills/tool-frontend-design/`
+   - [ ] AC-1.1: Skill folder at `.github/skills/x-ipe-tool-frontend-design/`
    - [ ] AC-1.2: SKILL.md with complete skill definition
    - [ ] AC-1.3: Registered in toolbox as a Mockup phase tool
 
@@ -180,7 +180,7 @@
 5. **Relationship to frontend-design**
    - [ ] AC-5.1: Separate skill from existing `frontend-design`
    - [ ] AC-5.2: Can coexist - user can enable either or both
-   - [ ] AC-5.3: `tool-frontend-design` is theme-aware, `frontend-design` uses its own defaults
+   - [ ] AC-5.3: `x-ipe-tool-frontend-design` is theme-aware, `frontend-design` uses its own defaults
 
 **Dependencies:**
 - FEATURE-012: Design Themes (provides theme infrastructure)
@@ -204,7 +204,7 @@
 **Acceptance Criteria:**
 
 1. **Skill Structure**
-   - [ ] AC-1.1: Skill folder at `.github/skills/tool-architecture-dsl/`
+   - [ ] AC-1.1: Skill folder at `.github/skills/x-ipe-tool-architecture-dsl/`
    - [ ] AC-1.2: SKILL.md with complete skill definition
    - [ ] AC-1.3: DSL grammar reference document included
    - [ ] AC-1.4: Example DSL files for Module View and Landscape View
@@ -239,7 +239,7 @@
    - [ ] AC-6.4: DSL refinement (update existing DSL based on feedback)
 
 7. **Integration**
-   - [ ] AC-7.1: Configurable via `x-ipe-docs/config/tools.json` under `stages.ideation.ideation.tool-architecture-dsl`
+   - [ ] AC-7.1: Configurable via `x-ipe-docs/config/tools.json` under `stages.ideation.ideation.x-ipe-tool-architecture-dsl`
    - [ ] AC-7.2: Can be enabled/disabled in Stage Toolbox modal
    - [ ] AC-7.3: Works alongside other ideation tools (mermaid, antv-infographic)
 
@@ -579,7 +579,7 @@
 2. **Local Skills Override**
    - [ ] AC-2.1: Local skills in `.github/skills/` discovered
    - [ ] AC-2.2: Local skill with same name overrides package skill
-   - [ ] AC-2.3: Override is by skill folder name (e.g., `task-type-bug-fix`)
+   - [ ] AC-2.3: Override is by skill folder name (e.g., `x-ipe-task-based-bug-fix`)
    - [ ] AC-2.4: Partial override: local skill completely replaces package skill
 
 3. **Skills Merge Logic**

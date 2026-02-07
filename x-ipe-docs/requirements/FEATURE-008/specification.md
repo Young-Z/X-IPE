@@ -24,7 +24,7 @@ The Ideation feature (formerly Workplace) introduces a dedicated space for users
 
 **Navigation Structure (CR-004):** Ideation appears as a nested submenu item under "Workplace" in the sidebar. The Workplace parent menu item has no action (does not redirect). Submenu items are always visible as indented nested children.
 
-This feature integrates with a new agent skill (`task-type-ideation`) that analyzes uploaded ideas, brainstorms with users to refine concepts, and produces structured summaries ready for requirement gathering.
+This feature integrates with a new agent skill (`x-ipe-task-based-ideation`) that analyzes uploaded ideas, brainstorms with users to refine concepts, and produces structured summaries ready for requirement gathering.
 
 ## User Stories
 

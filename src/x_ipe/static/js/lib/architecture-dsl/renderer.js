@@ -10,9 +10,9 @@
  * - Auto-detection of layer colors based on name
  * 
  * References:
- * - .github/skills/tool-draw-layered-architecture/SKILL.md
- * - .github/skills/tool-draw-layered-architecture/references/dsl-to-css.md
- * - .github/skills/tool-draw-layered-architecture/references/grid-system.md
+ * - .github/skills/x-ipe-tool-draw-layered-architecture/SKILL.md
+ * - .github/skills/x-ipe-tool-draw-layered-architecture/references/dsl-to-css.md
+ * - .github/skills/x-ipe-tool-draw-layered-architecture/references/grid-system.md
  * 
  * @module architecture-dsl/renderer
  */

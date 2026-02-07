@@ -34,8 +34,8 @@ triggers:
   - "generate skill template"
 
 not_for:
-  - "lesson-learned: for capturing feedback on existing skills"
-  - "task-execution-guideline: for executing tasks, not creating skills"
+  - "x-ipe-meta-lesson-learned: for capturing feedback on existing skills"
+  - "x-ipe-workflow-task-execution: for executing tasks, not creating skills"
 
 # ─────────────────────────────────────────────────────────────
 # VERSION HISTORY
@@ -202,7 +202,7 @@ acceptance_criteria:
 
     - id: AC-C02
       category: behavior
-      criterion: Skill update workflow checks lesson-learned.md
+      criterion: Skill update workflow checks x-ipe-meta-lesson-learned.md
       test: content_check
       expected: "Lesson integration documented"
 
@@ -222,7 +222,7 @@ acceptance_criteria:
 # ─────────────────────────────────────────────────────────────
 dependencies:
   skills:
-    - name: lesson-learned
+    - name: x-ipe-meta-lesson-learned
       relationship: integration
       description: Check for accumulated feedback before updates
 
@@ -288,8 +288,8 @@ template_usage:
 # ─────────────────────────────────────────────────────────────
 test_scenarios:
   happy_path:
-    - name: "Create task-type skill from template"
-      given: "User request for task-type skill"
+    - name: "Create task-based skill from template"
+      given: "User request for task-based skill"
       when: "Load x-ipe-task-based.md and skill-meta-x-ipe-task-based.md templates"
       then: "Valid SKILL.md and skill-meta.md produced from templates"
 

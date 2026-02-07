@@ -345,11 +345,11 @@ const elkOptions = {
 
 | Skill | Enhancement |
 |-------|-------------|
-| `task-type-code-implementation` | DoR: Check if tracing utility exists (create if not). DoD: All code has `@x_ipe_tracing` decorators |
-| `task-type-test-generation` | Include tracing assertions in each unit test |
-| `task-type-code-refactor-v2` | Preserve/add tracing during refactoring |
-| `task-type-refactoring-analysis` | Check tracing coverage as quality dimension |
-| `project-quality-board-management` | Report tracing gaps in quality reports |
+| `x-ipe-task-based-code-implementation` | DoR: Check if tracing utility exists (create if not). DoD: All code has `@x_ipe_tracing` decorators |
+| `x-ipe-task-based-test-generation` | Include tracing assertions in each unit test |
+| `x-ipe-task-based-code-refactor` | Preserve/add tracing during refactoring |
+| `x-ipe-task-based-refactoring-analysis` | Check tracing coverage as quality dimension |
+| `x-ipe+feature+quality-board-management` | Report tracing gaps in quality reports |
 
 ### Feature 7: Quality Enforcement
 

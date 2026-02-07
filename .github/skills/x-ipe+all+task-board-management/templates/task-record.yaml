@@ -1,0 +1,54 @@
+# Task Record Template
+
+# Task Board Management - Task Data Model
+# Copy this template when creating a new task
+
+# =============================================================================
+# REQUIRED FIELDS
+# =============================================================================
+
+task_id: TASK-XXX                    # Unique identifier (format: TASK-001, TASK-002, etc.)
+task_based_skill: ""                        # From predefined task types:
+                                     # - Requirement Gathering
+                                     # - Feature Breakdown
+                                     # - Technical Design
+                                     # - Test Generation
+                                     # - Code Implementation
+                                     # - Human Playground
+                                     # - Feature Closing
+                                     # - Bug Fix
+                                     # - Project Initialization
+                                     # - Dev Environment Setup
+
+role_assigned: ""                    # Who performs the work (e.g., Nova, Claude, Human)
+status: pending                      # Task status:
+                                     # - pending: Created, waiting to start
+                                     # - in_progress: Being worked on
+                                     # - blocked: Waiting for dependency
+                                     # - deferred: Paused by human
+                                     # - completed: Done (terminal)
+                                     # - cancelled: Stopped (terminal)
+
+# =============================================================================
+# OPTIONAL - ADVANCE CONTROL
+# =============================================================================
+
+next_task_based_skill: ""                   # Task type to create after this completes
+                                     # Leave blank/null for isolated/terminal tasks
+                                     # Default values by task type:
+                                     # - Requirement Gathering → Feature Breakdown
+                                     # - Feature Breakdown → Technical Design
+                                     # - Technical Design → Test Generation
+                                     # - Test Generation → Code Implementation
+                                     # - Code Implementation → Feature Closing
+                                     # - Feature Closing → (none)
+                                     # - Human Playground → (none) [Standalone]
+                                     # - Bug Fix → (none)
+                                     # - Project Initialization → (none)
+                                     # - Dev Environment Setup → (none)
+
+# =============================================================================
+# TIMESTAMPS (Auto-managed)
+# =============================================================================
+
+last_updated: ""                     # ISO 8601 format: YYYY-MM-DDTHH:MM:SS

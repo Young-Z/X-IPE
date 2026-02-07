@@ -113,12 +113,12 @@ workflow:
 
 dependencies:
   skills:
-    - lesson-learned
+    - x-ipe-meta-lesson-learned
   artifacts:
     - path: "x-ipe-docs/skill-meta/.templates/"
       description: "Skill meta templates for different skill types"
   templates:
-    - task-type-skill/skill-meta-task-type.md
+    - x-ipe-task-based-skill/skill-meta-task-type.md
     - task-category-skill/skill-meta-task-category.md
     - tool-skill/skill-meta-tool.md
     - workflow-orchestration-skill/skill-meta-workflow-orchestration.md
@@ -148,6 +148,6 @@ dependencies:
 
 ## Test Scenarios
 
-- **Create Task Type:** Given task-type skill request → When create invoked → Then valid x-ipe-task-type-{name} skill produced
+- **Create Task-Based Skill:** Given task-based skill request → When create invoked → Then valid x-ipe-task-based-{name} skill produced
 - **Validate Structure:** Given draft skill → When validate invoked → Then section order issues reported
 - **Iterate on Failure:** Given failed acceptance tests → When iterate invoked → Then candidate updated and re-tested

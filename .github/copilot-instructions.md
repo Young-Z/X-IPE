@@ -19,9 +19,9 @@
 **Then:**
 
 1. Check if Agent Model have capability to use Anthropic skills protocol.
-2. If yes, load skill: `task-execution-guideline`.
+2. If yes, load skill: `x-ipe-workflow-task-execution`.
 2. If no, do following things:
-   - read files under `.github/skills/task-execution-guideline/` folder to understand task execution guideline.
+   - read files under `.github/skills/x-ipe-workflow-task-execution/` folder to understand task execution guideline.
    - **Important:** each type of task mentioned in the guideline must have a corresponding skill file under `.github/skills/` folder. And SKILL.md file is the entry point to understand each skill.
 
 ---
@@ -31,8 +31,8 @@
 **The task board (`x-ipe-docs/planning/task-board.md`) is MANDATORY for ALL work.**
 
 ### Before ANY Work:
-1. **Create task on task-board.md** using `task-board-management` skill
-2. **Verify task exists** on board (Step 2 of task-execution-guideline)
+1. **Create task on task-board.md** using `x-ipe+all+task-board-management` skill
+2. **Verify task exists** on board (Step 2 of x-ipe-workflow-task-execution)
 3. **Only then** proceed to actual work
 
 ### After Completing Work:
@@ -52,58 +52,43 @@
 
 **Before doing ANY work**, the agent MUST:
 
-1. **Classify the work** into a Task Type from the table below
-2. **Create task on task-board.md** via `task-board-management` skill ← **BLOCKING**
+1. **Classify the work** into a task-based skill using auto-discovery (scan `.github/skills/x-ipe-task-based-*/`)
+2. **Create task on task-board.md** via `x-ipe+all+task-board-management` skill ← **BLOCKING**
 3. **Load the corresponding skill** from `.github/skills/` folder
 4. **Follow the skill's execution procedure** step-by-step
 5. **Complete the skill's Definition of Done (DoD)** before marking complete
 6. **Update task-board.md** with completion status ← **MANDATORY**
 
-### Task Type Identification
+### Task-Based Skill Identification
 
-## Task Types Registry
+## Task-Based Skills Auto-Discovery
 
-| Task Type | Skill | Category | Next Task | Human Review (default) |
-|-----------|-------|----------|-----------|------------------------|
-| Ideation | `x-ipe-task-based-ideation` | ideation-stage | Idea Mockup OR Idea to Architecture | No |
-| Idea Mockup | `task-type-idea-mockup` | ideation-stage | Requirement Gathering | No |
-| Idea to Architecture | `task-type-idea-to-architecture` | ideation-stage | Requirement Gathering | No |
-| Share Idea | `task-type-share-idea` | Standalone | - | Yes |
-| Requirement Gathering | `task-type-requirement-gathering` | requirement-stage | Feature Breakdown | Yes |
-| Feature Breakdown | `task-type-feature-breakdown` | requirement-stage | Feature Refinement | Yes |
-| Feature Refinement | `task-type-feature-refinement` | feature-stage | Technical Design | Yes |
-| Technical Design | `task-type-technical-design` | feature-stage | Test Generation | Yes |
-| Test Generation | `task-type-test-generation` | feature-stage | Code Implementation | No |
-| Code Implementation | `task-type-code-implementation` | feature-stage | Feature Acceptance Test | No |
-| Feature Acceptance Test | `task-type-feature-acceptance-test` | Standalone OR feature-stage | Feature Closing | No |
-| Human Playground | `task-type-human-playground` | Standalone | - | Yes |
-| Feature Closing | `task-type-feature-closing` | feature-stage | User Manual | No |
-| Bug Fix | `task-type-bug-fix` | Standalone | - | Yes |
-| Refactoring Analysis | `task-type-refactoring-analysis` | code-refactoring-stage | Improve Code Quality Before Refactoring | Yes |
-| Improve Code Quality Before Refactoring | `task-type-improve-code-quality-before-refactoring` | code-refactoring-stage | Code Refactor V2 | Yes |
-| Code Refactor V2 | `task-type-code-refactor-v2` | code-refactoring-stage | - | Yes |
-| Change Request | `task-type-change-request` | Standalone | Feature Refinement OR Feature Breakdown | Yes |
-| Project Initialization | `task-type-project-init` | Standalone | Dev Environment | No |
+BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
-> **Note:** "Human Review (default)" is the default behavior. When **Auto-Proceed is enabled** (global or task-level), human review is **skipped** regardless of this setting.
-| Dev Environment | `task-type-dev-environment` | Standalone | - | No |
-| User Manual | `task-type-user-manual` | Standalone | - | Yes |
+**Discovery rule:**
+1. Scan `.github/skills/x-ipe-task-based-*/SKILL.md`
+2. Each skill's Output Result YAML declares: `category`, `next_task_based_skill`, `require_human_review`
+3. Each skill's `description` in frontmatter contains trigger keywords for request matching
+
+**Request matching:** Match user request against trigger keywords in each skill's description (e.g., "fix bug" → `x-ipe-task-based-bug-fix`, "implement feature" → `x-ipe-task-based-code-implementation`).
+
+> **Note:** When **Auto-Proceed is enabled** (global or task-level), `require_human_review` is **skipped** regardless of the skill's default.
 
 ### 🛑 STOP AND THINK: Pre-Flight Checklist
 
 **Before touching ANY code or making ANY changes, ask yourself:**
 
 ```
-1. What task type is this? → Check registry table above
+1. What task-based skill is this? → Scan `.github/skills/x-ipe-task-based-*/` descriptions
 2. Did I create a task on task-board.md? → If NO, STOP and create it
 3. Did I load the corresponding skill? → If NO, STOP and load it
 4. Am I following the skill's procedure? → If NO, STOP and read it
 ```
 
 **Common Mistakes to Avoid:**
-- User says "refactor this" → You must use `task-type-code-refactor` skill, NOT just start coding
-- User says "fix this bug" → You must use `task-type-bug-fix` skill, NOT just fix it
-- User says "add this feature" → You must identify the right task type first
+- User says "refactor this" → You must use `x-ipe-task-based-code-refactor` skill, NOT just start coding
+- User says "fix this bug" → You must use `x-ipe-task-based-bug-fix` skill, NOT just fix it
+- User says "add this feature" → You must identify the right task-based skill first
 
 ### ⚠️ DO NOT Skip Skills
 
@@ -115,11 +100,11 @@
 - ❌ Fixing bugs without writing a failing test first
 - ❌ Implementing features without reading technical design
 - ❌ Making changes without following the skill's execution procedure
-- ❌ Refactoring code without using `task-type-code-refactor` skill
+- ❌ Refactoring code without using `x-ipe-task-based-code-refactor` skill
 
 **Required Actions:**
 - ✅ Always create task on task-board.md BEFORE starting work
-- ✅ Always identify task type first
+- ✅ Always identify task-based skill first
 - ✅ Always load and follow the corresponding skill
 - ✅ Always check prerequisites (DoR) before starting
 - ✅ Always complete Definition of Done (DoD) before finishing
@@ -157,7 +142,7 @@ Always follow:
 1. Load skill: `x-ipe-skill-creator-v3`
 2. Follow the skill creation process defined in the skill
 3. Use appropriate template based on skill type:
-   - Task Type → templates/x-ipe-task-based.md
+   - Task-Based → templates/x-ipe-task-based.md
    - Tool Skill → templates/x-ipe-tool.md
    - Workflow Orchestration → templates/x-ipe-workflow-orchestration.md
    - Meta Skill → templates/x-ipe-meta.md
@@ -167,10 +152,10 @@ Always follow:
 ### Capturing Lessons for Skill Improvement
 
 **When:** A skill execution has problems, human provides feedback, or agent observes suboptimal behavior
-**Then:** Use the `lesson-learned` skill
+**Then:** Use the `x-ipe-meta-lesson-learned` skill
 
 ```
-1. Load skill: `lesson-learned`
+1. Load skill: `x-ipe-meta-lesson-learned`
 2. Follow the lesson capture process
 3. Lessons are stored in x-ipe-docs/skill-meta/{skill}/lesson-learned.md
 4. Next time skill is updated, lessons will be incorporated

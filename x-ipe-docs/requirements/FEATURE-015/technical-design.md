@@ -19,7 +19,7 @@
 ### Scope & Boundaries
 
 **In Scope:**
-- Tool skill at `.github/skills/tool-architecture-dsl/`
+- Tool skill at `.github/skills/x-ipe-tool-architecture-dsl/`
 - DSL grammar reference document (v2 grid syntax)
 - Example DSL files (Module View, Landscape View)
 - Integration with `x-ipe-docs/config/tools.json`
@@ -46,7 +46,7 @@
 |------------|--------|-------------|-------------------|
 | `infographic-syntax-creator` | Existing Skill | [SKILL.md](../../.github/skills/infographic-syntax-creator/SKILL.md) | Reference for skill structure and DSL patterns |
 | `x-ipe-docs/config/tools.json` | FEATURE-011 | [technical-design.md](../FEATURE-011/technical-design.md) | Tool toggle configuration |
-| `tool-architecture-dsl-v1-backup` | v1 Backup | [SKILL.md](../../.github/skills/tool-architecture-dsl-v1-backup/SKILL.md) | Flexbox-based v1 for reference |
+| `x-ipe-tool-architecture-dsl-v1-backup` | v1 Backup | [SKILL.md](../../.github/skills/x-ipe-tool-architecture-dsl-v1-backup/SKILL.md) | Flexbox-based v1 for reference |
 
 ### Major Flow
 
@@ -132,7 +132,7 @@ layer "Data" {
 ### Skill Structure
 
 ```
-.github/skills/tool-architecture-dsl/
+.github/skills/x-ipe-tool-architecture-dsl/
 ├── SKILL.md                    # Main skill definition (v2 grid-based)
 ├── references/
 │   └── grammar.md              # Complete v2 DSL grammar
@@ -141,7 +141,7 @@ layer "Data" {
     ├── module-view-v2.dsl      # Module View example (v2 grid)
     └── landscape-view.dsl      # Landscape View example
 
-.github/skills/tool-architecture-dsl-v1-backup/
+.github/skills/x-ipe-tool-architecture-dsl-v1-backup/
 ├── SKILL.md                    # v1 Flexbox-based skill (archived)
 └── references/
     └── grammar.md              # v1 grammar (archived)
@@ -184,7 +184,7 @@ flowchart TD
         FEEDBACK[User Feedback]
     end
     
-    subgraph Skill["tool-architecture-dsl Skill (v2)"]
+    subgraph Skill["x-ipe-tool-architecture-dsl Skill (v2)"]
         direction TB
         PARSE[Parse Input]
         EXTRACT[Extract Entities]
@@ -257,7 +257,7 @@ NUMBER       := [0-9]+
 
 ```markdown
 ---
-name: tool-architecture-dsl
+name: x-ipe-tool-architecture-dsl
 description: Translate between natural language and Architecture DSL v2 (grid-based)...
 ---
 
@@ -303,7 +303,7 @@ description: Translate between natural language and Architecture DSL v2 (grid-ba
   "stages": {
     "ideation": {
       "ideation": {
-        "tool-architecture-dsl": true,  // Uses v2 grid syntax
+        "x-ipe-tool-architecture-dsl": true,  // Uses v2 grid syntax
         "antv-infographic": false,
         "mermaid": true
       }
@@ -320,7 +320,7 @@ description: Translate between natural language and Architecture DSL v2 (grid-ba
 
 #### Phase 1: Create v2 Skill Structure ✅
 
-1. ✅ Backup v1 skill to `tool-architecture-dsl-v1-backup/`
+1. ✅ Backup v1 skill to `x-ipe-tool-architecture-dsl-v1-backup/`
 2. ✅ Update `SKILL.md` with v2 grid syntax
 3. ✅ Update `references/grammar.md` with v2 grammar
 

@@ -7,7 +7,7 @@ for example for input and output data model:
 Task Type Default Attributes
 | Attribute | Value |
 |-----------|-------|
-| Task Type | Feature Breakdown |
+| Task | Feature Breakdown |
 | Category | requirement-stage |
 | Next Task Type | Feature Refinement |
 | Require Human Review | Yes |

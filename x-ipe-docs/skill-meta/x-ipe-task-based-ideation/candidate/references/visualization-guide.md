@@ -18,7 +18,7 @@ decision_tree:
     if_true: "Use mermaid diagrams"
     use_for: "Flowcharts, sequences, state diagrams"
     
-  - check: "config.stages.ideation.ideation.tool-architecture-dsl"
+  - check: "config.stages.ideation.ideation.x-ipe-tool-architecture-dsl"
     if_true: "Use architecture DSL"
     use_for: "Layered architecture, module views"
     
@@ -99,7 +99,7 @@ sequenceDiagram
 
 ## Architecture DSL
 
-Use for layered architecture when `tool-architecture-dsl` is enabled:
+Use for layered architecture when `x-ipe-tool-architecture-dsl` is enabled:
 
 ```architecture-dsl
 @startuml module-view

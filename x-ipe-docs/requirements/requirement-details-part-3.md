@@ -635,15 +635,15 @@ As applications grow in complexity, understanding execution flow becomes challen
 | 8. Skill Integration Updates | 25 AC | Update 5 existing skills with tracing checks |
 
 **Skills Created:**
-- `tool-tracing-instrumentation` - Add decorators to existing code
-- `tool-tracing-creator` - Create tracing infrastructure for projects
+- `x-ipe-tool-tracing-instrumentation` - Add decorators to existing code
+- `x-ipe-tool-tracing-creator` - Create tracing infrastructure for projects
 
 **Skills Updated:**
-- `task-type-code-implementation` - DoR/DoD tracing checks
-- `task-type-test-generation` - Tracing test assertions
-- `task-type-code-refactor-v2` - Preserve tracing during refactor
-- `task-type-refactoring-analysis` - Tracing as 5th quality dimension
-- `project-quality-board-management` - Tracing gap reporting
+- `x-ipe-task-based-code-implementation` - DoR/DoD tracing checks
+- `x-ipe-task-based-test-generation` - Tracing test assertions
+- `x-ipe-task-based-code-refactor` - Preserve tracing during refactor
+- `x-ipe-task-based-refactoring-analysis` - Tracing as 5th quality dimension
+- `x-ipe+feature+quality-board-management` - Tracing gap reporting
 
 **Total Acceptance Criteria:** ~58
 

@@ -46,7 +46,7 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `tool-architecture-dsl` | FEATURE-015 | [SKILL.md](../../.github/skills/tool-architecture-dsl/SKILL.md) | Provides DSL grammar for parsing input |
+| `x-ipe-tool-architecture-dsl` | FEATURE-015 | [SKILL.md](../../.github/skills/x-ipe-tool-architecture-dsl/SKILL.md) | Provides DSL grammar for parsing input |
 | `frontend-design` | Existing Skill | [SKILL.md](../../.github/skills/frontend-design/SKILL.md) | Reference for HTML rendering patterns |
 | `x-ipe-docs/config/tools.json` | FEATURE-011 | [technical-design.md](../FEATURE-011/technical-design.md) | Tool toggle configuration |
 
@@ -372,7 +372,7 @@ flowchart LR
   "stages": {
     "ideation": {
       "ideation": {
-        "tool-architecture-dsl": true,
+        "x-ipe-tool-architecture-dsl": true,
         "tool-architecture-draw": true
       }
     }

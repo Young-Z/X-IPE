@@ -20,7 +20,7 @@ lifecycle:  # Required
 
 data_model:  # Required
   core: [{field}: {type}]  # Required: array - set during planning
-  execution: [{field}: {type}]  # Optional: array - set by task-type skills
+  execution: [{field}: {type}]  # Optional: array - set by task-based skills
   closing: [{field}: {type}]  # Optional: array - set by category skills
   control: [auto_proceed: boolean]  # Required: array - routing flags
 
@@ -30,9 +30,9 @@ states:  # Required
   transitions: "pending→in_progress→completed|blocked"  # Required: string
 
 routing:  # Required
-  task_types:  # array<TaskRoute>
+  task_based_skills:  # array<TaskRoute>
     - pattern: "{request pattern}"  # Required: string (regex)
-      task_type: {task-type-skill}  # Required: string
+      task_based_skill: {x-ipe-task-based-skill}  # Required: string
       category: {category-name} | Standalone  # Required: string|literal
   category_skills:  # array<CategoryRoute>
     - category: {category-name}  # Required: string
@@ -61,28 +61,28 @@ acceptance_criteria:  # Required (MoSCoW)
 
 ```yaml
 ---
-skill_name: task-execution-guideline
+skill_name: x-ipe-workflow-task-execution
 skill_type: workflow-orchestration
 version: 1.0.0
 last_updated: 2026-02-03
-implementation_path: .github/skills/task-execution-guideline/
+implementation_path: .github/skills/x-ipe-workflow-task-execution/
 
 lifecycle:
   steps:
-    - {name: planning, action: "Match request → Create task", gate: "Task on board", skills_loaded: [task-board-management], next_step: execute}
-    - {name: execute, action: "Load task-type skill → Do work", skills_loaded: [task-type-{matched}], next_step: closing}
-    - {name: closing, action: "Update boards → Validate DoD", skills_loaded: [task-board-management], next_step: END}
+    - {name: planning, action: "Match request → Create task", gate: "Task on board", skills_loaded: [x-ipe+all+task-board-management], next_step: execute}
+    - {name: execute, action: "Load task-based skill → Do work", skills_loaded: [x-ipe-task-based-{matched}], next_step: closing}
+    - {name: closing, action: "Update boards → Validate DoD", skills_loaded: [x-ipe+all+task-board-management], next_step: END}
 
 data_model:
-  core: [task_id: string, task_type: string, category: string, status: enum]
-  execution: [next_task_type: string|null, require_human_review: boolean]
+  core: [task_id: string, task_based_skill: string, category: string, status: enum]
+  execution: [next_task_based_skill: string|null, require_human_review: boolean]
   control: [auto_proceed: boolean]
 
 states: {values: [pending, in_progress, completed], terminal: [completed], transitions: "pending→in_progress→completed"}
 
 routing:
-  task_types: [{pattern: "implement|code", task_type: task-type-code-implementation, category: feature-stage}]
-  category_skills: [{category: feature-stage, skill: feature-stage+feature-board-management, required: true}]
+  task_based_skills: [{pattern: "implement|code", task_based_skill: x-ipe-task-based-code-implementation, category: feature-stage}]
+  category_skills: [{category: feature-stage, skill: x-ipe+feature+feature-board-management, required: true}]
 
 decision_points: [{name: human_review_gate, condition: "require_human_review=true AND auto_proceed=false", on_true: "STOP", on_false: "Continue"}]
 error_handling: [{error_type: skill_not_found, recovery: "Log warning, continue manually"}]

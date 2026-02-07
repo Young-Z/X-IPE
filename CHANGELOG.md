@@ -114,7 +114,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 71 comprehensive tests validating structure, templates, CSS, rules, examples, and config
 
 - **FEATURE-015: Architecture DSL Skill** - Tool skill for architecture diagram DSL translation
-  - `.github/skills/tool-architecture-dsl/` folder with complete skill structure
+  - `.github/skills/x-ipe-tool-architecture-dsl/` folder with complete skill structure
   - `SKILL.md`: Main skill definition with workflow, capabilities, and quick reference
   - `references/grammar.md`: Complete DSL grammar in BNF format with validation rules
   - `examples/module-view.dsl`: AI Platform Architecture example (3-layer structure)
@@ -127,7 +127,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Supported style properties: justify-content, align-items, flex-direction, row-gap, column-gap
   - `text-align left|center|right` with inheritance (top → layer → module)
   - `virtual-box { }` for grouping with vertical stacking
-  - Registered in `x-ipe-docs/config/tools.json` under `stages.ideation.ideation.tool-architecture-dsl`
+  - Registered in `x-ipe-docs/config/tools.json` under `stages.ideation.ideation.x-ipe-tool-architecture-dsl`
   - 52 comprehensive tests validating structure, grammar, examples, and config
 
 - **FEATURE-013: Default Theme Content** - Pre-built default theme for X-IPE

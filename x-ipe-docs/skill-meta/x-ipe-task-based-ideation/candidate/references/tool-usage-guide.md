@@ -17,7 +17,7 @@ This reference document contains detailed tool configuration, mapping, and usage
       "ideation": {
         "antv-infographic": false,
         "mermaid": true,
-        "tool-architecture-dsl": false,
+        "x-ipe-tool-architecture-dsl": false,
         "_extra_instruction": "Optional extra instructions"
       },
       "mockup": {
@@ -38,7 +38,7 @@ This reference document contains detailed tool configuration, mapping, and usage
 |------------|------------------|---------------|
 | `stages.ideation.ideation.antv-infographic` | `infographic-syntax-creator` skill | Call skill to generate infographic DSL syntax |
 | `stages.ideation.ideation.mermaid` | Mermaid code blocks | Generate mermaid diagrams directly in markdown |
-| `stages.ideation.ideation.tool-architecture-dsl` | `tool-architecture-dsl` skill | Generate Architecture DSL directly in markdown |
+| `stages.ideation.ideation.x-ipe-tool-architecture-dsl` | `x-ipe-tool-architecture-dsl` skill | Generate Architecture DSL directly in markdown |
 | `stages.ideation.mockup.frontend-design` | `frontend-design` skill | Call skill to create HTML/CSS mockups |
 | `stages.ideation.mockup.figma-mcp` | Figma MCP server | Use MCP tools for Figma integration |
 
@@ -61,8 +61,8 @@ invocation_rules:
     output: "```mermaid code blocks"
     
   architecture_dsl:
-    config_key: "stages.ideation.ideation.tool-architecture-dsl"
-    when_true: "Load tool-architecture-dsl skill"
+    config_key: "stages.ideation.ideation.x-ipe-tool-architecture-dsl"
+    when_true: "Load x-ipe-tool-architecture-dsl skill"
     use_for: "Layered architecture, module views, landscape views"
     output: "```architecture-dsl code blocks"
     
@@ -84,7 +84,7 @@ When tools are enabled, invoke corresponding skills during brainstorming:
 | UI layout | `mockup.frontend-design == true` | Invoke frontend-design, create mockup |
 | User flow | `ideation.mermaid == true` | Generate mermaid flowchart |
 | Feature list | `ideation.antv-infographic == true` | Use infographic DSL |
-| System layers | `ideation.tool-architecture-dsl == true` | Generate architecture DSL |
+| System layers | `ideation.x-ipe-tool-architecture-dsl == true` | Generate architecture DSL |
 
 ---
 
@@ -95,7 +95,7 @@ visualization_rules:
   priority_order:
     1: "Check antv-infographic for features/roadmaps"
     2: "Check mermaid for flowcharts/sequences"
-    3: "Check tool-architecture-dsl for architecture"
+    3: "Check x-ipe-tool-architecture-dsl for architecture"
     4: "Fall back to standard markdown"
     
   antv_infographic_templates:

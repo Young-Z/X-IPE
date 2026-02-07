@@ -11,6 +11,7 @@ from .ideas_routes import ideas_bp
 from .tools_routes import tools_bp
 from .proxy_routes import proxy_bp
 from .kb_routes import kb_bp
+from .config_routes import config_bp
 
 __all__ = [
     'main_bp',
@@ -20,4 +21,5 @@ __all__ = [
     'tools_bp',
     'proxy_bp',
     'kb_bp',
+    'config_bp',
 ]

@@ -1,6 +1,6 @@
-# Task Type Skill Template
+# Task-Based Skill Template
 
-Use this template when creating a new task type skill. Follow v2 guidelines format.
+Use this template when creating a new task-based skill. Follow v2 guidelines format.
 
 **Section Order (Cognitive Flow):**
 1. CONTEXT: Purpose → Important Notes
@@ -17,7 +17,7 @@ name: x-ipe-task-based-{skill-name}
 description: {Brief description of what this task type does}. Use when {trigger conditions}. Triggers on requests like "{trigger 1}", "{trigger 2}".
 ---
 
-# Task Type: {Skill Name}
+# Task-Based Skill: {Skill Name}
 
 ## Purpose
 
@@ -31,7 +31,7 @@ description: {Brief description of what this task type does}. Use when {trigger 
 
 ## Important Notes
 
-BLOCKING: Learn `task-execution-guideline` skill before executing this skill.
+BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
@@ -43,11 +43,11 @@ BLOCKING: Learn `task-execution-guideline` skill before executing this skill.
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_type: "{task_type}"
+  task_based_skill: "{task_based_skill}"
   
   # Task type attributes
   category: "{standalone | feature-stage | requirement-stage | ideation-stage}"
-  next_task_type: "{Next Task Type | null}"
+  next_task_based_skill: "{Next Task-Based Skill | null}"
   require_human_review: "{yes | no}"
   
   # Required inputs
@@ -155,7 +155,7 @@ BLOCKING: {Rule that must not be skipped}
 task_completion_output:
   category: "{standalone | feature-stage | requirement-stage | ideation-stage}"
   status: completed | blocked
-  next_task_type: "{Next Task Type}"
+  next_task_based_skill: "{Next Task-Based Skill}"
   require_human_review: "{yes | no}"
   task_output_links:
     - "{output_file_path_1}"
@@ -188,7 +188,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 </definition_of_done>
 ```
 
-MANDATORY: After completing this skill, return to `task-execution-guideline` to continue the task execution flow.
+MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution` to continue the task execution flow.
 
 ---
 
@@ -240,7 +240,7 @@ CRITICAL: SKILL.md body MUST stay under 500 lines.
 MANDATORY: Sections must appear in this sequence:
 
 ```yaml
-task_type_skills:
+task_based_skill_skills:
   section_order:
     # CONTEXT
     1: Purpose

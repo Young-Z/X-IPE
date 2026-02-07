@@ -1,0 +1,36 @@
+adapters:
+  copilot:
+    display_name: "GitHub Copilot CLI"
+    command: "copilot"
+    run_args: "--allow-all-tools"
+    inline_prompt_flag: "-i"
+    prompt_format: '{command} {run_args} {inline_prompt_flag} "{escaped_prompt}"'
+    instructions_file: ".github/copilot-instructions.md"
+    skills_folder: ".github/skills/"
+    mcp_config_path: "~/.copilot/mcp-config.json"
+    mcp_config_format: "global"
+    detection_command: "copilot"
+
+  opencode:
+    display_name: "OpenCode CLI"
+    command: "opencode"
+    run_args: ""
+    inline_prompt_flag: "run"
+    prompt_format: '{command} {inline_prompt_flag} "{escaped_prompt}"'
+    instructions_file: ".opencode/instructions.md"
+    skills_folder: ".opencode/skills/"
+    mcp_config_path: "opencode.json"
+    mcp_config_format: "project"
+    detection_command: "opencode"
+
+  claude-code:
+    display_name: "Claude Code CLI"
+    command: "claude"
+    run_args: ""
+    inline_prompt_flag: "-p"
+    prompt_format: '{command} {inline_prompt_flag} "{escaped_prompt}"'
+    instructions_file: ".claude/instructions.md"
+    skills_folder: ".claude/skills/"
+    mcp_config_path: ".mcp.json"
+    mcp_config_format: "project"
+    detection_command: "claude"

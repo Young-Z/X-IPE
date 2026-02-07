@@ -157,35 +157,35 @@ Each CLI has its own instruction format. X-IPE maintains a **canonical skill for
 Canonical X-IPE skill (`SKILL.md`):
 ```markdown
 ---
-name: task-type-bug-fix
+name: x-ipe-task-based-bug-fix
 description: Diagnose and fix bugs in existing code.
 ---
-# Task Type: Bug Fix
+# Task-Based Skill: Bug Fix
 ## Purpose
 Diagnose and fix bugs by writing a failing test first...
 ```
 
-Translated to OpenCode skill (`.opencode/skills/task-type-bug-fix/SKILL.md`):
+Translated to OpenCode skill (`.opencode/skills/x-ipe-task-based-bug-fix/SKILL.md`):
 ```markdown
 ---
-name: task-type-bug-fix
+name: x-ipe-task-based-bug-fix
 description: Diagnose and fix bugs in existing code.
 ---
-# Task Type: Bug Fix
+# Task-Based Skill: Bug Fix
 ## Purpose
 Diagnose and fix bugs by writing a failing test first...
 ```
 
 > **Discovery:** OpenCode also supports `.opencode/skills/<name>/SKILL.md` with the same `SKILL.md` convention! Frontmatter requires only `name` and `description` (both required). OpenCode also reads `.claude/skills/` for compatibility. Translation from X-IPE canonical format is minimal.
 
-Translated to Claude Code skill (`.claude/skills/task-type-bug-fix/SKILL.md`):
+Translated to Claude Code skill (`.claude/skills/x-ipe-task-based-bug-fix/SKILL.md`):
 ```markdown
 ---
-name: task-type-bug-fix
+name: x-ipe-task-based-bug-fix
 description: Diagnose and fix bugs in existing code.
 context: fork
 ---
-# Task Type: Bug Fix
+# Task-Based Skill: Bug Fix
 ## Purpose
 Diagnose and fix bugs by writing a failing test first...
 ```

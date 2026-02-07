@@ -204,7 +204,7 @@ data
 
 | Mockup | Type | Path | Tool Used |
 |--------|------|------|-----------|
-| Dashboard | HTML | [mockups/dashboard-v1.html](mockups/dashboard-v1.html) | tool-frontend-design |
+| Dashboard | HTML | [mockups/dashboard-v1.html](mockups/dashboard-v1.html) | x-ipe-tool-frontend-design |
 
 ### Preview Instructions
 - Open the HTML file in a browser to view the interactive mockup

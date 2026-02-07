@@ -31,7 +31,7 @@ def project_root():
 @pytest.fixture
 def skill_dir(project_root):
     """Get the Architecture DSL skill directory"""
-    return project_root / '.github' / 'skills' / 'tool-architecture-dsl'
+    return project_root / '.github' / 'skills' / 'x-ipe-tool-architecture-dsl'
 
 
 @pytest.fixture
@@ -48,7 +48,7 @@ class TestSkillStructure:
     """Tests for AC-1.x: Skill file structure"""
     
     def test_skill_folder_exists(self, skill_dir):
-        """AC-1.1: Skill folder exists at .github/skills/tool-architecture-dsl/"""
+        """AC-1.1: Skill folder exists at .github/skills/x-ipe-tool-architecture-dsl/"""
         assert skill_dir.exists(), f"Skill folder not found at {skill_dir}"
         assert skill_dir.is_dir(), f"{skill_dir} is not a directory"
     
@@ -94,7 +94,7 @@ class TestSkillMdContent:
         assert skill_md_content.startswith('---'), "Missing YAML frontmatter start"
         
         # Check frontmatter has name
-        assert 'name: tool-architecture-dsl' in skill_md_content, "Missing skill name in frontmatter"
+        assert 'name: x-ipe-tool-architecture-dsl' in skill_md_content, "Missing skill name in frontmatter"
         
         # Check frontmatter has description
         assert 'description:' in skill_md_content, "Missing description in frontmatter"
@@ -420,28 +420,28 @@ class TestConfigIntegration:
         assert config_file.exists(), f"tools.json not found at {config_file}"
     
     def test_architecture_dsl_registered(self, config_content):
-        """AC-7.1: tool-architecture-dsl registered in tools.json"""
+        """AC-7.1: x-ipe-tool-architecture-dsl registered in tools.json"""
         assert config_content is not None, "tools.json not found"
         
-        # Navigate to stages.ideation.ideation.tool-architecture-dsl
+        # Navigate to stages.ideation.ideation.x-ipe-tool-architecture-dsl
         stages = config_content.get('stages', {})
         ideation = stages.get('ideation', {})
         ideation_phase = ideation.get('ideation', {})
         
-        assert 'tool-architecture-dsl' in ideation_phase, \
-            "tool-architecture-dsl not registered in stages.ideation.ideation"
+        assert 'x-ipe-tool-architecture-dsl' in ideation_phase, \
+            "x-ipe-tool-architecture-dsl not registered in stages.ideation.ideation"
     
     def test_architecture_dsl_is_boolean(self, config_content):
-        """tool-architecture-dsl value is boolean (can be enabled/disabled)"""
+        """x-ipe-tool-architecture-dsl value is boolean (can be enabled/disabled)"""
         assert config_content is not None, "tools.json not found"
         
         stages = config_content.get('stages', {})
         ideation = stages.get('ideation', {})
         ideation_phase = ideation.get('ideation', {})
         
-        value = ideation_phase.get('tool-architecture-dsl')
+        value = ideation_phase.get('x-ipe-tool-architecture-dsl')
         assert isinstance(value, bool), \
-            f"tool-architecture-dsl should be boolean, got {type(value)}"
+            f"x-ipe-tool-architecture-dsl should be boolean, got {type(value)}"
 
 
 # ============================================================================

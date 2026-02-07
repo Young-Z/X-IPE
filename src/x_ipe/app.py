@@ -127,6 +127,15 @@ def _init_services(app):
             if os.path.exists(saved_root) and os.path.isdir(saved_root):
                 app.config['PROJECT_ROOT'] = saved_root
     
+    # Initialize CLI adapter service (FEATURE-027-A)
+    if not app.config.get('TESTING'):
+        from x_ipe.services.cli_adapter_service import CLIAdapterService
+        try:
+            cli_adapter_service = CLIAdapterService()
+            app.config['CLI_ADAPTER_SERVICE'] = cli_adapter_service
+        except Exception:
+            pass  # Non-critical — adapter service is optional at startup
+    
     # Cleanup old UIUX feedback on startup (TASK-237)
     if not app.config.get('TESTING'):
         project_root = app.config.get('PROJECT_ROOT', '.')
@@ -152,7 +161,7 @@ def _init_services(app):
 
 def _register_blueprints(app):
     """Register all Flask Blueprints."""
-    from x_ipe.routes import main_bp, settings_bp, project_bp, ideas_bp, tools_bp, proxy_bp, kb_bp
+    from x_ipe.routes import main_bp, settings_bp, project_bp, ideas_bp, tools_bp, proxy_bp, kb_bp, config_bp
     from x_ipe.routes.uiux_feedback_routes import uiux_feedback_bp
     from x_ipe.routes.tracing_routes import tracing_bp
     from x_ipe.routes.quality_evaluation_routes import quality_evaluation_bp
@@ -171,6 +180,7 @@ def _register_blueprints(app):
     app.register_blueprint(tracing_bp)
     app.register_blueprint(quality_evaluation_bp)
     app.register_blueprint(kb_bp)
+    app.register_blueprint(config_bp)
 
 
 def _register_handlers():

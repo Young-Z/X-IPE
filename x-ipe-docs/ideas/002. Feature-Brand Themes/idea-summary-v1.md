@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-A **theming system** for X-IPE that enables brands to define unified design systems (colors, typography, spacing) and apply them consistently when designing mockups for new features. Themes are stored as structured files, selectable via the toolbox UI, and consumed by a new `tool-frontend-design` skill.
+A **theming system** for X-IPE that enables brands to define unified design systems (colors, typography, spacing) and apply them consistently when designing mockups for new features. Themes are stored as structured files, selectable via the toolbox UI, and consumed by a new `x-ipe-tool-frontend-design` skill.
 
 ---
 
@@ -66,7 +66,7 @@ x-ipe-docs/themes/
 - Selection saved to `x-ipe-docs/config/tools.json` (reusing existing toolbox config pattern)
 - Theme applies to current idea (per-idea persistence)
 
-### 4. New Skill: `tool-frontend-design`
+### 4. New Skill: `x-ipe-tool-frontend-design`
 
 - **Purpose**: Theme-aware frontend design skill
 - **Behavior**: Reads selected theme from `x-ipe-docs/config/tools.json`, loads `design-system.md` and `component-visualization.html`, applies tokens to generated designs
@@ -95,7 +95,7 @@ x-ipe-docs/themes/
 - Themes section in toolbox modal with visual cards
 - Theme selection persisted in `x-ipe-docs/config/tools.json`
 - Sidebar themes menu
-- New `tool-frontend-design` skill
+- New `x-ipe-tool-frontend-design` skill
 
 ### Out of Scope (Future)
 - Theme editor UI (create/edit themes in browser)
@@ -109,7 +109,7 @@ x-ipe-docs/themes/
 ## Technical Considerations
 
 1. **Config Reuse**: Leverage existing `x-ipe-docs/config/tools.json` pattern for theme persistence
-2. **Skill Design**: `tool-frontend-design` should be invocable from ideation toolbox
+2. **Skill Design**: `x-ipe-tool-frontend-design` should be invocable from ideation toolbox
 3. **Fallback**: If no theme selected, use `theme-default`
 4. **Discovery**: Scan `x-ipe-docs/themes/theme-*/` folders to list available themes
 5. **Thumbnail Generation**: Consider auto-generating theme card previews from design tokens

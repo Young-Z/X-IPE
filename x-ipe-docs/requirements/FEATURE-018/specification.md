@@ -173,7 +173,7 @@ def info(): ...
 **Description:** Access bundled skills and templates from installed package
 
 **Details:**
-- Input: Resource path (e.g., "skills/task-type-bug-fix")
+- Input: Resource path (e.g., "skills/x-ipe-task-based-bug-fix")
 - Process: Use `importlib.resources` for package data access
 - Output: File content or path to extracted resource
 
@@ -316,7 +316,7 @@ def get_scaffold_path(name: str) -> Path:
 **Rule:** `x-ipe init` must never overwrite existing files without `--force` flag
 
 **Example:**
-- User has existing `.github/skills/task-type-bug-fix/` → Skip with warning
+- User has existing `.github/skills/x-ipe-task-based-bug-fix/` → Skip with warning
 - User runs `x-ipe init --force` → Overwrite with backup
 
 ### BR-2: Backup Before Overwrite

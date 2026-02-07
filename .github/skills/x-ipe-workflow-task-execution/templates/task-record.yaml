@@ -1,0 +1,62 @@
+# Task Record Template
+# Task Execution Guideline - Task Data Model
+
+# =============================================================================
+# CORE FIELDS (set during planning)
+# =============================================================================
+
+task_id: TASK-XXX                    # Unique identifier (format: TASK-001, TASK-002, etc.)
+task_based_skill: ""                        # Auto-discovered from .github/skills/x-ipe-task-based-*/SKILL.md
+category: ""                         # Derived from task-based skill:
+                                     # - feature-stage (x-ipe-task-based-feature-*, x-ipe-task-based-human-playground, x-ipe-task-based-technical-design)
+                                     # - requirement-stage (x-ipe-task-based-ideation, x-ipe-task-based-requirement-gathering, x-ipe-task-based-feature-breakdown)
+                                     # - Standalone (no category)
+role_assigned: ""                    # Who performs the work (e.g., Nova, Claude, Human)
+status: pending                      # Task status: pending | in_progress | blocked | deferred | completed | cancelled
+last_updated: ""                     # Timestamp: MM-DD-YYYY HH:MM:SS
+
+# =============================================================================
+# EXECUTION FIELDS (set by task-based skill)
+# =============================================================================
+
+next_task_based_skill: ""                   # Next task-based skill to load after this completes (null if terminal)
+require_human_review: false          # Whether human review is required before next task
+task_output_links: []                # Links to outputs produced by this task
+
+# Dynamic attributes - fully defined by each task-based skill
+# Examples (uncomment as needed):
+# feature_id: ""                     # For feature-stage tasks
+# feature_phase: ""                  # For feature-stage tasks
+# requirement_id: ""                 # For requirement-stage tasks
+# bug_severity: ""                   # For bug-fix tasks
+
+# =============================================================================
+# CLOSING FIELDS (set by category skill)
+# =============================================================================
+
+category_level_change_summary: ""    # Summary of category-level changes (≤100 words)
+
+# =============================================================================
+# CONTROL FIELDS
+# =============================================================================
+
+auto_proceed: false                  # Whether to auto-proceed to next task
+
+# =============================================================================
+# EXAMPLE: Feature-stage task (Code Implementation)
+# =============================================================================
+# task_id: TASK-001
+# task_based_skill: Code Implementation
+# category: feature-stage
+# role_assigned: Nova
+# status: completed
+# last_updated: 01-17-2026 14:30:00
+# next_task_based_skill: Human Playground
+# require_human_review: false
+# task_output_links:
+#   - src/auth/login.ts
+#   - tests/auth/login.test.ts
+# feature_id: FEATURE-001
+# feature_phase: Code Implementation
+# category_level_change_summary: "FEATURE-001 updated to Done Code Implementation"
+# auto_proceed: true

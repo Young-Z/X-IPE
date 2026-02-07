@@ -186,8 +186,8 @@ sub_agents:
 | Component | Action | Priority |
 |-----------|--------|----------|
 | `skill-general-guidelines.md` | Add Principle 3 + 4 | Must Have |
-| `task-type-skill.md` template | Add workflow section | Should Have |
-| Existing task-type skills | Migrate to new format | Could Have |
+| `x-ipe-task-based-skill.md` template | Add workflow section | Should Have |
+| Existing task-based skills | Migrate to new format | Could Have |
 | Copilot instructions | Reference new principles | Must Have |
 
 ---
@@ -209,7 +209,7 @@ acceptance_criteria:
     condition: YAML schema for parallel_groups, steps, sub_agents documented
     
   - name: At least one skill migrated
-    condition: One task-type skill updated to demonstrate new format
+    condition: One task-based skill updated to demonstrate new format
 ```
 
 ---
@@ -253,7 +253,7 @@ step_1:
 
 ### Next Steps
 
-| Task Type | Description |
+| Task | Description |
 |-----------|-------------|
 | Feature Refinement | Refine the two principles with detailed specifications |
 | Technical Design | Design migration approach for existing skills |

@@ -1823,8 +1823,8 @@ def save_ideas_toolbox():
             </h6>
             <div class="form-check">
                 <input class="form-check-input toolbox-checkbox" type="checkbox" 
-                       id="tool-frontend-design" data-section="mockup" data-tool="frontend-design" checked>
-                <label class="form-check-label" for="tool-frontend-design">
+                       id="x-ipe-tool-frontend-design" data-section="mockup" data-tool="frontend-design" checked>
+                <label class="form-check-label" for="x-ipe-tool-frontend-design">
                     Frontend Design
                 </label>
             </div>

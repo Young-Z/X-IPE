@@ -13,7 +13,7 @@
 
 | Component | Responsibility | Scope/Impact | Tags |
 |-----------|----------------|--------------|------|
-| `tool-tracing-instrumentation` | Skill for adding tracing decorators | `.github/skills/` | #skill #tracing #instrumentation |
+| `x-ipe-tool-tracing-instrumentation` | Skill for adding tracing decorators | `.github/skills/` | #skill #tracing #instrumentation |
 | `TracingAnalyzer` | Analyze Python files for traceable functions | Backend utility | #analyzer #python #ast |
 | `SensitiveParamDetector` | Detect parameters that need redaction | Backend utility | #security #redaction |
 
@@ -62,7 +62,7 @@ Agent applies decorators...
 ### Skill Structure
 
 ```
-.github/skills/tool-tracing-instrumentation/
+.github/skills/x-ipe-tool-tracing-instrumentation/
 ├── SKILL.md           # Main skill definition
 └── references/
     └── examples.md    # Usage examples
@@ -72,7 +72,7 @@ Agent applies decorators...
 
 ```markdown
 ---
-name: tool-tracing-instrumentation
+name: x-ipe-tool-tracing-instrumentation
 description: Add @x_ipe_tracing decorators to Python functions. Analyzes code, 
   suggests levels (INFO/DEBUG), detects sensitive params for redaction, and 
   applies decorators in batch. Triggers on "add tracing to", "instrument for tracing".
@@ -320,7 +320,7 @@ User: "Add tracing to src/x_ipe/routes/"
 ### Step 1: Create Skill Folder
 
 ```bash
-mkdir -p .github/skills/tool-tracing-instrumentation/references
+mkdir -p .github/skills/x-ipe-tool-tracing-instrumentation/references
 ```
 
 ### Step 2: Create SKILL.md
@@ -352,8 +352,8 @@ Add `references/examples.md` with:
 
 | File | Change Type | Lines |
 |------|-------------|-------|
-| `.github/skills/tool-tracing-instrumentation/SKILL.md` | Create | ~200 |
-| `.github/skills/tool-tracing-instrumentation/references/examples.md` | Create | ~100 |
+| `.github/skills/x-ipe-tool-tracing-instrumentation/SKILL.md` | Create | ~200 |
+| `.github/skills/x-ipe-tool-tracing-instrumentation/references/examples.md` | Create | ~100 |
 
 **Total new lines:** ~300
 
@@ -364,7 +364,7 @@ Add `references/examples.md` with:
 | Date | Phase | Change Summary |
 |------|-------|----------------|
 | 2026-02-01 | Initial Design | Initial technical design for tracing skill. Skill-only implementation (no Python utility needed - agent uses AST analysis directly). |
-| 2026-02-01 | Extension | Added skill integration updates - 5 existing skills updated with tracing checks (code-implementation, test-generation, code-refactor-v2, refactoring-analysis, project-quality-board-management). Added tool-tracing-creator skill for project setup. |
+| 2026-02-01 | Extension | Added skill integration updates - 5 existing skills updated with tracing checks (code-implementation, test-generation, code-refactor-v2, refactoring-analysis, x-ipe+feature+quality-board-management). Added x-ipe-tool-tracing-creator skill for project setup. |
 
 ---
 
@@ -376,21 +376,21 @@ Add `references/examples.md` with:
 
 | Skill | Location | Purpose |
 |-------|----------|---------|
-| `tool-tracing-instrumentation` | `.github/skills/tool-tracing-instrumentation/` | Adds decorators to existing code |
-| `tool-tracing-creator` | `.github/skills/tool-tracing-creator/` | Creates tracing infrastructure for projects |
+| `x-ipe-tool-tracing-instrumentation` | `.github/skills/x-ipe-tool-tracing-instrumentation/` | Adds decorators to existing code |
+| `x-ipe-tool-tracing-creator` | `.github/skills/x-ipe-tool-tracing-creator/` | Creates tracing infrastructure for projects |
 
 ### Skills Updated
 
 | Skill | Section Updated | Changes |
 |-------|----------------|---------|
-| `task-type-code-implementation` | DoR | Added tracing utility check (6th checkpoint) |
-| `task-type-code-implementation` | DoD | Added decorator requirement (checkpoints 10-11), tracing verification section |
-| `task-type-test-generation` | DoD | Added tracing assertions requirement (checkpoint 9), test templates |
-| `task-type-code-refactor-v2` | DoD | Added tracing preservation rules (checkpoints 10-11) |
-| `task-type-refactoring-analysis` | Step 6 | Added Step 6b for tracing coverage evaluation |
-| `task-type-refactoring-analysis` | Gap Types | Added tracing gap types: untraced, unredacted, wrong_level |
-| `project-quality-board-management` | Report Structure | Added Tracing Coverage Violations as 5th subsection |
-| `project-quality-board-management` | Rules | Added RULE 4 for tracing coverage evaluation |
+| `x-ipe-task-based-code-implementation` | DoR | Added tracing utility check (6th checkpoint) |
+| `x-ipe-task-based-code-implementation` | DoD | Added decorator requirement (checkpoints 10-11), tracing verification section |
+| `x-ipe-task-based-test-generation` | DoD | Added tracing assertions requirement (checkpoint 9), test templates |
+| `x-ipe-task-based-code-refactor` | DoD | Added tracing preservation rules (checkpoints 10-11) |
+| `x-ipe-task-based-refactoring-analysis` | Step 6 | Added Step 6b for tracing coverage evaluation |
+| `x-ipe-task-based-refactoring-analysis` | Gap Types | Added tracing gap types: untraced, unredacted, wrong_level |
+| `x-ipe+feature+quality-board-management` | Report Structure | Added Tracing Coverage Violations as 5th subsection |
+| `x-ipe+feature+quality-board-management` | Rules | Added RULE 4 for tracing coverage evaluation |
 
 ### Execution Step Updates
 
@@ -398,21 +398,21 @@ Skills now include tracing instrumentation as explicit workflow steps:
 
 | Skill | New Step | Description |
 |-------|----------|-------------|
-| `task-type-code-implementation` | Step 7 | Invoke `tool-tracing-instrumentation` on all implemented code |
-| `task-type-test-generation` | Step 11 | Generate tracing-related tests (decorator presence, redaction) |
-| `task-type-code-refactor-v2` | Step 6 | Apply tracing to new/moved code, verify preservation |
+| `x-ipe-task-based-code-implementation` | Step 7 | Invoke `x-ipe-tool-tracing-instrumentation` on all implemented code |
+| `x-ipe-task-based-test-generation` | Step 11 | Generate tracing-related tests (decorator presence, redaction) |
+| `x-ipe-task-based-code-refactor` | Step 6 | Apply tracing to new/moved code, verify preservation |
 
 ### Updated File Locations
 
 ```
 .github/skills/
-├── tool-tracing-instrumentation/SKILL.md    # NEW
-├── tool-tracing-creator/SKILL.md            # NEW
-├── task-type-code-implementation/SKILL.md   # UPDATED (DoR, DoD, Step 7)
-├── task-type-test-generation/SKILL.md       # UPDATED (DoD, Step 11)
-├── task-type-code-refactor-v2/SKILL.md      # UPDATED (DoD, Step 6)
-├── task-type-refactoring-analysis/SKILL.md  # UPDATED (Step 6b, Gap Types)
-└── project-quality-board-management/SKILL.md # UPDATED (Report Structure, Rules)
+├── x-ipe-tool-tracing-instrumentation/SKILL.md    # NEW
+├── x-ipe-tool-tracing-creator/SKILL.md            # NEW
+├── x-ipe-task-based-code-implementation/SKILL.md   # UPDATED (DoR, DoD, Step 7)
+├── x-ipe-task-based-test-generation/SKILL.md       # UPDATED (DoD, Step 11)
+├── x-ipe-task-based-code-refactor/SKILL.md      # UPDATED (DoD, Step 6)
+├── x-ipe-task-based-refactoring-analysis/SKILL.md  # UPDATED (Step 6b, Gap Types)
+└── x-ipe+feature+quality-board-management/SKILL.md # UPDATED (Report Structure, Rules)
 ```
 
 ### Tracing Quality Thresholds

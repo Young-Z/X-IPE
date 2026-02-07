@@ -1,0 +1,103 @@
+# Quality Evaluation Data Model
+# Used by x-ipe+feature+quality-board-management skill
+
+QualityEvaluation:
+  # Metadata
+  evaluation_id: QE-{YYYYMMDD}-{sequence}
+  generated_at: <ISO timestamp>
+  generated_by: <agent nickname>
+  scope: project | feature | module
+
+  # Summary Metrics
+  overall_score: <1-10>
+  health_status: healthy | attention_needed | critical
+
+  # Feature-Level Evaluations
+  # Each dimension scored 1-10 based on principle violations and importance
+  # Status derived: 8-10 = aligned, 6-7 = needs_attention, 1-5 = critical
+  features:
+    - feature_id: FEATURE-XXX
+      feature_name: "<name>"
+      feature_score: <1-10>
+      status: aligned | needs_attention | critical | planned
+
+      requirements_alignment:
+        score: <1-10>  # Calculated from violations x importance weights
+        status: aligned | needs_attention | critical | planned
+        requirement_docs: [<paths>]
+        gaps:
+          - type: undocumented | unimplemented | deviated
+            description: "<gap description>"
+            severity: high | medium | low
+            importance_weight: <0.5-3>  # Based on principle importance
+
+      specification_alignment:
+        score: <1-10>
+        status: aligned | needs_attention | critical | planned
+        spec_doc: "<path>"
+        gaps:
+          - type: missing | outdated | incorrect
+            description: "<gap description>"
+            severity: high | medium | low
+            importance_weight: <0.5-3>
+
+      test_coverage:
+        score: <1-10>
+        status: aligned | needs_attention | critical
+        line_coverage: <XX%>
+        branch_coverage: <XX%>
+        critical_untested:
+          - area: "<untested area>"
+            risk: high | medium | low
+            importance_weight: <0.5-3>
+
+      code_alignment:
+        score: <1-10>
+        status: aligned | needs_attention | critical
+        implementation_files: [<paths>]
+        gaps:
+          - type: structure | behavior | interface
+            description: "<gap description>"
+            severity: high | medium | low
+            importance_weight: <0.5-3>
+
+  # Aggregated Gaps
+  priority_gaps:
+    high: [<gap references>]
+    medium: [<gap references>]
+    low: [<gap references>]
+
+  # Refactoring Suggestions (from x-ipe-task-based-refactoring-analysis)
+  refactoring_suggestions:
+    has_suggestions: true | false
+    source: "<evaluation_id or task_id that generated suggestions>"
+
+    suggestions:
+      - feature_id: FEATURE-XXX
+        summary: "<high-level description>"
+        goals:
+          - goal: "<specific improvement goal>"
+            priority: high | medium | low
+            rationale: "<why this goal matters>"
+        target_structure: "<description of desired structure>"
+
+        principles:
+          primary:
+            - principle: <SOLID | DRY | KISS | YAGNI | SoC | etc.>
+              rationale: "<why this principle applies>"
+              applications:
+                - area: "<code area>"
+                  action: "<specific application>"
+          secondary:
+            - principle: <name>
+              rationale: "<supporting rationale>"
+          constraints:
+            - constraint: "<what to avoid or preserve>"
+              reason: "<why>"
+
+  # Recommendations
+  recommendations:
+    - priority: <1-N>
+      category: requirements | specification | testing | code | refactoring
+      action: "<recommended action>"
+      affected_features: [<feature_ids>]

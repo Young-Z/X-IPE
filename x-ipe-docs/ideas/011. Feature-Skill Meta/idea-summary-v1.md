@@ -40,7 +40,7 @@ x-ipe-docs/skill-meta/
 ├── {skill-name}/
 │   ├── skill-meta.md              # Specification (YAML frontmatter + markdown)
 │   ├── skill-version-history.md   # Version changelog
-│   ├── lesson-learned.md          # Captured issues and feedback
+│   ├── x-ipe-meta-lesson-learned.md          # Captured issues and feedback
 │   ├── candidate/                 # Draft skills during create/update
 │   │   ├── SKILL.md               # Candidate skill entry point
 │   │   ├── templates/             # Skill templates (if needed)
@@ -56,11 +56,11 @@ x-ipe-docs/skill-meta/
 
 ```yaml
 ---
-skill_name: task-type-technical-design
+skill_name: x-ipe-task-based-technical-design
 skill_type: task-type  # task-type | tools | board-management
 version: 1.0.0
 last_updated: 2026-02-03
-implementation_path: .github/skills/task-type-technical-design/
+implementation_path: .github/skills/x-ipe-task-based-technical-design/
 
 inputs:
   - name: feature_id
@@ -155,7 +155,7 @@ flowchart TD
 
 ```yaml
 ---
-skill_name: task-type-technical-design
+skill_name: x-ipe-task-based-technical-design
 lessons:
   - id: LL-001
     date: 2026-02-03
@@ -181,9 +181,9 @@ lessons:
 
 | Type | Description | Example Skills |
 |------|-------------|----------------|
-| `task-type` | Task execution skills (includes standalone) | task-type-technical-design, task-type-bug-fix |
-| `tools` | Tool integration skills | tool-frontend-design, tool-architecture-dsl |
-| `board-management` | Board CRUD skills | task-board-management, feature-board-management |
+| `task-type` | Task execution skills (includes standalone) | x-ipe-task-based-technical-design, x-ipe-task-based-bug-fix |
+| `tools` | Tool integration skills | x-ipe-tool-frontend-design, x-ipe-tool-architecture-dsl |
+| `board-management` | Board CRUD skills | x-ipe+all+task-board-management, feature-board-management |
 
 ### Test Case Generation Rules
 
@@ -238,7 +238,7 @@ Creates a **quality assurance system for AI skills** with:
 
 3. **📝 Lesson Capture** - When things go wrong:
    - Manual trigger: "capture this as a lesson"
-   - Recorded in `lesson-learned.md`
+   - Recorded in `x-ipe-meta-lesson-learned.md`
    - Used by skill-creator to improve the skill
 
 ### Key Decisions
@@ -266,11 +266,11 @@ Creates a **quality assurance system for AI skills** with:
 ```mermaid
 flowchart LR
     subgraph Capture["Lesson Capture"]
-        Issue["Issue/Feedback"] -->|Manual trigger| LL["lesson-learned.md"]
+        Issue["Issue/Feedback"] -->|Manual trigger| LL["x-ipe-meta-lesson-learned.md"]
     end
     
     subgraph Create["Skill Create/Update"]
-        Input["User request OR lesson-learned"] --> SC["Skill-Creator"]
+        Input["User request OR x-ipe-meta-lesson-learned"] --> SC["Skill-Creator"]
         SC --> Meta["skill-meta.md"]
         SC --> Candidate["candidate/SKILL.md"]
         Candidate --> Test["Test & Evaluate"]
@@ -316,7 +316,7 @@ Key insights from ideation session:
 - [ ] Create skill-meta templates (3 types: task-type, tools, board-management)
 - [ ] Update Skill-Creator skill with new workflow
 - [ ] Create Lesson-Learned skill
-- [ ] Test with one skill (e.g., task-type-technical-design)
+- [ ] Test with one skill (e.g., x-ipe-task-based-technical-design)
 
 ## References & Common Principles
 

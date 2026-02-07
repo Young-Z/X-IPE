@@ -1,6 +1,6 @@
 ---
 name: x-ipe-meta-skill-creator
-description: Guide for creating effective X-IPE skills with templates, testing, and validation. Use when creating a new skill or updating an existing skill for the X-IPE framework. Triggers on requests like "create skill", "new skill", "add task type skill", "update skill".
+description: Guide for creating effective X-IPE skills with templates, testing, and validation. Use when creating a new skill or updating an existing skill for the X-IPE framework. Triggers on requests like "create skill", "new skill", "add task-based skill", "update skill".
 ---
 
 # X-IPE Skill Creator
@@ -32,7 +32,7 @@ Skills are modular, self-contained packages that extend AI Agent capabilities by
 | Type | Purpose | Naming Convention | SKILL.md Template | skill-meta.md Template |
 |------|---------|-------------------|-------------------|------------------------|
 | x-ipe-task-based | Belong to end-to-end project lifecycle workflows | `x-ipe-task-based-{name}` | [x-ipe-task-based.md](templates/x-ipe-task-based.md) | [skill-meta-x-ipe-task-based.md](templates/skill-meta-x-ipe-task-based.md) |
-| x-ipe-task-category | Category orchestration when related tasks complete | `x-ipe-{category}-{operation}` | [x-ipe-workflow-orchestration.md](templates/x-ipe-workflow-orchestration.md) | [skill-meta-x-ipe-task-category.md](templates/skill-meta-x-ipe-task-category.md) |
+| x-ipe-task-category | Category orchestration when related tasks complete | `x-ipe+{category}+{name}` (`all` for cross-category) | [x-ipe-workflow-orchestration.md](templates/x-ipe-workflow-orchestration.md) | [skill-meta-x-ipe-task-category.md](templates/skill-meta-x-ipe-task-category.md) |
 | x-ipe-tool | Utility functions and tool integrations | `x-ipe-tool-{name}` | [x-ipe-tool.md](templates/x-ipe-tool.md) | [skill-meta-x-ipe-tool.md](templates/skill-meta-x-ipe-tool.md) |
 | x-ipe-workflow-orchestration | Multi-skill coordination | `x-ipe-workflow-{name}` | [x-ipe-workflow-orchestration.md](templates/x-ipe-workflow-orchestration.md) | [skill-meta-x-ipe-task-based.md](templates/skill-meta-x-ipe-task-based.md) |
 | x-ipe-meta | Creates/manages skills | `x-ipe-meta-{name}` | [x-ipe-meta.md](templates/x-ipe-meta.md) | [skill-meta-x-ipe-meta.md](templates/skill-meta-x-ipe-meta.md) |
@@ -268,12 +268,12 @@ input:
     <name>Validate Cross-References</name>
     <requires>merge_status == merged</requires>
     <action>
-      1. Check copilot-instructions.md registration (x-ipe-task-based only)
-      2. Check task-execution-guideline registration (x-ipe-task-based only)
+      1. Verify skill's Output Result YAML declares: category, next_task_based_skill, require_human_review (x-ipe-task-based only)
+      2. Verify skill description contains trigger keywords for auto-discovery (x-ipe-task-based only)
       3. Verify bidirectional references
     </action>
     <constraints>
-      - MANDATORY: Task type skills must be registered in copilot-instructions.md
+      - MANDATORY: Task-based skills must declare category, next_task_based_skill, require_human_review in Output Result for auto-discovery
     </constraints>
     <success_criteria>
       - Cross-references validated
@@ -349,7 +349,7 @@ input:
 task_completion_output:
   category: standalone
   status: completed | blocked
-  next_task_type: null
+  next_task_based_skill: null
   require_human_review: yes
   task_output_links:
     - ".github/skills/{skill-name}/SKILL.md"
@@ -401,7 +401,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>Step 9 Output Complete</name>
-    <verification>Cross-references validated (copilot-instructions.md if x-ipe-task-based)</verification>
+    <verification>Cross-references validated (auto-discovery fields declared if x-ipe-task-based)</verification>
     <step_output>cross_references_valid</step_output>
   </checkpoint>
   
@@ -436,7 +436,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>Cross-References Valid</name>
-    <verification>Registered in copilot-instructions.md (if x-ipe-task-based)</verification>
+    <verification>Auto-discovery fields present in Output Result (if x-ipe-task-based)</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -483,4 +483,4 @@ See [references/examples.md](references/examples.md) for concrete execution exam
 
 | Skill | Purpose |
 |-------|---------|
-| `lesson-learned` | Capture issues and feedback after skill execution |
+| `x-ipe-meta-lesson-learned` | Capture issues and feedback after skill execution |

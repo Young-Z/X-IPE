@@ -150,7 +150,7 @@ acceptance_criteria:
 # ─────────────────────────────────────────────────────────────
 dependencies:
   skills:
-    - name: task-execution-guideline
+    - name: x-ipe-workflow-task-execution
       relationship: prerequisite
 
   artifacts:

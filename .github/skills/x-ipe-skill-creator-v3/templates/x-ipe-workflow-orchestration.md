@@ -302,7 +302,7 @@ workflow_orchestration_skills:
     7: Output Result
     8: Definition of Done (DoD)
     # REFERENCE
-    9: Registry (Task Types / Skill Mapping)
+    9: Registry (Task-Based Skills / Skill Mapping)
     10: Error Handling
     11: Templates
     12: Examples
@@ -319,9 +319,9 @@ workflow_orchestration_skills:
 | DoR/DoD | XML checkpoints |
 | Importance signals | Keywords (BLOCKING, CRITICAL, MANDATORY) |
 
-### Key Differences from Task Type Skills
+### Key Differences from Task-Based Skills
 
-| Aspect | Task Type | Workflow Orchestration |
+| Aspect | Task-Based | Workflow Orchestration |
 |--------|-----------|------------------------|
 | Implements logic | Yes | No - coordinates other skills |
 | Produces artifacts | Directly | Aggregates from coordinated skills |

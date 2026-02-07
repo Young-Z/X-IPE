@@ -69,7 +69,7 @@ FEATURE-023-D provides an AI skill that automatically instruments Python code wi
 
 | # | Criterion | Required |
 |---|-----------|----------|
-| 1.1 | Skill file exists at `.github/skills/tool-tracing-instrumentation/SKILL.md` | Yes |
+| 1.1 | Skill file exists at `.github/skills/x-ipe-tool-tracing-instrumentation/SKILL.md` | Yes |
 | 1.2 | Skill has clear trigger patterns (e.g., "add tracing to", "instrument for tracing") | Yes |
 | 1.3 | Skill defines step-by-step execution procedure | Yes |
 | 1.4 | Skill includes usage examples | Yes |
@@ -168,10 +168,10 @@ This section specifies updates to existing X-IPE skills to integrate tracing enf
 | # | Criterion | Required |
 |---|-----------|----------|
 | 8.1.1 | DoR includes tracing utility check (tracing infrastructure exists) | Yes |
-| 8.1.2 | DoR references `tool-tracing-creator` skill if tracing missing | Yes |
+| 8.1.2 | DoR references `x-ipe-tool-tracing-creator` skill if tracing missing | Yes |
 | 8.1.3 | DoD includes decorator requirement for all public functions | Yes |
 | 8.1.4 | DoD includes sensitive parameter redaction check | Yes |
-| 8.1.5 | DoD references `tool-tracing-instrumentation` skill for adding decorators | Yes |
+| 8.1.5 | DoD references `x-ipe-tool-tracing-instrumentation` skill for adding decorators | Yes |
 
 ### AC-8.2: Test Generation Skill Updates
 
@@ -190,7 +190,7 @@ This section specifies updates to existing X-IPE skills to integrate tracing enf
 | 8.3.1 | DoD includes "existing tracing preserved" check | Yes |
 | 8.3.2 | DoD includes "new/moved code has decorators" check | Yes |
 | 8.3.3 | Skill provides tracing preservation rules for move/split/rename | Yes |
-| 8.3.4 | Skill references `tool-tracing-instrumentation` for adding to new code | Yes |
+| 8.3.4 | Skill references `x-ipe-tool-tracing-instrumentation` for adding to new code | Yes |
 
 ### AC-8.4: Refactoring Analysis Skill Updates
 

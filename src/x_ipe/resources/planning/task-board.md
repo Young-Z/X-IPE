@@ -12,7 +12,7 @@ auto_proceed: false  # Set to true for automatic task chaining
 
 ## Active Tasks
 
-| Task ID | Task Type | Description | Role | Status | Last Updated | Output Links | Next Task |
+| Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
 | | | | | | | | |
 
@@ -20,7 +20,7 @@ auto_proceed: false  # Set to true for automatic task chaining
 
 ## Completed Tasks
 
-| Task ID | Task Type | Description | Role | Last Updated | Output Links | Notes |
+| Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
 | | | | | | | |
 
@@ -28,7 +28,7 @@ auto_proceed: false  # Set to true for automatic task chaining
 
 ## Cancelled Tasks
 
-| Task ID | Task Type | Description | Reason | Last Updated | Output Links |
+| Task ID | Task | Description | Reason | Last Updated | Output Links |
 |---------|-----------|-------------|--------|--------------|--------------|
 | | | | | | |
 
@@ -47,20 +47,20 @@ auto_proceed: false  # Set to true for automatic task chaining
 
 ---
 
-## Task Type Quick Reference
+## Task-Based Skills Quick Reference
 
-| Task Type | Skill | Default Next |
+| Task | Skill | Default Next |
 |-----------|-------|--------------|
-| Requirement Gathering | task-type-requirement-gathering | Feature Breakdown |
-| Feature Breakdown | task-type-feature-breakdown | Technical Design |
-| Technical Design | task-type-technical-design | Test Generation |
-| Test Generation | task-type-test-generation | Code Implementation |
-| Code Implementation | task-type-code-implementation | Human Playground |
-| Human Playground | task-type-human-playground | Feature Closing |
-| Feature Closing | task-type-feature-closing | - |
-| Code Refactor | task-type-code-refactor | - |
-| Project Initialization | task-type-project-init | Dev Environment Setup |
-| Dev Environment Setup | task-type-dev-environment | - |
+| Requirement Gathering | x-ipe-task-based-requirement-gathering | Feature Breakdown |
+| Feature Breakdown | x-ipe-task-based-feature-breakdown | Technical Design |
+| Technical Design | x-ipe-task-based-technical-design | Test Generation |
+| Test Generation | x-ipe-task-based-test-generation | Code Implementation |
+| Code Implementation | x-ipe-task-based-code-implementation | Human Playground |
+| Human Playground | x-ipe-task-based-human-playground | Feature Closing |
+| Feature Closing | x-ipe-task-based-feature-closing | - |
+| Code Refactor | x-ipe-task-based-code-refactor | - |
+| Project Initialization | x-ipe-task-based-project-init | Dev Environment Setup |
+| Dev Environment Setup | x-ipe-task-based-dev-environment | - |
 
 ---
 

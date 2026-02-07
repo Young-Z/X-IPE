@@ -82,7 +82,7 @@ quality_metrics: { max_active_items: 50, archive_after_days: 30, complexity: med
 
 ```yaml
 # Only showing fields that differ from template defaults
-skill_name: "x-ipe-task-board-management"
+skill_name: "x-ipe-x-ipe+all+task-board-management"
 managed_category: "task"
 board_path: "x-ipe-docs/planning/task-board.md"
 
@@ -97,7 +97,7 @@ sections:
 ## Example: Feature Board Management
 
 ```yaml
-skill_name: "x-ipe-feature-board-management"
+skill_name: "x-ipe+feature+feature-board-management"
 managed_category: "feature-stage"
 board_path: "x-ipe-docs/planning/feature-board.md"
 

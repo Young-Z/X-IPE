@@ -1,6 +1,6 @@
-# Skill Meta Template: Task Type
+# Skill Meta Template: Task-Based
 
-Use this template to create skill-meta.md for task-type skills. The skill-meta defines **acceptance criteria** for automated testing.
+Use this template to create skill-meta.md for task-based skills. The skill-meta defines **acceptance criteria** for automated testing.
 
 ---
 
@@ -8,13 +8,13 @@ Use this template to create skill-meta.md for task-type skills. The skill-meta d
 
 ```yaml
 # ═══════════════════════════════════════════════════════════
-# SKILL META - Task Type
+# SKILL META - Task-Based
 # ═══════════════════════════════════════════════════════════
 
 # ─────────────────────────────────────────────────────────────
 # IDENTITY
 # ─────────────────────────────────────────────────────────────
-skill_name: x-ipe-task-type-{name}
+skill_name: x-ipe-task-based-{name}
 skill_type: x-ipe-task-based
 version: "1.0.0"
 status: draft | candidate | production
@@ -40,7 +40,7 @@ not_for:
 workflow:
   category: feature-stage | requirement-stage | ideation-stage | code-refactoring-stage | standalone
   phase: "{phase name if category != standalone}"
-  next_task_type: "{TaskName}" | null
+  next_task_based_skill: "{TaskName}" | null
   human_review: true | false
 
 # ─────────────────────────────────────────────────────────────
@@ -71,8 +71,8 @@ outputs:
       value: "${workflow.category}"
     - name: status
       value: completed | blocked
-    - name: next_task_type
-      value: "${workflow.next_task_type}"
+    - name: next_task_based_skill
+      value: "${workflow.next_task_based_skill}"
     - name: require_human_review
       value: "${workflow.human_review}"
     - name: auto_proceed
@@ -195,14 +195,14 @@ acceptance_criteria:
   wont:
     - id: AC-W01
       criterion: Board status updates
-      reason: Handled by category skill, not task-type skill
+      reason: Handled by category skill, not task-based skill
 
 # ─────────────────────────────────────────────────────────────
 # DEPENDENCIES
 # ─────────────────────────────────────────────────────────────
 dependencies:
   skills:
-    - name: task-execution-guideline
+    - name: x-ipe-workflow-task-execution
       relationship: prerequisite
       description: Must be learned before executing this skill
 
@@ -267,14 +267,14 @@ evaluation:
 
 | Section | Field | Required | Description |
 |---------|-------|----------|-------------|
-| Identity | skill_name | Yes | `x-ipe-task-type-{name}` format |
+| Identity | skill_name | Yes | `x-ipe-task-based-{name}` format |
 | Identity | version | Yes | Semver format |
 | Identity | status | Yes | draft → candidate → production |
 | Purpose | summary | Yes | Single sentence outcome |
 | Purpose | triggers | Yes | Phrases that invoke skill |
 | Purpose | not_for | Yes | What to use instead |
 | Workflow | category | Yes | Where in lifecycle |
-| Workflow | next_task_type | Yes | Chain destination or null |
+| Workflow | next_task_based_skill | Yes | Chain destination or null |
 | Workflow | human_review | Yes | Pause for approval |
 | Interface | inputs.required | Yes | At minimum auto_proceed |
 | Interface | outputs.state | Yes | Task completion state |

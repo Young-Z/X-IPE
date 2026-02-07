@@ -2,8 +2,8 @@
 Tests for Architecture Diagram Renderer Skills (Split into two skills)
 
 After refactoring, we now have:
-1. tool-draw-layered-architecture - Module View diagrams
-2. tool-draw-system-landscape - Landscape View diagrams
+1. x-ipe-tool-draw-layered-architecture - Module View diagrams
+2. x-ipe-tool-draw-system-landscape - Landscape View diagrams
 
 This test suite validates both skill structures.
 """
@@ -14,16 +14,16 @@ import pytest
 
 # Base paths
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LAYERED_SKILL_PATH = os.path.join(PROJECT_ROOT, ".github", "skills", "tool-draw-layered-architecture")
-LANDSCAPE_SKILL_PATH = os.path.join(PROJECT_ROOT, ".github", "skills", "tool-draw-system-landscape")
+LAYERED_SKILL_PATH = os.path.join(PROJECT_ROOT, ".github", "skills", "x-ipe-tool-draw-layered-architecture")
+LANDSCAPE_SKILL_PATH = os.path.join(PROJECT_ROOT, ".github", "skills", "x-ipe-tool-draw-system-landscape")
 CONFIG_PATH = os.path.join(PROJECT_ROOT, "x-ipe-docs", "config", "tools.json")
 
 
 class TestLayeredArchitectureSkillStructure:
-    """Test tool-draw-layered-architecture folder and file structure."""
+    """Test x-ipe-tool-draw-layered-architecture folder and file structure."""
 
     def test_skill_folder_exists(self):
-        """Skill folder exists at .github/skills/tool-draw-layered-architecture/"""
+        """Skill folder exists at .github/skills/x-ipe-tool-draw-layered-architecture/"""
         assert os.path.isdir(LAYERED_SKILL_PATH), f"Skill folder not found at {LAYERED_SKILL_PATH}"
 
     def test_skill_md_exists(self):
@@ -53,7 +53,7 @@ class TestLayeredArchitectureSkillStructure:
 
 
 class TestLayeredArchitectureSkillContent:
-    """Test tool-draw-layered-architecture SKILL.md content."""
+    """Test x-ipe-tool-draw-layered-architecture SKILL.md content."""
 
     @pytest.fixture
     def skill_content(self):
@@ -66,7 +66,7 @@ class TestLayeredArchitectureSkillContent:
     def test_skill_md_has_frontmatter(self, skill_content):
         """SKILL.md has YAML frontmatter with name and description"""
         assert "---" in skill_content, "Missing YAML frontmatter"
-        assert "name: tool-draw-layered-architecture" in skill_content, "Incorrect name in frontmatter"
+        assert "name: x-ipe-tool-draw-layered-architecture" in skill_content, "Incorrect name in frontmatter"
 
     def test_skill_md_has_workflow_section(self, skill_content):
         """SKILL.md has Workflow section"""
@@ -83,14 +83,14 @@ class TestLayeredArchitectureSkillContent:
 
     def test_skill_md_references_landscape_skill(self, skill_content):
         """SKILL.md should reference the landscape skill for landscape diagrams"""
-        assert "tool-draw-system-landscape" in skill_content
+        assert "x-ipe-tool-draw-system-landscape" in skill_content
 
 
 class TestLandscapeSkillStructure:
-    """Test tool-draw-system-landscape folder and file structure."""
+    """Test x-ipe-tool-draw-system-landscape folder and file structure."""
 
     def test_skill_folder_exists(self):
-        """Skill folder exists at .github/skills/tool-draw-system-landscape/"""
+        """Skill folder exists at .github/skills/x-ipe-tool-draw-system-landscape/"""
         assert os.path.isdir(LANDSCAPE_SKILL_PATH), f"Skill folder not found at {LANDSCAPE_SKILL_PATH}"
 
     def test_skill_md_exists(self):
@@ -120,7 +120,7 @@ class TestLandscapeSkillStructure:
 
 
 class TestLandscapeSkillContent:
-    """Test tool-draw-system-landscape SKILL.md content."""
+    """Test x-ipe-tool-draw-system-landscape SKILL.md content."""
 
     @pytest.fixture
     def skill_content(self):
@@ -133,7 +133,7 @@ class TestLandscapeSkillContent:
     def test_skill_md_has_frontmatter(self, skill_content):
         """SKILL.md has YAML frontmatter with name and description"""
         assert "---" in skill_content, "Missing YAML frontmatter"
-        assert "name: tool-draw-system-landscape" in skill_content, "Incorrect name in frontmatter"
+        assert "name: x-ipe-tool-draw-system-landscape" in skill_content, "Incorrect name in frontmatter"
 
     def test_skill_md_has_workflow_section(self, skill_content):
         """SKILL.md has Workflow section"""
@@ -158,7 +158,7 @@ class TestLandscapeSkillContent:
 
     def test_skill_md_references_layered_skill(self, skill_content):
         """SKILL.md should reference the layered skill for module diagrams"""
-        assert "tool-draw-layered-architecture" in skill_content
+        assert "x-ipe-tool-draw-layered-architecture" in skill_content
 
 
 class TestConfigIntegration:
@@ -172,20 +172,20 @@ class TestConfigIntegration:
         return {}
 
     def test_layered_skill_registered_in_architecture(self, config_content):
-        """tool-draw-layered-architecture registered in ideation.architecture"""
-        assert config_content.get("stages", {}).get("ideation", {}).get("architecture", {}).get("tool-draw-layered-architecture") == True
+        """x-ipe-tool-draw-layered-architecture registered in ideation.architecture"""
+        assert config_content.get("stages", {}).get("ideation", {}).get("architecture", {}).get("x-ipe-tool-draw-layered-architecture") == True
 
     def test_landscape_skill_registered_in_architecture(self, config_content):
-        """tool-draw-system-landscape registered in ideation.architecture"""
-        assert config_content.get("stages", {}).get("ideation", {}).get("architecture", {}).get("tool-draw-system-landscape") == True
+        """x-ipe-tool-draw-system-landscape registered in ideation.architecture"""
+        assert config_content.get("stages", {}).get("ideation", {}).get("architecture", {}).get("x-ipe-tool-draw-system-landscape") == True
 
     def test_layered_skill_disabled_in_ideation(self, config_content):
-        """tool-draw-layered-architecture disabled in ideation.ideation (by default)"""
-        assert config_content.get("stages", {}).get("ideation", {}).get("ideation", {}).get("tool-draw-layered-architecture") == False
+        """x-ipe-tool-draw-layered-architecture disabled in ideation.ideation (by default)"""
+        assert config_content.get("stages", {}).get("ideation", {}).get("ideation", {}).get("x-ipe-tool-draw-layered-architecture") == False
 
     def test_landscape_skill_disabled_in_ideation(self, config_content):
-        """tool-draw-system-landscape disabled in ideation.ideation (by default)"""
-        assert config_content.get("stages", {}).get("ideation", {}).get("ideation", {}).get("tool-draw-system-landscape") == False
+        """x-ipe-tool-draw-system-landscape disabled in ideation.ideation (by default)"""
+        assert config_content.get("stages", {}).get("ideation", {}).get("ideation", {}).get("x-ipe-tool-draw-system-landscape") == False
 
 
 class TestModuleViewTemplate:

@@ -1,6 +1,6 @@
 # Lesson Learned Template
 
-<!-- Template for x-ipe-docs/skill-meta/{skill}/lesson-learned.md -->
+<!-- Template for x-ipe-docs/skill-meta/{skill}/x-ipe-meta-lesson-learned.md -->
 
 ## Quick Capture (5-line minimum)
 

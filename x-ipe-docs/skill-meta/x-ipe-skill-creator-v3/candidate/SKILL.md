@@ -1,6 +1,6 @@
 ---
 name: x-ipe-meta-skill-creator
-description: Guide for creating effective X-IPE skills with templates, testing, and validation. Use when creating a new skill or updating an existing skill for the X-IPE framework. Triggers on requests like "create skill", "new skill", "add task type skill", "update skill".
+description: Guide for creating effective X-IPE skills with templates, testing, and validation. Use when creating a new skill or updating an existing skill for the X-IPE framework. Triggers on requests like "create skill", "new skill", "add task-based skill", "update skill".
 ---
 
 # X-IPE Skill Creator
@@ -269,7 +269,7 @@ input:
     <requires>merge_status == merged</requires>
     <action>
       1. Check copilot-instructions.md registration (x-ipe-task-based only)
-      2. Check task-execution-guideline registration (x-ipe-task-based only)
+      2. Check x-ipe-workflow-task-execution registration (x-ipe-task-based only)
       3. Verify bidirectional references
     </action>
     <constraints>
@@ -349,7 +349,7 @@ input:
 task_completion_output:
   category: standalone
   status: completed | blocked
-  next_task_type: null
+  next_task_based_skill: null
   require_human_review: yes
   task_output_links:
     - ".github/skills/{skill-name}/SKILL.md"
@@ -483,4 +483,4 @@ See [references/examples.md](references/examples.md) for concrete execution exam
 
 | Skill | Purpose |
 |-------|---------|
-| `lesson-learned` | Capture issues and feedback after skill execution |
+| `x-ipe-meta-lesson-learned` | Capture issues and feedback after skill execution |

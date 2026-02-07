@@ -216,7 +216,7 @@ class StageToolboxModal {
     }
     
     _formatToolName(tool) {
-        // Convert "tool-frontend-design" to "Frontend Design"
+        // Convert "x-ipe-tool-frontend-design" to "Frontend Design"
         return tool
             .replace(/^tool-/, '')
             .split('-')
@@ -589,7 +589,7 @@ class StageToolboxModal {
      * Check if a specific tool is enabled
      * @param {string} stage - Stage name (e.g., 'ideation')
      * @param {string} phase - Phase name (e.g., 'mockup')
-     * @param {string} tool - Tool name (e.g., 'tool-frontend-design')
+     * @param {string} tool - Tool name (e.g., 'x-ipe-tool-frontend-design')
      * @returns {boolean}
      */
     isToolEnabled(stage, phase, tool) {

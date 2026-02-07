@@ -55,12 +55,12 @@ As an **architect**, I want to **align components within modules using nested gr
 ## Acceptance Criteria
 
 ### 1. Skill Structure
-- [x] AC-1.1: Skill folder exists at `.github/skills/tool-architecture-dsl/`
+- [x] AC-1.1: Skill folder exists at `.github/skills/x-ipe-tool-architecture-dsl/`
 - [x] AC-1.2: SKILL.md contains complete skill definition with purpose, workflow, and examples
 - [x] AC-1.3: DSL grammar reference document included at `references/grammar.md`
 - [x] AC-1.4: Example DSL files provided for Module View at `examples/module-view.dsl`
 - [x] AC-1.5: Example DSL files provided for Landscape View at `examples/landscape-view.dsl`
-- [x] AC-1.6: v1 backup maintained at `.github/skills/tool-architecture-dsl-v1-backup/` (v2)
+- [x] AC-1.6: v1 backup maintained at `.github/skills/x-ipe-tool-architecture-dsl-v1-backup/` (v2)
 
 ### 2. DSL Syntax - Core Elements
 - [x] AC-2.1: `@startuml <view-type>` / `@enduml` block delimiters are supported
@@ -107,7 +107,7 @@ As an **architect**, I want to **align components within modules using nested gr
 - [x] AC-6.6: Skill can handle partial/incomplete DSL and suggest completions
 
 ### 7. Integration
-- [x] AC-7.1: Skill registered in `x-ipe-docs/config/tools.json` under `stages.ideation.ideation.tool-architecture-dsl`
+- [x] AC-7.1: Skill registered in `x-ipe-docs/config/tools.json` under `stages.ideation.ideation.x-ipe-tool-architecture-dsl`
 - [x] AC-7.2: Skill can be enabled/disabled via Stage Toolbox modal
 - [x] AC-7.3: Skill works alongside other ideation tools (mermaid, antv-infographic)
 - [x] AC-7.4: DSL output can be embedded in markdown using ```architecture-dsl code blocks

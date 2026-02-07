@@ -191,7 +191,7 @@ flowchart TD
 
 | Mockup | Type | Path | Tool Used |
 |--------|------|------|-----------|
-| UI/UX Feedback View | HTML | [mockups/uiux-feedback-v1.html](mockups/uiux-feedback-v1.html) | tool-frontend-design |
+| UI/UX Feedback View | HTML | [mockups/uiux-feedback-v1.html](mockups/uiux-feedback-v1.html) | x-ipe-tool-frontend-design |
 
 ### Preview Instructions
 - Open HTML file in browser to view interactive mockup

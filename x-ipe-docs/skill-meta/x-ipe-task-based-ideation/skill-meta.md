@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════
-# SKILL META - Task Type
+# SKILL META - Task-Based
 # ═══════════════════════════════════════════════════════════
 
 # ─────────────────────────────────────────────────────────────
@@ -25,9 +25,9 @@ triggers:
   - "analyze my idea"
 
 not_for:
-  - "task-type-idea-mockup: Use when creating UI/UX mockups after ideation"
-  - "task-type-idea-to-architecture: Use when creating system architecture diagrams after ideation"
-  - "task-type-requirement-gathering: Use when gathering formal requirements (post-ideation)"
+  - "x-ipe-task-based-idea-mockup: Use when creating UI/UX mockups after ideation"
+  - "x-ipe-task-based-idea-to-architecture: Use when creating system architecture diagrams after ideation"
+  - "x-ipe-task-based-requirement-gathering: Use when gathering formal requirements (post-ideation)"
 
 # ─────────────────────────────────────────────────────────────
 # WORKFLOW POSITION
@@ -35,7 +35,7 @@ not_for:
 workflow:
   category: ideation-stage
   phase: ideation
-  next_task_type: "Idea Mockup | Idea to Architecture"
+  next_task_based_skill: "Idea Mockup | Idea to Architecture"
   human_review: true
 
 # ─────────────────────────────────────────────────────────────
@@ -71,7 +71,7 @@ outputs:
       value: ideation-stage
     - name: status
       value: completed | blocked
-    - name: next_task_type
+    - name: next_task_based_skill
       value: "Idea Mockup | Idea to Architecture"
     - name: require_human_review
       value: true
@@ -215,24 +215,20 @@ acceptance_criteria:
   wont:
     - id: AC-W01
       criterion: Board status updates
-      reason: Handled by ideation-stage+ideation-board-management, not task-type skill
+      reason: Not applicable (ideation board management skill removed)
 
 # ─────────────────────────────────────────────────────────────
 # DEPENDENCIES
 # ─────────────────────────────────────────────────────────────
 dependencies:
   skills:
-    - name: task-execution-guideline
+    - name: x-ipe-workflow-task-execution
       relationship: prerequisite
       description: Must be learned before executing this skill
 
     - name: infographic-syntax-creator
       relationship: integration
       description: Used for visual infographics when antv-infographic enabled
-
-    - name: ideation-stage+ideation-board-management
-      relationship: integration
-      description: Called for board updates
 
   artifacts:
     - path: "x-ipe-docs/ideas/{folder}/files/"

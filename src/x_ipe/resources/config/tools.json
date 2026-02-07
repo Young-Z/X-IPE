@@ -3,7 +3,7 @@
   "stages": {
     "ideation": {
       "ideation": {"_order": 1},
-      "mockup": {"_order": 2, "tool-frontend-design": true},
+      "mockup": {"_order": 2, "x-ipe-tool-frontend-design": true},
       "architecture": {"_order": 3},
       "sharing": {"_order": 4}
     },

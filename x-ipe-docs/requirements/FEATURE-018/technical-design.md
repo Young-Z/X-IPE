@@ -123,8 +123,8 @@ x-ipe/                          # Repository root
         ├── static/             # CSS, JS, images (package data)
         │
         ├── skills/             # Bundled skills (package data)
-        │   ├── task-type-bug-fix/
-        │   ├── task-type-code-implementation/
+        │   ├── x-ipe-task-based-bug-fix/
+        │   ├── x-ipe-task-based-code-implementation/
         │   └── ...
         │
         └── scaffolds/          # Init templates (package data)
@@ -243,12 +243,12 @@ server:
   "version": "1.0.0",
   "generated_at": "2026-01-25T05:20:00Z",
   "skills": {
-    "task-type-bug-fix": {
+    "x-ipe-task-based-bug-fix": {
       "hash": "sha256:abc123...",
       "source": "package",
       "files": ["SKILL.md", "references/examples.md"]
     },
-    "task-type-code-implementation": {
+    "x-ipe-task-based-code-implementation": {
       "hash": "sha256:def456...",
       "source": "local",
       "modified": true

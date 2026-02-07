@@ -124,7 +124,7 @@ As a **documentation author**, I want to **embed architecture diagrams in markdo
 ### 9. Integration
 - [x] AC-9.1: Skill registered in `x-ipe-docs/config/tools.json` under `stages.ideation.ideation.tool-architecture-draw`
 - [x] AC-9.2: Can be enabled/disabled via Stage Toolbox modal
-- [x] AC-9.3: Works alongside `tool-architecture-dsl` skill
+- [x] AC-9.3: Works alongside `x-ipe-tool-architecture-dsl` skill
 - [x] AC-9.4: Output files can be saved to idea folder
 
 ---

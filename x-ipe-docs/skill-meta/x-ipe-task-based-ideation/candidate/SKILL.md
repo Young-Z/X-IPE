@@ -3,7 +3,7 @@ name: x-ipe-task-based-ideation
 description: Learn and refine user ideas through brainstorming. Use when user uploads idea files to Workplace. Analyzes content, asks clarifying questions, produces structured idea summary with visualizations. Triggers on "ideate", "brainstorm", "refine idea", "analyze my idea".
 ---
 
-# Task Type: Ideation
+# Task-Based Skill: Ideation
 
 ## Purpose
 
@@ -18,7 +18,7 @@ Learn and refine user ideas through collaborative brainstorming by:
 
 ## Important Notes
 
-BLOCKING: Learn `task-execution-guideline` skill before executing this skill.
+BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
 
 BLOCKING: Learn `infographic-syntax-creator` skill for visual infographics in the idea summary.
 
@@ -31,10 +31,10 @@ BLOCKING: Learn `infographic-syntax-creator` skill for visual infographics in th
 ```yaml
 input:
   task_id: "{TASK-XXX}"
-  task_type: "Ideation"
+  task_based_skill: "Ideation"
 
   category: ideation-stage
-  next_task_type: "Idea Mockup | Idea to Architecture"
+  next_task_based_skill: "Idea Mockup | Idea to Architecture"
   require_human_review: yes
 
   auto_proceed: false
@@ -157,8 +157,8 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
       IF: config.stages.ideation.mockup["frontend-design"] == true
       THEN: Verify frontend-design skill available
 
-      IF: config.stages.ideation.ideation["tool-architecture-dsl"] == true
-      THEN: Verify tool-architecture-dsl skill available
+      IF: config.stages.ideation.ideation["x-ipe-tool-architecture-dsl"] == true
+      THEN: Verify x-ipe-tool-architecture-dsl skill available
     </branch>
     <output>tools_status</output>
   </step_3>
@@ -195,8 +195,8 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
       IF: user describes flow AND mermaid enabled
       THEN: Generate mermaid diagram
 
-      IF: user describes architecture AND tool-architecture-dsl enabled
-      THEN: Invoke tool-architecture-dsl skill
+      IF: user describes architecture AND x-ipe-tool-architecture-dsl enabled
+      THEN: Invoke x-ipe-tool-architecture-dsl skill
     </branch>
     <output>brainstorming_notes, artifacts[]</output>
   </step_5>
@@ -233,7 +233,7 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
     <branch>
       IF: antv-infographic enabled → Use infographic DSL for features/roadmaps
       IF: mermaid enabled → Use mermaid for flowcharts/sequences
-      IF: tool-architecture-dsl enabled → Use architecture DSL for system diagrams
+      IF: x-ipe-tool-architecture-dsl enabled → Use architecture DSL for system diagrams
       IF: all disabled → Use standard markdown (bullet lists, tables)
     </branch>
     <output>idea_draft</output>
@@ -323,7 +323,7 @@ See [references/folder-naming-guide.md](references/folder-naming-guide.md) for r
 task_completion_output:
   category: ideation-stage
   status: completed | blocked
-  next_task_type: "Idea Mockup | Idea to Architecture"
+  next_task_based_skill: "Idea Mockup | Idea to Architecture"
   require_human_review: yes
   task_output_links:
     - "x-ipe-docs/ideas/{folder}/idea-summary-vN.md"
@@ -422,7 +422,7 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
 </definition_of_done>
 ```
 
-MANDATORY: After completing this skill, return to `task-execution-guideline` to continue the task execution flow.
+MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution` to continue the task execution flow.
 
 ---
 

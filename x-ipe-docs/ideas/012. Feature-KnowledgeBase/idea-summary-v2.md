@@ -301,7 +301,7 @@ flowchart TD
 
 ## 14. Next Steps
 
-| Step | Task Type | Description |
+| Step | Task | Description |
 |------|-----------|-------------|
 | 1 | **Idea Mockup** | Create UI mockups for KB views |
 | 2 | **Idea to Architecture** | Detailed system architecture |

@@ -43,8 +43,8 @@ Skill creator
 		○ 
 		
 	- When update skill
-		○ Sub-agent 1: base on the user input or lesson-learned.md under x-ipe-docs/skill-meta/skill folder to understand the main points. Then analyze skill meta. If any gap, for each of them in lesson and learned we need have captured scenario, ground truth(from correct result after failure or mistake) add them into acceptance criteria in skill-meta.md, if any question ask user for feedback. 
-		○ Sub-agent 2: Having another sub-agent to follow base on the user input and lesson-learned.md to update candidate skill
+		○ Sub-agent 1: base on the user input or x-ipe-meta-lesson-learned.md under x-ipe-docs/skill-meta/skill folder to understand the main points. Then analyze skill meta. If any gap, for each of them in lesson and learned we need have captured scenario, ground truth(from correct result after failure or mistake) add them into acceptance criteria in skill-meta.md, if any question ask user for feedback. 
+		○ Sub-agent 2: Having another sub-agent to follow base on the user input and x-ipe-meta-lesson-learned.md to update candidate skill
 		○ Sub-agent 3 depends on Sub-agent 1: Leverage skill-meta to reflect candidate skill and make improve to it.
 		○ Sub-agent 4 depends on Sub-agent 1: Generate test cases base on acceptance criteria from skill-meta put in /test-{timestamp}
 		○ Sub-agent 5 depends on Sub-agent 3 and 4: use skill from candidate to run the test cases, if any test result required save the result to x-ipe-docs/skill-meta/skill folder/test-{timestamp}/result
@@ -56,12 +56,12 @@ New skill to be introduced
 
 Lesson-Learned Skill
 	- Skill preparation
-		○ Create a lesson-learned.md template in this skill, you can research what is important feedbacks required for SKILL update, **important lesson-learned.md is used for agent to know what should be updated for SKILL in skill meta**
+		○ Create a x-ipe-meta-lesson-learned.md template in this skill, you can research what is important feedbacks required for SKILL update, **important x-ipe-meta-lesson-learned.md is used for agent to know what should be updated for SKILL in skill meta**
 		○ All the templates here should focus on agent readable instead of human.
 		
 	- Skill execution
 		○ When it's called, learn from the context what happens, what skill in skill meta has been used. Mainly focus on issues and user feedbacks to generate a summary of skill, skill issue or human feedbacks
-		○ Having sub-agent to each skill, base on the summary and skill-meta.md to learn what's the gap, and having them noted in lesson-learned.md
+		○ Having sub-agent to each skill, base on the summary and skill-meta.md to learn what's the gap, and having them noted in x-ipe-meta-lesson-learned.md
 	
 	
 

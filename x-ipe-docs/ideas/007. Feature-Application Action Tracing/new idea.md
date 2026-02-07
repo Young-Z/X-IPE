@@ -2,7 +2,7 @@ I would like to futher increase code transparency. So I have following Idea.
 	1. I would like to have new sub menu "Application Action Tracing" under workplace.
 	2. Add a folder called "app-action-logs", and identify a app action log template. 
 	3. Test Generation, Code Implementation, Code Refactoring skills should base on the action log template and programming lanaguage to generate logs to the `app-action-logs` folder
-	4. Refactoring Analysis, and project-quality-board-management skills should check if code miss any app action logs in the code implementation and any log test missing.
+	4. Refactoring Analysis, and x-ipe+feature+quality-board-management skills should check if code miss any app action logs in the code implementation and any log test missing.
 	
 ## here are the details for each item above.
 ### Application Action Tracing
@@ -53,7 +53,7 @@ for test generator
 
 for code refactoring follow the same changes to support tracing handling.
 
-### Refactoring Analysis, and project-quality-board-management skills
+### Refactoring Analysis, and x-ipe+feature+quality-board-management skills
 for these two skill, let's adding tracing as 1 diamension to check if code follow tracing requirement for each api, function.
 
 above are functions or capabilities I want to implement for x-ipe.

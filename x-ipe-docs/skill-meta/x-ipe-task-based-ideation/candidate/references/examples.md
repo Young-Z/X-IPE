@@ -29,7 +29,7 @@
 
 **Execution:**
 ```
-1. Execute Task Flow from task-execution-guideline skill
+1. Execute Task Flow from x-ipe-workflow-task-execution skill
 
 2. Load Toolbox Meta:
    - Read x-ipe-docs/config/tools.json
@@ -80,7 +80,7 @@
    - Ideation Artifacts section with link to mockups created
    - References & Common Principles section with researched sources
 
-9. Resume Task Flow from task-execution-guideline skill
+9. Resume Task Flow from x-ipe-workflow-task-execution skill
 ```
 
 ---

@@ -327,11 +327,12 @@ class ScaffoldManager:
             shutil.copytree(theme_source, theme_target, dirs_exist_ok=True)
         self.created.append(theme_target)
     
-    def create_config_file(self, config_content: Optional[str] = None) -> None:
+    def create_config_file(self, config_content: Optional[str] = None, cli_name: Optional[str] = None) -> None:
         """Create .x-ipe.yaml with defaults.
         
         Args:
             config_content: Optional custom config content.
+            cli_name: Optional CLI adapter name to store in config (FEATURE-027-B).
         """
         path = self.project_root / ".x-ipe.yaml"
         
@@ -356,8 +357,12 @@ server:
   debug: false
 """
         
+        content = config_content or default_content
+        if cli_name and not config_content:
+            content = content.rstrip() + f'\n\ncli: "{cli_name}"\n'
+        
         if not self.dry_run:
-            path.write_text(config_content or default_content)
+            path.write_text(content)
         self.created.append(path)
     
     def update_gitignore(self) -> None:

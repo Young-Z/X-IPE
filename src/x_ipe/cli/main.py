@@ -7,6 +7,8 @@ from ..core.config import XIPEConfig
 from ..core.scaffold import ScaffoldManager
 from ..core.skills import SkillsManager
 from .. import __version__
+from ..services.cli_adapter_service import CLIAdapterService
+from ..services.mcp_deployer_service import MCPDeployerService
 
 
 @click.group(invoke_without_command=True)
@@ -180,8 +182,13 @@ def info(ctx: click.Context) -> None:
     is_flag=True,
     help="Skip MCP config merge prompt.",
 )
+@click.option(
+    "--cli", "cli_name",
+    default=None,
+    help="CLI to use (copilot, opencode, claude-code). Skips interactive prompt.",
+)
 @click.pass_context
-def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp: bool) -> None:
+def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp: bool, cli_name: Optional[str]) -> None:
     """Initialize X-IPE in the current project.
     
     Creates the standard X-IPE folder structure:
@@ -198,6 +205,9 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp
         click.echo(f"Initializing X-IPE in: {project_root}")
     
     click.echo("-" * 40)
+    
+    # CLI Detection & Selection (FEATURE-027-B)
+    selected_cli = _resolve_cli_selection(project_root, cli_name)
     
     # Create scaffold manager
     scaffold = ScaffoldManager(project_root, dry_run=dry_run, force=force)
@@ -225,7 +235,7 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp
     scaffold.copy_themes()
     
     # Create config file
-    scaffold.create_config_file()
+    scaffold.create_config_file(cli_name=selected_cli)
     
     # MCP config merge with user confirmation
     mcp_servers = scaffold.get_project_mcp_servers()
@@ -288,6 +298,178 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp
         click.echo("\nRun without --dry-run to apply changes.")
     else:
         click.echo(f"\n✓ X-IPE initialized in {project_root}")
+
+
+def _handle_cli_migration(project_root: Path, cli_name: str, dry_run: bool, force: bool) -> None:
+    """Handle CLI migration when --cli is provided on upgrade.
+    
+    FEATURE-027-E: CLI Migration & Upgrade
+    """
+    import shutil
+    import yaml
+    from datetime import datetime
+
+    # Validate CLI name
+    try:
+        service = CLIAdapterService()
+    except Exception:
+        click.echo("Error: CLI adapter service unavailable.")
+        raise click.Abort()
+
+    adapter_names = [a.name for a in service.list_adapters()]
+    if cli_name not in adapter_names:
+        available = ', '.join(adapter_names)
+        raise click.BadParameter(
+            f"Unknown CLI '{cli_name}'. Available: {available}",
+            param_hint="'--cli'",
+        )
+
+    # Read current CLI from config
+    config_path = project_root / '.x-ipe.yaml'
+    if not config_path.exists():
+        click.echo("Error: No .x-ipe.yaml found. Run `x-ipe init` first.")
+        raise click.Abort()
+
+    with open(config_path) as f:
+        config = yaml.safe_load(f) or {}
+    current_cli = config.get('cli', 'copilot')
+
+    if current_cli == cli_name:
+        click.echo(f"Already using '{cli_name}'. No migration needed.")
+        return
+
+    click.echo(f"Migrating from '{current_cli}' to '{cli_name}'")
+    click.echo("-" * 40)
+
+    old_adapter = service.get_adapter(current_cli)
+    new_adapter = service.get_adapter(cli_name)
+
+    # 1. Backup old artifacts
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    backup_dir = project_root / ".x-ipe" / "backup" / f"{current_cli}-{timestamp}"
+    backed_up = []
+
+    old_skills = project_root / old_adapter.skills_folder
+    old_instructions = project_root / old_adapter.instructions_file
+
+    if not dry_run:
+        backup_dir.mkdir(parents=True, exist_ok=True)
+
+        if old_skills.exists():
+            shutil.copytree(old_skills, backup_dir / "skills", dirs_exist_ok=True)
+            backed_up.append(str(old_skills))
+
+        if old_instructions.exists():
+            shutil.copy2(old_instructions, backup_dir / old_instructions.name)
+            backed_up.append(str(old_instructions))
+
+        # Back up project-scoped MCP config
+        if old_adapter.mcp_config_format == "project":
+            old_mcp = project_root / old_adapter.mcp_config_path
+            if old_mcp.exists():
+                shutil.copy2(old_mcp, backup_dir / old_mcp.name)
+                backed_up.append(str(old_mcp))
+
+    if backed_up:
+        click.echo(f"Backed up {len(backed_up)} artifact(s) to {backup_dir}")
+    elif not dry_run:
+        click.echo("No artifacts to back up.")
+
+    # 2. Update .x-ipe.yaml
+    if not dry_run:
+        config['cli'] = cli_name
+        with open(config_path, 'w') as f:
+            yaml.dump(config, f, default_flow_style=False)
+        click.echo(f"Updated .x-ipe.yaml: cli → {cli_name}")
+
+    # 3. Deploy MCP config for new CLI
+    deployer = MCPDeployerService(project_root)
+    result = deployer.deploy(new_adapter, force=force, dry_run=dry_run)
+    if result.merged_count > 0:
+        click.echo(f"Deployed {result.merged_count} MCP server(s) for {cli_name}")
+
+    # 4. Summary
+    if dry_run:
+        click.echo("\nDry run - no changes made.")
+    else:
+        click.echo(f"\n✓ Migration complete: {current_cli} → {cli_name}")
+
+
+def _resolve_cli_selection(project_root: Path, cli_flag: Optional[str]) -> str:
+    """Resolve CLI selection through flag, config, detection, or prompt.
+    
+    FEATURE-027-B: CLI Init & Selection
+    
+    Priority: --cli flag > existing config > auto-detection > default (copilot)
+    """
+    try:
+        service = CLIAdapterService()
+    except Exception:
+        click.echo("ℹ CLI adapter service unavailable. Defaulting to copilot.")
+        return 'copilot'
+
+    adapters = service.list_adapters()
+    adapter_names = [a.name for a in adapters]
+
+    # --cli flag: validate and return immediately
+    if cli_flag:
+        if cli_flag not in adapter_names:
+            available = ', '.join(adapter_names)
+            raise click.BadParameter(
+                f"Unknown CLI '{cli_flag}'. Available: {available}",
+                param_hint="'--cli'",
+            )
+        if not service.is_installed(cli_flag):
+            click.echo(f"⚠ Warning: '{cli_flag}' is not installed on this system.")
+        return cli_flag
+
+    # Detect installed CLIs
+    installed = service.detect_installed_clis()
+
+    # Determine default from existing config or detection
+    existing_cli = _read_existing_cli(project_root)
+    if existing_cli and existing_cli in adapter_names:
+        default = existing_cli
+    elif installed:
+        default = installed[0]
+    else:
+        click.echo("ℹ No supported CLI detected. Defaulting to copilot.")
+        default = 'copilot'
+
+    # Show detected info
+    if installed:
+        display = ', '.join(installed)
+        click.echo(f"Detected CLI(s): {display}")
+
+    # Prompt for selection (auto-accept default if non-interactive)
+    try:
+        selected = click.prompt(
+            "Select CLI",
+            type=click.Choice(adapter_names, case_sensitive=False),
+            default=default,
+        )
+    except (click.Abort, EOFError):
+        selected = default
+        click.echo(f"Using default CLI: {selected}")
+
+    if selected not in installed:
+        click.echo(f"⚠ Warning: '{selected}' is not installed on this system.")
+
+    return selected
+
+
+def _read_existing_cli(project_root: Path) -> Optional[str]:
+    """Read existing cli key from .x-ipe.yaml if present."""
+    config_path = project_root / '.x-ipe.yaml'
+    if not config_path.exists():
+        return None
+    try:
+        import yaml
+        with open(config_path) as f:
+            config = yaml.safe_load(f)
+        return config.get('cli') if config else None
+    except Exception:
+        return None
 
 
 @cli.command()
@@ -401,16 +583,28 @@ def serve(ctx: click.Context, host: Optional[str], port: Optional[int],
     is_flag=True,
     help="Skip MCP config merge prompt.",
 )
+@click.option(
+    "--cli", "cli_name",
+    default=None,
+    help="Switch to a different CLI adapter (triggers migration).",
+)
 @click.pass_context
 def upgrade(ctx: click.Context, force: bool, dry_run: bool, 
-            backup: bool, skill: Optional[str], no_mcp: bool) -> None:
+            backup: bool, skill: Optional[str], no_mcp: bool, cli_name: Optional[str]) -> None:
     """Upgrade skills from the X-IPE package.
     
     Syncs skills from the installed X-IPE package to the local
     project. Detects locally modified skills and prompts before
     overwriting (unless --force is used).
+    
+    Use --cli <name> to migrate to a different CLI adapter.
     """
     project_root = ctx.obj["project_root"]
+    
+    # CLI migration flow (FEATURE-027-E)
+    if cli_name:
+        _handle_cli_migration(project_root, cli_name, dry_run, force)
+        return
     
     click.echo(f"Upgrading X-IPE skills in: {project_root}")
     click.echo("-" * 40)

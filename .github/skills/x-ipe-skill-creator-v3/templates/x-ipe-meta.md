@@ -171,7 +171,7 @@ input:
 task_completion_output:
   category: standalone
   status: completed | blocked
-  next_task_type: null
+  next_task_based_skill: null
   require_human_review: "{yes | no}"
   task_output_links:
     - "{output_file_path_1}"

@@ -4,7 +4,7 @@ Concrete execution examples for the skill-creator workflow. This file contains a
 
 ---
 
-## Example 1: Create Task Type Skill
+## Example 1: Create Task-Based Skill
 
 **Request:** "Create a skill for bug fixing"
 
@@ -17,7 +17,7 @@ input:
   
 output:
   skill_type: x-ipe-task-based
-  template: templates/task-type-skill.md
+  template: templates/x-ipe-task-based-skill.md
 ```
 
 ### Step 2: Gather Examples
@@ -50,7 +50,7 @@ resources_plan:
 **Sub-agent 1 Output: skill-meta.md**
 
 ```yaml
-skill_name: task-type-bug-fix
+skill_name: x-ipe-task-based-bug-fix
 skill_type: x-ipe-task-based
 acceptance_criteria:
   must:
@@ -66,7 +66,7 @@ acceptance_criteria:
 
 ```
 candidate/
-├── SKILL.md (task-type-bug-fix skill)
+├── SKILL.md (x-ipe-task-based-bug-fix skill)
 └── references/
     └── examples.md (bug fix examples)
 ```
@@ -104,14 +104,14 @@ evaluation_result:
 ### Step 10: Merge
 
 ```bash
-cp -r candidate/* .github/skills/task-type-bug-fix/
+cp -r candidate/* .github/skills/x-ipe-task-based-bug-fix/
 ```
 
 ### Step 11: Cross-References
 
 ```yaml
 cross_reference_checks:
-  copilot_instructions_registry: added
+  auto_discovery_fields: declared
   task_execution_guideline: added
   status: valid
 ```
@@ -216,12 +216,12 @@ resources_plan:
   scripts: null
 
 orchestrated_skills:
-  - task-type-feature-refinement
-  - task-type-technical-design
-  - task-type-test-generation
-  - task-type-code-implementation
-  - task-type-feature-acceptance-test
-  - task-type-feature-closing
+  - x-ipe-task-based-feature-refinement
+  - x-ipe-task-based-technical-design
+  - x-ipe-task-based-test-generation
+  - x-ipe-task-based-code-implementation
+  - x-ipe-task-based-feature-acceptance-test
+  - x-ipe-task-based-feature-closing
 ```
 
 ### Steps 4-5: Round 1 (Parallel)
@@ -260,32 +260,32 @@ candidate/
 
 ```yaml
 skill_registry:
-  - skill: task-type-feature-refinement
+  - skill: x-ipe-task-based-feature-refinement
     phase: 1
     input: feature_id
     output: specification_path
     
-  - skill: task-type-technical-design
+  - skill: x-ipe-task-based-technical-design
     phase: 2
     input: specification_path
     output: design_path
     
-  - skill: task-type-test-generation
+  - skill: x-ipe-task-based-test-generation
     phase: 3
     input: design_path
     output: test_files[]
     
-  - skill: task-type-code-implementation
+  - skill: x-ipe-task-based-code-implementation
     phase: 4
     input: design_path, test_files[]
     output: implementation_files[]
     
-  - skill: task-type-feature-acceptance-test
+  - skill: x-ipe-task-based-feature-acceptance-test
     phase: 5
     input: implementation_files[]
     output: acceptance_report
     
-  - skill: task-type-feature-closing
+  - skill: x-ipe-task-based-feature-closing
     phase: 6
     input: acceptance_report
     output: pr_url
@@ -307,12 +307,12 @@ merge_target: ".github/skills/feature+full-pipeline/"
 
 ## Example 4: Update Skill from Lessons
 
-**Scenario:** Lesson-learned captured that task-type-bug-fix skill misses edge case
+**Scenario:** Lesson-learned captured that x-ipe-task-based-bug-fix skill misses edge case
 
 ### Pre-Step: Check Lessons
 
 ```yaml
-file: x-ipe-docs/skill-meta/task-type-bug-fix/lesson-learned.md
+file: x-ipe-docs/skill-meta/x-ipe-task-based-bug-fix/x-ipe-meta-lesson-learned.md
 
 lessons:
   - id: LL-001
@@ -413,7 +413,7 @@ evaluation_result:
   should_pass_rate: 88%
   overall_pass: true
 
-merge_target: ".github/skills/task-type-database-migration/"
+merge_target: ".github/skills/x-ipe-task-based-database-migration/"
 ```
 
 ---
@@ -422,7 +422,7 @@ merge_target: ".github/skills/task-type-database-migration/"
 
 | Example | Skill Type | Key Learning |
 |---------|------------|--------------|
-| 1 | task_type | Full happy path for task-type-bug-fix |
+| 1 | task_based_skill | Full happy path for x-ipe-task-based-bug-fix |
 | 2 | tool_skill | Tool skill with scripts and templates |
 | 3 | workflow_orchestration | Multi-skill coordination with registry |
 | 4 | Update flow | Incorporating lessons into existing skill |

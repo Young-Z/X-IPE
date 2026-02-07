@@ -8,7 +8,7 @@
 
 ## Overview
 
-Use X-IPE's newly created architecture diagram skills (`tool-architecture-dsl` + `tool-architecture-draw`) to create self-documenting architecture diagrams for the X-IPE application itself. This is a practical demonstration of the skills while producing valuable documentation.
+Use X-IPE's newly created architecture diagram skills (`x-ipe-tool-architecture-dsl` + `tool-architecture-draw`) to create self-documenting architecture diagrams for the X-IPE application itself. This is a practical demonstration of the skills while producing valuable documentation.
 
 ## Problem Statement
 
@@ -24,7 +24,7 @@ X-IPE lacks visual architecture documentation. As the application grows with 16+
 
 ## Proposed Solution
 
-Create two architecture diagrams using the `tool-architecture-dsl` and `tool-architecture-draw` skills:
+Create two architecture diagrams using the `x-ipe-tool-architecture-dsl` and `tool-architecture-draw` skills:
 
 ### 1. Module View (Internal Architecture)
 Shows X-IPE's layered architecture with services as components:
@@ -69,15 +69,15 @@ Shows X-IPE's connections to external systems:
 
 | Diagram | Type | DSL File | HTML File | Tool Used |
 |---------|------|----------|-----------|-----------|
-| X-IPE Application Architecture | Module View | [module-view.dsl](architecture/module-view.dsl) | [module-view.html](architecture/module-view.html) | tool-architecture-dsl + tool-architecture-draw |
-| X-IPE Integration Landscape | Landscape View | [landscape-view.dsl](architecture/landscape-view.dsl) | [landscape-view.html](architecture/landscape-view.html) | tool-architecture-dsl + tool-architecture-draw |
+| X-IPE Application Architecture | Module View | [module-view.dsl](architecture/module-view.dsl) | [module-view.html](architecture/module-view.html) | x-ipe-tool-architecture-dsl + tool-architecture-draw |
+| X-IPE Integration Landscape | Landscape View | [landscape-view.dsl](architecture/landscape-view.dsl) | [landscape-view.html](architecture/landscape-view.html) | x-ipe-tool-architecture-dsl + tool-architecture-draw |
 
 ### Canvas Rendering (PNG Export)
 
 | Diagram | Type | DSL File | HTML File | Tool Used |
 |---------|------|----------|-----------|-----------|
-| X-IPE Application Architecture | Module View | [module-view-canvas.dsl](architecture/module-view-canvas.dsl) | [module-view-canvas.html](architecture/module-view-canvas.html) | tool-architecture-dsl + tool-architecture-draw (Canvas) |
-| X-IPE Integration Landscape | Landscape View | [landscape-view-canvas.dsl](architecture/landscape-view-canvas.dsl) | [landscape-view-canvas.html](architecture/landscape-view-canvas.html) | tool-architecture-dsl + tool-architecture-draw (Canvas) |
+| X-IPE Application Architecture | Module View | [module-view-canvas.dsl](architecture/module-view-canvas.dsl) | [module-view-canvas.html](architecture/module-view-canvas.html) | x-ipe-tool-architecture-dsl + tool-architecture-draw (Canvas) |
+| X-IPE Integration Landscape | Landscape View | [landscape-view-canvas.dsl](architecture/landscape-view-canvas.dsl) | [landscape-view-canvas.html](architecture/landscape-view-canvas.html) | x-ipe-tool-architecture-dsl + tool-architecture-draw (Canvas) |
 
 ### Viewing Instructions
 
@@ -95,7 +95,7 @@ Shows X-IPE's connections to external systems:
 
 ## Constraints & Considerations
 
-1. **DSL Grammar** - Must follow `tool-architecture-dsl` syntax exactly ✅
+1. **DSL Grammar** - Must follow `x-ipe-tool-architecture-dsl` syntax exactly ✅
 2. **Skill Integration** - Use `tool-architecture-draw` for HTML rendering ✅
 3. **Accuracy** - Diagrams reflect actual codebase structure ✅
 4. **Maintainability** - DSL source files are easy to update ✅
@@ -117,7 +117,7 @@ Shows X-IPE's connections to external systems:
 
 - Original idea: `new idea.md` (raw input)
 - Architecture skills reference:
-  - `.github/skills/tool-architecture-dsl/SKILL.md`
+  - `.github/skills/x-ipe-tool-architecture-dsl/SKILL.md`
   - `.github/skills/tool-architecture-draw/SKILL.md`
 
 ## Source Files
@@ -139,5 +139,5 @@ Shows X-IPE's connections to external systems:
 
 ### Further Reading
 
-- [Architecture DSL Skill](.github/skills/tool-architecture-dsl/SKILL.md) - DSL grammar reference
+- [Architecture DSL Skill](.github/skills/x-ipe-tool-architecture-dsl/SKILL.md) - DSL grammar reference
 - [Architecture Draw Skill](.github/skills/tool-architecture-draw/SKILL.md) - HTML rendering rules

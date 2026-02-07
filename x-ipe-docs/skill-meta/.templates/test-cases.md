@@ -5,11 +5,11 @@
 ## Example
 
 ```yaml
-skill_name: task-type-bug-fix
+skill_name: x-ipe-task-based-bug-fix
 generated_date: # Auto-generated
 version: 1.0.0
 config:
-  sandbox_path: "x-ipe-docs/skill-meta/task-type-bug-fix/test-20250127-143022/sandbox/"
+  sandbox_path: "x-ipe-docs/skill-meta/x-ipe-task-based-bug-fix/test-20250127-143022/sandbox/"
   timeout_seconds: 300
 
 test_cases:
@@ -24,7 +24,7 @@ test_cases:
         - path: "input/bug-report.md"
           content: "# Bug: Login button unresponsive\nSteps: Click login → nothing happens"
     execution:
-      skill_invocation: "Load skill: task-type-bug-fix with input bug-report.md"
+      skill_invocation: "Load skill: x-ipe-task-based-bug-fix with input bug-report.md"
       inputs: { bug_file: "input/bug-report.md" }
       expected_outputs: [{ path: "output/fix-report.md" }]
     validation:
@@ -42,7 +42,7 @@ test_cases:
     evaluator: judge_agent
     setup: { description: "Complex bug with multiple symptoms" }
     execution:
-      skill_invocation: "Load skill: task-type-bug-fix with complex-bug.md"
+      skill_invocation: "Load skill: x-ipe-task-based-bug-fix with complex-bug.md"
       inputs: { bug_file: "input/complex-bug.md" }
     validation:
       method: judge_evaluation
