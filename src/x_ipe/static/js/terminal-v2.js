@@ -567,10 +567,10 @@
         }
 
         /**
-         * Internal: Send copilot command with typing effect
-         * Uses `copilot -i "{prompt}"` to pass prompt directly
+         * Internal: Send CLI command with typing effect
+         * Fetches active CLI adapter and builds command dynamically
          * Types command without pressing Enter - user can review before executing
-         * @param {string} command - Command/prompt to send to copilot
+         * @param {string} command - Command/prompt to send
          */
         _sendCopilotCommand(command) {
             let targetIndex = this.activeIndex >= 0 ? this.activeIndex : 0;
@@ -584,10 +584,30 @@
             const instance = this.terminals[targetIndex];
             if (!instance?.socket?.connected) return;
 
-            // Use copilot with all permissions and -i to pass prompt directly, no Enter (user reviews first)
             const escapedCommand = command.replace(/"/g, '\\"');
-            const copilotCommand = `copilot --allow-all-tools --allow-all-paths --allow-all-urls -i "${escapedCommand}"`;
-            this._typeWithEffect(instance.socket, copilotCommand, null, false);
+
+            // Fetch active CLI adapter and build command
+            fetch('/api/config/cli-adapter')
+                .then(r => r.json())
+                .then(data => {
+                    let cliCommand;
+                    if (data.success && data.prompt_format) {
+                        cliCommand = data.prompt_format
+                            .replace('{command}', data.command || 'copilot')
+                            .replace('{run_args}', data.run_args || '')
+                            .replace('{inline_prompt_flag}', data.inline_prompt_flag || '-i')
+                            .replace('{escaped_prompt}', escapedCommand)
+                            .replace(/\s+/g, ' ').trim();
+                    } else {
+                        cliCommand = `copilot --allow-all-tools -i "${escapedCommand}"`;
+                    }
+                    this._typeWithEffect(instance.socket, cliCommand, null, false);
+                })
+                .catch(() => {
+                    // Fallback to copilot if API unavailable
+                    const cliCommand = `copilot --allow-all-tools -i "${escapedCommand}"`;
+                    this._typeWithEffect(instance.socket, cliCommand, null, false);
+                });
         }
 
         /**

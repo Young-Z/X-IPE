@@ -237,8 +237,9 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp
     # Create config file
     scaffold.create_config_file(cli_name=selected_cli)
     
-    # MCP config merge with user confirmation
-    mcp_servers = scaffold.get_project_mcp_servers()
+    # MCP config merge using active CLI's target path
+    deployer = MCPDeployerService(project_root)
+    mcp_servers = deployer.get_source_servers()
     if mcp_servers and not dry_run and not no_mcp:
         click.echo("\n" + "-" * 40)
         click.echo("MCP Server Configuration")
@@ -252,18 +253,23 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp
         # Confirm each server
         servers_to_merge = []
         for name in mcp_servers:
-            if click.confirm(f"\nAdd '{name}' to global MCP config?", default=True):
+            if click.confirm(f"\nAdd '{name}' to MCP config?", default=True):
                 servers_to_merge.append(name)
         
         if servers_to_merge:
-            # Confirm target path
-            default_path = Path.home() / ".copilot" / "mcp-config.json"
+            try:
+                adapter = CLIAdapterService().get_adapter(selected_cli)
+                target_path = deployer.resolve_target_path(adapter)
+            except Exception:
+                target_path = Path.home() / ".copilot" / "mcp-config.json"
+            
             target_path = click.prompt(
                 "\nTarget MCP config path",
-                default=str(default_path),
+                default=str(target_path),
                 type=click.Path(dir_okay=False, path_type=Path)
             )
             
+            # Use deployer with explicit target override via scaffold for backward compat
             scaffold.merge_mcp_config(
                 servers_to_merge=servers_to_merge,
                 target_path=target_path
@@ -601,7 +607,15 @@ def upgrade(ctx: click.Context, force: bool, dry_run: bool,
     """
     project_root = ctx.obj["project_root"]
     
-    # CLI migration flow (FEATURE-027-E)
+    # CLI selection flow (FEATURE-027-E)
+    # If --cli provided, use it directly; otherwise prompt like init
+    if not cli_name:
+        existing_cli = _read_existing_cli(project_root)
+        if existing_cli:
+            selected_cli = _resolve_cli_selection(project_root, None)
+            if selected_cli != existing_cli:
+                cli_name = selected_cli
+
     if cli_name:
         _handle_cli_migration(project_root, cli_name, dry_run, force)
         return
@@ -681,12 +695,13 @@ def upgrade(ctx: click.Context, force: bool, dry_run: bool,
             for pkg_skill in package_skills:
                 click.echo(f"  → {pkg_skill.name}")
     
-    # Copy/update MCP config from package, then merge to global
+    # Copy/update MCP config from package, then merge using active CLI's path
     scaffold = ScaffoldManager(project_root, dry_run=dry_run, force=force)
     scaffold.copy_mcp_config()
     
-    # MCP config merge with user confirmation
-    mcp_servers = scaffold.get_project_mcp_servers()
+    # MCP config merge using active CLI's target path
+    deployer = MCPDeployerService(project_root)
+    mcp_servers = deployer.get_source_servers()
     if mcp_servers and not dry_run and not no_mcp:
         click.echo("\n" + "-" * 40)
         click.echo("MCP Server Configuration")
@@ -700,15 +715,21 @@ def upgrade(ctx: click.Context, force: bool, dry_run: bool,
         # Confirm each server
         servers_to_merge = []
         for name in mcp_servers:
-            if click.confirm(f"\nAdd '{name}' to global MCP config?", default=True):
+            if click.confirm(f"\nAdd '{name}' to MCP config?", default=True):
                 servers_to_merge.append(name)
         
         if servers_to_merge:
-            # Confirm target path
-            default_path = Path.home() / ".copilot" / "mcp-config.json"
+            # Resolve target path from active CLI
+            active_cli = _read_existing_cli(project_root) or 'copilot'
+            try:
+                adapter = CLIAdapterService().get_adapter(active_cli)
+                target_path = deployer.resolve_target_path(adapter)
+            except Exception:
+                target_path = Path.home() / ".copilot" / "mcp-config.json"
+            
             target_path = click.prompt(
                 "\nTarget MCP config path",
-                default=str(default_path),
+                default=str(target_path),
                 type=click.Path(dir_okay=False, path_type=Path)
             )
             

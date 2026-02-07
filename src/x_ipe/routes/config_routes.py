@@ -44,6 +44,8 @@ def get_cli_adapter():
         'adapter_name': adapter.name,
         'display_name': adapter.display_name,
         'command': adapter.command,
+        'run_args': adapter.run_args,
+        'inline_prompt_flag': adapter.inline_prompt_flag,
         'prompt_format': adapter.prompt_format,
         'is_installed': service.is_installed(adapter.name),
     })
