@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-231 | Ideation | Refine idea for Console Voice Input feature (001) | Spark | 🔄 in_progress | 02-09-2026 09:00:00 | - | Idea Mockup |
 
 
 
@@ -18,6 +19,8 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-233 | Bug Fix | UIUX Feedback: Submit Idea button goes out of viewport on small screens (Feedback-20260209-170854) | Pulse | 02-09-2026 17:10:00 | [workplace.css](../../src/x_ipe/static/css/workplace.css) | Root cause: min-height 250-300px on textarea/CodeMirror prevented flex shrinking. Fix: reduced min-height to 100px, added min-height:0 to flex chain, flex-shrink:0 on actions bar. |
+| TASK-232 | Bug Fix | UIUX Feedback: Move connection status to right, change color to pink (Feedback-20260209-170405) | Cipher | 02-09-2026 17:06:00 | [mockup.html](../ideas/001.%20Feature-Console%20Voice%20Input%20-%2001242026%20000728/mockup.html) | Moved .connection-status from header-left to header-right. Changed green→pink. Updated legend. |
 | TASK-229 | Code Implementation | Implement FEATURE-027-E CLI Migration & Upgrade (spec→design→tests→code) | Rune | 02-07-2026 15:40:00 | [specification.md](../requirements/FEATURE-027-E/specification.md), [technical-design.md](../requirements/FEATURE-027-E/technical-design.md), [test_cli_migration.py](../../tests/test_cli_migration.py) | 9/9 tests pass. --cli flag on upgrade, backup, config update, MCP redeploy. 0 regressions. |
 | TASK-228 | Code Implementation | Implement FEATURE-027-D MCP Configuration Deployment (spec→design→tests→code) | Rune | 02-07-2026 15:25:00 | [specification.md](../requirements/FEATURE-027-D/specification.md), [technical-design.md](../requirements/FEATURE-027-D/technical-design.md), [test_mcp_deployer.py](../../tests/test_mcp_deployer.py), [mcp_deployer_service.py](../../src/x_ipe/services/mcp_deployer_service.py) | 20/20 tests pass. CLI-agnostic MCP deployment with path resolution, merge, preserve, dry-run. 0 regressions. |
 | TASK-226 | Code Implementation | Implement FEATURE-027-B CLI Init & Selection (spec→design→tests→code) | Rune | 02-07-2026 15:10:00 | [specification.md](../requirements/FEATURE-027-B/specification.md), [technical-design.md](../requirements/FEATURE-027-B/technical-design.md), [test_cli_init_selection.py](../../tests/test_cli_init_selection.py) | 11/11 tests pass. --cli flag, auto-detect, config storage. Graceful non-interactive fallback. 0 regressions. |
@@ -120,11 +123,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 0
-- **In Progress:** 0
+- **Total Active:** 1
+- **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 270
+- **Completed (archived):** 272
 - **Pending Review:** 0
 - **Blocked:** 0
 

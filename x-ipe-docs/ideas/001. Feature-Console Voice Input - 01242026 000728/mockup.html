@@ -19,10 +19,12 @@
             --text-muted: #52525b;
             --accent-cyan: #22d3ee;
             --accent-green: #4ade80;
+            --accent-pink: #f472b6;
             --accent-red: #f87171;
             --accent-orange: #fb923c;
             --glow-cyan: rgba(34, 211, 238, 0.4);
             --glow-green: rgba(74, 222, 128, 0.3);
+            --glow-pink: rgba(244, 114, 182, 0.3);
         }
 
         * {
@@ -112,27 +114,27 @@
             font-weight: 500;
             color: var(--text-secondary);
             padding: 4px 10px;
-            background: rgba(74, 222, 128, 0.08);
+            background: rgba(244, 114, 182, 0.08);
             border-radius: 20px;
-            border: 1px solid rgba(74, 222, 128, 0.15);
+            border: 1px solid rgba(244, 114, 182, 0.15);
         }
 
         .connection-status.connected {
-            color: var(--accent-green);
+            color: var(--accent-pink);
         }
 
         .status-dot {
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: var(--accent-green);
-            box-shadow: 0 0 6px var(--glow-green);
-            animation: pulse-green 2s ease-in-out infinite;
+            background: var(--accent-pink);
+            box-shadow: 0 0 6px var(--glow-pink);
+            animation: pulse-pink 2s ease-in-out infinite;
         }
 
-        @keyframes pulse-green {
-            0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--glow-green); }
-            50% { opacity: 0.7; box-shadow: 0 0 10px var(--glow-green); }
+        @keyframes pulse-pink {
+            0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--glow-pink); }
+            50% { opacity: 0.7; box-shadow: 0 0 10px var(--glow-pink); }
         }
 
         /* Header Right Actions */
@@ -513,10 +515,6 @@
                         <i class="bi bi-terminal"></i>
                         <span>Console</span>
                     </div>
-                    <div class="connection-status connected">
-                        <span class="status-dot"></span>
-                        <span>Connected</span>
-                    </div>
                 </div>
                 <div class="header-right">
                     <!-- Voice Animation Indicator -->
@@ -544,6 +542,12 @@
                     <button class="action-btn" title="Collapse">
                         <i class="bi bi-chevron-down"></i>
                     </button>
+                    <div class="divider"></div>
+                    <!-- Connection Status (moved to right) -->
+                    <div class="connection-status connected">
+                        <span class="status-dot"></span>
+                        <span>Connected</span>
+                    </div>
                 </div>
             </div>
 
@@ -601,8 +605,8 @@
             <div class="legend-title">UI Components</div>
             <div class="legend-grid">
                 <div class="legend-item">
-                    <div class="legend-icon green"><i class="bi bi-circle-fill" style="font-size: 8px;"></i></div>
-                    <span>Connection status (moved left)</span>
+                    <div class="legend-icon" style="color: var(--accent-pink); background: rgba(244, 114, 182, 0.1);"><i class="bi bi-circle-fill" style="font-size: 8px;"></i></div>
+                    <span>Connection status (moved right, pink)</span>
                 </div>
                 <div class="legend-item">
                     <div class="legend-icon cyan"><i class="bi bi-mic"></i></div>

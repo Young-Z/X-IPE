@@ -29,13 +29,14 @@
 - [🛠️ Technology Stack](#️-technology-stack)
 - [📁 Project Structure](#-project-structure)
 - [📖 Documentation](#-documentation)
-- [📸 Screenshots](#-screenshots)
 - [📋 Version Changelog](#-version-changelog)
 - [📄 License](#-license)
 
 ---
 
 ## 💡 What is X-IPE?
+
+<img src="resources/X-IPE%20home.png" alt="X-IPE Home" width="600">
 
 **X-IPE (Integrated Project Environment)** is a demonstration of this mindset shift—from code-centric to value-centric software delivery in AI age.
 
@@ -82,7 +83,7 @@
 │   │  └──────────────────┘       └──────────────────┘       └──────────────────┘             │     │
 │   │                                                                                         │     │
 │   │  ═══════════════════════════════════════════════════════════════════════════════════    │     │
-│   │  📚 SKILLS LIBRARY: x-ipe-workflow-task-execution │ feature-board-management │ etc.          │     │
+│   │  📚 SKILLS LIBRARY: x-ipe-workflow-task-execution │ feature-board-management │ etc.     │     │
 │   │  ═══════════════════════════════════════════════════════════════════════════════════    │     │
 │   └─────────────────────────────────────────────────────────────────────────────────────────┘     │
 │                                           │                                                       │
@@ -917,76 +918,6 @@ X-IPE/
 │       └── *-stage+*-management/ # Stage board management
 └── pyproject.toml              # Project configuration (uv)
 ```
-
----
-
-##  Screenshots
-
-### Core Assets
-
-**Skill-Driven Development Operation Model for X-IPE Agents**
-
-<img src="resources/0.%20CORE-skill-driven-customized-development-operation-model-for-X-IPE-Agents.png" alt="Skill-Driven Development Operation Model" width="400">
-
----
-
-### In-Application Agent Console
-
-**Multi In-Application Agent Console**
-
-![Multi In-Application Agent Console](resources/10.%20multi-in-application-agent-console.png)
-
----
-
-### Overall Project Management
-
-**AI Sub-Agents Todo Tracking View**
-
-![AI Sub-Agents Todo Tracking](resources/1.%20AI-sub-agents-todo-tracking-view-@overall-project-management.png)
-
-**Feature Tracking View**
-
-![Feature Tracking View](resources/2.feature-tracking-view-@overall-project-management.png)
-
----
-
-### Ideation Stage
-
-**Ideation View**
-
-![Ideation View](resources/3.ideation-view-@ideation-stage.png)
-
-**Ideation Exported Document**
-
-![Ideation Exported Document](resources/4.ideation-exported-doc-@ideation-stage.png)
-
----
-
-### Requirement Stage
-
-**Requirement Gathering View**
-
-![Requirement Gathering View](resources/5.requirement-gathering-view-@requirement-stage.png)
-
-**Feature Breakdown View**
-
-![Feature Breakdown View](resources/6.%20feature-breakdown-view-@requirement-stage.png)
-
----
-
-### Feature Delivery Stage
-
-**Feature Refinement View**
-
-![Feature Refinement View](resources/7.%20feature-refinement-view-@feature-delivery.png)
-
-**Technical Design View**
-
-![Technical Design View](resources/8.%20technical-design-view-@feature-delivery.png)
-
-**Coding & Testing Views**
-
-![Coding & Testing Views](resources/9.%20coding-testing-views-@feature-delivery.png)
 
 ---
 
