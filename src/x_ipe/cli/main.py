@@ -1,4 +1,5 @@
 """X-IPE CLI main entry point."""
+import json
 import click
 from pathlib import Path
 from typing import Optional
@@ -217,13 +218,14 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp
     
     # Copy skills if requested
     if not no_skills:
-        scaffold.copy_skills()
+        scaffold.copy_skills(cli_name=selected_cli)
     
-    # Copy/merge copilot-instructions.md
-    scaffold.copy_copilot_instructions()
+    # Copy/merge instructions file
+    scaffold.copy_copilot_instructions(cli_name=selected_cli)
     
-    # Copy MCP config (.github/copilot/mcp-config.json)
-    scaffold.copy_mcp_config()
+    # Copy MCP config (.github/copilot/mcp-config.json) — only for copilot
+    if selected_cli == 'copilot':
+        scaffold.copy_mcp_config()
     
     # Copy config files (copilot-prompt.json, tools.json, .env.example)
     scaffold.copy_config_files()
@@ -238,8 +240,17 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp
     scaffold.create_config_file(cli_name=selected_cli)
     
     # MCP config merge using active CLI's target path
+    # Read MCP servers from package resources so it works for all CLIs
+    mcp_servers = {}
+    _mcp_res = scaffold._get_resource_path("copilot")
+    if _mcp_res:
+        _mcp_file = _mcp_res / "mcp-config.json"
+        if _mcp_file.exists():
+            try:
+                mcp_servers = json.loads(_mcp_file.read_text()).get("mcpServers", {})
+            except (json.JSONDecodeError, IOError):
+                pass
     deployer = MCPDeployerService(project_root)
-    mcp_servers = deployer.get_source_servers()
     if mcp_servers and not dry_run and not no_mcp:
         click.echo("\n" + "-" * 40)
         click.echo("MCP Server Configuration")
@@ -272,7 +283,8 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp
             # Use deployer with explicit target override via scaffold for backward compat
             scaffold.merge_mcp_config(
                 servers_to_merge=servers_to_merge,
-                target_path=target_path
+                target_path=target_path,
+                source_servers=mcp_servers
             )
             click.echo(f"\n✓ Merged {len(servers_to_merge)} MCP server(s) to {target_path}")
     

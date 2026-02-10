@@ -385,3 +385,342 @@ class TestMCPPathResolution:
             if (temp_project / "opencode.json").exists():
                 config = json.loads((temp_project / "opencode.json").read_text())
                 assert "mcpServers" in config
+
+
+# ============================================================================
+# CLI-SPECIFIC INIT: SKILLS FOLDER PLACEMENT
+# ============================================================================
+
+class TestCLISpecificSkillsCopy:
+    """copy_skills(cli_name=...) targets CLI-specific folder."""
+
+    def test_copy_skills_opencode_targets_opencode_folder(self, temp_project):
+        """copy_skills(cli_name='opencode') creates .opencode/skills/."""
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        skills_src = temp_project / "fake_skills"
+        skill_dir = skills_src / "my-skill"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text("---\nname: my-skill\ndescription: test\n---\n# Skill")
+
+        scaffold = ScaffoldManager(temp_project)
+        scaffold.copy_skills(skills_source=skills_src, cli_name='opencode')
+
+        target = temp_project / ".opencode" / "skills"
+        assert target in scaffold.created
+        assert not (temp_project / ".github" / "skills").exists()
+
+    def test_copy_skills_claude_code_targets_claude_folder(self, temp_project):
+        """copy_skills(cli_name='claude-code') creates .claude/skills/."""
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        skills_src = temp_project / "fake_skills"
+        skill_dir = skills_src / "my-skill"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text("---\nname: my-skill\ndescription: test\n---\n# Skill")
+
+        scaffold = ScaffoldManager(temp_project)
+        scaffold.copy_skills(skills_source=skills_src, cli_name='claude-code')
+
+        target = temp_project / ".claude" / "skills"
+        assert target in scaffold.created
+        assert not (temp_project / ".github" / "skills").exists()
+
+    def test_copy_skills_copilot_targets_github_folder(self, temp_project):
+        """copy_skills(cli_name='copilot') creates .github/skills/."""
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        skills_src = temp_project / "fake_skills"
+        skill_dir = skills_src / "my-skill"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text("# Skill")
+
+        scaffold = ScaffoldManager(temp_project)
+        scaffold.copy_skills(skills_source=skills_src, cli_name='copilot')
+
+        target = temp_project / ".github" / "skills"
+        assert target.exists()
+        assert target in scaffold.created
+
+    def test_copy_skills_no_cli_name_defaults_github(self, temp_project):
+        """copy_skills() without cli_name defaults to .github/skills/."""
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        skills_src = temp_project / "fake_skills"
+        skill_dir = skills_src / "my-skill"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text("# Skill")
+
+        scaffold = ScaffoldManager(temp_project)
+        scaffold.copy_skills(skills_source=skills_src)
+
+        target = temp_project / ".github" / "skills"
+        assert target.exists()
+        assert target in scaffold.created
+
+    def test_copy_skills_opencode_skips_if_exists(self, temp_project):
+        """copy_skills(cli_name='opencode') skips if .opencode/skills/ exists."""
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        skills_src = temp_project / "fake_skills"
+        skill_dir = skills_src / "my-skill"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text("# Skill")
+
+        target = temp_project / ".opencode" / "skills"
+        target.mkdir(parents=True)
+
+        scaffold = ScaffoldManager(temp_project)
+        scaffold.copy_skills(skills_source=skills_src, cli_name='opencode')
+
+        assert target in scaffold.skipped
+
+    def test_copy_skills_opencode_force_overwrites(self, temp_project):
+        """copy_skills(cli_name='opencode', force=True) overwrites existing."""
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        skills_src = temp_project / "fake_skills"
+        skill_dir = skills_src / "my-skill"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text("---\nname: my-skill\ndescription: test\n---\n# New")
+
+        target = temp_project / ".opencode" / "skills" / "my-skill"
+        target.mkdir(parents=True)
+        (target / "SKILL.md").write_text("# Old")
+
+        scaffold = ScaffoldManager(temp_project, force=True)
+        scaffold.copy_skills(skills_source=skills_src, cli_name='opencode')
+
+        assert (temp_project / ".opencode" / "skills") in scaffold.created
+
+    def test_copy_skills_dry_run_no_files(self, temp_project):
+        """copy_skills() in dry_run doesn't create files."""
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        skills_src = temp_project / "fake_skills"
+        skill_dir = skills_src / "my-skill"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text("# Skill")
+
+        scaffold = ScaffoldManager(temp_project, dry_run=True)
+        scaffold.copy_skills(skills_source=skills_src, cli_name='opencode')
+
+        assert not (temp_project / ".opencode" / "skills").exists()
+        assert (temp_project / ".opencode" / "skills") in scaffold.created
+
+
+# ============================================================================
+# CLI-SPECIFIC INIT: INSTRUCTIONS FILE PLACEMENT
+# ============================================================================
+
+class TestCLISpecificInstructions:
+    """copy_copilot_instructions(cli_name=...) targets CLI-specific path."""
+
+    def test_instructions_opencode_targets_opencode_path(self, temp_project):
+        """copy_copilot_instructions(cli_name='opencode') creates .opencode/instructions.md."""
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        scaffold = ScaffoldManager(temp_project)
+        scaffold.copy_copilot_instructions(cli_name='opencode')
+
+        target = temp_project / ".opencode" / "instructions.md"
+        assert target in scaffold.created
+        assert not (temp_project / ".github" / "copilot-instructions.md").exists()
+
+    def test_instructions_claude_code_targets_claude_path(self, temp_project):
+        """copy_copilot_instructions(cli_name='claude-code') creates .claude/instructions.md."""
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        scaffold = ScaffoldManager(temp_project)
+        scaffold.copy_copilot_instructions(cli_name='claude-code')
+
+        target = temp_project / ".claude" / "instructions.md"
+        assert target in scaffold.created
+        assert not (temp_project / ".github" / "copilot-instructions.md").exists()
+
+    def test_instructions_copilot_does_not_target_opencode(self, temp_project):
+        """copy_copilot_instructions(cli_name='copilot') does not create .opencode/ files."""
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        scaffold = ScaffoldManager(temp_project)
+        scaffold.copy_copilot_instructions(cli_name='copilot')
+
+        assert not (temp_project / ".opencode" / "instructions.md").exists()
+        assert not (temp_project / ".claude" / "instructions.md").exists()
+
+    def test_instructions_opencode_skips_if_exists(self, temp_project):
+        """copy_copilot_instructions(cli_name='opencode') skips if already exists."""
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        target = temp_project / ".opencode" / "instructions.md"
+        target.parent.mkdir(parents=True)
+        target.write_text("# Existing")
+
+        scaffold = ScaffoldManager(temp_project)
+        scaffold.copy_copilot_instructions(cli_name='opencode')
+
+        assert target in scaffold.skipped
+        assert target.read_text() == "# Existing"
+
+    def test_instructions_opencode_dry_run_no_file(self, temp_project):
+        """copy_copilot_instructions(cli_name='opencode') in dry_run doesn't write."""
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        scaffold = ScaffoldManager(temp_project, dry_run=True)
+        scaffold.copy_copilot_instructions(cli_name='opencode')
+
+        assert not (temp_project / ".opencode" / "instructions.md").exists()
+        assert (temp_project / ".opencode" / "instructions.md") in scaffold.created
+
+
+# ============================================================================
+# CLI-SPECIFIC INIT: MCP CONFIG NOT CREATED FOR NON-COPILOT
+# ============================================================================
+
+class TestCLISpecificMCPConfig:
+    """Non-copilot CLIs should not create .github/copilot/ artifacts."""
+
+    def test_opencode_init_no_github_copilot_folder(self, runner, temp_project):
+        """Init with --cli opencode does not create .github/copilot/."""
+        from x_ipe.cli.main import cli
+
+        with patch('x_ipe.cli.main.CLIAdapterService') as MockService:
+            instance = MockService.return_value
+            adapter = MagicMock()
+            adapter.name = 'opencode'
+            adapter.skills_folder = '.opencode/skills/'
+            adapter.instructions_file = '.opencode/instructions.md'
+            adapter.mcp_config_path = '.opencode.json'
+            adapter.mcp_config_format = 'project'
+            instance.list_adapters.return_value = [adapter]
+            instance.get_adapter.return_value = adapter
+            instance.is_installed.return_value = True
+
+            result = runner.invoke(cli, [
+                '--project', str(temp_project),
+                'init', '--cli', 'opencode', '--no-mcp'
+            ])
+
+            assert result.exit_code == 0
+            assert not (temp_project / ".github" / "copilot").exists()
+
+    def test_copilot_init_creates_github_copilot_folder(self, runner, temp_project):
+        """Init with --cli copilot creates .github/copilot/mcp-config.json."""
+        from x_ipe.cli.main import cli
+
+        with patch('x_ipe.cli.main.CLIAdapterService') as MockService:
+            instance = MockService.return_value
+            adapter = MagicMock()
+            adapter.name = 'copilot'
+            adapter.skills_folder = '.github/skills/'
+            adapter.instructions_file = '.github/copilot-instructions.md'
+            instance.list_adapters.return_value = [adapter]
+            instance.get_adapter.return_value = adapter
+            instance.is_installed.return_value = True
+
+            result = runner.invoke(cli, [
+                '--project', str(temp_project),
+                'init', '--cli', 'copilot', '--no-mcp'
+            ])
+
+            assert result.exit_code == 0
+
+
+# ============================================================================
+# MERGE MCP CONFIG WITH source_servers PARAMETER
+# ============================================================================
+
+class TestMergeMCPWithSourceServers:
+    """merge_mcp_config(source_servers=...) uses provided servers."""
+
+    def test_merge_with_source_servers_creates_file(self, temp_project):
+        """merge_mcp_config with source_servers creates target file."""
+        import json
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        scaffold = ScaffoldManager(temp_project)
+        servers = {"test-server": {"command": "node", "args": ["server.js"]}}
+        target = temp_project / ".opencode.json"
+
+        scaffold.merge_mcp_config(
+            servers_to_merge=["test-server"],
+            target_path=target,
+            source_servers=servers
+        )
+
+        assert target.exists()
+        config = json.loads(target.read_text())
+        assert "test-server" in config["mcpServers"]
+
+    def test_merge_without_source_servers_reads_from_project(self, temp_project):
+        """merge_mcp_config without source_servers reads .github/copilot/mcp-config.json."""
+        import json
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        scaffold = ScaffoldManager(temp_project)
+        target = temp_project / "target.json"
+
+        scaffold.merge_mcp_config(target_path=target)
+
+        assert not target.exists()
+
+    def test_merge_source_servers_filters_by_name(self, temp_project):
+        """merge_mcp_config filters source_servers by servers_to_merge list."""
+        import json
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        scaffold = ScaffoldManager(temp_project)
+        servers = {
+            "keep-this": {"command": "a"},
+            "skip-this": {"command": "b"},
+        }
+        target = temp_project / ".opencode.json"
+
+        scaffold.merge_mcp_config(
+            servers_to_merge=["keep-this"],
+            target_path=target,
+            source_servers=servers
+        )
+
+        config = json.loads(target.read_text())
+        assert "keep-this" in config["mcpServers"]
+        assert "skip-this" not in config["mcpServers"]
+
+    def test_merge_source_servers_dry_run(self, temp_project):
+        """merge_mcp_config with source_servers in dry_run doesn't write."""
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        scaffold = ScaffoldManager(temp_project, dry_run=True)
+        servers = {"test-server": {"command": "test"}}
+        target = temp_project / ".opencode.json"
+
+        scaffold.merge_mcp_config(
+            servers_to_merge=["test-server"],
+            target_path=target,
+            source_servers=servers
+        )
+
+        assert not target.exists()
+        assert target in scaffold.created
+
+    def test_merge_preserves_existing_servers(self, temp_project):
+        """merge_mcp_config preserves existing servers in target."""
+        import json
+        from x_ipe.core.scaffold import ScaffoldManager
+
+        target = temp_project / ".opencode.json"
+        existing = {"mcpServers": {"existing": {"command": "old"}}}
+        target.write_text(json.dumps(existing))
+
+        scaffold = ScaffoldManager(temp_project)
+        servers = {"new-server": {"command": "new"}}
+
+        scaffold.merge_mcp_config(
+            servers_to_merge=["new-server"],
+            target_path=target,
+            source_servers=servers
+        )
+
+        config = json.loads(target.read_text())
+        assert "existing" in config["mcpServers"]
+        assert "new-server" in config["mcpServers"]

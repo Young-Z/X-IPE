@@ -81,13 +81,26 @@ class ScaffoldManager:
         
         return None
     
-    def copy_skills(self, skills_source: Optional[Path] = None) -> None:
-        """Copy skills from source to .github/skills/.
+    def copy_skills(self, skills_source: Optional[Path] = None, cli_name: Optional[str] = None) -> None:
+        """Copy skills from source to CLI-specific skills folder.
         
         Args:
             skills_source: Path to skills source directory. If None, uses package skills.
+            cli_name: CLI adapter name. Determines target folder (e.g. .opencode/skills/).
         """
-        target = self.project_root / ".github" / "skills"
+        # Resolve target from adapter config
+        skills_folder = ".github/skills"
+        adapter = None
+        if cli_name:
+            try:
+                from x_ipe.services.cli_adapter_service import CLIAdapterService
+                adapter = CLIAdapterService().get_adapter(cli_name)
+                if adapter:
+                    skills_folder = adapter.skills_folder.rstrip('/')
+            except Exception:
+                pass
+        
+        target = self.project_root / skills_folder
         
         if skills_source is None:
             skills_source = self._get_resource_path("skills")
@@ -106,11 +119,45 @@ class ScaffoldManager:
             target.parent.mkdir(parents=True, exist_ok=True)
             if target.exists() and self.force:
                 shutil.rmtree(target)
-            shutil.copytree(skills_source, target, dirs_exist_ok=True)
+            
+            # Use SkillTranslator for non-copilot CLIs
+            if adapter and adapter.name != 'copilot':
+                from x_ipe.services.skill_translator import SkillTranslator
+                translator = SkillTranslator()
+                translator.translate_skills(skills_source, target, adapter)
+            else:
+                shutil.copytree(skills_source, target, dirs_exist_ok=True)
         self.created.append(target)
     
-    def copy_copilot_instructions(self) -> None:
-        """Copy or merge copilot-instructions.md to .github/."""
+    def copy_copilot_instructions(self, cli_name: Optional[str] = None) -> None:
+        """Copy or merge instructions file to CLI-specific location.
+        
+        Args:
+            cli_name: CLI adapter name. Determines target path (e.g. .opencode/instructions.md).
+        """
+        # For non-copilot CLIs, use SkillTranslator to generate instructions
+        adapter = None
+        if cli_name:
+            try:
+                from x_ipe.services.cli_adapter_service import CLIAdapterService
+                adapter = CLIAdapterService().get_adapter(cli_name)
+            except Exception:
+                pass
+        
+        if adapter and adapter.name != 'copilot':
+            target = self.project_root / adapter.instructions_file
+            if target.exists():
+                if not self.force:
+                    self.skipped.append(target)
+                    return
+            if not self.dry_run:
+                from x_ipe.services.skill_translator import SkillTranslator
+                translator = SkillTranslator()
+                translator.generate_instructions(adapter, self.project_root)
+            self.created.append(target)
+            return
+        
+        # Default copilot behavior
         source = self._get_resource_path("copilot-instructions.md")
         if source is None or not source.exists():
             return
@@ -181,19 +228,17 @@ class ScaffoldManager:
     def merge_mcp_config(
         self,
         servers_to_merge: Optional[List[str]] = None,
-        target_path: Optional[Path] = None
+        target_path: Optional[Path] = None,
+        source_servers: Optional[dict] = None
     ) -> None:
-        """Merge project's MCP servers into global config.
+        """Merge MCP servers into target config.
         
         Args:
             servers_to_merge: List of server names to merge. If None, merges all.
             target_path: Path to target mcp-config.json. Defaults to ~/.copilot/mcp-config.json.
-        
-        This allows project-specific MCP servers to be available globally.
-        Deep-merges mcpServers objects, with project servers added to global config.
-        Existing global servers are preserved unless --force is used for conflicts.
+            source_servers: Dict of server configs. If None, reads from .github/copilot/mcp-config.json.
         """
-        project_servers = self.get_project_mcp_servers()
+        project_servers = source_servers if source_servers is not None else self.get_project_mcp_servers()
         if not project_servers:
             return
         

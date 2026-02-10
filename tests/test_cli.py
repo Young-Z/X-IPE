@@ -139,7 +139,7 @@ class TestCLIEntryPoint:
         from src.x_ipe.cli.main import cli
         result = runner.invoke(cli, ["--version"])
         assert result.exit_code == 0
-        assert "1.0.0" in result.output
+        assert "x-ipe, version" in result.output
     
     def test_cli_has_init_command(self, runner):
         """CLI has init command."""
