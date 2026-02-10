@@ -23,6 +23,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 MANDATORY: This skill MUST call feature-board-management to create features on the board. Never edit features.md manually.
 
+MANDATORY: Every feature MUST have a feature ID in the format `FEATURE-{nnn}` (e.g., FEATURE-001, FEATURE-027). This applies regardless of the output language used.
+
 See [references/breakdown-guidelines.md](references/breakdown-guidelines.md) for:
 - Feature dependency patterns (sequential, parallel, multiple) and rules (no cycles, foundation first)
 - Feature sizing guidelines, naming conventions, version numbering rules

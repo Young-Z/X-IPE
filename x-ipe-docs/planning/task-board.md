@@ -15,12 +15,14 @@
 
 
 
+
 ---
 
 ## Completed Tasks
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-240 | Skill Update | Add feature ID format (FEATURE-{nnn}) note to requirement-gathering, feature-breakdown, feature-refinement skills | Drift | 02-10-2026 11:55:00 | [req-gathering](../../.github/skills/x-ipe-task-based-requirement-gathering/SKILL.md), [feat-breakdown](../../.github/skills/x-ipe-task-based-feature-breakdown/SKILL.md), [feat-refinement](../../.github/skills/x-ipe-task-based-feature-refinement/SKILL.md) | Added MANDATORY note: every feature must have ID in format FEATURE-{nnn}, regardless of output language. |
 | TASK-239 | Skill Update | Update x-ipe-task-based-ideation-v2: remove step 3, agentic expressions, tool list emphasis | Bolt | 02-10-2026 11:15:00 | [SKILL.md](../../.github/skills/x-ipe-task-based-ideation-v2/SKILL.md) | Removed step 3 (Initialize Tools), renumbered 11→10 steps. Step 1 outputs enabled tool list. Steps 6/8 recommend enabled tools. Agentic expressions in brainstorm step. No tool-specific usage instructions. |
 | TASK-238 | Bug Fix | UIUX Feedback: Brand theme creator must enforce `theme-` prefix in folder names (Feedback-20260210-180937) | Cipher | 02-10-2026 10:15:00 | [SKILL.md](../../.github/skills/x-ipe-tool-brand-theme-creator/SKILL.md) | Root cause: Skill didn't strongly enforce `theme-` prefix, so agents could create folders like `bilibili-brand-theme` which ThemesService ignores. Fix: Added BLOCKING constraints in Important Notes, Step 2 (auto-prepend), and Step 6 (validate prefix). |
 | TASK-237 | Bug Fix | UIUX Feedback: Copilot button dropdown empty on new projects — JS only reads v2.0 config format (Feedback-20260210-172238) | Cipher | 02-10-2026 09:30:00 | [workplace.js](../../src/x_ipe/static/js/features/workplace.js), [copilot-prompt.json](../../src/x_ipe/resources/config/copilot-prompt.json), [test_tools_config.py](../../tests/test_tools_config.py) | Root cause: JS code read `data.ideation?.prompts` only (v2.0 format) but scaffold template uses `data.prompts` (v1.0). Fix: JS now reads `data.ideation?.prompts \|\| data.prompts \|\| []`. Also updated scaffold template to v2.0 format. |
