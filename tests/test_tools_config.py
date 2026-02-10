@@ -52,7 +52,7 @@ def temp_project_with_legacy_config(temp_project_dir):
     legacy_config = {
         "version": "1.0",
         "ideation": {
-            "antv-infographic": True,
+            "x-ipe-tool-infographic-syntax": True,
             "mermaid": False
         },
         "mockup": {
@@ -78,7 +78,7 @@ def default_config():
         "version": "2.0",
         "stages": {
             "ideation": {
-                "ideation": {"antv-infographic": False, "mermaid": False},
+                "ideation": {"x-ipe-tool-infographic-syntax": False, "mermaid": False},
                 "mockup": {"frontend-design": True},
                 "sharing": {}
             },
@@ -97,7 +97,7 @@ def sample_config():
         "version": "2.0",
         "stages": {
             "ideation": {
-                "ideation": {"antv-infographic": True, "mermaid": True},
+                "ideation": {"x-ipe-tool-infographic-syntax": True, "mermaid": True},
                 "mockup": {"frontend-design": True},
                 "sharing": {}
             },
@@ -171,7 +171,7 @@ class TestToolsConfigServiceLoad:
         config = service.load()
         
         assert config['version'] == '2.0'
-        assert config['stages']['ideation']['ideation']['antv-infographic'] == True
+        assert config['stages']['ideation']['ideation']['x-ipe-tool-infographic-syntax'] == True
         assert config['stages']['ideation']['ideation']['mermaid'] == True
     
     def test_load_creates_default_when_no_config_exists(self, temp_project_dir, default_config):
@@ -234,7 +234,7 @@ class TestToolsConfigServiceMigration:
         assert config['version'] == '2.0'
         
         # Should preserve legacy tool states
-        assert config['stages']['ideation']['ideation']['antv-infographic'] == True
+        assert config['stages']['ideation']['ideation']['x-ipe-tool-infographic-syntax'] == True
         assert config['stages']['ideation']['ideation']['mermaid'] == False
         assert config['stages']['ideation']['mockup']['frontend-design'] == True
     
@@ -326,7 +326,7 @@ class TestToolsConfigServiceSave:
         
         saved = json.loads(config_path.read_text())
         assert saved['version'] == '2.0'
-        assert saved['stages']['ideation']['ideation']['antv-infographic'] == True
+        assert saved['stages']['ideation']['ideation']['x-ipe-tool-infographic-syntax'] == True
     
     def test_save_creates_config_directory(self, temp_project_dir, sample_config):
         """save() creates x-ipe-docs/config/ directory if missing"""
@@ -364,7 +364,7 @@ class TestToolsConfigServiceSave:
         
         # Verify overwritten
         saved = json.loads(config_path.read_text())
-        assert saved['stages']['ideation']['ideation']['antv-infographic'] == True
+        assert saved['stages']['ideation']['ideation']['x-ipe-tool-infographic-syntax'] == True
 
 
 # ============================================================================
@@ -516,7 +516,7 @@ class TestToolsConfigIntegration:
         get_response = test_client.get('/api/config/tools')
         data = get_response.get_json()
         
-        assert data['config']['stages']['ideation']['ideation']['antv-infographic'] == True
+        assert data['config']['stages']['ideation']['ideation']['x-ipe-tool-infographic-syntax'] == True
         assert data['config']['stages']['ideation']['ideation']['mermaid'] == True
     
     def test_migration_preserves_existing_config(self, temp_project_with_legacy_config):
@@ -533,7 +533,7 @@ class TestToolsConfigIntegration:
             "version": "2.0",
             "stages": {
                 "ideation": {
-                    "ideation": {"antv-infographic": False, "mermaid": False},
+                    "ideation": {"x-ipe-tool-infographic-syntax": False, "mermaid": False},
                     "mockup": {"frontend-design": False},
                     "sharing": {}
                 },
@@ -552,7 +552,7 @@ class TestToolsConfigIntegration:
         config = service.load()
         
         # Should have new config values (not migrated legacy values)
-        assert config['stages']['ideation']['ideation']['antv-infographic'] == False
+        assert config['stages']['ideation']['ideation']['x-ipe-tool-infographic-syntax'] == False
         assert config['stages']['ideation']['mockup']['frontend-design'] == False
         
         # Legacy file should still exist (not deleted since migration didn't run)
@@ -601,7 +601,7 @@ class TestToolsConfigEdgeCases:
             "custom_field": "custom_value",
             "stages": {
                 "ideation": {
-                    "ideation": {"antv-infographic": False, "mermaid": False, "extra-tool": True},
+                    "ideation": {"x-ipe-tool-infographic-syntax": False, "mermaid": False, "extra-tool": True},
                     "mockup": {"frontend-design": True},
                     "sharing": {}
                 },

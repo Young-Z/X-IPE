@@ -36,7 +36,7 @@ This reference document contains detailed tool configuration, mapping, and usage
 
 | Config Key | Skill/Capability | How to Invoke |
 |------------|------------------|---------------|
-| `stages.ideation.ideation.antv-infographic` | `infographic-syntax-creator` skill | Call skill to generate infographic DSL syntax |
+| `stages.ideation.ideation.antv-infographic` | `x-ipe-tool-infographic-syntax` skill | Call skill to generate infographic DSL syntax |
 | `stages.ideation.ideation.mermaid` | Mermaid code blocks | Generate mermaid diagrams directly in markdown |
 | `stages.ideation.ideation.x-ipe-tool-architecture-dsl` | `x-ipe-tool-architecture-dsl` skill | Generate Architecture DSL directly in markdown |
 | `stages.ideation.mockup.frontend-design` | `frontend-design` skill | Call skill to create HTML/CSS mockups |
@@ -50,7 +50,7 @@ This reference document contains detailed tool configuration, mapping, and usage
 invocation_rules:
   antv_infographic:
     config_key: "stages.ideation.ideation.antv-infographic"
-    when_true: "Load and invoke infographic-syntax-creator skill"
+    when_true: "Load and invoke x-ipe-tool-infographic-syntax skill"
     use_for: "Visual summaries, feature lists, roadmaps, comparisons"
     output: "Infographic DSL code blocks"
     

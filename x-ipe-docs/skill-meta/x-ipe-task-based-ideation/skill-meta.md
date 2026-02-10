@@ -226,9 +226,9 @@ dependencies:
       relationship: prerequisite
       description: Must be learned before executing this skill
 
-    - name: infographic-syntax-creator
+    - name: x-ipe-tool-infographic-syntax
       relationship: integration
-      description: Used for visual infographics when antv-infographic enabled
+      description: Used for visual infographics when x-ipe-tool-infographic-syntax enabled
 
   artifacts:
     - path: "x-ipe-docs/ideas/{folder}/files/"
@@ -243,7 +243,7 @@ dependencies:
 test_scenarios:
   happy_path:
     - name: "Full ideation with tools enabled"
-      given: "Idea files uploaded, tools.json has antv-infographic and mermaid enabled"
+      given: "Idea files uploaded, tools.json has x-ipe-tool-infographic-syntax and mermaid enabled"
       when: "Agent executes ideation skill"
       then: "idea-summary-vN.md created with infographic/mermaid visualizations"
 

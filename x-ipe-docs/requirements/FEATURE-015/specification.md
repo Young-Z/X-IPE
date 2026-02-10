@@ -109,7 +109,7 @@ As an **architect**, I want to **align components within modules using nested gr
 ### 7. Integration
 - [x] AC-7.1: Skill registered in `x-ipe-docs/config/tools.json` under `stages.ideation.ideation.x-ipe-tool-architecture-dsl`
 - [x] AC-7.2: Skill can be enabled/disabled via Stage Toolbox modal
-- [x] AC-7.3: Skill works alongside other ideation tools (mermaid, antv-infographic)
+- [x] AC-7.3: Skill works alongside other ideation tools (mermaid, x-ipe-tool-infographic-syntax)
 - [x] AC-7.4: DSL output can be embedded in markdown using ```architecture-dsl code blocks
 
 ---
@@ -374,7 +374,7 @@ Output:
 
 ## Technical Considerations
 
-- **Learning from `infographic-syntax-creator`**: Follow similar skill structure with grammar reference and examples
+- **Learning from `x-ipe-tool-infographic-syntax`**: Follow similar skill structure with grammar reference and examples
 - **Grid validation**: Ensure `cols` sum to 12 at parse time
 - **Migration path**: v1 DSL can be converted to v2 using migration guide
 - **Syntax highlighting**: Frontend should highlight DSL keywords in editor

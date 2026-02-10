@@ -20,6 +20,7 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-238 | Bug Fix | UIUX Feedback: Brand theme creator must enforce `theme-` prefix in folder names (Feedback-20260210-180937) | Cipher | 02-10-2026 10:15:00 | [SKILL.md](../../.github/skills/x-ipe-tool-brand-theme-creator/SKILL.md) | Root cause: Skill didn't strongly enforce `theme-` prefix, so agents could create folders like `bilibili-brand-theme` which ThemesService ignores. Fix: Added BLOCKING constraints in Important Notes, Step 2 (auto-prepend), and Step 6 (validate prefix). |
 | TASK-237 | Bug Fix | UIUX Feedback: Copilot button dropdown empty on new projects — JS only reads v2.0 config format (Feedback-20260210-172238) | Cipher | 02-10-2026 09:30:00 | [workplace.js](../../src/x_ipe/static/js/features/workplace.js), [copilot-prompt.json](../../src/x_ipe/resources/config/copilot-prompt.json), [test_tools_config.py](../../tests/test_tools_config.py) | Root cause: JS code read `data.ideation?.prompts` only (v2.0 format) but scaffold template uses `data.prompts` (v1.0). Fix: JS now reads `data.ideation?.prompts \|\| data.prompts \|\| []`. Also updated scaffold template to v2.0 format. |
 | TASK-236 | Bug Fix | UIUX Feedback: Browser simulator proxy shows host app data instead of target app data (Feedback-20260210-170511) | Cipher | 02-10-2026 09:17:00 | [proxy_service.py](../../src/x_ipe/services/proxy_service.py), [test_proxy.py](../../tests/test_proxy.py) | Root cause: JS fetch() calls in srcdoc iframe resolve to host origin (5858) instead of proxied target (6060). Fix: inject fetch/XHR interceptor script into proxied HTML that rewrites relative API calls through /api/proxy endpoint. |
 | TASK-235 | Bug Fix | UIUX Feedback: Toolbox accordion expanded content gets hard cut off (Feedback-20260210-141741) | Onyx | 02-10-2026 06:22:00 | [stage-toolbox.css](../../src/x_ipe/static/css/features/stage-toolbox.css) | Root cause: .toolbox-accordion-content max-height:1000px too small for expanded content with overflow:hidden. Fix: increased max-height to 5000px so content is never clipped, modal body scrollbar handles overflow. |
@@ -131,7 +132,7 @@
 - **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 275
+- **Completed (archived):** 276
 - **Pending Review:** 0
 - **Blocked:** 0
 

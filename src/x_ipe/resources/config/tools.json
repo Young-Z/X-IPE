@@ -25,7 +25,7 @@
       "ideation": {
         "_extra_instruction": "- for mermaid tool: just use it in workflow, sequence diagram\n- for Architecture DSL tool: embed ```architecture-dsl code blocks directly in markdown (IPE renders natively). Use for layered architecture, module views, and system landscapes.",
         "_order": 1,
-        "antv-infographic": false,
+        "x-ipe-tool-infographic-syntax": false,
         "mermaid": true,
         "x-ipe-tool-architecture-dsl": true
       },

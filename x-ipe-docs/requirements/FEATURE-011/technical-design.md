@@ -170,7 +170,7 @@ sequenceDiagram
   "stages": {
     "ideation": {
       "ideation": {
-        "antv-infographic": false,
+        "x-ipe-tool-infographic-syntax": false,
         "mermaid": false
       },
       "mockup": {
@@ -204,7 +204,7 @@ sequenceDiagram
 {
   "version": "1.0",
   "ideation": {
-    "antv-infographic": false,
+    "x-ipe-tool-infographic-syntax": false,
     "mermaid": false
   },
   "mockup": {
@@ -282,7 +282,7 @@ DEFAULT_CONFIG = {
     "version": "2.0",
     "stages": {
         "ideation": {
-            "ideation": {"antv-infographic": False, "mermaid": False},
+            "ideation": {"x-ipe-tool-infographic-syntax": False, "mermaid": False},
             "mockup": {"frontend-design": True},
             "sharing": {}
         },

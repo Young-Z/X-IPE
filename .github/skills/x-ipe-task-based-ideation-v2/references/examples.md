@@ -34,7 +34,7 @@
 2. Load Toolbox Meta:
    - Read x-ipe-docs/config/tools.json
    - Enabled tools:
-     - stages.ideation.ideation.antv-infographic: true → will invoke infographic-syntax-creator
+     - stages.ideation.ideation.antv-infographic: true → will invoke x-ipe-tool-infographic-syntax
      - stages.ideation.ideation.mermaid: true → will use mermaid diagrams
      - stages.ideation.mockup.frontend-design: true → will invoke frontend-design skill
 
@@ -44,7 +44,7 @@
    - Read competitor-notes.md
 
 4. Initialize Tools:
-   - infographic-syntax-creator skill → Available
+   - x-ipe-tool-infographic-syntax skill → Available
    - mermaid capability → Available  
    - frontend-design skill → Available
    - Status: All enabled tools ready

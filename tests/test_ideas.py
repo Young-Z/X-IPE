@@ -1189,7 +1189,7 @@ class TestIdeasServiceToolbox:
         config = service.get_toolbox()
         
         assert config['version'] == '1.0'
-        assert config['ideation']['antv-infographic'] is False
+        assert config['ideation']['x-ipe-tool-infographic-syntax'] is False
         assert config['ideation']['mermaid'] is True
         assert config['mockup']['frontend-design'] is True
         assert config['sharing'] == {}
@@ -1205,7 +1205,7 @@ class TestIdeasServiceToolbox:
         custom_config = {
             "version": "1.0",
             "ideation": {
-                "antv-infographic": True,
+                "x-ipe-tool-infographic-syntax": True,
                 "mermaid": False
             },
             "mockup": {
@@ -1219,7 +1219,7 @@ class TestIdeasServiceToolbox:
         service = IdeasService(temp_project_dir)
         config = service.get_toolbox()
         
-        assert config['ideation']['antv-infographic'] is True
+        assert config['ideation']['x-ipe-tool-infographic-syntax'] is True
         assert config['ideation']['mermaid'] is False
         assert config['mockup']['frontend-design'] is False
     
@@ -1249,7 +1249,7 @@ class TestIdeasServiceToolbox:
         service = IdeasService(temp_project_dir)
         config = {
             "version": "1.0",
-            "ideation": {"antv-infographic": True, "mermaid": True},
+            "ideation": {"x-ipe-tool-infographic-syntax": True, "mermaid": True},
             "mockup": {"frontend-design": False},
             "sharing": {}
         }
@@ -1261,7 +1261,7 @@ class TestIdeasServiceToolbox:
         assert toolbox_path.exists()
         
         saved_config = json.loads(toolbox_path.read_text())
-        assert saved_config['ideation']['antv-infographic'] is True
+        assert saved_config['ideation']['x-ipe-tool-infographic-syntax'] is True
         assert saved_config['mockup']['frontend-design'] is False
     
     def test_save_toolbox_updates_existing_file(self, temp_ideas_dir, temp_project_dir):
@@ -1274,7 +1274,7 @@ class TestIdeasServiceToolbox:
         toolbox_path = temp_ideas_dir / '.ideation-tools.json'
         initial_config = {
             "version": "1.0",
-            "ideation": {"antv-infographic": False, "mermaid": True},
+            "ideation": {"x-ipe-tool-infographic-syntax": False, "mermaid": True},
             "mockup": {"frontend-design": True},
             "sharing": {}
         }
@@ -1284,7 +1284,7 @@ class TestIdeasServiceToolbox:
         service = IdeasService(temp_project_dir)
         updated_config = {
             "version": "1.0",
-            "ideation": {"antv-infographic": True, "mermaid": False},
+            "ideation": {"x-ipe-tool-infographic-syntax": True, "mermaid": False},
             "mockup": {"frontend-design": True},
             "sharing": {}
         }
@@ -1293,7 +1293,7 @@ class TestIdeasServiceToolbox:
         
         assert result['success'] is True
         saved_config = json.loads(toolbox_path.read_text())
-        assert saved_config['ideation']['antv-infographic'] is True
+        assert saved_config['ideation']['x-ipe-tool-infographic-syntax'] is True
         assert saved_config['ideation']['mermaid'] is False
     
     def test_save_toolbox_creates_ideas_directory_if_missing(self, temp_project_dir):
@@ -1309,7 +1309,7 @@ class TestIdeasServiceToolbox:
         service = IdeasService(temp_project_dir)
         config = {
             "version": "1.0",
-            "ideation": {"antv-infographic": False, "mermaid": True},
+            "ideation": {"x-ipe-tool-infographic-syntax": False, "mermaid": True},
             "mockup": {"frontend-design": True},
             "sharing": {}
         }
@@ -1329,7 +1329,7 @@ class TestIdeasServiceToolbox:
         toolbox_path = temp_ideas_dir / '.ideation-tools.json'
         config_with_extras = {
             "version": "1.0",
-            "ideation": {"antv-infographic": True, "mermaid": True, "custom-tool": True},
+            "ideation": {"x-ipe-tool-infographic-syntax": True, "mermaid": True, "custom-tool": True},
             "mockup": {"frontend-design": True},
             "sharing": {"export-pdf": True},
             "custom_section": {"something": "value"}
@@ -1373,7 +1373,7 @@ class TestToolboxAPI:
         toolbox_path = populated_ideas_dir / '.ideation-tools.json'
         custom_config = {
             "version": "1.0",
-            "ideation": {"antv-infographic": True, "mermaid": False},
+            "ideation": {"x-ipe-tool-infographic-syntax": True, "mermaid": False},
             "mockup": {"frontend-design": False},
             "sharing": {}
         }
@@ -1384,7 +1384,7 @@ class TestToolboxAPI:
         
         assert response.status_code == 200
         data = response.get_json()
-        assert data['ideation']['antv-infographic'] is True
+        assert data['ideation']['x-ipe-tool-infographic-syntax'] is True
         assert data['ideation']['mermaid'] is False
     
     def test_save_toolbox_endpoint(self, populated_client, temp_project_dir, populated_ideas_dir):
@@ -1393,7 +1393,7 @@ class TestToolboxAPI:
         """
         config = {
             "version": "1.0",
-            "ideation": {"antv-infographic": True, "mermaid": True},
+            "ideation": {"x-ipe-tool-infographic-syntax": True, "mermaid": True},
             "mockup": {"frontend-design": False},
             "sharing": {}
         }
@@ -1418,7 +1418,7 @@ class TestToolboxAPI:
         """
         config = {
             "version": "1.0",
-            "ideation": {"antv-infographic": True, "mermaid": False},
+            "ideation": {"x-ipe-tool-infographic-syntax": True, "mermaid": False},
             "mockup": {"frontend-design": True},
             "sharing": {}
         }
@@ -1436,7 +1436,7 @@ class TestToolboxAPI:
         assert get_response.status_code == 200
         data = get_response.get_json()
         
-        assert data['ideation']['antv-infographic'] is True
+        assert data['ideation']['x-ipe-tool-infographic-syntax'] is True
         assert data['ideation']['mermaid'] is False
         assert data['mockup']['frontend-design'] is True
     
@@ -1466,7 +1466,7 @@ class TestToolboxAPI:
         # First save
         config1 = {
             "version": "1.0",
-            "ideation": {"antv-infographic": False, "mermaid": True},
+            "ideation": {"x-ipe-tool-infographic-syntax": False, "mermaid": True},
             "mockup": {"frontend-design": True},
             "sharing": {}
         }
@@ -1479,7 +1479,7 @@ class TestToolboxAPI:
         # Second save (update)
         config2 = {
             "version": "1.0",
-            "ideation": {"antv-infographic": True, "mermaid": True},
+            "ideation": {"x-ipe-tool-infographic-syntax": True, "mermaid": True},
             "mockup": {"frontend-design": False},
             "sharing": {}
         }
@@ -1493,7 +1493,7 @@ class TestToolboxAPI:
         response = populated_client.get('/api/ideas/toolbox')
         data = response.get_json()
         
-        assert data['ideation']['antv-infographic'] is True
+        assert data['ideation']['x-ipe-tool-infographic-syntax'] is True
         assert data['mockup']['frontend-design'] is False
 
 

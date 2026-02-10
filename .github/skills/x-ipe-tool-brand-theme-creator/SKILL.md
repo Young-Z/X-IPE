@@ -41,11 +41,13 @@ does_not_handle:
 
 ## Important Notes
 
-BLOCKING: Output location is `x-ipe-docs/themes/theme-{name}/`. Theme names must use kebab-case with `theme-` prefix.
+BLOCKING: Output location is `x-ipe-docs/themes/theme-{name}/`. The folder name MUST start with `theme-` prefix (e.g., `theme-bilibili`, `theme-ocean`). The `ThemesService` only discovers folders with this prefix — folders without it will NOT appear in the Toolbox.
 
 CRITICAL: Both `design-system.md` and `component-visualization.html` must be generated. Never produce only one file.
 
 CRITICAL: Minimum input is one accent/brand color. All other tokens can be derived. See [references/color-derivation.md](references/color-derivation.md).
+
+CRITICAL: If the user provides a theme name without the `theme-` prefix, prepend it automatically (e.g., user says "bilibili-brand" → folder is `theme-bilibili-brand`).
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
@@ -142,10 +144,12 @@ For detailed extraction procedures per source type, see [references/input-source
     <action>
       1. Present extracted/interpreted colors to user
       2. Ask for theme name if not already provided
-      3. Offer customization options (typography, border radius)
+      3. Validate theme name: IF name does not start with "theme-", prepend "theme-" prefix
+      4. Offer customization options (typography, border radius)
     </action>
     <constraints>
       - BLOCKING: Do not proceed to generation without user confirmation
+      - BLOCKING: Final folder name MUST start with "theme-" prefix. Auto-prepend if missing.
     </constraints>
     <output>Confirmed color palette and configuration</output>
   </step_2>
@@ -191,10 +195,14 @@ For detailed extraction procedures per source type, see [references/input-source
   <step_6>
     <name>Create Theme Folder</name>
     <action>
-      1. Create directory x-ipe-docs/themes/theme-{name}/
-      2. Write design-system.md
-      3. Write component-visualization.html
+      1. Verify theme name starts with "theme-" prefix. If not, prepend it.
+      2. Create directory x-ipe-docs/themes/theme-{name}/
+      3. Write design-system.md
+      4. Write component-visualization.html
     </action>
+    <constraints>
+      - BLOCKING: Folder name MUST match pattern "theme-{name}". ThemesService rejects folders without this prefix.
+    </constraints>
     <output>Theme directory with both files on disk</output>
   </step_6>
 

@@ -241,7 +241,7 @@
 7. **Integration**
    - [ ] AC-7.1: Configurable via `x-ipe-docs/config/tools.json` under `stages.ideation.ideation.x-ipe-tool-architecture-dsl`
    - [ ] AC-7.2: Can be enabled/disabled in Stage Toolbox modal
-   - [ ] AC-7.3: Works alongside other ideation tools (mermaid, antv-infographic)
+   - [ ] AC-7.3: Works alongside other ideation tools (mermaid, x-ipe-tool-infographic-syntax)
 
 **Dependencies:**
 - FEATURE-011: Stage Toolbox (for toolbox modal integration)

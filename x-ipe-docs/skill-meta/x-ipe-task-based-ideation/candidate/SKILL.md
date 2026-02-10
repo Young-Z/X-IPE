@@ -20,7 +20,7 @@ Learn and refine user ideas through collaborative brainstorming by:
 
 BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
 
-BLOCKING: Learn `infographic-syntax-creator` skill for visual infographics in the idea summary.
+BLOCKING: Learn `x-ipe-tool-infographic-syntax` skill for visual infographics in the idea summary.
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
@@ -148,8 +148,8 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
       2. Log status (available/unavailable)
     </action>
     <branch>
-      IF: config.stages.ideation.ideation["antv-infographic"] == true
-      THEN: Verify infographic-syntax-creator skill available
+      IF: config.stages.ideation.ideation["x-ipe-tool-infographic-syntax"] == true
+      THEN: Verify x-ipe-tool-infographic-syntax skill available
 
       IF: config.stages.ideation.ideation["mermaid"] == true
       THEN: Verify mermaid capability available
@@ -231,7 +231,7 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
       - MANDATORY: Include all sections from template
     </constraints>
     <branch>
-      IF: antv-infographic enabled → Use infographic DSL for features/roadmaps
+      IF: x-ipe-tool-infographic-syntax enabled → Use infographic DSL for features/roadmaps
       IF: mermaid enabled → Use mermaid for flowcharts/sequences
       IF: x-ipe-tool-architecture-dsl enabled → Use architecture DSL for system diagrams
       IF: all disabled → Use standard markdown (bullet lists, tables)

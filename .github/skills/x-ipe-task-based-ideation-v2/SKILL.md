@@ -20,7 +20,7 @@ Learn and refine user ideas through collaborative brainstorming by:
 
 BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
 
-BLOCKING: Learn `infographic-syntax-creator` skill for visual infographics in the idea summary.
+BLOCKING: Learn `x-ipe-tool-infographic-syntax` skill for visual infographics in the idea summary.
 
 CRITICAL: Only use tools that are explicitly enabled (`true`) in `x-ipe-docs/config/tools.json` under `stages.ideation`. If a tool is set to `false` or is absent from the config, do NOT use it -- even if the skill/capability is available. The tools.json config is the single source of truth for which tools are allowed.
 
@@ -143,7 +143,7 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
          IF tool value is true: check availability of corresponding skill/capability
          IF tool value is false or absent: mark as DISABLED -- do NOT use under any circumstances
       2. Specifically check:
-         IF antv-infographic enabled (true): verify infographic-syntax-creator skill available
+         IF antv-infographic enabled (true): verify x-ipe-tool-infographic-syntax skill available
          IF mermaid enabled (true): verify mermaid capability available
          IF frontend-design enabled (true): verify frontend-design skill available
          IF x-ipe-tool-architecture-dsl enabled (true): verify architecture DSL skill available

@@ -1703,7 +1703,7 @@ sequenceDiagram
 {
     "version": "1.0",
     "ideation": {
-        "antv-infographic": false,
+        "x-ipe-tool-infographic-syntax": false,
         "mermaid": true
     },
     "mockup": {
@@ -1722,7 +1722,7 @@ TOOLBOX_FILE = '.ideation-tools.json'
 DEFAULT_TOOLBOX = {
     "version": "1.0",
     "ideation": {
-        "antv-infographic": False,
+        "x-ipe-tool-infographic-syntax": False,
         "mermaid": True
     },
     "mockup": {
@@ -1802,8 +1802,8 @@ def save_ideas_toolbox():
             </h6>
             <div class="form-check">
                 <input class="form-check-input toolbox-checkbox" type="checkbox" 
-                       id="tool-antv-infographic" data-section="ideation" data-tool="antv-infographic">
-                <label class="form-check-label" for="tool-antv-infographic">
+                       id="tool-x-ipe-tool-infographic-syntax" data-section="ideation" data-tool="x-ipe-tool-infographic-syntax">
+                <label class="form-check-label" for="tool-x-ipe-tool-infographic-syntax">
                     AntV Infographic
                 </label>
             </div>

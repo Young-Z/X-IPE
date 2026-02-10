@@ -71,7 +71,7 @@ This feature integrates with a new agent skill (`x-ipe-task-based-ideation`) tha
 - [x] AC-19: After copilot CLI init, sends `refine the idea {file path}` command (CR-001)
 - [ ] AC-24: "Ideation Toolbox" button visible next to "Create Idea" button (CR-003)
 - [ ] AC-25: Clicking Toolbox button opens dropdown panel with 3 sections (CR-003)
-- [ ] AC-26: Ideation section contains checkboxes: antv-infographic, mermaid (CR-003)
+- [ ] AC-26: Ideation section contains checkboxes: x-ipe-tool-infographic-syntax, mermaid (CR-003)
 - [ ] AC-27: Mockup section contains checkbox: frontend-design (CR-003)
 - [ ] AC-28: Sharing section shows placeholder text (CR-003)
 - [ ] AC-29: Default selections: mermaid checked, frontend-design checked (CR-003)
@@ -254,7 +254,7 @@ This feature integrates with a new agent skill (`x-ipe-task-based-ideation`) tha
 
 **Sections and Options:**
 1. **Ideation** (for idea analysis and visualization)
-   - `antv-infographic`: AntV Infographic DSL generation (default: unchecked)
+   - `x-ipe-tool-infographic-syntax`: AntV Infographic DSL generation (default: unchecked)
    - `mermaid`: Mermaid diagram support (default: checked)
 2. **Mockup** (for UI prototyping)
    - `frontend-design`: Frontend design skill (default: checked)
@@ -266,7 +266,7 @@ This feature integrates with a new agent skill (`x-ipe-task-based-ideation`) tha
 {
   "version": "1.0",
   "ideation": {
-    "antv-infographic": false,
+    "x-ipe-tool-infographic-syntax": false,
     "mermaid": true
   },
   "mockup": {

@@ -379,7 +379,7 @@ project-root/           ← project_root (shown in file tree by default)
 
 3. **Ideation Stage (Functional)**
    - [ ] AC-3.1: Three sub-phases: Ideation, Mockup, Sharing
-   - [ ] AC-3.2: Ideation phase has tools: `antv-infographic`, `mermaid`
+   - [ ] AC-3.2: Ideation phase has tools: `x-ipe-tool-infographic-syntax`, `mermaid`
    - [ ] AC-3.3: Mockup phase has tool: `frontend-design`
    - [ ] AC-3.4: Sharing phase shows "No tools configured"
    - [ ] AC-3.5: Toggle switches enable/disable each tool

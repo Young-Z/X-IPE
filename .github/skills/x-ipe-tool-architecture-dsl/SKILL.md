@@ -197,8 +197,25 @@ operation_output:
 
 ## Definition of Done
 
+CRITICAL: Use a sub-agent to validate DoD checkpoints independently. The sub-agent MUST parse the generated DSL and verify every checkpoint below against the grammar specification at [references/grammar.md](references/grammar.md).
+
 ```xml
 <definition_of_done>
+  <validation_sub_agent>
+    <role>architecture-dsl-validator</role>
+    <goal>Parse generated DSL output and validate it meets the Architecture DSL specification</goal>
+    <model_hint>sonnet</model_hint>
+    <instructions>
+      1. Read the complete DSL grammar from references/grammar.md
+      2. Read the layout principles from references/layout-principles.md
+      3. Parse the generated DSL output line by line
+      4. Validate EVERY checkpoint below against the grammar rules
+      5. For each checkpoint: report PASS or FAIL with specific line references
+      6. IF any FAIL: return the list of violations with fix suggestions
+      7. The generating agent MUST fix all violations before output is accepted
+    </instructions>
+  </validation_sub_agent>
+
   <checkpoint required="true">
     <name>Structure Valid</name>
     <verification>@startuml and @enduml present, grid declared at document level</verification>
@@ -208,12 +225,20 @@ operation_output:
     <verification>Each layer has rows, each module has cols, module cols sum to 12 per layer</verification>
   </checkpoint>
   <checkpoint required="true">
+    <name>Component Grid Valid</name>
+    <verification>Each module's internal grid dimensions can contain all declared components (cols x rows >= component count)</verification>
+  </checkpoint>
+  <checkpoint required="true">
     <name>Stereotypes Correct</name>
     <verification>Stereotype-only modules use horizontal grid (grid N x 1)</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Aliases Valid</name>
     <verification>All aliases unique, all flow targets reference defined aliases</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Syntax Conforms to Grammar</name>
+    <verification>Every keyword, property, and nesting level matches references/grammar.md specification</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Output Embedded</name>

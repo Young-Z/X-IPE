@@ -53,7 +53,7 @@ This feature is designed for developers and project managers who need to configu
 
 ### Ideation Stage (Functional)
 - [x] AC-3.1: Three sub-phases: Ideation, Mockup, Sharing
-- [x] AC-3.2: Ideation phase has tools: `antv-infographic`, `mermaid`
+- [x] AC-3.2: Ideation phase has tools: `x-ipe-tool-infographic-syntax`, `mermaid`
 - [x] AC-3.3: Mockup phase has tool: `frontend-design`
 - [x] AC-3.4: Sharing phase shows "No tools configured"
 - [x] AC-3.5: Toggle switches enable/disable each tool
@@ -225,7 +225,7 @@ This feature is designed for developers and project managers who need to configu
 ### BR-3: Hardcoded Tool Registry
 
 **Rule:** Available tools are hardcoded in the application, not discovered dynamically. Tools for v1.0:
-- `ideation.ideation.antv-infographic`
+- `ideation.ideation.x-ipe-tool-infographic-syntax`
 - `ideation.ideation.mermaid`
 - `ideation.mockup.frontend-design`
 
@@ -286,7 +286,7 @@ This feature is designed for developers and project managers who need to configu
   "stages": {
     "ideation": {
       "ideation": {
-        "antv-infographic": false,
+        "x-ipe-tool-infographic-syntax": false,
         "mermaid": false
       },
       "mockup": {
