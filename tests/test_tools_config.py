@@ -684,6 +684,33 @@ class TestCopilotPromptAPI:
         assert len(data['ideation']['prompts']) == 1
         assert data['ideation']['prompts'][0]['id'] == 'test-prompt'
 
+    def test_get_copilot_prompt_v1_format_returns_top_level_prompts(self, test_client, temp_project_dir):
+        """GET /api/config/copilot-prompt with v1.0 format returns prompts at top level"""
+        # TASK-237: v1.0 configs have prompts at top level (data.prompts)
+        # Frontend JS must handle both v1.0 and v2.0 formats
+        config_path = Path(temp_project_dir) / 'x-ipe-docs' / 'config' / 'copilot-prompt.json'
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        copilot_config = {
+            "version": "1.0",
+            "prompts": [
+                {"id": "v1-prompt", "label": "V1 Prompt", "command": "v1-test"}
+            ]
+        }
+        config_path.write_text(json.dumps(copilot_config, indent=2))
+        
+        response = test_client.get('/api/config/copilot-prompt')
+        
+        assert response.status_code == 200
+        data = response.get_json()
+        
+        # v1.0 format: prompts are at data.prompts (no ideation wrapper)
+        assert 'prompts' in data
+        assert len(data['prompts']) == 1
+        assert data['prompts'][0]['id'] == 'v1-prompt'
+        # v1.0 should NOT have ideation key
+        assert 'ideation' not in data
+
 
 # ============================================================================
 # TEST COVERAGE SUMMARY

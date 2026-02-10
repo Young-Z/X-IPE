@@ -599,6 +599,60 @@ class TestProxyCSSFontUrlRewriting:
 
 
 # ============================================================================
+# Bug Fix Tests - TASK-236: JS fetch/XHR not intercepted in proxy iframe
+# ============================================================================
+
+class TestProxyFetchInterceptor:
+    """
+    Tests for TASK-236: Browser simulator shows host app data instead of target.
+
+    Bug: When proxying an X-IPE app on port 6060 via the simulator on port 5858,
+    JavaScript fetch() calls (e.g., /api/ideas/tree) resolve to 5858 (host) instead
+    of being proxied to 6060 (target). This is because the iframe uses srcdoc and
+    relative URLs resolve to the host origin.
+
+    Fix: Inject a fetch/XHR interceptor script into proxied HTML that rewrites
+    relative API calls through the proxy endpoint.
+    """
+
+    def test_rewrite_html_injects_fetch_interceptor(self, proxy_service):
+        """Proxied HTML should contain a fetch interceptor script"""
+        html = '<html><body><p>Hello</p></body></html>'
+        result = proxy_service._rewrite_html(html, "http://localhost:6060/")
+        assert 'data-x-ipe-fetch-interceptor' in result
+
+    def test_fetch_interceptor_contains_base_url(self, proxy_service):
+        """Fetch interceptor script should embed the target base URL"""
+        html = '<html><body><p>Hello</p></body></html>'
+        result = proxy_service._rewrite_html(html, "http://localhost:6060/")
+        # The interceptor needs to know the target origin to build proxy URLs
+        assert 'localhost:6060' in result or 'localhost%3A6060' in result
+
+    def test_fetch_interceptor_not_duplicated(self, proxy_service):
+        """Fetch interceptor should not be injected twice"""
+        html = '<html><body><script data-x-ipe-fetch-interceptor="true"></script></body></html>'
+        result = proxy_service._rewrite_html(html, "http://localhost:6060/")
+        assert result.count('data-x-ipe-fetch-interceptor') == 1
+
+    def test_fetch_interceptor_rewrites_relative_api_calls(self, proxy_service):
+        """Interceptor should rewrite relative paths like /api/ideas/tree to proxy URLs"""
+        html = '<html><body><p>Test</p></body></html>'
+        result = proxy_service._rewrite_html(html, "http://127.0.0.1:6060/")
+        # The interceptor script should contain logic to intercept fetch
+        assert 'fetch' in result.lower()
+        # Should reference the proxy endpoint
+        assert '/api/proxy' in result
+
+    def test_fetch_interceptor_with_different_ports(self, proxy_service):
+        """Interceptor should use the correct target URL for different ports"""
+        html = '<html><body><p>Test</p></body></html>'
+        result_3000 = proxy_service._rewrite_html(html, "http://localhost:3000/")
+        result_8080 = proxy_service._rewrite_html(html, "http://localhost:8080/")
+        assert 'localhost:3000' in result_3000 or 'localhost%3A3000' in result_3000
+        assert 'localhost:8080' in result_8080 or 'localhost%3A8080' in result_8080
+
+
+# ============================================================================
 # Test Coverage Summary
 # ============================================================================
 

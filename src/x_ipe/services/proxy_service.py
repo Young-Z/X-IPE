@@ -111,6 +111,69 @@ INSPECTOR_SCRIPT = '''
 </script>
 '''
 
+# TASK-236: Fetch/XHR interceptor injected into proxied HTML.
+# In srcdoc iframes, relative fetch('/api/...') calls resolve to the host origin
+# instead of the proxied target. This script intercepts fetch and XMLHttpRequest
+# to route them through the proxy endpoint.
+FETCH_INTERCEPTOR_TEMPLATE = '''
+<script data-x-ipe-fetch-interceptor="true">
+(function() {{
+    var TARGET_ORIGIN = '{target_origin}';
+    var PROXY_PATH = '/api/proxy?url=';
+
+    function buildProxyUrl(input) {{
+        var url;
+        if (typeof input === 'string') {{
+            url = input;
+        }} else if (input instanceof Request) {{
+            url = input.url;
+        }} else if (input instanceof URL) {{
+            url = input.href;
+        }} else {{
+            return null;
+        }}
+        // Skip already-proxied URLs and absolute external URLs
+        if (url.indexOf(PROXY_PATH) !== -1) return null;
+        if (url.indexOf('data:') === 0 || url.indexOf('blob:') === 0) return null;
+        // Handle relative URLs (starting with /)
+        if (url.charAt(0) === '/') {{
+            return PROXY_PATH + encodeURIComponent(TARGET_ORIGIN + url);
+        }}
+        // Handle relative URLs without leading slash
+        if (url.indexOf('://') === -1 && url.indexOf('//') !== 0) {{
+            return PROXY_PATH + encodeURIComponent(TARGET_ORIGIN + '/' + url);
+        }}
+        return null;
+    }}
+
+    // Intercept fetch
+    var originalFetch = window.fetch;
+    window.fetch = function(input, init) {{
+        var proxied = buildProxyUrl(input);
+        if (proxied) {{
+            if (typeof input === 'string') {{
+                return originalFetch.call(this, proxied, init);
+            }} else if (input instanceof Request) {{
+                var newReq = new Request(proxied, input);
+                return originalFetch.call(this, newReq, init);
+            }}
+        }}
+        return originalFetch.call(this, input, init);
+    }};
+
+    // Intercept XMLHttpRequest
+    var originalOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(method, url) {{
+        var proxied = buildProxyUrl(url);
+        if (proxied) {{
+            arguments[1] = proxied;
+        }}
+        return originalOpen.apply(this, arguments);
+    }};
+}})();
+</script>
+'''
+
 
 @dataclass
 class ProxyResult:
@@ -331,6 +394,15 @@ class ProxyService:
         if body and not soup.find('script', attrs={'data-x-ipe-inspector': 'true'}):
             inspector_soup = BeautifulSoup(INSPECTOR_SCRIPT, 'html.parser')
             body.append(inspector_soup)
+        
+        # TASK-236: Inject fetch/XHR interceptor to route API calls through proxy
+        if body and not soup.find('script', attrs={'data-x-ipe-fetch-interceptor': 'true'}):
+            parsed = urlparse(base_url)
+            target_origin = f"{parsed.scheme}://{parsed.netloc}"
+            interceptor_html = FETCH_INTERCEPTOR_TEMPLATE.format(target_origin=target_origin)
+            interceptor_soup = BeautifulSoup(interceptor_html, 'html.parser')
+            # Insert before other scripts so fetch is intercepted early
+            body.insert(0, interceptor_soup)
         
         return str(soup)
     

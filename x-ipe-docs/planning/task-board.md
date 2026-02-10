@@ -20,6 +20,8 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-237 | Bug Fix | UIUX Feedback: Copilot button dropdown empty on new projects — JS only reads v2.0 config format (Feedback-20260210-172238) | Cipher | 02-10-2026 09:30:00 | [workplace.js](../../src/x_ipe/static/js/features/workplace.js), [copilot-prompt.json](../../src/x_ipe/resources/config/copilot-prompt.json), [test_tools_config.py](../../tests/test_tools_config.py) | Root cause: JS code read `data.ideation?.prompts` only (v2.0 format) but scaffold template uses `data.prompts` (v1.0). Fix: JS now reads `data.ideation?.prompts \|\| data.prompts \|\| []`. Also updated scaffold template to v2.0 format. |
+| TASK-236 | Bug Fix | UIUX Feedback: Browser simulator proxy shows host app data instead of target app data (Feedback-20260210-170511) | Cipher | 02-10-2026 09:17:00 | [proxy_service.py](../../src/x_ipe/services/proxy_service.py), [test_proxy.py](../../tests/test_proxy.py) | Root cause: JS fetch() calls in srcdoc iframe resolve to host origin (5858) instead of proxied target (6060). Fix: inject fetch/XHR interceptor script into proxied HTML that rewrites relative API calls through /api/proxy endpoint. |
 | TASK-235 | Bug Fix | UIUX Feedback: Toolbox accordion expanded content gets hard cut off (Feedback-20260210-141741) | Onyx | 02-10-2026 06:22:00 | [stage-toolbox.css](../../src/x_ipe/static/css/features/stage-toolbox.css) | Root cause: .toolbox-accordion-content max-height:1000px too small for expanded content with overflow:hidden. Fix: increased max-height to 5000px so content is never clipped, modal body scrollbar handles overflow. |
 | TASK-233 | Bug Fix | UIUX Feedback: Submit Idea button goes out of viewport on small screens (Feedback-20260209-170854) | Pulse | 02-09-2026 17:10:00 | [workplace.css](../../src/x_ipe/static/css/workplace.css) | Root cause: min-height 250-300px on textarea/CodeMirror prevented flex shrinking. Fix: reduced min-height to 100px, added min-height:0 to flex chain, flex-shrink:0 on actions bar. |
 | TASK-232 | Bug Fix | UIUX Feedback: Move connection status to right, change color to pink (Feedback-20260209-170405) | Cipher | 02-09-2026 17:06:00 | [mockup.html](../ideas/001.%20Feature-Console%20Voice%20Input%20-%2001242026%20000728/mockup.html) | Moved .connection-status from header-left to header-right. Changed green→pink. Updated legend. |
@@ -129,7 +131,7 @@
 - **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 274
+- **Completed (archived):** 275
 - **Pending Review:** 0
 - **Blocked:** 0
 

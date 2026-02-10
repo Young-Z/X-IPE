@@ -50,8 +50,8 @@ class WorkplaceManager {
             const response = await fetch('/api/config/copilot-prompt');
             if (response.ok) {
                 const data = await response.json();
-                // TASK-196: Config structure is data.ideation.prompts, not data.prompts
-                this.copilotPrompts = data.ideation?.prompts || [];
+                // Support both v1.0 (data.prompts) and v2.0 (data.ideation.prompts) config formats
+                this.copilotPrompts = data.ideation?.prompts || data.prompts || [];
             }
         } catch (error) {
             console.warn('Failed to load copilot prompts:', error);

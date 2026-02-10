@@ -22,6 +22,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 BLOCKING: Learn `infographic-syntax-creator` skill for visual infographics in the idea summary.
 
+CRITICAL: Only use tools that are explicitly enabled (`true`) in `x-ipe-docs/config/tools.json` under `stages.ideation`. If a tool is set to `false` or is absent from the config, do NOT use it -- even if the skill/capability is available. The tools.json config is the single source of truth for which tools are allowed.
+
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
 ---
@@ -137,12 +139,20 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
   <step_3>
     <name>Initialize Tools</name>
     <action>
-      1. For each enabled tool in config, check availability:
-         IF antv-infographic enabled: verify infographic-syntax-creator skill available
-         IF mermaid enabled: verify mermaid capability available
-         IF frontend-design enabled: verify frontend-design skill available
-      2. Log status (available/unavailable) for each tool
+      1. For each tool key in stages.ideation section of config:
+         IF tool value is true: check availability of corresponding skill/capability
+         IF tool value is false or absent: mark as DISABLED -- do NOT use under any circumstances
+      2. Specifically check:
+         IF antv-infographic enabled (true): verify infographic-syntax-creator skill available
+         IF mermaid enabled (true): verify mermaid capability available
+         IF frontend-design enabled (true): verify frontend-design skill available
+         IF x-ipe-tool-architecture-dsl enabled (true): verify architecture DSL skill available
+      3. Log status (enabled+available / enabled+unavailable / disabled) for each tool
     </action>
+    <constraints>
+      - CRITICAL: Tools set to false or absent in config MUST NOT be used, even if the capability exists
+      - Only tools with enabled=true AND available=true may be invoked
+    </constraints>
     <output>tools_status</output>
   </step_3>
 
@@ -173,7 +183,7 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
     <constraints>
       - BLOCKING: Continue until idea is well-defined
       - CRITICAL: Batch questions (3-5), do not overwhelm
-      - MANDATORY: Use enabled tools for visualization
+      - MANDATORY: Only invoke tools that are enabled (true) in tools.json config -- never invoke a disabled tool
     </constraints>
     <output>brainstorming_notes, artifacts[]</output>
   </step_5>
@@ -202,7 +212,7 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
       5. Link to artifacts created during brainstorming
     </action>
     <constraints>
-      - CRITICAL: Use visualization tools based on config
+      - CRITICAL: Only use visualization tools that are enabled (true) in tools.json -- if a tool is disabled or absent, fall back to standard markdown
       - MANDATORY: Include all sections from template
     </constraints>
     <output>idea_draft</output>
