@@ -558,6 +558,22 @@ def _read_existing_cli(project_root: Path) -> Optional[str]:
         return None
 
 
+def _kill_port(port: int) -> None:
+    """Kill any process listening on the given port."""
+    import subprocess
+    try:
+        result = subprocess.run(
+            ["lsof", "-ti", f":{port}"],
+            capture_output=True, text=True, timeout=5
+        )
+        pids = result.stdout.strip().split('\n')
+        for pid in pids:
+            if pid.strip():
+                subprocess.run(["kill", "-9", pid.strip()], timeout=5)
+    except Exception:
+        pass
+
+
 @cli.command()
 @click.option(
     "--host", "-h",
@@ -619,13 +635,25 @@ def serve(ctx: click.Context, host: Optional[str], port: Optional[int],
     try:
         # Set environment for the app
         import os
+        import signal
         os.environ["X_IPE_PROJECT_ROOT"] = str(project_root)
         os.environ["FLASK_DEBUG"] = "1" if final_debug else "0"
+        
+        # Kill any stale process on the port
+        _kill_port(final_port)
         
         # Import the Flask app
         from x_ipe.app import create_app, socketio
         
         app = create_app()
+        
+        # Ensure clean shutdown on signals
+        def _shutdown(signum, frame):
+            click.echo("\n✓ Server stopped.")
+            raise SystemExit(0)
+        
+        signal.signal(signal.SIGINT, _shutdown)
+        signal.signal(signal.SIGTERM, _shutdown)
         
         # Run with socketio for WebSocket support
         socketio.run(
@@ -635,8 +663,8 @@ def serve(ctx: click.Context, host: Optional[str], port: Optional[int],
             debug=final_debug,
             use_reloader=final_debug,
         )
-    except KeyboardInterrupt:
-        click.echo("\n✓ Server stopped.")
+    except (KeyboardInterrupt, SystemExit):
+        pass
     except ImportError as e:
         click.echo(f"\nError: Could not import app: {e}")
         click.echo("Make sure you're running from the X-IPE project root.")
