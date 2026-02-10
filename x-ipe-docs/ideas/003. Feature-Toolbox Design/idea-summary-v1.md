@@ -22,7 +22,7 @@ The current toolbox is limited to ideation stage only and uses a dropdown/inline
 ├─────────────────────────────────────────┤
 │  ▼ Ideation Stage                       │
 │    ├─ Ideation                          │
-│    │   ☐ antv-infographic               │
+│    │   ☐ x-ipe-tool-infographic-syntax               │
 │    │   ☐ mermaid                        │
 │    ├─ Mockup                            │
 │    │   ☑ frontend-design                │
@@ -54,7 +54,7 @@ The current toolbox is limited to ideation stage only and uses a dropdown/inline
   "stages": {
     "ideation": {
       "ideation": {
-        "antv-infographic": false,
+        "x-ipe-tool-infographic-syntax": false,
         "mermaid": false
       },
       "mockup": {

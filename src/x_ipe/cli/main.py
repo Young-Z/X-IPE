@@ -268,9 +268,11 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp
                 servers_to_merge.append(name)
         
         if servers_to_merge:
+            mcp_format = 'global'
             try:
                 adapter = CLIAdapterService().get_adapter(selected_cli)
                 target_path = deployer.resolve_target_path(adapter)
+                mcp_format = adapter.mcp_config_format
             except Exception:
                 target_path = Path.home() / ".copilot" / "mcp-config.json"
             
@@ -284,7 +286,8 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp
             scaffold.merge_mcp_config(
                 servers_to_merge=servers_to_merge,
                 target_path=target_path,
-                source_servers=mcp_servers
+                source_servers=mcp_servers,
+                mcp_format=mcp_format
             )
             click.echo(f"\n✓ Merged {len(servers_to_merge)} MCP server(s) to {target_path}")
     

@@ -31,7 +31,7 @@ class IdeasService:
     DEFAULT_TOOLBOX = {
         "version": "1.0",
         "ideation": {
-            "antv-infographic": False,
+            "x-ipe-tool-infographic-syntax": False,
             "mermaid": True
         },
         "mockup": {

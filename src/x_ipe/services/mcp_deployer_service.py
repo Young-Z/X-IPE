@@ -85,6 +85,9 @@ class MCPDeployerService:
             )
 
         # Load existing target config
+        use_nested = (adapter.mcp_config_format == 'nested')
+        config_key = "mcp" if use_nested else "mcpServers"
+        
         target_config = {}
         if target_path.exists():
             try:
@@ -92,17 +95,36 @@ class MCPDeployerService:
             except (json.JSONDecodeError, IOError):
                 target_config = {}
 
-        if "mcpServers" not in target_config:
-            target_config["mcpServers"] = {}
+        if config_key not in target_config:
+            target_config[config_key] = {}
+        if use_nested and "$schema" not in target_config:
+            target_config["$schema"] = "https://opencode.ai/config.json"
+
+        # Transform server configs for nested (opencode) format
+        if use_nested:
+            transformed = {}
+            for name, cfg in source_servers.items():
+                entry = {
+                    "type": cfg.get("type", "local"),
+                    "enabled": True,
+                }
+                cmd = cfg.get("command", "")
+                args = cfg.get("args", [])
+                if cmd or args:
+                    entry["command"] = [cmd] + args if args else [cmd]
+                if cfg.get("env"):
+                    entry["environment"] = cfg["env"]
+                transformed[name] = entry
+            source_servers = transformed
 
         # Merge
         merged_count = 0
         skipped_count = 0
         for name, config in source_servers.items():
-            if name in target_config["mcpServers"] and not force:
+            if name in target_config[config_key] and not force:
                 skipped_count += 1
             else:
-                target_config["mcpServers"][name] = config
+                target_config[config_key][name] = config
                 merged_count += 1
 
         result = MCPDeployResult(

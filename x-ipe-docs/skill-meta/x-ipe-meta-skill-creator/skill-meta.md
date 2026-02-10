@@ -1,18 +1,18 @@
 ```yaml
 # ═══════════════════════════════════════════════════════════
-# SKILL META - x-ipe-meta-skill-creator-v3
+# SKILL META - x-ipe-meta-skill-creator
 # ═══════════════════════════════════════════════════════════
 
 # ─────────────────────────────────────────────────────────────
 # IDENTITY
 # ─────────────────────────────────────────────────────────────
-skill_name: x-ipe-meta-skill-creator-v3
+skill_name: x-ipe-meta-skill-creator
 skill_type: x-ipe-meta
 version: "1.0.0"
 status: candidate
 created: 2026-02-05
 updated: 2026-02-06
-implementation_path: .github/skills/x-ipe-skill-creator-v3/
+implementation_path: .github/skills/x-ipe-meta-skill-creator/
 
 # ─────────────────────────────────────────────────────────────
 # PURPOSE
@@ -234,7 +234,7 @@ dependencies:
   # TEMPLATE MAPPING
   # ═══════════════════════════════════════════════════════════
   # CRITICAL: Use these templates instead of creating from scratch
-  # Location: x-ipe-docs/skill-meta/x-ipe-skill-creator-v3/candidate/templates/
+  # Location: x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/candidate/templates/
   # ═══════════════════════════════════════════════════════════
   
   skill_templates:

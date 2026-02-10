@@ -25,11 +25,11 @@
 
 ## Key Features
 
-{IF antv-infographic enabled → use infographic DSL}
+{IF x-ipe-tool-infographic-syntax enabled → use infographic DSL}
 {IF mermaid enabled → use mermaid for flow}
 {IF both disabled → use bullet list}
 
-<!-- Example if antv-infographic: true -->
+<!-- Example if x-ipe-tool-infographic-syntax: true -->
 ```infographic
 infographic list-grid-badge-card
 data

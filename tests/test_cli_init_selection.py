@@ -384,7 +384,7 @@ class TestMCPPathResolution:
             # If MCP merge happened, target should be opencode.json not ~/.copilot/...
             if (temp_project / "opencode.json").exists():
                 config = json.loads((temp_project / "opencode.json").read_text())
-                assert "mcpServers" in config
+                assert "mcp" in config
 
 
 # ============================================================================
@@ -590,8 +590,8 @@ class TestCLISpecificMCPConfig:
             adapter.name = 'opencode'
             adapter.skills_folder = '.opencode/skills/'
             adapter.instructions_file = '.opencode/instructions.md'
-            adapter.mcp_config_path = '.opencode.json'
-            adapter.mcp_config_format = 'project'
+            adapter.mcp_config_path = 'opencode.json'
+            adapter.mcp_config_format = 'nested'
             instance.list_adapters.return_value = [adapter]
             instance.get_adapter.return_value = adapter
             instance.is_installed.return_value = True
@@ -640,7 +640,7 @@ class TestMergeMCPWithSourceServers:
 
         scaffold = ScaffoldManager(temp_project)
         servers = {"test-server": {"command": "node", "args": ["server.js"]}}
-        target = temp_project / ".opencode.json"
+        target = temp_project / "opencode.json"
 
         scaffold.merge_mcp_config(
             servers_to_merge=["test-server"],
@@ -674,7 +674,7 @@ class TestMergeMCPWithSourceServers:
             "keep-this": {"command": "a"},
             "skip-this": {"command": "b"},
         }
-        target = temp_project / ".opencode.json"
+        target = temp_project / "opencode.json"
 
         scaffold.merge_mcp_config(
             servers_to_merge=["keep-this"],
@@ -692,7 +692,7 @@ class TestMergeMCPWithSourceServers:
 
         scaffold = ScaffoldManager(temp_project, dry_run=True)
         servers = {"test-server": {"command": "test"}}
-        target = temp_project / ".opencode.json"
+        target = temp_project / "opencode.json"
 
         scaffold.merge_mcp_config(
             servers_to_merge=["test-server"],
@@ -708,7 +708,7 @@ class TestMergeMCPWithSourceServers:
         import json
         from x_ipe.core.scaffold import ScaffoldManager
 
-        target = temp_project / ".opencode.json"
+        target = temp_project / "opencode.json"
         existing = {"mcpServers": {"existing": {"command": "old"}}}
         target.write_text(json.dumps(existing))
 

@@ -15,7 +15,7 @@ This reference document contains detailed tool configuration, mapping, and usage
   "stages": {
     "ideation": {
       "ideation": {
-        "antv-infographic": false,
+        "x-ipe-tool-infographic-syntax": false,
         "mermaid": true,
         "x-ipe-tool-architecture-dsl": false,
         "_extra_instruction": "Optional extra instructions"
@@ -36,7 +36,7 @@ This reference document contains detailed tool configuration, mapping, and usage
 
 | Config Key | Skill/Capability | How to Invoke |
 |------------|------------------|---------------|
-| `stages.ideation.ideation.antv-infographic` | `x-ipe-tool-infographic-syntax` skill | Call skill to generate infographic DSL syntax |
+| `stages.ideation.ideation.x-ipe-tool-infographic-syntax` | `x-ipe-tool-infographic-syntax` skill | Call skill to generate infographic DSL syntax |
 | `stages.ideation.ideation.mermaid` | Mermaid code blocks | Generate mermaid diagrams directly in markdown |
 | `stages.ideation.ideation.x-ipe-tool-architecture-dsl` | `x-ipe-tool-architecture-dsl` skill | Generate Architecture DSL directly in markdown |
 | `stages.ideation.mockup.frontend-design` | `frontend-design` skill | Call skill to create HTML/CSS mockups |
@@ -49,7 +49,7 @@ This reference document contains detailed tool configuration, mapping, and usage
 ```yaml
 invocation_rules:
   antv_infographic:
-    config_key: "stages.ideation.ideation.antv-infographic"
+    config_key: "stages.ideation.ideation.x-ipe-tool-infographic-syntax"
     when_true: "Load and invoke x-ipe-tool-infographic-syntax skill"
     use_for: "Visual summaries, feature lists, roadmaps, comparisons"
     output: "Infographic DSL code blocks"
@@ -83,7 +83,7 @@ When tools are enabled, invoke corresponding skills during brainstorming:
 |----------------|--------------|-------------|
 | UI layout | `mockup.frontend-design == true` | Invoke frontend-design, create mockup |
 | User flow | `ideation.mermaid == true` | Generate mermaid flowchart |
-| Feature list | `ideation.antv-infographic == true` | Use infographic DSL |
+| Feature list | `ideation.x-ipe-tool-infographic-syntax == true` | Use infographic DSL |
 | System layers | `ideation.x-ipe-tool-architecture-dsl == true` | Generate architecture DSL |
 
 ---
@@ -93,7 +93,7 @@ When tools are enabled, invoke corresponding skills during brainstorming:
 ```yaml
 visualization_rules:
   priority_order:
-    1: "Check antv-infographic for features/roadmaps"
+    1: "Check x-ipe-tool-infographic-syntax for features/roadmaps"
     2: "Check mermaid for flowcharts/sequences"
     3: "Check x-ipe-tool-architecture-dsl for architecture"
     4: "Fall back to standard markdown"

@@ -62,7 +62,7 @@ def opencode_adapter():
         prompt_format='{command} {inline_prompt_flag} "{escaped_prompt}"',
         instructions_file=".opencode/instructions.md",
         skills_folder=".opencode/skills/",
-        mcp_config_path=".opencode.json",
+        mcp_config_path="opencode.json",
         mcp_config_format="nested",
         detection_command="opencode",
     )
@@ -125,7 +125,7 @@ class TestPathResolution:
     def test_ac_1_4_project_path_resolves_to_project_root(self, project_root, opencode_adapter):
         service = MCPDeployerService(project_root)
         path = service.resolve_target_path(opencode_adapter)
-        assert path == project_root / ".opencode.json"
+        assert path == project_root / "opencode.json"
 
     def test_ac_1_4_claude_project_path(self, project_root, claude_adapter):
         service = MCPDeployerService(project_root)
@@ -139,11 +139,15 @@ class TestMCPConfigMerge:
     def test_ac_3_1_merges_servers_into_target(self, project_root, opencode_adapter):
         service = MCPDeployerService(project_root)
         result = service.deploy(opencode_adapter)
-        target = project_root / ".opencode.json"
+        target = project_root / "opencode.json"
         assert target.exists()
         config = json.loads(target.read_text())
-        assert "chrome-devtools" in config["mcpServers"]
-        assert "github-mcp" in config["mcpServers"]
+        assert config["$schema"] == "https://opencode.ai/config.json"
+        assert "chrome-devtools" in config["mcp"]
+        assert "github-mcp" in config["mcp"]
+        # Verify opencode format: command is array, has enabled flag
+        assert config["mcp"]["chrome-devtools"]["enabled"] is True
+        assert isinstance(config["mcp"]["chrome-devtools"]["command"], list)
 
     def test_ac_3_2_creates_file_and_dirs(self, project_root, claude_adapter):
         service = MCPDeployerService(project_root)
@@ -152,53 +156,53 @@ class TestMCPConfigMerge:
         assert target.exists()
 
     def test_ac_3_3_preserves_non_xipe_entries(self, project_root, opencode_adapter):
-        target = project_root / ".opencode.json"
+        target = project_root / "opencode.json"
         existing = {
-            "mcpServers": {"my-custom-server": {"command": "custom"}},
+            "mcp": {"my-custom-server": {"command": ["custom"], "type": "local", "enabled": True}},
             "otherKey": "preserved"
         }
         target.write_text(json.dumps(existing))
         service = MCPDeployerService(project_root)
         result = service.deploy(opencode_adapter)
         config = json.loads(target.read_text())
-        assert "my-custom-server" in config["mcpServers"]
-        assert "chrome-devtools" in config["mcpServers"]
+        assert "my-custom-server" in config["mcp"]
+        assert "chrome-devtools" in config["mcp"]
         assert config["otherKey"] == "preserved"
 
     def test_ac_3_4_malformed_target_creates_fresh(self, project_root, opencode_adapter):
-        target = project_root / ".opencode.json"
+        target = project_root / "opencode.json"
         target.write_text("broken json{{{")
         service = MCPDeployerService(project_root)
         result = service.deploy(opencode_adapter)
         config = json.loads(target.read_text())
-        assert "chrome-devtools" in config["mcpServers"]
+        assert "chrome-devtools" in config["mcp"]
 
     def test_ac_3_5_selective_merge(self, project_root, opencode_adapter):
         service = MCPDeployerService(project_root)
         result = service.deploy(opencode_adapter, servers_to_merge=["chrome-devtools"])
-        config = json.loads((project_root / ".opencode.json").read_text())
-        assert "chrome-devtools" in config["mcpServers"]
-        assert "github-mcp" not in config["mcpServers"]
+        config = json.loads((project_root / "opencode.json").read_text())
+        assert "chrome-devtools" in config["mcp"]
+        assert "github-mcp" not in config["mcp"]
 
     def test_ac_3_6_skip_existing_without_force(self, project_root, opencode_adapter):
-        target = project_root / ".opencode.json"
-        existing = {"mcpServers": {"chrome-devtools": {"command": "old"}}}
+        target = project_root / "opencode.json"
+        existing = {"mcp": {"chrome-devtools": {"command": ["old"], "type": "local", "enabled": True}}}
         target.write_text(json.dumps(existing))
         service = MCPDeployerService(project_root)
         result = service.deploy(opencode_adapter, force=False)
         config = json.loads(target.read_text())
-        # Existing entry preserved
-        assert config["mcpServers"]["chrome-devtools"]["command"] == "old"
+        assert config["mcp"]["chrome-devtools"]["command"] == ["old"]
         assert result.skipped_count >= 1
 
     def test_ac_3_6_overwrite_existing_with_force(self, project_root, opencode_adapter):
-        target = project_root / ".opencode.json"
-        existing = {"mcpServers": {"chrome-devtools": {"command": "old"}}}
+        target = project_root / "opencode.json"
+        existing = {"mcp": {"chrome-devtools": {"command": ["old"], "type": "local", "enabled": True}}}
         target.write_text(json.dumps(existing))
         service = MCPDeployerService(project_root)
         result = service.deploy(opencode_adapter, force=True)
         config = json.loads(target.read_text())
-        assert config["mcpServers"]["chrome-devtools"]["command"] == "npx"
+        assert isinstance(config["mcp"]["chrome-devtools"]["command"], list)
+        assert config["mcp"]["chrome-devtools"]["command"][0] == "npx"
         assert result.merged_count >= 1
 
 
@@ -217,15 +221,15 @@ class TestCLISpecificConfig:
         assert "mcpServers" in config
 
     def test_ac_4_2_opencode_preserves_other_keys(self, project_root, opencode_adapter):
-        target = project_root / ".opencode.json"
-        existing = {"theme": "dark", "editor": "vim", "mcpServers": {}}
+        target = project_root / "opencode.json"
+        existing = {"theme": "dark", "editor": "vim", "mcp": {}}
         target.write_text(json.dumps(existing))
         service = MCPDeployerService(project_root)
         result = service.deploy(opencode_adapter)
         config = json.loads(target.read_text())
         assert config["theme"] == "dark"
         assert config["editor"] == "vim"
-        assert "chrome-devtools" in config["mcpServers"]
+        assert "chrome-devtools" in config["mcp"]
 
     def test_ac_4_3_claude_code_format(self, project_root, claude_adapter):
         service = MCPDeployerService(project_root)
@@ -241,7 +245,7 @@ class TestDryRun:
     def test_ac_5_1_no_files_written(self, project_root, opencode_adapter):
         service = MCPDeployerService(project_root)
         result = service.deploy(opencode_adapter, dry_run=True)
-        target = project_root / ".opencode.json"
+        target = project_root / "opencode.json"
         assert not target.exists()
 
     def test_ac_5_2_returns_what_would_change(self, project_root, opencode_adapter):

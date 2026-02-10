@@ -20,9 +20,7 @@ Learn and refine user ideas through collaborative brainstorming by:
 
 BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
 
-BLOCKING: Learn `x-ipe-tool-infographic-syntax` skill for visual infographics in the idea summary.
-
-CRITICAL: Only use tools that are explicitly enabled (`true`) in `x-ipe-docs/config/tools.json` under `stages.ideation`. If a tool is set to `false` or is absent from the config, do NOT use it -- even if the skill/capability is available. The tools.json config is the single source of truth for which tools are allowed.
+CRITICAL: Only use tools that are explicitly enabled (`true`) in `x-ipe-docs/config/tools.json` under `stages.ideation`. Only `true` counts as enabled -- `false`, absent, or any other value means DISABLED. The tools.json config is the single source of truth for which tools are allowed.
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
@@ -87,21 +85,20 @@ loading_logic:
 
 | Step | Name | Action | Gate |
 |------|------|--------|------|
-| 1 | Load Toolbox | Read tools.json config | config loaded |
+| 1 | Load Toolbox | Read tools.json config, output enabled tool list | config loaded |
 | 2 | Analyze Files | Read all files in idea folder | files analyzed |
-| 3 | Initialize Tools | Set up enabled tools from config | tools ready |
-| 4 | Generate Summary | Create understanding summary | summary shared |
-| 5 | Brainstorm | Ask clarifying questions (3-5 at a time) | idea refined |
-| 6 | Research | Search for common principles | research complete |
-| 7 | Generate Draft | Create idea draft using enabled tools | draft created |
-| 8 | Critique | Sub-agent provides constructive feedback | feedback received |
-| 9 | Improve Summary | Incorporate feedback, deliver final | summary finalized |
-| 10 | Rename Folder | Rename if "Draft Idea - xxx" | folder renamed |
-| 11 | Complete | Request human review | human approves |
+| 3 | Generate Summary | Create understanding summary | summary shared |
+| 4 | Brainstorm | Ask clarifying questions (3-5 at a time) | idea refined |
+| 5 | Research | Search for common principles | research complete |
+| 6 | Generate Draft | Create idea draft, prefer enabled tools from step 1 | draft created |
+| 7 | Critique | Sub-agent provides constructive feedback | feedback received |
+| 8 | Improve Summary | Incorporate feedback, prefer enabled tools from step 1 | summary finalized |
+| 9 | Rename Folder | Rename if "Draft Idea - xxx" | folder renamed |
+| 10 | Complete | Request human review | human approves |
 
-BLOCKING: Step 5 - Continue brainstorming until idea is well-defined.
+BLOCKING: Step 4 - Continue brainstorming until idea is well-defined.
 
-BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
+BLOCKING: Step 10 - Human MUST approve idea summary before proceeding.
 
 ---
 
@@ -114,12 +111,17 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
     <name>Load Ideation Toolbox Meta</name>
     <action>
       1. Check if x-ipe-docs/config/tools.json exists
-      2. If exists: parse JSON, extract enabled tools from stages.ideation
+      2. If exists: parse JSON, extract tools from stages.ideation
       3. If NOT exists: create default config with all tools disabled
       4. Load Extra Instructions (human → config → N/A)
-      5. Log active tool configuration
+      5. Build and output the enabled tool list -- only tools with value `true` count as enabled; `false`, absent, or any other value means DISABLED
+      6. Output format:
+         ```
+         Enabled tools: [list of enabled tool names]
+         Disabled tools: [list of disabled tool names]
+         ```
     </action>
-    <output>tool_config, extra_instructions</output>
+    <output>tool_config, enabled_tool_list, extra_instructions</output>
   </step_1>
 
   <step_2>
@@ -137,58 +139,35 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
   </step_2>
 
   <step_3>
-    <name>Initialize Tools</name>
-    <action>
-      1. For each tool key in stages.ideation section of config:
-         IF tool value is true: check availability of corresponding skill/capability
-         IF tool value is false or absent: mark as DISABLED -- do NOT use under any circumstances
-      2. Specifically check:
-         IF antv-infographic enabled (true): verify x-ipe-tool-infographic-syntax skill available
-         IF mermaid enabled (true): verify mermaid capability available
-         IF frontend-design enabled (true): verify frontend-design skill available
-         IF x-ipe-tool-architecture-dsl enabled (true): verify architecture DSL skill available
-      3. Log status (enabled+available / enabled+unavailable / disabled) for each tool
-    </action>
-    <constraints>
-      - CRITICAL: Tools set to false or absent in config MUST NOT be used, even if the capability exists
-      - Only tools with enabled=true AND available=true may be invoked
-    </constraints>
-    <output>tools_status</output>
-  </step_3>
-
-  <step_4>
     <name>Generate Understanding Summary</name>
     <action>
       1. Create summary of what you understand
       2. Include: Core Concept, Key Goals, Identified Components
       3. List Questions and Ambiguities
-      4. List enabled tools from config
+      4. List enabled tools from step 1
       5. Share summary with user for validation
     </action>
     <output>understanding_summary</output>
-  </step_4>
+  </step_3>
 
-  <step_5>
+  <step_4>
     <name>Brainstorming Session</name>
     <action>
       1. Ask questions in batches (3-5 at a time)
       2. Wait for human response before proceeding
       3. Build on previous answers
       4. Challenge assumptions constructively
-      5. Invoke enabled tools when user describes visuals/flows:
-         IF user describes UI layout AND frontend-design enabled: invoke frontend-design skill, create mockup
-         IF user describes flow AND mermaid enabled: generate mermaid diagram
-         IF user describes architecture AND x-ipe-tool-architecture-dsl enabled: invoke skill
+      5. When the user describes something visual (UI layouts, flows, system structure), proactively generate visual artifacts to enrich the brainstorming -- select the most appropriate enabled tool from step 1's tool list for the content type
     </action>
     <constraints>
       - BLOCKING: Continue until idea is well-defined
       - CRITICAL: Batch questions (3-5), do not overwhelm
-      - MANDATORY: Only invoke tools that are enabled (true) in tools.json config -- never invoke a disabled tool
+      - MANDATORY: Only use tools that appear in the enabled tool list from step 1
     </constraints>
     <output>brainstorming_notes, artifacts[]</output>
-  </step_5>
+  </step_4>
 
-  <step_6>
+  <step_5>
     <name>Research Common Principles</name>
     <action>
       1. Identify if topic is common/established (auth, API, UI/UX, security)
@@ -196,29 +175,27 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
          ELSE: skip this step
     </action>
     <output>common_principles[], references[]</output>
+  </step_5>
+
+  <step_6>
+    <name>Generate Idea Draft</name>
+    <action>
+      1. Synthesize outputs from steps 3, 4, 5 (summary, brainstorming, research)
+      2. Determine version number (auto-increment)
+      3. Create draft using template from templates/idea-summary.md
+      4. RECOMMENDED: Use enabled tools from step 1's tool list to create rich visual content (diagrams, infographics, architecture views) -- select the most appropriate tool for each content type
+      5. If no tools are enabled: use standard markdown (bullet lists, tables)
+      6. Link to artifacts created during brainstorming
+    </action>
+    <constraints>
+      - CRITICAL: Only use tools that appear in the enabled tool list from step 1 -- if a tool is not in the enabled list, do NOT use it
+      - MANDATORY: Include all sections from template
+      - RECOMMENDED: Prefer enabled tools over plain markdown for richer idea presentation
+    </constraints>
+    <output>idea_draft</output>
   </step_6>
 
   <step_7>
-    <name>Generate Idea Draft</name>
-    <action>
-      1. Synthesize outputs from steps 4, 5, 6 (summary, brainstorming, research)
-      2. Determine version number (auto-increment)
-      3. Create draft using template from templates/idea-summary.md
-      4. Apply enabled visualization tools:
-         IF antv-infographic enabled: use infographic DSL for features/roadmaps
-         IF mermaid enabled: use mermaid for flowcharts/sequences
-         IF x-ipe-tool-architecture-dsl enabled: use architecture DSL for system diagrams
-         IF all disabled: use standard markdown (bullet lists, tables)
-      5. Link to artifacts created during brainstorming
-    </action>
-    <constraints>
-      - CRITICAL: Only use visualization tools that are enabled (true) in tools.json -- if a tool is disabled or absent, fall back to standard markdown
-      - MANDATORY: Include all sections from template
-    </constraints>
-    <output>idea_draft</output>
-  </step_7>
-
-  <step_8>
     <name>Critique and Feedback</name>
     <action>
       1. Invoke sub-agent to review the idea draft
@@ -234,7 +211,7 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
         - Completeness: Are all key sections filled?
         - Consistency: Do sections align with each other?
         - Feasibility: Are goals realistic?
-        - Visualization: Are tools used effectively?
+        - Visualization: Are enabled tools used effectively?
       feedback_format:
         - Strengths: What works well
         - Improvements: Specific actionable suggestions
@@ -245,25 +222,27 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
       - MANDATORY: Include specific improvement suggestions
     </constraints>
     <output>critique_feedback</output>
-  </step_8>
+  </step_7>
 
-  <step_9>
+  <step_8>
     <name>Improve and Deliver Summary</name>
     <action>
-      1. Review critique feedback from step 8
+      1. Review critique feedback from step 7
       2. Address each improvement suggestion
       3. Resolve any questions raised
-      4. Finalize idea-summary-vN.md
-      5. Save to x-ipe-docs/ideas/{folder}/idea-summary-vN.md
+      4. RECOMMENDED: Use enabled tools from step 1's tool list to enhance or add visual content where feedback suggests improvements -- select the most appropriate tool for each content type
+      5. Finalize idea-summary-vN.md
+      6. Save to x-ipe-docs/ideas/{folder}/idea-summary-vN.md
     </action>
     <constraints>
       - MANDATORY: Create NEW versioned file, do not update existing
       - CRITICAL: All feedback items must be addressed
+      - CRITICAL: Only use tools that appear in the enabled tool list from step 1
     </constraints>
     <output>idea_summary_path</output>
-  </step_9>
+  </step_8>
 
-  <step_10>
+  <step_9>
     <name>Rename Folder</name>
     <action>
       1. Check if folder matches "Draft Idea - MMDDYYYY HHMMSS"
@@ -274,9 +253,9 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
          ELSE: skip rename
     </action>
     <output>folder_renamed, new_folder_name</output>
-  </step_10>
+  </step_9>
 
-  <step_11>
+  <step_10>
     <name>Complete and Request Review</name>
     <action>
       1. Present final idea summary to human
@@ -287,7 +266,7 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
       - BLOCKING: Human MUST approve before proceeding
     </constraints>
     <output>human_approval, next_task_choice</output>
-  </step_11>
+  </step_10>
 
 </procedure>
 ```
@@ -338,8 +317,8 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
 <definition_of_done>
   <checkpoint required="true">
     <name>Config Loaded</name>
-    <verification>x-ipe-docs/config/tools.json loaded and parsed</verification>
-    <step_output>tool_config, extra_instructions</step_output>
+    <verification>x-ipe-docs/config/tools.json loaded, enabled tool list output</verification>
+    <step_output>tool_config, enabled_tool_list, extra_instructions</step_output>
   </checkpoint>
   <checkpoint required="true">
     <name>Files Analyzed</name>
@@ -358,7 +337,7 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
   </checkpoint>
   <checkpoint required="true">
     <name>Draft Created</name>
-    <verification>Idea draft generated using enabled tools</verification>
+    <verification>Idea draft generated, enabled tools from step 1 used where appropriate</verification>
     <step_output>idea_draft</step_output>
   </checkpoint>
   <checkpoint required="true">
@@ -380,11 +359,6 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
     <name>Human Approved</name>
     <verification>Human has reviewed and approved idea summary</verification>
     <step_output>human_approval, next_task_choice</step_output>
-  </checkpoint>
-  <checkpoint required="recommended">
-    <name>Tools Initialized</name>
-    <verification>Enabled tools checked and status logged</verification>
-    <step_output>tools_status</step_output>
   </checkpoint>
   <checkpoint required="recommended">
     <name>Folder Renamed</name>
@@ -446,8 +420,8 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Too many questions at once | Overwhelms user | Batch 3-5 questions |
 | Accepting at face value | May miss issues | Challenge constructively |
 | Skipping to requirements | Idea not refined | Complete ideation first |
-| Ignoring tools.json | Misses capabilities | Always check config |
-| Using tools when disabled | Unexpected behavior | Respect config settings |
+| Ignoring tools.json | Uses wrong tools | Always check enabled tool list from step 1 |
+| Using disabled tools | Violates config | Only use tools in the enabled list |
 
 ---
 

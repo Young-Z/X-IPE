@@ -34,7 +34,7 @@ operates_on:
   - "Edge cases not covered by existing skills"
 
 does_not_handle:
-  - "Applying fixes to skills (handled by x-ipe-skill-creator-v3)"
+  - "Applying fixes to skills (handled by x-ipe-meta-skill-creator)"
   - "Automated detection of skill issues"
 ```
 

@@ -15,7 +15,7 @@
   "stages": {
     "ideation": {
       "ideation": {
-        "antv-infographic": true,
+        "x-ipe-tool-infographic-syntax": true,
         "mermaid": true
       },
       "mockup": {
@@ -34,7 +34,7 @@
 2. Load Toolbox Meta:
    - Read x-ipe-docs/config/tools.json
    - Enabled tools:
-     - stages.ideation.ideation.antv-infographic: true → will invoke x-ipe-tool-infographic-syntax
+     - stages.ideation.ideation.x-ipe-tool-infographic-syntax: true → will invoke x-ipe-tool-infographic-syntax
      - stages.ideation.ideation.mermaid: true → will use mermaid diagrams
      - stages.ideation.mockup.frontend-design: true → will invoke frontend-design skill
 
@@ -51,7 +51,7 @@
 
 5. Generate Summary:
    "I understand you want to build a mobile app for..."
-   "Enabled tools: antv-infographic, mermaid (visualization), frontend-design (mockups)"
+   "Enabled tools: x-ipe-tool-infographic-syntax, mermaid (visualization), frontend-design (mockups)"
    
 6. Brainstorming Questions (with Config-Driven Tool Usage):
    - "Your notes mention both iOS and Android - should v1 target both?"
@@ -73,7 +73,7 @@
 
 8. Create x-ipe-docs/ideas/mobile-app-idea/idea-summary-v1.md with:
    - Overview and problem statement (text)
-   - Key Features (config.stages.ideation.ideation.antv-infographic == true → use infographic: list-grid-badge-card)
+   - Key Features (config.stages.ideation.ideation.x-ipe-tool-infographic-syntax == true → use infographic: list-grid-badge-card)
    - User Flow (config.stages.ideation.ideation.mermaid == true → use mermaid flowchart)
    - Implementation Phases (infographic: sequence-roadmap-vertical-simple)
    - Platform Comparison (infographic: compare-binary-horizontal-badge-card-arrow)
@@ -94,7 +94,7 @@
   "stages": {
     "ideation": {
       "ideation": {
-        "antv-infographic": false,
+        "x-ipe-tool-infographic-syntax": false,
         "mermaid": false
       },
       "mockup": {
@@ -146,7 +146,7 @@
      "stages": {
        "ideation": {
          "ideation": {
-           "antv-infographic": false,
+           "x-ipe-tool-infographic-syntax": false,
            "mermaid": false
          },
          "mockup": {

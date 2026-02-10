@@ -112,6 +112,16 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 ---
 
+## Next Step Suggestions (OpenCode & Claude CLI)
+
+> **Note for CLI-based agents (OpenCode, Claude CLI):** When completing a task that is part of the X-IPE task workflow, your "next step" suggestion at the end of your response **MUST** be based on the `next_task_based_skill` field from the completed skill's Output Result YAML — not a generic suggestion. Read the skill's `task_completion_output` section to determine the recommended next action and present it to the user.
+>
+> For example, if the completed skill declares `next_task_based_skill: "Feature Acceptance Test"`, suggest: *"Next step: Run feature acceptance tests (x-ipe-task-based-feature-acceptance-test)"* rather than a generic "What would you like to do next?".
+>
+> If `next_task_based_skill` is empty or the task is standalone, you may suggest general next actions.
+
+---
+
 ## Human Interaction
 
 ### Approval Recognition
@@ -136,12 +146,12 @@ Always follow:
 ### Creating, Updating, or Validating X-IPE Skills
 
 **When:** Creating a new skill, updating an existing skill, or validating skill structure for any of the defined skill types (task-based, tool, workflow-orchestration, task-category, meta)
-**Then:** MANDATORY: Always use the `x-ipe-skill-creator-v3` skill
+**Then:** MANDATORY: Always use the `x-ipe-meta-skill-creator` skill
 
-CRITICAL: Any modification to a skill of a defined type (x-ipe-task-based, x-ipe-tool, x-ipe-workflow-orchestration, x-ipe-task-category, x-ipe-meta) MUST go through `x-ipe-skill-creator-v3`. Do NOT directly edit SKILL.md files without loading and following the skill creator process.
+CRITICAL: Any modification to a skill of a defined type (x-ipe-task-based, x-ipe-tool, x-ipe-workflow-orchestration, x-ipe-task-category, x-ipe-meta) MUST go through `x-ipe-meta-skill-creator`. Do NOT directly edit SKILL.md files without loading and following the skill creator process.
 
 ```
-1. Load skill: `x-ipe-skill-creator-v3`
+1. Load skill: `x-ipe-meta-skill-creator`
 2. Follow the skill creation process defined in the skill
 3. Use appropriate template based on skill type:
    - Task-Based → templates/x-ipe-task-based.md

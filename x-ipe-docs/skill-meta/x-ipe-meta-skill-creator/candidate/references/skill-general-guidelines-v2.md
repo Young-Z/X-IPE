@@ -247,7 +247,7 @@ skill_types:
     purpose: Skills used to create, validate, or manage other skills
     naming_convention: "x-ipe-meta-{name}"
     examples:
-      - x-ipe-meta-skill-creator-v3
+      - x-ipe-meta-skill-creator
 ```
 
 ## Skill Anatomy
@@ -312,8 +312,6 @@ See [2. reference-section-order.md](2.%20reference-section-order.md) for full se
 **Use for:** Procedures that must be executed in exact step order.
 
 CRITICAL: Only XML elements defined in the template below are allowed. Do NOT introduce custom XML tags or modify the structure.
-
-CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL actions for that step. Do NOT split actions into separate blocks (e.g., `<branch>`). Conditional logic (IF/THEN/ELSE) belongs inside the `<action>` block as inline conditions within the numbered action list.
 
 ### Template
 

@@ -276,7 +276,7 @@ def get_ideas_toolbox():
     
     Response:
         - version: string
-        - ideation: {antv-infographic: bool, mermaid: bool}
+        - ideation: {x-ipe-tool-infographic-syntax: bool, mermaid: bool}
         - mockup: {frontend-design: bool}
         - sharing: {}
     """
@@ -297,7 +297,7 @@ def save_ideas_toolbox():
     
     Request body:
         - version: string
-        - ideation: {antv-infographic: bool, mermaid: bool}
+        - ideation: {x-ipe-tool-infographic-syntax: bool, mermaid: bool}
         - mockup: {frontend-design: bool}
         - sharing: {}
     

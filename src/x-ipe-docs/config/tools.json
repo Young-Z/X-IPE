@@ -6,7 +6,7 @@
     },
     "ideation": {
       "ideation": {
-        "antv-infographic": false,
+        "x-ipe-tool-infographic-syntax": false,
         "mermaid": false
       },
       "mockup": {

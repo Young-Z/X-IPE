@@ -136,10 +136,10 @@ Always follow:
 ### Creating, Updating, or Validating X-IPE Skills
 
 **When:** Creating a new skill, updating an existing skill, or validating skill structure
-**Then:** Always use the `x-ipe-skill-creator-v3` skill
+**Then:** Always use the `x-ipe-meta-skill-creator` skill
 
 ```
-1. Load skill: `x-ipe-skill-creator-v3`
+1. Load skill: `x-ipe-meta-skill-creator`
 2. Follow the skill creation process defined in the skill
 3. Use appropriate template based on skill type:
    - Task-Based → templates/x-ipe-task-based.md

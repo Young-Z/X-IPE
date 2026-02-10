@@ -229,7 +229,8 @@ class ScaffoldManager:
         self,
         servers_to_merge: Optional[List[str]] = None,
         target_path: Optional[Path] = None,
-        source_servers: Optional[dict] = None
+        source_servers: Optional[dict] = None,
+        mcp_format: str = 'global'
     ) -> None:
         """Merge MCP servers into target config.
         
@@ -237,6 +238,7 @@ class ScaffoldManager:
             servers_to_merge: List of server names to merge. If None, merges all.
             target_path: Path to target mcp-config.json. Defaults to ~/.copilot/mcp-config.json.
             source_servers: Dict of server configs. If None, reads from .github/copilot/mcp-config.json.
+            mcp_format: Config format - 'global'/'project' use mcpServers, 'nested' uses mcp key.
         """
         project_servers = source_servers if source_servers is not None else self.get_project_mcp_servers()
         if not project_servers:
@@ -260,28 +262,53 @@ class ScaffoldManager:
             self.created.append(global_mcp)
             return
         
+        # Determine config key based on format
+        use_nested = (mcp_format == 'nested')
+        config_key = "mcp" if use_nested else "mcpServers"
+        
         # Load or create global config
-        global_config = {"mcpServers": {}}
+        global_config = {config_key: {}}
+        if use_nested and not global_mcp.exists():
+            global_config["$schema"] = "https://opencode.ai/config.json"
         if global_mcp.exists():
             try:
                 global_config = json.loads(global_mcp.read_text())
-                if "mcpServers" not in global_config:
-                    global_config["mcpServers"] = {}
+                if config_key not in global_config:
+                    global_config[config_key] = {}
             except (json.JSONDecodeError, IOError):
-                global_config = {"mcpServers": {}}
+                global_config = {config_key: {}}
+                if use_nested:
+                    global_config["$schema"] = "https://opencode.ai/config.json"
         
-        # Merge: add project servers to global
+        # Transform server configs for nested (opencode) format
+        if use_nested:
+            transformed = {}
+            for name, cfg in project_servers.items():
+                entry = {
+                    "type": cfg.get("type", "local"),
+                    "enabled": True,
+                }
+                cmd = cfg.get("command", "")
+                args = cfg.get("args", [])
+                if cmd or args:
+                    entry["command"] = [cmd] + args if args else [cmd]
+                if cfg.get("env"):
+                    entry["environment"] = cfg["env"]
+                transformed[name] = entry
+            project_servers = transformed
+        
+        # Merge: add project servers to config
         merged_count = 0
         skipped_count = 0
         for server_name, server_config in project_servers.items():
-            if server_name in global_config["mcpServers"]:
+            if server_name in global_config[config_key]:
                 if self.force:
-                    global_config["mcpServers"][server_name] = server_config
+                    global_config[config_key][server_name] = server_config
                     merged_count += 1
                 else:
                     skipped_count += 1
             else:
-                global_config["mcpServers"][server_name] = server_config
+                global_config[config_key][server_name] = server_config
                 merged_count += 1
         
         if merged_count > 0:

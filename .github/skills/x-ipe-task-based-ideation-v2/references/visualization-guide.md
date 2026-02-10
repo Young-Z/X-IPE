@@ -10,7 +10,7 @@ Check `x-ipe-docs/config/tools.json` before choosing visualization method:
 
 ```yaml
 decision_tree:
-  - check: "config.stages.ideation.ideation.antv-infographic"
+  - check: "config.stages.ideation.ideation.x-ipe-tool-infographic-syntax"
     if_true: "Use infographic DSL"
     use_for: "Feature lists, roadmaps, comparisons"
     
