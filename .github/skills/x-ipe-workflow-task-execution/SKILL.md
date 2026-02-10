@@ -14,7 +14,7 @@ Orchestrate a multi-skill workflow for development tasks by:
 3. **Execute** - Load and run task-based skills for core work
 4. **Close** - Update boards via category-based skill loading
 5. **Validate** - Confirm completion via Global DoD checks
-6. **Route** - Chain to next task if auto-advance enabled
+6. **Route** - Chain to next task if auto-proceed enabled
 
 ---
 

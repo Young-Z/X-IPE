@@ -52,6 +52,23 @@
 
 [High-level approach to implementing this CR]
 
+## Mockup Impact
+
+> Only applicable if CR involves UI/UX changes and existing mockups exist for the affected feature.
+
+**UI/UX Change:** Yes | No
+**Existing Mockups Referenced:**
+
+| Original Mockup | Path | Status After CR |
+|-----------------|------|-----------------|
+| [mockup name] | [mockups/mockup-v1.html] | superseded by v2 | current (unchanged) |
+
+**Updated Mockup(s):**
+
+| New Mockup | Path | Based On | Changes Applied |
+|------------|------|----------|-----------------|
+| [mockup name v2] | [mockups/mockup-v2.html] | mockup-v1.html | [summary of visual changes] |
+
 ## Approval
 
 - [ ] Classification approved by human
@@ -66,6 +83,8 @@
 - [ ] CR document created in feature folder
 - [ ] [If modification] Specification Version History updated with CR link
 - [ ] [If new feature] Requirement details updated
+- [ ] [If UI/UX CR] Existing mockups referenced, new mockup version created (if needed)
+- [ ] [If UI/UX CR] Specification Linked Mockups section updated
 - [ ] Next task type set: [x-ipe-task-based-feature-refinement | x-ipe-task-based-feature-breakdown]
 
 ## Links

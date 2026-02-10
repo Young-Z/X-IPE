@@ -13,12 +13,14 @@
 
 
 
+
 ---
 
 ## Completed Tasks
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-235 | Bug Fix | UIUX Feedback: Toolbox accordion expanded content gets hard cut off (Feedback-20260210-141741) | Onyx | 02-10-2026 06:22:00 | [stage-toolbox.css](../../src/x_ipe/static/css/features/stage-toolbox.css) | Root cause: .toolbox-accordion-content max-height:1000px too small for expanded content with overflow:hidden. Fix: increased max-height to 5000px so content is never clipped, modal body scrollbar handles overflow. |
 | TASK-233 | Bug Fix | UIUX Feedback: Submit Idea button goes out of viewport on small screens (Feedback-20260209-170854) | Pulse | 02-09-2026 17:10:00 | [workplace.css](../../src/x_ipe/static/css/workplace.css) | Root cause: min-height 250-300px on textarea/CodeMirror prevented flex shrinking. Fix: reduced min-height to 100px, added min-height:0 to flex chain, flex-shrink:0 on actions bar. |
 | TASK-232 | Bug Fix | UIUX Feedback: Move connection status to right, change color to pink (Feedback-20260209-170405) | Cipher | 02-09-2026 17:06:00 | [mockup.html](../ideas/001.%20Feature-Console%20Voice%20Input%20-%2001242026%20000728/mockup.html) | Moved .connection-status from header-left to header-right. Changed green→pink. Updated legend. |
 | TASK-229 | Code Implementation | Implement FEATURE-027-E CLI Migration & Upgrade (spec→design→tests→code) | Rune | 02-07-2026 15:40:00 | [specification.md](../requirements/FEATURE-027-E/specification.md), [technical-design.md](../requirements/FEATURE-027-E/technical-design.md), [test_cli_migration.py](../../tests/test_cli_migration.py) | 9/9 tests pass. --cli flag on upgrade, backup, config update, MCP redeploy. 0 regressions. |
@@ -127,7 +129,7 @@
 - **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 272
+- **Completed (archived):** 274
 - **Pending Review:** 0
 - **Blocked:** 0
 

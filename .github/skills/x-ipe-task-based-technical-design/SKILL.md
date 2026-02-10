@@ -160,9 +160,11 @@ BLOCKING: Step 6 requires human approval before proceeding to Test Generation.
       2. LOOK for existing libraries (don't reinvent the wheel)
       3. CHECK reference implementations
       4. REVIEW API documentation for planned libraries
-      5. DOCUMENT findings for design decisions
+      5. IF mockup_list provided AND scope includes [Frontend] or [Full Stack]:
+         OPEN and thoroughly analyze all mockup files. EXTRACT exact layout structure, component hierarchy, spacing, colors, and interaction patterns. DOCUMENT these as binding constraints for implementation. CRITICAL: The mockup is the source of truth for visual design — the technical design MUST faithfully translate mockup visuals into component specifications so that Code Implementation follows the mockup precisely.
+      6. DOCUMENT findings for design decisions
     </action>
-    <output>Research findings informing design decisions</output>
+    <output>Research findings informing design decisions (including mockup-derived UI constraints if applicable)</output>
   </step_4>
 
   <step_5>
@@ -171,13 +173,11 @@ BLOCKING: Step 6 requires human approval before proceeding to Test Generation.
       1. WRITE two-part technical design at x-ipe-docs/requirements/FEATURE-XXX/technical-design.md
       2. ADAPT structure based on implementation type (API, CLI, frontend, backend)
       3. USE templates from references/design-templates.md
-      4. INCLUDE Design Change Log section at end of document
+      4. IF mockup_list provided AND scope includes [Frontend] or [Full Stack]:
+         Open mockup files, extract UI component requirements, design frontend components based on mockup layout, reference mockup in Part 2
+         ELSE: Focus on service architecture, data models, APIs
+      5. INCLUDE Design Change Log section at end of document
     </action>
-    <branch>
-      IF: mockup_list provided AND scope includes [Frontend] or [Full Stack]
-      THEN: Open mockup files, extract UI component requirements, design frontend components based on mockup layout, reference mockup in Part 2
-      ELSE: Focus on service architecture, data models, APIs
-    </branch>
     <constraints>
       - MANDATORY: Part 1 must have component table with Tags for semantic search
       - MANDATORY: Part 1 must have usage example
@@ -309,6 +309,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 2. Document state management
 3. Include wireframes or mockup references
 4. Describe user interaction flows
+5. CRITICAL: Mockup is the source of truth for visual design - technical design must specify components, layout, and styling that faithfully reproduce the mockup so Code Implementation follows it precisely
 ```
 
 ### Anti-Patterns

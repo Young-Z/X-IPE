@@ -224,9 +224,14 @@ IF Mockup List != N/A AND Technical Scope in specification.md includes [Frontend
      - State management requirements
      - Event handlers and user interactions
      - CSS/styling approach
+     - Layout structure, spacing, colors, and visual details
   3. Design frontend components based on mockup
   4. Include mockup-derived requirements in Part 2 Implementation Guide
   5. Reference mockup filenames in design decisions
+  6. CRITICAL: Treat mockup as the source of truth for visual design.
+     The technical design MUST faithfully translate mockup visuals into
+     component specifications (layout, structure, styling) so that
+     Code Implementation reproduces the mockup precisely.
 
 ELSE IF Mockup List == N/A AND specification.md has "Linked Mockups" section:
   1. MUST review "Linked Mockups" section in specification.md

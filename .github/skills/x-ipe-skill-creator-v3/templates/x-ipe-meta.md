@@ -139,11 +139,7 @@ input:
       1. {Sub-action 1}
       2. {Sub-action 2}
     </action>
-    <branch>
-      IF: {condition}
-      THEN: {action if true}
-      ELSE: {action if false}
-    </branch>
+    <!-- Conditional logic goes inside <action> as inline IF/THEN/ELSE -->
     <output>{What this step produces}</output>
   </step_2>
 

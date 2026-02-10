@@ -256,10 +256,7 @@ BLOCKING: Human MUST approve feature list before refinement proceeds.
 
       See: references/breakdown-guidelines.md for index file structure.
     </action>
-    <branch>
-      IF: Parts do not exist
-      THEN: Skip this step
-    </branch>
+
     <output>Index updated (or skipped if no parts)</output>
   </step_7>
 

@@ -206,11 +206,7 @@ BLOCKING: Step 4 to 5 requires all references updated.
       8. PRESENT summary to human, WAIT for approval
       9. CREATE final commit
     </action>
-    <branch>
-      IF: No tracing infrastructure or only non-code files touched
-      THEN: Skip tracing sub-steps (5-7)
-      ELSE: Apply full tracing validation
-    </branch>
+
     <success_criteria>
       - All tests passing
       - Quality score improved

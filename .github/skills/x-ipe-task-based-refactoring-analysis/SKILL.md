@@ -118,11 +118,7 @@ CRITICAL: For detailed sub-steps, scoring formulas, and gap type definitions, se
       2. IF exists: READ report, EXTRACT baseline data (scores, violations, gaps)
       3. IF not exists: SET quality_baseline.exists = false
     </action>
-    <branch>
-      IF: quality evaluation file exists
-      THEN: Store as quality_baseline with evaluated_date, overall_score, code_violations, feature_gaps, test_coverage
-      ELSE: Log "No quality baseline found, will perform full analysis"
-    </branch>
+
     <output>quality_baseline (populated or empty)</output>
   </step_0>
 

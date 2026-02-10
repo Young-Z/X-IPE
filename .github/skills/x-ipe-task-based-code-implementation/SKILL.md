@@ -140,31 +140,28 @@ BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE impl
       2. UNDERSTAND Part 1 (Agent-Facing Summary) and Part 2 (Implementation Guide)
       3. NOTE references to architecture designs
       4. CHECK Design Change Log for updates
+      5. CHECK specification.md for Linked Mockups section:
+         a. IF mockups exist with status "current":
+            - READ each current mockup file from x-ipe-docs/requirements/FEATURE-XXX/mockups/
+            - Extract: layout structure, component placement, visual states, interactions, styling details
+            - These mockup details MUST guide frontend implementation in Step 5
+         b. IF mockups are marked "outdated" or absent: note and proceed
     </action>
     <constraints>
       - BLOCKING: Do NOT code until design is understood
       - If design is unclear -> STOP and clarify before proceeding
+      - CRITICAL: If implementation reveals design issues during later steps, STOP, UPDATE technical-design.md, add to Design Change Log, then RESUME
     </constraints>
-    <branch>
-      IF: Implementation reveals design issues during later steps
-      THEN: STOP, UPDATE technical-design.md, add to Design Change Log, RESUME
-      ELSE: Continue with current design
-    </branch>
-    <output>Complete understanding of implementation requirements</output>
+    <output>Complete understanding of implementation requirements, mockup references loaded (if applicable)</output>
   </step_2>
 
   <step_3>
     <name>Read Architecture Designs</name>
     <action>
       1. CHECK if technical design references architecture patterns
-      2. READ x-ipe-docs/architecture/technical-designs/{component}.md
-      3. UNDERSTAND common patterns, interfaces, integration requirements
+      2. IF no architecture references: skip this step
+         ELSE: READ x-ipe-docs/architecture/technical-designs/{component}.md and UNDERSTAND common patterns, interfaces, integration requirements
     </action>
-    <branch>
-      IF: No architecture references in technical design
-      THEN: Skip this step
-      ELSE: Read and follow referenced patterns
-    </branch>
     <output>Architecture patterns understood (or skipped)</output>
   </step_3>
 
@@ -189,11 +186,17 @@ BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE impl
       1. IMPLEMENT in order: Data models -> Business logic -> API endpoints -> Integration
       2. FOR EACH component: Write code -> Run tests -> Verify pass -> Refactor if needed
       3. Follow technical design exactly; no extra features
+      4. IF current mockups were loaded in Step 2 AND feature has frontend/UI components:
+         a. Use mockup as the visual source of truth for layout, component placement, and styling
+         b. Match HTML structure, CSS classes, and element hierarchy to the mockup
+         c. Implement all visual states shown in mockup (hover, active, disabled, empty, error)
+         d. Ensure spacing, colors, and typography follow mockup (and brand theme if specified in specification)
     </action>
     <constraints>
       - CRITICAL: Implement ONLY what is in technical design (YAGNI)
       - CRITICAL: Keep code simple (KISS)
       - CRITICAL: Do NOT modify existing tests; if test fails due to design gap, report to human
+      - CRITICAL: For UI/frontend code with current mockups, the mockup is the visual spec -- implementation MUST match it
       - Use web search for library APIs, error messages, best practices
     </constraints>
     <output>All feature tests passing</output>
@@ -213,6 +216,7 @@ BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE impl
       - No linter errors
       - Code matches technical design
       - No extra features added
+      - Frontend output matches current mockups (if applicable)
     </success_criteria>
     <output>All quality checks pass</output>
   </step_6>
@@ -220,16 +224,13 @@ BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE impl
   <step_7>
     <name>Apply Tracing Instrumentation</name>
     <action>
-      1. INVOKE x-ipe-tool-tracing-instrumentation skill for all modified files
-      2. REVIEW proposed decorators (INFO for public, DEBUG for helpers)
-      3. APPLY decorators with sensitive param redaction
-      4. RE-RUN tests to verify functionality
+      1. IF no tracing infrastructure (no x_ipe.tracing module) or only test/config files modified: skip this step
+      2. ELSE:
+         a. INVOKE x-ipe-tool-tracing-instrumentation skill for all modified files
+         b. REVIEW proposed decorators (INFO for public, DEBUG for helpers)
+         c. APPLY decorators with sensitive param redaction
+         d. RE-RUN tests to verify functionality
     </action>
-    <branch>
-      IF: No tracing infrastructure (no x_ipe.tracing module), or only test/config files
-      THEN: Skip this step
-      ELSE: Apply tracing decorators to all implementation files
-    </branch>
     <output>Tracing decorators applied; tests still pass</output>
   </step_7>
 
@@ -281,6 +282,10 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   <checkpoint required="true">
     <name>Implementation matches technical design</name>
     <verification>Compare implemented components against design document</verification>
+  </checkpoint>
+  <checkpoint required="if-applicable">
+    <name>Frontend matches current mockups</name>
+    <verification>If feature has current mockups in specification, UI layout/components/styling match the mockup</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>No extra features added (YAGNI)</name>
@@ -359,6 +364,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Add "nice to have" features | YAGNI violation | Only implement what is in design |
 | Complex code for coverage | Maintenance nightmare | Keep simple, accept 80% coverage |
 | Over-engineering | KISS violation | Simplest solution that works |
+| Ignore mockups for frontend | UI drifts from approved design | Use current mockups as visual spec |
 | Copy-paste code | DRY violation | Extract reusable functions |
 
 ---

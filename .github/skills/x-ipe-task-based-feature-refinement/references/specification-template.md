@@ -22,11 +22,12 @@
 
 ## Linked Mockups
 
-| Mockup | Type | Path | Description |
-|--------|------|------|-------------|
-| Dashboard Main | HTML | [mockups/dashboard-v1.html](mockups/dashboard-v1.html) | Main dashboard layout |
+| Mockup | Type | Path | Description | Status |
+|--------|------|------|-------------|--------|
+| Dashboard Main | HTML | [mockups/dashboard-v1.html](mockups/dashboard-v1.html) | Main dashboard layout | current |
 
-> **Note:** UI/UX requirements below are derived from these mockups.
+> **Note:** UI/UX requirements and acceptance criteria below are derived from mockups marked as "current".  
+> Mockups marked as "outdated" are directional references only -- do not use for AC comparison.
 
 ## Overview
 [2-3 paragraph description: what, why, who]

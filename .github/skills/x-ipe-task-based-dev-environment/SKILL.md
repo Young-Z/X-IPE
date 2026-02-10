@@ -102,21 +102,16 @@ BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
   <step_2>
     <name>Initialize Package Manager</name>
     <action>
-      1. Execute initialization for the selected stack
-      2. Create standard folder structure (src/, tests/)
-      3. Create entry-point files
+      1. IF tech_stack = "python":
+         a. Run: uv init
+         b. Run: uv venv
+         c. Create src/__init__.py and tests/__init__.py
+      2. ELSE (tech_stack = "nodejs"):
+         a. Ask user for npm or yarn preference (default: npm)
+         b. Run: npm init -y OR yarn init -y
+         c. Create src/index.js and tests/index.test.js
+      3. Verify standard folder structure exists (src/, tests/)
     </action>
-    <branch>
-      IF: tech_stack = "python"
-      THEN:
-        1. Run: uv init
-        2. Run: uv venv
-        3. Create src/__init__.py and tests/__init__.py
-      ELSE (tech_stack = "nodejs"):
-        1. Ask user for npm or yarn preference (default: npm)
-        2. Run: npm init -y OR yarn init -y
-        3. Create src/index.js and tests/index.test.js
-    </branch>
     <constraints>
       - BLOCKING: Must not proceed without confirmed tech stack
       - CRITICAL: Always create both src/ and tests/ directories

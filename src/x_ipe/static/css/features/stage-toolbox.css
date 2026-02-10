@@ -230,7 +230,7 @@
 }
 
 .toolbox-accordion.expanded .toolbox-accordion-content {
-    max-height: 1000px;
+    max-height: 5000px;
 }
 
 .toolbox-accordion-body {

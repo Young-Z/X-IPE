@@ -128,8 +128,12 @@ BLOCKING: Step 4 must complete before Step 5. Do NOT proceed without explicit hu
       3. FOR EACH potentially related feature:
          IF x-ipe-docs/requirements/FEATURE-XXX/specification.md exists:
            READ specification (functionality, user stories, acceptance criteria, out-of-scope)
+      4. IF CR involves UI/UX changes:
+         a. CHECK x-ipe-docs/requirements/FEATURE-XXX/mockups/ for existing mockup files
+         b. IF mockups exist: note them for reference in Step 5
+         c. CHECK specification.md Linked Mockups section for mockup status (current/outdated)
     </action>
-    <output>Related features list with relevance notes</output>
+    <output>Related features list with relevance notes, existing mockups identified (if UI/UX CR)</output>
   </step_2>
 
   <step_3>
@@ -168,30 +172,42 @@ BLOCKING: Step 4 must complete before Step 5. Do NOT proceed without explicit hu
 
   <step_5>
     <name>Execute Based on Classification</name>
-    <branch>
-      IF: classification = "modification"
-      THEN:
-        1. CREATE x-ipe-docs/requirements/FEATURE-XXX/CR-XXX.md using template (see templates/change-request.md)
-        2. UPDATE specification.md: add Version History entry with CR reference (see references/version-history-template.md)
-        3. Update affected sections, user stories, acceptance criteria
-        4. CHECK if requirement-details.md needs update:
-           IF cr_affects_high_level_requirements:
-             UPDATE requirement-details.md (High-Level Requirements, Clarifications, Constraints)
-             SET requirement_updated = true
-           ELSE:
-             SET requirement_updated = false
-        5. SET next_task_based_skill = x-ipe-task-based-feature-refinement
-
-      ELSE (classification = "new_feature"):
-        1. UPDATE x-ipe-docs/requirements/requirement-details.md
-           - Add new requirement to High-Level Requirements
-           - Document in Clarifications table
-           - Update Project Overview if scope changed
-        2. SET next_task_based_skill = x-ipe-task-based-feature-breakdown
-        3. NOTE: After feature breakdown creates FEATURE-XXX folder,
-           CREATE x-ipe-docs/requirements/FEATURE-XXX/CR-XXX.md to link CR to new feature
-    </branch>
-    <output>Updated documents, next_task_based_skill set</output>
+    <action>
+      1. IF classification = "modification":
+         a. CREATE x-ipe-docs/requirements/FEATURE-XXX/CR-XXX.md using template (see templates/change-request.md)
+         b. UPDATE specification.md: add Version History entry with CR reference (see references/version-history-template.md)
+         c. Update affected sections, user stories, acceptance criteria
+         d. CHECK if requirement-details.md needs update:
+            IF cr_affects_high_level_requirements:
+              UPDATE requirement-details.md (High-Level Requirements, Clarifications, Constraints)
+              SET requirement_updated = true
+            ELSE:
+              SET requirement_updated = false
+         e. IF CR involves UI/UX changes AND existing mockups found in Step 2:
+            - Reference existing mockup(s) in CR document (Mockup Impact section)
+            - IF CR changes are significant enough to warrant a new mockup:
+              i. Load tools.json to check if x-ipe-tool-frontend-design is enabled
+              ii. IF enabled: invoke design tool to create updated mockup
+                  - Use existing mockup as reference baseline
+                  - Apply CR changes to create new version
+                  - Save as {mockup-name}-v{N+1}.{ext} (DO NOT override the original)
+              iii. IF not enabled: describe mockup changes in CR document
+            - Update specification.md Linked Mockups section:
+              - Keep original mockup row (mark as "superseded by v{N+1}" if new version created)
+              - Add new mockup row with status "current"
+            - Update mockup-comparison ACs to reference the new mockup version
+         f. SET next_task_based_skill = x-ipe-task-based-feature-refinement
+      2. ELSE (classification = "new_feature"):
+         a. UPDATE x-ipe-docs/requirements/requirement-details.md:
+            Add new requirement to High-Level Requirements, document in Clarifications table, update Project Overview if scope changed
+         b. SET next_task_based_skill = x-ipe-task-based-feature-breakdown
+         c. NOTE: After feature breakdown creates FEATURE-XXX folder,
+            CREATE x-ipe-docs/requirements/FEATURE-XXX/CR-XXX.md to link CR to new feature
+    </action>
+    <constraints>
+      - CRITICAL: Never override or delete existing mockup files -- always create new versions
+    </constraints>
+    <output>Updated documents, next_task_based_skill set, updated mockups (if applicable)</output>
   </step_5>
 
   <step_6>
@@ -278,6 +294,8 @@ task_completion_output:
   affected_features: ["FEATURE-XXX"]    # For modifications
   new_feature_ids: ["FEATURE-XXX"]      # For new features
   requirement_updated: true | false
+  mockup_updated: true | false          # Whether a new mockup version was created
+  updated_mockup_paths: []              # Paths to new mockup versions (if applicable)
 ```
 
 ---
@@ -312,6 +330,10 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <name>Next task type set</name>
     <verification>next_task_based_skill = x-ipe-task-based-feature-refinement or x-ipe-task-based-feature-breakdown</verification>
   </checkpoint>
+  <checkpoint required="if-applicable">
+    <name>Mockups updated for UI/UX CR</name>
+    <verification>If CR involves UI/UX changes and existing mockups found: new mockup version created (not overriding original), specification Linked Mockups updated, CR document references mockup impact</verification>
+  </checkpoint>
 </definition_of_done>
 ```
 
@@ -344,6 +366,8 @@ See [references/patterns.md](references/patterns.md) for detailed patterns: Enha
 | Skip documentation | Lost traceability | Create CR document |
 | Modify multiple features at once | Hard to track | One CR = one classification |
 | No version history update | Lost change history | Update specification version |
+| Override existing mockup | Lost design history | Create new version (v{N+1}), keep original |
+| Ignore mockups on UI/UX CR | Stale mockups misguide dev | Reference and update mockups for UI/UX CRs |
 
 ---
 

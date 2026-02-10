@@ -172,13 +172,10 @@ input:
          - update_ac: existing AC is incomplete -> modify specific AC
          - update_instruction: skill procedure unclear -> target SKILL.md section
          - add_example: edge case not covered -> target references/examples.md
-      2. Draft the proposed change with target location
+      2. IF issue is a missing section or validation gap: propose new_ac with specific acceptance criteria
+         ELSE: propose update_instruction or add_example as appropriate
+      3. Draft the proposed change with target location
     </action>
-    <branch>
-      IF: Issue is a missing section or validation gap
-      THEN: Propose new_ac with specific acceptance criteria
-      ELSE: Propose update_instruction or add_example as appropriate
-    </branch>
     <output>Improvement proposal with type, target, and description</output>
   </step_5>
 

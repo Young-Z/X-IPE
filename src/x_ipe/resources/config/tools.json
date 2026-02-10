@@ -1,27 +1,74 @@
 {
-  "version": "2.0",
+  "feedback_retention_days": 7,
+  "selected-theme": {
+    "theme-folder-path": "x-ipe-docs/themes/theme-default",
+    "theme-name": "theme-default"
+  },
   "stages": {
-    "ideation": {
-      "ideation": {"_order": 1},
-      "mockup": {"_order": 2, "x-ipe-tool-frontend-design": true},
-      "architecture": {"_order": 3},
-      "sharing": {"_order": 4}
-    },
-    "requirement": {
-      "gathering": {"_order": 1},
-      "analysis": {"_order": 2}
-    },
     "feature": {
-      "design": {"_order": 1},
-      "implementation": {"_order": 2}
+      "design": {
+        "_order": 1
+      },
+      "implementation": {
+        "_order": 2
+      }
+    },
+    "ideation": {
+      "architecture": {
+        "_order": 3,
+        "excalidraw": false,
+        "mermaid": false,
+        "x-ipe-tool-architecture-dsl": true,
+        "x-ipe-tool-draw-layered-architecture": true,
+        "x-ipe-tool-draw-system-landscape": true
+      },
+      "ideation": {
+        "_extra_instruction": "- for mermaid tool: just use it in workflow, sequence diagram\n- for Architecture DSL tool: embed ```architecture-dsl code blocks directly in markdown (IPE renders natively). Use for layered architecture, module views, and system landscapes.",
+        "_order": 1,
+        "antv-infographic": false,
+        "mermaid": true,
+        "x-ipe-tool-architecture-dsl": true
+      },
+      "mockup": {
+        "_order": 2,
+        "x-ipe-tool-frontend-design": true
+      },
+      "sharing": {
+        "_order": 4
+      }
     },
     "quality": {
-      "testing": {"_order": 1},
-      "review": {"_order": 2}
+      "review": {
+        "_order": 2
+      },
+      "testing": {
+        "_order": 1
+      }
     },
     "refactoring": {
-      "analysis": {"_order": 1},
-      "execution": {"_order": 2}
+      "analysis": {
+        "_order": 1
+      },
+      "execution": {
+        "_order": 2
+      }
+    },
+    "requirement": {
+      "analysis": {
+        "_order": 2
+      },
+      "gathering": {
+        "_order": 1
+      }
     }
-  }
+  },
+  "tracing_enabled": false,
+  "tracing_ignored_apis": [
+    "/api/project/structure",
+    "/api/config/copilot/prompt",
+    "/api/ideas/tree",
+    "/api/proxy"
+  ],
+  "tracing_stop_at": null,
+  "version": "2.0"
 }

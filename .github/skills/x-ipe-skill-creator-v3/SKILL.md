@@ -47,6 +47,8 @@ CRITICAL: SKILL.md body must stay under 500 lines. Move examples to references/.
 
 MANDATORY: All 4 skill types have complete templates in the templates/ folder.
 
+CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL actions. Do NOT split actions into separate blocks (e.g., `<branch>`). Conditional logic (IF/THEN/ELSE) belongs inline within the `<action>` numbered list.
+
 ---
 
 ## Input Parameters
@@ -97,10 +99,10 @@ input:
 | 1 | Identify Skill Type | Determine type, select template | type selected |
 | 2 | Gather Examples | Collect usage scenarios | >= 2 examples |
 | 3 | Plan Resources | Identify scripts/references/templates | resources planned |
-| 4 | Round 1: Meta + Draft | Create skill-meta.md + candidate/ (parallel sub-agents 1,2) | both complete |
-| 5 | Round 2: Reflect + Tests | Reflect on candidate + generate tests (parallel sub-agents 3,4) | both complete |
-| 6 | Round 3: Run Tests | Execute tests in sandbox (sub-agent 5) | tests executed |
-| 7 | Round 4: Evaluate | Evaluate results (sub-agent 6) | evaluation complete |
+| 4 | Round 1: Meta + Draft | Create skill-meta.md + candidate/ (sub-agent 1) | both complete |
+| 5 | Round 2: Reflect + Tests | Reflect on candidate + generate tests (sub-agent 2) | both complete |
+| 6 | Round 3: Run Tests | Execute tests in sandbox (sub-agent 3) | tests executed |
+| 7 | Round 4: Evaluate | Evaluate results (sub-agent 4) | evaluation complete |
 | 8 | Merge/Iterate | Merge if pass, iterate if fail | decision made |
 | 9 | Cross-References | Validate external references | all valid |
 
@@ -282,60 +284,44 @@ input:
   </step_9>
 
   <sub-agent-planning>
+    <!-- Constraint: One step = one sub-agent; one sub-agent = many steps -->
     <sub_agent_1>
       <sub_agent_definition>
-        <role>Meta Creator</role>
-        <prompt>Load skill-meta template from {skill_meta_template_path}, fill with skill-specific content (purpose, acceptance criteria, test scenarios). Output: x-ipe-docs/skill-meta/{skill-name}/skill-meta.md</prompt>
+        <role>Meta & Draft Creator</role>
+        <prompt>Load skill-meta template from {skill_meta_template_path} and SKILL.md template from {skill_template_path}. Fill both with skill-specific content. Output: x-ipe-docs/skill-meta/{skill-name}/skill-meta.md and x-ipe-docs/skill-meta/{skill-name}/candidate/</prompt>
       </sub_agent_definition>
       <workflow_step_reference>step_4</workflow_step_reference>
     </sub_agent_1>
     <sub_agent_2>
       <sub_agent_definition>
-        <role>Draft Creator</role>
-        <prompt>Load SKILL.md template from {skill_template_path}, fill with skill-specific content following guidelines. Output: x-ipe-docs/skill-meta/{skill-name}/candidate/</prompt>
+        <role>Reflector & Test Generator</role>
+        <prompt>Review candidate against skill-meta, identify gaps, suggest improvements. Then generate test-cases.yaml from acceptance criteria in skill-meta.md</prompt>
       </sub_agent_definition>
-      <workflow_step_reference>step_4</workflow_step_reference>
+      <workflow_step_reference>step_5</workflow_step_reference>
+      <starting_condition>
+        - "START after sub_agent_1 completes"
+      </starting_condition>
     </sub_agent_2>
     <sub_agent_3>
-      <sub_agent_definition>
-        <role>Reflector</role>
-        <prompt>Review candidate against skill-meta, identify gaps, suggest improvements</prompt>
-      </sub_agent_definition>
-      <workflow_step_reference>step_5</workflow_step_reference>
-      <starting_condition>
-        - "START after sub_agent_1 and sub_agent_2 complete"
-      </starting_condition>
-    </sub_agent_3>
-    <sub_agent_4>
-      <sub_agent_definition>
-        <role>Test Generator</role>
-        <prompt>Generate test-cases.yaml from acceptance criteria in skill-meta.md</prompt>
-      </sub_agent_definition>
-      <workflow_step_reference>step_5</workflow_step_reference>
-      <starting_condition>
-        - "START after sub_agent_1 and sub_agent_2 complete"
-      </starting_condition>
-    </sub_agent_4>
-    <sub_agent_5>
       <sub_agent_definition>
         <role>Test Runner</role>
         <prompt>Execute test cases in sandbox, record outputs and execution log</prompt>
       </sub_agent_definition>
       <workflow_step_reference>step_6</workflow_step_reference>
       <starting_condition>
-        - "START after sub_agent_3 and sub_agent_4 complete"
+        - "START after sub_agent_2 completes"
       </starting_condition>
-    </sub_agent_5>
-    <sub_agent_6>
+    </sub_agent_3>
+    <sub_agent_4>
       <sub_agent_definition>
         <role>Evaluator</role>
         <prompt>Evaluate sandbox outputs against expectations, generate evaluation-report.yaml</prompt>
       </sub_agent_definition>
       <workflow_step_reference>step_7</workflow_step_reference>
       <starting_condition>
-        - "START after sub_agent_5 completes"
+        - "START after sub_agent_3 completes"
       </starting_condition>
-    </sub_agent_6>
+    </sub_agent_4>
   </sub-agent-planning>
 
 </procedure>

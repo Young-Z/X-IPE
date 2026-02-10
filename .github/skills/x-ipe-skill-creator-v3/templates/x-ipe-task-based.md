@@ -122,12 +122,9 @@ BLOCKING: {Rule that must not be skipped}
     <action>
       1. {Sub-action 1}
       2. {Sub-action 2}
+      3. IF {condition}: {action if true}
+         ELSE: {action if false}
     </action>
-    <branch>
-      IF: {condition}
-      THEN: {action if true}
-      ELSE: {action if false}
-    </branch>
     <output>{What this step produces}</output>
   </step_2>
 

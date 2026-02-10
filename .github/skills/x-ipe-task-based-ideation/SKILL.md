@@ -119,11 +119,6 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
       4. Load Extra Instructions (human → config → N/A)
       5. Log active tool configuration
     </action>
-    <branch>
-      IF: file exists
-      THEN: Parse and extract enabled tools
-      ELSE: Create default config, inform user
-    </branch>
     <output>tool_config, extra_instructions</output>
   </step_1>
 
@@ -144,22 +139,13 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
   <step_3>
     <name>Initialize Tools</name>
     <action>
-      1. For each enabled tool in config, check availability
-      2. Log status (available/unavailable)
+      1. For each enabled tool in config, check availability:
+         IF antv-infographic enabled: verify infographic-syntax-creator skill available
+         IF mermaid enabled: verify mermaid capability available
+         IF frontend-design enabled: verify frontend-design skill available
+         IF x-ipe-tool-architecture-dsl enabled: verify skill available
+      2. Log status (available/unavailable) for each tool
     </action>
-    <branch>
-      IF: config.stages.ideation.ideation["antv-infographic"] == true
-      THEN: Verify infographic-syntax-creator skill available
-
-      IF: config.stages.ideation.ideation["mermaid"] == true
-      THEN: Verify mermaid capability available
-
-      IF: config.stages.ideation.mockup["frontend-design"] == true
-      THEN: Verify frontend-design skill available
-
-      IF: config.stages.ideation.ideation["x-ipe-tool-architecture-dsl"] == true
-      THEN: Verify x-ipe-tool-architecture-dsl skill available
-    </branch>
     <output>tools_status</output>
   </step_3>
 
@@ -181,39 +167,26 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
       2. Wait for human response before proceeding
       3. Build on previous answers
       4. Challenge assumptions constructively
-      5. Invoke enabled tools when user describes visuals/flows
+      5. Invoke enabled tools when user describes visuals/flows:
+         IF user describes UI layout AND frontend-design enabled: invoke frontend-design skill, create mockup
+         IF user describes flow AND mermaid enabled: generate mermaid diagram
+         IF user describes architecture AND x-ipe-tool-architecture-dsl enabled: invoke skill
     </action>
     <constraints>
       - BLOCKING: Continue until idea is well-defined
       - CRITICAL: Batch questions (3-5), do not overwhelm
       - MANDATORY: Use enabled tools for visualization during brainstorming
     </constraints>
-    <branch>
-      IF: user describes UI layout AND frontend-design enabled
-      THEN: Invoke frontend-design skill, create mockup
-
-      IF: user describes flow AND mermaid enabled
-      THEN: Generate mermaid diagram
-
-      IF: user describes architecture AND x-ipe-tool-architecture-dsl enabled
-      THEN: Invoke x-ipe-tool-architecture-dsl skill
-    </branch>
     <output>brainstorming_notes, artifacts[]</output>
   </step_5>
 
   <step_6>
     <name>Research Common Principles</name>
     <action>
-      1. Identify if topic is common/established
-      2. Research: industry best practices, design patterns
-      3. Document findings as "Common Principles"
-      4. Note authoritative sources for references
+      1. Identify if topic is common/established (auth, API, UI/UX, security, data)
+      2. IF topic is common: research industry best practices, design patterns, document findings as "Common Principles", note authoritative sources
+         ELSE: skip this step
     </action>
-    <branch>
-      IF: topic is common (auth, API, UI/UX, security, data)
-      THEN: Research and document principles
-      ELSE: Skip this step
-    </branch>
     <output>common_principles[], references[]</output>
   </step_6>
 
@@ -223,19 +196,17 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
       1. Synthesize outputs from steps 4, 5, 6
       2. Determine version number (auto-increment from existing files)
       3. Create draft using template from templates/idea-summary.md
-      4. Apply enabled visualization tools per config
+      4. Apply enabled visualization tools per config:
+         IF antv-infographic enabled: use infographic DSL for features/roadmaps
+         IF mermaid enabled: use mermaid for flowcharts/sequences
+         IF x-ipe-tool-architecture-dsl enabled: use architecture DSL for system diagrams
+         IF all disabled: use standard markdown (bullet lists, tables)
       5. Link to artifacts created during brainstorming
     </action>
     <constraints>
       - CRITICAL: Use visualization tools based on config
       - MANDATORY: Include all sections from template
     </constraints>
-    <branch>
-      IF: antv-infographic enabled → Use infographic DSL for features/roadmaps
-      IF: mermaid enabled → Use mermaid for flowcharts/sequences
-      IF: x-ipe-tool-architecture-dsl enabled → Use architecture DSL for system diagrams
-      IF: all disabled → Use standard markdown (bullet lists, tables)
-    </branch>
     <output>idea_draft</output>
   </step_7>
 
@@ -273,15 +244,12 @@ BLOCKING: Step 11 - Human MUST approve idea summary before proceeding.
     <name>Rename Folder</name>
     <action>
       1. Check if folder matches "Draft Idea - MMDDYYYY HHMMSS"
-      2. Generate new name based on idea content (2-5 words, Title Case)
-      3. Rename folder, preserving timestamp suffix
-      4. Update internal links
+      2. IF folder matches draft pattern AND idea has clear identity:
+         a. Generate new name based on idea content (2-5 words, Title Case)
+         b. Rename folder to "{Idea Name} - {timestamp}"
+         c. Update internal links
+         ELSE: skip rename
     </action>
-    <branch>
-      IF: folder matches draft pattern AND idea has clear identity
-      THEN: Rename to "{Idea Name} - {timestamp}"
-      ELSE: Skip rename
-    </branch>
     <output>folder_renamed, new_folder_name</output>
   </step_10>
 

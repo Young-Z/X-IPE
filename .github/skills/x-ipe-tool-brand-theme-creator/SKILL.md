@@ -123,18 +123,13 @@ For detailed extraction procedures per source type, see [references/input-source
     <name>Extract Colors</name>
     <action>
       1. Determine input source type (web link, image, text, or direct hex)
-      2. Process source according to type-specific extraction rules
+      2. Extract colors based on source type:
+         IF source_type = web_link: use web_fetch to retrieve page, extract from CSS variables, meta tags, header/nav/CTA colors
+         ELSE IF source_type = image: use vision capabilities to identify dominant + accent colors by area coverage
+         ELSE IF source_type = text_description: parse brand adjectives, map to color direction and typography per interpretation guide
+         ELSE: use provided hex values directly
       3. Map extracted values to theme tokens (primary, secondary, accent, neutral)
     </action>
-    <branch>
-      IF: source_type = web_link
-      THEN: Use web_fetch to retrieve page; extract from CSS variables, meta tags, header/nav/CTA colors
-      ELSE IF: source_type = image
-      THEN: Use vision capabilities to identify dominant + accent colors by area coverage
-      ELSE IF: source_type = text_description
-      THEN: Parse brand adjectives; map to color direction and typography per interpretation guide
-      ELSE: Use provided hex values directly
-    </branch>
     <constraints>
       - BLOCKING: For web links, always use web_fetch - never guess colors
       - CRITICAL: Extract hex values only; no RGB or HSL in theme tokens

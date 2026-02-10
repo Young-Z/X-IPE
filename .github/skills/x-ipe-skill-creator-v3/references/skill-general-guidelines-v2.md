@@ -313,6 +313,8 @@ See [2. reference-section-order.md](2.%20reference-section-order.md) for full se
 
 CRITICAL: Only XML elements defined in the template below are allowed. Do NOT introduce custom XML tags or modify the structure.
 
+CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL actions for that step. Do NOT split actions into separate blocks (e.g., `<branch>`). Conditional logic (IF/THEN/ELSE) belongs inside the `<action>` block as inline conditions within the numbered action list.
+
 ### Template
 
 ```xml

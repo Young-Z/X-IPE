@@ -27,9 +27,7 @@
         "_order": 1,
         "antv-infographic": false,
         "mermaid": true,
-        "x-ipe-tool-architecture-dsl": true,
-        "x-ipe-tool-draw-layered-architecture": false,
-        "x-ipe-tool-draw-system-landscape": false
+        "x-ipe-tool-architecture-dsl": true
       },
       "mockup": {
         "_order": 2,

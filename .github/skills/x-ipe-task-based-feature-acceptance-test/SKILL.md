@@ -115,12 +115,9 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
       1. QUERY feature board for feature_id, specification_link, technical_design_link
       2. READ technical design, check "Technical Scope" section
       3. VERIFY feature is accessible (playground/demo URL exists)
+      4. IF scope does NOT include [Frontend] or [Full Stack]:
+         SET status="skipped", skip_reason="No web UI", RETURN next_task_based_skill=Feature Closing
     </action>
-    <branch>
-      IF: scope includes [Frontend] OR [Full Stack]
-      THEN: Proceed to Step 2
-      ELSE: SET status="skipped", skip_reason="No web UI", RETURN next_task_based_skill=Feature Closing
-    </branch>
     <output>Decision to proceed or skip</output>
   </step_1>
 
@@ -129,15 +126,23 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
     <action>
       1. READ specification.md at x-ipe-docs/requirements/FEATURE-XXX/specification.md
       2. EXTRACT all acceptance criteria (AC-X) with testable conditions
-      3. CREATE acceptance-test-cases.md using templates/acceptance-test-cases.md
-      4. FOR EACH acceptance criterion: create test case (TC-XXX), map to AC, set priority (P0/P1/P2), write high-level steps, define expected outcomes
-      5. PRIORITIZE: P0=Critical (must pass), P1=High (should pass), P2=Medium (edge cases)
+      3. CHECK specification.md for Linked Mockups section:
+         a. IF mockups exist with status "current":
+            - READ each current mockup file from x-ipe-docs/requirements/FEATURE-XXX/mockups/
+            - Note mockup details for UI/UX validation test cases in Step 5
+         b. IF mockups exist with status "outdated":
+            - FLAG for human notification: "Mockup {filename} is outdated -- UI/UX visual validation will be skipped for this mockup. Consider updating the mockup if visual comparison is needed."
+            - Do NOT generate mockup-comparison test cases for outdated mockups
+         c. IF no mockups: proceed without mockup validation
+      4. CREATE acceptance-test-cases.md using templates/acceptance-test-cases.md
+      5. FOR EACH acceptance criterion: create test case (TC-XXX), map to AC, set priority (P0/P1/P2), write high-level steps, define expected outcomes
+      6. PRIORITIZE: P0=Critical (must pass), P1=High (should pass), P2=Medium (edge cases)
     </action>
     <constraints>
       - MANDATORY: Each AC must have at least one test case
       - CRITICAL: Test cases must be independent and self-contained
     </constraints>
-    <output>Initial acceptance-test-cases.md with test case outlines</output>
+    <output>Initial acceptance-test-cases.md with test case outlines, mockup status noted</output>
   </step_2>
 
   <step_3>
@@ -158,15 +163,12 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
   <step_4>
     <name>Test Data Preparation</name>
     <action>
-      1. ANALYZE each test case for data requirements (Input, Selection, Expected, Compare)
-      2. ASK user for test data per test case
-      3. UPDATE Test Data table in each test case section
+      1. IF auto_proceed = true: skip this step, use placeholder/generated test data
+      2. ELSE:
+         a. ANALYZE each test case for data requirements (Input, Selection, Expected, Compare)
+         b. ASK user for test data per test case (see references/detailed-procedures.md)
+         c. UPDATE Test Data table in each test case section
     </action>
-    <branch>
-      IF: auto_proceed = true
-      THEN: SKIP this step, use placeholder/generated test data
-      ELSE: PAUSE and collect test data from user (see references/detailed-procedures.md)
-    </branch>
     <output>Test Data tables populated in each test case</output>
   </step_4>
 
@@ -176,31 +178,41 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
       1. FOR EACH test case, validate: AC coverage, preconditions, actionable steps, selector existence, measurable expected results, edge cases
       2. REFLECT: false negative risks, missing steps, vague expectations, split candidates
       3. REFINE: add missing steps, clarify results, add wait conditions, handle dynamic content
-      4. UPDATE acceptance-test-cases.md with refinements
+      4. IF current mockups were identified in Step 2:
+         a. ADD UI/UX visual validation test cases (priority P1):
+            - TC: "Layout matches mockup" -- compare page layout, component placement, element hierarchy against mockup
+            - TC: "Visual styling matches mockup" -- verify colors, spacing, typography, borders are consistent with mockup
+            - TC: "Interactive states match mockup" -- verify hover, active, disabled states shown in mockup
+            - TC: "Responsive behavior matches mockup" -- if mockup shows responsive layouts, verify breakpoints
+         b. For each visual validation TC: reference the specific mockup file in the test case description
+         c. Use screenshot comparison during execution (Step 6) to validate visual match
+      5. UPDATE acceptance-test-cases.md with refinements
     </action>
     <constraints>
       - MANDATORY: Every test case must pass reflection checklist (see references/detailed-procedures.md)
     </constraints>
-    <output>Refined and validated test cases</output>
+    <output>Refined and validated test cases, including mockup UI/UX validation (if applicable)</output>
   </step_5>
 
   <step_6>
     <name>Execute Tests via Chrome DevTools MCP</name>
     <action>
-      1. CHECK MCP availability
-      2. FOR EACH test case (ordered by priority):
-         a. SETUP: Navigate to test URL, verify page loaded
+      1. CHECK Chrome DevTools MCP availability
+      2. IF MCP not available: SET status="blocked", document "Test cases ready for manual execution"
+      3. ELSE: FOR EACH test case (ordered by priority):
+         a. SETUP: Navigate to test URL, verify page loaded (see references/detailed-procedures.md for command patterns)
          b. EXECUTE: Perform each action via MCP, capture results, screenshot on failure
          c. VERIFY: Check element states, validate text content, confirm UI changes
          d. RECORD: Status (Pass/Fail/Blocked), execution time, failure reason, screenshot link
-      3. CONTINUE with remaining tests even if some fail
+      4. FOR mockup UI/UX validation test cases (if applicable):
+         a. Take screenshot of the implemented UI
+         b. Open the referenced mockup file side-by-side (or load in separate tab)
+         c. Visually compare: layout structure, component placement, colors, spacing, typography
+         d. Document any deviations: element, mockup expectation, actual implementation, severity (major/minor)
+         e. Mark as Pass (matches mockup), Partial (minor deviations), or Fail (major deviations)
+      5. CONTINUE with remaining tests even if some fail
     </action>
-    <branch>
-      IF: Chrome DevTools MCP available
-      THEN: Execute tests via MCP (see references/detailed-procedures.md for command patterns)
-      ELSE: SET status="blocked", document "Test cases ready for manual execution"
-    </branch>
-    <output>Test execution results per test case</output>
+    <output>Test execution results per test case, including mockup comparison findings</output>
   </step_6>
 
   <step_7>
@@ -208,15 +220,23 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
     <action>
       1. UPDATE acceptance-test-cases.md: set status per test case (Pass/Fail/Not Run), add execution notes, fill Execution Results section
       2. DOCUMENT failures with reason and recommended action
-      3. CALCULATE metrics: total, passed, failed, blocked, pass_rate = (passed/total)*100
-      4. RETURN task completion output with results
+      3. IF mockup UI/UX validation was performed:
+         a. Add "Mockup Validation Summary" section with deviation table
+         b. Note which mockup(s) were compared and their status
+      4. IF outdated mockups were flagged in Step 2:
+         a. Add prominent notice: "⚠ Outdated Mockup(s) Detected"
+         b. List outdated mockup files and recommend updating them
+         c. INFORM human: "The following mockup(s) are outdated and were NOT used for UI/UX validation: {filenames}. Consider updating mockups to enable visual comparison in future acceptance tests."
+      5. CALCULATE metrics: total, passed, failed, blocked, pass_rate = (passed/total)*100
+      6. RETURN task completion output with results
     </action>
     <success_criteria>
       - All test cases have a status recorded
       - Metrics calculated and documented
       - acceptance-test-cases.md saved to feature folder
+      - Outdated mockups flagged to human (if any)
     </success_criteria>
-    <output>Completed acceptance-test-cases.md with execution results</output>
+    <output>Completed acceptance-test-cases.md with execution results and mockup validation</output>
   </step_7>
 
 </procedure>
@@ -286,6 +306,10 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <name>Test results documented</name>
     <verification>Execution Results section complete with metrics (if has UI)</verification>
   </checkpoint>
+  <checkpoint required="if-applicable">
+    <name>Mockup UI/UX validation performed</name>
+    <verification>If current mockups exist, visual validation test cases executed and deviations documented; if outdated mockups found, human notified</verification>
+  </checkpoint>
   <checkpoint required="true">
     <name>acceptance-test-cases.md saved to feature folder</name>
     <verification>File exists at x-ipe-docs/requirements/FEATURE-XXX/acceptance-test-cases.md</verification>
@@ -342,6 +366,8 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | One massive test | Hard to debug failures | Split into focused tests |
 | Ignore async loading | Flaky tests | Add explicit wait steps |
 | Hard-coded test data | Hard to maintain | Use variables/fixtures |
+| Skip mockup comparison | UI drifts from approved design | Validate against current mockups |
+| Use outdated mockup for validation | False failures, wasted effort | Flag outdated mockups to human |
 
 ---
 

@@ -166,10 +166,21 @@ BLOCKING: Human MUST approve specification before Technical Design proceeds.
          Overview, User Stories, Acceptance Criteria, Functional Requirements,
          Non-Functional Requirements, UI/UX Requirements, Dependencies,
          Business Rules, Edge Cases, Out of Scope, Technical Considerations, Open Questions
+      4. IF mockups exist in FEATURE-XXX/mockups/:
+         a. Assess mockup freshness -- compare mockup content against current feature scope:
+            - IF mockup aligns with current feature scope: mark as "current" in Linked Mockups table
+            - IF mockup is outdated (feature scope changed significantly since mockup was created): mark as "outdated -- use as directional reference only"
+         b. For each current (non-outdated) mockup, add acceptance criteria that reference mockup comparison:
+            - AC: "UI layout MUST match the approved mockup ({mockup-filename}) for [component/screen]"
+            - AC: "Visual styling (colors, spacing, typography) MUST be consistent with mockup ({mockup-filename})"
+            - AC: "Interactive elements shown in mockup ({mockup-filename}) MUST be present and functional"
+         c. For outdated mockups, do NOT add mockup-comparison ACs -- instead note in UI/UX Requirements:
+            "Mockup {filename} is outdated; use as directional reference only. Implementation should follow the updated requirements in this specification."
     </action>
     <constraints>
       - MANDATORY: Single file with version history (no versioned filenames)
       - CRITICAL: Focus on WHAT not HOW in Technical Considerations
+      - CRITICAL: Only add mockup-comparison ACs for current mockups, never for outdated ones
       - See references/specification-template.md for full structure
       - See references/specification-writing-guide.md for detailed guidance
     </constraints>
@@ -178,6 +189,7 @@ BLOCKING: Human MUST approve specification before Technical Design proceeds.
       - Acceptance criteria are testable and measurable
       - Dependencies documented
       - Edge cases identified
+      - If current mockups exist, ACs reference mockup comparison
     </success_criteria>
     <output>specification.md created/updated</output>
   </step_4>
@@ -252,7 +264,11 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Linked Mockups section populated</name>
-    <verification>If mockups exist, Linked Mockups table in specification</verification>
+    <verification>If mockups exist, Linked Mockups table in specification with freshness status (current/outdated)</verification>
+  </checkpoint>
+  <checkpoint required="if-applicable">
+    <name>Mockup-comparison ACs added</name>
+    <verification>If current (non-outdated) mockups exist, acceptance criteria reference mockup comparison for UI layout, styling, and interactive elements</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -269,15 +285,19 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 **Then:**
 ```
 1. Open and thoroughly analyze mockup file(s)
-2. Extract all visible UI elements and interactions
-3. Create UI/UX Requirements section with:
+2. Assess mockup freshness against current feature scope:
+   - Current: scope unchanged since mockup creation → add mockup-comparison ACs
+   - Outdated: scope changed significantly → mark outdated, use as directional reference only
+3. Extract all visible UI elements and interactions
+4. Create UI/UX Requirements section with:
    - Component inventory from mockup
    - User interaction flows
    - Form validation rules
    - Error/empty/loading states
-4. Add "Linked Mockups" section at top of specification
-5. Cross-reference acceptance criteria to mockup elements
-6. Note any functionality implied by mockup not in requirements
+5. Add "Linked Mockups" section at top of specification (with status column)
+6. For current mockups: add ACs like "UI layout MUST match mockup ({filename})"
+7. Cross-reference acceptance criteria to mockup elements
+8. Note any functionality implied by mockup not in requirements
 ```
 
 ### Pattern: Well-Defined Feature
@@ -325,6 +345,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Skip web research | Reinvent wheel | Research domain best practices |
 | Ignore mockup when provided | Missing UI requirements | Always analyze mockup_list |
 | Skip mockup-to-spec mapping | Incomplete specification | Extract all UI elements from mockup |
+| Compare against outdated mockup | Wrong ACs, blocks progress | Check mockup freshness; only add comparison ACs for current mockups |
 
 ---
 

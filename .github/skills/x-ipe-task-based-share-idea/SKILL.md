@@ -174,30 +174,16 @@ BLOCKING: Step 6 fails if any output file is empty or missing.
     <name>Execute Conversion</name>
     <action>
       1. Select conversion method based on detected tools:
-
-         Option A - Pandoc:
+         IF pandoc available:
            pandoc -t {format} -o "formal-{source_name}.{ext}" "{source_file}"
-
-         Option B - MCP Document Tools:
-           Use mcp-documents/convert, mcp-office/create-presentation,
-           or mcp-office/create-document
-
-         Option C - Manual Fallback:
-           Inform human that automatic conversion is unavailable,
-           provide structured content for manual copy-paste,
-           suggest alternatives (Google Docs, CloudConvert)
-
+         ELSE IF MCP document tools available:
+           Use mcp-documents/convert, mcp-office/create-presentation, or mcp-office/create-document
+         ELSE (manual fallback):
+           Inform human that automatic conversion is unavailable, provide structured content for manual copy-paste, suggest alternatives (Google Docs, CloudConvert). Mark task as partially complete.
       2. Generate each requested format sequentially
       3. Output naming: formal-{source_filename}.{extension}
          Example: idea-summary-v1.md -> formal-idea-summary-v1.pptx
     </action>
-    <branch>
-      IF: pandoc available
-      THEN: use pandoc for conversion
-      ELSE IF: MCP tools available
-      THEN: use MCP tools
-      ELSE: use manual fallback, mark task as partially complete
-    </branch>
     <output>Generated document files in {idea_folder}</output>
   </step_5>
 

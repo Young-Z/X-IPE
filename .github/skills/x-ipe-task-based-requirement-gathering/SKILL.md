@@ -98,16 +98,11 @@ BLOCKING: Human MUST approve requirements before proceeding to Feature Breakdown
       2. Identify WHO will use the feature
       3. Identify WHY this is needed (business value)
       4. Note any constraints mentioned
+      5. IF domain knowledge is insufficient: use web search to research industry standards, competitor features, domain terminology, and regulatory requirements
     </action>
     <constraints>
       - CRITICAL: Do not skip scope identification
     </constraints>
-    <branch>
-      IF: Domain knowledge is insufficient
-      THEN: Use web search to research industry standards, competitor features,
-            domain terminology, and regulatory requirements
-      ELSE: Proceed with existing knowledge
-    </branch>
     <output>Initial understanding summary</output>
   </step_1>
 
@@ -138,11 +133,7 @@ BLOCKING: Human MUST approve requirements before proceeding to Feature Breakdown
     <constraints>
       - BLOCKING: MUST split before adding new content if over threshold
     </constraints>
-    <branch>
-      IF: Current file > 500 lines
-      THEN: Split file per [references/file-splitting.md](references/file-splitting.md)
-      ELSE: Continue using current active file
-    </branch>
+
     <output>Active file path determined</output>
   </step_3>
 

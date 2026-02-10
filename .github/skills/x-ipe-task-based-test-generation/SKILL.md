@@ -118,11 +118,8 @@ BLOCKING: Step 7 - ALL tests MUST fail (no implementation exists). If any test p
       3. EXTRACT from Part 2 (Implementation Guide): Data models, API endpoints, workflows, edge cases
       4. CHECK Design Change Log for updates
       5. NOTE references to architecture designs
+      6. IF Technical Scope includes [Frontend] or [Full Stack]: review mockups for UI test cases
     </action>
-    <branch>
-      IF: Technical Scope includes [Frontend] or [Full Stack]
-      THEN: Review mockups for UI tests
-    </branch>
     <constraints>
       - BLOCKING: Tests MUST be based on technical design. If design is unclear - STOP and request update.
     </constraints>

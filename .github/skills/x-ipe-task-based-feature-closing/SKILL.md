@@ -97,19 +97,11 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
     <action>
       1. Read acceptance criteria from feature specification
       2. Check each criterion against implementation
-      3. Document verification results in table format (see references/examples.md)
-      4. Flag any unmet criteria
+      3. IF Technical Scope includes [Frontend] or [Full Stack]:
+         Also verify UI against linked mockups — layout matches design, all UI elements present, interactions work as shown, visual styling is consistent, document any approved deviations
+      4. Document verification results in table format (see references/examples.md)
+      5. Flag any unmet criteria
     </action>
-    <branch>
-      IF: Technical Scope in specification.md includes [Frontend] OR [Full Stack]
-      THEN: Also verify UI against linked mockups:
-            - Layout matches mockup design
-            - All UI elements present
-            - Interactions work as shown
-            - Visual styling is consistent
-            - Document any approved deviations
-      ELSE: Skip visual verification, focus on functional criteria
-    </branch>
     <constraints>
       - BLOCKING: If ANY criterion is not met, STOP and report to human
       - BLOCKING: Do NOT proceed to Step 2 until all criteria are verified

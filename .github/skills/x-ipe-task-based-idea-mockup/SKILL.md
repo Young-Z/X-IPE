@@ -87,14 +87,16 @@ MANDATORY: See [references/mockup-guidelines.md](references/mockup-guidelines.md
 | 2 | Load Config | Read `x-ipe-docs/config/tools.json` mockup section | Config loaded |
 | 3 | Read Idea Summary | Load latest idea-summary-vN.md from folder | Summary loaded |
 | 4 | Identify Mockup Needs | Extract UI/visual elements from idea | Needs identified |
-| 5 | Create Mockups | Invoke enabled mockup tools | Mockups created |
-| 6 | Save Artifacts | Store mockups in `{current_idea_folder}/mockups/` | Artifacts saved |
-| 7 | Update Summary | Add mockup links to idea summary | Summary updated |
-| 8 | Complete | Verify DoD, request human review | Human approves |
+| 5 | Research Design References | If needs lack detail, search online for design inspiration | References gathered |
+| 6 | Load Brand Theme | If `selected-theme` set in tools.json, read theme design system | Theme loaded |
+| 7 | Create Mockups | Invoke enabled mockup tools with creative, distinctive designs | Mockups created |
+| 8 | Save Artifacts | Store mockups in `{current_idea_folder}/mockups/` | Artifacts saved |
+| 9 | Update Summary | Add mockup links to idea summary | Summary updated |
+| 10 | Complete | Verify DoD, request human review | Human approves |
 
 BLOCKING: Step 1 halts if current_idea_folder is N/A -- ask human for folder path.
-BLOCKING: Step 5 halts if no tools available AND human declines manual mode.
-BLOCKING: Step 8 requires human approval before proceeding.
+BLOCKING: Step 7 halts if no tools available AND human declines manual mode.
+BLOCKING: Step 10 requires human approval before proceeding.
 
 ---
 
@@ -133,11 +135,7 @@ BLOCKING: Step 8 requires human approval before proceeding.
       4. Load Extra Instructions (human input > config._extra_instruction > N/A)
       5. Log active configuration
     </action>
-    <branch>
-      IF: config file exists
-      THEN: extract enabled tools from stages.ideation.mockup
-      ELSE: propose manual mode to human
-    </branch>
+
     <output>list of enabled mockup tools, extra_instructions value</output>
   </step_2>
 
@@ -168,20 +166,57 @@ BLOCKING: Step 8 requires human approval before proceeding.
   </step_4>
 
   <step_5>
-    <name>Create Mockups</name>
+    <name>Research Design References</name>
     <action>
-      1. For each enabled tool, invoke with idea context (UI/UX content only)
-      2. Generate mockup artifacts per identified needs
-      3. IF no tools enabled and manual mode accepted: create markdown description
+      1. Evaluate whether mockup needs from Step 4 provide enough detail to design a high-quality UI/UX
+      2. IF needs are vague, generic, or lack visual specificity (e.g., "a dashboard", "a form" without layout/interaction details):
+         a. Use the mockup needs as search queries to find real-world design references online
+         b. Search for: "{mockup type} UI design", "{domain} dashboard examples", "{feature} UX patterns"
+         c. Analyze found references for: layout patterns, component arrangements, interaction models, visual hierarchy
+         d. Enrich the mockup needs with specific design details gleaned from references
+         e. Document which references inspired which design decisions
+      3. IF needs are already detailed and specific enough: skip to next step
     </action>
-    <constraints>
-      - CRITICAL: Focus on UI/UX only -- ignore all tech stack mentions from idea files
-      - BLOCKING: Halts if no tools available AND human declines manual mode
-    </constraints>
-    <output>generated mockup files/links</output>
+    <success_criteria>
+      - Mockup needs now include concrete layout, component, and interaction details
+      - Design references documented (if searched)
+    </success_criteria>
+    <output>enriched mockup needs with design reference insights (if applicable)</output>
   </step_5>
 
   <step_6>
+    <name>Load Brand Theme</name>
+    <action>
+      1. Check x-ipe-docs/config/tools.json for `selected-theme` section
+      2. IF `selected-theme` exists AND `theme-folder-path` is set:
+         a. Read the design system file at {theme-folder-path}/design-system.md
+         b. Extract: color palette, typography, spacing, component styles, semantic tokens
+         c. These theme tokens MUST be applied when creating mockups in Step 7
+         d. Log: "Brand theme loaded: {theme-name}"
+      3. IF `selected-theme` is not set or theme folder does not exist:
+         a. Log: "No brand theme configured -- using tool defaults"
+         b. Proceed without theme constraints
+    </action>
+    <output>brand theme tokens (colors, typography, spacing) or null</output>
+  </step_6>
+
+  <step_7>
+    <name>Create Mockups</name>
+    <action>
+      1. For each enabled tool, invoke with idea context (UI/UX content only)
+      2. Generate mockup artifacts per identified needs (enriched with design references from Step 5)
+      3. IF brand theme loaded in Step 6: apply theme colors, typography, and spacing to all mockups
+      4. IF no tools enabled and manual mode accepted: create markdown description
+    </action>
+    <constraints>
+      - CRITICAL: Focus on UI/UX only -- ignore all tech stack mentions from idea files
+      - CRITICAL: Be creative and distinctive -- avoid generic, cookie-cutter layouts. Push for unique visual compositions, unexpected but intuitive interactions, and bold design choices that make the mockup memorable. Surprise the reviewer with thoughtful design details they did not ask for but will love.
+      - BLOCKING: Halts if no tools available AND human declines manual mode
+    </constraints>
+    <output>generated mockup files/links</output>
+  </step_7>
+
+  <step_8>
     <name>Save Artifacts</name>
     <action>
       1. Create {current_idea_folder}/mockups/ directory if needed
@@ -189,9 +224,9 @@ BLOCKING: Step 8 requires human approval before proceeding.
       3. Record list of saved artifact paths
     </action>
     <output>list of saved artifact paths relative to current_idea_folder</output>
-  </step_6>
+  </step_8>
 
-  <step_7>
+  <step_9>
     <name>Update Idea Summary</name>
     <action>
       1. Create new version: {current_idea_folder}/idea-summary-v{N+1}.md
@@ -202,9 +237,9 @@ BLOCKING: Step 8 requires human approval before proceeding.
       - CRITICAL: Do NOT modify existing idea-summary files -- create new version only
     </constraints>
     <output>updated idea summary version path</output>
-  </step_7>
+  </step_9>
 
-  <step_8>
+  <step_10>
     <name>Complete</name>
     <action>
       1. Verify all DoD checkpoints pass
@@ -215,7 +250,7 @@ BLOCKING: Step 8 requires human approval before proceeding.
       - BLOCKING: Human MUST approve mockups before proceeding
     </constraints>
     <output>human approval status</output>
-  </step_8>
+  </step_10>
 
 </procedure>
 ```
@@ -270,6 +305,14 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   <checkpoint required="true">
     <name>Needs Identified</name>
     <verification>Mockup needs identified and prioritized</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Design References Researched</name>
+    <verification>If needs lacked detail, online design references were searched and insights incorporated; otherwise explicitly skipped with justification</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Brand Theme Applied</name>
+    <verification>If selected-theme configured in tools.json, theme tokens read and applied to mockups; otherwise no theme configured</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Mockups Created</name>

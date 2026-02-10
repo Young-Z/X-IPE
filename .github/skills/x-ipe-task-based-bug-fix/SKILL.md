@@ -128,14 +128,10 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
   <step_2>
     <name>Reproduce the Bug</name>
     <action>
-      1. Follow provided reproduction steps exactly, confirm bug occurs
+      1. IF reproduction steps provided: follow them exactly, confirm bug occurs
+         ELSE: analyze symptoms, create hypothesis, design test case, attempt to reproduce
       2. Document exact steps, environment conditions, and error messages
     </action>
-    <branch>
-      IF: No reproduction steps provided
-      THEN: Analyze symptoms, create hypothesis, design test case, attempt to reproduce
-      ELSE: Follow provided steps and confirm bug occurs
-    </branch>
     <output>Documented reproduction steps with confirmed bug occurrence</output>
   </step_2>
 
@@ -161,13 +157,10 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
       1. Identify fix options (Option A, Option B, etc.)
       2. Evaluate each: code impact, regression risk, complexity, design compatibility
       3. Choose minimal fix: smallest change, lowest risk, most maintainable
-      4. Present to human for approval
+      4. IF fix requires changes to key components or interfaces:
+         UPDATE technical-design.md FIRST, add entry to Design Change Log
+      5. Present to human for approval
     </action>
-    <branch>
-      IF: Fix requires changes to key components or interfaces
-      THEN: UPDATE technical-design.md FIRST, add entry to Design Change Log, then proceed
-      ELSE: Proceed directly to implementation
-    </branch>
     <constraints>
       - BLOCKING: Do NOT make incompatible changes to key components without updating design first
       - CRITICAL: If fix changes component interfaces, data models, or workflows documented in

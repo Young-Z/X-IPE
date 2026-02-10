@@ -84,11 +84,7 @@ BLOCKING: Existing projects - only ADD missing files, do NOT restructure.
       3. If existing: understand current architecture and conventions
       4. If new: proceed to step 2
     </action>
-    <branch>
-      IF: project exists
-      THEN: catalog existing structure, note missing standard items
-      ELSE: proceed with full creation
-    </branch>
+
     <output>Inventory of existing vs missing structure</output>
   </step_1>
 

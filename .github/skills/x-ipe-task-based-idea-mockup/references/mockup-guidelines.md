@@ -120,6 +120,29 @@ Provides additional context or requirements for mockup creation.
 4. **Tool disabled (`false`):** Skip the tool
 5. **Tool unavailable:** Log limitation and provide alternative
 
+### Brand Theme Loading
+
+The `selected-theme` section in tools.json specifies an optional brand theme to apply to all mockups:
+
+```json
+{
+  "selected-theme": {
+    "theme-folder-path": "x-ipe-docs/themes/theme-default",
+    "theme-name": "theme-default"
+  }
+}
+```
+
+**Loading Procedure:**
+1. IF `selected-theme` exists in tools.json AND `theme-folder-path` is set:
+   - Read `{theme-folder-path}/design-system.md`
+   - Extract color palette, typography, spacing, component styles
+   - Apply these tokens to all generated mockups
+2. IF `selected-theme` is absent or theme folder does not exist:
+   - Proceed with tool defaults (no theme constraints)
+
+**Theme tokens typically include:** primary/secondary/accent colors, neutral scale, semantic colors (success/warning/error/info), font families, font sizes, spacing scale, border radius, and shadow definitions.
+
 ### Mockup Tool Mapping
 
 | Config Key | Skill/Capability | What It Creates |
@@ -131,6 +154,37 @@ Provides additional context or requirements for mockup creation.
 ---
 
 ## Mockup Analysis Guidelines
+
+### Design Reference Research
+
+When mockup needs from Step 4 are too vague or generic to produce a high-quality UI/UX design, research real-world design references online before creating mockups.
+
+**When to search:**
+- Needs are generic (e.g., "a dashboard" without layout specifics)
+- No interaction patterns described
+- Missing visual hierarchy or component arrangement details
+
+**How to search:**
+```
+1. Formulate search queries from mockup needs:
+   - "{mockup type} UI design inspiration" (e.g., "analytics dashboard UI design")
+   - "{domain} {component} UX examples" (e.g., "SaaS settings page UX")
+   - "{interaction} design pattern" (e.g., "drag-and-drop kanban design pattern")
+
+2. Analyze references for:
+   - Layout patterns (grid, sidebar+content, split-pane)
+   - Component arrangements (card grids, data tables, stat widgets)
+   - Interaction models (hover states, transitions, micro-interactions)
+   - Visual hierarchy (typography scale, color emphasis, whitespace)
+
+3. Enrich mockup needs with specific details:
+   - "Dashboard" → "Dashboard with top stat cards, left sidebar nav, main area with 2-column chart grid"
+   - "Form" → "Multi-step wizard form with progress indicator, inline validation, floating labels"
+```
+
+**When NOT to search:**
+- Needs already specify layout, components, and interactions in detail
+- Human provided explicit design instructions or wireframes
 
 ### Analysis Questions
 

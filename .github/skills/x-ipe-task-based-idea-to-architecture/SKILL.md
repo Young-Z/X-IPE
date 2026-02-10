@@ -155,11 +155,7 @@ BLOCKING: Step 8 requires human approval before proceeding.
       3. Identify enabled tools (value = true)
       4. Load extra_instructions (human value > config _extra_instruction > null)
     </action>
-    <branch>
-      IF: config file missing
-      THEN: ask human "Proceed with manual architecture description?"
-      ELSE: use enabled tools from config
-    </branch>
+
     <output>List of enabled architecture tools, extra_instructions value</output>
   </step_2>
 

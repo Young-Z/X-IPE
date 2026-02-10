@@ -135,8 +135,10 @@ Always follow:
 
 ### Creating, Updating, or Validating X-IPE Skills
 
-**When:** Creating a new skill, updating an existing skill, or validating skill structure
-**Then:** Always use the `x-ipe-skill-creator-v3` skill
+**When:** Creating a new skill, updating an existing skill, or validating skill structure for any of the defined skill types (task-based, tool, workflow-orchestration, task-category, meta)
+**Then:** MANDATORY: Always use the `x-ipe-skill-creator-v3` skill
+
+CRITICAL: Any modification to a skill of a defined type (x-ipe-task-based, x-ipe-tool, x-ipe-workflow-orchestration, x-ipe-task-category, x-ipe-meta) MUST go through `x-ipe-skill-creator-v3`. Do NOT directly edit SKILL.md files without loading and following the skill creator process.
 
 ```
 1. Load skill: `x-ipe-skill-creator-v3`
