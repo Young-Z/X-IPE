@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-IPE Platform — Module Architecture</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================
+           Corporate Theme - Enhanced Style
+           ======================================== */
+        :root {
+            --color-primary: #0f172a;
+            --color-secondary: #475569;
+            --color-accent: #10b981;
+            --color-neutral: #e2e8f0;
+            
+            --corp-bg: #ffffff;
+            --corp-border: #374151;
+            --corp-badge-bg: #1f2937;
+            --corp-badge-text: #ffffff;
+            --corp-label-bg: #f3f4f6;
+            --corp-label-text: #6b7280;
+            
+            --accent-blue: #3b82f6;
+            --accent-indigo: #6366f1;
+            --accent-emerald: #10b981;
+            
+            --layer-bg-default: #ffffff;
+            --layer-bg-highlight: #eff6ff;
+            --layer-bg-alt: #fafafa;
+            
+            --font-heading: 'Inter', sans-serif;
+            --font-body: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            
+            --diagram-bg: #ffffff;
+            --layer-gap: 16px;
+            --module-gap: 14px;
+            --component-gap: 10px;
+            --border-radius: 8px;
+            --component-radius: 18px;
+            
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            
+            --transition-fast: 150ms ease;
+            --transition-normal: 200ms ease;
+            --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+            padding: 32px;
+        }
+        
+        .diagram {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .diagram-title {
+            font-family: var(--font-heading);
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--corp-border);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .diagram-content {
+            display: flex;
+            flex-direction: column;
+            gap: var(--layer-gap);
+        }
+        
+        /* Layer Styles */
+        .layer-wrapper {
+            display: flex;
+            gap: 0;
+            transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+            animation: fadeSlideIn 0.5s ease-out backwards;
+        }
+        
+        .layer-wrapper:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-radius: var(--border-radius);
+        }
+        
+        .layer-wrapper:nth-child(1) { animation-delay: 0.1s; }
+        .layer-wrapper:nth-child(2) { animation-delay: 0.2s; }
+        .layer-wrapper:nth-child(3) { animation-delay: 0.3s; }
+        .layer-wrapper:nth-child(4) { animation-delay: 0.4s; }
+        .layer-wrapper:nth-child(5) { animation-delay: 0.5s; }
+        .layer-wrapper:nth-child(6) { animation-delay: 0.6s; }
+        .layer-wrapper:nth-child(7) { animation-delay: 0.7s; }
+        .layer-wrapper:nth-child(8) { animation-delay: 0.8s; }
+        
+        .layer-label {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            background: var(--corp-badge-bg);
+            padding: 5px 3px;
+            font-family: var(--font-heading);
+            font-size: 12px;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            min-width: 36px;
+            transition: background var(--transition-normal), min-width var(--transition-normal);
+            line-height: 1.3;
+            text-align: center;
+        }
+        
+        .layer-wrapper:hover .layer-label {
+            background: var(--accent-indigo);
+            min-width: 40px;
+        }
+        
+        .layer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: var(--module-gap);
+            padding: 20px;
+            border: 2px solid var(--corp-border);
+            border-left: none;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            background: var(--layer-bg-default);
+            transition: border-color var(--transition-normal), background var(--transition-normal);
+        }
+        
+        .layer-wrapper:hover .layer {
+            border-color: var(--accent-indigo);
+        }
+        
+        .layer-highlight { background: var(--layer-bg-highlight); }
+        .layer-alt { background: var(--layer-bg-alt); }
+        
+        .layer-row {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--module-gap);
+            align-items: start;
+        }
+        
+        /* Module Styles */
+        .module {
+            background: var(--corp-bg);
+            border: 2px dashed var(--corp-border);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            height: 100%;
+            box-sizing: border-box;
+            transition: border-color var(--transition-normal), 
+                        box-shadow var(--transition-normal),
+                        transform var(--transition-fast);
+        }
+        
+        .module:hover {
+            border-color: var(--accent-blue);
+            box-shadow: var(--shadow-md);
+            transform: scale(1.01);
+        }
+        
+        .module-title {
+            font-family: var(--font-heading);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--corp-border);
+            text-align: left;
+            transition: color var(--transition-fast);
+        }
+        
+        .module:hover .module-title {
+            color: var(--accent-blue);
+        }
+        
+        .module-content {
+            display: grid;
+            gap: var(--component-gap);
+            align-items: center;
+            justify-items: stretch;
+        }
+        
+        /* Component Styles */
+        .component {
+            width: 100%;
+            height: 100%;
+            background: var(--corp-badge-bg);
+            color: var(--corp-badge-text);
+            border-radius: var(--component-radius);
+            padding: 3px 5px;
+            font-family: var(--font-heading);
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 43px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all var(--transition-normal);
+            line-height: 1.3;
+        }
+        
+        .component::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .component:hover {
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-indigo) 100%);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .component:hover::before { left: 100%; }
+        .component:active { transform: translateY(0) scale(0.98); }
+        
+        /* Icon Components (for Infrastructure layer) */
+        .component-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            padding: 16px 12px;
+            color: #374151;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-normal);
+        }
+        
+        .component-icon:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-4px);
+        }
+        
+        .component-icon .icon {
+            font-size: 36px;
+            line-height: 1;
+            transition: transform var(--transition-smooth);
+        }
+        
+        .component-icon:hover .icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+        
+        .component-icon .label {
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            color: #6b7280;
+            transition: color var(--transition-fast);
+        }
+        
+        .component-icon:hover .label {
+            color: var(--accent-indigo);
+            font-weight: 600;
+        }
+        
+        /* Grid Column Utilities */
+        .cols-1 { grid-column: span 1; }
+        .cols-2 { grid-column: span 2; }
+        .cols-3 { grid-column: span 3; }
+        .cols-4 { grid-column: span 4; }
+        .cols-5 { grid-column: span 5; }
+        .cols-6 { grid-column: span 6; }
+        .cols-7 { grid-column: span 7; }
+        .cols-8 { grid-column: span 8; }
+        .cols-9 { grid-column: span 9; }
+        .cols-10 { grid-column: span 10; }
+        .cols-11 { grid-column: span 11; }
+        .cols-12 { grid-column: span 12; }
+        
+        /* Grid Row Utilities */
+        .rows-1 { grid-row: span 1; }
+        .rows-2 { grid-row: span 2; }
+        .rows-3 { grid-row: span 3; }
+        .rows-4 { grid-row: span 4; }
+        
+        /* Internal Grid Utilities */
+        .grid-1x1 { grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr); }
+        .grid-1x2 { grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .grid-1x3 { grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .grid-1x4 { grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(4, 1fr); }
+        .grid-2x1 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(1, 1fr); }
+        .grid-2x2 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .grid-2x3 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .grid-2x4 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr); }
+        .grid-3x1 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(1, 1fr); }
+        .grid-3x2 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .grid-3x3 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .grid-4x1 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(1, 1fr); }
+        .grid-4x2 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .grid-4x3 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .grid-4x4 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); }
+        .grid-5x1 { grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(1, 1fr); }
+        .grid-5x2 { grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .grid-6x1 { grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(1, 1fr); }
+        .grid-6x2 { grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(2, 1fr); }
+        
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .powered-by {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13px;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .powered-by .brand-logo {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #f59e0b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .powered-by .brand-name {
+            font-weight: 600;
+            color: var(--corp-border);
+        }
+    </style>
+</head>
+<body>
+    <div class="diagram">
+        <h1 class="diagram-title">X-IPE Platform — Module Architecture</h1>
+        <div class="diagram-content">
+
+            <!-- =============================================
+                 Layer 1: CLI (rows 1)
+                 ============================================= -->
+            <div class="layer-wrapper">
+                <div class="layer-label">CLI</div>
+                <div class="layer">
+                    <div class="layer-row">
+                        <div class="module cols-12">
+                            <h3 class="module-title">CLI Commands</h3>
+                            <div class="module-content grid-5x1" style="gap: 10px;">
+                                <div class="component cols-1 rows-1">Project Init</div>
+                                <div class="component cols-1 rows-1">Dev Server</div>
+                                <div class="component cols-1 rows-1">Upgrade</div>
+                                <div class="component cols-1 rows-1">Status</div>
+                                <div class="component cols-1 rows-1">Info</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 Layer 2: Presentation (rows 2)
+                 ============================================= -->
+            <div class="layer-wrapper">
+                <div class="layer-label">Presentation</div>
+                <div class="layer">
+                    <div class="layer-row">
+                        <div class="module cols-3">
+                            <h3 class="module-title">Page Templates</h3>
+                            <div class="module-content grid-2x3" style="gap: 10px;">
+                                <div class="component cols-1 rows-1">Layout Shell</div>
+                                <div class="component cols-1 rows-1">Homepage</div>
+                                <div class="component cols-1 rows-1">Workplace</div>
+                                <div class="component cols-1 rows-1">Knowledge Base</div>
+                                <div class="component cols-1 rows-1">Settings</div>
+                                <div class="component cols-1 rows-1">UIUX Feedback</div>
+                            </div>
+                        </div>
+                        <div class="module cols-6">
+                            <h3 class="module-title">Interactive Features</h3>
+                            <div class="module-content grid-4x4" style="gap: 10px;">
+                                <div class="component cols-1 rows-1">Workspace Manager</div>
+                                <div class="component cols-1 rows-1">Sidebar Navigation</div>
+                                <div class="component cols-1 rows-1">Content Editor</div>
+                                <div class="component cols-1 rows-1">Folder Explorer</div>
+                                <div class="component cols-1 rows-1">Stage Toolbox</div>
+                                <div class="component cols-1 rows-1">Voice Input</div>
+                                <div class="component cols-1 rows-1">Tracing Dashboard</div>
+                                <div class="component cols-1 rows-1">Tracing Graph</div>
+                                <div class="component cols-1 rows-1">Infinity Loop Home</div>
+                                <div class="component cols-1 rows-1">KB Explorer</div>
+                                <div class="component cols-1 rows-1">Quality Eval View</div>
+                                <div class="component cols-1 rows-1">Project Switcher</div>
+                                <div class="component cols-1 rows-1">Tree Search</div>
+                                <div class="component cols-1 rows-1">Drag and Drop</div>
+                                <div class="component cols-1 rows-1">Live Refresh</div>
+                                <div class="component cols-1 rows-1">Confirm Dialog</div>
+                            </div>
+                        </div>
+                        <div class="module cols-3">
+                            <h3 class="module-title">Rendering Engine</h3>
+                            <div class="module-content grid-1x3" style="gap: 10px;">
+                                <div class="component cols-1 rows-1">App Bootstrap</div>
+                                <div class="component cols-1 rows-1">Content Renderer</div>
+                                <div class="component cols-1 rows-1">Architecture DSL Renderer</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 Layer 3: API Gateway (rows 2)
+                 ============================================= -->
+            <div class="layer-wrapper">
+                <div class="layer-label">API Gateway</div>
+                <div class="layer">
+                    <div class="layer-row">
+                        <div class="module cols-9">
+                            <h3 class="module-title">REST Endpoints</h3>
+                            <div class="module-content grid-3x3" style="gap: 10px;">
+                                <div class="component cols-1 rows-1">Page Routing &amp; File I/O</div>
+                                <div class="component cols-1 rows-1">Idea Management</div>
+                                <div class="component cols-1 rows-1">App Settings</div>
+                                <div class="component cols-1 rows-1">Project Switching</div>
+                                <div class="component cols-1 rows-1">Toolbox &amp; Themes</div>
+                                <div class="component cols-1 rows-1">Proxy &amp; Preview</div>
+                                <div class="component cols-1 rows-1">Tracing Control</div>
+                                <div class="component cols-1 rows-1">Knowledge Base</div>
+                                <div class="component cols-1 rows-1">Quality Evaluation</div>
+                            </div>
+                        </div>
+                        <div class="module cols-3">
+                            <h3 class="module-title">WebSocket Channels</h3>
+                            <div class="module-content grid-1x2" style="gap: 10px;">
+                                <div class="component cols-1 rows-1">Terminal I/O</div>
+                                <div class="component cols-1 rows-1">Voice Streaming</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 Layer 4: Business Logic (rows 3)
+                 ============================================= -->
+            <div class="layer-wrapper">
+                <div class="layer-label">Business Logic</div>
+                <div class="layer layer-highlight">
+                    <div class="layer-row">
+                        <div class="module cols-3">
+                            <h3 class="module-title">Project Services</h3>
+                            <div class="module-content grid-1x4" style="gap: 10px;">
+                                <div class="component cols-1 rows-1">File Navigation &amp; Editing</div>
+                                <div class="component cols-1 rows-1">Idea Lifecycle</div>
+                                <div class="component cols-1 rows-1">Knowledge Indexing</div>
+                                <div class="component cols-1 rows-1">Homepage Stage Mapping</div>
+                            </div>
+                        </div>
+                        <div class="module cols-3">
+                            <h3 class="module-title">Config Services</h3>
+                            <div class="module-content grid-1x4" style="gap: 10px;">
+                                <div class="component cols-1 rows-1">Project Config Loader</div>
+                                <div class="component cols-1 rows-1">App Settings Persistence</div>
+                                <div class="component cols-1 rows-1">Stage Toolbox Config</div>
+                                <div class="component cols-1 rows-1">Prompt Config &amp; Migration</div>
+                            </div>
+                        </div>
+                        <div class="module cols-3">
+                            <h3 class="module-title">Platform Services</h3>
+                            <div class="module-content grid-1x3" style="gap: 10px;">
+                                <div class="component cols-1 rows-1">Interactive Terminal &amp; PTY</div>
+                                <div class="component cols-1 rows-1">URL Proxy &amp; Asset Rewriting</div>
+                                <div class="component cols-1 rows-1">Speech Recognition</div>
+                            </div>
+                        </div>
+                        <div class="module cols-3">
+                            <h3 class="module-title">Extension Services</h3>
+                            <div class="module-content grid-1x4" style="gap: 10px;">
+                                <div class="component cols-1 rows-1">Theme Discovery</div>
+                                <div class="component cols-1 rows-1">Skill Discovery</div>
+                                <div class="component cols-1 rows-1">Skill Translation</div>
+                                <div class="component cols-1 rows-1">CLI Adapter &amp; MCP Deploy</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 Layer 5: Cross-Cutting (rows 2)
+                 ============================================= -->
+            <div class="layer-wrapper">
+                <div class="layer-label">Cross-Cutting</div>
+                <div class="layer">
+                    <div class="layer-row">
+                        <div class="module cols-8">
+                            <h3 class="module-title">Observability Pipeline</h3>
+                            <div class="module-content grid-4x2" style="gap: 10px;">
+                                <div class="component cols-1 rows-1">Trace Context Propagation</div>
+                                <div class="component cols-1 rows-1">Method Decoration</div>
+                                <div class="component cols-1 rows-1">In-Memory Buffer</div>
+                                <div class="component cols-1 rows-1">Log Persistence</div>
+                                <div class="component cols-1 rows-1">Request Interception</div>
+                                <div class="component cols-1 rows-1">DAG Reconstruction</div>
+                                <div class="component cols-1 rows-1">Credential Redaction</div>
+                                <div class="component cols-1 rows-1">Trace Lifecycle Mgmt</div>
+                            </div>
+                        </div>
+                        <div class="module cols-4">
+                            <h3 class="module-title">Feedback &amp; Quality</h3>
+                            <div class="module-content grid-1x2" style="gap: 10px;">
+                                <div class="component cols-1 rows-1">UIUX Feedback Capture</div>
+                                <div class="component cols-1 rows-1">Project Health Scoring</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 Layer 6: Core (rows 2)
+                 ============================================= -->
+            <div class="layer-wrapper">
+                <div class="layer-label">Core</div>
+                <div class="layer">
+                    <div class="layer-row">
+                        <div class="module cols-6">
+                            <h3 class="module-title">Foundation Utilities</h3>
+                            <div class="module-content grid-3x1" style="gap: 10px;">
+                                <div class="component cols-1 rows-1">Path Resolution</div>
+                                <div class="component cols-1 rows-1">File Hashing</div>
+                                <div class="component cols-1 rows-1">YAML Config Parser</div>
+                            </div>
+                        </div>
+                        <div class="module cols-6">
+                            <h3 class="module-title">Project Bootstrap</h3>
+                            <div class="module-content grid-2x1" style="gap: 10px;">
+                                <div class="component cols-1 rows-1">Scaffold Manager</div>
+                                <div class="component cols-1 rows-1">Skills Manager</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 Layer 7: Infrastructure (rows 2)
+                 ============================================= -->
+            <div class="layer-wrapper">
+                <div class="layer-label">Infrastructure</div>
+                <div class="layer layer-alt">
+                    <div class="layer-row">
+                        <div class="module cols-3">
+                            <h3 class="module-title">Web Framework</h3>
+                            <div class="module-content grid-1x3" style="gap: 10px;">
+                                <div class="component-icon"><span class="icon">🌶️</span><span class="label">Flask</span></div>
+                                <div class="component-icon"><span class="icon">🔌</span><span class="label">Flask-SocketIO</span></div>
+                                <div class="component-icon"><span class="icon">🧵</span><span class="label">Eventlet / Gevent</span></div>
+                            </div>
+                        </div>
+                        <div class="module cols-3">
+                            <h3 class="module-title">CLI &amp; Config</h3>
+                            <div class="module-content grid-1x3" style="gap: 10px;">
+                                <div class="component-icon"><span class="icon">⌨️</span><span class="label">Click</span></div>
+                                <div class="component-icon"><span class="icon">📄</span><span class="label">PyYAML</span></div>
+                                <div class="component-icon"><span class="icon">🔧</span><span class="label">Hatchling (Build)</span></div>
+                            </div>
+                        </div>
+                        <div class="module cols-3">
+                            <h3 class="module-title">I/O &amp; Networking</h3>
+                            <div class="module-content grid-1x3" style="gap: 10px;">
+                                <div class="component-icon"><span class="icon">📡</span><span class="label">Requests</span></div>
+                                <div class="component-icon"><span class="icon">🌐</span><span class="label">WebSockets</span></div>
+                                <div class="component-icon"><span class="icon">🖥️</span><span class="label">PTYProcess</span></div>
+                            </div>
+                        </div>
+                        <div class="module cols-3">
+                            <h3 class="module-title">AI &amp; Content</h3>
+                            <div class="module-content grid-1x3" style="gap: 10px;">
+                                <div class="component-icon"><span class="icon">🤖</span><span class="label">Dashscope SDK</span></div>
+                                <div class="component-icon"><span class="icon">🔍</span><span class="label">BeautifulSoup4</span></div>
+                                <div class="component-icon"><span class="icon">🖼️</span><span class="label">Pillow</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================
+                 Layer 8: Data (rows 2)
+                 ============================================= -->
+            <div class="layer-wrapper">
+                <div class="layer-label">Data</div>
+                <div class="layer">
+                    <div class="layer-row">
+                        <div class="module cols-4">
+                            <h3 class="module-title">Project Workspace</h3>
+                            <div class="module-content grid-2x2" style="gap: 10px;">
+                                <div class="component-icon"><span class="icon">📁</span><span class="label">Documentation &amp; Planning</span></div>
+                                <div class="component-icon"><span class="icon">💻</span><span class="label">Source Code</span></div>
+                                <div class="component-icon"><span class="icon">🧠</span><span class="label">Skills &amp; Workflows</span></div>
+                                <div class="component-icon"><span class="icon">🎨</span><span class="label">Static Assets &amp; Themes</span></div>
+                            </div>
+                        </div>
+                        <div class="module cols-4">
+                            <h3 class="module-title">Configuration Store</h3>
+                            <div class="module-content grid-2x2" style="gap: 10px;">
+                                <div class="component-icon"><span class="icon">⚙️</span><span class="label">Project Config</span></div>
+                                <div class="component-icon"><span class="icon">🛠️</span><span class="label">Toolbox Config</span></div>
+                                <div class="component-icon"><span class="icon">💬</span><span class="label">Prompt Templates</span></div>
+                                <div class="component-icon"><span class="icon">🔗</span><span class="label">CLI Adapter Registry</span></div>
+                            </div>
+                        </div>
+                        <div class="module cols-4">
+                            <h3 class="module-title">Persistence</h3>
+                            <div class="module-content grid-1x2" style="gap: 10px;">
+                                <div class="component-icon"><span class="icon">🗄️</span><span class="label">App Settings DB</span></div>
+                                <div class="component-icon"><span class="icon">📋</span><span class="label">Session State</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="powered-by">
+            <div class="brand-logo">X</div>
+            <span>Powered by <span class="brand-name">X-IPE</span> — AI-Native Integrated Project Environment</span>
+        </div>
+    </div>
+</body>
+</html>

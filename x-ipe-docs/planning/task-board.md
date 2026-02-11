@@ -6,8 +6,9 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-285 | Ideation | Refine idea for CR-Switch Language in Settings (016) | Sage | 🔄 in_progress | 02-11-2026 06:50:00 | - | - |
-| TASK-257 | Ideation | Refine idea for X-IPE Module Architecture research (101) | Zephyr | 🔄 in_progress | 02-11-2026 06:51:00 | [idea-summary-v1.md](../ideas/101.%20Research-X-IPE%20Module%20Architecture/idea-summary-v1.md) | Idea to Architecture |
+| TASK-285 | Ideation | Refine idea for CR-Switch Language in Settings (016) | Sage | 🔄 in_progress | 02-11-2026 06:55:00 | [idea-summary-v1.md](../ideas/016.%20CR-Switch%20Language%20in%20Settings/idea-summary-v1.md) | Idea Mockup |
+| TASK-286 | Idea Mockup | Create mockup for CR-Switch Language in Settings (016) | Sage | ⏳ pending | 02-11-2026 08:24:00 | - | Change Request |
+| TASK-257 | Ideation | Refine idea for X-IPE Module Architecture research (101) | Zephyr | 🔄 in_progress | 02-11-2026 08:23:00 | [idea-summary-v1.md](../ideas/101.%20Research-X-IPE%20Module%20Architecture/idea-summary-v1.md), [module-architecture.html](../ideas/101.%20Research-X-IPE%20Module%20Architecture/module-architecture.html) | Idea to Architecture |
 
 
 
@@ -154,9 +155,9 @@
 
 ## Quick Stats
 
-- **Total Active:** 1
+- **Total Active:** 2
 - **In Progress:** 1
-- **Pending:** 0
+- **Pending:** 1
 - **Deferred:** 0
 - **Completed (archived):** 294
 - **Pending Review:** 0
