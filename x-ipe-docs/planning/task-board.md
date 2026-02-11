@@ -6,7 +6,8 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-289 | Technical Design | Design FEATURE-028-D Settings Language Switch | Sage | ⏳ pending | 02-11-2026 08:36:00 | - | Test Generation |
+| TASK-290 | Test Generation | Generate tests for FEATURE-028-D Settings Language Switch | Sage | ⏳ pending | 02-11-2026 10:05:00 | - | Code Implementation |
+| TASK-292 | Feature Acceptance Test | Execute acceptance tests for FEATURE-025-B KB Landing Zone | Pulse | 🔄 in_progress | 02-11-2026 10:06:00 | - | Feature Closing |
 
 
 
@@ -28,6 +29,7 @@
 |---------|-----------|-------------|------|--------------|--------------|-------|
 | TASK-291 | Code Implementation | Implement FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:22:00 | [kb_service.py](../../src/x_ipe/services/kb_service.py), [kb_routes.py](../../src/x_ipe/routes/kb_routes.py), [kb-landing.js](../../src/x_ipe/static/js/features/kb-landing.js), [kb-landing.css](../../src/x_ipe/static/css/kb-landing.css) | Backend: upload_files/delete_files/get_landing_files + 3 endpoints. Frontend: file grid, drag-drop, selection. 111/111 KB tests pass. |
 | TASK-290 | Test Generation | Generate tests for FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:22:00 | [test_kb_landing.py](../../tests/test_kb_landing.py) | 57 tests across 9 classes. TDD ready confirmed. |
+| TASK-289 | Technical Design | Design FEATURE-028-D Settings Language Switch | Sage | 02-11-2026 10:05:00 | [technical-design.md](../requirements/FEATURE-028-D/technical-design.md) | Full-stack design: POST /api/config/language, LanguageManager JS, ConfigData.language. 9/9 DoD pass. |
 | TASK-288 | Feature Refinement | Refine FEATURE-028-D Settings Language Switch | Sage | 02-11-2026 08:36:00 | [specification.md](../requirements/FEATURE-028-D/specification.md) | Specification with 14 ACs, 7 FRs, 4 user flows. Mockup analyzed and linked. All DoD passed. |
 | TASK-287 | Change Request | CR-002: Settings Language Switch for FEATURE-028-D | Sage | 02-11-2026 08:33:00 | [CR-002.md](../requirements/FEATURE-028-D/CR-002.md) | Modification: new sub-feature FEATURE-028-D. Dropdown en/中文 in Settings, POST /api/config/language, atomicity safeguards. Mockup referenced. |
 | TASK-286 | Idea Mockup | Create mockup for CR-Switch Language in Settings (016) | Sage | 02-11-2026 08:30:00 | [mockup-v1.html](../ideas/016.%20CR-Switch%20Language%20in%20Settings/mockups/settings-language-v1.html) | Interactive mockup with 4 scenarios. Human approved. |
