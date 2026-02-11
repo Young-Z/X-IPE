@@ -188,8 +188,13 @@ def info(ctx: click.Context) -> None:
     default=None,
     help="CLI to use (copilot, opencode, claude-code). Skips interactive prompt.",
 )
+@click.option(
+    "--lang", "lang",
+    default=None,
+    help="Language for instructions (en, zh). Skips interactive prompt.",
+)
 @click.pass_context
-def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp: bool, cli_name: Optional[str]) -> None:
+def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp: bool, cli_name: Optional[str], lang: Optional[str]) -> None:
     """Initialize X-IPE in the current project.
     
     Creates the standard X-IPE folder structure:
@@ -210,6 +215,9 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp
     # CLI Detection & Selection (FEATURE-027-B)
     selected_cli = _resolve_cli_selection(project_root, cli_name)
     
+    # Language Selection (FEATURE-028-B)
+    selected_lang = _resolve_language_selection(lang)
+    
     # Create scaffold manager
     scaffold = ScaffoldManager(project_root, dry_run=dry_run, force=force)
     
@@ -221,7 +229,7 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp
         scaffold.copy_skills(cli_name=selected_cli)
     
     # Copy/merge instructions file
-    scaffold.copy_copilot_instructions(cli_name=selected_cli)
+    scaffold.copy_copilot_instructions(cli_name=selected_cli, language=selected_lang)
     
     # Copy MCP config (.github/copilot/mcp-config.json) — only for copilot
     if selected_cli == 'copilot':
@@ -237,7 +245,7 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp
     scaffold.copy_themes()
     
     # Create config file
-    scaffold.create_config_file(cli_name=selected_cli)
+    scaffold.create_config_file(cli_name=selected_cli, language=selected_lang)
     
     # MCP config merge using active CLI's target path
     # Read MCP servers from package resources so it works for all CLIs
@@ -558,6 +566,72 @@ def _read_existing_cli(project_root: Path) -> Optional[str]:
         return None
 
 
+SUPPORTED_LANGUAGES = ['en', 'zh']
+
+
+def _resolve_language_selection(lang_flag: Optional[str] = None) -> str:
+    """Resolve language selection from flag or interactive prompt.
+    
+    Args:
+        lang_flag: Language code from --lang option, or None for interactive.
+        
+    Returns:
+        Selected language code ('en' or 'zh').
+    """
+    if lang_flag:
+        if lang_flag not in SUPPORTED_LANGUAGES:
+            raise click.BadParameter(
+                f"Invalid language '{lang_flag}'. Supported: {', '.join(SUPPORTED_LANGUAGES)}",
+                param_hint="'--lang'",
+            )
+        return lang_flag
+
+    try:
+        selected = click.prompt(
+            "Select language for instructions",
+            type=click.Choice(SUPPORTED_LANGUAGES, case_sensitive=False),
+            default='en',
+        )
+    except (click.Abort, EOFError):
+        selected = 'en'
+        click.echo("Using default language: en")
+
+    return selected
+
+
+def _handle_language_switch(project_root: Path, language: str, dry_run: bool = False) -> None:
+    """Switch language: update .x-ipe.yaml and re-extract instructions.
+    
+    Args:
+        project_root: Project root path.
+        language: Target language code.
+        dry_run: If True, show what would be done.
+    """
+    import yaml
+    
+    config_path = project_root / '.x-ipe.yaml'
+    if not config_path.exists():
+        click.echo("Error: Project not initialized. Run `x-ipe init` first.")
+        return
+    
+    click.echo(f"Switching language to: {language}")
+    
+    if not dry_run:
+        # Update .x-ipe.yaml
+        with open(config_path) as f:
+            config = yaml.safe_load(f) or {}
+        config['language'] = language
+        with open(config_path, 'w') as f:
+            yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+        
+        # Re-extract instructions
+        existing_cli = config.get('cli', 'copilot')
+        scaffold = ScaffoldManager(project_root, dry_run=False, force=True)
+        scaffold.copy_copilot_instructions(cli_name=existing_cli, language=language)
+    
+    click.echo(f"✓ Language switched to '{language}'")
+
+
 def _kill_port(port: int) -> None:
     """Kill any process listening on the given port."""
     import subprocess
@@ -702,9 +776,14 @@ def serve(ctx: click.Context, host: Optional[str], port: Optional[int],
     default=None,
     help="Switch to a different CLI adapter (triggers migration).",
 )
+@click.option(
+    "--lang", "lang",
+    default=None,
+    help="Switch language for instructions (en, zh).",
+)
 @click.pass_context
 def upgrade(ctx: click.Context, force: bool, dry_run: bool, 
-            backup: bool, skill: Optional[str], no_mcp: bool, cli_name: Optional[str]) -> None:
+            backup: bool, skill: Optional[str], no_mcp: bool, cli_name: Optional[str], lang: Optional[str]) -> None:
     """Upgrade skills from the X-IPE package.
     
     Syncs skills from the installed X-IPE package to the local
@@ -726,6 +805,11 @@ def upgrade(ctx: click.Context, force: bool, dry_run: bool,
 
     if cli_name:
         _handle_cli_migration(project_root, cli_name, dry_run, force)
+    
+    # Language switch (FEATURE-028-B)
+    if lang is not None:
+        selected_lang = _resolve_language_selection(lang)
+        _handle_language_switch(project_root, selected_lang, dry_run)
     
     click.echo(f"Upgrading X-IPE skills in: {project_root}")
     click.echo("-" * 40)

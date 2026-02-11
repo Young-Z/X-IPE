@@ -129,11 +129,12 @@ class ScaffoldManager:
                 shutil.copytree(skills_source, target, dirs_exist_ok=True)
         self.created.append(target)
     
-    def copy_copilot_instructions(self, cli_name: Optional[str] = None) -> None:
+    def copy_copilot_instructions(self, cli_name: Optional[str] = None, language: str = "en") -> None:
         """Copy or merge instructions file to CLI-specific location.
         
         Args:
             cli_name: CLI adapter name. Determines target path (e.g. .opencode/instructions.md).
+            language: Language code for bilingual template extraction ('en' or 'zh').
         """
         # For non-copilot CLIs, use SkillTranslator to generate instructions
         adapter = None
@@ -157,19 +158,23 @@ class ScaffoldManager:
             self.created.append(target)
             return
         
-        # Default copilot behavior
-        source = self._get_resource_path("copilot-instructions.md")
+        # Default copilot behavior — load language-specific instructions file
+        source = self._get_resource_path(f"copilot-instructions-{language}.md")
+        if source is None or not source.exists():
+            # Fallback to EN if requested language not found
+            source = self._get_resource_path("copilot-instructions-en.md")
         if source is None or not source.exists():
             return
         
         target = self.project_root / ".github" / "copilot-instructions.md"
+        
+        xipe_content = source.read_text()
         
         if target.exists():
             if not self.force:
                 # Merge: append X-IPE instructions if not already present
                 if not self.dry_run:
                     existing_content = target.read_text()
-                    xipe_content = source.read_text()
                     
                     # Check if X-IPE section already exists
                     if "# Copilot Instructions" in existing_content and "## Before You Start" in existing_content:
@@ -184,7 +189,7 @@ class ScaffoldManager:
         
         if not self.dry_run:
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(source, target)
+            target.write_text(xipe_content)
         self.created.append(target)
     
     def copy_mcp_config(self) -> None:
@@ -399,12 +404,13 @@ class ScaffoldManager:
             shutil.copytree(theme_source, theme_target, dirs_exist_ok=True)
         self.created.append(theme_target)
     
-    def create_config_file(self, config_content: Optional[str] = None, cli_name: Optional[str] = None) -> None:
+    def create_config_file(self, config_content: Optional[str] = None, cli_name: Optional[str] = None, language: str = "en") -> None:
         """Create .x-ipe.yaml with defaults.
         
         Args:
             config_content: Optional custom config content.
             cli_name: Optional CLI adapter name to store in config (FEATURE-027-B).
+            language: Language code to store in config (FEATURE-028-B).
         """
         path = self.project_root / ".x-ipe.yaml"
         
@@ -442,6 +448,9 @@ server:
                 pass
             content = content.replace('skills: ".github/skills"', f'skills: "{skills_folder}"')
             content = content.rstrip() + f'\n\ncli: "{cli_name}"\n'
+        
+        if language and not config_content:
+            content = content.rstrip() + f'\nlanguage: "{language}"\n'
         
         if not self.dry_run:
             path.write_text(content)

@@ -17,9 +17,12 @@ AI Agents follow this skill to generate Architecture DSL definitions to:
 
 ## Important Notes
 
+BLOCKING: Document MUST start with `@startuml module-view` or `@startuml landscape-view` and end with `@enduml`. The `view` keyword is NOT valid — only `@startuml` is recognized by the parser.
 BLOCKING: Module `cols` within a layer MUST sum to 12. Violation produces invalid diagrams.
-CRITICAL: IPE natively renders Architecture DSL in markdown via `architecture-dsl` code blocks -- no HTML files needed.
+BLOCKING: `component` is the mandatory smallest unit. Every layer MUST contain at least one `component`. `module` is optional — use it only when grouping components adds clarity; otherwise place components directly in the layer.
+CRITICAL: IPE natively renders Architecture DSL in markdown via `architecture-dsl` code blocks — no HTML files needed.
 CRITICAL: Stereotyped components render at half width (0.5x) and 1.5x height. Use horizontal grid (`grid N x 1`) for stereotype-only modules.
+CRITICAL: Do NOT invent keywords. Only use keywords defined in the grammar (`layer`, `module`, `component`, `cols`, `rows`, `grid`, `align`, `gap`, `color`, `border-color`, `text-align`, `title`, `theme`, `direction`, `canvas`, `side-column`). Unknown keywords like `desc`, `description`, `note` are silently ignored by the parser and will cause missing content.
 
 ---
 
@@ -125,10 +128,13 @@ input:
     7. Validate output against checklist
   </action>
   <constraints>
+    - BLOCKING: Document MUST start with `@startuml module-view` and end with `@enduml` — the `view` keyword is NOT valid syntax
     - BLOCKING: Module cols MUST sum to 12 per layer
     - BLOCKING: Every layer MUST have rows declaration
+    - BLOCKING: Every layer MUST contain at least one `component` (the smallest renderable unit)
     - BLOCKING: Stereotype-only modules MUST use horizontal grid (grid N x 1)
-    - Document MUST start with @startuml module-view and end with @enduml
+    - BLOCKING: Only use keywords defined in the grammar — unknown keywords (e.g. `desc`) are silently dropped
+    - Module is OPTIONAL — use only when grouping components adds clarity
     - Document MUST have grid declaration at document level
   </constraints>
   <output>Complete Architecture DSL in architecture-dsl code block</output>
@@ -218,11 +224,15 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently. The sub-age
 
   <checkpoint required="true">
     <name>Structure Valid</name>
-    <verification>@startuml and @enduml present, grid declared at document level</verification>
+    <verification>Document starts with `@startuml module-view` or `@startuml landscape-view` (NOT `view`), ends with `@enduml`, grid declared at document level</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Grid Rules Satisfied</name>
     <verification>Each layer has rows, each module has cols, module cols sum to 12 per layer</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Components Present</name>
+    <verification>Every layer contains at least one `component` — component is the mandatory smallest renderable unit</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Component Grid Valid</name>
@@ -238,7 +248,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently. The sub-age
   </checkpoint>
   <checkpoint required="true">
     <name>Syntax Conforms to Grammar</name>
-    <verification>Every keyword, property, and nesting level matches references/grammar.md specification</verification>
+    <verification>Only grammar-defined keywords used (no `desc`, `description`, `note`, `view` etc.). Every keyword, property, and nesting level matches references/grammar.md specification</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Output Embedded</name>

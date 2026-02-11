@@ -1,75 +1,186 @@
 {
-  "version": "2.0",
+  "version": "3.0",
   "ideation": {
     "prompts": [
       {
         "id": "generate-architecture",
-        "label": "Generate Architecture",
         "icon": "bi-diagram-3",
-        "command": "Base on <current-idea-file> to generate layered architecture"
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Generate Architecture",
+            "command": "Base on <current-idea-file> to generate layered architecture"
+          },
+          {
+            "language": "zh",
+            "label": "生成架构图",
+            "command": "基于<current-idea-file>生成分层架构图"
+          }
+        ]
       },
       {
         "id": "idea-reflection",
-        "label": "Idea Reflection",
         "icon": "bi-diagram-3",
-        "command": "Extra key points in <current-idea-file>, then create a sub-agent that uses these key points to learn from the project and give feedback to the idea file (the feedback should be critical but constructive), then you use the feedback to improve the idea."
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Idea Reflection",
+            "command": "Extra key points in <current-idea-file>, then create a sub-agent that uses these key points to learn from the project and give feedback to the idea file (the feedback should be critical but constructive), then you use the feedback to improve the idea."
+          },
+          {
+            "language": "zh",
+            "label": "创意反思",
+            "command": "提取<current-idea-file>中的关键点，然后创建一个子代理，使用这些关键点从项目中学习并给出对创意文件的反馈（反馈应当批判性但建设性），然后你使用反馈来改进创意。"
+          }
+        ]
       },
       {
         "id": "generate-mockup",
-        "label": "Generate Mockup",
         "icon": "bi-palette",
-        "command": "Base on <current-idea-file> to generate mockups"
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Generate Mockup",
+            "command": "Base on <current-idea-file> to generate mockups"
+          },
+          {
+            "language": "zh",
+            "label": "生成原型",
+            "command": "基于<current-idea-file>生成原型设计"
+          }
+        ]
       },
       {
         "id": "free-question",
-        "label": "Free Collaboration",
         "icon": "bi-chat-dots",
-        "command": "Let's base on <current-idea-file> to collaborate, wait for my instructions."
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Free Collaboration",
+            "command": "Let's base on <current-idea-file> to collaborate, wait for my instructions."
+          },
+          {
+            "language": "zh",
+            "label": "自由协作",
+            "command": "基于<current-idea-file>进行协作，等待我的指示。"
+          }
+        ]
       }
     ]
   },
   "evaluation": {
     "evaluate": {
-      "label": "Evaluate Project Quality",
       "icon": "bi-clipboard-check",
-      "command": "Evaluate project quality and generate report"
+      "id": "evaluate",
+      "prompt-details": [
+        {
+          "language": "en",
+          "label": "Evaluate Project Quality",
+          "command": "Evaluate project quality and generate report"
+        },
+        {
+          "language": "zh",
+          "label": "评估项目质量",
+          "command": "评估项目质量并生成报告"
+        }
+      ]
     },
     "refactoring": [
       {
         "id": "refactor-all",
-        "label": "Refactor All",
         "icon": "bi-arrow-repeat",
-        "command": "Refactor all with reference to its code and <evaluation-file>"
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Refactor All",
+            "command": "Refactor all with reference to its code and <evaluation-file>"
+          },
+          {
+            "language": "zh",
+            "label": "全面重构",
+            "command": "参照代码和<evaluation-file>进行全面重构"
+          }
+        ]
       },
       {
         "id": "refactor-requirements",
-        "label": "Align Requirements to Features",
         "icon": "bi-file-text",
-        "command": "Update requirement docs to match current feature specification"
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Align Requirements to Features",
+            "command": "Update requirement docs to match current feature specification"
+          },
+          {
+            "language": "zh",
+            "label": "对齐需求与功能",
+            "command": "更新需求文档以匹配当前功能规范"
+          }
+        ]
       },
       {
         "id": "refactor-features",
-        "label": "Align Features to Code",
         "icon": "bi-list-check",
-        "command": "Update feature specification docs to match current code implementation"
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Align Features to Code",
+            "command": "Update feature specification docs to match current code implementation"
+          },
+          {
+            "language": "zh",
+            "label": "对齐功能与代码",
+            "command": "更新功能规范以匹配当前代码实现"
+          }
+        ]
       },
       {
         "id": "refactor-tests",
-        "label": "Align Tests to Code",
         "icon": "bi-bug",
-        "command": "Update test cases to match current code implementation and reference <evaluation-file>"
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Align Tests to Code",
+            "command": "Update test cases to match current code implementation and reference <evaluation-file>"
+          },
+          {
+            "language": "zh",
+            "label": "对齐测试与代码",
+            "command": "更新测试用例以匹配当前代码实现，参照<evaluation-file>"
+          }
+        ]
       },
       {
         "id": "refactor-tracing-tests",
-        "label": "Align Tracing + Tests to Features",
         "icon": "bi-graph-up",
-        "command": "Update tracing decorators and tests to match current feature specification"
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Align Tracing + Tests to Features",
+            "command": "Update tracing decorators and tests to match current feature specification"
+          },
+          {
+            "language": "zh",
+            "label": "对齐追踪与测试",
+            "command": "更新追踪装饰器和测试以匹配当前功能规范"
+          }
+        ]
       },
       {
         "id": "refactor-code-tests",
-        "label": "Refactor Code + Tracing + Tests",
         "icon": "bi-code-slash",
-        "command": "Refactor code and tests to match current feature specification and reference <evaluation-file>"
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Refactor Code + Tracing + Tests",
+            "command": "Refactor code and tests to match current feature specification and reference <evaluation-file>"
+          },
+          {
+            "language": "zh",
+            "label": "重构代码+追踪+测试",
+            "command": "重构代码和测试以匹配当前功能规范，参照<evaluation-file>"
+          }
+        ]
       }
     ]
   },

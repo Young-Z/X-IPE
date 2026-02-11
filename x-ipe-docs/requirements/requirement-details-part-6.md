@@ -14,6 +14,10 @@
 | FEATURE-027-C | Skill & Instruction Translation | v1.0 | Translate canonical X-IPE skills to Copilot, OpenCode, and Claude Code native formats | FEATURE-027-A |
 | FEATURE-027-D | MCP Configuration Deployment | v1.0 | Deploy MCP server config in each CLI's native format and location | FEATURE-027-A |
 | FEATURE-027-E | CLI Migration & Upgrade | v1.0 | `x-ipe upgrade --cli` to switch between CLIs with non-destructive backup and redeployment | FEATURE-027-B, FEATURE-027-C, FEATURE-027-D |
+| FEATURE-028-A | Bilingual Prompt Schema & Migration | v1.0 | copilot-prompt.json v3.0 schema with prompt-details array, bilingual prompt content, v2.0→v3.0 auto-migration | None |
+| FEATURE-028-B | CLI Language Selection & Instructions | v1.0 | Language selection at init/upgrade, bilingual copilot-instructions.md template with ---LANG:xx--- markers, extraction logic | FEATURE-028-A |
+| FEATURE-028-C | Frontend Prompt Language Filtering | v1.0 | Client-side prompt-details filtering by language, API language field, fallback chain for v2.0 compat | FEATURE-028-A, FEATURE-028-B |
+| FEATURE-028-D | Settings Language Switch (Web UI) | v1.0 | Language dropdown in Settings page with confirmation dialog, AJAX switch via POST /api/config/language, reuses ScaffoldManager logic | FEATURE-028-B |
 
 ---
 
@@ -255,3 +259,215 @@ FEATURE-027-A (Registry & Service) ──┬── FEATURE-027-B (Init & Selecti
 - [OpenCode Skills](https://opencode.ai/docs/skills/)
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
 - [Claude Code Skills](https://docs.anthropic.com/en/docs/claude-code/skills)
+
+---
+
+## FEATURE-028: Prompt Bi-language Support
+
+**Source:** [IDEA-019: Prompt Bi-language Support](../ideas/015.%20Feature-Prompt%20Bi-language%20Support/idea-summary-v1.md)
+
+### Problem Statement
+
+X-IPE's copilot-prompt.json labels and commands are English-only. The copilot-instructions.md file also only uses English skill routing keywords. Chinese-speaking users — the primary user base — must mentally translate button labels and write requests in English for correct skill routing. This creates friction and limits adoption.
+
+### Solution Overview
+
+Add bilingual (EN/ZH) support across three areas:
+
+1. **copilot-prompt.json** — New `prompt-details` array per prompt with per-language `label` + `command`
+2. **copilot-instructions.md** — Single template file with EN and ZH parts separated by `---LANG:xx---` markers; init/upgrade extracts the selected part
+3. **CLI + Frontend** — Language selection at `x-ipe init` / `x-ipe upgrade --lang`; frontend filters prompts client-side by language setting
+
+### Clarifications
+
+| Question | Answer |
+|----------|--------|
+| Scope of bi-language? | copilot-prompt.json + copilot-instructions.md only. X-IPE web UI stays English-only. |
+| copilot-prompt.json structure? | `prompt-details[]` array per prompt. No `label` at prompt level — only inside prompt-details entries. |
+| Language separator in instructions template? | `---LANG:en---` / `---LANG:zh---` custom text markers |
+| Where to store language preference? | `.x-ipe.yaml` (alongside CLI selection) |
+| `x-ipe upgrade --lang` with user edits? | Behave like `x-ipe init` — overwrite with selected language part |
+| How frontend gets language? | Added to existing `/api/config/*` response — no new endpoint |
+| v2.0 → v3.0 migration timing? | Auto-migrate on any `x-ipe upgrade` |
+| Default language for existing projects? | English (en) |
+| Modify SKILL.md files? | No — skills stay as-is. CN skill keywords only in the ZH part of copilot-instructions.md |
+| Future languages? | Only zh/en for now — no extensibility framework |
+
+### Acceptance Criteria
+
+| # | Acceptance Criteria | Priority |
+|---|---------------------|----------|
+| AC-028.1 | `x-ipe init` MUST prompt for language selection after CLI detection (choices: English/中文, default: en) | Must |
+| AC-028.2 | `x-ipe init` MUST support `--lang <en\|zh>` flag for non-interactive language selection | Must |
+| AC-028.3 | The selected language MUST be stored in `.x-ipe.yaml` under a `language` key | Must |
+| AC-028.4 | copilot-prompt.json MUST bump schema version from `"2.0"` to `"3.0"` | Must |
+| AC-028.5 | Each prompt entry in v3.0 MUST contain a `prompt-details` array with objects: `{ language, label, command }` | Must |
+| AC-028.6 | The `label` field MUST NOT exist at the prompt level — only inside `prompt-details` entries | Must |
+| AC-028.7 | Each prompt MUST have `prompt-details` entries for both `"en"` and `"zh"` languages | Must |
+| AC-028.8 | The `prompt-details` structure MUST apply uniformly to `prompts[]` arrays, singleton `evaluate` objects, and `refactoring[]` arrays | Must |
+| AC-028.9 | The package MUST ship a single bilingual `copilot-instructions.md` template with EN and ZH parts separated by `---LANG:en---` and `---LANG:zh---` markers | Must |
+| AC-028.10 | `x-ipe init` MUST extract only the selected language part from the bilingual template and copy it into the project as `copilot-instructions.md` | Must |
+| AC-028.11 | The ZH part of copilot-instructions.md MUST include Chinese keyword examples for skill routing (e.g., "优化创意" → Ideation, "修复bug" → Bug Fix) | Must |
+| AC-028.12 | `x-ipe upgrade --lang` MUST present an interactive language selection prompt | Must |
+| AC-028.13 | `x-ipe upgrade --lang` MUST update `.x-ipe.yaml` language setting and re-extract the matching instructions part (same behavior as init) | Must |
+| AC-028.14 | `x-ipe upgrade` (without `--lang`) MUST auto-migrate copilot-prompt.json from v2.0 to v3.0 format | Must |
+| AC-028.15 | v2.0 → v3.0 migration MUST wrap existing `command`/`label` into `prompt-details[{language:"en",...}]` and add `{language:"zh",...}` entries | Must |
+| AC-028.16 | The existing `/api/config/*` response MUST include the `language` field from `.x-ipe.yaml` | Must |
+| AC-028.17 | Frontend Copilot button JS MUST filter `prompt-details` by the language setting and display the matching `label` and `command` | Must |
+| AC-028.18 | Frontend MUST fall back to `"en"` entry if no matching language found in `prompt-details` | Must |
+| AC-028.19 | Frontend MUST fall back to top-level `command`/`label` fields if `prompt-details` is absent (v2.0 backward compatibility) | Must |
+| AC-028.20 | Existing v2.0 copilot-prompt.json (without `prompt-details`) MUST continue working without errors | Must |
+| AC-028.21 | Existing projects upgrading without a `language` key in `.x-ipe.yaml` MUST default to `"en"` | Must |
+| AC-028.22 | SKILL.md files MUST NOT be modified — skills remain English-only | Must |
+| AC-028.23 | X-IPE web UI (sidebar, page titles, buttons) MUST remain English-only — bi-language applies to prompts and instructions only | Must |
+
+### Non-Functional Requirements
+
+| # | Requirement | Priority |
+|---|-------------|----------|
+| NFR-028.1 | Adding a new language SHOULD only require adding entries to `prompt-details`, a new `---LANG:xx---` section in the instructions template, and updating CLI choices | Should |
+| NFR-028.2 | copilot-prompt.json v2.0 → v3.0 migration MUST be idempotent (running upgrade twice produces the same result) | Must |
+| NFR-028.3 | Language switching via `--lang` MUST complete in under 5 seconds | Should |
+| NFR-028.4 | All new code MUST follow existing project patterns (service layer, tracing decorators, route patterns) | Must |
+
+### Technical Considerations
+
+- Modifies `src/x_ipe/cli/main.py` (init + upgrade commands)
+- Modifies copilot-prompt.json template in `src/x_ipe/resources/config/`
+- Modifies copilot-instructions.md template in `src/x_ipe/resources/` (add ZH part with `---LANG:zh---` separator)
+- Modifies frontend JS for client-side prompt filtering (likely `workplace.js` or wherever Copilot button prompts are rendered)
+- Modifies config API route to include language field
+- `.x-ipe.yaml` gains `language` key
+- v2.0 → v3.0 JSON migration logic needed in upgrade command
+
+### Dependency Graph
+
+```
+FEATURE-027-A (CLI Registry) ──── FEATURE-027-B (CLI Init) ──── FEATURE-028 (Bi-language Support)
+```
+
+FEATURE-028 depends on the CLI init/upgrade infrastructure from FEATURE-027 since language selection is added to the same init flow and stored in the same `.x-ipe.yaml` config.
+
+### Open Questions
+
+- None (all clarifications resolved during gathering)
+
+---
+
+### FEATURE-028-A: Bilingual Prompt Schema & Migration
+
+**Version:** v1.0
+**Brief Description:** Define the copilot-prompt.json v3.0 schema with `prompt-details` array, create bilingual EN/ZH prompt content for all existing prompts, and implement v2.0→v3.0 auto-migration logic.
+
+**Acceptance Criteria:**
+- [ ] copilot-prompt.json MUST bump schema version to `"3.0"` (AC-028.4)
+- [ ] Each prompt entry MUST contain a `prompt-details` array with `{ language, label, command }` objects (AC-028.5)
+- [ ] `label` MUST NOT exist at the prompt level — only inside `prompt-details` entries (AC-028.6)
+- [ ] Each prompt MUST have entries for both `"en"` and `"zh"` (AC-028.7)
+- [ ] `prompt-details` MUST apply to `prompts[]` arrays, singleton `evaluate`, and `refactoring[]` (AC-028.8)
+- [ ] v2.0→v3.0 migration MUST wrap existing `command`/`label` into `prompt-details[{language:"en",...}]` and add ZH entries (AC-028.14, AC-028.15)
+- [ ] Existing v2.0 copilot-prompt.json MUST continue working without errors (AC-028.20)
+
+**Dependencies:**
+- None (foundation feature — defines the schema all others consume)
+
+**Technical Considerations:**
+- New v3.0 template at `src/x_ipe/resources/config/copilot-prompt.json`
+- Migration utility function in CLI or service layer
+- Migration must be idempotent (NFR-028.2)
+- Chinese translations for all existing prompts needed
+
+---
+
+### FEATURE-028-B: CLI Language Selection & Instructions
+
+**Version:** v1.0
+**Brief Description:** Add language selection to `x-ipe init` and `x-ipe upgrade --lang`, create bilingual copilot-instructions.md template with `---LANG:xx---` markers, and implement extraction logic to copy only the selected language part.
+
+**Acceptance Criteria:**
+- [ ] `x-ipe init` MUST prompt for language selection after CLI detection (default: en) (AC-028.1)
+- [ ] `x-ipe init` MUST support `--lang <en|zh>` for non-interactive mode (AC-028.2)
+- [ ] Selected language MUST be stored in `.x-ipe.yaml` under `language` key (AC-028.3)
+- [ ] Package MUST ship bilingual copilot-instructions.md template with `---LANG:en---` / `---LANG:zh---` markers (AC-028.9)
+- [ ] `x-ipe init` MUST extract only the selected language part into the project (AC-028.10)
+- [ ] ZH part MUST include Chinese keyword examples for skill routing (AC-028.11)
+- [ ] `x-ipe upgrade --lang` MUST present interactive language prompt (AC-028.12)
+- [ ] `x-ipe upgrade --lang` MUST update `.x-ipe.yaml` and re-extract instructions (AC-028.13)
+- [ ] Existing projects without `language` key MUST default to `"en"` (AC-028.21)
+
+**Dependencies:**
+- FEATURE-028-A: v3.0 copilot-prompt.json must exist for init to scaffold it
+
+**Technical Considerations:**
+- Modifies `src/x_ipe/cli/main.py` (init + upgrade commands)
+- Bilingual instructions template in `src/x_ipe/resources/`
+- Language extraction: parse `---LANG:xx---` markers, extract matching section
+- Chinese instructions content authoring required
+
+---
+
+### FEATURE-028-C: Frontend Prompt Language Filtering
+
+**Version:** v1.0
+**Brief Description:** Frontend client-side filtering of `prompt-details` by language setting, with fallback chain for v2.0 backward compatibility. Language field added to existing config API response.
+
+**Acceptance Criteria:**
+- [ ] Existing `/api/config/*` response MUST include `language` field from `.x-ipe.yaml` (AC-028.16)
+- [ ] Frontend Copilot button JS MUST filter `prompt-details` by language and display matching `label`/`command` (AC-028.17)
+- [ ] Frontend MUST fall back to `"en"` entry if no matching language found (AC-028.18)
+- [ ] Frontend MUST fall back to top-level `command`/`label` if `prompt-details` absent (v2.0 compat) (AC-028.19)
+
+**Dependencies:**
+- FEATURE-028-A: v3.0 schema defines the `prompt-details` structure consumed by frontend
+- FEATURE-028-B: Language setting in `.x-ipe.yaml` must be available via API
+
+**Technical Considerations:**
+- Modifies config API route to read language from `.x-ipe.yaml`
+- Modifies frontend JS (likely `workplace.js`) for prompt-details filtering
+- Fallback chain: prompt-details[lang] → prompt-details["en"] → top-level command/label
+- No new API endpoint — adds field to existing response
+
+---
+
+### Sub-Feature Dependency Graph
+
+```
+FEATURE-028-A (Schema & Migration) ──┬── FEATURE-028-B (CLI & Instructions) ──── FEATURE-028-D (Settings Language Switch)
+                                     │                    │
+                                     └────────────────────┴── FEATURE-028-C (Frontend Filtering)
+```
+
+---
+
+### FEATURE-028-D: Settings Language Switch (Web UI)
+
+**Version:** v1.0
+**Brief Description:** Add a language dropdown to the Settings web UI page that replicates `x-ipe upgrade --lang` behavior — switching language and re-extracting copilot instructions via AJAX without page reload.
+**Source:** [CR-002](../FEATURE-028-D/CR-002.md) — [IDEA-020](../../ideas/016.%20CR-Switch%20Language%20in%20Settings/idea-summary-v1.md)
+
+**Acceptance Criteria:**
+- [ ] Settings page MUST display a dedicated "Language" section with current language badge and dropdown (en / 中文) (AC-CR2-1, AC-CR2-2)
+- [ ] Selecting a different language MUST show a confirmation dialog warning about instruction regeneration (AC-CR2-3)
+- [ ] Backend MUST expose `POST /api/config/language` endpoint that calls ScaffoldManager (AC-CR2-4)
+- [ ] Instructions MUST be extracted BEFORE updating `.x-ipe.yaml` for atomicity (AC-CR2-5)
+- [ ] Success/error feedback via toast notification without page reload (AC-CR2-6)
+- [ ] Same-language selection MUST be a no-op with informational toast (AC-CR2-7)
+- [ ] Dropdown MUST be disabled during switch operation (AC-CR2-8)
+- [ ] Custom edits outside X-IPE markers MUST be preserved (AC-CR2-9)
+
+**Dependencies:**
+- FEATURE-028-B: ScaffoldManager language switch logic (reused from CLI)
+
+**Technical Considerations:**
+- New `POST /api/config/language` endpoint in `settings_routes.py`
+- ScaffoldManager imported into web layer (currently CLI-only)
+- Settings page HTML: new Language section with dropdown, confirmation dialog
+- Inline JS: LanguageManager class following ProjectFoldersManager pattern
+- Atomic ordering: extract instructions → update config → respond
+
+### Shared Constraints (All FEATURE-028-* Sub-Features)
+
+- Only zh/en supported — no extensibility framework
+- SKILL.md files remain unmodified (AC-028.22)
+- X-IPE web UI stays English-only (AC-028.23)
+- All new code follows existing patterns (NFR-028.4)

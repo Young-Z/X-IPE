@@ -1,0 +1,1 @@
+please study x-ipe document and code. then base on your understanding use architecture dsl to draw the module architecture

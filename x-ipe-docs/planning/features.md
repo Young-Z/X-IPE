@@ -65,6 +65,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-028-A | Bilingual Prompt Schema & Migration | v1.0 | Implemented | [specification.md](../requirements/FEATURE-028-A/specification.md), [technical-design.md](../requirements/FEATURE-028-A/technical-design.md) | 02-11-2026 | 02-11-2026 03:00:00 |
 | FEATURE-028-B | CLI Language Selection & Instructions | v1.0 | Implemented | [specification.md](../requirements/FEATURE-028-B/specification.md), [technical-design.md](../requirements/FEATURE-028-B/technical-design.md) | 02-11-2026 | 02-11-2026 03:00:00 |
 | FEATURE-028-C | Frontend Prompt Language Filtering | v1.0 | Implemented | [specification.md](../requirements/FEATURE-028-C/specification.md), [technical-design.md](../requirements/FEATURE-028-C/technical-design.md) | 02-11-2026 | 02-11-2026 03:00:00 |
+| FEATURE-028-D | Settings Language Switch (Web UI) | v1.0 | Specified | [CR-002.md](../requirements/FEATURE-028-D/CR-002.md) | 02-11-2026 | 02-11-2026 08:29:00 |
 
 ---
 
@@ -99,6 +100,7 @@ This board tracks all features across the project lifecycle.
 - FEATURE-028-A: Bilingual Prompt Schema & Migration
 - FEATURE-028-B: CLI Language Selection & Instructions
 - FEATURE-028-C: Frontend Prompt Language Filtering
+- FEATURE-028-D: Settings Language Switch (Web UI)
 
 ### Implemented (2)
 - FEATURE-027-A: CLI Adapter Registry & Service

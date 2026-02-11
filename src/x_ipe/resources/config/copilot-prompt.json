@@ -1,24 +1,54 @@
 {
-  "version": "2.0",
+  "version": "3.0",
   "ideation": {
     "prompts": [
       {
         "id": "generate-architecture",
-        "label": "Generate Architecture",
         "icon": "bi-diagram-3",
-        "command": "Base on <current-idea-file> to generate layered architecture"
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Generate Architecture",
+            "command": "Base on <current-idea-file> to generate layered architecture"
+          },
+          {
+            "language": "zh",
+            "label": "生成架构图",
+            "command": "基于<current-idea-file>生成分层架构图"
+          }
+        ]
       },
       {
         "id": "generate-mockup",
-        "label": "Generate Mockup",
         "icon": "bi-palette",
-        "command": "Base on <current-idea-file> to generate mockups"
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Generate Mockup",
+            "command": "Base on <current-idea-file> to generate mockups"
+          },
+          {
+            "language": "zh",
+            "label": "生成原型",
+            "command": "基于<current-idea-file>生成原型设计"
+          }
+        ]
       },
       {
         "id": "free-question",
-        "label": "Free Collaboration",
         "icon": "bi-chat-dots",
-        "command": "Let's base on <current-idea-file> to collaborate, wait for my instructions."
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Free Collaboration",
+            "command": "Let's base on <current-idea-file> to collaborate, wait for my instructions."
+          },
+          {
+            "language": "zh",
+            "label": "自由协作",
+            "command": "基于<current-idea-file>进行协作，等待我的指示。"
+          }
+        ]
       }
     ]
   },

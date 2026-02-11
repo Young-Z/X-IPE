@@ -25,6 +25,7 @@ class WorkplaceManager {
         this.fileExtension = null;
         this.easyMDE = null; // EasyMDE editor instance for compose view
         this.copilotPrompts = []; // Loaded from x-ipe-docs/config/copilot-prompt.json
+        this.language = 'en'; // Project language from .x-ipe.yaml (FEATURE-028-C)
         this.targetFolderPath = null; // Target folder for compose/upload (null = create new folder)
         
         // CR-006: New managers
@@ -47,15 +48,27 @@ class WorkplaceManager {
      */
     async _loadCopilotPrompts() {
         try {
+            // Load language from project config (FEATURE-028-C)
+            try {
+                const configResp = await fetch('/api/config');
+                if (configResp.ok) {
+                    const configData = await configResp.json();
+                    this.language = configData.language || 'en';
+                }
+            } catch (e) {
+                this.language = 'en';
+            }
+            
             const response = await fetch('/api/config/copilot-prompt');
             if (response.ok) {
                 const data = await response.json();
-                // Support both v1.0 (data.prompts) and v2.0 (data.ideation.prompts) config formats
+                // Support v1.0 (data.prompts), v2.0 and v3.0 (data.ideation.prompts)
                 this.copilotPrompts = data.ideation?.prompts || data.prompts || [];
             }
         } catch (error) {
             console.warn('Failed to load copilot prompts:', error);
             this.copilotPrompts = [];
+            this.language = 'en';
         }
     }
     
@@ -1172,12 +1185,16 @@ class WorkplaceManager {
      * Render Copilot button with dropdown container
      */
     _renderCopilotButton() {
-        const dropdownItems = this.copilotPrompts.map(prompt => `
+        const dropdownItems = this.copilotPrompts.map(prompt => {
+            const resolved = this._resolvePromptDetails(prompt, this.language);
+            if (!resolved) return '';
+            return `
             <div class="copilot-dropdown-item" data-prompt-id="${prompt.id}">
                 <i class="${prompt.icon || 'bi bi-arrow-right'}"></i>
-                <span>${this._escapeHtml(prompt.label)}</span>
+                <span>${this._escapeHtml(resolved.label)}</span>
             </div>
-        `).join('');
+        `;
+        }).join('');
         
         return `
             <div class="copilot-btn-container" id="copilot-btn-container">
@@ -1237,8 +1254,12 @@ class WorkplaceManager {
         const prompt = this.copilotPrompts.find(p => p.id === promptId);
         if (!prompt) return;
         
+        // Resolve language-aware command (FEATURE-028-C)
+        const resolved = this._resolvePromptDetails(prompt, this.language);
+        if (!resolved) return;
+        
         // Replace <current-idea-file> placeholder with actual file path
-        const command = prompt.command.replace(/<current-idea-file>/g, this.currentPath);
+        const command = resolved.command.replace(/<current-idea-file>/g, this.currentPath);
         
         // Expand terminal panel
         if (window.terminalPanel) {
@@ -1249,6 +1270,28 @@ class WorkplaceManager {
         if (window.terminalManager) {
             window.terminalManager.sendCopilotPromptCommand(command);
         }
+    }
+    
+    /**
+     * Resolve label and command for a prompt based on configured language.
+     * Fallback chain: prompt-details[lang] → prompt-details["en"] → top-level label/command.
+     * @param {Object} prompt - Prompt object (v2.0 or v3.0)
+     * @param {string} language - Language code ("en", "zh")
+     * @returns {{label: string, command: string}|null}
+     */
+    _resolvePromptDetails(prompt, language) {
+        if (prompt['prompt-details'] && Array.isArray(prompt['prompt-details'])) {
+            const match = prompt['prompt-details'].find(d => d.language === language);
+            if (match) return { label: match.label, command: match.command };
+            
+            const en = prompt['prompt-details'].find(d => d.language === 'en');
+            if (en) return { label: en.label, command: en.command };
+        }
+        // v2.0 backward compat
+        if (prompt.label && prompt.command) {
+            return { label: prompt.label, command: prompt.command };
+        }
+        return null;
     }
     
     /**

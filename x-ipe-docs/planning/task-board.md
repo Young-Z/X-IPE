@@ -6,7 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-286 | Idea Mockup | Create mockup for CR-Switch Language in Settings (016) | Sage | 🔄 in_progress | 02-11-2026 08:30:00 | [mockup-v1.html](../ideas/016.%20CR-Switch%20Language%20in%20Settings/mockups/settings-language-v1.html) | Change Request |
+| TASK-288 | Feature Refinement | Refine FEATURE-028-D Settings Language Switch | Sage | ⏳ pending | 02-11-2026 08:33:00 | - | Technical Design |
 
 
 
@@ -26,6 +26,8 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-287 | Change Request | CR-002: Settings Language Switch for FEATURE-028-D | Sage | 02-11-2026 08:33:00 | [CR-002.md](../requirements/FEATURE-028-D/CR-002.md) | Modification: new sub-feature FEATURE-028-D. Dropdown en/中文 in Settings, POST /api/config/language, atomicity safeguards. Mockup referenced. |
+| TASK-286 | Idea Mockup | Create mockup for CR-Switch Language in Settings (016) | Sage | 02-11-2026 08:30:00 | [mockup-v1.html](../ideas/016.%20CR-Switch%20Language%20in%20Settings/mockups/settings-language-v1.html) | Interactive mockup with 4 scenarios. Human approved. |
 | TASK-285 | Ideation | Refine idea for CR-Switch Language in Settings (016) | Sage | 02-11-2026 08:30:00 | [idea-summary-v1.md](../ideas/016.%20CR-Switch%20Language%20in%20Settings/idea-summary-v1.md) | IDEA-020. CR to FEATURE-028. Dropdown en/中文, AJAX+toast, confirmation dialog, atomicity safeguards. Sub-agent critique applied. |
 | TASK-257 | Ideation | Refine idea for X-IPE Module Architecture research (101) | Zephyr | 02-11-2026 08:27:00 | [idea-summary-v1.md](../ideas/101.%20Research-X-IPE%20Module%20Architecture/idea-summary-v1.md), [module-architecture.html](../ideas/101.%20Research-X-IPE%20Module%20Architecture/module-architecture.html) | 8-layer architecture: CLI, Presentation, API, Business, Cross-Cutting, Core, Infrastructure (3rd-party), Data (purpose-based). Standalone HTML with corporate theme. |
 | TASK-252 | Technical Design | Design FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:17:00 | [technical-design.md](../requirements/FEATURE-025-B/technical-design.md) | Full Stack design: 4 components (KBService ext, kb_routes ext, kb-landing.js, kb-landing.css). Upload/delete/grid/drag-drop. ~40 tests estimated. DoD 9/9 pass. |
