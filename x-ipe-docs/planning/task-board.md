@@ -7,6 +7,8 @@
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
 | TASK-289 | Technical Design | Design FEATURE-028-D Settings Language Switch | Sage | ⏳ pending | 02-11-2026 08:36:00 | - | Test Generation |
+| TASK-308 | Feature Closing | Close FEATURE-029-A Session Explorer Core | Spark | 🔄 in_progress | 02-11-2026 16:25:00 | - | User Manual |
+
 
 
 
@@ -26,6 +28,21 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-307 | Feature Acceptance Test | Acceptance test FEATURE-029-A Session Explorer Core | Spark | 02-11-2026 16:30:00 | [acceptance-test-cases.md](../requirements/FEATURE-029-A/acceptance-test-cases.md) | 16/16 tests passed (100%). All 7 ACs covered. Mockup validated. |
+| TASK-306 | Code Implementation | Implement FEATURE-029-A Session Explorer Core | Spark | 02-11-2026 16:30:00 | [terminal.js](../../src/x_ipe/static/js/terminal.js), [terminal.css](../../src/x_ipe/static/css/terminal.css), [index.html](../../src/x_ipe/templates/index.html) | Map-based TerminalManager + SessionExplorer class. 17/17 tests pass. Browser verified: 3 sessions, switching, explorer panel. |
+| TASK-305 | Test Generation | Generate tests for FEATURE-029-A Session Explorer Core | Spark | 02-11-2026 15:56:00 | [test_session_explorer.py](../../tests/test_session_explorer.py) | 17 backend regression tests (4 classes). All pass — backend already supports 10 sessions. Frontend is primary scope (no JS test framework). |
+| TASK-304 | Technical Design | Design FEATURE-029-A Session Explorer Core | Spark | 02-11-2026 15:42:00 | [technical-design.md](../requirements/FEATURE-029-A/technical-design.md) | Two-part design: Map-based TerminalManager + SessionExplorer class. 4 Mermaid diagrams. 12 impl steps. All DoD passed. |
+| TASK-303 | Feature Refinement | Refine FEATURE-029-A Session Explorer Core specification | Spark | 02-11-2026 15:42:00 | [specification.md](../requirements/FEATURE-029-A/specification.md) | 14 sections, 7 ACs, 5 FRs, 4 NFRs. Mockup current. All DoD passed. |
+| TASK-302 | Feature Breakdown | Break down FEATURE-029 Console Session Explorer into sub-features | Spark | 02-11-2026 15:35:00 | [requirement-details-part-7.md](../requirements/requirement-details-part-7.md), [features.md](features.md) | Split into 4 sub-features: 029-A (Core), 029-B (Actions), 029-C (Preview), 029-D (UI Controls). 32 ACs distributed. All DoD passed. |
+| TASK-301 | Skill Update | Update x-ipe-task-based-feature-breakdown: add parent feature dedup step | Spark | 02-11-2026 15:26:00 | [SKILL.md](../../.github/skills/x-ipe-task-based-feature-breakdown/SKILL.md) | Added Step 8 (Parent Feature Deduplication Check). 25 test cases passed. v1→v2. |
+| TASK-300 | Requirement Gathering | Conflict Review for FEATURE-029 Console Session Explorer | Spark | 02-11-2026 15:18:00 | [part-1](../requirements/requirement-details-part-1.md), [part-3](../requirements/requirement-details-part-3.md), [part-7](../requirements/requirement-details-part-7.md) | Scanned all 6 parts. Found 2 conflicts: FEATURE-005 (CR, split-pane→explorer), FEATURE-021 (spec refactoring, pane→session terminology). CR impact markers added. Human approved. |
+| TASK-299 | Skill Update | Update x-ipe-task-based-requirement-gathering: add conflict review + impact update steps | Spark | 02-11-2026 15:05:00 | [SKILL.md](../../.github/skills/x-ipe-task-based-requirement-gathering/SKILL.md) | Added Step 3 (Conflict & Overlap Review) and Step 4 (Update Impacted Features). 38 test cases passed. v1→v2. |
+| TASK-298 | Bug Fix | Copilot button: extract refine prompt into copilot-prompt.json, remove click behavior, add as top dropdown option | Ember | 02-11-2026 14:31:00 | [workplace.js](../../src/x_ipe/static/js/features/workplace.js), [copilot-prompt.json](../../src/x_ipe/resources/config/copilot-prompt.json), [copilot-prompt.json](../config/copilot-prompt.json) | Added bilingual "Refine Idea" prompt (en/zh) as first item in copilot-prompt.json. Removed hardcoded click→refine behavior. Button click now toggles dropdown. All prompts use language-aware resolution. 1390 tests pass. |
+| TASK-298 | Requirement Gathering | Gather requirements for CR-Console Window Explorer (IDEA-021) | Spark | 02-11-2026 14:55:00 | [requirement-details-part-7.md](../requirements/requirement-details-part-7.md) | FEATURE-029. 13 FRs, 32 ACs, 5 NFRs. Mockup linked. New part-7 created. Human approved. |
+| TASK-297 | Idea Mockup | Create mockup for CR-Console Window Explorer (017) | Spark | 02-11-2026 14:30:00 | [console-explorer-v1.html](../ideas/017.%20CR-Console%20Window%20Explorer/mockups/console-explorer-v1.html), [idea-summary-v2.md](../ideas/017.%20CR-Console%20Window%20Explorer/idea-summary-v2.md) | Interactive mockup with 6 scenarios: Default, 5 Sessions, Rename, Hover Preview, Max Sessions, Collapsed. Dark terminal aesthetic with phosphor green accents. All interactions functional. |
+| TASK-295 | Ideation | Refine idea for CR-Console Window Explorer (017) | Spark | 02-11-2026 14:15:00 | [idea-summary-v1.md](../ideas/017.%20CR-Console%20Window%20Explorer/idea-summary-v1.md) | IDEA-021. CR to FEATURE-005. Session Explorer sidebar (up to 10 sessions), collapsible+resizable, hover live preview, inline rename, no-confirm delete. Sub-agent critique applied (9 items addressed). Human approved. |
+| TASK-296 | Bug Fix | UIUX Feedback: Preview content not using full width of container (Feedback-20260211-220315) | Cipher | 02-11-2026 14:05:00 | [workplace.css](../../src/x_ipe/static/css/workplace.css) | Root cause: `.workplace-markdown-content` had `max-width: 900px` limiting preview width. Fix: changed to `max-width: 100%` so content fills its container. 1354 tests pass, 0 regressions. |
+| TASK-294 | Bug Fix | Fix tree drag-drop: CR-002 drop handler blocked CR-006 TreeDragManager internal move | Ember | 02-11-2026 13:25:00 | [workplace.js](../../src/x_ipe/static/js/features/workplace.js) | Root cause: `_setupFolderDragDrop()` called `e.stopPropagation()` unconditionally on dragover/dragleave/drop, blocking TreeDragManager from handling internal tree moves. Fix: only stop propagation for external file uploads. 160/160 tests pass. |
 | TASK-293 | Feature Acceptance Test | Execute acceptance tests for FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 10:45:00 | [acceptance-test-cases.md](../../x-ipe-docs/requirements/FEATURE-025-B/acceptance-test-cases.md) | 13/13 tests passed (100%). All P0/P1 ACs verified via Chrome DevTools MCP. Mockup validation passed. |
 | TASK-292 | Feature Acceptance Test | Acceptance test FEATURE-028-D Settings Language Switch | Sage | 02-11-2026 10:32:00 | [screenshot](/tmp/settings-language-final.png) | 19/19 acceptance tests passed. Verified: AC-1 (card positioning), AC-2 (badge+dropdown), AC-3 (confirmation modal+cancel), AC-4/5 (API call+atomicity), AC-6 (success toast, no reload), AC-7 (same-language guard), AC-8 (disabled during switch), AC-14 (badge update). |
 | TASK-291 | Code Implementation | Implement FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:22:00 | [kb_service.py](../../src/x_ipe/services/kb_service.py), [kb_routes.py](../../src/x_ipe/routes/kb_routes.py), [kb-landing.js](../../src/x_ipe/static/js/features/kb-landing.js), [kb-landing.css](../../src/x_ipe/static/css/kb-landing.css) | Backend: upload_files/delete_files/get_landing_files + 3 endpoints. Frontend: file grid, drag-drop, selection. 111/111 KB tests pass. |
@@ -165,11 +182,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 1
+- **Total Active:** 2
 - **In Progress:** 1
-- **Pending:** 0
+- **Pending:** 1
 - **Deferred:** 0
-- **Completed (archived):** 296
+- **Completed (archived):** 310
 - **Pending Review:** 0
 - **Blocked:** 0
 

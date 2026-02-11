@@ -164,141 +164,175 @@
     color: #fff;
 }
 
-/* Pane container - use calc for explicit height */
-.terminal-panes {
+/* Terminal body - main content area below header */
+.terminal-body {
     display: none;
     flex-direction: row;
-    height: calc(100% - 36px);  /* Panel height minus header */
+    height: calc(100% - 36px);
     overflow: hidden;
 }
 
-.terminal-panel.expanded .terminal-panes,
-.terminal-panel.zen-mode .terminal-panes {
+.terminal-panel.expanded .terminal-body,
+.terminal-panel.zen-mode .terminal-body {
     display: flex;
 }
 
-/* Horizontal splitter between panes */
-.pane-splitter {
-    flex: 0 0 4px;
-    background: #333;
-    cursor: ew-resize;
-    position: relative;
-    z-index: 10;
-}
-
-.pane-splitter::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 2px;
-    height: 30px;
-    background: #555;
-    border-radius: 1px;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.pane-splitter:hover::before,
-.terminal-panes.dragging-splitter .pane-splitter::before {
-    opacity: 1;
-}
-
-.pane-splitter:hover,
-.terminal-panes.dragging-splitter .pane-splitter {
-    background: rgba(0, 122, 204, 0.5);
-}
-
-/* Individual terminal pane */
-.terminal-pane {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background-color: #1e1e1e;
-    border: 2px solid transparent;
-    transition: border-color 0.2s;
-    min-width: 100px;
-    height: 100%;
-    overflow: hidden;
-}
-
-.terminal-pane.focused {
-    border-color: #007acc;
-}
-
-/* Pane header - fixed 24px */
-.pane-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 2px 8px;
-    background-color: #252526;
-    height: 24px;
-    min-height: 24px;
-    max-height: 24px;
-}
-
-.pane-title {
-    font-size: 11px;
-    color: #888;
-    font-weight: 500;
-}
-
-.terminal-pane.focused .pane-title {
-    color: #ccc;
-}
-
-.close-pane-btn {
-    width: 18px;
-    height: 18px;
-    border: none;
-    border-radius: 3px;
-    background: transparent;
-    color: #888;
-    cursor: pointer;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.close-pane-btn:hover {
-    background-color: #c42b1c;
-    color: #fff;
-}
-
-/* Terminal content - xterm container with explicit height */
+/* Main terminal area - holds all session containers */
 .terminal-content {
-    height: calc(100% - 24px);  /* Pane height minus pane-header */
-    padding: 4px;
-    overflow: hidden;
+    flex: 1;
     position: relative;
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* Individual session container - absolute positioned, toggled via .active */
+.terminal-session-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 4px;
+    display: none;
+}
+.terminal-session-container.active {
+    display: block;
 }
 
 /* xterm fills container */
-.terminal-content .xterm {
+.terminal-session-container .xterm {
     height: 100% !important;
     width: 100% !important;
 }
 
-.terminal-content .xterm-screen {
+.terminal-session-container .xterm-screen {
     width: 100% !important;
 }
 
-.terminal-content .xterm-viewport {
+.terminal-session-container .xterm-viewport {
     overflow-y: auto !important;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
 
-.terminal-content .xterm-viewport::-webkit-scrollbar {
+.terminal-session-container .xterm-viewport::-webkit-scrollbar {
     display: none;
 }
 
 /* Prevent scroll issues with xterm textarea */
-.terminal-content .xterm-helper-textarea {
+.terminal-session-container .xterm-helper-textarea {
     position: absolute !important;
+}
+
+/* =============================================================================
+   FEATURE-029-A: Session Explorer
+   ============================================================================= */
+
+/* Session Explorer panel - right side */
+.session-explorer {
+    width: 220px;
+    min-width: 220px;
+    max-width: 220px;
+    display: flex;
+    flex-direction: column;
+    background: #252526;
+    border-left: 1px solid #333;
+}
+
+.explorer-header {
+    height: 32px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    background: #2d2d2d;
+    border-bottom: 1px solid #333;
+}
+
+.explorer-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #888;
+}
+
+.session-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 0;
+    scrollbar-width: none;
+}
+
+.session-list::-webkit-scrollbar {
+    display: none;
+}
+
+/* Session bar */
+.session-bar {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    cursor: pointer;
+    gap: 8px;
+    font-size: 13px;
+    color: #ccc;
+    border-left: 3px solid transparent;
+    transition: background-color 0.15s;
+}
+.session-bar:hover {
+    background: #2a2d2e;
+}
+.session-bar[data-active="true"] {
+    border-left-color: #4ec9b0;
+    background: #37373d;
+    color: #fff;
+}
+
+/* Status dot */
+.session-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #555;
+    flex-shrink: 0;
+}
+.session-bar[data-active="true"] .session-status-dot {
+    background: #4ec9b0;
+}
+
+/* Session name */
+.session-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Add session button */
+.explorer-add-btn {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-top: 1px solid #333;
+    color: #888;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.15s, color 0.15s;
+}
+.explorer-add-btn:hover {
+    background: #2a2d2e;
+    color: #ccc;
+}
+.explorer-add-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Hide explorer in zen mode */
+.terminal-panel.zen-mode .session-explorer {
+    display: none;
 }
 
 /* =============================================================================

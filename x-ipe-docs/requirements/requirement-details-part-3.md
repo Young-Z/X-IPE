@@ -184,6 +184,12 @@ The following are explicitly out of scope for the initial version:
 |---------|------------|--------|
 | FEATURE-021 | FEATURE-005 (Interactive Console) | Voice input requires existing console/terminal infrastructure |
 
+> **⚠️ CR Impact Note** (added 2026-02-11, ref: FEATURE-029)
+> - **Change:** FEATURE-029 replaces multi-pane terminal model with single-session view + Session Explorer sidebar. "Focused terminal pane" → "active session"; "Add Terminal" button → session explorer "+" button; console header layout changes.
+> - **Affected FRs:** AC-1.2 (mic button placement), AC-1.4 (Add Terminal button), AC-5.2 (focused pane injection), AC-5.3 (last active pane fallback), EC-2 (pane focus switching)
+> - **Action Required:** Feature specification refactoring needed — update all "terminal pane" references to "active session", adjust UI placement specs for new console header layout
+> - **New Feature Ref:** FEATURE-029 (Console Session Explorer) — see [requirement-details-part-7.md](requirement-details-part-7.md)
+
 ---
 
 ### FEATURE-022-A: Browser Simulator & Proxy (MVP)

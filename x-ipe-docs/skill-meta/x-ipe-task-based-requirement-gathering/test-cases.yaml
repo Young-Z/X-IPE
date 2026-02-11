@@ -1,0 +1,365 @@
+# ═══════════════════════════════════════════════════════════
+# Test Cases for x-ipe-task-based-requirement-gathering
+# Generated from skill-meta.md acceptance criteria
+# ═══════════════════════════════════════════════════════════
+
+test_cases:
+  # ─────────────────────────────────────────────────────────
+  # MUST — Structure
+  # ─────────────────────────────────────────────────────────
+  - id: TC-01
+    name: "SKILL.md exists with valid frontmatter"
+    acceptance_criteria: "AC-S01"
+    type: structure
+    test_method: file_exists
+    input: "SKILL.md"
+    expected: "File exists at .github/skills/x-ipe-task-based-requirement-gathering/SKILL.md"
+    priority: must
+
+  - id: TC-02
+    name: "Frontmatter has name field"
+    acceptance_criteria: "AC-S01"
+    type: structure
+    test_method: content_check
+    input: "SKILL.md frontmatter between --- delimiters"
+    expected: "name: x-ipe-task-based-requirement-gathering"
+    priority: must
+
+  - id: TC-03
+    name: "Frontmatter has description with trigger keywords"
+    acceptance_criteria: "AC-S01"
+    type: structure
+    test_method: content_check
+    input: "SKILL.md frontmatter description field"
+    expected: "Description contains at least one trigger: 'new feature', 'add feature', 'I want to build', 'create requirement'"
+    priority: must
+
+  - id: TC-04
+    name: "references/examples.md exists"
+    acceptance_criteria: "AC-S02"
+    type: structure
+    test_method: file_exists
+    input: "references/examples.md (relative to SKILL.md)"
+    expected: "File exists at .github/skills/x-ipe-task-based-requirement-gathering/references/examples.md"
+    priority: must
+
+  - id: TC-05
+    name: "references/examples.md has at least 1 example"
+    acceptance_criteria: "AC-S02"
+    type: content
+    test_method: content_check
+    input: "references/examples.md"
+    expected: "File contains at least one section starting with '## Example' or '### Example'"
+    priority: must
+
+  - id: TC-06
+    name: "SKILL.md body is under 500 lines"
+    acceptance_criteria: "AC-S03"
+    type: structure
+    test_method: line_count
+    input: "SKILL.md"
+    expected: "< 500 lines"
+    priority: must
+
+  # ─────────────────────────────────────────────────────────
+  # MUST — Content
+  # ─────────────────────────────────────────────────────────
+  - id: TC-07
+    name: "All required sections present"
+    acceptance_criteria: "AC-C01"
+    type: content
+    test_method: section_parse
+    input: "SKILL.md H2 headings"
+    expected: >
+      Sections in order: Purpose, Important Notes, Input Parameters,
+      Definition of Ready, Execution Flow, Execution Procedure,
+      Output Result, Definition of Done, Patterns & Anti-Patterns, Examples
+    priority: must
+
+  - id: TC-08
+    name: "Sections follow cognitive flow order"
+    acceptance_criteria: "AC-C01"
+    type: content
+    test_method: section_parse
+    input: "Line numbers of each H2 heading in SKILL.md"
+    expected: "Purpose < Important Notes < Input Parameters < Definition of Ready < Execution Flow < Execution Procedure < Output Result < Definition of Done < Patterns & Anti-Patterns < Examples"
+    priority: must
+
+  - id: TC-09
+    name: "Execution Flow table has exactly 7 steps"
+    acceptance_criteria: "AC-C02"
+    type: content
+    test_method: table_parse
+    input: "Execution Flow section table rows (excluding header)"
+    expected: "7 rows with steps: Understand, Clarify, Conflict Review, Update Impacted, Check File, Document, Complete"
+    priority: must
+
+  - id: TC-10
+    name: "Step names match expected sequence"
+    acceptance_criteria: "AC-C02"
+    type: content
+    test_method: table_parse
+    input: "Execution Flow table 'Name' column values"
+    expected: "Row 1=Understand, Row 2=Clarify, Row 3=Conflict Review, Row 4=Update Impacted, Row 5=Check File, Row 6=Document, Row 7=Complete"
+    priority: must
+
+  - id: TC-11
+    name: "Step 3 scans ALL existing requirement-details files"
+    acceptance_criteria: "AC-C03"
+    type: content
+    test_method: content_check
+    input: "step_3 element in Execution Procedure"
+    expected: "Action includes reading requirement-details-index.md and scanning each requirement-details file"
+    priority: must
+
+  - id: TC-12
+    name: "Step 3 compares new requirements against existing features"
+    acceptance_criteria: "AC-C03"
+    type: content
+    test_method: content_check
+    input: "step_3 action items"
+    expected: "Contains comparison of new requirements against existing features covering: functional overlap, scope overlap, dependency conflict"
+    priority: must
+
+  - id: TC-13
+    name: "Step 3 asks human to decide CR vs new feature"
+    acceptance_criteria: "AC-C04"
+    type: content
+    test_method: content_check
+    input: "step_3 action items"
+    expected: "Contains question asking human 'Should this be handled as a Change Request (CR) on {FEATURE-XXX}, or as a new standalone feature?'"
+    priority: must
+
+  - id: TC-14
+    name: "Step 3 provides principle-based recommendation"
+    acceptance_criteria: "AC-C04"
+    type: content
+    test_method: content_check
+    input: "step_3 action items"
+    expected: "Recommendation references at least: Single Responsibility, Cohesion, Independence, Minimal coupling"
+    priority: must
+
+  - id: TC-15
+    name: "Step 4 adds CR impact markers to affected features"
+    acceptance_criteria: "AC-C05"
+    type: content
+    test_method: content_check
+    input: "step_4 element in Execution Procedure"
+    expected: "Action includes adding CR impact marker with defined format to affected feature sections"
+    priority: must
+
+  - id: TC-16
+    name: "Step 4 does NOT modify existing FRs/ACs"
+    acceptance_criteria: "AC-C05"
+    type: content
+    test_method: content_check
+    input: "step_4 constraints"
+    expected: "Contains constraint: 'Do NOT modify existing FRs, ACs, or NFRs — only append CR impact markers'"
+    priority: must
+
+  - id: TC-17
+    name: "DoD has conflict review checkpoint"
+    acceptance_criteria: "AC-C06"
+    type: content
+    test_method: section_parse
+    input: "Definition of Done XML checkpoints"
+    expected: "Contains checkpoint named 'Conflict review completed' with verification about scanning existing files and recording decisions"
+    priority: must
+
+  - id: TC-18
+    name: "DoD has impacted features checkpoint"
+    acceptance_criteria: "AC-C06"
+    type: content
+    test_method: section_parse
+    input: "Definition of Done XML checkpoints"
+    expected: "Contains checkpoint named 'Impacted features marked' with verification about CR impact markers"
+    priority: must
+
+  # ─────────────────────────────────────────────────────────
+  # MUST — Behavior
+  # ─────────────────────────────────────────────────────────
+  - id: TC-19
+    name: "Step 3 has BLOCKING constraint for human decision"
+    acceptance_criteria: "AC-B01"
+    type: behavior
+    test_method: content_check
+    input: "step_3 constraints in Execution Procedure"
+    expected: "Contains 'BLOCKING: Do not proceed until human has decided on EVERY conflict'"
+    priority: must
+
+  - id: TC-20
+    name: "Execution Flow has BLOCKING note for Step 3"
+    acceptance_criteria: "AC-B01"
+    type: behavior
+    test_method: content_check
+    input: "BLOCKING notes after Execution Flow table"
+    expected: "Contains 'BLOCKING: Human MUST decide on each conflict in Step 3 before proceeding'"
+    priority: must
+
+  - id: TC-21
+    name: "No-conflict path skips Step 4"
+    acceptance_criteria: "AC-B02"
+    type: behavior
+    test_method: content_check
+    input: "step_3 action item 4 (no conflicts found)"
+    expected: "When no conflicts found: reports 'No conflicts found' and proceeds to Step 5 (skip Step 4)"
+    priority: must
+
+  - id: TC-22
+    name: "Step 4 skips when no conflicts"
+    acceptance_criteria: "AC-B02"
+    type: behavior
+    test_method: content_check
+    input: "step_4 action item 1"
+    expected: "Contains 'IF no conflicts were found in Step 3: skip this step entirely'"
+    priority: must
+
+  # ─────────────────────────────────────────────────────────
+  # SHOULD — Content
+  # ─────────────────────────────────────────────────────────
+  - id: TC-23
+    name: "Conflict recommendation references design principles"
+    acceptance_criteria: "AC-C07"
+    type: content
+    test_method: content_check
+    input: "step_3 recommendation guidelines"
+    expected: "References at least 3 of: Single Responsibility, Cohesion, Independence, Minimal coupling"
+    priority: should
+
+  - id: TC-24
+    name: "Recommendation explains when to choose CR vs new feature"
+    acceptance_criteria: "AC-C07"
+    type: content
+    test_method: content_check
+    input: "step_3 recommendation guidelines"
+    expected: "Each principle maps to a recommendation (e.g., same responsibility → CR, independent lifecycle → new feature)"
+    priority: should
+
+  - id: TC-25
+    name: "CR impact marker has defined format"
+    acceptance_criteria: "AC-C08"
+    type: content
+    test_method: content_check
+    input: "step_4 action — CR impact marker template"
+    expected: "Marker format includes: date, new feature reference, change description, affected FRs, action required"
+    priority: should
+
+  - id: TC-26
+    name: "CR impact marker format is consistent and parseable"
+    acceptance_criteria: "AC-C08"
+    type: content
+    test_method: content_check
+    input: "step_4 marker template"
+    expected: "Uses structured blockquote format with ⚠️ CR Impact Note header containing date, ref, Change, Affected FRs, Action Required, New Feature Ref fields"
+    priority: should
+
+  - id: TC-27
+    name: "Anti-patterns include conflict-skipping scenario"
+    acceptance_criteria: "AC-C09"
+    type: content
+    test_method: table_parse
+    input: "Anti-Patterns table"
+    expected: "Table contains row with 'Skipping conflict review' anti-pattern"
+    priority: should
+
+  - id: TC-28
+    name: "Anti-patterns include modifying existing FRs scenario"
+    acceptance_criteria: "AC-C09"
+    type: content
+    test_method: table_parse
+    input: "Anti-Patterns table"
+    expected: "Table contains row with 'Modifying existing FRs during impact update' anti-pattern"
+    priority: should
+
+  - id: TC-29
+    name: "Anti-patterns include deciding without human scenario"
+    acceptance_criteria: "AC-C09"
+    type: content
+    test_method: table_parse
+    input: "Anti-Patterns table"
+    expected: "Table contains row with 'Deciding CR vs new feature without human' anti-pattern"
+    priority: should
+
+  # ─────────────────────────────────────────────────────────
+  # Additional structural & content checks
+  # ─────────────────────────────────────────────────────────
+  - id: TC-30
+    name: "Input Parameters include conflict-related output fields"
+    acceptance_criteria: "AC-C05"
+    type: content
+    test_method: content_check
+    input: "Output Result YAML block"
+    expected: "Contains fields: conflict_review_completed, conflicts_found, impacted_features"
+    priority: must
+
+  - id: TC-31
+    name: "Execution Procedure has 7 step elements"
+    acceptance_criteria: "AC-C02"
+    type: content
+    test_method: section_parse
+    input: "Execution Procedure XML — step_N elements"
+    expected: "Contains step_1 through step_7"
+    priority: must
+
+  - id: TC-32
+    name: "Conflict review pattern exists in Patterns section"
+    acceptance_criteria: "AC-C07"
+    type: content
+    test_method: content_check
+    input: "Patterns & Anti-Patterns section"
+    expected: "Contains pattern for 'Overlap with Existing Feature' or similar conflict handling scenario"
+    priority: should
+
+  - id: TC-33
+    name: "Existing Project Addition pattern includes conflict review"
+    acceptance_criteria: "AC-C07"
+    type: content
+    test_method: content_check
+    input: "Pattern: Existing Project Addition"
+    expected: "Pattern steps include scanning for conflicts/overlaps and asking human to decide"
+    priority: should
+
+  - id: TC-34
+    name: "Step 3 presents conflict summary table to human"
+    acceptance_criteria: "AC-C04"
+    type: content
+    test_method: content_check
+    input: "step_3 action item 5"
+    expected: "Contains conflict summary table format with columns: Aspect, New Requirement, Existing Feature, Overlap Type"
+    priority: should
+
+  - id: TC-35
+    name: "DoR prerequisite for clarification"
+    acceptance_criteria: "AC-C01"
+    type: content
+    test_method: section_parse
+    input: "Definition of Ready checkpoints"
+    expected: "Contains checkpoint 'AI Agent has no more clarifying questions'"
+    priority: must
+
+  - id: TC-36
+    name: "Purpose lists conflict review in numbered steps"
+    acceptance_criteria: "AC-C01"
+    type: content
+    test_method: content_check
+    input: "Purpose section numbered list"
+    expected: "Includes step for reviewing existing requirements for conflicts/overlaps"
+    priority: must
+
+  - id: TC-37
+    name: "Important Notes has workflow prerequisite"
+    acceptance_criteria: "AC-C01"
+    type: content
+    test_method: content_check
+    input: "Important Notes section"
+    expected: "Contains BLOCKING note to learn x-ipe-workflow-task-execution before executing"
+    priority: must
+
+  - id: TC-38
+    name: "Step 3 constraints scan ALL parts not just latest"
+    acceptance_criteria: "AC-C03"
+    type: content
+    test_method: content_check
+    input: "step_3 constraints"
+    expected: "Contains 'CRITICAL: Scan ALL requirement-details parts, not just the latest'"
+    priority: must

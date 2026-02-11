@@ -168,9 +168,12 @@ function initializeApp() {
         });
     }
     
-    // Initialize terminal panel (FEATURE-005)
+    // Initialize terminal panel (FEATURE-005, FEATURE-029-A)
     if (typeof TerminalManager !== 'undefined') {
-        window.terminalManager = new TerminalManager('terminal-panes');
+        window.terminalManager = new TerminalManager('terminal-content');
+        if (typeof SessionExplorer !== 'undefined') {
+            window.sessionExplorer = new SessionExplorer(window.terminalManager);
+        }
         window.terminalManager.initialize();
         window.terminalPanel = new TerminalPanel(window.terminalManager);
     }

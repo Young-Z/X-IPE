@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-029-A: Session Explorer Core**
+  - Console Session Explorer panel replacing the 2-pane split-terminal layout
+  - Right-side explorer panel (220px) with vertically scrollable session list
+  - Support for up to 10 concurrent terminal sessions (Map-based architecture)
+  - Session creation via "+" button with sequential naming ("Session 1", "Session 2", ...)
+  - Single-session view: only active session visible, others hidden but running
+  - Click-to-switch between sessions with output preservation
+  - Background sessions continue running with buffered output
+  - Default "Session 1" auto-created on console load
+  - Active session indicator (green dot) and inactive indicator (dim dot)
+  - "+" button disabled at 10/10 session limit
+  - Zen mode hides explorer panel, restores on exit
+  - Backward compatible: reconnection, buffer replay, FitAddon, voice controls
+  - SessionExplorer class for panel UI management
+  - 17 backend regression tests (test_session_explorer.py)
+  - 16 acceptance test cases (16/16 pass, 100%)
+
+### Changed
 - **FEATURE-026: Homepage Infinity Loop**
   - Interactive homepage visualization displaying 8 development lifecycle stages on an infinity loop (∞)
   - Entry point: Click "X IPE" logo in header to display homepage

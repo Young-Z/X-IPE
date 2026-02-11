@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Console Window Explorer — Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN DIRECTION: Terminal-native dark UI
+   Tone: Industrial-utilitarian meets hacker aesthetic
+   Key: Phosphor green accents on deep charcoal
+   ═══════════════════════════════════════════ */
+
+:root {
+  /* Terminal palette */
+  --bg-deep: #0d1117;
+  --bg-surface: #161b22;
+  --bg-elevated: #1c2129;
+  --bg-panel: #21262d;
+  --bg-hover: #292e36;
+  --bg-active: #1a3a2a;
+
+  /* Text */
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  --text-terminal: #c9d1d9;
+
+  /* Accents */
+  --accent: #3fb950;
+  --accent-dim: #238636;
+  --accent-glow: rgba(63, 185, 80, 0.15);
+  --accent-bright: #56d364;
+  --cyan: #58a6ff;
+  --cyan-dim: rgba(88, 166, 255, 0.12);
+  --orange: #d29922;
+  --red: #f85149;
+  --red-dim: rgba(248, 81, 73, 0.12);
+
+  /* Borders */
+  --border: #30363d;
+  --border-subtle: #21262d;
+  --border-focus: #388bfd;
+
+  /* Spacing */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-6: 24px;
+
+  /* Radius */
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 10px;
+
+  /* Shadows */
+  --shadow-float: 0 16px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border);
+  --shadow-preview: 0 12px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border), 0 0 60px rgba(63, 185, 80, 0.06);
+
+  /* Explorer width */
+  --explorer-width: 220px;
+  --explorer-min: 160px;
+  --explorer-max: 360px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: #080b10;
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ─── Scenario Tabs ─── */
+.scenario-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  background: var(--bg-deep);
+  border-bottom: 1px solid var(--border);
+  padding: var(--sp-2) var(--sp-4);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 42px;
+}
+
+.scenario-bar__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-right: var(--sp-3);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.scenario-tab {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 14px;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.scenario-tab:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.scenario-tab.active {
+  color: var(--accent-bright);
+  border-color: var(--accent-dim);
+  background: var(--accent-glow);
+}
+
+/* ─── Main Layout ─── */
+.mockup-frame {
+  margin-top: 42px;
+  height: calc(100vh - 42px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Simulated App Context ─── */
+.app-topbar {
+  height: 36px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--sp-4);
+  gap: var(--sp-3);
+  flex-shrink: 0;
+}
+
+.app-topbar__brand {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: -0.3px;
+}
+
+.app-topbar__sep {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+}
+
+.app-topbar__nav {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.app-topbar__nav-item {
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 10px;
+  border-radius: var(--r-sm);
+  cursor: default;
+}
+
+.app-topbar__nav-item:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.app-content-placeholder {
+  flex: 1;
+  background: var(--bg-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+}
+
+.app-content-placeholder span {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ─── Terminal Panel ─── */
+.terminal-panel {
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ─── Terminal Header ─── */
+.terminal-header {
+  height: 36px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--sp-3);
+  flex-shrink: 0;
+  gap: var(--sp-2);
+}
+
+.terminal-header__title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.terminal-header__title svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.6;
+}
+
+.terminal-header__actions {
+  display: flex;
+  gap: var(--sp-1);
+}
+
+.header-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+
+.header-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.header-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ─── Terminal Body (Console + Explorer) ─── */
+.terminal-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+/* ─── Console Area ─── */
+.console-area {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.console-screen {
+  position: absolute;
+  inset: 0;
+  padding: var(--sp-3);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-terminal);
+  background: var(--bg-deep);
+  overflow-y: auto;
+  display: none;
+}
+
+.console-screen.active {
+  display: block;
+}
+
+.console-screen::-webkit-scrollbar {
+  width: 8px;
+}
+
+.console-screen::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.console-screen::-webkit-scrollbar-thumb {
+  background: var(--bg-panel);
+  border-radius: 4px;
+}
+
+.console-screen::-webkit-scrollbar-thumb:hover {
+  background: var(--border);
+}
+
+/* Terminal text styling */
+.prompt { color: var(--accent); font-weight: 500; }
+.cmd { color: var(--text-primary); }
+.output { color: var(--text-secondary); }
+.path { color: var(--cyan); }
+.success { color: var(--accent-bright); }
+.warn { color: var(--orange); }
+.error { color: var(--red); }
+.dim { color: var(--text-muted); }
+.cursor-block {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background: var(--accent);
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* ─── Resize Handle ─── */
+.resize-handle {
+  width: 5px;
+  cursor: col-resize;
+  background: var(--border-subtle);
+  flex-shrink: 0;
+  position: relative;
+  transition: background 0.15s;
+  z-index: 10;
+}
+
+.resize-handle:hover,
+.resize-handle.dragging {
+  background: var(--accent-dim);
+}
+
+.resize-handle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 24px;
+  border-radius: 1px;
+  background: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.resize-handle:hover::after {
+  opacity: 1;
+}
+
+/* ─── Session Explorer ─── */
+.session-explorer {
+  width: var(--explorer-width);
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0s;
+  overflow: hidden;
+}
+
+.session-explorer.collapsed {
+  width: 0;
+  min-width: 0;
+  border-left: none;
+  padding: 0;
+  visibility: hidden;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.25s;
+}
+
+/* Explorer header */
+.explorer-header {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--sp-2) 0 var(--sp-3);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.explorer-header__title {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  flex: 1;
+  white-space: nowrap;
+}
+
+.explorer-header__add {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.explorer-header__add:hover {
+  background: var(--accent-glow);
+  color: var(--accent);
+}
+
+.explorer-header__add svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Session list */
+.session-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-1) 0;
+}
+
+.session-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.session-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+/* Session bar */
+.session-bar {
+  display: flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 var(--sp-2) 0 var(--sp-3);
+  margin: 1px var(--sp-1);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all 0.12s;
+  position: relative;
+  gap: var(--sp-2);
+}
+
+.session-bar:hover {
+  background: var(--bg-hover);
+}
+
+.session-bar.active {
+  background: var(--bg-active);
+}
+
+.session-bar.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
+}
+
+/* Session icon */
+.session-bar__icon {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.session-bar__icon svg {
+  width: 13px;
+  height: 13px;
+  color: var(--text-muted);
+}
+
+.session-bar.active .session-bar__icon svg {
+  color: var(--accent);
+}
+
+/* Session name */
+.session-bar__name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1;
+}
+
+.session-bar.active .session-bar__name {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* Session name editing */
+.session-bar__name-input {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--text-primary);
+  background: var(--bg-deep);
+  border: 1px solid var(--border-focus);
+  border-radius: 3px;
+  padding: 2px 6px;
+  flex: 1;
+  min-width: 0;
+  outline: none;
+  line-height: 1;
+}
+
+/* Session status dot */
+.session-bar__status {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--accent-dim);
+}
+
+.session-bar.active .session-bar__status {
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent-glow);
+}
+
+/* Session actions (visible on hover or active) */
+.session-bar__actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.1s;
+  flex-shrink: 0;
+}
+
+.session-bar:hover .session-bar__actions,
+.session-bar.active .session-bar__actions {
+  opacity: 1;
+}
+
+.session-action-btn {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.1s;
+}
+
+.session-action-btn:hover {
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+}
+
+.session-action-btn.delete:hover {
+  background: var(--red-dim);
+  color: var(--red);
+}
+
+.session-action-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Session count badge */
+.session-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: var(--sp-2) var(--sp-3);
+  border-top: 1px solid var(--border-subtle);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.session-count strong {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* ─── Preview Modal ─── */
+.preview-modal {
+  position: fixed;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-preview);
+  z-index: 900;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.preview-modal.visible {
+  display: flex;
+  animation: previewIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes previewIn {
+  from {
+    opacity: 0;
+    transform: translateX(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.preview-modal__header {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--sp-3);
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-subtle);
+  gap: var(--sp-2);
+}
+
+.preview-modal__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.preview-modal__title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.preview-modal__badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--accent);
+  background: var(--accent-glow);
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: auto;
+  letter-spacing: 0.5px;
+}
+
+.preview-modal__content {
+  flex: 1;
+  padding: var(--sp-2) var(--sp-3);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--text-terminal);
+  background: var(--bg-deep);
+  overflow-y: auto;
+  opacity: 0.88;
+}
+
+/* ─── Toast ─── */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--sp-2) var(--sp-4);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-float);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  z-index: 1100;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.toast.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.toast.warn {
+  border-color: var(--orange);
+}
+
+.toast__icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Annotations ─── */
+.annotation {
+  position: fixed;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  color: var(--cyan);
+  pointer-events: none;
+  z-index: 800;
+  display: none;
+}
+
+.annotation.visible {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  animation: annotFade 0.4s ease;
+}
+
+@keyframes annotFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.annotation__line {
+  width: 20px;
+  height: 1px;
+  background: var(--cyan);
+  margin-top: 7px;
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+.annotation__text {
+  background: rgba(88, 166, 255, 0.08);
+  border: 1px solid rgba(88, 166, 255, 0.2);
+  border-radius: var(--r-sm);
+  padding: 4px 10px;
+  max-width: 200px;
+  line-height: 1.4;
+}
+
+/* ─── Scenario-specific states ─── */
+.scenario { display: none; }
+.scenario.active { display: contents; }
+
+/* ─── Inline rename state ─── */
+.session-bar.renaming .session-bar__name { display: none; }
+.session-bar.renaming .session-bar__name-input { display: block; }
+.session-bar:not(.renaming) .session-bar__name-input { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ═══════ SCENARIO NAVIGATION ═══════ -->
+<div class="scenario-bar">
+  <span class="scenario-bar__label">Scenarios</span>
+  <button class="scenario-tab active" data-scenario="main">Default View</button>
+  <button class="scenario-tab" data-scenario="multi">5 Sessions</button>
+  <button class="scenario-tab" data-scenario="rename">Rename Session</button>
+  <button class="scenario-tab" data-scenario="preview">Hover Preview</button>
+  <button class="scenario-tab" data-scenario="limit">Max Sessions</button>
+  <button class="scenario-tab" data-scenario="collapsed">Explorer Collapsed</button>
+</div>
+
+<!-- ═══════ MOCKUP FRAME ═══════ -->
+<div class="mockup-frame">
+
+  <!-- Simulated app top bar -->
+  <div class="app-topbar">
+    <span class="app-topbar__brand">X-IPE</span>
+    <div class="app-topbar__sep"></div>
+    <div class="app-topbar__nav">
+      <span class="app-topbar__nav-item">Workplace</span>
+      <span class="app-topbar__nav-item">Ideas</span>
+      <span class="app-topbar__nav-item">Settings</span>
+    </div>
+  </div>
+
+  <!-- Simulated content area above terminal -->
+  <div class="app-content-placeholder">
+    <span>— main content area —</span>
+  </div>
+
+  <!-- ═══════ TERMINAL PANEL ═══════ -->
+  <div class="terminal-panel" id="terminalPanel">
+
+    <!-- Terminal Header -->
+    <div class="terminal-header">
+      <div class="terminal-header__title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        Console
+      </div>
+      <div class="terminal-header__actions">
+        <button class="header-btn" title="Toggle Explorer" id="toggleExplorer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        </button>
+        <button class="header-btn" title="Maximize">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Terminal Body -->
+    <div class="terminal-body" id="terminalBody">
+
+      <!-- Console Area -->
+      <div class="console-area" id="consoleArea">
+
+        <!-- Session 1 console -->
+        <div class="console-screen active" data-session="1" id="screen1">
+          <div><span class="prompt">❯</span> <span class="cmd">cd ~/projects/my-app</span></div>
+          <div><span class="prompt">❯</span> <span class="cmd">python main.py --serve</span></div>
+          <div class="output">Starting development server...</div>
+          <div class="success">✓ Server running on http://localhost:5858</div>
+          <div class="output">Press Ctrl+C to stop</div>
+          <div class="dim">───────────────────────────────────</div>
+          <div class="output">[14:02:11] GET /api/config <span class="success">200</span> 3ms</div>
+          <div class="output">[14:02:12] GET /api/ideas/tree <span class="success">200</span> 8ms</div>
+          <div class="output">[14:02:14] POST /api/proxy <span class="success">200</span> 142ms</div>
+          <div class="output">[14:02:15] GET /static/js/terminal.js <span class="success">200</span> 1ms</div>
+          <div class="output">[14:03:01] WebSocket connected: sid=a4f2...</div>
+          <div class="output">[14:03:22] GET /api/config <span class="success">200</span> 2ms</div>
+          <div><br></div>
+          <div><span class="prompt">❯</span> <span class="cursor-block"></span></div>
+        </div>
+
+        <!-- Session 2 console -->
+        <div class="console-screen" data-session="2" id="screen2">
+          <div><span class="prompt">❯</span> <span class="cmd">uv run pytest tests/ -v</span></div>
+          <div class="output">========================= test session starts =========================</div>
+          <div class="output">platform darwin -- Python 3.12.4, pytest-8.3.5</div>
+          <div class="output">collected 1354 items</div>
+          <div><br></div>
+          <div class="success">tests/test_config.py::TestConfigService::test_load ✓</div>
+          <div class="success">tests/test_config.py::TestConfigService::test_save ✓</div>
+          <div class="success">tests/test_config.py::TestConfigService::test_defaults ✓</div>
+          <div class="warn">tests/test_proxy.py::TestProxy::test_intercept ⚠ SKIP</div>
+          <div class="success">tests/test_terminal.py::TestTerminal::test_create ✓</div>
+          <div class="success">tests/test_terminal.py::TestTerminal::test_attach ✓</div>
+          <div class="success">tests/test_terminal.py::TestTerminal::test_resize ✓</div>
+          <div class="output">...</div>
+          <div class="success">========================= 1351 passed, 3 skipped =========================</div>
+          <div><span class="prompt">❯</span> <span class="cursor-block"></span></div>
+        </div>
+
+        <!-- Session 3 console -->
+        <div class="console-screen" data-session="3" id="screen3">
+          <div><span class="prompt">❯</span> <span class="cmd">tail -f /var/log/system.log</span></div>
+          <div class="output">Feb 11 14:01:33 mac kernel: IOReturn AppleHPM...</div>
+          <div class="output">Feb 11 14:01:45 mac syslogd: ASL Sender Statistics</div>
+          <div class="output">Feb 11 14:02:01 mac com.apple.xpc.launchd: ...</div>
+          <div class="output">Feb 11 14:02:15 mac WindowServer: Visible
+            
+ 
+ 
+ 
+ 
+ </div>
+          <div><span class="cursor-block"></span></div>
+        </div>
+
+        <!-- Session 4 console -->
+        <div class="console-screen" data-session="4" id="screen4">
+          <div><span class="prompt">❯</span> <span class="cmd">node --inspect server.js</span></div>
+          <div class="output">Debugger listening on ws://127.0.0.1:9229/...</div>
+          <div class="output">For help, see: https://nodejs.org/en/docs/inspector</div>
+          <div class="success">Server started on port 3000</div>
+          <div><span class="prompt">❯</span> <span class="cursor-block"></span></div>
+        </div>
+
+        <!-- Session 5 console -->
+        <div class="console-screen" data-session="5" id="screen5">
+          <div><span class="prompt">❯</span> <span class="cmd">git log --oneline -20</span></div>
+          <div class="output"><span class="warn">a3f2b1c</span> feat: add session explorer panel</div>
+          <div class="output"><span class="warn">8d1e4f2</span> fix: terminal resize on split</div>
+          <div class="output"><span class="warn">c7a9b3d</span> chore: update xterm.js to v5.3.0</div>
+          <div class="output"><span class="warn">2e6f8a1</span> feat: add PTY output buffer</div>
+          <div class="output"><span class="warn">f4c2d9e</span> fix: WebSocket reconnection</div>
+          <div><span class="prompt">❯</span> <span class="cursor-block"></span></div>
+        </div>
+
+      </div>
+
+      <!-- Resize Handle -->
+      <div class="resize-handle" id="resizeHandle"></div>
+
+      <!-- Session Explorer -->
+      <div class="session-explorer" id="sessionExplorer">
+        <div class="explorer-header">
+          <span class="explorer-header__title">Sessions</span>
+          <button class="explorer-header__add" id="addSessionBtn" title="New Session">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+
+        <div class="session-list" id="sessionList">
+          <!-- Sessions are rendered by JS -->
+        </div>
+
+        <div class="session-count" id="sessionCount">
+          <strong>1</strong> / 10 sessions
+        </div>
+      </div>
+
+    </div><!-- /terminal-body -->
+  </div><!-- /terminal-panel -->
+</div><!-- /mockup-frame -->
+
+<!-- Preview Modal -->
+<div class="preview-modal" id="previewModal">
+  <div class="preview-modal__header">
+    <div class="preview-modal__dot"></div>
+    <span class="preview-modal__title" id="previewTitle">Session 2</span>
+    <span class="preview-modal__badge">LIVE</span>
+  </div>
+  <div class="preview-modal__content" id="previewContent"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="toast__icon">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  </span>
+  <span id="toastText">Session limit reached (10/10)</span>
+</div>
+
+<script>
+(() => {
+  // ─── State ───
+  let activeScenario = 'main';
+  let activeSession = 1;
+  let sessions = [];
+  let explorerCollapsed = false;
+  let previewTimeout = null;
+
+  // ─── Session data per scenario ───
+  const scenarioConfigs = {
+    main: {
+      sessions: [{ id: 1, name: 'Session 1' }],
+      active: 1
+    },
+    multi: {
+      sessions: [
+        { id: 1, name: 'Dev Server' },
+        { id: 2, name: 'Test Runner' },
+        { id: 3, name: 'Log Watcher' },
+        { id: 4, name: 'Node Debug' },
+        { id: 5, name: 'Session 5' }
+      ],
+      active: 1
+    },
+    rename: {
+      sessions: [
+        { id: 1, name: 'Dev Server' },
+        { id: 2, name: 'Test Runner', renaming: true },
+        { id: 3, name: 'Log Watcher' }
+      ],
+      active: 2
+    },
+    preview: {
+      sessions: [
+        { id: 1, name: 'Dev Server' },
+        { id: 2, name: 'Test Runner' },
+        { id: 3, name: 'Log Watcher' }
+      ],
+      active: 1,
+      previewSession: 2
+    },
+    limit: {
+      sessions: Array.from({ length: 10 }, (_, i) => ({ id: i + 1, name: `Session ${i + 1}` })),
+      active: 1,
+      showToast: true
+    },
+    collapsed: {
+      sessions: [
+        { id: 1, name: 'Dev Server' },
+        { id: 2, name: 'Test Runner' }
+      ],
+      active: 1,
+      collapsed: true
+    }
+  };
+
+  // ─── Elements ───
+  const sessionList = document.getElementById('sessionList');
+  const sessionCount = document.getElementById('sessionCount');
+  const consoleArea = document.getElementById('consoleArea');
+  const previewModal = document.getElementById('previewModal');
+  const previewTitle = document.getElementById('previewTitle');
+  const previewContent = document.getElementById('previewContent');
+  const toast = document.getElementById('toast');
+  const toastText = document.getElementById('toastText');
+  const explorer = document.getElementById('sessionExplorer');
+  const resizeHandle = document.getElementById('resizeHandle');
+  const toggleBtn = document.getElementById('toggleExplorer');
+  const addBtn = document.getElementById('addSessionBtn');
+
+  // ─── Render sessions ───
+  function renderSessions() {
+    sessionList.innerHTML = '';
+
+    sessions.forEach(s => {
+      const bar = document.createElement('div');
+      bar.className = 'session-bar' + (s.id === activeSession ? ' active' : '') + (s.renaming ? ' renaming' : '');
+      bar.dataset.id = s.id;
+
+      bar.innerHTML = `
+        <div class="session-bar__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        </div>
+        <span class="session-bar__name">${s.name}</span>
+        <input class="session-bar__name-input" value="${s.renaming ? s.name : ''}" spellcheck="false" />
+        <div class="session-bar__status"></div>
+        <div class="session-bar__actions">
+          <button class="session-action-btn rename" title="Rename">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="session-action-btn delete" title="Delete">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+      `;
+
+      // Click to select
+      bar.addEventListener('click', (e) => {
+        if (e.target.closest('.session-action-btn')) return;
+        selectSession(s.id);
+      });
+
+      // Rename click
+      bar.querySelector('.rename').addEventListener('click', () => {
+        startRename(s.id);
+      });
+
+      // Delete click
+      bar.querySelector('.delete').addEventListener('click', () => {
+        deleteSession(s.id);
+      });
+
+      // Hover preview (only non-active)
+      let hoverTimer;
+      bar.addEventListener('mouseenter', () => {
+        if (s.id === activeSession) return;
+        hoverTimer = setTimeout(() => showPreview(s, bar), 500);
+      });
+      bar.addEventListener('mouseleave', (e) => {
+        clearTimeout(hoverTimer);
+        // Check if moving to the preview modal
+        const related = e.relatedTarget;
+        if (related && (related === previewModal || previewModal.contains(related))) return;
+        hidePreview();
+      });
+
+      // If renaming, auto-focus
+      if (s.renaming) {
+        requestAnimationFrame(() => {
+          const input = bar.querySelector('.session-bar__name-input');
+          input.focus();
+          input.select();
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              s.name = input.value || s.name;
+              s.renaming = false;
+              renderSessions();
+            }
+            if (e.key === 'Escape') {
+              s.renaming = false;
+              renderSessions();
+            }
+          });
+          input.addEventListener('blur', () => {
+            s.name = input.value || s.name;
+            s.renaming = false;
+            renderSessions();
+          });
+        });
+      }
+
+      sessionList.appendChild(bar);
+    });
+
+    sessionCount.innerHTML = `<strong>${sessions.length}</strong> / 10 sessions`;
+  }
+
+  // ─── Select session ───
+  function selectSession(id) {
+    activeSession = id;
+    // Show corresponding console screen
+    document.querySelectorAll('.console-screen').forEach(s => s.classList.remove('active'));
+    const screen = document.querySelector(`.console-screen[data-session="${id}"]`);
+    if (screen) screen.classList.add('active');
+    else {
+      // Show first screen as fallback
+      const first = document.querySelector('.console-screen');
+      if (first) first.classList.add('active');
+    }
+    renderSessions();
+  }
+
+  // ─── Start rename ───
+  function startRename(id) {
+    sessions.forEach(s => s.renaming = (s.id === id));
+    renderSessions();
+  }
+
+  // ─── Delete session ───
+  function deleteSession(id) {
+    if (sessions.length === 1) {
+      // Auto-create new session
+      sessions = [{ id: Date.now(), name: 'Session 1' }];
+      activeSession = sessions[0].id;
+    } else {
+      const idx = sessions.findIndex(s => s.id === id);
+      sessions.splice(idx, 1);
+      if (activeSession === id) {
+        activeSession = sessions[Math.min(idx, sessions.length - 1)].id;
+      }
+    }
+    selectSession(activeSession);
+  }
+
+  // ─── Add session ───
+  function addSession() {
+    if (sessions.length >= 10) {
+      showToast('Session limit reached (10/10)', true);
+      return;
+    }
+    const nextNum = sessions.length + 1;
+    const newSession = { id: Date.now(), name: `Session ${nextNum}` };
+    sessions.push(newSession);
+    selectSession(newSession.id);
+  }
+
+  // ─── Preview ───
+  function showPreview(session, barEl) {
+    const rect = barEl.getBoundingClientRect();
+    const explorerRect = explorer.getBoundingClientRect();
+    const consoleRect = consoleArea.getBoundingClientRect();
+
+    const previewW = consoleRect.width * 0.50;
+    const previewH = consoleRect.height * 0.60;
+
+    previewModal.style.width = previewW + 'px';
+    previewModal.style.height = previewH + 'px';
+    previewModal.style.right = (window.innerWidth - explorerRect.left + 8) + 'px';
+    previewModal.style.top = Math.max(rect.top - previewH / 3, consoleRect.top + 8) + 'px';
+
+    previewTitle.textContent = session.name;
+
+    // Simulate preview content from the session's screen
+    const screenEl = document.getElementById(`screen${session.id}`);
+    if (screenEl) {
+      previewContent.innerHTML = screenEl.innerHTML;
+    } else {
+      previewContent.innerHTML = `<span class="dim">Terminal output for ${session.name}...</span>`;
+    }
+
+    previewModal.classList.add('visible');
+  }
+
+  function hidePreview() {
+    previewModal.classList.remove('visible');
+  }
+
+  // Preview modal hover continuation
+  previewModal.addEventListener('mouseleave', hidePreview);
+  previewModal.addEventListener('click', () => {
+    // Click preview → switch to that session
+    const name = previewTitle.textContent;
+    const s = sessions.find(s => s.name === name);
+    if (s) selectSession(s.id);
+    hidePreview();
+  });
+
+  // ─── Toast ───
+  function showToast(text, isWarn) {
+    toastText.textContent = text;
+    toast.classList.toggle('warn', !!isWarn);
+    toast.classList.add('visible');
+    setTimeout(() => toast.classList.remove('visible'), 2500);
+  }
+
+  // ─── Toggle explorer ───
+  toggleBtn.addEventListener('click', () => {
+    explorerCollapsed = !explorerCollapsed;
+    explorer.classList.toggle('collapsed', explorerCollapsed);
+    resizeHandle.style.display = explorerCollapsed ? 'none' : '';
+  });
+
+  // ─── Add button ───
+  addBtn.addEventListener('click', addSession);
+
+  // ─── Resize handle drag ───
+  let isDragging = false;
+  resizeHandle.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    resizeHandle.classList.add('dragging');
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const bodyRect = document.getElementById('terminalBody').getBoundingClientRect();
+    const newWidth = bodyRect.right - e.clientX;
+    const clamped = Math.max(160, Math.min(360, newWidth));
+    explorer.style.width = clamped + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    resizeHandle.classList.remove('dragging');
+  });
+
+  // ─── Scenario switching ───
+  document.querySelectorAll('.scenario-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.scenario-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      loadScenario(tab.dataset.scenario);
+    });
+  });
+
+  function loadScenario(name) {
+    activeScenario = name;
+    const config = scenarioConfigs[name];
+
+    sessions = config.sessions.map(s => ({ ...s }));
+    activeSession = config.active;
+
+    // Explorer state
+    explorerCollapsed = !!config.collapsed;
+    explorer.classList.toggle('collapsed', explorerCollapsed);
+    resizeHandle.style.display = explorerCollapsed ? 'none' : '';
+    explorer.style.width = explorerCollapsed ? '' : 'var(--explorer-width)';
+
+    // Show active screen
+    document.querySelectorAll('.console-screen').forEach(s => s.classList.remove('active'));
+    const screen = document.querySelector(`.console-screen[data-session="${activeSession}"]`) ||
+                   document.querySelector('.console-screen');
+    if (screen) screen.classList.add('active');
+
+    renderSessions();
+
+    // Hide preview
+    hidePreview();
+    toast.classList.remove('visible');
+
+    // Scenario-specific effects
+    if (config.showToast) {
+      setTimeout(() => showToast('Session limit reached (10/10)', true), 400);
+    }
+
+    if (config.previewSession) {
+      setTimeout(() => {
+        const bar = document.querySelector(`.session-bar[data-id="${config.previewSession}"]`);
+        const s = sessions.find(s => s.id === config.previewSession);
+        if (bar && s) showPreview(s, bar);
+      }, 500);
+    }
+  }
+
+  // ─── Initial load ───
+  loadScenario('main');
+})();
+</script>
+</body>
+</html>

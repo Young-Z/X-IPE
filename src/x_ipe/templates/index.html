@@ -116,7 +116,6 @@
             </div>
             <!-- Right side: Actions -->
             <div class="terminal-actions">
-                <button id="add-terminal-btn" title="Add Terminal">+</button>
                 <button id="terminal-zen-btn" title="Zen Mode">
                     <i class="bi bi-arrows-fullscreen"></i>
                 </button>
@@ -129,8 +128,21 @@
         <div class="transcription-preview" id="transcription-preview">
             <span class="transcription-text" id="transcription-text"></span>
         </div>
-        <div class="terminal-panes" id="terminal-panes">
-            <!-- Panes inserted dynamically by TerminalManager -->
+        <div class="terminal-body" id="terminal-body">
+            <div class="terminal-content" id="terminal-content">
+                <!-- Session containers inserted dynamically by TerminalManager -->
+            </div>
+            <div class="session-explorer" id="session-explorer">
+                <div class="explorer-header">
+                    <span class="explorer-title">Sessions</span>
+                </div>
+                <div class="session-list" id="session-list">
+                    <!-- Session bars inserted dynamically by SessionExplorer -->
+                </div>
+                <button class="explorer-add-btn" id="explorer-add-btn" title="New Session">
+                    <i class="bi bi-plus-lg"></i>
+                </button>
+            </div>
         </div>
     </div><!-- end terminal-panel -->
 </div><!-- end page-root -->

@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 02-11-2026 01:52:00
+> Last Updated: 02-11-2026 15:35:00
 
 ## Overview
 
@@ -66,12 +66,16 @@ This board tracks all features across the project lifecycle.
 | FEATURE-028-B | CLI Language Selection & Instructions | v1.0 | Implemented | [specification.md](../requirements/FEATURE-028-B/specification.md), [technical-design.md](../requirements/FEATURE-028-B/technical-design.md) | 02-11-2026 | 02-11-2026 03:00:00 |
 | FEATURE-028-C | Frontend Prompt Language Filtering | v1.0 | Implemented | [specification.md](../requirements/FEATURE-028-C/specification.md), [technical-design.md](../requirements/FEATURE-028-C/technical-design.md) | 02-11-2026 | 02-11-2026 03:00:00 |
 | FEATURE-028-D | Settings Language Switch (Web UI) | v1.0 | Implemented | [specification.md](../requirements/FEATURE-028-D/specification.md), [technical-design.md](../requirements/FEATURE-028-D/technical-design.md), [CR-002.md](../requirements/FEATURE-028-D/CR-002.md) | 02-11-2026 | 02-11-2026 10:15:00 |
+| FEATURE-029-A | Session Explorer Core | v1.0 | Implemented | [specification.md](../requirements/FEATURE-029-A/specification.md), [technical-design.md](../requirements/FEATURE-029-A/technical-design.md) | 02-11-2026 | 02-11-2026 16:30:00 |
+| FEATURE-029-B | Session Actions | v1.0 | Planned | - | 02-11-2026 | 02-11-2026 15:34:00 |
+| FEATURE-029-C | Session Hover Preview | v1.0 | Planned | - | 02-11-2026 | 02-11-2026 15:34:00 |
+| FEATURE-029-D | Explorer UI Controls | v1.0 | Planned | - | 02-11-2026 | 02-11-2026 15:34:00 |
 
 ---
 
 ## Status Details
 
-### Planned (17)
+### Planned (20)
 - FEATURE-007: Git Integration
 - FEATURE-014: Theme-Aware Frontend Design Skill
 - FEATURE-017: Architecture DSL JavaScript Library
@@ -89,15 +93,19 @@ This board tracks all features across the project lifecycle.
 - FEATURE-025-F: KB Navigation & Polish
 - FEATURE-026: Homepage Infinity Loop
 - FEATURE-027-E: CLI Migration & Upgrade
+- FEATURE-029-B: Session Actions
+- FEATURE-029-C: Session Hover Preview
+- FEATURE-029-D: Explorer UI Controls
 
 ### Refined (2)
 - FEATURE-024: Project Quality Evaluation UI
 - FEATURE-027-B: CLI Init & Selection
 
-### Designed (4)
+### Designed (5)
 - FEATURE-027-C: Skill & Instruction Translation
 - FEATURE-028-A: Bilingual Prompt Schema & Migration
 - FEATURE-028-B: CLI Language Selection & Instructions
+- FEATURE-029-A: Session Explorer Core
 - FEATURE-028-C: Frontend Prompt Language Filtering
 - FEATURE-028-D: Settings Language Switch (Web UI)
 
@@ -813,3 +821,72 @@ This board tracks all features across the project lifecycle.
 - Deploy new CLI artifacts via translation + MCP
 - Report backed up and created files
 - Skip migration if target CLI equals current CLI
+
+---
+
+### FEATURE-029-A: Session Explorer Core
+
+**Version:** v1.0
+**Status:** Planned
+**Description:** MVP — Session Explorer panel on right side of console with session list, create/switch sessions (up to 10), single-session view. Replaces split-pane layout.
+**Dependencies:** FEATURE-005 (CR)
+**Specification:** -
+**Technical Design:** -
+
+**Key Capabilities:**
+- Explorer panel renders on right side of console
+- "+" button creates PTY sessions (max 10)
+- Single-session view — only active session visible
+- Auto-create 1 default session on load
+- Preserves existing WebSocket/buffer replay
+
+---
+
+### FEATURE-029-B: Session Actions
+
+**Version:** v1.0
+**Status:** Planned
+**Description:** Session bar actions: inline rename, delete with auto-recreate, sequential naming, limit toast, visual status indicators.
+**Dependencies:** FEATURE-029-A
+**Specification:** -
+**Technical Design:** -
+
+**Key Capabilities:**
+- Inline rename via edit icon (Enter confirms, Escape cancels)
+- Delete via delete icon (no confirmation, auto-create if last)
+- Green accent bar for active session, dim dot for background
+- Error toast on PTY creation failure
+
+---
+
+### FEATURE-029-C: Session Hover Preview
+
+**Version:** v1.0
+**Status:** Planned
+**Description:** Live read-only mini-terminal preview modal on hover (0.5s delay), configurable size via .x-ipe.yaml.
+**Dependencies:** FEATURE-029-A
+**Specification:** -
+**Technical Design:** -
+
+**Key Capabilities:**
+- Hover 0.5s shows live preview modal
+- Connected hover zone (bar + modal) with 100ms grace period
+- Click preview switches to that session
+- Size configurable: console.preview_size_percent (20-80, default 50)
+
+---
+
+### FEATURE-029-D: Explorer UI Controls
+
+**Version:** v1.0
+**Status:** Planned
+**Description:** Explorer panel collapse/expand toggle, drag-to-resize (160-360px), width/state persistence in localStorage.
+**Dependencies:** FEATURE-029-A
+**Specification:** -
+**Technical Design:** -
+
+**Key Capabilities:**
+- Toggle button in console header collapses/expands
+- Collapsed = fully hidden, terminal takes full width
+- Drag handle resizes (160-360px, default 220px)
+- Width and collapsed state persist in localStorage
