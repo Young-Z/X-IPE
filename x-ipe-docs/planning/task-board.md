@@ -6,7 +6,6 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-251 | Test Generation | Generate tests for FEATURE-028-A Bilingual Prompt Schema & Migration | Drift | 🔄 in_progress | 02-11-2026 02:18:00 | - | Code Implementation |
 
 
 
@@ -25,8 +24,12 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-253 | Test Generation | Generate tests for FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:22:00 | [test_kb_landing.py](../../tests/test_kb_landing.py) | 57 tests (14 validation, 10 upload, 7 delete, 3 get_landing, 6 upload API, 5 delete API, 5 landing API, 4 integration, 3 tracing). TDD ready: 57 failing, 0 passing. |
 | TASK-252 | Technical Design | Design FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:17:00 | [technical-design.md](../requirements/FEATURE-025-B/technical-design.md) | Full Stack design: 4 components (KBService ext, kb_routes ext, kb-landing.js, kb-landing.css). Upload/delete/grid/drag-drop. ~40 tests estimated. DoD 9/9 pass. |
 | TASK-249 | Feature Refinement | Refine FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:10:00 | [specification.md](../requirements/FEATURE-025-B/specification.md) | 31 ACs, 5 FRs, 5 NFRs. File upload, drag-drop, grid, delete, empty state. Mockup current. DoD validated. |
+| TASK-255 | Code Implementation | Implement FEATURE-028-C Frontend Prompt Language Filtering | Drift | 02-11-2026 03:00:00 | [workplace.js](../../src/x_ipe/static/js/features/workplace.js) | _resolvePromptDetails() with 3-level fallback, language from /api/config. 1291 tests pass, 0 regressions. |
+| TASK-254 | Code Implementation | Implement FEATURE-028-B CLI Language Selection & Instructions | Drift | 02-11-2026 02:55:00 | [main.py](../../src/x_ipe/cli/main.py), [scaffold.py](../../src/x_ipe/core/scaffold.py) | --lang on init/upgrade, language in .x-ipe.yaml, extract_language_section() for instructions. 1291 pass, 0 regressions. |
+| TASK-251 | Code Implementation | Implement FEATURE-028-A Bilingual Prompt Schema & Migration | Drift | 02-11-2026 02:45:00 | [prompt_config_service.py](../../src/x_ipe/services/prompt_config_service.py), [test_prompt_config.py](../../tests/test_prompt_config.py) | 30/30 tests pass. v3.0 schema migration + extraction utility. 0 regressions. |
 | TASK-250 | Technical Design | Design FEATURE-028-C Frontend Prompt Language Filtering | Drift | 02-11-2026 02:15:00 | [technical-design.md](../requirements/FEATURE-028-C/technical-design.md) | Client-side filtering with 3-level fallback. 1 file change (workplace.js). DoD validated. |
 | TASK-249 | Technical Design | Design FEATURE-028-B CLI Language Selection & Instructions | Drift | 02-11-2026 02:14:00 | [technical-design.md](../requirements/FEATURE-028-B/technical-design.md) | --lang option, bilingual template, extraction utility. 4 file changes. DoD validated. |
 | TASK-248 | Technical Design | Design FEATURE-028-A Bilingual Prompt Schema & Migration | Drift | 02-11-2026 02:12:00 | [technical-design.md](../requirements/FEATURE-028-A/technical-design.md) | v3.0 schema, migration utility, Chinese translations. 2 file changes. DoD validated. |
@@ -152,7 +155,7 @@
 - **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 290
+- **Completed (archived):** 293
 - **Pending Review:** 0
 - **Blocked:** 0
 

@@ -62,9 +62,9 @@ This board tracks all features across the project lifecycle.
 | FEATURE-027-C | Skill & Instruction Translation | v1.0 | Implemented | [specification.md](../requirements/FEATURE-027-C/specification.md), [technical-design.md](../requirements/FEATURE-027-C/technical-design.md), [skill_translator.py](../../src/x_ipe/services/skill_translator.py) | 02-07-2026 | 02-07-2026 16:05:00 |
 | FEATURE-027-D | MCP Configuration Deployment | v1.0 | Implemented | [specification.md](../requirements/FEATURE-027-D/specification.md), [test_mcp_deployer.py](../../tests/test_mcp_deployer.py), [mcp_deployer_service.py](../../src/x_ipe/services/mcp_deployer_service.py) | 02-07-2026 | 02-07-2026 15:25:00 |
 | FEATURE-027-E | CLI Migration & Upgrade | v1.0 | Implemented | [specification.md](../requirements/FEATURE-027-E/specification.md), [test_cli_migration.py](../../tests/test_cli_migration.py) | 02-07-2026 | 02-07-2026 15:40:00 |
-| FEATURE-028-A | Bilingual Prompt Schema & Migration | v1.0 | Done Technical Design | [specification.md](../requirements/FEATURE-028-A/specification.md), [technical-design.md](../requirements/FEATURE-028-A/technical-design.md) | 02-11-2026 | 02-11-2026 02:15:00 |
-| FEATURE-028-B | CLI Language Selection & Instructions | v1.0 | Done Technical Design | [specification.md](../requirements/FEATURE-028-B/specification.md), [technical-design.md](../requirements/FEATURE-028-B/technical-design.md) | 02-11-2026 | 02-11-2026 02:15:00 |
-| FEATURE-028-C | Frontend Prompt Language Filtering | v1.0 | Done Technical Design | [specification.md](../requirements/FEATURE-028-C/specification.md), [technical-design.md](../requirements/FEATURE-028-C/technical-design.md) | 02-11-2026 | 02-11-2026 02:15:00 |
+| FEATURE-028-A | Bilingual Prompt Schema & Migration | v1.0 | Implemented | [specification.md](../requirements/FEATURE-028-A/specification.md), [technical-design.md](../requirements/FEATURE-028-A/technical-design.md) | 02-11-2026 | 02-11-2026 03:00:00 |
+| FEATURE-028-B | CLI Language Selection & Instructions | v1.0 | Implemented | [specification.md](../requirements/FEATURE-028-B/specification.md), [technical-design.md](../requirements/FEATURE-028-B/technical-design.md) | 02-11-2026 | 02-11-2026 03:00:00 |
+| FEATURE-028-C | Frontend Prompt Language Filtering | v1.0 | Implemented | [specification.md](../requirements/FEATURE-028-C/specification.md), [technical-design.md](../requirements/FEATURE-028-C/technical-design.md) | 02-11-2026 | 02-11-2026 03:00:00 |
 
 ---
 
@@ -636,6 +636,7 @@ This board tracks all features across the project lifecycle.
 **Tasks:**
 - TASK-249: Feature Refinement (Pulse) — 31 ACs, 5 FRs, 5 NFRs
 - TASK-252: Technical Design (Pulse) — Full Stack design, 4 new components
+- TASK-253: Test Generation (Pulse) — 57 tests, TDD ready
 
 ---
 
