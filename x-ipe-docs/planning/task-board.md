@@ -6,8 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-292 | Feature Acceptance Test | Acceptance test FEATURE-028-D Settings Language Switch | Sage | ⏳ pending | 02-11-2026 10:15:00 | - | Feature Closing |
-| TASK-292 | Feature Acceptance Test | Execute acceptance tests for FEATURE-025-B KB Landing Zone | Pulse | 🔄 in_progress | 02-11-2026 10:06:00 | - | Feature Closing |
+| TASK-289 | Technical Design | Design FEATURE-028-D Settings Language Switch | Sage | ⏳ pending | 02-11-2026 08:36:00 | - | Test Generation |
 
 
 
@@ -27,6 +26,7 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-292 | Feature Acceptance Test | Acceptance test FEATURE-028-D Settings Language Switch | Sage | 02-11-2026 10:32:00 | [screenshot](/tmp/settings-language-final.png) | 19/19 acceptance tests passed. Verified: AC-1 (card positioning), AC-2 (badge+dropdown), AC-3 (confirmation modal+cancel), AC-4/5 (API call+atomicity), AC-6 (success toast, no reload), AC-7 (same-language guard), AC-8 (disabled during switch), AC-14 (badge update). |
 | TASK-291 | Code Implementation | Implement FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:22:00 | [kb_service.py](../../src/x_ipe/services/kb_service.py), [kb_routes.py](../../src/x_ipe/routes/kb_routes.py), [kb-landing.js](../../src/x_ipe/static/js/features/kb-landing.js), [kb-landing.css](../../src/x_ipe/static/css/kb-landing.css) | Backend: upload_files/delete_files/get_landing_files + 3 endpoints. Frontend: file grid, drag-drop, selection. 111/111 KB tests pass. |
 | TASK-290 | Test Generation | Generate tests for FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:22:00 | [test_kb_landing.py](../../tests/test_kb_landing.py) | 57 tests across 9 classes. TDD ready confirmed. |
 | TASK-291 | Code Implementation | Implement FEATURE-028-D Settings Language Switch | Sage | 02-11-2026 10:15:00 | [settings_routes.py](../../src/x_ipe/routes/settings_routes.py), [settings.html](../../src/x_ipe/templates/settings.html), [config_service.py](../../src/x_ipe/services/config_service.py) | Backend: POST /api/config/language + ConfigData.language. Frontend: LanguageManager JS, Language card, confirmation modal, toasts. All 17 tests pass. |
@@ -168,7 +168,7 @@
 - **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 295
+- **Completed (archived):** 296
 - **Pending Review:** 0
 - **Blocked:** 0
 
