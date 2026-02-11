@@ -1,0 +1,499 @@
+/**
+ * FEATURE-025-B: KB Landing Zone CSS
+ * 
+ * Styles for file grid, cards, drag-drop zone, action toolbar,
+ * processing indicator, and empty state.
+ * Derived from knowledge-base-v1.html mockup.
+ */
+
+/* Content Header */
+.kb-content-header {
+    padding: 12px 20px;
+    background: var(--bg-secondary, #252526);
+    border-bottom: 1px solid var(--border-color, #3d3d3d);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.kb-content-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.kb-content-title h5 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-primary, #e0e0e0);
+}
+
+.kb-status-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+}
+
+.kb-content-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Action Toolbar */
+.kb-action-toolbar {
+    padding: 10px 20px;
+    background: var(--bg-tertiary, #2a2a2a);
+    border-bottom: 1px solid var(--border-color, #3d3d3d);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.kb-action-group {
+    display: flex;
+    gap: 6px;
+}
+
+.kb-action-toolbar .kb-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border-color, #3d3d3d);
+}
+
+.kb-action-toolbar .kb-selection-count {
+    font-size: 12px;
+    color: var(--text-muted, #808080);
+    margin-left: auto;
+}
+
+/* Toolbar Buttons */
+.kb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: 1px solid var(--border-color, #3d3d3d);
+    background: transparent;
+    color: var(--text-secondary, #cccccc);
+}
+
+.kb-btn:hover {
+    background: var(--bg-hover, #2a2a2a);
+    color: var(--text-primary, #e0e0e0);
+}
+
+.kb-btn.active {
+    background: var(--accent-color-dim, rgba(13, 110, 253, 0.2));
+    color: var(--accent-color, #0d6efd);
+    border-color: var(--accent-color, #0d6efd);
+}
+
+.kb-btn-primary {
+    background: var(--accent-color, #0d6efd);
+    color: white;
+    border-color: var(--accent-color, #0d6efd);
+}
+
+.kb-btn-primary:hover {
+    opacity: 0.85;
+}
+
+.kb-btn-danger {
+    color: #ef4444;
+    border-color: #ef4444;
+}
+
+.kb-btn-danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* File Grid */
+.kb-file-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+    padding: 20px;
+}
+
+/* File List View */
+.kb-file-list {
+    padding: 8px 20px;
+}
+
+.kb-file-list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+    border-bottom: 1px solid var(--border-color, #3d3d3d);
+}
+
+.kb-file-list-item:hover {
+    background: var(--bg-hover, #2a2a2a);
+}
+
+.kb-file-list-item.selected {
+    background: var(--accent-color-dim, rgba(13, 110, 253, 0.1));
+    border-color: var(--accent-color, #0d6efd);
+}
+
+.kb-file-list-item .kb-list-checkbox {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border-color, #3d3d3d);
+    border-radius: 3px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: white;
+}
+
+.kb-file-list-item.selected .kb-list-checkbox {
+    background: var(--accent-color, #0d6efd);
+    border-color: var(--accent-color, #0d6efd);
+}
+
+.kb-file-list-item .kb-list-name {
+    flex: 1;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-primary, #e0e0e0);
+}
+
+.kb-file-list-item .kb-list-meta {
+    font-size: 11px;
+    color: var(--text-muted, #808080);
+    white-space: nowrap;
+}
+
+/* File Card */
+.kb-file-card {
+    background: var(--bg-secondary, #252526);
+    border: 1px solid var(--border-color, #3d3d3d);
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.kb-file-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-color, #0d6efd), #a78bfa);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.kb-file-card:hover {
+    background: var(--bg-hover, #2a2a2a);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.kb-file-card:hover::before {
+    opacity: 1;
+}
+
+.kb-file-card.selected {
+    border-color: var(--accent-color, #0d6efd);
+    background: var(--accent-color-dim, rgba(13, 110, 253, 0.08));
+}
+
+.kb-file-card.selected::before {
+    opacity: 1;
+}
+
+/* Card Icon */
+.kb-file-card-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 24px;
+    margin-bottom: 12px;
+}
+
+.kb-file-card-icon.pdf {
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+}
+
+.kb-file-card-icon.doc {
+    background: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+}
+
+.kb-file-card-icon.code {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+}
+
+.kb-file-card-icon.image {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+}
+
+.kb-file-card-icon.markdown {
+    background: rgba(124, 106, 239, 0.12);
+    color: #7c6aef;
+}
+
+.kb-file-card-icon.default {
+    background: rgba(156, 163, 175, 0.12);
+    color: #9ca3af;
+}
+
+/* Card Name & Meta */
+.kb-file-card-name {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-primary, #e0e0e0);
+}
+
+.kb-file-card-meta {
+    font-size: 11px;
+    color: var(--text-muted, #808080);
+}
+
+/* Card Checkbox */
+.kb-file-card-checkbox {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    background: transparent;
+    opacity: 0;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 10px;
+}
+
+.kb-file-card:hover .kb-file-card-checkbox,
+.kb-file-card.selected .kb-file-card-checkbox {
+    opacity: 1;
+}
+
+.kb-file-card.selected .kb-file-card-checkbox {
+    background: var(--accent-color, #0d6efd);
+    border-color: var(--accent-color, #0d6efd);
+}
+
+/* Drop Zone */
+.kb-drop-zone {
+    border: 2px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    transition: all 0.2s;
+    margin: 20px;
+    background: rgba(13, 110, 253, 0.03);
+}
+
+.kb-drop-zone:hover,
+.kb-drop-zone.drag-over {
+    border-color: var(--accent-color, #0d6efd);
+    background: rgba(13, 110, 253, 0.08);
+}
+
+.kb-drop-zone-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    background: var(--bg-secondary, #252526);
+    color: var(--accent-color, #0d6efd);
+    font-size: 28px;
+}
+
+.kb-drop-zone-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary, #e0e0e0);
+}
+
+.kb-drop-zone-subtitle {
+    font-size: 13px;
+    color: var(--text-muted, #808080);
+    margin-bottom: 16px;
+}
+
+/* Processing Indicator */
+.kb-processing-indicator {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: rgba(13, 110, 253, 0.1);
+    border-radius: 8px;
+    margin: 12px 20px;
+}
+
+.kb-processing-indicator.active {
+    display: flex;
+}
+
+.kb-processing-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-top-color: var(--accent-color, #0d6efd);
+    border-radius: 50%;
+    animation: kb-spin 0.8s linear infinite;
+}
+
+@keyframes kb-spin {
+    to { transform: rotate(360deg); }
+}
+
+.kb-processing-text {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text-secondary, #cccccc);
+}
+
+.kb-processing-cancel {
+    font-size: 12px;
+    color: var(--accent-color, #0d6efd);
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+.kb-processing-cancel:hover {
+    text-decoration: underline;
+}
+
+/* Empty State */
+.kb-empty-state-landing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.kb-empty-state-icon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    background: var(--bg-secondary, #252526);
+    color: var(--text-muted, #808080);
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+.kb-empty-state-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary, #e0e0e0);
+}
+
+.kb-empty-state-subtitle {
+    font-size: 14px;
+    color: var(--text-muted, #808080);
+    max-width: 300px;
+    margin-bottom: 20px;
+}
+
+/* Landing content wrapper */
+.kb-landing-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+/* Drag overlay (full content area) */
+.kb-drag-overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(13, 110, 253, 0.05);
+    border: 2px dashed var(--accent-color, #0d6efd);
+    z-index: 10;
+    align-items: center;
+    justify-content: center;
+}
+
+.kb-drag-overlay.active {
+    display: flex;
+}
+
+/* Toast notification */
+.kb-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: white;
+    z-index: 1000;
+    animation: kb-toast-in 0.3s ease;
+}
+
+.kb-toast.success {
+    background: #10b981;
+}
+
+.kb-toast.error {
+    background: #ef4444;
+}
+
+.kb-toast.warning {
+    background: #f59e0b;
+    color: #1a1b1e;
+}
+
+@keyframes kb-toast-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

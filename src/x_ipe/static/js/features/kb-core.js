@@ -287,40 +287,20 @@ const kbCore = {
         const files = this.index?.files || [];
         const landing = files.filter(f => f.path.startsWith('landing/'));
         
-        content.innerHTML = `
-            <div class="kb-welcome">
-                <div class="kb-stats mb-4">
-                    <span class="badge bg-secondary me-2">${files.length} files</span>
-                    <span class="badge bg-info">${this.topics.length} topics</span>
-                </div>
-                <div class="kb-section">
-                    <h6><i class="bi bi-inbox text-warning me-2"></i>Landing (Unprocessed)</h6>
-                    <div class="kb-landing-list">
-                        ${landing.length > 0 ? landing.map(f => `
-                            <div class="kb-landing-file">
-                                <i class="bi ${this.getFileIcon(f.type)}"></i>
-                                <span>${f.name}</span>
-                                <span class="text-muted small ms-auto">${this.formatSize(f.size)}</span>
-                            </div>
-                        `).join('') : '<p class="text-muted small">No files in landing folder</p>'}
+        // Delegate landing view to kbLanding module
+        if (typeof kbLanding !== 'undefined') {
+            kbLanding.render(content, landing);
+        } else {
+            content.innerHTML = `
+                <div class="kb-welcome">
+                    <div class="kb-stats mb-4">
+                        <span class="badge bg-secondary me-2">${files.length} files</span>
+                        <span class="badge bg-info">${this.topics.length} topics</span>
                     </div>
+                    <p class="text-muted">Landing view module not loaded.</p>
                 </div>
-                <div class="kb-section mt-4">
-                    <h6><i class="bi bi-folder text-info me-2"></i>Topics</h6>
-                    <div class="kb-topics-grid">
-                        ${this.topics.length > 0 ? this.topics.map(topic => {
-                            const topicFiles = files.filter(f => f.topic === topic);
-                            return `
-                                <div class="kb-topic-card">
-                                    <i class="bi bi-folder me-2"></i>${topic}
-                                    <span class="badge bg-secondary ms-auto">${topicFiles.length}</span>
-                                </div>
-                            `;
-                        }).join('') : '<p class="text-muted small">No topics created yet</p>'}
-                    </div>
-                </div>
-            </div>
-        `;
+            `;
+        }
     },
 
     /**

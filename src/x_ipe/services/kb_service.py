@@ -1,16 +1,19 @@
 """
 FEATURE-025-A: KB Core Infrastructure
+FEATURE-025-B: KB Landing Zone
 
 KBService: Core Knowledge Base operations
 - Folder structure initialization
 - File index management  
 - Topic metadata management
+- Landing zone: upload, delete, list
 """
 import json
 import re
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple
+from werkzeug.utils import secure_filename
 
 from x_ipe.tracing import x_ipe_tracing
 
@@ -63,6 +66,11 @@ class KBService:
         '.svg': 'image',
         '.webp': 'image',
     }
+    
+    # Allowed extensions for upload (keys from FILE_TYPE_MAP)
+    ALLOWED_EXTENSIONS = set(FILE_TYPE_MAP.keys())
+    
+    MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
     
     def __init__(self, project_root: str):
         """
@@ -364,6 +372,124 @@ class KBService:
         
         # Write
         self._write_json(metadata_path, metadata)
+    
+    # ------------------------------------------------------------------
+    # FEATURE-025-B: Landing Zone operations
+    # ------------------------------------------------------------------
+    
+    def _validate_upload(self, filename: str, size: int) -> Tuple[bool, str]:
+        """
+        Validate a file for upload.
+        
+        Args:
+            filename: Original filename
+            size: File size in bytes
+            
+        Returns:
+            Tuple of (is_valid, error_message)
+        """
+        ext = Path(filename).suffix.lower()
+        if not ext or ext not in self.ALLOWED_EXTENSIONS:
+            return False, f"Unsupported file type: '{ext or 'none'}'"
+        if size > self.MAX_FILE_SIZE:
+            return False, f"File exceeds 50MB size limit ({size} bytes)"
+        return True, ''
+    
+    @x_ipe_tracing(level="INFO")
+    def upload_files(self, files: List[tuple]) -> Dict[str, Any]:
+        """
+        Upload files to the landing directory.
+        
+        Args:
+            files: List of (filename, data, size) tuples
+            
+        Returns:
+            Dict with 'uploaded', 'skipped', 'errors' lists
+        """
+        uploaded = []
+        skipped = []
+        errors = []
+        landing_dir = self.kb_root / 'landing'
+        landing_dir.mkdir(parents=True, exist_ok=True)
+        
+        for filename, data, size in files:
+            safe_name = secure_filename(filename)
+            if not safe_name:
+                errors.append({'file': filename, 'reason': 'Invalid filename'})
+                continue
+            
+            valid, msg = self._validate_upload(safe_name, size)
+            if not valid:
+                errors.append({'file': filename, 'reason': msg})
+                continue
+            
+            dest = landing_dir / safe_name
+            if dest.exists():
+                skipped.append({'file': safe_name, 'reason': 'Duplicate file already exists'})
+                continue
+            
+            try:
+                dest.write_bytes(data if isinstance(data, bytes) else data.encode('utf-8'))
+                uploaded.append(f'landing/{safe_name}')
+            except Exception as e:
+                errors.append({'file': filename, 'reason': str(e)})
+        
+        if uploaded:
+            self.refresh_index()
+        
+        return {'uploaded': uploaded, 'skipped': skipped, 'errors': errors}
+    
+    @x_ipe_tracing(level="INFO")
+    def delete_files(self, paths: List[str]) -> Dict[str, Any]:
+        """
+        Delete files from the landing directory.
+        
+        Args:
+            paths: List of relative paths (must start with 'landing/')
+            
+        Returns:
+            Dict with 'deleted' and 'errors' lists
+        """
+        deleted = []
+        errors = []
+        
+        for rel_path in paths:
+            if not rel_path.startswith('landing/'):
+                errors.append({'file': rel_path, 'reason': 'Path must be under landing/'})
+                continue
+            
+            # Resolve and check for path traversal
+            file_path = (self.kb_root / rel_path).resolve()
+            landing_resolved = (self.kb_root / 'landing').resolve()
+            if not str(file_path).startswith(str(landing_resolved)):
+                errors.append({'file': rel_path, 'reason': 'Invalid path'})
+                continue
+            
+            if not file_path.exists():
+                errors.append({'file': rel_path, 'reason': 'File not found'})
+                continue
+            
+            try:
+                file_path.unlink()
+                deleted.append(rel_path)
+            except Exception as e:
+                errors.append({'file': rel_path, 'reason': str(e)})
+        
+        if deleted:
+            self.refresh_index()
+        
+        return {'deleted': deleted, 'errors': errors}
+    
+    @x_ipe_tracing(level="DEBUG")
+    def get_landing_files(self) -> List[Dict[str, Any]]:
+        """
+        Get files in the landing directory from the index.
+        
+        Returns:
+            List of file entries with path starting with 'landing/'
+        """
+        index = self.get_index()
+        return [f for f in index.get('files', []) if f.get('path', '').startswith('landing/')]
     
     def _write_json(self, path: Path, data: Dict) -> None:
         """
