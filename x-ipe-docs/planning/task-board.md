@@ -166,8 +166,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 1
-- **In Progress:** 1
+- **Total Active:** 2
+- **In Progress:** 2
 - **Pending:** 0
 - **Deferred:** 0
 - **Completed (archived):** 297

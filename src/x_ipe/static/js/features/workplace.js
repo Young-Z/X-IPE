@@ -2230,13 +2230,15 @@ class WorkplaceManager {
             });
             
             node.addEventListener('drop', async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
                 node.classList.remove('drop-target');
                 
                 if (e.dataTransfer.files.length > 0) {
+                    // External file upload - handle here and stop propagation
+                    e.preventDefault();
+                    e.stopPropagation();
                     await this._uploadToFolder(e.dataTransfer.files, folderPath);
                 }
+                // Internal tree drag-drop: let event bubble to TreeDragManager
             });
         });
     }
