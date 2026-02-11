@@ -25,6 +25,7 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-294 | Feature Closing | Close FEATURE-025-B KB Landing Zone and create PR | Pulse | 02-11-2026 13:38:00 | [CHANGELOG.md](../../CHANGELOG.md), [PR branch](feature/025-B-kb-landing-zone) | All ACs verified (13/13 acceptance tests). CHANGELOG updated. features.md → Complete. Branch pushed. |
 | TASK-293 | Feature Closing | Close FEATURE-028-D Settings Language Switch | Sage | 02-11-2026 13:40:00 | [PR branch](https://github.com/Young-Z/X-IPE/compare/feature/028-D-settings-language-switch) | 14/14 ACs verified. CHANGELOG updated. features.md → Complete. Branch pushed, PR ready. |
 | TASK-293 | Feature Acceptance Test | Execute acceptance tests for FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 10:45:00 | [acceptance-test-cases.md](../../x-ipe-docs/requirements/FEATURE-025-B/acceptance-test-cases.md) | 13/13 tests passed (100%). All P0/P1 ACs verified via Chrome DevTools MCP. Mockup validation passed. |
 | TASK-292 | Feature Acceptance Test | Acceptance test FEATURE-028-D Settings Language Switch | Sage | 02-11-2026 10:32:00 | [screenshot](/tmp/settings-language-final.png) | 19/19 acceptance tests passed. Verified: AC-1 (card positioning), AC-2 (badge+dropdown), AC-3 (confirmation modal+cancel), AC-4/5 (API call+atomicity), AC-6 (success toast, no reload), AC-7 (same-language guard), AC-8 (disabled during switch), AC-14 (badge update). |
