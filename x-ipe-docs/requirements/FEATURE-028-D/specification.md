@@ -37,20 +37,20 @@ The target user is any developer using X-IPE in a non-English environment who ha
 
 ## Acceptance Criteria
 
-- [ ] AC-1: Settings page MUST display a dedicated "Language" section positioned above the "Project Folders" section (AC-CR2-1)
-- [ ] AC-2: Language section MUST show the current language as a badge and a dropdown with options "English" and "中文" (AC-CR2-2)
-- [ ] AC-3: Selecting a different language MUST trigger a confirmation dialog warning that copilot instructions will be regenerated (AC-CR2-3)
-- [ ] AC-4: Confirming the dialog MUST send `POST /api/config/language` with body `{ "language": "en" | "zh" }` (AC-CR2-4)
-- [ ] AC-5: Backend MUST extract instructions for the new language BEFORE updating `.x-ipe.yaml` (atomicity — if extraction fails, language stays unchanged) (AC-CR2-5)
-- [ ] AC-6: On success, a toast notification MUST appear confirming the switch; the page MUST NOT reload (AC-CR2-6)
-- [ ] AC-7: Selecting the same language that is already active MUST be a no-op with an informational toast "Already using [language]" (AC-CR2-7)
-- [ ] AC-8: The dropdown MUST be disabled (non-interactive) while a switch operation is in progress (AC-CR2-8)
-- [ ] AC-9: Custom edits outside X-IPE markers in copilot-instructions files MUST be preserved after the switch (AC-CR2-9)
-- [ ] AC-10: UI layout MUST match the approved mockup (settings-language-v1.html) for the Language card, confirmation dialog, and toast components
-- [ ] AC-11: Visual styling (colors, spacing, typography) MUST be consistent with mockup (settings-language-v1.html)
-- [ ] AC-12: Interactive elements shown in mockup (settings-language-v1.html) — dropdown, confirm/cancel buttons, toast dismiss — MUST be present and functional
-- [ ] AC-13: On backend error, an error toast MUST display the error message and the dropdown MUST revert to the previous language selection
-- [ ] AC-14: The current language badge MUST update after a successful switch without page reload
+- [x] AC-1: Settings page MUST display a dedicated "Language" section positioned above the "Project Folders" section (AC-CR2-1)
+- [x] AC-2: Language section MUST show the current language as a badge and a dropdown with options "English" and "中文" (AC-CR2-2)
+- [x] AC-3: Selecting a different language MUST trigger a confirmation dialog warning that copilot instructions will be regenerated (AC-CR2-3)
+- [x] AC-4: Confirming the dialog MUST send `POST /api/config/language` with body `{ "language": "en" | "zh" }` (AC-CR2-4)
+- [x] AC-5: Backend MUST extract instructions for the new language BEFORE updating `.x-ipe.yaml` (atomicity — if extraction fails, language stays unchanged) (AC-CR2-5)
+- [x] AC-6: On success, a toast notification MUST appear confirming the switch; the page MUST NOT reload (AC-CR2-6)
+- [x] AC-7: Selecting the same language that is already active MUST be a no-op with an informational toast "Already using [language]" (AC-CR2-7)
+- [x] AC-8: The dropdown MUST be disabled (non-interactive) while a switch operation is in progress (AC-CR2-8)
+- [x] AC-9: Custom edits outside X-IPE markers in copilot-instructions files MUST be preserved after the switch (AC-CR2-9)
+- [x] AC-10: UI layout MUST match the approved mockup (settings-language-v1.html) for the Language card, confirmation dialog, and toast components
+- [x] AC-11: Visual styling (colors, spacing, typography) MUST be consistent with mockup (settings-language-v1.html)
+- [x] AC-12: Interactive elements shown in mockup (settings-language-v1.html) — dropdown, confirm/cancel buttons, toast dismiss — MUST be present and functional
+- [x] AC-13: On backend error, an error toast MUST display the error message and the dropdown MUST revert to the previous language selection
+- [x] AC-14: The current language badge MUST update after a successful switch without page reload
 
 ## Functional Requirements
 

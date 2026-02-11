@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-028-D: Settings Language Switch (Web UI)**
+  - Language switching from Settings page — no CLI needed
+  - Language card with globe icon, current language badge, dropdown (English / 中文)
+  - Confirmation modal before switching (warns about copilot instruction regeneration)
+  - Same-language guard: info toast "Already using [language]" — no API call
+  - `POST /api/config/language` endpoint with atomicity: extract instructions BEFORE updating `.x-ipe.yaml`
+  - Success/error/info toast notifications — no page reload
+  - Dropdown disabled during switch to prevent concurrent operations
+  - Badge updates in real-time after successful switch
+  - Error recovery: dropdown reverts to previous language on failure
+  - 17 unit/integration tests, 19 acceptance tests (Playwright)
+
 - **FEATURE-026: Homepage Infinity Loop**
   - Interactive homepage visualization displaying 8 development lifecycle stages on an infinity loop (∞)
   - Entry point: Click "X IPE" logo in header to display homepage

@@ -6,7 +6,8 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-289 | Technical Design | Design FEATURE-028-D Settings Language Switch | Sage | ⏳ pending | 02-11-2026 08:36:00 | - | Test Generation |
+| TASK-293 | Feature Closing | Close FEATURE-028-D Settings Language Switch, create PR | Sage | 🔄 in_progress | 02-11-2026 13:30:00 | - | - |
+| TASK-294 | Bug Fix | Fix tree drag-drop: CR-002 drop handler blocks CR-006 TreeDragManager internal move | Ember | 🔄 in_progress | 02-11-2026 13:21:00 | - | - |
 
 
 
@@ -165,8 +166,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 1
-- **In Progress:** 1
+- **Total Active:** 2
+- **In Progress:** 2
 - **Pending:** 0
 - **Deferred:** 0
 - **Completed (archived):** 296
