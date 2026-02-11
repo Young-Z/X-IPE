@@ -6,7 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-288 | Feature Refinement | Refine FEATURE-028-D Settings Language Switch | Sage | ⏳ pending | 02-11-2026 08:33:00 | - | Technical Design |
+| TASK-289 | Technical Design | Design FEATURE-028-D Settings Language Switch | Sage | ⏳ pending | 02-11-2026 08:36:00 | - | Test Generation |
 
 
 
@@ -26,6 +26,7 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-288 | Feature Refinement | Refine FEATURE-028-D Settings Language Switch | Sage | 02-11-2026 08:36:00 | [specification.md](../requirements/FEATURE-028-D/specification.md) | Specification with 14 ACs, 7 FRs, 4 user flows. Mockup analyzed and linked. All DoD passed. |
 | TASK-287 | Change Request | CR-002: Settings Language Switch for FEATURE-028-D | Sage | 02-11-2026 08:33:00 | [CR-002.md](../requirements/FEATURE-028-D/CR-002.md) | Modification: new sub-feature FEATURE-028-D. Dropdown en/中文 in Settings, POST /api/config/language, atomicity safeguards. Mockup referenced. |
 | TASK-286 | Idea Mockup | Create mockup for CR-Switch Language in Settings (016) | Sage | 02-11-2026 08:30:00 | [mockup-v1.html](../ideas/016.%20CR-Switch%20Language%20in%20Settings/mockups/settings-language-v1.html) | Interactive mockup with 4 scenarios. Human approved. |
 | TASK-285 | Ideation | Refine idea for CR-Switch Language in Settings (016) | Sage | 02-11-2026 08:30:00 | [idea-summary-v1.md](../ideas/016.%20CR-Switch%20Language%20in%20Settings/idea-summary-v1.md) | IDEA-020. CR to FEATURE-028. Dropdown en/中文, AJAX+toast, confirmation dialog, atomicity safeguards. Sub-agent critique applied. |
