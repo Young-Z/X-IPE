@@ -6,9 +6,8 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-285 | Ideation | Refine idea for CR-Switch Language in Settings (016) | Sage | 🔄 in_progress | 02-11-2026 06:55:00 | [idea-summary-v1.md](../ideas/016.%20CR-Switch%20Language%20in%20Settings/idea-summary-v1.md) | Idea Mockup |
-| TASK-286 | Idea Mockup | Create mockup for CR-Switch Language in Settings (016) | Sage | ⏳ pending | 02-11-2026 08:24:00 | - | Change Request |
-| TASK-257 | Ideation | Refine idea for X-IPE Module Architecture research (101) | Zephyr | 🔄 in_progress | 02-11-2026 08:23:00 | [idea-summary-v1.md](../ideas/101.%20Research-X-IPE%20Module%20Architecture/idea-summary-v1.md), [module-architecture.html](../ideas/101.%20Research-X-IPE%20Module%20Architecture/module-architecture.html) | Idea to Architecture |
+| TASK-286 | Idea Mockup | Create mockup for CR-Switch Language in Settings (016) | Sage | 🔄 in_progress | 02-11-2026 08:30:00 | [mockup-v1.html](../ideas/016.%20CR-Switch%20Language%20in%20Settings/mockups/settings-language-v1.html) | Change Request |
+
 
 
 
@@ -27,7 +26,7 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
-| TASK-253 | Test Generation | Generate tests for FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:22:00 | [test_kb_landing.py](../../tests/test_kb_landing.py) | 57 tests (14 validation, 10 upload, 7 delete, 3 get_landing, 6 upload API, 5 delete API, 5 landing API, 4 integration, 3 tracing). TDD ready: 57 failing, 0 passing. |
+| TASK-257 | Ideation | Refine idea for X-IPE Module Architecture research (101) | Zephyr | 02-11-2026 08:27:00 | [idea-summary-v1.md](../ideas/101.%20Research-X-IPE%20Module%20Architecture/idea-summary-v1.md), [module-architecture.html](../ideas/101.%20Research-X-IPE%20Module%20Architecture/module-architecture.html) | 8-layer architecture: CLI, Presentation, API, Business, Cross-Cutting, Core, Infrastructure (3rd-party), Data (purpose-based). Standalone HTML with corporate theme. |
 | TASK-252 | Technical Design | Design FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:17:00 | [technical-design.md](../requirements/FEATURE-025-B/technical-design.md) | Full Stack design: 4 components (KBService ext, kb_routes ext, kb-landing.js, kb-landing.css). Upload/delete/grid/drag-drop. ~40 tests estimated. DoD 9/9 pass. |
 | TASK-249 | Feature Refinement | Refine FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:10:00 | [specification.md](../requirements/FEATURE-025-B/specification.md) | 31 ACs, 5 FRs, 5 NFRs. File upload, drag-drop, grid, delete, empty state. Mockup current. DoD validated. |
 | TASK-256 | Change Request | CR-001: Separate bilingual instructions into two files (FEATURE-028-B) | Drift | 02-11-2026 02:55:00 | [CR-001.md](../requirements/FEATURE-028-B/CR-001.md) | Modification: split copilot-instructions.md into -en.md/-zh.md. Scaffold copies language-specific file directly. 52 tests pass, 0 regressions. |
@@ -159,7 +158,7 @@
 - **In Progress:** 1
 - **Pending:** 1
 - **Deferred:** 0
-- **Completed (archived):** 294
+- **Completed (archived):** 295
 - **Pending Review:** 0
 - **Blocked:** 0
 
