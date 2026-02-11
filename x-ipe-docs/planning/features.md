@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 02-07-2026 13:20:00
+> Last Updated: 02-11-2026 01:52:00
 
 ## Overview
 
@@ -51,7 +51,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-023-D | Tracing Skill Integration | v1.0 | Completed | [specification.md](../requirements/FEATURE-023-D/specification.md), [technical-design.md](../requirements/FEATURE-023-D/technical-design.md) | 02-01-2026 | 02-01-2026 09:20:00 |
 | FEATURE-024 | Project Quality Evaluation UI | v1.0 | Completed | [specification.md](../requirements/FEATURE-024/specification.md), [technical-design.md](../requirements/FEATURE-024/technical-design.md) | 02-01-2026 | 02-01-2026 11:20:00 |
 | FEATURE-025-A | KB Core Infrastructure | v1.0 | Completed | [specification.md](../requirements/FEATURE-025-A/specification.md), [technical-design.md](../requirements/FEATURE-025-A/technical-design.md), [acceptance-test-cases.md](../requirements/FEATURE-025-A/acceptance-test-cases.md) | 02-05-2026 | 02-05-2026 16:15:00 |
-| FEATURE-025-B | KB Landing Zone | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
+| FEATURE-025-B | KB Landing Zone | v1.0 | Refined | [specification.md](../requirements/FEATURE-025-B/specification.md) | 02-05-2026 | 02-11-2026 02:10:00 |
 | FEATURE-025-C | KB Manager Skill | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
 | FEATURE-025-D | KB Topics & Summaries | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
 | FEATURE-025-E | KB Search & Preview | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
@@ -62,12 +62,15 @@ This board tracks all features across the project lifecycle.
 | FEATURE-027-C | Skill & Instruction Translation | v1.0 | Implemented | [specification.md](../requirements/FEATURE-027-C/specification.md), [technical-design.md](../requirements/FEATURE-027-C/technical-design.md), [skill_translator.py](../../src/x_ipe/services/skill_translator.py) | 02-07-2026 | 02-07-2026 16:05:00 |
 | FEATURE-027-D | MCP Configuration Deployment | v1.0 | Implemented | [specification.md](../requirements/FEATURE-027-D/specification.md), [test_mcp_deployer.py](../../tests/test_mcp_deployer.py), [mcp_deployer_service.py](../../src/x_ipe/services/mcp_deployer_service.py) | 02-07-2026 | 02-07-2026 15:25:00 |
 | FEATURE-027-E | CLI Migration & Upgrade | v1.0 | Implemented | [specification.md](../requirements/FEATURE-027-E/specification.md), [test_cli_migration.py](../../tests/test_cli_migration.py) | 02-07-2026 | 02-07-2026 15:40:00 |
+| FEATURE-028-A | Bilingual Prompt Schema & Migration | v1.0 | Done Feature Refinement | [specification.md](../requirements/FEATURE-028-A/specification.md) | 02-11-2026 | 02-11-2026 02:05:00 |
+| FEATURE-028-B | CLI Language Selection & Instructions | v1.0 | Done Feature Refinement | [specification.md](../requirements/FEATURE-028-B/specification.md) | 02-11-2026 | 02-11-2026 02:05:00 |
+| FEATURE-028-C | Frontend Prompt Language Filtering | v1.0 | Done Feature Refinement | [specification.md](../requirements/FEATURE-028-C/specification.md) | 02-11-2026 | 02-11-2026 02:05:00 |
 
 ---
 
 ## Status Details
 
-### Planned (18)
+### Planned (17)
 - FEATURE-007: Git Integration
 - FEATURE-014: Theme-Aware Frontend Design Skill
 - FEATURE-017: Architecture DSL JavaScript Library
@@ -79,7 +82,6 @@ This board tracks all features across the project lifecycle.
 - FEATURE-023-B: Tracing Dashboard UI
 - FEATURE-023-C: Trace Viewer & DAG Visualization
 - FEATURE-023-D: Tracing Skill Integration
-- FEATURE-025-B: KB Landing Zone
 - FEATURE-025-C: KB Manager Skill
 - FEATURE-025-D: KB Topics & Summaries
 - FEATURE-025-E: KB Search & Preview
@@ -87,9 +89,13 @@ This board tracks all features across the project lifecycle.
 - FEATURE-026: Homepage Infinity Loop
 - FEATURE-027-E: CLI Migration & Upgrade
 
-### Refined (2)
+### Refined (6)
 - FEATURE-024: Project Quality Evaluation UI
+- FEATURE-025-B: KB Landing Zone
 - FEATURE-027-B: CLI Init & Selection
+- FEATURE-028-A: Bilingual Prompt Schema & Migration
+- FEATURE-028-B: CLI Language Selection & Instructions
+- FEATURE-028-C: Frontend Prompt Language Filtering
 
 ### Designed (1)
 - FEATURE-027-C: Skill & Instruction Translation
@@ -610,10 +616,10 @@ This board tracks all features across the project lifecycle.
 ### FEATURE-025-B: KB Landing Zone
 
 **Version:** v1.0  
-**Status:** Planned  
+**Status:** Refined  
 **Description:** File upload, drag-drop support, landing view grid, and landing actions (delete, move, process trigger).  
 **Dependencies:** FEATURE-025-A  
-**Specification:** -  
+**Specification:** [specification.md](../requirements/FEATURE-025-B/specification.md)  
 **Technical Design:** -  
 
 **Source:**
@@ -626,6 +632,9 @@ This board tracks all features across the project lifecycle.
 - Drag-drop upload zone
 - Delete, Move to Topic, Process Selected actions
 - Duplicate detection (warn and skip)
+
+**Tasks:**
+- TASK-247: Feature Refinement (Pulse) — 31 ACs, 5 FRs, 5 NFRs
 
 ---
 

@@ -6,7 +6,10 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-231 | Ideation | Refine idea for Console Voice Input feature (001) | Spark | 🔄 in_progress | 02-09-2026 09:00:00 | - | Idea Mockup |
+| TASK-248 | Technical Design | Design FEATURE-028-A Bilingual Prompt Schema & Migration | Drift | 🔄 in_progress | 02-11-2026 02:10:00 | - | Code Implementation |
+
+
+
 
 
 
@@ -22,6 +25,15 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-249 | Feature Refinement | Refine FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:10:00 | [specification.md](../requirements/FEATURE-025-B/specification.md) | 31 ACs, 5 FRs, 5 NFRs. File upload, drag-drop, grid, delete, empty state. Mockup current. DoD validated. |
+| TASK-247 | Feature Refinement | Refine FEATURE-028-C Frontend Prompt Language Filtering | Drift | 02-11-2026 02:10:00 | [specification.md](../requirements/FEATURE-028-C/specification.md) | 11 ACs, 5 FRs, 3 NFRs. Client-side filtering + fallback chain. DoD validated. |
+| TASK-246 | Feature Refinement | Refine FEATURE-028-B CLI Language Selection & Instructions | Drift | 02-11-2026 02:08:00 | [specification.md](../requirements/FEATURE-028-B/specification.md) | 23 ACs, 6 FRs, 4 NFRs. Init/upgrade --lang + bilingual template. DoD validated. |
+| TASK-245 | Feature Refinement | Refine FEATURE-028-A Bilingual Prompt Schema & Migration | Drift | 02-11-2026 02:05:00 | [specification.md](../requirements/FEATURE-028-A/specification.md) | 22 ACs, 5 FRs, 4 NFRs. v3.0 schema + migration. DoD validated. |
+| TASK-244 | Feature Breakdown | Break down FEATURE-028 Prompt Bi-language Support into 3 sub-features (A-C) | Drift | 02-11-2026 02:00:00 | [requirement-details-part-6.md](../requirements/requirement-details-part-6.md), [features.md](features.md) | 3 sub-features: A (Schema & Migration), B (CLI & Instructions), C (Frontend Filtering). Dependency DAG: A→B,C. All DoD pass. |
+| TASK-243 | Requirement Gathering | Gather requirements for FEATURE-028 Prompt Bi-language Support (IDEA-019) | Drift | 02-10-2026 17:30:00 | [requirement-details-part-6.md](../requirements/requirement-details-part-6.md) | FEATURE-028: 23 ACs, 4 NFRs. Bilingual copilot-prompt.json v3.0 + instructions template. Human approved. |
+| TASK-231 | Ideation | Refine idea for Console Voice Input feature (001) | Spark | 02-10-2026 17:25:00 | - | Closed by human request. |
+| TASK-242 | Bug Fix | UIUX Feedback: Architecture DSL rendering missing content — invalid DSL syntax in idea-summary (Feedback-20260211-010118) | Cipher | 02-10-2026 17:20:00 | [SKILL.md](../../.github/skills/x-ipe-tool-architecture-dsl/SKILL.md), [idea-summary-v1.md](../ideas/015.%20Feature-Prompt%20Bi-language%20Support/idea-summary-v1.md) | Root cause: idea-summary used non-standard `view` header and `desc` keyword (not in grammar). Fix: 1) Enforced `@startuml` syntax + no-unknown-keywords rules in DSL skill (Important Notes, constraints, DoD). 2) Clarified `component` is mandatory smallest unit, `module` is optional. 3) Rewrote idea-summary DSL to valid `@startuml` format with proper components. |
+| TASK-241 | Ideation | Refine idea for Prompt Bi-language Support (015) | Drift | 02-10-2026 16:46:00 | [idea-summary-v1.md](../ideas/015.%20Feature-Prompt%20Bi-language%20Support/idea-summary-v1.md) | IDEA-019. Sub-agent critique applied (15 findings, 8 addressed). |
 | TASK-240 | Skill Update | Add feature ID format (FEATURE-{nnn}) note to requirement-gathering, feature-breakdown, feature-refinement skills | Drift | 02-10-2026 11:55:00 | [req-gathering](../../.github/skills/x-ipe-task-based-requirement-gathering/SKILL.md), [feat-breakdown](../../.github/skills/x-ipe-task-based-feature-breakdown/SKILL.md), [feat-refinement](../../.github/skills/x-ipe-task-based-feature-refinement/SKILL.md) | Added MANDATORY note: every feature must have ID in format FEATURE-{nnn}, regardless of output language. |
 | TASK-239 | Skill Update | Update x-ipe-task-based-ideation-v2: remove step 3, agentic expressions, tool list emphasis | Bolt | 02-10-2026 11:15:00 | [SKILL.md](../../.github/skills/x-ipe-task-based-ideation-v2/SKILL.md) | Removed step 3 (Initialize Tools), renumbered 11→10 steps. Step 1 outputs enabled tool list. Steps 6/8 recommend enabled tools. Agentic expressions in brainstorm step. No tool-specific usage instructions. |
 | TASK-238 | Bug Fix | UIUX Feedback: Brand theme creator must enforce `theme-` prefix in folder names (Feedback-20260210-180937) | Cipher | 02-10-2026 10:15:00 | [SKILL.md](../../.github/skills/x-ipe-tool-brand-theme-creator/SKILL.md) | Root cause: Skill didn't strongly enforce `theme-` prefix, so agents could create folders like `bilibili-brand-theme` which ThemesService ignores. Fix: Added BLOCKING constraints in Important Notes, Step 2 (auto-prepend), and Step 6 (validate prefix). |
@@ -136,7 +148,7 @@
 - **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 277
+- **Completed (archived):** 286
 - **Pending Review:** 0
 - **Blocked:** 0
 
