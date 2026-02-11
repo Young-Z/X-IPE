@@ -6,7 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-291 | Code Implementation | Implement FEATURE-028-D Settings Language Switch | Sage | ⏳ pending | 02-11-2026 10:08:00 | - | Feature Acceptance Test |
+| TASK-292 | Feature Acceptance Test | Acceptance test FEATURE-028-D Settings Language Switch | Sage | ⏳ pending | 02-11-2026 10:15:00 | - | Feature Closing |
 | TASK-292 | Feature Acceptance Test | Execute acceptance tests for FEATURE-025-B KB Landing Zone | Pulse | 🔄 in_progress | 02-11-2026 10:06:00 | - | Feature Closing |
 
 
@@ -29,6 +29,7 @@
 |---------|-----------|-------------|------|--------------|--------------|-------|
 | TASK-291 | Code Implementation | Implement FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:22:00 | [kb_service.py](../../src/x_ipe/services/kb_service.py), [kb_routes.py](../../src/x_ipe/routes/kb_routes.py), [kb-landing.js](../../src/x_ipe/static/js/features/kb-landing.js), [kb-landing.css](../../src/x_ipe/static/css/kb-landing.css) | Backend: upload_files/delete_files/get_landing_files + 3 endpoints. Frontend: file grid, drag-drop, selection. 111/111 KB tests pass. |
 | TASK-290 | Test Generation | Generate tests for FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:22:00 | [test_kb_landing.py](../../tests/test_kb_landing.py) | 57 tests across 9 classes. TDD ready confirmed. |
+| TASK-291 | Code Implementation | Implement FEATURE-028-D Settings Language Switch | Sage | 02-11-2026 10:15:00 | [settings_routes.py](../../src/x_ipe/routes/settings_routes.py), [settings.html](../../src/x_ipe/templates/settings.html), [config_service.py](../../src/x_ipe/services/config_service.py) | Backend: POST /api/config/language + ConfigData.language. Frontend: LanguageManager JS, Language card, confirmation modal, toasts. All 17 tests pass. |
 | TASK-290 | Test Generation | Generate tests for FEATURE-028-D Settings Language Switch | Sage | 02-11-2026 10:08:00 | [test_settings_language.py](../../tests/test_settings_language.py) | 17 tests: 5 unit (ConfigData), 6 API, 3 atomicity, 2 config API, 3 edge cases. Baseline: 5 FAILED + 12 ERROR (TDD ready). |
 | TASK-289 | Technical Design | Design FEATURE-028-D Settings Language Switch | Sage | 02-11-2026 10:05:00 | [technical-design.md](../requirements/FEATURE-028-D/technical-design.md) | Full-stack design: POST /api/config/language, LanguageManager JS, ConfigData.language. 9/9 DoD pass. |
 | TASK-288 | Feature Refinement | Refine FEATURE-028-D Settings Language Switch | Sage | 02-11-2026 08:36:00 | [specification.md](../requirements/FEATURE-028-D/specification.md) | Specification with 14 ACs, 7 FRs, 4 user flows. Mockup analyzed and linked. All DoD passed. |

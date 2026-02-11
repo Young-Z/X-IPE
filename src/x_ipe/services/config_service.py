@@ -23,6 +23,7 @@ class ConfigData:
     Resolved configuration from .x-ipe.yaml
     
     FEATURE-010: Project Root Configuration
+    FEATURE-028-D: Language field for Settings Language Switch
     
     All paths are absolute after resolution.
     """
@@ -32,6 +33,7 @@ class ConfigData:
     x_ipe_app: str
     file_tree_scope: str
     terminal_cwd: str
+    language: str = "en"
     
     @x_ipe_tracing()
     def get_file_tree_path(self) -> str:
@@ -52,7 +54,8 @@ class ConfigData:
             'project_root': self.project_root,
             'x_ipe_app': self.x_ipe_app,
             'file_tree_scope': self.file_tree_scope,
-            'terminal_cwd': self.terminal_cwd
+            'terminal_cwd': self.terminal_cwd,
+            'language': self.language,
         }
 
 
@@ -183,6 +186,9 @@ class ConfigService:
         file_tree_scope = defaults.get('file_tree_scope', 'project_root')
         terminal_cwd = defaults.get('terminal_cwd', 'project_root')
         
+        # Language (FEATURE-028-D)
+        language = raw.get('language', 'en')
+        
         # Validate scope values
         valid_scopes = ('project_root', 'x_ipe_app')
         if file_tree_scope not in valid_scopes:
@@ -198,7 +204,8 @@ class ConfigService:
             project_root=str(project_root),
             x_ipe_app=str(x_ipe_app),
             file_tree_scope=file_tree_scope,
-            terminal_cwd=terminal_cwd
+            terminal_cwd=terminal_cwd,
+            language=language,
         )
     
     @property

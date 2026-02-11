@@ -222,10 +222,8 @@ class TestLanguageSwitchAtomicity:
 
     def test_yaml_unchanged_on_extraction_failure(self, client, temp_project):
         """If instruction extraction fails, .x-ipe.yaml language must NOT change. (AC-CR2-5)"""
-        with patch('x_ipe.routes.settings_routes.ScaffoldManager') as MockScaffold:
-            instance = MockScaffold.return_value
-            instance.copy_copilot_instructions.side_effect = Exception('Extraction failed')
-
+        with patch('x_ipe.core.scaffold.ScaffoldManager.copy_copilot_instructions',
+                   side_effect=Exception('Extraction failed')):
             response = client.post(
                 '/api/config/language',
                 data=json.dumps({'language': 'zh'}),
@@ -245,24 +243,26 @@ class TestLanguageSwitchAtomicity:
 
     def test_scaffold_called_with_force_true(self, client, temp_project):
         """ScaffoldManager must be called with force=True to overwrite existing instructions."""
-        with patch('x_ipe.routes.settings_routes.ScaffoldManager') as MockScaffold:
-            instance = MockScaffold.return_value
-            instance.copy_copilot_instructions.return_value = None
-
+        with patch('x_ipe.core.scaffold.ScaffoldManager.__init__', return_value=None) as mock_init, \
+             patch('x_ipe.core.scaffold.ScaffoldManager.copy_copilot_instructions') as mock_copy:
             client.post(
                 '/api/config/language',
                 data=json.dumps({'language': 'zh'}),
                 content_type='application/json'
             )
 
-            MockScaffold.assert_called_once()
-            call_kwargs = MockScaffold.call_args
-            # force=True should be passed
+            mock_init.assert_called_once()
+            call_kwargs = mock_init.call_args
             assert call_kwargs[1].get('force') is True or (len(call_kwargs[0]) > 2 and call_kwargs[0][2] is True)
 
     def test_scaffold_called_before_yaml_update(self, client, temp_project):
         """Instructions must be extracted BEFORE updating .x-ipe.yaml. (AC-CR2-5)"""
         call_order = []
+
+        original_open = open
+
+        def track_extract(*args, **kwargs):
+            call_order.append('extract')
 
         original_yaml_dump = yaml.dump
 
@@ -270,25 +270,20 @@ class TestLanguageSwitchAtomicity:
             call_order.append('yaml_write')
             return original_yaml_dump(*args, **kwargs)
 
-        with patch('x_ipe.routes.settings_routes.ScaffoldManager') as MockScaffold:
-            instance = MockScaffold.return_value
+        with patch('x_ipe.core.scaffold.ScaffoldManager.__init__', return_value=None), \
+             patch('x_ipe.core.scaffold.ScaffoldManager.copy_copilot_instructions',
+                   side_effect=track_extract), \
+             patch('x_ipe.routes.settings_routes.yaml.dump', side_effect=track_yaml_write):
+            client.post(
+                '/api/config/language',
+                data=json.dumps({'language': 'zh'}),
+                content_type='application/json'
+            )
 
-            def track_extract(*args, **kwargs):
-                call_order.append('extract')
-
-            instance.copy_copilot_instructions.side_effect = track_extract
-
-            with patch('x_ipe.routes.settings_routes.yaml.dump', side_effect=track_yaml_write):
-                client.post(
-                    '/api/config/language',
-                    data=json.dumps({'language': 'zh'}),
-                    content_type='application/json'
-                )
-
-            # Extract must happen before yaml write
-            assert 'extract' in call_order
-            assert 'yaml_write' in call_order
-            assert call_order.index('extract') < call_order.index('yaml_write')
+        # Extract must happen before yaml write
+        assert 'extract' in call_order
+        assert 'yaml_write' in call_order
+        assert call_order.index('extract') < call_order.index('yaml_write')
 
 
 # --- Integration Tests: Config API ---

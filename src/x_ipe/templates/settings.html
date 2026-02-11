@@ -96,6 +96,38 @@
             padding: 0.25rem 0.5rem;
             font-size: 0.875rem;
         }
+        
+        /* FEATURE-028-D: Language Section */
+        .language-icon-box {
+            width: 40px;
+            height: 40px;
+            background: #ecfdf5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #059669;
+            font-size: 1.25rem;
+        }
+        
+        .language-badge {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .language-note {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 6px;
+            padding: 0.625rem 0.875rem;
+            font-size: 0.8125rem;
+            color: #92400e;
+        }
+        
+        .select-loading {
+            pointer-events: none;
+            opacity: 0.55;
+        }
     </style>
 </head>
 <body>
@@ -110,6 +142,24 @@
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         </div>
+        <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <span id="errorToastMessage">An error occurred</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        <div id="infoToast" class="toast align-items-center text-bg-info border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <span id="infoToastMessage">Information</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
     </div>
 
     <div class="settings-container">
@@ -120,6 +170,76 @@
                 Settings
             </h1>
             <p class="text-muted mb-0">Configure your Document Viewer application</p>
+        </div>
+        
+        <!-- Language Section (FEATURE-028-D) -->
+        <div class="settings-card card" id="languageCard">
+            <div class="card-header">
+                <span>
+                    <i class="bi bi-globe me-2"></i>
+                    Language
+                </span>
+                <span class="badge bg-success language-badge" id="languageBadge">
+                    <i class="bi bi-check2 me-1"></i><span id="languageBadgeText">English</span>
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <div class="language-icon-box">
+                        <i class="bi bi-globe"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <label for="languageSelect" class="form-label fw-medium mb-1">Interface Language</label>
+                        <p class="text-muted mb-2" style="font-size: 0.875rem;">Controls copilot instructions and prompt display language for the active project.</p>
+                        <select class="form-select" id="languageSelect" style="max-width: 200px;" aria-label="Select language">
+                            <option value="en">English</option>
+                            <option value="zh">中文</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="language-note">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Instructions will be regenerated. Custom edits outside X-IPE sections are preserved.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Language Confirmation Modal (FEATURE-028-D) -->
+        <div class="modal fade" id="languageConfirmModal" tabindex="-1" aria-labelledby="languageConfirmLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="languageConfirmLabel">
+                            <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                            Change Language?
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="bg-light rounded p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted">Current</small>
+                                    <div class="fw-medium" id="confirmFromLang">English</div>
+                                </div>
+                                <i class="bi bi-arrow-right text-muted"></i>
+                                <div>
+                                    <small class="text-muted">New</small>
+                                    <div class="fw-medium" id="confirmToLang">中文</div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-muted mb-0" style="font-size: 0.875rem;">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Copilot instructions will be regenerated for the new language. Custom edits outside X-IPE sections are preserved.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-success" id="confirmLanguageBtn">Proceed</button>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <!-- Project Folders Section (v2.0) -->
@@ -564,11 +684,132 @@
         let projectManager;
         
         /**
+         * LanguageManager - Handles language switching via dropdown
+         * FEATURE-028-D: Settings Language Switch
+         */
+        class LanguageManager {
+            constructor() {
+                this.dropdown = document.getElementById('languageSelect');
+                this.badge = document.getElementById('languageBadge');
+                this.badgeText = document.getElementById('languageBadgeText');
+                this.confirmModal = new bootstrap.Modal(document.getElementById('languageConfirmModal'));
+                this.confirmFromLang = document.getElementById('confirmFromLang');
+                this.confirmToLang = document.getElementById('confirmToLang');
+                this.confirmBtn = document.getElementById('confirmLanguageBtn');
+                this.currentLanguage = 'en';
+                this.switching = false;
+                this.pendingLanguage = null;
+                this.bindEvents();
+            }
+            
+            init(language) {
+                this.currentLanguage = language || 'en';
+                this.dropdown.value = this.currentLanguage;
+                this.badgeText.textContent = this.getDisplayName(this.currentLanguage);
+            }
+            
+            bindEvents() {
+                this.dropdown.addEventListener('change', () => this.onDropdownChange());
+                this.confirmBtn.addEventListener('click', () => this.onConfirm());
+                document.getElementById('languageConfirmModal').addEventListener('hidden.bs.modal', () => this.onModalDismiss());
+            }
+            
+            onDropdownChange() {
+                const selected = this.dropdown.value;
+                
+                // Same-language guard (AC-CR2-7)
+                if (selected === this.currentLanguage) {
+                    this.showToast(`Already using ${this.getDisplayName(selected)}`, 'info');
+                    return;
+                }
+                
+                // Show confirmation dialog (AC-CR2-3)
+                this.pendingLanguage = selected;
+                this.confirmFromLang.textContent = this.getDisplayName(this.currentLanguage);
+                this.confirmToLang.textContent = this.getDisplayName(selected);
+                this.confirmModal.show();
+            }
+            
+            onModalDismiss() {
+                // Revert dropdown if user cancelled
+                if (this.pendingLanguage) {
+                    this.dropdown.value = this.currentLanguage;
+                    this.pendingLanguage = null;
+                }
+            }
+            
+            async onConfirm() {
+                const language = this.pendingLanguage;
+                this.pendingLanguage = null;
+                this.confirmModal.hide();
+                await this.executeSwitch(language);
+            }
+            
+            async executeSwitch(language) {
+                // Disable dropdown during operation (AC-CR2-8)
+                this.setDropdownDisabled(true);
+                
+                try {
+                    const response = await fetch('/api/config/language', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ language })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.currentLanguage = language;
+                        this.dropdown.value = language;
+                        this.badgeText.textContent = this.getDisplayName(language);
+                        this.showToast(`Language switched to ${this.getDisplayName(language)}`, 'success');
+                    } else {
+                        this.dropdown.value = this.currentLanguage;
+                        this.showToast(data.error || 'Failed to switch language', 'error');
+                    }
+                } catch (error) {
+                    this.dropdown.value = this.currentLanguage;
+                    this.showToast('Network error — please try again.', 'error');
+                } finally {
+                    this.setDropdownDisabled(false);
+                }
+            }
+            
+            setDropdownDisabled(disabled) {
+                this.switching = disabled;
+                this.dropdown.disabled = disabled;
+                if (disabled) {
+                    this.dropdown.classList.add('select-loading');
+                } else {
+                    this.dropdown.classList.remove('select-loading');
+                }
+            }
+            
+            showToast(message, type) {
+                if (type === 'success') {
+                    document.getElementById('toastMessage').textContent = message;
+                    new bootstrap.Toast(document.getElementById('successToast')).show();
+                } else if (type === 'error') {
+                    document.getElementById('errorToastMessage').textContent = message;
+                    new bootstrap.Toast(document.getElementById('errorToast')).show();
+                } else {
+                    document.getElementById('infoToastMessage').textContent = message;
+                    new bootstrap.Toast(document.getElementById('infoToast')).show();
+                }
+            }
+            
+            getDisplayName(code) {
+                return { en: 'English', zh: '中文' }[code] || code;
+            }
+        }
+        
+        /**
          * ConfigManager - Displays project configuration from .x-ipe.yaml
          * FEATURE-010: Project Root Configuration
          */
         class ConfigManager {
-            constructor() {
+            constructor(languageManager) {
+                this.languageManager = languageManager;
                 this.configCard = document.getElementById('projectConfigCard');
                 this.configContent = document.getElementById('configContent');
                 this.statusBadge = document.getElementById('configStatusBadge');
@@ -580,6 +821,10 @@
                     const response = await fetch('/api/config');
                     const data = await response.json();
                     this.renderConfig(data);
+                    // Wire language from config to LanguageManager
+                    if (this.languageManager) {
+                        this.languageManager.init(data.language || 'en');
+                    }
                 } catch (error) {
                     console.error('Failed to load config:', error);
                     this.statusBadge.textContent = 'Error';
@@ -654,7 +899,8 @@
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
             projectManager = new ProjectFoldersManager();
-            new ConfigManager();
+            const languageManager = new LanguageManager();
+            new ConfigManager(languageManager);
         });
     </script>
 </body>

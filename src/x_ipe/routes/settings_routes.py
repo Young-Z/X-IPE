@@ -3,18 +3,24 @@ Settings Routes Blueprint
 
 FEATURE-006: Settings & Configuration
 FEATURE-010: Project Root Configuration
+FEATURE-028-D: Settings Language Switch
 
 Provides:
 - Settings page
 - Settings API (GET/POST)
 - Config API
+- Language switch API
 """
 import os
+import yaml
 from flask import Blueprint, render_template, jsonify, request, current_app
+from pathlib import Path
 
 from x_ipe.tracing import x_ipe_tracing
 
 settings_bp = Blueprint('settings', __name__)
+
+SUPPORTED_LANGUAGES = ['en', 'zh']
 
 
 def get_settings_service():
@@ -141,3 +147,84 @@ def get_config():
             'project_root': current_app.config.get('PROJECT_ROOT', os.getcwd()),
             'message': 'No .x-ipe.yaml found. Using default paths.'
         })
+
+
+@settings_bp.route('/api/config/language', methods=['POST'])
+@x_ipe_tracing()
+def switch_language():
+    """
+    POST /api/config/language
+    
+    Switch project language and re-extract copilot instructions.
+    
+    FEATURE-028-D: Settings Language Switch
+    
+    Request body:
+        - language: string ('en' or 'zh')
+    
+    Response (success):
+        - success: true
+        - language: string
+        - message: string
+    
+    Response (error):
+        - success: false
+        - error: string
+    """
+    from x_ipe.core.scaffold import ScaffoldManager
+    
+    config_data = current_app.config.get('X_IPE_CONFIG')
+    if not config_data:
+        return jsonify({
+            'success': False,
+            'error': 'Project not initialized. No .x-ipe.yaml detected.'
+        }), 400
+    
+    data = request.get_json() or {}
+    language = data.get('language')
+    
+    if not language:
+        return jsonify({
+            'success': False,
+            'error': 'Missing required field: language'
+        }), 400
+    
+    if language not in SUPPORTED_LANGUAGES:
+        return jsonify({
+            'success': False,
+            'error': f"Unsupported language '{language}'. Supported: {', '.join(SUPPORTED_LANGUAGES)}"
+        }), 400
+    
+    config_path = Path(config_data.config_file_path)
+    project_root = Path(config_data.project_root)
+    
+    try:
+        # Read current YAML config
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = yaml.safe_load(f) or {}
+        
+        cli_name = config.get('cli', 'copilot')
+        
+        # Step 1: Extract instructions FIRST (atomicity — AC-CR2-5)
+        scaffold = ScaffoldManager(project_root, dry_run=False, force=True)
+        scaffold.copy_copilot_instructions(cli_name=cli_name, language=language)
+        
+        # Step 2: Only after success, update .x-ipe.yaml
+        config['language'] = language
+        with open(config_path, 'w', encoding='utf-8') as f:
+            yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+        
+        # Update in-memory config
+        config_data.language = language
+        
+        return jsonify({
+            'success': True,
+            'language': language,
+            'message': f'Language switched to {language}'
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Failed to switch language: {str(e)}'
+        }), 500
