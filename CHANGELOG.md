@@ -8,6 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-025-B: KB Landing Zone**
+  - File upload to Knowledge Base landing folder via Upload button or drag-and-drop
+  - Supported file types: PDF, MD, TXT, DOCX, XLSX, code files (.py, .js, .ts, .java, .go, .rs, .c, .cpp, .h, .html, .css, .json, .yaml), images (.png, .jpg, .jpeg, .gif, .svg, .webp)
+  - Maximum file size: 50MB per file with validation
+  - Duplicate file detection (skips with warning, preserves original)
+  - File grid view with responsive card layout showing type icon, filename, and size
+  - List view alternative with same data and selection support
+  - File card selection with visual highlight (click to toggle, Select All, Clear)
+  - Batch delete with confirmation dialog and disk cleanup
+  - Sort by name, size, date, or type with ascending/descending toggle
+  - Empty state with centered upload zone and drop area
+  - Automatic index refresh after upload/delete operations
+  - Path traversal protection on delete operations
+  - Backend: KBService extensions (`upload_files()`, `delete_files()`, `get_landing_files()`, `_validate_upload()`)
+  - API endpoints: `POST /api/kb/upload`, `POST /api/kb/landing/delete`, `GET /api/kb/landing`
+  - Frontend: `kb-landing.js` (~550 lines) + `kb-landing.css` (~370 lines)
+  - 57 unit tests across 9 test classes, 13 acceptance tests (all passing)
 - **FEATURE-028-D: Settings Language Switch (Web UI)**
   - Language switching from Settings page — no CLI needed
   - Language card with globe icon, current language badge, dropdown (English / 中文)
