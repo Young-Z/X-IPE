@@ -172,4 +172,3 @@ CRITICAL: Any modification to a skill of a defined type (x-ipe-task-based, x-ipe
 3. Lessons are stored in x-ipe-docs/skill-meta/{skill}/lesson-learned.md
 4. Next time skill is updated, lessons will be incorporated
 ```
-
