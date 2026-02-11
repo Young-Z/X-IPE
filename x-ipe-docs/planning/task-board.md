@@ -6,7 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-248 | Technical Design | Design FEATURE-028-A Bilingual Prompt Schema & Migration | Drift | 🔄 in_progress | 02-11-2026 02:10:00 | - | Code Implementation |
+| TASK-251 | Test Generation | Generate tests for FEATURE-028-A Bilingual Prompt Schema & Migration | Drift | 🔄 in_progress | 02-11-2026 02:18:00 | - | Code Implementation |
 
 
 
@@ -25,7 +25,11 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-252 | Technical Design | Design FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:17:00 | [technical-design.md](../requirements/FEATURE-025-B/technical-design.md) | Full Stack design: 4 components (KBService ext, kb_routes ext, kb-landing.js, kb-landing.css). Upload/delete/grid/drag-drop. ~40 tests estimated. DoD 9/9 pass. |
 | TASK-249 | Feature Refinement | Refine FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:10:00 | [specification.md](../requirements/FEATURE-025-B/specification.md) | 31 ACs, 5 FRs, 5 NFRs. File upload, drag-drop, grid, delete, empty state. Mockup current. DoD validated. |
+| TASK-250 | Technical Design | Design FEATURE-028-C Frontend Prompt Language Filtering | Drift | 02-11-2026 02:15:00 | [technical-design.md](../requirements/FEATURE-028-C/technical-design.md) | Client-side filtering with 3-level fallback. 1 file change (workplace.js). DoD validated. |
+| TASK-249 | Technical Design | Design FEATURE-028-B CLI Language Selection & Instructions | Drift | 02-11-2026 02:14:00 | [technical-design.md](../requirements/FEATURE-028-B/technical-design.md) | --lang option, bilingual template, extraction utility. 4 file changes. DoD validated. |
+| TASK-248 | Technical Design | Design FEATURE-028-A Bilingual Prompt Schema & Migration | Drift | 02-11-2026 02:12:00 | [technical-design.md](../requirements/FEATURE-028-A/technical-design.md) | v3.0 schema, migration utility, Chinese translations. 2 file changes. DoD validated. |
 | TASK-247 | Feature Refinement | Refine FEATURE-028-C Frontend Prompt Language Filtering | Drift | 02-11-2026 02:10:00 | [specification.md](../requirements/FEATURE-028-C/specification.md) | 11 ACs, 5 FRs, 3 NFRs. Client-side filtering + fallback chain. DoD validated. |
 | TASK-246 | Feature Refinement | Refine FEATURE-028-B CLI Language Selection & Instructions | Drift | 02-11-2026 02:08:00 | [specification.md](../requirements/FEATURE-028-B/specification.md) | 23 ACs, 6 FRs, 4 NFRs. Init/upgrade --lang + bilingual template. DoD validated. |
 | TASK-245 | Feature Refinement | Refine FEATURE-028-A Bilingual Prompt Schema & Migration | Drift | 02-11-2026 02:05:00 | [specification.md](../requirements/FEATURE-028-A/specification.md) | 22 ACs, 5 FRs, 4 NFRs. v3.0 schema + migration. DoD validated. |
@@ -148,7 +152,7 @@
 - **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 286
+- **Completed (archived):** 290
 - **Pending Review:** 0
 - **Blocked:** 0
 
