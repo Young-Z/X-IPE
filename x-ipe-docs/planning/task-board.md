@@ -26,6 +26,7 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-285 | Ideation | Refine idea for CR-Switch Language in Settings (016) | Sage | 02-11-2026 08:30:00 | [idea-summary-v1.md](../ideas/016.%20CR-Switch%20Language%20in%20Settings/idea-summary-v1.md) | IDEA-020. CR to FEATURE-028. Dropdown en/中文, AJAX+toast, confirmation dialog, atomicity safeguards. Sub-agent critique applied. |
 | TASK-257 | Ideation | Refine idea for X-IPE Module Architecture research (101) | Zephyr | 02-11-2026 08:27:00 | [idea-summary-v1.md](../ideas/101.%20Research-X-IPE%20Module%20Architecture/idea-summary-v1.md), [module-architecture.html](../ideas/101.%20Research-X-IPE%20Module%20Architecture/module-architecture.html) | 8-layer architecture: CLI, Presentation, API, Business, Cross-Cutting, Core, Infrastructure (3rd-party), Data (purpose-based). Standalone HTML with corporate theme. |
 | TASK-252 | Technical Design | Design FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:17:00 | [technical-design.md](../requirements/FEATURE-025-B/technical-design.md) | Full Stack design: 4 components (KBService ext, kb_routes ext, kb-landing.js, kb-landing.css). Upload/delete/grid/drag-drop. ~40 tests estimated. DoD 9/9 pass. |
 | TASK-249 | Feature Refinement | Refine FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 02:10:00 | [specification.md](../requirements/FEATURE-025-B/specification.md) | 31 ACs, 5 FRs, 5 NFRs. File upload, drag-drop, grid, delete, empty state. Mockup current. DoD validated. |
@@ -154,9 +155,9 @@
 
 ## Quick Stats
 
-- **Total Active:** 2
+- **Total Active:** 1
 - **In Progress:** 1
-- **Pending:** 1
+- **Pending:** 0
 - **Deferred:** 0
 - **Completed (archived):** 295
 - **Pending Review:** 0

@@ -1,0 +1,1 @@
+I would like to have language switch in settings. it should behave just like x-ipe upgrade --lang zh|cn.

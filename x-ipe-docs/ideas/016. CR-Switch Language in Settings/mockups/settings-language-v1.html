@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings – Language Switch Mockup</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            --emerald-50: #ecfdf5;
+            --emerald-100: #d1fae5;
+            --emerald-200: #a7f3d0;
+            --emerald-400: #34d399;
+            --emerald-500: #10b981;
+            --emerald-600: #059669;
+            --amber-50: #fffbeb;
+            --amber-100: #fef3c7;
+            --amber-400: #fbbf24;
+            --amber-500: #f59e0b;
+            --amber-600: #d97706;
+            --red-500: #ef4444;
+            --blue-500: #3b82f6;
+            --page-bg: var(--slate-50);
+            --card-bg: #ffffff;
+            --card-border: var(--slate-200);
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --card-shadow-hover: 0 4px 12px rgba(0,0,0,0.08);
+            --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', Consolas, monospace;
+            --radius-card: 10px;
+            --radius-btn: 7px;
+            --radius-input: 7px;
+            --transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--page-bg);
+            color: var(--slate-800);
+            min-height: 100vh;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Mockup Banner ── */
+        .mockup-banner {
+            background: linear-gradient(135deg, var(--slate-800), var(--slate-900));
+            color: white;
+            text-align: center;
+            padding: 10px 16px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            position: sticky;
+            top: 0;
+            z-index: 1100;
+        }
+        .mockup-banner span {
+            opacity: 0.6;
+        }
+        .mockup-banner strong {
+            color: var(--emerald-400);
+            font-weight: 600;
+        }
+
+        /* ── Container ── */
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem 3rem;
+        }
+
+        /* ── Header ── */
+        .settings-header {
+            margin-bottom: 1.75rem;
+        }
+        .settings-header h1 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: var(--slate-900);
+            margin: 0 0 0.25rem;
+            letter-spacing: -0.02em;
+        }
+        .settings-header p {
+            color: var(--slate-500);
+            margin: 0;
+            font-size: 0.92rem;
+        }
+
+        /* ── Card ── */
+        .settings-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-card);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+            transition: box-shadow var(--transition-base);
+        }
+        .settings-card:hover {
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .settings-card .card-header {
+            background: var(--slate-50);
+            border-bottom: 1px solid var(--card-border);
+            padding: 0.85rem 1.15rem;
+            font-weight: 600;
+            font-size: 0.92rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--slate-700);
+        }
+        .settings-card .card-header i {
+            color: var(--slate-400);
+        }
+        .settings-card .card-body {
+            padding: 1.15rem;
+        }
+
+        /* ── Table ── */
+        .project-table { margin-bottom: 0; }
+        .project-table th {
+            font-weight: 600;
+            color: var(--slate-500);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom-width: 1px;
+        }
+        .project-table td { vertical-align: middle; }
+        .project-name { font-weight: 500; }
+        .project-path {
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            color: var(--slate-500);
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .active-badge { font-size: 0.72rem; }
+        .btn-action {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.82rem;
+            border-radius: 5px;
+        }
+
+        /* ── NEW: Language Section ── */
+        .language-card {
+            position: relative;
+        }
+        .language-card .card-header {
+            background: linear-gradient(135deg, var(--slate-50) 0%, var(--emerald-50) 100%);
+        }
+        .language-card .card-header .bi-translate {
+            color: var(--emerald-500);
+        }
+
+        .language-body {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+            padding: 1.25rem;
+        }
+
+        .language-icon-wrap {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--emerald-50), var(--emerald-100));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.4rem;
+            color: var(--emerald-600);
+            border: 1px solid var(--emerald-200);
+        }
+
+        .language-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .language-label {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--slate-800);
+            margin-bottom: 0.2rem;
+        }
+        .language-desc {
+            font-size: 0.82rem;
+            color: var(--slate-500);
+            margin-bottom: 0.75rem;
+            line-height: 1.45;
+        }
+
+        .language-select-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .language-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background: var(--card-bg);
+            border: 1.5px solid var(--slate-200);
+            border-radius: var(--radius-input);
+            padding: 0.55rem 2.5rem 0.55rem 0.85rem;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--slate-800);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            min-width: 200px;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 12px;
+        }
+        .language-select:hover {
+            border-color: var(--slate-300);
+        }
+        .language-select:focus {
+            border-color: var(--emerald-500);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+        }
+        .language-select option {
+            font-family: var(--font-body);
+            padding: 8px;
+        }
+
+        .current-lang-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: var(--emerald-50);
+            color: var(--emerald-600);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.3rem 0.6rem;
+            border-radius: 100px;
+            border: 1px solid var(--emerald-200);
+            white-space: nowrap;
+        }
+        .current-lang-badge .bi {
+            font-size: 0.65rem;
+        }
+
+        .language-note {
+            margin-top: 0.65rem;
+            padding: 0.6rem 0.75rem;
+            background: var(--amber-50);
+            border: 1px solid var(--amber-100);
+            border-radius: 6px;
+            font-size: 0.78rem;
+            color: var(--amber-600);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.4rem;
+            line-height: 1.45;
+        }
+        .language-note i {
+            margin-top: 1px;
+            flex-shrink: 0;
+        }
+
+        /* ── Config table ── */
+        .config-table td:first-child {
+            color: var(--slate-500);
+            width: 150px;
+            font-size: 0.88rem;
+        }
+        .config-table code {
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            background: var(--slate-100);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            color: var(--slate-700);
+        }
+
+        /* ── Toast ── */
+        .toast-container {
+            position: fixed;
+            top: 60px;
+            right: 1rem;
+            z-index: 1200;
+        }
+
+        /* ── Confirmation Modal ── */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 1050;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.15s ease;
+        }
+        .confirm-overlay.show {
+            display: flex;
+        }
+
+        .confirm-dialog {
+            background: var(--card-bg);
+            border-radius: 14px;
+            box-shadow: 0 24px 48px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+            width: 420px;
+            max-width: 92vw;
+            overflow: hidden;
+            animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .confirm-header {
+            padding: 1.25rem 1.25rem 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.85rem;
+        }
+        .confirm-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--amber-50);
+            border: 1px solid var(--amber-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.15rem;
+            color: var(--amber-500);
+        }
+        .confirm-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--slate-900);
+            margin: 0 0 0.2rem;
+            letter-spacing: -0.01em;
+        }
+        .confirm-subtitle {
+            font-size: 0.85rem;
+            color: var(--slate-500);
+            line-height: 1.5;
+        }
+
+        .confirm-body {
+            padding: 1rem 1.25rem;
+        }
+        .confirm-detail {
+            background: var(--slate-50);
+            border: 1px solid var(--slate-200);
+            border-radius: 8px;
+            padding: 0.75rem;
+        }
+        .confirm-detail-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .confirm-detail-row + .confirm-detail-row {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--slate-200);
+        }
+        .confirm-detail-label {
+            color: var(--slate-500);
+            min-width: 70px;
+        }
+        .confirm-detail-value {
+            font-weight: 600;
+            color: var(--slate-800);
+        }
+        .confirm-arrow {
+            color: var(--slate-400);
+            font-size: 0.7rem;
+        }
+
+        .confirm-warning {
+            margin-top: 0.75rem;
+            padding: 0.6rem 0.75rem;
+            background: var(--amber-50);
+            border: 1px solid var(--amber-100);
+            border-radius: 7px;
+            font-size: 0.8rem;
+            color: var(--amber-600);
+            line-height: 1.45;
+            display: flex;
+            gap: 0.4rem;
+            align-items: flex-start;
+        }
+        .confirm-warning i { margin-top: 1px; flex-shrink: 0; }
+
+        .confirm-footer {
+            padding: 0 1.25rem 1.25rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+        .btn-confirm-cancel {
+            background: var(--card-bg);
+            border: 1.5px solid var(--slate-200);
+            color: var(--slate-600);
+            padding: 0.55rem 1.1rem;
+            border-radius: var(--radius-btn);
+            font-family: var(--font-body);
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+        .btn-confirm-cancel:hover {
+            background: var(--slate-50);
+            border-color: var(--slate-300);
+        }
+        .btn-confirm-proceed {
+            background: var(--emerald-500);
+            border: none;
+            color: white;
+            padding: 0.55rem 1.1rem;
+            border-radius: var(--radius-btn);
+            font-family: var(--font-body);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .btn-confirm-proceed:hover {
+            background: var(--emerald-600);
+        }
+
+        /* ── Success Toast ── */
+        .custom-toast {
+            position: fixed;
+            top: 60px;
+            right: 1.25rem;
+            z-index: 1200;
+            background: var(--slate-800);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 9px;
+            font-size: 0.87rem;
+            font-weight: 500;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .custom-toast.show { display: flex; }
+        .custom-toast .toast-icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--emerald-500);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        /* ── Back link ── */
+        .back-link {
+            color: var(--slate-500);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: color var(--transition-base);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .back-link:hover { color: var(--emerald-600); }
+
+        /* ── State: loading ── */
+        .select-loading {
+            pointer-events: none;
+            opacity: 0.55;
+        }
+
+        /* ── Annotations (mockup-only) ── */
+        .annotation {
+            position: absolute;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #e11d48;
+            background: #fff1f2;
+            border: 1.5px solid #fda4af;
+            border-radius: 100px;
+            padding: 0.2rem 0.55rem;
+            white-space: nowrap;
+            z-index: 10;
+            pointer-events: none;
+            letter-spacing: 0.02em;
+        }
+        .annotation::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 1.5px;
+            background: #fda4af;
+        }
+        .ann-right {
+            right: -130px;
+        }
+        .ann-right::before {
+            left: -22px;
+            top: 50%;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(12px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(24px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+
+        /* Scenario tabs */
+        .scenario-tabs {
+            display: flex;
+            gap: 0.35rem;
+            padding: 0.5rem 1rem;
+            background: var(--slate-100);
+            border-bottom: 1px solid var(--slate-200);
+            position: sticky;
+            top: 37px;
+            z-index: 1000;
+        }
+        .scenario-tab {
+            font-family: var(--font-body);
+            font-size: 0.78rem;
+            font-weight: 500;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--slate-500);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+        .scenario-tab:hover {
+            background: var(--card-bg);
+            color: var(--slate-700);
+        }
+        .scenario-tab.active {
+            background: var(--card-bg);
+            color: var(--slate-800);
+            border-color: var(--slate-200);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mockup banner -->
+    <div class="mockup-banner">
+        <strong>IDEA-020</strong> <span>·</span> CR-Switch Language in Settings <span>·</span> Mockup v1
+    </div>
+
+    <!-- Scenario tabs -->
+    <div class="scenario-tabs">
+        <button class="scenario-tab active" onclick="showScenario('default')">
+            <i class="bi bi-eye me-1"></i>Default State
+        </button>
+        <button class="scenario-tab" onclick="showScenario('confirm')">
+            <i class="bi bi-exclamation-diamond me-1"></i>Confirmation Dialog
+        </button>
+        <button class="scenario-tab" onclick="showScenario('success')">
+            <i class="bi bi-check-circle me-1"></i>Success Toast
+        </button>
+        <button class="scenario-tab" onclick="showScenario('same')">
+            <i class="bi bi-info-circle me-1"></i>Same Language
+        </button>
+    </div>
+
+    <div class="settings-container">
+        <!-- Header -->
+        <div class="settings-header">
+            <h1>
+                <i class="bi bi-gear"></i>
+                Settings
+            </h1>
+            <p>Configure your X-IPE application</p>
+        </div>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- NEW: Language Section                       -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div class="settings-card language-card" id="languageCard">
+            <div class="card-header">
+                <span>
+                    <i class="bi bi-translate me-2"></i>
+                    Language
+                </span>
+                <span class="current-lang-badge" id="currentLangBadge">
+                    <i class="bi bi-check-circle-fill"></i>
+                    English
+                </span>
+            </div>
+            <div class="language-body">
+                <div class="language-icon-wrap">
+                    <i class="bi bi-globe2"></i>
+                </div>
+                <div class="language-content">
+                    <div class="language-label">Interface Language</div>
+                    <div class="language-desc">
+                        Controls copilot instructions and prompt display language for the active project.
+                    </div>
+                    <div class="language-select-row">
+                        <select class="language-select" id="languageSelect">
+                            <option value="en" selected>English</option>
+                            <option value="zh">中文</option>
+                        </select>
+                    </div>
+                    <div class="language-note">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <span>Switching language will regenerate copilot instructions. Custom edits outside X-IPE markers are preserved.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Existing: Project Folders -->
+        <div class="settings-card">
+            <div class="card-header">
+                <span>
+                    <i class="bi bi-folder me-2"></i>
+                    Project Folders
+                </span>
+                <button type="button" class="btn btn-primary btn-sm" style="font-size:0.82rem; border-radius:6px;">
+                    <i class="bi bi-plus-lg me-1"></i>
+                    Add Project
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <table class="table project-table mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Path</th>
+                            <th style="width:140px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <span class="project-name">X-IPE</span>
+                                <span class="badge bg-primary ms-2 active-badge">Active</span>
+                            </td>
+                            <td>
+                                <span class="project-path" title="/Users/yzhang/ML/2026/agent/X-IPE">
+                                    /Users/yzhang/ML/2026/agent/X-IPE
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-outline-secondary btn-action me-1" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="project-name">Demo App</span>
+                            </td>
+                            <td>
+                                <span class="project-path" title="/Users/yzhang/projects/demo-app">
+                                    /Users/yzhang/projects/demo-app
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-outline-success btn-action me-1" title="Switch">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary btn-action me-1" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-danger btn-action" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Existing: Project Configuration -->
+        <div class="settings-card">
+            <div class="card-header">
+                <span>
+                    <i class="bi bi-gear-wide-connected me-2"></i>
+                    Project Configuration
+                </span>
+                <span class="badge bg-success">Detected</span>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small style="color:var(--slate-500);">
+                        <i class="bi bi-file-earmark-code me-1"></i>
+                        Config file: <code style="font-family:var(--font-mono);font-size:0.8rem;background:var(--slate-100);padding:0.1rem 0.35rem;border-radius:3px;">.x-ipe.yaml</code>
+                    </small>
+                </div>
+                <table class="table table-sm table-borderless config-table mb-0">
+                    <tbody>
+                        <tr>
+                            <td>Version</td>
+                            <td><code>1</code></td>
+                        </tr>
+                        <tr>
+                            <td>Project Root</td>
+                            <td><code>.</code></td>
+                        </tr>
+                        <tr>
+                            <td>CLI</td>
+                            <td><code>copilot</code></td>
+                        </tr>
+                        <tr>
+                            <td>Language</td>
+                            <td><code id="configLangValue">en</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Back -->
+        <div class="mt-3">
+            <a href="#" class="back-link" onclick="event.preventDefault()">
+                <i class="bi bi-arrow-left"></i>
+                Back to Document Viewer
+            </a>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- Confirmation Dialog Overlay                 -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-dialog">
+            <div class="confirm-header">
+                <div class="confirm-icon">
+                    <i class="bi bi-arrow-repeat"></i>
+                </div>
+                <div>
+                    <div class="confirm-title">Switch Language?</div>
+                    <div class="confirm-subtitle">This will update your project's copilot instructions.</div>
+                </div>
+            </div>
+            <div class="confirm-body">
+                <div class="confirm-detail">
+                    <div class="confirm-detail-row">
+                        <span class="confirm-detail-label">From</span>
+                        <span class="confirm-detail-value" id="confirmFrom">English</span>
+                        <i class="bi bi-arrow-right confirm-arrow"></i>
+                        <span class="confirm-detail-label" style="min-width:auto;">To</span>
+                        <span class="confirm-detail-value" id="confirmTo">中文</span>
+                    </div>
+                    <div class="confirm-detail-row">
+                        <span class="confirm-detail-label">Project</span>
+                        <span class="confirm-detail-value">X-IPE</span>
+                    </div>
+                </div>
+                <div class="confirm-warning">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>Copilot instructions (<code style="font-size:0.75rem;">.github/copilot-instructions.md</code>) will be regenerated. Custom edits outside X-IPE sections are preserved.</span>
+                </div>
+            </div>
+            <div class="confirm-footer">
+                <button class="btn-confirm-cancel" onclick="hideConfirm()">Cancel</button>
+                <button class="btn-confirm-proceed" onclick="doSwitch()">
+                    <i class="bi bi-check-lg"></i>
+                    Switch Language
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success toast -->
+    <div class="custom-toast" id="successToast">
+        <div class="toast-icon">
+            <i class="bi bi-check-lg"></i>
+        </div>
+        <span id="toastMsg">Language switched to 中文</span>
+    </div>
+
+    <!-- Same-language toast -->
+    <div class="custom-toast" id="sameToast" style="background:var(--slate-600);">
+        <div class="toast-icon" style="background:var(--blue-500);">
+            <i class="bi bi-info-lg"></i>
+        </div>
+        <span>Already using English</span>
+    </div>
+
+    <script>
+        const tabs = document.querySelectorAll('.scenario-tab');
+        const overlay = document.getElementById('confirmOverlay');
+        const successToast = document.getElementById('successToast');
+        const sameToast = document.getElementById('sameToast');
+        const langSelect = document.getElementById('languageSelect');
+        const langBadge = document.getElementById('currentLangBadge');
+        const configLang = document.getElementById('configLangValue');
+
+        function showScenario(scenario) {
+            // reset
+            overlay.classList.remove('show');
+            successToast.classList.remove('show');
+            sameToast.classList.remove('show');
+            langSelect.value = 'en';
+            langSelect.classList.remove('select-loading');
+            langBadge.innerHTML = '<i class="bi bi-check-circle-fill"></i> English';
+            configLang.textContent = 'en';
+
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.closest('.scenario-tab').classList.add('active');
+
+            switch(scenario) {
+                case 'default':
+                    // Just show the default state
+                    break;
+
+                case 'confirm':
+                    langSelect.value = 'zh';
+                    setTimeout(() => overlay.classList.add('show'), 150);
+                    break;
+
+                case 'success':
+                    langSelect.value = 'zh';
+                    langSelect.classList.add('select-loading');
+                    langBadge.innerHTML = '<i class="bi bi-check-circle-fill"></i> 中文';
+                    configLang.textContent = 'zh';
+                    setTimeout(() => {
+                        langSelect.classList.remove('select-loading');
+                        successToast.classList.add('show');
+                        setTimeout(() => successToast.classList.remove('show'), 3000);
+                    }, 300);
+                    break;
+
+                case 'same':
+                    setTimeout(() => {
+                        sameToast.classList.add('show');
+                        setTimeout(() => sameToast.classList.remove('show'), 3000);
+                    }, 200);
+                    break;
+            }
+        }
+
+        function hideConfirm() {
+            overlay.classList.remove('show');
+            langSelect.value = 'en';
+        }
+
+        function doSwitch() {
+            overlay.classList.remove('show');
+            langSelect.classList.add('select-loading');
+
+            setTimeout(() => {
+                langSelect.classList.remove('select-loading');
+                langBadge.innerHTML = '<i class="bi bi-check-circle-fill"></i> 中文';
+                configLang.textContent = 'zh';
+                successToast.classList.add('show');
+                setTimeout(() => successToast.classList.remove('show'), 3000);
+            }, 600);
+        }
+
+        // Live interaction: selecting from dropdown triggers confirm
+        langSelect.addEventListener('change', function() {
+            if (this.value !== 'en') {
+                overlay.classList.add('show');
+            }
+        });
+    </script>
+</body>
+</html>
