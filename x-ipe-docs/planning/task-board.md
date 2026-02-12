@@ -10,6 +10,10 @@
 | TASK-324 | Feature Refinement | Refine FEATURE-025-D KB Topics & Summaries | Pulse | ✅ completed | 02-12-2026 10:50:00 | [specification.md](../requirements/FEATURE-025-D/specification.md) | Technical Design |
 | TASK-325 | Technical Design | Technical design for FEATURE-029-D Explorer UI Controls | Flux | ✅ completed | 02-12-2026 13:18:00 | [technical-design.md](../requirements/FEATURE-029-D/technical-design.md) | Code Implementation |
 | TASK-326 | Code Implementation | Implement FEATURE-029-D Explorer UI Controls | Flux | ✅ completed | 02-12-2026 13:20:00 | [terminal.js](../../src/x_ipe/static/js/terminal.js), [terminal.css](../../src/x_ipe/static/css/terminal.css), [index.html](../../src/x_ipe/templates/index.html) | Feature Acceptance Test |
+| TASK-327 | Feature Acceptance Test | Acceptance test FEATURE-029-D Explorer UI Controls | Flux | ✅ completed | 02-12-2026 14:00:00 | [acceptance-test-cases.md](../requirements/FEATURE-029-D/acceptance-test-cases.md) | Feature Closing |
+| TASK-327 | Bug Fix | UIUX: Delete icon should recycle terminal session (Feedback-20260212-212638) | Sage | ✅ completed | 02-12-2026 13:28:00 | [terminal.js](../../src/x_ipe/static/js/terminal.js), [terminal_service.py](../../src/x_ipe/services/terminal_service.py) | |
+| TASK-328 | Technical Design | Technical design for FEATURE-025-D KB Topics & Summaries | Rune | ✅ completed | 02-12-2026 14:00:00 | [technical-design.md](../requirements/FEATURE-025-D/technical-design.md) | Code Implementation |
+| TASK-329 | Code Implementation | Implement FEATURE-025-D KB Topics & Summaries | Rune | 🔄 in_progress | 02-12-2026 14:08:00 | | Feature Acceptance Test |
 
 
 
@@ -208,8 +212,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 1
-- **In Progress:** 1
+- **Total Active:** 2
+- **In Progress:** 2
 - **Pending:** 0
 - **Deferred:** 0
 - **Completed (archived):** 322
