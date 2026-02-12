@@ -893,6 +893,15 @@
             
             // Register with manager
             this.manager.explorer = this;
+
+            // FEATURE-029-C: Preview state
+            this._previewContainer = null;
+            this._previewTerminal = null;
+            this._previewFitAddon = null;
+            this._previewKey = null;
+            this._hoverTimer = null;
+            this._graceTimer = null;
+            this._previewOutputHandler = null;
             
             this._bindEvents();
         }
@@ -945,11 +954,23 @@
             bar.addEventListener('click', () => {
                 this.manager.switchSession(key);
             });
+
+            // FEATURE-029-C: Hover preview triggers
+            bar.addEventListener('mouseenter', () => {
+                if (bar.dataset.active === 'true') return;
+                clearTimeout(this._graceTimer);
+                this._hoverTimer = setTimeout(() => this._showPreview(key, bar), 500);
+            });
+            bar.addEventListener('mouseleave', () => {
+                clearTimeout(this._hoverTimer);
+                this._graceTimer = setTimeout(() => this._dismissPreview(), 100);
+            });
             
             this.listEl.appendChild(bar);
         }
 
         removeSessionBar(key) {
+            if (this._previewKey === key) this._dismissPreview();
             const bar = this.listEl.querySelector(`[data-session-key="${key}"]`);
             if (bar) bar.remove();
         }
@@ -1023,6 +1044,111 @@
             toast.textContent = message;
             toast.classList.add('visible');
             setTimeout(() => toast.classList.remove('visible'), 2500);
+        }
+
+        // FEATURE-029-C: Preview methods
+        _initPreviewContainer() {
+            if (this._previewContainer) return;
+
+            this._previewContainer = document.createElement('div');
+            this._previewContainer.className = 'session-preview';
+            this._previewContainer.style.display = 'none';
+
+            const header = document.createElement('div');
+            header.className = 'session-preview-header';
+            this._previewContainer.appendChild(header);
+
+            const body = document.createElement('div');
+            body.className = 'session-preview-body';
+            this._previewContainer.appendChild(body);
+
+            this._previewContainer.addEventListener('mouseenter', () => {
+                clearTimeout(this._graceTimer);
+            });
+            this._previewContainer.addEventListener('mouseleave', () => {
+                this._graceTimer = setTimeout(() => this._dismissPreview(), 100);
+            });
+            this._previewContainer.addEventListener('click', () => {
+                if (this._previewKey) {
+                    const key = this._previewKey;
+                    this._dismissPreview();
+                    this.manager.switchSession(key);
+                }
+            });
+
+            document.getElementById('terminal-panel').appendChild(this._previewContainer);
+
+            this._previewTerminal = new Terminal({
+                disableStdin: true,
+                scrollback: 500,
+                fontSize: 12,
+                fontFamily: terminalConfig.fontFamily,
+                theme: terminalConfig.theme,
+                cursorBlink: false
+            });
+            this._previewFitAddon = new FitAddon.FitAddon();
+            this._previewTerminal.loadAddon(this._previewFitAddon);
+            this._previewTerminal.open(body);
+        }
+
+        _showPreview(key, barElement) {
+            const session = this.manager.sessions.get(key);
+            if (!session) return;
+
+            this._initPreviewContainer();
+
+            if (this._previewKey && this._previewKey !== key) {
+                this._cleanupPreviewListeners();
+            }
+            this._previewKey = key;
+
+            this._previewContainer.querySelector('.session-preview-header').textContent = session.name;
+
+            this._previewTerminal.clear();
+
+            const srcBuffer = session.terminal.buffer.active;
+            const lines = [];
+            for (let i = 0; i < srcBuffer.length; i++) {
+                const line = srcBuffer.getLine(i);
+                if (line) lines.push(line.translateToString(true));
+            }
+            if (lines.length > 0) {
+                this._previewTerminal.write(lines.join('\r\n'));
+            }
+            this._previewTerminal.scrollToBottom();
+
+            if (session.socket) {
+                this._previewOutputHandler = (data) => {
+                    if (this._previewKey === key) {
+                        this._previewTerminal.write(data);
+                        this._previewTerminal.scrollToBottom();
+                    }
+                };
+                session.socket.on('output', this._previewOutputHandler);
+            }
+
+            this._previewContainer.style.display = 'flex';
+            try { this._previewFitAddon.fit(); } catch(e) {}
+        }
+
+        _dismissPreview() {
+            clearTimeout(this._hoverTimer);
+            clearTimeout(this._graceTimer);
+            this._cleanupPreviewListeners();
+            this._previewKey = null;
+            if (this._previewContainer) {
+                this._previewContainer.style.display = 'none';
+            }
+        }
+
+        _cleanupPreviewListeners() {
+            if (this._previewOutputHandler && this._previewKey) {
+                const session = this.manager.sessions.get(this._previewKey);
+                if (session && session.socket) {
+                    session.socket.off('output', this._previewOutputHandler);
+                }
+                this._previewOutputHandler = null;
+            }
         }
     }
 

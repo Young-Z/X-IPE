@@ -391,6 +391,37 @@
 }
 
 /* =============================================================================
+   FEATURE-029-C: Session Hover Preview
+   ============================================================================= */
+
+.session-preview {
+    position: absolute;
+    right: 181px;
+    top: 40px;
+    width: 50%;
+    height: 60%;
+    background: #1e1e1e;
+    border: 1px solid #4ec9b0;
+    border-radius: 4px;
+    display: none;
+    flex-direction: column;
+    z-index: 50;
+    box-shadow: -4px 4px 12px rgba(0,0,0,0.5);
+    cursor: pointer;
+}
+.session-preview-header {
+    padding: 4px 8px;
+    font-size: 12px;
+    color: #4ec9b0;
+    border-bottom: 1px solid #333;
+    flex-shrink: 0;
+}
+.session-preview-body {
+    flex: 1;
+    overflow: hidden;
+}
+
+/* =============================================================================
    FEATURE-021: Console Voice Input
    ============================================================================= */
 
