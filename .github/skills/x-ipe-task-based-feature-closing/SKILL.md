@@ -43,6 +43,10 @@ input:
   feature_title: "{title}"
   feature_version: "{version}"
 
+  # Git strategy (from .x-ipe.yaml, passed by workflow)
+  git_strategy: "main-branch-only | dev-session-based"
+  git_main_branch: "{auto-detected}"
+
   # Context (from previous task or project)
   specification_path: "x-ipe-docs/features/{FEATURE-XXX}/specification.md"
   test_results: "all passing"
@@ -56,7 +60,7 @@ input:
 <definition_of_ready>
   <checkpoint required="true">
     <name>Code implementation complete</name>
-    <verification>All implementation code merged to feature branch</verification>
+    <verification>All implementation code committed (on main if main-branch-only, on dev/{nickname} if dev-session-based)</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Feature status is "Implemented"</name>
@@ -77,7 +81,7 @@ input:
 |------|------|--------|------|
 | 1 | Verify Criteria | Check all acceptance criteria are met | All criteria met |
 | 2 | Finalize Docs | Update README, API docs, CHANGELOG | Docs complete |
-| 3 | Create PR | Create pull request with proper description | PR created |
+| 3 | Ship | Push to main (main-branch-only) or create PR (dev-session-based) | Shipped |
 | 4 | Output Summary | Provide completion summary to human | Summary delivered |
 
 BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP and report to human.
@@ -127,19 +131,27 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
   </step_2>
 
   <step_3>
-    <name>Create Pull Request</name>
+    <name>Create Pull Request (conditional)</name>
     <action>
-      1. Stage all feature changes
-      2. Create PR using template from references/templates/pr-template.md
-      3. Title format: feat: [Feature Name] - [Brief Description]
-      4. Link feature ID and design doc in PR description
-      5. Include testing checklist status
+      IF git_strategy == "main-branch-only":
+        1. Skip PR creation — code is already on main
+        2. Ensure all changes are pushed: git push origin {git_main_branch}
+        3. Log: "Strategy is main-branch-only, no PR needed"
+
+      ELSE IF git_strategy == "dev-session-based":
+        1. Stage all feature changes
+        2. Push dev/{nickname} branch to remote: git push origin dev/{nickname}
+        3. Create PR from dev/{nickname} → {git_main_branch}
+        4. Use PR template from references/templates/pr-template.md
+        5. Title format: feat: [Feature Name] - [Brief Description]
+        6. Link feature ID and design doc in PR description
+        7. Include testing checklist status
     </action>
     <constraints>
-      - BLOCKING: PR description must not be empty
+      - BLOCKING (dev-session-based only): PR description must not be empty
       - CRITICAL: PR must be scoped to single feature
     </constraints>
-    <output>Pull request URL and number</output>
+    <output>Pull request URL and number (dev-session-based) or push confirmation (main-branch-only)</output>
   </step_3>
 
   <step_4>
@@ -167,7 +179,7 @@ task_completion_output:
   require_human_review: false
   auto_proceed: "{from input auto_proceed}"
   task_output_links:
-    - "{PR link}"
+    - "{PR link (dev-session-based) or 'pushed to main' (main-branch-only)}"
     - "CHANGELOG.md"
     - "x-ipe-docs/features/{FEATURE-XXX}/changelog.md"
   feature_id: "{FEATURE-XXX}"
@@ -193,8 +205,8 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <verification>README, API docs, and changelog updated where applicable</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>PR created with proper description</name>
-    <verification>PR exists with title, description, linked feature, and checklist</verification>
+    <name>PR created or code pushed to main</name>
+    <verification>If dev-session-based: PR exists with title, description, linked feature, and checklist. If main-branch-only: code pushed to main.</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Summary provided to human</name>
@@ -255,6 +267,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Skipping criteria check | Incomplete feature shipped | Verify each criterion with evidence |
 | Giant multi-feature PR | Hard to review and revert | Keep PR scoped to single feature |
 | No changelog entry | Lost version history | Always update CHANGELOG.md |
+| Creating feature branches in main-branch-only mode | Unnecessary complexity | Check git_strategy before creating branches |
 
 ---
 

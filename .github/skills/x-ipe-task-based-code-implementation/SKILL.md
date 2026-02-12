@@ -54,6 +54,10 @@ input:
   # Required inputs
   auto_proceed: false
   feature_id: "{FEATURE-XXX}"
+
+  # Git strategy (from .x-ipe.yaml, passed by workflow)
+  git_strategy: "main-branch-only | dev-session-based"
+  git_main_branch: "{auto-detected}"
 ```
 
 ---

@@ -39,6 +39,10 @@ input:
   # Required inputs
   auto_proceed: false
 
+  # Git strategy (from .x-ipe.yaml, passed by workflow)
+  git_strategy: "main-branch-only | dev-session-based"
+  git_main_branch: "{auto-detected}"
+
   # Context (from previous task or project)
   project_root: "{absolute path to project root}"
   project_name: "{project name}"

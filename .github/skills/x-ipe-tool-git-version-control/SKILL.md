@@ -43,11 +43,12 @@ triggers:
   - "push to remote"
   - "pull from remote"
   - "check git status"
+  - "switch branch"
+  - "create branch"
 
 not_for:
   - "Creating GitHub repositories remotely"
   - "Resolving merge conflicts (manual intervention required)"
-  - "Branch management or PR workflows"
 ```
 
 ---
@@ -56,7 +57,7 @@ not_for:
 
 ```yaml
 input:
-  operation: "status | init | create_gitignore | add | commit | push | pull"
+  operation: "status | init | create_gitignore | add | commit | push | pull | ensure_branch"
   directory: "<absolute-path-to-project-root>"
   # Operation-specific parameters:
   tech_stack: "python | nodejs"          # create_gitignore only
@@ -66,7 +67,8 @@ input:
     task_description: "<description>"
     feature_id: "FEATURE-XXX | null"
   remote: "origin | <remote-name>"       # push/pull only; default: origin
-  branch: "main | <branch-name>"         # push/pull only; default: current branch
+  branch: "main | <branch-name>"         # push/pull/ensure_branch only; default: current branch
+  create_from: "main | <base-branch>"    # ensure_branch only; base branch to create from
 ```
 
 ---
@@ -248,6 +250,36 @@ input:
     remote: "{remote}"
     branch: "{branch}"
     changes: "summary-of-changes | Already up to date"
+  </output>
+</operation>
+```
+
+### Operation: Ensure Branch
+
+**When:** To ensure the agent is on the correct branch per git strategy. Creates branch if it doesn't exist, switches to it if it does.
+
+```xml
+<operation name="ensure_branch">
+  <action>
+    1. cd {directory}
+    2. Check if branch {branch} exists locally: git branch --list {branch}
+    3. IF branch exists:
+       → git checkout {branch}
+    4. IF branch does NOT exist:
+       → git checkout {create_from}
+       → git pull origin {create_from} (ignore errors if no remote)
+       → git checkout -b {branch}
+    5. Return current branch name
+  </action>
+  <constraints>
+    - Working tree must be clean (commit or stash changes first)
+    - create_from branch must exist locally
+  </constraints>
+  <output>
+    success: true | false
+    message: "Switched to {branch}" | "Created and switched to {branch}"
+    branch: "{branch}"
+    created: true | false
   </output>
 </operation>
 ```

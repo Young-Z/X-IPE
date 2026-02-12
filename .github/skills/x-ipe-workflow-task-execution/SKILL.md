@@ -52,10 +52,40 @@ input:
     task_output_links: ["{links}"] | null
     dynamic_attributes: {}  # Fully dynamic per task-based skill
 
+  # Git strategy (read from .x-ipe.yaml at workflow start)
+  git:
+    strategy: "main-branch-only | dev-session-based"  # from .x-ipe.yaml git.strategy (default: dev-session-based)
+    main_branch: "{auto-detected}"                     # auto-detected from git, overridable via .x-ipe.yaml git.main-branch
+
   # Closing fields (set by category skill)
   closing:
     category_level_change_summary: "{summary, max 100 words} | null"
 ```
+
+### Git Strategy
+
+BLOCKING: At the start of every workflow execution, read `.x-ipe.yaml` from project root to determine `git.strategy` and `git.main-branch`. If `.x-ipe.yaml` does not exist or `git.strategy` is not specified, default to `dev-session-based`. If `git.main-branch` is not specified, auto-detect the main branch from git (see Step 2 procedure). Pass these values to all task-based skills that interact with git.
+
+| Strategy | Branch Model | PR Required? | Description |
+|----------|-------------|--------------|-------------|
+| `main-branch-only` | Work directly on main branch | No | All commits go to main. No feature branches created. |
+| `dev-session-based` | `dev/{nickname}` branch per developer | Yes, on feature close | Each developer works on their own persistent branch. PR to main when a feature is closed. |
+
+**Rules by strategy:**
+
+**`main-branch-only`:**
+- Do NOT create any branches
+- All commits go directly to the main branch
+- No PRs needed — code lands on main immediately
+- `git push` pushes to main
+
+**`dev-session-based`:**
+- On first task execution, check if `dev/{nickname}` branch exists
+  - If not → create it from main: `git checkout -b dev/{nickname}`
+  - If exists → switch to it: `git checkout dev/{nickname}`
+- All work happens on this branch
+- On feature close → push branch, create PR targeting main
+- Branch persists across features (not deleted after PR)
 
 ### Category Derivation
 
@@ -112,6 +142,10 @@ deferred → in_progress
   <checkpoint required="true">
     <name>Git Repository Initialized</name>
     <verification>Project root is a git repository (invoke x-ipe-tool-git-version-control skill if needed)</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Git Strategy Resolved</name>
+    <verification>Read .x-ipe.yaml git.strategy; agent is on correct branch per strategy rules</verification>
   </checkpoint>
 </definition_of_ready>
 ```
@@ -181,6 +215,25 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
          IF not a git repository:
            CALL x-ipe-tool-git-version-control skill: operation=init
            CALL x-ipe-tool-git-version-control skill: operation=create_gitignore
+
+      6. Read git strategy from .x-ipe.yaml:
+         → Read .x-ipe.yaml from project root (if file exists)
+         → Set git.strategy = git.strategy (default: "dev-session-based" if not specified or file missing)
+         → Set git.main_branch:
+           IF .x-ipe.yaml specifies git.main-branch → use that value
+           ELSE → auto-detect: run `git remote show origin` to find HEAD branch,
+                  or fallback to `git symbolic-ref refs/remotes/origin/HEAD` → parse branch name,
+                  or fallback to checking if `main` or `master` branch exists locally
+
+      7. Apply git strategy:
+         IF git.strategy == "main-branch-only":
+           → Ensure on main branch: git checkout {main_branch}
+           → Do NOT create any other branches
+         ELSE IF git.strategy == "dev-session-based":
+           → Check if branch dev/{nickname} exists
+           → IF not exists: git checkout -b dev/{nickname} (from main)
+           → IF exists: git checkout dev/{nickname}
+           → Pull latest: git pull origin dev/{nickname} (ignore if remote doesn't exist yet)
     </actions>
     <on_failure>STOP and report missing prerequisites</on_failure>
     <on_success>Transition task status: pending → in_progress</on_success>
