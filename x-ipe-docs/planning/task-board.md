@@ -6,7 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-331 | Feature Closing | Close FEATURE-025-D KB Topics & Summaries | Rune | 🔄 in_progress | 02-12-2026 14:46:00 | | — |
+| TASK-331 | Feature Closing | Close FEATURE-025-D KB Topics & Summaries | Rune | ✅ completed | 02-12-2026 14:47:00 | [CHANGELOG.md](../../CHANGELOG.md), [features.md](features.md) | — |
 
 
 

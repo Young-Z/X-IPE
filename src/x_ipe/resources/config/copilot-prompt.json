@@ -3,6 +3,22 @@
   "ideation": {
     "prompts": [
       {
+        "id": "refine-idea",
+        "icon": "bi-stars",
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Refine Idea",
+            "command": "refine the idea <current-idea-file>"
+          },
+          {
+            "language": "zh",
+            "label": "完善创意",
+            "command": "完善创意 <current-idea-file>"
+          }
+        ]
+      },
+      {
         "id": "generate-architecture",
         "icon": "bi-diagram-3",
         "prompt-details": [

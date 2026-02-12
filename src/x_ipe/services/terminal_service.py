@@ -79,9 +79,13 @@ class PersistentSession:
         def buffered_emit(data: str) -> None:
             # Always buffer output
             self.output_buffer.append(data)
-            # Only emit if connected
-            if self.emit_callback and self.state == 'connected':
-                self.emit_callback(data)
+            # Emit under lock to avoid TOCTOU race with detach()
+            with self._lock:
+                if self.emit_callback and self.state == 'connected':
+                    try:
+                        self.emit_callback(data)
+                    except Exception:
+                        pass
         
         self.pty_session = PTYSession(self.session_id, buffered_emit)
         self.pty_session.start(rows, cols)

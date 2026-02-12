@@ -1,5 +1,53 @@
 {
   "version": "1.0",
-  "last_updated": "2026-02-11T13:27:31.863041Z",
-  "files": []
+  "last_updated": "2026-02-12T14:39:54.061210Z",
+  "files": [
+    {
+      "path": "topics/uncategorized/raw/research.pdf",
+      "name": "research.pdf",
+      "type": "pdf",
+      "size": 10,
+      "topic": "uncategorized",
+      "created_date": "2026-02-12T14:24:14.744968Z",
+      "keywords": [
+        "research"
+      ]
+    },
+    {
+      "path": "topics/uncategorized/raw/sample-doc.md",
+      "name": "sample-doc.md",
+      "type": "markdown",
+      "size": 60,
+      "topic": "uncategorized",
+      "created_date": "2026-02-12T14:24:14.744787Z",
+      "keywords": [
+        "sample",
+        "doc"
+      ]
+    },
+    {
+      "path": "processed/test-topic/summary-v1.md",
+      "name": "summary-v1.md",
+      "type": "markdown",
+      "size": 606,
+      "topic": "test-topic",
+      "created_date": "2026-02-12T14:24:14.752177Z",
+      "keywords": [
+        "summary",
+        "v1"
+      ]
+    },
+    {
+      "path": "processed/test-topic/summary-v2.md",
+      "name": "summary-v2.md",
+      "type": "markdown",
+      "size": 908,
+      "topic": "test-topic",
+      "created_date": "2026-02-12T14:30:56.714386Z",
+      "keywords": [
+        "summary",
+        "v2"
+      ]
+    }
+  ]
 }

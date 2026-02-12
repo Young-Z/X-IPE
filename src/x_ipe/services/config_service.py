@@ -34,6 +34,7 @@ class ConfigData:
     file_tree_scope: str
     terminal_cwd: str
     language: str = "en"
+    auto_execute_prompt: bool = False
     
     @x_ipe_tracing()
     def get_file_tree_path(self) -> str:
@@ -56,6 +57,7 @@ class ConfigData:
             'file_tree_scope': self.file_tree_scope,
             'terminal_cwd': self.terminal_cwd,
             'language': self.language,
+            'auto_execute_prompt': self.auto_execute_prompt,
         }
 
 
@@ -189,6 +191,10 @@ class ConfigService:
         # Language (FEATURE-028-D)
         language = raw.get('language', 'en')
         
+        # Console settings
+        console = raw.get('console', {})
+        auto_execute_prompt = console.get('auto_execute_prompt', False)
+        
         # Validate scope values
         valid_scopes = ('project_root', 'x_ipe_app')
         if file_tree_scope not in valid_scopes:
@@ -206,6 +212,7 @@ class ConfigService:
             file_tree_scope=file_tree_scope,
             terminal_cwd=terminal_cwd,
             language=language,
+            auto_execute_prompt=auto_execute_prompt,
         )
     
     @property

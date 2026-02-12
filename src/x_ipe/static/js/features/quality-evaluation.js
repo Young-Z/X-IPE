@@ -361,9 +361,9 @@ class QualityEvaluationView {
             window.terminalPanel.expand();
         }
         
-        // Use terminalManager to type command (user can review/edit before pressing Enter)
-        if (window.terminalManager && window.terminalManager.sendCopilotPromptCommandNoEnter) {
-            window.terminalManager.sendCopilotPromptCommandNoEnter(command);
+        // Use terminalManager to send prompt (respects auto_execute_prompt config)
+        if (window.terminalManager && window.terminalManager.sendCopilotPromptCommand) {
+            window.terminalManager.sendCopilotPromptCommand(command);
         } else {
             // Fallback: copy to clipboard and show alert
             navigator.clipboard.writeText(command).then(() => {

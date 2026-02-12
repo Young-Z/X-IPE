@@ -89,11 +89,27 @@
             // Session Explorer
             this.explorer = null;
             
+            // Config: auto-execute prompts (default: false, configurable via .x-ipe.yaml)
+            this.autoExecutePrompt = false;
+            this._loadAutoExecuteConfig();
+            
             // Track if initial fit has been done (for containers that start hidden)
             this._initialFitDone = false;
             
             this._setupEventListeners();
             this._setupResizeObserver();
+        }
+
+        async _loadAutoExecuteConfig() {
+            try {
+                const resp = await fetch('/api/config');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    this.autoExecutePrompt = data.auto_execute_prompt || false;
+                }
+            } catch (e) {
+                // Keep default (false)
+            }
         }
 
         /**
@@ -218,6 +234,11 @@
             
             // Handle input
             terminal.onData(data => {
+                // Cancel active typing on Ctrl+C / Cmd+C
+                if (data === '\x03' && this._activeTyping) {
+                    this._cancelTyping();
+                    return;
+                }
                 if (sessionData.socket && sessionData.socket.connected) {
                     const scrollX = window.scrollX;
                     const scrollY = window.scrollY;
@@ -763,18 +784,7 @@
             if (!session) return;
             const escapedPrompt = promptCommand.replace(/"/g, '\\"');
             const copilotCommand = `copilot --allow-all-tools --allow-all-paths --allow-all-urls -i "${escapedPrompt}"`;
-            // Use typing effect but don't send Enter
-            if (!session.socket || !session.socket.connected) return;
-            const chars = copilotCommand.split('');
-            let i = 0;
-            const typeChar = () => {
-                if (i < chars.length) {
-                    session.socket.emit('input', chars[i]);
-                    i++;
-                    setTimeout(typeChar, 30 + Math.random() * 50);
-                }
-            };
-            typeChar();
+            this._sendWithTypingEffectNoEnter(session.key, copilotCommand);
         }
 
         // --- Copilot integration ---
@@ -795,7 +805,11 @@
             
             const escapedPrompt = prompt.replace(/"/g, '\\"');
             const copilotCommand = `copilot --allow-all-tools --allow-all-paths --allow-all-urls -i "${escapedPrompt}"`;
-            this._sendWithTypingEffect(session.key, copilotCommand, null);
+            if (this.autoExecutePrompt) {
+                this._sendWithTypingEffect(session.key, copilotCommand, null);
+            } else {
+                this._sendWithTypingEffectNoEnter(session.key, copilotCommand);
+            }
         }
 
         _waitForCopilotReady(sessionKey, callback, maxAttempts = 30) {
@@ -867,10 +881,15 @@
             const session = this.sessions.get(sessionKey);
             if (!session || !session.socket || !session.socket.connected) return;
             
+            this._cancelTyping();
+            const typingState = { cancelled: false };
+            this._activeTyping = typingState;
+            
             const chars = text.split('');
             let i = 0;
             
             const typeChar = () => {
+                if (typingState.cancelled) return;
                 if (i < chars.length) {
                     session.socket.emit('input', chars[i]);
                     i++;
@@ -878,12 +897,50 @@
                     setTimeout(typeChar, delay);
                 } else {
                     setTimeout(() => {
+                        if (typingState.cancelled) return;
                         session.socket.emit('input', '\r');
+                        this._activeTyping = null;
                         if (callback) callback();
                     }, 100);
                 }
             };
             typeChar();
+        }
+
+        /**
+         * Send text with typing simulation but without pressing Enter
+         */
+        _sendWithTypingEffectNoEnter(sessionKey, text) {
+            const session = this.sessions.get(sessionKey);
+            if (!session || !session.socket || !session.socket.connected) return;
+            
+            this._cancelTyping();
+            const typingState = { cancelled: false };
+            this._activeTyping = typingState;
+            
+            const chars = text.split('');
+            let i = 0;
+            const typeChar = () => {
+                if (typingState.cancelled) return;
+                if (i < chars.length) {
+                    session.socket.emit('input', chars[i]);
+                    i++;
+                    setTimeout(typeChar, 30 + Math.random() * 50);
+                } else {
+                    this._activeTyping = null;
+                }
+            };
+            typeChar();
+        }
+
+        /**
+         * Cancel any active typing simulation
+         */
+        _cancelTyping() {
+            if (this._activeTyping) {
+                this._activeTyping.cancelled = true;
+                this._activeTyping = null;
+            }
         }
     }
 

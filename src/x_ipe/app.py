@@ -44,6 +44,21 @@ def load_env_file():
 # Load environment variables on module import
 load_env_file()
 
+# Patch SimpleWebSocketWSGI to call start_response after websocket closes,
+# preventing werkzeug "write() before start_response" assertion error.
+try:
+    from engineio.async_drivers._websocket_wsgi import SimpleWebSocketWSGI
+    _orig_ws_call = SimpleWebSocketWSGI.__call__
+
+    def _patched_ws_call(self, environ, start_response):
+        ret = _orig_ws_call(self, environ, start_response)
+        start_response('200 OK', [('Content-Type', 'text/plain')])
+        return ret or []
+
+    SimpleWebSocketWSGI.__call__ = _patched_ws_call
+except Exception:
+    pass
+
 # Socket.IO instance with ping/pong for keep-alive
 socketio = SocketIO(
     cors_allowed_origins="*",
@@ -56,6 +71,7 @@ socketio = SocketIO(
     engineio_logger=False,
     http_compression=True,
     manage_session=True,
+    allow_unsafe_werkzeug=True,
 )
 
 

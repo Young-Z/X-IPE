@@ -433,6 +433,9 @@ server:
   host: "127.0.0.1"
   port: 5959
   debug: false
+
+git:
+  strategy: "main-branch-only"
 """
         
         content = config_content or default_content

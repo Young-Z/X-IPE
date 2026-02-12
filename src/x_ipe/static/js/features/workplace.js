@@ -1165,19 +1165,12 @@ class WorkplaceManager {
     }
     
     /**
-     * Handle Copilot button click - open terminal and send refine command
+     * Handle Copilot button click - toggle dropdown menu
      */
     _handleCopilotClick() {
-        if (!this.currentPath) return;
-        
-        // Expand terminal panel
-        if (window.terminalPanel) {
-            window.terminalPanel.expand();
-        }
-        
-        // Send copilot command to terminal with typing simulation
-        if (window.terminalManager) {
-            window.terminalManager.sendCopilotRefineCommand(this.currentPath);
+        const dropdown = document.getElementById('copilot-dropdown');
+        if (dropdown) {
+            dropdown.classList.toggle('show');
         }
     }
     
@@ -1198,7 +1191,7 @@ class WorkplaceManager {
         
         return `
             <div class="copilot-btn-container" id="copilot-btn-container">
-                <button class="btn btn-sm btn-outline-info workplace-copilot-btn" id="workplace-copilot-btn" title="Refine with Copilot">
+                <button class="btn btn-sm btn-outline-info workplace-copilot-btn" id="workplace-copilot-btn" title="Copilot Actions">
                     <i class="bi bi-robot"></i> Copilot
                 </button>
                 ${this.copilotPrompts.length > 0 ? `
@@ -1220,18 +1213,19 @@ class WorkplaceManager {
         
         if (!copilotBtn) return;
         
-        // Click handler - same as before
-        copilotBtn.addEventListener('click', () => this._handleCopilotClick());
+        // Click handler - toggle dropdown
+        copilotBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this._handleCopilotClick();
+        });
         
         if (!dropdown || !container) return;
         
-        // Show dropdown on hover
-        container.addEventListener('mouseenter', () => {
-            dropdown.classList.add('show');
-        });
-        
-        container.addEventListener('mouseleave', () => {
-            dropdown.classList.remove('show');
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            if (!container.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
         });
         
         // Handle dropdown item clicks
