@@ -27,6 +27,7 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-322 | Bug Fix | UIUX: Move + to explorer header, add toggle, show in zen (Feedback-20260212-182906) | Flux | 02-12-2026 10:32:00 | [terminal.css](../../src/x_ipe/static/css/terminal.css), [terminal.js](../../src/x_ipe/static/js/terminal.js), [index.html](../../src/x_ipe/templates/index.html) | Moved + btn from bottom to header. Added toggle btn in terminal actions. Explorer visible in zen mode when toggle on. Collapsed state with CSS transition. |
 | TASK-321 | Bug Fix | Preview window width should match terminal area | Flux | 02-12-2026 10:20:00 | [terminal.css](../../src/x_ipe/static/css/terminal.css) | Changed .session-preview from width:50%/right:181px to left:0/right:220px/top:36px/bottom:0 to fill terminal content area. 17 tests pass. |
 | TASK-321 | Feature Closing | Close FEATURE-025-C KB Manager Skill | Pulse | 02-12-2026 10:35:00 | [CHANGELOG.md](../../CHANGELOG.md), [features.md](features.md) | FEATURE-025-C complete. CHANGELOG updated, features.md status→Complete. |
 | TASK-320 | Feature Acceptance Test | Execute acceptance tests for FEATURE-025-C KB Manager Skill | Pulse | 02-12-2026 10:25:00 | [acceptance-test-cases.md](../../x-ipe-docs/requirements/FEATURE-025-C/acceptance-test-cases.md) | 10/10 tests pass (100%). 4 P0, 4 P1, 2 P2. API + UI verified. |
@@ -208,7 +209,7 @@
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 321
+- **Completed (archived):** 322
 - **Pending Review:** 0
 - **Blocked:** 0
 
