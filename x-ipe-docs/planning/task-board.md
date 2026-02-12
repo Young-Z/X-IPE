@@ -6,6 +6,8 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-320 | Feature Acceptance Test | Execute acceptance tests for FEATURE-025-C KB Manager Skill | Pulse | 🔄 in_progress | 02-12-2026 10:15:00 | - | Feature Closing |
+| TASK-321 | Bug Fix | Preview window width should match terminal area | Flux | ✅ completed | 02-12-2026 10:20:00 | [terminal.css](../../src/x_ipe/static/css/terminal.css) | - |
 
 
 
@@ -26,6 +28,7 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-321 | Bug Fix | Preview window width should match terminal area | Flux | 02-12-2026 10:20:00 | [terminal.css](../../src/x_ipe/static/css/terminal.css) | Changed .session-preview from width:50%/right:181px to left:0/right:220px/top:36px/bottom:0 to fill terminal content area. 17 tests pass. |
 | TASK-319 | Code Implementation | Implement FEATURE-025-C KB Manager Skill | Pulse | 02-12-2026 10:10:00 | [llm_service.py](../../src/x_ipe/services/llm_service.py), [kb_manager_service.py](../../src/x_ipe/services/kb_manager_service.py), [kb_routes.py](../../src/x_ipe/routes/kb_routes.py) | LLMService (DashScope), KBManagerService (classify/execute/cancel/summary/search/reorganize), 5 API endpoints. 57/57 tests pass, 1461 total (0 regressions). |
 | TASK-318 | Test Generation | Generate tests for FEATURE-025-C KB Manager Skill | Pulse | 02-12-2026 10:00:00 | [test_kb_manager.py](../../tests/test_kb_manager.py) | 57 tests across 14 classes. TDD ready: 57 failed, 0 passed. |
 | TASK-317 | Feature Closing | Close FEATURE-029-C Session Hover Preview | Spark | 02-12-2026 09:30:00 | [commit](feature/029-A-session-explorer-core) | All 10 ACs verified. FitAddon fix. 37 tests pass. Committed & pushed. |
@@ -200,11 +203,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 0
-- **In Progress:** 0
+- **Total Active:** 1
+- **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 319
+- **Completed (archived):** 320
 - **Pending Review:** 0
 - **Blocked:** 0
 
