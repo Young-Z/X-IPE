@@ -768,7 +768,10 @@ class TestKBProcessConfirmEndpoint:
     def test_confirm_endpoint_exists(self, client):
         response = client.post('/api/kb/process/confirm',
                                json={"session_id": "test", "classifications": []})
-        assert response.status_code != 404
+        # Endpoint returns 404 for invalid session, but with JSON body
+        data = response.get_json()
+        assert data is not None
+        assert "error" in data
 
     def test_confirm_invalid_session_returns_404(self, client):
         response = client.post('/api/kb/process/confirm',
@@ -798,7 +801,10 @@ class TestKBProcessCancelEndpoint:
     def test_cancel_endpoint_exists(self, client):
         response = client.post('/api/kb/process/cancel',
                                json={"session_id": "test"})
-        assert response.status_code != 404
+        # Endpoint returns 404 for invalid session, but with JSON body
+        data = response.get_json()
+        assert data is not None
+        assert "error" in data
 
 
 class TestKBSearchEndpoint:
