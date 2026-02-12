@@ -150,6 +150,10 @@ BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE impl
             - Extract: layout structure, component placement, visual states, interactions, styling details
             - These mockup details MUST guide frontend implementation in Step 5
          b. IF mockups are marked "outdated" or absent: note and proceed
+      6. CHECK if technical design includes skill files (`.github/skills/*/SKILL.md`):
+         a. SCAN technical design for references to `.github/skills/` paths
+         b. IF skill file(s) found: FLAG for delegation to `x-ipe-meta-skill-creator` in Step 5
+         c. NOTE: Skill files MUST NOT be created directly — they require the skill creator process
     </action>
     <constraints>
       - BLOCKING: Do NOT code until design is understood
@@ -195,6 +199,14 @@ BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE impl
          b. Match HTML structure, CSS classes, and element hierarchy to the mockup
          c. Implement all visual states shown in mockup (hover, active, disabled, empty, error)
          d. Ensure spacing, colors, and typography follow mockup (and brand theme if specified in specification)
+      5. IF skill files were flagged in Step 2:
+         a. BLOCKING: Do NOT create .github/skills/*/SKILL.md directly
+         b. INVOKE `x-ipe-meta-skill-creator` skill with:
+            - skill_name: extracted from technical design path
+            - skill_type: determined from naming convention and purpose
+            - user_request: context from technical design skill specification
+         c. WAIT for skill creator to complete before proceeding
+         d. VERIFY created skill passes skill creator's DoD
     </action>
     <constraints>
       - CRITICAL: Implement ONLY what is in technical design (YAGNI)
@@ -291,6 +303,10 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <name>Frontend matches current mockups</name>
     <verification>If feature has current mockups in specification, UI layout/components/styling match the mockup</verification>
   </checkpoint>
+  <checkpoint required="if-applicable">
+    <name>Skill files created via skill creator</name>
+    <verification>If technical design includes .github/skills/ files, they were created by x-ipe-meta-skill-creator (not directly)</verification>
+  </checkpoint>
   <checkpoint required="true">
     <name>No extra features added (YAGNI)</name>
     <verification>Review code for functionality not specified in design</verification>
@@ -369,6 +385,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Complex code for coverage | Maintenance nightmare | Keep simple, accept 80% coverage |
 | Over-engineering | KISS violation | Simplest solution that works |
 | Ignore mockups for frontend | UI drifts from approved design | Use current mockups as visual spec |
+| Create skill files directly | Skill won't follow standards | Delegate to x-ipe-meta-skill-creator |
 | Copy-paste code | DRY violation | Extract reusable functions |
 
 ---
