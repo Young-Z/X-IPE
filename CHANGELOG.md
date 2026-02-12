@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-029-D: Explorer UI Controls**
+  - Drag-to-resize handle (5px) between terminal content and explorer panel
+  - Explorer width resizable via drag within 160–360px range
+  - col-resize cursor and accent highlight on handle hover
+  - Centered dot indicator on handle hover (2px × 24px)
+  - Explorer width persisted to localStorage (`console_explorer_width`)
+  - Explorer collapsed/expanded state persisted (`console_explorer_collapsed`)
+  - State restored on page reload (width, collapsed)
+  - Handle auto-hidden when explorer collapsed
+  - Preview panel offset synced with explorer width during resize
+  - Edge case handling: invalid localStorage values clamped, graceful degradation
+  - 18 acceptance test cases (18/18 pass, 100%)
+
 - **FEATURE-025-C: KB Manager Skill**
   - LLMService: DashScope Generation API wrapper for AI-powered text completion
   - KBManagerService: Classification, summary generation, search, and reorganization

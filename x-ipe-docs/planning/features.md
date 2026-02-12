@@ -69,7 +69,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-029-A | Session Explorer Core | v1.0 | Implemented | [specification.md](../requirements/FEATURE-029-A/specification.md), [technical-design.md](../requirements/FEATURE-029-A/technical-design.md) | 02-11-2026 | 02-11-2026 16:30:00 |
 | FEATURE-029-B | Session Actions | v1.0 | Implemented | - | 02-11-2026 | 02-12-2026 08:30:00 |
 | FEATURE-029-C | Session Hover Preview | v1.0 | Complete | - | 02-11-2026 | 02-12-2026 09:30:00 |
-| FEATURE-029-D | Explorer UI Controls | v1.0 | Refined | [specification.md](../requirements/FEATURE-029-D/specification.md) | 02-11-2026 | 02-12-2026 10:46:00 |
+| FEATURE-029-D | Explorer UI Controls | v1.0 | Complete | [specification.md](../requirements/FEATURE-029-D/specification.md) | 02-11-2026 | 02-12-2026 14:05:00 |
 
 ---
 
@@ -92,7 +92,6 @@ This board tracks all features across the project lifecycle.
 - FEATURE-025-F: KB Navigation & Polish
 - FEATURE-026: Homepage Infinity Loop
 - FEATURE-027-E: CLI Migration & Upgrade
-- FEATURE-029-D: Explorer UI Controls
 
 ### Refined (2)
 - FEATURE-024: Project Quality Evaluation UI
@@ -106,9 +105,10 @@ This board tracks all features across the project lifecycle.
 - FEATURE-028-C: Frontend Prompt Language Filtering
 - FEATURE-028-D: Settings Language Switch (Web UI)
 
-### Complete (1)
+### Complete (2)
 - FEATURE-025-B: KB Landing Zone
 - FEATURE-025-C: KB Manager Skill
+- FEATURE-029-D: Explorer UI Controls
 
 ### Implemented (2)
 - FEATURE-027-A: CLI Adapter Registry & Service
