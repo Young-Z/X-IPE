@@ -26,6 +26,11 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-318 | Test Generation | Generate tests for FEATURE-025-C KB Manager Skill | Pulse | 02-12-2026 10:00:00 | [test_kb_manager.py](../../tests/test_kb_manager.py) | 57 tests across 14 classes. TDD ready: 57 failed, 0 passed. |
+| TASK-317 | Feature Closing | Close FEATURE-029-C Session Hover Preview | Spark | 02-12-2026 09:30:00 | [commit](feature/029-A-session-explorer-core) | All 10 ACs verified. FitAddon fix. 37 tests pass. Committed & pushed. |
+| TASK-316 | Code Implementation | Implement FEATURE-029-C Session Hover Preview | Spark | 02-12-2026 09:15:00 | [terminal.js](../../src/x_ipe/static/js/terminal.js), [terminal.css](../../src/x_ipe/static/css/terminal.css) | +157 lines. FitAddon.FitAddon() fix. |
+| TASK-315 | Technical Design | Design FEATURE-029-C Session Hover Preview | Spark | 02-12-2026 08:30:00 | [technical-design.md](../requirements/FEATURE-029-C/technical-design.md) | 7-step implementation plan. |
+| TASK-314 | Feature Refinement | Refine FEATURE-029-C Session Hover Preview | Spark | 02-12-2026 08:00:00 | [specification.md](../requirements/FEATURE-029-C/specification.md) | 10 ACs, 7 FRs, 4 NFRs, 5 edge cases. |
 | TASK-313 | Technical Design | Design FEATURE-025-C KB Manager Skill | Pulse | 02-12-2026 07:55:00 | [technical-design.md](../requirements/FEATURE-025-C/technical-design.md) | Separate KBManagerService (800-line rule). LLMService with DashScope. 5 API endpoints. Two-step classify→confirm flow. |
 | TASK-312 | Feature Refinement | Refine FEATURE-025-C KB Manager Skill specification | Pulse | 02-12-2026 07:45:00 | [specification.md](../requirements/FEATURE-025-C/specification.md) | 30 ACs (6 categories), 5 FRs, 6 NFRs, 10 edge cases. |
 | TASK-311 | Code Implementation | Implement FEATURE-029-B Session Actions | Spark | 02-12-2026 08:30:00 | [terminal.js](../../src/x_ipe/static/js/terminal.js), [terminal.css](../../src/x_ipe/static/css/terminal.css) | Inline rename, delete, toast, limit guard. All 8 ACs pass. 37 backend tests pass. |
@@ -194,11 +199,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 2
-- **In Progress:** 1
-- **Pending:** 1
+- **Total Active:** 0
+- **In Progress:** 0
+- **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 310
+- **Completed (archived):** 318
 - **Pending Review:** 0
 - **Blocked:** 0
 
