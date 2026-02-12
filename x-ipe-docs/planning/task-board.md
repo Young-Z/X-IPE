@@ -6,8 +6,8 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-313 | Technical Design | Design FEATURE-025-C KB Manager Skill | Pulse | 🔄 in_progress | 02-12-2026 07:54:00 | - | Test Generation |
 | TASK-289 | Technical Design | Design FEATURE-028-D Settings Language Switch | Sage | ⏳ pending | 02-11-2026 08:36:00 | - | Test Generation |
-| TASK-308 | Feature Closing | Close FEATURE-029-A Session Explorer Core | Spark | 🔄 in_progress | 02-11-2026 16:25:00 | - | User Manual |
 
 
 
@@ -28,6 +28,10 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-311 | Code Implementation | Implement FEATURE-029-B Session Actions | Spark | 02-12-2026 08:30:00 | [terminal.js](../../src/x_ipe/static/js/terminal.js), [terminal.css](../../src/x_ipe/static/css/terminal.css) | Inline rename, delete, toast, limit guard. All 8 ACs pass. 37 backend tests pass. |
+| TASK-310 | Technical Design | Design FEATURE-029-B Session Actions | Spark | 02-12-2026 08:00:00 | [technical-design.md](../requirements/FEATURE-029-B/technical-design.md) | 6-step implementation guide. |
+| TASK-309 | Feature Refinement | Refine FEATURE-029-B Session Actions specification | Spark | 02-12-2026 07:45:00 | [specification.md](../requirements/FEATURE-029-B/specification.md) | 8 ACs, 4 FRs, 3 NFRs, 5 edge cases. |
+| TASK-308 | Feature Closing | Close FEATURE-029-A Session Explorer Core | Spark | 02-11-2026 16:30:00 | [PR branch](https://github.com/Young-Z/X-IPE/tree/feature/029-A-session-explorer-core) | Committed and pushed. |
 | TASK-307 | Feature Acceptance Test | Acceptance test FEATURE-029-A Session Explorer Core | Spark | 02-11-2026 16:30:00 | [acceptance-test-cases.md](../requirements/FEATURE-029-A/acceptance-test-cases.md) | 16/16 tests passed (100%). All 7 ACs covered. Mockup validated. |
 | TASK-306 | Code Implementation | Implement FEATURE-029-A Session Explorer Core | Spark | 02-11-2026 16:30:00 | [terminal.js](../../src/x_ipe/static/js/terminal.js), [terminal.css](../../src/x_ipe/static/css/terminal.css), [index.html](../../src/x_ipe/templates/index.html) | Map-based TerminalManager + SessionExplorer class. 17/17 tests pass. Browser verified: 3 sessions, switching, explorer panel. |
 | TASK-305 | Test Generation | Generate tests for FEATURE-029-A Session Explorer Core | Spark | 02-11-2026 15:56:00 | [test_session_explorer.py](../../tests/test_session_explorer.py) | 17 backend regression tests (4 classes). All pass — backend already supports 10 sessions. Frontend is primary scope (no JS test framework). |
