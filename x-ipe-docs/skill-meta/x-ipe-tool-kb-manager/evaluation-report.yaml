@@ -1,0 +1,48 @@
+# Evaluation Report: x-ipe-tool-kb-manager
+# Generated: 2026-02-12
+
+evaluation:
+  skill_name: x-ipe-tool-kb-manager
+  skill_type: x-ipe-tool
+  iteration: 1
+
+  results:
+    must:
+      total: 10
+      passed: 10
+      rate: "100%"
+      details:
+        - { id: TC-S01, status: PASS, note: "Valid frontmatter with name=x-ipe-tool-kb-manager" }
+        - { id: TC-S02, status: PASS, note: "5 examples in references/examples.md" }
+        - { id: TC-S03, status: PASS, note: "255 lines, well under 500" }
+        - { id: TC-C01, status: PASS, note: "All 11 sections present in correct order" }
+        - { id: TC-C02, status: PASS, note: "All 4 operations use XML structure" }
+        - { id: TC-C03, status: PASS, note: "Error table has Error, Cause, Resolution columns" }
+        - { id: TC-C04, status: PASS, note: "classify, search, reorganize, cancel all defined" }
+        - { id: TC-B01, status: PASS, note: "POST /api/kb/process referenced in classify" }
+        - { id: TC-B02, status: PASS, note: "GET /api/kb/search referenced in search" }
+        - { id: TC-B03, status: PASS, note: "Trigger phrases present in description" }
+    should:
+      total: 2
+      passed: 2
+      rate: "100%"
+      details:
+        - { id: TC-C05, status: PASS, note: "When to Use contains triggers list" }
+        - { id: TC-C06, status: PASS, note: "About section has Key Concepts" }
+    could:
+      total: 1
+      passed: 0
+      rate: "0%"
+      details:
+        - { id: TC-C07, status: FAIL, note: "Templates dir not needed for this tool skill" }
+
+  decision: MERGE
+  rationale: |
+    must_pass_rate=100% (10/10) meets required 100%.
+    should_pass_rate=100% (2/2) exceeds required 80%.
+    could test failure (templates dir) is acceptable — tool skill has no template outputs.
+    Skill already merged to .github/skills/x-ipe-tool-kb-manager/ in prior step.
+    No iteration needed.
+
+  merge_status: merged
+  skill_path: ".github/skills/x-ipe-tool-kb-manager/SKILL.md"

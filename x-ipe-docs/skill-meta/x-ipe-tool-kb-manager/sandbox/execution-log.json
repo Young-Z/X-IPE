@@ -1,0 +1,117 @@
+{
+  "execution_log": {
+    "skill": "x-ipe-tool-kb-manager",
+    "timestamp": "2026-02-12T10:42:00Z",
+    "results": [
+      {
+        "id": "TC-S01",
+        "name": "SKILL.md exists with valid frontmatter",
+        "priority": "must",
+        "passed": true,
+        "detail": "exists=True, name=x-ipe-tool-kb-manager, desc_has_knowledge=True"
+      },
+      {
+        "id": "TC-S02",
+        "name": "references/examples.md with examples",
+        "priority": "must",
+        "passed": true,
+        "detail": "exists=True, example_count=5"
+      },
+      {
+        "id": "TC-S03",
+        "name": "SKILL.md under 500 lines",
+        "priority": "must",
+        "passed": true,
+        "detail": "lines=255"
+      },
+      {
+        "id": "TC-C01",
+        "name": "Sections present in order",
+        "priority": "must",
+        "passed": true,
+        "detail": "all_found=True, in_order=True, missing=[]"
+      },
+      {
+        "id": "TC-C02",
+        "name": "Operations use XML structure",
+        "priority": "must",
+        "passed": true,
+        "detail": "found={'classify': True, 'search': True, 'reorganize': True, 'cancel': True}"
+      },
+      {
+        "id": "TC-C03",
+        "name": "Error table columns",
+        "priority": "must",
+        "passed": true,
+        "detail": "checked Error, Cause, Resolution in table"
+      },
+      {
+        "id": "TC-C04",
+        "name": "Four operations defined",
+        "priority": "must",
+        "passed": true,
+        "detail": "ops=['classify', 'search', 'reorganize', 'cancel']"
+      },
+      {
+        "id": "TC-B01",
+        "name": "Classify refs POST /api/kb/process",
+        "priority": "must",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "id": "TC-B02",
+        "name": "Search refs GET /api/kb/search",
+        "priority": "must",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "id": "TC-B03",
+        "name": "Triggers in frontmatter",
+        "priority": "must",
+        "passed": true,
+        "detail": "desc_lower contains classify/search/reorganize"
+      },
+      {
+        "id": "TC-C05",
+        "name": "When to Use has triggers",
+        "priority": "should",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "id": "TC-C06",
+        "name": "Key Concepts in About",
+        "priority": "should",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "id": "TC-C07",
+        "name": "Templates directory",
+        "priority": "could",
+        "passed": false,
+        "detail": "exists=False"
+      }
+    ],
+    "summary": {
+      "must": {
+        "passed": 10,
+        "total": 10,
+        "rate": "100%"
+      },
+      "should": {
+        "passed": 2,
+        "total": 2,
+        "rate": "100%"
+      },
+      "could": {
+        "passed": 0,
+        "total": 1,
+        "rate": "0%"
+      },
+      "overall": "PASS"
+    }
+  }
+}

@@ -8,7 +8,7 @@
 skill_name: x-ipe-tool-kb-manager
 skill_type: x-ipe-tool
 version: "1.0.0"
-status: candidate
+status: released
 created: 2026-02-12
 updated: 2026-02-12
 
