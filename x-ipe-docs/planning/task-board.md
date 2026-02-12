@@ -6,7 +6,6 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-313 | Technical Design | Design FEATURE-025-C KB Manager Skill | Pulse | 🔄 in_progress | 02-12-2026 07:54:00 | - | Test Generation |
 | TASK-289 | Technical Design | Design FEATURE-028-D Settings Language Switch | Sage | ⏳ pending | 02-11-2026 08:36:00 | - | Test Generation |
 
 
@@ -28,6 +27,8 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-313 | Technical Design | Design FEATURE-025-C KB Manager Skill | Pulse | 02-12-2026 07:55:00 | [technical-design.md](../requirements/FEATURE-025-C/technical-design.md) | Separate KBManagerService (800-line rule). LLMService with DashScope. 5 API endpoints. Two-step classify→confirm flow. |
+| TASK-312 | Feature Refinement | Refine FEATURE-025-C KB Manager Skill specification | Pulse | 02-12-2026 07:45:00 | [specification.md](../requirements/FEATURE-025-C/specification.md) | 30 ACs (6 categories), 5 FRs, 6 NFRs, 10 edge cases. |
 | TASK-311 | Code Implementation | Implement FEATURE-029-B Session Actions | Spark | 02-12-2026 08:30:00 | [terminal.js](../../src/x_ipe/static/js/terminal.js), [terminal.css](../../src/x_ipe/static/css/terminal.css) | Inline rename, delete, toast, limit guard. All 8 ACs pass. 37 backend tests pass. |
 | TASK-310 | Technical Design | Design FEATURE-029-B Session Actions | Spark | 02-12-2026 08:00:00 | [technical-design.md](../requirements/FEATURE-029-B/technical-design.md) | 6-step implementation guide. |
 | TASK-309 | Feature Refinement | Refine FEATURE-029-B Session Actions specification | Spark | 02-12-2026 07:45:00 | [specification.md](../requirements/FEATURE-029-B/specification.md) | 8 ACs, 4 FRs, 3 NFRs, 5 edge cases. |

@@ -52,7 +52,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-024 | Project Quality Evaluation UI | v1.0 | Completed | [specification.md](../requirements/FEATURE-024/specification.md), [technical-design.md](../requirements/FEATURE-024/technical-design.md) | 02-01-2026 | 02-01-2026 11:20:00 |
 | FEATURE-025-A | KB Core Infrastructure | v1.0 | Completed | [specification.md](../requirements/FEATURE-025-A/specification.md), [technical-design.md](../requirements/FEATURE-025-A/technical-design.md), [acceptance-test-cases.md](../requirements/FEATURE-025-A/acceptance-test-cases.md) | 02-05-2026 | 02-05-2026 16:15:00 |
 | FEATURE-025-B | KB Landing Zone | v1.0 | Acceptance Tested | [specification.md](../requirements/FEATURE-025-B/specification.md), [technical-design.md](../requirements/FEATURE-025-B/technical-design.md), [acceptance-test-cases.md](../requirements/FEATURE-025-B/acceptance-test-cases.md) | 02-05-2026 | 02-11-2026 10:45:00 |
-| FEATURE-025-C | KB Manager Skill | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
+| FEATURE-025-C | KB Manager Skill | v1.0 | Designed | [specification.md](../requirements/FEATURE-025-C/specification.md), [technical-design.md](../requirements/FEATURE-025-C/technical-design.md) | 02-05-2026 | 02-12-2026 07:55:00 |
 | FEATURE-025-D | KB Topics & Summaries | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
 | FEATURE-025-E | KB Search & Preview | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
 | FEATURE-025-F | KB Navigation & Polish | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
@@ -87,7 +87,6 @@ This board tracks all features across the project lifecycle.
 - FEATURE-023-B: Tracing Dashboard UI
 - FEATURE-023-C: Trace Viewer & DAG Visualization
 - FEATURE-023-D: Tracing Skill Integration
-- FEATURE-025-C: KB Manager Skill
 - FEATURE-025-D: KB Topics & Summaries
 - FEATURE-025-E: KB Search & Preview
 - FEATURE-025-F: KB Navigation & Polish
@@ -101,7 +100,8 @@ This board tracks all features across the project lifecycle.
 - FEATURE-024: Project Quality Evaluation UI
 - FEATURE-027-B: CLI Init & Selection
 
-### Designed (5)
+### Designed (6)
+- FEATURE-025-C: KB Manager Skill
 - FEATURE-027-C: Skill & Instruction Translation
 - FEATURE-028-A: Bilingual Prompt Schema & Migration
 - FEATURE-028-B: CLI Language Selection & Instructions
