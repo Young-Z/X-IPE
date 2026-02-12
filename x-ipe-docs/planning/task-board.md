@@ -6,7 +6,8 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-321 | Bug Fix | Preview window width should match terminal area | Flux | ✅ completed | 02-12-2026 10:20:00 | [terminal.css](../../src/x_ipe/static/css/terminal.css) | - |
+| TASK-323 | Feature Refinement | Refine FEATURE-029-D Explorer UI Controls | Flux | ✅ completed | 02-12-2026 10:46:00 | [specification.md](../requirements/FEATURE-029-D/specification.md) | Technical Design |
+| TASK-324 | Feature Refinement | Refine FEATURE-025-D KB Topics & Summaries | Pulse | 🔄 in_progress | 02-12-2026 10:47:00 | - | Technical Design |
 
 
 
@@ -205,8 +206,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 0
-- **In Progress:** 0
+- **Total Active:** 1
+- **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
 - **Completed (archived):** 322

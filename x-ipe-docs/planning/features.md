@@ -69,7 +69,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-029-A | Session Explorer Core | v1.0 | Implemented | [specification.md](../requirements/FEATURE-029-A/specification.md), [technical-design.md](../requirements/FEATURE-029-A/technical-design.md) | 02-11-2026 | 02-11-2026 16:30:00 |
 | FEATURE-029-B | Session Actions | v1.0 | Implemented | - | 02-11-2026 | 02-12-2026 08:30:00 |
 | FEATURE-029-C | Session Hover Preview | v1.0 | Complete | - | 02-11-2026 | 02-12-2026 09:30:00 |
-| FEATURE-029-D | Explorer UI Controls | v1.0 | Planned | - | 02-11-2026 | 02-11-2026 15:34:00 |
+| FEATURE-029-D | Explorer UI Controls | v1.0 | Refined | [specification.md](../requirements/FEATURE-029-D/specification.md) | 02-11-2026 | 02-12-2026 10:46:00 |
 
 ---
 
