@@ -218,6 +218,12 @@ Create a web viewer for AI-created project documentation with:
 - subprocess or pty for server-side execution
 - Security: Consider command restrictions
 
+> **⚠️ CR Impact Note** (added 2026-02-11, ref: FEATURE-029)
+> - **Change:** Replace 2-pane split-terminal layout with Session Explorer sidebar; raise MAX_TERMINALS from 2 to 10; switch to single-session view model
+> - **Affected FRs:** All ACs referencing split-pane layout, terminal expansion, and 2-terminal limit
+> - **Action Required:** Feature specification refactoring needed before FEATURE-029 implementation
+> - **New Feature Ref:** FEATURE-029 (Console Session Explorer) — see [requirement-details-part-7.md](requirement-details-part-7.md)
+
 ---
 
 ### FEATURE-006: Settings & Configuration

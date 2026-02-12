@@ -1,16 +1,19 @@
 /**
  * Terminal Manager
  * FEATURE-005: Interactive Console
+ * FEATURE-029-A: Session Explorer Core
  * 
  * Based on sample-root implementation.
  * Manages multiple xterm.js terminals with Socket.IO.
+ * Session Explorer provides a right-side panel for up to 10 sessions.
  */
 
 (function() {
     'use strict';
 
     const SESSION_KEY = 'terminal_session_ids';
-    const MAX_TERMINALS = 2;
+    const SESSION_NAMES_KEY = 'terminal_session_names';
+    const MAX_SESSIONS = 10;
 
     /**
      * Debounce utility
@@ -64,21 +67,22 @@
     };
 
     /**
-     * TerminalManager - Manages multiple terminal instances
-     * Based on sample-root/static/js/terminal.js
+     * TerminalManager - Manages multiple terminal sessions
+     * Refactored from array-based (2 panes) to Map-based (10 sessions)
      */
     class TerminalManager {
-        constructor(paneContainerId) {
-            this.terminals = [];
-            this.fitAddons = [];
-            this.sockets = [];
-            this.sessionIds = [];
-            this.activeIndex = -1;
+        constructor(contentContainerId) {
+            // Map<string, SessionData> where key is a local session key (s0, s1, ...)
+            this.sessions = new Map();
+            this.activeSessionKey = null;
+            this._sessionCounter = 0;
             
-            this.paneContainer = document.getElementById(paneContainerId);
+            this.contentContainer = document.getElementById(contentContainerId);
             this.statusIndicator = document.getElementById('terminal-status-indicator');
             this.statusText = document.getElementById('terminal-status-text');
-            this.addButton = document.getElementById('add-terminal-btn');
+            
+            // Session Explorer
+            this.explorer = null;
             
             // Track if initial fit has been done (for containers that start hidden)
             this._initialFitDone = false;
@@ -86,46 +90,34 @@
             this._setupEventListeners();
             this._setupResizeObserver();
         }
-        
+
         /**
          * Setup ResizeObserver to detect when terminal container becomes visible
-         * This fixes the initial sizing issue when terminal panel starts collapsed
          */
         _setupResizeObserver() {
-            if (!this.paneContainer || typeof ResizeObserver === 'undefined') return;
+            if (!this.contentContainer || typeof ResizeObserver === 'undefined') return;
             
             this._resizeObserver = new ResizeObserver(debounce((entries) => {
                 for (const entry of entries) {
                     const { width, height } = entry.contentRect;
-                    // Only fit if container has actual dimensions
                     if (width > 0 && height > 0) {
-                        console.log(`[Terminal] Container resized to ${width}x${height} - fitting terminals`);
-                        this._doFit();
-                        
-                        // Mark initial fit as done once we have proper dimensions
-                        if (!this._initialFitDone && this.terminals.length > 0) {
+                        console.log(`[Terminal] Container resized to ${width}x${height} - fitting active`);
+                        this._fitActiveSession();
+                        if (!this._initialFitDone && this.sessions.size > 0) {
                             this._initialFitDone = true;
                         }
                     }
                 }
             }, 50));
             
-            this._resizeObserver.observe(this.paneContainer);
+            this._resizeObserver.observe(this.contentContainer);
         }
 
         _setupEventListeners() {
-            if (this.addButton) {
-                this.addButton.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.addTerminal();
-                });
-            }
+            // Window resize - fit active session (debounced)
+            window.addEventListener('resize', debounce(() => this._fitActiveSession(), 150));
             
-            // Window resize - resize all terminals (debounced)
-            window.addEventListener('resize', debounce(() => this._resizeAll(), 150));
-            
-            // Handle page visibility changes - keep socket alive when tab is hidden
-            // Session should stay open for 1 hour regardless of tab focus
+            // Handle page visibility changes
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') {
                     console.log('[Terminal] Tab became visible - checking connections');
@@ -135,485 +127,263 @@
                 }
             });
             
-            // Handle window focus/blur as backup
             window.addEventListener('focus', () => {
                 console.log('[Terminal] Window focused - checking connections');
                 this._checkAndReconnectAll();
             });
         }
         
-        /**
-         * Check all sockets and reconnect if needed
-         */
         _checkAndReconnectAll() {
-            this.sockets.forEach((socket, index) => {
-                if (socket && !socket.connected) {
-                    console.log(`[Terminal ${index + 1}] Reconnecting after visibility change`);
-                    socket.connect();
+            for (const [key, session] of this.sessions) {
+                if (session.socket && !session.socket.connected) {
+                    console.log(`[Terminal ${session.name}] Reconnecting after visibility change`);
+                    session.socket.connect();
                 }
-            });
+            }
         }
 
         /**
-         * Initialize terminals
+         * Initialize terminals - restore sessions or create first one
          */
         initialize() {
             const storedIds = this._getStoredSessionIds();
+            const storedNames = this._getStoredSessionNames();
             if (storedIds.length > 0) {
-                storedIds.forEach(id => this.addTerminal(id));
+                storedIds.forEach((id, i) => {
+                    const name = storedNames[id] || this._getNextSessionName();
+                    this.addSession(id, name);
+                });
             } else {
-                this.addTerminal();
+                this.addSession();
             }
         }
 
         /**
-         * Add a new terminal pane
+         * Add a new session
+         * @param {string|null} existingSessionId - Backend session ID to reconnect
+         * @param {string|null} name - Display name for explorer
+         * @returns {string} session key
          */
-        addTerminal(existingSessionId = null) {
-            if (this.terminals.length >= MAX_TERMINALS) {
-                console.warn('[Terminal] Maximum terminals reached');
-                return -1;
+        addSession(existingSessionId = null, name = null) {
+            if (this.sessions.size >= MAX_SESSIONS) {
+                if (this.explorer) this.explorer.showToast('Maximum 10 sessions reached');
+                console.warn('[Terminal] Maximum sessions reached');
+                return null;
             }
 
-            // Add splitter before second terminal
-            if (this.terminals.length === 1) {
-                this._addSplitter();
-            }
-
-            const index = this.terminals.length;
+            const key = `s${this._sessionCounter++}`;
+            const sessionName = name || this._getNextSessionName();
             
-            // Create pane DOM
-            const pane = this._createPane(index);
-            this.paneContainer.appendChild(pane);
+            // Create session container DOM
+            const container = this._createSessionContainer(key);
+            this.contentContainer.appendChild(container);
             
             // Create terminal
             const terminal = new Terminal(terminalConfig);
             const fitAddon = new FitAddon.FitAddon();
             terminal.loadAddon(fitAddon);
             
-            // Load Unicode11 addon for special character support (powerline, icons, etc.)
             if (typeof Unicode11Addon !== 'undefined') {
                 const unicode11Addon = new Unicode11Addon.Unicode11Addon();
                 terminal.loadAddon(unicode11Addon);
                 terminal.unicode.activeVersion = '11';
             }
             
-            // Open terminal in content div
-            const contentDiv = pane.querySelector('.terminal-content');
-            terminal.open(contentDiv);
+            // Open terminal in container
+            terminal.open(container);
             
-            // Store references
-            this.terminals.push(terminal);
-            this.fitAddons.push(fitAddon);
-            this.sessionIds.push(existingSessionId);
+            // Store session data
+            const sessionData = {
+                key,
+                sessionId: existingSessionId,
+                name: sessionName,
+                terminal,
+                fitAddon,
+                socket: null,
+                container,
+                isActive: false
+            };
+            this.sessions.set(key, sessionData);
             
-            // Prevent scroll-to-top when typing in terminal
-            // xterm.js uses a hidden textarea that can trigger browser scroll on focus
-            this._setupScrollPrevention(terminal, contentDiv);
-            
-            // Fit terminal to container
-            this.fitAll();
+            // Prevent scroll-to-top when typing
+            this._setupScrollPrevention(terminal, container);
             
             // Create socket
-            const socket = this._createSocket(index, existingSessionId);
-            this.sockets.push(socket);
+            sessionData.socket = this._createSocket(key, existingSessionId);
             
-            // Handle input - scroll to bottom on typing and prevent page scroll
+            // Handle input
             terminal.onData(data => {
-                if (socket.connected) {
-                    // Preserve page scroll position
+                if (sessionData.socket && sessionData.socket.connected) {
                     const scrollX = window.scrollX;
                     const scrollY = window.scrollY;
-                    
-                    socket.emit('input', data);
-                    
-                    // Scroll terminal to bottom (where cursor is)
+                    sessionData.socket.emit('input', data);
                     terminal.scrollToBottom();
-                    
-                    // Restore page scroll if it changed
                     if (window.scrollX !== scrollX || window.scrollY !== scrollY) {
                         window.scrollTo(scrollX, scrollY);
                     }
                 }
             });
             
-            this.setFocus(index);
-            this._updateAddButton();
+            // Switch to new session
+            this.switchSession(key);
+            
+            // Update explorer
+            if (this.explorer) {
+                this.explorer.addSessionBar(key, sessionName);
+                this.explorer.updateActiveIndicator(this.activeSessionKey);
+                this.explorer.setAddButtonEnabled(this.sessions.size < MAX_SESSIONS);
+            }
+            
             this._saveSessionIds();
+            this._saveSessionNames();
             
-            console.log(`[Terminal] Added terminal ${index + 1}`);
-            return index;
+            console.log(`[Terminal] Added session "${sessionName}" (${key})`);
+            return key;
         }
 
         /**
-         * Create pane DOM element
+         * Create session container DOM element
          */
-        _createPane(index) {
-            const pane = document.createElement('div');
-            pane.className = 'terminal-pane';
-            pane.dataset.paneIndex = index;
-
-            const header = document.createElement('div');
-            header.className = 'pane-header';
-
-            const title = document.createElement('span');
-            title.className = 'pane-title';
-            title.textContent = `Terminal ${index + 1}`;
-
-            const closeBtn = document.createElement('button');
-            closeBtn.className = 'close-pane-btn';
-            closeBtn.innerHTML = '×';
-            closeBtn.title = 'Close terminal';
-            closeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.closeTerminal(parseInt(pane.dataset.paneIndex));
-            });
-
-            header.appendChild(title);
-            header.appendChild(closeBtn);
-
-            const content = document.createElement('div');
-            content.className = 'terminal-content';
-            content.id = `terminal-${index}`;
-
-            pane.appendChild(header);
-            pane.appendChild(content);
-
-            pane.addEventListener('click', () => {
-                this.setFocus(parseInt(pane.dataset.paneIndex));
-            });
-
-            return pane;
+        _createSessionContainer(key) {
+            const container = document.createElement('div');
+            container.className = 'terminal-session-container';
+            container.dataset.sessionKey = key;
+            return container;
         }
 
         /**
-         * Add horizontal splitter between panes
+         * Remove a session
          */
-        _addSplitter() {
-            const splitter = document.createElement('div');
-            splitter.className = 'pane-splitter';
-            splitter.id = 'pane-splitter';
+        removeSession(key) {
+            const session = this.sessions.get(key);
+            if (!session) return;
+
+            if (session.socket) session.socket.disconnect();
+            if (session.terminal) session.terminal.dispose();
+            if (session.container) session.container.remove();
             
-            let startX, leftPaneWidth, rightPaneWidth;
+            this.sessions.delete(key);
             
-            splitter.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                const panes = this.paneContainer.querySelectorAll('.terminal-pane');
-                if (panes.length < 2) return;
-                
-                const leftPane = panes[0];
-                const rightPane = panes[1];
-                
-                startX = e.clientX;
-                leftPaneWidth = leftPane.offsetWidth;
-                rightPaneWidth = rightPane.offsetWidth;
-                
-                // Visual feedback
-                this.paneContainer.classList.add('dragging-splitter');
-                document.body.style.cursor = 'ew-resize';
-                document.body.style.userSelect = 'none';
-                
-                const onMove = (e) => {
-                    const delta = e.clientX - startX;
-                    const totalWidth = leftPaneWidth + rightPaneWidth;
-                    const minWidth = 100;
-                    
-                    let newLeftWidth = leftPaneWidth + delta;
-                    let newRightWidth = rightPaneWidth - delta;
-                    
-                    // Enforce minimum widths
-                    if (newLeftWidth < minWidth) {
-                        newLeftWidth = minWidth;
-                        newRightWidth = totalWidth - minWidth;
-                    } else if (newRightWidth < minWidth) {
-                        newRightWidth = minWidth;
-                        newLeftWidth = totalWidth - minWidth;
-                    }
-                    
-                    // Set flex-basis for each pane
-                    leftPane.style.flex = `0 0 ${newLeftWidth}px`;
-                    rightPane.style.flex = `0 0 ${newRightWidth}px`;
-                    
-                    // Resize terminals to fit new pane sizes
-                    this._doFit();
-                };
-                
-                const onUp = () => {
-                    document.removeEventListener('mousemove', onMove);
-                    document.removeEventListener('mouseup', onUp);
-                    
-                    // Remove visual feedback
-                    this.paneContainer.classList.remove('dragging-splitter');
-                    document.body.style.cursor = '';
-                    document.body.style.userSelect = '';
-                    
-                    // Final fit
-                    this.fitAll();
-                };
-                
-                document.addEventListener('mousemove', onMove);
-                document.addEventListener('mouseup', onUp);
-            });
-            
-            // Insert splitter after first pane
-            const firstPane = this.paneContainer.querySelector('.terminal-pane');
-            if (firstPane) {
-                firstPane.after(splitter);
-            }
-        }
-
-        /**
-         * Remove splitter when going back to single terminal
-         */
-        _removeSplitter() {
-            const splitter = this.paneContainer.querySelector('.pane-splitter');
-            if (splitter) {
-                splitter.remove();
-            }
-            // Reset flex for remaining pane
-            const panes = this.paneContainer.querySelectorAll('.terminal-pane');
-            panes.forEach(pane => {
-                pane.style.flex = '1';
-            });
-        }
-
-        /**
-         * Get current index for a socket (handles reindexing after close)
-         */
-        _getSocketIndex(socket) {
-            return this.sockets.indexOf(socket);
-        }
-
-        /**
-         * Create Socket.IO connection with improved stability
-         * Session stays alive for 1 hour regardless of tab focus
-         */
-        _createSocket(index, existingSessionId) {
-            const socket = io({
-                transports: ['websocket'],           // WebSocket only for lower latency
-                upgrade: false,                       // No upgrade needed since we start with WS
-                reconnection: true,
-                reconnectionAttempts: Infinity,
-                reconnectionDelay: 1000,
-                reconnectionDelayMax: 30000,          // Max 30s between retries
-                randomizationFactor: 0.5,
-                timeout: 60000,                       // Initial connection timeout (60s)
-                forceNew: false,
-                // Heartbeat settings - match server (ping_timeout=300s, ping_interval=60s)
-                pingTimeout: 300000,                  // Server waits 5min for pong
-                pingInterval: 60000                   // Server pings every 60s
-            });
-            
-            // Track connection health
-            let lastPongTime = Date.now();
-            let healthCheckInterval = null;
-            
-            const startHealthCheck = () => {
-                if (healthCheckInterval) clearInterval(healthCheckInterval);
-                healthCheckInterval = setInterval(() => {
-                    const timeSincePong = Date.now() - lastPongTime;
-                    // If no pong for 3 minutes, connection may be unhealthy (server timeout is 5min)
-                    if (timeSincePong > 180000 && socket.connected) {
-                        console.warn(`[Terminal ${index + 1}] Connection may be stale (${Math.round(timeSincePong/1000)}s since last pong)`);
-                    }
-                }, 60000);  // Check every minute
-            };
-            
-            const stopHealthCheck = () => {
-                if (healthCheckInterval) {
-                    clearInterval(healthCheckInterval);
-                    healthCheckInterval = null;
-                }
-            };
-
-            socket.on('connect', () => {
-                const idx = this._getSocketIndex(socket);
-                console.log(`[Terminal ${idx + 1}] Connected`);
-                lastPongTime = Date.now();
-                startHealthCheck();
-                this._updateStatus();
-                
-                const dims = this.fitAddons[idx]?.proposeDimensions();
-                socket.emit('attach', {
-                    session_id: existingSessionId,
-                    rows: dims ? dims.rows : 24,
-                    cols: dims ? dims.cols : 80
-                });
-            });
-
-            socket.on('session_id', sessionId => {
-                const idx = this._getSocketIndex(socket);
-                if (idx >= 0) {
-                    this.sessionIds[idx] = sessionId;
-                    this._saveSessionIds();
-                }
-            });
-
-            socket.on('new_session', data => {
-                const idx = this._getSocketIndex(socket);
-                if (idx >= 0) {
-                    this.terminals[idx].write('\x1b[32m[New session started]\x1b[0m\r\n');
-                    this.sessionIds[idx] = data.session_id;
-                    this._saveSessionIds();
-                }
-            });
-
-            socket.on('reconnected', () => {
-                const idx = this._getSocketIndex(socket);
-                if (idx >= 0) {
-                    this.terminals[idx].write('\x1b[33m[Reconnected to session]\x1b[0m\r\n');
-                }
-            });
-
-            socket.on('output', data => {
-                const idx = this._getSocketIndex(socket);
-                if (idx >= 0) {
-                    const terminal = this.terminals[idx];
-                    terminal.write(data);
-                    // Scroll terminal viewport to bottom after output
-                    terminal.scrollToBottom();
-                }
-            });
-            
-            // Handle pong to track connection health
-            socket.io.engine.on('pong', () => {
-                lastPongTime = Date.now();
-            });
-
-            socket.on('disconnect', reason => {
-                const idx = this._getSocketIndex(socket);
-                console.log(`[Terminal ${idx + 1}] Disconnected: ${reason}`);
-                stopHealthCheck();
-                this._updateStatus();
-                
-                if (reason !== 'io client disconnect' && idx >= 0) {
-                    // Only show message for unexpected disconnects
-                    if (reason === 'ping timeout') {
-                        this.terminals[idx].write('\r\n\x1b[31m[Connection timeout - reconnecting...]\x1b[0m\r\n');
-                    } else if (reason === 'transport close' || reason === 'transport error') {
-                        this.terminals[idx].write('\r\n\x1b[31m[Connection lost - reconnecting...]\x1b[0m\r\n');
-                    }
-                }
-            });
-
-            socket.io.on('reconnect', attempt => {
-                const idx = this._getSocketIndex(socket);
-                console.log(`[Terminal ${idx + 1}] Reconnected after ${attempt} attempts`);
-                lastPongTime = Date.now();
-                startHealthCheck();
-                this._updateStatus();
-                
-                if (idx >= 0) {
-                    const sessionId = this.sessionIds[idx];
-                    const dims = this.fitAddons[idx]?.proposeDimensions();
-                    socket.emit('attach', {
-                        session_id: sessionId,
-                        rows: dims ? dims.rows : 24,
-                        cols: dims ? dims.cols : 80
-                    });
-                }
-            });
-
-            socket.io.on('reconnect_attempt', attempt => {
-                const idx = this._getSocketIndex(socket);
-                console.log(`[Terminal ${idx + 1}] Reconnection attempt ${attempt}`);
-                if (attempt === 1 && idx >= 0) {
-                    this.terminals[idx].write('\x1b[33m[Reconnecting...]\x1b[0m\r\n');
-                }
-            });
-
-            socket.io.on('reconnect_failed', () => {
-                const idx = this._getSocketIndex(socket);
-                stopHealthCheck();
-                if (idx >= 0) {
-                    this.terminals[idx].write('\r\n\x1b[31m[Connection lost - please refresh page]\x1b[0m\r\n');
-                }
-            });
-
-            socket.on('connect_error', error => {
-                console.error(`[Terminal ${index + 1}] Connection error:`, error.message || error);
-                this._updateStatus();
-            });
-
-            return socket;
-        }
-
-        /**
-         * Close a terminal
-         */
-        closeTerminal(index) {
-            if (index < 0 || index >= this.terminals.length) return;
-
-            if (this.sockets[index]) this.sockets[index].disconnect();
-            if (this.terminals[index]) this.terminals[index].dispose();
-            
-            this.terminals.splice(index, 1);
-            this.fitAddons.splice(index, 1);
-            this.sockets.splice(index, 1);
-            this.sessionIds.splice(index, 1);
-            
-            const pane = this.paneContainer.querySelector(`[data-pane-index="${index}"]`);
-            if (pane) pane.remove();
-            
-            // Remove splitter when going back to 1 or 0 terminals
-            if (this.terminals.length <= 1) {
-                this._removeSplitter();
+            // Update explorer
+            if (this.explorer) {
+                this.explorer.removeSessionBar(key);
+                this.explorer.setAddButtonEnabled(this.sessions.size < MAX_SESSIONS);
             }
             
-            this._reindexPanes();
-            
-            if (this.terminals.length > 0) {
-                this.setFocus(Math.min(index, this.terminals.length - 1));
-                this.fitAll();
+            if (this.sessions.size > 0) {
+                // Switch to another session
+                if (this.activeSessionKey === key) {
+                    const nextKey = this.sessions.keys().next().value;
+                    this.switchSession(nextKey);
+                }
+                if (this.explorer) {
+                    this.explorer.updateActiveIndicator(this.activeSessionKey);
+                }
             } else {
-                this.activeIndex = -1;
-                this.addTerminal();
+                this.activeSessionKey = null;
+                this.addSession();
             }
             
-            this._updateAddButton();
             this._saveSessionIds();
+            this._saveSessionNames();
             this._updateStatus();
             
-            console.log(`[Terminal] Closed terminal at index ${index}`);
+            console.log(`[Terminal] Removed session "${session.name}" (${key})`);
         }
 
         /**
-         * Set focus to a terminal without scrolling the page
+         * Rename a session
          */
-        setFocus(index) {
-            if (index < 0 || index >= this.terminals.length) return;
-
-            this.paneContainer.querySelectorAll('.terminal-pane').forEach(p => {
-                p.classList.remove('focused');
-            });
-            
-            const pane = this.paneContainer.querySelector(`[data-pane-index="${index}"]`);
-            if (pane) pane.classList.add('focused');
-            
-            this.activeIndex = index;
-            
-            // Focus terminal without triggering browser scroll
-            this._focusWithoutScroll(this.terminals[index]);
+        renameSession(key, newName) {
+            const session = this.sessions.get(key);
+            if (!session) return;
+            session.name = newName;
+            this._saveSessionNames();
+            console.log(`[Terminal] Renamed session ${key} to "${newName}"`);
         }
+
+        /**
+         * Switch active session
+         */
+        switchSession(key) {
+            const session = this.sessions.get(key);
+            if (!session) return;
+
+            // Hide all containers, show target
+            for (const [k, s] of this.sessions) {
+                s.container.classList.remove('active');
+                s.isActive = false;
+            }
+            session.container.classList.add('active');
+            session.isActive = true;
+            this.activeSessionKey = key;
+            
+            // Update explorer indicator
+            if (this.explorer) {
+                this.explorer.updateActiveIndicator(key);
+            }
+            
+            // Fit active terminal after display change
+            this.fitActive();
+            
+            // Focus without scroll
+            this._focusWithoutScroll(session.terminal);
+        }
+
+        /**
+         * Get active session data
+         */
+        _getActiveSession() {
+            return this.activeSessionKey ? this.sessions.get(this.activeSessionKey) : null;
+        }
+
+        /**
+         * Fit the active terminal
+         */
+        _fitActiveSession() {
+            const session = this._getActiveSession();
+            if (!session) return;
+            try {
+                session.fitAddon.fit();
+                const dims = session.fitAddon.proposeDimensions();
+                if (dims && session.socket && session.socket.connected) {
+                    session.socket.emit('resize', { rows: dims.rows, cols: dims.cols });
+                }
+            } catch (e) {}
+        }
+
+        /**
+         * Fit active terminal - immediate + double RAF backup
+         */
+        fitActive() {
+            this._fitActiveSession();
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    this._fitActiveSession();
+                    setTimeout(() => this._fitActiveSession(), 50);
+                });
+            });
+        }
+
+        // Legacy aliases for backward compatibility
+        fitAll() { this.fitActive(); }
+        _doFit() { this._fitActiveSession(); }
+        _resizeAll() { this._fitActiveSession(); }
 
         /**
          * Focus terminal without triggering browser scroll-to-focus behavior
-         * xterm.js uses a hidden textarea for input, which can cause scroll jumps
          */
         _focusWithoutScroll(terminal) {
             if (!terminal) return;
             
-            // Save current scroll positions (window and content-body)
             const scrollX = window.scrollX;
             const scrollY = window.scrollY;
             const contentBody = document.querySelector('.content-body');
             const contentBodyScroll = contentBody?.scrollTop || 0;
             
-            // Get the terminal's viewport element to preserve its scroll
             const viewport = terminal.element?.querySelector('.xterm-viewport');
             const terminalScrollTop = viewport?.scrollTop || 0;
             
-            // Focus with preventScroll option (modern browsers)
             try {
                 const textarea = terminal.element?.querySelector('.xterm-helper-textarea');
                 if (textarea) {
@@ -625,7 +395,6 @@
                 terminal.focus();
             }
             
-            // Restore scroll positions immediately
             if (window.scrollX !== scrollX || window.scrollY !== scrollY) {
                 window.scrollTo(scrollX, scrollY);
             }
@@ -639,147 +408,221 @@
 
         /**
          * Setup scroll prevention for terminal's hidden textarea
-         * Prevents browser from scrolling page/containers when textarea receives focus/input
          */
         _setupScrollPrevention(terminal, container) {
-            // Wait for terminal to fully render and create its textarea
             requestAnimationFrame(() => {
                 const textarea = terminal.element?.querySelector('.xterm-helper-textarea');
                 if (!textarea) return;
                 
-                // Find scrollable parent containers (e.g., .content-body)
                 const contentBody = document.querySelector('.content-body');
-                
-                // Store scroll positions for all scrollable elements
-                let savedScrollX = 0;
-                let savedScrollY = 0;
-                let savedContentBodyScroll = 0;
+                let savedScrollX = 0, savedScrollY = 0, savedContentBodyScroll = 0;
                 
                 const saveScrollPositions = () => {
                     savedScrollX = window.scrollX;
                     savedScrollY = window.scrollY;
-                    if (contentBody) {
-                        savedContentBodyScroll = contentBody.scrollTop;
-                    }
+                    if (contentBody) savedContentBodyScroll = contentBody.scrollTop;
                 };
                 
                 const restoreScrollPositions = () => {
-                    // Restore window scroll
                     if (window.scrollX !== savedScrollX || window.scrollY !== savedScrollY) {
                         window.scrollTo(savedScrollX, savedScrollY);
                     }
-                    // Restore content-body scroll (main scrollable area)
                     if (contentBody && contentBody.scrollTop !== savedContentBodyScroll) {
                         contentBody.scrollTop = savedContentBodyScroll;
                     }
                 };
                 
-                // Intercept focus events to prevent scroll
-                textarea.addEventListener('focus', (e) => {
-                    saveScrollPositions();
-                    // Use multiple mechanisms to restore scroll
-                    queueMicrotask(restoreScrollPositions);
-                    requestAnimationFrame(restoreScrollPositions);
-                }, { capture: true });
-                
-                // Intercept keydown - this is where the scroll often happens
-                textarea.addEventListener('keydown', (e) => {
-                    saveScrollPositions();
-                    // Restore after key processing
-                    queueMicrotask(restoreScrollPositions);
-                    requestAnimationFrame(restoreScrollPositions);
-                }, { capture: true });
-                
-                // Intercept input events
-                textarea.addEventListener('input', (e) => {
+                textarea.addEventListener('focus', () => {
                     saveScrollPositions();
                     queueMicrotask(restoreScrollPositions);
                     requestAnimationFrame(restoreScrollPositions);
                 }, { capture: true });
                 
-                // Also handle the container click to prevent scroll on re-focus
-                container.addEventListener('mousedown', (e) => {
+                textarea.addEventListener('keydown', () => {
+                    saveScrollPositions();
+                    queueMicrotask(restoreScrollPositions);
+                    requestAnimationFrame(restoreScrollPositions);
+                }, { capture: true });
+                
+                textarea.addEventListener('input', () => {
+                    saveScrollPositions();
+                    queueMicrotask(restoreScrollPositions);
+                    requestAnimationFrame(restoreScrollPositions);
+                }, { capture: true });
+                
+                container.addEventListener('mousedown', () => {
                     saveScrollPositions();
                     requestAnimationFrame(restoreScrollPositions);
                 });
                 
-                // Additional: observe for any scroll changes and restore
-                // This catches edge cases where other mechanisms fail
                 let scrollCheckTimeout = null;
-                const scheduleScrollCheck = () => {
+                textarea.addEventListener('keypress', () => {
                     if (scrollCheckTimeout) clearTimeout(scrollCheckTimeout);
                     scrollCheckTimeout = setTimeout(() => {
-                        if (document.activeElement === textarea) {
-                            restoreScrollPositions();
-                        }
+                        if (document.activeElement === textarea) restoreScrollPositions();
                     }, 10);
-                };
-                
-                textarea.addEventListener('keypress', scheduleScrollCheck, { capture: true });
+                }, { capture: true });
             });
         }
 
         /**
-         * Internal fit logic - fits all terminals and sends resize to server
-         * Note: Do NOT call terminal.refresh() here - it resets scroll position
+         * Create Socket.IO connection for a session
          */
-        _doFit() {
-            this.fitAddons.forEach((fitAddon, index) => {
-                try {
-                    fitAddon.fit();
-                    const dims = fitAddon.proposeDimensions();
-                    if (dims && this.sockets[index] && this.sockets[index].connected) {
-                        this.sockets[index].emit('resize', { rows: dims.rows, cols: dims.cols });
+        _createSocket(sessionKey, existingSessionId) {
+            const socket = io({
+                transports: ['websocket'],
+                upgrade: false,
+                reconnection: true,
+                reconnectionAttempts: Infinity,
+                reconnectionDelay: 1000,
+                reconnectionDelayMax: 30000,
+                randomizationFactor: 0.5,
+                timeout: 60000,
+                forceNew: false,
+                pingTimeout: 300000,
+                pingInterval: 60000
+            });
+            
+            let lastPongTime = Date.now();
+            let healthCheckInterval = null;
+            
+            const getSession = () => this.sessions.get(sessionKey);
+            
+            const startHealthCheck = () => {
+                if (healthCheckInterval) clearInterval(healthCheckInterval);
+                healthCheckInterval = setInterval(() => {
+                    const timeSincePong = Date.now() - lastPongTime;
+                    const session = getSession();
+                    if (timeSincePong > 180000 && socket.connected && session) {
+                        console.warn(`[Terminal ${session.name}] Connection may be stale (${Math.round(timeSincePong/1000)}s since last pong)`);
                     }
-                } catch (e) {}
-            });
-        }
+                }, 60000);
+            };
+            
+            const stopHealthCheck = () => {
+                if (healthCheckInterval) {
+                    clearInterval(healthCheckInterval);
+                    healthCheckInterval = null;
+                }
+            };
 
-        /**
-         * Fit all terminals - immediate fit + double RAF backup
-         * Call this from any trigger (expand, resize, zen mode, etc.)
-         */
-        fitAll() {
-            // Immediate fit attempt
-            this._doFit();
-            // Double RAF ensures CSS layout is fully computed
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    this._doFit();
-                    // Final fit after any remaining layout shifts
-                    setTimeout(() => this._doFit(), 50);
+            socket.on('connect', () => {
+                const session = getSession();
+                if (!session) return;
+                console.log(`[Terminal ${session.name}] Connected`);
+                lastPongTime = Date.now();
+                startHealthCheck();
+                this._updateStatus();
+                
+                const dims = session.fitAddon?.proposeDimensions();
+                socket.emit('attach', {
+                    session_id: existingSessionId,
+                    rows: dims ? dims.rows : 24,
+                    cols: dims ? dims.cols : 80
                 });
             });
-        }
 
-        /**
-         * Resize all terminals (legacy name, calls fitAll)
-         */
-        _resizeAll() {
-            this._doFit();
-        }
-
-        /**
-         * Reindex panes after removal
-         */
-        _reindexPanes() {
-            const panes = this.paneContainer.querySelectorAll('.terminal-pane');
-            panes.forEach((pane, i) => {
-                pane.dataset.paneIndex = i;
-                pane.querySelector('.pane-title').textContent = `Terminal ${i + 1}`;
-                pane.querySelector('.terminal-content').id = `terminal-${i}`;
+            socket.on('session_id', sessionId => {
+                const session = getSession();
+                if (session) {
+                    session.sessionId = sessionId;
+                    this._saveSessionIds();
+                }
             });
-        }
 
-        _updateAddButton() {
-            if (this.addButton) {
-                this.addButton.disabled = this.terminals.length >= MAX_TERMINALS;
-            }
+            socket.on('new_session', data => {
+                const session = getSession();
+                if (session) {
+                    session.terminal.write('\x1b[32m[New session started]\x1b[0m\r\n');
+                    session.sessionId = data.session_id;
+                    this._saveSessionIds();
+                }
+            });
+
+            socket.on('reconnected', () => {
+                const session = getSession();
+                if (session) {
+                    session.terminal.write('\x1b[33m[Reconnected to session]\x1b[0m\r\n');
+                }
+            });
+
+            socket.on('output', data => {
+                const session = getSession();
+                if (session) {
+                    session.terminal.write(data);
+                    session.terminal.scrollToBottom();
+                }
+            });
+            
+            socket.io.engine.on('pong', () => {
+                lastPongTime = Date.now();
+            });
+
+            socket.on('disconnect', reason => {
+                const session = getSession();
+                const name = session ? session.name : sessionKey;
+                console.log(`[Terminal ${name}] Disconnected: ${reason}`);
+                stopHealthCheck();
+                this._updateStatus();
+                
+                if (reason !== 'io client disconnect' && session) {
+                    if (reason === 'ping timeout') {
+                        session.terminal.write('\r\n\x1b[31m[Connection timeout - reconnecting...]\x1b[0m\r\n');
+                    } else if (reason === 'transport close' || reason === 'transport error') {
+                        session.terminal.write('\r\n\x1b[31m[Connection lost - reconnecting...]\x1b[0m\r\n');
+                    }
+                }
+            });
+
+            socket.io.on('reconnect', attempt => {
+                const session = getSession();
+                if (!session) return;
+                console.log(`[Terminal ${session.name}] Reconnected after ${attempt} attempts`);
+                lastPongTime = Date.now();
+                startHealthCheck();
+                this._updateStatus();
+                
+                const dims = session.fitAddon?.proposeDimensions();
+                socket.emit('attach', {
+                    session_id: session.sessionId,
+                    rows: dims ? dims.rows : 24,
+                    cols: dims ? dims.cols : 80
+                });
+            });
+
+            socket.io.on('reconnect_attempt', attempt => {
+                const session = getSession();
+                if (!session) return;
+                console.log(`[Terminal ${session.name}] Reconnection attempt ${attempt}`);
+                if (attempt === 1) {
+                    session.terminal.write('\x1b[33m[Reconnecting...]\x1b[0m\r\n');
+                }
+            });
+
+            socket.io.on('reconnect_failed', () => {
+                const session = getSession();
+                stopHealthCheck();
+                if (session) {
+                    session.terminal.write('\r\n\x1b[31m[Connection lost - please refresh page]\x1b[0m\r\n');
+                }
+            });
+
+            socket.on('connect_error', error => {
+                const session = getSession();
+                const name = session ? session.name : sessionKey;
+                console.error(`[Terminal ${name}] Connection error:`, error.message || error);
+                this._updateStatus();
+            });
+
+            return socket;
         }
 
         _updateStatus() {
-            const connected = this.sockets.filter(s => s && s.connected).length;
-            const total = this.terminals.length;
+            let connected = 0, total = 0;
+            for (const [, session] of this.sessions) {
+                total++;
+                if (session.socket && session.socket.connected) connected++;
+            }
 
             if (this.statusIndicator) {
                 if (connected === total && total > 0) {
@@ -795,6 +638,19 @@
             }
         }
 
+        // --- Session name helpers ---
+        _getNextSessionName() {
+            const usedNumbers = new Set();
+            for (const [, session] of this.sessions) {
+                const match = session.name.match(/^Session (\d+)$/);
+                if (match) usedNumbers.add(parseInt(match[1]));
+            }
+            let n = 1;
+            while (usedNumbers.has(n)) n++;
+            return `Session ${n}`;
+        }
+
+        // --- Persistence ---
         _getStoredSessionIds() {
             try {
                 const stored = localStorage.getItem(SESSION_KEY);
@@ -806,109 +662,168 @@
 
         _saveSessionIds() {
             try {
-                const validIds = this.sessionIds.filter(id => id !== null);
-                localStorage.setItem(SESSION_KEY, JSON.stringify(validIds));
+                const ids = [];
+                for (const [, session] of this.sessions) {
+                    if (session.sessionId) ids.push(session.sessionId);
+                }
+                localStorage.setItem(SESSION_KEY, JSON.stringify(ids));
             } catch (e) {}
         }
 
-        /**
-         * Send Copilot refine command with typing simulation
-         * Uses `copilot -i "{prompt}"` - types command, no Enter (user can review)
-         * @param {string} filePath - Path to the idea file to refine
-         */
-        sendCopilotRefineCommand(filePath) {
-            const refineCommand = `refine the idea ${filePath}`;
-            this._sendCopilotWithPrompt(refineCommand);
+        _getStoredSessionNames() {
+            try {
+                const stored = localStorage.getItem(SESSION_NAMES_KEY);
+                return stored ? JSON.parse(stored) : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        _saveSessionNames() {
+            try {
+                const names = {};
+                for (const [, session] of this.sessions) {
+                    if (session.sessionId) names[session.sessionId] = session.name;
+                }
+                localStorage.setItem(SESSION_NAMES_KEY, JSON.stringify(names));
+            } catch (e) {}
+        }
+
+        // --- Legacy compatibility: index-based accessors ---
+        // These provide backward compatibility for TerminalPanel and Copilot commands
+        get terminals() {
+            return Array.from(this.sessions.values()).map(s => s.terminal);
+        }
+        get sockets() {
+            return Array.from(this.sessions.values()).map(s => s.socket);
+        }
+        get activeIndex() {
+            if (!this.activeSessionKey) return -1;
+            let i = 0;
+            for (const key of this.sessions.keys()) {
+                if (key === this.activeSessionKey) return i;
+                i++;
+            }
+            return -1;
+        }
+
+        // Legacy method aliases
+        addTerminal(existingSessionId = null) {
+            return this.addSession(existingSessionId) ? this.activeIndex : -1;
+        }
+        setFocus(index) {
+            const keys = Array.from(this.sessions.keys());
+            if (index >= 0 && index < keys.length) {
+                this.switchSession(keys[index]);
+            }
         }
 
         /**
-         * Send a custom Copilot prompt command with typing simulation
-         * Uses `copilot -i "{prompt}"` - types command, no Enter (user can review)
-         * @param {string} promptCommand - The command to send (with placeholders already replaced)
+         * Get the currently focused terminal for voice input injection (FEATURE-021)
          */
+        getFocusedTerminal() {
+            const session = this._getActiveSession();
+            if (session) {
+                return {
+                    terminal: session.terminal,
+                    socket: session.socket,
+                    sessionId: session.sessionId,
+                    sendInput: (text) => {
+                        if (session.socket && session.sessionId) {
+                            session.socket.emit('input', text);
+                        }
+                    }
+                };
+            }
+            return null;
+        }
+
+        /**
+         * Get first connected socket for voice input (FEATURE-021)
+         */
+        get socket() {
+            for (const [, session] of this.sessions) {
+                if (session.socket && session.socket.connected) return session.socket;
+            }
+            const first = this.sessions.values().next().value;
+            return first ? first.socket : null;
+        }
+
+        /**
+         * Send copilot prompt without pressing Enter (FEATURE-021)
+         */
+        sendCopilotPromptCommandNoEnter(promptCommand) {
+            if (this.sessions.size === 0) this.addSession();
+            const session = this._getActiveSession();
+            if (!session) return;
+            const escapedPrompt = promptCommand.replace(/"/g, '\\"');
+            const copilotCommand = `copilot --allow-all-tools --allow-all-paths --allow-all-urls -i "${escapedPrompt}"`;
+            // Use typing effect but don't send Enter
+            if (!session.socket || !session.socket.connected) return;
+            const chars = copilotCommand.split('');
+            let i = 0;
+            const typeChar = () => {
+                if (i < chars.length) {
+                    session.socket.emit('input', chars[i]);
+                    i++;
+                    setTimeout(typeChar, 30 + Math.random() * 50);
+                }
+            };
+            typeChar();
+        }
+
+        // --- Copilot integration ---
+        sendCopilotRefineCommand(filePath) {
+            this._sendCopilotWithPrompt(`refine the idea ${filePath}`);
+        }
+
         sendCopilotPromptCommand(promptCommand) {
             this._sendCopilotWithPrompt(promptCommand);
         }
 
-        /**
-         * Internal: Send copilot command with -i flag
-         * Types command without pressing Enter - user can review before executing
-         * @param {string} prompt - The prompt to pass to copilot
-         */
         _sendCopilotWithPrompt(prompt) {
-            let targetIndex = this.activeIndex;
-            
-            // If no terminals exist, create one
-            if (this.terminals.length === 0) {
-                targetIndex = this.addTerminal();
-            } else if (targetIndex < 0) {
-                targetIndex = 0;
+            if (this.sessions.size === 0) {
+                this.addSession();
             }
+            const session = this._getActiveSession();
+            if (!session) return;
             
-            this.setFocus(targetIndex);
-            
-            // Use copilot with all permissions and -i to pass prompt directly, no Enter (user reviews first)
             const escapedPrompt = prompt.replace(/"/g, '\\"');
             const copilotCommand = `copilot --allow-all-tools --allow-all-paths --allow-all-urls -i "${escapedPrompt}"`;
-            
-            // Send command with typing simulation, no Enter
-            this._sendWithTypingEffect(targetIndex, copilotCommand, null, false);
+            this._sendWithTypingEffect(session.key, copilotCommand, null);
         }
 
-        /**
-         * Wait for Copilot CLI to be ready (prompt appears)
-         * @param {number} index - Terminal index
-         * @param {Function} callback - Callback when ready
-         * @param {number} maxAttempts - Maximum polling attempts
-         */
-        _waitForCopilotReady(index, callback, maxAttempts = 30) {
+        _waitForCopilotReady(sessionKey, callback, maxAttempts = 30) {
+            const session = this.sessions.get(sessionKey);
+            if (!session) return;
             let attempts = 0;
-            const pollInterval = 200; // Check every 200ms
+            const pollInterval = 200;
             
             const checkReady = () => {
                 attempts++;
-                
-                if (this._isCopilotPromptReady(index)) {
-                    // Small additional delay to ensure prompt is fully rendered
+                if (this._isCopilotPromptReady(sessionKey)) {
                     setTimeout(callback, 300);
                     return;
                 }
-                
                 if (attempts >= maxAttempts) {
-                    // Timeout - proceed anyway after max wait (6 seconds)
                     console.warn('Copilot CLI initialization timeout, proceeding anyway');
                     setTimeout(callback, 500);
                     return;
                 }
-                
                 setTimeout(checkReady, pollInterval);
             };
-            
-            // Start checking after initial delay
             setTimeout(checkReady, 500);
         }
 
-        /**
-         * Check if Copilot CLI prompt is ready for input
-         * @param {number} index - Terminal index
-         * @returns {boolean} - True if prompt is ready
-         */
-        _isCopilotPromptReady(index) {
-            if (index < 0 || index >= this.terminals.length) return false;
+        _isCopilotPromptReady(sessionKey) {
+            const session = this.sessions.get(sessionKey);
+            if (!session) return false;
             
-            const terminal = this.terminals[index];
-            if (!terminal) return false;
-            
-            // Check last few lines of terminal buffer for copilot ready indicators
-            const buffer = terminal.buffer.active;
+            const buffer = session.terminal.buffer.active;
             for (let i = Math.max(0, buffer.cursorY - 3); i <= buffer.cursorY; i++) {
                 const line = buffer.getLine(i);
                 if (line) {
                     const text = line.translateToString(true);
-                    // Copilot CLI shows specific prompts when ready:
-                    // - ">" prompt at line start
-                    // - "⏺" indicator
-                    // - Ends with ">" suggesting ready for input
                     if (text.match(/^>[\s]*$/) || text.includes('⏺') || text.match(/>\s*$/)) {
                         return true;
                     }
@@ -917,25 +832,21 @@
             return false;
         }
 
-        /**
-         * Check if terminal appears to be in Copilot CLI mode
-         * @param {number} index - Terminal index
-         * @returns {boolean} - True if appears to be in copilot mode
-         */
-        _isInCopilotMode(index) {
-            if (index < 0 || index >= this.terminals.length) return false;
+        _isInCopilotMode(sessionKeyOrIndex) {
+            let session;
+            if (typeof sessionKeyOrIndex === 'number') {
+                const keys = Array.from(this.sessions.keys());
+                session = this.sessions.get(keys[sessionKeyOrIndex]);
+            } else {
+                session = this.sessions.get(sessionKeyOrIndex);
+            }
+            if (!session) return false;
             
-            // Get terminal buffer content to check for copilot indicators
-            const terminal = this.terminals[index];
-            if (!terminal) return false;
-            
-            // Check last few lines of terminal buffer for copilot prompt indicators
-            const buffer = terminal.buffer.active;
+            const buffer = session.terminal.buffer.active;
             for (let i = Math.max(0, buffer.cursorY - 5); i <= buffer.cursorY; i++) {
                 const line = buffer.getLine(i);
                 if (line) {
                     const text = line.translateToString(true);
-                    // Copilot CLI typically shows a specific prompt or status
                     if (text.includes('copilot>') || text.includes('Copilot') || text.includes('⏺')) {
                         return true;
                     }
@@ -946,36 +857,298 @@
 
         /**
          * Send text with typing simulation effect
-         * @param {number} index - Terminal index
-         * @param {string} text - Text to type
-         * @param {Function} callback - Optional callback after completion
          */
-        _sendWithTypingEffect(index, text, callback) {
-            if (index < 0 || index >= this.sockets.length) return;
-            
-            const socket = this.sockets[index];
-            if (!socket || !socket.connected) return;
+        _sendWithTypingEffect(sessionKey, text, callback) {
+            const session = this.sessions.get(sessionKey);
+            if (!session || !session.socket || !session.socket.connected) return;
             
             const chars = text.split('');
             let i = 0;
             
             const typeChar = () => {
                 if (i < chars.length) {
-                    socket.emit('input', chars[i]);
+                    session.socket.emit('input', chars[i]);
                     i++;
-                    // Random delay between 30-80ms for realistic typing
                     const delay = 30 + Math.random() * 50;
                     setTimeout(typeChar, delay);
                 } else {
-                    // Send Enter key after typing complete
                     setTimeout(() => {
-                        socket.emit('input', '\r');
+                        session.socket.emit('input', '\r');
                         if (callback) callback();
                     }, 100);
                 }
             };
-            
             typeChar();
+        }
+    }
+
+    /**
+     * SessionExplorer - Right-side panel for session management
+     */
+    class SessionExplorer {
+        constructor(terminalManager) {
+            this.manager = terminalManager;
+            this.listEl = document.getElementById('session-list');
+            this.addBtn = document.getElementById('explorer-add-btn');
+            
+            // Register with manager
+            this.manager.explorer = this;
+
+            // FEATURE-029-C: Preview state
+            this._previewContainer = null;
+            this._previewTerminal = null;
+            this._previewFitAddon = null;
+            this._previewKey = null;
+            this._hoverTimer = null;
+            this._graceTimer = null;
+            this._previewOutputHandler = null;
+            
+            this._bindEvents();
+        }
+
+        _bindEvents() {
+            if (this.addBtn) {
+                this.addBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.manager.addSession();
+                });
+            }
+        }
+
+        addSessionBar(key, name) {
+            const bar = document.createElement('div');
+            bar.className = 'session-bar';
+            bar.dataset.sessionKey = key;
+            bar.dataset.active = 'false';
+            
+            const dot = document.createElement('span');
+            dot.className = 'session-status-dot';
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'session-name';
+            nameSpan.textContent = name;
+
+            const renameBtn = document.createElement('button');
+            renameBtn.className = 'session-action-btn rename-btn';
+            renameBtn.title = 'Rename';
+            renameBtn.innerHTML = '<i class="bi bi-pencil"></i>';
+            renameBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.startRename(key);
+            });
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'session-action-btn delete-btn';
+            deleteBtn.title = 'Delete';
+            deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.manager.removeSession(key);
+            });
+            
+            bar.appendChild(dot);
+            bar.appendChild(nameSpan);
+            bar.appendChild(renameBtn);
+            bar.appendChild(deleteBtn);
+            
+            bar.addEventListener('click', () => {
+                this.manager.switchSession(key);
+            });
+
+            // FEATURE-029-C: Hover preview triggers
+            bar.addEventListener('mouseenter', () => {
+                if (bar.dataset.active === 'true') return;
+                clearTimeout(this._graceTimer);
+                this._hoverTimer = setTimeout(() => this._showPreview(key, bar), 500);
+            });
+            bar.addEventListener('mouseleave', () => {
+                clearTimeout(this._hoverTimer);
+                this._graceTimer = setTimeout(() => this._dismissPreview(), 100);
+            });
+            
+            this.listEl.appendChild(bar);
+        }
+
+        removeSessionBar(key) {
+            if (this._previewKey === key) this._dismissPreview();
+            const bar = this.listEl.querySelector(`[data-session-key="${key}"]`);
+            if (bar) bar.remove();
+        }
+
+        updateActiveIndicator(activeKey) {
+            this.listEl.querySelectorAll('.session-bar').forEach(bar => {
+                bar.dataset.active = (bar.dataset.sessionKey === activeKey) ? 'true' : 'false';
+            });
+        }
+
+        setAddButtonEnabled(enabled) {
+            if (this.addBtn) this.addBtn.disabled = !enabled;
+        }
+
+        startRename(key) {
+            const bar = this.listEl.querySelector(`[data-session-key="${key}"]`);
+            if (!bar) return;
+            const nameSpan = bar.querySelector('.session-name');
+            if (!nameSpan || nameSpan.tagName === 'INPUT') return;
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'session-name-input';
+            input.value = nameSpan.textContent;
+            const originalName = nameSpan.textContent;
+
+            let done = false;
+            const confirm = () => {
+                if (done) return;
+                done = true;
+                const newName = input.value.trim();
+                if (newName && newName !== originalName) {
+                    this.manager.renameSession(key, newName);
+                }
+                const span = document.createElement('span');
+                span.className = 'session-name';
+                span.textContent = newName || originalName;
+                input.replaceWith(span);
+            };
+
+            const cancel = () => {
+                if (done) return;
+                done = true;
+                const span = document.createElement('span');
+                span.className = 'session-name';
+                span.textContent = originalName;
+                input.replaceWith(span);
+            };
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); confirm(); }
+                if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+            });
+            input.addEventListener('blur', () => confirm());
+
+            nameSpan.replaceWith(input);
+            input.focus();
+            input.select();
+        }
+
+        showToast(message) {
+            const panel = document.getElementById('terminal-panel');
+            if (!panel) return;
+            let toast = panel.querySelector('.session-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.className = 'session-toast';
+                toast.setAttribute('role', 'alert');
+                panel.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.classList.add('visible');
+            setTimeout(() => toast.classList.remove('visible'), 2500);
+        }
+
+        // FEATURE-029-C: Preview methods
+        _initPreviewContainer() {
+            if (this._previewContainer) return;
+
+            this._previewContainer = document.createElement('div');
+            this._previewContainer.className = 'session-preview';
+            this._previewContainer.style.display = 'none';
+
+            const header = document.createElement('div');
+            header.className = 'session-preview-header';
+            this._previewContainer.appendChild(header);
+
+            const body = document.createElement('div');
+            body.className = 'session-preview-body';
+            this._previewContainer.appendChild(body);
+
+            this._previewContainer.addEventListener('mouseenter', () => {
+                clearTimeout(this._graceTimer);
+            });
+            this._previewContainer.addEventListener('mouseleave', () => {
+                this._graceTimer = setTimeout(() => this._dismissPreview(), 100);
+            });
+            this._previewContainer.addEventListener('click', () => {
+                if (this._previewKey) {
+                    const key = this._previewKey;
+                    this._dismissPreview();
+                    this.manager.switchSession(key);
+                }
+            });
+
+            document.getElementById('terminal-panel').appendChild(this._previewContainer);
+
+            this._previewTerminal = new Terminal({
+                disableStdin: true,
+                scrollback: 500,
+                fontSize: 12,
+                fontFamily: terminalConfig.fontFamily,
+                theme: terminalConfig.theme,
+                cursorBlink: false
+            });
+            this._previewFitAddon = new FitAddon.FitAddon();
+            this._previewTerminal.loadAddon(this._previewFitAddon);
+            this._previewTerminal.open(body);
+        }
+
+        _showPreview(key, barElement) {
+            const session = this.manager.sessions.get(key);
+            if (!session) return;
+
+            this._initPreviewContainer();
+
+            if (this._previewKey && this._previewKey !== key) {
+                this._cleanupPreviewListeners();
+            }
+            this._previewKey = key;
+
+            this._previewContainer.querySelector('.session-preview-header').textContent = session.name;
+
+            this._previewTerminal.clear();
+
+            const srcBuffer = session.terminal.buffer.active;
+            const lines = [];
+            for (let i = 0; i < srcBuffer.length; i++) {
+                const line = srcBuffer.getLine(i);
+                if (line) lines.push(line.translateToString(true));
+            }
+            if (lines.length > 0) {
+                this._previewTerminal.write(lines.join('\r\n'));
+            }
+            this._previewTerminal.scrollToBottom();
+
+            if (session.socket) {
+                this._previewOutputHandler = (data) => {
+                    if (this._previewKey === key) {
+                        this._previewTerminal.write(data);
+                        this._previewTerminal.scrollToBottom();
+                    }
+                };
+                session.socket.on('output', this._previewOutputHandler);
+            }
+
+            this._previewContainer.style.display = 'flex';
+            try { this._previewFitAddon.fit(); } catch(e) {}
+        }
+
+        _dismissPreview() {
+            clearTimeout(this._hoverTimer);
+            clearTimeout(this._graceTimer);
+            this._cleanupPreviewListeners();
+            this._previewKey = null;
+            if (this._previewContainer) {
+                this._previewContainer.style.display = 'none';
+            }
+        }
+
+        _cleanupPreviewListeners() {
+            if (this._previewOutputHandler && this._previewKey) {
+                const session = this.manager.sessions.get(this._previewKey);
+                if (session && session.socket) {
+                    session.socket.off('output', this._previewOutputHandler);
+                }
+                this._previewOutputHandler = null;
+            }
         }
     }
 
@@ -1000,7 +1173,6 @@
         }
 
         _bindEvents() {
-            // Header click to toggle (except on buttons/status/center controls)
             this.header.addEventListener('click', (e) => {
                 if (e.target.closest('.terminal-actions') || 
                     e.target.closest('.terminal-status') ||
@@ -1020,7 +1192,6 @@
                 });
             }
 
-            // Copilot command button - insert command without triggering expand/collapse
             if (this.copilotCmdBtn) {
                 this.copilotCmdBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -1030,7 +1201,6 @@
 
             this._initResize();
 
-            // ESC to exit zen mode
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && this.isZenMode) {
                     this.toggleZenMode();
@@ -1046,7 +1216,6 @@
                 startY = e.clientY;
                 startHeight = this.panel.offsetHeight;
                 
-                // Add visual feedback
                 this.panel.classList.add('resizing');
                 document.body.style.cursor = 'ns-resize';
                 document.body.style.userSelect = 'none';
@@ -1062,13 +1231,11 @@
                     document.removeEventListener('mousemove', onMove);
                     document.removeEventListener('mouseup', onUp);
                     
-                    // Remove visual feedback
                     this.panel.classList.remove('resizing');
                     document.body.style.cursor = '';
                     document.body.style.userSelect = '';
                     
-                    // Final fit after resize complete
-                    this.terminalManager.fitAll();
+                    this.terminalManager.fitActive();
                 };
 
                 document.addEventListener('mousemove', onMove);
@@ -1093,8 +1260,7 @@
             this.panel.style.height = this.panelHeight + 'px';
             this.toggleBtn.querySelector('i').className = 'bi bi-chevron-down';
 
-            // Wait for layout to stabilize then fit
-            setTimeout(() => this.terminalManager.fitAll(), 0);
+            setTimeout(() => this.terminalManager.fitActive(), 0);
         }
 
         collapse() {
@@ -1131,7 +1297,7 @@
             if (topMenu) topMenu.style.display = 'none';
             if (this.appContainer) this.appContainer.style.display = 'none';
 
-            this.terminalManager.fitAll();
+            this.terminalManager.fitActive();
         }
 
         _exitZenMode() {
@@ -1145,7 +1311,7 @@
             if (topMenu) topMenu.style.display = '';
             if (this.appContainer) this.appContainer.style.display = '';
 
-            this.terminalManager.fitAll();
+            this.terminalManager.fitActive();
         }
 
         /**
@@ -1154,24 +1320,21 @@
         _insertCopilotCommand() {
             const copilotCommand = 'copilot --allow-all-tools --allow-all-paths --allow-all-urls';
             
-            // Ensure we have a terminal
-            let targetIndex = this.terminalManager.activeIndex;
-            if (this.terminalManager.terminals.length === 0) {
-                targetIndex = this.terminalManager.addTerminal();
-            } else if (targetIndex < 0) {
-                targetIndex = 0;
+            if (this.terminalManager.sessions.size === 0) {
+                this.terminalManager.addSession();
             }
             
-            this.terminalManager.setFocus(targetIndex);
+            const session = this.terminalManager._getActiveSession();
+            if (!session) return;
             
-            // Type command without pressing Enter
-            this.terminalManager._sendWithTypingEffect(targetIndex, copilotCommand, null, false);
+            this.terminalManager._sendWithTypingEffect(session.key, copilotCommand, null);
         }
     }
 
     // Export to window
     window.TerminalManager = TerminalManager;
     window.TerminalPanel = TerminalPanel;
+    window.SessionExplorer = SessionExplorer;
 
     console.log('[Terminal] Module loaded');
 })();

@@ -1,0 +1,229 @@
+test_cases:
+  # ── Structure (AC-S01 through AC-S03) ──────────────────────
+  - id: TC-01
+    name: "SKILL.md exists"
+    acceptance_criteria: "AC-S01"
+    type: structure
+    test_method: file_exists
+    input: "candidate/SKILL.md"
+    expected: "file exists"
+    priority: must
+
+  - id: TC-02
+    name: "Frontmatter has name field"
+    acceptance_criteria: "AC-S01"
+    type: structure
+    test_method: content_check
+    input: "candidate/SKILL.md frontmatter"
+    expected: "name: x-ipe-task-based-feature-breakdown"
+    priority: must
+
+  - id: TC-03
+    name: "Frontmatter has description field"
+    acceptance_criteria: "AC-S01"
+    type: structure
+    test_method: content_check
+    input: "candidate/SKILL.md frontmatter"
+    expected: "description field present and non-empty"
+    priority: must
+
+  - id: TC-04
+    name: "examples.md exists"
+    acceptance_criteria: "AC-S02"
+    type: structure
+    test_method: file_exists
+    input: "candidate/references/examples.md"
+    expected: "file exists"
+    priority: must
+
+  - id: TC-05
+    name: "examples.md has at least 1 example"
+    acceptance_criteria: "AC-S02"
+    type: structure
+    test_method: content_check
+    input: "candidate/references/examples.md"
+    expected: "contains at least one '## Example' heading"
+    priority: must
+
+  - id: TC-06
+    name: "SKILL.md under 500 lines"
+    acceptance_criteria: "AC-S03"
+    type: structure
+    test_method: line_count
+    input: "candidate/SKILL.md"
+    expected: "< 500 lines"
+    priority: must
+
+  # ── Content (AC-C01 through AC-C06) ────────────────────────
+  - id: TC-07
+    name: "Purpose section present"
+    acceptance_criteria: "AC-C01"
+    type: content
+    test_method: section_parse
+    input: "candidate/SKILL.md"
+    expected: "## Purpose heading exists"
+    priority: must
+
+  - id: TC-08
+    name: "Important Notes section present"
+    acceptance_criteria: "AC-C01"
+    type: content
+    test_method: section_parse
+    input: "candidate/SKILL.md"
+    expected: "## Important Notes heading exists"
+    priority: must
+
+  - id: TC-09
+    name: "Input Parameters section present"
+    acceptance_criteria: "AC-C01"
+    type: content
+    test_method: section_parse
+    input: "candidate/SKILL.md"
+    expected: "## Input Parameters heading exists"
+    priority: must
+
+  - id: TC-10
+    name: "Definition of Ready section present"
+    acceptance_criteria: "AC-C01"
+    type: content
+    test_method: section_parse
+    input: "candidate/SKILL.md"
+    expected: "## Definition of Ready heading exists"
+    priority: must
+
+  - id: TC-11
+    name: "Execution Flow section present"
+    acceptance_criteria: "AC-C01"
+    type: content
+    test_method: section_parse
+    input: "candidate/SKILL.md"
+    expected: "## Execution Flow heading exists"
+    priority: must
+
+  - id: TC-12
+    name: "Execution Procedure section present"
+    acceptance_criteria: "AC-C01"
+    type: content
+    test_method: section_parse
+    input: "candidate/SKILL.md"
+    expected: "## Execution Procedure heading exists"
+    priority: must
+
+  - id: TC-13
+    name: "Output Result section present"
+    acceptance_criteria: "AC-C01"
+    type: content
+    test_method: section_parse
+    input: "candidate/SKILL.md"
+    expected: "## Output Result heading exists"
+    priority: must
+
+  - id: TC-14
+    name: "Definition of Done section present"
+    acceptance_criteria: "AC-C01"
+    type: content
+    test_method: section_parse
+    input: "candidate/SKILL.md"
+    expected: "## Definition of Done heading exists"
+    priority: must
+
+  - id: TC-15
+    name: "Patterns section present"
+    acceptance_criteria: "AC-C01"
+    type: content
+    test_method: section_parse
+    input: "candidate/SKILL.md"
+    expected: "## Patterns heading exists"
+    priority: must
+
+  - id: TC-16
+    name: "Examples section present"
+    acceptance_criteria: "AC-C01"
+    type: content
+    test_method: section_parse
+    input: "candidate/SKILL.md"
+    expected: "## Examples heading exists"
+    priority: must
+
+  - id: TC-17
+    name: "Execution Flow table has 9 steps"
+    acceptance_criteria: "AC-C02"
+    type: content
+    test_method: table_parse
+    input: "Execution Flow table rows (excluding header/separator)"
+    expected: "9 data rows: Analyze, Evaluate Complexity, Identify Features, Process Mockups, Create Summary, Update Board, Update Index, Dedup Check, Complete"
+    priority: must
+
+  - id: TC-18
+    name: "Step 8 compares parent FRs/ACs against sub-feature union"
+    acceptance_criteria: "AC-C03"
+    type: content
+    test_method: content_check
+    input: "step_8 in Execution Procedure"
+    expected: "contains FR/AC comparison logic between parent and sub-features"
+    priority: must
+
+  - id: TC-19
+    name: "Step 8 removes parent via feature-board-management at 100% coverage"
+    acceptance_criteria: "AC-C04"
+    type: content
+    test_method: content_check
+    input: "step_8 in Execution Procedure"
+    expected: "contains instruction to remove/archive parent via feature-board-management when fully covered"
+    priority: must
+
+  - id: TC-20
+    name: "Step 8 keeps parent at partial coverage with gap flag"
+    acceptance_criteria: "AC-C05"
+    type: content
+    test_method: content_check
+    input: "step_8 in Execution Procedure"
+    expected: "contains conditional for partial coverage: keep parent, flag uncovered items"
+    priority: must
+
+  - id: TC-21
+    name: "DoD includes dedup checkpoint"
+    acceptance_criteria: "AC-C06"
+    type: content
+    test_method: table_parse
+    input: "Definition of Done checkpoints"
+    expected: "checkpoint named 'Parent feature deduplication verified' or similar exists"
+    priority: must
+
+  # ── Behavior (AC-B01) ──────────────────────────────────────
+  - id: TC-22
+    name: "Step 8 skipped when no splitting occurred"
+    acceptance_criteria: "AC-B01"
+    type: behavior
+    test_method: content_check
+    input: "step_8 in Execution Procedure"
+    expected: "contains skip condition: 'IF no feature was split' or 'no parent-child relationship'"
+    priority: must
+
+  # ── Should (AC-C07 through AC-C09) ─────────────────────────
+  - id: TC-23
+    name: "Dedup step produces coverage comparison table"
+    acceptance_criteria: "AC-C07"
+    type: content
+    test_method: content_check
+    input: "step_8 in Execution Procedure"
+    expected: "contains structured coverage table with Parent FR/AC, Covered By, Status columns"
+    priority: should
+
+  - id: TC-24
+    name: "Anti-patterns include keeping duplicate parent"
+    acceptance_criteria: "AC-C08"
+    type: content
+    test_method: table_parse
+    input: "Anti-Patterns table"
+    expected: "row with 'Keeping duplicate parent' or similar anti-pattern"
+    priority: should
+
+  - id: TC-25
+    name: "Examples include dedup scenario"
+    acceptance_criteria: "AC-C09"
+    type: content
+    test_method: content_check
+    input: "candidate/references/examples.md"
+    expected: "contains example with parent feature deduplication (split + coverage check)"
+    priority: should

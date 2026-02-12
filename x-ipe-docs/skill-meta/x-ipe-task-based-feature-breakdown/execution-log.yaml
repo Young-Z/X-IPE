@@ -1,0 +1,223 @@
+execution_log:
+  skill: x-ipe-task-based-feature-breakdown
+  candidate_path: candidate/SKILL.md
+  executed_at: "2025-07-24"
+  rounds_completed: [reflect, test-generate, test-run]
+
+  summary:
+    total_tests: 25
+    passed: 25
+    failed: 0
+    pass_rate: "100%"
+    verdict: PASS
+
+  round_1_reflect:
+    fixes_applied: 0
+    notes: "All acceptance criteria (AC-S01–AC-S03, AC-C01–AC-C09, AC-B01) satisfied. No gaps found."
+
+  round_3_results:
+    # ── Structure ──────────────────────────────────────────────
+    - id: TC-01
+      name: "SKILL.md exists"
+      acceptance_criteria: AC-S01
+      type: structure
+      priority: must
+      result: PASS
+      evidence: "File candidate/SKILL.md exists (451 lines)"
+
+    - id: TC-02
+      name: "Frontmatter has name field"
+      acceptance_criteria: AC-S01
+      type: structure
+      priority: must
+      result: PASS
+      evidence: "name: x-ipe-task-based-feature-breakdown found in frontmatter"
+
+    - id: TC-03
+      name: "Frontmatter has description field"
+      acceptance_criteria: AC-S01
+      type: structure
+      priority: must
+      result: PASS
+      evidence: "description field present and non-empty in frontmatter"
+
+    - id: TC-04
+      name: "examples.md exists"
+      acceptance_criteria: AC-S02
+      type: structure
+      priority: must
+      result: PASS
+      evidence: "File candidate/references/examples.md exists"
+
+    - id: TC-05
+      name: "examples.md has at least 1 example"
+      acceptance_criteria: AC-S02
+      type: structure
+      priority: must
+      result: PASS
+      evidence: "5 '## Example' headings found"
+
+    - id: TC-06
+      name: "SKILL.md under 500 lines"
+      acceptance_criteria: AC-S03
+      type: structure
+      priority: must
+      result: PASS
+      evidence: "451 lines (< 500 threshold)"
+
+    # ── Content ────────────────────────────────────────────────
+    - id: TC-07
+      name: "Purpose section present"
+      acceptance_criteria: AC-C01
+      type: content
+      priority: must
+      result: PASS
+      evidence: "## Purpose heading found"
+
+    - id: TC-08
+      name: "Important Notes section present"
+      acceptance_criteria: AC-C01
+      type: content
+      priority: must
+      result: PASS
+      evidence: "## Important Notes heading found"
+
+    - id: TC-09
+      name: "Input Parameters section present"
+      acceptance_criteria: AC-C01
+      type: content
+      priority: must
+      result: PASS
+      evidence: "## Input Parameters heading found"
+
+    - id: TC-10
+      name: "Definition of Ready section present"
+      acceptance_criteria: AC-C01
+      type: content
+      priority: must
+      result: PASS
+      evidence: "## Definition of Ready heading found"
+
+    - id: TC-11
+      name: "Execution Flow section present"
+      acceptance_criteria: AC-C01
+      type: content
+      priority: must
+      result: PASS
+      evidence: "## Execution Flow heading found"
+
+    - id: TC-12
+      name: "Execution Procedure section present"
+      acceptance_criteria: AC-C01
+      type: content
+      priority: must
+      result: PASS
+      evidence: "## Execution Procedure heading found"
+
+    - id: TC-13
+      name: "Output Result section present"
+      acceptance_criteria: AC-C01
+      type: content
+      priority: must
+      result: PASS
+      evidence: "## Output Result heading found"
+
+    - id: TC-14
+      name: "Definition of Done section present"
+      acceptance_criteria: AC-C01
+      type: content
+      priority: must
+      result: PASS
+      evidence: "## Definition of Done heading found"
+
+    - id: TC-15
+      name: "Patterns section present"
+      acceptance_criteria: AC-C01
+      type: content
+      priority: must
+      result: PASS
+      evidence: "## Patterns & Anti-Patterns heading found"
+
+    - id: TC-16
+      name: "Examples section present"
+      acceptance_criteria: AC-C01
+      type: content
+      priority: must
+      result: PASS
+      evidence: "## Examples heading found"
+
+    - id: TC-17
+      name: "Execution Flow table has 9 steps"
+      acceptance_criteria: AC-C02
+      type: content
+      priority: must
+      result: PASS
+      evidence: "9 numbered step rows in Execution Flow table"
+
+    - id: TC-18
+      name: "Step 8 compares parent FRs/ACs against sub-feature union"
+      acceptance_criteria: AC-C03
+      type: content
+      priority: must
+      result: PASS
+      evidence: "step_8 contains FR/AC comparison between parent and sub-features with coverage logic"
+
+    - id: TC-19
+      name: "Step 8 removes parent via feature-board-management at 100% coverage"
+      acceptance_criteria: AC-C04
+      type: content
+      priority: must
+      result: PASS
+      evidence: "step_8 calls feature-board-management to archive/remove parent when fully covered"
+
+    - id: TC-20
+      name: "Step 8 keeps parent at partial coverage with gap flag"
+      acceptance_criteria: AC-C05
+      type: content
+      priority: must
+      result: PASS
+      evidence: "step_8 has conditional: partial coverage keeps parent, adds note about uncovered items"
+
+    - id: TC-21
+      name: "DoD includes dedup checkpoint"
+      acceptance_criteria: AC-C06
+      type: content
+      priority: must
+      result: PASS
+      evidence: "DoD checkpoint 'Parent feature deduplication verified' found in definition_of_done"
+
+    # ── Behavior ───────────────────────────────────────────────
+    - id: TC-22
+      name: "Step 8 skipped when no splitting occurred"
+      acceptance_criteria: AC-B01
+      type: behavior
+      priority: must
+      result: PASS
+      evidence: "step_8 contains 'IF no feature was split into sub-features...Skip this step entirely'"
+
+    # ── Should ─────────────────────────────────────────────────
+    - id: TC-23
+      name: "Dedup step produces coverage comparison table"
+      acceptance_criteria: AC-C07
+      type: content
+      priority: should
+      result: PASS
+      evidence: "step_8 contains '| Parent FR/AC | Covered By | Status |' table structure"
+
+    - id: TC-24
+      name: "Anti-patterns include keeping duplicate parent"
+      acceptance_criteria: AC-C08
+      type: content
+      priority: should
+      result: PASS
+      evidence: "'Keeping duplicate parent' row found in Anti-Patterns table"
+
+    - id: TC-25
+      name: "Examples include dedup scenario"
+      acceptance_criteria: AC-C09
+      type: content
+      priority: should
+      result: PASS
+      evidence: "Example 5 'Parent Feature Deduplication After Split' in examples.md covers full + partial coverage"
+
+  issues_found: []
