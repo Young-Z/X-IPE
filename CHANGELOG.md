@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-025-C: KB Manager Skill**
+  - LLMService: DashScope Generation API wrapper for AI-powered text completion
+  - KBManagerService: Classification, summary generation, search, and reorganization
+  - `POST /api/kb/process`: Trigger classification of landing files with AI-suggested topics
+  - `POST /api/kb/process/confirm`: Execute confirmed classifications (move files, generate summaries)
+  - `POST /api/kb/process/cancel`: Cancel active processing session
+  - `GET /api/kb/search?q={query}`: Search knowledge base files by query
+  - `POST /api/kb/reorganize`: Trigger topic reorganization
+  - Session-based processing flow with pending/confirmed/cancelled states
+  - Fallback to "uncategorized" topic when AI classification unavailable
+  - Per-file atomic processing (failure on one file doesn't affect others)
+  - 57 unit tests, 10 acceptance tests (100% pass rate)
+
 - **FEATURE-029-A: Session Explorer Core**
   - Console Session Explorer panel replacing the 2-pane split-terminal layout
   - Right-side explorer panel (220px) with vertically scrollable session list
