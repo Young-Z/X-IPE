@@ -237,13 +237,24 @@
     flex-direction: column;
     background: #252526;
     border-left: 1px solid #333;
+    transition: width 0.25s ease, min-width 0.25s ease, max-width 0.25s ease, visibility 0s linear 0s;
+    overflow: hidden;
+}
+
+.session-explorer.collapsed {
+    width: 0;
+    min-width: 0;
+    max-width: 0;
+    border-left: none;
+    visibility: hidden;
+    transition: width 0.25s ease, min-width 0.25s ease, max-width 0.25s ease, visibility 0s linear 0.25s;
 }
 
 .explorer-header {
     height: 32px;
     display: flex;
     align-items: center;
-    padding: 0 12px;
+    padding: 0 8px 0 12px;
     background: #2d2d2d;
     border-bottom: 1px solid #333;
 }
@@ -253,6 +264,7 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: #888;
+    flex: 1;
 }
 
 .session-list {
@@ -307,32 +319,29 @@
     white-space: nowrap;
 }
 
-/* Add session button */
+/* Add session button - in explorer header */
 .explorer-add-btn {
-    height: 36px;
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: transparent;
     border: none;
-    border-top: 1px solid #333;
+    border-radius: 4px;
     color: #888;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
+    flex-shrink: 0;
     transition: background-color 0.15s, color 0.15s;
 }
 .explorer-add-btn:hover {
-    background: #2a2d2e;
-    color: #ccc;
+    background: rgba(78, 201, 176, 0.15);
+    color: #4ec9b0;
 }
 .explorer-add-btn:disabled {
     opacity: 0.3;
     cursor: not-allowed;
-}
-
-/* Hide explorer in zen mode */
-.terminal-panel.zen-mode .session-explorer {
-    display: none;
 }
 
 /* =============================================================================

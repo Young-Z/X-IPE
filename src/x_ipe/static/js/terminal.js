@@ -1161,12 +1161,14 @@
             this.header = document.getElementById('terminal-header');
             this.toggleBtn = document.getElementById('terminal-toggle');
             this.zenBtn = document.getElementById('terminal-zen-btn');
+            this.explorerToggleBtn = document.getElementById('terminal-explorer-toggle');
             this.copilotCmdBtn = document.getElementById('copilot-cmd-btn');
             this.resizeHandle = document.getElementById('terminal-resize-handle');
             this.terminalManager = terminalManager;
 
             this.isExpanded = false;
             this.isZenMode = false;
+            this.explorerVisible = true;
             this.panelHeight = 300;
 
             this._bindEvents();
@@ -1189,6 +1191,13 @@
                 this.zenBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     this.toggleZenMode();
+                });
+            }
+
+            if (this.explorerToggleBtn) {
+                this.explorerToggleBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleExplorer();
                 });
             }
 
@@ -1283,6 +1292,14 @@
             } else {
                 this._enterZenMode();
             }
+        }
+
+        toggleExplorer() {
+            const explorer = document.getElementById('session-explorer');
+            if (!explorer) return;
+            this.explorerVisible = !this.explorerVisible;
+            explorer.classList.toggle('collapsed', !this.explorerVisible);
+            setTimeout(() => this.terminalManager.fitActive(), 300);
         }
 
         _enterZenMode() {
