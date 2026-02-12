@@ -336,6 +336,61 @@
 }
 
 /* =============================================================================
+   FEATURE-029-B: Session Actions
+   ============================================================================= */
+
+.session-action-btn {
+    background: transparent;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 2px 4px;
+    font-size: 12px;
+    line-height: 1;
+    flex-shrink: 0;
+    opacity: 0.5;
+    transition: opacity 0.15s, color 0.15s;
+}
+.session-action-btn:hover {
+    opacity: 1;
+    color: #ccc;
+}
+.session-action-btn.delete-btn:hover {
+    color: #f44;
+}
+
+.session-name-input {
+    flex: 1;
+    background: #1e1e1e;
+    border: 1px solid #4ec9b0;
+    color: #fff;
+    font-size: 13px;
+    padding: 1px 4px;
+    outline: none;
+    min-width: 0;
+}
+
+.session-toast {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #333;
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 100;
+}
+.session-toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* =============================================================================
    FEATURE-021: Console Voice Input
    ============================================================================= */
 

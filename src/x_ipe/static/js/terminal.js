@@ -166,6 +166,7 @@
          */
         addSession(existingSessionId = null, name = null) {
             if (this.sessions.size >= MAX_SESSIONS) {
+                if (this.explorer) this.explorer.showToast('Maximum 10 sessions reached');
                 console.warn('[Terminal] Maximum sessions reached');
                 return null;
             }
@@ -288,6 +289,17 @@
             this._updateStatus();
             
             console.log(`[Terminal] Removed session "${session.name}" (${key})`);
+        }
+
+        /**
+         * Rename a session
+         */
+        renameSession(key, newName) {
+            const session = this.sessions.get(key);
+            if (!session) return;
+            session.name = newName;
+            this._saveSessionNames();
+            console.log(`[Terminal] Renamed session ${key} to "${newName}"`);
         }
 
         /**
@@ -906,9 +918,29 @@
             const nameSpan = document.createElement('span');
             nameSpan.className = 'session-name';
             nameSpan.textContent = name;
+
+            const renameBtn = document.createElement('button');
+            renameBtn.className = 'session-action-btn rename-btn';
+            renameBtn.title = 'Rename';
+            renameBtn.innerHTML = '<i class="bi bi-pencil"></i>';
+            renameBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.startRename(key);
+            });
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'session-action-btn delete-btn';
+            deleteBtn.title = 'Delete';
+            deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.manager.removeSession(key);
+            });
             
             bar.appendChild(dot);
             bar.appendChild(nameSpan);
+            bar.appendChild(renameBtn);
+            bar.appendChild(deleteBtn);
             
             bar.addEventListener('click', () => {
                 this.manager.switchSession(key);
@@ -930,6 +962,67 @@
 
         setAddButtonEnabled(enabled) {
             if (this.addBtn) this.addBtn.disabled = !enabled;
+        }
+
+        startRename(key) {
+            const bar = this.listEl.querySelector(`[data-session-key="${key}"]`);
+            if (!bar) return;
+            const nameSpan = bar.querySelector('.session-name');
+            if (!nameSpan || nameSpan.tagName === 'INPUT') return;
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'session-name-input';
+            input.value = nameSpan.textContent;
+            const originalName = nameSpan.textContent;
+
+            let done = false;
+            const confirm = () => {
+                if (done) return;
+                done = true;
+                const newName = input.value.trim();
+                if (newName && newName !== originalName) {
+                    this.manager.renameSession(key, newName);
+                }
+                const span = document.createElement('span');
+                span.className = 'session-name';
+                span.textContent = newName || originalName;
+                input.replaceWith(span);
+            };
+
+            const cancel = () => {
+                if (done) return;
+                done = true;
+                const span = document.createElement('span');
+                span.className = 'session-name';
+                span.textContent = originalName;
+                input.replaceWith(span);
+            };
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); confirm(); }
+                if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+            });
+            input.addEventListener('blur', () => confirm());
+
+            nameSpan.replaceWith(input);
+            input.focus();
+            input.select();
+        }
+
+        showToast(message) {
+            const panel = document.getElementById('terminal-panel');
+            if (!panel) return;
+            let toast = panel.querySelector('.session-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.className = 'session-toast';
+                toast.setAttribute('role', 'alert');
+                panel.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.classList.add('visible');
+            setTimeout(() => toast.classList.remove('visible'), 2500);
         }
     }
 
