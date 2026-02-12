@@ -25,6 +25,7 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-312 | Feature Refinement | Refine FEATURE-025-C KB Manager Skill specification | Pulse | 02-12-2026 07:45:00 | [specification.md](../requirements/FEATURE-025-C/specification.md) | 30 ACs (6 categories), 5 FRs, 6 NFRs, 10 edge cases. Dual-nature: REST API + Copilot skill. |
 | TASK-294 | Feature Closing | Close FEATURE-025-B KB Landing Zone and create PR | Pulse | 02-11-2026 13:38:00 | [CHANGELOG.md](../../CHANGELOG.md), [PR branch](feature/025-B-kb-landing-zone) | All ACs verified (13/13 acceptance tests). CHANGELOG updated. features.md → Complete. Branch pushed. |
 | TASK-293 | Feature Closing | Close FEATURE-028-D Settings Language Switch | Sage | 02-11-2026 13:40:00 | [PR branch](https://github.com/Young-Z/X-IPE/compare/feature/028-D-settings-language-switch) | 14/14 ACs verified. CHANGELOG updated. features.md → Complete. Branch pushed, PR ready. |
 | TASK-293 | Feature Acceptance Test | Execute acceptance tests for FEATURE-025-B KB Landing Zone | Pulse | 02-11-2026 10:45:00 | [acceptance-test-cases.md](../../x-ipe-docs/requirements/FEATURE-025-B/acceptance-test-cases.md) | 13/13 tests passed (100%). All P0/P1 ACs verified via Chrome DevTools MCP. Mockup validation passed. |
