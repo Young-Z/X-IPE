@@ -51,7 +51,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-023-D | Tracing Skill Integration | v1.0 | Completed | [specification.md](../requirements/FEATURE-023-D/specification.md), [technical-design.md](../requirements/FEATURE-023-D/technical-design.md) | 02-01-2026 | 02-01-2026 09:20:00 |
 | FEATURE-024 | Project Quality Evaluation UI | v1.0 | Completed | [specification.md](../requirements/FEATURE-024/specification.md), [technical-design.md](../requirements/FEATURE-024/technical-design.md) | 02-01-2026 | 02-01-2026 11:20:00 |
 | FEATURE-025-A | KB Core Infrastructure | v1.0 | Completed | [specification.md](../requirements/FEATURE-025-A/specification.md), [technical-design.md](../requirements/FEATURE-025-A/technical-design.md), [acceptance-test-cases.md](../requirements/FEATURE-025-A/acceptance-test-cases.md) | 02-05-2026 | 02-05-2026 16:15:00 |
-| FEATURE-025-B | KB Landing Zone | v1.0 | Acceptance Tested | [specification.md](../requirements/FEATURE-025-B/specification.md), [technical-design.md](../requirements/FEATURE-025-B/technical-design.md), [acceptance-test-cases.md](../requirements/FEATURE-025-B/acceptance-test-cases.md) | 02-05-2026 | 02-11-2026 10:45:00 |
+| FEATURE-025-B | KB Landing Zone | v1.0 | Complete | [specification.md](../requirements/FEATURE-025-B/specification.md), [technical-design.md](../requirements/FEATURE-025-B/technical-design.md), [acceptance-test-cases.md](../requirements/FEATURE-025-B/acceptance-test-cases.md) | 02-05-2026 | 02-11-2026 13:38:00 |
 | FEATURE-025-C | KB Manager Skill | v1.0 | Designed | [specification.md](../requirements/FEATURE-025-C/specification.md), [technical-design.md](../requirements/FEATURE-025-C/technical-design.md) | 02-05-2026 | 02-12-2026 07:55:00 |
 | FEATURE-025-D | KB Topics & Summaries | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
 | FEATURE-025-E | KB Search & Preview | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
@@ -65,7 +65,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-028-A | Bilingual Prompt Schema & Migration | v1.0 | Implemented | [specification.md](../requirements/FEATURE-028-A/specification.md), [technical-design.md](../requirements/FEATURE-028-A/technical-design.md) | 02-11-2026 | 02-11-2026 03:00:00 |
 | FEATURE-028-B | CLI Language Selection & Instructions | v1.0 | Implemented | [specification.md](../requirements/FEATURE-028-B/specification.md), [technical-design.md](../requirements/FEATURE-028-B/technical-design.md) | 02-11-2026 | 02-11-2026 03:00:00 |
 | FEATURE-028-C | Frontend Prompt Language Filtering | v1.0 | Implemented | [specification.md](../requirements/FEATURE-028-C/specification.md), [technical-design.md](../requirements/FEATURE-028-C/technical-design.md) | 02-11-2026 | 02-11-2026 03:00:00 |
-| FEATURE-028-D | Settings Language Switch (Web UI) | v1.0 | Implemented | [specification.md](../requirements/FEATURE-028-D/specification.md), [technical-design.md](../requirements/FEATURE-028-D/technical-design.md), [CR-002.md](../requirements/FEATURE-028-D/CR-002.md) | 02-11-2026 | 02-11-2026 10:15:00 |
+| FEATURE-028-D | Settings Language Switch (Web UI) | v1.0 | Complete | [specification.md](../requirements/FEATURE-028-D/specification.md), [technical-design.md](../requirements/FEATURE-028-D/technical-design.md), [CR-002.md](../requirements/FEATURE-028-D/CR-002.md) | 02-11-2026 | 02-11-2026 13:30:00 |
 | FEATURE-029-A | Session Explorer Core | v1.0 | Implemented | [specification.md](../requirements/FEATURE-029-A/specification.md), [technical-design.md](../requirements/FEATURE-029-A/technical-design.md) | 02-11-2026 | 02-11-2026 16:30:00 |
 | FEATURE-029-B | Session Actions | v1.0 | Implemented | - | 02-11-2026 | 02-12-2026 08:30:00 |
 | FEATURE-029-C | Session Hover Preview | v1.0 | Planned | - | 02-11-2026 | 02-11-2026 15:34:00 |
@@ -100,7 +100,7 @@ This board tracks all features across the project lifecycle.
 - FEATURE-024: Project Quality Evaluation UI
 - FEATURE-027-B: CLI Init & Selection
 
-### Designed (6)
+### Designed (5)
 - FEATURE-025-C: KB Manager Skill
 - FEATURE-027-C: Skill & Instruction Translation
 - FEATURE-028-A: Bilingual Prompt Schema & Migration
@@ -109,7 +109,7 @@ This board tracks all features across the project lifecycle.
 - FEATURE-028-C: Frontend Prompt Language Filtering
 - FEATURE-028-D: Settings Language Switch (Web UI)
 
-### Acceptance Tested (1)
+### Complete (1)
 - FEATURE-025-B: KB Landing Zone
 
 ### Implemented (2)

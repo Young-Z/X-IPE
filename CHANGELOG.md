@@ -26,6 +26,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 16 acceptance test cases (16/16 pass, 100%)
 
 ### Changed
+- **FEATURE-025-B: KB Landing Zone**
+  - File upload to Knowledge Base landing folder via Upload button or drag-and-drop
+  - Supported file types: PDF, MD, TXT, DOCX, XLSX, code files (.py, .js, .ts, .java, .go, .rs, .c, .cpp, .h, .html, .css, .json, .yaml), images (.png, .jpg, .jpeg, .gif, .svg, .webp)
+  - Maximum file size: 50MB per file with validation
+  - Duplicate file detection (skips with warning, preserves original)
+  - File grid view with responsive card layout showing type icon, filename, and size
+  - List view alternative with same data and selection support
+  - File card selection with visual highlight (click to toggle, Select All, Clear)
+  - Batch delete with confirmation dialog and disk cleanup
+  - Sort by name, size, date, or type with ascending/descending toggle
+  - Empty state with centered upload zone and drop area
+  - Automatic index refresh after upload/delete operations
+  - Path traversal protection on delete operations
+  - Backend: KBService extensions (`upload_files()`, `delete_files()`, `get_landing_files()`, `_validate_upload()`)
+  - API endpoints: `POST /api/kb/upload`, `POST /api/kb/landing/delete`, `GET /api/kb/landing`
+  - Frontend: `kb-landing.js` (~550 lines) + `kb-landing.css` (~370 lines)
+  - 57 unit tests across 9 test classes, 13 acceptance tests (all passing)
+- **FEATURE-028-D: Settings Language Switch (Web UI)**
+  - Language switching from Settings page — no CLI needed
+  - Language card with globe icon, current language badge, dropdown (English / 中文)
+  - Confirmation modal before switching (warns about copilot instruction regeneration)
+  - Same-language guard: info toast "Already using [language]" — no API call
+  - `POST /api/config/language` endpoint with atomicity: extract instructions BEFORE updating `.x-ipe.yaml`
+  - Success/error/info toast notifications — no page reload
+  - Dropdown disabled during switch to prevent concurrent operations
+  - Badge updates in real-time after successful switch
+  - Error recovery: dropdown reverts to previous language on failure
+  - 17 unit/integration tests, 19 acceptance tests (Playwright)
+
 - **FEATURE-026: Homepage Infinity Loop**
   - Interactive homepage visualization displaying 8 development lifecycle stages on an infinity loop (∞)
   - Entry point: Click "X IPE" logo in header to display homepage
