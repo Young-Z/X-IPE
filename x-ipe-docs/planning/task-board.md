@@ -9,6 +9,7 @@
 | TASK-323 | Feature Refinement | Refine FEATURE-029-D Explorer UI Controls | Flux | ✅ completed | 02-12-2026 10:46:00 | [specification.md](../requirements/FEATURE-029-D/specification.md) | Technical Design |
 | TASK-324 | Feature Refinement | Refine FEATURE-025-D KB Topics & Summaries | Pulse | ✅ completed | 02-12-2026 10:50:00 | [specification.md](../requirements/FEATURE-025-D/specification.md) | Technical Design |
 | TASK-325 | Technical Design | Technical design for FEATURE-029-D Explorer UI Controls | Flux | ✅ completed | 02-12-2026 13:18:00 | [technical-design.md](../requirements/FEATURE-029-D/technical-design.md) | Code Implementation |
+| TASK-326 | Code Implementation | Implement FEATURE-029-D Explorer UI Controls | Flux | ✅ completed | 02-12-2026 13:20:00 | [terminal.js](../../src/x_ipe/static/js/terminal.js), [terminal.css](../../src/x_ipe/static/css/terminal.css), [index.html](../../src/x_ipe/templates/index.html) | Feature Acceptance Test |
 
 
 

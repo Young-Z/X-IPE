@@ -14,6 +14,11 @@
     const SESSION_KEY = 'terminal_session_ids';
     const SESSION_NAMES_KEY = 'terminal_session_names';
     const MAX_SESSIONS = 10;
+    const EXPLORER_WIDTH_KEY = 'console_explorer_width';
+    const EXPLORER_COLLAPSED_KEY = 'console_explorer_collapsed';
+    const EXPLORER_DEFAULT_WIDTH = 220;
+    const EXPLORER_MIN_WIDTH = 160;
+    const EXPLORER_MAX_WIDTH = 360;
 
     /**
      * Debounce utility
@@ -1128,6 +1133,11 @@
             }
 
             this._previewContainer.style.display = 'flex';
+            // Sync preview offset with current explorer width
+            const explorer = document.getElementById('session-explorer');
+            if (explorer && !explorer.classList.contains('collapsed')) {
+                this._previewContainer.style.right = explorer.style.width || '';
+            }
             try { this._previewFitAddon.fit(); } catch(e) {}
         }
 
@@ -1169,6 +1179,8 @@
             this.isExpanded = false;
             this.isZenMode = false;
             this.explorerVisible = true;
+            this.explorerWidth = EXPLORER_DEFAULT_WIDTH;
+            this.explorerResizeHandle = document.getElementById('explorer-resize-handle');
             this.panelHeight = 300;
 
             this._bindEvents();
@@ -1209,6 +1221,8 @@
             }
 
             this._initResize();
+            this._initExplorerResize();
+            this._restoreExplorerState();
 
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && this.isZenMode) {
@@ -1299,7 +1313,99 @@
             if (!explorer) return;
             this.explorerVisible = !this.explorerVisible;
             explorer.classList.toggle('collapsed', !this.explorerVisible);
+
+            if (this.explorerResizeHandle) {
+                this.explorerResizeHandle.style.display = this.explorerVisible ? '' : 'none';
+            }
+
+            this._saveExplorerCollapsed(!this.explorerVisible);
+
+            if (this.explorerVisible) {
+                this._updateExplorerWidth(this.explorerWidth);
+            }
+
             setTimeout(() => this.terminalManager.fitActive(), 300);
+        }
+
+        _initExplorerResize() {
+            const handle = this.explorerResizeHandle;
+            if (!handle) return;
+
+            handle.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                handle.classList.add('dragging');
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+
+                const body = document.getElementById('terminal-body');
+
+                const onMove = (e) => {
+                    const bodyRect = body.getBoundingClientRect();
+                    const newWidth = bodyRect.right - e.clientX;
+                    const clamped = Math.max(EXPLORER_MIN_WIDTH, Math.min(EXPLORER_MAX_WIDTH, newWidth));
+                    this.explorerWidth = clamped;
+                    this._updateExplorerWidth(clamped);
+                };
+
+                const onUp = () => {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                    handle.classList.remove('dragging');
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                    this._saveExplorerWidth(this.explorerWidth);
+                    this.terminalManager.fitActive();
+                };
+
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+            });
+        }
+
+        _restoreExplorerState() {
+            const explorer = document.getElementById('session-explorer');
+            if (!explorer) return;
+
+            try {
+                const savedWidth = localStorage.getItem(EXPLORER_WIDTH_KEY);
+                if (savedWidth !== null) {
+                    const w = Math.max(EXPLORER_MIN_WIDTH, Math.min(EXPLORER_MAX_WIDTH, parseInt(savedWidth, 10)));
+                    if (!isNaN(w)) {
+                        this.explorerWidth = w;
+                        this._updateExplorerWidth(w);
+                    }
+                }
+            } catch (e) {}
+
+            try {
+                const savedCollapsed = localStorage.getItem(EXPLORER_COLLAPSED_KEY);
+                if (savedCollapsed === 'true') {
+                    this.explorerVisible = false;
+                    explorer.classList.add('collapsed');
+                    if (this.explorerResizeHandle) this.explorerResizeHandle.style.display = 'none';
+                }
+            } catch (e) {}
+        }
+
+        _updateExplorerWidth(width) {
+            const explorer = document.getElementById('session-explorer');
+            if (!explorer) return;
+            explorer.style.width = width + 'px';
+            explorer.style.minWidth = width + 'px';
+            explorer.style.maxWidth = width + 'px';
+
+            const preview = document.querySelector('.session-preview');
+            if (preview) {
+                preview.style.right = width + 'px';
+            }
+        }
+
+        _saveExplorerWidth(width) {
+            try { localStorage.setItem(EXPLORER_WIDTH_KEY, String(width)); } catch (e) {}
+        }
+
+        _saveExplorerCollapsed(collapsed) {
+            try { localStorage.setItem(EXPLORER_COLLAPSED_KEY, String(collapsed)); } catch (e) {}
         }
 
         _enterZenMode() {

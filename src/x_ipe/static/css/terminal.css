@@ -231,8 +231,7 @@
 /* Session Explorer panel - right side */
 .session-explorer {
     width: 220px;
-    min-width: 220px;
-    max-width: 220px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     background: #252526;
@@ -248,6 +247,40 @@
     border-left: none;
     visibility: hidden;
     transition: width 0.25s ease, min-width 0.25s ease, max-width 0.25s ease, visibility 0s linear 0.25s;
+}
+
+/* Explorer resize handle */
+.explorer-resize-handle {
+    width: 5px;
+    cursor: col-resize;
+    background: #333;
+    flex-shrink: 0;
+    position: relative;
+    transition: background 0.15s;
+    z-index: 10;
+}
+
+.explorer-resize-handle:hover,
+.explorer-resize-handle.dragging {
+    background: rgba(78, 201, 176, 0.3);
+}
+
+.explorer-resize-handle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 2px;
+    height: 24px;
+    border-radius: 1px;
+    background: #888;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.explorer-resize-handle:hover::after {
+    opacity: 1;
 }
 
 .explorer-header {
