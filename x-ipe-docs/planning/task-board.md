@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-319 | Code Implementation | Implement FEATURE-025-C KB Manager Skill | Pulse | 🔄 in_progress | 02-12-2026 10:05:00 | - | Feature Acceptance Test |
 
 
 
@@ -199,8 +200,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 0
-- **In Progress:** 0
+- **Total Active:** 1
+- **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
 - **Completed (archived):** 318
