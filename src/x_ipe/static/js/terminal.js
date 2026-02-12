@@ -483,7 +483,7 @@
                 reconnectionDelayMax: 30000,
                 randomizationFactor: 0.5,
                 timeout: 60000,
-                forceNew: false,
+                forceNew: true,
                 pingTimeout: 300000,
                 pingInterval: 60000
             });
@@ -1086,7 +1086,7 @@
             this._previewTerminal = new Terminal({
                 disableStdin: true,
                 scrollback: 500,
-                fontSize: 12,
+                fontSize: terminalConfig.fontSize,
                 fontFamily: terminalConfig.fontFamily,
                 theme: terminalConfig.theme,
                 cursorBlink: false
