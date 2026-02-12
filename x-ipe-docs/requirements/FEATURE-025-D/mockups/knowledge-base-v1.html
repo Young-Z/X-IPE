@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Base - X-IPE Mockup</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =================================================================
+         * DESIGN SYSTEM - Knowledge Base Mockup
+         * Aesthetic: Modern IDE with subtle warmth
+         * ================================================================= */
+        
+        :root {
+            /* Core Layout */
+            --top-bar-height: 44px;
+            --sidebar-width: 280px;
+            --terminal-height: 36px;
+            
+            /* Color Palette - Warm Dark Theme */
+            --bg-primary: #1a1b1e;
+            --bg-secondary: #212226;
+            --bg-tertiary: #2a2b30;
+            --bg-elevated: #323338;
+            --bg-hover: #3a3b42;
+            --bg-active: #4a4b54;
+            
+            /* Accent Colors */
+            --accent-primary: #7c6aef;
+            --accent-secondary: #a78bfa;
+            --accent-warm: #f59e0b;
+            --accent-success: #10b981;
+            --accent-info: #3b82f6;
+            --accent-danger: #ef4444;
+            
+            /* Text Colors */
+            --text-primary: #e4e5e9;
+            --text-secondary: #9ca3af;
+            --text-tertiary: #6b7280;
+            --text-muted: #4b5563;
+            
+            /* Borders */
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-default: rgba(255, 255, 255, 0.1);
+            --border-strong: rgba(255, 255, 255, 0.15);
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+            
+            /* Typography */
+            --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: var(--font-sans);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        /* =================================================================
+         * LAYOUT STRUCTURE
+         * ================================================================= */
+        .app-root {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* =================================================================
+         * TOP BAR
+         * ================================================================= */
+        .top-bar {
+            height: var(--top-bar-height);
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-default);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            flex-shrink: 0;
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .brand i {
+            color: var(--accent-primary);
+            font-size: 18px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb-sep {
+            color: var(--text-tertiary);
+        }
+
+        .breadcrumb-current {
+            color: var(--accent-warm);
+            font-weight: 500;
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* =================================================================
+         * BUTTONS
+         * ================================================================= */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-1px);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-default);
+        }
+
+        .btn-ghost:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--border-strong);
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+        }
+
+        .btn-icon:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        /* =================================================================
+         * MAIN CONTENT AREA
+         * ================================================================= */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* =================================================================
+         * SIDEBAR
+         * ================================================================= */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-default);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-tertiary);
+        }
+
+        .sidebar-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .sidebar-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background: transparent;
+            border: none;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+
+        .sidebar-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        /* =================================================================
+         * SECTION TABS
+         * ================================================================= */
+        .section-tabs {
+            display: flex;
+            padding: 8px 12px;
+            gap: 4px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .section-tab {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            background: transparent;
+            border: none;
+            color: var(--text-tertiary);
+            font-size: 12px;
+            font-weight: 500;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .section-tab:hover {
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+        }
+
+        .section-tab.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .section-tab .badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* =================================================================
+         * SEARCH BAR
+         * ================================================================= */
+        .search-container {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-default);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: var(--font-sans);
+            transition: all 0.15s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            background: var(--bg-elevated);
+            box-shadow: 0 0 0 3px rgba(124, 106, 239, 0.15);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+
+        /* =================================================================
+         * TREE VIEW
+         * ================================================================= */
+        .tree-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+
+        .tree-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .tree-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .tree-container::-webkit-scrollbar-thumb {
+            background: var(--bg-hover);
+            border-radius: 3px;
+        }
+
+        .tree-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 12px 6px 16px;
+            cursor: pointer;
+            transition: background 0.1s;
+            gap: 8px;
+        }
+
+        .tree-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .tree-item.active {
+            background: var(--bg-active);
+        }
+
+        .tree-item.landing {
+            border-left: 3px solid var(--accent-warm);
+        }
+
+        .tree-item.processed {
+            border-left: 3px solid var(--accent-success);
+        }
+
+        .tree-item.topic {
+            border-left: 3px solid var(--accent-info);
+        }
+
+        .tree-chevron {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-tertiary);
+            font-size: 10px;
+            transition: transform 0.15s;
+        }
+
+        .tree-chevron.expanded {
+            transform: rotate(90deg);
+        }
+
+        .tree-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .tree-icon.folder {
+            color: var(--accent-warm);
+        }
+
+        .tree-icon.file {
+            color: var(--text-tertiary);
+        }
+
+        .tree-icon.pdf {
+            color: #ef4444;
+        }
+
+        .tree-icon.md {
+            color: var(--accent-info);
+        }
+
+        .tree-label {
+            flex: 1;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tree-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: var(--bg-elevated);
+            color: var(--text-tertiary);
+        }
+
+        .tree-nested {
+            padding-left: 20px;
+        }
+
+        /* =================================================================
+         * CONTENT PANEL
+         * ================================================================= */
+        .content-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+            overflow: hidden;
+        }
+
+        .content-header {
+            padding: 12px 20px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-default);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .content-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .content-title h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .content-title .status-badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .status-badge.landing {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent-warm);
+        }
+
+        .status-badge.processed {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-success);
+        }
+
+        .content-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* =================================================================
+         * ACTION TOOLBAR
+         * ================================================================= */
+        .action-toolbar {
+            padding: 12px 20px;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .action-toolbar .action-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .action-toolbar .divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border-default);
+        }
+
+        /* =================================================================
+         * CONTENT BODY - FILE GRID
+         * ================================================================= */
+        .content-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .file-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: 10px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .file-card:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-strong);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .file-card:hover::before {
+            opacity: 1;
+        }
+
+        .file-card.selected {
+            border-color: var(--accent-primary);
+            background: rgba(124, 106, 239, 0.08);
+        }
+
+        .file-card.selected::before {
+            opacity: 1;
+        }
+
+        .file-card-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .file-card-icon.pdf {
+            background: rgba(239, 68, 68, 0.12);
+            color: #ef4444;
+        }
+
+        .file-card-icon.doc {
+            background: rgba(59, 130, 246, 0.12);
+            color: #3b82f6;
+        }
+
+        .file-card-icon.code {
+            background: rgba(16, 185, 129, 0.12);
+            color: #10b981;
+        }
+
+        .file-card-icon.folder {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--accent-warm);
+        }
+
+        .file-card-icon.md {
+            background: rgba(124, 106, 239, 0.12);
+            color: var(--accent-primary);
+        }
+
+        .file-card-name {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-card-meta {
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        .file-card-checkbox {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-strong);
+            border-radius: 4px;
+            background: transparent;
+            opacity: 0;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+        }
+
+        .file-card:hover .file-card-checkbox,
+        .file-card.selected .file-card-checkbox {
+            opacity: 1;
+        }
+
+        .file-card.selected .file-card-checkbox {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        /* =================================================================
+         * PREVIEW PANEL (Right Side)
+         * ================================================================= */
+        .preview-panel {
+            width: 360px;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-default);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .preview-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .preview-header h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .preview-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .preview-thumbnail {
+            width: 100%;
+            aspect-ratio: 16/10;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-tertiary);
+            font-size: 48px;
+        }
+
+        .preview-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .preview-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        .preview-info-label {
+            color: var(--text-tertiary);
+        }
+
+        .preview-info-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .preview-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .preview-tag {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+        }
+
+        .preview-actions {
+            padding: 16px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            gap: 8px;
+        }
+
+        .preview-actions .btn {
+            flex: 1;
+        }
+
+        /* =================================================================
+         * SEARCH MODAL OVERLAY
+         * ================================================================= */
+        .search-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 100px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+        }
+
+        .search-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .search-modal-content {
+            width: 600px;
+            max-width: 90%;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-default);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            transform: translateY(-20px);
+            transition: transform 0.2s;
+        }
+
+        .search-modal.active .search-modal-content {
+            transform: translateY(0);
+        }
+
+        .search-modal-header {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+            gap: 12px;
+        }
+
+        .search-modal-header i {
+            color: var(--accent-primary);
+            font-size: 20px;
+        }
+
+        .search-modal-header input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: var(--font-sans);
+            outline: none;
+        }
+
+        .search-modal-header input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .search-modal-body {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .search-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-tertiary);
+            padding: 12px 16px 8px;
+        }
+
+        .search-result {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        .search-result:hover {
+            background: var(--bg-hover);
+        }
+
+        .search-result-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+        }
+
+        .search-result-content {
+            flex: 1;
+        }
+
+        .search-result-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .search-result-path {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .search-result-highlight {
+            color: var(--accent-warm);
+            background: rgba(245, 158, 11, 0.15);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .search-modal-footer {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .search-modal-footer kbd {
+            padding: 2px 6px;
+            background: var(--bg-elevated);
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+
+        /* =================================================================
+         * TERMINAL PANEL (Bottom)
+         * ================================================================= */
+        .terminal-panel {
+            height: var(--terminal-height);
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-default);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 12px;
+        }
+
+        .terminal-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .terminal-tab {
+            padding: 4px 12px;
+            border-radius: 4px;
+            background: transparent;
+            border: none;
+            color: var(--text-tertiary);
+            font-size: 12px;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .terminal-tab:hover {
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+        }
+
+        .terminal-tab.active {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+        }
+
+        .terminal-spacer {
+            flex: 1;
+        }
+
+        /* =================================================================
+         * UPLOAD ZONE
+         * ================================================================= */
+        .upload-zone {
+            border: 2px dashed var(--border-strong);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.2s;
+            margin: 20px;
+            background: rgba(124, 106, 239, 0.03);
+        }
+
+        .upload-zone:hover,
+        .upload-zone.drag-over {
+            border-color: var(--accent-primary);
+            background: rgba(124, 106, 239, 0.08);
+        }
+
+        .upload-zone-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            background: var(--bg-elevated);
+            color: var(--accent-primary);
+            font-size: 28px;
+        }
+
+        .upload-zone-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .upload-zone-subtitle {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+        }
+
+        /* =================================================================
+         * PROCESSING INDICATOR
+         * ================================================================= */
+        .processing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            background: rgba(124, 106, 239, 0.1);
+            border-radius: 8px;
+            margin: 16px 20px;
+        }
+
+        .processing-spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-strong);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .processing-text {
+            flex: 1;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .processing-cancel {
+            font-size: 12px;
+            color: var(--accent-primary);
+            cursor: pointer;
+        }
+
+        .processing-cancel:hover {
+            text-decoration: underline;
+        }
+
+        /* =================================================================
+         * EMPTY STATE
+         * ================================================================= */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            background: var(--bg-tertiary);
+            color: var(--text-tertiary);
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-subtitle {
+            font-size: 14px;
+            color: var(--text-tertiary);
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+
+        /* =================================================================
+         * RESPONSIVE
+         * ================================================================= */
+        @media (max-width: 1200px) {
+            .preview-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                left: -280px;
+                z-index: 100;
+                height: calc(100vh - var(--top-bar-height) - var(--terminal-height));
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-root">
+        <!-- TOP BAR -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <a href="#" class="brand">
+                    <i class="bi bi-journal-code"></i>
+                    X-IPE
+                </a>
+                <div class="breadcrumb">
+                    <span>Workplace</span>
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-current">Knowledge Base</span>
+                </div>
+            </div>
+            <div class="top-bar-right">
+                <button class="btn btn-primary" title="Upload knowledge">
+                    <i class="bi bi-cloud-upload"></i>
+                    Upload
+                </button>
+                <button class="btn btn-ghost" id="btn-search" title="Search knowledge">
+                    <i class="bi bi-search"></i>
+                    Search
+                </button>
+                <button class="btn-icon" title="Stage Toolbox">
+                    <i class="bi bi-tools"></i>
+                </button>
+                <button class="btn-icon" title="Settings">
+                    <i class="bi bi-gear"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- SIDEBAR -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <span class="sidebar-title">Knowledge Base</span>
+                    <div class="sidebar-actions">
+                        <button class="sidebar-btn" title="Refresh">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                        <button class="sidebar-btn" title="Collapse all">
+                            <i class="bi bi-arrows-collapse"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Section Tabs -->
+                <div class="section-tabs">
+                    <button class="section-tab active">
+                        <i class="bi bi-inbox"></i>
+                        Landing
+                        <span class="badge">12</span>
+                    </button>
+                    <button class="section-tab">
+                        <i class="bi bi-layers"></i>
+                        Topics
+                    </button>
+                </div>
+
+                <!-- Search -->
+                <div class="search-container">
+                    <div class="search-wrapper">
+                        <i class="bi bi-search"></i>
+                        <input type="text" class="search-input" placeholder="Filter files...">
+                    </div>
+                </div>
+
+                <!-- Tree View -->
+                <div class="tree-container">
+                    <!-- Landing Section -->
+                    <div class="tree-item landing active">
+                        <span class="tree-chevron expanded"><i class="bi bi-chevron-right"></i></span>
+                        <span class="tree-icon folder"><i class="bi bi-inbox-fill"></i></span>
+                        <span class="tree-label">landing</span>
+                        <span class="tree-badge">12</span>
+                    </div>
+                    <div class="tree-nested">
+                        <div class="tree-item">
+                            <span class="tree-chevron"></span>
+                            <span class="tree-icon pdf"><i class="bi bi-file-pdf"></i></span>
+                            <span class="tree-label">research-paper-v2.pdf</span>
+                        </div>
+                        <div class="tree-item">
+                            <span class="tree-chevron"></span>
+                            <span class="tree-icon md"><i class="bi bi-markdown"></i></span>
+                            <span class="tree-label">api-documentation.md</span>
+                        </div>
+                        <div class="tree-item">
+                            <span class="tree-chevron expanded"><i class="bi bi-chevron-right"></i></span>
+                            <span class="tree-icon folder"><i class="bi bi-folder-fill"></i></span>
+                            <span class="tree-label">code-samples</span>
+                        </div>
+                        <div class="tree-nested">
+                            <div class="tree-item">
+                                <span class="tree-chevron"></span>
+                                <span class="tree-icon file"><i class="bi bi-file-code"></i></span>
+                                <span class="tree-label">example.py</span>
+                            </div>
+                            <div class="tree-item">
+                                <span class="tree-chevron"></span>
+                                <span class="tree-icon file"><i class="bi bi-file-code"></i></span>
+                                <span class="tree-label">utils.ts</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Processed Section -->
+                    <div class="tree-item processed" style="margin-top: 8px;">
+                        <span class="tree-chevron"><i class="bi bi-chevron-right"></i></span>
+                        <span class="tree-icon folder"><i class="bi bi-check-circle-fill"></i></span>
+                        <span class="tree-label">processed</span>
+                        <span class="tree-badge">5</span>
+                    </div>
+
+                    <!-- Topics Section -->
+                    <div class="tree-item topic" style="margin-top: 8px;">
+                        <span class="tree-chevron expanded"><i class="bi bi-chevron-right"></i></span>
+                        <span class="tree-icon folder"><i class="bi bi-collection-fill"></i></span>
+                        <span class="tree-label">topics</span>
+                    </div>
+                    <div class="tree-nested">
+                        <div class="tree-item">
+                            <span class="tree-chevron"><i class="bi bi-chevron-right"></i></span>
+                            <span class="tree-icon folder"><i class="bi bi-folder-fill"></i></span>
+                            <span class="tree-label">machine-learning</span>
+                            <span class="tree-badge">8</span>
+                        </div>
+                        <div class="tree-item">
+                            <span class="tree-chevron"><i class="bi bi-chevron-right"></i></span>
+                            <span class="tree-icon folder"><i class="bi bi-folder-fill"></i></span>
+                            <span class="tree-label">api-design</span>
+                            <span class="tree-badge">3</span>
+                        </div>
+                        <div class="tree-item">
+                            <span class="tree-chevron"><i class="bi bi-chevron-right"></i></span>
+                            <span class="tree-icon folder"><i class="bi bi-folder-fill"></i></span>
+                            <span class="tree-label">best-practices</span>
+                            <span class="tree-badge">6</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- CONTENT PANEL -->
+            <main class="content-panel">
+                <div class="content-header">
+                    <div class="content-title">
+                        <h2><i class="bi bi-inbox-fill" style="color: var(--accent-warm);"></i> Landing Folder</h2>
+                        <span class="status-badge landing">12 items awaiting processing</span>
+                    </div>
+                    <div class="content-actions">
+                        <button class="btn btn-primary">
+                            <i class="bi bi-cpu"></i>
+                            Process Selected
+                        </button>
+                        <button class="btn btn-ghost">
+                            <i class="bi bi-folder-symlink"></i>
+                            Move to Topic
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Toolbar -->
+                <div class="action-toolbar">
+                    <div class="action-group">
+                        <button class="btn btn-ghost" style="padding: 6px 10px;">
+                            <i class="bi bi-check-all"></i> Select All
+                        </button>
+                        <button class="btn btn-ghost" style="padding: 6px 10px;">
+                            <i class="bi bi-x"></i> Clear
+                        </button>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="action-group">
+                        <button class="btn btn-ghost" style="padding: 6px 10px;">
+                            <i class="bi bi-grid-3x3-gap"></i>
+                        </button>
+                        <button class="btn btn-ghost" style="padding: 6px 10px;">
+                            <i class="bi bi-list"></i>
+                        </button>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="action-group">
+                        <button class="btn btn-ghost" style="padding: 6px 10px;">
+                            <i class="bi bi-sort-alpha-down"></i> Sort
+                        </button>
+                        <button class="btn btn-ghost" style="padding: 6px 10px;">
+                            <i class="bi bi-funnel"></i> Filter
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Processing Indicator (shown when processing) -->
+                <div class="processing-indicator">
+                    <div class="processing-spinner"></div>
+                    <span class="processing-text">Processing 3 files... Analyzing content and generating summaries</span>
+                    <span class="processing-cancel">Cancel</span>
+                </div>
+
+                <!-- Content Body - File Grid -->
+                <div class="content-body">
+                    <div class="file-grid">
+                        <div class="file-card selected">
+                            <div class="file-card-checkbox"><i class="bi bi-check"></i></div>
+                            <div class="file-card-icon pdf"><i class="bi bi-file-pdf"></i></div>
+                            <div class="file-card-name">research-paper-v2.pdf</div>
+                            <div class="file-card-meta">2.4 MB • Today</div>
+                        </div>
+                        <div class="file-card selected">
+                            <div class="file-card-checkbox"><i class="bi bi-check"></i></div>
+                            <div class="file-card-icon md"><i class="bi bi-markdown"></i></div>
+                            <div class="file-card-name">api-documentation.md</div>
+                            <div class="file-card-meta">156 KB • Yesterday</div>
+                        </div>
+                        <div class="file-card selected">
+                            <div class="file-card-checkbox"><i class="bi bi-check"></i></div>
+                            <div class="file-card-icon folder"><i class="bi bi-folder-fill"></i></div>
+                            <div class="file-card-name">code-samples</div>
+                            <div class="file-card-meta">5 files • 2 days ago</div>
+                        </div>
+                        <div class="file-card">
+                            <div class="file-card-checkbox"></div>
+                            <div class="file-card-icon doc"><i class="bi bi-file-word"></i></div>
+                            <div class="file-card-name">project-specs.docx</div>
+                            <div class="file-card-meta">890 KB • 3 days ago</div>
+                        </div>
+                        <div class="file-card">
+                            <div class="file-card-checkbox"></div>
+                            <div class="file-card-icon code"><i class="bi bi-file-code"></i></div>
+                            <div class="file-card-name">utils.py</div>
+                            <div class="file-card-meta">12 KB • 4 days ago</div>
+                        </div>
+                        <div class="file-card">
+                            <div class="file-card-checkbox"></div>
+                            <div class="file-card-icon pdf"><i class="bi bi-file-pdf"></i></div>
+                            <div class="file-card-name">design-patterns.pdf</div>
+                            <div class="file-card-meta">5.1 MB • 5 days ago</div>
+                        </div>
+                        <div class="file-card">
+                            <div class="file-card-checkbox"></div>
+                            <div class="file-card-icon md"><i class="bi bi-markdown"></i></div>
+                            <div class="file-card-name">meeting-notes.md</div>
+                            <div class="file-card-meta">45 KB • 1 week ago</div>
+                        </div>
+                        <div class="file-card">
+                            <div class="file-card-checkbox"></div>
+                            <div class="file-card-icon folder"><i class="bi bi-folder-fill"></i></div>
+                            <div class="file-card-name">screenshots</div>
+                            <div class="file-card-meta">12 files • 1 week ago</div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- PREVIEW PANEL -->
+            <aside class="preview-panel">
+                <div class="preview-header">
+                    <h3>Preview</h3>
+                    <button class="btn-icon" title="Close preview">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="preview-content">
+                    <div class="preview-thumbnail">
+                        <i class="bi bi-file-pdf"></i>
+                    </div>
+                    <div class="preview-info">
+                        <div class="preview-info-row">
+                            <span class="preview-info-label">Name</span>
+                            <span class="preview-info-value">research-paper-v2.pdf</span>
+                        </div>
+                        <div class="preview-info-row">
+                            <span class="preview-info-label">Type</span>
+                            <span class="preview-info-value">PDF Document</span>
+                        </div>
+                        <div class="preview-info-row">
+                            <span class="preview-info-label">Size</span>
+                            <span class="preview-info-value">2.4 MB</span>
+                        </div>
+                        <div class="preview-info-row">
+                            <span class="preview-info-label">Added</span>
+                            <span class="preview-info-value">Feb 5, 2026</span>
+                        </div>
+                        <div class="preview-info-row">
+                            <span class="preview-info-label">Status</span>
+                            <span class="preview-info-value" style="color: var(--accent-warm);">Pending</span>
+                        </div>
+                    </div>
+                    <div class="preview-tags">
+                        <span class="preview-tag">research</span>
+                        <span class="preview-tag">machine-learning</span>
+                        <span class="preview-tag">neural-networks</span>
+                    </div>
+                </div>
+                <div class="preview-actions">
+                    <button class="btn btn-primary">
+                        <i class="bi bi-cpu"></i> Process
+                    </button>
+                    <button class="btn btn-ghost">
+                        <i class="bi bi-eye"></i> Open
+                    </button>
+                </div>
+            </aside>
+        </div>
+
+        <!-- TERMINAL PANEL -->
+        <footer class="terminal-panel">
+            <div class="terminal-tabs">
+                <button class="terminal-tab active">Console</button>
+                <button class="terminal-tab">KB Manager Logs</button>
+            </div>
+            <div class="terminal-spacer"></div>
+            <button class="btn-icon" title="Expand terminal">
+                <i class="bi bi-chevron-up"></i>
+            </button>
+        </footer>
+    </div>
+
+    <!-- SEARCH MODAL -->
+    <div class="search-modal" id="search-modal">
+        <div class="search-modal-content">
+            <div class="search-modal-header">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search knowledge base..." autofocus>
+                <kbd>ESC</kbd>
+            </div>
+            <div class="search-modal-body">
+                <div class="search-section-title">Recent</div>
+                <div class="search-result">
+                    <div class="search-result-icon"><i class="bi bi-file-pdf"></i></div>
+                    <div class="search-result-content">
+                        <div class="search-result-title">research-paper-v2.pdf</div>
+                        <div class="search-result-path">landing / research-paper-v2.pdf</div>
+                    </div>
+                </div>
+                <div class="search-result">
+                    <div class="search-result-icon"><i class="bi bi-markdown"></i></div>
+                    <div class="search-result-content">
+                        <div class="search-result-title">api-documentation.md</div>
+                        <div class="search-result-path">landing / api-documentation.md</div>
+                    </div>
+                </div>
+                <div class="search-section-title">Topics</div>
+                <div class="search-result">
+                    <div class="search-result-icon"><i class="bi bi-folder"></i></div>
+                    <div class="search-result-content">
+                        <div class="search-result-title"><span class="search-result-highlight">machine</span>-learning</div>
+                        <div class="search-result-path">topics / machine-learning (8 items)</div>
+                    </div>
+                </div>
+                <div class="search-result">
+                    <div class="search-result-icon"><i class="bi bi-file-text"></i></div>
+                    <div class="search-result-content">
+                        <div class="search-result-title">Neural Network Architecture Summary</div>
+                        <div class="search-result-path">processed / neural-networks / summary-v1.md</div>
+                    </div>
+                </div>
+            </div>
+            <div class="search-modal-footer">
+                <span><kbd>↑</kbd> <kbd>↓</kbd> to navigate</span>
+                <span><kbd>Enter</kbd> to select</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle search modal
+        const searchBtn = document.getElementById('btn-search');
+        const searchModal = document.getElementById('search-modal');
+        
+        searchBtn.addEventListener('click', () => {
+            searchModal.classList.add('active');
+            searchModal.querySelector('input').focus();
+        });
+        
+        searchModal.addEventListener('click', (e) => {
+            if (e.target === searchModal) {
+                searchModal.classList.remove('active');
+            }
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                searchModal.classList.remove('active');
+            }
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                searchModal.classList.add('active');
+                searchModal.querySelector('input').focus();
+            }
+        });
+
+        // Toggle file card selection
+        document.querySelectorAll('.file-card').forEach(card => {
+            card.addEventListener('click', () => {
+                card.classList.toggle('selected');
+            });
+        });
+    </script>
+</body>
+</html>

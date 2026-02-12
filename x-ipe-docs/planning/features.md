@@ -53,7 +53,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-025-A | KB Core Infrastructure | v1.0 | Completed | [specification.md](../requirements/FEATURE-025-A/specification.md), [technical-design.md](../requirements/FEATURE-025-A/technical-design.md), [acceptance-test-cases.md](../requirements/FEATURE-025-A/acceptance-test-cases.md) | 02-05-2026 | 02-05-2026 16:15:00 |
 | FEATURE-025-B | KB Landing Zone | v1.0 | Complete | [specification.md](../requirements/FEATURE-025-B/specification.md), [technical-design.md](../requirements/FEATURE-025-B/technical-design.md), [acceptance-test-cases.md](../requirements/FEATURE-025-B/acceptance-test-cases.md) | 02-05-2026 | 02-11-2026 13:38:00 |
 | FEATURE-025-C | KB Manager Skill | v1.0 | Complete | [specification.md](../requirements/FEATURE-025-C/specification.md), [technical-design.md](../requirements/FEATURE-025-C/technical-design.md), [acceptance-test-cases.md](../requirements/FEATURE-025-C/acceptance-test-cases.md) | 02-05-2026 | 02-12-2026 10:30:00 |
-| FEATURE-025-D | KB Topics & Summaries | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
+| FEATURE-025-D | KB Topics & Summaries | v1.0 | Refined | [specification.md](../requirements/FEATURE-025-D/specification.md) | 02-05-2026 | 02-12-2026 10:50:00 |
 | FEATURE-025-E | KB Search & Preview | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
 | FEATURE-025-F | KB Navigation & Polish | v1.0 | Planned | - | 02-05-2026 | 02-05-2026 13:30:00 |
 | FEATURE-026 | Homepage Infinity Loop | v1.0 | Completed | [specification.md](../requirements/FEATURE-026/specification.md), [technical-design.md](../requirements/FEATURE-026/technical-design.md), [acceptance-test-cases.md](../requirements/FEATURE-026/acceptance-test-cases.md) | 02-05-2026 | 02-06-2026 02:50:00 |
@@ -672,10 +672,10 @@ This board tracks all features across the project lifecycle.
 ### FEATURE-025-D: KB Topics & Summaries
 
 **Version:** v1.0  
-**Status:** Planned  
+**Status:** Refined  
 **Description:** Topics view, AI-generated summary cards with version history, topic detail display and management.  
 **Dependencies:** FEATURE-025-B, FEATURE-025-C  
-**Specification:** -  
+**Specification:** [specification.md](../requirements/FEATURE-025-D/specification.md)  
 **Technical Design:** -  
 
 **Source:**
