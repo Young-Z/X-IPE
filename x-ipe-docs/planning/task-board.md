@@ -6,15 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-323 | Feature Refinement | Refine FEATURE-029-D Explorer UI Controls | Flux | ✅ completed | 02-12-2026 10:46:00 | [specification.md](../requirements/FEATURE-029-D/specification.md) | Technical Design |
-| TASK-324 | Feature Refinement | Refine FEATURE-025-D KB Topics & Summaries | Pulse | ✅ completed | 02-12-2026 10:50:00 | [specification.md](../requirements/FEATURE-025-D/specification.md) | Technical Design |
-| TASK-325 | Technical Design | Technical design for FEATURE-029-D Explorer UI Controls | Flux | ✅ completed | 02-12-2026 13:18:00 | [technical-design.md](../requirements/FEATURE-029-D/technical-design.md) | Code Implementation |
-| TASK-326 | Code Implementation | Implement FEATURE-029-D Explorer UI Controls | Flux | ✅ completed | 02-12-2026 13:20:00 | [terminal.js](../../src/x_ipe/static/js/terminal.js), [terminal.css](../../src/x_ipe/static/css/terminal.css), [index.html](../../src/x_ipe/templates/index.html) | Feature Acceptance Test |
-| TASK-327 | Feature Acceptance Test | Acceptance test FEATURE-029-D Explorer UI Controls | Flux | ✅ completed | 02-12-2026 14:00:00 | [acceptance-test-cases.md](../requirements/FEATURE-029-D/acceptance-test-cases.md) | Feature Closing |
-| TASK-328 | Feature Closing | Close FEATURE-029-D Explorer UI Controls | Flux | ✅ completed | 02-12-2026 14:05:00 | — | — |
-| TASK-327 | Bug Fix | UIUX: Delete icon should recycle terminal session (Feedback-20260212-212638) | Sage | ✅ completed | 02-12-2026 13:28:00 | [terminal.js](../../src/x_ipe/static/js/terminal.js), [terminal_service.py](../../src/x_ipe/services/terminal_service.py) | |
-| TASK-328 | Technical Design | Technical design for FEATURE-025-D KB Topics & Summaries | Rune | ✅ completed | 02-12-2026 14:00:00 | [technical-design.md](../requirements/FEATURE-025-D/technical-design.md) | Code Implementation |
-| TASK-329 | Code Implementation | Implement FEATURE-025-D KB Topics & Summaries | Rune | 🔄 in_progress | 02-12-2026 14:08:00 | | Feature Acceptance Test |
+| TASK-331 | Feature Closing | Close FEATURE-025-D KB Topics & Summaries | Rune | 🔄 in_progress | 02-12-2026 14:46:00 | | — |
 
 
 
@@ -35,6 +27,16 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-330 | Feature Acceptance Test | Acceptance test FEATURE-025-D KB Topics & Summaries | Rune | 02-12-2026 22:45:00 | [acceptance-test-cases.md](../requirements/FEATURE-025-D/acceptance-test-cases.md) | 22/25 pass (100% executed). CSS dark-theme bug found & fixed. Mockup validation pass. |
+| TASK-329 | Code Implementation | Implement FEATURE-025-D KB Topics & Summaries | Rune | 02-12-2026 14:08:00 | [kb_service.py](../../src/x_ipe/services/kb_service.py), [kb_routes.py](../../src/x_ipe/routes/kb_routes.py), [kb-topics.js](../../src/x_ipe/static/js/features/kb-topics.js), [kb-topics.css](../../src/x_ipe/static/css/kb-topics.css) | 3 service methods, 2 API routes, ~400 lines JS, ~555 lines CSS. 34/34 tests pass. |
+| TASK-328 | Technical Design | Technical design for FEATURE-025-D KB Topics & Summaries | Rune | 02-12-2026 14:00:00 | [technical-design.md](../requirements/FEATURE-025-D/technical-design.md) | Two-part design. 7 AC groups, 6 FRs, 5 NFRs covered. |
+| TASK-328 | Feature Closing | Close FEATURE-029-D Explorer UI Controls | Flux | 02-12-2026 14:05:00 | — | FEATURE-029-D complete. |
+| TASK-327 | Feature Acceptance Test | Acceptance test FEATURE-029-D Explorer UI Controls | Flux | 02-12-2026 14:00:00 | [acceptance-test-cases.md](../requirements/FEATURE-029-D/acceptance-test-cases.md) | All ACs verified. |
+| TASK-327 | Bug Fix | UIUX: Delete icon should recycle terminal session (Feedback-20260212-212638) | Sage | 02-12-2026 13:28:00 | [terminal.js](../../src/x_ipe/static/js/terminal.js), [terminal_service.py](../../src/x_ipe/services/terminal_service.py) | Delete recycles session instead of destroying. |
+| TASK-326 | Code Implementation | Implement FEATURE-029-D Explorer UI Controls | Flux | 02-12-2026 13:20:00 | [terminal.js](../../src/x_ipe/static/js/terminal.js), [terminal.css](../../src/x_ipe/static/css/terminal.css), [index.html](../../src/x_ipe/templates/index.html) | Explorer UI controls implemented. |
+| TASK-325 | Technical Design | Technical design for FEATURE-029-D Explorer UI Controls | Flux | 02-12-2026 13:18:00 | [technical-design.md](../requirements/FEATURE-029-D/technical-design.md) | Full design doc. |
+| TASK-324 | Feature Refinement | Refine FEATURE-025-D KB Topics & Summaries | Pulse | 02-12-2026 10:50:00 | [specification.md](../requirements/FEATURE-025-D/specification.md) | 7 AC groups, 6 FRs, 5 NFRs, mockup linked. |
+| TASK-323 | Feature Refinement | Refine FEATURE-029-D Explorer UI Controls | Flux | 02-12-2026 10:46:00 | [specification.md](../requirements/FEATURE-029-D/specification.md) | Specification complete. |
 | TASK-322 | Bug Fix | UIUX: Move + to explorer header, add toggle, show in zen (Feedback-20260212-182906) | Flux | 02-12-2026 10:32:00 | [terminal.css](../../src/x_ipe/static/css/terminal.css), [terminal.js](../../src/x_ipe/static/js/terminal.js), [index.html](../../src/x_ipe/templates/index.html) | Moved + btn from bottom to header. Added toggle btn in terminal actions. Explorer visible in zen mode when toggle on. Collapsed state with CSS transition. |
 | TASK-321 | Bug Fix | Preview window width should match terminal area | Flux | 02-12-2026 10:20:00 | [terminal.css](../../src/x_ipe/static/css/terminal.css) | Changed .session-preview from width:50%/right:181px to left:0/right:220px/top:36px/bottom:0 to fill terminal content area. 17 tests pass. |
 | TASK-321 | Feature Closing | Close FEATURE-025-C KB Manager Skill | Pulse | 02-12-2026 10:35:00 | [CHANGELOG.md](../../CHANGELOG.md), [features.md](features.md) | FEATURE-025-C complete. CHANGELOG updated, features.md status→Complete. |

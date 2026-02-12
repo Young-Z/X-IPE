@@ -250,6 +250,81 @@ class KBService:
                 return json.load(f)
         except (json.JSONDecodeError, IOError):
             return None
+
+    @x_ipe_tracing(level="INFO")
+    def get_summary_versions(self, topic: str) -> List[Dict]:
+        """Get list of summary versions for a topic, newest first (max 5)."""
+        processed_dir = self.kb_root / 'processed' / topic
+        if not processed_dir.exists():
+            return []
+        versions = []
+        for f in processed_dir.glob("summary-v*.md"):
+            match = re.match(r"summary-v(\d+)\.md", f.name)
+            if match:
+                ver = int(match.group(1))
+                stat = f.stat()
+                versions.append({
+                    "version": ver,
+                    "date": datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).isoformat().replace("+00:00", "Z"),
+                })
+        versions.sort(key=lambda v: v["version"], reverse=True)
+        if versions:
+            versions[0]["current"] = True
+        for v in versions[1:]:
+            v["current"] = False
+        return versions[:5]
+
+    @x_ipe_tracing(level="INFO")
+    def get_summary_content(self, topic: str, version: str = "latest") -> Optional[Dict]:
+        """Read summary markdown content for a specific version."""
+        processed_dir = self.kb_root / 'processed' / topic
+        if not processed_dir.exists():
+            return None
+        if version == "latest":
+            versions = self.get_summary_versions(topic)
+            if not versions:
+                return None
+            version = versions[0]["version"]
+        else:
+            version = int(version)
+        filepath = processed_dir / f"summary-v{version}.md"
+        if not filepath.exists():
+            return None
+        content = filepath.read_text(encoding="utf-8")
+        stat = filepath.stat()
+        return {
+            "version": version,
+            "date": datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).isoformat().replace("+00:00", "Z"),
+            "content": content,
+        }
+
+    @x_ipe_tracing(level="INFO")
+    def get_topic_detail(self, topic: str) -> Optional[Dict]:
+        """Get full topic detail: metadata + summaries + files + related topics."""
+        metadata = self.get_topic_metadata(topic)
+        if metadata is None:
+            return None
+        summaries = self.get_summary_versions(topic)
+        raw_dir = self.kb_root / 'topics' / topic / 'raw'
+        files = []
+        if raw_dir.exists():
+            for f in sorted(raw_dir.iterdir()):
+                if f.is_file():
+                    files.append({
+                        "name": f.name,
+                        "path": f"topics/{topic}/raw/{f.name}",
+                        "size": f.stat().st_size,
+                        "type": self._get_file_type(Path(f.name).suffix),
+                    })
+        all_topics = self.get_topics()
+        related = [t for t in all_topics if t != topic]
+        return {
+            **metadata,
+            "summary_count": len(summaries),
+            "summaries": summaries,
+            "files": files,
+            "related_topics": related[:4],
+        }
     
     def _scan_folder(self, folder: Path, topic: Optional[str], prefix: str = None) -> List[Dict]:
         """

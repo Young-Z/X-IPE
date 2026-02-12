@@ -8,6 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-025-D: KB Topics & Summaries**
+  - Topics sidebar listing all knowledge base topics with icon, name, metadata, and item count badge
+  - Active topic visual highlighting (green left border, darker background)
+  - Topic detail view: header with name, "Processed" badge, Reprocess and Add Knowledge buttons
+  - Stats row: Raw Files count, Summaries count, Last Updated (relative time), Related Topics count
+  - AI-Generated Summary card with markdown rendering (headings, lists, code, blockquotes, highlights)
+  - Summary version badge showing version number and generation date
+  - Source references section linking to files used for summary generation
+  - Version History panel listing up to 5 summary versions (newest-first)
+  - Version switching: click any version to load its summary content
+  - Knowledge Graph preview with connected topic nodes and Expand button (Phase 2 placeholder)
+  - Source Files section with type-specific icons (PDF red, MD purple), file sizes, hover-reveal View/Download buttons
+  - Reprocess button triggering POST /api/kb/process with auto-refresh
+  - Add Knowledge button opening file upload dialog scoped to current topic
+  - Empty state messages for no-topics and no-summaries scenarios
+  - `GET /api/kb/topics/<name>/detail`: Topic detail API with metadata, raw files, summary versions
+  - `GET /api/kb/topics/<name>/summary?version=N|latest`: Summary content retrieval API
+  - Dark theme CSS fix: explicit text colors with fallbacks for visibility on dark backgrounds
+  - 34 unit tests, 22/25 acceptance tests executed (100% pass rate)
+
 - **FEATURE-029-D: Explorer UI Controls**
   - Drag-to-resize handle (5px) between terminal content and explorer panel
   - Explorer width resizable via drag within 160–360px range

@@ -1,0 +1,10 @@
+{
+  "name": "test-topic",
+  "description": "Test topic for acceptance testing",
+  "file_count": 0,
+  "last_updated": "2026-02-12T14:39:54.059642Z",
+  "tags": [
+    "test",
+    "demo"
+  ]
+}

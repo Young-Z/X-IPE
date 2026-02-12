@@ -279,6 +279,7 @@ const kbCore = {
 
     /**
      * Render welcome/placeholder in content area.
+     * Delegates to kbTopics if topics exist, else kbLanding.
      */
     renderWelcome() {
         const content = document.getElementById('kb-content');
@@ -287,6 +288,12 @@ const kbCore = {
         const files = this.index?.files || [];
         const landing = files.filter(f => f.path.startsWith('landing/'));
         
+        // FEATURE-025-D: If topics exist, show topics view
+        if (this.topics.length > 0 && typeof kbTopics !== 'undefined') {
+            kbTopics.render(content, this.topics);
+            return;
+        }
+
         // Delegate landing view to kbLanding module
         if (typeof kbLanding !== 'undefined') {
             kbLanding.render(content, landing);

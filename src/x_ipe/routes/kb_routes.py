@@ -2,6 +2,7 @@
 FEATURE-025-A: KB Core Infrastructure
 FEATURE-025-B: KB Landing Zone
 FEATURE-025-C: KB Manager Skill
+FEATURE-025-D: KB Topics & Summaries
 
 KB Routes: REST API endpoints for Knowledge Base operations.
 """
@@ -82,6 +83,33 @@ def get_topic_metadata(name: str):
         return jsonify({"error": f"Topic '{name}' not found"}), 404
     
     return jsonify(metadata)
+
+
+# ------------------------------------------------------------------
+# FEATURE-025-D: Topics & Summaries endpoints
+# ------------------------------------------------------------------
+
+@kb_bp.route('/topics/<name>/detail', methods=['GET'])
+@x_ipe_tracing(level="INFO")
+def get_topic_detail(name: str):
+    """Get full topic detail: metadata, summaries, files, related topics."""
+    service = _get_kb_service()
+    detail = service.get_topic_detail(name)
+    if detail is None:
+        return jsonify({"error": f"Topic '{name}' not found"}), 404
+    return jsonify(detail)
+
+
+@kb_bp.route('/topics/<name>/summary', methods=['GET'])
+@x_ipe_tracing(level="INFO")
+def get_topic_summary(name: str):
+    """Read summary content by version (default: latest)."""
+    service = _get_kb_service()
+    version = request.args.get("version", "latest")
+    summary = service.get_summary_content(name, version)
+    if summary is None:
+        return jsonify({"error": f"Summary not found for topic '{name}' version '{version}'"}), 404
+    return jsonify(summary)
 
 
 # ------------------------------------------------------------------
