@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDEA-018 Mockup — Injected Reference Toolbar (Light)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --toolbar-bg: rgba(255, 255, 255, 0.94);
+    --toolbar-border: rgba(55, 48, 163, 0.15);
+    --toolbar-glow: rgba(55, 48, 163, 0.06);
+    --panel-bg: rgba(255, 255, 255, 0.97);
+    --item-bg: rgba(245, 243, 238, 0.8);
+    --item-hover: rgba(55, 48, 163, 0.06);
+    --border: rgba(224, 220, 212, 0.9);
+    --border-strong: #d0ccc4;
+    --text-primary: #1a1a2e;
+    --text-secondary: #4a4a5c;
+    --text-muted: #8e8e9f;
+    --accent: #3730a3;
+    --accent-hover: #4f46e5;
+    --accent-light: rgba(55, 48, 163, 0.08);
+    --emerald: #047857;
+    --emerald-light: #059669;
+    --emerald-bg: rgba(4, 120, 87, 0.06);
+    --amber: #b45309;
+    --amber-bg: rgba(180, 83, 9, 0.06);
+    --rose: #be123c;
+    --rose-bg: rgba(190, 18, 60, 0.06);
+    --blue: #1d4ed8;
+    --font-ui: 'Outfit', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --transition: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== Simulated Target Page ===== */
+  .sim-page {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .sim-nav {
+    background: white;
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .sim-logo {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111;
+    letter-spacing: -0.02em;
+  }
+
+  .sim-nav-links {
+    display: flex;
+    gap: 20px;
+    margin-left: auto;
+  }
+
+  .sim-nav-links a {
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .sim-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 60px 32px;
+    color: white;
+    text-align: center;
+  }
+
+  .sim-hero h1 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .sim-hero p {
+    font-size: 16px;
+    opacity: 0.85;
+    max-width: 500px;
+    margin: 0 auto 24px;
+  }
+
+  .sim-hero-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    color: #667eea;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .sim-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 32px;
+  }
+
+  .sim-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    position: relative;
+  }
+
+  .sim-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111;
+    margin-bottom: 8px;
+  }
+
+  .sim-card p {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.5;
+  }
+
+  .sim-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    font-size: 18px;
+    color: white;
+  }
+
+  /* ===== Element Highlight ===== */
+  .highlight-overlay {
+    position: absolute;
+    inset: -3px;
+    border: 2px solid var(--accent);
+    border-radius: 14px;
+    pointer-events: none;
+    animation: highlightPulse 1.5s ease-in-out infinite;
+    z-index: 50;
+  }
+
+  .highlight-overlay::before {
+    content: 'body > main > .cards > .card:nth-child(2)';
+    position: absolute;
+    top: -26px;
+    left: 8px;
+    background: var(--accent);
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  @keyframes highlightPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(55, 48, 163, 0.2); }
+    50% { box-shadow: 0 0 0 6px rgba(55, 48, 163, 0); }
+  }
+
+  /* ===== Comment Bubble ===== */
+  .comment-bubble {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 28px;
+    height: 28px;
+    background: var(--amber);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 13px;
+    box-shadow: 0 2px 8px rgba(180, 83, 9, 0.3);
+    cursor: pointer;
+    z-index: 60;
+    transition: transform 0.2s var(--transition);
+  }
+
+  .comment-bubble:hover { transform: scale(1.15); }
+
+  .comment-tooltip {
+    position: absolute;
+    top: 34px;
+    right: 0;
+    background: var(--panel-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    color: var(--text-primary);
+    width: 200px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    display: none;
+    z-index: 70;
+  }
+
+  .comment-tooltip.visible {
+    display: block;
+    animation: tooltipIn 0.25s var(--transition);
+  }
+
+  @keyframes tooltipIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .comment-tooltip .ct-author {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  /* ===== Picked Color Swatch ===== */
+  .picked-color {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    border: 1px solid var(--border-strong);
+    border-radius: 100px;
+    padding: 4px 10px 4px 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-secondary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    z-index: 60;
+  }
+
+  .picked-color .swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.08);
+  }
+
+  /* ===== INJECTED TOOLBAR ===== */
+  .xipe-toolbar {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 2147483647;
+    font-family: var(--font-ui);
+    user-select: none;
+  }
+
+  /* Hamburger */
+  .xipe-hamburger {
+    width: 44px;
+    height: 44px;
+    background: var(--toolbar-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--toolbar-border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    color: var(--accent);
+    font-size: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(55, 48, 163, 0.05);
+    transition: all 0.3s var(--transition);
+    position: relative;
+  }
+
+  .xipe-hamburger:hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12), 0 0 0 2px rgba(55, 48, 163, 0.1);
+    transform: scale(1.05);
+  }
+
+  .xipe-hamburger .xipe-logo {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+  }
+
+  .xipe-hamburger .badge-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 18px;
+    height: 18px;
+    background: var(--emerald);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(4, 120, 87, 0.3);
+  }
+
+  /* Panel */
+  .xipe-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 272px;
+    background: var(--toolbar-bg);
+    backdrop-filter: blur(24px);
+    border: 1px solid var(--toolbar-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 0 0 1px rgba(55, 48, 163, 0.04);
+    overflow: hidden;
+    display: none;
+    animation: panelSlideIn 0.35s var(--transition);
+  }
+
+  .xipe-panel.visible { display: block; }
+
+  @keyframes panelSlideIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .xipe-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .xipe-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0.01em;
+  }
+
+  .xipe-panel-title .logo-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(55, 48, 163, 0.35);
+  }
+
+  .xipe-panel-close {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+
+  .xipe-panel-close:hover {
+    background: var(--item-hover);
+    color: var(--text-primary);
+  }
+
+  /* Tools */
+  .xipe-tools { padding: 6px 8px; }
+
+  .xipe-tool-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 10px;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-family: var(--font-ui);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s var(--transition);
+    text-align: left;
+  }
+
+  .xipe-tool-btn:hover {
+    background: var(--item-hover);
+    color: var(--text-primary);
+    border-color: rgba(55, 48, 163, 0.06);
+  }
+
+  .xipe-tool-btn.active {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: rgba(55, 48, 163, 0.12);
+  }
+
+  .xipe-tool-icon {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .xipe-tool-icon.color-picker { background: var(--rose-bg); color: var(--rose); }
+  .xipe-tool-icon.highlighter { background: var(--accent-light); color: var(--accent); }
+  .xipe-tool-icon.commenter { background: var(--amber-bg); color: var(--amber); }
+  .xipe-tool-icon.extractor { background: var(--emerald-bg); color: var(--emerald); }
+
+  .xipe-tool-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .xipe-tool-name { font-size: 12.5px; font-weight: 500; }
+  .xipe-tool-desc { font-size: 10px; color: var(--text-muted); }
+
+  .xipe-tool-badge {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 100px;
+    background: var(--item-bg);
+    color: var(--text-muted);
+  }
+
+  .xipe-tool-badge.has-items {
+    background: var(--emerald-bg);
+    color: var(--emerald);
+  }
+
+  /* Phase separator */
+  .xipe-phase-sep {
+    padding: 8px 12px 4px;
+    font-size: 9.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .xipe-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 8px;
+  }
+
+  /* Collected */
+  .xipe-collected {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+    background: var(--emerald-bg);
+  }
+
+  .xipe-collected-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  .xipe-collected-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .xipe-collected-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 100px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  .xipe-collected-tag.colors { background: var(--rose-bg); color: var(--rose); }
+  .xipe-collected-tag.elements { background: var(--accent-light); color: var(--accent); }
+
+  /* Send */
+  .xipe-send-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: calc(100% - 16px);
+    margin: 8px 8px 10px;
+    padding: 10px;
+    background: var(--emerald);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s var(--transition);
+    box-shadow: 0 2px 8px rgba(4, 120, 87, 0.2);
+  }
+
+  .xipe-send-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3);
+    background: var(--emerald-light);
+  }
+
+  /* Drag hint */
+  .drag-hint {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    border: 1px solid var(--border-strong);
+    border-radius: 100px;
+    padding: 5px 12px;
+    font-family: var(--font-ui);
+    font-size: 10px;
+    color: var(--text-muted);
+    z-index: 2147483646;
+    animation: hintFade 3s ease-in-out forwards;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  @keyframes hintFade {
+    0% { opacity: 0; transform: translateY(-4px); }
+    15% { opacity: 1; transform: translateY(0); }
+    75% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* Info bar */
+  .mockup-info {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+    padding: 14px 24px;
+    font-family: var(--font-ui);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 2147483647;
+  }
+
+  .mockup-info-badge {
+    background: var(--accent);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 100px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .mockup-info-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .mockup-info-text strong { color: var(--text-primary); }
+
+  .mockup-toggle-view {
+    margin-left: auto;
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .view-btn {
+    padding: 6px 12px;
+    background: var(--item-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .view-btn:hover, .view-btn.active {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: rgba(55, 48, 163, 0.15);
+  }
+
+  @media (max-width: 768px) {
+    .sim-cards { grid-template-columns: 1fr; }
+    .sim-hero h1 { font-size: 24px; }
+    .mockup-info { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .mockup-toggle-view { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Simulated Target Website ===== -->
+<div class="sim-page">
+  <nav class="sim-nav">
+    <div class="sim-logo">AcmeDesign</div>
+    <div class="sim-nav-links">
+      <a href="#">Products</a>
+      <a href="#">Pricing</a>
+      <a href="#">Blog</a>
+      <a href="#">Contact</a>
+    </div>
+  </nav>
+
+  <section class="sim-hero">
+    <h1>Design Systems Made Simple</h1>
+    <p>Build consistent, beautiful interfaces with our component library and design tokens.</p>
+    <a href="#" class="sim-hero-btn">
+      <i class="bi bi-play-fill"></i> Get Started
+    </a>
+  </section>
+
+  <section class="sim-cards">
+    <div class="sim-card">
+      <div class="sim-card-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+        <i class="bi bi-palette"></i>
+      </div>
+      <h3>Color Tokens</h3>
+      <p>Semantic color system with light and dark mode support out of the box.</p>
+      <div class="picked-color">
+        <span class="swatch" style="background: #667eea;"></span>
+        #667eea
+      </div>
+    </div>
+
+    <div class="sim-card" style="position: relative;">
+      <div class="highlight-overlay"></div>
+      <div class="comment-bubble" id="comment-bubble">
+        <i class="bi bi-chat-fill"></i>
+        <div class="comment-tooltip" id="comment-tooltip">
+          <div class="ct-author">You — just now</div>
+          Great card layout — use this rounded corner + subtle shadow pattern for our feature cards.
+        </div>
+      </div>
+      <div class="sim-card-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+        <i class="bi bi-fonts"></i>
+      </div>
+      <h3>Typography Scale</h3>
+      <p>Harmonious type system with responsive sizes and weights.</p>
+    </div>
+
+    <div class="sim-card">
+      <div class="sim-card-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+        <i class="bi bi-grid-3x3-gap"></i>
+      </div>
+      <h3>Spacing Grid</h3>
+      <p>Consistent 4px-based spacing scale for predictable layouts everywhere.</p>
+    </div>
+  </section>
+</div>
+
+<!-- ===== X-IPE INJECTED TOOLBAR ===== -->
+<div class="xipe-toolbar" id="xipe-toolbar">
+  <div class="xipe-hamburger" id="xipe-hamburger">
+    <span class="xipe-logo">X</span>
+    <span class="badge-count">5</span>
+  </div>
+
+  <div class="xipe-panel" id="xipe-panel">
+    <div class="xipe-panel-header">
+      <div class="xipe-panel-title">
+        <span class="logo-dot"></span>
+        X-IPE Reference
+      </div>
+      <button class="xipe-panel-close" id="xipe-close"><i class="bi bi-x"></i></button>
+    </div>
+
+    <div class="xipe-phase-sep">Phase 1 — Core</div>
+    <div class="xipe-tools">
+      <button class="xipe-tool-btn active" data-tool="color">
+        <span class="xipe-tool-icon color-picker"><i class="bi bi-eyedropper"></i></span>
+        <span class="xipe-tool-info">
+          <span class="xipe-tool-name">Color Picker</span>
+          <span class="xipe-tool-desc">Pick colors from page</span>
+        </span>
+        <span class="xipe-tool-badge has-items">3</span>
+      </button>
+      <button class="xipe-tool-btn" data-tool="highlight">
+        <span class="xipe-tool-icon highlighter"><i class="bi bi-cursor-text"></i></span>
+        <span class="xipe-tool-info">
+          <span class="xipe-tool-name">Element Highlighter</span>
+          <span class="xipe-tool-desc">Inspect & screenshot</span>
+        </span>
+        <span class="xipe-tool-badge has-items">2</span>
+      </button>
+    </div>
+
+    <div class="xipe-divider"></div>
+    <div class="xipe-phase-sep">Phase 2 — Advanced</div>
+    <div class="xipe-tools">
+      <button class="xipe-tool-btn" data-tool="comment">
+        <span class="xipe-tool-icon commenter"><i class="bi bi-chat-left-text"></i></span>
+        <span class="xipe-tool-info">
+          <span class="xipe-tool-name">Element Commenter</span>
+          <span class="xipe-tool-desc">Attach notes to elements</span>
+        </span>
+        <span class="xipe-tool-badge">—</span>
+      </button>
+      <button class="xipe-tool-btn" data-tool="extract">
+        <span class="xipe-tool-icon extractor"><i class="bi bi-box-arrow-down"></i></span>
+        <span class="xipe-tool-info">
+          <span class="xipe-tool-name">Asset Extractor</span>
+          <span class="xipe-tool-desc">CSS, fonts, images</span>
+        </span>
+        <span class="xipe-tool-badge">—</span>
+      </button>
+    </div>
+
+    <div class="xipe-collected">
+      <div class="xipe-collected-title">Collected References</div>
+      <div class="xipe-collected-items">
+        <span class="xipe-collected-tag colors"><i class="bi bi-circle-fill" style="font-size:6px;"></i> 3 colors</span>
+        <span class="xipe-collected-tag elements"><i class="bi bi-circle-fill" style="font-size:6px;"></i> 2 elements</span>
+      </div>
+    </div>
+
+    <button class="xipe-send-btn" id="xipe-send">
+      <i class="bi bi-send-fill"></i>
+      Send References
+    </button>
+  </div>
+</div>
+
+<div class="drag-hint" id="drag-hint">
+  <i class="bi bi-arrows-move"></i> Drag to move toolbar
+</div>
+
+<div class="mockup-info">
+  <span class="mockup-info-badge">IDEA-018 · Mockup</span>
+  <span class="mockup-info-text">
+    <strong>Injected Reference Toolbar</strong> — Simulated on a sample website. Shows hamburger collapsed state, expanded tool panel with Phase 1/2 tools, collected data summary, element highlighting with CSS selector, color picker swatch, and comment bubble.
+  </span>
+  <div class="mockup-toggle-view">
+    <button class="view-btn" id="view-collapsed">Collapsed</button>
+    <button class="view-btn active" id="view-expanded">Expanded</button>
+  </div>
+</div>
+
+<script>
+  const hamburger = document.getElementById('xipe-hamburger');
+  const panel = document.getElementById('xipe-panel');
+  const closeBtn = document.getElementById('xipe-close');
+  const viewCollapsed = document.getElementById('view-collapsed');
+  const viewExpanded = document.getElementById('view-expanded');
+  const commentBubble = document.getElementById('comment-bubble');
+  const commentTooltip = document.getElementById('comment-tooltip');
+  const sendBtn = document.getElementById('xipe-send');
+
+  function showPanel() {
+    hamburger.style.display = 'none';
+    panel.classList.add('visible');
+    viewCollapsed.classList.remove('active');
+    viewExpanded.classList.add('active');
+  }
+
+  function hidePanel() {
+    panel.classList.remove('visible');
+    hamburger.style.display = 'flex';
+    viewExpanded.classList.remove('active');
+    viewCollapsed.classList.add('active');
+  }
+
+  hamburger.addEventListener('click', showPanel);
+  closeBtn.addEventListener('click', hidePanel);
+  viewCollapsed.addEventListener('click', hidePanel);
+  viewExpanded.addEventListener('click', showPanel);
+  showPanel();
+
+  commentBubble.addEventListener('click', () => {
+    commentTooltip.classList.toggle('visible');
+  });
+
+  document.querySelectorAll('.xipe-tool-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.xipe-tool-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  sendBtn.addEventListener('click', () => {
+    sendBtn.innerHTML = '<i class="bi bi-arrow-repeat" style="animation: spin 0.8s linear infinite;"></i> Sending...';
+    setTimeout(() => {
+      sendBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Sent to X-IPE!';
+      sendBtn.style.background = '#059669';
+    }, 1200);
+    setTimeout(() => {
+      sendBtn.innerHTML = '<i class="bi bi-send-fill"></i> Send References';
+      sendBtn.style.background = '';
+    }, 3500);
+  });
+
+  const toolbar = document.getElementById('xipe-toolbar');
+  let isDragging = false;
+  let startX, startY, startRight, startTop;
+
+  hamburger.addEventListener('mousedown', startDrag);
+
+  function startDrag(e) {
+    if (panel.classList.contains('visible')) return;
+    isDragging = true;
+    const rect = toolbar.getBoundingClientRect();
+    startX = e.clientX;
+    startY = e.clientY;
+    startTop = rect.top;
+    startRight = window.innerWidth - rect.right;
+    hamburger.style.cursor = 'grabbing';
+    e.preventDefault();
+  }
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    toolbar.style.top = (startTop + dy) + 'px';
+    toolbar.style.right = (startRight - dx) + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isDragging) {
+      isDragging = false;
+      hamburger.style.cursor = 'grab';
+    }
+  });
+
+  const style = document.createElement('style');
+  style.textContent = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
+  document.head.appendChild(style);
+</script>
+
+</body>
+</html>

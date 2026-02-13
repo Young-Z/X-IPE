@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| | | | | | | | |
 
 
 
@@ -26,6 +27,7 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-333 | Idea Mockup | Create mockups for IDEA-018 Feature-UIUX Reference | Nova | 02-13-2026 08:15:00 | [idea-summary-v3.md](../ideas/018.%20Feature-UIUX%20Reference/idea-summary-v3.md) | 4 mockups (v1 dark + v2 light). v2 approved. |
 | TASK-332 | Ideation | Refine idea: Feature-UIUX Reference | Nova | 02-13-2026 07:50:00 | [idea-summary-v2.md](../ideas/018.%20Feature-UIUX%20Reference/idea-summary-v2.md) | Idea refined. 11 brainstorming questions. CDP callback research. v2 approved. |
 | TASK-331 | Feature Closing | Close FEATURE-025-D KB Topics & Summaries | Rune | 02-12-2026 14:47:00 | [CHANGELOG.md](../../CHANGELOG.md), [features.md](features.md) | — |
 | TASK-330 | Feature Acceptance Test | Acceptance test FEATURE-025-D KB Topics & Summaries | Rune | 02-12-2026 22:45:00 | [acceptance-test-cases.md](../requirements/FEATURE-025-D/acceptance-test-cases.md) | 22/25 pass (100% executed). CSS dark-theme bug found & fixed. Mockup validation pass. |
@@ -220,7 +222,7 @@
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 324
+- **Completed (archived):** 325
 - **Pending Review:** 0
 - **Blocked:** 0
 
