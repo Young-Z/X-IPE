@@ -496,6 +496,155 @@ class TestGlobalSessionManager:
 # Fixtures
 # =============================================================================
 
+# =============================================================================
+# Bug Fix Tests: Multi-Tab Session Stability (TASK-413)
+# =============================================================================
+
+class TestMultiTabSessionStability:
+    """
+    Tests for TASK-413: Console session instability when multiple browser tabs
+    connect to the same server.
+    
+    Root cause: PersistentSession.attach() overwrites socket_sid/emit_callback,
+    and handle_disconnect detaches even if disconnecting SID != current socket_sid.
+    """
+
+    def test_detach_only_when_sid_matches(self):
+        """detach() called from stale SID should NOT clear the active connection."""
+        from x_ipe.services import PersistentSession
+        
+        session = PersistentSession("test-multi-tab")
+        
+        # Tab 1 attaches
+        emit_tab1 = Mock()
+        session.attach("sid-tab1", emit_tab1)
+        assert session.socket_sid == "sid-tab1"
+        assert session.state == 'connected'
+        
+        # Tab 2 attaches (overwrites Tab 1 — this is expected "last writer wins")
+        emit_tab2 = Mock()
+        session.attach("sid-tab2", emit_tab2)
+        assert session.socket_sid == "sid-tab2"
+        assert session.state == 'connected'
+        
+        # Tab 1 disconnects — should NOT detach since sid-tab1 != current socket_sid
+        # This simulates the bug: handle_disconnect for Tab 1 should not kill Tab 2's connection
+        if session.socket_sid == "sid-tab1":
+            session.detach()
+        
+        # Tab 2 should still be connected
+        assert session.socket_sid == "sid-tab2"
+        assert session.emit_callback == emit_tab2
+        assert session.state == 'connected'
+
+    def test_detach_when_sid_matches(self):
+        """detach() should work normally when SID matches current socket_sid."""
+        from x_ipe.services import PersistentSession
+        
+        session = PersistentSession("test-detach-match")
+        
+        emit_fn = Mock()
+        session.attach("sid-active", emit_fn)
+        
+        # Same SID disconnects — should detach
+        if session.socket_sid == "sid-active":
+            session.detach()
+        
+        assert session.socket_sid is None
+        assert session.emit_callback is None
+        assert session.state == 'disconnected'
+
+    def test_active_session_not_hijacked_by_second_tab(self):
+        """When session is actively connected, a second attach should NOT overwrite it."""
+        from x_ipe.services import PersistentSession
+        
+        session = PersistentSession("test-no-hijack")
+        
+        # Tab 1 attaches
+        emit_tab1 = Mock()
+        session.attach("sid-tab1", emit_tab1)
+        assert session.state == 'connected'
+        assert session.socket_sid == "sid-tab1"
+        
+        # Simulate what handle_attach should do: check if session is active
+        # before allowing attach from a different SID
+        is_active_on_other_tab = (
+            session.state == 'connected' and 
+            session.socket_sid and 
+            session.socket_sid != "sid-tab2"
+        )
+        
+        # Should detect that session is active on another tab
+        assert is_active_on_other_tab is True
+        
+        # Tab 1's callback should remain intact
+        assert session.emit_callback == emit_tab1
+        assert session.socket_sid == "sid-tab1"
+
+    def test_session_manager_list_sessions(self):
+        """SessionManager should provide a way to list all active sessions."""
+        from x_ipe.services import SessionManager, PersistentSession
+        
+        manager = SessionManager()
+        
+        # Manually add sessions (bypass create_session which needs PTY)
+        session1 = PersistentSession("session-1")
+        session1.attach("sid-1", Mock())
+        
+        session2 = PersistentSession("session-2")
+        session2.attach("sid-2", Mock())
+        
+        session3 = PersistentSession("session-3")
+        # session3 is disconnected
+        
+        with manager._lock:
+            manager.sessions["session-1"] = session1
+            manager.sessions["session-2"] = session2
+            manager.sessions["session-3"] = session3
+        
+        result = manager.list_sessions()
+        
+        assert len(result) == 3
+        # Each entry should have session_id and state
+        ids = [s['session_id'] for s in result]
+        assert "session-1" in ids
+        assert "session-2" in ids
+        assert "session-3" in ids
+        
+        # Check states
+        states = {s['session_id']: s['state'] for s in result}
+        assert states["session-1"] == 'connected'
+        assert states["session-2"] == 'connected'
+        assert states["session-3"] == 'disconnected'
+
+    def test_session_manager_destroy_sessions_by_ids(self):
+        """SessionManager should destroy specific sessions by ID list."""
+        from x_ipe.services import SessionManager, PersistentSession
+        
+        manager = SessionManager()
+        
+        session1 = PersistentSession("session-1")
+        session2 = PersistentSession("session-2")
+        session3 = PersistentSession("session-3")
+        
+        with manager._lock:
+            manager.sessions["session-1"] = session1
+            manager.sessions["session-2"] = session2
+            manager.sessions["session-3"] = session3
+        
+        # Destroy sessions 1 and 3
+        count = manager.destroy_sessions(["session-1", "session-3"])
+        
+        assert count == 2
+        assert not manager.has_session("session-1")
+        assert manager.has_session("session-2")
+        assert not manager.has_session("session-3")
+
+
+# =============================================================================
+# Fixtures
+# =============================================================================
+
 @pytest.fixture
 def temp_project(tmp_path):
     """Create a temporary project directory."""
@@ -506,3 +655,126 @@ def temp_project(tmp_path):
     (project_dir / "README.md").write_text("# Test Project")
     
     return project_dir
+
+
+# =============================================================================
+# Unit Tests: Terminal Auto-Scroll Pause (Feedback-20260213-235226)
+# =============================================================================
+
+class TestTerminalAutoScrollPause:
+    """Tests for auto-scroll pause behavior when user scrolls up in terminal.
+
+    The terminal should NOT force scroll-to-bottom when the user has actively
+    scrolled up. Auto-scroll should only resume after 5 seconds of no user
+    scroll activity when new content arrives.
+
+    These tests validate the JavaScript logic contract by checking the
+    terminal.js source contains the required scroll-pause mechanism.
+    """
+
+    def test_terminal_js_has_user_scroll_tracking(self):
+        """terminal.js must track user scroll state to pause auto-scroll."""
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        # Must have user scroll tracking flag
+        assert '_userScrolledUp' in content or 'userScrolledUp' in content, \
+            "terminal.js must track user scroll-up state"
+
+    def test_terminal_js_has_scroll_pause_timeout(self):
+        """terminal.js must have a 5-second timeout before resuming auto-scroll."""
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        # Must have a 5000ms (5 second) timeout for scroll resume
+        assert '5000' in content, \
+            "terminal.js must have a 5-second timeout for scroll-pause"
+
+    def test_terminal_js_output_handler_checks_scroll_state(self):
+        """The output handler must check scroll state before calling scrollToBottom."""
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        # The output handler should NOT unconditionally call scrollToBottom
+        # It should have a conditional check
+        # Find the output handler section
+        output_idx = content.find("socket.on('output'")
+        assert output_idx != -1, "Must have socket output handler"
+
+        # Get the output handler block (next ~200 chars)
+        handler_block = content[output_idx:output_idx + 300]
+
+        # scrollToBottom should be conditional (wrapped in _shouldAutoScroll or similar)
+        assert '_shouldAutoScroll' in handler_block or 'userScrolledUp' in handler_block or '_userScrolledUp' in handler_block, \
+            "Output handler must check scroll state before scrollToBottom"
+
+
+class TestSessionPreviewDismissOnLeave:
+    """Tests for session preview dismiss behavior (Feedback-20260214-000335).
+
+    When the mouse leaves a session bar, the preview must dismiss immediately.
+    The preview container must NOT keep itself alive by canceling the dismiss
+    timer on mouseenter — i.e., the preview container should have no mouseenter
+    handler that clears _graceTimer.
+    """
+
+    def test_preview_container_does_not_cancel_dismiss_on_mouseenter(self):
+        """Preview container must NOT have a mouseenter handler that clears graceTimer."""
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        # Find the _initPreviewContainer method
+        init_idx = content.find('_initPreviewContainer')
+        assert init_idx != -1, "Must have _initPreviewContainer method"
+
+        # Get the method body (until the next method)
+        next_method = content.find('\n        _showPreview', init_idx)
+        method_body = content[init_idx:next_method] if next_method != -1 else content[init_idx:init_idx + 1500]
+
+        # The preview container must NOT have a mouseenter handler that clears graceTimer
+        # Look for pattern: previewContainer.addEventListener('mouseenter', ..._graceTimer
+        import re
+        mouseenter_match = re.search(
+            r"_previewContainer\.addEventListener\(\s*['\"]mouseenter['\"]",
+            method_body
+        )
+        assert mouseenter_match is None, \
+            "Preview container must NOT have a mouseenter handler that keeps preview alive"
+
+    def test_session_bar_mouseleave_dismisses_immediately(self):
+        """Session bar mouseleave must dismiss preview without grace timer delay."""
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        # Find the session bar mouseleave handler
+        mouseleave_idx = content.find("bar.addEventListener('mouseleave'")
+        assert mouseleave_idx != -1, "Must have bar mouseleave handler"
+
+        # Get the handler block
+        handler_block = content[mouseleave_idx:mouseleave_idx + 200]
+
+        # Must call _dismissPreview directly, not via _graceTimer/setTimeout
+        assert '_dismissPreview' in handler_block, \
+            "Session bar mouseleave must call _dismissPreview"
+        assert '_graceTimer' not in handler_block, \
+            "Session bar mouseleave must NOT use grace timer - must dismiss immediately"

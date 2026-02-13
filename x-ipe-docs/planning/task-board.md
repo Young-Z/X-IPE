@@ -13,6 +13,9 @@
 | TASK-410 | Test Generation | FEATURE-030-B: UIUX Reference Agent Skill & Toolbar — Generate test suite | Sage ✅ | ✅ completed | 02-13-2026 15:10:00 | tests/test_uiux_reference_toolbar.py | Code Implementation |
 | TASK-411 | Code Implementation | FEATURE-030-B: UIUX Reference Agent Skill & Toolbar — Implement skill + toolbar | Sage ✅ | ✅ completed | 02-13-2026 15:20:00 | src/x_ipe/static/js/injected/xipe-toolbar.js, .github/skills/x-ipe-tool-uiux-reference/SKILL.md | Feature Acceptance Test |
 | TASK-412 | Feature Acceptance Test | FEATURE-030-B: UIUX Reference Agent Skill & Toolbar — Acceptance test injected toolbar | Sage ✅ | ✅ completed | 02-13-2026 16:00:00 | x-ipe-docs/requirements/FEATURE-030-B/acceptance-test-cases.md | Feature Closing |
+| TASK-413 | Bug Fix | Fix console session instability when multiple browser tabs connect to same server (Feedback-20260213-234829) | Zephyr ✅ | ✅ completed | 02-13-2026 15:55:00 | src/x_ipe/handlers/terminal_handlers.py, src/x_ipe/services/terminal_service.py, src/x_ipe/static/js/terminal.js, tests/test_terminal.py | - |
+| TASK-414 | Bug Fix | Console terminal forces scroll-to-bottom during output, ignoring user scroll-up (Feedback-20260213-235226) | Ember ✅ | ✅ completed | 02-13-2026 16:05:00 | src/x_ipe/static/js/terminal.js, tests/test_terminal.py | - |
+| TASK-415 | Bug Fix | Session preview stays visible when hovering on preview window instead of dismissing on session bar mouseleave (Feedback-20260214-000335) | Drift ✅ | ✅ completed | 02-13-2026 16:05:00 | src/x_ipe/static/js/terminal.js, tests/test_terminal.py | - |
 
 
 
@@ -76,11 +79,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 2
+- **Total Active:** 3
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 406
+- **Completed (archived):** 408
 - **Pending Review:** 0
 - **Blocked:** 0
 

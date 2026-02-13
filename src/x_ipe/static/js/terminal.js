@@ -96,6 +96,10 @@
             // Track if initial fit has been done (for containers that start hidden)
             this._initialFitDone = false;
             
+            // Auto-scroll pause: track per-session user scroll state
+            this._userScrolledUp = new Map();
+            this._scrollResumeTimers = new Map();
+            
             this._setupEventListeners();
             this._setupResizeObserver();
         }
@@ -161,6 +165,10 @@
                     session.socket.connect();
                 }
             }
+            // TASK-413: Check for orphaned sessions after reconnect
+            setTimeout(() => {
+                if (this.explorer) this.explorer.checkOrphanedSessions();
+            }, 2000);
         }
 
         /**
@@ -177,6 +185,10 @@
             } else {
                 this.addSession();
             }
+            // TASK-413: Check for orphaned sessions after sockets connect
+            setTimeout(() => {
+                if (this.explorer) this.explorer.checkOrphanedSessions();
+            }, 3000);
         }
 
         /**
@@ -228,6 +240,9 @@
             
             // Prevent scroll-to-top when typing
             this._setupScrollPrevention(terminal, container);
+            
+            // Setup auto-scroll pause on user scroll-up
+            this._setupAutoScrollPause(terminal, key);
             
             // Create socket
             sessionData.socket = this._createSocket(key, existingSessionId);
@@ -289,6 +304,11 @@
             if (session.container) session.container.remove();
             
             this.sessions.delete(key);
+            
+            // Clean up scroll state
+            this._userScrolledUp.delete(key);
+            const timer = this._scrollResumeTimers.get(key);
+            if (timer) { clearTimeout(timer); this._scrollResumeTimers.delete(key); }
             
             // Update explorer
             if (this.explorer) {
@@ -492,6 +512,47 @@
         }
 
         /**
+         * Setup auto-scroll pause: detect user scroll-up and pause auto-scroll for 5s
+         */
+        _setupAutoScrollPause(terminal, sessionKey) {
+            const viewport = terminal.element?.querySelector('.xterm-viewport');
+            if (!viewport) return;
+
+            viewport.addEventListener('wheel', (e) => {
+                if (e.deltaY < 0) {
+                    // User scrolled up
+                    this._userScrolledUp.set(sessionKey, true);
+                    const existing = this._scrollResumeTimers.get(sessionKey);
+                    if (existing) clearTimeout(existing);
+                    this._scrollResumeTimers.set(sessionKey, setTimeout(() => {
+                        this._userScrolledUp.set(sessionKey, false);
+                        this._scrollResumeTimers.delete(sessionKey);
+                    }, 5000));
+                }
+            }, { passive: true });
+
+            // Reset scroll pause when user scrolls to bottom manually
+            viewport.addEventListener('scroll', () => {
+                const atBottom = viewport.scrollTop + viewport.clientHeight >= viewport.scrollHeight - 1;
+                if (atBottom) {
+                    this._userScrolledUp.set(sessionKey, false);
+                    const existing = this._scrollResumeTimers.get(sessionKey);
+                    if (existing) {
+                        clearTimeout(existing);
+                        this._scrollResumeTimers.delete(sessionKey);
+                    }
+                }
+            }, { passive: true });
+        }
+
+        /**
+         * Check if auto-scroll should be applied for a session
+         */
+        _shouldAutoScroll(sessionKey) {
+            return !this._userScrolledUp.get(sessionKey);
+        }
+
+        /**
          * Create Socket.IO connection for a session
          */
         _createSocket(sessionKey, existingSessionId) {
@@ -576,7 +637,9 @@
                 const session = getSession();
                 if (session) {
                     session.terminal.write(data);
-                    session.terminal.scrollToBottom();
+                    if (this._shouldAutoScroll(sessionKey)) {
+                        session.terminal.scrollToBottom();
+                    }
                 }
             });
             
@@ -964,6 +1027,11 @@
             this._hoverTimer = null;
             this._graceTimer = null;
             this._previewOutputHandler = null;
+
+            // TASK-413: Orphaned sessions indicator
+            this._orphanBar = null;
+            this._orphanCount = 0;
+            this._createOrphanBar();
             
             this._bindEvents();
         }
@@ -975,6 +1043,87 @@
                     this.manager.addSession();
                 });
             }
+        }
+
+        /**
+         * TASK-413: Create the orphaned sessions indicator bar
+         */
+        _createOrphanBar() {
+            const bar = document.createElement('div');
+            bar.className = 'orphan-sessions-bar';
+            bar.style.display = 'none';
+
+            const info = document.createElement('span');
+            info.className = 'orphan-info';
+            info.innerHTML = '<i class="bi bi-exclamation-triangle"></i> <span class="orphan-count">0</span> orphaned';
+
+            const destroyBtn = document.createElement('button');
+            destroyBtn.className = 'session-action-btn orphan-destroy-btn';
+            destroyBtn.title = 'Destroy orphaned sessions';
+            destroyBtn.innerHTML = '<i class="bi bi-trash"></i>';
+            destroyBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this._destroyOrphanedSessions();
+            });
+
+            bar.appendChild(info);
+            bar.appendChild(destroyBtn);
+            this._orphanBar = bar;
+
+            // Insert after session-list
+            this.listEl.parentNode.appendChild(bar);
+        }
+
+        /**
+         * TASK-413: Check for orphaned server sessions not owned by this tab
+         */
+        checkOrphanedSessions() {
+            const socket = this._getAnySocket();
+            if (!socket || !socket.connected) return;
+
+            socket.emit('list_server_sessions');
+            socket.once('server_sessions', (serverSessions) => {
+                const localIds = new Set();
+                this.manager.sessions.forEach(s => {
+                    if (s.sessionId) localIds.add(s.sessionId);
+                });
+
+                const orphaned = serverSessions.filter(s => !localIds.has(s.session_id));
+                this._orphanCount = orphaned.length;
+                this._orphanIds = orphaned.map(s => s.session_id);
+                this._updateOrphanBar();
+            });
+        }
+
+        _updateOrphanBar() {
+            if (!this._orphanBar) return;
+            if (this._orphanCount > 0) {
+                this._orphanBar.style.display = 'flex';
+                this._orphanBar.querySelector('.orphan-count').textContent = this._orphanCount;
+            } else {
+                this._orphanBar.style.display = 'none';
+            }
+        }
+
+        _destroyOrphanedSessions() {
+            if (!this._orphanIds || this._orphanIds.length === 0) return;
+            const socket = this._getAnySocket();
+            if (!socket || !socket.connected) return;
+
+            socket.emit('destroy_sessions', { session_ids: this._orphanIds });
+            socket.once('sessions_destroyed', (data) => {
+                console.log(`[SessionExplorer] Destroyed ${data.count} orphaned sessions`);
+                this._orphanCount = 0;
+                this._orphanIds = [];
+                this._updateOrphanBar();
+            });
+        }
+
+        _getAnySocket() {
+            for (const [, session] of this.manager.sessions) {
+                if (session.socket && session.socket.connected) return session.socket;
+            }
+            return null;
         }
 
         addSessionBar(key, name) {
@@ -1020,12 +1169,11 @@
             // FEATURE-029-C: Hover preview triggers
             bar.addEventListener('mouseenter', () => {
                 if (bar.dataset.active === 'true') return;
-                clearTimeout(this._graceTimer);
                 this._hoverTimer = setTimeout(() => this._showPreview(key, bar), 500);
             });
             bar.addEventListener('mouseleave', () => {
                 clearTimeout(this._hoverTimer);
-                this._graceTimer = setTimeout(() => this._dismissPreview(), 100);
+                this._dismissPreview();
             });
             
             this.listEl.appendChild(bar);
@@ -1124,12 +1272,6 @@
             body.className = 'session-preview-body';
             this._previewContainer.appendChild(body);
 
-            this._previewContainer.addEventListener('mouseenter', () => {
-                clearTimeout(this._graceTimer);
-            });
-            this._previewContainer.addEventListener('mouseleave', () => {
-                this._graceTimer = setTimeout(() => this._dismissPreview(), 100);
-            });
             this._previewContainer.addEventListener('click', () => {
                 if (this._previewKey) {
                     const key = this._previewKey;

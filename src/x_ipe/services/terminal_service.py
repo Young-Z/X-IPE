@@ -205,6 +205,30 @@ class SessionManager:
         return len(expired_ids)
     
     @x_ipe_tracing()
+    def list_sessions(self) -> list:
+        """List all sessions with their state info."""
+        result = []
+        with self._lock:
+            for session_id, session in self.sessions.items():
+                result.append({
+                    'session_id': session_id,
+                    'state': session.state,
+                    'created_at': session.created_at.isoformat(),
+                    'socket_sid': session.socket_sid,
+                })
+        return result
+    
+    @x_ipe_tracing()
+    def destroy_sessions(self, session_ids: list) -> int:
+        """Destroy specific sessions by ID. Returns count destroyed."""
+        count = 0
+        for session_id in session_ids:
+            if self.has_session(session_id):
+                self.remove_session(session_id)
+                count += 1
+        return count
+    
+    @x_ipe_tracing()
     def start_cleanup_task(self) -> None:
         """Start background cleanup task (every 5 minutes)."""
         self._running = True

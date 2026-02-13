@@ -377,6 +377,34 @@
     cursor: not-allowed;
 }
 
+/* TASK-413: Orphaned sessions indicator */
+.orphan-sessions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    margin-top: 4px;
+    border-top: 1px solid #333;
+    font-size: 12px;
+    color: #e5a00d;
+    gap: 8px;
+}
+.orphan-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.orphan-info i {
+    font-size: 13px;
+}
+.orphan-destroy-btn {
+    color: #e5a00d;
+}
+.orphan-destroy-btn:hover {
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.15);
+}
+
 /* =============================================================================
    FEATURE-029-B: Session Actions
    ============================================================================= */
