@@ -27,8 +27,10 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-338 | Technical Design | Technical design for FEATURE-030-A UIUX Reference Tab & Console Integration | Nova | 02-13-2026 09:05:00 | [technical-design.md](../requirements/FEATURE-030-A/technical-design.md) | Two-part design. 5 components, 6 files. Frontend-only. Mockup-derived. Auto-proceed. |
+| TASK-336 | Feature Refinement | Refine FEATURE-030-A UIUX Reference Tab & Console Integration | Nova | 02-13-2026 08:55:00 | [specification.md](../requirements/FEATURE-030-A/specification.md) | 23 ACs, 15 FRs, 6 NFRs. Mockup-driven. Auto-proceed. |
+| TASK-337 | Feature Refinement | Refine FEATURE-033 App-Agent Interaction MCP | Bolt | 02-13-2026 08:52:00 | [specification.md](../requirements/FEATURE-033/specification.md) | 8 ACs, 7 FRs, 5 NFRs, 5 BRs, 8 edge cases. FEATURE-033 → Refined. |
 | TASK-335 | Bug Fix | UIUX: Hamburger icon to circle with X-IPE label and hover effect (Feedback-20260213-162737) | Sage | 02-13-2026 08:30:00 | [injected-toolbar-v2.html](../ideas/018.%20Feature-UIUX%20Reference/mockups/injected-toolbar-v2.html) | Circle shape, X-IPE label, gradient hover effect. |
-| TASK-336 | Feature Refinement | Refine FEATURE-030-A UIUX Reference Tab & Console Integration | Nova | 02-13-2026 08:55:00 | [specification.md](../requirements/FEATURE-030-A/specification.md) | 23 ACs, 15 FRs, mockup-driven. Auto-proceed. |
 | TASK-335 | Feature Breakdown | Break down IDEA-018 into features (FEATURE-030-A/B, 031, 032, 033) | Nova | 02-13-2026 08:50:00 | [part-8](../requirements/requirement-details-part-8.md), [features.md](features.md) | 5 features, FEATURE-030 split into A/B. Mockups copied. Approved. |
 | TASK-334 | Requirement Gathering | Gather requirements for IDEA-018 Feature-UIUX Reference | Nova | 02-13-2026 08:30:00 | [part-8](../requirements/requirement-details-part-8.md) | 4 features (FEATURE-030 to FEATURE-033). 3 conflicts reviewed, all standalone. Approved. |
 | TASK-333 | Idea Mockup | Create mockups for IDEA-018 Feature-UIUX Reference | Nova | 02-13-2026 08:15:00 | [idea-summary-v3.md](../ideas/018.%20Feature-UIUX%20Reference/idea-summary-v3.md) | 4 mockups (v1 dark + v2 light). v2 approved. |
@@ -222,11 +224,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 1
-- **In Progress:** 1
+- **Total Active:** 0
+- **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 328
+- **Completed (archived):** 330
 - **Pending Review:** 0
 - **Blocked:** 0
 

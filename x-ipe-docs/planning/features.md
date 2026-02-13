@@ -70,17 +70,17 @@ This board tracks all features across the project lifecycle.
 | FEATURE-029-B | Session Actions | v1.0 | Implemented | - | 02-11-2026 | 02-12-2026 08:30:00 |
 | FEATURE-029-C | Session Hover Preview | v1.0 | Complete | - | 02-11-2026 | 02-12-2026 09:30:00 |
 | FEATURE-029-D | Explorer UI Controls | v1.0 | Complete | [specification.md](../requirements/FEATURE-029-D/specification.md) | 02-11-2026 | 02-12-2026 14:05:00 |
-| FEATURE-030-A | UIUX Reference Tab & Console Integration | v1.0 | Refined | [specification.md](../requirements/FEATURE-030-A/specification.md) | 02-13-2026 | 02-13-2026 08:55:00 |
+| FEATURE-030-A | UIUX Reference Tab & Console Integration | v1.0 | Designed | [specification.md](../requirements/FEATURE-030-A/specification.md) | 02-13-2026 | 02-13-2026 09:05:00 |
 | FEATURE-030-B | UIUX Reference Agent Skill & Toolbar | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
 | FEATURE-031 | UIUX Reference Advanced Tools (Phase 2) | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
 | FEATURE-032 | UIUX Reference Design System (Phase 3) | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
-| FEATURE-033 | App-Agent Interaction MCP | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
+| FEATURE-033 | App-Agent Interaction MCP | v1.0 | Refined | [specification.md](../requirements/FEATURE-033/specification.md) | 02-13-2026 | 02-13-2026 08:52:00 |
 
 ---
 
 ## Status Details
 
-### Planned (20)
+### Planned (19)
 - FEATURE-007: Git Integration
 - FEATURE-014: Theme-Aware Frontend Design Skill
 - FEATURE-017: Architecture DSL JavaScript Library
@@ -100,12 +100,11 @@ This board tracks all features across the project lifecycle.
 - FEATURE-030-B: UIUX Reference Agent Skill & Toolbar
 - FEATURE-031: UIUX Reference Advanced Tools (Phase 2)
 - FEATURE-032: UIUX Reference Design System (Phase 3)
-- FEATURE-033: App-Agent Interaction MCP
 
-### Refined (2)
+### Refined (3)
 - FEATURE-024: Project Quality Evaluation UI
 - FEATURE-027-B: CLI Init & Selection
-- FEATURE-030-A: UIUX Reference Tab & Console Integration
+- FEATURE-033: App-Agent Interaction MCP
 
 ### Designed (5)
 - FEATURE-027-C: Skill & Instruction Translation
@@ -114,6 +113,7 @@ This board tracks all features across the project lifecycle.
 - FEATURE-029-A: Session Explorer Core
 - FEATURE-028-C: Frontend Prompt Language Filtering
 - FEATURE-028-D: Settings Language Switch (Web UI)
+- FEATURE-030-A: UIUX Reference Tab & Console Integration
 
 ### Complete (2)
 - FEATURE-025-B: KB Landing Zone
@@ -904,11 +904,11 @@ This board tracks all features across the project lifecycle.
 ### FEATURE-030-A: UIUX Reference Tab & Console Integration
 
 **Version:** v1.0
-**Status:** Refined
+**Status:** Designed
 **Description:** Frontend tab in Workplace idea creation panel (third tab alongside Compose/Upload) with URL input, auth prerequisite toggle, extra instructions, and "Go to Reference" button that triggers console-first flow.
 **Dependencies:** None
 **Specification:** [specification.md](../requirements/FEATURE-030-A/specification.md)
-**Technical Design:** -
+**Technical Design:** [technical-design.md](../requirements/FEATURE-030-A/technical-design.md)
 
 **Key Capabilities:**
 - "UIUX Reference" tab as third idea creation method
@@ -979,10 +979,10 @@ This board tracks all features across the project lifecycle.
 ### FEATURE-033: App-Agent Interaction MCP
 
 **Version:** v1.0
-**Status:** Planned
+**Status:** Refined
 **Description:** New reusable MCP server for browser→agent communication. Calls new Flask backend endpoint. Phase 1: save_uiux_reference tool + POST /api/ideas/uiux-reference.
 **Dependencies:** None
-**Specification:** -
+**Specification:** [specification.md](../requirements/FEATURE-033/specification.md)
 **Technical Design:** -
 
 **Key Capabilities:**
