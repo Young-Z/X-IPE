@@ -1,0 +1,295 @@
+/*
+ * FEATURE-030-A: UIUX Reference Tab — Editorial Light Theme
+ * Namespace: .uiux-ref-*
+ * Derived from mockup: uiux-reference-tab-v2.html
+ */
+
+/* ── Animations ── */
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-badge {
+    0%, 100% { opacity: 0.4; }
+    50%      { opacity: 1; }
+}
+
+@keyframes uiux-ref-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Tab Pane Entrance ── */
+#uiux-reference-pane.show {
+    animation: fadeSlideIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── NEW Badge ── */
+.uiux-ref-new-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 1px 6px;
+    border-radius: 8px;
+    background: #3730a3;
+    color: #fff;
+    margin-left: 6px;
+    vertical-align: middle;
+    animation: pulse-badge 2.5s ease-in-out infinite;
+}
+
+/* ── Pane Container ── */
+.uiux-ref-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 0;
+    max-width: 480px;
+}
+
+/* ── Labels ── */
+.uiux-ref-label {
+    display: block;
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #4a4a5c;
+    margin-bottom: 6px;
+}
+
+.uiux-ref-optional {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+    color: #8e8e9f;
+    font-size: 11px;
+}
+
+/* ── Input Wrapper ── */
+.uiux-ref-input-wrapper {
+    position: relative;
+}
+
+.uiux-ref-input-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8e8e9f;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+/* ── Inputs ── */
+.uiux-ref-input {
+    width: 100%;
+    padding: 12px 14px 12px 38px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #1a1a2e;
+    background: #f4f2ed;
+    border: 1.5px solid #e0dcd4;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.25s, box-shadow 0.25s, background-color 0.25s;
+}
+
+.uiux-ref-input::placeholder {
+    color: #b5b5c3;
+}
+
+.uiux-ref-input:focus {
+    border-color: #3730a3;
+    box-shadow: 0 0 0 3px rgba(55, 48, 163, 0.12);
+    background: #fff;
+}
+
+.uiux-ref-input-error {
+    border-color: #b91c1c !important;
+    box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1) !important;
+}
+
+/* ── Textarea ── */
+.uiux-ref-textarea {
+    width: 100%;
+    min-height: 76px;
+    padding: 12px 14px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #1a1a2e;
+    background: #f4f2ed;
+    border: 1.5px solid #e0dcd4;
+    border-radius: 10px;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.25s, box-shadow 0.25s, background-color 0.25s;
+}
+
+.uiux-ref-textarea::placeholder {
+    color: #b5b5c3;
+}
+
+.uiux-ref-textarea:focus {
+    border-color: #3730a3;
+    box-shadow: 0 0 0 3px rgba(55, 48, 163, 0.12);
+    background: #fff;
+}
+
+.uiux-ref-char-count {
+    text-align: right;
+    font-size: 11px;
+    color: #8e8e9f;
+    margin-top: 4px;
+}
+
+/* ── Auth Section ── */
+.uiux-ref-auth-section {
+    border: 1.5px solid #e0dcd4;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.uiux-ref-auth-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 14px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #1a1a2e;
+    text-align: left;
+}
+
+.uiux-ref-auth-toggle:hover {
+    background: rgba(55, 48, 163, 0.03);
+}
+
+.uiux-ref-chevron {
+    margin-left: auto;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    font-size: 12px;
+    color: #8e8e9f;
+}
+
+.uiux-ref-auth-toggle[aria-expanded="true"] .uiux-ref-chevron {
+    transform: rotate(90deg);
+}
+
+.uiux-ref-auth-content {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 14px;
+    transition: max-height 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                padding 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.uiux-ref-auth-content.uiux-ref-auth-expanded {
+    max-height: 200px;
+    padding: 0 14px 14px;
+}
+
+.uiux-ref-auth-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: rgba(180, 83, 9, 0.06);
+    border-radius: 8px;
+    font-size: 12px;
+    color: #4a4a5c;
+    line-height: 1.4;
+}
+
+.uiux-ref-auth-hint > i {
+    color: #b45309;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+/* ── Go to Reference Button ── */
+.uiux-ref-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    background: #3730a3;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
+}
+
+.uiux-ref-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(55, 48, 163, 0.25);
+    background: #4f46e5;
+}
+
+.uiux-ref-btn[data-state="loading"] {
+    background: #4f46e5;
+    pointer-events: none;
+}
+
+.uiux-ref-btn[data-state="success"] {
+    background: #047857;
+    pointer-events: none;
+}
+
+/* ── Spinner ── */
+.uiux-ref-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: uiux-ref-spin 0.8s linear infinite;
+}
+
+/* ── Flow Preview ── */
+.uiux-ref-flow-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 20px;
+    background: rgba(55, 48, 163, 0.06);
+    border-radius: 14px;
+}
+
+.uiux-ref-flow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #3730a3;
+    font-weight: 500;
+}
+
+.uiux-ref-flow-step i {
+    font-size: 16px;
+}
+
+.uiux-ref-flow-arrow {
+    color: #8e8e9f;
+    font-size: 12px;
+}

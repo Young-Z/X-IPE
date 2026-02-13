@@ -1872,6 +1872,12 @@ class WorkplaceManager {
                             <i class="bi bi-cloud-upload"></i> Upload Files
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="uiux-reference-tab" data-bs-toggle="tab" data-bs-target="#uiux-reference-pane" type="button" role="tab">
+                            <i class="bi bi-palette2"></i> UIUX Reference
+                            <span class="uiux-ref-new-badge">NEW</span>
+                        </button>
+                    </li>
                 </ul>
                 
                 <!-- Tab Content -->
@@ -1914,6 +1920,12 @@ class WorkplaceManager {
                             </p>
                         </div>
                     </div>
+                    
+                    <!-- UIUX Reference Tab (FEATURE-030-A) -->
+                    <div class="tab-pane fade" id="uiux-reference-pane" role="tabpanel"
+                         aria-labelledby="uiux-reference-tab">
+                        <!-- Content rendered by UiuxReferenceTab.render() -->
+                    </div>
                 </div>
                 
                 <div class="workplace-upload-status d-none" id="workplace-upload-status">
@@ -1926,6 +1938,7 @@ class WorkplaceManager {
         this.setupUploader();
         this.setupComposer();
         this._setupClearTargetButton();
+        this._initUiuxReferenceTab();
     }
     
     /**
@@ -1943,6 +1956,20 @@ class WorkplaceManager {
                 }
                 this._showToast('Will create a new folder instead', 'info');
             });
+        }
+    }
+
+    /**
+     * FEATURE-030-A: Initialize UIUX Reference Tab
+     */
+    _initUiuxReferenceTab() {
+        const pane = document.getElementById('uiux-reference-pane');
+        if (pane && typeof UiuxReferenceTab !== 'undefined') {
+            this.uiuxReferenceTab = new UiuxReferenceTab(pane, {
+                copilotPrompts: this.copilotPrompts,
+                language: this.language
+            });
+            this.uiuxReferenceTab.render();
         }
     }
     

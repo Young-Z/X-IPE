@@ -81,6 +81,22 @@
             "command": "基于<current-idea-file>进行协作，等待我的指示。"
           }
         ]
+      },
+      {
+        "id": "uiux-reference",
+        "icon": "bi-palette2",
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "UIUX Reference",
+            "command": "copilot execute uiux-reference --url <target-url>"
+          },
+          {
+            "language": "zh",
+            "label": "UIUX参考",
+            "command": "copilot execute uiux-reference --url <target-url>"
+          }
+        ]
       }
     ]
   },
