@@ -71,7 +71,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-029-C | Session Hover Preview | v1.0 | Complete | - | 02-11-2026 | 02-12-2026 09:30:00 |
 | FEATURE-029-D | Explorer UI Controls | v1.0 | Complete | [specification.md](../requirements/FEATURE-029-D/specification.md) | 02-11-2026 | 02-12-2026 14:05:00 |
 | FEATURE-030-A | UIUX Reference Tab & Console Integration | v1.0 | Completed | [specification.md](../requirements/FEATURE-030-A/specification.md) | 02-13-2026 | 02-13-2026 09:44:00 |
-| FEATURE-030-B | UIUX Reference Agent Skill & Toolbar | v1.0 | Refined | [specification.md](../requirements/FEATURE-030-B/specification.md) | 02-13-2026 | 02-13-2026 12:55:00 |
+| FEATURE-030-B | UIUX Reference Agent Skill & Toolbar | v1.0 | Designed | [specification.md](../requirements/FEATURE-030-B/specification.md) | 02-13-2026 | 02-13-2026 13:45:00 |
 | FEATURE-031 | UIUX Reference Advanced Tools (Phase 2) | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
 | FEATURE-032 | UIUX Reference Design System (Phase 3) | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
 | FEATURE-033 | App-Agent Interaction MCP | v1.0 | Complete | [specification.md](../requirements/FEATURE-033/specification.md) | 02-13-2026 | 02-13-2026 09:47:00 |
