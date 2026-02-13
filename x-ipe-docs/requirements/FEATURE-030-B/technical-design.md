@@ -310,8 +310,8 @@ The toolbar is a single self-contained IIFE that injects all HTML, CSS, and JS i
 classDiagram
     class XipeToolbar {
         -HTMLElement root
-        -String activeTool : "color" | "highlight" | null
-        -Object refData : {colors[], elements[]}
+        -String activeTool
+        -Object refData
         -Boolean isDragging
         -Number startX
         -Number startY
