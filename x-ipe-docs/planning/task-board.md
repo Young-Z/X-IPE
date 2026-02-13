@@ -6,7 +6,6 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-331 | Feature Closing | Close FEATURE-025-D KB Topics & Summaries | Rune | ✅ completed | 02-12-2026 14:47:00 | [CHANGELOG.md](../../CHANGELOG.md), [features.md](features.md) | — |
 
 
 
@@ -27,6 +26,8 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-332 | Ideation | Refine idea: Feature-UIUX Reference | Nova | 02-13-2026 07:50:00 | [idea-summary-v2.md](../ideas/018.%20Feature-UIUX%20Reference/idea-summary-v2.md) | Idea refined. 11 brainstorming questions. CDP callback research. v2 approved. |
+| TASK-331 | Feature Closing | Close FEATURE-025-D KB Topics & Summaries | Rune | 02-12-2026 14:47:00 | [CHANGELOG.md](../../CHANGELOG.md), [features.md](features.md) | — |
 | TASK-330 | Feature Acceptance Test | Acceptance test FEATURE-025-D KB Topics & Summaries | Rune | 02-12-2026 22:45:00 | [acceptance-test-cases.md](../requirements/FEATURE-025-D/acceptance-test-cases.md) | 22/25 pass (100% executed). CSS dark-theme bug found & fixed. Mockup validation pass. |
 | TASK-329 | Code Implementation | Implement FEATURE-025-D KB Topics & Summaries | Rune | 02-12-2026 14:08:00 | [kb_service.py](../../src/x_ipe/services/kb_service.py), [kb_routes.py](../../src/x_ipe/routes/kb_routes.py), [kb-topics.js](../../src/x_ipe/static/js/features/kb-topics.js), [kb-topics.css](../../src/x_ipe/static/css/kb-topics.css) | 3 service methods, 2 API routes, ~400 lines JS, ~555 lines CSS. 34/34 tests pass. |
 | TASK-328 | Technical Design | Technical design for FEATURE-025-D KB Topics & Summaries | Rune | 02-12-2026 14:00:00 | [technical-design.md](../requirements/FEATURE-025-D/technical-design.md) | Two-part design. 7 AC groups, 6 FRs, 5 NFRs covered. |
@@ -215,11 +216,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 2
-- **In Progress:** 2
+- **Total Active:** 0
+- **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 322
+- **Completed (archived):** 324
 - **Pending Review:** 0
 - **Blocked:** 0
 

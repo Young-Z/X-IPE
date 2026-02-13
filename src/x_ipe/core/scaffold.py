@@ -436,6 +436,9 @@ server:
 
 git:
   strategy: "main-branch-only"
+
+console:
+  auto_execute_prompt: false
 """
         
         content = config_content or default_content
