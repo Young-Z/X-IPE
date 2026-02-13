@@ -12,6 +12,7 @@
 | TASK-409 | Technical Design | FEATURE-030-B: UIUX Reference Agent Skill & Toolbar — Create technical design | Sage ✅ | ✅ completed | 02-13-2026 13:45:00 | x-ipe-docs/requirements/FEATURE-030-B/technical-design.md | Code Implementation |
 | TASK-410 | Test Generation | FEATURE-030-B: UIUX Reference Agent Skill & Toolbar — Generate test suite | Sage ✅ | ✅ completed | 02-13-2026 15:10:00 | tests/test_uiux_reference_toolbar.py | Code Implementation |
 | TASK-411 | Code Implementation | FEATURE-030-B: UIUX Reference Agent Skill & Toolbar — Implement skill + toolbar | Sage ✅ | ✅ completed | 02-13-2026 15:20:00 | src/x_ipe/static/js/injected/xipe-toolbar.js, .github/skills/x-ipe-tool-uiux-reference/SKILL.md | Feature Acceptance Test |
+| TASK-412 | Feature Acceptance Test | FEATURE-030-B: UIUX Reference Agent Skill & Toolbar — Acceptance test injected toolbar | Sage ✅ | ✅ completed | 02-13-2026 16:00:00 | x-ipe-docs/requirements/FEATURE-030-B/acceptance-test-cases.md | Feature Closing |
 
 
 
@@ -75,11 +76,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 3
+- **Total Active:** 2
 - **In Progress:** 0
-- **Pending:** 1
+- **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 405
+- **Completed (archived):** 406
 - **Pending Review:** 0
 - **Blocked:** 0
 
