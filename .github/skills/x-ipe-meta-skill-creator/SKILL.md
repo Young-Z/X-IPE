@@ -190,15 +190,21 @@ input:
       2. Create skill-meta.md under x-ipe-docs/skill-meta/{skill-name}/ by filling template
       3. Load SKILL.md template from {skill_template_path}
       4. Create candidate/ under x-ipe-docs/skill-meta/{skill-name}/ with full skill structure
+      5. Create ALL bundled resources from resources_plan[] inside candidate/:
+         - candidate/references/ — all reference files
+         - candidate/scripts/ — all script files
+         - candidate/templates/ — all template files
     </action>
     <constraints>
       - BLOCKING: Both outputs must complete before Round 2
       - BLOCKING: skill-meta.md MUST be created from template, not from scratch
       - BLOCKING: SKILL.md MUST be created from template, not from scratch
+      - BLOCKING: ALL bundled resources (references/, scripts/, templates/) MUST be created inside candidate/ — never directly in .github/skills/{skill-name}/
     </constraints>
     <success_criteria>
       - skill-meta.md exists (created from {skill_meta_template_path})
       - candidate/ folder with SKILL.md exists (created from {skill_template_path})
+      - All planned resources from resources_plan[] exist inside candidate/
     </success_criteria>
     <output>skill-meta.md, candidate/</output>
   </step_4>
@@ -252,6 +258,8 @@ input:
     <action>
       1. Check evaluation results
       2. IF must_pass_rate == 100% AND should_pass_rate >= 80%:
+         - Validate candidate/ completeness: verify all files referenced by candidate/SKILL.md exist inside candidate/ (references/, scripts/, templates/)
+         - IF missing files found: add them to candidate/ before merging
          - cp -r candidate/* .github/skills/{skill-name}/
          - Update skill-version-history.md
          - Proceed to Step 9
@@ -260,6 +268,9 @@ input:
       4. IF tests failed AND iteration_count >= 3:
          - Escalate to human
     </action>
+    <constraints>
+      - BLOCKING: Pre-merge validation must confirm candidate/ contains ALL files that will exist in production — no direct writes to .github/skills/{skill-name}/ after merge
+    </constraints>
     <success_criteria>
       - Skill merged OR iteration documented
     </success_criteria>
@@ -362,7 +373,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>Step 4 Outputs Complete</name>
-    <verification>skill-meta.md and candidate/ folder created</verification>
+    <verification>skill-meta.md and candidate/ folder created with ALL bundled resources (references/, scripts/, templates/) inside candidate/</verification>
     <step_output>skill-meta.md, candidate/</step_output>
   </checkpoint>
   <checkpoint required="true">
@@ -384,6 +395,10 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <name>Step 8 Output Complete</name>
     <verification>Skill merged to .github/skills/{skill-name}/ or iteration documented</verification>
     <step_output>merge_status</step_output>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Candidate-Production Parity</name>
+    <verification>Every file in .github/skills/{skill-name}/ has a corresponding file in candidate/ — no files were created directly in production</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Step 9 Output Complete</name>
