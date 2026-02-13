@@ -1,6 +1,6 @@
 # Requirement Details Index
 
-> Last Updated: 02-11-2026
+> Last Updated: 02-13-2026
 
 ## Parts Overview
 
@@ -13,3 +13,4 @@
 | 5 | [Part 5](requirement-details-part-5.md) | FEATURE-025-A to F, FEATURE-026 | ~465 |
 | 6 | [Part 6](requirement-details-part-6.md) | FEATURE-027-A to E, FEATURE-028-A to D | ~473 |
 | 7 | [Part 7](requirement-details-part-7.md) | FEATURE-029-A to D | ~240 |
+| 8 | [Part 8](requirement-details-part-8.md) | FEATURE-030 to FEATURE-033 | ~280 |

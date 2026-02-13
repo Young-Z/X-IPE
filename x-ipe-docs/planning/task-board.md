@@ -27,6 +27,8 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
+| TASK-335 | Bug Fix | UIUX: Hamburger icon to circle with X-IPE label and hover effect (Feedback-20260213-162737) | Sage | 02-13-2026 08:30:00 | [injected-toolbar-v2.html](../ideas/018.%20Feature-UIUX%20Reference/mockups/injected-toolbar-v2.html) | Circle shape, X-IPE label, gradient hover effect. |
+| TASK-334 | Requirement Gathering | Gather requirements for IDEA-018 Feature-UIUX Reference | Nova | 02-13-2026 08:30:00 | [part-8](../requirements/requirement-details-part-8.md) | 4 features (FEATURE-030 to FEATURE-033). 3 conflicts reviewed, all standalone. Approved. |
 | TASK-333 | Idea Mockup | Create mockups for IDEA-018 Feature-UIUX Reference | Nova | 02-13-2026 08:15:00 | [idea-summary-v3.md](../ideas/018.%20Feature-UIUX%20Reference/idea-summary-v3.md) | 4 mockups (v1 dark + v2 light). v2 approved. |
 | TASK-332 | Ideation | Refine idea: Feature-UIUX Reference | Nova | 02-13-2026 07:50:00 | [idea-summary-v2.md](../ideas/018.%20Feature-UIUX%20Reference/idea-summary-v2.md) | Idea refined. 11 brainstorming questions. CDP callback research. v2 approved. |
 | TASK-331 | Feature Closing | Close FEATURE-025-D KB Topics & Summaries | Rune | 02-12-2026 14:47:00 | [CHANGELOG.md](../../CHANGELOG.md), [features.md](features.md) | — |
@@ -222,7 +224,7 @@
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 325
+- **Completed (archived):** 326
 - **Pending Review:** 0
 - **Blocked:** 0
 
