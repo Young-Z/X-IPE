@@ -5,105 +5,106 @@
 
 ---
 
-## FEATURE-030: UIUX Reference — Core Tab & Agent Skill (Phase 1)
+## Feature List
+
+| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------------|---------|-------------------|-------------------|
+| FEATURE-030-A | UIUX Reference Tab & Console Integration | v1.0 | Frontend tab (URL input, auth toggle, instructions) + console-first flow (find/create session, auto-type prompt) | None |
+| FEATURE-030-B | UIUX Reference Agent Skill & Toolbar | v1.0 | Agent skill using CDP to open URL, handle auth, inject interactive toolbar (Color Picker, Element Highlighter), callback mechanism, save reference data | FEATURE-030-A, FEATURE-033 |
+| FEATURE-031 | UIUX Reference Advanced Tools (Phase 2) | v1.0 | Element Commenter and Asset Extractor tools in toolbar; download fonts, icons, images for 1:1 reproduction | FEATURE-030-B |
+| FEATURE-032 | UIUX Reference Design System (Phase 3) | v1.0 | Auto-generate design-system.md from extracted tokens; promotion path to global theme | FEATURE-031 |
+| FEATURE-033 | App-Agent Interaction MCP | v1.0 | New reusable MCP server + Flask endpoint for browser→agent communication; Phase 1: save_uiux_reference tool | None |
+
+---
+
+## Linked Mockups
+
+| Mockup Function Name | Feature | Mockup Link |
+|---------------------|---------|-------------|
+| UIUX Reference Tab (light) | FEATURE-030-A | [uiux-reference-tab-v2.html](FEATURE-030-A/mockups/uiux-reference-tab-v2.html) |
+| UIUX Reference Tab (dark alt) | FEATURE-030-A | [uiux-reference-tab-v1.html](FEATURE-030-A/mockups/uiux-reference-tab-v1.html) |
+| Injected Reference Toolbar (light) | FEATURE-030-B | [injected-toolbar-v2.html](FEATURE-030-B/mockups/injected-toolbar-v2.html) |
+| Injected Reference Toolbar (dark alt) | FEATURE-030-B | [injected-toolbar-v1.html](FEATURE-030-B/mockups/injected-toolbar-v1.html) |
+| Injected Toolbar with Phase 2 tools | FEATURE-031 | [injected-toolbar-v2.html](FEATURE-031/mockups/injected-toolbar-v2.html) |
+
+---
+
+## Feature Details
+
+---
+
+### FEATURE-030-A: UIUX Reference Tab & Console Integration
+
+**Version:** v1.0
+**Brief Description:** Frontend tab in Workplace idea creation panel with URL input, auth prerequisite toggle, extra instructions, and "Go to Reference" button that triggers console-first flow.
+
+> Source: IDEA-018 (Feature-UIUX Reference)
+> Status: Proposed
+> Priority: High (MVP — entry point for the entire UIUX Reference workflow)
+> Mockup: [uiux-reference-tab-v2.html](FEATURE-030-A/mockups/uiux-reference-tab-v2.html)
+> Phase: 1 of 3
+
+**Acceptance Criteria:**
+- [ ] "UIUX Reference" tab visible as third tab in Workplace idea creation panel (alongside Compose and Upload)
+- [ ] URL input field accepts target web page URL
+- [ ] Optional auth prerequisite URL input (collapsible section, hidden by default)
+- [ ] Extra instructions text area visible for guiding the agent
+- [ ] "Go to Reference" button triggers console-first flow: finds idle terminal session (or creates new one), auto-types prompt from `copilot-prompt.json` (key: `uiux-reference`)
+- [ ] Prompt format: `copilot execute uiux-reference --url {url} --auth-url {auth_url} --extra "{instructions}"`
+
+**Dependencies:**
+- Existing Workplace idea creation UI (FEATURE-008) — for tab placement
+- Existing console session management (FEATURE-005 / FEATURE-029) — for session finding/creation
+
+**Technical Considerations:**
+- Tab UI follows existing Compose/Upload tab pattern in Workplace
+- `copilot-prompt.json` must have a `uiux-reference` key for the prompt template
+- Console integration reuses existing session management API
+
+---
+
+### FEATURE-030-B: UIUX Reference Agent Skill & Toolbar
+
+**Version:** v1.0
+**Brief Description:** Agent skill using Chrome DevTools MCP to open target URL, handle authentication, inject interactive toolbar (Color Picker, Element Highlighter), collect reference data via CDP callback, and save to idea folder.
 
 > Source: IDEA-018 (Feature-UIUX Reference)
 > Status: Proposed
 > Priority: High
-> Mockup: [uiux-reference-tab-v2.html](../ideas/018.%20Feature-UIUX%20Reference/mockups/uiux-reference-tab-v2.html)
+> Mockup: [injected-toolbar-v2.html](FEATURE-030-B/mockups/injected-toolbar-v2.html)
 > Phase: 1 of 3
 
-### Overview
+**Acceptance Criteria:**
+- [ ] Agent opens target URL in Chrome via Chrome DevTools MCP
+- [ ] Authentication prerequisite flow: open auth URL → user logs in → URL-change detection → redirect to target URL; 5-minute timeout
+- [ ] Draggable toolbar injected top-right with hamburger icon; expands on hover/click to show tool panel
+- [ ] Toolbar uses `z-index: 2147483647`; remains functional after scroll/resize/dynamic content changes
+- [ ] Color Picker tool: click element → capture hex, RGB, HSL + CSS selector; counter increments
+- [ ] Element Highlighter tool: hover → bounding box overlay + CSS selector label; click → capture selector path, bounding box, full-page + cropped screenshots
+- [ ] "Send References" callback via `Runtime.addBinding("__xipeCallback")`; fallback: `evaluate_script` polling
+- [ ] Reference data saved as JSON in `uiux-references/sessions/ref-session-{NNN}.json`
+- [ ] Screenshots saved to `uiux-references/screenshots/` (full-page + element crops)
+- [ ] Top-level `uiux-references/reference-data.json` created/updated as merged view of all sessions
 
-Add a **UIUX Reference** tab as the third idea creation method in the Workplace (alongside Compose and Upload). The tab provides URL input, optional authentication prerequisite, extra instructions, and a "Go to Reference" button. Clicking the button triggers a console-first flow: the app finds an idle terminal session (or creates a new one), auto-types a `uiux-reference` prompt, and the user presses Enter. The CLI agent then opens the target URL in Chrome via Chrome DevTools MCP, handles authentication if needed, and injects an interactive toolbar with Color Picker and Element Highlighter tools. Collected reference data is sent back to the agent via CDP `Runtime.addBinding` callback and saved to the idea folder.
+**Dependencies:**
+- FEATURE-030-A (UIUX Reference Tab) — provides the entry point and prompt
+- FEATURE-033 (App-Agent Interaction MCP) — for saving reference data back to the app
+- Chrome DevTools MCP server (external, must be pre-configured)
 
-### User Request
+**Technical Considerations:**
+- Toolbar injection must not break target page layout or functionality
+- CDP connection resilience: 3 reconnection retries on drop; save partial data on failure
+- Top-level DOM only (no Shadow DOM, no cross-origin iframes in v1)
+- Reference JSON must conform to schema defined in idea-summary-v2.md
+- CORS-blocked assets logged as warnings, skipped without breaking flow
 
-The user wants to:
-1. Reference external web pages for design inspiration during ideation
-2. Pick colors and highlight elements directly on live web pages
-3. Have reference data automatically saved to the idea folder in structured JSON format
-4. Support authentication flows for gated pages (login → redirect → target)
-
-### Clarifications
+**Clarifications (inherited from FEATURE-030):**
 
 | Question | Answer |
 |----------|--------|
-| Relationship to FEATURE-022 (Browser Simulator)? | **Independent** — FEATURE-022 uses iframe for localhost only; UIUX Reference uses Chrome DevTools MCP for real external web pages. If UIUX Reference approach works well, its technique may be backported to FEATURE-022 later. |
-| Relationship to FEATURE-008 (Workplace)? | **Independent** — UIUX Reference has its own data flow to the idea folder; does not modify Workplace file management. Uses existing folder structure. |
-| Relationship to FEATURE-012 (Design Themes)? | **Complementary** — UIUX Reference extracts design tokens from web pages; FEATURE-012 stores/applies themes. Phase 3 can promote extracted tokens to FEATURE-012's theme folder. |
-| Browser infrastructure? | Independent CDP connection — UIUX Reference manages its own Chrome browser tab via Chrome DevTools MCP, not dependent on FEATURE-022 infrastructure. |
-| Frontend tab placement? | Third tab in the Workplace idea creation UI, alongside Compose and Upload. Tab contains URL input, console handles agent execution. |
-| Phase scope? | 3 phases as separate features: Phase 1 (FEATURE-030), Phase 2 (FEATURE-031), Phase 3 (FEATURE-032). |
-| MCP endpoint scope? | Phase 1 only: `POST /api/ideas/uiux-reference` (save reference data). Extend later as needed. |
-
-### High-Level Requirements
-
-#### Functional Requirements
-
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-030.1 | "UIUX Reference" tab in Workplace idea creation panel (third tab alongside Compose and Upload) | P0 |
-| FR-030.2 | URL input field for target web page URL | P0 |
-| FR-030.3 | Optional prerequisite URL input for authentication flows (collapsible section, hidden by default) | P1 |
-| FR-030.4 | Extra instructions text area for guiding the agent | P1 |
-| FR-030.5 | "Go to Reference" button triggers console-first flow | P0 |
-| FR-030.6 | Console integration: find idle terminal session or create new one; auto-type prompt from `copilot-prompt.json` (key: `uiux-reference`) | P0 |
-| FR-030.7 | Agent opens target URL via Chrome DevTools MCP | P0 |
-| FR-030.8 | Authentication prerequisite flow: open auth URL → user completes login → URL-change-based detection (current URL leaves auth domain or matches target) → redirect to target URL | P1 |
-| FR-030.9 | Auth timeout: 5-minute timer on auth page; prompt user if exceeded | P2 |
-| FR-030.10 | Inject interactive toolbar into target page as draggable element (initial position: top-right corner) | P0 |
-| FR-030.11 | Toolbar collapses to hamburger menu icon; expands on hover/click to show tool panel | P0 |
-| FR-030.12 | Toolbar uses `z-index: 2147483647` to remain on top of all page content | P0 |
-| FR-030.13 | **Color Picker tool** — click any element to capture hex, RGB, HSL values + CSS selector of source element | P0 |
-| FR-030.14 | **Element Highlighter tool** — hover to highlight any element with bounding box overlay; click to capture CSS selector path, bounding box coordinates, full-page screenshot, and cropped element screenshot | P0 |
-| FR-030.15 | Collected data displayed in toolbar panel as running summary (color count, element count) | P1 |
-| FR-030.16 | "Send References" button in toolbar triggers callback to agent | P0 |
-| FR-030.17 | Primary callback: `Runtime.addBinding("__xipeCallback")` — injected JS calls `window.__xipeCallback(JSON.stringify(data))`, CDP fires `Runtime.bindingCalled` event, agent receives payload directly | P0 |
-| FR-030.18 | Fallback callback: if `Runtime.addBinding` unavailable, set `window.__xipeRefReady = true` and agent polls via `evaluate_script` | P1 |
-| FR-030.19 | Reference data saved as JSON in `uiux-references/sessions/ref-session-{NNN}.json` within the idea folder | P0 |
-| FR-030.20 | Top-level `uiux-references/reference-data.json` created/updated as merged view of all sessions | P1 |
-| FR-030.21 | Screenshots saved to `uiux-references/screenshots/` (full-page: `full-page-{NNN}.png`, element crops: `elem-{NNN}-crop.png`) | P0 |
-
-#### Non-Functional Requirements
-
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| NFR-030.1 | Toolbar injection must not break target page layout or functionality | P0 |
-| NFR-030.2 | Toolbar must remain functional after page scroll, resize, and dynamic content changes | P0 |
-| NFR-030.3 | Reference JSON must conform to the schema defined in idea-summary-v2.md | P0 |
-| NFR-030.4 | CDP connection resilience: 3 reconnection retries on drop; save partial data on failure | P1 |
-| NFR-030.5 | CORS-blocked assets logged as warnings, skipped without breaking flow | P1 |
-| NFR-030.6 | Top-level DOM only (v1); Shadow DOM and cross-origin iframes out of scope | P0 |
-
-### Acceptance Criteria
-
-| AC ID | Given | When | Then |
-|-------|-------|------|------|
-| AC-030.1 | User is in Workplace idea creation panel | User clicks "UIUX Reference" tab | Tab displays URL input, optional auth URL (collapsed), extra instructions, and "Go to Reference" button |
-| AC-030.2 | User has entered a target URL and clicks "Go to Reference" | Console-first flow triggers | App finds idle session (or creates new one), auto-types `copilot execute uiux-reference --url {url}` prompt |
-| AC-030.3 | Agent receives uiux-reference prompt with auth URL | Agent processes authentication flow | Auth page opens, user logs in, URL-change detection redirects to target URL |
-| AC-030.4 | Target page loaded in Chrome | Agent injects toolbar | Draggable toolbar appears top-right with hamburger icon; expands to show Color Picker and Element Highlighter tools |
-| AC-030.5 | Color Picker tool active | User clicks an element | Hex, RGB, HSL values captured along with source element's CSS selector; counter increments in toolbar |
-| AC-030.6 | Element Highlighter tool active | User hovers over an element | Element highlighted with bounding box overlay and CSS selector label (e.g., `body > main > .cards > .card:nth-child(2)`) |
-| AC-030.7 | Element Highlighter tool active | User clicks a highlighted element | CSS selector path, bounding box, full-page screenshot, and cropped element screenshot captured |
-| AC-030.8 | User has collected references | User clicks "Send References" | Callback fires via `Runtime.addBinding`; agent receives JSON payload with all collected data |
-| AC-030.9 | Agent receives reference data | Agent saves to idea folder | JSON saved to `uiux-references/sessions/ref-session-{NNN}.json`; screenshots saved to `uiux-references/screenshots/` |
-| AC-030.10 | Multiple reference sessions completed | Agent merges sessions | `uiux-references/reference-data.json` contains merged view of all sessions |
-
-### Constraints
-
-- Chrome DevTools MCP must be configured and running
-- Only one UIUX Reference session per browser tab at a time
-- `copilot-prompt.json` must have a `uiux-reference` key for the prompt template
-- Top-level DOM only (no Shadow DOM, no cross-origin iframes)
-
-### Dependencies
-
-- Chrome DevTools MCP server (external, must be pre-configured)
-- FEATURE-033 (x-ipe-app-and-agent-interaction MCP) — for saving reference data back to the app
-- Existing Workplace idea creation UI (FEATURE-008) — for tab placement
-- Existing console session management (FEATURE-005 / FEATURE-029) — for session finding/creation
+| Relationship to FEATURE-022? | **Independent** — FEATURE-022 uses iframe for localhost; UIUX Reference uses CDP for real external pages. May backport technique later. |
+| Browser infrastructure? | Independent CDP connection — not dependent on FEATURE-022 infrastructure. |
+| Phase scope? | 3 phases: Phase 1 (030-A/B), Phase 2 (031), Phase 3 (032). |
 
 ---
 
@@ -156,7 +157,7 @@ Extend the UIUX Reference toolbar (from FEATURE-030) with two advanced tools: **
 
 ### Dependencies
 
-- FEATURE-030 (UIUX Reference Phase 1) — toolbar infrastructure, callback mechanism
+- FEATURE-030-B (UIUX Reference Agent Skill & Toolbar) — toolbar infrastructure, callback mechanism
 - FEATURE-033 (x-ipe-app-and-agent-interaction MCP) — for saving extended reference data
 
 ---

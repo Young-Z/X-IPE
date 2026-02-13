@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 02-11-2026 15:35:00
+> Last Updated: 02-13-2026 08:46:00
 
 ## Overview
 
@@ -70,6 +70,11 @@ This board tracks all features across the project lifecycle.
 | FEATURE-029-B | Session Actions | v1.0 | Implemented | - | 02-11-2026 | 02-12-2026 08:30:00 |
 | FEATURE-029-C | Session Hover Preview | v1.0 | Complete | - | 02-11-2026 | 02-12-2026 09:30:00 |
 | FEATURE-029-D | Explorer UI Controls | v1.0 | Complete | [specification.md](../requirements/FEATURE-029-D/specification.md) | 02-11-2026 | 02-12-2026 14:05:00 |
+| FEATURE-030-A | UIUX Reference Tab & Console Integration | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
+| FEATURE-030-B | UIUX Reference Agent Skill & Toolbar | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
+| FEATURE-031 | UIUX Reference Advanced Tools (Phase 2) | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
+| FEATURE-032 | UIUX Reference Design System (Phase 3) | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
+| FEATURE-033 | App-Agent Interaction MCP | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
 
 ---
 
@@ -92,6 +97,11 @@ This board tracks all features across the project lifecycle.
 - FEATURE-025-F: KB Navigation & Polish
 - FEATURE-026: Homepage Infinity Loop
 - FEATURE-027-E: CLI Migration & Upgrade
+- FEATURE-030-A: UIUX Reference Tab & Console Integration
+- FEATURE-030-B: UIUX Reference Agent Skill & Toolbar
+- FEATURE-031: UIUX Reference Advanced Tools (Phase 2)
+- FEATURE-032: UIUX Reference Design System (Phase 3)
+- FEATURE-033: App-Agent Interaction MCP
 
 ### Refined (2)
 - FEATURE-024: Project Quality Evaluation UI
@@ -888,3 +898,96 @@ This board tracks all features across the project lifecycle.
 - Collapsed = fully hidden, terminal takes full width
 - Drag handle resizes (160-360px, default 220px)
 - Width and collapsed state persist in localStorage
+
+---
+
+### FEATURE-030-A: UIUX Reference Tab & Console Integration
+
+**Version:** v1.0
+**Status:** Planned
+**Description:** Frontend tab in Workplace idea creation panel (third tab alongside Compose/Upload) with URL input, auth prerequisite toggle, extra instructions, and "Go to Reference" button that triggers console-first flow.
+**Dependencies:** None
+**Specification:** -
+**Technical Design:** -
+
+**Key Capabilities:**
+- "UIUX Reference" tab as third idea creation method
+- URL input field for target web page
+- Collapsible auth prerequisite URL section
+- Extra instructions text area
+- Console integration: find idle session or create new, auto-type prompt from copilot-prompt.json
+- Prompt format: `copilot execute uiux-reference --url {url} --auth-url {auth_url} --extra "{instructions}"`
+
+---
+
+### FEATURE-030-B: UIUX Reference Agent Skill & Toolbar
+
+**Version:** v1.0
+**Status:** Planned
+**Description:** Agent skill using Chrome DevTools MCP to open target URL, handle authentication, inject interactive toolbar (Color Picker, Element Highlighter), collect reference data via CDP callback, and save to idea folder.
+**Dependencies:** FEATURE-030-A, FEATURE-033
+**Specification:** -
+**Technical Design:** -
+
+**Key Capabilities:**
+- Open target URL via Chrome DevTools MCP
+- Authentication: prerequisite URL → URL-change detection → redirect
+- Inject draggable toolbar (top-right, z-index max)
+- Color Picker: hex, RGB, HSL + CSS selector
+- Element Highlighter: bounding box overlay, CSS selector path, screenshots
+- Callback: Runtime.addBinding primary, evaluate_script fallback
+- Save reference data to uiux-references/sessions/ as JSON
+
+---
+
+### FEATURE-031: UIUX Reference Advanced Tools (Phase 2)
+
+**Version:** v1.0
+**Status:** Planned
+**Description:** Element Commenter and Asset Extractor tools added to toolbar. Extract computed CSS, CSS rules, fonts, icons, images for 1:1 reproduction.
+**Dependencies:** FEATURE-030-B
+**Specification:** -
+**Technical Design:** -
+
+**Key Capabilities:**
+- Element Commenter: attach text comments to elements via CSS tree selector
+- Asset Extractor: computed CSS, relevant rules, fonts, icons, images
+- Binary assets downloaded to assets/ folder
+- Phase 2 tools in separate toolbar section with separator
+- CORS-resilient downloads (skip blocked assets with warning)
+
+---
+
+### FEATURE-032: UIUX Reference Design System (Phase 3)
+
+**Version:** v1.0
+**Status:** Planned
+**Description:** Auto-generate design-system.md from extracted tokens (colors, typography). Promotion path to global theme folder via brand-theme-creator.
+**Dependencies:** FEATURE-031
+**Specification:** -
+**Technical Design:** -
+
+**Key Capabilities:**
+- Auto-generate uiux-references/design-system.md
+- Design tokens: color palette, typography (fonts, sizes)
+- Only directly extractable values (no spacing/component inference)
+- Promotion path to FEATURE-012's global theme folder
+- Multi-session token merging
+
+---
+
+### FEATURE-033: App-Agent Interaction MCP
+
+**Version:** v1.0
+**Status:** Planned
+**Description:** New reusable MCP server for browser→agent communication. Calls new Flask backend endpoint. Phase 1: save_uiux_reference tool + POST /api/ideas/uiux-reference.
+**Dependencies:** None
+**Specification:** -
+**Technical Design:** -
+
+**Key Capabilities:**
+- New MCP server process: x-ipe-app-and-agent-interaction
+- MCP tool: save_uiux_reference → calls Flask POST /api/ideas/uiux-reference
+- Flask endpoint validates JSON, saves sessions, screenshots, assets
+- Extensible tool registration for future endpoints
+- JSON schema validation before saving

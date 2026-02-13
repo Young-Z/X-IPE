@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDEA-018 Mockup — UIUX Reference Tab</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-app: #0f1117;
+    --bg-panel: #161822;
+    --bg-card: #1c1f2e;
+    --bg-input: #12141e;
+    --bg-hover: #252840;
+    --border: #2a2d42;
+    --border-focus: #6366f1;
+    --text-primary: #e8eaed;
+    --text-secondary: #8b8fa3;
+    --text-muted: #5c6078;
+    --accent: #6366f1;
+    --accent-glow: rgba(99, 102, 241, 0.15);
+    --accent-hover: #818cf8;
+    --emerald: #10b981;
+    --emerald-glow: rgba(16, 185, 129, 0.12);
+    --amber: #f59e0b;
+    --amber-glow: rgba(245, 158, 11, 0.1);
+    --danger: #ef4444;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+    --shadow-float: 0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2);
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --transition: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-app);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -150px;
+    left: -150px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, var(--emerald-glow) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .mockup-badge {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: var(--accent);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 6px 14px;
+    border-radius: 100px;
+    z-index: 100;
+    font-family: var(--font-body);
+    text-transform: uppercase;
+  }
+
+  .mockup-container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .mockup-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-hover) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em;
+  }
+
+  .mockup-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+
+  /* ===== Simulated App Panel ===== */
+  .app-panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-float);
+  }
+
+  /* ===== Target Folder Indicator ===== */
+  .target-folder {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--emerald-glow);
+    border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+    font-size: 12px;
+    color: var(--emerald);
+  }
+  .target-folder i { font-size: 14px; }
+  .target-folder strong { color: #34d399; }
+  .target-folder .clear-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 14px;
+    transition: color 0.2s;
+  }
+  .target-folder .clear-btn:hover { color: var(--danger); }
+
+  /* ===== Tab Navigation ===== */
+  .tab-nav {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+    padding: 0 4px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 13px 10px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s var(--transition);
+    white-space: nowrap;
+  }
+
+  .tab-btn i { font-size: 14px; }
+
+  .tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 20%;
+    right: 20%;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px 2px 0 0;
+    transform: scaleX(0);
+    transition: transform 0.3s var(--transition);
+  }
+
+  .tab-btn:hover {
+    color: var(--text-secondary);
+    background: var(--bg-hover);
+  }
+
+  .tab-btn.active {
+    color: var(--accent-hover);
+  }
+
+  .tab-btn.active::after {
+    transform: scaleX(1);
+  }
+
+  /* New tab highlight */
+  .tab-btn.is-new .new-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 100px;
+    letter-spacing: 0.05em;
+    margin-left: 2px;
+    animation: pulse-badge 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-badge {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* ===== Tab Content ===== */
+  .tab-content {
+    padding: 0;
+  }
+
+  .tab-pane {
+    display: none;
+    padding: 20px;
+    animation: fadeSlideIn 0.35s var(--transition);
+  }
+
+  .tab-pane.active {
+    display: block;
+  }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== Compose & Upload Panes (simplified placeholders) ===== */
+  .placeholder-pane {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+  .placeholder-pane i {
+    font-size: 28px;
+    opacity: 0.4;
+  }
+
+  /* ===== UIUX Reference Pane ===== */
+  .ref-section {
+    margin-bottom: 18px;
+  }
+
+  .ref-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+  }
+
+  .ref-label .optional {
+    font-weight: 400;
+    color: var(--text-muted);
+    text-transform: none;
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+
+  .ref-label .info-icon {
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: help;
+    position: relative;
+  }
+
+  .ref-input {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 11px 14px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 13px;
+    transition: all 0.25s var(--transition);
+    outline: none;
+  }
+
+  .ref-input::placeholder {
+    color: var(--text-muted);
+    font-size: 12.5px;
+  }
+
+  .ref-input:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .ref-input.url-input {
+    padding-left: 36px;
+    font-family: 'DM Sans', monospace;
+    font-size: 12.5px;
+  }
+
+  .url-input-wrapper {
+    position: relative;
+  }
+
+  .url-input-wrapper .url-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  .ref-textarea {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 11px 14px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 13px;
+    line-height: 1.55;
+    resize: vertical;
+    min-height: 72px;
+    transition: all 0.25s var(--transition);
+    outline: none;
+  }
+
+  .ref-textarea::placeholder {
+    color: var(--text-muted);
+    font-size: 12.5px;
+  }
+
+  .ref-textarea:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  /* ===== Auth Prerequisite Collapsible ===== */
+  .auth-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-family: var(--font-body);
+    cursor: pointer;
+    padding: 4px 0;
+    margin-bottom: 8px;
+    transition: color 0.2s;
+  }
+
+  .auth-toggle:hover { color: var(--amber); }
+
+  .auth-toggle i {
+    font-size: 10px;
+    transition: transform 0.3s var(--transition);
+  }
+
+  .auth-toggle.expanded i {
+    transform: rotate(90deg);
+  }
+
+  .auth-content {
+    display: none;
+    animation: fadeSlideIn 0.3s var(--transition);
+  }
+
+  .auth-content.visible {
+    display: block;
+  }
+
+  .auth-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    line-height: 1.45;
+    padding-left: 2px;
+  }
+
+  .auth-hint i { font-size: 11px; color: var(--amber); }
+
+  /* ===== Action Button ===== */
+  .ref-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-go-ref {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s var(--transition);
+    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn-go-ref::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .btn-go-ref:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.45);
+  }
+
+  .btn-go-ref:hover::before {
+    opacity: 1;
+  }
+
+  .btn-go-ref:active {
+    transform: translateY(0);
+  }
+
+  .btn-go-ref i { font-size: 16px; }
+
+  /* ===== Flow Preview ===== */
+  .flow-preview {
+    margin-top: 16px;
+    padding: 14px;
+    background: rgba(99, 102, 241, 0.06);
+    border: 1px solid rgba(99, 102, 241, 0.12);
+    border-radius: var(--radius-md);
+  }
+
+  .flow-preview-title {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--accent-hover);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+
+  .flow-steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    padding: 4px 0;
+  }
+
+  .flow-step .step-icon {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 11px;
+    color: var(--accent-hover);
+  }
+
+  .flow-arrow {
+    color: var(--text-muted);
+    font-size: 10px;
+    padding: 0 6px;
+  }
+
+  /* ===== Annotations ===== */
+  .annotation {
+    position: absolute;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    pointer-events: none;
+  }
+
+  .annotation-line {
+    width: 40px;
+    border-top: 1px dashed var(--accent);
+    margin-top: 7px;
+    opacity: 0.5;
+  }
+
+  .annotation-text {
+    font-size: 10.5px;
+    color: var(--accent-hover);
+    font-style: italic;
+    line-height: 1.4;
+    max-width: 120px;
+    opacity: 0.7;
+  }
+
+  /* ===== Footer info ===== */
+  .mockup-footer {
+    margin-top: 24px;
+    padding: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    font-size: 11.5px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .mockup-footer strong {
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  .mockup-footer ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 8px;
+  }
+
+  .mockup-footer li {
+    padding: 3px 0;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .mockup-footer li::before {
+    content: '→';
+    color: var(--accent);
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="mockup-badge">IDEA-018 · Mockup</div>
+
+<div class="mockup-container">
+  <h1 class="mockup-title">UIUX Reference Tab</h1>
+  <p class="mockup-subtitle">New ideation tab — reference external web pages for design inspiration, extract colors, components, and design tokens.</p>
+
+  <!-- Simulated App Panel -->
+  <div class="app-panel">
+
+    <!-- Target Folder -->
+    <div class="target-folder">
+      <i class="bi bi-folder-fill"></i>
+      <span>Saving to: <strong>018. Feature-UIUX Reference</strong></span>
+      <button class="clear-btn"><i class="bi bi-x-circle"></i></button>
+    </div>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-nav">
+      <button class="tab-btn" data-tab="compose">
+        <i class="bi bi-pencil-square"></i> Compose
+      </button>
+      <button class="tab-btn" data-tab="upload">
+        <i class="bi bi-cloud-upload"></i> Upload
+      </button>
+      <button class="tab-btn active is-new" data-tab="reference">
+        <i class="bi bi-palette2"></i> UIUX Reference
+        <span class="new-badge">NEW</span>
+      </button>
+    </nav>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+
+      <!-- Compose Pane (placeholder) -->
+      <div class="tab-pane" id="compose-pane">
+        <div class="placeholder-pane">
+          <i class="bi bi-pencil-square"></i>
+          <span>Compose your idea directly in markdown</span>
+        </div>
+      </div>
+
+      <!-- Upload Pane (placeholder) -->
+      <div class="tab-pane" id="upload-pane">
+        <div class="placeholder-pane">
+          <i class="bi bi-cloud-upload"></i>
+          <span>Drag & drop files to upload</span>
+        </div>
+      </div>
+
+      <!-- UIUX Reference Pane -->
+      <div class="tab-pane active" id="reference-pane">
+
+        <!-- Target URL -->
+        <div class="ref-section">
+          <label class="ref-label">
+            <i class="bi bi-link-45deg"></i>
+            Target Page URL
+          </label>
+          <div class="url-input-wrapper">
+            <i class="bi bi-globe2 url-icon"></i>
+            <input type="url" class="ref-input url-input" placeholder="https://example.com/design-page" value="https://dribbble.com/shots/popular">
+          </div>
+        </div>
+
+        <!-- Auth Prerequisite (collapsible) -->
+        <div class="ref-section">
+          <button class="auth-toggle" id="auth-toggle">
+            <i class="bi bi-chevron-right"></i>
+            <i class="bi bi-shield-lock"></i>
+            Authentication Prerequisite
+            <span class="ref-label"><span class="optional">(optional)</span></span>
+          </button>
+          <div class="auth-content" id="auth-content">
+            <div class="url-input-wrapper">
+              <i class="bi bi-key url-icon"></i>
+              <input type="url" class="ref-input url-input" placeholder="https://example.com/login">
+            </div>
+            <div class="auth-hint">
+              <i class="bi bi-info-circle"></i>
+              Agent will open this page first for login, then redirect to the target URL after detecting authentication success.
+            </div>
+          </div>
+        </div>
+
+        <!-- Extra Instructions -->
+        <div class="ref-section">
+          <label class="ref-label">
+            <i class="bi bi-chat-left-text"></i>
+            Extra Instructions
+            <span class="optional">(optional)</span>
+          </label>
+          <textarea class="ref-textarea" placeholder="e.g., Focus on the header navigation and color scheme. Extract the card component styles for reuse."></textarea>
+        </div>
+
+        <!-- Action -->
+        <div class="ref-actions">
+          <button class="btn-go-ref" id="btn-go-ref">
+            <i class="bi bi-box-arrow-up-right"></i>
+            Go to Reference
+          </button>
+        </div>
+
+        <!-- Flow Preview -->
+        <div class="flow-preview">
+          <div class="flow-preview-title">What happens next</div>
+          <div class="flow-steps">
+            <div class="flow-step">
+              <span class="step-icon"><i class="bi bi-terminal"></i></span>
+              Console opens
+            </div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step">
+              <span class="step-icon"><i class="bi bi-robot"></i></span>
+              Agent starts
+            </div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step">
+              <span class="step-icon"><i class="bi bi-browser-chrome"></i></span>
+              Page opens
+            </div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step">
+              <span class="step-icon"><i class="bi bi-tools"></i></span>
+              Tools injected
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Mockup Info Footer -->
+  <div class="mockup-footer">
+    <strong>Mockup Notes — UIUX Reference Tab</strong>
+    <ul>
+      <li>Third tab alongside existing Compose and Upload tabs</li>
+      <li>Auth prerequisite is collapsible to keep the UI clean by default</li>
+      <li>"Go to Reference" triggers copilot-prompt.json prompt in terminal</li>
+      <li>Flow preview shows users what to expect after clicking</li>
+      <li>Prompt auto-typed: <code>copilot execute uiux-reference --url {url}</code></li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const pane = document.getElementById(btn.dataset.tab + '-pane');
+      if (pane) pane.classList.add('active');
+    });
+  });
+
+  // Auth toggle
+  const authToggle = document.getElementById('auth-toggle');
+  const authContent = document.getElementById('auth-content');
+  authToggle.addEventListener('click', () => {
+    authToggle.classList.toggle('expanded');
+    authContent.classList.toggle('visible');
+  });
+
+  // Go to Reference button animation
+  const btnGoRef = document.getElementById('btn-go-ref');
+  btnGoRef.addEventListener('click', () => {
+    btnGoRef.innerHTML = '<i class="bi bi-arrow-repeat spin"></i> Opening console...';
+    btnGoRef.style.background = 'linear-gradient(135deg, #4f46e5 0%, #3730a3 100%)';
+    setTimeout(() => {
+      btnGoRef.innerHTML = '<i class="bi bi-check-circle"></i> Console ready — press Enter';
+      btnGoRef.style.background = 'linear-gradient(135deg, #059669 0%, #047857 100%)';
+      btnGoRef.style.boxShadow = '0 2px 12px rgba(16, 185, 129, 0.3)';
+    }, 1500);
+    setTimeout(() => {
+      btnGoRef.innerHTML = '<i class="bi bi-box-arrow-up-right"></i> Go to Reference';
+      btnGoRef.style.background = '';
+      btnGoRef.style.boxShadow = '';
+    }, 4000);
+  });
+
+  // Add spin animation
+  const style = document.createElement('style');
+  style.textContent = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .spin { animation: spin 0.8s linear infinite; }`;
+  document.head.appendChild(style);
+</script>
+
+</body>
+</html>
