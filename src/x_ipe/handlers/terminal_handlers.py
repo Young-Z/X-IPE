@@ -68,12 +68,15 @@ def register_terminal_handlers(socketio):
                     session.attach(sid, emit_output)
                     socket_to_session[sid] = requested_session_id
                     
-                    # Replay buffered output
-                    buffer = session.get_buffer()
-                    if buffer:
-                        socketio.emit('output', buffer, room=sid)
+                    # Resize PTY to match new terminal dimensions
+                    session.resize(rows, cols)
                     
-                    socketio.emit('reconnected', {'session_id': requested_session_id}, room=sid)
+                    # Send reconnected with buffer so client can clear before replay
+                    buffer = session.get_buffer()
+                    socketio.emit('reconnected', {
+                        'session_id': requested_session_id,
+                        'buffer': buffer or ''
+                    }, room=sid)
                     return
             
             # Create new session

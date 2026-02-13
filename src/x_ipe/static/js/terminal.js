@@ -626,10 +626,16 @@
                 }
             });
 
-            socket.on('reconnected', () => {
+            socket.on('reconnected', (data) => {
                 const session = getSession();
                 if (session) {
-                    session.terminal.write('\x1b[33m[Reconnected to session]\x1b[0m\r\n');
+                    // Clear terminal and replay buffer at correct dimensions
+                    session.terminal.reset();
+                    if (data && data.buffer) {
+                        session.terminal.write(data.buffer);
+                    }
+                    // Fit terminal and resize PTY to current dimensions
+                    this.fitActive();
                 }
             });
 
