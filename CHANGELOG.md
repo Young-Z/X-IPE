@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-030-A: UIUX Reference Tab & Console Integration**
+  - New "UIUX Reference" tab in the Ideation upload view (third tab alongside Compose and Upload)
+  - Pulsing "NEW" badge on tab to draw attention
+  - Target Page URL input with validation (empty/invalid URL detection, accent border on focus)
+  - Collapsible "Authentication Prerequisite" section with auth URL input and info hint
+  - "Extra Instructions" textarea with character counter (0/1000)
+  - "Go to Reference" button with 3-state transitions: idle → loading (spinner) → success (checkmark) → auto-reset
+  - Console integration: auto-finds or creates terminal session, types copilot command with realistic keystroke simulation
+  - Command format: `copilot execute uiux-reference --url {url} [--auth-url {auth}] [--extra "{instructions}"]`
+  - Flow preview section showing 4 steps: Enter URL → Console Opens → Agent Navigates → Pick Elements
+  - Editorial light theme: Outfit sans-serif body, warm cream background (#f8f6f1), deep indigo accent (#3730a3)
+  - Staggered entrance animations (fadeSlideIn with progressive delays)
+  - Added `uiux-reference` prompt entry to copilot-prompt.json (EN/ZH bilingual)
+  - 22 unit tests, 23/23 acceptance criteria verified
 - **FEATURE-025-D: KB Topics & Summaries**
   - Topics sidebar listing all knowledge base topics with icon, name, metadata, and item count badge
   - Active topic visual highlighting (green left border, darker background)
