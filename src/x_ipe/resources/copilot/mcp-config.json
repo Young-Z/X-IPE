@@ -10,6 +10,21 @@
         "-y",
         "chrome-devtools-mcp@latest"
       ]
+    },
+    "x-ipe-app-and-agent-interaction": {
+      "type": "local",
+      "command": "uv",
+      "tools": [
+        "*"
+      ],
+      "args": [
+        "run",
+        "--directory",
+        "${workspaceFolder}",
+        "python",
+        "-m",
+        "x_ipe.mcp.app_agent_interaction"
+      ]
     }
   }
 }

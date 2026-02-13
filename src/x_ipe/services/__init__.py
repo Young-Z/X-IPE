@@ -76,6 +76,9 @@ from .skill_translator import SkillTranslator, TranslationResult
 # MCP Deployer Service (FEATURE-027-D)
 from .mcp_deployer_service import MCPDeployerService, MCPDeployResult
 
+# UIUX Reference Service (FEATURE-033)
+from .uiux_reference_service import UiuxReferenceService
+
 
 __all__ = [
     # Config
@@ -129,4 +132,6 @@ __all__ = [
     # MCP Deployer
     'MCPDeployerService',
     'MCPDeployResult',
+    # UIUX Reference
+    'UiuxReferenceService',
 ]

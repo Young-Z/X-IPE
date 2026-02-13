@@ -181,6 +181,7 @@ def _register_blueprints(app):
     from x_ipe.routes.uiux_feedback_routes import uiux_feedback_bp
     from x_ipe.routes.tracing_routes import tracing_bp
     from x_ipe.routes.quality_evaluation_routes import quality_evaluation_bp
+    from x_ipe.routes.uiux_reference_routes import uiux_reference_bp
     
     # Initialize tracing middleware (FEATURE-023)
     from x_ipe.tracing.middleware import init_tracing_middleware
@@ -197,6 +198,7 @@ def _register_blueprints(app):
     app.register_blueprint(quality_evaluation_bp)
     app.register_blueprint(kb_bp)
     app.register_blueprint(config_bp)
+    app.register_blueprint(uiux_reference_bp)
 
 
 def _register_handlers():
@@ -211,4 +213,4 @@ def _register_handlers():
 if __name__ == '__main__':
     app = create_app()
     session_manager.start_cleanup_task()
-    socketio.run(app, debug=True, host='0.0.0.0', port=5858)
+    socketio.run(app, debug=True, use_reloader=False, host='0.0.0.0', port=5858)

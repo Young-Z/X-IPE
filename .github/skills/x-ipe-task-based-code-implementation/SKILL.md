@@ -154,6 +154,10 @@ BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE impl
          a. SCAN technical design for references to `.github/skills/` paths
          b. IF skill file(s) found: FLAG for delegation to `x-ipe-meta-skill-creator` in Step 5
          c. NOTE: Skill files MUST NOT be created directly — they require the skill creator process
+      7. CHECK if specification or technical design requires an MCP server:
+         a. SCAN for keywords: "MCP server", "MCP tool", "Model Context Protocol", "MCP endpoint"
+         b. IF MCP server is required: FLAG for delegation to `mcp-builder` skill in Step 5
+         c. NOTE: MCP servers MUST be built via `mcp-builder` skill to ensure protocol compliance
     </action>
     <constraints>
       - BLOCKING: Do NOT code until design is understood
@@ -207,6 +211,11 @@ BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE impl
             - user_request: context from technical design skill specification
          c. WAIT for skill creator to complete before proceeding
          d. VERIFY created skill passes skill creator's DoD
+      6. IF MCP server was flagged in Step 2:
+         a. BLOCKING: Do NOT build MCP server directly — use `mcp-builder` skill
+         b. INVOKE `mcp-builder` skill with context from technical design (API endpoints, service integrations, transport type)
+         c. WAIT for mcp-builder to complete before proceeding
+         d. VERIFY MCP server builds and passes mcp-builder quality checks
     </action>
     <constraints>
       - CRITICAL: Implement ONLY what is in technical design (YAGNI)
@@ -307,6 +316,10 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <name>Skill files created via skill creator</name>
     <verification>If technical design includes .github/skills/ files, they were created by x-ipe-meta-skill-creator (not directly)</verification>
   </checkpoint>
+  <checkpoint required="if-applicable">
+    <name>MCP server built via mcp-builder</name>
+    <verification>If specification or technical design requires MCP server, it was built using mcp-builder skill (not directly)</verification>
+  </checkpoint>
   <checkpoint required="true">
     <name>No extra features added (YAGNI)</name>
     <verification>Review code for functionality not specified in design</verification>
@@ -386,6 +399,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Over-engineering | KISS violation | Simplest solution that works |
 | Ignore mockups for frontend | UI drifts from approved design | Use current mockups as visual spec |
 | Create skill files directly | Skill won't follow standards | Delegate to x-ipe-meta-skill-creator |
+| Build MCP server directly | Won't follow MCP protocol standards | Delegate to mcp-builder skill |
 | Copy-paste code | DRY violation | Extract reusable functions |
 
 ---

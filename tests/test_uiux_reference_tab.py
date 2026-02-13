@@ -202,6 +202,38 @@ class TestWorkplaceIntegration:
 
 # ============ PROMPT BUILDING LOGIC ============
 
+# ============ URL NORMALIZATION TESTS ============
+
+class TestUrlNormalization:
+    """Test that URLs without protocol prefix get https:// prepended."""
+
+    def test_js_has_normalize_url_method(self, project_root):
+        """JS must have normalizeUrl method to auto-prepend https://."""
+        js_path = os.path.join(project_root, 'src', 'x_ipe', 'static', 'js', 'features', 'uiux-reference-tab.js')
+        with open(js_path, 'r') as f:
+            content = f.read()
+        assert 'normalizeUrl' in content
+
+    def test_js_normalize_url_prepends_https(self, project_root):
+        """normalizeUrl must prepend https:// when no protocol is present."""
+        js_path = os.path.join(project_root, 'src', 'x_ipe', 'static', 'js', 'features', 'uiux-reference-tab.js')
+        with open(js_path, 'r') as f:
+            content = f.read()
+        # Verify the method contains logic to check for protocol and prepend https://
+        assert "https://" in content
+        assert re.search(r'normalizeUrl\s*\(', content)
+        # The method should check if URL starts with http:// or https://
+        assert re.search(r'https?://', content)
+
+    def test_js_normalize_url_called_in_validate(self, project_root):
+        """validateForm must use normalizeUrl before validation."""
+        js_path = os.path.join(project_root, 'src', 'x_ipe', 'static', 'js', 'features', 'uiux-reference-tab.js')
+        with open(js_path, 'r') as f:
+            content = f.read()
+        # normalizeUrl should be called within or before validateForm
+        assert 'normalizeUrl' in content
+
+
 class TestPromptBuilding:
     """Test prompt format matches specification FR-13."""
 

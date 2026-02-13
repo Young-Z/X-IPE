@@ -117,12 +117,30 @@ class UiuxReferenceTab {
             urlInput.addEventListener('input', () => {
                 urlInput.classList.remove('uiux-ref-input-error');
             });
+            urlInput.addEventListener('blur', () => {
+                const val = urlInput.value.trim();
+                if (val) {
+                    urlInput.value = this.normalizeUrl(val);
+                }
+            });
         }
+    }
+
+    normalizeUrl(url) {
+        if (!url) return url;
+        if (!/^https?:\/\//i.test(url)) {
+            return 'https://' + url;
+        }
+        return url;
     }
 
     validateForm() {
         const urlInput = this.container.querySelector('#uiux-ref-url');
-        const url = urlInput ? urlInput.value.trim() : '';
+        let url = urlInput ? urlInput.value.trim() : '';
+        url = this.normalizeUrl(url);
+        if (urlInput && url !== urlInput.value.trim()) {
+            urlInput.value = url;
+        }
         if (!url || !/^https?:\/\/.+/.test(url)) {
             if (urlInput) urlInput.classList.add('uiux-ref-input-error');
             return false;
@@ -221,7 +239,7 @@ class UiuxReferenceTab {
 
     getFormData() {
         return {
-            url: (this.container.querySelector('#uiux-ref-url')?.value || '').trim(),
+            url: this.normalizeUrl((this.container.querySelector('#uiux-ref-url')?.value || '').trim()),
             authUrl: (this.container.querySelector('#uiux-ref-auth-url')?.value || '').trim(),
             instructions: (this.container.querySelector('#uiux-ref-instructions')?.value || '').trim()
         };

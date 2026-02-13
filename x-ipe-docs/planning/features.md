@@ -71,10 +71,10 @@ This board tracks all features across the project lifecycle.
 | FEATURE-029-C | Session Hover Preview | v1.0 | Complete | - | 02-11-2026 | 02-12-2026 09:30:00 |
 | FEATURE-029-D | Explorer UI Controls | v1.0 | Complete | [specification.md](../requirements/FEATURE-029-D/specification.md) | 02-11-2026 | 02-12-2026 14:05:00 |
 | FEATURE-030-A | UIUX Reference Tab & Console Integration | v1.0 | Completed | [specification.md](../requirements/FEATURE-030-A/specification.md) | 02-13-2026 | 02-13-2026 09:44:00 |
-| FEATURE-030-B | UIUX Reference Agent Skill & Toolbar | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
+| FEATURE-030-B | UIUX Reference Agent Skill & Toolbar | v1.0 | Refined | [specification.md](../requirements/FEATURE-030-B/specification.md) | 02-13-2026 | 02-13-2026 12:55:00 |
 | FEATURE-031 | UIUX Reference Advanced Tools (Phase 2) | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
 | FEATURE-032 | UIUX Reference Design System (Phase 3) | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
-| FEATURE-033 | App-Agent Interaction MCP | v1.0 | Implemented | [specification.md](../requirements/FEATURE-033/specification.md) | 02-13-2026 | 02-13-2026 09:40:00 |
+| FEATURE-033 | App-Agent Interaction MCP | v1.0 | Complete | [specification.md](../requirements/FEATURE-033/specification.md) | 02-13-2026 | 02-13-2026 09:47:00 |
 
 ---
 
@@ -97,13 +97,13 @@ This board tracks all features across the project lifecycle.
 - FEATURE-025-F: KB Navigation & Polish
 - FEATURE-026: Homepage Infinity Loop
 - FEATURE-027-E: CLI Migration & Upgrade
-- FEATURE-030-B: UIUX Reference Agent Skill & Toolbar
 - FEATURE-031: UIUX Reference Advanced Tools (Phase 2)
 - FEATURE-032: UIUX Reference Design System (Phase 3)
 
-### Refined (2)
+### Refined (3)
 - FEATURE-024: Project Quality Evaluation UI
 - FEATURE-027-B: CLI Init & Selection
+- FEATURE-030-B: UIUX Reference Agent Skill & Toolbar
 
 ### Designed (5)
 - FEATURE-027-C: Skill & Instruction Translation
@@ -121,10 +121,10 @@ This board tracks all features across the project lifecycle.
 ### Implemented (2)
 - FEATURE-027-A: CLI Adapter Registry & Service
 - FEATURE-027-D: MCP Configuration Deployment
-- FEATURE-033: App-Agent Interaction MCP
 
 ### Completed (1)
 - FEATURE-030-A: UIUX Reference Tab & Console Integration
+- FEATURE-033: App-Agent Interaction MCP
 
 ### Designed (4)
 - FEATURE-005: Interactive Console v2.0
