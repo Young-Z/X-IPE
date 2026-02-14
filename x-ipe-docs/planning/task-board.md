@@ -36,16 +36,6 @@
 | TASK-433 | Feature Acceptance Test | FEATURE-030-B v2.0: Inject toolbar into browser page, verify core shell + theme mode + mockup mode | Cipher ✅ | ✅ completed | 02-14-2026 09:15:00 | commit 933a80a (magnifier fix) | Feature Closing |
 | TASK-434 | Feature Closing | FEATURE-030-B v2.0: Close feature, finalize docs, update changelog, push branch | Cipher ✅ | ✅ completed | 02-14-2026 09:30:00 | CHANGELOG.md, features.md, dev/Cipher branch pushed | User Manual |
 
-
-
-
-
-
-
-
-
-
-
 ---
 
 ## Completed Tasks
