@@ -71,16 +71,18 @@ This board tracks all features across the project lifecycle.
 | FEATURE-029-C | Session Hover Preview | v1.0 | Complete | - | 02-11-2026 | 02-12-2026 09:30:00 |
 | FEATURE-029-D | Explorer UI Controls | v1.0 | Complete | [specification.md](../requirements/FEATURE-029-D/specification.md) | 02-11-2026 | 02-12-2026 14:05:00 |
 | FEATURE-030-A | UIUX Reference Tab & Console Integration | v1.0 | Completed | [specification.md](../requirements/FEATURE-030-A/specification.md) | 02-13-2026 | 02-13-2026 09:44:00 |
-| FEATURE-030-B | UIUX Reference Agent Skill & Toolbar | v1.0 | Implemented | [specification.md](../requirements/FEATURE-030-B/specification.md) | 02-13-2026 | 02-13-2026 15:20:00 |
-| FEATURE-031 | UIUX Reference Advanced Tools (Phase 2) | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
-| FEATURE-032 | UIUX Reference Design System (Phase 3) | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
+| FEATURE-030-B | UIUX Reference Agent Skill & Toolbar | v2.0 | ✅ Implemented | [specification.md](../requirements/FEATURE-030-B/specification.md) | 02-14-2026 | 02-14-2026 09:20:00 |
+| FEATURE-030-B-THEME | Catch Design Theme Mode | v2.0 | ✅ Implemented | [specification.md](../requirements/FEATURE-030-B-THEME/specification.md) | 02-14-2026 | 02-14-2026 09:20:00 |
+| FEATURE-030-B-MOCKUP | Copy Design as Mockup Mode | v2.0 | ✅ Implemented | [specification.md](../requirements/FEATURE-030-B-MOCKUP/specification.md) | 02-14-2026 | 02-14-2026 09:20:00 |
+| FEATURE-031 | UIUX Reference Advanced Tools (Phase 2) | v1.0 | ❌ Cancelled | - | 02-14-2026 | 02-14-2026 07:06:00 |
+| FEATURE-032 | UIUX Reference Design System (Phase 3) | v1.0 | ❌ Cancelled | - | 02-14-2026 | 02-14-2026 07:06:00 |
 | FEATURE-033 | App-Agent Interaction MCP | v1.0 | Complete | [specification.md](../requirements/FEATURE-033/specification.md) | 02-13-2026 | 02-13-2026 09:47:00 |
 
 ---
 
 ## Status Details
 
-### Planned (19)
+### Planned (20)
 - FEATURE-007: Git Integration
 - FEATURE-014: Theme-Aware Frontend Design Skill
 - FEATURE-017: Architecture DSL JavaScript Library
@@ -97,13 +99,13 @@ This board tracks all features across the project lifecycle.
 - FEATURE-025-F: KB Navigation & Polish
 - FEATURE-026: Homepage Infinity Loop
 - FEATURE-027-E: CLI Migration & Upgrade
-- FEATURE-031: UIUX Reference Advanced Tools (Phase 2)
-- FEATURE-032: UIUX Reference Design System (Phase 3)
+- FEATURE-030-B: UIUX Reference Agent Skill & Toolbar (v2.0)
+- FEATURE-030-B-THEME: Catch Design Theme Mode
+- FEATURE-030-B-MOCKUP: Copy Design as Mockup Mode
 
-### Refined (3)
+### Refined (2)
 - FEATURE-024: Project Quality Evaluation UI
 - FEATURE-027-B: CLI Init & Selection
-- FEATURE-030-B: UIUX Reference Agent Skill & Toolbar
 
 ### Designed (5)
 - FEATURE-027-C: Skill & Instruction Translation
@@ -153,6 +155,10 @@ This board tracks all features across the project lifecycle.
 - FEATURE-015: Architecture DSL Skill ✅
 - FEATURE-016: Architecture Diagram Renderer ✅
 - FEATURE-023-A: Application Action Tracing - Core ✅
+
+### Cancelled (2)
+- FEATURE-031: UIUX Reference Advanced Tools (Phase 2) — absorbed into IDEA-019 "Copy Design as Mockup" mode
+- FEATURE-032: UIUX Reference Design System (Phase 3) — absorbed into IDEA-019 "Catch Design Theme" mode
 
 ---
 
@@ -920,28 +926,75 @@ This board tracks all features across the project lifecycle.
 
 ### FEATURE-030-B: UIUX Reference Agent Skill & Toolbar
 
-**Version:** v1.0
+**Version:** v2.0
 **Status:** Planned
-**Description:** Agent skill using Chrome DevTools MCP to open target URL, handle authentication, inject interactive toolbar (Color Picker, Element Highlighter), collect reference data via CDP callback, and save to idea folder.
+**Description:** Toolbar shell and infrastructure for the two-mode wizard system. Hamburger menu as sole entry point, auto-collapse (2s after mouseleave), draggable panel (default right), mode switcher tabs, inline toast notifications, new data schema (`colors[]` with roles, `components[]` with analysis), `__xipeRefCommand` bi-directional channel, and optimized injection (minified payload, lazy font loading).
 **Dependencies:** FEATURE-030-A, FEATURE-033
+**Specification:** [specification.md](../requirements/FEATURE-030-B/specification.md) (v1.1 — pending v2.0 update)
+**Technical Design:** -
+**CR:** [CR-002.md](../requirements/FEATURE-030-B/CR-002.md)
+**Mockup:** [toolbar-v2-v1.html](../ideas/019.%20CR-UIUX%20Reference/mockups/toolbar-v2-v1.html)
+
+**Key Capabilities (v2.0):**
+- Hamburger icon → expand on hover → auto-collapse 2s after mouseleave
+- Mode switcher: "Catch Theme" / "Copy Mockup" tabs
+- Shared data session (`window.__xipeRefData`) across both modes
+- Inline toast notifications (info/progress/success/error) at panel bottom
+- `__xipeRefCommand` queue for agent→toolbar communication
+- New schema: `colors[]` with `role` field, `components[]` with `html_css`, `instruction`, `agent_analysis`
+- Optimized injection: minified IIFE, lazy font loading, deferred non-critical UI
+- Auth flow unchanged from v1.1
+
+**v1.x History:** v1.0 implemented standalone Color Picker + Element Highlighter. v1.1 added eyedropper cursor, expandable lists, hover-highlight, screenshot accuracy, post-send reset (CR-001). v2.0 replaces entire toolbar per CR-002/IDEA-019.
+
+---
+
+### FEATURE-030-B-THEME: Catch Design Theme Mode
+
+**Version:** v2.0
+**Status:** Planned
+**Description:** 3-step wizard mode for extracting a reusable design theme from any web page. Offscreen canvas color picker with circular magnifier (120px, 10x zoom, crosshair), color role annotation (primary/secondary/accent/custom), and "Create Theme" action that invokes the brand-theme-creator skill.
+**Dependencies:** FEATURE-030-B v2.0
 **Specification:** -
 **Technical Design:** -
 
 **Key Capabilities:**
-- Open target URL via Chrome DevTools MCP
-- Authentication: prerequisite URL → URL-change detection → redirect
-- Inject draggable toolbar (top-right, z-index max)
-- Color Picker: hex, RGB, HSL + CSS selector
-- Element Highlighter: bounding box overlay, CSS selector path, screenshots
-- Callback: Runtime.addBinding primary, evaluate_script fallback
-- Save reference data to uiux-references/sessions/ as JSON
+- Offscreen canvas renders viewport for universal pixel sampling (images, video, canvas, gradients, text)
+- Circular magnifier: 120px diameter, 10x zoom, crosshair overlay, throttled via requestAnimationFrame
+- Click to sample pixel → store hex/rgb/hsl/source selector
+- Role annotation: chips (primary/secondary/accent) + custom text input
+- "Create Theme" sends annotated colors via `__xipeRefReady` → agent invokes brand-theme-creator
+- CORS limitation acknowledged: cross-origin content not sampled, toast warning displayed
+
+---
+
+### FEATURE-030-B-MOCKUP: Copy Design as Mockup Mode
+
+**Version:** v2.0
+**Status:** Planned
+**Description:** 4-step wizard mode for capturing page components and generating pixel-perfect mockups. Smart-snap to semantic containers with drag-handle resize, per-component text instructions, agent 5-dimension rubric analysis with deep-capture loop, metadata persistence via MCP before generation, and iterative mockup validation (max 3 auto-iterations).
+**Dependencies:** FEATURE-030-B v2.0
+**Specification:** -
+**Technical Design:** -
+
+**Key Capabilities:**
+- Smart-snap: click detects nearest semantic container (section/nav/article/card); fallback to nearest div >50px×50px within 5 ancestor levels
+- Drag handles for resize after snapping
+- Lightweight initial capture: bounding box + screenshot crop + minimal computed styles
+- Per-component free-text instructions
+- Agent analysis rubric (5 dimensions): layout, typography, color, spacing, visual effects (confident/uncertain/missing)
+- Deep capture on demand via `__xipeRefCommand` when dimension is "missing"
+- Step 4a: persist all metadata via MCP before generation (resumability)
+- Step 4b: generate mockup → screenshot comparison → below threshold re-analyze (max 3 iterations) → human approval after 3 failures
 
 ---
 
 ### FEATURE-031: UIUX Reference Advanced Tools (Phase 2)
 
 **Version:** v1.0
-**Status:** Planned
+**Status:** ❌ Cancelled
+**Cancelled:** 02-14-2026
+**Reason:** Absorbed into IDEA-019 (CR-UIUX Reference). Element Commenter → "Copy Design as Mockup" Step 2 (per-component instructions). Asset Extractor → agent analysis loop (rubric-driven deep capture).
 **Description:** Element Commenter and Asset Extractor tools added to toolbar. Extract computed CSS, CSS rules, fonts, icons, images for 1:1 reproduction.
 **Dependencies:** FEATURE-030-B
 **Specification:** -
@@ -959,7 +1012,9 @@ This board tracks all features across the project lifecycle.
 ### FEATURE-032: UIUX Reference Design System (Phase 3)
 
 **Version:** v1.0
-**Status:** Planned
+**Status:** ❌ Cancelled
+**Cancelled:** 02-14-2026
+**Reason:** Absorbed into IDEA-019 (CR-UIUX Reference). "Catch Design Theme" mode captures colors with role annotations and calls brand-theme-creator to generate design-system.md — exactly what FEATURE-032 planned.
 **Description:** Auto-generate design-system.md from extracted tokens (colors, typography). Promotion path to global theme folder via brand-theme-creator.
 **Dependencies:** FEATURE-031
 **Specification:** -

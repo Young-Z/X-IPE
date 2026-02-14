@@ -1,0 +1,116 @@
+{
+  "version": "1.0",
+  "source_url": "https://www.baidu.com",
+  "auth_url": null,
+  "timestamp": "2026-02-13T16:28:13.873Z",
+  "colors": [
+    {
+      "id": "color-001",
+      "hex": "#000000",
+      "rgb": "0, 0, 0",
+      "hsl": "0, 0%, 0%",
+      "source_selector": "body > div.wrapper_new.smart_input_superman:nth-child(1) > div:nth-child(2) > div.head_wrapper.s-isindex-wrap:nth-child(3) > div.s_form.s_form_nologin:nth-child(2) > div.s_form_wrapper.soutu-env-mac",
+      "context": ""
+    },
+    {
+      "id": "color-002",
+      "hex": "#000000",
+      "rgb": "0, 0, 0",
+      "hsl": "0, 0%, 0%",
+      "source_selector": "body > div.wrapper_new.smart_input_superman:nth-child(1) > div:nth-child(2) > div.head_wrapper.s-isindex-wrap:nth-child(3) > div.s_form.s_form_nologin:nth-child(2) > div.s_form_wrapper.soutu-env-mac",
+      "context": ""
+    },
+    {
+      "id": "color-003",
+      "hex": "#000000",
+      "rgb": "0, 0, 0",
+      "hsl": "0, 0%, 0%",
+      "source_selector": "body > div.wrapper_new.smart_input_superman:nth-child(1) > div:nth-child(2) > div.head_wrapper.s-isindex-wrap:nth-child(3) > div.s_form.s_form_nologin:nth-child(2) > div.s_form_wrapper.soutu-env-mac > div.ai-input:nth-child(2) > div.san-card > div.chat-input-background_3edHa > div > div.chat-input-anchor > div:nth-child(2) > div > div.panel-list_8jHmm",
+      "context": ""
+    },
+    {
+      "id": "color-004",
+      "hex": "#ffffff",
+      "rgb": "255, 255, 255",
+      "hsl": "0, 0%, 100%",
+      "source_selector": "body > div:nth-child(5)",
+      "context": ""
+    },
+    {
+      "id": "color-005",
+      "hex": "#4e6ef2",
+      "rgb": "78, 110, 242",
+      "hsl": "228, 86%, 63%",
+      "source_selector": "search button area",
+      "context": "Baidu primary blue"
+    },
+    {
+      "id": "color-006",
+      "hex": "#4e6ef2",
+      "rgb": "78, 110, 242",
+      "hsl": "228, 86%, 63%",
+      "source_selector": "search button area",
+      "context": "Baidu primary blue"
+    },
+    {
+      "id": "color-007",
+      "hex": "#ffffff",
+      "rgb": "255, 255, 255",
+      "hsl": "0, 0%, 100%",
+      "source_selector": "search button",
+      "context": ""
+    },
+    {
+      "id": "color-008",
+      "hex": "#ffffff",
+      "rgb": "255, 255, 255",
+      "hsl": "0, 0%, 100%",
+      "source_selector": "search button",
+      "context": ""
+    },
+    {
+      "id": "color-009",
+      "hex": "#ffffff",
+      "rgb": "255, 255, 255",
+      "hsl": "0, 0%, 100%",
+      "source_selector": "search button",
+      "context": ""
+    },
+    {
+      "id": "color-010",
+      "hex": "#4e6ef2",
+      "rgb": "78, 110, 242",
+      "hsl": "228, 86%, 63%",
+      "source_selector": "tool icon",
+      "context": ""
+    },
+    {
+      "id": "color-011",
+      "hex": "#4e6ef2",
+      "rgb": "78, 110, 242",
+      "hsl": "228, 86%, 63%",
+      "source_selector": "icon right",
+      "context": ""
+    }
+  ],
+  "elements": [
+    {
+      "id": "elem-001",
+      "selector": "body > div.wrapper_new.smart_input_superman:nth-child(1) > div:nth-child(2) > div.head_wrapper.s-isindex-wrap:nth-child(3) > div.s_form.s_form_nologin:nth-child(2) > div.s_form_wrapper.soutu-env-mac > div.ai-input:nth-child(2) > div.san-card > div.chat-input-background_3edHa > div > div.chat-input-anchor",
+      "tag": "div",
+      "bounding_box": {
+        "x": 457,
+        "y": 185,
+        "width": 800,
+        "height": 100
+      },
+      "screenshots": {
+        "full_page": "screenshots/elem-001-fullpage.png",
+        "element_crop": "screenshots/elem-001-crop.png"
+      },
+      "comment": null,
+      "extracted_assets": null
+    }
+  ],
+  "design_tokens": null
+}

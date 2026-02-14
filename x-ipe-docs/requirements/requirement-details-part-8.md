@@ -10,9 +10,11 @@
 | Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
 |------------|---------------|---------|-------------------|-------------------|
 | FEATURE-030-A | UIUX Reference Tab & Console Integration | v1.0 | Frontend tab (URL input, auth toggle, instructions) + console-first flow (find/create session, auto-type prompt) | None |
-| FEATURE-030-B | UIUX Reference Agent Skill & Toolbar | v1.0 | Agent skill using CDP to open URL, handle auth, inject interactive toolbar (Color Picker, Element Highlighter), callback mechanism, save reference data | FEATURE-030-A, FEATURE-033 |
-| FEATURE-031 | UIUX Reference Advanced Tools (Phase 2) | v1.0 | Element Commenter and Asset Extractor tools in toolbar; download fonts, icons, images for 1:1 reproduction | FEATURE-030-B |
-| FEATURE-032 | UIUX Reference Design System (Phase 3) | v1.0 | Auto-generate design-system.md from extracted tokens; promotion path to global theme | FEATURE-031 |
+| FEATURE-030-B | UIUX Reference Agent Skill & Toolbar | v2.0 | Toolbar shell: hamburger menu, auto-collapse, mode switcher, toast system, new data schema, optimized injection | FEATURE-030-A, FEATURE-033 |
+| FEATURE-030-B-THEME | Catch Design Theme Mode | v2.0 | Offscreen canvas color picker with magnifier, color role annotation, brand-theme-creator integration | FEATURE-030-B v2.0 |
+| FEATURE-030-B-MOCKUP | Copy Design as Mockup Mode | v2.0 | Smart-snap component selector, agent rubric analysis, iterative mockup validation | FEATURE-030-B v2.0 |
+| FEATURE-031 | UIUX Reference Advanced Tools (Phase 2) | v1.0 | ❌ Cancelled — absorbed into IDEA-019 "Copy Design as Mockup" mode | FEATURE-030-B |
+| FEATURE-032 | UIUX Reference Design System (Phase 3) | v1.0 | ❌ Cancelled — absorbed into IDEA-019 "Catch Design Theme" mode | FEATURE-031 |
 | FEATURE-033 | App-Agent Interaction MCP | v1.0 | New reusable MCP server + Flask endpoint for browser→agent communication; Phase 1: save_uiux_reference tool | None |
 
 ---
@@ -104,14 +106,34 @@
 |----------|--------|
 | Relationship to FEATURE-022? | **Independent** — FEATURE-022 uses iframe for localhost; UIUX Reference uses CDP for real external pages. May backport technique later. |
 | Browser infrastructure? | Independent CDP connection — not dependent on FEATURE-022 infrastructure. |
-| Phase scope? | 3 phases: Phase 1 (030-A/B), Phase 2 (031), Phase 3 (032). |
+| Phase scope? | ~~3 phases: Phase 1 (030-A/B), Phase 2 (031), Phase 3 (032).~~ Revised: Phase 2 (031) and Phase 3 (032) cancelled — absorbed into CR-002 on FEATURE-030-B v2.0. |
+
+> **⚠️ CR Impact Note** (added 02-14-2026, ref: IDEA-019 / CR-002)
+> - **Change:** Complete toolbar redesign — v1.1 standalone tools replaced by two-mode wizard (Catch Design Theme + Copy Design as Mockup)
+> - **Affected FRs:** All existing FRs (FR-1 through FR-37) — v1.x user stories and FRs to be deprecated and replaced
+> - **Action Required:** Feature specification refactoring to v2.0 needed before implementation
+> - **Source:** IDEA-019 (CR-UIUX Reference) — see [idea-summary-v3.md](../ideas/019.%20CR-UIUX%20Reference/idea-summary-v3.md)
+
+#### v2.0 Feature Breakdown (CR-002)
+
+| Feature ID | Feature Title | Version | Priority | Dependencies | Brief Description |
+|------------|---------------|---------|----------|-------------|-------------------|
+| FEATURE-030-B | Toolbar Shell & Infrastructure (MVP) | v2.0 | P0 | FEATURE-030-A, FEATURE-033 | Hamburger menu, auto-collapse (2s), draggable panel, mode switcher tabs, inline toast system, new data schema (`colors[]` with roles, `components[]`), `__xipeRefCommand` bi-directional channel, optimized injection (minified payload, lazy font loading) |
+| FEATURE-030-B-THEME | Catch Design Theme Mode | v2.0 | P0 | FEATURE-030-B v2.0 | 3-step wizard: offscreen canvas color picker with circular magnifier (120px, 10x zoom, crosshair), color role annotation (primary/secondary/accent/custom), "Create Theme" action → brand-theme-creator skill |
+| FEATURE-030-B-MOCKUP | Copy Design as Mockup Mode | v2.0 | P1 | FEATURE-030-B v2.0 | 4-step wizard: smart-snap to semantic containers with drag-handle resize, per-component text instructions, agent 5-dimension rubric analysis with deep-capture loop, metadata persistence (MCP) before generation, iterative mockup validation (max 3 auto-iterations) |
+
+**Implementation order:** FEATURE-030-B (foundation) → FEATURE-030-B-THEME (simpler mode) → FEATURE-030-B-MOCKUP (complex mode)
+
+**Mockup:** [toolbar-v2-v1.html](../ideas/019.%20CR-UIUX%20Reference/mockups/toolbar-v2-v1.html)
 
 ---
 
 ## FEATURE-031: UIUX Reference — Advanced Tools (Phase 2)
 
 > Source: IDEA-018 (Feature-UIUX Reference)
-> Status: Proposed
+> Status: ❌ Cancelled
+> Cancelled: 02-14-2026
+> Reason: Absorbed into IDEA-019 (CR-UIUX Reference). Element Commenter → "Copy Design as Mockup" Step 2 (per-component instructions). Asset Extractor → agent analysis loop (rubric-driven deep capture on demand).
 > Priority: Medium
 > Mockup: [injected-toolbar-v2.html](../ideas/018.%20Feature-UIUX%20Reference/mockups/injected-toolbar-v2.html)
 > Phase: 2 of 3
@@ -165,7 +187,9 @@ Extend the UIUX Reference toolbar (from FEATURE-030) with two advanced tools: **
 ## FEATURE-032: UIUX Reference — Design System Integration (Phase 3)
 
 > Source: IDEA-018 (Feature-UIUX Reference)
-> Status: Proposed
+> Status: ❌ Cancelled
+> Cancelled: 02-14-2026
+> Reason: Absorbed into IDEA-019 (CR-UIUX Reference). "Catch Design Theme" mode captures colors with role annotations and calls brand-theme-creator to generate design-system.md — the full scope of FEATURE-032.
 > Priority: Low
 > Phase: 3 of 3
 > Depends on: FEATURE-031
@@ -291,3 +315,4 @@ The user wants:
 | Injected Reference Toolbar (light editorial theme) | [injected-toolbar-v2.html](../ideas/018.%20Feature-UIUX%20Reference/mockups/injected-toolbar-v2.html) |
 | UIUX Reference Tab (dark alt) | [uiux-reference-tab-v1.html](../ideas/018.%20Feature-UIUX%20Reference/mockups/uiux-reference-tab-v1.html) |
 | Injected Reference Toolbar (dark alt) | [injected-toolbar-v1.html](../ideas/018.%20Feature-UIUX%20Reference/mockups/injected-toolbar-v1.html) |
+| Toolbar v2.0 — Two-mode wizard (IDEA-019) | [toolbar-v2-v1.html](../ideas/019.%20CR-UIUX%20Reference/mockups/toolbar-v2-v1.html) |

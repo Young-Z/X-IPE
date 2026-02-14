@@ -16,6 +16,25 @@
 | TASK-413 | Bug Fix | Fix console session instability when multiple browser tabs connect to same server (Feedback-20260213-234829) | Zephyr ✅ | ✅ completed | 02-13-2026 15:55:00 | src/x_ipe/handlers/terminal_handlers.py, src/x_ipe/services/terminal_service.py, src/x_ipe/static/js/terminal.js, tests/test_terminal.py | - |
 | TASK-414 | Bug Fix | Console terminal forces scroll-to-bottom during output, ignoring user scroll-up (Feedback-20260213-235226) | Ember ✅ | ✅ completed | 02-13-2026 16:05:00 | src/x_ipe/static/js/terminal.js, tests/test_terminal.py | - |
 | TASK-415 | Bug Fix | Session preview stays visible when hovering on preview window instead of dismissing on session bar mouseleave (Feedback-20260214-000335) | Drift ✅ | ✅ completed | 02-13-2026 16:05:00 | src/x_ipe/static/js/terminal.js, tests/test_terminal.py | - |
+| TASK-416 | Change Request | CR-001: FEATURE-030-B toolbar improvements — eyedropper cursor, expandable color/element lists, screenshot accuracy, post-send reset | Nova ✅ | ✅ completed | 02-13-2026 16:45:00 | x-ipe-docs/requirements/FEATURE-030-B/CR-001.md, x-ipe-docs/requirements/FEATURE-030-B/specification.md | Feature Refinement |
+| TASK-417 | Feature Refinement | FEATURE-030-B v1.1: Update specification and mockup for CR-001 (eyedropper, color/element lists, screenshot fix, post-send reset) | Nova ✅ | ✅ completed | 02-13-2026 17:15:00 | x-ipe-docs/requirements/FEATURE-030-B/specification.md, x-ipe-docs/requirements/FEATURE-030-B/mockups/injected-toolbar-v3.html | Technical Design |
+| TASK-418 | Technical Design | FEATURE-030-B v1.1: Update technical design for CR-001 enhancements (eyedropper cursor, expandable lists, hover-highlight, screenshot accuracy, post-send reset) | Nova ✅ | ✅ completed | 02-14-2026 03:35:00 | x-ipe-docs/requirements/FEATURE-030-B/technical-design.md | Test Generation |
+| TASK-419 | Test Generation | FEATURE-030-B v1.1: Generate tests for CR-001 enhancements (eyedropper cursor, expandable lists, hover-highlight, screenshot accuracy, post-send reset) | Nova ✅ | ✅ completed | 02-14-2026 03:50:00 | tests/test_uiux_reference_toolbar.py | Code Implementation |
+| TASK-420 | Code Implementation | FEATURE-030-B v1.1: Implement CR-001 enhancements in toolbar IIFE (eyedropper cursor, expandable lists, hover-highlight, screenshot accuracy, post-send reset) | Nova ✅ | ✅ completed | 02-14-2026 03:55:00 | 02-14-2026 04:30:00 | Feature Acceptance Test |
+| TASK-421 | Feature Acceptance Test | FEATURE-030-B v1.1: Acceptance test CR-001 toolbar enhancements — inject toolbar, verify eyedropper cursor, color/element lists, hover highlights, post-send reset | Nova ✅ | ✅ completed | 02-14-2026 04:35:00 | x-ipe-docs/requirements/FEATURE-030-B/acceptance-test-cases.md | Feature Closing |
+| TASK-422 | Feature Closing | FEATURE-030-B v1.1: Close CR-001 — commit all changes, update task board | Nova ✅ | ✅ completed | 02-14-2026 04:50:00 | commit c83c8ec | - |
+| TASK-423 | Bug Fix | Fix 3 UIUX reference bugs: (1) post-send reset clears data before agent capture, (2) eyedropper cursor overridden by page hover effects, (3) screenshots not saved to screenshots folder | Pulse ✅ | ✅ completed | 02-14-2026 04:05:00 | src/x_ipe/static/js/injected/xipe-toolbar.js, .github/skills/x-ipe-tool-uiux-reference/SKILL.md, .github/skills/x-ipe-tool-uiux-reference/references/toolbar-template.md, tests/test_uiux_reference_toolbar.py | - |
+| TASK-424 | Bug Fix | Fix 2 color picker bugs: (1) z-index overlap causes wrong e.target — use elementsFromPoint, (2) image/canvas/gradient pixel colors unreadable by getComputedStyle — add canvas pixel sampling | Rune ✅ | ✅ completed | 02-14-2026 04:26:00 | src/x_ipe/static/js/injected/xipe-toolbar.js, .github/skills/x-ipe-tool-uiux-reference/references/toolbar-template.md, tests/test_uiux_reference_toolbar.py | - |
+| TASK-425 | Ideation | Refine idea 019: CR-UIUX Reference — Catch Design Theme & Copy Design as Mockup toolbar features | Cipher ✅ | ✅ completed | 02-14-2026 06:30:00 | x-ipe-docs/ideas/019. CR-UIUX Reference/idea-summary-v2.md | Idea Mockup |
+| TASK-426 | Idea Mockup | IDEA-019: Create toolbar mockup for CR-UIUX Reference (Catch Design Theme + Copy Design as Mockup) | Cipher ✅ | ✅ completed | 02-14-2026 07:25:00 | x-ipe-docs/ideas/019. CR-UIUX Reference/mockups/toolbar-v2-v1.html, idea-summary-v3.md | Requirement Gathering |
+| TASK-427 | Requirement Gathering | CR for FEATURE-030-B v2.0: Two-mode wizard toolbar (Catch Design Theme + Copy Design as Mockup) from IDEA-019 | Cipher ✅ | ✅ completed | 02-14-2026 07:30:00 | x-ipe-docs/requirements/FEATURE-030-B/CR-002.md, requirement-details-part-8.md | Feature Breakdown |
+| TASK-428 | Feature Breakdown | FEATURE-030-B v2.0: Break CR-002 into sub-features for toolbar redesign | Cipher ✅ | ✅ completed | 02-14-2026 07:35:00 | features.md, requirement-details-part-8.md, requirement-details-index.md | Feature Refinement |
+| TASK-429 | Feature Refinement | FEATURE-030-B v2.0: Create v2.0 specifications for 3 sub-features (shell, theme, mockup) | Cipher ✅ | ✅ completed | 02-14-2026 08:00:00 | x-ipe-docs/requirements/FEATURE-030-B/specification.md, FEATURE-030-B-THEME/specification.md, FEATURE-030-B-MOCKUP/specification.md | Technical Design |
+| TASK-430 | Technical Design | FEATURE-030-B v2.0: Technical design for toolbar shell, theme mode, and mockup mode | Cipher ✅ | ✅ completed | 02-14-2026 08:15:00 | x-ipe-docs/requirements/FEATURE-030-B/technical-design.md, FEATURE-030-B-THEME/technical-design.md, FEATURE-030-B-MOCKUP/technical-design.md | Test Generation |
+| TASK-431 | Test Generation | FEATURE-030-B v2.0: Generate test suite for toolbar shell, theme mode, mockup mode | Cipher ✅ | ✅ completed | 02-14-2026 08:25:00 | tests/test_uiux_reference_toolbar.py | Code Implementation |
+| TASK-432 | Code Implementation | FEATURE-030-B v2.0: Implement toolbar core, theme mode, mockup mode, build script, skill update | Cipher ✅ | ✅ completed | 02-14-2026 08:45:00 | xipe-toolbar-core.js, xipe-toolbar-theme.js, xipe-toolbar-mockup.js, build.py, SKILL.md, 3x .min.js | Feature Acceptance Test |
+| TASK-433 | Feature Acceptance Test | FEATURE-030-B v2.0: Inject toolbar into browser page, verify core shell + theme mode + mockup mode | Cipher ✅ | ✅ completed | 02-14-2026 09:15:00 | commit 933a80a (magnifier fix) | Feature Closing |
+| TASK-434 | Feature Closing | FEATURE-030-B v2.0: Close feature, finalize docs, update changelog, push branch | Cipher ✅ | ✅ completed | 02-14-2026 09:30:00 | CHANGELOG.md, features.md, dev/Cipher branch pushed | User Manual |
 
 
 
@@ -79,11 +98,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 3
+- **Total Active:** 11
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 408
+- **Completed (archived):** 427
 - **Pending Review:** 0
 - **Blocked:** 0
 

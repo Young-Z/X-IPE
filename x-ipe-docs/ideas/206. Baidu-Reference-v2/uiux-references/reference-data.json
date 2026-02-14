@@ -1,0 +1,44 @@
+{
+  "colors": [
+    {
+      "context": "",
+      "hex": "#ff455b",
+      "hsl": "353, 100%, 64%",
+      "id": "color-003",
+      "rgb": "255, 69, 91",
+      "source_selector": "body > div.wrapper_new.smart_input_superman:nth-child(1) > div.s_down:nth-child(2) > div.head_wrapper.s-isindex-wrap:nth-child(3) > div.s_form.s_form_nologin:nth-child(2) > div.s_form_wrapper.soutu-env-mac > div.s-isindex-wrap.s-hotsearch-wrapper:nth-child(5) > ul.s-hotsearch-content > li.hotsearch-item.even:nth-child(2) > span.title-content-mark.ie-vertical"
+    },
+    {
+      "context": "",
+      "hex": "#0000ee",
+      "hsl": "240, 100%, 47%",
+      "id": "color-004",
+      "rgb": "0, 0, 238",
+      "source_selector": "body > div.wrapper_new.smart_input_superman:nth-child(1) > div.s_down:nth-child(2) > div.head_wrapper.s-isindex-wrap:nth-child(3) > div.s_form.s_form_nologin:nth-child(2) > div.s_form_wrapper.soutu-env-mac > div.ai-input:nth-child(2) > div.san-card > div.chat-input-background_3edHa > div:nth-child(1) > div.chat-input-anchor > div:nth-child(2) > div > div.panel-list_8jHmm > div.panel-sample_xVtAM.panel_2vfwX > a.guide-bub-container_2skZT > img"
+    }
+  ],
+  "elements": [
+    {
+      "bounding_box": {
+        "height": 39,
+        "width": 402,
+        "x": 656,
+        "y": 287
+      },
+      "comment": null,
+      "extracted_assets": null,
+      "id": "elem-001",
+      "screenshots": {
+        "element_crop": "screenshots/elem-001.png",
+        "full_page": "screenshots/full-page.png"
+      },
+      "selector": "body > div.wrapper_new.smart_input_superman:nth-child(1) > div.s_down:nth-child(2) > div.head_wrapper.s-isindex-wrap:nth-child(3) > div.s_form.s_form_nologin:nth-child(2) > div.s_form_wrapper.soutu-env-mac > div.ai-input:nth-child(2) > div.san-card > div.chat-input-background_3edHa > div:nth-child(1) > div.chat-input-anchor > div:nth-child(2) > div > div.panel-list_8jHmm > div.panel-sample_xVtAM.panel_2vfwX > a.guide-bub-container_2skZT",
+      "tag": "a"
+    }
+  ],
+  "design_tokens": {},
+  "source_urls": [
+    "https://www.baidu.com"
+  ],
+  "last_updated": "2026-02-14T03:54:03.775619+00:00"
+}
