@@ -28,6 +28,7 @@
 | TASK-425 | Ideation | Refine idea 019: CR-UIUX Reference — Catch Design Theme & Copy Design as Mockup toolbar features | Cipher ✅ | ✅ completed | 02-14-2026 06:30:00 | x-ipe-docs/ideas/019. CR-UIUX Reference/idea-summary-v2.md | Idea Mockup |
 | TASK-426 | Idea Mockup | IDEA-019: Create toolbar mockup for CR-UIUX Reference (Catch Design Theme + Copy Design as Mockup) | Cipher ✅ | ✅ completed | 02-14-2026 07:25:00 | x-ipe-docs/ideas/019. CR-UIUX Reference/mockups/toolbar-v2-v1.html, idea-summary-v3.md | Requirement Gathering |
 | TASK-427 | Requirement Gathering | CR for FEATURE-030-B v2.0: Two-mode wizard toolbar (Catch Design Theme + Copy Design as Mockup) from IDEA-019 | Cipher ✅ | ✅ completed | 02-14-2026 07:30:00 | x-ipe-docs/requirements/FEATURE-030-B/CR-002.md, requirement-details-part-8.md | Feature Breakdown |
+| TASK-428 | Feature Breakdown | FEATURE-030-B v2.0: Break CR-002 into sub-features for toolbar redesign | Cipher 🔄 | 🔄 in_progress | 02-14-2026 07:24:00 | - | Feature Refinement |
 
 
 
@@ -91,8 +92,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 8
-- **In Progress:** 0
+- **Total Active:** 9
+- **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
 - **Completed (archived):** 420
