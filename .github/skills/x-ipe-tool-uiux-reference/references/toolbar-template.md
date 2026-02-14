@@ -511,18 +511,72 @@ This file contains the toolbar IIFE source code that the agent injects into the 
   let labelEl = null;
 
   // ===== Color Picker =====
+  function samplePixelColor(el, e) {
+    // Canvas-based pixel sampling for IMG, CANVAS, VIDEO, and gradient backgrounds
+    try {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (el.tagName === 'IMG' || el.tagName === 'VIDEO') {
+        canvas.width = el.naturalWidth || el.width;
+        canvas.height = el.naturalHeight || el.height;
+        ctx.drawImage(el, 0, 0);
+        const rect = el.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const px = Math.round((e.clientX - rect.left) * scaleX);
+        const py = Math.round((e.clientY - rect.top) * scaleY);
+        const pixel = ctx.getImageData(px, py, 1, 1).data;
+        return 'rgb(' + pixel[0] + ', ' + pixel[1] + ', ' + pixel[2] + ')';
+      }
+      if (el.tagName === 'CANVAS') {
+        const srcCtx = el.getContext('2d');
+        const rect = el.getBoundingClientRect();
+        const px = Math.round(e.clientX - rect.left);
+        const py = Math.round(e.clientY - rect.top);
+        const pixel = srcCtx.getImageData(px, py, 1, 1).data;
+        return 'rgb(' + pixel[0] + ', ' + pixel[1] + ', ' + pixel[2] + ')';
+      }
+    } catch (err) {
+      // Cross-origin or tainted canvas — fall back to CSS
+    }
+    return null;
+  }
+
   function handleColorClick(e) {
     if (!colorPickerActive) return;
     if (e.target.closest('.xipe-toolbar')) return;
     e.preventDefault();
     e.stopPropagation();
 
-    const el = e.target;
-    const computed = window.getComputedStyle(el);
-    const bgColor = computed.backgroundColor;
-    const textColor = computed.color;
-    const colorStr = (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent')
-      ? bgColor : textColor;
+    // Z-index aware element resolution via elementsFromPoint
+    const candidates = document.elementsFromPoint(e.clientX, e.clientY)
+      .filter(function(el) { return !el.closest('.xipe-toolbar'); });
+
+    let el = candidates[0] || e.target;
+    let colorStr = null;
+
+    // Check for pixel-sampled color (IMG, CANVAS, VIDEO, gradients)
+    const bgImage = window.getComputedStyle(el).backgroundImage;
+    if (['IMG', 'CANVAS', 'VIDEO'].includes(el.tagName) || (bgImage && bgImage !== 'none')) {
+      colorStr = samplePixelColor(el, e);
+    }
+
+    // If pixel sampling didn't yield a result, iterate stacking order for visible background
+    if (!colorStr) {
+      for (const candidate of candidates) {
+        const bg = window.getComputedStyle(candidate).backgroundColor;
+        if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+          colorStr = bg;
+          el = candidate;
+          break;
+        }
+      }
+    }
+
+    // Final fallback: text color of topmost element
+    if (!colorStr) {
+      colorStr = window.getComputedStyle(el).color;
+    }
 
     const match = colorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
     if (!match) return;

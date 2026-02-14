@@ -19,28 +19,22 @@ FILES = {
 
 
 def minify(source: str) -> str:
-    """JS minification: strip comments, collapse whitespace, remove unnecessary space."""
+    """JS minification: strip comments, collapse whitespace."""
     # Remove single-line comments (preserve URLs with //)
     result = re.sub(r'(?<![:\'"\\])//(?!/)[^\n]*', '', source)
     # Remove multi-line comments
     result = re.sub(r'/\*.*?\*/', '', result, flags=re.DOTALL)
-    # Collapse runs of whitespace to single space
+    # Collapse runs of whitespace (spaces/tabs) to single space
     result = re.sub(r'[ \t]+', ' ', result)
     # Remove blank lines
     result = re.sub(r'\n\s*\n', '\n', result)
     # Remove leading whitespace per line
-    result = re.sub(r'\n\s+', '\n', result)
-    # Remove newlines around brackets/operators
-    result = re.sub(r'\n([{}();,\[\]:])', r'\1', result)
-    result = re.sub(r'([{}();,\[\]:])\n', r'\1', result)
-    # Remove space around operators
-    result = re.sub(r' ?([\{\}\(\)\[\];,:<>=\+\-\*\/\&\|\!]) ?', r'\1', result)
-    # Restore needed spaces (keywords)
-    for kw in ['const', 'let', 'var', 'function', 'return', 'if', 'else',
-               'new', 'typeof', 'instanceof', 'in', 'of', 'for', 'while',
-               'switch', 'case', 'break', 'throw', 'class', 'extends',
-               'import', 'export', 'default', 'try', 'catch', 'finally']:
-        result = re.sub(rf'({kw})([^\s\({{;,\}}])', rf'\1 \2', result)
+    result = re.sub(r'\n +', '\n', result)
+    # Collapse single newlines where safe (after ; { } and before { })
+    result = re.sub(r';\n', ';', result)
+    result = re.sub(r'\{\n', '{', result)
+    result = re.sub(r'\n\}', '}', result)
+    result = re.sub(r'\n\n+', '\n', result)
     return result.strip()
 
 
