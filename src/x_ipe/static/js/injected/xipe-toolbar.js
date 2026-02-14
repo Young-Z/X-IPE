@@ -68,13 +68,14 @@
       position: absolute;
       top: 0;
       right: 0;
-      width: 272px;
+      width: 288px;
+      max-height: calc(100vh - 120px);
       background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(24px);
       border: 1px solid rgba(55, 48, 163, 0.15);
       border-radius: 14px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 0 0 1px rgba(55, 48, 163, 0.04);
-      overflow: hidden;
+      overflow-y: auto;
       display: none;
       animation: xipePanelSlideIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
     }
@@ -89,6 +90,10 @@
       justify-content: space-between;
       padding: 12px 14px;
       border-bottom: 1px solid rgba(224, 220, 212, 0.9);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.97);
     }
     .xipe-panel-title {
       display: flex;
@@ -324,6 +329,49 @@
       to { transform: rotate(360deg); }
     }
     .xipe-spin { animation: xipeSpin 1s linear infinite; }
+    .xipe-cursor-eyedropper { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M27.3 4.7a3.8 3.8 0 00-5.4 0l-3.2 3.2-1.4-1.4a1 1 0 00-1.4 0l-1.4 1.4a1 1 0 000 1.4l.7.7L5.7 19.5a2 2 0 00-.5.9l-1.1 4.4a1 1 0 001.2 1.2l4.4-1.1a2 2 0 00.9-.5L20 14.9l.7.7a1 1 0 001.4 0l1.4-1.4a1 1 0 000-1.4l-1.4-1.4 3.2-3.2a3.8 3.8 0 000-5.4z" fill="%233730a3"/></svg>') 2 30, crosshair; }
+    .xipe-cursor-crosshair { cursor: crosshair; }
+    .xipe-color-list, .xipe-elem-list { padding: 0 4px; }
+    .xipe-color-entry, .xipe-elem-entry {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 6px; border-radius: 6px;
+      font-family: 'Outfit', sans-serif; font-size: 10px;
+      transition: background 0.15s;
+    }
+    .xipe-color-entry:hover { background: rgba(190, 18, 60, 0.04); }
+    .xipe-elem-entry:hover { background: rgba(55, 48, 163, 0.04); }
+    .xipe-color-hex { font-family: 'Space Mono', monospace; font-size: 10px; color: #4a4a5c; }
+    .xipe-color-selector, .xipe-elem-selector {
+      font-size: 9px; color: #8e8e9f; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap; max-width: 120px;
+    }
+    .xipe-tag-pill {
+      font-family: 'Space Mono', monospace; font-size: 9px;
+      background: rgba(55, 48, 163, 0.08); color: #3730a3;
+      padding: 2px 6px; border-radius: 3px; flex-shrink: 0;
+    }
+    .xipe-elem-dims { font-size: 9px; color: #8e8e9f; white-space: nowrap; }
+    .xipe-remove-btn {
+      margin-left: auto; width: 16px; height: 16px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; cursor: pointer;
+      font-size: 12px; color: #8e8e9f; opacity: 0;
+      border-radius: 50%; transition: all 0.15s; flex-shrink: 0;
+    }
+    .xipe-color-entry:hover .xipe-remove-btn { opacity: 1; color: #be123c; }
+    .xipe-elem-entry:hover .xipe-remove-btn { opacity: 1; color: #3730a3; }
+    .xipe-remove-btn:hover { background: rgba(0,0,0,0.06); }
+    .xipe-hover-highlight-rose { box-shadow: 0 0 0 2px #be123c !important; transition: box-shadow 0.15s; }
+    .xipe-hover-highlight-accent { box-shadow: 0 0 0 2px #3730a3 !important; transition: box-shadow 0.15s; }
+    .xipe-collected-header {
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; margin-bottom: 8px;
+    }
+    .xipe-collected-chevron {
+      font-size: 10px; color: #8e8e9f;
+      transition: transform 0.2s ease;
+    }
+    .xipe-collected-chevron.collapsed { transform: rotate(180deg); }
   `;
   document.head.appendChild(style);
 
@@ -396,11 +444,16 @@
         </button>
       </div>
       <div class="xipe-collected">
-        <div class="xipe-collected-title">Collected References</div>
-        <div class="xipe-collected-items" id="xipe-collected">
+        <div class="xipe-collected-header" id="xipe-collected-toggle">
+          <div class="xipe-collected-title" style="margin-bottom:0;">Collected References</div>
+          <i class="bi bi-chevron-up xipe-collected-chevron" id="xipe-chevron"></i>
+        </div>
+        <div class="xipe-collected-items" id="xipe-collected" style="margin-top:8px;">
           <span class="xipe-collected-tag colors"><i class="bi bi-circle-fill"></i> <span id="xipe-color-count">0</span> colors</span>
           <span class="xipe-collected-tag elements"><i class="bi bi-circle-fill"></i> <span id="xipe-elem-count">0</span> elements</span>
         </div>
+        <div class="xipe-color-list" id="xipe-color-list"></div>
+        <div class="xipe-elem-list" id="xipe-elem-list"></div>
       </div>
       <button class="xipe-send-btn" id="xipe-send">
         <i class="bi bi-send-fill"></i> Send References
@@ -483,15 +536,17 @@
     const hsl = Math.round(h * 360) + ', ' + Math.round(s * 100) + '%, ' + Math.round(l * 100) + '%';
 
     const colorId = 'color-' + String(window.__xipeRefData.colors.length + 1).padStart(3, '0');
+    const sourceSelector = generateSelector(el);
     window.__xipeRefData.colors.push({
       id: colorId,
       hex: hex,
       rgb: r + ', ' + g + ', ' + b,
       hsl: hsl,
-      source_selector: generateSelector(el),
+      source_selector: sourceSelector,
       context: ''
     });
     updateBadges();
+    addColorEntry(colorId, hex, sourceSelector);
     showSwatch(el, hex);
   }
 
@@ -505,6 +560,29 @@
     swatch.style.left = (rect.left + window.scrollX) + 'px';
     document.body.appendChild(swatch);
     setTimeout(() => swatch.remove(), 5000);
+  }
+
+  // ===== Color List Management (CR-001) =====
+  function addColorEntry(id, hex, selector) {
+    const list = document.getElementById('xipe-color-list');
+    const entry = document.createElement('div');
+    entry.className = 'xipe-color-entry';
+    entry.dataset.colorId = id;
+    entry.dataset.selector = selector;
+    entry.innerHTML =
+      '<span class="xipe-swatch-dot" style="background:' + hex + ';width:16px;height:16px;border-radius:50%;flex-shrink:0;"></span>' +
+      '<span class="xipe-color-hex">' + hex + '</span>' +
+      '<span class="xipe-color-selector">' + selector + '</span>' +
+      '<button class="xipe-remove-btn" title="Remove">\u00d7</button>';
+    entry.addEventListener('mouseenter', function() { highlightPageElement(selector, 'rose'); });
+    entry.addEventListener('mouseleave', function() { removePageHighlight(); });
+    entry.querySelector('.xipe-remove-btn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      window.__xipeRefData.colors = window.__xipeRefData.colors.filter(function(c) { return c.id !== id; });
+      entry.remove();
+      updateBadges();
+    });
+    list.appendChild(entry);
   }
 
   // ===== Element Highlighter =====
@@ -523,9 +601,10 @@
     const el = e.target;
     const rect = el.getBoundingClientRect();
     const elemId = 'elem-' + String(window.__xipeRefData.elements.length + 1).padStart(3, '0');
+    const elemSelector = generateSelector(el);
     window.__xipeRefData.elements.push({
       id: elemId,
-      selector: generateSelector(el),
+      selector: elemSelector,
       tag: el.tagName.toLowerCase(),
       bounding_box: {
         x: Math.round(rect.x),
@@ -538,6 +617,30 @@
       extracted_assets: null
     });
     updateBadges();
+    addElementEntry(elemId, el.tagName.toLowerCase(), elemSelector, rect);
+  }
+
+  // ===== Element List Management (CR-001) =====
+  function addElementEntry(id, tag, selector, rect) {
+    const list = document.getElementById('xipe-elem-list');
+    const entry = document.createElement('div');
+    entry.className = 'xipe-elem-entry';
+    entry.dataset.elemId = id;
+    entry.dataset.selector = selector;
+    entry.innerHTML =
+      '<span class="xipe-tag-pill">' + tag + '</span>' +
+      '<span class="xipe-elem-selector">' + selector + '</span>' +
+      '<span class="xipe-elem-dims">' + Math.round(rect.width) + '\u00d7' + Math.round(rect.height) + '</span>' +
+      '<button class="xipe-remove-btn" title="Remove">\u00d7</button>';
+    entry.addEventListener('mouseenter', function() { highlightPageElement(selector, 'accent'); });
+    entry.addEventListener('mouseleave', function() { removePageHighlight(); });
+    entry.querySelector('.xipe-remove-btn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      window.__xipeRefData.elements = window.__xipeRefData.elements.filter(function(el) { return el.id !== id; });
+      entry.remove();
+      updateBadges();
+    });
+    list.appendChild(entry);
   }
 
   function showOverlay(el) {
@@ -564,6 +667,46 @@
     if (labelEl) { labelEl.remove(); labelEl = null; }
   }
 
+  // ===== Hover Highlight for List Entries (CR-001) =====
+  let hoverHighlightEl = null;
+  let hoverLabelEl = null;
+
+  function highlightPageElement(selector, colorType) {
+    removePageHighlight();
+    try {
+      const el = document.querySelector(selector);
+      if (!el) return;
+      const className = colorType === 'rose' ? 'xipe-hover-highlight-rose' : 'xipe-hover-highlight-accent';
+      el.classList.add(className);
+      hoverHighlightEl = { element: el, className: className };
+      if (colorType === 'accent') {
+        const rect = el.getBoundingClientRect();
+        hoverLabelEl = document.createElement('div');
+        hoverLabelEl.className = 'xipe-selector-label';
+        hoverLabelEl.textContent = selector;
+        hoverLabelEl.style.cssText = 'position:fixed;top:' + (rect.top - 24) + 'px;left:' + rect.left + 'px;z-index:2147483646;pointer-events:none;';
+        document.body.appendChild(hoverLabelEl);
+      }
+    } catch (e) { /* invalid selector */ }
+  }
+
+  function removePageHighlight() {
+    if (hoverHighlightEl) {
+      hoverHighlightEl.element.classList.remove(hoverHighlightEl.className);
+      hoverHighlightEl = null;
+    }
+    if (hoverLabelEl) { hoverLabelEl.remove(); hoverLabelEl = null; }
+  }
+
+  // ===== Cursor Management (CR-001) =====
+  function updateCursor() {
+    document.body.classList.remove('xipe-cursor-eyedropper', 'xipe-cursor-crosshair');
+    if (panel.classList.contains('visible')) {
+      if (colorPickerActive) document.body.classList.add('xipe-cursor-eyedropper');
+      else if (highlighterActive) document.body.classList.add('xipe-cursor-crosshair');
+    }
+  }
+
   // ===== Badge Updates =====
   function updateBadges() {
     const cc = window.__xipeRefData.colors.length;
@@ -588,6 +731,7 @@
       colorPickerActive = tool === 'color';
       highlighterActive = tool === 'highlight';
       if (!highlighterActive) hideOverlay();
+      updateCursor();
     });
   });
 
@@ -598,14 +742,29 @@
     if (e.detail === 0) return;
     hamburger.style.display = 'none';
     panel.classList.add('visible');
+    updateCursor();
   });
   document.getElementById('xipe-close').addEventListener('click', () => {
     panel.classList.remove('visible');
     hamburger.style.display = 'flex';
+    updateCursor();
   });
   // Start expanded
   hamburger.style.display = 'none';
   panel.classList.add('visible');
+  updateCursor();
+
+  // ===== Collected References Toggle (CR-001) =====
+  let listsExpanded = true;
+  document.getElementById('xipe-collected-toggle').addEventListener('click', () => {
+    listsExpanded = !listsExpanded;
+    const chevron = document.getElementById('xipe-chevron');
+    const colorList = document.getElementById('xipe-color-list');
+    const elemList = document.getElementById('xipe-elem-list');
+    chevron.classList.toggle('collapsed', !listsExpanded);
+    colorList.style.display = listsExpanded ? '' : 'none';
+    elemList.style.display = listsExpanded ? '' : 'none';
+  });
 
   // ===== Drag =====
   let isDragging = false, dragStartX, dragStartY, toolbarStartTop, toolbarStartRight;
@@ -648,6 +807,13 @@
         sendBtn.innerHTML = '<i class="bi bi-send-fill"></i> Send References';
         sendBtn.style.background = '';
         sendBtn.disabled = false;
+        // ===== Post-Send Reset (CR-001) =====
+        window.__xipeRefData.colors = [];
+        window.__xipeRefData.elements = [];
+        window.__xipeRefReady = false;
+        document.getElementById('xipe-color-list').innerHTML = '';
+        document.getElementById('xipe-elem-list').innerHTML = '';
+        updateBadges();
       }, 2300);
     }, 1200);
   });

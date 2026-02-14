@@ -129,14 +129,13 @@ input:
        - IF 30 minutes elapsed: INFORM user "Session timed out.", STOP
 
     6. FOR each element in result.elements:
-       a. Mark element for screenshot:
-          evaluate_script((sel) => { const el = document.querySelector(sel); if(el) el.setAttribute('data-xipe-target','true'); }, with selector arg)
-       b. full_screenshot = take_screenshot(fullPage: true)
-       c. snapshot = take_snapshot()
-       d. Find element with data-xipe-target in snapshot, get its UID
-       e. IF UID found: element_screenshot = take_screenshot(uid: found_uid)
-       f. Remove marker: evaluate_script(() => { const el = document.querySelector('[data-xipe-target]'); if(el) el.removeAttribute('data-xipe-target'); })
-       g. Attach screenshots to element data (base64-encoded with "base64:" prefix)
+       a. full_screenshot = take_screenshot(fullPage: true)
+       b. snapshot = take_snapshot()
+       c. Use bounding_box from element data to find matching node in snapshot:
+          - Compare element's bounding_box (x, y, width, height) against snapshot node positions
+          - Allow 20px tolerance for coordinate matching
+       d. IF matching UID found: element_screenshot = take_screenshot(uid: found_uid)
+       e. Attach screenshots to element data (base64-encoded with "base64:" prefix)
 
     7. CONSTRUCT Reference Data JSON:
        {

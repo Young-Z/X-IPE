@@ -16,6 +16,12 @@
 | TASK-413 | Bug Fix | Fix console session instability when multiple browser tabs connect to same server (Feedback-20260213-234829) | Zephyr ✅ | ✅ completed | 02-13-2026 15:55:00 | src/x_ipe/handlers/terminal_handlers.py, src/x_ipe/services/terminal_service.py, src/x_ipe/static/js/terminal.js, tests/test_terminal.py | - |
 | TASK-414 | Bug Fix | Console terminal forces scroll-to-bottom during output, ignoring user scroll-up (Feedback-20260213-235226) | Ember ✅ | ✅ completed | 02-13-2026 16:05:00 | src/x_ipe/static/js/terminal.js, tests/test_terminal.py | - |
 | TASK-415 | Bug Fix | Session preview stays visible when hovering on preview window instead of dismissing on session bar mouseleave (Feedback-20260214-000335) | Drift ✅ | ✅ completed | 02-13-2026 16:05:00 | src/x_ipe/static/js/terminal.js, tests/test_terminal.py | - |
+| TASK-416 | Change Request | CR-001: FEATURE-030-B toolbar improvements — eyedropper cursor, expandable color/element lists, screenshot accuracy, post-send reset | Nova ✅ | ✅ completed | 02-13-2026 16:45:00 | x-ipe-docs/requirements/FEATURE-030-B/CR-001.md, x-ipe-docs/requirements/FEATURE-030-B/specification.md | Feature Refinement |
+| TASK-417 | Feature Refinement | FEATURE-030-B v1.1: Update specification and mockup for CR-001 (eyedropper, color/element lists, screenshot fix, post-send reset) | Nova ✅ | ✅ completed | 02-13-2026 17:15:00 | x-ipe-docs/requirements/FEATURE-030-B/specification.md, x-ipe-docs/requirements/FEATURE-030-B/mockups/injected-toolbar-v3.html | Technical Design |
+| TASK-418 | Technical Design | FEATURE-030-B v1.1: Update technical design for CR-001 enhancements (eyedropper cursor, expandable lists, hover-highlight, screenshot accuracy, post-send reset) | Nova ✅ | ✅ completed | 02-14-2026 03:35:00 | x-ipe-docs/requirements/FEATURE-030-B/technical-design.md | Test Generation |
+| TASK-419 | Test Generation | FEATURE-030-B v1.1: Generate tests for CR-001 enhancements (eyedropper cursor, expandable lists, hover-highlight, screenshot accuracy, post-send reset) | Nova ✅ | ✅ completed | 02-14-2026 03:50:00 | tests/test_uiux_reference_toolbar.py | Code Implementation |
+| TASK-420 | Code Implementation | FEATURE-030-B v1.1: Implement CR-001 enhancements in toolbar IIFE (eyedropper cursor, expandable lists, hover-highlight, screenshot accuracy, post-send reset) | Nova ✅ | ✅ completed | 02-14-2026 03:55:00 | 02-14-2026 04:30:00 | Feature Acceptance Test |
+| TASK-421 | Feature Acceptance Test | FEATURE-030-B v1.1: Acceptance test CR-001 toolbar enhancements — inject toolbar, verify eyedropper cursor, color/element lists, hover highlights, post-send reset | Nova ✅ | ✅ completed | 02-14-2026 04:35:00 | x-ipe-docs/requirements/FEATURE-030-B/acceptance-test-cases.md | Feature Closing |
 
 
 
@@ -79,11 +85,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 3
+- **Total Active:** 4
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 408
+- **Completed (archived):** 414
 - **Pending Review:** 0
 - **Blocked:** 0
 

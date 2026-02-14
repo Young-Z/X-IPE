@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FEATURE-030-B Mockup — Injected Reference Toolbar v3 (CR-001)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --toolbar-bg: rgba(255, 255, 255, 0.94);
+    --toolbar-border: rgba(55, 48, 163, 0.15);
+    --toolbar-glow: rgba(55, 48, 163, 0.06);
+    --panel-bg: rgba(255, 255, 255, 0.97);
+    --item-bg: rgba(245, 243, 238, 0.8);
+    --item-hover: rgba(55, 48, 163, 0.06);
+    --border: rgba(224, 220, 212, 0.9);
+    --border-strong: #d0ccc4;
+    --text-primary: #1a1a2e;
+    --text-secondary: #4a4a5c;
+    --text-muted: #8e8e9f;
+    --accent: #3730a3;
+    --accent-hover: #4f46e5;
+    --accent-light: rgba(55, 48, 163, 0.08);
+    --emerald: #047857;
+    --emerald-light: #059669;
+    --emerald-bg: rgba(4, 120, 87, 0.06);
+    --amber: #b45309;
+    --amber-bg: rgba(180, 83, 9, 0.06);
+    --rose: #be123c;
+    --rose-bg: rgba(190, 18, 60, 0.06);
+    --blue: #1d4ed8;
+    --font-ui: 'Outfit', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --transition: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== CR-001-A: Eyedropper cursor when color picker active ===== */
+  body.xipe-color-picker-active {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23be123c' d='M20.71 5.63l-2.34-2.34a1 1 0 0 0-1.41 0l-3.54 3.54 1.06 1.06-1.41 1.41-1.06-1.06-6.36 6.36a2 2 0 0 0-.59 1.42V18.5a.5.5 0 0 0 .5.5h2.48a2 2 0 0 0 1.42-.59l6.36-6.36-1.06-1.06 1.41-1.41 1.06 1.06 3.54-3.54a1 1 0 0 0-.06-1.47z'/%3E%3Crect fill='%23be123c' x='3' y='20' width='4' height='2' rx='1'/%3E%3C/svg%3E") 2 22, crosshair;
+  }
+  body.xipe-color-picker-active .xipe-toolbar,
+  body.xipe-color-picker-active .xipe-toolbar * {
+    cursor: default !important;
+  }
+  body.xipe-highlighter-active {
+    cursor: crosshair;
+  }
+  body.xipe-highlighter-active .xipe-toolbar,
+  body.xipe-highlighter-active .xipe-toolbar * {
+    cursor: default !important;
+  }
+
+  /* ===== Simulated Target Page ===== */
+  .sim-page { max-width: 1200px; margin: 0 auto; }
+
+  .sim-nav {
+    background: white;
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .sim-logo { font-size: 20px; font-weight: 700; color: #111; letter-spacing: -0.02em; }
+
+  .sim-nav-links { display: flex; gap: 20px; margin-left: auto; }
+  .sim-nav-links a { color: #6b7280; text-decoration: none; font-size: 14px; font-weight: 500; }
+
+  .sim-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 60px 32px;
+    color: white;
+    text-align: center;
+  }
+  .sim-hero h1 { font-size: 36px; font-weight: 700; margin-bottom: 12px; }
+  .sim-hero p { font-size: 16px; opacity: 0.85; max-width: 500px; margin: 0 auto 24px; }
+  .sim-hero-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: white; color: #667eea; padding: 12px 28px;
+    border-radius: 8px; font-size: 14px; font-weight: 600;
+    text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .sim-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 32px; }
+
+  .sim-card {
+    background: white; border-radius: 12px; padding: 24px;
+    border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    position: relative; transition: box-shadow 0.2s;
+  }
+  .sim-card h3 { font-size: 16px; font-weight: 600; color: #111; margin-bottom: 8px; }
+  .sim-card p { font-size: 13px; color: #6b7280; line-height: 1.5; }
+  .sim-card-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px; font-size: 18px; color: white;
+  }
+
+  /* ===== Element Highlight (from hover in list) ===== */
+  .sim-card.hover-highlighted {
+    box-shadow: 0 0 0 2px var(--accent), 0 0 0 6px rgba(55, 48, 163, 0.12);
+  }
+  .sim-card.hover-highlighted::after {
+    content: attr(data-selector);
+    position: absolute;
+    top: -26px; left: 8px;
+    background: var(--accent); color: white;
+    font-family: var(--font-mono); font-size: 10px;
+    padding: 3px 8px; border-radius: 4px; white-space: nowrap;
+  }
+
+  /* ===== Color source highlight (from hover in list) ===== */
+  .sim-card.color-source-highlighted {
+    box-shadow: 0 0 0 2px var(--rose), 0 0 0 6px rgba(190, 18, 60, 0.12);
+  }
+
+  /* ===== Picked Color Swatch ===== */
+  .picked-color {
+    position: absolute; bottom: 12px; right: 12px;
+    display: flex; align-items: center; gap: 6px;
+    background: white; border: 1px solid var(--border-strong);
+    border-radius: 100px; padding: 4px 10px 4px 4px;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--text-secondary); box-shadow: 0 2px 8px rgba(0,0,0,0.08); z-index: 60;
+  }
+  .picked-color .swatch {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.08);
+  }
+
+  /* ===== Highlight Overlay (static mockup demo) ===== */
+  .highlight-overlay {
+    position: absolute; inset: -3px;
+    border: 2px solid var(--accent); border-radius: 14px;
+    pointer-events: none; animation: highlightPulse 1.5s ease-in-out infinite; z-index: 50;
+  }
+  .highlight-overlay::before {
+    content: 'body > main > .cards > .card:nth-child(2)';
+    position: absolute; top: -26px; left: 8px;
+    background: var(--accent); color: white;
+    font-family: var(--font-mono); font-size: 10px;
+    padding: 3px 8px; border-radius: 4px; white-space: nowrap;
+  }
+  @keyframes highlightPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(55, 48, 163, 0.2); }
+    50% { box-shadow: 0 0 0 6px rgba(55, 48, 163, 0); }
+  }
+
+  /* ===== INJECTED TOOLBAR ===== */
+  .xipe-toolbar {
+    position: fixed; top: 20px; right: 20px;
+    z-index: 2147483647; font-family: var(--font-ui); user-select: none;
+  }
+
+  .xipe-hamburger {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(255, 255, 255, 0.25); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: grab; color: white; font-size: 20px;
+    box-shadow: 0 4px 16px rgba(55, 48, 163, 0.35), 0 0 0 1px rgba(55, 48, 163, 0.08);
+    transition: all 0.4s var(--transition); position: relative;
+  }
+  .xipe-hamburger:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 6px 24px rgba(79, 70, 229, 0.45), 0 0 0 3px rgba(79, 70, 229, 0.15);
+    transform: scale(1.1);
+  }
+  .xipe-hamburger .xipe-logo {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+    color: white; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  .xipe-hamburger .badge-count {
+    position: absolute; top: -5px; right: -5px;
+    width: 18px; height: 18px; background: var(--emerald);
+    color: white; font-size: 10px; font-weight: 700;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 4px rgba(4, 120, 87, 0.3);
+  }
+
+  .xipe-panel {
+    position: absolute; top: 0; right: 0; width: 288px;
+    background: var(--toolbar-bg); backdrop-filter: blur(24px);
+    border: 1px solid var(--toolbar-border); border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 0 0 1px rgba(55, 48, 163, 0.04);
+    overflow: hidden; display: none;
+    animation: panelSlideIn 0.35s var(--transition);
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+  }
+  .xipe-panel.visible { display: block; }
+  /* Custom scrollbar for panel */
+  .xipe-panel::-webkit-scrollbar { width: 4px; }
+  .xipe-panel::-webkit-scrollbar-track { background: transparent; }
+  .xipe-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  @keyframes panelSlideIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .xipe-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--toolbar-bg); z-index: 2;
+  }
+  .xipe-panel-title {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 12.5px; font-weight: 600; color: var(--text-primary); letter-spacing: 0.01em;
+  }
+  .xipe-panel-title .logo-dot {
+    width: 8px; height: 8px; background: var(--accent);
+    border-radius: 50%; box-shadow: 0 0 6px rgba(55, 48, 163, 0.35);
+  }
+  .xipe-panel-close {
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none; color: var(--text-muted);
+    font-size: 16px; cursor: pointer; border-radius: 6px; transition: all 0.2s;
+  }
+  .xipe-panel-close:hover { background: var(--item-hover); color: var(--text-primary); }
+
+  .xipe-tools { padding: 6px 8px; }
+
+  .xipe-tool-btn {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 9px 10px; background: none; border: 1px solid transparent;
+    border-radius: var(--radius-sm); color: var(--text-secondary);
+    font-family: var(--font-ui); font-size: 12.5px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s var(--transition); text-align: left;
+  }
+  .xipe-tool-btn:hover { background: var(--item-hover); color: var(--text-primary); border-color: rgba(55, 48, 163, 0.06); }
+  .xipe-tool-btn.active { background: var(--accent-light); color: var(--accent); border-color: rgba(55, 48, 163, 0.12); }
+
+  .xipe-tool-icon {
+    width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; font-size: 14px; flex-shrink: 0;
+  }
+  .xipe-tool-icon.color-picker { background: var(--rose-bg); color: var(--rose); }
+  .xipe-tool-icon.highlighter { background: var(--accent-light); color: var(--accent); }
+  .xipe-tool-icon.commenter { background: var(--amber-bg); color: var(--amber); }
+  .xipe-tool-icon.extractor { background: var(--emerald-bg); color: var(--emerald); }
+
+  .xipe-tool-info { display: flex; flex-direction: column; gap: 1px; }
+  .xipe-tool-name { font-size: 12.5px; font-weight: 500; }
+  .xipe-tool-desc { font-size: 10px; color: var(--text-muted); }
+
+  .xipe-tool-badge {
+    margin-left: auto; font-size: 10px; font-weight: 600;
+    padding: 2px 7px; border-radius: 100px;
+    background: var(--item-bg); color: var(--text-muted);
+  }
+  .xipe-tool-badge.has-items { background: var(--emerald-bg); color: var(--emerald); }
+
+  .xipe-phase-sep {
+    padding: 8px 12px 4px; font-size: 9.5px; font-weight: 600;
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .xipe-divider { height: 1px; background: var(--border); margin: 4px 8px; }
+
+  /* ===== CR-001-B/C: Expandable collected items lists ===== */
+  .xipe-collected-section {
+    border-top: 1px solid var(--border);
+  }
+  .xipe-collected-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .xipe-collected-header:hover { background: rgba(0,0,0,0.02); }
+  .xipe-collected-title {
+    font-size: 10px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .xipe-collected-toggle {
+    font-size: 10px; color: var(--text-muted);
+    transition: transform 0.2s var(--transition);
+  }
+  .xipe-collected-toggle.expanded { transform: rotate(180deg); }
+
+  .xipe-collected-summary {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    padding: 0 14px 8px;
+  }
+  .xipe-collected-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 100px; font-size: 10px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .xipe-collected-tag.colors { background: var(--rose-bg); color: var(--rose); }
+  .xipe-collected-tag.colors:hover { background: rgba(190, 18, 60, 0.12); }
+  .xipe-collected-tag.elements { background: var(--accent-light); color: var(--accent); }
+  .xipe-collected-tag.elements:hover { background: rgba(55, 48, 163, 0.14); }
+
+  /* ===== CR-001-B: Color list ===== */
+  .xipe-color-list {
+    padding: 0 8px 6px;
+    display: none;
+  }
+  .xipe-color-list.visible { display: block; }
+
+  .xipe-color-entry {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; border-radius: var(--radius-sm);
+    cursor: pointer; transition: all 0.15s;
+    position: relative;
+  }
+  .xipe-color-entry:hover {
+    background: var(--rose-bg);
+  }
+  .xipe-color-entry .swatch-circle {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 1.5px solid rgba(0,0,0,0.1); flex-shrink: 0;
+  }
+  .xipe-color-entry .color-hex {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--text-secondary); font-weight: 400;
+  }
+  .xipe-color-entry .color-source {
+    font-size: 9px; color: var(--text-muted);
+    max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    margin-left: auto;
+  }
+  .xipe-color-entry .remove-btn {
+    font-size: 10px; color: var(--text-muted); opacity: 0;
+    cursor: pointer; transition: opacity 0.15s;
+    margin-left: 4px;
+  }
+  .xipe-color-entry:hover .remove-btn { opacity: 1; }
+  .xipe-color-entry:hover .remove-btn:hover { color: var(--rose); }
+
+  /* ===== CR-001-C: Element list ===== */
+  .xipe-elem-list {
+    padding: 0 8px 6px;
+    display: none;
+  }
+  .xipe-elem-list.visible { display: block; }
+
+  .xipe-elem-entry {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; border-radius: var(--radius-sm);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .xipe-elem-entry:hover {
+    background: var(--accent-light);
+  }
+  .xipe-elem-entry .elem-tag {
+    font-family: var(--font-mono); font-size: 9px;
+    background: var(--accent-light); color: var(--accent);
+    padding: 1px 5px; border-radius: 3px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .xipe-elem-entry .elem-selector {
+    font-family: var(--font-mono); font-size: 9px;
+    color: var(--text-muted);
+    max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .xipe-elem-entry .elem-size {
+    font-size: 9px; color: var(--text-muted); margin-left: auto; flex-shrink: 0;
+  }
+  .xipe-elem-entry .remove-btn {
+    font-size: 10px; color: var(--text-muted); opacity: 0;
+    cursor: pointer; transition: opacity 0.15s;
+    margin-left: 4px;
+  }
+  .xipe-elem-entry:hover .remove-btn { opacity: 1; }
+  .xipe-elem-entry:hover .remove-btn:hover { color: var(--rose); }
+
+  /* Hover hint */
+  .xipe-hover-hint {
+    font-size: 9px; color: var(--text-muted); font-style: italic;
+    padding: 2px 14px 6px; display: none;
+  }
+  .xipe-hover-hint.visible { display: block; }
+
+  /* Send */
+  .xipe-send-btn {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    width: calc(100% - 16px); margin: 8px 8px 10px; padding: 10px;
+    background: var(--emerald); color: white; border: none;
+    border-radius: var(--radius-sm); font-family: var(--font-ui);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: all 0.3s var(--transition);
+    box-shadow: 0 2px 8px rgba(4, 120, 87, 0.2);
+  }
+  .xipe-send-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3);
+    background: var(--emerald-light);
+  }
+  .xipe-send-btn:disabled {
+    opacity: 0.7; cursor: not-allowed; transform: none;
+  }
+
+  /* Drag hint */
+  .drag-hint {
+    position: fixed; top: 70px; right: 20px;
+    display: flex; align-items: center; gap: 6px;
+    background: white; border: 1px solid var(--border-strong);
+    border-radius: 100px; padding: 5px 12px;
+    font-family: var(--font-ui); font-size: 10px;
+    color: var(--text-muted); z-index: 2147483646;
+    animation: hintFade 3s ease-in-out forwards;
+    pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  @keyframes hintFade {
+    0% { opacity: 0; transform: translateY(-4px); }
+    15% { opacity: 1; transform: translateY(0); }
+    75% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* Info bar */
+  .mockup-info {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border); padding: 14px 24px;
+    font-family: var(--font-ui); display: flex; align-items: center; gap: 16px;
+    z-index: 2147483647;
+  }
+  .mockup-info-badge {
+    background: var(--accent); color: white; font-size: 10px; font-weight: 700;
+    padding: 4px 10px; border-radius: 100px; letter-spacing: 0.06em;
+    text-transform: uppercase; flex-shrink: 0;
+  }
+  .mockup-info-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+  .mockup-info-text strong { color: var(--text-primary); }
+
+  .mockup-toggle-view { margin-left: auto; display: flex; gap: 6px; flex-shrink: 0; }
+  .view-btn {
+    padding: 6px 12px; background: var(--item-bg); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text-muted); font-family: var(--font-ui);
+    font-size: 11px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+  }
+  .view-btn:hover, .view-btn.active {
+    background: var(--accent-light); color: var(--accent);
+    border-color: rgba(55, 48, 163, 0.15);
+  }
+
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  @media (max-width: 768px) {
+    .sim-cards { grid-template-columns: 1fr; }
+    .sim-hero h1 { font-size: 24px; }
+    .mockup-info { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .mockup-toggle-view { margin-left: 0; }
+  }
+</style>
+</head>
+<body class="xipe-color-picker-active">
+
+<!-- ===== Simulated Target Website ===== -->
+<div class="sim-page">
+  <nav class="sim-nav">
+    <div class="sim-logo">AcmeDesign</div>
+    <div class="sim-nav-links">
+      <a href="#">Products</a>
+      <a href="#">Pricing</a>
+      <a href="#">Blog</a>
+      <a href="#">Contact</a>
+    </div>
+  </nav>
+
+  <section class="sim-hero" id="sim-hero">
+    <h1>Design Systems Made Simple</h1>
+    <p>Build consistent, beautiful interfaces with our component library and design tokens.</p>
+    <a href="#" class="sim-hero-btn"><i class="bi bi-play-fill"></i> Get Started</a>
+  </section>
+
+  <section class="sim-cards">
+    <div class="sim-card" id="card-1" data-selector=".cards > .card:nth-child(1)">
+      <div class="sim-card-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+        <i class="bi bi-palette"></i>
+      </div>
+      <h3>Color Tokens</h3>
+      <p>Semantic color system with light and dark mode support out of the box.</p>
+      <div class="picked-color">
+        <span class="swatch" style="background: #667eea;"></span>
+        #667eea
+      </div>
+    </div>
+
+    <div class="sim-card" id="card-2" data-selector=".cards > .card:nth-child(2)" style="position: relative;">
+      <div class="highlight-overlay"></div>
+      <div class="sim-card-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+        <i class="bi bi-fonts"></i>
+      </div>
+      <h3>Typography Scale</h3>
+      <p>Harmonious type system with responsive sizes and weights.</p>
+    </div>
+
+    <div class="sim-card" id="card-3" data-selector=".cards > .card:nth-child(3)">
+      <div class="sim-card-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+        <i class="bi bi-grid-3x3-gap"></i>
+      </div>
+      <h3>Spacing Grid</h3>
+      <p>Consistent 4px-based spacing scale for predictable layouts everywhere.</p>
+    </div>
+  </section>
+</div>
+
+<!-- ===== X-IPE INJECTED TOOLBAR ===== -->
+<div class="xipe-toolbar" id="xipe-toolbar">
+  <div class="xipe-hamburger" id="xipe-hamburger">
+    <span class="xipe-logo">X-IPE</span>
+    <span class="badge-count" id="xipe-badge">5</span>
+  </div>
+
+  <div class="xipe-panel" id="xipe-panel">
+    <div class="xipe-panel-header">
+      <div class="xipe-panel-title">
+        <span class="logo-dot"></span> X-IPE Reference
+      </div>
+      <button class="xipe-panel-close" id="xipe-close"><i class="bi bi-x"></i></button>
+    </div>
+
+    <div class="xipe-phase-sep">Phase 1 — Core</div>
+    <div class="xipe-tools">
+      <button class="xipe-tool-btn active" data-tool="color" id="tool-color">
+        <span class="xipe-tool-icon color-picker"><i class="bi bi-eyedropper"></i></span>
+        <span class="xipe-tool-info">
+          <span class="xipe-tool-name">Color Picker</span>
+          <span class="xipe-tool-desc">Pick colors from page</span>
+        </span>
+        <span class="xipe-tool-badge has-items" id="color-badge">3</span>
+      </button>
+      <button class="xipe-tool-btn" data-tool="highlight" id="tool-highlight">
+        <span class="xipe-tool-icon highlighter"><i class="bi bi-cursor-text"></i></span>
+        <span class="xipe-tool-info">
+          <span class="xipe-tool-name">Element Highlighter</span>
+          <span class="xipe-tool-desc">Inspect & screenshot</span>
+        </span>
+        <span class="xipe-tool-badge has-items" id="elem-badge">2</span>
+      </button>
+    </div>
+
+    <div class="xipe-divider"></div>
+    <div class="xipe-phase-sep">Phase 2 — Advanced</div>
+    <div class="xipe-tools">
+      <button class="xipe-tool-btn" data-tool="comment" disabled style="opacity:0.5;cursor:not-allowed;">
+        <span class="xipe-tool-icon commenter"><i class="bi bi-chat-left-text"></i></span>
+        <span class="xipe-tool-info">
+          <span class="xipe-tool-name">Element Commenter</span>
+          <span class="xipe-tool-desc">Attach notes to elements</span>
+        </span>
+        <span class="xipe-tool-badge">—</span>
+      </button>
+      <button class="xipe-tool-btn" data-tool="extract" disabled style="opacity:0.5;cursor:not-allowed;">
+        <span class="xipe-tool-icon extractor"><i class="bi bi-box-arrow-down"></i></span>
+        <span class="xipe-tool-info">
+          <span class="xipe-tool-name">Asset Extractor</span>
+          <span class="xipe-tool-desc">CSS, fonts, images</span>
+        </span>
+        <span class="xipe-tool-badge">—</span>
+      </button>
+    </div>
+
+    <!-- ===== CR-001-B/C: Expandable Collected References ===== -->
+    <div class="xipe-collected-section">
+      <div class="xipe-collected-header" id="collected-header">
+        <div class="xipe-collected-title">
+          Collected References
+          <i class="bi bi-chevron-down xipe-collected-toggle expanded" id="collected-toggle"></i>
+        </div>
+      </div>
+      <div class="xipe-collected-summary">
+        <span class="xipe-collected-tag colors" id="tag-colors"><i class="bi bi-circle-fill" style="font-size:6px;"></i> 3 colors</span>
+        <span class="xipe-collected-tag elements" id="tag-elements"><i class="bi bi-circle-fill" style="font-size:6px;"></i> 2 elements</span>
+      </div>
+
+      <!-- CR-001-B: Color List (expandable) -->
+      <div class="xipe-color-list visible" id="color-list">
+        <div class="xipe-color-entry" data-highlight="card-1" data-type="color">
+          <span class="swatch-circle" style="background: #667eea;"></span>
+          <span class="color-hex">#667eea</span>
+          <span class="color-source">.card-icon</span>
+          <span class="remove-btn"><i class="bi bi-x-circle"></i></span>
+        </div>
+        <div class="xipe-color-entry" data-highlight="sim-hero" data-type="color">
+          <span class="swatch-circle" style="background: #764ba2;"></span>
+          <span class="color-hex">#764ba2</span>
+          <span class="color-source">.hero</span>
+          <span class="remove-btn"><i class="bi bi-x-circle"></i></span>
+        </div>
+        <div class="xipe-color-entry" data-highlight="card-3" data-type="color">
+          <span class="swatch-circle" style="background: #4facfe;"></span>
+          <span class="color-hex">#4facfe</span>
+          <span class="color-source">.card-icon</span>
+          <span class="remove-btn"><i class="bi bi-x-circle"></i></span>
+        </div>
+      </div>
+
+      <!-- CR-001-C: Element List (expandable) -->
+      <div class="xipe-elem-list visible" id="elem-list">
+        <div class="xipe-elem-entry" data-highlight="card-2" data-type="elem">
+          <span class="elem-tag">div</span>
+          <span class="elem-selector">.cards > .card:nth-child(2)</span>
+          <span class="elem-size">340×180</span>
+          <span class="remove-btn"><i class="bi bi-x-circle"></i></span>
+        </div>
+        <div class="xipe-elem-entry" data-highlight="card-1" data-type="elem">
+          <span class="elem-tag">div</span>
+          <span class="elem-selector">.cards > .card:nth-child(1)</span>
+          <span class="elem-size">340×180</span>
+          <span class="remove-btn"><i class="bi bi-x-circle"></i></span>
+        </div>
+      </div>
+
+      <div class="xipe-hover-hint visible" id="hover-hint">
+        <i class="bi bi-lightbulb" style="font-size:9px;"></i> Hover items to highlight on page
+      </div>
+    </div>
+
+    <button class="xipe-send-btn" id="xipe-send">
+      <i class="bi bi-send-fill"></i> Send References
+    </button>
+  </div>
+</div>
+
+<div class="drag-hint" id="drag-hint">
+  <i class="bi bi-arrows-move"></i> Drag to move toolbar
+</div>
+
+<div class="mockup-info">
+  <span class="mockup-info-badge">FEATURE-030-B v3 · CR-001</span>
+  <span class="mockup-info-text">
+    <strong>Injected Reference Toolbar v3</strong> — CR-001 enhancements: eyedropper cursor on color picker, expandable color/element lists with hover-to-highlight, remove buttons, post-send reset. Hover list items to see page highlighting.
+  </span>
+  <div class="mockup-toggle-view">
+    <button class="view-btn" id="view-collapsed">Collapsed</button>
+    <button class="view-btn active" id="view-expanded">Expanded</button>
+  </div>
+</div>
+
+<script>
+  const hamburger = document.getElementById('xipe-hamburger');
+  const panel = document.getElementById('xipe-panel');
+  const closeBtn = document.getElementById('xipe-close');
+  const viewCollapsed = document.getElementById('view-collapsed');
+  const viewExpanded = document.getElementById('view-expanded');
+  const sendBtn = document.getElementById('xipe-send');
+
+  function showPanel() {
+    hamburger.style.display = 'none';
+    panel.classList.add('visible');
+    viewCollapsed.classList.remove('active');
+    viewExpanded.classList.add('active');
+  }
+  function hidePanel() {
+    panel.classList.remove('visible');
+    hamburger.style.display = 'flex';
+    viewExpanded.classList.remove('active');
+    viewCollapsed.classList.add('active');
+  }
+
+  hamburger.addEventListener('click', showPanel);
+  closeBtn.addEventListener('click', hidePanel);
+  viewCollapsed.addEventListener('click', hidePanel);
+  viewExpanded.addEventListener('click', showPanel);
+  showPanel();
+
+  // ===== Tool selection with cursor change (CR-001-A) =====
+  document.querySelectorAll('.xipe-tool-btn:not([disabled])').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.xipe-tool-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tool = btn.dataset.tool;
+      document.body.classList.remove('xipe-color-picker-active', 'xipe-highlighter-active');
+      if (tool === 'color') document.body.classList.add('xipe-color-picker-active');
+      if (tool === 'highlight') document.body.classList.add('xipe-highlighter-active');
+    });
+  });
+
+  // ===== CR-001-B/C: Hover-to-highlight from lists =====
+  document.querySelectorAll('.xipe-color-entry, .xipe-elem-entry').forEach(entry => {
+    entry.addEventListener('mouseenter', () => {
+      const targetId = entry.dataset.highlight;
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      if (entry.dataset.type === 'color') {
+        target.classList.add('color-source-highlighted');
+      } else {
+        target.classList.add('hover-highlighted');
+      }
+    });
+    entry.addEventListener('mouseleave', () => {
+      const targetId = entry.dataset.highlight;
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      target.classList.remove('color-source-highlighted', 'hover-highlighted');
+    });
+  });
+
+  // ===== Toggle collected lists =====
+  const collectedHeader = document.getElementById('collected-header');
+  const collectedToggle = document.getElementById('collected-toggle');
+  const colorList = document.getElementById('color-list');
+  const elemList = document.getElementById('elem-list');
+  const hoverHint = document.getElementById('hover-hint');
+
+  collectedHeader.addEventListener('click', () => {
+    const isExpanded = collectedToggle.classList.contains('expanded');
+    collectedToggle.classList.toggle('expanded');
+    colorList.classList.toggle('visible');
+    elemList.classList.toggle('visible');
+    hoverHint.classList.toggle('visible');
+  });
+
+  // ===== CR-001-E: Send References + Reset =====
+  sendBtn.addEventListener('click', () => {
+    sendBtn.innerHTML = '<i class="bi bi-arrow-repeat" style="animation: spin 0.8s linear infinite;"></i> Sending...';
+    sendBtn.disabled = true;
+    setTimeout(() => {
+      sendBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Sent to X-IPE!';
+      sendBtn.style.background = '#059669';
+    }, 1200);
+    setTimeout(() => {
+      // CR-001-E: Reset all collected data
+      sendBtn.innerHTML = '<i class="bi bi-send-fill"></i> Send References';
+      sendBtn.style.background = '';
+      sendBtn.disabled = false;
+      // Clear lists
+      colorList.innerHTML = '';
+      elemList.innerHTML = '';
+      // Reset badges
+      document.getElementById('color-badge').textContent = '0';
+      document.getElementById('color-badge').classList.remove('has-items');
+      document.getElementById('elem-badge').textContent = '0';
+      document.getElementById('elem-badge').classList.remove('has-items');
+      document.getElementById('xipe-badge').textContent = '0';
+      // Reset summary tags
+      document.getElementById('tag-colors').innerHTML = '<i class="bi bi-circle-fill" style="font-size:6px;"></i> 0 colors';
+      document.getElementById('tag-elements').innerHTML = '<i class="bi bi-circle-fill" style="font-size:6px;"></i> 0 elements';
+      // Hide hover hint
+      hoverHint.classList.remove('visible');
+      // Remove highlights from page
+      document.querySelectorAll('.color-source-highlighted, .hover-highlighted').forEach(el => {
+        el.classList.remove('color-source-highlighted', 'hover-highlighted');
+      });
+    }, 3500);
+  });
+
+  // ===== Drag =====
+  const toolbar = document.getElementById('xipe-toolbar');
+  let isDragging = false, startX, startY, startRight, startTop;
+  hamburger.addEventListener('mousedown', (e) => {
+    if (panel.classList.contains('visible')) return;
+    isDragging = true;
+    const rect = toolbar.getBoundingClientRect();
+    startX = e.clientX; startY = e.clientY;
+    startTop = rect.top; startRight = window.innerWidth - rect.right;
+    hamburger.style.cursor = 'grabbing';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    toolbar.style.top = (startTop + e.clientY - startY) + 'px';
+    toolbar.style.right = (startRight - (e.clientX - startX)) + 'px';
+  });
+  document.addEventListener('mouseup', () => {
+    if (isDragging) { isDragging = false; hamburger.style.cursor = 'grab'; }
+  });
+</script>
+
+</body>
+</html>

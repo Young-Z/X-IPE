@@ -1,6 +1,6 @@
 # Technical Design: UIUX Reference Agent Skill & Toolbar
 
-> Feature ID: FEATURE-030-B | Version: v1.0 | Last Updated: 02-13-2026
+> Feature ID: FEATURE-030-B | Version: v1.1 | Last Updated: 02-14-2026
 
 ---
 
@@ -13,15 +13,22 @@
 
 | Component | Responsibility | Scope/Impact | Tags |
 |-----------|----------------|--------------|------|
-| `.github/skills/x-ipe-tool-uiux-reference/SKILL.md` | Agent skill definition — step-by-step procedure for the `uiux-reference` workflow | New skill file: agent reads and follows this procedure | #skill #agent #uiux-reference #chrome-devtools #cdp |
-| `src/x_ipe/static/js/injected/xipe-toolbar.js` | Self-contained IIFE injected into target page via `evaluate_script` — toolbar UI, color picker, element highlighter, callback | New file: injected into external pages at runtime | #frontend #injection #toolbar #cdp #color-picker #highlighter |
-| `.github/skills/x-ipe-tool-uiux-reference/references/toolbar-template.md` | Reference doc containing the toolbar IIFE source for the agent to inject | New file: agent reads this to get the injection payload | #skill #reference #toolbar #template |
+| `.github/skills/x-ipe-tool-uiux-reference/SKILL.md` | Agent skill definition — step-by-step procedure for the `uiux-reference` workflow | Existing skill file: update screenshot strategy (bounding-box UID matching) | #skill #agent #uiux-reference #chrome-devtools #cdp |
+| `src/x_ipe/static/js/injected/xipe-toolbar.js` | Self-contained IIFE injected into target page via `evaluate_script` — toolbar UI, color picker, element highlighter, expandable lists, hover-highlight, post-send reset | Existing file: add CR-001 enhancements (eyedropper cursor, color/element lists, hover-highlight, reset) | #frontend #injection #toolbar #cdp #color-picker #highlighter |
+| `.github/skills/x-ipe-tool-uiux-reference/references/toolbar-template.md` | Reference doc containing the toolbar IIFE source for the agent to inject | Existing file: update with new toolbar source after code changes | #skill #reference #toolbar #template |
 
 ### Scope & Boundaries
 
 **In Scope:**
 - Agent skill procedure: parse prompt → navigate → optional auth → inject toolbar → register callback → await "Send References" → receive data → save via MCP
 - Toolbar IIFE (HTML + CSS + JS in a single `evaluate_script` call): hamburger toggle, panel with Color Picker + Element Highlighter tools, collected data summary, "Send References" button
+- **CR-001 enhancements (v1.1):**
+  - Eyedropper/crosshair cursor on `<body>` when tools are active (outside toolbar)
+  - Expandable color list with swatch, hex, source selector, remove button
+  - Expandable element list with tag pill, selector, dimensions, remove button
+  - Hover-to-highlight: color entries highlight source element (rose), element entries highlight target (accent)
+  - Improved screenshot accuracy: bounding-box-to-UID matching instead of CSS selector matching
+  - Post-send reset: clear all collected data, badges, and lists after successful send
 - CDP callback registration (`Runtime.addBinding`) with `evaluate_script` polling fallback
 - Screenshot capture via Chrome DevTools MCP `take_screenshot`
 - Data persistence via FEATURE-033 `save_uiux_reference` MCP tool
@@ -104,9 +111,12 @@ This feature consists of two deliverables that work together:
 │  ────────────────────────────────────────────────────────────────    │
 │  Self-contained JS injected into target page:                       │
 │  - Hamburger button (52×52px, draggable, top-right)                 │
-│  - Panel (272px): Color Picker, Element Highlighter tools           │
-│  - Collected References summary                                     │
-│  - "Send References" button → sets window.__xipeRefReady = true     │
+│  - Panel (288px): Color Picker, Element Highlighter tools           │
+│  - Eyedropper cursor (Color Picker) / Crosshair (Highlighter)      │
+│  - Expandable color list (hover → rose highlight on source)         │
+│  - Expandable element list (hover → accent highlight on target)     │
+│  - Collected References summary with collapsible section            │
+│  - "Send References" button → sets __xipeRefReady + resets all data │
 │  - All data stored in window.__xipeRefData                          │
 └──────────────────────────────────────────────────────────────────────┘
 ```
@@ -272,9 +282,16 @@ PROCEDURE uiux-reference:
     FOR each element in result.elements:
       full_page_screenshot = take_screenshot(fullPage: true)
       snapshot = take_snapshot()
-      element_uid = find UID matching element.selector in snapshot
-      IF element_uid found:
+      # CR-001: Match element by bounding box instead of CSS selector
+      element_uid = find UID in snapshot where:
+        |node.x - element.bounding_box.x| <= 20 AND
+        |node.y - element.bounding_box.y| <= 20 AND
+        |node.width - element.bounding_box.width| <= 20 AND
+        |node.height - element.bounding_box.height| <= 20
+      IF element_uid found (smallest area difference if multiple matches):
         element_screenshot = take_screenshot(uid: element_uid)
+      ELSE:
+        LOG warning: "No snapshot match for element, using full-page screenshot"
       Encode screenshots as base64 with "base64:" prefix
       Attach to element.screenshots.full_page and element.screenshots.element_crop
 
@@ -315,6 +332,7 @@ classDiagram
         -Boolean isDragging
         -Number startX
         -Number startY
+        -Boolean listsExpanded
         +init() void
         +injectStyles() void
         +injectHTML() void
@@ -322,7 +340,10 @@ classDiagram
         +togglePanel() void
         +selectTool(toolName) void
         +updateBadges() void
+        +updateCursor() void
         +sendReferences() void
+        +resetCollectedData() void
+        +toggleCollectedLists() void
     }
 
     class ColorPicker {
@@ -334,6 +355,8 @@ classDiagram
         -rgbToHsl(r, g, b) String
         -generateSelector(element) String
         -showSwatch(element, hex) void
+        -addToColorList(colorEntry) void
+        -removeColor(colorId) void
     }
 
     class ElementHighlighter {
@@ -345,6 +368,8 @@ classDiagram
         -hideOverlay() void
         -generateSelector(element) String
         -captureElement(element) Object
+        -addToElementList(elemEntry) void
+        -removeElement(elemId) void
     }
 
     class SelectorGenerator {
@@ -354,10 +379,27 @@ classDiagram
         -isUnique(selector) Boolean
     }
 
+    class HoverHighlighter {
+        +highlightElement(selector, color) void
+        +removeHighlight() void
+        -findElement(selector) HTMLElement
+        -applyHighlightStyle(element, color) void
+    }
+
+    class CursorManager {
+        +setEyedropper() void
+        +setCrosshair() void
+        +resetCursor() void
+        -injectCursorStyles() void
+    }
+
     XipeToolbar --> ColorPicker : manages
     XipeToolbar --> ElementHighlighter : manages
+    XipeToolbar --> CursorManager : manages
     ColorPicker --> SelectorGenerator : uses
+    ColorPicker --> HoverHighlighter : uses (color list hover)
     ElementHighlighter --> SelectorGenerator : uses
+    ElementHighlighter --> HoverHighlighter : uses (element list hover)
 ```
 
 #### IIFE Structure
@@ -376,12 +418,32 @@ classDiagram
   // ===== CSS Injection =====
   const style = document.createElement('style');
   style.textContent = `
-    /* All styles from mockup injected-toolbar-v2.html */
+    /* All styles from mockup injected-toolbar-v3.html */
     /* Prefixed with .xipe- to avoid conflicts */
     .xipe-toolbar { position: fixed; top: 20px; right: 20px; z-index: 2147483647; ... }
     .xipe-hamburger { width: 52px; height: 52px; ... }
-    .xipe-panel { width: 272px; ... backdrop-filter: blur(24px); ... }
-    /* ... (full CSS from mockup) ... */
+    .xipe-panel { width: 288px; max-height: calc(100vh - 120px); overflow-y: auto; ... backdrop-filter: blur(24px); ... }
+    .xipe-panel-header { position: sticky; top: 0; z-index: 1; ... }
+    /* Eyedropper cursor (applied to body when Color Picker active) */
+    .xipe-cursor-eyedropper { cursor: url('data:image/svg+xml,...') 2 30, crosshair; }
+    .xipe-cursor-crosshair { cursor: crosshair; }
+    /* Color list entries */
+    .xipe-color-entry { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 6px; ... }
+    .xipe-color-entry:hover { background: rgba(190,18,60,0.04); }
+    .xipe-color-entry .xipe-remove-btn { opacity: 0; transition: opacity 0.15s; }
+    .xipe-color-entry:hover .xipe-remove-btn { opacity: 1; }
+    /* Element list entries */
+    .xipe-elem-entry { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 6px; ... }
+    .xipe-elem-entry:hover { background: rgba(55,48,163,0.04); }
+    .xipe-elem-entry .xipe-remove-btn { opacity: 0; transition: opacity 0.15s; }
+    .xipe-elem-entry:hover .xipe-remove-btn { opacity: 1; }
+    /* Hover highlight applied to page elements */
+    .xipe-hover-highlight-rose { box-shadow: 0 0 0 2px #be123c !important; transition: box-shadow 0.15s; }
+    .xipe-hover-highlight-accent { box-shadow: 0 0 0 2px #3730a3 !important; transition: box-shadow 0.15s; }
+    /* Collected references section toggle */
+    .xipe-collected-chevron { transition: transform 0.2s ease; }
+    .xipe-collected-chevron.collapsed { transform: rotate(180deg); }
+    /* ... (full CSS from v3 mockup) ... */
   `;
   document.head.appendChild(style);
 
@@ -454,10 +516,19 @@ classDiagram
         </button>
       </div>
       <div class="xipe-collected">
-        <div class="xipe-collected-title">Collected References</div>
+        <div class="xipe-collected-header" id="xipe-collected-toggle">
+          <div class="xipe-collected-title">Collected References</div>
+          <i class="bi bi-chevron-up xipe-collected-chevron" id="xipe-chevron"></i>
+        </div>
         <div class="xipe-collected-items" id="xipe-collected">
           <span class="xipe-collected-tag colors"><i class="bi bi-circle-fill"></i> <span id="xipe-color-count">0</span> colors</span>
           <span class="xipe-collected-tag elements"><i class="bi bi-circle-fill"></i> <span id="xipe-elem-count">0</span> elements</span>
+        </div>
+        <div class="xipe-color-list" id="xipe-color-list">
+          <!-- Color entries added dynamically -->
+        </div>
+        <div class="xipe-elem-list" id="xipe-elem-list">
+          <!-- Element entries added dynamically -->
         </div>
       </div>
       <button class="xipe-send-btn" id="xipe-send">
@@ -555,7 +626,34 @@ classDiagram
       context: ''
     });
     updateBadges();
+    addColorEntry(colorId, hex, generateSelector(el));
     showSwatch(el, hex);
+  }
+
+  // ===== Color List Management (CR-001) =====
+  function addColorEntry(id, hex, selector) {
+    const list = document.getElementById('xipe-color-list');
+    const entry = document.createElement('div');
+    entry.className = 'xipe-color-entry';
+    entry.dataset.colorId = id;
+    entry.dataset.selector = selector;
+    entry.innerHTML = `
+      <span class="xipe-swatch-dot" style="background:${hex};width:16px;height:16px;border-radius:50%;flex-shrink:0;"></span>
+      <span class="xipe-color-hex" style="font-family:'Space Mono',monospace;font-size:10px;">${hex}</span>
+      <span class="xipe-color-selector" style="font-size:9px;color:#8e8e9f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px;">${selector}</span>
+      <button class="xipe-remove-btn" title="Remove">×</button>
+    `;
+    // Hover-to-highlight source element
+    entry.addEventListener('mouseenter', () => highlightPageElement(selector, 'rose'));
+    entry.addEventListener('mouseleave', () => removePageHighlight());
+    // Remove button
+    entry.querySelector('.xipe-remove-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.__xipeRefData.colors = window.__xipeRefData.colors.filter(c => c.id !== id);
+      entry.remove();
+      updateBadges();
+    });
+    list.appendChild(entry);
   }
 
   function showSwatch(el, hex) {
@@ -601,6 +699,33 @@ classDiagram
       extracted_assets: null
     });
     updateBadges();
+    addElementEntry(elemId, el.tagName.toLowerCase(), generateSelector(el), rect);
+  }
+
+  // ===== Element List Management (CR-001) =====
+  function addElementEntry(id, tag, selector, rect) {
+    const list = document.getElementById('xipe-elem-list');
+    const entry = document.createElement('div');
+    entry.className = 'xipe-elem-entry';
+    entry.dataset.elemId = id;
+    entry.dataset.selector = selector;
+    entry.innerHTML = `
+      <span class="xipe-tag-pill" style="font-family:'Space Mono',monospace;font-size:9px;background:rgba(55,48,163,0.08);color:#3730a3;padding:2px 6px;border-radius:3px;">${tag}</span>
+      <span class="xipe-elem-selector" style="font-size:9px;color:#4a4a5c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px;">${selector}</span>
+      <span class="xipe-elem-dims" style="font-size:9px;color:#8e8e9f;">${Math.round(rect.width)}×${Math.round(rect.height)}</span>
+      <button class="xipe-remove-btn" title="Remove">×</button>
+    `;
+    // Hover-to-highlight target element
+    entry.addEventListener('mouseenter', () => highlightPageElement(selector, 'accent'));
+    entry.addEventListener('mouseleave', () => removePageHighlight());
+    // Remove button
+    entry.querySelector('.xipe-remove-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.__xipeRefData.elements = window.__xipeRefData.elements.filter(el => el.id !== id);
+      entry.remove();
+      updateBadges();
+    });
+    list.appendChild(entry);
   }
 
   function showOverlay(el) {
@@ -629,6 +754,59 @@ classDiagram
     if (labelEl) { labelEl.remove(); labelEl = null; }
   }
 
+  // ===== Hover Highlight for List Entries (CR-001) =====
+  let hoverHighlightEl = null;
+  let hoverLabelEl = null;
+
+  function highlightPageElement(selector, colorType) {
+    removePageHighlight();
+    try {
+      const el = document.querySelector(selector);
+      if (!el) return;
+      const className = colorType === 'rose' ? 'xipe-hover-highlight-rose' : 'xipe-hover-highlight-accent';
+      el.classList.add(className);
+      hoverHighlightEl = { element: el, className };
+      // For element highlights, also show selector label
+      if (colorType === 'accent') {
+        const rect = el.getBoundingClientRect();
+        hoverLabelEl = document.createElement('div');
+        hoverLabelEl.className = 'xipe-selector-label';
+        hoverLabelEl.textContent = selector;
+        hoverLabelEl.style.cssText = `position:fixed;top:${rect.top-24}px;left:${rect.left}px;z-index:2147483646;pointer-events:none;`;
+        document.body.appendChild(hoverLabelEl);
+      }
+    } catch (e) { /* invalid selector — no-op */ }
+  }
+
+  function removePageHighlight() {
+    if (hoverHighlightEl) {
+      hoverHighlightEl.element.classList.remove(hoverHighlightEl.className);
+      hoverHighlightEl = null;
+    }
+    if (hoverLabelEl) { hoverLabelEl.remove(); hoverLabelEl = null; }
+  }
+
+  // ===== Cursor Management (CR-001) =====
+  function updateCursor() {
+    document.body.classList.remove('xipe-cursor-eyedropper', 'xipe-cursor-crosshair');
+    if (panel.classList.contains('visible')) {
+      if (colorPickerActive) document.body.classList.add('xipe-cursor-eyedropper');
+      else if (highlighterActive) document.body.classList.add('xipe-cursor-crosshair');
+    }
+  }
+
+  // ===== Collected References Toggle (CR-001) =====
+  let listsExpanded = true;
+  document.getElementById('xipe-collected-toggle').addEventListener('click', () => {
+    listsExpanded = !listsExpanded;
+    const chevron = document.getElementById('xipe-chevron');
+    const colorList = document.getElementById('xipe-color-list');
+    const elemList = document.getElementById('xipe-elem-list');
+    chevron.classList.toggle('collapsed', !listsExpanded);
+    colorList.style.display = listsExpanded ? '' : 'none';
+    elemList.style.display = listsExpanded ? '' : 'none';
+  });
+
   // ===== Badge Updates =====
   function updateBadges() {
     const cc = window.__xipeRefData.colors.length;
@@ -654,6 +832,7 @@ classDiagram
       colorPickerActive = tool === 'color';
       highlighterActive = tool === 'highlight';
       if (!highlighterActive) hideOverlay();
+      updateCursor();  // CR-001: update cursor icon
     });
   });
 
@@ -664,10 +843,12 @@ classDiagram
     if (e.detail === 0) return; // ignore non-click
     hamburger.style.display = 'none';
     panel.classList.add('visible');
+    updateCursor();  // CR-001: apply cursor when panel opens
   });
   document.getElementById('xipe-close').addEventListener('click', () => {
     panel.classList.remove('visible');
     hamburger.style.display = 'flex';
+    updateCursor();  // CR-001: remove cursor when panel closes
   });
   // Start expanded
   hamburger.style.display = 'none';
@@ -710,6 +891,16 @@ classDiagram
       sendBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Sent to X-IPE!';
       sendBtn.style.background = '#059669';
       setTimeout(() => {
+        // CR-001: Post-send reset — clear all collected data
+        window.__xipeRefData.colors = [];
+        window.__xipeRefData.elements = [];
+        window.__xipeRefReady = false;
+        // Clear DOM lists
+        document.getElementById('xipe-color-list').innerHTML = '';
+        document.getElementById('xipe-elem-list').innerHTML = '';
+        // Reset badges and summary
+        updateBadges();
+        // Reset send button
         sendBtn.innerHTML = '<i class="bi bi-send-fill"></i> Send References';
         sendBtn.style.background = '';
         sendBtn.disabled = false;
@@ -735,19 +926,25 @@ classDiagram
 | Capture-phase event listeners (`true` 3rd arg) | Ensures toolbar intercepts clicks before page handlers |
 | Phase 2 tools rendered but disabled | Shows the roadmap to users; no functional code needed yet |
 | Guard `if (window.__xipeToolbarInjected)` | Prevents double injection if agent re-runs `evaluate_script` |
+| Eyedropper cursor via SVG data URI on `<body>` class (CR-001) | Applying cursor to `<body>` ensures it covers all page elements. SVG data URI avoids external asset dependency. Class-based approach makes it easy to toggle on/off. Toolbar panel has `cursor: default` override so toolbar interactions are unaffected. |
+| Hover-highlight via CSS class toggle on page elements (CR-001) | Using `classList.add/remove` with `box-shadow` is lightweight, doesn't modify layout, and is easily reversible on `mouseleave`. No DOM insertion needed for the highlight effect. |
+| Post-send reset clears both JS data and DOM (CR-001) | Resetting `window.__xipeRefData` arrays ensures the agent receives clean data on next send. Clearing DOM lists provides immediate visual feedback. Setting `__xipeRefReady = false` prevents agent from re-reading stale data. |
+| Bounding-box UID matching for screenshots (CR-001) | CSS selectors generated by the toolbar use dynamic class names that may not match when the agent calls `document.querySelector()`. Matching by bounding box coordinates against the a11y tree snapshot is selector-independent and more reliable. |
 
 #### Toolbar CSS (Key Styles from Mockup)
 
-The full CSS is derived from `injected-toolbar-v2.html`. Key visual specifications:
+The full CSS is derived from `injected-toolbar-v3.html`. Key visual specifications:
 
 | Element | Property | Value |
 |---------|----------|-------|
 | Hamburger | Size | 52×52px circle |
 | Hamburger | Background | `linear-gradient(135deg, #3730a3 0%, #4f46e5 100%)` |
 | Hamburger | Shadow | `0 4px 16px rgba(55,48,163,0.35)` |
-| Panel | Width | 272px |
+| Panel | Width | 288px |
+| Panel | Max-height | `calc(100vh - 120px)`, `overflow-y: auto` |
 | Panel | Background | `rgba(255,255,255,0.94)` + `backdrop-filter: blur(24px)` |
 | Panel | Border-radius | 14px |
+| Panel header | Position | `sticky`, `top: 0`, `z-index: 1` |
 | Tool button | Padding | 9px 10px |
 | Tool icon | Size | 30×30px, 8px radius |
 | Active tool | Background | `rgba(55,48,163,0.08)` |
@@ -755,8 +952,15 @@ The full CSS is derived from `injected-toolbar-v2.html`. Key visual specificatio
 | Highlight overlay | Border | `2px solid #3730a3`, pulsing glow |
 | Selector label | Background | `#3730a3`, white text, Space Mono 10px |
 | Swatch pill | Background | white, 1px border, Space Mono 10px hex |
+| Eyedropper cursor | Type | SVG data URI, 32×32, hotspot (2, 30), fallback: `crosshair` |
+| Crosshair cursor | Type | CSS `crosshair` |
+| Color list entry | Layout | 16px swatch + hex (mono) + selector (truncated 120px) + × button |
+| Element list entry | Layout | tag pill (accent bg) + selector (truncated 120px) + dims + × button |
+| Hover highlight (rose) | Effect | `box-shadow: 0 0 0 2px #be123c` on source element |
+| Hover highlight (accent) | Effect | `box-shadow: 0 0 0 2px #3730a3` on target element |
+| Collected header chevron | Animation | `rotate(0deg)` ↔ `rotate(180deg)`, 0.2s ease |
 
-### Component 3: Screenshot Capture Strategy
+### Component 3: Screenshot Capture Strategy (CR-001 Updated)
 
 Screenshots are taken by the **agent** (server-side via Chrome DevTools MCP), not by the in-page JavaScript. The flow:
 
@@ -766,11 +970,11 @@ flowchart TD
     B -->|Yes| F[Skip screenshots]
     B -->|No| C[For each element]
     C --> D1[take_screenshot fullPage: true]
-    D1 --> D2[take_snapshot]
-    D2 --> D3{Find element UID by selector?}
-    D3 -->|Found| D4[take_screenshot uid: element_uid]
-    D3 -->|Not found| D5[Log warning, skip element crop]
-    D4 --> D6[Encode both as base64: prefix]
+    D1 --> D2[take_snapshot — get a11y tree with UIDs]
+    D2 --> D3{Match element by bounding box?}
+    D3 -->|Found within 20px tolerance| D4[take_screenshot uid: matched_uid]
+    D3 -->|No match| D5[Fallback: full-page screenshot crop]
+    D4 --> D6[Save screenshots to uiux-references/screenshots/]
     D5 --> D6
     D6 --> D7{More elements?}
     D7 -->|Yes| C
@@ -778,26 +982,43 @@ flowchart TD
     F --> G[Call save_uiux_reference MCP tool]
 ```
 
-**Finding element UID from CSS selector:**
-1. Agent calls `take_snapshot()` to get the page's accessibility tree with UIDs
-2. Agent calls `evaluate_script((sel) => { const el = document.querySelector(sel); return el ? el.getAttribute('data-xipe-uid') : null; }, args: [{uid: ...}])` — but this won't work since UIDs are snapshot-internal
-3. **Better approach:** Agent calls `evaluate_script` to mark the element with a temporary attribute: `document.querySelector(selector).setAttribute('data-xipe-target', 'true')` → then `take_snapshot` → find element with `data-xipe-target` attribute in the snapshot tree → use that UID for `take_screenshot` → remove attribute
+**Finding element UID by bounding box (CR-001-D):**
+
+The previous approach used CSS selectors to find elements in the snapshot, but this fails when selectors contain dynamic class names that don't match the DOM at screenshot time.
+
+**New approach (bounding-box matching):**
+1. Agent receives element data with `bounding_box: {x, y, width, height}` from `window.__xipeRefData.elements`
+2. Agent calls `take_snapshot()` to get the accessibility tree (each node has coordinates and a UID)
+3. Agent iterates snapshot nodes, comparing each node's position/size against the element's bounding box
+4. Match criteria: `|node.x - elem.x| <= 20 && |node.y - elem.y| <= 20 && |node.width - elem.width| <= 20 && |node.height - elem.height| <= 20`
+5. If multiple matches, select the node with the smallest area difference
+6. Use matched node's `uid` for `take_screenshot(uid: matched_uid)`
+7. If no match within tolerance → fall back to full-page screenshot (agent can crop manually if needed)
+
+This approach is **selector-independent** and works regardless of dynamic CSS class names, Shadow DOM, or other DOM mutation.
 
 ### File Summary
 
 | File | Action | Description |
 |------|--------|-------------|
-| `.github/skills/x-ipe-tool-uiux-reference/SKILL.md` | Create | Agent skill definition with step-by-step procedure |
-| `.github/skills/x-ipe-tool-uiux-reference/references/toolbar-template.md` | Create | Contains the toolbar IIFE source for agent to inject |
-| `src/x_ipe/static/js/injected/xipe-toolbar.js` | Create | Source file for the toolbar IIFE (also referenced in toolbar-template.md) |
+| `.github/skills/x-ipe-tool-uiux-reference/SKILL.md` | Update | Update screenshot strategy to use bounding-box UID matching (CR-001-D) |
+| `.github/skills/x-ipe-tool-uiux-reference/references/toolbar-template.md` | Update | Update toolbar IIFE source with all CR-001 enhancements |
+| `src/x_ipe/static/js/injected/xipe-toolbar.js` | Update | Add eyedropper cursor, expandable lists, hover-highlight, remove buttons, post-send reset |
 
 ### Implementation Steps
 
-1. **Create skill folder:** `.github/skills/x-ipe-tool-uiux-reference/`
-2. **Write SKILL.md:** Agent skill procedure (parse → navigate → auth → inject → poll → screenshot → save)
-3. **Write toolbar IIFE:** `src/x_ipe/static/js/injected/xipe-toolbar.js` — all HTML/CSS/JS in a single file
-4. **Create toolbar-template.md:** Reference document containing the IIFE wrapped in a code block for the agent to read and inject
-5. **Test manually:** Run `copilot execute uiux-reference --url https://example.com` and verify the full workflow
+1. **Update toolbar IIFE:** `src/x_ipe/static/js/injected/xipe-toolbar.js`
+   - Add CSS for eyedropper cursor (SVG data URI), crosshair cursor, hover highlights, list entries, remove buttons, chevron toggle
+   - Update panel width from 272px to 288px, add max-height + sticky header
+   - Add `Collected References` header with chevron toggle
+   - Add `xipe-color-list` and `xipe-elem-list` containers
+   - Add `addColorEntry()`, `addElementEntry()` functions for dynamic list population
+   - Add `highlightPageElement()`, `removePageHighlight()` for hover-to-highlight
+   - Add `updateCursor()` for cursor management on tool/panel state changes
+   - Update `sendReferences()` to reset all data, lists, badges after success animation
+2. **Update toolbar-template.md:** Copy updated IIFE into the reference document
+3. **Update SKILL.md:** Change screenshot strategy from CSS-selector-based to bounding-box-based UID matching
+4. **Test manually:** Run `copilot execute uiux-reference --url https://example.com` and verify CR-001 features
 
 ### Edge Cases & Error Handling
 
@@ -813,6 +1034,11 @@ flowchart TD
 | Polling timeout (30 min, no data sent) | Agent skill | Inform user: "Session timed out. Please click Send References or re-run the command." |
 | Double injection (agent re-runs evaluate_script) | Toolbar IIFE | Guard: `if (window.__xipeToolbarInjected) return;` prevents duplicate toolbars. |
 | CDN fonts/icons fail to load | Toolbar IIFE | Toolbar degrades gracefully — system fonts used, icons show as empty squares. Functionality unaffected. |
+| Hover-highlight on removed DOM element (CR-001) | Toolbar IIFE | `document.querySelector(selector)` returns null → no highlight applied, no error. |
+| Color/element list with 20+ entries (CR-001) | Toolbar IIFE | Panel scrolls via `max-height` + `overflow-y: auto`. Sticky header remains visible. No pagination needed. |
+| User removes all items via × buttons (CR-001) | Toolbar IIFE | Badges show 0. Lists are empty. Send button works (sends empty arrays). |
+| Element bounding box matches multiple snapshot nodes (CR-001) | Agent skill | Select node with smallest area difference. If no match within 20px tolerance, fall back to full-page screenshot. |
+| Dynamic CSS classes in selector (CR-001) | Agent skill | Bounding-box UID matching is selector-independent — works regardless of class name mutations. |
 
 ---
 
@@ -821,3 +1047,4 @@ flowchart TD
 | Date | Phase | Change Summary |
 |------|-------|----------------|
 | 02-13-2026 | Initial Design | Initial technical design: Agent skill procedure (SKILL.md) + Toolbar IIFE (xipe-toolbar.js) + screenshot capture strategy. Polling-based callback (evaluate_script) as primary mechanism for reliability across all MCP implementations. |
+| 02-14-2026 | CR-001 Update (v1.1) | Added CR-001 enhancements: (A) eyedropper/crosshair cursor management via CSS classes on `<body>`, (B) expandable color list with swatch/hex/selector/remove and hover-to-highlight source element, (C) expandable element list with tag-pill/selector/dims/remove and hover-to-highlight target, (D) screenshot accuracy via bounding-box-to-UID matching (replaces CSS selector approach), (E) post-send reset of all collected data/lists/badges. Updated class diagram with HoverHighlighter and CursorManager. Panel width 272→288px, added max-height scroll + sticky header. |

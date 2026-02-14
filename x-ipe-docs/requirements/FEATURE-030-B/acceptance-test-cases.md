@@ -493,3 +493,71 @@ None — all 16 test cases passed.
 - Toolbar is injected via evaluate_script, not hosted at a specific page — tests use http://127.0.0.1:5959/ as a host page
 - Agent-side ACs (AC-1–5, AC-24, AC-26, AC-28–32) are not testable via browser UI
 - Mockup v1 (dark) is outdated — only v2 (light) used for visual validation
+
+---
+
+## CR-001 Acceptance Tests (v1.1)
+
+> Added: 02-14-2026
+> Status: All Passed (10/10)
+> Target: http://localhost:8899/ (local dev server)
+
+### Results Summary
+
+| Test ID | Test Name | CR | Result |
+|---------|-----------|-----|--------|
+| AT-CR-01 | Toolbar CR-001 elements present | All | ✅ PASS |
+| AT-CR-02 | Eyedropper cursor on Color Picker | CR-001-A | ✅ PASS |
+| AT-CR-03 | Color entry added to list | CR-001-B | ✅ PASS |
+| AT-CR-04 | Crosshair cursor on Element Highlighter | CR-001-A | ✅ PASS |
+| AT-CR-05 | Element entry added to list | CR-001-C, CR-001-D | ✅ PASS |
+| AT-CR-06 | Element highlight overlay visible | CR-001-C | ✅ PASS |
+| AT-CR-07 | Collapsible toggle hides/shows lists | CR-001-B, CR-001-C | ✅ PASS |
+| AT-CR-08 | Remove button removes entry | CR-001-B | ✅ PASS |
+| AT-CR-09 | Post-send reset clears all | CR-001-E | ✅ PASS |
+| AT-CR-10 | Cursor reset on panel close | CR-001-A | ✅ PASS |
+| AT-CR-11 | Panel scrollability (288px, max-height, overflow) | All | ✅ PASS |
+
+### Test Details
+
+**AT-CR-01: Toolbar CR-001 Elements Present**
+- Verified: `xipe-color-list`, `xipe-elem-list`, `xipe-chevron`, `xipe-collected-toggle` all exist in DOM
+
+**AT-CR-02: Eyedropper Cursor**
+- Clicked Color Picker → `body.classList` contains `xipe-cursor-eyedropper` ✅
+- `xipe-cursor-crosshair` absent ✅
+
+**AT-CR-03: Color Entry Added to List**
+- Clicked h1 element → color entry `color-001` with `#000000` hex appears in `xipe-color-list`
+- Badge updated to "1 colors" ✅
+- Remove button present ✅
+
+**AT-CR-04: Crosshair Cursor**
+- Clicked Element Highlighter → `body.classList` contains `xipe-cursor-crosshair` ✅
+- `xipe-cursor-eyedropper` absent ✅
+
+**AT-CR-05: Element Entry Added to List**
+- Clicked h1 → element entry `elem-001` with tag pill "h1", dims "1697×37"
+- `bounding_box` data present in `__xipeRefData.elements[0]` ✅
+
+**AT-CR-06: Element Highlight Overlay**
+- Visual confirmation: h1 has blue highlight border + "body > h1" label overlay (screenshot verified)
+
+**AT-CR-07: Collapsible Toggle**
+- Click toggle → both lists hidden (`display: none`) ✅
+- Click again → both lists visible ✅
+
+**AT-CR-08: Remove Button**
+- Clicked remove on color entry → entry removed from DOM, data array empty, badge "0" ✅
+
+**AT-CR-09: Post-Send Reset**
+- After Send References + 4s wait: colors=0, elements=0, `__xipeRefReady=false`, DOM lists empty, badges "0" ✅
+
+**AT-CR-10: Cursor Reset on Panel Close**
+- Color Picker active → eyedropper cursor ✅
+- Close panel → eyedropper cursor removed ✅
+
+**AT-CR-11: Panel Scrollability**
+- Width: 288px ✅
+- Max-height: calc(100vh - 120px) → 394px computed ✅
+- Overflow-y: auto ✅
