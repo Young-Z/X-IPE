@@ -7,9 +7,10 @@
 
 ## Version History
 
-| Version | Date | Description |
-|---------|------|-------------|
-| v1.0 | 02-13-2026 | Initial specification |
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| v1.1 | 02-14-2026 | Add `inject_script` tool for browser script injection via CDP | [CR-001](./CR-001.md) |
+| v1.0 | 02-13-2026 | Initial specification | - |
 
 ## Overview
 

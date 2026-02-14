@@ -35,6 +35,9 @@
 | TASK-432 | Code Implementation | FEATURE-030-B v2.0: Implement toolbar core, theme mode, mockup mode, build script, skill update | Cipher ✅ | ✅ completed | 02-14-2026 08:45:00 | xipe-toolbar-core.js, xipe-toolbar-theme.js, xipe-toolbar-mockup.js, build.py, SKILL.md, 3x .min.js | Feature Acceptance Test |
 | TASK-433 | Feature Acceptance Test | FEATURE-030-B v2.0: Inject toolbar into browser page, verify core shell + theme mode + mockup mode | Cipher ✅ | ✅ completed | 02-14-2026 09:15:00 | commit 933a80a (magnifier fix) | Feature Closing |
 | TASK-434 | Feature Closing | FEATURE-030-B v2.0: Close feature, finalize docs, update changelog, push branch | Cipher ✅ | ✅ completed | 02-14-2026 09:30:00 | CHANGELOG.md, features.md, dev/Cipher branch pushed | User Manual |
+| TASK-435 | Bug Fix | Console auto-scroll pause not working — viewport wheel listener & scroll-event reset race condition (regression of TASK-414) | Drift ✅ | ✅ completed | 02-14-2026 10:00:00 | src/x_ipe/static/js/terminal.js, tests/test_terminal.py | - |
+| TASK-436 | Feature Acceptance Test | FEATURE-030-B-THEME + FEATURE-030-B-MOCKUP: Quick acceptance test — inject toolbar, verify theme mode + mockup mode | Spark ✅ | ✅ completed | 02-14-2026 13:15:00 | FEATURE-030-B-THEME/acceptance-test-cases.md, FEATURE-030-B-MOCKUP/acceptance-test-cases.md | Feature Closing |
+| TASK-437 | Change Request | CR-001 for FEATURE-033: Add inject_script tool to MCP server for browser script injection via CDP | Bolt ✅ | ✅ completed | 02-14-2026 15:22:00 | x-ipe-docs/requirements/FEATURE-033/CR-001.md, specification.md | Feature Refinement |
 
 ---
 
@@ -88,11 +91,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 11
-- **In Progress:** 0
+- **Total Active:** 12
+- **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 427
+- **Completed (archived):** 428
 - **Pending Review:** 0
 - **Blocked:** 0
 
