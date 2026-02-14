@@ -1,0 +1,358 @@
+(() => {
+  // Wait for core
+  if (!window.__xipeRegisterMode) {
+    console.warn('[X-IPE Theme] Core not loaded');
+    return;
+  }
+
+  window.__xipeRegisterMode('theme', function ThemeModeInit(container) {
+    let colorCounter = 0;
+    let magnifierActive = false;
+    let currentStep = 1;
+
+    // ===== Offscreen Canvas =====
+    const offscreenCanvas = document.createElement('canvas');
+    offscreenCanvas.width = window.innerWidth;
+    offscreenCanvas.height = window.innerHeight;
+    const offscreenCtx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
+
+    // Load agent-provided screenshot into canvas
+    function loadScreenshot() {
+      if (window.__xipeViewportScreenshot) {
+        const img = new Image();
+        img.onload = () => { offscreenCtx.drawImage(img, 0, 0); };
+        img.src = window.__xipeViewportScreenshot;
+      }
+    }
+    loadScreenshot();
+    // Re-check periodically for updated screenshots
+    const screenshotPoll = setInterval(() => {
+      if (window.__xipeViewportScreenshot) loadScreenshot();
+    }, 2000);
+
+    // Debounced re-render on scroll/resize
+    let renderTimer;
+    const debouncedRender = () => {
+      clearTimeout(renderTimer);
+      renderTimer = setTimeout(() => {
+        offscreenCanvas.width = window.innerWidth;
+        offscreenCanvas.height = window.innerHeight;
+        loadScreenshot();
+      }, 200);
+    };
+    window.addEventListener('scroll', debouncedRender, { passive: true });
+    window.addEventListener('resize', debouncedRender, { passive: true });
+
+    // ===== Color Utilities =====
+    function rgbToHex(r, g, b) {
+      return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+    }
+
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+      if (max === min) { h = s = 0; }
+      else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+          case g: h = ((b - r) / d + 2) / 6; break;
+          case b: h = ((r - g) / d + 4) / 6; break;
+        }
+      }
+      return `${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%`;
+    }
+
+    // ===== Magnifier =====
+    const magnifierStyle = document.createElement('style');
+    magnifierStyle.textContent = `
+      .xipe-magnifier { position: fixed; width: 120px; height: 150px; pointer-events: none; z-index: 2147483647; display: none; }
+      .xipe-magnifier canvas { border-radius: 50%; border: 2px solid #10b981; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+      .xipe-magnifier-hex { text-align: center; font-family: 'Space Mono', monospace; font-size: 10px; color: #e2e8f0; margin-top: 4px; background: rgba(15,23,42,0.8); padding: 2px 6px; border-radius: 4px; }
+      .xipe-swatch-pill { position: fixed; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-family: 'Space Mono', monospace; color: white; pointer-events: none; z-index: 2147483646; animation: xipe-fade-out 3s forwards; }
+      @keyframes xipe-fade-out { 0%,70% { opacity: 1; } 100% { opacity: 0; } }
+      .xipe-color-row { display: flex; align-items: center; gap: 6px; padding: 4px 0; font-size: 11px; color: #e2e8f0; }
+      .xipe-swatch { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.2); }
+      .xipe-hex { font-family: 'Space Mono', monospace; font-size: 10px; }
+      .xipe-color-remove { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 12px; margin-left: auto; opacity: 0; transition: opacity 0.2s; font-family: inherit; }
+      .xipe-color-row:hover .xipe-color-remove { opacity: 1; }
+      .xipe-role-row { display: flex; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06); flex-wrap: wrap; }
+      .xipe-role-chips { display: flex; gap: 4px; align-items: center; }
+      .xipe-chip { padding: 2px 8px; border-radius: 12px; font-size: 10px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #94a3b8; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+      .xipe-chip.xipe-active { background: #10b981; color: white; border-color: #10b981; }
+      .xipe-custom-role { width: 60px; padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #e2e8f0; font-size: 10px; font-family: inherit; }
+      .xipe-step-indicator { display: flex; gap: 4px; padding: 8px 0; margin-bottom: 8px; }
+      .xipe-step-dot { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.1); }
+      .xipe-step-dot.xipe-active { background: #10b981; }
+      .xipe-step-label { font-size: 11px; color: #94a3b8; margin-bottom: 8px; }
+      .xipe-btn { display: block; width: 100%; padding: 8px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.2s; margin-top: 8px; font-family: inherit; }
+      .xipe-btn-primary { background: #10b981; color: white; }
+      .xipe-btn-primary:hover { background: #059669; }
+      .xipe-btn-primary:disabled { background: #374151; color: #6b7280; cursor: not-allowed; }
+      .xipe-btn-secondary { background: rgba(255,255,255,0.08); color: #e2e8f0; }
+      .xipe-nav-buttons { display: flex; gap: 6px; margin-top: 10px; }
+      .xipe-nav-buttons .xipe-btn { flex: 1; }
+    `;
+    document.head.appendChild(magnifierStyle);
+
+    const magnifier = document.createElement('div');
+    magnifier.className = 'xipe-magnifier';
+    const magnifierCanvas = document.createElement('canvas');
+    magnifierCanvas.width = 120;
+    magnifierCanvas.height = 120;
+    const magCtx = magnifierCanvas.getContext('2d');
+    magnifier.appendChild(magnifierCanvas);
+    const hexLabel = document.createElement('div');
+    hexLabel.className = 'xipe-magnifier-hex';
+    magnifier.appendChild(hexLabel);
+    document.body.appendChild(magnifier);
+
+    let rafId = null;
+
+    function updateMagnifier(e) {
+      if (!magnifierActive || !offscreenCtx) return;
+      magnifier.style.display = 'block';
+      magnifier.style.left = (e.clientX + 20) + 'px';
+      magnifier.style.top = (e.clientY - 140) + 'px';
+
+      const GRID = 11;
+      const halfGrid = Math.floor(GRID / 2);
+      try {
+        const imageData = offscreenCtx.getImageData(e.clientX - halfGrid, e.clientY - halfGrid, GRID, GRID);
+        magCtx.clearRect(0, 0, 120, 120);
+        const cellSize = 120 / GRID;
+        for (let y = 0; y < GRID; y++) {
+          for (let x = 0; x < GRID; x++) {
+            const idx = (y * GRID + x) * 4;
+            magCtx.fillStyle = `rgb(${imageData.data[idx]},${imageData.data[idx + 1]},${imageData.data[idx + 2]})`;
+            magCtx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            magCtx.strokeStyle = 'rgba(255,255,255,0.15)';
+            magCtx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+          }
+        }
+        // Crosshair
+        const center = halfGrid * cellSize + cellSize / 2;
+        magCtx.strokeStyle = '#10b981';
+        magCtx.lineWidth = 2;
+        magCtx.beginPath();
+        magCtx.moveTo(center, 0); magCtx.lineTo(center, 120);
+        magCtx.moveTo(0, center); magCtx.lineTo(120, center);
+        magCtx.stroke();
+        // Center pixel hex
+        const ci = (halfGrid * GRID + halfGrid) * 4;
+        hexLabel.textContent = rgbToHex(imageData.data[ci], imageData.data[ci + 1], imageData.data[ci + 2]);
+      } catch (err) {
+        magCtx.fillStyle = '#666';
+        magCtx.fillRect(0, 0, 120, 120);
+        hexLabel.textContent = 'CORS';
+      }
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      if (!magnifierActive) return;
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => updateMagnifier(e));
+    }, true);
+
+    // ===== Swatch Pill =====
+    function showSwatchPill(x, y, hex) {
+      const pill = document.createElement('div');
+      pill.className = 'xipe-swatch-pill';
+      pill.style.left = (x + 10) + 'px';
+      pill.style.top = (y - 20) + 'px';
+      pill.style.background = hex;
+      pill.textContent = hex;
+      document.body.appendChild(pill);
+      setTimeout(() => { if (pill.parentNode) pill.remove(); }, 3000);
+    }
+
+    // ===== Color Click Handler =====
+    function handleColorClick(e) {
+      if (!magnifierActive) return;
+      if (e.target.closest('.xipe-toolbar') || e.target.closest('.xipe-magnifier')) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      try {
+        const imageData = offscreenCtx.getImageData(e.clientX, e.clientY, 1, 1);
+        const [r, g, b] = imageData.data;
+        const hex = rgbToHex(r, g, b);
+        const hsl = rgbToHsl(r, g, b);
+
+        colorCounter++;
+        const id = `color-${String(colorCounter).padStart(3, '0')}`;
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        const selector = el ? window.__xipeGenerateSelector(el) : 'unknown';
+
+        window.__xipeRefData.colors.push({ id, hex, rgb: `${r}, ${g}, ${b}`, hsl, source_selector: selector, role: '', context: '' });
+        showSwatchPill(e.clientX, e.clientY, hex);
+        renderColorList();
+        window.__xipeToast(`Picked ${hex}`, 'info', 2000);
+      } catch (err) {
+        window.__xipeToast('Cross-origin content cannot be color-sampled.', 'error');
+      }
+    }
+    document.addEventListener('click', handleColorClick, true);
+
+    // ===== Step UI =====
+    const steps = ['Pick Colors', 'Annotate Roles', 'Create Theme'];
+    const stepContainers = [];
+
+    function buildStepUI() {
+      container.innerHTML = '';
+      // Step indicator
+      const indicator = document.createElement('div');
+      indicator.className = 'xipe-step-indicator';
+      steps.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = `xipe-step-dot${i < currentStep ? ' xipe-active' : ''}`;
+        indicator.appendChild(dot);
+      });
+      container.appendChild(indicator);
+
+      // Step label
+      const label = document.createElement('div');
+      label.className = 'xipe-step-label';
+      label.textContent = `Step ${currentStep}/3: ${steps[currentStep - 1]}`;
+      container.appendChild(label);
+
+      // Step content
+      steps.forEach((_, i) => {
+        const sc = document.createElement('div');
+        sc.className = `xipe-step-${i + 1}`;
+        sc.style.display = (i + 1) === currentStep ? 'block' : 'none';
+        stepContainers[i] = sc;
+        container.appendChild(sc);
+      });
+
+      // Nav buttons
+      const nav = document.createElement('div');
+      nav.className = 'xipe-nav-buttons';
+      if (currentStep > 1) {
+        const back = document.createElement('button');
+        back.className = 'xipe-btn xipe-btn-secondary';
+        back.textContent = 'Back';
+        back.onclick = () => { currentStep--; buildStepUI(); renderStep(); };
+        nav.appendChild(back);
+      }
+      if (currentStep < 3) {
+        const next = document.createElement('button');
+        next.className = 'xipe-btn xipe-btn-primary';
+        next.textContent = 'Next';
+        next.onclick = () => { currentStep++; magnifierActive = (currentStep === 1); magnifier.style.display = 'none'; buildStepUI(); renderStep(); };
+        nav.appendChild(next);
+      }
+      container.appendChild(nav);
+
+      renderStep();
+    }
+
+    function renderStep() {
+      if (currentStep === 1) {
+        magnifierActive = true;
+        renderColorList();
+      } else if (currentStep === 2) {
+        magnifierActive = false;
+        magnifier.style.display = 'none';
+        renderRoleAnnotation();
+      } else if (currentStep === 3) {
+        magnifierActive = false;
+        magnifier.style.display = 'none';
+        renderCreateTheme();
+      }
+    }
+
+    // ===== Color List (Step 1) =====
+    function renderColorList() {
+      const sc = stepContainers[0];
+      if (!sc) return;
+      sc.innerHTML = '';
+      window.__xipeRefData.colors.forEach((color, i) => {
+        const row = document.createElement('div');
+        row.className = 'xipe-color-row';
+        row.innerHTML = `<span class="xipe-swatch" style="background:${color.hex}"></span><span class="xipe-hex">${color.hex}</span><span style="color:#64748b;font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px">${color.source_selector}</span>`;
+        const rmBtn = document.createElement('button');
+        rmBtn.className = 'xipe-color-remove';
+        rmBtn.textContent = '×';
+        rmBtn.onclick = () => { window.__xipeRefData.colors.splice(i, 1); renderColorList(); };
+        row.appendChild(rmBtn);
+        sc.appendChild(row);
+      });
+      if (window.__xipeRefData.colors.length === 0) {
+        sc.innerHTML = '<div style="color:#64748b;font-size:11px;text-align:center;padding:20px">Click anywhere on the page to pick colors</div>';
+      }
+    }
+
+    // ===== Role Annotation (Step 2) =====
+    const roles = ['primary', 'secondary', 'accent'];
+    function renderRoleAnnotation() {
+      const sc = stepContainers[1];
+      if (!sc) return;
+      sc.innerHTML = '';
+      if (window.__xipeRefData.colors.length === 0) {
+        sc.innerHTML = '<div style="color:#64748b;font-size:11px;text-align:center;padding:20px">No colors picked yet. Go back to Step 1.</div>';
+        return;
+      }
+      window.__xipeRefData.colors.forEach((color) => {
+        const row = document.createElement('div');
+        row.className = 'xipe-role-row';
+        row.innerHTML = `<span class="xipe-swatch" style="background:${color.hex}"></span><span class="xipe-hex">${color.hex}</span>`;
+        const chips = document.createElement('div');
+        chips.className = 'xipe-role-chips';
+        roles.forEach(r => {
+          const chip = document.createElement('button');
+          chip.className = `xipe-chip${color.role === r ? ' xipe-active' : ''}`;
+          chip.dataset.role = r;
+          chip.textContent = r;
+          chip.onclick = () => { color.role = r; renderRoleAnnotation(); };
+          chips.appendChild(chip);
+        });
+        const customInput = document.createElement('input');
+        customInput.className = 'xipe-custom-role';
+        customInput.placeholder = 'custom';
+        customInput.value = !roles.includes(color.role) ? color.role : '';
+        customInput.addEventListener('input', (e) => { color.role = e.target.value; });
+        chips.appendChild(customInput);
+        row.appendChild(chips);
+        sc.appendChild(row);
+      });
+    }
+
+    // ===== Create Theme (Step 3) =====
+    function renderCreateTheme() {
+      const sc = stepContainers[2];
+      if (!sc) return;
+      sc.innerHTML = '';
+      // Summary
+      const assigned = window.__xipeRefData.colors.filter(c => c.role);
+      const summary = document.createElement('div');
+      summary.style.cssText = 'color:#e2e8f0;font-size:11px;margin-bottom:12px';
+      summary.textContent = `${window.__xipeRefData.colors.length} colors, ${assigned.length} with roles`;
+      sc.appendChild(summary);
+
+      // Color preview
+      window.__xipeRefData.colors.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'xipe-color-row';
+        row.innerHTML = `<span class="xipe-swatch" style="background:${c.hex}"></span><span class="xipe-hex">${c.hex}</span><span style="color:#94a3b8;font-size:10px">${c.role || '—'}</span>`;
+        sc.appendChild(row);
+      });
+
+      const btn = document.createElement('button');
+      btn.className = 'xipe-btn xipe-btn-primary';
+      btn.textContent = 'Create Theme';
+      btn.disabled = assigned.length === 0;
+      if (assigned.length === 0) btn.title = 'Assign at least one color role first.';
+      btn.onclick = () => {
+        window.__xipeRefData.mode = 'theme';
+        window.__xipeRefReady = true;
+        window.__xipeToast('Creating theme...', 'progress');
+      };
+      sc.appendChild(btn);
+    }
+
+    buildStepUI();
+  });
+})();
