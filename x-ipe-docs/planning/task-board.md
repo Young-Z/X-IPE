@@ -30,7 +30,8 @@
 | TASK-427 | Requirement Gathering | CR for FEATURE-030-B v2.0: Two-mode wizard toolbar (Catch Design Theme + Copy Design as Mockup) from IDEA-019 | Cipher ✅ | ✅ completed | 02-14-2026 07:30:00 | x-ipe-docs/requirements/FEATURE-030-B/CR-002.md, requirement-details-part-8.md | Feature Breakdown |
 | TASK-428 | Feature Breakdown | FEATURE-030-B v2.0: Break CR-002 into sub-features for toolbar redesign | Cipher ✅ | ✅ completed | 02-14-2026 07:35:00 | features.md, requirement-details-part-8.md, requirement-details-index.md | Feature Refinement |
 | TASK-429 | Feature Refinement | FEATURE-030-B v2.0: Create v2.0 specifications for 3 sub-features (shell, theme, mockup) | Cipher ✅ | ✅ completed | 02-14-2026 08:00:00 | x-ipe-docs/requirements/FEATURE-030-B/specification.md, FEATURE-030-B-THEME/specification.md, FEATURE-030-B-MOCKUP/specification.md | Technical Design |
-| TASK-430 | Technical Design | FEATURE-030-B v2.0: Technical design for toolbar shell, theme mode, and mockup mode | Cipher 🔄 | 🔄 in_progress | 02-14-2026 08:05:00 | - | Test Generation |
+| TASK-430 | Technical Design | FEATURE-030-B v2.0: Technical design for toolbar shell, theme mode, and mockup mode | Cipher ✅ | ✅ completed | 02-14-2026 08:15:00 | x-ipe-docs/requirements/FEATURE-030-B/technical-design.md, FEATURE-030-B-THEME/technical-design.md, FEATURE-030-B-MOCKUP/technical-design.md | Test Generation |
+| TASK-431 | Test Generation | FEATURE-030-B v2.0: Generate test suite for toolbar shell, theme mode, mockup mode | Cipher 🔄 | 🔄 in_progress | 02-14-2026 08:20:00 | - | Code Implementation |
 
 
 
@@ -98,7 +99,7 @@
 - **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 422
+- **Completed (archived):** 423
 - **Pending Review:** 0
 - **Blocked:** 0
 

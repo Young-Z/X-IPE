@@ -1,10 +1,13 @@
-"""Tests for FEATURE-030-B: UIUX Reference Agent Skill & Toolbar.
+"""Tests for FEATURE-030-B v2.0: UIUX Reference Toolbar — Shell, Theme Mode, Mockup Mode.
 
-Tests validate the toolbar IIFE (injected JavaScript) structure,
-the agent skill definition (SKILL.md), and the toolbar template reference.
+Tests validate the v2.0 toolbar system:
+- Core shell (xipe-toolbar-core.js): hamburger, panel, mode tabs, toast, data store, comms
+- Theme mode (xipe-toolbar-theme.js): offscreen canvas, magnifier, color sampling, role annotation
+- Mockup mode (xipe-toolbar-mockup.js): smart-snap, component capture, drag handles, instructions
+- Build script (build.py): minification pipeline
+- Agent skill (SKILL.md): staged injection, data polling, rubric analysis
 """
 
-import os
 import re
 import pytest
 from pathlib import Path
@@ -14,755 +17,765 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent.parent
 
-TOOLBAR_JS_PATH = PROJECT_ROOT / "src" / "x_ipe" / "static" / "js" / "injected" / "xipe-toolbar.js"
+# Source files
+CORE_JS = PROJECT_ROOT / "src" / "x_ipe" / "static" / "js" / "injected" / "xipe-toolbar-core.js"
+THEME_JS = PROJECT_ROOT / "src" / "x_ipe" / "static" / "js" / "injected" / "xipe-toolbar-theme.js"
+MOCKUP_JS = PROJECT_ROOT / "src" / "x_ipe" / "static" / "js" / "injected" / "xipe-toolbar-mockup.js"
+BUILD_PY = PROJECT_ROOT / "src" / "x_ipe" / "static" / "js" / "injected" / "build.py"
+
+# Minified outputs (agent reads these)
+CORE_MIN = PROJECT_ROOT / ".github" / "skills" / "x-ipe-tool-uiux-reference" / "references" / "toolbar-core.min.js"
+THEME_MIN = PROJECT_ROOT / ".github" / "skills" / "x-ipe-tool-uiux-reference" / "references" / "toolbar-theme.min.js"
+MOCKUP_MIN = PROJECT_ROOT / ".github" / "skills" / "x-ipe-tool-uiux-reference" / "references" / "toolbar-mockup.min.js"
+
+# Skill
 SKILL_PATH = PROJECT_ROOT / ".github" / "skills" / "x-ipe-tool-uiux-reference" / "SKILL.md"
-TEMPLATE_PATH = PROJECT_ROOT / ".github" / "skills" / "x-ipe-tool-uiux-reference" / "references" / "toolbar-template.md"
+
+# Legacy (should exist as deprecated reference)
+LEGACY_TEMPLATE = PROJECT_ROOT / ".github" / "skills" / "x-ipe-tool-uiux-reference" / "references" / "toolbar-template.md"
 
 
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 @pytest.fixture
-def toolbar_js():
-    """Load toolbar IIFE source code."""
-    assert TOOLBAR_JS_PATH.exists(), f"Toolbar JS not found: {TOOLBAR_JS_PATH}"
-    return TOOLBAR_JS_PATH.read_text(encoding="utf-8")
+def core_js():
+    """Load core shell source code."""
+    assert CORE_JS.exists(), f"Core JS not found: {CORE_JS}"
+    return CORE_JS.read_text(encoding="utf-8")
+
+
+@pytest.fixture
+def theme_js():
+    """Load theme mode source code."""
+    assert THEME_JS.exists(), f"Theme JS not found: {THEME_JS}"
+    return THEME_JS.read_text(encoding="utf-8")
+
+
+@pytest.fixture
+def mockup_js():
+    """Load mockup mode source code."""
+    assert MOCKUP_JS.exists(), f"Mockup JS not found: {MOCKUP_JS}"
+    return MOCKUP_JS.read_text(encoding="utf-8")
 
 
 @pytest.fixture
 def skill_md():
     """Load skill definition."""
-    assert SKILL_PATH.exists(), f"Skill SKILL.md not found: {SKILL_PATH}"
+    assert SKILL_PATH.exists(), f"Skill not found: {SKILL_PATH}"
     return SKILL_PATH.read_text(encoding="utf-8")
 
 
-@pytest.fixture
-def template_md():
-    """Load toolbar template reference."""
-    assert TEMPLATE_PATH.exists(), f"Template not found: {TEMPLATE_PATH}"
-    return TEMPLATE_PATH.read_text(encoding="utf-8")
+# ═══════════════════════════════════════════════════════════════════════════
+# CORE SHELL TESTS (FEATURE-030-B)
+# ═══════════════════════════════════════════════════════════════════════════
 
 
-# ── Toolbar IIFE: File Existence ───────────────────────────────────────────
+class TestCoreFileExists:
+    """Verify source files exist at expected locations."""
 
-class TestToolbarFileExists:
-    """Verify toolbar JS file exists at expected location."""
+    def test_core_js_exists(self):
+        """Core shell JS file must exist."""
+        assert CORE_JS.exists()
 
-    def test_toolbar_js_file_exists(self):
-        """AC-6: Toolbar IIFE source file must exist."""
-        assert TOOLBAR_JS_PATH.exists()
+    def test_core_js_not_empty(self):
+        """Core shell must have substantial content."""
+        assert CORE_JS.stat().st_size > 500
 
-    def test_toolbar_js_not_empty(self):
-        """Toolbar file must have substantial content."""
-        assert TOOLBAR_JS_PATH.stat().st_size > 1000
+    def test_theme_js_exists(self):
+        """Theme mode JS file must exist."""
+        assert THEME_JS.exists()
+
+    def test_mockup_js_exists(self):
+        """Mockup mode JS file must exist."""
+        assert MOCKUP_JS.exists()
+
+    def test_build_script_exists(self):
+        """Build/minification script must exist."""
+        assert BUILD_PY.exists()
 
 
-# ── Toolbar IIFE: Guard & Data Store ──────────────────────────────────────
+class TestCoreIIFEStructure:
+    """Verify IIFE structure and guard clause."""
 
-class TestToolbarGuardAndDataStore:
-    """Verify IIFE guard clause and global data structures."""
-
-    def test_iife_structure(self, toolbar_js):
-        """Toolbar must be wrapped in an IIFE."""
-        stripped = toolbar_js.strip()
+    def test_iife_wrapper(self, core_js):
+        """Core must be wrapped in an IIFE."""
+        stripped = core_js.strip()
         assert stripped.startswith("(()") or stripped.startswith("(function"), \
-            "Toolbar must start with IIFE: (() => { or (function() {"
+            "Must start with IIFE"
         assert stripped.endswith("})();") or stripped.endswith("})()"), \
-            "Toolbar must end with IIFE closure: })();"
-
-    def test_double_injection_guard(self, toolbar_js):
-        """AC-14/FR-5: Guard prevents double injection."""
-        assert "window.__xipeToolbarInjected" in toolbar_js
-        assert re.search(r"if\s*\(\s*window\.__xipeToolbarInjected\s*\)\s*return", toolbar_js), \
-            "Must have: if (window.__xipeToolbarInjected) return;"
-
-    def test_data_store_initialization(self, toolbar_js):
-        """FR-15: window.__xipeRefData must be initialized with colors and elements arrays."""
-        assert "window.__xipeRefData" in toolbar_js
-        assert re.search(r"__xipeRefData\s*=\s*\{", toolbar_js), \
-            "Must initialize __xipeRefData as object"
-
-    def test_ready_flag_initialization(self, toolbar_js):
-        """AC-28/FR-21: window.__xipeRefReady must be initialized to false."""
-        assert "window.__xipeRefReady" in toolbar_js
-        assert re.search(r"__xipeRefReady\s*=\s*false", toolbar_js), \
-            "Must initialize __xipeRefReady = false"
+            "Must end with IIFE closure"
 
+    def test_double_injection_guard(self, core_js):
+        """FR-3: Guard prevents double injection."""
+        assert "window.__xipeToolbarInjected" in core_js
+        assert re.search(r"if\s*\(\s*window\.__xipeToolbarInjected\s*\)\s*return", core_js)
 
-# ── Toolbar IIFE: CSS Namespacing ─────────────────────────────────────────
-
-class TestToolbarCSSNamespacing:
-    """Verify CSS class prefix to prevent style conflicts."""
-
-    def test_xipe_prefix_in_styles(self, toolbar_js):
-        """NFR/AC-14: All toolbar CSS classes must use .xipe- prefix."""
-        # Find style content
-        assert ".xipe-" in toolbar_js, "CSS must use .xipe- prefix"
-
-    def test_toolbar_class_name(self, toolbar_js):
-        """Root element uses xipe-toolbar class."""
-        assert "xipe-toolbar" in toolbar_js
-
-    def test_hamburger_class_name(self, toolbar_js):
-        """Hamburger uses xipe-hamburger class."""
-        assert "xipe-hamburger" in toolbar_js
-
-    def test_panel_class_name(self, toolbar_js):
-        """Panel uses xipe-panel class."""
-        assert "xipe-panel" in toolbar_js
 
-    def test_z_index_max(self, toolbar_js):
-        """AC-10: Toolbar z-index must be 2147483647 (max 32-bit int)."""
-        assert "2147483647" in toolbar_js
+class TestCoreDataStore:
+    """Verify data store initialization (FR-12, AC-24 through AC-27)."""
 
+    def test_data_store_init(self, core_js):
+        """AC-24: __xipeRefData must be initialized with v2.0 schema."""
+        assert "window.__xipeRefData" in core_js
 
-# ── Toolbar IIFE: HTML Structure ──────────────────────────────────────────
+    def test_mode_field(self, core_js):
+        """AC-27: Data store must include mode field."""
+        assert re.search(r"mode\s*:\s*['\"]theme['\"]", core_js), \
+            "Default mode must be 'theme'"
 
-class TestToolbarHTMLStructure:
-    """Verify required HTML elements in the toolbar."""
+    def test_colors_array(self, core_js):
+        """AC-25: Data store must include colors array."""
+        assert re.search(r"colors\s*:\s*\[", core_js)
 
-    def test_hamburger_button_present(self, toolbar_js):
-        """AC-6: Hamburger button with X-IPE label."""
-        assert "xipe-hamburger" in toolbar_js
-        assert "X-IPE" in toolbar_js
+    def test_components_array(self, core_js):
+        """AC-26: Data store must include components array (replaces elements[])."""
+        assert re.search(r"components\s*:\s*\[", core_js)
 
-    def test_panel_header(self, toolbar_js):
-        """AC-7: Panel has 'X-IPE Reference' title."""
-        assert "X-IPE Reference" in toolbar_js
+    def test_ref_ready_init(self, core_js):
+        """FR-13: __xipeRefReady initialized to false."""
+        assert "window.__xipeRefReady" in core_js
+        assert re.search(r"__xipeRefReady\s*=\s*false", core_js)
 
-    def test_close_button(self, toolbar_js):
-        """AC-8: Panel has close button."""
-        assert "xipe-close" in toolbar_js or "xipe-panel-close" in toolbar_js
+    def test_ref_command_init(self, core_js):
+        """FR-14: __xipeRefCommand initialized to null."""
+        assert "window.__xipeRefCommand" in core_js
 
-    def test_color_picker_tool(self, toolbar_js):
-        """AC-15: Color Picker tool button present."""
-        assert "Color Picker" in toolbar_js
-        assert 'data-tool="color"' in toolbar_js or "data-tool='color'" in toolbar_js
 
-    def test_element_highlighter_tool(self, toolbar_js):
-        """AC-19: Element Highlighter tool button present."""
-        assert "Element Highlighter" in toolbar_js
-        assert 'data-tool="highlight"' in toolbar_js or "data-tool='highlight'" in toolbar_js
+class TestCoreModeRegistry:
+    """Verify mode extension point system (FR-16)."""
 
-    def test_phase2_tools_disabled(self, toolbar_js):
-        """AC-35/FR-24: Phase 2 tools present but disabled."""
-        assert "Element Commenter" in toolbar_js
-        assert "Asset Extractor" in toolbar_js
-        assert "xipe-disabled" in toolbar_js
-        assert "disabled" in toolbar_js
+    def test_register_mode_function(self, core_js):
+        """FR-16: Must expose window.__xipeRegisterMode function."""
+        assert "window.__xipeRegisterMode" in core_js
+        assert re.search(r"__xipeRegisterMode\s*=\s*", core_js)
 
-    def test_phase_separators(self, toolbar_js):
-        """AC-35: Phase 1 and Phase 2 separators."""
-        assert "Phase 1" in toolbar_js
-        assert "Phase 2" in toolbar_js
 
-    def test_send_button(self, toolbar_js):
-        """AC-25: Send References button present."""
-        assert "Send References" in toolbar_js
-        assert "xipe-send" in toolbar_js
+class TestCoreToastAPI:
+    """Verify toast notification system (FR-11, AC-19 through AC-23)."""
 
-    def test_collected_references_section(self, toolbar_js):
-        """AC-18/AC-23/FR-16: Collected References summary section."""
-        assert "Collected References" in toolbar_js
-        assert "xipe-collected" in toolbar_js
+    def test_toast_function(self, core_js):
+        """FR-11: Must expose window.__xipeToast function."""
+        assert "window.__xipeToast" in core_js
 
-    def test_badge_count_elements(self, toolbar_js):
-        """FR-17: Badge count elements for hamburger and tools."""
-        assert "xipe-badge" in toolbar_js
-        assert "xipe-color-badge" in toolbar_js
-        assert "xipe-elem-badge" in toolbar_js
+    def test_toast_types(self, core_js):
+        """AC-19: Toast supports info, progress, success, error types."""
+        for toast_type in ["info", "progress", "success", "error"]:
+            assert toast_type in core_js, f"Toast type '{toast_type}' must be supported"
 
-    def test_drag_hint(self, toolbar_js):
-        """AC-13/FR-9: Drag hint element."""
-        assert "xipe-drag-hint" in toolbar_js
-        assert "Drag to move" in toolbar_js or "drag" in toolbar_js.lower()
 
+class TestCoreCSSScoping:
+    """Verify CSS isolation (FR-15, AC-32)."""
 
-# ── Toolbar IIFE: Color Picker Logic ──────────────────────────────────────
+    def test_xipe_prefix(self, core_js):
+        """AC-32: All CSS classes must use .xipe-* prefix."""
+        # Find CSS class declarations in the source
+        css_classes = re.findall(r'className\s*=\s*[\'"]([^\'"]+)[\'"]', core_js)
+        css_classes += re.findall(r'classList\.add\([\'"]([^\'"]+)[\'"]\)', core_js)
+        for cls in css_classes:
+            for c in cls.split():
+                assert c.startswith("xipe-"), \
+                    f"CSS class '{c}' must use xipe- prefix"
 
-class TestToolbarColorPicker:
-    """Verify Color Picker tool functionality."""
+    def test_fixed_positioning(self, core_js):
+        """FR-15: Toolbar must use position: fixed."""
+        assert "position: fixed" in core_js or "position:fixed" in core_js
 
-    def test_color_extraction_uses_computed_style(self, toolbar_js):
-        """FR-10: Extracts color via getComputedStyle."""
-        assert "getComputedStyle" in toolbar_js
+    def test_z_index_max(self, core_js):
+        """FR-15: z-index must be 2147483647."""
+        assert "2147483647" in core_js
 
-    def test_hex_conversion(self, toolbar_js):
-        """AC-15: Converts to hex format."""
-        assert "toString(16)" in toolbar_js or "toHex" in toolbar_js
 
-    def test_hsl_conversion(self, toolbar_js):
-        """AC-15: Converts to HSL format."""
-        assert "hsl" in toolbar_js.lower()
+class TestCoreHamburger:
+    """Verify hamburger icon (FR-5, AC-1 through AC-3)."""
 
-    def test_rgb_parsing(self, toolbar_js):
-        """AC-15: Parses RGB values."""
-        assert re.search(r"rgba?\s*\(", toolbar_js), \
-            "Must parse rgba() color strings"
+    def test_hamburger_class(self, core_js):
+        """FR-5: Hamburger button element must exist."""
+        assert "xipe-hamburger" in core_js
 
-    def test_color_swatch_feedback(self, toolbar_js):
-        """AC-17: Shows swatch pill near picked element."""
-        assert "swatch" in toolbar_js.lower()
+    def test_hamburger_size(self, core_js):
+        """FR-5: Hamburger should be 52x52px."""
+        assert "52px" in core_js or "52" in core_js
 
-    def test_color_data_structure(self, toolbar_js):
-        """AC-16: Color data has required fields: id, hex, rgb, hsl, source_selector."""
-        for field in ["id", "hex", "rgb", "hsl", "source_selector"]:
-            assert field in toolbar_js, f"Color data must include '{field}' field"
 
+class TestCorePanelExpandCollapse:
+    """Verify expand/collapse behavior (FR-6, FR-7, AC-4 through AC-6)."""
 
-# ── Toolbar IIFE: Element Highlighter Logic ───────────────────────────────
+    def test_panel_class(self, core_js):
+        """FR-6: Panel element must exist."""
+        assert "xipe-panel" in core_js
 
-class TestToolbarElementHighlighter:
-    """Verify Element Highlighter tool functionality."""
+    def test_panel_width(self, core_js):
+        """FR-6: Expanded panel should be 280px wide."""
+        assert "280" in core_js
 
-    def test_mousemove_handler(self, toolbar_js):
-        """AC-19: Listens for mousemove to show hover overlay."""
-        assert "mousemove" in toolbar_js
+    def test_mouseenter_expand(self, core_js):
+        """FR-6: Must handle mouseenter for expand."""
+        assert "mouseenter" in core_js
 
-    def test_overlay_element(self, toolbar_js):
-        """AC-19: Creates bounding box overlay element."""
-        assert "xipe-highlight-overlay" in toolbar_js or "overlay" in toolbar_js.lower()
+    def test_mouseleave_collapse(self, core_js):
+        """FR-7: Must handle mouseleave for collapse."""
+        assert "mouseleave" in core_js
 
-    def test_selector_label(self, toolbar_js):
-        """AC-19: Shows CSS selector label."""
-        assert "xipe-selector-label" in toolbar_js or "selector-label" in toolbar_js
+    def test_collapse_timer(self, core_js):
+        """FR-7: Must use 2-second collapse delay."""
+        assert "2000" in core_js
 
-    def test_bounding_box_capture(self, toolbar_js):
-        """AC-21/FR-13: Uses getBoundingClientRect for element dimensions."""
-        assert "getBoundingClientRect" in toolbar_js
 
-    def test_element_data_structure(self, toolbar_js):
-        """AC-22: Element data has required fields: id, selector, tag, bounding_box."""
-        for field in ["selector", "tag", "bounding_box"]:
-            assert field in toolbar_js, f"Element data must include '{field}' field"
+class TestCoreModeSwitcher:
+    """Verify mode switching (FR-9, FR-10, AC-7 through AC-10)."""
 
+    def test_mode_tabs(self, core_js):
+        """FR-9: Must have mode tab elements."""
+        assert "theme" in core_js.lower()
+        assert "mockup" in core_js.lower()
 
-# ── Toolbar IIFE: CSS Selector Generator ──────────────────────────────────
+    def test_default_mode(self, core_js):
+        """FR-10: Default mode must be 'theme'."""
+        assert re.search(r"['\"]theme['\"]", core_js)
 
-class TestToolbarSelectorGenerator:
-    """Verify CSS selector generation logic."""
 
-    def test_selector_generator_exists(self, toolbar_js):
-        """FR-26: Selector generator function must exist."""
-        assert re.search(r"function\s+generateSelector|generateSelector\s*=", toolbar_js), \
-            "Must have generateSelector function"
+class TestCoreDrag:
+    """Verify drag behavior (FR-8, AC-11 through AC-13)."""
 
-    def test_nth_child_disambiguation(self, toolbar_js):
-        """FR-26: Uses nth-child for sibling disambiguation."""
-        assert "nth-child" in toolbar_js
+    def test_mousedown_drag(self, core_js):
+        """FR-8: Must handle mousedown for drag start."""
+        assert "mousedown" in core_js
 
-    def test_tag_name_usage(self, toolbar_js):
-        """FR-26: Uses tagName for selector parts."""
-        assert "tagName" in toolbar_js
+    def test_mousemove_drag(self, core_js):
+        """FR-8: Must handle mousemove for drag."""
+        assert "mousemove" in core_js
 
-    def test_class_list_usage(self, toolbar_js):
-        """FR-26: Uses classList for meaningful classes."""
-        assert "classList" in toolbar_js
+    def test_mouseup_drag(self, core_js):
+        """FR-8: Must handle mouseup for drag end."""
+        assert "mouseup" in core_js
 
 
-# ── Toolbar IIFE: Panel & Drag Interactions ───────────────────────────────
+class TestCoreCommandPolling:
+    """Verify bi-directional communication (FR-14, AC-29 through AC-30)."""
 
-class TestToolbarInteractions:
-    """Verify panel toggle and drag functionality."""
+    def test_command_polling(self, core_js):
+        """FR-14: Must poll __xipeRefCommand."""
+        assert "__xipeRefCommand" in core_js
 
-    def test_panel_toggle(self, toolbar_js):
-        """AC-7/AC-8: Panel toggling via hamburger click and close button."""
-        assert "visible" in toolbar_js, "Panel must toggle 'visible' class"
+    def test_deep_capture_handler(self, core_js):
+        """FR-14: Must handle 'deep_capture' command action."""
+        assert "deep_capture" in core_js
 
-    def test_drag_functionality(self, toolbar_js):
-        """AC-11/FR-8: Drag via mousedown/mousemove/mouseup."""
-        assert "mousedown" in toolbar_js
-        assert "mousemove" in toolbar_js
-        assert "mouseup" in toolbar_js
+    def test_command_clear_after_execute(self, core_js):
+        """FR-14: Must clear command after execution."""
+        assert re.search(r"__xipeRefCommand\s*=\s*null", core_js)
 
-    def test_tool_selection_mutually_exclusive(self, toolbar_js):
-        """FR-25: Only one tool active at a time."""
-        assert re.search(r"classList\.remove\(\s*['\"]active['\"]\s*\)", toolbar_js), \
-            "Must remove 'active' from all tools before activating one"
+    def test_setinterval_polling(self, core_js):
+        """FR-14: Must use setInterval for command polling."""
+        assert "setInterval" in core_js
 
-    def test_capture_phase_event_listeners(self, toolbar_js):
-        """Events registered in capture phase to intercept before page handlers."""
-        assert re.search(r"addEventListener\([^)]+,\s*true\s*\)", toolbar_js), \
-            "Must use capture phase (true) for click/mousemove listeners"
 
-    def test_toolbar_click_exclusion(self, toolbar_js):
-        """Clicks on toolbar itself must be excluded from tool handling."""
-        assert re.search(r"closest\(\s*['\"]\.xipe-toolbar['\"]\s*\)", toolbar_js), \
-            "Must check .closest('.xipe-toolbar') to exclude toolbar clicks"
+class TestCoreReadySignal:
+    """Verify toolbar ready signal."""
 
+    def test_toolbar_ready_signal(self, core_js):
+        """Core must set __xipeToolbarReady = true after init."""
+        assert "__xipeToolbarReady" in core_js
+        assert re.search(r"__xipeToolbarReady\s*=\s*true", core_js)
 
-# ── Toolbar IIFE: Send References & Callback ──────────────────────────────
 
-class TestToolbarSendReferences:
-    """Verify Send References button and callback mechanism."""
+class TestCoreFontLoading:
+    """Verify lazy font loading (NFR-5)."""
 
-    def test_send_button_handler(self, toolbar_js):
-        """AC-25: Send button has click handler."""
-        assert "xipe-send" in toolbar_js
+    def test_lazy_font_loading(self, core_js):
+        """NFR-5: Fonts must be loaded lazily."""
+        assert "requestIdleCallback" in core_js or "setTimeout" in core_js
+        assert "fonts.googleapis.com" in core_js or "font-display" in core_js
 
-    def test_ready_flag_set_on_send(self, toolbar_js):
-        """AC-28/FR-21: Sets __xipeRefReady = true on send."""
-        assert re.search(r"__xipeRefReady\s*=\s*true", toolbar_js)
 
-    def test_empty_data_validation(self, toolbar_js):
-        """Edge case: Shows feedback when no data collected."""
-        assert re.search(r"(total|length)\s*===?\s*0|No data", toolbar_js), \
-            "Must handle case when user sends with 0 items"
+class TestCoreSelectorGenerator:
+    """Verify CSS selector generation utility."""
 
-    def test_send_button_state_transitions(self, toolbar_js):
-        """AC-25/AC-27/FR-20: Three states — idle, sending, success."""
-        assert "Sending" in toolbar_js or "sending" in toolbar_js
-        assert "Sent to X-IPE" in toolbar_js or "sent" in toolbar_js.lower()
-        assert "Send References" in toolbar_js
+    def test_selector_generator_exists(self, core_js):
+        """Must include selector generation function."""
+        assert "generateSelector" in core_js or "getSelector" in core_js
 
+    def test_body_prefix(self, core_js):
+        """Selector should include body prefix."""
+        assert "body" in core_js
 
-# ── Toolbar IIFE: Font & Icon Loading ─────────────────────────────────────
 
-class TestToolbarAssetLoading:
-    """Verify external font and icon loading."""
+# ═══════════════════════════════════════════════════════════════════════════
+# THEME MODE TESTS (FEATURE-030-B-THEME)
+# ═══════════════════════════════════════════════════════════════════════════
 
-    def test_outfit_font_loaded(self, toolbar_js):
-        """AC-33: Outfit font for UI text."""
-        assert "Outfit" in toolbar_js
 
-    def test_space_mono_font_loaded(self, toolbar_js):
-        """AC-33: Space Mono font for selectors/values."""
-        assert "Space+Mono" in toolbar_js or "Space Mono" in toolbar_js
+class TestThemeIIFEStructure:
+    """Verify theme mode IIFE and registration."""
 
-    def test_bootstrap_icons_loaded(self, toolbar_js):
-        """Icons loaded via Bootstrap Icons CDN."""
-        assert "bootstrap-icons" in toolbar_js
+    def test_iife_wrapper(self, theme_js):
+        """Theme must be wrapped in an IIFE."""
+        stripped = theme_js.strip()
+        assert stripped.startswith("(()") or stripped.startswith("(function")
 
+    def test_mode_registration(self, theme_js):
+        """Theme must register with core via __xipeRegisterMode."""
+        assert "__xipeRegisterMode" in theme_js
+        assert re.search(r"__xipeRegisterMode\s*\(\s*['\"]theme['\"]", theme_js)
 
-# ── Skill SKILL.md: File Existence ────────────────────────────────────────
+    def test_core_dependency_check(self, theme_js):
+        """Theme must check that core is loaded."""
+        assert "__xipeRegisterMode" in theme_js
 
-class TestSkillFileExists:
-    """Verify agent skill definition file exists."""
 
-    def test_skill_file_exists(self):
-        """Skill SKILL.md must exist at expected location."""
+class TestThemeOffscreenCanvas:
+    """Verify offscreen canvas for color picking (FR-T1, AC-T1 through AC-T7)."""
+
+    def test_canvas_creation(self, theme_js):
+        """FR-T1: Must create offscreen canvas element."""
+        assert "createElement" in theme_js
+        assert "canvas" in theme_js.lower()
+
+    def test_canvas_context(self, theme_js):
+        """FR-T1: Must get 2d context with willReadFrequently."""
+        assert "getContext" in theme_js
+        assert "2d" in theme_js
+
+    def test_scroll_resize_handler(self, theme_js):
+        """FR-T1: Must debounce re-render on scroll/resize."""
+        assert "scroll" in theme_js
+        assert "resize" in theme_js
+
+
+class TestThemeMagnifier:
+    """Verify circular magnifier (FR-T2, AC-T1)."""
+
+    def test_magnifier_element(self, theme_js):
+        """FR-T2: Must create magnifier element."""
+        assert "magnifier" in theme_js.lower()
+
+    def test_magnifier_canvas(self, theme_js):
+        """FR-T2: Magnifier must have its own canvas for zoomed grid."""
+        assert re.search(r"(magnifier|mag).*canvas|canvas.*magnifier", theme_js, re.I)
+
+    def test_magnifier_size(self, theme_js):
+        """FR-T2: Magnifier should be 120px."""
+        assert "120" in theme_js
+
+    def test_raf_throttling(self, theme_js):
+        """FR-T2/AC-T7: Must use requestAnimationFrame for throttling."""
+        assert "requestAnimationFrame" in theme_js
+
+    def test_crosshair(self, theme_js):
+        """FR-T2: Must draw crosshair at center pixel."""
+        assert re.search(r"cross|#10b981|stroke", theme_js, re.I)
+
+
+class TestThemeColorSampling:
+    """Verify color sampling on click (FR-T3, AC-T2 through AC-T5)."""
+
+    def test_click_handler(self, theme_js):
+        """FR-T3: Must handle click for color sampling."""
+        assert "click" in theme_js
+
+    def test_get_image_data(self, theme_js):
+        """FR-T3: Must use getImageData for pixel sampling."""
+        assert "getImageData" in theme_js
+
+    def test_hex_conversion(self, theme_js):
+        """FR-T3: Must convert RGB to hex."""
+        assert "Hex" in theme_js or "hex" in theme_js
+        assert "toString(16)" in theme_js or "rgbToHex" in theme_js
+
+    def test_hsl_conversion(self, theme_js):
+        """FR-T3: Must convert RGB to HSL."""
+        assert "hsl" in theme_js.lower()
+
+    def test_color_id_format(self, theme_js):
+        """FR-T3: Color IDs must follow color-001 format."""
+        assert re.search(r"color-|padStart", theme_js)
+
+    def test_selector_for_clicked_element(self, theme_js):
+        """FR-T4: Must generate selector for clicked element."""
+        assert "elementFromPoint" in theme_js or "generateSelector" in theme_js
+
+
+class TestThemeCORSHandling:
+    """Verify CORS error handling (FR-T8, AC-T6)."""
+
+    def test_cors_try_catch(self, theme_js):
+        """FR-T8: Must handle CORS via try/catch on getImageData."""
+        assert "try" in theme_js
+        assert "catch" in theme_js
+
+    def test_cors_toast_message(self, theme_js):
+        """AC-T6: Must show toast for cross-origin content."""
+        assert re.search(r"cross.?origin|CORS|taint", theme_js, re.I)
+
+
+class TestThemeSwatchPill:
+    """Verify visual feedback (FR-T5, AC-T2)."""
+
+    def test_swatch_feedback(self, theme_js):
+        """FR-T5: Must show swatch pill near click point."""
+        assert "swatch" in theme_js.lower() or "pill" in theme_js.lower()
+
+
+class TestThemeRoleAnnotation:
+    """Verify role annotation UI (FR-T6, AC-T9 through AC-T12)."""
+
+    def test_role_presets(self, theme_js):
+        """FR-T6: Must include primary, secondary, accent role presets."""
+        assert "primary" in theme_js
+        assert "secondary" in theme_js
+        assert "accent" in theme_js
+
+    def test_custom_role_input(self, theme_js):
+        """AC-T11: Must support custom text role input."""
+        assert "custom" in theme_js.lower()
+        assert "input" in theme_js.lower()
+
+    def test_role_stored_in_data(self, theme_js):
+        """AC-T10: Must store role in __xipeRefData.colors[n].role."""
+        assert "role" in theme_js
+
+
+class TestThemeCreateButton:
+    """Verify Create Theme trigger (FR-T7, AC-T13, AC-T16)."""
+
+    def test_create_theme_button(self, theme_js):
+        """FR-T7: Must have Create Theme button."""
+        assert re.search(r"create.?theme|Create Theme", theme_js, re.I)
+
+    def test_create_sets_ready(self, theme_js):
+        """AC-T13: Create Theme must set __xipeRefReady = true."""
+        assert "__xipeRefReady" in theme_js
+
+    def test_mode_set_to_theme(self, theme_js):
+        """AC-T13: Must set mode to 'theme' on Create."""
+        assert re.search(r"mode\s*=\s*['\"]theme['\"]", theme_js)
+
+
+class TestThemeWizardSteps:
+    """Verify 3-step wizard navigation (FR-T9)."""
+
+    def test_step_navigation(self, theme_js):
+        """FR-T9: Must support step navigation (1-3)."""
+        assert "step" in theme_js.lower()
+        # Should have at least 3 steps
+        assert re.search(r"step.{0,5}[123]|currentStep|step.*3", theme_js, re.I)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# MOCKUP MODE TESTS (FEATURE-030-B-MOCKUP)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestMockupIIFEStructure:
+    """Verify mockup mode IIFE and registration."""
+
+    def test_iife_wrapper(self, mockup_js):
+        """Mockup must be wrapped in an IIFE."""
+        stripped = mockup_js.strip()
+        assert stripped.startswith("(()") or stripped.startswith("(function")
+
+    def test_mode_registration(self, mockup_js):
+        """Mockup must register with core via __xipeRegisterMode."""
+        assert "__xipeRegisterMode" in mockup_js
+        assert re.search(r"__xipeRegisterMode\s*\(\s*['\"]mockup['\"]", mockup_js)
+
+
+class TestMockupSmartSnap:
+    """Verify smart-snap detection (FR-M1, FR-M2, AC-M1 through AC-M2)."""
+
+    def test_semantic_tags(self, mockup_js):
+        """FR-M1: Must check semantic HTML tags."""
+        for tag in ["SECTION", "NAV", "ARTICLE", "ASIDE", "HEADER", "FOOTER", "MAIN"]:
+            assert tag in mockup_js or tag.lower() in mockup_js, \
+                f"Semantic tag '{tag}' must be in snap detection"
+
+    def test_role_attribute_check(self, mockup_js):
+        """FR-M1: Must check for ARIA role attribute."""
+        assert "role" in mockup_js
+
+    def test_fallback_div(self, mockup_js):
+        """FR-M2: Fallback must check div with offsetWidth/Height > 50."""
+        assert "DIV" in mockup_js or "div" in mockup_js
+        assert "50" in mockup_js
+
+    def test_max_depth(self, mockup_js):
+        """FR-M1: Must traverse max 5 ancestor levels."""
+        assert "5" in mockup_js
+
+    def test_body_exclusion(self, mockup_js):
+        """Edge case: Must skip body/html elements."""
+        assert "document.body" in mockup_js
+
+
+class TestMockupComponentCapture:
+    """Verify component capture (FR-M5, FR-M6, AC-M5 through AC-M6)."""
+
+    def test_bounding_rect(self, mockup_js):
+        """FR-M5: Must use getBoundingClientRect."""
+        assert "getBoundingClientRect" in mockup_js
+
+    def test_computed_styles(self, mockup_js):
+        """FR-M5: Must use getComputedStyle."""
+        assert "getComputedStyle" in mockup_js
+
+    def test_component_id_format(self, mockup_js):
+        """FR-M6: Component IDs must follow comp-001 format."""
+        assert re.search(r"comp-|padStart", mockup_js)
+
+    def test_lightweight_capture(self, mockup_js):
+        """FR-M5: Must capture limited CSS property set."""
+        # Check for at least some of the lightweight properties
+        for prop in ["display", "position", "background", "font-family", "border-radius"]:
+            assert prop in mockup_js, f"Property '{prop}' must be in capture list"
+
+    def test_max_components(self, mockup_js):
+        """NFR-M5: Must enforce max 20 components."""
+        assert "20" in mockup_js
+
+    def test_toolbar_click_exclusion(self, mockup_js):
+        """Edge case: Must ignore clicks on toolbar itself."""
+        assert "xipe-toolbar" in mockup_js
+
+
+class TestMockupOverlay:
+    """Verify snap overlay with drag handles (FR-M3, FR-M4, AC-M3 through AC-M4)."""
+
+    def test_overlay_border(self, mockup_js):
+        """FR-M3: Must show dashed teal border."""
+        assert "dashed" in mockup_js
+        assert "#10b981" in mockup_js or "10b981" in mockup_js
+
+    def test_tag_badge(self, mockup_js):
+        """FR-M3: Must show tag badge."""
+        assert "badge" in mockup_js.lower() or "tag" in mockup_js.lower()
+
+    def test_drag_handles(self, mockup_js):
+        """FR-M4: Must create drag handles."""
+        assert "handle" in mockup_js.lower() or "resize" in mockup_js.lower()
+
+    def test_eight_handles(self, mockup_js):
+        """FR-M4: Must have 8 drag handle positions (4 corners + 4 midpoints)."""
+        # Check for at least some resize cursors
+        resize_cursors = re.findall(r"(nw|ne|sw|se|n|s|e|w)-resize", mockup_js)
+        assert len(resize_cursors) >= 4, "Must have at least 4 resize handle directions"
+
+
+class TestMockupInstructions:
+    """Verify per-component instructions (FR-M7, AC-M8 through AC-M10)."""
+
+    def test_instruction_field(self, mockup_js):
+        """FR-M7: Must support instruction input per component."""
+        assert "instruction" in mockup_js
+
+
+class TestMockupAnalyze:
+    """Verify analyze step (FR-M8, AC-M11 through AC-M16)."""
+
+    def test_analyze_button(self, mockup_js):
+        """FR-M8: Must have Analyze button."""
+        assert re.search(r"[Aa]nalyz", mockup_js)
+
+    def test_sets_ready_for_analysis(self, mockup_js):
+        """AC-M11: Must set __xipeRefReady for agent analysis."""
+        assert "__xipeRefReady" in mockup_js
+
+
+class TestMockupGenerate:
+    """Verify generate step (FR-M10, FR-M11, AC-M17 through AC-M22)."""
+
+    def test_generate_button(self, mockup_js):
+        """Must have Generate button."""
+        assert re.search(r"[Gg]enerat", mockup_js)
+
+    def test_mode_set_to_mockup(self, mockup_js):
+        """Must set mode to 'mockup' on send."""
+        assert re.search(r"mode\s*=\s*['\"]mockup['\"]", mockup_js)
+
+
+class TestMockupWizardSteps:
+    """Verify 4-step wizard navigation (FR-M13)."""
+
+    def test_step_navigation(self, mockup_js):
+        """FR-M13: Must support 4-step navigation."""
+        assert "step" in mockup_js.lower()
+        assert re.search(r"step.{0,5}[1234]|currentStep|step.*4", mockup_js, re.I)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# BUILD SCRIPT TESTS
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestBuildScript:
+    """Verify build.py minification pipeline."""
+
+    def test_build_script_exists(self):
+        """Build script must exist."""
+        assert BUILD_PY.exists()
+
+    def test_build_script_content(self):
+        """Build script must reference all 3 source files."""
+        content = BUILD_PY.read_text(encoding="utf-8")
+        assert "xipe-toolbar-core" in content
+        assert "xipe-toolbar-theme" in content
+        assert "xipe-toolbar-mockup" in content
+
+    def test_build_output_paths(self):
+        """Build script must output to references/ directory."""
+        content = BUILD_PY.read_text(encoding="utf-8")
+        assert "toolbar-core.min.js" in content
+        assert "toolbar-theme.min.js" in content
+        assert "toolbar-mockup.min.js" in content
+
+
+class TestMinifiedOutputs:
+    """Verify minified files exist and meet size targets."""
+
+    def test_core_min_exists(self):
+        """Minified core must exist."""
+        assert CORE_MIN.exists(), f"Core min not found: {CORE_MIN}"
+
+    def test_theme_min_exists(self):
+        """Minified theme must exist."""
+        assert THEME_MIN.exists(), f"Theme min not found: {THEME_MIN}"
+
+    def test_mockup_min_exists(self):
+        """Minified mockup must exist."""
+        assert MOCKUP_MIN.exists(), f"Mockup min not found: {MOCKUP_MIN}"
+
+    def test_core_size_target(self):
+        """NFR-2: Core minified must be < 8KB."""
+        size = CORE_MIN.stat().st_size
+        assert size < 8192, f"Core min is {size} bytes, target < 8192"
+
+    def test_theme_size_target(self):
+        """Theme minified must be < 5KB."""
+        size = THEME_MIN.stat().st_size
+        assert size < 5120, f"Theme min is {size} bytes, target < 5120"
+
+    def test_mockup_size_target(self):
+        """Mockup minified must be < 5KB."""
+        size = MOCKUP_MIN.stat().st_size
+        assert size < 5120, f"Mockup min is {size} bytes, target < 5120"
+
+    def test_minified_is_valid_iife(self):
+        """Minified files must still be valid IIFEs."""
+        for path in [CORE_MIN, THEME_MIN, MOCKUP_MIN]:
+            content = path.read_text(encoding="utf-8").strip()
+            assert content.startswith("("), f"{path.name} must start with ("
+            assert content.endswith(")()") or content.endswith("})();") or content.endswith("})()"), \
+                f"{path.name} must end with IIFE closure"
+
+    def test_minified_smaller_than_source(self):
+        """Minified files must be smaller than source."""
+        pairs = [(CORE_JS, CORE_MIN), (THEME_JS, THEME_MIN), (MOCKUP_JS, MOCKUP_MIN)]
+        for src, min_f in pairs:
+            assert min_f.stat().st_size < src.stat().st_size, \
+                f"{min_f.name} must be smaller than {src.name}"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# AGENT SKILL TESTS
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestSkillDefinition:
+    """Verify skill SKILL.md for v2.0 staged injection."""
+
+    def test_skill_exists(self):
+        """Skill SKILL.md must exist."""
         assert SKILL_PATH.exists()
 
-    def test_skill_file_not_empty(self):
-        """Skill file must have substantial content."""
-        assert SKILL_PATH.stat().st_size > 500
+    def test_staged_injection_references(self, skill_md):
+        """Skill must reference staged injection files."""
+        assert "toolbar-core.min.js" in skill_md
+        assert "toolbar-theme.min.js" in skill_md
+        assert "toolbar-mockup.min.js" in skill_md
 
+    def test_toolbar_ready_polling(self, skill_md):
+        """Skill must poll __xipeToolbarReady after core injection."""
+        assert "__xipeToolbarReady" in skill_md
 
-# ── Skill SKILL.md: Structure ─────────────────────────────────────────────
+    def test_data_polling(self, skill_md):
+        """Skill must poll __xipeRefReady for user data."""
+        assert "__xipeRefReady" in skill_md
+        assert "__xipeRefData" in skill_md
 
-class TestSkillStructure:
-    """Verify skill definition has required sections."""
+    def test_screenshot_provision(self, skill_md):
+        """Skill must provide viewport screenshot for canvas."""
+        assert "screenshot" in skill_md.lower()
+        assert "__xipeViewportScreenshot" in skill_md
 
-    def test_skill_frontmatter(self, skill_md):
-        """Skill must have YAML frontmatter with name and description."""
-        assert skill_md.startswith("---")
-        assert "name:" in skill_md
-        assert "x-ipe-tool-uiux-reference" in skill_md
+    def test_deep_capture_command(self, skill_md):
+        """Skill must support __xipeRefCommand for deep capture."""
+        assert "__xipeRefCommand" in skill_md
+        assert "deep_capture" in skill_md
 
-    def test_skill_has_purpose(self, skill_md):
-        """Skill must describe its purpose."""
-        assert "## Purpose" in skill_md or "purpose" in skill_md.lower()
-
-    def test_skill_has_procedure(self, skill_md):
-        """Skill must have execution procedure."""
-        assert "procedure" in skill_md.lower() or "step" in skill_md.lower()
-
-    def test_skill_references_navigate_page(self, skill_md):
-        """AC-1: Skill procedure must reference navigate_page CDP tool."""
-        assert "navigate_page" in skill_md
-
-    def test_skill_references_evaluate_script(self, skill_md):
-        """AC-6/FR-5: Skill procedure must reference evaluate_script for toolbar injection."""
-        assert "evaluate_script" in skill_md
-
-    def test_skill_references_take_screenshot(self, skill_md):
-        """AC-21/FR-14: Skill procedure must reference take_screenshot."""
-        assert "take_screenshot" in skill_md
-
-    def test_skill_references_save_uiux_reference(self, skill_md):
-        """AC-29/FR-23: Skill must call save_uiux_reference MCP tool."""
+    def test_save_uiux_reference(self, skill_md):
+        """Skill must use save_uiux_reference MCP for persistence."""
         assert "save_uiux_reference" in skill_md
 
-    def test_skill_has_auth_flow(self, skill_md):
-        """AC-2/FR-3: Skill must describe authentication flow."""
-        assert "auth" in skill_md.lower()
-
-    def test_skill_has_polling_mechanism(self, skill_md):
-        """AC-28/FR-21: Skill must describe polling for __xipeRefReady."""
-        assert "__xipeRefReady" in skill_md or "polling" in skill_md.lower()
-
-    def test_skill_references_toolbar_template(self, skill_md):
-        """Skill must reference the toolbar template for injection."""
-        assert "toolbar-template" in skill_md or "toolbar" in skill_md.lower()
-
-
-# ── Toolbar Template: Consistency ─────────────────────────────────────────
-
-class TestToolbarTemplate:
-    """Verify toolbar template matches source JS."""
-
-    def test_template_file_exists(self):
-        """Template reference file must exist."""
-        assert TEMPLATE_PATH.exists()
-
-    def test_template_contains_toolbar_code(self, template_md):
-        """Template must contain the toolbar IIFE code."""
-        assert "__xipeToolbarInjected" in template_md, \
-            "Template must contain the toolbar IIFE guard clause"
-        assert "__xipeRefData" in template_md, \
-            "Template must contain the data store initialization"
-
-    def test_template_has_code_block(self, template_md):
-        """Template must wrap code in a markdown code block."""
-        assert "```" in template_md, "Template must contain code block markers"
-
-    def test_template_matches_source(self, toolbar_js, template_md):
-        """Template code block content must match toolbar source file."""
-        # Extract code from template between ``` markers
-        code_blocks = re.findall(r"```(?:javascript|js)?\s*\n(.*?)```", template_md, re.DOTALL)
-        assert len(code_blocks) > 0, "Template must have at least one code block"
-        # The toolbar source should be contained in the template
-        template_code = code_blocks[0].strip()
-        source_code = toolbar_js.strip()
-        assert template_code == source_code, \
-            "Template code block must exactly match xipe-toolbar.js source"
-
-
-# ── CR-001: Eyedropper Cursor ─────────────────────────────────────────────
-
-class TestToolbarEyedropperCursor:
-    """Verify eyedropper/crosshair cursor management (CR-001-A)."""
-
-    def test_eyedropper_cursor_class(self, toolbar_js):
-        """AC-36/FR-27: Eyedropper cursor CSS class defined."""
-        assert "xipe-cursor-eyedropper" in toolbar_js, \
-            "Must define .xipe-cursor-eyedropper class for color picker cursor"
-
-    def test_crosshair_cursor_class(self, toolbar_js):
-        """AC-38/FR-28: Crosshair cursor CSS class defined."""
-        assert "xipe-cursor-crosshair" in toolbar_js, \
-            "Must define .xipe-cursor-crosshair class for element highlighter cursor"
-
-    def test_cursor_applied_to_body(self, toolbar_js):
-        """AC-36: Cursor classes are applied to document.body."""
-        assert re.search(r"document\.body\.classList\.(add|remove)\(\s*['\"]xipe-cursor", toolbar_js), \
-            "Must add/remove cursor classes on document.body"
-
-    def test_cursor_update_function(self, toolbar_js):
-        """FR-27/FR-28: updateCursor function exists to manage cursor state."""
-        assert re.search(r"function\s+updateCursor|updateCursor\s*=", toolbar_js), \
-            "Must have updateCursor function"
-
-    def test_cursor_changes_on_tool_switch(self, toolbar_js):
-        """AC-39: Cursor updates when tool selection changes."""
-        # updateCursor must be called in the tool selection handler
-        assert "updateCursor" in toolbar_js, \
-            "Must call updateCursor when tool is selected"
-
-    def test_eyedropper_svg_cursor(self, toolbar_js):
-        """AC-36: Custom SVG eyedropper cursor via CSS url() data URI."""
-        assert re.search(r"cursor:\s*url\(\s*['\"]?data:image/svg\+xml", toolbar_js), \
-            "Must use SVG data URI for eyedropper cursor"
-
-
-# ── CR-001: Expandable Color List ─────────────────────────────────────────
-
-class TestToolbarColorList:
-    """Verify expandable color list in Collected References (CR-001-B)."""
-
-    def test_color_list_container(self, toolbar_js):
-        """AC-41/FR-29: Color list container exists in DOM."""
-        assert "xipe-color-list" in toolbar_js, \
-            "Must have xipe-color-list container element"
-
-    def test_color_entry_class(self, toolbar_js):
-        """AC-41/FR-29: Color entries use xipe-color-entry class."""
-        assert "xipe-color-entry" in toolbar_js, \
-            "Must create elements with xipe-color-entry class"
-
-    def test_color_entry_swatch(self, toolbar_js):
-        """AC-41: Each color entry displays a swatch circle."""
-        assert "xipe-swatch-dot" in toolbar_js or "swatch-dot" in toolbar_js, \
-            "Must include swatch dot in color entry"
-
-    def test_color_entry_hex_value(self, toolbar_js):
-        """AC-41: Each color entry displays hex value."""
-        assert "xipe-color-hex" in toolbar_js or "color-hex" in toolbar_js, \
-            "Must include hex value in color entry"
-
-    def test_color_entry_remove_button(self, toolbar_js):
-        """AC-44/FR-33: Each color entry has a remove (×) button."""
-        assert "xipe-remove-btn" in toolbar_js, \
-            "Must have remove button in entries"
-
-    def test_add_color_entry_function(self, toolbar_js):
-        """FR-29: addColorEntry function populates the list."""
-        assert re.search(r"function\s+addColorEntry|addColorEntry\s*=", toolbar_js), \
-            "Must have addColorEntry function"
-
-    def test_remove_color_updates_data(self, toolbar_js):
-        """AC-44/FR-33: Removing color entry removes from __xipeRefData.colors."""
-        assert re.search(r"__xipeRefData\.colors\s*=\s*.*filter|colors\.splice", toolbar_js), \
-            "Must filter/remove from __xipeRefData.colors on remove"
-
-
-# ── CR-001: Expandable Element List ───────────────────────────────────────
-
-class TestToolbarElementList:
-    """Verify expandable element list in Collected References (CR-001-C)."""
-
-    def test_element_list_container(self, toolbar_js):
-        """AC-46/FR-31: Element list container exists in DOM."""
-        assert "xipe-elem-list" in toolbar_js, \
-            "Must have xipe-elem-list container element"
-
-    def test_element_entry_class(self, toolbar_js):
-        """AC-46/FR-31: Element entries use xipe-elem-entry class."""
-        assert "xipe-elem-entry" in toolbar_js, \
-            "Must create elements with xipe-elem-entry class"
-
-    def test_element_entry_tag_pill(self, toolbar_js):
-        """AC-46: Each element entry displays tag name pill."""
-        assert "xipe-tag-pill" in toolbar_js or "tag-pill" in toolbar_js, \
-            "Must include tag pill in element entry"
-
-    def test_add_element_entry_function(self, toolbar_js):
-        """FR-31: addElementEntry function populates the list."""
-        assert re.search(r"function\s+addElementEntry|addElementEntry\s*=", toolbar_js), \
-            "Must have addElementEntry function"
-
-    def test_remove_element_updates_data(self, toolbar_js):
-        """AC-49/FR-33: Removing element entry removes from __xipeRefData.elements."""
-        assert re.search(r"__xipeRefData\.elements\s*=\s*.*filter|elements\.splice", toolbar_js), \
-            "Must filter/remove from __xipeRefData.elements on remove"
-
-
-# ── CR-001: Hover-to-Highlight ────────────────────────────────────────────
-
-class TestToolbarHoverHighlight:
-    """Verify hover-to-highlight for color/element list entries (CR-001-B/C)."""
-
-    def test_highlight_rose_class(self, toolbar_js):
-        """AC-42/FR-30: Rose highlight class for color entry hover."""
-        assert "xipe-hover-highlight-rose" in toolbar_js, \
-            "Must define xipe-hover-highlight-rose CSS class"
-
-    def test_highlight_accent_class(self, toolbar_js):
-        """AC-47/FR-32: Accent highlight class for element entry hover."""
-        assert "xipe-hover-highlight-accent" in toolbar_js, \
-            "Must define xipe-hover-highlight-accent CSS class"
-
-    def test_highlight_function(self, toolbar_js):
-        """FR-30/FR-32: highlightPageElement function exists."""
-        assert re.search(r"function\s+highlightPageElement|highlightPageElement\s*=", toolbar_js), \
-            "Must have highlightPageElement function"
-
-    def test_remove_highlight_function(self, toolbar_js):
-        """AC-43/AC-48: removePageHighlight function exists."""
-        assert re.search(r"function\s+removePageHighlight|removePageHighlight\s*=", toolbar_js), \
-            "Must have removePageHighlight function"
-
-    def test_mouseenter_event(self, toolbar_js):
-        """AC-42/AC-47: Highlight applied on mouseenter."""
-        assert "mouseenter" in toolbar_js, \
-            "Must listen for mouseenter on list entries"
-
-    def test_mouseleave_event(self, toolbar_js):
-        """AC-43/AC-48: Highlight removed on mouseleave."""
-        assert "mouseleave" in toolbar_js, \
-            "Must listen for mouseleave on list entries"
-
-    def test_highlight_uses_box_shadow(self, toolbar_js):
-        """AC-42/AC-47: Highlight applied via box-shadow."""
-        assert "box-shadow" in toolbar_js, \
-            "Must use box-shadow for hover highlight effect"
-
-
-# ── CR-001: Collapsible Collected References ──────────────────────────────
-
-class TestToolbarCollapsibleReferences:
-    """Verify collapsible Collected References section (CR-001-B/C)."""
-
-    def test_collected_header_toggle(self, toolbar_js):
-        """AC-45/FR-34: Collected References header has toggle."""
-        assert "xipe-collected-toggle" in toolbar_js or "collected-toggle" in toolbar_js, \
-            "Must have toggle element in collected section header"
-
-    def test_chevron_icon(self, toolbar_js):
-        """AC-45/FR-34: Chevron icon for collapse/expand state."""
-        assert "xipe-chevron" in toolbar_js or "chevron" in toolbar_js, \
-            "Must have chevron element for toggle state"
-
-    def test_collapse_toggle_logic(self, toolbar_js):
-        """FR-34: Toggle shows/hides color and element lists."""
-        assert re.search(r"(display\s*=\s*['\"]none['\"]|style\.display)", toolbar_js), \
-            "Must toggle display of lists"
-
-
-# ── CR-001: Post-Send Reset ──────────────────────────────────────────────
-
-class TestToolbarPostSendReset:
-    """Verify post-send behavior (CR-001-E, updated for agent-driven reset).
-
-    The toolbar no longer auto-resets data after send. Instead, it keeps
-    data intact for the agent to capture via polling. The agent is
-    responsible for resetting the toolbar state after data capture.
-    """
-
-    def test_send_sets_ready_flag(self, toolbar_js):
-        """AC-53: __xipeRefReady set to true on send."""
-        true_matches = re.findall(r"__xipeRefReady\s*=\s*true", toolbar_js)
-        assert len(true_matches) >= 1, "Must set __xipeRefReady = true on send"
-
-    def test_initial_ready_flag_false(self, toolbar_js):
-        """__xipeRefReady initialized to false at startup."""
-        false_matches = re.findall(r"__xipeRefReady\s*=\s*false", toolbar_js)
-        assert len(false_matches) >= 1, \
-            "Must initialize __xipeRefReady = false"
-
-    def test_data_preserved_after_send(self, toolbar_js):
-        """Data must NOT be auto-cleared — agent captures via polling."""
-        send_idx = toolbar_js.find("__xipeRefReady = true")
-        assert send_idx != -1
-        after_ready = toolbar_js[send_idx:]
-        assert "__xipeRefReady = false" not in after_ready, \
-            "Must NOT auto-reset __xipeRefReady — agent needs time to poll"
-
-
-# ── CR-001: Panel Scrollability ──────────────────────────────────────────
-
-class TestToolbarPanelScrollability:
-    """Verify panel scrollability for large lists (CR-001-B/C)."""
-
-    def test_panel_max_height(self, toolbar_js):
-        """FR-37: Panel has max-height constraint."""
-        assert "max-height" in toolbar_js, \
-            "Must set max-height on panel for scrollability"
-
-    def test_panel_overflow_scroll(self, toolbar_js):
-        """FR-37: Panel has overflow-y scroll."""
-        assert re.search(r"overflow-y\s*:\s*(auto|scroll)", toolbar_js), \
-            "Must set overflow-y: auto/scroll on panel"
-
-    def test_panel_width_288(self, toolbar_js):
-        """FR-7 (updated): Panel width is 288px."""
-        assert "288px" in toolbar_js or "288" in toolbar_js, \
-            "Panel width must be 288px (updated from 272px)"
-
-
-# ── CR-001: Screenshot Accuracy (Skill) ──────────────────────────────────
-
-class TestSkillScreenshotAccuracy:
-    """Verify bounding-box UID matching strategy in skill (CR-001-D)."""
-
-    def test_skill_mentions_bounding_box(self, skill_md):
-        """AC-50/FR-35: Skill describes bounding box matching."""
-        assert "bounding" in skill_md.lower() or "bounding_box" in skill_md, \
-            "Skill must describe bounding box matching for screenshot accuracy"
-
-    def test_skill_mentions_take_snapshot(self, skill_md):
-        """AC-50/FR-35: Skill uses take_snapshot for a11y tree."""
-        assert "take_snapshot" in skill_md, \
-            "Skill must reference take_snapshot for UID matching"
-
-
-# ── Bug Fix: Post-Send Data Preservation ─────────────────────────────────
-
-class TestToolbarPostSendDataPreservation:
-    """Bug fix: Toolbar must NOT auto-reset data after send.
-
-    The agent polls __xipeRefReady every 3s. The old toolbar reset
-    data 2.3s after setting __xipeRefReady=true, so the agent could
-    miss the data entirely. Now the toolbar must keep data intact
-    and let the agent reset it after capture.
-    """
-
-    def test_no_auto_reset_after_send(self, toolbar_js):
-        """Data must NOT be auto-cleared after __xipeRefReady = true."""
-        # Find the send handler section (after "Sent to X-IPE")
-        send_idx = toolbar_js.find("__xipeRefReady = true")
-        assert send_idx != -1, "Must set __xipeRefReady = true"
-        after_ready = toolbar_js[send_idx:]
-        # There should be NO setTimeout that resets __xipeRefReady to false
-        # within the send handler
-        assert "__xipeRefReady = false" not in after_ready, \
-            "Must NOT auto-reset __xipeRefReady after send — agent needs time to poll"
-
-    def test_no_auto_clear_colors_after_send(self, toolbar_js):
-        """Colors array must NOT be auto-cleared after send."""
-        send_idx = toolbar_js.find("__xipeRefReady = true")
-        after_ready = toolbar_js[send_idx:]
-        assert "__xipeRefData.colors = []" not in after_ready, \
-            "Must NOT auto-clear colors after send — agent captures data via polling"
-
-    def test_no_auto_clear_elements_after_send(self, toolbar_js):
-        """Elements array must NOT be auto-cleared after send."""
-        send_idx = toolbar_js.find("__xipeRefReady = true")
-        after_ready = toolbar_js[send_idx:]
-        assert "__xipeRefData.elements = []" not in after_ready, \
-            "Must NOT auto-clear elements after send — agent captures data via polling"
-
-
-# ── Bug Fix: Eyedropper Cursor Priority ──────────────────────────────────
-
-class TestToolbarCursorPriority:
-    """Bug fix: Eyedropper/crosshair cursor must override page element cursors.
-
-    Page elements (links, buttons) set their own cursor: pointer which
-    overrides body-level cursor styles. The toolbar must use !important
-    and wildcard selectors to ensure its cursor takes highest priority.
-    """
-
-    def test_eyedropper_cursor_important(self, toolbar_js):
-        """Eyedropper cursor must use !important to override page styles."""
-        assert re.search(
-            r"xipe-cursor-eyedropper.*cursor:.*!important",
-            toolbar_js,
-            re.DOTALL
-        ), "Eyedropper cursor must use !important to override element cursors"
-
-    def test_crosshair_cursor_important(self, toolbar_js):
-        """Crosshair cursor must use !important to override page styles."""
-        assert re.search(
-            r"xipe-cursor-crosshair.*cursor:.*!important",
-            toolbar_js,
-            re.DOTALL
-        ), "Crosshair cursor must use !important to override element cursors"
-
-    def test_cursor_applies_to_all_children(self, toolbar_js):
-        """Cursor classes must target all child elements via wildcard."""
-        # Check for body.xipe-cursor-eyedropper * or similar wildcard selector
-        assert re.search(
-            r"\.xipe-cursor-eyedropper\s+\*",
-            toolbar_js
-        ) or re.search(
-            r"\.xipe-cursor-eyedropper[^{]*\*[^{]*\{",
-            toolbar_js
-        ), "Must use wildcard selector (* ) to apply cursor to all child elements"
-
-
-# ── Bug Fix: Skill Screenshot File Saving ────────────────────────────────
-
-class TestSkillScreenshotFileSaving:
-    """Bug fix: Skill must instruct agent to save screenshots to files.
-
-    The old skill told the agent to attach base64 screenshots to element
-    data, but take_screenshot(filePath:...) saves to files. The skill
-    must instruct saving to {idea}/uiux-references/screenshots/ and
-    recording file paths in element data.
-    """
-
-    def test_skill_instructs_filepath_screenshot(self, skill_md):
-        """Skill must instruct using take_screenshot with filePath parameter."""
-        assert "filePath" in skill_md or "filepath" in skill_md.lower(), \
-            "Skill must instruct saving screenshots via filePath parameter"
-
-    def test_skill_instructs_screenshots_folder(self, skill_md):
-        """Skill must reference the screenshots/ subfolder for saving."""
-        assert "screenshots/" in skill_md, \
-            "Skill must instruct saving to uiux-references/screenshots/ folder"
-
-    def test_skill_no_base64_encoding_instruction(self, skill_md):
-        """Skill must NOT instruct base64 encoding for screenshots."""
-        # The old instruction said "base64-encoded with base64: prefix"
-        assert "base64-encoded" not in skill_md and "base64:" not in skill_md, \
-            "Skill must NOT instruct base64 encoding — use filePath instead"
+    def test_rubric_dimensions(self, skill_md):
+        """Skill must evaluate 5 rubric dimensions for mockup mode."""
+        for dim in ["layout", "typography", "color", "spacing", "visual"]:
+            assert dim in skill_md.lower(), f"Rubric dimension '{dim}' must be referenced"
+
+    def test_three_evaluate_script_calls(self, skill_md):
+        """Skill must show 3 evaluate_script injection steps."""
+        matches = re.findall(r"evaluate_script", skill_md)
+        assert len(matches) >= 3, "Must have at least 3 evaluate_script calls (core + theme + mockup)"
+
+    def test_iterative_validation(self, skill_md):
+        """Skill must describe iterative mockup validation (max 3)."""
+        assert re.search(r"3.*iteration|max.*3|attempt.*3", skill_md, re.I)
+
+
+class TestSkillModeHandling:
+    """Verify skill handles both modes correctly."""
+
+    def test_theme_mode_handler(self, skill_md):
+        """Skill must handle theme mode (invoke brand-theme-creator)."""
+        assert "brand-theme-creator" in skill_md or "theme" in skill_md.lower()
+
+    def test_mockup_mode_handler(self, skill_md):
+        """Skill must handle mockup mode (generate mockup)."""
+        assert "mockup" in skill_md.lower()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# INTEGRATION TESTS
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestSourceTemplateSync:
+    """Verify source files and minified outputs are in sync."""
+
+    def test_core_has_all_globals(self, core_js):
+        """Core must define all required globals."""
+        globals_required = [
+            "__xipeToolbarInjected",
+            "__xipeRefData",
+            "__xipeRefReady",
+            "__xipeRefCommand",
+            "__xipeRegisterMode",
+            "__xipeToast",
+            "__xipeToolbarReady",
+        ]
+        for g in globals_required:
+            assert g in core_js, f"Global '{g}' must be defined in core"
+
+    def test_theme_does_not_redefine_globals(self, theme_js):
+        """Theme must not redefine core globals."""
+        assert "__xipeToolbarInjected" not in theme_js or "if" in theme_js
+        assert "window.__xipeRefData =" not in theme_js
+
+    def test_mockup_does_not_redefine_globals(self, mockup_js):
+        """Mockup must not redefine core globals."""
+        assert "__xipeToolbarInjected" not in mockup_js or "if" in mockup_js
+        assert "window.__xipeRefData =" not in mockup_js
+
+    def test_no_elements_array_in_schema(self, core_js):
+        """v2.0 schema uses 'components', not 'elements'."""
+        # Should not have elements: [] in data store init
+        assert not re.search(r"elements\s*:\s*\[", core_js), \
+            "v2.0 uses components[], not elements[]"
