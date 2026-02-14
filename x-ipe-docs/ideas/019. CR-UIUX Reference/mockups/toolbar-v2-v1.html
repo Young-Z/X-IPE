@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X-IPE Toolbar v2.0 — CR-UIUX Reference Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   SIMULATED HOST PAGE
+   ═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: #f0f0f0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.sim-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.sim-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0;
+  border-bottom: 1px solid #ddd;
+}
+.sim-nav-logo {
+  font-weight: 700;
+  font-size: 22px;
+  color: #1a1a2e;
+  letter-spacing: -0.5px;
+}
+.sim-nav-links { display: flex; gap: 28px; }
+.sim-nav-links a {
+  text-decoration: none;
+  color: #555;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.sim-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+  padding: 64px 0;
+}
+.sim-hero h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+}
+.sim-hero p {
+  color: #666;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-top: 16px;
+}
+.sim-hero-cta {
+  display: inline-block;
+  margin-top: 24px;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sim-hero-visual {
+  background: linear-gradient(135deg, #e0e7ff, #c7d2fe, #a5b4fc);
+  border-radius: 20px;
+  height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.sim-hero-visual::before {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(99,102,241,0.3), transparent 70%);
+  top: 20%;
+  left: 30%;
+}
+.sim-hero-visual span {
+  font-size: 64px;
+  opacity: 0.5;
+}
+
+.sim-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  padding: 0 0 64px;
+}
+.sim-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border: 1px solid #e8e8f0;
+}
+.sim-card h3 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin-bottom: 8px;
+}
+.sim-card p {
+  font-size: 13px;
+  color: #777;
+  line-height: 1.5;
+}
+.sim-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+/* ═══════════════════════════════════════
+   X-IPE TOOLBAR v2.0 — INJECTED OVERLAY
+   All selectors prefixed with .xipe-
+   ═══════════════════════════════════════ */
+
+/* --- Hamburger FAB --- */
+.xipe-fab {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 99999;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  cursor: grab;
+  background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+  box-shadow:
+    0 4px 16px rgba(15, 23, 42, 0.35),
+    0 0 0 2px rgba(16, 185, 129, 0.25),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none;
+}
+.xipe-fab:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 6px 24px rgba(15, 23, 42, 0.45),
+    0 0 0 3px rgba(16, 185, 129, 0.4),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.xipe-fab-icon {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  color: #10b981;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.xipe-fab.active {
+  transform: scale(0.92);
+  opacity: 0.7;
+}
+
+/* --- Panel Shell --- */
+.xipe-panel {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 99998;
+  width: 310px;
+  max-height: calc(100vh - 28px);
+  background: #0f172a;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow:
+    0 24px 48px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(255,255,255,0.03),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateX(20px) scale(0.96);
+  pointer-events: none;
+  transition: all 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.xipe-panel.open {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  pointer-events: auto;
+}
+
+/* --- Panel Header --- */
+.xipe-panel-header {
+  padding: 16px 18px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.xipe-panel-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.xipe-panel-brand-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+.xipe-panel-brand-text {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: #e2e8f0;
+  letter-spacing: 0.3px;
+}
+.xipe-panel-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.05);
+  color: #94a3b8;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.xipe-panel-close:hover {
+  background: rgba(255,255,255,0.1);
+  color: #e2e8f0;
+}
+
+/* --- Mode Selector (Hamburger Menu) --- */
+.xipe-mode-selector {
+  padding: 12px 14px;
+  display: flex;
+  gap: 6px;
+}
+.xipe-mode-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: transparent;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.xipe-mode-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.xipe-mode-btn.active {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.08);
+}
+.xipe-mode-btn.active::before {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.06), transparent);
+  opacity: 1;
+}
+.xipe-mode-icon {
+  font-size: 20px;
+  display: block;
+  margin-bottom: 4px;
+}
+.xipe-mode-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  display: block;
+}
+.xipe-mode-btn.active .xipe-mode-label {
+  color: #10b981;
+}
+
+/* --- Scrollable Body --- */
+.xipe-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+.xipe-panel-body::-webkit-scrollbar { width: 4px; }
+.xipe-panel-body::-webkit-scrollbar-track { background: transparent; }
+.xipe-panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+/* --- Step Wizard --- */
+.xipe-wizard {
+  padding: 6px 14px 14px;
+  display: none;
+}
+.xipe-wizard.visible { display: block; }
+
+.xipe-step {
+  position: relative;
+  padding-left: 28px;
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+}
+.xipe-step:last-child { padding-bottom: 0; margin-bottom: 0; }
+
+/* Step connector line */
+.xipe-step::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 24px;
+  bottom: -4px;
+  width: 1px;
+  background: rgba(255,255,255,0.06);
+}
+.xipe-step:last-child::before { display: none; }
+.xipe-step.active::before,
+.xipe-step.completed::before {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+/* Step number dot */
+.xipe-step-dot {
+  position: absolute;
+  left: 2px;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  color: #64748b;
+  transition: all 0.3s;
+}
+.xipe-step.active .xipe-step-dot {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
+}
+.xipe-step.completed .xipe-step-dot {
+  border-color: #10b981;
+  background: #10b981;
+  color: #0f172a;
+}
+
+.xipe-step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 4px 0;
+}
+.xipe-step-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #475569;
+  transition: color 0.2s;
+}
+.xipe-step.active .xipe-step-title { color: #e2e8f0; }
+.xipe-step.completed .xipe-step-title { color: #94a3b8; }
+
+.xipe-step-badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.04);
+  color: #64748b;
+}
+.xipe-step.active .xipe-step-badge {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+/* Step content (collapsible) */
+.xipe-step-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s;
+  opacity: 0;
+}
+.xipe-step.active .xipe-step-content {
+  max-height: 600px;
+  opacity: 1;
+}
+.xipe-step-inner {
+  padding: 8px 0 12px;
+}
+
+/* --- Color Picker Items (inside step) --- */
+.xipe-color-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.xipe-color-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.xipe-color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+}
+.xipe-color-info {
+  flex: 1;
+  min-width: 0;
+}
+.xipe-color-hex {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: #e2e8f0;
+  font-weight: 700;
+}
+.xipe-color-source {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+.xipe-color-role {
+  flex-shrink: 0;
+}
+.xipe-color-role-chip {
+  font-family: 'Outfit', sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+}
+.xipe-color-role-chip.primary {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+}
+.xipe-color-role-chip.secondary {
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+}
+.xipe-color-role-chip.accent {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+.xipe-color-role-chip.unset {
+  background: rgba(255,255,255,0.05);
+  color: #64748b;
+  border: 1px dashed rgba(255,255,255,0.1);
+}
+.xipe-color-remove {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.xipe-color-remove:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+/* --- Role Dropdown --- */
+.xipe-role-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.xipe-role-option {
+  font-family: 'Outfit', sans-serif;
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  transition: all 0.2s;
+}
+.xipe-role-option:hover { background: rgba(255,255,255,0.06); }
+.xipe-role-option.selected {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+.xipe-role-custom {
+  flex: 1;
+  min-width: 60px;
+  padding: 4px 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: transparent;
+  color: #e2e8f0;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  outline: none;
+}
+.xipe-role-custom::placeholder { color: #475569; }
+.xipe-role-custom:focus { border-color: rgba(16, 185, 129, 0.3); }
+
+/* --- Component Selector (Mockup mode) --- */
+.xipe-comp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.xipe-comp-item {
+  padding: 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.xipe-comp-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.xipe-comp-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.xipe-comp-tag.section { background: rgba(99, 102, 241, 0.12); color: #818cf8; }
+.xipe-comp-tag.nav { background: rgba(245, 158, 11, 0.12); color: #fbbf24; }
+.xipe-comp-tag.card { background: rgba(16, 185, 129, 0.12); color: #34d399; }
+
+.xipe-comp-selector {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: #64748b;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.xipe-comp-dims {
+  font-family: 'Space Mono', monospace;
+  font-size: 8.5px;
+  color: #475569;
+  margin-top: 5px;
+  display: flex;
+  gap: 10px;
+}
+.xipe-comp-dims span { opacity: 0.7; }
+
+.xipe-comp-thumb {
+  margin-top: 8px;
+  height: 48px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: #475569;
+  font-family: 'Space Mono', monospace;
+}
+
+.xipe-comp-instruction {
+  margin-top: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  color: #e2e8f0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10.5px;
+  outline: none;
+  resize: none;
+  min-height: 32px;
+}
+.xipe-comp-instruction::placeholder { color: #475569; }
+.xipe-comp-instruction:focus { border-color: rgba(16, 185, 129, 0.3); }
+
+/* --- Action Buttons --- */
+.xipe-action-row {
+  padding: 6px 14px 14px;
+}
+.xipe-action-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-family: 'Outfit', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.25s;
+  letter-spacing: 0.2px;
+}
+.xipe-action-btn.primary-action {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  box-shadow:
+    0 2px 8px rgba(16, 185, 129, 0.3),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.xipe-action-btn.primary-action:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 16px rgba(16, 185, 129, 0.4),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.xipe-action-btn.secondary-action {
+  background: rgba(255,255,255,0.04);
+  color: #94a3b8;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.xipe-action-btn.secondary-action:hover {
+  background: rgba(255,255,255,0.07);
+  color: #e2e8f0;
+}
+
+/* --- Toast Notification --- */
+.xipe-toast-area {
+  padding: 0 14px 12px;
+}
+.xipe-toast {
+  padding: 10px 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  animation: xipe-toast-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.xipe-toast.info {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
+}
+.xipe-toast.success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+}
+.xipe-toast.progress {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  color: #fcd34d;
+}
+.xipe-toast-icon { font-size: 14px; flex-shrink: 0; }
+.xipe-toast-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(245, 158, 11, 0.2);
+  border-top-color: #fbbf24;
+  border-radius: 50%;
+  animation: xipe-spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes xipe-toast-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes xipe-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* --- Magnifier Overlay (simulated) --- */
+.xipe-magnifier {
+  position: fixed;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 2px solid rgba(16, 185, 129, 0.6);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.3),
+    0 8px 32px rgba(0,0,0,0.4),
+    inset 0 0 40px rgba(0,0,0,0.15);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 99997;
+  display: none;
+}
+.xipe-magnifier.visible { display: block; }
+.xipe-magnifier-grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  grid-template-rows: repeat(11, 1fr);
+  gap: 0;
+}
+.xipe-magnifier-pixel {
+  border: 0.5px solid rgba(0,0,0,0.08);
+}
+/* Crosshair */
+.xipe-magnifier::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  border: 1.5px solid rgba(16, 185, 129, 0.9);
+  border-radius: 2px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.5);
+  z-index: 2;
+}
+.xipe-magnifier-label {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: #10b981;
+  background: #0f172a;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* --- Smart-Snap Highlight Overlay (simulated) --- */
+.xipe-snap-overlay {
+  position: absolute;
+  border: 2px solid #10b981;
+  background: rgba(16, 185, 129, 0.06);
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 99996;
+  display: none;
+}
+.xipe-snap-overlay.visible { display: block; }
+.xipe-snap-label {
+  position: absolute;
+  top: -22px;
+  left: 0;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: #0f172a;
+  background: #10b981;
+  padding: 2px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.xipe-snap-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border: 1.5px solid #0f172a;
+  border-radius: 2px;
+}
+.xipe-snap-handle.tl { top: -4px; left: -4px; cursor: nw-resize; }
+.xipe-snap-handle.tr { top: -4px; right: -4px; cursor: ne-resize; }
+.xipe-snap-handle.bl { bottom: -4px; left: -4px; cursor: sw-resize; }
+.xipe-snap-handle.br { bottom: -4px; right: -4px; cursor: se-resize; }
+
+/* --- Step instructions text --- */
+.xipe-step-desc {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+.xipe-step-desc strong {
+  color: #94a3b8;
+}
+
+/* --- Activate / Capture Button --- */
+.xipe-capture-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  background: rgba(16, 185, 129, 0.08);
+  color: #10b981;
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+.xipe-capture-btn:hover {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+.xipe-capture-btn.active-picking {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #10b981;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+}
+.xipe-capture-btn .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  animation: xipe-pulse 1.5s ease-in-out infinite;
+}
+@keyframes xipe-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+/* --- Info hint --- */
+.xipe-hint {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  color: #475569;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 6px;
+  border-left: 2px solid rgba(16, 185, 129, 0.3);
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+/* ═══════════════════════════════════════
+   DEMO CONTROLS (not part of toolbar)
+   ═══════════════════════════════════════ */
+.demo-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100000;
+  display: flex;
+  gap: 8px;
+  background: #0f172a;
+  padding: 10px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.demo-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: #94a3b8;
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.2px;
+}
+.demo-btn:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
+.demo-btn.active {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #10b981;
+}
+.demo-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: #475569;
+  align-self: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     SIMULATED HOST PAGE
+     ════════════════════════════════════════ -->
+<div class="sim-page">
+  <nav class="sim-nav">
+    <div class="sim-nav-logo">Acme Studio</div>
+    <div class="sim-nav-links">
+      <a href="#">Products</a>
+      <a href="#">Pricing</a>
+      <a href="#">About</a>
+      <a href="#">Blog</a>
+    </div>
+  </nav>
+
+  <section class="sim-hero" id="sim-hero">
+    <div>
+      <h1>Design tools that<br>inspire creativity</h1>
+      <p>Powerful workspace for designers and developers to create beautiful interfaces together.</p>
+      <button class="sim-hero-cta">Get Started Free</button>
+    </div>
+    <div class="sim-hero-visual">
+      <span>🎨</span>
+    </div>
+  </section>
+
+  <div class="sim-cards">
+    <div class="sim-card">
+      <div class="sim-card-icon" style="background: #ede9fe;">🧩</div>
+      <h3>Component Library</h3>
+      <p>Hundreds of pre-built components ready to use in your projects.</p>
+    </div>
+    <div class="sim-card">
+      <div class="sim-card-icon" style="background: #d1fae5;">⚡</div>
+      <h3>Real-time Sync</h3>
+      <p>Changes appear instantly across all team members' screens.</p>
+    </div>
+    <div class="sim-card">
+      <div class="sim-card-icon" style="background: #fee2e2;">🔒</div>
+      <h3>Enterprise Security</h3>
+      <p>SOC 2 certified with end-to-end encryption for all your data.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     X-IPE TOOLBAR v2.0
+     ════════════════════════════════════════ -->
+
+<!-- FAB Button -->
+<button class="xipe-fab" id="xipeFab" onclick="togglePanel()">
+  <span class="xipe-fab-icon">X-IPE</span>
+</button>
+
+<!-- Panel -->
+<div class="xipe-panel" id="xipePanel">
+  <!-- Header -->
+  <div class="xipe-panel-header">
+    <div class="xipe-panel-brand">
+      <div class="xipe-panel-brand-dot"></div>
+      <span class="xipe-panel-brand-text">X-IPE Reference</span>
+    </div>
+    <button class="xipe-panel-close" onclick="togglePanel()">✕</button>
+  </div>
+
+  <!-- Mode Selector -->
+  <div class="xipe-mode-selector">
+    <button class="xipe-mode-btn active" id="modeTheme" onclick="switchMode('theme')">
+      <span class="xipe-mode-icon">🎨</span>
+      <span class="xipe-mode-label">Catch Theme</span>
+    </button>
+    <button class="xipe-mode-btn" id="modeMockup" onclick="switchMode('mockup')">
+      <span class="xipe-mode-icon">📐</span>
+      <span class="xipe-mode-label">Copy Mockup</span>
+    </button>
+  </div>
+
+  <!-- Scrollable Body -->
+  <div class="xipe-panel-body">
+
+    <!-- ═══ THEME MODE WIZARD ═══ -->
+    <div class="xipe-wizard visible" id="wizardTheme">
+
+      <!-- Step 1: Pick Colors -->
+      <div class="xipe-step active" id="themeStep1">
+        <div class="xipe-step-dot">1</div>
+        <div class="xipe-step-header" onclick="activateStep('theme', 1)">
+          <span class="xipe-step-title">Pick Colors</span>
+          <span class="xipe-step-badge">3 picked</span>
+        </div>
+        <div class="xipe-step-content">
+          <div class="xipe-step-inner">
+            <p class="xipe-step-desc">Click any pixel on the page. A <strong>magnifier</strong> follows your cursor for precision.</p>
+
+            <button class="xipe-capture-btn active-picking" id="colorPickerBtn">
+              <span class="dot"></span>
+              Picking colors…
+            </button>
+
+            <div class="xipe-color-list">
+              <div class="xipe-color-item">
+                <div class="xipe-color-swatch" style="background: #6366f1;"></div>
+                <div class="xipe-color-info">
+                  <div class="xipe-color-hex">#6366f1</div>
+                  <div class="xipe-color-source">.sim-hero-cta background</div>
+                </div>
+                <div class="xipe-color-role">
+                  <span class="xipe-color-role-chip primary">PRIMARY</span>
+                </div>
+                <button class="xipe-color-remove">×</button>
+              </div>
+              <div class="xipe-color-item">
+                <div class="xipe-color-swatch" style="background: #1a1a2e;"></div>
+                <div class="xipe-color-info">
+                  <div class="xipe-color-hex">#1a1a2e</div>
+                  <div class="xipe-color-source">.sim-hero h1 color</div>
+                </div>
+                <div class="xipe-color-role">
+                  <span class="xipe-color-role-chip secondary">SECONDARY</span>
+                </div>
+                <button class="xipe-color-remove">×</button>
+              </div>
+              <div class="xipe-color-item">
+                <div class="xipe-color-swatch" style="background: #a5b4fc;"></div>
+                <div class="xipe-color-info">
+                  <div class="xipe-color-hex">#a5b4fc</div>
+                  <div class="xipe-color-source">.sim-hero-visual gradient</div>
+                </div>
+                <div class="xipe-color-role">
+                  <span class="xipe-color-role-chip accent">ACCENT</span>
+                </div>
+                <button class="xipe-color-remove">×</button>
+              </div>
+            </div>
+
+            <div class="xipe-hint">💡 Tip: Click on images, videos, or gradients — the offscreen canvas samples any visual content.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Annotate Roles -->
+      <div class="xipe-step" id="themeStep2">
+        <div class="xipe-step-dot">2</div>
+        <div class="xipe-step-header" onclick="activateStep('theme', 2)">
+          <span class="xipe-step-title">Annotate Roles</span>
+          <span class="xipe-step-badge">assign</span>
+        </div>
+        <div class="xipe-step-content">
+          <div class="xipe-step-inner">
+            <p class="xipe-step-desc">Tag each color with a role. Choose a preset or type a custom label.</p>
+            <div class="xipe-role-picker">
+              <button class="xipe-role-option selected">Primary</button>
+              <button class="xipe-role-option">Secondary</button>
+              <button class="xipe-role-option">Accent</button>
+              <input class="xipe-role-custom" type="text" placeholder="custom…">
+            </div>
+            <div class="xipe-hint">Roles help the theme creator map colors to semantic tokens (background, surface, text, etc.)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Create Theme -->
+      <div class="xipe-step" id="themeStep3">
+        <div class="xipe-step-dot">3</div>
+        <div class="xipe-step-header" onclick="activateStep('theme', 3)">
+          <span class="xipe-step-title">Create Theme</span>
+          <span class="xipe-step-badge">ready</span>
+        </div>
+        <div class="xipe-step-content">
+          <div class="xipe-step-inner">
+            <p class="xipe-step-desc">Send picked colors to agent. The <strong>brand-theme-creator</strong> skill generates a full design system.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MOCKUP MODE WIZARD ═══ -->
+    <div class="xipe-wizard" id="wizardMockup">
+
+      <!-- Step 1: Select Components -->
+      <div class="xipe-step active" id="mockupStep1">
+        <div class="xipe-step-dot">1</div>
+        <div class="xipe-step-header" onclick="activateStep('mockup', 1)">
+          <span class="xipe-step-title">Select Components</span>
+          <span class="xipe-step-badge">2 selected</span>
+        </div>
+        <div class="xipe-step-content">
+          <div class="xipe-step-inner">
+            <p class="xipe-step-desc">Click elements on the page. Auto-snaps to the nearest <strong>semantic container</strong>. Drag handles to resize.</p>
+
+            <button class="xipe-capture-btn active-picking" id="compSelectorBtn">
+              <span class="dot"></span>
+              Selecting…
+            </button>
+
+            <div class="xipe-comp-list">
+              <div class="xipe-comp-item">
+                <div class="xipe-comp-item-header">
+                  <span class="xipe-comp-tag section">section</span>
+                  <span class="xipe-comp-selector">body &gt; .sim-page &gt; .sim-hero</span>
+                </div>
+                <div class="xipe-comp-dims">
+                  <span>1200 × 320px</span>
+                  <span>x:0 y:64</span>
+                </div>
+                <div class="xipe-comp-thumb">📸 screenshot captured</div>
+              </div>
+
+              <div class="xipe-comp-item">
+                <div class="xipe-comp-item-header">
+                  <span class="xipe-comp-tag nav">nav</span>
+                  <span class="xipe-comp-selector">body &gt; .sim-page &gt; .sim-nav</span>
+                </div>
+                <div class="xipe-comp-dims">
+                  <span>1200 × 56px</span>
+                  <span>x:0 y:0</span>
+                </div>
+                <div class="xipe-comp-thumb">📸 screenshot captured</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Add Instructions -->
+      <div class="xipe-step" id="mockupStep2">
+        <div class="xipe-step-dot">2</div>
+        <div class="xipe-step-header" onclick="activateStep('mockup', 2)">
+          <span class="xipe-step-title">Add Instructions</span>
+          <span class="xipe-step-badge">notes</span>
+        </div>
+        <div class="xipe-step-content">
+          <div class="xipe-step-inner">
+            <p class="xipe-step-desc">Add context for each component. The agent uses these to understand intent.</p>
+            <div class="xipe-comp-list">
+              <div class="xipe-comp-item">
+                <div class="xipe-comp-item-header">
+                  <span class="xipe-comp-tag section">section</span>
+                  <span class="xipe-comp-selector">.sim-hero</span>
+                </div>
+                <textarea class="xipe-comp-instruction" placeholder="Add notes…" rows="2">Hero section with gradient visual. Parallax effect on scroll.</textarea>
+              </div>
+              <div class="xipe-comp-item">
+                <div class="xipe-comp-item-header">
+                  <span class="xipe-comp-tag nav">nav</span>
+                  <span class="xipe-comp-selector">.sim-nav</span>
+                </div>
+                <textarea class="xipe-comp-instruction" placeholder="Add notes…" rows="2">Sticky navigation bar with logo and horizontal links.</textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Analyze -->
+      <div class="xipe-step" id="mockupStep3">
+        <div class="xipe-step-dot">3</div>
+        <div class="xipe-step-header" onclick="activateStep('mockup', 3)">
+          <span class="xipe-step-title">Analyze</span>
+          <span class="xipe-step-badge">agent</span>
+        </div>
+        <div class="xipe-step-content">
+          <div class="xipe-step-inner">
+            <p class="xipe-step-desc">Agent assesses captured data across <strong>5 dimensions</strong> (layout, typography, color, spacing, effects). May request deeper capture if needed.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Generate Mockup -->
+      <div class="xipe-step" id="mockupStep4">
+        <div class="xipe-step-dot">4</div>
+        <div class="xipe-step-header" onclick="activateStep('mockup', 4)">
+          <span class="xipe-step-title">Generate Mockup</span>
+          <span class="xipe-step-badge">create</span>
+        </div>
+        <div class="xipe-step-content">
+          <div class="xipe-step-inner">
+            <p class="xipe-step-desc">Saves metadata, then generates a <strong>1:1 mockup</strong>. Validates against original screenshot (max 3 iterations).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end panel-body -->
+
+  <!-- Action Button -->
+  <div class="xipe-action-row" id="actionRow">
+    <button class="xipe-action-btn primary-action" id="mainActionBtn">
+      🎨 Create Theme
+    </button>
+  </div>
+
+  <!-- Toast -->
+  <div class="xipe-toast-area" id="toastArea"></div>
+
+</div><!-- end panel -->
+
+<!-- ════════════════════════════════════════
+     MAGNIFIER (simulated position)
+     ════════════════════════════════════════ -->
+<div class="xipe-magnifier visible" id="magnifier" style="top: 200px; left: 380px;">
+  <div class="xipe-magnifier-grid" id="magnifierGrid"></div>
+  <span class="xipe-magnifier-label">#6366f1</span>
+</div>
+
+<!-- ════════════════════════════════════════
+     SMART-SNAP OVERLAY (simulated)
+     ════════════════════════════════════════ -->
+<div class="xipe-snap-overlay visible" id="snapOverlay" style="display:none;">
+  <span class="xipe-snap-label">&lt;section&gt; .sim-hero</span>
+  <div class="xipe-snap-handle tl"></div>
+  <div class="xipe-snap-handle tr"></div>
+  <div class="xipe-snap-handle bl"></div>
+  <div class="xipe-snap-handle br"></div>
+</div>
+
+<!-- ════════════════════════════════════════
+     DEMO CONTROLS
+     ════════════════════════════════════════ -->
+<div class="demo-controls">
+  <span class="demo-label">View:</span>
+  <button class="demo-btn active" id="demoTheme" onclick="demoSwitch('theme')">🎨 Theme Mode</button>
+  <button class="demo-btn" id="demoMockup" onclick="demoSwitch('mockup')">📐 Mockup Mode</button>
+  <button class="demo-btn" id="demoMagnifier" onclick="demoToggleMagnifier()">🔍 Magnifier</button>
+  <button class="demo-btn" id="demoSnap" onclick="demoToggleSnap()">📦 Smart Snap</button>
+  <button class="demo-btn" id="demoToast" onclick="demoShowToast()">💬 Toast</button>
+</div>
+
+<script>
+// ═══ Panel toggle ═══
+function togglePanel() {
+  const panel = document.getElementById('xipePanel');
+  const fab = document.getElementById('xipeFab');
+  panel.classList.toggle('open');
+  fab.classList.toggle('active');
+}
+
+// ═══ Mode switching ═══
+function switchMode(mode) {
+  document.getElementById('modeTheme').classList.toggle('active', mode === 'theme');
+  document.getElementById('modeMockup').classList.toggle('active', mode === 'mockup');
+  document.getElementById('wizardTheme').classList.toggle('visible', mode === 'theme');
+  document.getElementById('wizardMockup').classList.toggle('visible', mode === 'mockup');
+
+  const btn = document.getElementById('mainActionBtn');
+  if (mode === 'theme') {
+    btn.className = 'xipe-action-btn primary-action';
+    btn.innerHTML = '🎨 Create Theme';
+  } else {
+    btn.className = 'xipe-action-btn primary-action';
+    btn.innerHTML = '📐 Analyze & Generate';
+  }
+
+  // Toggle overlays
+  document.getElementById('magnifier').style.display = mode === 'theme' ? 'block' : 'none';
+  const snap = document.getElementById('snapOverlay');
+  if (mode === 'mockup') showSnapOverlay(); else snap.style.display = 'none';
+}
+
+// ═══ Step activation ═══
+function activateStep(wizard, stepNum) {
+  const prefix = wizard === 'theme' ? 'themeStep' : 'mockupStep';
+  const maxSteps = wizard === 'theme' ? 3 : 4;
+  for (let i = 1; i <= maxSteps; i++) {
+    const el = document.getElementById(prefix + i);
+    if (!el) continue;
+    if (i < stepNum) {
+      el.className = 'xipe-step completed';
+    } else if (i === stepNum) {
+      el.className = 'xipe-step active';
+    } else {
+      el.className = 'xipe-step';
+    }
+  }
+}
+
+// ═══ Magnifier pixel grid ═══
+function buildMagnifier() {
+  const grid = document.getElementById('magnifierGrid');
+  const colors = [
+    '#c7d2fe','#c7d2fe','#c7d2fe','#bfcbfd','#b4c0fc','#a8b5fb','#a5b4fc','#a5b4fc','#a8b5fb','#b4c0fc','#bfcbfd',
+    '#c7d2fe','#bfcbfd','#b4c0fc','#a8b5fb','#9da9fa','#8b96f8','#7c85f6','#7c85f6','#8b96f8','#9da9fa','#a8b5fb',
+    '#bfcbfd','#b4c0fc','#a8b5fb','#9097f7','#7c85f6','#6e76f4','#6366f1','#6366f1','#6e76f4','#7c85f6','#9097f7',
+    '#b4c0fc','#a8b5fb','#9097f7','#7c85f6','#6e76f4','#6366f1','#5b5ee9','#5b5ee9','#6366f1','#6e76f4','#7c85f6',
+    '#a8b5fb','#9da9fa','#7c85f6','#6e76f4','#6366f1','#5b5ee9','#5558e0','#5558e0','#5b5ee9','#6366f1','#6e76f4',
+    '#a5b4fc','#8b96f8','#6e76f4','#6366f1','#5b5ee9','#5558e0','#5255d8','#5255d8','#5558e0','#5b5ee9','#6366f1',
+    '#a5b4fc','#7c85f6','#6366f1','#5b5ee9','#5558e0','#5255d8','#504fd0','#504fd0','#5255d8','#5558e0','#5b5ee9',
+    '#a5b4fc','#7c85f6','#6366f1','#5b5ee9','#5558e0','#5255d8','#504fd0','#504fd0','#5255d8','#5558e0','#5b5ee9',
+    '#a8b5fb','#8b96f8','#6e76f4','#6366f1','#5b5ee9','#5558e0','#5255d8','#5255d8','#5558e0','#5b5ee9','#6366f1',
+    '#b4c0fc','#9da9fa','#7c85f6','#6e76f4','#6366f1','#5b5ee9','#5558e0','#5558e0','#5b5ee9','#6366f1','#6e76f4',
+    '#bfcbfd','#a8b5fb','#9097f7','#7c85f6','#6e76f4','#6366f1','#5b5ee9','#5b5ee9','#6366f1','#6e76f4','#7c85f6',
+  ];
+  grid.innerHTML = '';
+  colors.forEach(c => {
+    const px = document.createElement('div');
+    px.className = 'xipe-magnifier-pixel';
+    px.style.background = c;
+    grid.appendChild(px);
+  });
+}
+buildMagnifier();
+
+// ═══ Smart-snap overlay ═══
+function showSnapOverlay() {
+  const hero = document.getElementById('sim-hero');
+  if (!hero) return;
+  const rect = hero.getBoundingClientRect();
+  const snap = document.getElementById('snapOverlay');
+  snap.style.display = 'block';
+  snap.style.position = 'fixed';
+  snap.style.top = rect.top + 'px';
+  snap.style.left = rect.left + 'px';
+  snap.style.width = rect.width + 'px';
+  snap.style.height = rect.height + 'px';
+}
+
+// ═══ Demo controls ═══
+function demoSwitch(mode) {
+  switchMode(mode);
+  document.getElementById('demoTheme').classList.toggle('active', mode === 'theme');
+  document.getElementById('demoMockup').classList.toggle('active', mode === 'mockup');
+}
+
+function demoToggleMagnifier() {
+  const m = document.getElementById('magnifier');
+  const btn = document.getElementById('demoMagnifier');
+  const vis = m.style.display !== 'none';
+  m.style.display = vis ? 'none' : 'block';
+  btn.classList.toggle('active', !vis);
+}
+
+function demoToggleSnap() {
+  const s = document.getElementById('snapOverlay');
+  const btn = document.getElementById('demoSnap');
+  if (s.style.display === 'none') {
+    showSnapOverlay();
+    btn.classList.add('active');
+  } else {
+    s.style.display = 'none';
+    btn.classList.remove('active');
+  }
+}
+
+let toastIdx = 0;
+const toasts = [
+  { type: 'info', icon: 'ℹ️', text: 'Color picker activated — click any pixel' },
+  { type: 'progress', spinner: true, text: 'Generating design system…' },
+  { type: 'success', icon: '✓', text: 'Theme created — design-system.md saved' },
+  { type: 'progress', spinner: true, text: 'Agent analyzing captured components…' },
+  { type: 'info', icon: '📦', text: 'Requesting deeper CSS capture for .sim-hero' },
+  { type: 'success', icon: '✓', text: 'Mockup generated — 94% match ✓' },
+];
+function demoShowToast() {
+  const area = document.getElementById('toastArea');
+  const t = toasts[toastIdx % toasts.length];
+  toastIdx++;
+  const toast = document.createElement('div');
+  toast.className = 'xipe-toast ' + t.type;
+  toast.innerHTML = (t.spinner
+    ? '<div class="xipe-toast-spinner"></div>'
+    : '<span class="xipe-toast-icon">' + t.icon + '</span>')
+    + '<span>' + t.text + '</span>';
+  area.innerHTML = '';
+  area.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 4000);
+}
+
+// Auto-open panel on load
+setTimeout(() => togglePanel(), 600);
+</script>
+</body>
+</html>

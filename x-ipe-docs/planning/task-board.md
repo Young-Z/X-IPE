@@ -26,6 +26,7 @@
 | TASK-423 | Bug Fix | Fix 3 UIUX reference bugs: (1) post-send reset clears data before agent capture, (2) eyedropper cursor overridden by page hover effects, (3) screenshots not saved to screenshots folder | Pulse ✅ | ✅ completed | 02-14-2026 04:05:00 | src/x_ipe/static/js/injected/xipe-toolbar.js, .github/skills/x-ipe-tool-uiux-reference/SKILL.md, .github/skills/x-ipe-tool-uiux-reference/references/toolbar-template.md, tests/test_uiux_reference_toolbar.py | - |
 | TASK-424 | Bug Fix | Fix 2 color picker bugs: (1) z-index overlap causes wrong e.target — use elementsFromPoint, (2) image/canvas/gradient pixel colors unreadable by getComputedStyle — add canvas pixel sampling | Rune ✅ | ✅ completed | 02-14-2026 04:26:00 | src/x_ipe/static/js/injected/xipe-toolbar.js, .github/skills/x-ipe-tool-uiux-reference/references/toolbar-template.md, tests/test_uiux_reference_toolbar.py | - |
 | TASK-425 | Ideation | Refine idea 019: CR-UIUX Reference — Catch Design Theme & Copy Design as Mockup toolbar features | Cipher ✅ | ✅ completed | 02-14-2026 06:30:00 | x-ipe-docs/ideas/019. CR-UIUX Reference/idea-summary-v2.md | Idea Mockup |
+| TASK-426 | Idea Mockup | IDEA-019: Create toolbar mockup for CR-UIUX Reference (Catch Design Theme + Copy Design as Mockup) | Cipher 🔄 | 🔄 in_progress | 02-14-2026 06:57:00 | - | Requirement Gathering |
 
 
 
@@ -89,8 +90,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 7
-- **In Progress:** 0
+- **Total Active:** 8
+- **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
 - **Completed (archived):** 418
