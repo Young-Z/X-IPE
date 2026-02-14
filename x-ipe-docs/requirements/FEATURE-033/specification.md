@@ -1,9 +1,9 @@
 # Feature Specification: App-Agent Interaction MCP
 
 > Feature ID: FEATURE-033
-> Version: v1.0
+> Version: v1.1
 > Status: Refined
-> Last Updated: 02-13-2026
+> Last Updated: 02-14-2026
 
 ## Version History
 
@@ -27,6 +27,9 @@ The primary users are CLI agents that interact with the X-IPE system. The Flask 
 - As a **developer**, I want to **add new MCP tools for future app-agent interactions**, so that **the MCP server can be extended without architectural changes**.
 - As a **CLI agent**, I want to **save multiple reference sessions for the same idea**, so that **each session is preserved and a merged view is maintained**.
 - As a **CLI agent**, I want to **include base64-encoded screenshots in the reference data**, so that **the Flask endpoint decodes and saves them as image files**.
+- As a **CLI agent**, I want to **inject a JavaScript file into the currently active browser page via an MCP tool**, so that **I can set up toolbars and utilities without wasting context tokens on inline script content**. *(v1.1 — CR-001)*
+- As a **CLI agent**, I want to **inject inline JavaScript code into the browser page via an MCP tool**, so that **I can execute small scripts without needing a file on disk**. *(v1.1 — CR-001)*
+- As a **CLI agent**, I want to **receive clear feedback when script injection fails** (e.g., no browser, wrong page), so that **I can diagnose and retry**. *(v1.1 — CR-001)*
 
 ## Acceptance Criteria
 
@@ -72,6 +75,35 @@ The primary users are CLI agents that interact with the X-IPE system. The Flask 
 - [ ] Given an idea folder exists but has no `uiux-references/` subfolder
 - [ ] When the first reference session is saved
 - [ ] Then the Flask endpoint automatically creates the `uiux-references/`, `uiux-references/sessions/`, and `uiux-references/screenshots/` directories
+
+### AC-033.9: Inject Script from File *(v1.1 — CR-001)*
+- [ ] Given the MCP server is running and a browser page is open with Chrome remote debugging enabled (`--remote-debugging-port`)
+- [ ] When the agent calls `inject_script` with `file_path` pointing to a valid JavaScript file (e.g., `toolbar.min.js`)
+- [ ] Then the MCP server reads the file content, connects to the browser via CDP WebSocket, executes `Runtime.evaluate` with the file content on the active page, and returns a success response
+- [ ] And the script executes in the page context with full DOM access
+
+### AC-033.10: Inject Inline Script *(v1.1 — CR-001)*
+- [ ] Given the MCP server is running and a browser page is open with Chrome remote debugging enabled
+- [ ] When the agent calls `inject_script` with `script` containing inline JavaScript code (and no `file_path`)
+- [ ] Then the MCP server connects via CDP and executes the inline script on the active page
+- [ ] And returns the script's return value (if JSON-serializable) in the response
+
+### AC-033.11: CDP Connection Discovery *(v1.1 — CR-001)*
+- [ ] Given Chrome is running with `--remote-debugging-port=9222`
+- [ ] When the agent calls `inject_script`
+- [ ] Then the MCP server discovers available pages via `GET http://localhost:{port}/json`
+- [ ] And selects the first non-extension, non-devtools page (or the page matching an optional `target_url` parameter)
+- [ ] And connects via the page's `webSocketDebuggerUrl`
+
+### AC-033.12: Injection Error — No Browser *(v1.1 — CR-001)*
+- [ ] Given Chrome is not running or remote debugging is not enabled
+- [ ] When the agent calls `inject_script`
+- [ ] Then the MCP tool returns a structured error: `{ "error": "CDP_CONNECTION_FAILED", "message": "Cannot connect to Chrome DevTools at localhost:{port}. Ensure Chrome is running with --remote-debugging-port={port}" }`
+
+### AC-033.13: Injection Error — Script Evaluation Failure *(v1.1 — CR-001)*
+- [ ] Given a browser page is available via CDP
+- [ ] When the agent calls `inject_script` with a script that throws a runtime error
+- [ ] Then the MCP tool returns a structured error containing the exception message and stack trace from the browser
 
 ## Functional Requirements
 
@@ -138,6 +170,30 @@ The primary users are CLI agents that interact with the X-IPE system. The Flask 
 - Process: Register tool with the MCP server framework; each tool maps to a Flask backend endpoint
 - Output: Tool available for agent use
 
+### FR-033.8: MCP Tool — `inject_script` *(v1.1 — CR-001)*
+
+**Description:** An MCP tool that injects JavaScript into the active browser page via Chrome DevTools Protocol (CDP).
+
+**Details:**
+- Input: One of the following (mutually exclusive):
+  - `file_path` (string): Absolute or project-relative path to a `.js` file to inject
+  - `script` (string): Inline JavaScript code to execute
+- Optional input:
+  - `target_url` (string, optional): URL pattern to match a specific browser tab (default: first non-extension page)
+  - `cdp_port` (integer, optional): Chrome remote debugging port (default: 9222)
+- Process: Read file content (if `file_path`), discover browser pages via CDP HTTP endpoint, select target page, connect via WebSocket, send `Runtime.evaluate` command, return result or error
+- Output: Success response with script evaluation result, or structured error
+
+### FR-033.9: CDP Client Module *(v1.1 — CR-001)*
+
+**Description:** A lightweight CDP (Chrome DevTools Protocol) client for browser communication.
+
+**Details:**
+- Input: CDP port number, optional target URL pattern
+- Process: HTTP GET `localhost:{port}/json` for page discovery, WebSocket connect to `webSocketDebuggerUrl`, send/receive CDP JSON messages
+- Output: Page list for discovery, script evaluation result for injection
+- Constraints: Short-lived connections (connect → evaluate → disconnect) to avoid conflicts with Chrome DevTools MCP; no Playwright/Puppeteer dependency; use `websockets` Python package
+
 ## Non-Functional Requirements
 
 ### NFR-033.1: MCP Convention Compliance
@@ -193,6 +249,7 @@ Not applicable — FEATURE-033 is a backend-only feature (MCP server + Flask end
 - **FastMCP** (Python package): MCP server framework for creating the standalone server
 - **Flask** (existing): Web framework for the new endpoint
 - **Chrome DevTools MCP** (existing, external): Provides the browser interaction that generates the reference data (upstream dependency, not direct)
+- **websockets** (Python package): WebSocket client for CDP communication *(v1.1 — CR-001)*
 
 ## Business Rules
 
@@ -201,6 +258,9 @@ Not applicable — FEATURE-033 is a backend-only feature (MCP server + Flask end
 - **BR-033.3:** Base64 screenshot data in submitted JSON must be prefixed with `base64:` to distinguish from file path references
 - **BR-033.4:** The Flask endpoint must only write to idea folders that already exist — it must not create new idea folders
 - **BR-033.5:** Session numbering is sequential and gap-free within an idea; determined by scanning existing files, not by trusting client-provided `session_id`
+- **BR-033.6:** CDP connections for `inject_script` must be short-lived (connect → evaluate → disconnect) to avoid conflicts with Chrome DevTools MCP server sessions *(v1.1 — CR-001)*
+- **BR-033.7:** The `inject_script` tool requires exactly one of `file_path` or `script` — providing both or neither is a validation error *(v1.1 — CR-001)*
+- **BR-033.8:** File paths provided to `inject_script` must be resolved relative to the project root; absolute paths are also accepted *(v1.1 — CR-001)*
 
 ## Edge Cases & Constraints
 
@@ -214,6 +274,12 @@ Not applicable — FEATURE-033 is a backend-only feature (MCP server + Flask end
 | Flask backend restarts between MCP tool calls | MCP tool retries once after a connection error before returning failure |
 | Session folder already has files with gaps (e.g., 001, 003) | Next session is 004 (use max existing + 1, not count) |
 | Reference data contains `colors` with duplicate `id` values within the same session | Accept as-is (validation is per-field, not cross-field); merging deduplicates by `id` keeping latest |
+| CDP port is in use by another service (not Chrome) | `inject_script` returns `CDP_CONNECTION_FAILED` with descriptive message *(v1.1)* |
+| Multiple Chrome pages open; no `target_url` provided | Select the first non-extension, non-devtools page from the page list *(v1.1)* |
+| Script file does not exist at `file_path` | Return `FILE_NOT_FOUND` error with the resolved path *(v1.1)* |
+| Script file is very large (>1MB) | Accept and inject — `Runtime.evaluate` handles large scripts; log a warning *(v1.1)* |
+| Chrome DevTools MCP has an active session on the same page | Short-lived CDP connection avoids conflicts; connect → evaluate → disconnect immediately *(v1.1)* |
+| `file_path` points outside project directory | Accept the path — agent may need to inject scripts from skill folders or other locations *(v1.1)* |
 
 ## Out of Scope
 
@@ -224,6 +290,8 @@ Not applicable — FEATURE-033 is a backend-only feature (MCP server + Flask end
 - **MCP authentication/authorization** — not needed for local-only communication
 - **WebSocket/SSE real-time updates** — not needed for Phase 1 (simple request-response)
 - **Binary asset storage** (computed-styles.json, rules.css, fonts, icons) — Phase 1 only handles screenshots; extended asset storage is Phase 2
+- **Browser lifecycle management** via `inject_script` — the tool does not launch, close, or navigate Chrome; it only injects into an already-open page *(v1.1)*
+- **Persistent CDP sessions** — `inject_script` uses ephemeral connections; persistent page monitoring or event subscriptions are not supported *(v1.1)*
 
 ## Technical Considerations
 
@@ -233,6 +301,9 @@ Not applicable — FEATURE-033 is a backend-only feature (MCP server + Flask end
 - Atomic file writes (write to `.tmp`, then `os.rename`) should be used for both session files and `reference-data.json` to prevent partial writes
 - The MCP server needs to know the Flask backend URL; this should be configurable (default `http://localhost:5000`)
 - The `x_ipe_tracing` decorator should be applied to the Flask endpoint for consistency with existing routes
+- The `inject_script` tool should use a lightweight CDP client (~50 lines) built on the `websockets` Python package — no Playwright/Puppeteer dependency *(v1.1 — CR-001)*
+- CDP page discovery via `GET http://localhost:{port}/json` returns a JSON array of page descriptors; filter by `type == "page"` and exclude `chrome-extension://` URLs *(v1.1 — CR-001)*
+- The `inject_script` tool does not route through the Flask backend — it communicates directly with Chrome via CDP WebSocket, keeping the tool self-contained within the MCP server *(v1.1 — CR-001)*
 
 ## Open Questions
 

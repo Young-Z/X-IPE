@@ -38,6 +38,7 @@
 | TASK-435 | Bug Fix | Console auto-scroll pause not working — viewport wheel listener & scroll-event reset race condition (regression of TASK-414) | Drift ✅ | ✅ completed | 02-14-2026 10:00:00 | src/x_ipe/static/js/terminal.js, tests/test_terminal.py | - |
 | TASK-436 | Feature Acceptance Test | FEATURE-030-B-THEME + FEATURE-030-B-MOCKUP: Quick acceptance test — inject toolbar, verify theme mode + mockup mode | Spark ✅ | ✅ completed | 02-14-2026 13:15:00 | FEATURE-030-B-THEME/acceptance-test-cases.md, FEATURE-030-B-MOCKUP/acceptance-test-cases.md | Feature Closing |
 | TASK-437 | Change Request | CR-001 for FEATURE-033: Add inject_script tool to MCP server for browser script injection via CDP | Bolt ✅ | ✅ completed | 02-14-2026 15:22:00 | x-ipe-docs/requirements/FEATURE-033/CR-001.md, specification.md | Feature Refinement |
+| TASK-438 | Feature Refinement | FEATURE-033 v1.1: Update specification for inject_script tool (CR-001) | Bolt ✅ | ✅ completed | 02-14-2026 15:25:00 | x-ipe-docs/requirements/FEATURE-033/specification.md | Technical Design |
 
 ---
 
