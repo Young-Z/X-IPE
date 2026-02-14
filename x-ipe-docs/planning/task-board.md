@@ -22,6 +22,7 @@
 | TASK-419 | Test Generation | FEATURE-030-B v1.1: Generate tests for CR-001 enhancements (eyedropper cursor, expandable lists, hover-highlight, screenshot accuracy, post-send reset) | Nova ✅ | ✅ completed | 02-14-2026 03:50:00 | tests/test_uiux_reference_toolbar.py | Code Implementation |
 | TASK-420 | Code Implementation | FEATURE-030-B v1.1: Implement CR-001 enhancements in toolbar IIFE (eyedropper cursor, expandable lists, hover-highlight, screenshot accuracy, post-send reset) | Nova ✅ | ✅ completed | 02-14-2026 03:55:00 | 02-14-2026 04:30:00 | Feature Acceptance Test |
 | TASK-421 | Feature Acceptance Test | FEATURE-030-B v1.1: Acceptance test CR-001 toolbar enhancements — inject toolbar, verify eyedropper cursor, color/element lists, hover highlights, post-send reset | Nova ✅ | ✅ completed | 02-14-2026 04:35:00 | x-ipe-docs/requirements/FEATURE-030-B/acceptance-test-cases.md | Feature Closing |
+| TASK-422 | Feature Closing | FEATURE-030-B v1.1: Close CR-001 — commit all changes, update task board | Nova ✅ | ✅ completed | 02-14-2026 04:50:00 | commit c83c8ec | - |
 
 
 
@@ -89,7 +90,7 @@
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 414
+- **Completed (archived):** 415
 - **Pending Review:** 0
 - **Blocked:** 0
 
