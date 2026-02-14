@@ -104,7 +104,13 @@
 |----------|--------|
 | Relationship to FEATURE-022? | **Independent** — FEATURE-022 uses iframe for localhost; UIUX Reference uses CDP for real external pages. May backport technique later. |
 | Browser infrastructure? | Independent CDP connection — not dependent on FEATURE-022 infrastructure. |
-| Phase scope? | 3 phases: Phase 1 (030-A/B), Phase 2 (031), Phase 3 (032). |
+| Phase scope? | ~~3 phases: Phase 1 (030-A/B), Phase 2 (031), Phase 3 (032).~~ Revised: Phase 2 (031) and Phase 3 (032) cancelled — absorbed into CR-002 on FEATURE-030-B v2.0. |
+
+> **⚠️ CR Impact Note** (added 02-14-2026, ref: IDEA-019 / CR-002)
+> - **Change:** Complete toolbar redesign — v1.1 standalone tools replaced by two-mode wizard (Catch Design Theme + Copy Design as Mockup)
+> - **Affected FRs:** All existing FRs (FR-1 through FR-37) — v1.x user stories and FRs to be deprecated and replaced
+> - **Action Required:** Feature specification refactoring to v2.0 needed before implementation
+> - **Source:** IDEA-019 (CR-UIUX Reference) — see [idea-summary-v3.md](../ideas/019.%20CR-UIUX%20Reference/idea-summary-v3.md)
 
 ---
 
@@ -295,3 +301,4 @@ The user wants:
 | Injected Reference Toolbar (light editorial theme) | [injected-toolbar-v2.html](../ideas/018.%20Feature-UIUX%20Reference/mockups/injected-toolbar-v2.html) |
 | UIUX Reference Tab (dark alt) | [uiux-reference-tab-v1.html](../ideas/018.%20Feature-UIUX%20Reference/mockups/uiux-reference-tab-v1.html) |
 | Injected Reference Toolbar (dark alt) | [injected-toolbar-v1.html](../ideas/018.%20Feature-UIUX%20Reference/mockups/injected-toolbar-v1.html) |
+| Toolbar v2.0 — Two-mode wizard (IDEA-019) | [toolbar-v2-v1.html](../ideas/019.%20CR-UIUX%20Reference/mockups/toolbar-v2-v1.html) |

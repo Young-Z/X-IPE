@@ -27,6 +27,7 @@
 | TASK-424 | Bug Fix | Fix 2 color picker bugs: (1) z-index overlap causes wrong e.target — use elementsFromPoint, (2) image/canvas/gradient pixel colors unreadable by getComputedStyle — add canvas pixel sampling | Rune ✅ | ✅ completed | 02-14-2026 04:26:00 | src/x_ipe/static/js/injected/xipe-toolbar.js, .github/skills/x-ipe-tool-uiux-reference/references/toolbar-template.md, tests/test_uiux_reference_toolbar.py | - |
 | TASK-425 | Ideation | Refine idea 019: CR-UIUX Reference — Catch Design Theme & Copy Design as Mockup toolbar features | Cipher ✅ | ✅ completed | 02-14-2026 06:30:00 | x-ipe-docs/ideas/019. CR-UIUX Reference/idea-summary-v2.md | Idea Mockup |
 | TASK-426 | Idea Mockup | IDEA-019: Create toolbar mockup for CR-UIUX Reference (Catch Design Theme + Copy Design as Mockup) | Cipher ✅ | ✅ completed | 02-14-2026 07:25:00 | x-ipe-docs/ideas/019. CR-UIUX Reference/mockups/toolbar-v2-v1.html, idea-summary-v3.md | Requirement Gathering |
+| TASK-427 | Requirement Gathering | CR for FEATURE-030-B v2.0: Two-mode wizard toolbar (Catch Design Theme + Copy Design as Mockup) from IDEA-019 | Cipher 🔄 | 🔄 in_progress | 02-14-2026 07:10:00 | - | Feature Breakdown |
 
 
 
@@ -90,8 +91,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 7
-- **In Progress:** 0
+- **Total Active:** 8
+- **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
 - **Completed (archived):** 419
