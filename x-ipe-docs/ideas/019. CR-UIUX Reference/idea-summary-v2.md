@@ -2,7 +2,7 @@
 
 > Idea ID: IDEA-019
 > Folder: 019. CR-UIUX Reference
-> Version: v2
+> Version: v2.1
 > Created: 2026-02-14
 > Status: Refined
 
@@ -249,9 +249,112 @@ Key decisions made during brainstorming:
 
 - new idea.md
 
+## Feature Reorganization Strategy
+
+### Current Feature Landscape
+
+| Feature ID | Name | Status | What It Does |
+|-----------|------|--------|-------------|
+| FEATURE-030-A | UIUX Reference Tab & Console Integration | ✅ Completed | Workplace tab with URL input → console prompt |
+| FEATURE-030-B | UIUX Reference Agent Skill & Toolbar | ✅ Implemented (v1.1) | Injected toolbar with color picker + element highlighter |
+| FEATURE-031 | UIUX Reference Advanced Tools (Phase 2) | 📋 Planned | Element Commenter + Asset Extractor |
+| FEATURE-032 | UIUX Reference Design System (Phase 3) | 📋 Planned | Design system generation from captured data |
+| FEATURE-033 | App-Agent Interaction MCP | ✅ Completed | MCP bridge for saving reference data |
+
+### Impact Analysis
+
+This CR **replaces the entire toolbar** with a two-mode wizard. This has cascading effects:
+
+```mermaid
+flowchart LR
+    subgraph KEEP["✅ Keep As-Is"]
+        A["FEATURE-030-A\nTab & Console"]
+        B["FEATURE-033\nMCP Bridge"]
+    end
+
+    subgraph SUPERSEDE["🔄 Superseded by This CR"]
+        C["FEATURE-030-B\nCurrent Toolbar"]
+        D["FEATURE-031\nPhase 2 Advanced"]
+        E["FEATURE-032\nPhase 3 Design System"]
+    end
+
+    subgraph NEW["🆕 New Structure"]
+        F["FEATURE-030-B v2.0\nToolbar Redesign"]
+        F --> G["Mode 1: Catch Design Theme\n(replaces FEATURE-032)"]
+        F --> H["Mode 2: Copy Design as Mockup\n(replaces FEATURE-031 partially)"]
+    end
+
+    C -.->|"replaced by"| F
+    D -.->|"absorbed into"| H
+    E -.->|"absorbed into"| G
+```
+
+### Recommended Reorganization
+
+#### 1. FEATURE-030-A — ✅ **Keep as-is**
+No changes needed. The Workplace tab + console integration remains the entry point.
+
+#### 2. FEATURE-030-B — 🔄 **Major version bump to v2.0**
+The current v1.1 toolbar (standalone color picker + element highlighter) is **fully replaced** by the two-mode wizard. This is not a minor CR — it's a complete toolbar rewrite. Recommended approach:
+- Bump FEATURE-030-B to **v2.0**
+- Update specification to reflect the new wizard-based design
+- Deprecate all v1.x user stories (US-1 through US-14) and write new ones
+- Keep the same feature ID since the *purpose* is the same (toolbar for reference capture)
+
+#### 3. FEATURE-031 (Phase 2 Advanced Tools) — ❌ **Cancel / Absorb**
+The planned Phase 2 features were:
+- **Element Commenter** → Absorbed into "Copy Design as Mockup" Step 2 (per-component instructions)
+- **Asset Extractor** → Absorbed into the agent analysis loop (agent decides what to extract during rubric assessment)
+
+**Action:** Cancel FEATURE-031. Remove the Phase 2 placeholder UI from the toolbar. All its intended functionality is covered by the new "Copy Design as Mockup" mode.
+
+#### 4. FEATURE-032 (Phase 3 Design System) — ❌ **Cancel / Absorb**
+The planned Phase 3 was about generating a design system from captured data. This is now **exactly** what "Catch Design Theme" does — it captures colors with role annotations and calls `brand-theme-creator` to generate a design system.
+
+**Action:** Cancel FEATURE-032. Its entire purpose is fulfilled by "Catch Design Theme" mode.
+
+#### 5. FEATURE-033 — ✅ **Keep as-is, extend if needed**
+The MCP bridge (`save_uiux_reference`) still serves as the data persistence layer. May need schema updates to support the new data format (roles on colors, components with analysis data), but the feature itself stays.
+
+### Summary of Changes
+
+| Feature | Action | Rationale |
+|---------|--------|-----------|
+| FEATURE-030-A | ✅ Keep | Unchanged entry point |
+| FEATURE-030-B | 🔄 Bump to v2.0 | Complete toolbar redesign |
+| FEATURE-031 | ❌ Cancel | Absorbed into Copy Design as Mockup mode |
+| FEATURE-032 | ❌ Cancel | Absorbed into Catch Design Theme mode |
+| FEATURE-033 | ✅ Keep + extend schema | Data bridge still needed |
+
+### Implementation Order
+
+```mermaid
+flowchart TD
+    R["Requirement Gathering\n(CR for FEATURE-030-B v2.0)"] --> S["Feature Refinement\n(new specification)"]
+    S --> T["Technical Design"]
+    T --> I["Implementation"]
+
+    R2["Cancel FEATURE-031"] --> R
+    R3["Cancel FEATURE-032"] --> R
+
+    style R2 fill:#fee2e2,stroke:#dc2626
+    style R3 fill:#fee2e2,stroke:#dc2626
+    style R fill:#dbeafe,stroke:#2563eb
+    style S fill:#dbeafe,stroke:#2563eb
+    style T fill:#dbeafe,stroke:#2563eb
+    style I fill:#dbeafe,stroke:#2563eb
+```
+
+**Recommended sequence:**
+1. Cancel FEATURE-031 and FEATURE-032 on the feature board
+2. Proceed with Requirement Gathering as a CR for FEATURE-030-B → v2.0
+3. Write new specification replacing v1.x user stories
+4. Technical design + implementation
+
 ## Next Steps
 
-- [ ] Proceed to Requirement Gathering (this is a CR for existing feature FEATURE-030-B)
+- [ ] Cancel FEATURE-031 and FEATURE-032 on the feature board
+- [ ] Proceed to Requirement Gathering (CR for FEATURE-030-B v2.0)
 
 ## References & Common Principles
 
