@@ -157,27 +157,19 @@ class TestCDPClientEvaluate:
         from x_ipe.mcp.cdp_client import CDPClient
         return CDPClient()
 
-    @patch.object(
-        __import__('builtins'), '__import__', side_effect=ImportError
-    )
     def test_evaluate_calls_discover_and_ws(self):
         """evaluate() discovers pages, finds target, connects via WS."""
-        # This test verifies the integration between discover + ws_evaluate
-        # We mock both discover_pages and _ws_evaluate
         client = self._make_client()
 
         pages = [{"type": "page", "url": "https://example.com", "webSocketDebuggerUrl": "ws://test"}]
         ws_result = {"id": 1, "result": {"result": {"type": "string", "value": "hello"}}}
 
+        async def mock_coro(ws_url, expression):
+            return ws_result
+
         with patch.object(client, 'discover_pages', return_value=pages), \
-             patch.object(client, '_ws_evaluate', return_value=ws_result) as mock_ws:
-            import asyncio
-            mock_ws.return_value = ws_result
-            # Make _ws_evaluate a coroutine that returns ws_result
-            async def mock_coro(ws_url, expression):
-                return ws_result
-            with patch.object(client, '_ws_evaluate', side_effect=mock_coro):
-                result = client.evaluate("1+1", target_url=None)
+             patch.object(client, '_ws_evaluate', side_effect=mock_coro):
+            result = client.evaluate("1+1", target_url=None)
 
         assert result["id"] == 1
 
