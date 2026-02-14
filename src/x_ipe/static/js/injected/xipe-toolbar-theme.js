@@ -151,7 +151,10 @@
     }
 
     document.addEventListener('mousemove', (e) => {
-      if (!magnifierActive) return;
+      if (!magnifierActive || container.style.display === 'none') {
+        magnifier.style.display = 'none';
+        return;
+      }
       cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => updateMagnifier(e));
     }, true);
