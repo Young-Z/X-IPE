@@ -11,9 +11,8 @@ AI Agents follow this skill to execute the UIUX reference workflow:
 1. Navigate to a target URL via Chrome DevTools MCP
 2. Optionally handle an authentication prerequisite page
 3. Inject the v2.0 toolbar via 3-stage injection (core + theme mode + mockup mode)
-4. Provide viewport screenshot for offscreen canvas color picking
-5. Await user data collection (colors with roles, or components with instructions)
-6. Process based on mode: theme → brand-theme-creator, mockup → deep capture + generate
+4. Await user data collection (colors with roles, or components with instructions)
+5. Process based on mode: theme → brand-theme-creator, mockup → deep capture + generate
 
 ---
 
@@ -21,14 +20,10 @@ AI Agents follow this skill to execute the UIUX reference workflow:
 
 BLOCKING: Chrome DevTools MCP must be configured and Chrome must be open with DevTools MCP connected before executing this skill.
 
-CRITICAL: The toolbar is split into 3 files for staged injection:
-- `references/toolbar-core.min.js` — Shell (inject first)
-- `references/toolbar-theme.min.js` — Theme mode
-- `references/toolbar-mockup.min.js` — Mockup mode
+CRITICAL: The toolbar is a single merged file for injection via `inject_script` MCP tool:
+- `references/toolbar.min.js` — Complete toolbar (core + theme + mockup modes, ~24KB)
 
-CRITICAL: Do NOT modify the toolbar code. Inject each file exactly as provided.
-
-CRITICAL: After core injection, provide a viewport screenshot via `__xipeViewportScreenshot` for the offscreen canvas color picker.
+CRITICAL: Do NOT modify the toolbar code. Inject the file exactly as provided via `inject_script`.
 
 ---
 
@@ -40,8 +35,8 @@ This tool skill automates the collection of design reference data from external 
 - **Copy Design as Mockup** — Select components via smart-snap, add instructions, agent analyzes via 5-dimension rubric, generate mockup
 
 **Key Concepts:**
-- **Staged Injection** — Core shell first (<10KB), then mode scripts. Faster first paint vs v1.x single-file approach.
-- **Offscreen Canvas** — Agent provides viewport screenshot, toolbar loads into canvas for pixel-accurate color picking.
+- **Staged Injection** — Single merged file (~24KB) injected via `inject_script` MCP tool (FEATURE-033 v1.1). Avoids reading file content into agent context, saving ~48KB tokens per injection.
+- **EyeDropper API** — Uses native browser EyeDropper API (Chromium) for pixel-accurate color picking. Falls back to `elementsFromPoint` CSS sampling. No viewport screenshot needed.
 - **Bi-directional Communication** — `__xipeRefReady` (toolbar→agent) + `__xipeRefCommand` (agent→toolbar) for deep captures.
 - **Data Schema v2.0** — `colors[]` with `role` field, `components[]` with `html_css`, `instruction`, `agent_analysis`.
 
@@ -95,7 +90,7 @@ input:
   </checkpoint>
   <checkpoint required="true">
     <name>save_uiux_reference MCP tool available</name>
-    <verification>App-Agent Interaction MCP server is running</verification>
+    <verification>App-Agent Interaction MCP server is running (provides save_uiux_reference and inject_script tools)</verification>
   </checkpoint>
 </definition_of_ready>
 ```
@@ -129,32 +124,22 @@ input:
        - Wait for page load (30s timeout)
        - IF page fails to load: REPORT error "Failed to load {url}", STOP
 
-    4. INJECT TOOLBAR (3-stage):
-       a. READ references/toolbar-core.min.js
-          - CALL evaluate_script(function: CORE_CODE)
+    4. INJECT TOOLBAR (single-file via inject_script):
+       a. CALL inject_script(file_path: ".github/skills/x-ipe-tool-uiux-reference/references/toolbar.min.js")
+          - IF inject_script not available (MCP server not running):
+            FALLBACK: READ references/toolbar.min.js, CALL evaluate_script(function: CODE)
        b. POLL: evaluate_script(() => window.__xipeToolbarReady) every 1s, max 10s
-          - IF timeout: REPORT error "Core toolbar failed to initialize", STOP
-       c. READ references/toolbar-theme.min.js
-          - CALL evaluate_script(function: THEME_CODE)
-       d. READ references/toolbar-mockup.min.js
-          - CALL evaluate_script(function: MOCKUP_CODE)
-       e. INFORM user: "Toolbar injected. Use Catch Theme or Copy Mockup mode."
-       f. IF --extra provided: INFORM user the extra instructions
+          - IF timeout: REPORT error "Toolbar failed to initialize", STOP
+       c. INFORM user: "Toolbar injected. Use Catch Theme or Copy Mockup mode."
+       d. IF --extra provided: INFORM user the extra instructions
 
-    5. PROVIDE VIEWPORT SCREENSHOT:
-       - CALL take_screenshot(format: "png") — returns base64 data
-       - CALL evaluate_script with function:
-         (dataUrl) => { window.__xipeViewportScreenshot = dataUrl; }
-         passing the screenshot data URL as argument
-       - This populates the offscreen canvas for color picking
-
-    6. AWAIT USER DATA:
+    5. AWAIT USER DATA:
        LOOP every 3 seconds (max 30 minutes):
        - result = evaluate_script(() => window.__xipeRefReady ? window.__xipeRefData : null)
        - IF result is not null: DATA RECEIVED, break
        - IF 30 minutes elapsed: INFORM user "Session timed out.", STOP
 
-    7. PROCESS BASED ON MODE:
+    6. PROCESS BASED ON MODE:
 
        IF result.mode === "theme":
          → Go to Operation: process_theme
@@ -165,9 +150,9 @@ input:
   </action>
   <constraints>
     - BLOCKING: Do NOT proceed past step 3 if page fails to load
-    - CRITICAL: Inject toolbar files exactly as read — do NOT modify code
+    - CRITICAL: Inject toolbar file exactly as provided — do NOT modify code
+    - CRITICAL: Prefer inject_script over evaluate_script — saves ~48KB context tokens
     - CRITICAL: Do NOT click or interact with the toolbar — user does this manually
-    - CRITICAL: Provide viewport screenshot AFTER toolbar injection
   </constraints>
   <output>Mode-specific processing triggered</output>
 </operation>
@@ -293,12 +278,8 @@ operation_output:
     <verification>Page loaded without errors</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Toolbar injected (3-stage)</name>
-    <verification>evaluate_script executed for core + theme + mockup without errors. __xipeToolbarReady is true.</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Viewport screenshot provided</name>
-    <verification>__xipeViewportScreenshot set on page</verification>
+    <name>Toolbar injected</name>
+    <verification>inject_script (or fallback evaluate_script) executed for toolbar.min.js without errors. __xipeToolbarReady is true.</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>User data received</name>
@@ -320,7 +301,7 @@ operation_output:
 | URL is required | No --url parameter | Report error, ask user to provide URL |
 | Failed to load page | Network error, invalid URL | Report error, suggest user check URL |
 | Auth timeout | Login not completed in 5 min | Prompt user to skip or retry |
-| Core toolbar init failed | CSP or page error | Retry once; if fails, report to user |
+| Core toolbar init failed | CSP or page error | Retry once; if fails, try evaluate_script fallback |
 | Session timeout | User didn't send data in 30 min | Inform user, suggest re-running |
 | Deep capture failed | Element removed from DOM | Log warning, use available data |
 | Screenshot failed | Element not in snapshot | Skip element crop, continue |
@@ -332,7 +313,8 @@ operation_output:
 
 | File | Purpose |
 |------|---------|
-| `references/toolbar-core.min.js` | Core shell IIFE — inject first |
-| `references/toolbar-theme.min.js` | Theme mode IIFE — inject second |
-| `references/toolbar-mockup.min.js` | Mockup mode IIFE — inject third |
+| `references/toolbar.min.js` | Complete toolbar IIFE — inject via `inject_script` MCP tool |
+| `references/toolbar-core.min.js` | DEPRECATED — v2.0 staged core shell (superseded by toolbar.min.js) |
+| `references/toolbar-theme.min.js` | DEPRECATED — v2.0 staged theme mode (superseded by toolbar.min.js) |
+| `references/toolbar-mockup.min.js` | DEPRECATED — v2.0 staged mockup mode (superseded by toolbar.min.js) |
 | `references/toolbar-template.md` | DEPRECATED — v1.x single-file template |
