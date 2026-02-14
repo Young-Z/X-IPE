@@ -1,6 +1,6 @@
 # Technical Design: App-Agent Interaction MCP
 
-> Feature ID: FEATURE-033 | Version: v1.0 | Last Updated: 02-13-2026
+> Feature ID: FEATURE-033 | Version: v1.1 | Last Updated: 02-14-2026
 
 ---
 
@@ -13,10 +13,11 @@
 
 | Component | Responsibility | Scope/Impact | Tags |
 |-----------|----------------|--------------|------|
-| `app_agent_interaction` MCP server | Standalone MCP server (FastMCP, stdio) exposing tools for app↔agent communication | New module: `src/x_ipe/mcp/app_agent_interaction.py` | #mcp #fastmcp #stdio #app-agent |
-| `UiuxReferenceService` | Validates, decodes, and persists UIUX reference data to idea folders | New service: `src/x_ipe/services/uiux_reference_service.py` | #service #uiux #reference #persistence |
-| `uiux_reference_routes` blueprint | Flask endpoint `POST /api/ideas/uiux-reference` | New blueprint: `src/x_ipe/routes/uiux_reference_routes.py` | #flask #api #endpoint #blueprint |
-| MCP config entries | Config for all CLI adapters (Copilot, Claude Code, OpenCode) | Updated: `.github/copilot/mcp-config.json`, `src/x_ipe/resources/copilot/mcp-config.json` | #mcp #config #cli-adapter |
+| `app_agent_interaction` MCP server | Standalone MCP server (FastMCP, stdio) exposing tools for app↔agent communication | Updated module: `src/x_ipe/mcp/app_agent_interaction.py` | #mcp #fastmcp #stdio #app-agent |
+| `CDPClient` | Lightweight CDP client for browser page discovery and script injection via WebSocket | New module: `src/x_ipe/mcp/cdp_client.py` | #cdp #websocket #chrome #injection |
+| `UiuxReferenceService` | Validates, decodes, and persists UIUX reference data to idea folders | Existing service: `src/x_ipe/services/uiux_reference_service.py` | #service #uiux #reference #persistence |
+| `uiux_reference_routes` blueprint | Flask endpoint `POST /api/ideas/uiux-reference` | Existing blueprint: `src/x_ipe/routes/uiux_reference_routes.py` | #flask #api #endpoint #blueprint |
+| MCP config entries | Config for all CLI adapters (Copilot, Claude Code, OpenCode) | Existing: `.github/copilot/mcp-config.json`, `src/x_ipe/resources/copilot/mcp-config.json` | #mcp #config #cli-adapter |
 
 ### Dependencies
 
@@ -27,12 +28,15 @@
 | Flask app factory | Foundation | — | Register new blueprint in `_register_blueprints()` |
 | MCPDeployerService | Foundation | — | Deploy MCP config to CLI adapters during `x-ipe init` |
 | FastMCP (new dep) | External | [pypi](https://pypi.org/project/fastmcp/) | Python MCP server framework with `@mcp.tool` decorator |
+| websockets | External | [pypi](https://pypi.org/project/websockets/) | WebSocket client for CDP communication in `CDPClient` *(v1.1)* |
 
 ### Major Flow
 
-1. Agent calls MCP tool `save_uiux_reference` with reference data JSON → MCP server validates required fields → POSTs to Flask backend `POST /api/ideas/uiux-reference`
+1. **save_uiux_reference:** Agent calls MCP tool `save_uiux_reference` with reference data JSON → MCP server validates required fields → POSTs to Flask backend `POST /api/ideas/uiux-reference`
 2. Flask endpoint receives JSON → `UiuxReferenceService` validates schema → resolves idea folder → auto-creates `uiux-references/` subdirectories → decodes base64 screenshots → saves session JSON → updates merged `reference-data.json` → returns success with session file path
 3. MCP tool returns Flask response to agent
+
+4. **inject_script (v1.1):** Agent calls MCP tool `inject_script` with `file_path` or `script` → MCP server reads file (if path) → `CDPClient` discovers browser pages via HTTP → selects target page → connects via WebSocket → sends `Runtime.evaluate` → returns result or error → disconnects immediately
 
 ### Usage Example
 
@@ -56,6 +60,22 @@
 
 # Response from MCP tool:
 # {"success": True, "session_file": "ref-session-001.json", "session_number": 1}
+```
+
+```python
+# Agent calls inject_script MCP tool (v1.1)
+# Tool name: inject_script
+# Inject from file:
+inject_script(file_path=".github/skills/x-ipe-tool-uiux-reference/references/toolbar.min.js")
+# Response: {"success": True, "result": None, "target_url": "https://www.baidu.com/"}
+
+# Inject inline script:
+inject_script(script="document.title = 'Hello from X-IPE';")
+# Response: {"success": True, "result": "Hello from X-IPE", "target_url": "https://www.baidu.com/"}
+
+# Target a specific page by URL:
+inject_script(script="alert('test')", target_url="https://example.com")
+# Response: {"success": True, "result": None, "target_url": "https://example.com/"}
 ```
 
 ```python
@@ -109,6 +129,44 @@ sequenceDiagram
     MCP-->>Agent: success result
 ```
 
+### Workflow Diagram: inject_script (v1.1)
+
+```mermaid
+sequenceDiagram
+    participant Agent as CLI Agent
+    participant MCP as MCP Server<br/>(app_agent_interaction)
+    participant CDP as CDPClient
+    participant Chrome as Chrome Browser
+
+    Agent->>MCP: call inject_script(file_path or script)
+    MCP->>MCP: validate input (exactly one of file_path/script)
+    alt file_path provided
+        MCP->>MCP: read file content from disk
+        alt file not found
+            MCP-->>Agent: error: FILE_NOT_FOUND
+        end
+    end
+    MCP->>CDP: discover_pages(port)
+    CDP->>Chrome: GET http://localhost:{port}/json
+    Chrome-->>CDP: [{type, url, webSocketDebuggerUrl}, ...]
+    CDP->>CDP: filter pages (type="page", exclude extensions)
+    alt target_url provided
+        CDP->>CDP: match page URL against target_url
+    end
+    alt no matching page
+        CDP-->>MCP: error: no suitable page
+        MCP-->>Agent: error: CDP_NO_PAGE
+    end
+    CDP->>Chrome: WebSocket connect (webSocketDebuggerUrl)
+    CDP->>Chrome: Runtime.evaluate({expression: script})
+    Chrome-->>CDP: {result} or {exceptionDetails}
+    CDP->>Chrome: WebSocket disconnect
+    alt evaluation error
+        MCP-->>Agent: error: SCRIPT_EVALUATION_ERROR + exception details
+    end
+    MCP-->>Agent: success: {result, target_url}
+```
+
 ### Class Diagram
 
 ```mermaid
@@ -116,6 +174,15 @@ classDiagram
     class AppAgentInteractionMCP {
         -base_url: str
         +save_uiux_reference(data: dict) dict
+        +inject_script(file_path: str, script: str, target_url: str, cdp_port: int) dict
+    }
+
+    class CDPClient {
+        -port: int
+        +discover_pages() list~dict~
+        +evaluate(script: str, target_url: str) dict
+        -_find_target_page(pages: list, target_url: str) dict
+        -_ws_evaluate(ws_url: str, expression: str) dict
     }
 
     class UiuxReferenceService {
@@ -135,6 +202,7 @@ classDiagram
     }
 
     AppAgentInteractionMCP --> UiuxReferenceService : calls via HTTP
+    AppAgentInteractionMCP --> CDPClient : uses for inject_script
     UiuxReferenceBlueprint --> UiuxReferenceService : uses
 ```
 
@@ -427,6 +495,176 @@ from .uiux_reference_service import UiuxReferenceService
 
 Both `.github/copilot/mcp-config.json` and `src/x_ipe/resources/copilot/mcp-config.json` already updated with `x-ipe-app-and-agent-interaction` entry. MCPDeployerService handles format conversion for all CLI adapters automatically.
 
+#### 8. Create CDPClient Module *(v1.1 — CR-001)*
+
+**File:** `src/x_ipe/mcp/cdp_client.py`
+
+Lightweight CDP client using `websockets` and `urllib`. No Playwright/Puppeteer dependency.
+
+```python
+"""Lightweight Chrome DevTools Protocol client for script injection."""
+import json
+import urllib.request
+import asyncio
+from websockets.asyncio.client import connect as ws_connect
+
+
+class CDPClient:
+    """Short-lived CDP client for page discovery and script evaluation."""
+
+    def __init__(self, port: int = 9222):
+        self.port = port
+        self.base_url = f"http://localhost:{port}"
+        self._msg_id = 0
+
+    def discover_pages(self) -> list[dict]:
+        """GET /json to list all inspectable pages."""
+        try:
+            with urllib.request.urlopen(f"{self.base_url}/json", timeout=5) as resp:
+                return json.loads(resp.read())
+        except Exception as e:
+            raise ConnectionError(
+                f"Cannot connect to Chrome DevTools at {self.base_url}. "
+                f"Ensure Chrome is running with --remote-debugging-port={self.port}"
+            ) from e
+
+    def evaluate(self, script: str, target_url: str | None = None) -> dict:
+        """Discover page, connect via WS, run Runtime.evaluate, disconnect."""
+        pages = self.discover_pages()
+        page = self._find_target_page(pages, target_url)
+        return asyncio.run(self._ws_evaluate(page["webSocketDebuggerUrl"], script))
+
+    def _find_target_page(self, pages: list[dict], target_url: str | None) -> dict:
+        """Select target page: match target_url or first suitable page."""
+        suitable = [
+            p for p in pages
+            if p.get("type") == "page"
+            and not p.get("url", "").startswith("chrome-extension://")
+            and not p.get("url", "").startswith("devtools://")
+        ]
+        if not suitable:
+            raise ValueError("No suitable browser page found")
+
+        if target_url:
+            for p in suitable:
+                if target_url in p.get("url", ""):
+                    return p
+            raise ValueError(f"No page matching URL pattern: {target_url}")
+
+        return suitable[0]
+
+    async def _ws_evaluate(self, ws_url: str, expression: str) -> dict:
+        """Connect via WebSocket, send Runtime.evaluate, return result."""
+        self._msg_id += 1
+        msg = {
+            "id": self._msg_id,
+            "method": "Runtime.evaluate",
+            "params": {
+                "expression": expression,
+                "returnByValue": True,
+                "awaitPromise": True,
+            },
+        }
+        async with ws_connect(ws_url) as ws:
+            await ws.send(json.dumps(msg))
+            while True:
+                resp = json.loads(await ws.recv())
+                if resp.get("id") == self._msg_id:
+                    return resp
+```
+
+**Key decisions:**
+- `urllib.request` for HTTP discovery (stdlib, no extra dependency)
+- `websockets` for async WebSocket CDP communication
+- `asyncio.run()` in `evaluate()` to keep the public API synchronous (MCP tools are sync)
+- Short-lived: connect → one command → disconnect (avoids conflicts with Chrome DevTools MCP)
+- `returnByValue: True` to get actual values, `awaitPromise: True` for async scripts
+- Minimal ~60 lines — KISS principle
+
+#### 9. Add `inject_script` Tool to MCP Server *(v1.1 — CR-001)*
+
+**File:** `src/x_ipe/mcp/app_agent_interaction.py` — add new tool:
+
+```python
+from pathlib import Path
+from x_ipe.mcp.cdp_client import CDPClient
+
+@mcp.tool
+def inject_script(
+    file_path: str | None = None,
+    script: str | None = None,
+    target_url: str | None = None,
+    cdp_port: int = 9222,
+) -> dict:
+    """Inject JavaScript into the active browser page via Chrome DevTools Protocol.
+
+    Reads a JS file from disk or accepts inline script, then executes it in the
+    browser page context via CDP Runtime.evaluate. Requires Chrome to be running
+    with --remote-debugging-port.
+
+    Args:
+        file_path: Path to a .js file to inject (mutually exclusive with script).
+        script: Inline JavaScript code to execute (mutually exclusive with file_path).
+        target_url: Optional URL pattern to select a specific browser tab.
+        cdp_port: Chrome remote debugging port (default: 9222).
+    """
+    # Validate: exactly one of file_path or script
+    if bool(file_path) == bool(script):
+        return {
+            "success": False,
+            "error": "VALIDATION_ERROR",
+            "message": "Provide exactly one of 'file_path' or 'script'",
+        }
+
+    # Read file if file_path provided
+    if file_path:
+        path = Path(file_path).expanduser()
+        if not path.is_absolute():
+            path = Path.cwd() / path
+        if not path.is_file():
+            return {
+                "success": False,
+                "error": "FILE_NOT_FOUND",
+                "message": f"Script file not found: {path}",
+            }
+        script = path.read_text(encoding="utf-8")
+
+    # Execute via CDP
+    try:
+        client = CDPClient(port=cdp_port)
+        resp = client.evaluate(script, target_url=target_url)
+    except ConnectionError as e:
+        return {"success": False, "error": "CDP_CONNECTION_FAILED", "message": str(e)}
+    except ValueError as e:
+        return {"success": False, "error": "CDP_NO_PAGE", "message": str(e)}
+
+    # Parse CDP response
+    result = resp.get("result", {})
+    if "exceptionDetails" in result:
+        exc = result["exceptionDetails"]
+        return {
+            "success": False,
+            "error": "SCRIPT_EVALUATION_ERROR",
+            "message": exc.get("text", "Script evaluation failed"),
+            "details": {
+                "exception": exc.get("exception", {}).get("description", ""),
+            },
+        }
+
+    return {
+        "success": True,
+        "result": result.get("result", {}).get("value"),
+        "target_url": target_url,
+    }
+```
+
+**Key decisions:**
+- `file_path` and `script` are mutually exclusive — XOR validation
+- File paths resolved relative to CWD; absolute paths accepted
+- `CDPClient` instantiated per call — no persistent state (KISS)
+- Error types mapped to structured responses: `CDP_CONNECTION_FAILED`, `CDP_NO_PAGE`, `SCRIPT_EVALUATION_ERROR`, `FILE_NOT_FOUND`
+- Does NOT route through Flask backend — direct CDP communication (self-contained)
+
 ### Edge Cases & Error Handling
 
 | Scenario | Component | Expected Behavior |
@@ -439,6 +677,15 @@ Both `.github/copilot/mcp-config.json` and `src/x_ipe/resources/copilot/mcp-conf
 | Flask backend unreachable | MCP server | Return `{"error": "BACKEND_UNREACHABLE", "message": "..."}` |
 | Request body > 10MB | Flask | Return 413 via Flask `MAX_CONTENT_LENGTH` config |
 | Special chars in idea folder name | Service | Use `Path` resolution; no URL encoding needed (local FS only) |
+| CDP port not reachable | CDPClient | Raise `ConnectionError` → MCP returns `CDP_CONNECTION_FAILED` *(v1.1)* |
+| No browser pages available | CDPClient | `_find_target_page` raises `ValueError` → MCP returns `CDP_NO_PAGE` *(v1.1)* |
+| Script throws runtime error | CDPClient | CDP response contains `exceptionDetails` → MCP returns `SCRIPT_EVALUATION_ERROR` with details *(v1.1)* |
+| File path does not exist | MCP tool | Return `FILE_NOT_FOUND` before attempting CDP connection *(v1.1)* |
+| Both `file_path` and `script` provided | MCP tool | Return `VALIDATION_ERROR` — mutually exclusive *(v1.1)* |
+| Neither `file_path` nor `script` provided | MCP tool | Return `VALIDATION_ERROR` — at least one required *(v1.1)* |
+| Chrome DevTools MCP has active session | CDPClient | Short-lived WS connection avoids conflicts — connect, evaluate, disconnect immediately *(v1.1)* |
+| Large script file (>1MB) | CDPClient | `Runtime.evaluate` handles large expressions; no size check needed *(v1.1)* |
+| `target_url` matches multiple tabs | CDPClient | Return first match — deterministic selection *(v1.1)* |
 
 ### Testing Strategy
 
@@ -446,8 +693,11 @@ Both `.github/copilot/mcp-config.json` and `src/x_ipe/resources/copilot/mcp-conf
 |---------------|-------|-----------|
 | Unit: UiuxReferenceService | Service | Schema validation, session numbering, screenshot decoding, merge logic, atomic writes, error cases |
 | Unit: Flask endpoint | Route | Valid request → 200, invalid schema → 400, missing folder → 404, empty body → 400 |
-| Unit: MCP tool | MCP server | Valid call → success, missing fields → local validation error, backend unreachable → error |
+| Unit: MCP tool (save) | MCP server | Valid call → success, missing fields → local validation error, backend unreachable → error |
+| Unit: CDPClient | CDP client | Page discovery (mock HTTP), page filtering, target URL matching, WS evaluate (mock WS), error handling *(v1.1)* |
+| Unit: MCP tool (inject) | MCP server | File read, inline script, validation (XOR), error mapping (ConnectionError→CDP_CONNECTION_FAILED, ValueError→CDP_NO_PAGE) *(v1.1)* |
 | Integration | End-to-end | MCP tool → Flask endpoint → file system → verify files on disk |
+| Integration: inject_script | End-to-end | MCP tool → CDPClient → Chrome → verify script executed *(v1.1, requires running Chrome)* |
 
 ---
 
@@ -455,4 +705,5 @@ Both `.github/copilot/mcp-config.json` and `src/x_ipe/resources/copilot/mcp-conf
 
 | Date | Phase | Change Summary |
 |------|-------|----------------|
+| 02-14-2026 | CR-001 (v1.1) | Added `inject_script` tool and `CDPClient` module. New components: `src/x_ipe/mcp/cdp_client.py` (~60 lines, websockets + urllib). inject_script reads JS files or accepts inline scripts, executes via CDP `Runtime.evaluate`. Short-lived WS connections to avoid conflicts with Chrome DevTools MCP. No Flask routing needed — direct CDP. |
 | 02-13-2026 | Initial Design | Initial technical design: FastMCP server (`x_ipe.mcp.app_agent_interaction`), `UiuxReferenceService`, Flask blueprint, MCP config for all CLI adapters. |
