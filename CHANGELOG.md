@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-030-B v2.0: UIUX Reference Toolbar — Two-Mode Wizard System**
+  - Complete redesign from v1.x single-mode toolbar to v2.0 two-mode wizard system
+  - **Core Shell** (`xipe-toolbar-core.js`): Hamburger icon, auto-collapse panel (expand on hover, 2s collapse timer), mode tabs, toast notifications (max 3, auto-dismiss 4s), draggable positioning, mode registry, bidirectional command system, CSS scoped with `.xipe-*` prefix
+  - **Catch Design Theme Mode** (`xipe-toolbar-theme.js`): 3-step wizard (Pick Colors → Annotate Roles → Create Theme), 120px magnifier with 10x zoom via offscreen canvas, color sampling (hex/RGB/HSL), role annotation (primary/secondary/accent + custom), viewport screenshot-based pixel sampling
+  - **Copy Design as Mockup Mode** (`xipe-toolbar-mockup.js`): 4-step wizard (Select Components → Instructions → Analyze → Generate), smart-snap to semantic containers (SECTION/NAV/ARTICLE/ASIDE etc.), snap overlay with drag handles, component capture (bbox/screenshot/styles), per-component instruction input
+  - **Staged injection architecture**: Core (~10KB min) injected first for fast first-paint, then mode modules lazy-loaded. 3 `evaluate_script` calls vs single 30KB call in v1.x
+  - **Mode registry pattern**: `window.__xipeRegisterMode(name, initFn)` — modes self-register, initialize lazily on first activation
+  - **Data schema v2.0**: `{mode, colors: [{id, hex, rgb, hsl, source_selector, role}], components: [{id, selector, tag, bounding_box, screenshot_dataurl, html_css, instruction, agent_analysis}], design_tokens}`
+  - **Build script** (`build.py`): Python minification for injected JS files
+  - Agent skill (`SKILL.md`) rewritten to v2.0: 3-stage injection, viewport screenshot, bidirectional comms
+  - 116 unit tests across 36 test classes (core, theme, mockup, build, skill, integration)
+  - FEATURE-031 (Colour/Typography Theme Extractor) and FEATURE-032 (Component Blueprint Capture) cancelled — absorbed into v2.0 modes
+
 - **FEATURE-030-A: UIUX Reference Tab & Console Integration**
   - New "UIUX Reference" tab in the Ideation upload view (third tab alongside Compose and Upload)
   - Pulsing "NEW" badge on tab to draw attention
