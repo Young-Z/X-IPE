@@ -72,15 +72,15 @@ This board tracks all features across the project lifecycle.
 | FEATURE-029-D | Explorer UI Controls | v1.0 | Complete | [specification.md](../requirements/FEATURE-029-D/specification.md) | 02-11-2026 | 02-12-2026 14:05:00 |
 | FEATURE-030-A | UIUX Reference Tab & Console Integration | v1.0 | Completed | [specification.md](../requirements/FEATURE-030-A/specification.md) | 02-13-2026 | 02-13-2026 09:44:00 |
 | FEATURE-030-B | UIUX Reference Agent Skill & Toolbar | v1.0 | Implemented | [specification.md](../requirements/FEATURE-030-B/specification.md) | 02-13-2026 | 02-13-2026 15:20:00 |
-| FEATURE-031 | UIUX Reference Advanced Tools (Phase 2) | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
-| FEATURE-032 | UIUX Reference Design System (Phase 3) | v1.0 | Planned | - | 02-13-2026 | 02-13-2026 08:46:00 |
+| FEATURE-031 | UIUX Reference Advanced Tools (Phase 2) | v1.0 | ❌ Cancelled | - | 02-14-2026 | 02-14-2026 07:06:00 |
+| FEATURE-032 | UIUX Reference Design System (Phase 3) | v1.0 | ❌ Cancelled | - | 02-14-2026 | 02-14-2026 07:06:00 |
 | FEATURE-033 | App-Agent Interaction MCP | v1.0 | Complete | [specification.md](../requirements/FEATURE-033/specification.md) | 02-13-2026 | 02-13-2026 09:47:00 |
 
 ---
 
 ## Status Details
 
-### Planned (19)
+### Planned (17)
 - FEATURE-007: Git Integration
 - FEATURE-014: Theme-Aware Frontend Design Skill
 - FEATURE-017: Architecture DSL JavaScript Library
@@ -97,8 +97,6 @@ This board tracks all features across the project lifecycle.
 - FEATURE-025-F: KB Navigation & Polish
 - FEATURE-026: Homepage Infinity Loop
 - FEATURE-027-E: CLI Migration & Upgrade
-- FEATURE-031: UIUX Reference Advanced Tools (Phase 2)
-- FEATURE-032: UIUX Reference Design System (Phase 3)
 
 ### Refined (3)
 - FEATURE-024: Project Quality Evaluation UI
@@ -153,6 +151,10 @@ This board tracks all features across the project lifecycle.
 - FEATURE-015: Architecture DSL Skill ✅
 - FEATURE-016: Architecture Diagram Renderer ✅
 - FEATURE-023-A: Application Action Tracing - Core ✅
+
+### Cancelled (2)
+- FEATURE-031: UIUX Reference Advanced Tools (Phase 2) — absorbed into IDEA-019 "Copy Design as Mockup" mode
+- FEATURE-032: UIUX Reference Design System (Phase 3) — absorbed into IDEA-019 "Catch Design Theme" mode
 
 ---
 
@@ -941,7 +943,9 @@ This board tracks all features across the project lifecycle.
 ### FEATURE-031: UIUX Reference Advanced Tools (Phase 2)
 
 **Version:** v1.0
-**Status:** Planned
+**Status:** ❌ Cancelled
+**Cancelled:** 02-14-2026
+**Reason:** Absorbed into IDEA-019 (CR-UIUX Reference). Element Commenter → "Copy Design as Mockup" Step 2 (per-component instructions). Asset Extractor → agent analysis loop (rubric-driven deep capture).
 **Description:** Element Commenter and Asset Extractor tools added to toolbar. Extract computed CSS, CSS rules, fonts, icons, images for 1:1 reproduction.
 **Dependencies:** FEATURE-030-B
 **Specification:** -
@@ -959,7 +963,9 @@ This board tracks all features across the project lifecycle.
 ### FEATURE-032: UIUX Reference Design System (Phase 3)
 
 **Version:** v1.0
-**Status:** Planned
+**Status:** ❌ Cancelled
+**Cancelled:** 02-14-2026
+**Reason:** Absorbed into IDEA-019 (CR-UIUX Reference). "Catch Design Theme" mode captures colors with role annotations and calls brand-theme-creator to generate design-system.md — exactly what FEATURE-032 planned.
 **Description:** Auto-generate design-system.md from extracted tokens (colors, typography). Promotion path to global theme folder via brand-theme-creator.
 **Dependencies:** FEATURE-031
 **Specification:** -

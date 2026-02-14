@@ -11,8 +11,8 @@
 |------------|---------------|---------|-------------------|-------------------|
 | FEATURE-030-A | UIUX Reference Tab & Console Integration | v1.0 | Frontend tab (URL input, auth toggle, instructions) + console-first flow (find/create session, auto-type prompt) | None |
 | FEATURE-030-B | UIUX Reference Agent Skill & Toolbar | v1.0 | Agent skill using CDP to open URL, handle auth, inject interactive toolbar (Color Picker, Element Highlighter), callback mechanism, save reference data | FEATURE-030-A, FEATURE-033 |
-| FEATURE-031 | UIUX Reference Advanced Tools (Phase 2) | v1.0 | Element Commenter and Asset Extractor tools in toolbar; download fonts, icons, images for 1:1 reproduction | FEATURE-030-B |
-| FEATURE-032 | UIUX Reference Design System (Phase 3) | v1.0 | Auto-generate design-system.md from extracted tokens; promotion path to global theme | FEATURE-031 |
+| FEATURE-031 | UIUX Reference Advanced Tools (Phase 2) | v1.0 | ❌ Cancelled — absorbed into IDEA-019 "Copy Design as Mockup" mode | FEATURE-030-B |
+| FEATURE-032 | UIUX Reference Design System (Phase 3) | v1.0 | ❌ Cancelled — absorbed into IDEA-019 "Catch Design Theme" mode | FEATURE-031 |
 | FEATURE-033 | App-Agent Interaction MCP | v1.0 | New reusable MCP server + Flask endpoint for browser→agent communication; Phase 1: save_uiux_reference tool | None |
 
 ---
@@ -111,7 +111,9 @@
 ## FEATURE-031: UIUX Reference — Advanced Tools (Phase 2)
 
 > Source: IDEA-018 (Feature-UIUX Reference)
-> Status: Proposed
+> Status: ❌ Cancelled
+> Cancelled: 02-14-2026
+> Reason: Absorbed into IDEA-019 (CR-UIUX Reference). Element Commenter → "Copy Design as Mockup" Step 2 (per-component instructions). Asset Extractor → agent analysis loop (rubric-driven deep capture on demand).
 > Priority: Medium
 > Mockup: [injected-toolbar-v2.html](../ideas/018.%20Feature-UIUX%20Reference/mockups/injected-toolbar-v2.html)
 > Phase: 2 of 3
@@ -165,7 +167,9 @@ Extend the UIUX Reference toolbar (from FEATURE-030) with two advanced tools: **
 ## FEATURE-032: UIUX Reference — Design System Integration (Phase 3)
 
 > Source: IDEA-018 (Feature-UIUX Reference)
-> Status: Proposed
+> Status: ❌ Cancelled
+> Cancelled: 02-14-2026
+> Reason: Absorbed into IDEA-019 (CR-UIUX Reference). "Catch Design Theme" mode captures colors with role annotations and calls brand-theme-creator to generate design-system.md — the full scope of FEATURE-032.
 > Priority: Low
 > Phase: 3 of 3
 > Depends on: FEATURE-031
