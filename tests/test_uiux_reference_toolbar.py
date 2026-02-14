@@ -601,39 +601,31 @@ class TestToolbarCollapsibleReferences:
 # ── CR-001: Post-Send Reset ──────────────────────────────────────────────
 
 class TestToolbarPostSendReset:
-    """Verify post-send reset of all collected data (CR-001-E)."""
+    """Verify post-send behavior (CR-001-E, updated for agent-driven reset).
 
-    def test_colors_reset_after_send(self, toolbar_js):
-        """AC-53/FR-36: Colors array cleared after send."""
-        assert re.search(r"__xipeRefData\.colors\s*=\s*\[\s*\]", toolbar_js), \
-            "Must reset colors to empty array after send"
+    The toolbar no longer auto-resets data after send. Instead, it keeps
+    data intact for the agent to capture via polling. The agent is
+    responsible for resetting the toolbar state after data capture.
+    """
 
-    def test_elements_reset_after_send(self, toolbar_js):
-        """AC-53/FR-36: Elements array cleared after send."""
-        assert re.search(r"__xipeRefData\.elements\s*=\s*\[\s*\]", toolbar_js), \
-            "Must reset elements to empty array after send"
-
-    def test_ready_flag_reset(self, toolbar_js):
-        """AC-53/FR-36: __xipeRefReady reset to false after send."""
-        # There should be both a true and false assignment for __xipeRefReady
+    def test_send_sets_ready_flag(self, toolbar_js):
+        """AC-53: __xipeRefReady set to true on send."""
         true_matches = re.findall(r"__xipeRefReady\s*=\s*true", toolbar_js)
-        false_matches = re.findall(r"__xipeRefReady\s*=\s*false", toolbar_js)
         assert len(true_matches) >= 1, "Must set __xipeRefReady = true on send"
-        assert len(false_matches) >= 2, \
-            "Must reset __xipeRefReady = false (initial + post-send)"
 
-    def test_dom_lists_cleared(self, toolbar_js):
-        """AC-54/FR-36: Color and element list DOM containers cleared after send."""
-        assert re.search(r"(innerHTML\s*=\s*['\"]['\"]|textContent\s*=\s*['\"]['\"])", toolbar_js), \
-            "Must clear list container innerHTML after send"
+    def test_initial_ready_flag_false(self, toolbar_js):
+        """__xipeRefReady initialized to false at startup."""
+        false_matches = re.findall(r"__xipeRefReady\s*=\s*false", toolbar_js)
+        assert len(false_matches) >= 1, \
+            "Must initialize __xipeRefReady = false"
 
-    def test_badges_reset_after_send(self, toolbar_js):
-        """AC-54/FR-36: Badge counts reset after send."""
-        # updateBadges must be called after the reset
-        # Check that updateBadges is called in the send success handler
-        send_section = toolbar_js[toolbar_js.find("Sent to X-IPE"):]
-        assert "updateBadges" in send_section, \
-            "Must call updateBadges after resetting data in send handler"
+    def test_data_preserved_after_send(self, toolbar_js):
+        """Data must NOT be auto-cleared — agent captures via polling."""
+        send_idx = toolbar_js.find("__xipeRefReady = true")
+        assert send_idx != -1
+        after_ready = toolbar_js[send_idx:]
+        assert "__xipeRefReady = false" not in after_ready, \
+            "Must NOT auto-reset __xipeRefReady — agent needs time to poll"
 
 
 # ── CR-001: Panel Scrollability ──────────────────────────────────────────
@@ -671,3 +663,106 @@ class TestSkillScreenshotAccuracy:
         """AC-50/FR-35: Skill uses take_snapshot for a11y tree."""
         assert "take_snapshot" in skill_md, \
             "Skill must reference take_snapshot for UID matching"
+
+
+# ── Bug Fix: Post-Send Data Preservation ─────────────────────────────────
+
+class TestToolbarPostSendDataPreservation:
+    """Bug fix: Toolbar must NOT auto-reset data after send.
+
+    The agent polls __xipeRefReady every 3s. The old toolbar reset
+    data 2.3s after setting __xipeRefReady=true, so the agent could
+    miss the data entirely. Now the toolbar must keep data intact
+    and let the agent reset it after capture.
+    """
+
+    def test_no_auto_reset_after_send(self, toolbar_js):
+        """Data must NOT be auto-cleared after __xipeRefReady = true."""
+        # Find the send handler section (after "Sent to X-IPE")
+        send_idx = toolbar_js.find("__xipeRefReady = true")
+        assert send_idx != -1, "Must set __xipeRefReady = true"
+        after_ready = toolbar_js[send_idx:]
+        # There should be NO setTimeout that resets __xipeRefReady to false
+        # within the send handler
+        assert "__xipeRefReady = false" not in after_ready, \
+            "Must NOT auto-reset __xipeRefReady after send — agent needs time to poll"
+
+    def test_no_auto_clear_colors_after_send(self, toolbar_js):
+        """Colors array must NOT be auto-cleared after send."""
+        send_idx = toolbar_js.find("__xipeRefReady = true")
+        after_ready = toolbar_js[send_idx:]
+        assert "__xipeRefData.colors = []" not in after_ready, \
+            "Must NOT auto-clear colors after send — agent captures data via polling"
+
+    def test_no_auto_clear_elements_after_send(self, toolbar_js):
+        """Elements array must NOT be auto-cleared after send."""
+        send_idx = toolbar_js.find("__xipeRefReady = true")
+        after_ready = toolbar_js[send_idx:]
+        assert "__xipeRefData.elements = []" not in after_ready, \
+            "Must NOT auto-clear elements after send — agent captures data via polling"
+
+
+# ── Bug Fix: Eyedropper Cursor Priority ──────────────────────────────────
+
+class TestToolbarCursorPriority:
+    """Bug fix: Eyedropper/crosshair cursor must override page element cursors.
+
+    Page elements (links, buttons) set their own cursor: pointer which
+    overrides body-level cursor styles. The toolbar must use !important
+    and wildcard selectors to ensure its cursor takes highest priority.
+    """
+
+    def test_eyedropper_cursor_important(self, toolbar_js):
+        """Eyedropper cursor must use !important to override page styles."""
+        assert re.search(
+            r"xipe-cursor-eyedropper.*cursor:.*!important",
+            toolbar_js,
+            re.DOTALL
+        ), "Eyedropper cursor must use !important to override element cursors"
+
+    def test_crosshair_cursor_important(self, toolbar_js):
+        """Crosshair cursor must use !important to override page styles."""
+        assert re.search(
+            r"xipe-cursor-crosshair.*cursor:.*!important",
+            toolbar_js,
+            re.DOTALL
+        ), "Crosshair cursor must use !important to override element cursors"
+
+    def test_cursor_applies_to_all_children(self, toolbar_js):
+        """Cursor classes must target all child elements via wildcard."""
+        # Check for body.xipe-cursor-eyedropper * or similar wildcard selector
+        assert re.search(
+            r"\.xipe-cursor-eyedropper\s+\*",
+            toolbar_js
+        ) or re.search(
+            r"\.xipe-cursor-eyedropper[^{]*\*[^{]*\{",
+            toolbar_js
+        ), "Must use wildcard selector (* ) to apply cursor to all child elements"
+
+
+# ── Bug Fix: Skill Screenshot File Saving ────────────────────────────────
+
+class TestSkillScreenshotFileSaving:
+    """Bug fix: Skill must instruct agent to save screenshots to files.
+
+    The old skill told the agent to attach base64 screenshots to element
+    data, but take_screenshot(filePath:...) saves to files. The skill
+    must instruct saving to {idea}/uiux-references/screenshots/ and
+    recording file paths in element data.
+    """
+
+    def test_skill_instructs_filepath_screenshot(self, skill_md):
+        """Skill must instruct using take_screenshot with filePath parameter."""
+        assert "filePath" in skill_md or "filepath" in skill_md.lower(), \
+            "Skill must instruct saving screenshots via filePath parameter"
+
+    def test_skill_instructs_screenshots_folder(self, skill_md):
+        """Skill must reference the screenshots/ subfolder for saving."""
+        assert "screenshots/" in skill_md, \
+            "Skill must instruct saving to uiux-references/screenshots/ folder"
+
+    def test_skill_no_base64_encoding_instruction(self, skill_md):
+        """Skill must NOT instruct base64 encoding for screenshots."""
+        # The old instruction said "base64-encoded with base64: prefix"
+        assert "base64-encoded" not in skill_md and "base64:" not in skill_md, \
+            "Skill must NOT instruct base64 encoding — use filePath instead"

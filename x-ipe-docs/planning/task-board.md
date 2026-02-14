@@ -23,6 +23,7 @@
 | TASK-420 | Code Implementation | FEATURE-030-B v1.1: Implement CR-001 enhancements in toolbar IIFE (eyedropper cursor, expandable lists, hover-highlight, screenshot accuracy, post-send reset) | Nova ✅ | ✅ completed | 02-14-2026 03:55:00 | 02-14-2026 04:30:00 | Feature Acceptance Test |
 | TASK-421 | Feature Acceptance Test | FEATURE-030-B v1.1: Acceptance test CR-001 toolbar enhancements — inject toolbar, verify eyedropper cursor, color/element lists, hover highlights, post-send reset | Nova ✅ | ✅ completed | 02-14-2026 04:35:00 | x-ipe-docs/requirements/FEATURE-030-B/acceptance-test-cases.md | Feature Closing |
 | TASK-422 | Feature Closing | FEATURE-030-B v1.1: Close CR-001 — commit all changes, update task board | Nova ✅ | ✅ completed | 02-14-2026 04:50:00 | commit c83c8ec | - |
+| TASK-423 | Bug Fix | Fix 3 UIUX reference bugs: (1) post-send reset clears data before agent capture, (2) eyedropper cursor overridden by page hover effects, (3) screenshots not saved to screenshots folder | Pulse ✅ | ✅ completed | 02-14-2026 04:05:00 | src/x_ipe/static/js/injected/xipe-toolbar.js, .github/skills/x-ipe-tool-uiux-reference/SKILL.md, .github/skills/x-ipe-tool-uiux-reference/references/toolbar-template.md, tests/test_uiux_reference_toolbar.py | - |
 
 
 
@@ -86,11 +87,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 4
+- **Total Active:** 5
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 415
+- **Completed (archived):** 416
 - **Pending Review:** 0
 - **Blocked:** 0
 

@@ -128,16 +128,24 @@ input:
        - IF result is not null: DATA RECEIVED, break
        - IF 30 minutes elapsed: INFORM user "Session timed out.", STOP
 
-    6. FOR each element in result.elements:
-       a. full_screenshot = take_screenshot(fullPage: true)
-       b. snapshot = take_snapshot()
-       c. Use bounding_box from element data to find matching node in snapshot:
+    6. DETERMINE screenshots folder path:
+       - screenshots_path = "{idea_folder}/uiux-references/screenshots/"
+       - CALL evaluate_script to create the folder if needed (or ensure it exists via save_uiux_reference)
+
+    7. TAKE full-page screenshot:
+       - CALL take_screenshot(fullPage: true, filePath: "{screenshots_path}/full-page.png")
+
+    8. FOR each element in result.elements:
+       a. snapshot = take_snapshot()
+       b. Use bounding_box from element data to find matching node in snapshot:
           - Compare element's bounding_box (x, y, width, height) against snapshot node positions
           - Allow 20px tolerance for coordinate matching
-       d. IF matching UID found: element_screenshot = take_screenshot(uid: found_uid)
-       e. Attach screenshots to element data (base64-encoded with "base64:" prefix)
+       c. IF matching UID found:
+          - CALL take_screenshot(uid: found_uid, filePath: "{screenshots_path}/{elem_id}.png")
+          - SET element.screenshots.element_crop = "screenshots/{elem_id}.png"
+       d. SET element.screenshots.full_page = "screenshots/full-page.png"
 
-    7. CONSTRUCT Reference Data JSON:
+    9. CONSTRUCT Reference Data JSON:
        {
          version: "1.0",
          source_url: target_url,
@@ -145,11 +153,11 @@ input:
          timestamp: ISO 8601 now,
          idea_folder: idea_folder,
          colors: result.colors,
-         elements: result.elements (with screenshot data),
+         elements: result.elements (with screenshots/ file paths),
          design_tokens: result.design_tokens
        }
 
-    8. CALL save_uiux_reference(data: constructed_json)
+   10. CALL save_uiux_reference(data: constructed_json)
        - IF success: INFORM user "Reference data saved — {N} colors, {M} elements from {url}. Session: {session_file}"
        - IF failure: REPORT error from MCP response
   </action>

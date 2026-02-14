@@ -329,8 +329,8 @@
       to { transform: rotate(360deg); }
     }
     .xipe-spin { animation: xipeSpin 1s linear infinite; }
-    .xipe-cursor-eyedropper { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M27.3 4.7a3.8 3.8 0 00-5.4 0l-3.2 3.2-1.4-1.4a1 1 0 00-1.4 0l-1.4 1.4a1 1 0 000 1.4l.7.7L5.7 19.5a2 2 0 00-.5.9l-1.1 4.4a1 1 0 001.2 1.2l4.4-1.1a2 2 0 00.9-.5L20 14.9l.7.7a1 1 0 001.4 0l1.4-1.4a1 1 0 000-1.4l-1.4-1.4 3.2-3.2a3.8 3.8 0 000-5.4z" fill="%233730a3"/></svg>') 2 30, crosshair; }
-    .xipe-cursor-crosshair { cursor: crosshair; }
+    .xipe-cursor-eyedropper, .xipe-cursor-eyedropper * { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M27.3 4.7a3.8 3.8 0 00-5.4 0l-3.2 3.2-1.4-1.4a1 1 0 00-1.4 0l-1.4 1.4a1 1 0 000 1.4l.7.7L5.7 19.5a2 2 0 00-.5.9l-1.1 4.4a1 1 0 001.2 1.2l4.4-1.1a2 2 0 00.9-.5L20 14.9l.7.7a1 1 0 001.4 0l1.4-1.4a1 1 0 000-1.4l-1.4-1.4 3.2-3.2a3.8 3.8 0 000-5.4z" fill="%233730a3"/></svg>') 2 30, crosshair !important; }
+    .xipe-cursor-crosshair, .xipe-cursor-crosshair * { cursor: crosshair !important; }
     .xipe-color-list, .xipe-elem-list { padding: 0 4px; }
     .xipe-color-entry, .xipe-elem-entry {
       display: flex; align-items: center; gap: 6px;
@@ -803,18 +803,6 @@
       window.__xipeRefReady = true;
       sendBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Sent to X-IPE!';
       sendBtn.style.background = '#059669';
-      setTimeout(() => {
-        sendBtn.innerHTML = '<i class="bi bi-send-fill"></i> Send References';
-        sendBtn.style.background = '';
-        sendBtn.disabled = false;
-        // ===== Post-Send Reset (CR-001) =====
-        window.__xipeRefData.colors = [];
-        window.__xipeRefData.elements = [];
-        window.__xipeRefReady = false;
-        document.getElementById('xipe-color-list').innerHTML = '';
-        document.getElementById('xipe-elem-list').innerHTML = '';
-        updateBadges();
-      }, 2300);
     }, 1200);
   });
 
