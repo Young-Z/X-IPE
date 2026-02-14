@@ -40,6 +40,7 @@
 | TASK-437 | Change Request | CR-001 for FEATURE-033: Add inject_script tool to MCP server for browser script injection via CDP | Bolt ✅ | ✅ completed | 02-14-2026 15:22:00 | x-ipe-docs/requirements/FEATURE-033/CR-001.md, specification.md | Feature Refinement |
 | TASK-438 | Feature Refinement | FEATURE-033 v1.1: Update specification for inject_script tool (CR-001) | Bolt ✅ | ✅ completed | 02-14-2026 15:25:00 | x-ipe-docs/requirements/FEATURE-033/specification.md | Technical Design |
 | TASK-439 | Technical Design | FEATURE-033 v1.1: Technical design for inject_script tool and CDP client (CR-001) | Bolt ✅ | ✅ completed | 02-14-2026 15:30:00 | x-ipe-docs/requirements/FEATURE-033/technical-design.md | Test Generation |
+| TASK-440 | Test Generation | FEATURE-033 v1.1: Tests for inject_script tool and CDPClient (CR-001) | Bolt ✅ | ✅ completed | 02-14-2026 15:35:00 | tests/test_inject_script.py | Code Implementation |
 
 ---
 
