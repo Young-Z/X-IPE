@@ -19,7 +19,6 @@ dependencies = [
     "pyyaml>=6.0.3",
     "requests>=2.32.5",
     "watchdog>=6.0.0",
-    "websockets>=16.0",
 ]
 
 [project.scripts]

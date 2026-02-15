@@ -16,6 +16,18 @@ Guide for creating effective X-IPE skills by:
 
 ---
 
+## Important Notes
+
+⛔ **NEVER directly edit files in `.github/skills/{skill-name}/`.**
+All skill modifications — updates, bug fixes, enhancements — MUST go through the candidate workflow:
+1. Edit in `x-ipe-docs/skill-meta/{skill-name}/candidate/`
+2. Validate via reflection + tests (Rounds 2–3)
+3. Merge candidate → `.github/skills/{skill-name}/` only after validation
+
+This ensures traceability, rollback capability, and quality control. Direct edits to live skills bypass validation and risk breaking production behavior.
+
+---
+
 ## About X-IPE Skills
 
 Skills are modular, self-contained packages that extend AI Agent capabilities by providing specialized knowledge, workflows, and tools.

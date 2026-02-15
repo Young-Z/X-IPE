@@ -78,43 +78,6 @@ This board tracks all features across the project lifecycle.
 | FEATURE-001 | User Authentication | v1.0 | Designed | [spec](FEATURE-001/specification.md) | 01-15-2026 | 01-17-2026 |
 
 ---
-
-## Status Details
-
-### Planned (0)
-- None
-
-### Refined (0)
-- None
-
-### Designed (1)
-- FEATURE-001: User Authentication
-
-### Implemented (0)
-- None
-
-### Tested (0)
-- None
-
-### Completed (0)
-- None
-
----
-
-## Feature Details
-
-### FEATURE-001: User Authentication
-- **Version:** v1.0
-- **Status:** Designed
-- **Description:** JWT-based user authentication with login, logout, and token refresh
-- **Dependencies:** None
-- **Specification:** [x-ipe-docs/requirements/FEATURE-001/specification.md](FEATURE-001/specification.md)
-- **Technical Design:** [x-ipe-docs/requirements/FEATURE-001/technical-design.md](FEATURE-001/technical-design.md)
-- **Tasks:**
-  - TASK-015 (Feature Refinement) - Completed on 01-16-2026
-  - TASK-023 (Technical Design) - Completed on 01-17-2026
-
----
 ```
 
 ---

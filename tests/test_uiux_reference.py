@@ -237,30 +237,47 @@ class TestUiuxReferenceServiceValidation:
         assert errors == []
 
 
-class TestUiuxReferenceServiceSessionNumbering:
-    """Unit tests for session auto-increment numbering."""
+class TestUiuxReferenceServiceReferencedElements:
+    """Unit tests for referenced-elements.json (replaces session numbering)."""
 
-    def test_first_session_gets_number_001(self, uiux_service, temp_project):
-        """First session in empty folder gets number 1."""
-        sessions_dir = temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea" / "uiux-references" / "sessions"
-        sessions_dir.mkdir(parents=True)
-        number = uiux_service._get_next_session_number(sessions_dir)
-        assert number == 1
+    def test_first_save_creates_referenced_elements(self, uiux_service, temp_project):
+        """First save creates referenced-elements.json."""
+        data = make_reference_data()
+        uiux_service.save_reference(data)
+        ref_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                   / "uiux-references" / "page-element-references" / "referenced-elements.json")
+        assert ref_path.exists()
 
-    def test_next_session_after_two_gets_003(self, uiux_service_with_sessions, temp_project_with_sessions):
-        """After sessions 001 and 002, next is 003."""
-        sessions_dir = temp_project_with_sessions / "x-ipe-docs" / "ideas" / "018. Test Idea" / "uiux-references" / "sessions"
-        number = uiux_service_with_sessions._get_next_session_number(sessions_dir)
-        assert number == 3
+    def test_referenced_elements_contains_areas(self, uiux_service, temp_project):
+        """referenced-elements.json contains areas from saved data."""
+        element = {"id": "area-1", "selector": ".hero", "tag": "section",
+                   "bounding_box": {"x": 0, "y": 0, "width": 100, "height": 50}}
+        data = make_reference_data(elements=[element])
+        uiux_service.save_reference(data)
+        ref_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                   / "uiux-references" / "page-element-references" / "referenced-elements.json")
+        content = json.loads(ref_path.read_text())
+        assert len(content["areas"]) == 1
+        assert content["areas"][0]["area_id"] == "area-1"
 
-    def test_session_numbering_with_gaps(self, uiux_service, temp_project):
-        """Gaps in numbering (001, 003) → next is 004."""
-        sessions_dir = temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea" / "uiux-references" / "sessions"
-        sessions_dir.mkdir(parents=True)
-        (sessions_dir / "ref-session-001.json").write_text("{}")
-        (sessions_dir / "ref-session-003.json").write_text("{}")
-        number = uiux_service._get_next_session_number(sessions_dir)
-        assert number == 4
+    def test_incremental_save_merges_areas(self, uiux_service, temp_project):
+        """Subsequent saves merge new areas into existing referenced-elements.json."""
+        elem1 = {"id": "area-1", "selector": ".hero", "tag": "section",
+                 "bounding_box": {"x": 0, "y": 0, "width": 100, "height": 50}}
+        data1 = make_reference_data(elements=[elem1])
+        uiux_service.save_reference(data1)
+
+        elem2 = {"id": "area-2", "selector": ".footer", "tag": "footer",
+                 "bounding_box": {"x": 0, "y": 500, "width": 100, "height": 50}}
+        data2 = make_reference_data(elements=[elem2])
+        uiux_service.save_reference(data2)
+
+        ref_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                   / "uiux-references" / "page-element-references" / "referenced-elements.json")
+        content = json.loads(ref_path.read_text())
+        area_ids = [a["area_id"] for a in content["areas"]]
+        assert "area-1" in area_ids
+        assert "area-2" in area_ids
 
 
 class TestUiuxReferenceServiceScreenshots:
@@ -333,30 +350,28 @@ class TestUiuxReferenceServiceSaveReference:
         result = uiux_service.save_reference(data)
 
         assert result["success"] is True
-        assert "session_file" in result
-        assert result["session_file"] == "ref-session-001.json"
-        assert result["session_number"] == 1
+        assert "referenced_elements_file" in result
 
-    def test_save_creates_session_json_file(self, uiux_service, temp_project):
-        """Session JSON file is created on disk."""
+    def test_save_creates_referenced_elements_file(self, uiux_service, temp_project):
+        """referenced-elements.json is created on disk."""
         data = make_reference_data()
         uiux_service.save_reference(data)
 
-        session_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
-                       / "uiux-references" / "sessions" / "ref-session-001.json")
-        assert session_path.exists()
+        ref_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                   / "uiux-references" / "page-element-references" / "referenced-elements.json")
+        assert ref_path.exists()
 
-        content = json.loads(session_path.read_text())
+        content = json.loads(ref_path.read_text())
         assert content["source_url"] == "https://example.com/page"
 
     def test_save_creates_directories_automatically(self, uiux_service, temp_project):
-        """AC-033.8: uiux-references/, sessions/, screenshots/ are auto-created."""
+        """AC-033.8: uiux-references/, page-element-references/, screenshots/ are auto-created."""
         data = make_reference_data()
         uiux_service.save_reference(data)
 
         uiux_dir = temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea" / "uiux-references"
         assert uiux_dir.exists()
-        assert (uiux_dir / "sessions").exists()
+        assert (uiux_dir / "page-element-references").exists()
         assert (uiux_dir / "screenshots").exists()
 
     def test_save_with_screenshots_decodes_and_saves(self, uiux_service, temp_project):
@@ -389,44 +404,48 @@ class TestUiuxReferenceServiceSaveReference:
         assert result["error"] == "IDEA_NOT_FOUND"
         assert "999. Does Not Exist" in result["message"]
 
-    def test_save_increments_session_number(self, uiux_service_with_sessions):
-        """AC-033.5: Session number auto-increments past existing sessions."""
-        data = make_reference_data()
-        result = uiux_service_with_sessions.save_reference(data)
+    def test_save_merges_areas_across_calls(self, uiux_service, temp_project):
+        """Multiple saves merge areas into referenced-elements.json."""
+        elem1 = {"id": "area-1", "selector": ".hero", "tag": "section",
+                 "bounding_box": {"x": 0, "y": 0, "width": 100, "height": 50}}
+        data1 = make_reference_data(elements=[elem1])
+        uiux_service.save_reference(data1)
+
+        elem2 = {"id": "area-2", "selector": ".nav", "tag": "nav",
+                 "bounding_box": {"x": 0, "y": 200, "width": 100, "height": 50}}
+        data2 = make_reference_data(elements=[elem2])
+        result = uiux_service.save_reference(data2)
 
         assert result["success"] is True
-        assert result["session_number"] == 3
-        assert result["session_file"] == "ref-session-003.json"
 
-    def test_save_updates_merged_reference_data(self, uiux_service, temp_project):
-        """AC-033.4: reference-data.json is created after save."""
-        data = make_reference_data()
-        uiux_service.save_reference(data)
+    def test_save_referenced_elements_contains_all_areas(self, uiux_service, temp_project):
+        """AC-033.4: referenced-elements.json contains all areas' data."""
+        elem1 = {"id": "area-1", "selector": ".hero", "tag": "section",
+                 "bounding_box": {"x": 0, "y": 0, "width": 100, "height": 50}}
+        data1 = make_reference_data(elements=[elem1],
+                                     colors=[{"id": "color-001", "hex": "#FF0000"}])
+        uiux_service.save_reference(data1)
 
-        merged_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
-                      / "uiux-references" / "reference-data.json")
-        assert merged_path.exists()
+        elem2 = {"id": "area-2", "selector": ".nav", "tag": "nav",
+                 "bounding_box": {"x": 0, "y": 200, "width": 100, "height": 50}}
+        data2 = make_reference_data(elements=[elem2],
+                                     colors=[{"id": "color-002", "hex": "#00FF00"}])
+        uiux_service.save_reference(data2)
 
-        merged = json.loads(merged_path.read_text())
-        assert "colors" in merged
-        assert "last_updated" in merged
+        elem3 = {"id": "area-3", "selector": ".footer", "tag": "footer",
+                 "bounding_box": {"x": 0, "y": 500, "width": 100, "height": 50}}
+        data3 = make_reference_data(elements=[elem3],
+                                     colors=[{"id": "color-003", "hex": "#0000FF"}])
+        uiux_service.save_reference(data3)
 
-    def test_save_merged_contains_all_sessions(self, uiux_service_with_sessions, temp_project_with_sessions):
-        """AC-033.4: Merged reference-data.json contains all sessions' data."""
-        data = make_reference_data(
-            colors=[{"id": "color-003", "hex": "#0000FF"}]
-        )
-        uiux_service_with_sessions.save_reference(data)
+        ref_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                   / "uiux-references" / "page-element-references" / "referenced-elements.json")
+        content = json.loads(ref_path.read_text())
 
-        merged_path = (temp_project_with_sessions / "x-ipe-docs" / "ideas" / "018. Test Idea"
-                      / "uiux-references" / "reference-data.json")
-        merged = json.loads(merged_path.read_text())
-
-        # Should contain colors from all 3 sessions
-        color_ids = [c["id"] for c in merged.get("colors", [])]
-        assert "color-001" in color_ids
-        assert "color-002" in color_ids
-        assert "color-003" in color_ids
+        area_ids = [a["area_id"] for a in content.get("areas", [])]
+        assert "area-1" in area_ids
+        assert "area-2" in area_ids
+        assert "area-3" in area_ids
 
 
 class TestUiuxReferenceServiceEdgeCases:
@@ -471,16 +490,16 @@ class TestUiuxReferenceEndpoint:
         assert response.status_code == 200
         result = json.loads(response.data)
         assert result["success"] is True
-        assert "session_file" in result
+        assert "referenced_elements_file" in result
 
-    def test_post_valid_data_creates_session_file(self, client, temp_project):
-        """Session JSON file is created after POST."""
+    def test_post_valid_data_creates_referenced_elements(self, client, temp_project):
+        """referenced-elements.json is created after POST."""
         data = make_reference_data()
         client.post('/api/ideas/uiux-reference', json=data, content_type='application/json')
 
-        session_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
-                       / "uiux-references" / "sessions" / "ref-session-001.json")
-        assert session_path.exists()
+        ref_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                   / "uiux-references" / "page-element-references" / "referenced-elements.json")
+        assert ref_path.exists()
 
     def test_post_missing_fields_returns_400(self, client):
         """AC-033.3: Missing required fields returns 400."""
@@ -529,17 +548,21 @@ class TestUiuxReferenceEndpoint:
         result = json.loads(response.data)
         assert result["success"] is True
 
-    def test_post_increments_session_number(self, client_with_sessions):
-        """AC-033.5: Session number auto-increments."""
-        data = make_reference_data()
-        response = client_with_sessions.post(
-            '/api/ideas/uiux-reference',
-            json=data,
-            content_type='application/json'
-        )
+    def test_post_merges_areas_across_calls(self, client, temp_project):
+        """Multiple POSTs merge areas into referenced-elements.json."""
+        elem1 = {"id": "area-1", "selector": ".hero", "tag": "section",
+                 "bounding_box": {"x": 0, "y": 0, "width": 100, "height": 50}}
+        data1 = make_reference_data(elements=[elem1])
+        client.post('/api/ideas/uiux-reference', json=data1, content_type='application/json')
+
+        elem2 = {"id": "area-2", "selector": ".nav", "tag": "nav",
+                 "bounding_box": {"x": 0, "y": 200, "width": 100, "height": 50}}
+        data2 = make_reference_data(elements=[elem2])
+        response = client.post('/api/ideas/uiux-reference', json=data2, content_type='application/json')
+
         assert response.status_code == 200
         result = json.loads(response.data)
-        assert result["session_number"] == 3
+        assert result["success"] is True
 
     def test_post_error_response_has_descriptive_message(self, client):
         """AC-033.3: Error response includes descriptive message."""
@@ -575,7 +598,7 @@ class TestMCPToolSaveUiuxReference:
         """MCP tool POSTs valid data to Flask backend."""
         mock_post.return_value = MagicMock(
             status_code=200,
-            json=lambda: {"success": True, "session_file": "ref-session-001.json", "session_number": 1}
+            json=lambda: {"success": True, "referenced_elements_file": "page-element-references/referenced-elements.json"}
         )
 
         data = make_reference_data()
@@ -645,6 +668,250 @@ class TestMCPToolSaveUiuxReference:
 
         assert result["success"] is False
         assert result["error"] == "IDEA_NOT_FOUND"
+
+
+# ===========================================================================
+# STRUCTURED OUTPUT TESTS (LL-010, LL-011)
+# ===========================================================================
+
+def make_component_data(comp_id="comp-001", with_html=True, with_styles=True):
+    """Create a component with outer_html and computed_styles for structured output."""
+    comp = {
+        "id": comp_id,
+        "selector": "body > div.wrapper > div.search-form",
+        "tag": "div",
+        "bounding_box": {"x": 131.5, "y": 0, "width": 800, "height": 383.5},
+        "instruction": "Mimic this search form area exactly",
+        "agent_analysis": {
+            "layout": "confident",
+            "typography": "confident",
+            "color_palette": "confident",
+            "spacing": "confident",
+            "visual_effects": "confident",
+            "static_resources": "confident",
+        },
+    }
+    if with_html:
+        comp["html_css"] = {
+            "level": "deep",
+            "computed_styles": {
+                "display": "block",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "color": "rgb(0, 0, 0)",
+                "font-family": "Arial, sans-serif",
+                "font-size": "12px",
+            } if with_styles else {},
+            "outer_html": '<div class="search-form"><input type="text"><button>Search</button></div>',
+        }
+    return comp
+
+
+def make_analysis_reference_data(**overrides):
+    """Create reference data with component analysis for structured output."""
+    data = {
+        "version": "2.1",
+        "source_url": "https://www.baidu.com",
+        "timestamp": "2026-02-15T04:00:00Z",
+        "idea_folder": "018. Test Idea",
+        "colors": [],
+        "elements": [make_component_data()],
+        "design_tokens": {},
+        "static_resources": [
+            {"type": "image", "src": "https://cdn.example.com/logo.png", "usage": "logo"},
+            {"type": "stylesheet", "src": "https://cdn.example.com/style.css", "usage": "main"},
+        ],
+    }
+    data.update(overrides)
+    return data
+
+
+class TestStructuredFolderCreation:
+    """Tests for structured folder output (page-element-references, mimic-strategy)."""
+
+    def test_save_creates_page_element_references_dir(self, uiux_service, temp_project):
+        """page-element-references/ directory is created on save."""
+        data = make_analysis_reference_data()
+        uiux_service.save_reference(data)
+
+        refs_dir = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                    / "uiux-references" / "page-element-references")
+        assert refs_dir.is_dir()
+
+    def test_save_creates_resources_subdir(self, uiux_service, temp_project):
+        """page-element-references/resources/ directory is created on save."""
+        data = make_analysis_reference_data()
+        uiux_service.save_reference(data)
+
+        resources_dir = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                         / "uiux-references" / "page-element-references" / "resources")
+        assert resources_dir.is_dir()
+
+    def test_save_creates_component_structure_html(self, uiux_service, temp_project):
+        """Component outer_html is saved as {comp-id}-structure.html."""
+        data = make_analysis_reference_data()
+        uiux_service.save_reference(data)
+
+        html_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                     / "uiux-references" / "page-element-references" / "resources"
+                     / "comp-001-structure.html")
+        assert html_path.exists()
+        content = html_path.read_text()
+        assert '<div class="search-form">' in content
+
+    def test_save_creates_component_styles_css(self, uiux_service, temp_project):
+        """Component computed_styles are saved as {comp-id}-styles.css."""
+        data = make_analysis_reference_data()
+        uiux_service.save_reference(data)
+
+        css_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                    / "uiux-references" / "page-element-references" / "resources"
+                    / "comp-001-styles.css")
+        assert css_path.exists()
+        content = css_path.read_text()
+        assert "font-family" in content
+        assert "Arial" in content
+
+    def test_save_creates_summarized_uiux_reference_md(self, uiux_service, temp_project):
+        """summarized-uiux-reference.md is created with page and component data."""
+        data = make_analysis_reference_data()
+        uiux_service.save_reference(data)
+
+        md_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                   / "uiux-references" / "page-element-references"
+                   / "summarized-uiux-reference.md")
+        assert md_path.exists()
+        content = md_path.read_text()
+        assert "https://www.baidu.com" in content
+        assert "comp-001" in content
+
+    def test_summarized_reference_contains_colors_section(self, uiux_service, temp_project):
+        """summarized-uiux-reference.md includes colors from component styles."""
+        data = make_analysis_reference_data()
+        data["colors"] = [{"id": "color-001", "hex": "#4e6ef2", "role": "primary"}]
+        uiux_service.save_reference(data)
+
+        md_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                   / "uiux-references" / "page-element-references"
+                   / "summarized-uiux-reference.md")
+        content = md_path.read_text()
+        assert "#4e6ef2" in content
+
+    def test_summarized_reference_contains_typography(self, uiux_service, temp_project):
+        """summarized-uiux-reference.md includes typography from computed styles."""
+        data = make_analysis_reference_data()
+        uiux_service.save_reference(data)
+
+        md_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                   / "uiux-references" / "page-element-references"
+                   / "summarized-uiux-reference.md")
+        content = md_path.read_text()
+        assert "Arial" in content
+
+    def test_summarized_reference_contains_static_resources(self, uiux_service, temp_project):
+        """summarized-uiux-reference.md includes static resources."""
+        data = make_analysis_reference_data()
+        uiux_service.save_reference(data)
+
+        md_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                   / "uiux-references" / "page-element-references"
+                   / "summarized-uiux-reference.md")
+        content = md_path.read_text()
+        assert "logo.png" in content
+
+    def test_save_creates_mimic_strategy_md(self, uiux_service, temp_project):
+        """mimic-strategy.md is created with 6-dimension validation rubric."""
+        data = make_analysis_reference_data()
+        uiux_service.save_reference(data)
+
+        strategy_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                         / "uiux-references" / "mimic-strategy.md")
+        assert strategy_path.exists()
+
+    def test_mimic_strategy_contains_six_dimensions(self, uiux_service, temp_project):
+        """mimic-strategy.md contains all 6 validation dimensions."""
+        data = make_analysis_reference_data()
+        uiux_service.save_reference(data)
+
+        strategy_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                         / "uiux-references" / "mimic-strategy.md")
+        content = strategy_path.read_text()
+        for dim in ["Layout", "Typography", "Color Palette", "Spacing", "Visual Effects", "Static Resources"]:
+            assert dim in content, f"Missing dimension: {dim}"
+
+    def test_mimic_strategy_contains_component_instruction(self, uiux_service, temp_project):
+        """mimic-strategy.md includes user instruction per component."""
+        data = make_analysis_reference_data()
+        uiux_service.save_reference(data)
+
+        strategy_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                         / "uiux-references" / "mimic-strategy.md")
+        content = strategy_path.read_text()
+        assert "Mimic this search form area exactly" in content
+
+    def test_mimic_strategy_contains_source_url(self, uiux_service, temp_project):
+        """mimic-strategy.md references the source URL."""
+        data = make_analysis_reference_data()
+        uiux_service.save_reference(data)
+
+        strategy_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                         / "uiux-references" / "mimic-strategy.md")
+        content = strategy_path.read_text()
+        assert "https://www.baidu.com" in content
+
+    def test_multiple_components_each_get_resource_files(self, uiux_service, temp_project):
+        """Multiple components each get their own structure.html and styles.css."""
+        comp1 = make_component_data("comp-001")
+        comp2 = make_component_data("comp-002")
+        comp2["html_css"]["outer_html"] = "<nav>Menu</nav>"
+        data = make_analysis_reference_data(elements=[comp1, comp2])
+        uiux_service.save_reference(data)
+
+        resources = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                     / "uiux-references" / "page-element-references" / "resources")
+        assert (resources / "comp-001-structure.html").exists()
+        assert (resources / "comp-002-structure.html").exists()
+        assert (resources / "comp-001-styles.css").exists()
+        assert (resources / "comp-002-styles.css").exists()
+
+    def test_component_without_html_css_skips_resource_files(self, uiux_service, temp_project):
+        """Component without html_css field skips resource file creation."""
+        comp = make_component_data("comp-001", with_html=False)
+        data = make_analysis_reference_data(elements=[comp])
+        uiux_service.save_reference(data)
+
+        resources = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                     / "uiux-references" / "page-element-references" / "resources")
+        assert not (resources / "comp-001-structure.html").exists()
+
+    def test_save_result_includes_structured_output_info(self, uiux_service):
+        """Result includes counts for structured output files."""
+        data = make_analysis_reference_data()
+        result = uiux_service.save_reference(data)
+
+        assert result["success"] is True
+        assert "resource_files_saved" in result
+        assert result["resource_files_saved"] > 0
+
+    def test_backward_compatible_with_v1_data(self, uiux_service):
+        """Original v1.0 data format (no html_css, no static_resources) still works."""
+        data = make_reference_data()  # v1.0 format from original tests
+        result = uiux_service.save_reference(data)
+        assert result["success"] is True
+
+    def test_static_resources_saved_in_summarized_reference(self, uiux_service, temp_project):
+        """static_resources array is persisted and listed in summarized reference."""
+        data = make_analysis_reference_data(static_resources=[
+            {"type": "font", "src": "https://fonts.googleapis.com/css?family=Roboto", "usage": "body"},
+            {"type": "icon", "src": "https://cdn.example.com/icon.svg", "usage": "search"},
+        ])
+        uiux_service.save_reference(data)
+
+        md_path = (temp_project / "x-ipe-docs" / "ideas" / "018. Test Idea"
+                   / "uiux-references" / "page-element-references"
+                   / "summarized-uiux-reference.md")
+        content = md_path.read_text()
+        assert "Roboto" in content
+        assert "icon.svg" in content
 
 
 # ===========================================================================

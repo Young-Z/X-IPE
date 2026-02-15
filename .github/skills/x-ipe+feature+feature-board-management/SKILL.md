@@ -34,7 +34,7 @@ The feature board at `x-ipe-docs/planning/features.md` tracks all features acros
 - **Feature Data Model** — Structured record containing feature_id, title, version, status, description, dependencies, artifact links, and task history. See [references/examples.md](references/examples.md) for full schema.
 - **Feature Statuses** — `Planned`, `Refined`, `Designed`, `Implemented`, `Tested`, `Completed`
 - **Status Lifecycle** — `Planned -> Refined -> Designed -> Implemented -> Tested -> Completed`. Each transition is triggered by completing a specific feature-stage task phase.
-- **Board Sections** — Overview, Feature Tracking Table, Status Details (grouped by status), Feature Details (expanded information)
+- **Board Sections** — Overview, Feature Tracking Table
 - **Category-Level Skill** — Called automatically during Step 4 (Category Closing) for feature-stage tasks to update feature status and return category_level_change_summary
 - **Query Interface** — Provides Feature Data Model to any skill needing feature context
 
@@ -132,8 +132,6 @@ input:
          Set status = "Planned"
          Set created = today's date
        Set last_updated = current timestamp
-    3. Update status details sections
-    4. Update feature details sections
   </action>
   <constraints>
     - BLOCKING: feature_id must be unique per feature
@@ -183,9 +181,7 @@ input:
     5. Update artifact links from task_output_links if applicable
     6. Add task to feature's task list
     7. Update last_updated timestamp
-    8. Move feature in status details sections
-    9. Update feature details section
-    10. Return category_level_change_summary
+    8. Return category_level_change_summary
   </action>
   <constraints>
     - BLOCKING: Task Data Model must contain feature_id and feature_phase
@@ -230,12 +226,8 @@ operation_output:
     <verification>x-ipe-docs/planning/features.md reflects the operation changes</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Status details consistent</name>
-    <verification>Feature appears in correct status group in Status Details section</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Feature details accurate</name>
-    <verification>Feature Details section reflects current status, links, and task history</verification>
+    <name>Status consistency verified</name>
+    <verification>After every update, verify the feature status in the tracking table is correct. Cross-check that the status aligns with the feature_phase lifecycle (Planned → Refined → Designed → Implemented → Completed). If any mismatch is found, correct it before completing the operation.</verification>
   </checkpoint>
 </definition_of_done>
 ```

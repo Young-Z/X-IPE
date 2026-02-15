@@ -56,3 +56,12 @@ htmlcov/
 # Build
 *.log
 .pypirc
+
+# Node / Playwright MCP
+node_modules/
+package.json
+package-lock.json
+.playwright-mcp/
+
+# Screenshots (dev artifacts)
+screenshots/

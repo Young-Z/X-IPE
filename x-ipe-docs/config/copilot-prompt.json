@@ -9,12 +9,12 @@
           {
             "language": "en",
             "label": "Refine Idea",
-            "command": "refine the idea <current-idea-file>"
+            "command": "refine the idea <current-idea-file> with ideation skill"
           },
           {
             "language": "zh",
             "label": "完善创意",
-            "command": "完善创意 <current-idea-file>"
+            "command": "使用创意技能, 完善创意 <current-idea-file> "
           }
         ]
       },
@@ -89,12 +89,12 @@
           {
             "language": "en",
             "label": "UIUX Reference",
-            "command": "copilot execute uiux-reference --url <target-url>"
+            "command": "using uiux-reference skill to work on uiux reference --url <target-url>"
           },
           {
             "language": "zh",
             "label": "UIUX参考",
-            "command": "copilot execute uiux-reference --url <target-url>"
+            "command": "使用uiux-reference技能处理UIUX引用 --url <target-url>"
           }
         ]
       }

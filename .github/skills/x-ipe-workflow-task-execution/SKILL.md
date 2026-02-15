@@ -69,7 +69,7 @@ BLOCKING: At the start of every workflow execution, read `.x-ipe.yaml` from proj
 | Strategy | Branch Model | PR Required? | Description |
 |----------|-------------|--------------|-------------|
 | `main-branch-only` | Work directly on main branch | No | All commits go to main. No feature branches created. |
-| `dev-session-based` | `dev/{nickname}` branch per developer | Yes, on feature close | Each developer works on their own persistent branch. PR to main when a feature is closed. |
+| `dev-session-based` | `dev/{git_user_name}` branch per developer | Yes, on feature close | Each developer works on their own persistent branch. PR to main when a feature is closed. |
 
 **Rules by strategy:**
 
@@ -80,9 +80,13 @@ BLOCKING: At the start of every workflow execution, read `.x-ipe.yaml` from proj
 - `git push` pushes to main
 
 **`dev-session-based`:**
-- On first task execution, check if `dev/{nickname}` branch exists
-  - If not → create it from main: `git checkout -b dev/{nickname}`
-  - If exists → switch to it: `git checkout dev/{nickname}`
+- Resolve dev branch name from git identity (NOT agent nickname):
+  → Run: `git config user.name` (or `git config user.email` if user.name is empty)
+  → Sanitize: lowercase, replace spaces with hyphens, remove special chars
+  → Branch name: `dev/{sanitized_git_user_name}`
+- On first task execution, check if `dev/{git_user_name}` branch exists
+  - If not → create it from main: `git checkout -b dev/{git_user_name}`
+  - If exists → switch to it: `git checkout dev/{git_user_name}`
 - All work happens on this branch
 - On feature close → push branch, create PR targeting main
 - Branch persists across features (not deleted after PR)
@@ -230,10 +234,14 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
            → Ensure on main branch: git checkout {main_branch}
            → Do NOT create any other branches
          ELSE IF git.strategy == "dev-session-based":
-           → Check if branch dev/{nickname} exists
-           → IF not exists: git checkout -b dev/{nickname} (from main)
-           → IF exists: git checkout dev/{nickname}
-           → Pull latest: git pull origin dev/{nickname} (ignore if remote doesn't exist yet)
+           → Resolve dev branch name from git identity:
+             Run: git config user.name (or git config user.email if empty)
+             Sanitize: lowercase, spaces→hyphens, remove special chars
+             Branch name: dev/{sanitized_git_user_name}
+           → Check if branch dev/{git_user_name} exists
+           → IF not exists: git checkout -b dev/{git_user_name} (from main)
+           → IF exists: git checkout dev/{git_user_name}
+           → Pull latest: git pull origin dev/{git_user_name} (ignore if remote doesn't exist yet)
     </actions>
     <on_failure>STOP and report missing prerequisites</on_failure>
     <on_success>Transition task status: pending → in_progress</on_success>

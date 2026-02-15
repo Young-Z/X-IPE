@@ -1,108 +1,137 @@
 /**
- * Terminal Manager
+ * Terminal Manager — Refactored
  * FEATURE-005: Interactive Console
- * FEATURE-029-A: Session Explorer Core
- * 
- * Based on sample-root implementation.
- * Manages multiple xterm.js terminals with Socket.IO.
- * Session Explorer provides a right-side panel for up to 10 sessions.
+ * FEATURE-029-A/B/C: Session Explorer, Actions, Hover Preview
+ * FEATURE-021: Voice Input Integration
+ * TASK-413: Multi-tab session stability & orphan detection
+ * TASK-414/435: Auto-scroll pause with xterm.js buffer API
+ * TASK-415: Session preview dismiss on mouseleave
+ *
+ * Architecture:
+ *   TerminalManager  — session lifecycle, persistence, socket wiring
+ *   SessionExplorer  — right-side panel UI (list, rename, preview, orphans)
+ *   TerminalPanel    — chrome wrapper (collapse, zen, resize, explorer toggle)
  */
-
-(function() {
+(function () {
     'use strict';
 
-    const SESSION_KEY = 'terminal_session_ids';
-    const SESSION_NAMES_KEY = 'terminal_session_names';
-    const MAX_SESSIONS = 10;
-    const EXPLORER_WIDTH_KEY = 'console_explorer_width';
+    // =========================================================================
+    // Constants
+    // =========================================================================
+
+    const SESSION_KEY            = 'terminal_session_ids';
+    const SESSION_NAMES_KEY      = 'terminal_session_names';
+    const MAX_SESSIONS           = 10;
+    const EXPLORER_WIDTH_KEY     = 'console_explorer_width';
     const EXPLORER_COLLAPSED_KEY = 'console_explorer_collapsed';
     const EXPLORER_DEFAULT_WIDTH = 220;
-    const EXPLORER_MIN_WIDTH = 160;
-    const EXPLORER_MAX_WIDTH = 360;
+    const EXPLORER_MIN_WIDTH     = 160;
+    const EXPLORER_MAX_WIDTH     = 360;
+    const SCROLL_RESUME_MS       = 5000;
+    const HEALTH_CHECK_MS        = 60000;
+    const STALE_THRESHOLD_MS     = 180000;
+    const TYPING_BASE_DELAY      = 30;
+    const TYPING_JITTER          = 50;
 
-    /**
-     * Debounce utility
-     */
+    // =========================================================================
+    // Utilities
+    // =========================================================================
+
     function debounce(func, wait) {
         let timeout;
-        return function(...args) {
+        return function (...args) {
             clearTimeout(timeout);
             timeout = setTimeout(() => func.apply(this, args), wait);
         };
     }
 
-    /**
-     * Terminal configuration - matches sample-root exactly
-     */
+    /** Safe localStorage get with JSON parse */
+    function storageGet(key, fallback) {
+        try {
+            const v = localStorage.getItem(key);
+            return v !== null ? JSON.parse(v) : fallback;
+        } catch { return fallback; }
+    }
+
+    /** Safe localStorage set with JSON stringify */
+    function storageSet(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+    }
+
+    /** Save/restore page scroll positions to prevent focus-induced jumps */
+    function withScrollLock(fn) {
+        const sx = window.scrollX, sy = window.scrollY;
+        const cb = document.querySelector('.content-body');
+        const cbs = cb?.scrollTop || 0;
+        fn();
+        if (window.scrollX !== sx || window.scrollY !== sy) window.scrollTo(sx, sy);
+        if (cb && cb.scrollTop !== cbs) cb.scrollTop = cbs;
+    }
+
+    // =========================================================================
+    // Shared terminal config
+    // =========================================================================
+
     const terminalConfig = {
         cursorBlink: true,
         cursorStyle: 'block',
         fontSize: 14,
         fontFamily: 'Menlo, Monaco, "Courier New", monospace',
         scrollback: 1000,
-        scrollOnUserInput: false,  // Disable auto-scroll when pressing up/down arrows
+        scrollOnUserInput: false,
         allowProposedApi: true,
-        windowsPty: {
-            backend: undefined,
-            buildNumber: undefined
-        },
+        windowsPty: { backend: undefined, buildNumber: undefined },
         theme: {
-            background: '#1e1e1e',
-            foreground: '#d4d4d4',
-            cursor: '#ffffff',
-            cursorAccent: '#000000',
+            background: '#1e1e1e', foreground: '#d4d4d4',
+            cursor: '#ffffff', cursorAccent: '#000000',
             selection: 'rgba(255, 255, 255, 0.3)',
-            black: '#000000',
-            red: '#cd3131',
-            green: '#0dbc79',
-            yellow: '#e5e510',
-            blue: '#2472c8',
-            magenta: '#bc3fbc',
-            cyan: '#11a8cd',
-            white: '#e5e5e5',
-            brightBlack: '#666666',
-            brightRed: '#f14c4c',
-            brightGreen: '#23d18b',
-            brightYellow: '#f5f543',
-            brightBlue: '#3b8eea',
-            brightMagenta: '#d670d6',
-            brightCyan: '#29b8db',
-            brightWhite: '#ffffff'
+            black: '#000000', red: '#cd3131', green: '#0dbc79',
+            yellow: '#e5e510', blue: '#2472c8', magenta: '#bc3fbc',
+            cyan: '#11a8cd', white: '#e5e5e5',
+            brightBlack: '#666666', brightRed: '#f14c4c', brightGreen: '#23d18b',
+            brightYellow: '#f5f543', brightBlue: '#3b8eea', brightMagenta: '#d670d6',
+            brightCyan: '#29b8db', brightWhite: '#ffffff'
         }
     };
 
-    /**
-     * TerminalManager - Manages multiple terminal sessions
-     * Refactored from array-based (2 panes) to Map-based (10 sessions)
-     */
+    const socketConfig = {
+        transports: ['websocket'],
+        upgrade: false,
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 30000,
+        randomizationFactor: 0.5,
+        timeout: 60000,
+        forceNew: true,
+        pingTimeout: 300000,
+        pingInterval: 60000
+    };
+
+    // =========================================================================
+    // TerminalManager
+    // =========================================================================
+
     class TerminalManager {
         constructor(contentContainerId) {
-            // Map<string, SessionData> where key is a local session key (s0, s1, ...)
             this.sessions = new Map();
             this.activeSessionKey = null;
             this._sessionCounter = 0;
-            
             this.contentContainer = document.getElementById(contentContainerId);
             this.statusIndicator = document.getElementById('terminal-status-indicator');
             this.statusText = document.getElementById('terminal-status-text');
-            
-            // Session Explorer
             this.explorer = null;
-            
-            // Config: auto-execute prompts (default: false, configurable via .x-ipe.yaml)
             this.autoExecutePrompt = false;
-            this._loadAutoExecuteConfig();
-            
-            // Track if initial fit has been done (for containers that start hidden)
             this._initialFitDone = false;
-            
-            // Auto-scroll pause: track per-session user scroll state
-            this._userScrolledUp = new Map();
             this._scrollResumeTimers = new Map();
-            
+            this._activeTyping = null;
+
+            this._loadAutoExecuteConfig();
             this._setupEventListeners();
             this._setupResizeObserver();
         }
+
+        // -- Config -----------------------------------------------------------
 
         async _loadAutoExecuteConfig() {
             try {
@@ -111,296 +140,170 @@
                     const data = await resp.json();
                     this.autoExecutePrompt = data.auto_execute_prompt || false;
                 }
-            } catch (e) {
-                // Keep default (false)
-            }
+            } catch {}
         }
 
-        /**
-         * Setup ResizeObserver to detect when terminal container becomes visible
-         */
+        // -- Resize / visibility observers ------------------------------------
+
         _setupResizeObserver() {
             if (!this.contentContainer || typeof ResizeObserver === 'undefined') return;
-            
             this._resizeObserver = new ResizeObserver(debounce((entries) => {
                 for (const entry of entries) {
                     const { width, height } = entry.contentRect;
                     if (width > 0 && height > 0) {
-                        console.log(`[Terminal] Container resized to ${width}x${height} - fitting active`);
                         this._fitActiveSession();
-                        if (!this._initialFitDone && this.sessions.size > 0) {
-                            this._initialFitDone = true;
-                        }
+                        if (!this._initialFitDone && this.sessions.size > 0) this._initialFitDone = true;
                     }
                 }
             }, 50));
-            
             this._resizeObserver.observe(this.contentContainer);
         }
 
         _setupEventListeners() {
-            // Window resize - fit active session (debounced)
             window.addEventListener('resize', debounce(() => this._fitActiveSession(), 150));
-            
-            // Handle page visibility changes
             document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible') {
-                    console.log('[Terminal] Tab became visible - checking connections');
-                    this._checkAndReconnectAll();
-                } else {
-                    console.log('[Terminal] Tab hidden - connections will stay alive');
-                }
+                if (document.visibilityState === 'visible') this._checkAndReconnectAll();
             });
-            
-            window.addEventListener('focus', () => {
-                console.log('[Terminal] Window focused - checking connections');
-                this._checkAndReconnectAll();
-            });
-        }
-        
-        _checkAndReconnectAll() {
-            for (const [key, session] of this.sessions) {
-                if (session.socket && !session.socket.connected) {
-                    console.log(`[Terminal ${session.name}] Reconnecting after visibility change`);
-                    session.socket.connect();
-                }
-            }
-            // TASK-413: Check for orphaned sessions after reconnect
-            setTimeout(() => {
-                if (this.explorer) this.explorer.checkOrphanedSessions();
-            }, 2000);
+            window.addEventListener('focus', () => this._checkAndReconnectAll());
         }
 
-        /**
-         * Initialize terminals - restore sessions or create first one
-         */
+        _checkAndReconnectAll() {
+            for (const [, s] of this.sessions) {
+                if (s.socket && !s.socket.connected) s.socket.connect();
+            }
+            setTimeout(() => this.explorer?.checkOrphanedSessions(), 2000);
+        }
+
+        // -- Initialization ---------------------------------------------------
+
         initialize() {
-            const storedIds = this._getStoredSessionIds();
-            const storedNames = this._getStoredSessionNames();
-            if (storedIds.length > 0) {
-                storedIds.forEach((id, i) => {
-                    const name = storedNames[id] || this._getNextSessionName();
-                    this.addSession(id, name);
-                });
+            const ids = storageGet(SESSION_KEY, []);
+            const names = storageGet(SESSION_NAMES_KEY, {});
+            if (ids.length > 0) {
+                ids.forEach(id => this.addSession(id, names[id] || null));
             } else {
                 this.addSession();
             }
-            // TASK-413: Check for orphaned sessions after sockets connect
-            setTimeout(() => {
-                if (this.explorer) this.explorer.checkOrphanedSessions();
-            }, 3000);
+            setTimeout(() => this.explorer?.checkOrphanedSessions(), 3000);
         }
 
-        /**
-         * Add a new session
-         * @param {string|null} existingSessionId - Backend session ID to reconnect
-         * @param {string|null} name - Display name for explorer
-         * @returns {string} session key
-         */
+        // -- Session CRUD -----------------------------------------------------
+
         addSession(existingSessionId = null, name = null) {
             if (this.sessions.size >= MAX_SESSIONS) {
-                if (this.explorer) this.explorer.showToast('Maximum 10 sessions reached');
-                console.warn('[Terminal] Maximum sessions reached');
+                this.explorer?.showToast('Maximum 10 sessions reached');
                 return null;
             }
-
             const key = `s${this._sessionCounter++}`;
-            const sessionName = name || this._getNextSessionName();
-            
-            // Create session container DOM
-            const container = this._createSessionContainer(key);
-            this.contentContainer.appendChild(container);
-            
-            // Create terminal
-            const terminal = new Terminal(terminalConfig);
-            const fitAddon = new FitAddon.FitAddon();
-            terminal.loadAddon(fitAddon);
-            
-            if (typeof Unicode11Addon !== 'undefined') {
-                const unicode11Addon = new Unicode11Addon.Unicode11Addon();
-                terminal.loadAddon(unicode11Addon);
-                terminal.unicode.activeVersion = '11';
-            }
-            
-            // Open terminal in container
-            terminal.open(container);
-            
-            // Store session data
-            const sessionData = {
-                key,
-                sessionId: existingSessionId,
-                name: sessionName,
-                terminal,
-                fitAddon,
-                socket: null,
-                container,
-                isActive: false
-            };
-            this.sessions.set(key, sessionData);
-            
-            // Prevent scroll-to-top when typing
-            this._setupScrollPrevention(terminal, container);
-            
-            // Setup auto-scroll pause on user scroll-up
-            this._setupAutoScrollPause(terminal, key);
-            
-            // Create socket
-            sessionData.socket = this._createSocket(key, existingSessionId);
-            
-            // Handle input
-            terminal.onData(data => {
-                // Cancel active typing on Ctrl+C / Cmd+C
-                if (data === '\x03' && this._activeTyping) {
-                    this._cancelTyping();
-                    return;
-                }
-                if (sessionData.socket && sessionData.socket.connected) {
-                    const scrollX = window.scrollX;
-                    const scrollY = window.scrollY;
-                    sessionData.socket.emit('input', data);
-                    terminal.scrollToBottom();
-                    if (window.scrollX !== scrollX || window.scrollY !== scrollY) {
-                        window.scrollTo(scrollX, scrollY);
-                    }
-                }
-            });
-            
-            // Switch to new session
-            this.switchSession(key);
-            
-            // Update explorer
-            if (this.explorer) {
-                this.explorer.addSessionBar(key, sessionName);
-                this.explorer.updateActiveIndicator(this.activeSessionKey);
-                this.explorer.setAddButtonEnabled(this.sessions.size < MAX_SESSIONS);
-            }
-            
-            this._saveSessionIds();
-            this._saveSessionNames();
-            
-            console.log(`[Terminal] Added session "${sessionName}" (${key})`);
-            return key;
-        }
+            const sessionName = name || this._nextName();
 
-        /**
-         * Create session container DOM element
-         */
-        _createSessionContainer(key) {
+            // DOM container
             const container = document.createElement('div');
             container.className = 'terminal-session-container';
             container.dataset.sessionKey = key;
-            return container;
+            this.contentContainer.appendChild(container);
+
+            // xterm + addons
+            const terminal = new Terminal(terminalConfig);
+            const fitAddon = new FitAddon.FitAddon();
+            terminal.loadAddon(fitAddon);
+            if (typeof Unicode11Addon !== 'undefined') {
+                const u = new Unicode11Addon.Unicode11Addon();
+                terminal.loadAddon(u);
+                terminal.unicode.activeVersion = '11';
+            }
+            terminal.open(container);
+
+            const sessionData = {
+                key, sessionId: existingSessionId, name: sessionName,
+                terminal, fitAddon, socket: null, container, isActive: false
+            };
+            this.sessions.set(key, sessionData);
+
+            this._setupScrollPrevention(terminal, container);
+            this._setupAutoScrollPause(terminal, key);
+            sessionData.socket = this._createSocket(key, existingSessionId);
+            this._setupInput(sessionData);
+
+            this.switchSession(key);
+            this.explorer?.addSessionBar(key, sessionName);
+            this.explorer?.updateActiveIndicator(this.activeSessionKey);
+            this.explorer?.setAddButtonEnabled(this.sessions.size < MAX_SESSIONS);
+            this._persistSessions();
+            return key;
         }
 
-        /**
-         * Remove a session
-         */
         removeSession(key) {
             const session = this.sessions.get(key);
             if (!session) return;
 
-            if (session.socket) session.socket.disconnect();
-            if (session.terminal) session.terminal.dispose();
-            if (session.container) session.container.remove();
-            
+            // Destroy backend PTY session before disconnecting socket
+            if (session.sessionId && session.socket?.connected) {
+                session.socket.emit('destroy_sessions', { session_ids: [session.sessionId] });
+            }
+            session.socket?.disconnect();
+            session.terminal?.dispose();
+            session.container?.remove();
             this.sessions.delete(key);
-            
-            // Clean up scroll state
-            this._userScrolledUp.delete(key);
+
+            // Clean up scroll timer
             const timer = this._scrollResumeTimers.get(key);
             if (timer) { clearTimeout(timer); this._scrollResumeTimers.delete(key); }
-            
-            // Update explorer
-            if (this.explorer) {
-                this.explorer.removeSessionBar(key);
-                this.explorer.setAddButtonEnabled(this.sessions.size < MAX_SESSIONS);
-            }
-            
+
+            this.explorer?.removeSessionBar(key);
+            this.explorer?.setAddButtonEnabled(this.sessions.size < MAX_SESSIONS);
+
             if (this.sessions.size > 0) {
-                // Switch to another session
                 if (this.activeSessionKey === key) {
-                    const nextKey = this.sessions.keys().next().value;
-                    this.switchSession(nextKey);
+                    this.switchSession(this.sessions.keys().next().value);
                 }
-                if (this.explorer) {
-                    this.explorer.updateActiveIndicator(this.activeSessionKey);
-                }
+                this.explorer?.updateActiveIndicator(this.activeSessionKey);
             } else {
                 this.activeSessionKey = null;
                 this.addSession();
             }
-            
-            this._saveSessionIds();
-            this._saveSessionNames();
+            this._persistSessions();
             this._updateStatus();
-            
-            console.log(`[Terminal] Removed session "${session.name}" (${key})`);
         }
 
-        /**
-         * Rename a session
-         */
         renameSession(key, newName) {
-            const session = this.sessions.get(key);
-            if (!session) return;
-            session.name = newName;
-            this._saveSessionNames();
-            console.log(`[Terminal] Renamed session ${key} to "${newName}"`);
+            const s = this.sessions.get(key);
+            if (s) { s.name = newName; this._persistSessions(); }
         }
 
-        /**
-         * Switch active session
-         */
         switchSession(key) {
             const session = this.sessions.get(key);
             if (!session) return;
-
-            // Hide all containers, show target
-            for (const [k, s] of this.sessions) {
+            for (const [, s] of this.sessions) {
                 s.container.classList.remove('active');
                 s.isActive = false;
             }
             session.container.classList.add('active');
             session.isActive = true;
             this.activeSessionKey = key;
-            
-            // Update explorer indicator
-            if (this.explorer) {
-                this.explorer.updateActiveIndicator(key);
-            }
-            
-            // Fit active terminal after display change
+            this.explorer?.updateActiveIndicator(key);
             this.fitActive();
-            
-            // Focus without scroll
             this._focusWithoutScroll(session.terminal);
         }
 
-        /**
-         * Get active session data
-         */
+        // -- Fit / resize helpers ---------------------------------------------
+
         _getActiveSession() {
             return this.activeSessionKey ? this.sessions.get(this.activeSessionKey) : null;
         }
 
-        /**
-         * Fit the active terminal
-         */
         _fitActiveSession() {
-            const session = this._getActiveSession();
-            if (!session) return;
+            const s = this._getActiveSession();
+            if (!s) return;
             try {
-                session.fitAddon.fit();
-                const dims = session.fitAddon.proposeDimensions();
-                if (dims && session.socket && session.socket.connected) {
-                    session.socket.emit('resize', { rows: dims.rows, cols: dims.cols });
+                s.fitAddon.fit();
+                const dims = s.fitAddon.proposeDimensions();
+                if (dims && s.socket?.connected) {
+                    s.socket.emit('resize', { rows: dims.rows, cols: dims.cols });
                 }
-            } catch (e) {}
+            } catch {}
         }
 
-        /**
-         * Fit active terminal - immediate + double RAF backup
-         */
         fitActive() {
             this._fitActiveSession();
             requestAnimationFrame(() => {
@@ -411,621 +314,483 @@
             });
         }
 
-        // Legacy aliases for backward compatibility
-        fitAll() { this.fitActive(); }
-        _doFit() { this._fitActiveSession(); }
+        // Legacy aliases
+        fitAll()     { this.fitActive(); }
+        _doFit()     { this._fitActiveSession(); }
         _resizeAll() { this._fitActiveSession(); }
 
-        /**
-         * Focus terminal without triggering browser scroll-to-focus behavior
-         */
+        // -- Focus without scroll ---------------------------------------------
+
         _focusWithoutScroll(terminal) {
             if (!terminal) return;
-            
-            const scrollX = window.scrollX;
-            const scrollY = window.scrollY;
-            const contentBody = document.querySelector('.content-body');
-            const contentBodyScroll = contentBody?.scrollTop || 0;
-            
             const viewport = terminal.element?.querySelector('.xterm-viewport');
-            const terminalScrollTop = viewport?.scrollTop || 0;
-            
-            try {
-                const textarea = terminal.element?.querySelector('.xterm-helper-textarea');
-                if (textarea) {
-                    textarea.focus({ preventScroll: true });
-                } else {
-                    terminal.focus();
-                }
-            } catch (e) {
-                terminal.focus();
-            }
-            
-            if (window.scrollX !== scrollX || window.scrollY !== scrollY) {
-                window.scrollTo(scrollX, scrollY);
-            }
-            if (contentBody && contentBody.scrollTop !== contentBodyScroll) {
-                contentBody.scrollTop = contentBodyScroll;
-            }
-            if (viewport && viewport.scrollTop !== terminalScrollTop) {
-                viewport.scrollTop = terminalScrollTop;
-            }
+            const vtop = viewport?.scrollTop || 0;
+            withScrollLock(() => {
+                try {
+                    const ta = terminal.element?.querySelector('.xterm-helper-textarea');
+                    if (ta) ta.focus({ preventScroll: true }); else terminal.focus();
+                } catch { terminal.focus(); }
+            });
+            if (viewport && viewport.scrollTop !== vtop) viewport.scrollTop = vtop;
         }
 
-        /**
-         * Setup scroll prevention for terminal's hidden textarea
-         */
+        // -- Scroll prevention for textarea -----------------------------------
+
         _setupScrollPrevention(terminal, container) {
             requestAnimationFrame(() => {
                 const textarea = terminal.element?.querySelector('.xterm-helper-textarea');
                 if (!textarea) return;
-                
-                const contentBody = document.querySelector('.content-body');
-                let savedScrollX = 0, savedScrollY = 0, savedContentBodyScroll = 0;
-                
-                const saveScrollPositions = () => {
-                    savedScrollX = window.scrollX;
-                    savedScrollY = window.scrollY;
-                    if (contentBody) savedContentBodyScroll = contentBody.scrollTop;
-                };
-                
-                const restoreScrollPositions = () => {
-                    if (window.scrollX !== savedScrollX || window.scrollY !== savedScrollY) {
-                        window.scrollTo(savedScrollX, savedScrollY);
-                    }
-                    if (contentBody && contentBody.scrollTop !== savedContentBodyScroll) {
-                        contentBody.scrollTop = savedContentBodyScroll;
-                    }
-                };
-                
-                textarea.addEventListener('focus', () => {
-                    saveScrollPositions();
-                    queueMicrotask(restoreScrollPositions);
-                    requestAnimationFrame(restoreScrollPositions);
-                }, { capture: true });
-                
-                textarea.addEventListener('keydown', () => {
-                    saveScrollPositions();
-                    queueMicrotask(restoreScrollPositions);
-                    requestAnimationFrame(restoreScrollPositions);
-                }, { capture: true });
-                
-                textarea.addEventListener('input', () => {
-                    saveScrollPositions();
-                    queueMicrotask(restoreScrollPositions);
-                    requestAnimationFrame(restoreScrollPositions);
-                }, { capture: true });
-                
-                container.addEventListener('mousedown', () => {
-                    saveScrollPositions();
-                    requestAnimationFrame(restoreScrollPositions);
-                });
-                
-                let scrollCheckTimeout = null;
+                const restore = () => withScrollLock(() => {});
+                const guard = () => { restore(); queueMicrotask(restore); requestAnimationFrame(restore); };
+
+                textarea.addEventListener('focus', guard, { capture: true });
+                textarea.addEventListener('keydown', guard, { capture: true });
+                textarea.addEventListener('input', guard, { capture: true });
+                container.addEventListener('mousedown', () => { requestAnimationFrame(restore); });
+
+                let kpTimeout = null;
                 textarea.addEventListener('keypress', () => {
-                    if (scrollCheckTimeout) clearTimeout(scrollCheckTimeout);
-                    scrollCheckTimeout = setTimeout(() => {
-                        if (document.activeElement === textarea) restoreScrollPositions();
+                    if (kpTimeout) clearTimeout(kpTimeout);
+                    kpTimeout = setTimeout(() => {
+                        if (document.activeElement === textarea) restore();
                     }, 10);
                 }, { capture: true });
             });
         }
 
+        // -- Auto-scroll pause (TASK-414/435) ---------------------------------
+
         /**
-         * Setup auto-scroll pause: detect user scroll-up and pause auto-scroll for 5s
+         * Uses xterm.js buffer API (viewportY === baseY) to detect scroll state.
          */
+        _isAtBottom(terminal) {
+            return terminal.buffer.active.viewportY
+                === terminal.buffer.active.baseY;
+        }
+
         _setupAutoScrollPause(terminal, sessionKey) {
-            const viewport = terminal.element?.querySelector('.xterm-viewport');
-            if (!viewport) return;
+            const trySetup = (attempt) => {
+                const viewport = terminal.element?.querySelector('.xterm-viewport');
+                if (!viewport) {
+                    if (attempt < 3) requestAnimationFrame(() => trySetup(attempt + 1));
+                    return;
+                }
+                this._initAutoScrollListeners(viewport, terminal, sessionKey);
+            };
+            requestAnimationFrame(() => trySetup(0));
+        }
+
+        /**
+         * Auto-scroll pause listeners using xterm.js buffer API (viewportY vs baseY).
+         * No 'scroll' event listener here — avoids race conditions with programmatic scrolls.
+         */
+        _initAutoScrollListeners(viewport, terminal, sessionKey) {
+            const startOrRestartTimer = () => {
+                const existing = this._scrollResumeTimers.get(sessionKey);
+                if (existing) clearTimeout(existing);
+                this._scrollResumeTimers.set(sessionKey, setTimeout(() => {
+                    this._scrollResumeTimers.delete(sessionKey);
+                    terminal.scrollToBottom();
+                }, 5000));
+            };
+
+            const cancelTimer = () => {
+                const existing = this._scrollResumeTimers.get(sessionKey);
+                if (existing) { clearTimeout(existing); this._scrollResumeTimers.delete(sessionKey); }
+            };
 
             viewport.addEventListener('wheel', (e) => {
                 if (e.deltaY < 0) {
-                    // User scrolled up
-                    this._userScrolledUp.set(sessionKey, true);
-                    const existing = this._scrollResumeTimers.get(sessionKey);
-                    if (existing) clearTimeout(existing);
-                    this._scrollResumeTimers.set(sessionKey, setTimeout(() => {
-                        this._userScrolledUp.set(sessionKey, false);
-                        this._scrollResumeTimers.delete(sessionKey);
-                    }, 5000));
+                    // Scroll up — only start timer if viewport left the bottom
+                    requestAnimationFrame(() => {
+                        const isAtBottom = terminal.buffer.active.viewportY
+                            === terminal.buffer.active.baseY;
+                        if (!isAtBottom) startOrRestartTimer();
+                    });
+                    return;
                 }
-            }, { passive: true });
 
-            // Reset scroll pause when user scrolls to bottom manually
-            viewport.addEventListener('scroll', () => {
-                const atBottom = viewport.scrollTop + viewport.clientHeight >= viewport.scrollHeight - 1;
-                if (atBottom) {
-                    this._userScrolledUp.set(sessionKey, false);
-                    const existing = this._scrollResumeTimers.get(sessionKey);
-                    if (existing) {
-                        clearTimeout(existing);
-                        this._scrollResumeTimers.delete(sessionKey);
-                    }
+                // Non-upward wheel while scrolled up restarts the timer
+                if (terminal.buffer.active.viewportY !== terminal.buffer.active.baseY) {
+                    startOrRestartTimer();
+                }
+
+                // Scroll down past bottom — cancel timer
+                if (e.deltaY > 0) {
+                    requestAnimationFrame(() => {
+                        const isAtBottom = terminal.buffer.active.viewportY
+                            === terminal.buffer.active.baseY;
+                        if (isAtBottom) cancelTimer();
+                    });
                 }
             }, { passive: true });
         }
 
-        /**
-         * Check if auto-scroll should be applied for a session
-         */
-        _shouldAutoScroll(sessionKey) {
-            return !this._userScrolledUp.get(sessionKey);
-        }
+        // -- Input handling ---------------------------------------------------
 
-        /**
-         * Create Socket.IO connection for a session
-         */
-        _createSocket(sessionKey, existingSessionId) {
-            const socket = io({
-                transports: ['websocket'],
-                upgrade: false,
-                reconnection: true,
-                reconnectionAttempts: Infinity,
-                reconnectionDelay: 1000,
-                reconnectionDelayMax: 30000,
-                randomizationFactor: 0.5,
-                timeout: 60000,
-                forceNew: true,
-                pingTimeout: 300000,
-                pingInterval: 60000
+        _setupInput(sessionData) {
+            sessionData.terminal.onData(data => {
+                if (data === '\x03' && this._activeTyping) {
+                    this._cancelTyping();
+                    return;
+                }
+                if (sessionData.socket?.connected) {
+                    withScrollLock(() => {
+                        sessionData.socket.emit('input', data);
+                        sessionData.terminal.scrollToBottom();
+                    });
+                }
             });
-            
+        }
+
+        // -- Socket.IO --------------------------------------------------------
+
+        _createSocket(sessionKey, existingSessionId) {
+            const socket = io(socketConfig);
             let lastPongTime = Date.now();
-            let healthCheckInterval = null;
-            
+            let healthCheckId = null;
             const getSession = () => this.sessions.get(sessionKey);
-            
+
             const startHealthCheck = () => {
-                if (healthCheckInterval) clearInterval(healthCheckInterval);
-                healthCheckInterval = setInterval(() => {
-                    const timeSincePong = Date.now() - lastPongTime;
-                    const session = getSession();
-                    if (timeSincePong > 180000 && socket.connected && session) {
-                        console.warn(`[Terminal ${session.name}] Connection may be stale (${Math.round(timeSincePong/1000)}s since last pong)`);
+                if (healthCheckId) clearInterval(healthCheckId);
+                healthCheckId = setInterval(() => {
+                    const elapsed = Date.now() - lastPongTime;
+                    const s = getSession();
+                    if (elapsed > STALE_THRESHOLD_MS && socket.connected && s) {
+                        console.warn(`[Terminal ${s.name}] Possibly stale (${Math.round(elapsed / 1000)}s)`);
                     }
-                }, 60000);
+                }, HEALTH_CHECK_MS);
             };
-            
-            const stopHealthCheck = () => {
-                if (healthCheckInterval) {
-                    clearInterval(healthCheckInterval);
-                    healthCheckInterval = null;
-                }
+            const stopHealthCheck = () => { if (healthCheckId) { clearInterval(healthCheckId); healthCheckId = null; } };
+
+            const emitAttach = (sessionId) => {
+                const s = getSession();
+                const dims = s?.fitAddon?.proposeDimensions();
+                socket.emit('attach', {
+                    session_id: sessionId,
+                    rows: dims?.rows ?? 24,
+                    cols: dims?.cols ?? 80
+                });
             };
 
+            // -- connect
             socket.on('connect', () => {
-                const session = getSession();
-                if (!session) return;
-                console.log(`[Terminal ${session.name}] Connected`);
+                const s = getSession();
+                if (!s) return;
                 lastPongTime = Date.now();
                 startHealthCheck();
                 this._updateStatus();
-                
-                const dims = session.fitAddon?.proposeDimensions();
-                socket.emit('attach', {
-                    session_id: existingSessionId,
-                    rows: dims ? dims.rows : 24,
-                    cols: dims ? dims.cols : 80
-                });
+                emitAttach(existingSessionId);
             });
 
-            socket.on('session_id', sessionId => {
-                const session = getSession();
-                if (session) {
-                    session.sessionId = sessionId;
-                    this._saveSessionIds();
-                }
+            // -- session lifecycle
+            socket.on('session_id', id => {
+                const s = getSession();
+                if (s) { s.sessionId = id; this._persistSessions(); }
             });
 
             socket.on('new_session', data => {
-                const session = getSession();
-                if (session) {
-                    session.terminal.write('\x1b[32m[New session started]\x1b[0m\r\n');
-                    session.sessionId = data.session_id;
-                    this._saveSessionIds();
+                const s = getSession();
+                if (s) {
+                    s.terminal.write('\x1b[32m[New session started]\x1b[0m\r\n');
+                    s.sessionId = data.session_id;
+                    this._persistSessions();
                 }
             });
 
-            socket.on('reconnected', (data) => {
-                const session = getSession();
-                if (session) {
-                    // Clear terminal and replay buffer at correct dimensions
-                    session.terminal.reset();
-                    if (data && data.buffer) {
-                        session.terminal.write(data.buffer);
-                    }
-                    // Fit terminal and resize PTY to current dimensions
+            socket.on('reconnected', data => {
+                const s = getSession();
+                if (s) {
+                    s.terminal.reset();
+                    if (data?.buffer) s.terminal.write(data.buffer);
                     this.fitActive();
                 }
             });
 
+            // -- output with scroll-lock when user has scrolled up
             socket.on('output', data => {
-                const session = getSession();
-                if (session) {
-                    session.terminal.write(data);
-                    if (this._shouldAutoScroll(sessionKey)) {
-                        session.terminal.scrollToBottom();
+                const s = getSession();
+                if (!s) return;
+                const isAtBottom = this._isAtBottom(s.terminal);
+                if (isAtBottom) {
+                    s.terminal.write(data);
+                    s.terminal.scrollToBottom();
+                } else {
+                    const viewport = s.terminal.element?.querySelector('.xterm-viewport');
+                    if (viewport) {
+                        const savedScrollTop = viewport.scrollTop;
+                        let locked = true;
+                        const lockScroll = () => { if (locked) viewport.scrollTop = savedScrollTop; };
+                        viewport.addEventListener('scroll', lockScroll);
+                        s.terminal.write(data, () => {
+                            requestAnimationFrame(() => {
+                                requestAnimationFrame(() => {
+                                    locked = false;
+                                    viewport.removeEventListener('scroll', lockScroll);
+                                    viewport.scrollTop = savedScrollTop;
+                                });
+                            });
+                        });
+                    } else {
+                        s.terminal.write(data);
                     }
                 }
             });
-            
-            socket.io.engine.on('pong', () => {
-                lastPongTime = Date.now();
-            });
 
+            // -- pong
+            socket.io.engine.on('pong', () => { lastPongTime = Date.now(); });
+
+            // -- disconnect / reconnect
             socket.on('disconnect', reason => {
-                const session = getSession();
-                const name = session ? session.name : sessionKey;
-                console.log(`[Terminal ${name}] Disconnected: ${reason}`);
+                const s = getSession();
                 stopHealthCheck();
                 this._updateStatus();
-                
-                if (reason !== 'io client disconnect' && session) {
-                    if (reason === 'ping timeout') {
-                        session.terminal.write('\r\n\x1b[31m[Connection timeout - reconnecting...]\x1b[0m\r\n');
-                    } else if (reason === 'transport close' || reason === 'transport error') {
-                        session.terminal.write('\r\n\x1b[31m[Connection lost - reconnecting...]\x1b[0m\r\n');
-                    }
+                if (reason !== 'io client disconnect' && s) {
+                    const msg = reason === 'ping timeout'
+                        ? '[Connection timeout - reconnecting...]'
+                        : (reason === 'transport close' || reason === 'transport error')
+                            ? '[Connection lost - reconnecting...]' : null;
+                    if (msg) s.terminal.write(`\r\n\x1b[31m${msg}\x1b[0m\r\n`);
                 }
             });
 
-            socket.io.on('reconnect', attempt => {
-                const session = getSession();
-                if (!session) return;
-                console.log(`[Terminal ${session.name}] Reconnected after ${attempt} attempts`);
+            socket.io.on('reconnect', () => {
+                const s = getSession();
+                if (!s) return;
                 lastPongTime = Date.now();
                 startHealthCheck();
                 this._updateStatus();
-                
-                const dims = session.fitAddon?.proposeDimensions();
-                socket.emit('attach', {
-                    session_id: session.sessionId,
-                    rows: dims ? dims.rows : 24,
-                    cols: dims ? dims.cols : 80
-                });
+                emitAttach(s.sessionId);
             });
 
             socket.io.on('reconnect_attempt', attempt => {
-                const session = getSession();
-                if (!session) return;
-                console.log(`[Terminal ${session.name}] Reconnection attempt ${attempt}`);
-                if (attempt === 1) {
-                    session.terminal.write('\x1b[33m[Reconnecting...]\x1b[0m\r\n');
-                }
+                const s = getSession();
+                if (s && attempt === 1) s.terminal.write('\x1b[33m[Reconnecting...]\x1b[0m\r\n');
             });
 
             socket.io.on('reconnect_failed', () => {
-                const session = getSession();
                 stopHealthCheck();
-                if (session) {
-                    session.terminal.write('\r\n\x1b[31m[Connection lost - please refresh page]\x1b[0m\r\n');
-                }
+                getSession()?.terminal.write('\r\n\x1b[31m[Connection lost - please refresh page]\x1b[0m\r\n');
             });
 
             socket.on('connect_error', error => {
-                const session = getSession();
-                const name = session ? session.name : sessionKey;
-                console.error(`[Terminal ${name}] Connection error:`, error.message || error);
+                console.error(`[Terminal] Connection error:`, error.message || error);
                 this._updateStatus();
             });
 
             return socket;
         }
 
+        // -- Status -----------------------------------------------------------
+
         _updateStatus() {
             let connected = 0, total = 0;
-            for (const [, session] of this.sessions) {
+            for (const [, s] of this.sessions) {
                 total++;
-                if (session.socket && session.socket.connected) connected++;
+                if (s.socket?.connected) connected++;
             }
-
-            if (this.statusIndicator) {
-                if (connected === total && total > 0) {
-                    this.statusIndicator.className = 'status-indicator connected';
-                    if (this.statusText) this.statusText.textContent = total > 1 ? `Connected (${connected}/${total})` : 'Connected';
-                } else if (connected > 0) {
-                    this.statusIndicator.className = 'status-indicator connected';
-                    if (this.statusText) this.statusText.textContent = `Partial (${connected}/${total})`;
-                } else {
-                    this.statusIndicator.className = 'status-indicator disconnected';
-                    if (this.statusText) this.statusText.textContent = 'Disconnected';
-                }
+            if (!this.statusIndicator) return;
+            if (connected === total && total > 0) {
+                this.statusIndicator.className = 'status-indicator connected';
+                if (this.statusText) this.statusText.textContent = total > 1 ? `Connected (${connected}/${total})` : 'Connected';
+            } else if (connected > 0) {
+                this.statusIndicator.className = 'status-indicator connected';
+                if (this.statusText) this.statusText.textContent = `Partial (${connected}/${total})`;
+            } else {
+                this.statusIndicator.className = 'status-indicator disconnected';
+                if (this.statusText) this.statusText.textContent = 'Disconnected';
             }
         }
 
-        // --- Session name helpers ---
-        _getNextSessionName() {
-            const usedNumbers = new Set();
-            for (const [, session] of this.sessions) {
-                const match = session.name.match(/^Session (\d+)$/);
-                if (match) usedNumbers.add(parseInt(match[1]));
+        // -- Persistence ------------------------------------------------------
+
+        _nextName() {
+            const used = new Set();
+            for (const [, s] of this.sessions) {
+                const m = s.name.match(/^Session (\d+)$/);
+                if (m) used.add(+m[1]);
             }
             let n = 1;
-            while (usedNumbers.has(n)) n++;
+            while (used.has(n)) n++;
             return `Session ${n}`;
         }
 
-        // --- Persistence ---
-        _getStoredSessionIds() {
-            try {
-                const stored = localStorage.getItem(SESSION_KEY);
-                return stored ? JSON.parse(stored) : [];
-            } catch (e) {
-                return [];
+        _persistSessions() {
+            const ids = [], names = {};
+            for (const [, s] of this.sessions) {
+                if (s.sessionId) { ids.push(s.sessionId); names[s.sessionId] = s.name; }
             }
+            storageSet(SESSION_KEY, ids);
+            storageSet(SESSION_NAMES_KEY, names);
         }
 
-        _saveSessionIds() {
-            try {
-                const ids = [];
-                for (const [, session] of this.sessions) {
-                    if (session.sessionId) ids.push(session.sessionId);
-                }
-                localStorage.setItem(SESSION_KEY, JSON.stringify(ids));
-            } catch (e) {}
-        }
+        // -- Legacy compatibility ---------------------------------------------
 
-        _getStoredSessionNames() {
-            try {
-                const stored = localStorage.getItem(SESSION_NAMES_KEY);
-                return stored ? JSON.parse(stored) : {};
-            } catch (e) {
-                return {};
-            }
-        }
-
-        _saveSessionNames() {
-            try {
-                const names = {};
-                for (const [, session] of this.sessions) {
-                    if (session.sessionId) names[session.sessionId] = session.name;
-                }
-                localStorage.setItem(SESSION_NAMES_KEY, JSON.stringify(names));
-            } catch (e) {}
-        }
-
-        // --- Legacy compatibility: index-based accessors ---
-        // These provide backward compatibility for TerminalPanel and Copilot commands
-        get terminals() {
-            return Array.from(this.sessions.values()).map(s => s.terminal);
-        }
-        get sockets() {
-            return Array.from(this.sessions.values()).map(s => s.socket);
-        }
+        get terminals()  { return Array.from(this.sessions.values()).map(s => s.terminal); }
+        get sockets()    { return Array.from(this.sessions.values()).map(s => s.socket); }
         get activeIndex() {
             if (!this.activeSessionKey) return -1;
             let i = 0;
-            for (const key of this.sessions.keys()) {
-                if (key === this.activeSessionKey) return i;
-                i++;
-            }
+            for (const k of this.sessions.keys()) { if (k === this.activeSessionKey) return i; i++; }
             return -1;
         }
-
-        // Legacy method aliases
-        addTerminal(existingSessionId = null) {
-            return this.addSession(existingSessionId) ? this.activeIndex : -1;
-        }
+        addTerminal(existingSessionId = null) { return this.addSession(existingSessionId) ? this.activeIndex : -1; }
         setFocus(index) {
             const keys = Array.from(this.sessions.keys());
-            if (index >= 0 && index < keys.length) {
-                this.switchSession(keys[index]);
-            }
+            if (index >= 0 && index < keys.length) this.switchSession(keys[index]);
         }
 
-        /**
-         * Get the currently focused terminal for voice input injection (FEATURE-021)
-         */
+        // -- Voice input (FEATURE-021) ----------------------------------------
+
         getFocusedTerminal() {
-            const session = this._getActiveSession();
-            if (session) {
-                return {
-                    terminal: session.terminal,
-                    socket: session.socket,
-                    sessionId: session.sessionId,
-                    sendInput: (text) => {
-                        if (session.socket && session.sessionId) {
-                            session.socket.emit('input', text);
-                        }
-                    }
-                };
-            }
-            return null;
+            const s = this._getActiveSession();
+            if (!s) return null;
+            return {
+                terminal: s.terminal, socket: s.socket, sessionId: s.sessionId,
+                sendInput: (text) => { if (s.socket?.connected) s.socket.emit('input', text); }
+            };
         }
 
-        /**
-         * Get first connected socket for voice input (FEATURE-021)
-         */
         get socket() {
-            for (const [, session] of this.sessions) {
-                if (session.socket && session.socket.connected) return session.socket;
-            }
-            const first = this.sessions.values().next().value;
-            return first ? first.socket : null;
+            for (const [, s] of this.sessions) if (s.socket?.connected) return s.socket;
+            return this.sessions.values().next().value?.socket ?? null;
         }
 
-        /**
-         * Send copilot prompt without pressing Enter (FEATURE-021)
-         */
+        // -- Copilot integration ----------------------------------------------
+
         sendCopilotPromptCommandNoEnter(promptCommand) {
             if (this.sessions.size === 0) this.addSession();
-            const session = this._getActiveSession();
-            if (!session) return;
-            const escapedPrompt = promptCommand.replace(/"/g, '\\"');
-            const copilotCommand = `copilot --allow-all-tools --allow-all-paths --allow-all-urls -i "${escapedPrompt}"`;
-            this._sendWithTypingEffectNoEnter(session.key, copilotCommand);
+            const s = this._getActiveSession();
+            if (!s) return;
+            this._sendWithTypingEffectNoEnter(s.key, this._buildCopilotCmd(promptCommand));
         }
 
-        // --- Copilot integration ---
-        sendCopilotRefineCommand(filePath) {
-            this._sendCopilotWithPrompt(`refine the idea ${filePath}`);
-        }
-
-        sendCopilotPromptCommand(promptCommand) {
-            this._sendCopilotWithPrompt(promptCommand);
-        }
+        sendCopilotRefineCommand(filePath) { this._sendCopilotWithPrompt(`refine the idea ${filePath}`); }
+        sendCopilotPromptCommand(prompt)   { this._sendCopilotWithPrompt(prompt); }
 
         _sendCopilotWithPrompt(prompt) {
-            if (this.sessions.size === 0) {
-                this.addSession();
-            }
-            const session = this._getActiveSession();
-            if (!session) return;
-            
-            const escapedPrompt = prompt.replace(/"/g, '\\"');
-            const copilotCommand = `copilot --allow-all-tools --allow-all-paths --allow-all-urls -i "${escapedPrompt}"`;
-            if (this.autoExecutePrompt) {
-                this._sendWithTypingEffect(session.key, copilotCommand, null);
-            } else {
-                this._sendWithTypingEffectNoEnter(session.key, copilotCommand);
-            }
+            if (this.sessions.size === 0) this.addSession();
+            const s = this._getActiveSession();
+            if (!s) return;
+            const cmd = this._buildCopilotCmd(prompt);
+            this.autoExecutePrompt
+                ? this._sendWithTypingEffect(s.key, cmd, null)
+                : this._sendWithTypingEffectNoEnter(s.key, cmd);
+        }
+
+        _buildCopilotCmd(prompt) {
+            return `copilot --allow-all-tools --allow-all-paths --allow-all-urls -i "${prompt.replace(/"/g, '\\"')}"`;
         }
 
         _waitForCopilotReady(sessionKey, callback, maxAttempts = 30) {
-            const session = this.sessions.get(sessionKey);
-            if (!session) return;
+            const s = this.sessions.get(sessionKey);
+            if (!s) return;
             let attempts = 0;
-            const pollInterval = 200;
-            
-            const checkReady = () => {
-                attempts++;
-                if (this._isCopilotPromptReady(sessionKey)) {
-                    setTimeout(callback, 300);
+            const check = () => {
+                if (++attempts > maxAttempts || this._isCopilotPromptReady(sessionKey)) {
+                    setTimeout(callback, attempts > maxAttempts ? 500 : 300);
                     return;
                 }
-                if (attempts >= maxAttempts) {
-                    console.warn('Copilot CLI initialization timeout, proceeding anyway');
-                    setTimeout(callback, 500);
-                    return;
-                }
-                setTimeout(checkReady, pollInterval);
+                setTimeout(check, 200);
             };
-            setTimeout(checkReady, 500);
+            setTimeout(check, 500);
         }
 
         _isCopilotPromptReady(sessionKey) {
-            const session = this.sessions.get(sessionKey);
-            if (!session) return false;
-            
-            const buffer = session.terminal.buffer.active;
-            for (let i = Math.max(0, buffer.cursorY - 3); i <= buffer.cursorY; i++) {
-                const line = buffer.getLine(i);
+            const s = this.sessions.get(sessionKey);
+            if (!s) return false;
+            const buf = s.terminal.buffer.active;
+            for (let i = Math.max(0, buf.cursorY - 3); i <= buf.cursorY; i++) {
+                const line = buf.getLine(i);
                 if (line) {
                     const text = line.translateToString(true);
-                    if (text.match(/^>[\s]*$/) || text.includes('⏺') || text.match(/>\s*$/)) {
-                        return true;
-                    }
+                    if (text.match(/^>[\s]*$/) || text.includes('⏺') || text.match(/>\s*$/)) return true;
                 }
             }
             return false;
         }
 
         _isInCopilotMode(sessionKeyOrIndex) {
-            let session;
+            let s;
             if (typeof sessionKeyOrIndex === 'number') {
-                const keys = Array.from(this.sessions.keys());
-                session = this.sessions.get(keys[sessionKeyOrIndex]);
+                s = this.sessions.get(Array.from(this.sessions.keys())[sessionKeyOrIndex]);
             } else {
-                session = this.sessions.get(sessionKeyOrIndex);
+                s = this.sessions.get(sessionKeyOrIndex);
             }
-            if (!session) return false;
-            
-            const buffer = session.terminal.buffer.active;
-            for (let i = Math.max(0, buffer.cursorY - 5); i <= buffer.cursorY; i++) {
-                const line = buffer.getLine(i);
+            if (!s) return false;
+            const buf = s.terminal.buffer.active;
+            for (let i = Math.max(0, buf.cursorY - 5); i <= buf.cursorY; i++) {
+                const line = buf.getLine(i);
                 if (line) {
                     const text = line.translateToString(true);
-                    if (text.includes('copilot>') || text.includes('Copilot') || text.includes('⏺')) {
-                        return true;
-                    }
+                    if (text.includes('copilot>') || text.includes('Copilot') || text.includes('⏺')) return true;
                 }
             }
             return false;
         }
 
-        /**
-         * Send text with typing simulation effect
-         */
+        // -- Typing effect ----------------------------------------------------
+
         _sendWithTypingEffect(sessionKey, text, callback) {
-            const session = this.sessions.get(sessionKey);
-            if (!session || !session.socket || !session.socket.connected) return;
-            
+            const s = this.sessions.get(sessionKey);
+            if (!s?.socket?.connected) return;
             this._cancelTyping();
-            const typingState = { cancelled: false };
-            this._activeTyping = typingState;
-            
-            const chars = text.split('');
+            const state = { cancelled: false };
+            this._activeTyping = state;
             let i = 0;
-            
-            const typeChar = () => {
-                if (typingState.cancelled) return;
-                if (i < chars.length) {
-                    session.socket.emit('input', chars[i]);
-                    i++;
-                    const delay = 30 + Math.random() * 50;
-                    setTimeout(typeChar, delay);
+            const type = () => {
+                if (state.cancelled) return;
+                if (i < text.length) {
+                    s.socket.emit('input', text[i++]);
+                    setTimeout(type, TYPING_BASE_DELAY + Math.random() * TYPING_JITTER);
                 } else {
                     setTimeout(() => {
-                        if (typingState.cancelled) return;
-                        session.socket.emit('input', '\r');
+                        if (state.cancelled) return;
+                        s.socket.emit('input', '\r');
                         this._activeTyping = null;
-                        if (callback) callback();
+                        callback?.();
                     }, 100);
                 }
             };
-            typeChar();
+            type();
         }
 
-        /**
-         * Send text with typing simulation but without pressing Enter
-         */
         _sendWithTypingEffectNoEnter(sessionKey, text) {
-            const session = this.sessions.get(sessionKey);
-            if (!session || !session.socket || !session.socket.connected) return;
-            
+            const s = this.sessions.get(sessionKey);
+            if (!s?.socket?.connected) return;
             this._cancelTyping();
-            const typingState = { cancelled: false };
-            this._activeTyping = typingState;
-            
-            const chars = text.split('');
+            const state = { cancelled: false };
+            this._activeTyping = state;
             let i = 0;
-            const typeChar = () => {
-                if (typingState.cancelled) return;
-                if (i < chars.length) {
-                    session.socket.emit('input', chars[i]);
-                    i++;
-                    setTimeout(typeChar, 30 + Math.random() * 50);
+            const type = () => {
+                if (state.cancelled) return;
+                if (i < text.length) {
+                    s.socket.emit('input', text[i++]);
+                    setTimeout(type, TYPING_BASE_DELAY + Math.random() * TYPING_JITTER);
                 } else {
                     this._activeTyping = null;
                 }
             };
-            typeChar();
+            type();
         }
 
-        /**
-         * Cancel any active typing simulation
-         */
         _cancelTyping() {
-            if (this._activeTyping) {
-                this._activeTyping.cancelled = true;
-                this._activeTyping = null;
-            }
+            if (this._activeTyping) { this._activeTyping.cancelled = true; this._activeTyping = null; }
         }
     }
 
-    /**
-     * SessionExplorer - Right-side panel for session management
-     */
+    // =========================================================================
+    // SessionExplorer (FEATURE-029-A/B/C, TASK-413, TASK-415)
+    // =========================================================================
+
     class SessionExplorer {
         constructor(terminalManager) {
             this.manager = terminalManager;
             this.listEl = document.getElementById('session-list');
             this.addBtn = document.getElementById('explorer-add-btn');
-            
-            // Register with manager
             this.manager.explorer = this;
 
-            // FEATURE-029-C: Preview state
+            // Preview state (FEATURE-029-C)
             this._previewContainer = null;
             this._previewTerminal = null;
             this._previewFitAddon = null;
@@ -1034,66 +799,47 @@
             this._graceTimer = null;
             this._previewOutputHandler = null;
 
-            // TASK-413: Orphaned sessions indicator
+            // Orphan detection (TASK-413)
             this._orphanBar = null;
             this._orphanCount = 0;
+            this._orphanIds = [];
             this._createOrphanBar();
-            
             this._bindEvents();
         }
 
         _bindEvents() {
-            if (this.addBtn) {
-                this.addBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.manager.addSession();
-                });
-            }
+            this.addBtn?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.manager.addSession();
+            });
         }
 
-        /**
-         * TASK-413: Create the orphaned sessions indicator bar
-         */
+        // -- Orphan detection (TASK-413) --------------------------------------
+
         _createOrphanBar() {
             const bar = document.createElement('div');
             bar.className = 'orphan-sessions-bar';
             bar.style.display = 'none';
-
-            const info = document.createElement('span');
-            info.className = 'orphan-info';
-            info.innerHTML = '<i class="bi bi-exclamation-triangle"></i> <span class="orphan-count">0</span> orphaned';
-
-            const destroyBtn = document.createElement('button');
-            destroyBtn.className = 'session-action-btn orphan-destroy-btn';
-            destroyBtn.title = 'Destroy orphaned sessions';
-            destroyBtn.innerHTML = '<i class="bi bi-trash"></i>';
-            destroyBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this._destroyOrphanedSessions();
-            });
-
-            bar.appendChild(info);
-            bar.appendChild(destroyBtn);
+            bar.innerHTML = `
+                <span class="orphan-info"><i class="bi bi-exclamation-triangle"></i> <span class="orphan-count">0</span> orphaned</span>
+            `;
+            const btn = document.createElement('button');
+            btn.className = 'session-action-btn orphan-destroy-btn';
+            btn.title = 'Destroy orphaned sessions';
+            btn.innerHTML = '<i class="bi bi-trash"></i>';
+            btn.addEventListener('click', (e) => { e.stopPropagation(); this._destroyOrphanedSessions(); });
+            bar.appendChild(btn);
             this._orphanBar = bar;
-
-            // Insert after session-list
             this.listEl.parentNode.appendChild(bar);
         }
 
-        /**
-         * TASK-413: Check for orphaned server sessions not owned by this tab
-         */
         checkOrphanedSessions() {
             const socket = this._getAnySocket();
-            if (!socket || !socket.connected) return;
-
+            if (!socket?.connected) return;
             socket.emit('list_server_sessions');
             socket.once('server_sessions', (serverSessions) => {
                 const localIds = new Set();
-                this.manager.sessions.forEach(s => {
-                    if (s.sessionId) localIds.add(s.sessionId);
-                });
-
+                this.manager.sessions.forEach(s => { if (s.sessionId) localIds.add(s.sessionId); });
                 const orphaned = serverSessions.filter(s => !localIds.has(s.session_id));
                 this._orphanCount = orphaned.length;
                 this._orphanIds = orphaned.map(s => s.session_id);
@@ -1103,22 +849,18 @@
 
         _updateOrphanBar() {
             if (!this._orphanBar) return;
+            this._orphanBar.style.display = this._orphanCount > 0 ? 'flex' : 'none';
             if (this._orphanCount > 0) {
-                this._orphanBar.style.display = 'flex';
                 this._orphanBar.querySelector('.orphan-count').textContent = this._orphanCount;
-            } else {
-                this._orphanBar.style.display = 'none';
             }
         }
 
         _destroyOrphanedSessions() {
-            if (!this._orphanIds || this._orphanIds.length === 0) return;
+            if (!this._orphanIds.length) return;
             const socket = this._getAnySocket();
-            if (!socket || !socket.connected) return;
-
+            if (!socket?.connected) return;
             socket.emit('destroy_sessions', { session_ids: this._orphanIds });
-            socket.once('sessions_destroyed', (data) => {
-                console.log(`[SessionExplorer] Destroyed ${data.count} orphaned sessions`);
+            socket.once('sessions_destroyed', () => {
                 this._orphanCount = 0;
                 this._orphanIds = [];
                 this._updateOrphanBar();
@@ -1126,53 +868,30 @@
         }
 
         _getAnySocket() {
-            for (const [, session] of this.manager.sessions) {
-                if (session.socket && session.socket.connected) return session.socket;
-            }
+            for (const [, s] of this.manager.sessions) if (s.socket?.connected) return s.socket;
             return null;
         }
+
+        // -- Session bars -----------------------------------------------------
 
         addSessionBar(key, name) {
             const bar = document.createElement('div');
             bar.className = 'session-bar';
             bar.dataset.sessionKey = key;
             bar.dataset.active = 'false';
-            
-            const dot = document.createElement('span');
-            dot.className = 'session-status-dot';
-            
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'session-name';
-            nameSpan.textContent = name;
 
-            const renameBtn = document.createElement('button');
-            renameBtn.className = 'session-action-btn rename-btn';
-            renameBtn.title = 'Rename';
-            renameBtn.innerHTML = '<i class="bi bi-pencil"></i>';
-            renameBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.startRename(key);
-            });
+            bar.innerHTML = `
+                <span class="session-status-dot"></span>
+                <span class="session-name">${this._escapeHtml(name)}</span>
+                <button class="session-action-btn rename-btn" title="Rename"><i class="bi bi-pencil"></i></button>
+                <button class="session-action-btn delete-btn" title="Delete"><i class="bi bi-trash"></i></button>
+            `;
 
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'session-action-btn delete-btn';
-            deleteBtn.title = 'Delete';
-            deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
-            deleteBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.manager.removeSession(key);
-            });
-            
-            bar.appendChild(dot);
-            bar.appendChild(nameSpan);
-            bar.appendChild(renameBtn);
-            bar.appendChild(deleteBtn);
-            
-            bar.addEventListener('click', () => {
-                this.manager.switchSession(key);
-            });
+            bar.querySelector('.rename-btn').addEventListener('click', (e) => { e.stopPropagation(); this.startRename(key); });
+            bar.querySelector('.delete-btn').addEventListener('click', (e) => { e.stopPropagation(); this.manager.removeSession(key); });
+            bar.addEventListener('click', () => this.manager.switchSession(key));
 
-            // FEATURE-029-C: Hover preview triggers
+            // Hover preview (FEATURE-029-C / TASK-415)
             bar.addEventListener('mouseenter', () => {
                 if (bar.dataset.active === 'true') return;
                 this._hoverTimer = setTimeout(() => this._showPreview(key, bar), 500);
@@ -1181,25 +900,30 @@
                 clearTimeout(this._hoverTimer);
                 this._dismissPreview();
             });
-            
+
             this.listEl.appendChild(bar);
+        }
+
+        _escapeHtml(str) {
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
         }
 
         removeSessionBar(key) {
             if (this._previewKey === key) this._dismissPreview();
-            const bar = this.listEl.querySelector(`[data-session-key="${key}"]`);
-            if (bar) bar.remove();
+            this.listEl.querySelector(`[data-session-key="${key}"]`)?.remove();
         }
 
         updateActiveIndicator(activeKey) {
             this.listEl.querySelectorAll('.session-bar').forEach(bar => {
-                bar.dataset.active = (bar.dataset.sessionKey === activeKey) ? 'true' : 'false';
+                bar.dataset.active = bar.dataset.sessionKey === activeKey ? 'true' : 'false';
             });
         }
 
-        setAddButtonEnabled(enabled) {
-            if (this.addBtn) this.addBtn.disabled = !enabled;
-        }
+        setAddButtonEnabled(enabled) { if (this.addBtn) this.addBtn.disabled = !enabled; }
+
+        // -- Rename -----------------------------------------------------------
 
         startRename(key) {
             const bar = this.listEl.querySelector(`[data-session-key="${key}"]`);
@@ -1211,41 +935,31 @@
             input.type = 'text';
             input.className = 'session-name-input';
             input.value = nameSpan.textContent;
-            const originalName = nameSpan.textContent;
-
+            const original = nameSpan.textContent;
             let done = false;
-            const confirm = () => {
-                if (done) return;
-                done = true;
-                const newName = input.value.trim();
-                if (newName && newName !== originalName) {
-                    this.manager.renameSession(key, newName);
-                }
-                const span = document.createElement('span');
-                span.className = 'session-name';
-                span.textContent = newName || originalName;
-                input.replaceWith(span);
-            };
 
-            const cancel = () => {
+            const finish = (save) => {
                 if (done) return;
                 done = true;
+                const val = save ? input.value.trim() : '';
+                if (val && val !== original) this.manager.renameSession(key, val);
                 const span = document.createElement('span');
                 span.className = 'session-name';
-                span.textContent = originalName;
+                span.textContent = (save && val) ? val : original;
                 input.replaceWith(span);
             };
 
             input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') { e.preventDefault(); confirm(); }
-                if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+                if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+                if (e.key === 'Escape') { e.preventDefault(); finish(false); }
             });
-            input.addEventListener('blur', () => confirm());
-
+            input.addEventListener('blur', () => finish(true));
             nameSpan.replaceWith(input);
             input.focus();
             input.select();
         }
+
+        // -- Toast ------------------------------------------------------------
 
         showToast(message) {
             const panel = document.getElementById('terminal-panel');
@@ -1262,69 +976,58 @@
             setTimeout(() => toast.classList.remove('visible'), 2500);
         }
 
-        // FEATURE-029-C: Preview methods
+        // -- Preview (FEATURE-029-C) ------------------------------------------
+
         _initPreviewContainer() {
             if (this._previewContainer) return;
-
             this._previewContainer = document.createElement('div');
             this._previewContainer.className = 'session-preview';
             this._previewContainer.style.display = 'none';
 
             const header = document.createElement('div');
             header.className = 'session-preview-header';
-            this._previewContainer.appendChild(header);
-
             const body = document.createElement('div');
             body.className = 'session-preview-body';
+            this._previewContainer.appendChild(header);
             this._previewContainer.appendChild(body);
 
             this._previewContainer.addEventListener('click', () => {
                 if (this._previewKey) {
-                    const key = this._previewKey;
+                    const k = this._previewKey;
                     this._dismissPreview();
-                    this.manager.switchSession(key);
+                    this.manager.switchSession(k);
                 }
             });
 
             document.getElementById('terminal-panel').appendChild(this._previewContainer);
 
             this._previewTerminal = new Terminal({
-                disableStdin: true,
-                scrollback: 500,
-                fontSize: terminalConfig.fontSize,
-                fontFamily: terminalConfig.fontFamily,
-                theme: terminalConfig.theme,
-                cursorBlink: false
+                disableStdin: true, scrollback: 500,
+                fontSize: terminalConfig.fontSize, fontFamily: terminalConfig.fontFamily,
+                theme: terminalConfig.theme, cursorBlink: false
             });
             this._previewFitAddon = new FitAddon.FitAddon();
             this._previewTerminal.loadAddon(this._previewFitAddon);
             this._previewTerminal.open(body);
         }
 
-        _showPreview(key, barElement) {
+        _showPreview(key) {
             const session = this.manager.sessions.get(key);
             if (!session) return;
-
             this._initPreviewContainer();
-
-            if (this._previewKey && this._previewKey !== key) {
-                this._cleanupPreviewListeners();
-            }
+            if (this._previewKey && this._previewKey !== key) this._cleanupPreviewListeners();
             this._previewKey = key;
 
             this._previewContainer.querySelector('.session-preview-header').textContent = session.name;
-
             this._previewTerminal.clear();
 
-            const srcBuffer = session.terminal.buffer.active;
+            const buf = session.terminal.buffer.active;
             const lines = [];
-            for (let i = 0; i < srcBuffer.length; i++) {
-                const line = srcBuffer.getLine(i);
+            for (let i = 0; i < buf.length; i++) {
+                const line = buf.getLine(i);
                 if (line) lines.push(line.translateToString(true));
             }
-            if (lines.length > 0) {
-                this._previewTerminal.write(lines.join('\r\n'));
-            }
+            if (lines.length) this._previewTerminal.write(lines.join('\r\n'));
             this._previewTerminal.scrollToBottom();
 
             if (session.socket) {
@@ -1338,12 +1041,11 @@
             }
 
             this._previewContainer.style.display = 'flex';
-            // Sync preview offset with current explorer width
             const explorer = document.getElementById('session-explorer');
             if (explorer && !explorer.classList.contains('collapsed')) {
                 this._previewContainer.style.right = explorer.style.width || '';
             }
-            try { this._previewFitAddon.fit(); } catch(e) {}
+            try { this._previewFitAddon.fit(); } catch {}
         }
 
         _dismissPreview() {
@@ -1351,25 +1053,22 @@
             clearTimeout(this._graceTimer);
             this._cleanupPreviewListeners();
             this._previewKey = null;
-            if (this._previewContainer) {
-                this._previewContainer.style.display = 'none';
-            }
+            if (this._previewContainer) this._previewContainer.style.display = 'none';
         }
 
         _cleanupPreviewListeners() {
             if (this._previewOutputHandler && this._previewKey) {
-                const session = this.manager.sessions.get(this._previewKey);
-                if (session && session.socket) {
-                    session.socket.off('output', this._previewOutputHandler);
-                }
+                const s = this.manager.sessions.get(this._previewKey);
+                s?.socket?.off('output', this._previewOutputHandler);
                 this._previewOutputHandler = null;
             }
         }
     }
 
-    /**
-     * TerminalPanel - Collapsible panel wrapper
-     */
+    // =========================================================================
+    // TerminalPanel — chrome wrapper
+    // =========================================================================
+
     class TerminalPanel {
         constructor(terminalManager) {
             this.panel = document.getElementById('terminal-panel');
@@ -1379,125 +1078,78 @@
             this.explorerToggleBtn = document.getElementById('terminal-explorer-toggle');
             this.copilotCmdBtn = document.getElementById('copilot-cmd-btn');
             this.resizeHandle = document.getElementById('terminal-resize-handle');
+            this.explorerResizeHandle = document.getElementById('explorer-resize-handle');
             this.terminalManager = terminalManager;
-
             this.isExpanded = false;
             this.isZenMode = false;
             this.explorerVisible = true;
             this.explorerWidth = EXPLORER_DEFAULT_WIDTH;
-            this.explorerResizeHandle = document.getElementById('explorer-resize-handle');
             this.panelHeight = 300;
-
             this._bindEvents();
         }
 
         _bindEvents() {
             this.header.addEventListener('click', (e) => {
-                if (e.target.closest('.terminal-actions') || 
-                    e.target.closest('.terminal-status') ||
-                    e.target.closest('.terminal-header-center')) return;
+                if (e.target.closest('.terminal-actions, .terminal-status, .terminal-header-center')) return;
                 this.toggle();
             });
-
-            this.toggleBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.toggle();
-            });
-
-            if (this.zenBtn) {
-                this.zenBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.toggleZenMode();
-                });
-            }
-
-            if (this.explorerToggleBtn) {
-                this.explorerToggleBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.toggleExplorer();
-                });
-            }
-
-            if (this.copilotCmdBtn) {
-                this.copilotCmdBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this._insertCopilotCommand();
-                });
-            }
+            this.toggleBtn.addEventListener('click', (e) => { e.stopPropagation(); this.toggle(); });
+            this.zenBtn?.addEventListener('click', (e) => { e.stopPropagation(); this.toggleZenMode(); });
+            this.explorerToggleBtn?.addEventListener('click', (e) => { e.stopPropagation(); this.toggleExplorer(); });
+            this.copilotCmdBtn?.addEventListener('click', (e) => { e.stopPropagation(); this._insertCopilotCommand(); });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && this.isZenMode) this.toggleZenMode(); });
 
             this._initResize();
             this._initExplorerResize();
             this._restoreExplorerState();
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && this.isZenMode) {
-                    this.toggleZenMode();
-                }
-            });
         }
 
-        _initResize() {
-            let startY, startHeight;
+        // -- Panel resize -----------------------------------------------------
 
+        _initResize() {
             this.resizeHandle.addEventListener('mousedown', (e) => {
                 e.preventDefault();
-                startY = e.clientY;
-                startHeight = this.panel.offsetHeight;
-                
+                const startY = e.clientY;
+                const startH = this.panel.offsetHeight;
                 this.panel.classList.add('resizing');
                 document.body.style.cursor = 'ns-resize';
                 document.body.style.userSelect = 'none';
 
-                const onMove = (e) => {
-                    const delta = startY - e.clientY;
-                    this.panelHeight = Math.min(Math.max(startHeight + delta, 100), window.innerHeight - 100);
+                const onMove = (ev) => {
+                    this.panelHeight = Math.min(Math.max(startH + (startY - ev.clientY), 100), window.innerHeight - 100);
                     this.panel.style.height = this.panelHeight + 'px';
                     this.terminalManager._resizeAll();
                 };
-
                 const onUp = () => {
                     document.removeEventListener('mousemove', onMove);
                     document.removeEventListener('mouseup', onUp);
-                    
                     this.panel.classList.remove('resizing');
                     document.body.style.cursor = '';
                     document.body.style.userSelect = '';
-                    
                     this.terminalManager.fitActive();
                 };
-
                 document.addEventListener('mousemove', onMove);
                 document.addEventListener('mouseup', onUp);
             });
         }
 
-        toggle() {
-            if (this.isExpanded) {
-                this.collapse();
-            } else {
-                this.expand();
-            }
-        }
+        // -- Collapse / expand ------------------------------------------------
+
+        toggle()  { this.isExpanded ? this.collapse() : this.expand(); }
 
         expand() {
             if (this.isExpanded) return;
-
             this.isExpanded = true;
             this.panel.classList.remove('collapsed');
             this.panel.classList.add('expanded');
             this.panel.style.height = this.panelHeight + 'px';
             this.toggleBtn.querySelector('i').className = 'bi bi-chevron-down';
-
             setTimeout(() => this.terminalManager.fitActive(), 0);
         }
 
         collapse() {
             if (!this.isExpanded && !this.isZenMode) return;
-
-            if (this.isZenMode) {
-                this._exitZenMode();
-            }
-
+            if (this.isZenMode) this._exitZenMode();
             this.isExpanded = false;
             this.panel.classList.remove('expanded');
             this.panel.classList.add('collapsed');
@@ -1505,126 +1157,19 @@
             this.toggleBtn.querySelector('i').className = 'bi bi-chevron-up';
         }
 
-        toggleZenMode() {
-            if (this.isZenMode) {
-                this._exitZenMode();
-            } else {
-                this._enterZenMode();
-            }
-        }
+        // -- Zen mode ---------------------------------------------------------
 
-        toggleExplorer() {
-            const explorer = document.getElementById('session-explorer');
-            if (!explorer) return;
-            this.explorerVisible = !this.explorerVisible;
-            explorer.classList.toggle('collapsed', !this.explorerVisible);
-
-            if (this.explorerResizeHandle) {
-                this.explorerResizeHandle.style.display = this.explorerVisible ? '' : 'none';
-            }
-
-            this._saveExplorerCollapsed(!this.explorerVisible);
-
-            if (this.explorerVisible) {
-                this._updateExplorerWidth(this.explorerWidth);
-            }
-
-            setTimeout(() => this.terminalManager.fitActive(), 300);
-        }
-
-        _initExplorerResize() {
-            const handle = this.explorerResizeHandle;
-            if (!handle) return;
-
-            handle.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                handle.classList.add('dragging');
-                document.body.style.cursor = 'col-resize';
-                document.body.style.userSelect = 'none';
-
-                const body = document.getElementById('terminal-body');
-
-                const onMove = (e) => {
-                    const bodyRect = body.getBoundingClientRect();
-                    const newWidth = bodyRect.right - e.clientX;
-                    const clamped = Math.max(EXPLORER_MIN_WIDTH, Math.min(EXPLORER_MAX_WIDTH, newWidth));
-                    this.explorerWidth = clamped;
-                    this._updateExplorerWidth(clamped);
-                };
-
-                const onUp = () => {
-                    document.removeEventListener('mousemove', onMove);
-                    document.removeEventListener('mouseup', onUp);
-                    handle.classList.remove('dragging');
-                    document.body.style.cursor = '';
-                    document.body.style.userSelect = '';
-                    this._saveExplorerWidth(this.explorerWidth);
-                    this.terminalManager.fitActive();
-                };
-
-                document.addEventListener('mousemove', onMove);
-                document.addEventListener('mouseup', onUp);
-            });
-        }
-
-        _restoreExplorerState() {
-            const explorer = document.getElementById('session-explorer');
-            if (!explorer) return;
-
-            try {
-                const savedWidth = localStorage.getItem(EXPLORER_WIDTH_KEY);
-                if (savedWidth !== null) {
-                    const w = Math.max(EXPLORER_MIN_WIDTH, Math.min(EXPLORER_MAX_WIDTH, parseInt(savedWidth, 10)));
-                    if (!isNaN(w)) {
-                        this.explorerWidth = w;
-                        this._updateExplorerWidth(w);
-                    }
-                }
-            } catch (e) {}
-
-            try {
-                const savedCollapsed = localStorage.getItem(EXPLORER_COLLAPSED_KEY);
-                if (savedCollapsed === 'true') {
-                    this.explorerVisible = false;
-                    explorer.classList.add('collapsed');
-                    if (this.explorerResizeHandle) this.explorerResizeHandle.style.display = 'none';
-                }
-            } catch (e) {}
-        }
-
-        _updateExplorerWidth(width) {
-            const explorer = document.getElementById('session-explorer');
-            if (!explorer) return;
-            explorer.style.width = width + 'px';
-            explorer.style.minWidth = width + 'px';
-            explorer.style.maxWidth = width + 'px';
-
-            const preview = document.querySelector('.session-preview');
-            if (preview) {
-                preview.style.right = width + 'px';
-            }
-        }
-
-        _saveExplorerWidth(width) {
-            try { localStorage.setItem(EXPLORER_WIDTH_KEY, String(width)); } catch (e) {}
-        }
-
-        _saveExplorerCollapsed(collapsed) {
-            try { localStorage.setItem(EXPLORER_COLLAPSED_KEY, String(collapsed)); } catch (e) {}
-        }
+        toggleZenMode() { this.isZenMode ? this._exitZenMode() : this._enterZenMode(); }
 
         _enterZenMode() {
             if (!this.isExpanded) this.expand();
-
             this.isZenMode = true;
             this.panel.classList.add('zen-mode');
             this.zenBtn.querySelector('i').className = 'bi bi-fullscreen-exit';
             this.zenBtn.title = 'Exit Zen Mode (ESC)';
-
             const topMenu = document.querySelector('.top-menu');
             if (topMenu) topMenu.style.display = 'none';
             if (this.appContainer) this.appContainer.style.display = 'none';
-
             this.terminalManager.fitActive();
         }
 
@@ -1634,35 +1179,98 @@
             this.panel.style.height = this.panelHeight + 'px';
             this.zenBtn.querySelector('i').className = 'bi bi-arrows-fullscreen';
             this.zenBtn.title = 'Zen Mode';
-
             const topMenu = document.querySelector('.top-menu');
             if (topMenu) topMenu.style.display = '';
             if (this.appContainer) this.appContainer.style.display = '';
-
             this.terminalManager.fitActive();
         }
 
-        /**
-         * Insert copilot command into active terminal (no Enter)
-         */
+        // -- Explorer toggle / resize -----------------------------------------
+
+        toggleExplorer() {
+            const explorer = document.getElementById('session-explorer');
+            if (!explorer) return;
+            this.explorerVisible = !this.explorerVisible;
+            explorer.classList.toggle('collapsed', !this.explorerVisible);
+            if (this.explorerResizeHandle) this.explorerResizeHandle.style.display = this.explorerVisible ? '' : 'none';
+            try { localStorage.setItem(EXPLORER_COLLAPSED_KEY, String(!this.explorerVisible)); } catch {}
+            if (this.explorerVisible) this._updateExplorerWidth(this.explorerWidth);
+            setTimeout(() => this.terminalManager.fitActive(), 300);
+        }
+
+        _initExplorerResize() {
+            const handle = this.explorerResizeHandle;
+            if (!handle) return;
+            handle.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                handle.classList.add('dragging');
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+                const body = document.getElementById('terminal-body');
+                const onMove = (ev) => {
+                    const w = Math.max(EXPLORER_MIN_WIDTH, Math.min(EXPLORER_MAX_WIDTH, body.getBoundingClientRect().right - ev.clientX));
+                    this.explorerWidth = w;
+                    this._updateExplorerWidth(w);
+                };
+                const onUp = () => {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                    handle.classList.remove('dragging');
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                    try { localStorage.setItem(EXPLORER_WIDTH_KEY, String(this.explorerWidth)); } catch {}
+                    this.terminalManager.fitActive();
+                };
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+            });
+        }
+
+        _restoreExplorerState() {
+            const explorer = document.getElementById('session-explorer');
+            if (!explorer) return;
+            try {
+                const w = parseInt(localStorage.getItem(EXPLORER_WIDTH_KEY), 10);
+                if (!isNaN(w)) {
+                    this.explorerWidth = Math.max(EXPLORER_MIN_WIDTH, Math.min(EXPLORER_MAX_WIDTH, w));
+                    this._updateExplorerWidth(this.explorerWidth);
+                }
+            } catch {}
+            try {
+                if (localStorage.getItem(EXPLORER_COLLAPSED_KEY) === 'true') {
+                    this.explorerVisible = false;
+                    explorer.classList.add('collapsed');
+                    if (this.explorerResizeHandle) this.explorerResizeHandle.style.display = 'none';
+                }
+            } catch {}
+        }
+
+        _updateExplorerWidth(width) {
+            const explorer = document.getElementById('session-explorer');
+            if (!explorer) return;
+            const px = width + 'px';
+            explorer.style.width = px;
+            explorer.style.minWidth = px;
+            explorer.style.maxWidth = px;
+            const preview = document.querySelector('.session-preview');
+            if (preview) preview.style.right = px;
+        }
+
+        // -- Copilot command --------------------------------------------------
+
         _insertCopilotCommand() {
-            const copilotCommand = 'copilot --allow-all-tools --allow-all-paths --allow-all-urls';
-            
-            if (this.terminalManager.sessions.size === 0) {
-                this.terminalManager.addSession();
-            }
-            
-            const session = this.terminalManager._getActiveSession();
-            if (!session) return;
-            
-            this.terminalManager._sendWithTypingEffect(session.key, copilotCommand, null);
+            if (this.terminalManager.sessions.size === 0) this.terminalManager.addSession();
+            const s = this.terminalManager._getActiveSession();
+            if (!s) return;
+            this.terminalManager._sendWithTypingEffect(s.key, 'copilot --allow-all-tools --allow-all-paths --allow-all-urls', null);
         }
     }
 
-    // Export to window
+    // =========================================================================
+    // Export
+    // =========================================================================
+
     window.TerminalManager = TerminalManager;
     window.TerminalPanel = TerminalPanel;
     window.SessionExplorer = SessionExplorer;
-
-    console.log('[Terminal] Module loaded');
 })();

@@ -3,7 +3,7 @@
 Tests validate the v2.0 toolbar system:
 - Core shell (xipe-toolbar-core.js): hamburger, panel, mode tabs, toast, data store, comms
 - Theme mode (xipe-toolbar-theme.js): offscreen canvas, magnifier, color sampling, role annotation
-- Mockup mode (xipe-toolbar-mockup.js): smart-snap, component capture, drag handles, instructions
+- Mockup mode (xipe-toolbar-mockup.js): smart-snap, area capture, drag handles, instructions
 - Build script (build.py): minification pipeline
 - Agent skill (SKILL.md): staged injection, data polling, rubric analysis
 """
@@ -127,9 +127,9 @@ class TestCoreDataStore:
         """AC-25: Data store must include colors array."""
         assert re.search(r"colors\s*:\s*\[", core_js)
 
-    def test_components_array(self, core_js):
-        """AC-26: Data store must include components array (replaces elements[])."""
-        assert re.search(r"components\s*:\s*\[", core_js)
+    def test_areas_array(self, core_js):
+        """AC-26: Data store must include areas array."""
+        assert re.search(r"areas\s*:\s*\[", core_js)
 
     def test_ref_ready_init(self, core_js):
         """FR-13: __xipeRefReady initialized to false."""
@@ -508,7 +508,7 @@ class TestMockupSmartSnap:
 
 
 class TestMockupComponentCapture:
-    """Verify component capture (FR-M5, FR-M6, AC-M5 through AC-M6)."""
+    """Verify area capture (FR-M5, FR-M6, AC-M5 through AC-M6)."""
 
     def test_bounding_rect(self, mockup_js):
         """FR-M5: Must use getBoundingClientRect."""
@@ -518,9 +518,9 @@ class TestMockupComponentCapture:
         """FR-M5: Must use getComputedStyle."""
         assert "getComputedStyle" in mockup_js
 
-    def test_component_id_format(self, mockup_js):
-        """FR-M6: Component IDs must follow comp-001 format."""
-        assert re.search(r"comp-|padStart", mockup_js)
+    def test_area_id_format(self, mockup_js):
+        """FR-M6: Area IDs must follow area-N format."""
+        assert re.search(r"area-|areaCounter", mockup_js)
 
     def test_lightweight_capture(self, mockup_js):
         """FR-M5: Must capture limited CSS property set."""
@@ -528,13 +528,38 @@ class TestMockupComponentCapture:
         for prop in ["display", "position", "background", "font-family", "border-radius"]:
             assert prop in mockup_js, f"Property '{prop}' must be in capture list"
 
-    def test_max_components(self, mockup_js):
-        """NFR-M5: Must enforce max 20 components."""
+    def test_max_areas(self, mockup_js):
+        """NFR-M5: Must enforce max 20 areas."""
         assert "20" in mockup_js
 
     def test_toolbar_click_exclusion(self, mockup_js):
         """Edge case: Must ignore clicks on toolbar itself."""
         assert "xipe-toolbar" in mockup_js
+
+
+class TestMockupAreaDataModel:
+    """Verify area data model stores bounding_box and snap context (v2.3, TD 2.14)."""
+
+    def test_area_stores_bounding_box(self, mockup_js):
+        """v2.3: captureArea must store bounding_box in area object."""
+        assert "bounding_box" in mockup_js
+
+    def test_bounding_box_has_coordinates(self, mockup_js):
+        """v2.3: bounding_box must have x, y, width, height."""
+        # Check for bounding_box construction with rect properties
+        assert re.search(r"bounding_box.*\{.*x.*y.*width.*height", mockup_js, re.DOTALL)
+
+    def test_area_stores_selector(self, mockup_js):
+        """v2.3: Area must store snap element selector."""
+        assert "selector" in mockup_js
+
+    def test_area_stores_tag(self, mockup_js):
+        """v2.3: Area must store snap element tag name."""
+        assert re.search(r"tag.*tagName|tagName.*tag", mockup_js, re.I)
+
+    def test_area_id_sequential(self, mockup_js):
+        """v2.3: Area IDs must be sequential (area-1, area-2, ...)."""
+        assert re.search(r"area-\$\{|`area-|'area-'.*\+|areaCounter", mockup_js)
 
 
 class TestMockupOverlay:
@@ -561,10 +586,10 @@ class TestMockupOverlay:
 
 
 class TestMockupInstructions:
-    """Verify per-component instructions (FR-M7, AC-M8 through AC-M10)."""
+    """Verify per-area instructions (FR-M7, AC-M8 through AC-M10)."""
 
     def test_instruction_field(self, mockup_js):
-        """FR-M7: Must support instruction input per component."""
+        """FR-M7: Must support instruction input per area."""
         assert "instruction" in mockup_js
 
 
@@ -599,6 +624,299 @@ class TestMockupWizardSteps:
         """FR-M13: Must support 4-step navigation."""
         assert "step" in mockup_js.lower()
         assert re.search(r"step.{0,5}[1234]|currentStep|step.*4", mockup_js, re.I)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# MOCKUP MODE v2.1 TESTS (CR-001: Button Lifecycle & Agent Flow)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestMockupButtonGlobals:
+    """Verify global button control variables (FR-M14, AC-M31)."""
+
+    def test_analyze_enabled_global_in_core(self, core_js):
+        """FR-M14: Core must initialize __xipeAnalyzeEnabled."""
+        assert "__xipeAnalyzeEnabled" in core_js
+
+    def test_generate_enabled_global_in_core(self, core_js):
+        """FR-M14: Core must initialize __xipeGenerateMockupEnabled."""
+        assert "__xipeGenerateMockupEnabled" in core_js
+
+    def test_analyze_enabled_default_false(self, core_js):
+        """FR-M14: __xipeAnalyzeEnabled must default to false."""
+        assert re.search(r"__xipeAnalyzeEnabled\s*=\s*false", core_js)
+
+    def test_generate_enabled_default_false(self, core_js):
+        """FR-M14: __xipeGenerateMockupEnabled must default to false."""
+        assert re.search(r"__xipeGenerateMockupEnabled\s*=\s*false", core_js)
+
+
+class TestMockupButtonPolling:
+    """Verify toolbar polls global variables for button state (FR-M14)."""
+
+    def test_polling_interval_exists(self, mockup_js):
+        """FR-M14: Must have setInterval for button state polling."""
+        assert "setInterval" in mockup_js
+
+    def test_polls_analyze_enabled(self, mockup_js):
+        """FR-M14: Must read __xipeAnalyzeEnabled in polling."""
+        assert "__xipeAnalyzeEnabled" in mockup_js
+
+    def test_polls_generate_enabled(self, mockup_js):
+        """FR-M14: Must read __xipeGenerateMockupEnabled in polling."""
+        assert "__xipeGenerateMockupEnabled" in mockup_js
+
+    def test_polling_removes_processing_when_enabled(self, mockup_js):
+        """TASK-451: Polling must NOT skip buttons that have processing class.
+
+        The polling condition must re-enable buttons even when xipe-btn-processing
+        is present — that's exactly the state that needs clearing. The guard
+        '!...contains(processing)' is inverted and prevents re-enabling.
+        """
+        # The polling block should NOT have a negative guard on processing class.
+        # Extract the setInterval polling block and check it doesn't skip processing buttons.
+        polling_match = re.search(
+            r'setInterval\s*\(\s*\(\)\s*=>\s*\{(.+?)\}\s*,\s*500\s*\)',
+            mockup_js,
+            re.DOTALL,
+        )
+        assert polling_match, "Button polling setInterval block not found"
+        polling_body = polling_match.group(1)
+        # Must NOT contain negated processing-class guard
+        assert not re.search(
+            r'!\s*\w+\.classList\.contains\([\'"]xipe-btn-processing[\'"]\)',
+            polling_body,
+        ), "Polling must not skip buttons with processing class — inverted guard bug"
+
+    def test_skill_enforces_button_reenable(self, skill_md):
+        """TASK-451: SKILL.md must instruct agents to directly re-enable buttons."""
+        assert re.search(
+            r'disabled\s*=\s*false.*classList\.remove|classList\.remove.*disabled\s*=\s*false',
+            skill_md,
+            re.DOTALL,
+        ), "SKILL.md must instruct agents to directly set disabled=false and remove processing class"
+
+
+class TestMockupActionField:
+    """Verify action field distinguishes analyze vs generate (FR-M16)."""
+
+    def test_analyze_sets_action(self, mockup_js):
+        """FR-M16: Analyze click must set action = 'analyze'."""
+        assert re.search(r"action\s*=\s*['\"]analyze['\"]", mockup_js)
+
+    def test_generate_sets_action(self, mockup_js):
+        """FR-M16: Generate click must set action = 'generate'."""
+        assert re.search(r"action\s*=\s*['\"]generate['\"]", mockup_js)
+
+
+class TestMockupProcessingAnimation:
+    """Verify processing animation on buttons (FR-M15, AC-M11, AC-M17)."""
+
+    def test_processing_css_class(self, mockup_js):
+        """FR-M15: Must add processing CSS class on click."""
+        assert "xipe-btn-processing" in mockup_js
+
+    def test_processing_spinner_keyframes(self, mockup_js):
+        """FR-M15: Must define spinner animation (xipe-spin or similar)."""
+        assert re.search(r"xipe-spin|@keyframes|animation.*spin", mockup_js, re.I)
+
+    def test_analyze_disables_on_click(self, mockup_js):
+        """AC-M11: Analyze button must add processing class on click."""
+        # This test will pass once xipe-btn-processing is added to analyze handler
+        assert "xipe-btn-processing" in mockup_js
+
+    def test_generate_disables_on_click(self, mockup_js):
+        """AC-M17: Generate button must set disabled = true on click."""
+        # Both buttons should disable on click
+        assert re.search(r"disabled\s*=\s*true", mockup_js)
+
+
+class TestMockupButtonDataAttributes:
+    """Verify data attributes for stable button targeting (TD 2.2)."""
+
+    def test_analyze_data_attribute(self, mockup_js):
+        """TD 2.3: Analyze button must have data-xipe-analyze attribute."""
+        assert "data-xipe-analyze" in mockup_js
+
+    def test_generate_data_attribute(self, mockup_js):
+        """TD 2.4: Generate button must have data-xipe-generate attribute."""
+        assert "data-xipe-generate" in mockup_js
+
+
+class TestMockupAnalyzeDisablesGlobal:
+    """Verify analyze click sets global to false (AC-M11, FR-M14)."""
+
+    def test_analyze_click_sets_global_false(self, mockup_js):
+        """AC-M11: Clicking Analyze must set __xipeAnalyzeEnabled = false."""
+        # The onclick handler should set the global to false
+        assert re.search(r"__xipeAnalyzeEnabled\s*=\s*false", mockup_js)
+
+    def test_generate_click_sets_global_false(self, mockup_js):
+        """AC-M17: Clicking Generate must set __xipeGenerateMockupEnabled = false."""
+        assert re.search(r"__xipeGenerateMockupEnabled\s*=\s*false", mockup_js)
+
+
+class TestSkillDecoupledAnalyzeGenerate:
+    """Verify skill decouples analyze from generate (FR-M20, AC-M31–M33)."""
+
+    def test_skill_references_action_analyze(self, skill_md):
+        """FR-M20: Skill must check action = 'analyze'."""
+        assert re.search(r"action.*=.*['\"]analyze['\"]|action.*analyze", skill_md, re.I)
+
+    def test_skill_references_action_generate(self, skill_md):
+        """FR-M20: Skill must check action = 'generate'."""
+        assert re.search(r"action.*=.*['\"]generate['\"]|action.*generate", skill_md, re.I)
+
+    def test_skill_no_auto_trigger(self, skill_md):
+        """FR-M20: Skill must NOT auto-trigger generation after analysis."""
+        assert re.search(r"NOT.*auto.?trigger|does NOT|no.*auto", skill_md, re.I)
+
+    def test_skill_resume_polling_after_analysis(self, skill_md):
+        """AC-M31: Skill must resume polling after analysis completes."""
+        assert re.search(r"resume.*poll|loop.*back|AwaitData", skill_md, re.I)
+
+    def test_skill_enables_both_buttons(self, skill_md):
+        """AC-M15/AC-M31: Skill must set both enabled variables after analysis."""
+        assert "__xipeAnalyzeEnabled" in skill_md
+        assert "__xipeGenerateMockupEnabled" in skill_md
+
+
+class TestSkillExactAreaScreenshots:
+    """Verify skill takes exact area screenshots by coordinate (FR-M17, AC-M42–M43, TD 2.8)."""
+
+    def test_skill_coordinate_based_crop(self, skill_md):
+        """TD 2.8: Skill must crop screenshots by bounding_box coordinates, not DOM UID."""
+        assert "bounding_box" in skill_md
+        assert re.search(r"crop|clip|coordinate", skill_md, re.I)
+
+    def test_skill_scroll_before_capture(self, skill_md):
+        """TD 2.8: Skill must scroll area into viewport before screenshot."""
+        assert re.search(r"scroll.*viewport|scrollTo|scroll.*bounding", skill_md, re.I)
+
+    def test_skill_dimension_validation(self, skill_md):
+        """AC-M43: Cropped dimensions must match bounding_box within 1px."""
+        assert re.search(r"1px|within.*1|dimension.*match|validate.*dimension", skill_md, re.I)
+
+    def test_skill_full_page_screenshot(self, skill_md):
+        """AC-M46: Skill must take viewport screenshot saved as full-page.png."""
+        assert re.search(r"take_screenshot.*full-page\.png|full-page\.png.*screenshot", skill_md, re.I)
+        assert re.search(r"full-page\.png", skill_md)
+
+    def test_skill_per_area_screenshot_naming(self, skill_md):
+        """AC-M47: Per-area screenshots must use {area-id}.png naming."""
+        assert re.search(r"area-\d+\.png|\{area.?id\}\.png|screenshots/", skill_md, re.I)
+
+    def test_skill_no_dom_uid_for_screenshots(self, skill_md):
+        """TD 2.8: Skill must NOT use DOM element UID for area screenshots."""
+        assert re.search(r"not.*uid|not.*dom.*element.*uid|coordinate.based|NOT.*UID", skill_md, re.I)
+
+
+class TestSkillAreaElementDiscovery:
+    """Verify skill discovers all elements within area bounding_box (FR-M18, AC-M44, TD 2.9)."""
+
+    def test_skill_element_discovery_concept(self, skill_md):
+        """TD 2.9: Skill must reference element discovery for areas."""
+        assert re.search(r"element.*discover|discover.*element|discovered_elements", skill_md, re.I)
+
+    def test_skill_bbox_intersection(self, skill_md):
+        """TD 2.9: Skill must check element intersection with bounding_box."""
+        assert re.search(r"getBoundingClientRect|bounding.*rect|intersect", skill_md, re.I)
+
+    def test_skill_all_elements_not_just_subtree(self, skill_md):
+        """AC-M44: Must discover ALL elements in bbox, not just snap element subtree."""
+        assert re.search(r"all.*element|querySelectorAll|not.*just.*snap|not.*subtree", skill_md, re.I)
+
+    def test_skill_classify_element_types(self, skill_md):
+        """TD 2.9: Must classify elements by type (img, svg, canvas, video, dom)."""
+        # Must reference at least img, svg, canvas types
+        assert re.search(r"img|image", skill_md, re.I)
+        assert re.search(r"svg", skill_md, re.I)
+        assert re.search(r"canvas", skill_md, re.I)
+
+    def test_skill_extract_computed_styles(self, skill_md):
+        """TD 2.9: Must extract computed styles for discovered elements."""
+        assert re.search(r"computedStyle|getComputedStyle|computed.*style", skill_md, re.I)
+
+    def test_skill_skip_toolbar_elements(self, skill_md):
+        """TD 2.9: Must skip toolbar container elements during discovery."""
+        assert re.search(r"skip.*toolbar|xipe-toolbar-container|closest.*toolbar", skill_md, re.I)
+
+
+class TestSkillResourceDownload:
+    """Verify skill downloads static resources from discovered elements (FR-M25, AC-M45, TD 2.10)."""
+
+    def test_skill_resource_download_concept(self, skill_md):
+        """TD 2.10: Skill must reference resource download for areas."""
+        assert re.search(r"resource.*download|download.*resource", skill_md, re.I)
+
+    def test_skill_fetch_in_page_context(self, skill_md):
+        """TD 2.10: Must use page-context fetch via evaluate_script."""
+        assert "evaluate_script" in skill_md
+        assert "fetch" in skill_md
+
+    def test_skill_image_download(self, skill_md):
+        """TD 2.10: Must download images (img src, background-image)."""
+        assert re.search(r"img.*src|background.?image", skill_md, re.I)
+
+    def test_skill_svg_download(self, skill_md):
+        """TD 2.10: Must handle SVGs (inline outerHTML or external src)."""
+        assert re.search(r"svg|outerHTML", skill_md, re.I)
+
+    def test_skill_font_detection(self, skill_md):
+        """TD 2.10: Must detect @font-face URLs from stylesheets."""
+        assert re.search(r"font.?face|CSSFontFaceRule|font.*url|stylesheet.*font", skill_md, re.I)
+
+    def test_skill_resource_naming_convention(self, skill_md):
+        """TD 2.10: Resources must use {area-id}-{type}-{N}.{ext} naming."""
+        assert re.search(r"area-\d+-img|area.?id.*img|\{area.?id\}-img", skill_md, re.I)
+
+    def test_skill_resources_folder(self, skill_md):
+        """TD 2.10: Resources must be saved to resources/ folder."""
+        assert re.search(r"resources/|resources.*folder", skill_md, re.I)
+
+
+class TestSkillStructuredOutput:
+    """Verify skill generates structured folder output (FR-M26, FR-M27, AC-M46–M48, TD Flow 6)."""
+
+    def test_skill_structure_html_output(self, skill_md):
+        """AC-M47: Must generate {area-id}-structure.html files."""
+        assert re.search(r"structure\.html|structure.*html", skill_md, re.I)
+
+    def test_skill_styles_css_output(self, skill_md):
+        """AC-M47: Must generate {area-id}-styles.css files."""
+        assert re.search(r"styles\.css|styles.*css", skill_md, re.I)
+
+    def test_skill_mimic_strategy(self, skill_md):
+        """AC-M48: Must generate mimic-strategy.md."""
+        assert "mimic-strategy" in skill_md
+
+    def test_skill_summarized_reference(self, skill_md):
+        """AC-M47: Must generate summarized-uiux-reference.md."""
+        assert "summarized-uiux-reference" in skill_md
+
+    def test_skill_page_element_references_folder(self, skill_md):
+        """AC-M47: Must use page-element-references/ folder structure."""
+        assert "page-element-references" in skill_md
+
+    def test_skill_save_uiux_reference_call(self, skill_md):
+        """Flow 6: Must call save_uiux_reference for structured output."""
+        assert "save_uiux_reference" in skill_md
+
+    def test_skill_verify_folder_structure(self, skill_md):
+        """Flow 6: Must verify folder structure after save."""
+        assert re.search(r"verify.*folder|verify.*structure|check.*folder", skill_md, re.I)
+
+
+class TestSkillVersionedMockups:
+    """Verify skill generates versioned mockup files (FR-M19, AC-M34–M35)."""
+
+    def test_skill_versioned_filenames(self, skill_md):
+        """FR-M19: Skill must use versioned mockup filenames."""
+        assert re.search(r"mockup-v\d|version.*suffix|versioned.*file", skill_md, re.I)
+
+    def test_skill_no_overwrite(self, skill_md):
+        """AC-M35: Skill must not overwrite existing mockup versions."""
+        assert re.search(r"not.*overwrite|never.*overwrite|no.*overwrite|append|preserved", skill_md, re.I)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -687,10 +1005,8 @@ class TestSkillDefinition:
         assert SKILL_PATH.exists()
 
     def test_staged_injection_references(self, skill_md):
-        """Skill must reference staged injection files."""
-        assert "toolbar-core.min.js" in skill_md
-        assert "toolbar-theme.min.js" in skill_md
-        assert "toolbar-mockup.min.js" in skill_md
+        """Skill must reference toolbar injection file."""
+        assert "toolbar.min.js" in skill_md
 
     def test_toolbar_ready_polling(self, skill_md):
         """Skill must poll __xipeToolbarReady after core injection."""
@@ -702,9 +1018,9 @@ class TestSkillDefinition:
         assert "__xipeRefData" in skill_md
 
     def test_screenshot_provision(self, skill_md):
-        """Skill must provide viewport screenshot for canvas."""
+        """Skill must reference screenshot handling."""
         assert "screenshot" in skill_md.lower()
-        assert "__xipeViewportScreenshot" in skill_md
+        assert "take_screenshot" in skill_md
 
     def test_deep_capture_command(self, skill_md):
         """Skill must support __xipeRefCommand for deep capture."""
@@ -760,6 +1076,8 @@ class TestSourceTemplateSync:
             "__xipeRegisterMode",
             "__xipeToast",
             "__xipeToolbarReady",
+            "__xipeAnalyzeEnabled",
+            "__xipeGenerateMockupEnabled",
         ]
         for g in globals_required:
             assert g in core_js, f"Global '{g}' must be defined in core"
@@ -775,7 +1093,199 @@ class TestSourceTemplateSync:
         assert "window.__xipeRefData =" not in mockup_js
 
     def test_no_elements_array_in_schema(self, core_js):
-        """v2.0 schema uses 'components', not 'elements'."""
+        """v2.0+ schema uses 'areas', not 'elements'."""
         # Should not have elements: [] in data store init
         assert not re.search(r"elements\s*:\s*\[", core_js), \
-            "v2.0 uses components[], not elements[]"
+            "v2.0+ uses areas[], not elements[]"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# BUG FIX TESTS — TASK-467
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestSkillViewportScreenshot:
+    """Bug 1: full-page.png should be viewport screenshot, not fullPage."""
+
+    def test_skill_viewport_screenshot_not_fullpage(self, skill_md):
+        """SKILL.md must NOT use fullPage: true as a parameter for screenshot."""
+        # Find all instances of fullPage: true — they must appear only in
+        # warning/prohibition context (e.g., "Do NOT use fullPage: true")
+        for m in re.finditer(r"fullPage:\s*true", skill_md):
+            context = skill_md[max(0, m.start()-40):m.start()]
+            assert re.search(r"NOT|not|Don.t|never|avoid", context, re.I), \
+                f"fullPage: true used as parameter (not prohibition) near: ...{context}..."
+
+    def test_skill_viewport_screenshot_instruction(self, skill_md):
+        """SKILL.md must instruct viewport-only screenshot for reference."""
+        assert re.search(r"viewport.*screenshot|viewport.*capture|take_screenshot\b(?!.*fullPage)", skill_md, re.I)
+
+
+class TestSkillAreaScreenshotCrop:
+    """Bug 2: area screenshot must be cropped to exact bounding box."""
+
+    def test_skill_area_screenshot_uses_clip(self, skill_md):
+        """SKILL.md must instruct clipping area screenshot to bounding box."""
+        # Must reference using evaluate_script to crop or clip region
+        assert re.search(r"clip.*bounding|crop.*bounding|clip.*region|clip.*area", skill_md, re.I)
+
+
+class TestSkillMockupUsesDiscoveredElements:
+    """Bug 3: Mockup must use ALL elements in bounding box, not just snap element."""
+
+    def test_skill_mockup_uses_discovered_not_outer_html(self, skill_md):
+        """SKILL.md generate flow must use discovered_elements, not snap outer_html."""
+        # Step 10b must reference discovered_elements as content source
+        assert re.search(r"discovered_elements.*content|discovered_elements.*source|discovered_elements.*mockup", skill_md, re.I)
+
+    def test_skill_mockup_not_only_outer_html(self, skill_md):
+        """SKILL.md must NOT rely solely on snap element outer_html for mockup."""
+        # Must explicitly warn not to use only outer_html
+        assert re.search(r"not.*only.*outer_html|not.*rely.*outer_html|beyond.*snap.*element|all.*elements.*bounding", skill_md, re.I)
+
+
+class TestToolbarSnapVsBoundingBox:
+    """Bug 4: Area selector must represent bounding box, not snap element."""
+
+    def test_mockup_stores_snap_selector(self, mockup_js):
+        """Toolbar must store snap element as snap_selector (anchor), not selector."""
+        assert re.search(r"snap_selector|snap_element|snap_tag", mockup_js), \
+            "Toolbar must store snap element reference separately as snap_selector"
+
+    def test_mockup_area_not_single_selector(self, mockup_js):
+        """Area data must not use a single selector as the area identity."""
+        # The area is defined by bounding_box, not by a single DOM selector
+        # capture function should store snap info distinctly
+        assert re.search(r"snap_selector|snap_tag", mockup_js)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# BUG FIX TESTS — TASK-474: Select toggle + analyze/generate button persistence
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestSnapToggleAfterCapture:
+    """Bug 1: Select Area button must toggle off after capturing an area."""
+
+    def test_snap_deactivates_after_capture(self, mockup_js):
+        """After captureArea, snapActive must be set to false."""
+        # handleSnapClick must set snapActive = false after calling captureArea
+        assert re.search(
+            r"captureArea\(target\).*?snapActive\s*=\s*false",
+            mockup_js,
+            re.DOTALL,
+        ), "snapActive must be set to false after captureArea call"
+
+    def test_render_area_list_called_after_deactivation(self, mockup_js):
+        """After deactivating snap, area list must be re-rendered."""
+        assert re.search(
+            r"snapActive\s*=\s*false.*?renderAreaList\(\)",
+            mockup_js,
+            re.DOTALL,
+        ), "renderAreaList() must be called after snapActive = false"
+
+
+class TestReadOnlyAreaListInSteps3And4:
+    """Bug 2: Steps 3/4 must show read-only area summary, not interactive C()."""
+
+    def test_source_has_render_area_summary(self, mockup_js):
+        """Source must define renderAreaSummary for read-only area display."""
+        assert "renderAreaSummary" in mockup_js, \
+            "Must have renderAreaSummary function for read-only area list in steps 3/4"
+
+    def test_analyze_step_uses_area_summary(self, mockup_js):
+        """renderAnalyze must call renderAreaSummary, not renderAreaList."""
+        # Find the renderAnalyze function body
+        analyze_match = re.search(
+            r"function renderAnalyze\(\)\s*\{(.+?)(?=function\s+render|$)",
+            mockup_js,
+            re.DOTALL,
+        )
+        assert analyze_match, "renderAnalyze function not found"
+        body = analyze_match.group(1)
+        assert "renderAreaSummary" in body, \
+            "renderAnalyze must use renderAreaSummary for read-only area list"
+        assert "renderAreaList" not in body, \
+            "renderAnalyze must NOT call renderAreaList (interactive, causes rebuild)"
+
+    def test_generate_step_uses_area_summary(self, mockup_js):
+        """renderGenerate must call renderAreaSummary, not renderAreaList."""
+        generate_match = re.search(
+            r"function renderGenerate\(\)\s*\{(.+?)(?=function\s+|// ===|$)",
+            mockup_js,
+            re.DOTALL,
+        )
+        assert generate_match, "renderGenerate function not found"
+        body = generate_match.group(1)
+        assert "renderAreaSummary" in body, \
+            "renderGenerate must use renderAreaSummary for read-only area list"
+        assert "renderAreaList" not in body, \
+            "renderGenerate must NOT call renderAreaList (interactive, causes rebuild)"
+
+    def test_area_summary_no_click_handlers(self, mockup_js):
+        """renderAreaSummary must NOT have click event listeners."""
+        summary_match = re.search(
+            r"function renderAreaSummary\([^)]*\)\s*\{(.+?)\n\s*\}",
+            mockup_js,
+            re.DOTALL,
+        )
+        assert summary_match, "renderAreaSummary function not found"
+        body = summary_match.group(1)
+        assert "addEventListener" not in body, \
+            "renderAreaSummary must be read-only (no click handlers)"
+        assert "onclick" not in body, \
+            "renderAreaSummary must be read-only (no onclick)"
+
+    def test_area_summary_no_remove_buttons(self, mockup_js):
+        """renderAreaSummary must NOT have remove (✕) buttons or splice calls."""
+        summary_match = re.search(
+            r"function renderAreaSummary\([^)]*\)\s*\{(.+?)\n\s*\}",
+            mockup_js,
+            re.DOTALL,
+        )
+        assert summary_match, "renderAreaSummary function not found"
+        body = summary_match.group(1)
+        # Must not have splice (removal logic) or xipe-area-remove class
+        assert "splice" not in body, \
+            "renderAreaSummary must not have splice (removal logic)"
+        assert "xipe-area-remove" not in body, \
+            "renderAreaSummary must not have remove button class"
+
+
+class TestCombinedToolbarReadOnlyAreaList:
+    """Bug 2 (combined toolbar.min.js): Steps 3/4 must use R() not C()."""
+
+    COMBINED_MIN = Path(__file__).parent.parent / ".github" / "skills" / \
+        "x-ipe-tool-uiux-reference" / "references" / "toolbar.min.js"
+
+    def test_combined_has_readonly_function(self):
+        """Combined toolbar.min.js must define R() read-only area function."""
+        if not self.COMBINED_MIN.exists():
+            pytest.skip("Combined toolbar.min.js not found")
+        content = self.COMBINED_MIN.read_text(encoding="utf-8")
+        assert "function R(e){" in content, \
+            "Combined toolbar.min.js must have R() read-only area summary"
+
+    def test_combined_step3_uses_readonly(self):
+        """Combined step 3 (Analyze) must use R() not C() for area list."""
+        if not self.COMBINED_MIN.exists():
+            pytest.skip("Combined toolbar.min.js not found")
+        content = self.COMBINED_MIN.read_text(encoding="utf-8")
+        # Step 3: after "areas ready" text, before Analyze button
+        assert "R(e[2])" in content, "Step 3 must use R(e[2]) for read-only area list"
+        assert "C(e[2])" not in content, "Step 3 must NOT use C(e[2]) (interactive)"
+
+    def test_combined_step4_uses_readonly(self):
+        """Combined step 4 (Generate) must use R() not C() for area list."""
+        if not self.COMBINED_MIN.exists():
+            pytest.skip("Combined toolbar.min.js not found")
+        content = self.COMBINED_MIN.read_text(encoding="utf-8")
+        assert "R(e[3])" in content, "Step 4 must use R(e[3]) for read-only area list"
+        assert "C(e[3])" not in content, "Step 4 must NOT use C(e[3]) (interactive)"
+
+    def test_combined_step1_still_uses_interactive(self):
+        """Combined step 1 must still use C() for interactive area list."""
+        if not self.COMBINED_MIN.exists():
+            pytest.skip("Combined toolbar.min.js not found")
+        content = self.COMBINED_MIN.read_text(encoding="utf-8")
+        assert "C(e[0])" in content, "Step 1 must still use C(e[0]) for interactive area list"

@@ -6,10 +6,10 @@
   }
 
   window.__xipeRegisterMode('mockup', function MockupModeInit(container) {
-    let compCounter = 0;
+    let areaCounter = 0;
     let snapActive = false;
     let currentStep = 1;
-    const MAX_COMPONENTS = 20;
+    const MAX_AREAS = 20;
 
     const SEMANTIC_TAGS = new Set(['SECTION', 'NAV', 'ARTICLE', 'ASIDE', 'HEADER', 'FOOTER', 'MAIN', 'FIGURE']);
 
@@ -29,12 +29,12 @@
       .xipe-snap-overlay { position: fixed; border: 2px dashed #10b981; pointer-events: none; z-index: 2147483646; }
       .xipe-tag-badge { position: absolute; top: -22px; left: 0; background: #10b981; color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-family: 'Space Mono', monospace; pointer-events: none; }
       .xipe-drag-handle { position: absolute; width: 8px; height: 8px; background: #10b981; pointer-events: auto; border-radius: 1px; }
-      .xipe-comp-row { display: flex; align-items: center; gap: 6px; padding: 6px 0; font-size: 11px; color: #e2e8f0; border-bottom: 1px solid rgba(255,255,255,0.06); }
-      .xipe-comp-tag { background: rgba(16,185,129,0.15); color: #10b981; padding: 1px 5px; border-radius: 4px; font-size: 9px; font-family: 'Space Mono', monospace; }
-      .xipe-comp-selector { color: #64748b; font-size: 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; }
-      .xipe-comp-dims { color: #94a3b8; font-size: 9px; }
-      .xipe-comp-remove { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 12px; margin-left: auto; opacity: 0; transition: opacity 0.2s; font-family: inherit; }
-      .xipe-comp-row:hover .xipe-comp-remove { opacity: 1; }
+      .xipe-area-row { display: flex; align-items: center; gap: 6px; padding: 6px 0; font-size: 11px; color: #e2e8f0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+      .xipe-area-tag { background: rgba(16,185,129,0.15); color: #10b981; padding: 1px 5px; border-radius: 4px; font-size: 9px; font-family: 'Space Mono', monospace; }
+      .xipe-area-selector { color: #64748b; font-size: 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; }
+      .xipe-area-dims { color: #94a3b8; font-size: 9px; }
+      .xipe-area-remove { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 12px; margin-left: auto; opacity: 0; transition: opacity 0.2s; font-family: inherit; }
+      .xipe-area-row:hover .xipe-area-remove { opacity: 1; }
       .xipe-instruction-input { width: 100%; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #e2e8f0; font-size: 10px; margin-top: 4px; font-family: inherit; }
       .xipe-step-indicator { display: flex; gap: 4px; padding: 8px 0; margin-bottom: 8px; }
       .xipe-step-dot { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.1); }
@@ -44,6 +44,9 @@
       .xipe-btn-primary { background: #10b981; color: white; }
       .xipe-btn-primary:hover { background: #059669; }
       .xipe-btn-primary:disabled { background: #374151; color: #6b7280; cursor: not-allowed; }
+      .xipe-btn-processing { position: relative; pointer-events: none; opacity: 0.7; }
+      .xipe-btn-processing::after { content: ''; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: xipe-spin 0.6s linear infinite; }
+      @keyframes xipe-spin { to { transform: translateY(-50%) rotate(360deg); } }
       .xipe-btn-secondary { background: rgba(255,255,255,0.08); color: #e2e8f0; }
       .xipe-nav-buttons { display: flex; gap: 6px; margin-top: 10px; }
       .xipe-nav-buttons .xipe-btn { flex: 1; }
@@ -84,22 +87,25 @@
         return;
       }
 
-      if (window.__xipeRefData.components.length >= MAX_COMPONENTS) {
-        window.__xipeToast('Maximum 20 components per session.', 'error');
+      if (window.__xipeRefData.areas.length >= MAX_AREAS) {
+        window.__xipeToast('Maximum 20 areas per session.', 'error');
         return;
       }
 
-      captureComponent(target);
+      captureArea(target);
+      // Toggle off snap after each selection so user must re-enable
+      snapActive = false;
+      renderAreaList();
     }
     document.addEventListener('click', handleSnapClick, true);
 
-    // ===== Component Capture =====
-    function captureComponent(el) {
-      compCounter++;
-      const id = `comp-${String(compCounter).padStart(3, '0')}`;
+    // ===== Area Capture =====
+    function captureArea(el) {
+      areaCounter++;
+      const id = `area-${areaCounter}`;
       const rect = el.getBoundingClientRect();
-      const selector = window.__xipeGenerateSelector(el);
-      const tag = el.tagName.toLowerCase();
+      const snap_selector = window.__xipeGenerateSelector(el);
+      const snap_tag = el.tagName.toLowerCase();
 
       const styles = window.getComputedStyle(el);
       const computedStyles = {};
@@ -120,18 +126,18 @@
         } catch (err) { /* ignore crop errors */ }
       }
 
-      const component = {
-        id, selector, tag,
+      const area = {
+        id, snap_selector, snap_tag,
         bounding_box: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
         screenshot_dataurl: screenshotDataurl,
         html_css: { level: 'minimal', computed_styles: computedStyles, outer_html: null },
         instruction: '',
         agent_analysis: null
       };
-      window.__xipeRefData.components.push(component);
-      showSnapOverlay(rect, tag, selector);
-      renderComponentList();
-      window.__xipeToast(`Selected: <${tag}>`, 'info', 2000);
+      window.__xipeRefData.areas.push(area);
+      showSnapOverlay(rect, snap_tag, snap_selector);
+      renderAreaList();
+      window.__xipeToast(`Selected: area-${areaCounter}`, 'info', 2000);
     }
 
     // ===== Snap Overlay with Drag Handles =====
@@ -167,7 +173,7 @@
     }
 
     // ===== Step UI =====
-    const steps = ['Select Components', 'Add Instructions', 'Analyze', 'Generate'];
+    const steps = ['Select Areas', 'Add Instructions', 'Analyze', 'Generate'];
     const stepContainers = [];
 
     function buildStepUI() {
@@ -218,7 +224,7 @@
     function renderStep() {
       if (currentStep === 1) {
         snapActive = true;
-        renderComponentList();
+        renderAreaList();
       } else if (currentStep === 2) {
         snapActive = false;
         renderInstructions();
@@ -231,22 +237,22 @@
       }
     }
 
-    // ===== Component List (Step 1) =====
-    function renderComponentList() {
+    // ===== Area List (Step 1) =====
+    function renderAreaList() {
       const sc = stepContainers[0];
       if (!sc) return;
       sc.innerHTML = '';
-      window.__xipeRefData.components.forEach((comp, i) => {
+      window.__xipeRefData.areas.forEach((area, i) => {
         const row = document.createElement('div');
-        row.className = 'xipe-comp-row';
-        row.innerHTML = `<span class="xipe-comp-tag">${comp.tag}</span><span class="xipe-comp-selector">${comp.selector}</span><span class="xipe-comp-dims">${Math.round(comp.bounding_box.width)}×${Math.round(comp.bounding_box.height)}</span>`;
+        row.className = 'xipe-area-row';
+        row.innerHTML = `<span class="xipe-area-tag">${area.id}</span><span class="xipe-area-selector">${area.snap_tag}</span><span class="xipe-area-dims">${Math.round(area.bounding_box.width)}×${Math.round(area.bounding_box.height)}</span>`;
         const rmBtn = document.createElement('button');
-        rmBtn.className = 'xipe-comp-remove';
+        rmBtn.className = 'xipe-area-remove';
         rmBtn.textContent = '×';
         rmBtn.onclick = () => {
-          window.__xipeRefData.components.splice(i, 1);
+          window.__xipeRefData.areas.splice(i, 1);
           if (overlays[i]) { overlays[i].remove(); overlays.splice(i, 1); }
-          renderComponentList();
+          renderAreaList();
         };
         row.appendChild(rmBtn);
         // Hover highlight
@@ -258,8 +264,8 @@
         });
         sc.appendChild(row);
       });
-      if (window.__xipeRefData.components.length === 0) {
-        sc.innerHTML = '<div style="color:#64748b;font-size:11px;text-align:center;padding:20px">Click elements on the page to select components</div>';
+      if (window.__xipeRefData.areas.length === 0) {
+        sc.innerHTML = '<div style="color:#64748b;font-size:11px;text-align:center;padding:20px">Click on the page to select areas</div>';
       }
     }
 
@@ -268,21 +274,31 @@
       const sc = stepContainers[1];
       if (!sc) return;
       sc.innerHTML = '';
-      window.__xipeRefData.components.forEach((comp) => {
+      window.__xipeRefData.areas.forEach((area) => {
         const wrapper = document.createElement('div');
         wrapper.style.marginBottom = '8px';
-        wrapper.innerHTML = `<div class="xipe-comp-row"><span class="xipe-comp-tag">${comp.tag}</span><span class="xipe-comp-selector">${comp.selector}</span></div>`;
+        wrapper.innerHTML = `<div class="xipe-area-row"><span class="xipe-area-tag">${area.id}</span><span class="xipe-area-selector">${area.snap_tag}</span></div>`;
         const input = document.createElement('input');
         input.className = 'xipe-instruction-input';
         input.placeholder = 'Add notes (e.g., sticky header, animated)';
-        input.value = comp.instruction;
-        input.addEventListener('input', (e) => { comp.instruction = e.target.value; });
+        input.value = area.instruction;
+        input.addEventListener('input', (e) => { area.instruction = e.target.value; });
         wrapper.appendChild(input);
         sc.appendChild(wrapper);
       });
-      if (window.__xipeRefData.components.length === 0) {
-        sc.innerHTML = '<div style="color:#64748b;font-size:11px;text-align:center;padding:20px">No components selected. Go back to Step 1.</div>';
+      if (window.__xipeRefData.areas.length === 0) {
+        sc.innerHTML = '<div style="color:#64748b;font-size:11px;text-align:center;padding:20px">No areas selected. Go back to Step 1.</div>';
       }
+    }
+
+    // ===== Read-only area summary for steps 3/4 =====
+    function renderAreaSummary(sc) {
+      window.__xipeRefData.areas.forEach((area) => {
+        const row = document.createElement('div');
+        row.className = 'xipe-area-row';
+        row.innerHTML = `<span class="xipe-area-tag">${area.id}</span><span class="xipe-area-selector">${area.snap_tag}</span><span class="xipe-area-dims">${Math.round(area.bounding_box.width)}×${Math.round(area.bounding_box.height)}</span>`;
+        sc.appendChild(row);
+      });
     }
 
     // ===== Analyze (Step 3) =====
@@ -292,17 +308,25 @@
       sc.innerHTML = '';
       const summary = document.createElement('div');
       summary.style.cssText = 'color:#e2e8f0;font-size:11px;margin-bottom:12px';
-      summary.textContent = `${window.__xipeRefData.components.length} components ready for analysis`;
+      summary.textContent = `${window.__xipeRefData.areas.length} areas ready for analysis`;
       sc.appendChild(summary);
+
+      renderAreaSummary(sc);
 
       const btn = document.createElement('button');
       btn.className = 'xipe-btn xipe-btn-primary';
       btn.textContent = 'Analyze';
-      btn.disabled = window.__xipeRefData.components.length === 0;
+      btn.setAttribute('data-xipe-analyze', 'true');
+      btn.disabled = window.__xipeRefData.areas.length === 0;
       btn.onclick = () => {
         window.__xipeRefData.mode = 'mockup';
+        window.__xipeRefData.action = 'analyze';
+        window.__xipeAnalyzeEnabled = false;
+        window.__xipeGenerateMockupEnabled = false;
+        btn.disabled = true;
+        btn.classList.add('xipe-btn-processing');
         window.__xipeRefReady = true;
-        window.__xipeToast('Analyzing components...', 'progress');
+        window.__xipeToast('Analyzing areas...', 'progress');
       };
       sc.appendChild(btn);
     }
@@ -314,21 +338,42 @@
       sc.innerHTML = '';
       const summary = document.createElement('div');
       summary.style.cssText = 'color:#e2e8f0;font-size:11px;margin-bottom:12px';
-      summary.textContent = `Ready to generate mockup from ${window.__xipeRefData.components.length} components`;
+      summary.textContent = `Ready to generate mockup from ${window.__xipeRefData.areas.length} areas`;
       sc.appendChild(summary);
+
+      renderAreaSummary(sc);
 
       const btn = document.createElement('button');
       btn.className = 'xipe-btn xipe-btn-primary';
       btn.textContent = 'Generate Mockup';
-      btn.disabled = window.__xipeRefData.components.length === 0;
-      if (btn.disabled) btn.title = 'Select at least one component first.';
+      btn.setAttribute('data-xipe-generate', 'true');
+      btn.disabled = window.__xipeRefData.areas.length === 0;
+      if (btn.disabled) btn.title = 'Select at least one area first.';
       btn.onclick = () => {
         window.__xipeRefData.mode = 'mockup';
+        window.__xipeRefData.action = 'generate';
+        window.__xipeGenerateMockupEnabled = false;
+        btn.disabled = true;
+        btn.classList.add('xipe-btn-processing');
         window.__xipeRefReady = true;
-        window.__xipeToast('Saving reference data...', 'progress');
+        window.__xipeToast('Generating mockup...', 'progress');
       };
       sc.appendChild(btn);
     }
+
+    // ===== Button Polling (FR-M14, v2.1) =====
+    setInterval(() => {
+      const analyzeBtn = container.querySelector('[data-xipe-analyze]');
+      const generateBtn = container.querySelector('[data-xipe-generate]');
+      if (analyzeBtn && window.__xipeAnalyzeEnabled) {
+        analyzeBtn.disabled = false;
+        analyzeBtn.classList.remove('xipe-btn-processing');
+      }
+      if (generateBtn && window.__xipeGenerateMockupEnabled) {
+        generateBtn.disabled = false;
+        generateBtn.classList.remove('xipe-btn-processing');
+      }
+    }, 500);
 
     buildStepUI();
   });

@@ -1,0 +1,436 @@
+# Test Cases for x-ipe-tool-uiux-reference skill update
+# Derived from acceptance criteria in skill-meta.md
+# Generated: 2026-02-15
+
+test_cases:
+  # ═══════════════════════════════════════════════════
+  # MUST — Structure
+  # ═══════════════════════════════════════════════════
+
+  - id: TC-001
+    name: "SKILL.md exists with valid frontmatter"
+    ac_ref: "AC-S01"
+    priority: must
+    type: structure
+    test_method: file_exists
+    input: "candidate/SKILL.md"
+    expected: "File exists"
+
+  - id: TC-002
+    name: "Frontmatter name field is x-ipe-tool-uiux-reference"
+    ac_ref: "AC-S01"
+    priority: must
+    type: structure
+    test_method: regex_match
+    input: "candidate/SKILL.md frontmatter"
+    expected: "name: x-ipe-tool-uiux-reference"
+
+  - id: TC-003
+    name: "Frontmatter description contains trigger keywords"
+    ac_ref: "AC-S01"
+    priority: must
+    type: structure
+    test_method: regex_match
+    input: "candidate/SKILL.md frontmatter description field"
+    expected: "Contains at least: 'uiux-reference', 'toolbar', 'referenced-elements.json'"
+
+  - id: TC-004
+    name: "references/examples.md exists with at least 1 example"
+    ac_ref: "AC-S02"
+    priority: must
+    type: structure
+    test_method: file_exists
+    input: "candidate/references/examples.md"
+    expected: "File exists and contains '## Example'"
+
+  - id: TC-005
+    name: "SKILL.md body under 500 lines"
+    ac_ref: "AC-S03"
+    priority: must
+    type: structure
+    test_method: line_count
+    input: "candidate/SKILL.md"
+    expected: "< 500 lines"
+
+  # ═══════════════════════════════════════════════════
+  # MUST — Content
+  # ═══════════════════════════════════════════════════
+
+  - id: TC-006
+    name: "All 12 required sections present"
+    ac_ref: "AC-C01"
+    priority: must
+    type: content
+    test_method: section_parse
+    input: "candidate/SKILL.md"
+    expected: >
+      Sections in order: Frontmatter (---), Purpose, Important Notes, About,
+      When to Use, Input Parameters, Definition of Ready, Operations,
+      Output Result, Definition of Done, Error Handling, Templates, Examples
+
+  - id: TC-007
+    name: "Section order is correct (Purpose before Important Notes before About)"
+    ac_ref: "AC-C01"
+    priority: must
+    type: content
+    test_method: section_parse
+    input: "candidate/SKILL.md — line numbers of ## headings"
+    expected: "Line(Purpose) < Line(Important Notes) < Line(About) < Line(When to Use) < Line(Input Parameters) < Line(Definition of Ready) < Line(Operations) < Line(Output Result) < Line(Definition of Done) < Line(Error Handling) < Line(Templates) < Line(Examples)"
+
+  - id: TC-008
+    name: "Operations use XML structure with <operation name=...>"
+    ac_ref: "AC-C02"
+    priority: must
+    type: content
+    test_method: regex_match
+    input: "candidate/SKILL.md"
+    expected: "At least 1 match of '<operation name=\"[a-z_]+\">'"
+
+  - id: TC-009
+    name: "All 3 operations have XML tags"
+    ac_ref: "AC-C02"
+    priority: must
+    type: content
+    test_method: regex_match
+    input: "candidate/SKILL.md"
+    expected: "Matches: '<operation name=\"execute_reference\">', '<operation name=\"process_theme\">', '<operation name=\"process_mockup\">'"
+
+  - id: TC-010
+    name: "Error Handling table has correct columns"
+    ac_ref: "AC-C03"
+    priority: must
+    type: content
+    test_method: table_parse
+    input: "candidate/SKILL.md — Error Handling section"
+    expected: "Table header: | Error | Cause | Resolution |"
+
+  - id: TC-011
+    name: "Error Handling table has at least 5 rows"
+    ac_ref: "AC-C03"
+    priority: must
+    type: content
+    test_method: table_parse
+    input: "candidate/SKILL.md — Error Handling section"
+    expected: ">= 5 data rows (excluding header and separator)"
+
+  # ═══════════════════════════════════════════════════
+  # MUST — Behavior
+  # ═══════════════════════════════════════════════════
+
+  - id: TC-012
+    name: "Compressed injection references toolbar.compressed.json"
+    ac_ref: "AC-B01"
+    priority: must
+    type: behavior
+    test_method: content_check
+    input: "candidate/SKILL.md"
+    expected: "String 'toolbar.compressed.json' appears at least twice"
+
+  - id: TC-013
+    name: "2-call injection procedure documented (not 6+)"
+    ac_ref: "AC-B01"
+    priority: must
+    type: behavior
+    test_method: content_check
+    input: "candidate/SKILL.md"
+    expected: "Contains '2-call' or '2 evaluate_script' or 'CALL 1' + 'CALL 2' pattern"
+
+  - id: TC-014
+    name: "No script tag injection mentioned"
+    ac_ref: "AC-B01"
+    priority: must
+    type: behavior
+    test_method: regex_match
+    input: "candidate/SKILL.md"
+    expected: "Contains 'Do NOT use.*script.*tag' or equivalent warning"
+
+  - id: TC-015
+    name: "referenced-elements.json is single source of truth"
+    ac_ref: "AC-B02"
+    priority: must
+    type: behavior
+    test_method: content_check
+    input: "candidate/SKILL.md"
+    expected: "'referenced-elements.json' appears, 'single source of truth' appears"
+
+  - id: TC-016
+    name: "No session file references in SKILL.md"
+    ac_ref: "AC-B02"
+    priority: must
+    type: behavior
+    test_method: regex_match
+    input: "candidate/SKILL.md"
+    expected: "Zero matches for 'ref-session' or 'reference-data.json'"
+
+  - id: TC-017
+    name: "No session file references in examples.md"
+    ac_ref: "AC-B02"
+    priority: must
+    type: behavior
+    test_method: regex_match
+    input: "candidate/references/examples.md"
+    expected: "Zero matches for 'ref-session' or 'reference-data.json'"
+
+  - id: TC-018
+    name: "LL-001 ARIA workaround documented"
+    ac_ref: "AC-B03"
+    priority: must
+    type: behavior
+    test_method: content_check
+    input: "candidate/SKILL.md"
+    expected: "Contains 'aria-label' or 'ARIA' with workaround description"
+
+  - id: TC-019
+    name: "ARIA workaround references code-snippets.md"
+    ac_ref: "AC-B03"
+    priority: must
+    type: behavior
+    test_method: content_check
+    input: "candidate/SKILL.md"
+    expected: "Contains 'references/code-snippets.md#aria-workaround' link"
+
+  - id: TC-020
+    name: "LL-001 workaround in code-snippets.md has 3 steps"
+    ac_ref: "AC-B03"
+    priority: must
+    type: behavior
+    test_method: content_check
+    input: "candidate/references/code-snippets.md"
+    expected: "Section 'aria-workaround-screenshot' exists with Step 1 (add ARIA), Step 2 (snapshot+screenshot), Step 3 (remove ARIA)"
+
+  # ═══════════════════════════════════════════════════
+  # SHOULD — Content
+  # ═══════════════════════════════════════════════════
+
+  - id: TC-021
+    name: "When to Use includes theme trigger phrases"
+    ac_ref: "AC-C04"
+    priority: should
+    type: content
+    test_method: content_check
+    input: "candidate/SKILL.md — When to Use section"
+    expected: "Contains 'catch design theme' or 'extract colors'"
+
+  - id: TC-022
+    name: "When to Use includes mockup trigger phrases"
+    ac_ref: "AC-C04"
+    priority: should
+    type: content
+    test_method: content_check
+    input: "candidate/SKILL.md — When to Use section"
+    expected: "Contains 'copy design as mockup' or 'collect design references'"
+
+  - id: TC-023
+    name: "When to Use triggers also in frontmatter description"
+    ac_ref: "AC-C04"
+    priority: should
+    type: content
+    test_method: regex_match
+    input: "candidate/SKILL.md frontmatter"
+    expected: "description field mentions 'uiux-reference' and 'design'"
+
+  - id: TC-024
+    name: "Key Concepts explains compressed injection mechanism"
+    ac_ref: "AC-C05"
+    priority: should
+    type: content
+    test_method: content_check
+    input: "candidate/SKILL.md — About section"
+    expected: "Contains 'gzip+base64' or 'gzip' + 'base64' or 'compressed injection'"
+
+  - id: TC-025
+    name: "Key Concepts explains 2 chunks"
+    ac_ref: "AC-C05"
+    priority: should
+    type: content
+    test_method: content_check
+    input: "candidate/SKILL.md — About section"
+    expected: "Contains '2 chunks' description"
+
+  - id: TC-026
+    name: "Code snippets externalized to references/code-snippets.md"
+    ac_ref: "AC-C06"
+    priority: should
+    type: structure
+    test_method: file_exists
+    input: "candidate/references/code-snippets.md"
+    expected: "File exists with JS code blocks"
+
+  - id: TC-027
+    name: "No large JS blocks inline in SKILL.md"
+    ac_ref: "AC-C06"
+    priority: should
+    type: content
+    test_method: content_check
+    input: "candidate/SKILL.md"
+    expected: "No ```js or ```javascript code blocks > 10 lines in SKILL.md body"
+
+  - id: TC-028
+    name: "SKILL.md references code-snippets.md for JS code"
+    ac_ref: "AC-C06"
+    priority: should
+    type: content
+    test_method: regex_match
+    input: "candidate/SKILL.md"
+    expected: "At least 3 references to 'references/code-snippets.md#'"
+
+  # ═══════════════════════════════════════════════════
+  # COULD — Content
+  # ═══════════════════════════════════════════════════
+
+  - id: TC-029
+    name: "Data schema externalized to references/data-schema.md"
+    ac_ref: "AC-C07"
+    priority: could
+    type: structure
+    test_method: file_exists
+    input: "candidate/references/data-schema.md"
+    expected: "File exists with referenced-elements.json schema"
+
+  - id: TC-030
+    name: "data-schema.md contains full JSON schema"
+    ac_ref: "AC-C07"
+    priority: could
+    type: content
+    test_method: content_check
+    input: "candidate/references/data-schema.md"
+    expected: "Contains JSON code block with 'version', 'areas', 'elements' fields"
+
+  - id: TC-031
+    name: "SKILL.md references data-schema.md"
+    ac_ref: "AC-C07"
+    priority: could
+    type: content
+    test_method: regex_match
+    input: "candidate/SKILL.md"
+    expected: "Contains 'references/data-schema.md' link"
+
+  # ═══════════════════════════════════════════════════
+  # ADDITIONAL — Quality Standards
+  # ═══════════════════════════════════════════════════
+
+  - id: TC-032
+    name: "Important Notes use BLOCKING/CRITICAL keywords (not emoji)"
+    ac_ref: "AC-C01"
+    priority: must
+    type: content
+    test_method: regex_match
+    input: "candidate/SKILL.md — Important Notes section"
+    expected: "Contains 'BLOCKING:' and 'CRITICAL:' keywords; zero matches for ⚠️ ⛔ 🔴 🟢"
+
+  - id: TC-033
+    name: "DoD checkpoints cover page navigation"
+    ac_ref: "AC-C01"
+    priority: must
+    type: content
+    test_method: content_check
+    input: "candidate/SKILL.md — Definition of Done section"
+    expected: "Checkpoint for 'Target page navigated'"
+
+  - id: TC-034
+    name: "DoD checkpoints cover toolbar injection"
+    ac_ref: "AC-C01"
+    priority: must
+    type: content
+    test_method: content_check
+    input: "candidate/SKILL.md — Definition of Done section"
+    expected: "Checkpoint for 'Toolbar injected via compressed injection'"
+
+  - id: TC-035
+    name: "DoD checkpoints cover user data reception"
+    ac_ref: "AC-C01"
+    priority: must
+    type: content
+    test_method: content_check
+    input: "candidate/SKILL.md — Definition of Done section"
+    expected: "Checkpoint for 'User data received'"
+
+  - id: TC-036
+    name: "DoD checkpoints cover MCP save"
+    ac_ref: "AC-C01"
+    priority: must
+    type: content
+    test_method: content_check
+    input: "candidate/SKILL.md — Definition of Done section"
+    expected: "Checkpoint for 'Data saved via MCP'"
+
+  - id: TC-037
+    name: "DoD checkpoints cover theme-mode output"
+    ac_ref: "AC-C01"
+    priority: must
+    type: content
+    test_method: content_check
+    input: "candidate/SKILL.md — Definition of Done section"
+    expected: "Checkpoint for theme colors saved with roles"
+
+  - id: TC-038
+    name: "DoD checkpoints cover mockup-mode referenced-elements.json"
+    ac_ref: "AC-C01"
+    priority: must
+    type: content
+    test_method: content_check
+    input: "candidate/SKILL.md — Definition of Done section"
+    expected: "Checkpoint for 'referenced-elements.json persisted'"
+
+  - id: TC-039
+    name: "DoD checkpoints cover button re-enable"
+    ac_ref: "AC-C01"
+    priority: must
+    type: content
+    test_method: content_check
+    input: "candidate/SKILL.md — Definition of Done section"
+    expected: "Checkpoint for 'Buttons re-enabled after processing'"
+
+  - id: TC-040
+    name: "All referenced files exist in candidate/references/"
+    ac_ref: "AC-S02"
+    priority: must
+    type: structure
+    test_method: file_exists
+    input: "candidate/references/"
+    expected: "Files exist: code-snippets.md, data-schema.md, examples.md, toolbar-template.md"
+
+  - id: TC-041
+    name: "Templates table lists all reference files"
+    ac_ref: "AC-C01"
+    priority: should
+    type: content
+    test_method: table_parse
+    input: "candidate/SKILL.md — Templates section"
+    expected: "Table rows reference: toolbar.compressed.json, toolbar.min.js, code-snippets.md, data-schema.md, examples.md"
+
+  - id: TC-042
+    name: "Definition of Ready has Chrome DevTools checkpoint"
+    ac_ref: "AC-C01"
+    priority: must
+    type: content
+    test_method: content_check
+    input: "candidate/SKILL.md — Definition of Ready section"
+    expected: "Checkpoint for 'Chrome DevTools MCP connected'"
+
+  - id: TC-043
+    name: "Definition of Ready has URL checkpoint"
+    ac_ref: "AC-C01"
+    priority: must
+    type: content
+    test_method: content_check
+    input: "candidate/SKILL.md — Definition of Ready section"
+    expected: "Checkpoint for 'Target URL provided'"
+
+  - id: TC-044
+    name: "Examples reflect v3.0 workflow (not v1 Send References)"
+    ac_ref: "AC-S02"
+    priority: must
+    type: content
+    test_method: content_check
+    input: "candidate/references/examples.md"
+    expected: "Examples reference theme/mockup modes, not 'Send References' button"
+
+  - id: TC-045
+    name: "Examples include ARIA workaround scenario"
+    ac_ref: "AC-B03"
+    priority: should
+    type: content
+    test_method: content_check
+    input: "candidate/references/examples.md"
+    expected: "At least one example covers ARIA workaround for elements without UIDs"

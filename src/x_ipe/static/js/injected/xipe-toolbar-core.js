@@ -4,9 +4,13 @@
   window.__xipeToolbarInjected = true;
 
   // ===== Data Store (FR-12) =====
-  window.__xipeRefData = { mode: 'theme', colors: [], components: [], design_tokens: null };
+  window.__xipeRefData = { mode: 'theme', colors: [], areas: [], design_tokens: null };
   window.__xipeRefReady = false;
   window.__xipeRefCommand = null;
+
+  // ===== Agent Button Control (FR-M14, v2.1) =====
+  window.__xipeAnalyzeEnabled = false;
+  window.__xipeGenerateMockupEnabled = false;
 
   // ===== Mode Registry (FR-16) =====
   const modeRegistry = {};
@@ -217,16 +221,16 @@
 
   // ===== Command Polling (FR-14) =====
   function handleDeepCapture(targetId) {
-    const comp = window.__xipeRefData.components.find(c => c.id === targetId);
-    if (!comp) { window.__xipeToast(`Component ${targetId} not found`, 'error'); return; }
-    const el = document.querySelector(comp.selector);
+    const area = window.__xipeRefData.areas.find(a => a.id === targetId);
+    if (!area) { window.__xipeToast(`Area ${targetId} not found`, 'error'); return; }
+    const el = document.querySelector(area.selector);
     if (!el) { window.__xipeToast(`Element not found for ${targetId}`, 'error'); return; }
     const styles = window.getComputedStyle(el);
     const allStyles = {};
     for (let i = 0; i < styles.length; i++) {
       allStyles[styles[i]] = styles.getPropertyValue(styles[i]);
     }
-    comp.html_css = { level: 'deep', computed_styles: allStyles, outer_html: el.outerHTML };
+    area.html_css = { level: 'deep', computed_styles: allStyles, outer_html: el.outerHTML };
     window.__xipeToast(`Deep capture complete: ${targetId}`, 'success');
     window.__xipeRefReady = true;
   }
@@ -239,7 +243,7 @@
       switch (cmd.action) {
         case 'deep_capture': handleDeepCapture(cmd.target); break;
         case 'reset':
-          window.__xipeRefData = { mode: activeMode, colors: [], components: [], design_tokens: null };
+          window.__xipeRefData = { mode: activeMode, colors: [], areas: [], design_tokens: null };
           window.__xipeToast('Data reset', 'info');
           break;
         default: window.__xipeToast(`Unknown command: ${cmd.action}`, 'error');

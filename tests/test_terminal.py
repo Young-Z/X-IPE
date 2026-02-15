@@ -672,8 +672,8 @@ class TestTerminalAutoScrollPause:
     terminal.js source contains the required scroll-pause mechanism.
     """
 
-    def test_terminal_js_has_user_scroll_tracking(self):
-        """terminal.js must track user scroll state to pause auto-scroll."""
+    def test_terminal_js_uses_buffer_api_for_scroll_detection(self):
+        """terminal.js must use xterm.js buffer API (viewportY/baseY) for scroll state."""
         import os
         terminal_js = os.path.join(
             os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
@@ -681,9 +681,12 @@ class TestTerminalAutoScrollPause:
         with open(terminal_js, 'r') as f:
             content = f.read()
 
-        # Must have user scroll tracking flag
-        assert '_userScrolledUp' in content or 'userScrolledUp' in content, \
-            "terminal.js must track user scroll-up state"
+        assert 'buffer.active.viewportY' in content, \
+            "terminal.js must use terminal.buffer.active.viewportY"
+        assert 'buffer.active.baseY' in content, \
+            "terminal.js must use terminal.buffer.active.baseY"
+        assert '_isAtBottom' in content, \
+            "terminal.js must have an _isAtBottom helper method"
 
     def test_terminal_js_has_scroll_pause_timeout(self):
         """terminal.js must have a 5-second timeout before resuming auto-scroll."""
@@ -699,7 +702,7 @@ class TestTerminalAutoScrollPause:
             "terminal.js must have a 5-second timeout for scroll-pause"
 
     def test_terminal_js_output_handler_checks_scroll_state(self):
-        """The output handler must check scroll state before calling scrollToBottom."""
+        """The output handler must check scroll state using xterm.js buffer API."""
         import os
         terminal_js = os.path.join(
             os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
@@ -707,18 +710,232 @@ class TestTerminalAutoScrollPause:
         with open(terminal_js, 'r') as f:
             content = f.read()
 
-        # The output handler should NOT unconditionally call scrollToBottom
-        # It should have a conditional check
-        # Find the output handler section
+        # The output handler should use the xterm.js buffer API
         output_idx = content.find("socket.on('output'")
         assert output_idx != -1, "Must have socket output handler"
 
-        # Get the output handler block (next ~200 chars)
-        handler_block = content[output_idx:output_idx + 300]
+        handler_block = content[output_idx:output_idx + 600]
 
-        # scrollToBottom should be conditional (wrapped in _shouldAutoScroll or similar)
-        assert '_shouldAutoScroll' in handler_block or 'userScrolledUp' in handler_block or '_userScrolledUp' in handler_block, \
-            "Output handler must check scroll state before scrollToBottom"
+        # Must use _isAtBottom (which checks viewportY === baseY)
+        assert '_isAtBottom' in handler_block, \
+            "Output handler must use _isAtBottom (xterm.js buffer API) to check scroll state"
+
+    def test_terminal_js_output_handler_preserves_scroll_when_paused(self):
+        """When user has scrolled up, output handler must lock scroll position.
+
+        xterm.js's terminal.write() internally scrolls the viewport to follow
+        the cursor in a requestAnimationFrame render cycle that fires AFTER the
+        write callback. The output handler must use a scroll-lock approach:
+        1. Save scrollTop and install a scroll event listener that reverts changes
+        2. Use write(data, callback) with double-rAF to outlast xterm's render
+        3. Only release the lock after xterm's render pass completes
+        """
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        output_idx = content.find("socket.on('output'")
+        assert output_idx != -1, "Must have socket output handler"
+
+        handler_block = content[output_idx:output_idx + 2500]
+
+        # Must save viewport scrollTop before write
+        assert 'savedScrollTop' in handler_block, \
+            "Output handler must save viewport scrollTop when user has scrolled up"
+
+        # Must query .xterm-viewport to get the viewport element
+        assert 'xterm-viewport' in handler_block, \
+            "Output handler must access .xterm-viewport to save/restore scroll position"
+
+        # Must install a scroll event listener to lock position
+        assert "addEventListener('scroll'" in handler_block or \
+               'addEventListener("scroll"' in handler_block, \
+            "Output handler must use a scroll event lock to prevent xterm render scroll"
+
+        # Must use write() callback for post-render handling
+        assert 'write(data,' in handler_block or 'write(data, ' in handler_block, \
+            "Output handler must use write(data, callback) for post-render scroll restore"
+
+        # Must use requestAnimationFrame to outlast xterm's render cycle
+        assert 'requestAnimationFrame' in handler_block, \
+            "Output handler must use requestAnimationFrame to unlock after render"
+
+        # Must remove the scroll listener to avoid leaks
+        assert "removeEventListener('scroll'" in handler_block or \
+               'removeEventListener("scroll"' in handler_block, \
+            "Output handler must remove scroll lock listener after write completes"
+
+    def test_terminal_js_setup_uses_request_animation_frame(self):
+        """_setupAutoScrollPause must use requestAnimationFrame to wait for DOM."""
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        # Find the _setupAutoScrollPause method definition (not call site)
+        method_idx = content.find('_setupAutoScrollPause(terminal, sessionKey)')
+        assert method_idx != -1, "Must have _setupAutoScrollPause method definition"
+
+        method_block = content[method_idx:method_idx + 800]
+
+        # Must use requestAnimationFrame (not synchronous DOM query)
+        assert 'requestAnimationFrame' in method_block, \
+            "_setupAutoScrollPause must use requestAnimationFrame for robust DOM access"
+
+    def test_terminal_js_no_scroll_event_reset(self):
+        """Wheel listener must NOT use 'scroll' event to detect scroll state.
+
+        Programmatic scrollTop changes from xterm.js internals (during write/resize)
+        also fire 'scroll' events. Using them in the wheel listener causes race
+        conditions. The buffer API (viewportY/baseY) is used instead.
+        """
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        # Find the _initAutoScrollListeners method (where listeners are set up)
+        method_idx = content.find('_initAutoScrollListeners')
+        assert method_idx != -1, "Must have _initAutoScrollListeners method"
+
+        method_block = content[method_idx:method_idx + 1500]
+
+        # Must NOT have a 'scroll' event listener that resets _userScrolledUp
+        import re
+        scroll_listener = re.search(
+            r"addEventListener\(\s*['\"]scroll['\"]",
+            method_block
+        )
+        assert scroll_listener is None, \
+            "Must NOT use 'scroll' event to reset auto-scroll pause (causes race condition)"
+
+    def test_terminal_js_wheel_down_resets_at_bottom(self):
+        """Scrolling down past the bottom must cancel the 5s resume timer."""
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        # Find the auto-scroll listener section
+        method_idx = content.find('_initAutoScrollListeners')
+        assert method_idx != -1
+        method_block = content[method_idx:method_idx + 3000]
+
+        # Must check deltaY > 0 (scroll down) and isAtBottom to cancel timer
+        assert 'deltaY > 0' in method_block, \
+            "Must detect wheel-down to cancel timer when user scrolls to bottom"
+        assert 'isAtBottom' in method_block or 'viewportY' in method_block, \
+            "Must check if viewport is at bottom using xterm.js buffer API"
+
+    def test_terminal_js_scroll_up_only_pauses_when_not_at_bottom(self):
+        """Scroll-up must only start resume timer if viewport actually left the bottom.
+
+        When the scrollbar is already at the bottom, a small trackpad bounce or
+        accidental deltaY < 0 event should NOT start a timer. The handler must
+        check inside a requestAnimationFrame using xterm.js buffer API.
+        """
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        # Find the _initAutoScrollListeners method
+        method_idx = content.find('_initAutoScrollListeners')
+        assert method_idx != -1
+        method_block = content[method_idx:method_idx + 3000]
+
+        # The deltaY < 0 branch must defer to rAF and check buffer API
+        delta_neg_idx = method_block.find('deltaY < 0')
+        assert delta_neg_idx != -1, "Must have deltaY < 0 check"
+
+        delta_neg_block = method_block[delta_neg_idx:delta_neg_idx + 800]
+
+        # Must have requestAnimationFrame inside the deltaY < 0 branch
+        assert 'requestAnimationFrame' in delta_neg_block, \
+            "deltaY < 0 must defer to requestAnimationFrame before checking scroll"
+
+        # Must check !isAtBottom using buffer API before starting timer
+        assert '!isAtBottom' in delta_neg_block or 'viewportY' in delta_neg_block, \
+            "Must check buffer API (viewportY vs baseY) before starting resume timer"
+
+
+    def test_terminal_js_is_at_bottom_uses_buffer_api(self):
+        """_isAtBottom must use viewportY === baseY, not DOM scrollTop."""
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        method_idx = content.find('_isAtBottom(terminal)')
+        assert method_idx != -1, "Must have _isAtBottom method"
+
+        method_block = content[method_idx:method_idx + 300]
+        assert 'viewportY' in method_block, \
+            "_isAtBottom must use buffer.active.viewportY"
+        assert 'baseY' in method_block, \
+            "_isAtBottom must use buffer.active.baseY"
+        # Must NOT use DOM-level scrollTop for this check
+        assert 'scrollTop' not in method_block, \
+            "_isAtBottom must use buffer API, not DOM scrollTop"
+
+    def test_terminal_js_session_cleanup_clears_scroll_timer(self):
+        """removeSession must clear the scroll resume timer to avoid leaks."""
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        method_idx = content.find('removeSession(key)')
+        assert method_idx != -1, "Must have removeSession method"
+
+        method_block = content[method_idx:method_idx + 800]
+        assert '_scrollResumeTimers' in method_block, \
+            "removeSession must clean up _scrollResumeTimers"
+        assert 'clearTimeout' in method_block, \
+            "removeSession must clearTimeout on scroll resume timer"
+
+    def test_terminal_js_remove_session_destroys_backend_session(self):
+        """removeSession must emit destroy_sessions to server before disconnecting socket.
+
+        Bug (Feedback-20260215-211648): Clicking the delete icon in the session
+        list only disconnects the socket but never tells the server to destroy
+        the PTY session, leaving it orphaned.
+        """
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        method_idx = content.find('removeSession(key)')
+        assert method_idx != -1, "Must have removeSession method"
+
+        method_block = content[method_idx:method_idx + 800]
+
+        assert 'destroy_sessions' in method_block, \
+            "removeSession must emit destroy_sessions to server to kill backend PTY session"
+
+        # Ensure destroy_sessions is emitted BEFORE socket.disconnect()
+        destroy_idx = method_block.find('destroy_sessions')
+        disconnect_idx = method_block.find('.disconnect()')
+        assert destroy_idx < disconnect_idx, \
+            "destroy_sessions must be emitted BEFORE socket.disconnect()"
 
 
 class TestSessionPreviewDismissOnLeave:

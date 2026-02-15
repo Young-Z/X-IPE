@@ -2391,7 +2391,6 @@ dependencies = [
     { name = "pyyaml" },
     { name = "requests" },
     { name = "watchdog" },
-    { name = "websockets" },
 ]
 
 [package.dev-dependencies]
@@ -2418,7 +2417,6 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "requests", specifier = ">=2.32.5" },
     { name = "watchdog", specifier = ">=6.0.0" },
-    { name = "websockets", specifier = ">=16.0" },
 ]
 
 [package.metadata.requires-dev]

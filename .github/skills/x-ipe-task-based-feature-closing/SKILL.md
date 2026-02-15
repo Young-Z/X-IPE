@@ -46,6 +46,7 @@ input:
   # Git strategy (from .x-ipe.yaml, passed by workflow)
   git_strategy: "main-branch-only | dev-session-based"
   git_main_branch: "{auto-detected}"
+  git_dev_branch: "dev/{git_user_name}"  # Only for dev-session-based; derived from `git config user.name` (sanitized: lowercase, spaces→hyphens)
 
   # Context (from previous task or project)
   specification_path: "x-ipe-docs/features/{FEATURE-XXX}/specification.md"
@@ -60,7 +61,7 @@ input:
 <definition_of_ready>
   <checkpoint required="true">
     <name>Code implementation complete</name>
-    <verification>All implementation code committed (on main if main-branch-only, on dev/{nickname} if dev-session-based)</verification>
+    <verification>All implementation code committed (on main if main-branch-only, on dev/{git_user_name} if dev-session-based)</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Feature status is "Implemented"</name>
@@ -81,7 +82,7 @@ input:
 |------|------|--------|------|
 | 1 | Verify Criteria | Check all acceptance criteria are met | All criteria met |
 | 2 | Finalize Docs | Update README, API docs, CHANGELOG | Docs complete |
-| 3 | Ship | Push to main (main-branch-only) or create PR (dev-session-based) | Shipped |
+| 3 | Ship | Push to main (main-branch-only) or push dev branch & create PR (dev-session-based) | Shipped |
 | 4 | Output Summary | Provide completion summary to human | Summary delivered |
 
 BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP and report to human.
@@ -134,22 +135,31 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
     <name>Create Pull Request (conditional)</name>
     <action>
       IF git_strategy == "main-branch-only":
-        1. Skip PR creation — code is already on main
-        2. Ensure all changes are pushed: git push origin {git_main_branch}
-        3. Log: "Strategy is main-branch-only, no PR needed"
+        1. CRITICAL: Do NOT create any branches — code is already on main
+        2. Ensure agent is on {git_main_branch}: git checkout {git_main_branch}
+        3. Stage and commit any remaining changes on {git_main_branch}
+        4. Push to main: git push origin {git_main_branch}
+        5. Skip PR creation — no PR needed for main-branch-only
+        6. Log: "Strategy is main-branch-only — pushed directly to {git_main_branch}, no PR created"
 
       ELSE IF git_strategy == "dev-session-based":
-        1. Stage all feature changes
-        2. Push dev/{nickname} branch to remote: git push origin dev/{nickname}
-        3. Create PR from dev/{nickname} → {git_main_branch}
-        4. Use PR template from references/templates/pr-template.md
-        5. Title format: feat: [Feature Name] - [Brief Description]
-        6. Link feature ID and design doc in PR description
-        7. Include testing checklist status
+        1. Resolve dev branch name:
+           → Run: git config user.name (or git config user.email if user.name is empty)
+           → Sanitize: lowercase, replace spaces with hyphens, remove special chars
+           → Branch name: dev/{sanitized_git_user_name}
+        2. Stage all feature changes
+        3. Push dev branch to remote: git push origin dev/{git_user_name}
+        4. Create PR from dev/{git_user_name} → {git_main_branch}
+        5. Use PR template from references/templates/pr-template.md
+        6. Title format: feat: [Feature Name] - [Brief Description]
+        7. Link feature ID and design doc in PR description
+        8. Include testing checklist status
     </action>
     <constraints>
       - BLOCKING (dev-session-based only): PR description must not be empty
       - CRITICAL: PR must be scoped to single feature
+      - CRITICAL (dev-session-based): Branch name MUST use git user identity, NOT agent nickname
+      - BLOCKING (main-branch-only): Do NOT create branches or PRs
     </constraints>
     <output>Pull request URL and number (dev-session-based) or push confirmation (main-branch-only)</output>
   </step_3>
@@ -206,7 +216,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>PR created or code pushed to main</name>
-    <verification>If dev-session-based: PR exists with title, description, linked feature, and checklist. If main-branch-only: code pushed to main.</verification>
+    <verification>If dev-session-based: PR exists with title, description, linked feature, and checklist; branch name uses git user identity. If main-branch-only: code pushed to main, no branches or PRs created.</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Summary provided to human</name>
@@ -267,7 +277,8 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Skipping criteria check | Incomplete feature shipped | Verify each criterion with evidence |
 | Giant multi-feature PR | Hard to review and revert | Keep PR scoped to single feature |
 | No changelog entry | Lost version history | Always update CHANGELOG.md |
-| Creating feature branches in main-branch-only mode | Unnecessary complexity | Check git_strategy before creating branches |
+| Creating feature branches in main-branch-only mode | Unnecessary complexity, violates strategy | BLOCKING: Check git_strategy BEFORE any branch operations; if main-branch-only, stay on main |
+| Using agent nickname for dev branch name | Branch not tied to git identity | Use `git config user.name` (sanitized) for dev branch name, NOT agent nickname |
 
 ---
 

@@ -1,170 +1,83 @@
 # Technical Design: App-Agent Interaction MCP
 
-> Feature ID: FEATURE-033 | Version: v1.1 | Last Updated: 02-14-2026
+> Feature ID: FEATURE-033 | Version: v1.0 | Last Updated: 02-13-2026
 
 ---
 
 ## Part 1: Agent-Facing Summary
 
-> **Purpose:** Quick reference for AI agents navigating large projects.
-> **📌 AI Coders:** Focus on this section for implementation context.
-
 ### Key Components Implemented
 
 | Component | Responsibility | Scope/Impact | Tags |
 |-----------|----------------|--------------|------|
-| `app_agent_interaction` MCP server | Standalone MCP server (FastMCP, stdio) exposing tools for app↔agent communication | Updated module: `src/x_ipe/mcp/app_agent_interaction.py` | #mcp #fastmcp #stdio #app-agent |
-| `CDPClient` | Lightweight CDP client for browser page discovery and script injection via WebSocket | New module: `src/x_ipe/mcp/cdp_client.py` | #cdp #websocket #chrome #injection |
-| `UiuxReferenceService` | Validates, decodes, and persists UIUX reference data to idea folders | Existing service: `src/x_ipe/services/uiux_reference_service.py` | #service #uiux #reference #persistence |
-| `uiux_reference_routes` blueprint | Flask endpoint `POST /api/ideas/uiux-reference` | Existing blueprint: `src/x_ipe/routes/uiux_reference_routes.py` | #flask #api #endpoint #blueprint |
-| MCP config entries | Config for all CLI adapters (Copilot, Claude Code, OpenCode) | Existing: `.github/copilot/mcp-config.json`, `src/x_ipe/resources/copilot/mcp-config.json` | #mcp #config #cli-adapter |
+| `app_agent_interaction` MCP server | Standalone MCP server (FastMCP, stdio) exposing tools for app↔agent communication | Module: `src/x_ipe/mcp/app_agent_interaction.py` | #mcp #fastmcp #stdio |
+| `UiuxReferenceService` | Validates, decodes, and persists UIUX reference data to idea folders | Service: `src/x_ipe/services/uiux_reference_service.py` | #service #uiux #persistence |
+| `uiux_reference_routes` blueprint | Flask endpoint `POST /api/ideas/uiux-reference` | Blueprint: `src/x_ipe/routes/uiux_reference_routes.py` | #flask #api #endpoint |
+| MCP config entries | Config for all CLI adapters (Copilot, Claude Code, OpenCode) | Config: `.github/copilot/mcp-config.json` | #mcp #config |
 
 ### Dependencies
 
-| Dependency | Source | Design Link | Usage Description |
-|------------|--------|-------------|-------------------|
-| `IdeasService` | FEATURE-008 | — | Resolve idea folder paths, validate folder exists |
-| `x_ipe_tracing` | Foundation | — | Decorate routes and service methods for observability |
-| Flask app factory | Foundation | — | Register new blueprint in `_register_blueprints()` |
-| MCPDeployerService | Foundation | — | Deploy MCP config to CLI adapters during `x-ipe init` |
-| FastMCP (new dep) | External | [pypi](https://pypi.org/project/fastmcp/) | Python MCP server framework with `@mcp.tool` decorator |
-| websockets | External | [pypi](https://pypi.org/project/websockets/) | WebSocket client for CDP communication in `CDPClient` *(v1.1)* |
+| Dependency | Source | Usage Description |
+|------------|--------|-------------------|
+| `IdeasService` | FEATURE-008 | Resolve idea folder paths |
+| `x_ipe_tracing` | Foundation | Decorate routes for observability |
+| Flask app factory | Foundation | Register new blueprint |
+| MCPDeployerService | Foundation | Deploy MCP config to CLI adapters |
+| FastMCP (dep) | External | Python MCP server framework |
 
 ### Major Flow
 
-1. **save_uiux_reference:** Agent calls MCP tool `save_uiux_reference` with reference data JSON → MCP server validates required fields → POSTs to Flask backend `POST /api/ideas/uiux-reference`
-2. Flask endpoint receives JSON → `UiuxReferenceService` validates schema → resolves idea folder → auto-creates `uiux-references/` subdirectories → decodes base64 screenshots → saves session JSON → updates merged `reference-data.json` → returns success with session file path
+1. **save_uiux_reference:** Agent calls MCP tool → MCP server validates required fields → POSTs to Flask backend
+2. Flask endpoint receives JSON → `UiuxReferenceService` validates → resolves folder → saves session → updates merged reference → returns success
 3. MCP tool returns Flask response to agent
-
-4. **inject_script (v1.1):** Agent calls MCP tool `inject_script` with `file_path` or `script` → MCP server reads file (if path) → `CDPClient` discovers browser pages via HTTP → selects target page → connects via WebSocket → sends `Runtime.evaluate` → returns result or error → disconnects immediately
 
 ### Usage Example
 
 ```python
-# Agent calls MCP tool (handled by FastMCP framework)
-# Tool name: save_uiux_reference
-# Input: reference data JSON
-
-# Example MCP tool call payload:
+# MCP tool call payload:
 {
   "version": "1.0",
   "source_url": "https://example.com/landing",
   "timestamp": "2026-02-13T09:00:00Z",
   "idea_folder": "018. Feature-UIUX Reference",
   "colors": [
-    {"id": "color-001", "hex": "#1A73E8", "rgb": "26, 115, 232", "hsl": "217, 80%, 51%", "source_selector": "header .logo", "context": "Brand primary"}
+    {"id": "color-001", "hex": "#1A73E8", "rgb": "26, 115, 232"}
   ],
   "elements": [],
-  "design_tokens": {"colors": {"primary": "#1A73E8"}, "typography": {"heading_font": "Google Sans"}}
+  "design_tokens": {"colors": {"primary": "#1A73E8"}}
 }
 
-# Response from MCP tool:
-# {"success": True, "session_file": "ref-session-001.json", "session_number": 1}
-```
-
-```python
-# Agent calls inject_script MCP tool (v1.1)
-# Tool name: inject_script
-# Inject from file:
-inject_script(file_path=".github/skills/x-ipe-tool-uiux-reference/references/toolbar.min.js")
-# Response: {"success": True, "result": None, "target_url": "https://www.baidu.com/"}
-
-# Inject inline script:
-inject_script(script="document.title = 'Hello from X-IPE';")
-# Response: {"success": True, "result": "Hello from X-IPE", "target_url": "https://www.baidu.com/"}
-
-# Target a specific page by URL:
-inject_script(script="alert('test')", target_url="https://example.com")
-# Response: {"success": True, "result": None, "target_url": "https://example.com/"}
-```
-
-```python
-# Flask endpoint usage (internal):
-from x_ipe.services import UiuxReferenceService
-
-service = UiuxReferenceService(project_root)
-result = service.save_reference(data)
-# result: {"success": True, "session_file": "ref-session-001.json", "session_number": 1, "screenshots_saved": 0}
+# Response: {"success": True, "session_file": "ref-session-001.json", "session_number": 1}
 ```
 
 ---
 
 ## Part 2: Implementation Guide
 
-> **Purpose:** Human-readable details for developers.
-> **📌 Emphasis on visual diagrams for comprehension.
-
 ### Workflow Diagram
 
 ```mermaid
 sequenceDiagram
     participant Agent as CLI Agent
-    participant MCP as MCP Server<br/>(app_agent_interaction)
-    participant Flask as Flask Backend<br/>(POST /api/ideas/uiux-reference)
+    participant MCP as MCP Server
+    participant Flask as Flask Backend
     participant Svc as UiuxReferenceService
     participant FS as File System
 
     Agent->>MCP: call save_uiux_reference(data)
     MCP->>MCP: validate required fields
-    alt missing fields
-        MCP-->>Agent: error: missing required fields
-    end
     MCP->>Flask: POST /api/ideas/uiux-reference (JSON)
     Flask->>Svc: save_reference(data)
     Svc->>FS: check idea folder exists
-    alt folder not found
-        Svc-->>Flask: 404 IDEA_NOT_FOUND
-        Flask-->>MCP: 404 error
-        MCP-->>Agent: error: idea folder not found
-    end
     Svc->>FS: mkdir uiux-references/{sessions,screenshots}
     Svc->>Svc: determine next session number
     Svc->>Svc: decode base64 screenshots
-    Svc->>FS: save screenshots to screenshots/
     Svc->>FS: save ref-session-{NNN}.json
     Svc->>Svc: merge all sessions
     Svc->>FS: save reference-data.json
     Svc-->>Flask: {success, session_file, session_number}
     Flask-->>MCP: 200 JSON response
     MCP-->>Agent: success result
-```
-
-### Workflow Diagram: inject_script (v1.1)
-
-```mermaid
-sequenceDiagram
-    participant Agent as CLI Agent
-    participant MCP as MCP Server<br/>(app_agent_interaction)
-    participant CDP as CDPClient
-    participant Chrome as Chrome Browser
-
-    Agent->>MCP: call inject_script(file_path or script)
-    MCP->>MCP: validate input (exactly one of file_path/script)
-    alt file_path provided
-        MCP->>MCP: read file content from disk
-        alt file not found
-            MCP-->>Agent: error: FILE_NOT_FOUND
-        end
-    end
-    MCP->>CDP: discover_pages(port)
-    CDP->>Chrome: GET http://localhost:{port}/json
-    Chrome-->>CDP: [{type, url, webSocketDebuggerUrl}, ...]
-    CDP->>CDP: filter pages (type="page", exclude extensions)
-    alt target_url provided
-        CDP->>CDP: match page URL against target_url
-    end
-    alt no matching page
-        CDP-->>MCP: error: no suitable page
-        MCP-->>Agent: error: CDP_NO_PAGE
-    end
-    CDP->>Chrome: WebSocket connect (webSocketDebuggerUrl)
-    CDP->>Chrome: Runtime.evaluate({expression: script})
-    Chrome-->>CDP: {result} or {exceptionDetails}
-    CDP->>Chrome: WebSocket disconnect
-    alt evaluation error
-        MCP-->>Agent: error: SCRIPT_EVALUATION_ERROR + exception details
-    end
-    MCP-->>Agent: success: {result, target_url}
 ```
 
 ### Class Diagram
@@ -174,15 +87,6 @@ classDiagram
     class AppAgentInteractionMCP {
         -base_url: str
         +save_uiux_reference(data: dict) dict
-        +inject_script(file_path: str, script: str, target_url: str, cdp_port: int) dict
-    }
-
-    class CDPClient {
-        -port: int
-        +discover_pages() list~dict~
-        +evaluate(script: str, target_url: str) dict
-        -_find_target_page(pages: list, target_url: str) dict
-        -_ws_evaluate(ws_url: str, expression: str) dict
     }
 
     class UiuxReferenceService {
@@ -202,508 +106,28 @@ classDiagram
     }
 
     AppAgentInteractionMCP --> UiuxReferenceService : calls via HTTP
-    AppAgentInteractionMCP --> CDPClient : uses for inject_script
     UiuxReferenceBlueprint --> UiuxReferenceService : uses
 ```
-
-### Data Models
-
-#### Reference Data JSON Schema (Input)
-
-```python
-# Required fields
-REQUIRED_FIELDS = ["version", "source_url", "timestamp", "idea_folder"]
-
-# At least one data section must be non-empty
-DATA_SECTIONS = ["colors", "elements", "design_tokens"]
-
-# Full schema (validated by UiuxReferenceService)
-{
-    "version": str,           # "1.0"
-    "source_url": str,        # target URL
-    "auth_url": str | None,   # optional auth prerequisite URL
-    "timestamp": str,         # ISO 8601
-    "idea_folder": str,       # folder name under x-ipe-docs/ideas/
-    "colors": [               # optional
-        {
-            "id": str,
-            "hex": str,
-            "rgb": str | None,
-            "hsl": str | None,
-            "source_selector": str | None,
-            "context": str | None
-        }
-    ],
-    "elements": [             # optional
-        {
-            "id": str,
-            "selector": str,
-            "tag": str | None,
-            "bounding_box": {"x": int, "y": int, "width": int, "height": int} | None,
-            "screenshots": {
-                "full_page": str | None,   # file path or "base64:..." encoded
-                "element_crop": str | None  # file path or "base64:..." encoded
-            } | None,
-            "comment": str | None,
-            "extracted_assets": dict | None
-        }
-    ],
-    "design_tokens": {        # optional
-        "colors": dict | None,
-        "typography": dict | None
-    }
-}
-```
-
-#### Success Response
-
-```json
-{
-    "success": true,
-    "session_file": "ref-session-001.json",
-    "session_number": 1,
-    "screenshots_saved": 2,
-    "merged_reference_updated": true
-}
-```
-
-#### Error Response
-
-```json
-{
-    "success": false,
-    "error": "VALIDATION_ERROR",
-    "message": "Missing required field: idea_folder",
-    "details": {"missing_fields": ["idea_folder"]}
-}
-```
-
-### API Specification
-
-#### POST /api/ideas/uiux-reference
-
-**Request:**
-```json
-{
-    "version": "1.0",
-    "source_url": "https://example.com",
-    "timestamp": "2026-02-13T09:00:00Z",
-    "idea_folder": "018. Feature-UIUX Reference",
-    "colors": [...],
-    "elements": [...],
-    "design_tokens": {...}
-}
-```
-
-**Response (200):**
-```json
-{
-    "success": true,
-    "session_file": "ref-session-001.json",
-    "session_number": 1,
-    "screenshots_saved": 0,
-    "merged_reference_updated": true
-}
-```
-
-**Errors:**
-
-| Status | Error Code | Description |
-|--------|-----------|-------------|
-| 400 | VALIDATION_ERROR | Missing required fields or empty data sections |
-| 404 | IDEA_NOT_FOUND | `idea_folder` does not match an existing folder |
-| 413 | PAYLOAD_TOO_LARGE | Request body exceeds 10MB |
-| 500 | WRITE_ERROR | File system error during save |
 
 ### File Structure (Output)
 
 ```
 x-ipe-docs/ideas/{idea_folder}/
-└── uiux-references/                    # auto-created
-    ├── reference-data.json             # merged view of all sessions
-    ├── sessions/                       # auto-created
-    │   ├── ref-session-001.json        # individual session
+└── uiux-references/
+    ├── reference-data.json
+    ├── sessions/
+    │   ├── ref-session-001.json
     │   └── ref-session-002.json
-    └── screenshots/                    # auto-created
+    └── screenshots/
         ├── full-page-001.png
         └── elem-001-crop.png
 ```
-
-### Implementation Steps
-
-#### 1. Add FastMCP Dependency
-
-**File:** `pyproject.toml`
-
-Add `fastmcp>=2.0.0` to `dependencies` list. Run `uv sync`.
-
-#### 2. Create MCP Server Module
-
-**File:** `src/x_ipe/mcp/__init__.py` (empty)
-**File:** `src/x_ipe/mcp/app_agent_interaction.py`
-
-```python
-from fastmcp import FastMCP
-import requests
-import os
-
-mcp = FastMCP(name="x-ipe-app-and-agent-interaction")
-
-BASE_URL = os.environ.get("X_IPE_BASE_URL", "http://localhost:5000")
-
-@mcp.tool
-def save_uiux_reference(data: dict) -> dict:
-    """Save UIUX reference data (colors, elements, screenshots, design tokens)
-    to an idea folder. The data is validated and persisted by the X-IPE backend.
-
-    Args:
-        data: Reference data JSON with required fields: version, source_url,
-              timestamp, idea_folder. Must include at least one of: colors,
-              elements, design_tokens.
-    """
-    # Validate required fields locally before HTTP call
-    missing = [f for f in ["version", "source_url", "timestamp", "idea_folder"]
-               if f not in data or not data[f]]
-    if missing:
-        return {"success": False, "error": "VALIDATION_ERROR",
-                "message": f"Missing required fields: {', '.join(missing)}"}
-
-    try:
-        resp = requests.post(f"{BASE_URL}/api/ideas/uiux-reference",
-                           json=data, timeout=30)
-        return resp.json()
-    except requests.ConnectionError:
-        return {"success": False, "error": "BACKEND_UNREACHABLE",
-                "message": f"Cannot connect to X-IPE backend at {BASE_URL}"}
-    except requests.Timeout:
-        return {"success": False, "error": "BACKEND_TIMEOUT",
-                "message": "Request to X-IPE backend timed out (30s)"}
-
-if __name__ == "__main__":
-    mcp.run()
-```
-
-**Key decisions:**
-- Single file — KISS, server has one tool in Phase 1
-- `requests` for HTTP (already a project dependency)
-- `BASE_URL` from environment variable, default `http://localhost:5000`
-- Local validation before HTTP to fail fast
-- `mcp.run()` uses stdio transport by default
-
-#### 3. Create UiuxReferenceService
-
-**File:** `src/x_ipe/services/uiux_reference_service.py`
-
-Core logic in a service class following existing patterns:
-
-```python
-class UiuxReferenceService:
-    IDEAS_PATH = 'x-ipe-docs/ideas'
-    REQUIRED_FIELDS = ["version", "source_url", "timestamp", "idea_folder"]
-    DATA_SECTIONS = ["colors", "elements", "design_tokens"]
-
-    def __init__(self, project_root: str):
-        self.project_root = Path(project_root).resolve()
-        self.ideas_root = self.project_root / self.IDEAS_PATH
-```
-
-**Methods:**
-
-| Method | Input | Output | Description |
-|--------|-------|--------|-------------|
-| `save_reference(data)` | dict | dict | Main entry point — orchestrates validation, save, merge |
-| `_validate_schema(data)` | dict | list[str] | Returns list of validation error messages |
-| `_resolve_idea_path(folder)` | str | Path | Resolves and validates idea folder path |
-| `_get_next_session_number(dir)` | Path | int | Scans existing sessions, returns max+1 |
-| `_decode_screenshots(data, dir)` | dict, Path | dict | Finds `base64:` prefixed values, decodes to files, replaces with paths |
-| `_save_session_file(data, path)` | dict, Path | None | Atomic write (tmp + rename) |
-| `_update_merged_reference(dir)` | Path | None | Read all sessions, merge, atomic write |
-
-**Atomic write pattern:**
-```python
-import tempfile, json, os
-
-def _save_session_file(self, data: dict, session_path: Path) -> None:
-    tmp_fd, tmp_path = tempfile.mkstemp(dir=session_path.parent, suffix='.tmp')
-    try:
-        with os.fdopen(tmp_fd, 'w') as f:
-            json.dump(data, f, indent=2)
-        os.rename(tmp_path, session_path)
-    except Exception:
-        os.unlink(tmp_path)
-        raise
-```
-
-**Merge logic for `reference-data.json`:**
-- Read all `ref-session-*.json` files, sorted by number
-- Merge `colors` arrays — deduplicate by `id`, keep latest
-- Merge `elements` arrays — deduplicate by `id`, keep latest
-- Use latest session's `design_tokens`
-- Record list of `source_urls` from all sessions
-- Set `last_updated` to current timestamp
-
-#### 4. Create Flask Blueprint
-
-**File:** `src/x_ipe/routes/uiux_reference_routes.py`
-
-```python
-from flask import Blueprint, jsonify, request, current_app
-from x_ipe.services import UiuxReferenceService
-from x_ipe.tracing import x_ipe_tracing
-
-uiux_reference_bp = Blueprint('uiux_reference', __name__)
-
-@uiux_reference_bp.route('/api/ideas/uiux-reference', methods=['POST'])
-@x_ipe_tracing()
-def post_uiux_reference():
-    project_root = current_app.config.get('PROJECT_ROOT', os.getcwd())
-    service = UiuxReferenceService(project_root)
-
-    data = request.json
-    if not data:
-        return jsonify({"success": False, "error": "VALIDATION_ERROR",
-                        "message": "Request body must be JSON"}), 400
-
-    result = service.save_reference(data)
-
-    if not result.get("success"):
-        status = 404 if result.get("error") == "IDEA_NOT_FOUND" else 400
-        return jsonify(result), status
-
-    return jsonify(result), 200
-```
-
-#### 5. Register Blueprint
-
-**File:** `src/x_ipe/app.py` — add to `_register_blueprints()`:
-
-```python
-from x_ipe.routes.uiux_reference_routes import uiux_reference_bp
-app.register_blueprint(uiux_reference_bp)
-```
-
-#### 6. Export Service
-
-**File:** `src/x_ipe/services/__init__.py` — add:
-
-```python
-from .uiux_reference_service import UiuxReferenceService
-# Add to __all__
-```
-
-#### 7. MCP Config (Already Done)
-
-Both `.github/copilot/mcp-config.json` and `src/x_ipe/resources/copilot/mcp-config.json` already updated with `x-ipe-app-and-agent-interaction` entry. MCPDeployerService handles format conversion for all CLI adapters automatically.
-
-#### 8. Create CDPClient Module *(v1.1 — CR-001)*
-
-**File:** `src/x_ipe/mcp/cdp_client.py`
-
-Lightweight CDP client using `websockets` and `urllib`. No Playwright/Puppeteer dependency.
-
-```python
-"""Lightweight Chrome DevTools Protocol client for script injection."""
-import json
-import urllib.request
-import asyncio
-from websockets.asyncio.client import connect as ws_connect
-
-
-class CDPClient:
-    """Short-lived CDP client for page discovery and script evaluation."""
-
-    def __init__(self, port: int = 9222):
-        self.port = port
-        self.base_url = f"http://localhost:{port}"
-        self._msg_id = 0
-
-    def discover_pages(self) -> list[dict]:
-        """GET /json to list all inspectable pages."""
-        try:
-            with urllib.request.urlopen(f"{self.base_url}/json", timeout=5) as resp:
-                return json.loads(resp.read())
-        except Exception as e:
-            raise ConnectionError(
-                f"Cannot connect to Chrome DevTools at {self.base_url}. "
-                f"Ensure Chrome is running with --remote-debugging-port={self.port}"
-            ) from e
-
-    def evaluate(self, script: str, target_url: str | None = None) -> dict:
-        """Discover page, connect via WS, run Runtime.evaluate, disconnect."""
-        pages = self.discover_pages()
-        page = self._find_target_page(pages, target_url)
-        return asyncio.run(self._ws_evaluate(page["webSocketDebuggerUrl"], script))
-
-    def _find_target_page(self, pages: list[dict], target_url: str | None) -> dict:
-        """Select target page: match target_url or first suitable page."""
-        suitable = [
-            p for p in pages
-            if p.get("type") == "page"
-            and not p.get("url", "").startswith("chrome-extension://")
-            and not p.get("url", "").startswith("devtools://")
-        ]
-        if not suitable:
-            raise ValueError("No suitable browser page found")
-
-        if target_url:
-            for p in suitable:
-                if target_url in p.get("url", ""):
-                    return p
-            raise ValueError(f"No page matching URL pattern: {target_url}")
-
-        return suitable[0]
-
-    async def _ws_evaluate(self, ws_url: str, expression: str) -> dict:
-        """Connect via WebSocket, send Runtime.evaluate, return result."""
-        self._msg_id += 1
-        msg = {
-            "id": self._msg_id,
-            "method": "Runtime.evaluate",
-            "params": {
-                "expression": expression,
-                "returnByValue": True,
-                "awaitPromise": True,
-            },
-        }
-        async with ws_connect(ws_url) as ws:
-            await ws.send(json.dumps(msg))
-            while True:
-                resp = json.loads(await ws.recv())
-                if resp.get("id") == self._msg_id:
-                    return resp
-```
-
-**Key decisions:**
-- `urllib.request` for HTTP discovery (stdlib, no extra dependency)
-- `websockets` for async WebSocket CDP communication
-- `asyncio.run()` in `evaluate()` to keep the public API synchronous (MCP tools are sync)
-- Short-lived: connect → one command → disconnect (avoids conflicts with Chrome DevTools MCP)
-- `returnByValue: True` to get actual values, `awaitPromise: True` for async scripts
-- Minimal ~60 lines — KISS principle
-
-#### 9. Add `inject_script` Tool to MCP Server *(v1.1 — CR-001)*
-
-**File:** `src/x_ipe/mcp/app_agent_interaction.py` — add new tool:
-
-```python
-from pathlib import Path
-from x_ipe.mcp.cdp_client import CDPClient
-
-@mcp.tool
-def inject_script(
-    file_path: str | None = None,
-    script: str | None = None,
-    target_url: str | None = None,
-    cdp_port: int = 9222,
-) -> dict:
-    """Inject JavaScript into the active browser page via Chrome DevTools Protocol.
-
-    Reads a JS file from disk or accepts inline script, then executes it in the
-    browser page context via CDP Runtime.evaluate. Requires Chrome to be running
-    with --remote-debugging-port.
-
-    Args:
-        file_path: Path to a .js file to inject (mutually exclusive with script).
-        script: Inline JavaScript code to execute (mutually exclusive with file_path).
-        target_url: Optional URL pattern to select a specific browser tab.
-        cdp_port: Chrome remote debugging port (default: 9222).
-    """
-    # Validate: exactly one of file_path or script
-    if bool(file_path) == bool(script):
-        return {
-            "success": False,
-            "error": "VALIDATION_ERROR",
-            "message": "Provide exactly one of 'file_path' or 'script'",
-        }
-
-    # Read file if file_path provided
-    if file_path:
-        path = Path(file_path).expanduser()
-        if not path.is_absolute():
-            path = Path.cwd() / path
-        if not path.is_file():
-            return {
-                "success": False,
-                "error": "FILE_NOT_FOUND",
-                "message": f"Script file not found: {path}",
-            }
-        script = path.read_text(encoding="utf-8")
-
-    # Execute via CDP
-    try:
-        client = CDPClient(port=cdp_port)
-        resp = client.evaluate(script, target_url=target_url)
-    except ConnectionError as e:
-        return {"success": False, "error": "CDP_CONNECTION_FAILED", "message": str(e)}
-    except ValueError as e:
-        return {"success": False, "error": "CDP_NO_PAGE", "message": str(e)}
-
-    # Parse CDP response
-    result = resp.get("result", {})
-    if "exceptionDetails" in result:
-        exc = result["exceptionDetails"]
-        return {
-            "success": False,
-            "error": "SCRIPT_EVALUATION_ERROR",
-            "message": exc.get("text", "Script evaluation failed"),
-            "details": {
-                "exception": exc.get("exception", {}).get("description", ""),
-            },
-        }
-
-    return {
-        "success": True,
-        "result": result.get("result", {}).get("value"),
-        "target_url": target_url,
-    }
-```
-
-**Key decisions:**
-- `file_path` and `script` are mutually exclusive — XOR validation
-- File paths resolved relative to CWD; absolute paths accepted
-- `CDPClient` instantiated per call — no persistent state (KISS)
-- Error types mapped to structured responses: `CDP_CONNECTION_FAILED`, `CDP_NO_PAGE`, `SCRIPT_EVALUATION_ERROR`, `FILE_NOT_FOUND`
-- Does NOT route through Flask backend — direct CDP communication (self-contained)
-
-### Edge Cases & Error Handling
-
-| Scenario | Component | Expected Behavior |
-|----------|-----------|-------------------|
-| Idea folder not found | Service | Return `{"error": "IDEA_NOT_FOUND", "message": "Idea folder not found: {name}"}` |
-| All data sections empty | Service | Return `{"error": "VALIDATION_ERROR", "message": "At least one data section required"}` |
-| Base64 screenshot decode fails | Service | Log warning, skip that screenshot, continue saving rest |
-| Session folder has gaps (001, 003) | Service | Next session = max(existing) + 1 = 004 |
-| Concurrent saves to same idea | Service | Atomic writes prevent corruption; second writer gets next number |
-| Flask backend unreachable | MCP server | Return `{"error": "BACKEND_UNREACHABLE", "message": "..."}` |
-| Request body > 10MB | Flask | Return 413 via Flask `MAX_CONTENT_LENGTH` config |
-| Special chars in idea folder name | Service | Use `Path` resolution; no URL encoding needed (local FS only) |
-| CDP port not reachable | CDPClient | Raise `ConnectionError` → MCP returns `CDP_CONNECTION_FAILED` *(v1.1)* |
-| No browser pages available | CDPClient | `_find_target_page` raises `ValueError` → MCP returns `CDP_NO_PAGE` *(v1.1)* |
-| Script throws runtime error | CDPClient | CDP response contains `exceptionDetails` → MCP returns `SCRIPT_EVALUATION_ERROR` with details *(v1.1)* |
-| File path does not exist | MCP tool | Return `FILE_NOT_FOUND` before attempting CDP connection *(v1.1)* |
-| Both `file_path` and `script` provided | MCP tool | Return `VALIDATION_ERROR` — mutually exclusive *(v1.1)* |
-| Neither `file_path` nor `script` provided | MCP tool | Return `VALIDATION_ERROR` — at least one required *(v1.1)* |
-| Chrome DevTools MCP has active session | CDPClient | Short-lived WS connection avoids conflicts — connect, evaluate, disconnect immediately *(v1.1)* |
-| Large script file (>1MB) | CDPClient | `Runtime.evaluate` handles large expressions; no size check needed *(v1.1)* |
-| `target_url` matches multiple tabs | CDPClient | Return first match — deterministic selection *(v1.1)* |
 
 ### Testing Strategy
 
 | Test Category | Scope | Key Tests |
 |---------------|-------|-----------|
-| Unit: UiuxReferenceService | Service | Schema validation, session numbering, screenshot decoding, merge logic, atomic writes, error cases |
-| Unit: Flask endpoint | Route | Valid request → 200, invalid schema → 400, missing folder → 404, empty body → 400 |
-| Unit: MCP tool (save) | MCP server | Valid call → success, missing fields → local validation error, backend unreachable → error |
-| Unit: CDPClient | CDP client | Page discovery (mock HTTP), page filtering, target URL matching, WS evaluate (mock WS), error handling *(v1.1)* |
-| Unit: MCP tool (inject) | MCP server | File read, inline script, validation (XOR), error mapping (ConnectionError→CDP_CONNECTION_FAILED, ValueError→CDP_NO_PAGE) *(v1.1)* |
-| Integration | End-to-end | MCP tool → Flask endpoint → file system → verify files on disk |
-| Integration: inject_script | End-to-end | MCP tool → CDPClient → Chrome → verify script executed *(v1.1, requires running Chrome)* |
-
----
-
-## Design Change Log
-
-| Date | Phase | Change Summary |
-|------|-------|----------------|
-| 02-14-2026 | CR-001 (v1.1) | Added `inject_script` tool and `CDPClient` module. New components: `src/x_ipe/mcp/cdp_client.py` (~60 lines, websockets + urllib). inject_script reads JS files or accepts inline scripts, executes via CDP `Runtime.evaluate`. Short-lived WS connections to avoid conflicts with Chrome DevTools MCP. No Flask routing needed — direct CDP. |
-| 02-13-2026 | Initial Design | Initial technical design: FastMCP server (`x_ipe.mcp.app_agent_interaction`), `UiuxReferenceService`, Flask blueprint, MCP config for all CLI adapters. |
+| Unit: UiuxReferenceService | Service | Schema validation, session numbering, screenshot decoding, merge logic |
+| Unit: Flask endpoint | Route | Valid request → 200, invalid → 400, missing folder → 404 |
+| Unit: MCP tool | MCP server | Valid call → success, missing fields → error, backend unreachable → error |
+| Integration | End-to-end | MCP tool → Flask → file system → verify files |

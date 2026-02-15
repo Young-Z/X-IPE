@@ -1,0 +1,149 @@
+execution_log:
+  timestamp: '2026-02-15T09:17:54Z'
+  total_tests: 45
+  passed: 45
+  failed: 0
+  results:
+  - id: TC-001
+    status: pass
+    actual: 'File exists: True'
+  - id: TC-002
+    status: pass
+    actual: 'Frontmatter contains name field: True'
+  - id: TC-003
+    status: pass
+    actual: uiux-reference:True, toolbar:True, referenced-elements.json:True
+  - id: TC-004
+    status: pass
+    actual: 'File exists: True, has ''## Example'': True'
+  - id: TC-005
+    status: pass
+    actual: 'Line count: 360'
+  - id: TC-006
+    status: pass
+    actual: 'Frontmatter: True, Found 12/12, Missing: []'
+  - id: TC-007
+    status: pass
+    actual: 'Section line numbers: [(''Purpose'', 8), (''Important Notes'', 19), (''About'',
+      33), (''When to Use'', 48), (''Input Parameters'', 66), (''Definition of Ready'',
+      78), (''Operations'', 103), (''Output Result'', 276), (''Definition of Done'',
+      292), (''Error Handling'', 329), (''Templates'', 344), (''Examples'', 357)],
+      ordered: True'
+  - id: TC-008
+    status: pass
+    actual: 'Found 3 operation XML tags: [''<operation name="execute_reference">'',
+      ''<operation name="process_theme">'', ''<operation name="process_mockup">'']'
+  - id: TC-009
+    status: pass
+    actual: 'Found: [''execute_reference'', ''process_theme'', ''process_mockup''],
+      Missing: []'
+  - id: TC-010
+    status: pass
+    actual: 'Has correct header: True'
+  - id: TC-011
+    status: pass
+    actual: 'Data rows: 8'
+  - id: TC-012
+    status: pass
+    actual: '''toolbar.compressed.json'' count: 7'
+  - id: TC-013
+    status: pass
+    actual: 2-call:True, 2 evaluate_script:True, CALL 1+2:True
+  - id: TC-014
+    status: pass
+    actual: 'Warning pattern found: 2 matches'
+  - id: TC-015
+    status: pass
+    actual: 'referenced-elements.json: True, single source of truth: True'
+  - id: TC-016
+    status: pass
+    actual: 'ref-session: False, reference-data.json: False'
+  - id: TC-017
+    status: pass
+    actual: 'ref-session: False, reference-data.json: False'
+  - id: TC-018
+    status: pass
+    actual: 'ARIA/aria-label mention: True'
+  - id: TC-019
+    status: pass
+    actual: 'Link to code-snippets.md#aria-workaround: True'
+  - id: TC-020
+    status: pass
+    actual: section:True, step1:True, step2:True, step3:True
+  - id: TC-021
+    status: pass
+    actual: catch design theme:True, extract colors:True
+  - id: TC-022
+    status: pass
+    actual: copy design as mockup:True, collect design references:True
+  - id: TC-023
+    status: pass
+    actual: uiux-reference:True, design:True
+  - id: TC-024
+    status: pass
+    actual: gzip+base64:True, compressed injection:True
+  - id: TC-025
+    status: pass
+    actual: '''2 chunks'' in About: True'
+  - id: TC-026
+    status: pass
+    actual: 'File exists: True, has JS blocks: True'
+  - id: TC-027
+    status: pass
+    actual: 'Large JS blocks (>10 lines): 0'
+  - id: TC-028
+    status: pass
+    actual: 'References to code-snippets.md#: 8'
+  - id: TC-029
+    status: pass
+    actual: 'File exists: True, has schema: True'
+  - id: TC-030
+    status: pass
+    actual: JSON block:True, version:True, areas:True, elements:True
+  - id: TC-031
+    status: pass
+    actual: 'Link to data-schema.md: True'
+  - id: TC-032
+    status: pass
+    actual: BLOCKING:True, CRITICAL:True, emoji:False
+  - id: TC-033
+    status: pass
+    actual: '''Target page navigated'': True'
+  - id: TC-034
+    status: pass
+    actual: '''Toolbar injected via compressed injection'': True'
+  - id: TC-035
+    status: pass
+    actual: '''User data received'': True'
+  - id: TC-036
+    status: pass
+    actual: '''Data saved via MCP'': True'
+  - id: TC-037
+    status: pass
+    actual: '''Theme colors saved with roles'' in DoD: True'
+  - id: TC-038
+    status: pass
+    actual: '''referenced-elements.json persisted'': True'
+  - id: TC-039
+    status: pass
+    actual: '''Buttons re-enabled after processing'': True'
+  - id: TC-040
+    status: pass
+    actual: 'Existing: [''code-snippets.md'', ''data-schema.md'', ''examples.md'',
+      ''toolbar-template.md''], Missing: []'
+  - id: TC-041
+    status: pass
+    actual: 'Found: [''toolbar.compressed.json'', ''toolbar.min.js'', ''code-snippets.md'',
+      ''data-schema.md'', ''examples.md''], Missing: []'
+  - id: TC-042
+    status: pass
+    actual: '''Chrome DevTools MCP connected'': True'
+  - id: TC-043
+    status: pass
+    actual: '''Target URL provided'': True'
+  - id: TC-044
+    status: pass
+    actual: theme/mockup references:True, 'Send References':False
+  - id: TC-045
+    status: pass
+    actual: ARIA:True, workaround/UID:True
