@@ -168,15 +168,27 @@
 
   // ===== Drag (FR-8) =====
   let isDragging = false;
+  let dragStartX = 0, dragStartY = 0;
   let dragOffsetX = 0, dragOffsetY = 0;
+  const DRAG_THRESHOLD = 5;
+
   hamburger.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    dragOffsetX = e.clientX - toolbar.getBoundingClientRect().left;
-    dragOffsetY = e.clientY - toolbar.getBoundingClientRect().top;
-    hamburger.style.cursor = 'grabbing';
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    const rect = toolbar.getBoundingClientRect();
+    dragOffsetX = e.clientX - rect.left;
+    dragOffsetY = e.clientY - rect.top;
     e.preventDefault();
   });
   document.addEventListener('mousemove', (e) => {
+    if (dragStartX === 0 && dragStartY === 0) return;
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+    if (!isDragging && (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD)) {
+      isDragging = true;
+      hamburger.style.cursor = 'grabbing';
+      collapsePanel();
+    }
     if (!isDragging) return;
     let x = e.clientX - dragOffsetX;
     let y = e.clientY - dragOffsetY;
@@ -186,12 +198,22 @@
     toolbar.style.top = y + 'px';
     toolbar.style.right = 'auto';
     toolbar.style.transform = 'none';
+    // Flip panel to left/right based on toolbar position
+    if (x > window.innerWidth / 2) {
+      panel.style.right = '62px';
+      panel.style.left = 'auto';
+    } else {
+      panel.style.left = '62px';
+      panel.style.right = 'auto';
+    }
   });
   document.addEventListener('mouseup', () => {
     if (isDragging) {
       isDragging = false;
       hamburger.style.cursor = 'grab';
     }
+    dragStartX = 0;
+    dragStartY = 0;
   });
 
   // ===== CSS Selector Generator =====
