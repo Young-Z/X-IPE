@@ -9,7 +9,11 @@
 
 | Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
 |------------|---------|---------------|---------|-------------------|-------------------|
-| EPIC-036 | EPIC-036 | Engineering Workflow View | v1.0 | Centralized workflow view orchestrating project delivery lifecycle (Ideation → Requirement → Implement → Validation → Feedback) with workflow panels, stage ribbons, feature lanes, dependency visualization, parallel execution, and backend Workflow Manager | EPIC-001, EPIC-005, EPIC-008, EPIC-029, EPIC-033 |
+| FEATURE-036-A | EPIC-036 | Workflow Manager & State Persistence | v1.0 | Backend service: workflow CRUD, stage gating logic, dependency evaluation, next-action suggestion; JSON state persistence; new MCP tools | None (depends on FEATURE-033 externally) |
+| FEATURE-036-B | EPIC-036 | Workflow View Shell & CRUD | v1.0 | New top-nav entry "Engineering Workflow"; workflow list view with expandable panels; create/delete/archive actions | FEATURE-036-A |
+| FEATURE-036-C | EPIC-036 | Stage Ribbon & Action Execution | v1.0 | Horizontal stage progression bar with done/active/pending states; stage-specific action buttons; CLI agent action execution; stage gating enforcement | FEATURE-036-A, FEATURE-036-B |
+| FEATURE-036-D | EPIC-036 | Feature Lanes & Dependencies | v1.0 | Horizontal feature swimlanes; per-lane stage progress; SVG dependency arrows; parallel session execution with dependency check | FEATURE-036-A, FEATURE-036-B, FEATURE-036-C |
+| FEATURE-036-E | EPIC-036 | Deliverables, Polling & Lifecycle | v1.0 | Collapsible deliverables section; Deliverables Resolver; 7-second polling; auto-archive; error recovery | FEATURE-036-A, FEATURE-036-B |
 | FEATURE-035-A | EPIC-035 | Epic Core Workflow Skills | v1.0 | Update requirement-gathering and feature-breakdown skills for Epic folder/naming support | None |
 | FEATURE-035-B | EPIC-035 | Feature Board Epic Tracking | v1.0 | Add Epic ID column to features.md, update feature-board-management skill | FEATURE-035-A |
 | FEATURE-035-C | EPIC-035 | Feature Lifecycle Skill Updates | v1.0 | Update 10+ lifecycle skills for Epic-aware paths | FEATURE-035-A, FEATURE-035-B |
@@ -22,7 +26,7 @@
 
 | Mockup Function Name | Feature | Mockup Link |
 |---------------------|---------|-------------|
-| Engineering Workflow View (full interactive) | EPIC-036 | [workflow-view-v1.html](EPIC-036/mockups/workflow-view-v1.html) |
+| Engineering Workflow View (full interactive) | All FEATURE-036-* | [workflow-view-v1.html](EPIC-036/mockups/workflow-view-v1.html) |
 | Introduce Epic Layer (idea summary) | CR-EPIC | [idea-summary-v2.md](../ideas/022.%20CR-Introduce%20Epic/idea-summary-v2.md) |
 
 ---
