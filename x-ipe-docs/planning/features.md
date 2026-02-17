@@ -84,6 +84,6 @@ This board tracks all features across the project lifecycle.
 | FEATURE-035-E | EPIC-035 | Retroactive Feature Migration | v1.0 | Completed | [specification.md](../requirements/EPIC-035/FEATURE-035-E/specification.md) | 02-17-2026 | 02-17-2026 11:20:00 |
 | FEATURE-036-A | EPIC-036 | Workflow Manager & State Persistence | v1.0 | Completed | [specification.md](../requirements/EPIC-036/FEATURE-036-A/specification.md), [technical-design.md](../requirements/EPIC-036/FEATURE-036-A/technical-design.md) | 02-17-2026 | 02-17-2026 12:30:00 |
 | FEATURE-036-B | EPIC-036 | Workflow View Shell & CRUD | v1.0 | Completed | - | 02-17-2026 | 02-17-2026 12:15:00 |
-| FEATURE-036-C | EPIC-036 | Stage Ribbon & Action Execution | v1.0 | In Progress | [specification.md](../requirements/EPIC-036/FEATURE-036-C/specification.md) | 02-17-2026 | 02-17-2026 13:57:00 |
+| FEATURE-036-C | EPIC-036 | Stage Ribbon & Action Execution | v1.0 | Completed | [specification.md](../requirements/EPIC-036/FEATURE-036-C/specification.md) | 02-17-2026 | 02-17-2026 14:34:00 |
 | FEATURE-036-D | EPIC-036 | Feature Lanes & Dependencies | v1.0 | Planned | - | 02-17-2026 | 02-17-2026 12:15:00 |
 | FEATURE-036-E | EPIC-036 | Deliverables, Polling & Lifecycle | v1.0 | Planned | - | 02-17-2026 | 02-17-2026 12:15:00 |
