@@ -1,9 +1,19 @@
 /**
  * FEATURE-036-C: Stage Ribbon & Action Execution
- * Renders stage progression ribbon and action buttons inside workflow panels.
+ * FEATURE-036-D: Feature Lanes & Dependencies
+ * Renders stage progression ribbon, action buttons, and feature lanes.
  */
 const workflowStage = {
     STAGE_ORDER: ['ideation', 'requirement', 'implement', 'validation', 'feedback'],
+
+    FEATURE_LANE_ACTIONS: [
+        { key: 'feature_refinement', label: 'Refinement',  icon: '📐' },
+        { key: 'technical_design',   label: 'Tech Design', icon: '⚙' },
+        { key: 'implementation',     label: 'Implement',   icon: '💻' },
+        { key: 'acceptance_testing', label: 'Testing',     icon: '✅' },
+        { key: 'quality_evaluation', label: 'Quality',     icon: '📊' },
+        { key: 'change_request',     label: 'CR',          icon: '🔄' },
+    ],
 
     ACTION_MAP: {
         ideation: {
@@ -45,10 +55,23 @@ const workflowStage = {
         }
     },
 
-    /** Main entry: render stage ribbon + actions into container. */
+    /** Main entry: render stage ribbon + actions (or feature lanes) into container. */
     render(container, workflowState, nextAction, workflowName) {
         container.appendChild(this._renderRibbon(workflowState.stages));
-        container.appendChild(this._renderActionsArea(workflowState.stages, nextAction, workflowName));
+        if (this._hasFeatures(workflowState.stages)) {
+            container.appendChild(this._renderFeatureSelector(workflowState.stages, nextAction, workflowName));
+            container.appendChild(this._renderFeatureLanes(workflowState.stages, nextAction, workflowName));
+        } else {
+            container.appendChild(this._renderActionsArea(workflowState.stages, nextAction, workflowName));
+        }
+    },
+
+    /** Check if any stage has features. */
+    _hasFeatures(stages) {
+        return this.STAGE_ORDER.some(s => {
+            const st = stages[s] || {};
+            return st.features && Object.keys(st.features).length > 0;
+        });
     },
 
     _renderRibbon(stages) {
@@ -296,6 +319,329 @@ const workflowStage = {
                 cleanup(v);
             };
         });
+    },
+
+    // ─── FEATURE-036-D: Feature Lanes & Dependencies ────────────
+
+    /** Collect all features from per-feature stages. */
+    _collectFeatures(stages) {
+        const feats = {};
+        for (const s of ['implement', 'validation', 'feedback']) {
+            const st = stages[s] || {};
+            if (st.features) {
+                Object.entries(st.features).forEach(([id, data]) => {
+                    if (!feats[id]) feats[id] = { ...data, _id: id };
+                });
+            }
+        }
+        return feats;
+    },
+
+    /** Render feature selector dropdown. */
+    _renderFeatureSelector(stages, nextAction, wfName) {
+        const wrap = document.createElement('div');
+        wrap.className = 'feature-selector-wrap';
+
+        const btn = document.createElement('button');
+        btn.className = 'feature-selector-btn';
+        btn.innerHTML = 'Select Feature to Work On ▼';
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'feature-selector-dropdown';
+
+        const header = document.createElement('div');
+        header.className = 'feature-selector-header';
+        header.textContent = 'Select Feature to Work On';
+        dropdown.appendChild(header);
+
+        const feats = this._collectFeatures(stages);
+        Object.entries(feats).forEach(([id, data], idx) => {
+            const item = document.createElement('div');
+            item.className = 'feature-selector-item';
+            item.dataset.featureId = id;
+            if (idx === 0) item.classList.add('selected');
+
+            const icon = this._getFeatureStatusIcon(data);
+            const stageName = this._getFeatureCurrentStage(data);
+            const nextAct = nextAction && nextAction.feature_id === id ? nextAction.action : '';
+
+            item.innerHTML = `
+                <span class="feature-selector-icon">${icon}</span>
+                <div class="feature-selector-info">
+                    <div class="feature-selector-name">${id} · ${data.name || id}</div>
+                    <div class="feature-selector-stage">${stageName}</div>
+                </div>
+                ${nextAct ? `<span class="feature-selector-next">→ ${nextAct.replace(/_/g, ' ')}</span>` : ''}`;
+
+            item.onclick = (e) => {
+                e.stopPropagation();
+                dropdown.querySelectorAll('.feature-selector-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+                const lanes = wrap.parentElement.querySelectorAll('.feature-lane');
+                lanes.forEach((lane, i) => {
+                    lane.classList.toggle('highlighted', lane.dataset.feature === id);
+                });
+                dropdown.classList.remove('open');
+            };
+            dropdown.appendChild(item);
+        });
+
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('open');
+        };
+        document.addEventListener('click', () => dropdown.classList.remove('open'));
+
+        wrap.appendChild(btn);
+        wrap.appendChild(dropdown);
+
+        // Dependencies toggle
+        const depToggle = document.createElement('span');
+        depToggle.className = 'dep-toggle active';
+        depToggle.innerHTML = '<span class="dep-toggle-icon">⑆</span> Dependencies';
+        depToggle.onclick = () => this._toggleDeps(wrap.parentElement, depToggle);
+        wrap.appendChild(depToggle);
+
+        return wrap;
+    },
+
+    /** Toggle dependency visibility. */
+    _toggleDeps(parent, toggle) {
+        const container = parent.querySelector('.lanes-container');
+        if (container) container.classList.toggle('deps-hidden');
+        toggle.classList.toggle('active');
+    },
+
+    /** Render feature lanes container with SVG overlay. */
+    _renderFeatureLanes(stages, nextAction, wfName) {
+        const container = document.createElement('div');
+        container.className = 'lanes-container';
+
+        const feats = this._collectFeatures(stages);
+        const entries = Object.entries(feats);
+
+        entries.forEach(([id, data], idx) => {
+            container.appendChild(this._renderLane(id, data, stages, nextAction, wfName, idx === 0));
+        });
+
+        // SVG overlay
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'dep-svg-overlay');
+        svg.id = 'dep-svg-' + wfName;
+        container.appendChild(svg);
+
+        // Draw arrows after render
+        setTimeout(() => this._drawDepArrows(container), 100);
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => this._drawDepArrows(container), 200);
+        });
+
+        return container;
+    },
+
+    /** Render a single feature lane. */
+    _renderLane(featureId, featureData, stages, nextAction, wfName, highlighted) {
+        const lane = document.createElement('div');
+        lane.className = 'feature-lane' + (highlighted ? ' highlighted' : '');
+        lane.dataset.feature = featureId;
+        if (featureData.depends_on && featureData.depends_on.length > 0) {
+            lane.dataset.dependsOn = featureData.depends_on.join(',');
+        }
+
+        // Label
+        const label = document.createElement('div');
+        label.className = 'lane-label';
+        label.innerHTML = `
+            <div class="lane-feature-id">${featureId}</div>
+            <div class="lane-feature-name">${featureData.name || featureId}</div>`;
+        label.appendChild(this._renderDepBadge(featureData));
+        lane.appendChild(label);
+
+        // Stages
+        const stagesDiv = document.createElement('div');
+        stagesDiv.className = 'lane-stages';
+        const actions = featureData.actions || {};
+
+        this.FEATURE_LANE_ACTIONS.forEach((act, i) => {
+            if (i > 0) {
+                const arrow = document.createElement('span');
+                arrow.className = 'lane-arrow';
+                arrow.textContent = '›';
+                stagesDiv.appendChild(arrow);
+            }
+            const status = (actions[act.key] || {}).status || 'pending';
+            const isSuggested = nextAction && nextAction.feature_id === featureId && nextAction.action === act.key;
+
+            const dot = document.createElement('span');
+            if (status === 'done') {
+                dot.className = 'lane-stage done';
+                dot.innerHTML = `<span>✓</span> ${act.label}`;
+            } else if (status === 'in_progress' || isSuggested) {
+                dot.className = 'lane-stage active';
+                dot.innerHTML = `<span class="stage-dot"></span> ${act.label}`;
+            } else {
+                dot.className = 'lane-stage pending';
+                dot.textContent = act.label;
+            }
+
+            dot.style.cursor = 'pointer';
+            dot.onclick = (e) => {
+                e.stopPropagation();
+                if (status === 'done') {
+                    this._showToast(`${act.label} is already completed for ${featureId}`, 'info');
+                    return;
+                }
+                this._dispatchFeatureAction(wfName, featureId, act.key, featureData);
+            };
+
+            stagesDiv.appendChild(dot);
+        });
+        lane.appendChild(stagesDiv);
+
+        lane.onclick = () => {
+            lane.parentElement.querySelectorAll('.feature-lane').forEach(l => l.classList.remove('highlighted'));
+            lane.classList.add('highlighted');
+        };
+
+        return lane;
+    },
+
+    /** Render dependency badge: ⛓ needs or ⇉ Parallel. */
+    _renderDepBadge(featureData) {
+        const badge = document.createElement('span');
+        if (featureData.depends_on && featureData.depends_on.length > 0) {
+            badge.className = 'dep-tag depends';
+            badge.textContent = `⛓ needs ${featureData.depends_on.join(', ')}`;
+        } else {
+            badge.className = 'dep-tag parallel';
+            badge.textContent = '⇉ Parallel';
+        }
+        return badge;
+    },
+
+    /** Draw SVG dependency arrows between lanes. */
+    _drawDepArrows(container) {
+        const svg = container.querySelector('.dep-svg-overlay');
+        if (!svg) return;
+        svg.innerHTML = '';
+        const cRect = container.getBoundingClientRect();
+
+        const lanes = container.querySelectorAll('.feature-lane[data-feature]');
+        const laneMap = {};
+        lanes.forEach(lane => { laneMap[lane.dataset.feature] = lane; });
+
+        lanes.forEach(lane => {
+            const deps = lane.dataset.dependsOn;
+            if (!deps) return;
+            deps.split(',').forEach(dep => {
+                const srcLane = laneMap[dep.trim()];
+                if (!srcLane) return;
+
+                const srcLabel = srcLane.querySelector('.lane-label');
+                const tgtLabel = lane.querySelector('.lane-label');
+                const srcRect = srcLabel.getBoundingClientRect();
+                const tgtRect = tgtLabel.getBoundingClientRect();
+
+                const x1 = srcRect.left + srcRect.width / 2 - cRect.left;
+                const y1 = srcRect.bottom - cRect.top;
+                const x2 = tgtRect.left + tgtRect.width / 2 - cRect.left;
+                const y2 = tgtRect.top - cRect.top;
+                const midY = (y1 + y2) / 2;
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2 - 4}`);
+                path.setAttribute('class', 'dep-arrow-line');
+                svg.appendChild(path);
+
+                const arrowSize = 5;
+                const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                arrow.setAttribute('points', `${x2},${y2} ${x2 - arrowSize},${y2 - arrowSize * 1.6} ${x2 + arrowSize},${y2 - arrowSize * 1.6}`);
+                arrow.setAttribute('class', 'dep-arrow-head');
+                svg.appendChild(arrow);
+            });
+        });
+    },
+
+    /** Dispatch feature-level action with dependency check. */
+    async _dispatchFeatureAction(wfName, featureId, actionKey, featureData) {
+        // Check dependencies first
+        if (featureData.depends_on && featureData.depends_on.length > 0) {
+            try {
+                const resp = await fetch(`/api/workflow/${encodeURIComponent(wfName)}/dependencies/${encodeURIComponent(featureId)}`);
+                const json = await resp.json();
+                if (json.data && json.data.blocked) {
+                    const blockerList = json.data.blockers.map(b => `${b.feature_id} (${b.current_stage})`).join(', ');
+                    const proceed = await this._showDependencyConfirm(featureId, blockerList);
+                    if (!proceed) return;
+                }
+            } catch (e) {
+                // If check fails, proceed with warning
+            }
+        }
+
+        // Find the skill for this action from ACTION_MAP
+        const skillMap = {};
+        for (const stage of Object.values(this.ACTION_MAP)) {
+            for (const [k, v] of Object.entries(stage.actions || {})) {
+                if (v.skill) skillMap[k] = v.skill;
+            }
+        }
+        const skill = skillMap[actionKey];
+        if (skill) {
+            this._dispatchCliAction(wfName, actionKey, skill);
+        } else {
+            this._showToast(`Action ${actionKey} not yet available`, 'info');
+        }
+    },
+
+    /** Show dependency confirmation modal (custom, NOT native). */
+    _showDependencyConfirm(featureId, blockerList) {
+        return new Promise(resolve => {
+            const overlay = document.createElement('div');
+            overlay.className = 'workflow-modal-overlay';
+
+            const modal = document.createElement('div');
+            modal.className = 'workflow-modal';
+            modal.innerHTML = `
+                <h3>⚠️ Dependency Warning</h3>
+                <p style="color:#94a3b8;margin:8px 0 12px">
+                    <strong>${featureId}</strong> has unfinished dependencies:<br/>
+                    <span style="color:#f59e0b">${blockerList}</span>
+                </p>
+                <p style="color:#64748b;font-size:12px">Proceeding may cause issues if dependent features are not complete.</p>
+                <div class="workflow-modal-actions">
+                    <button id="wf-dep-cancel">Cancel</button>
+                    <button id="wf-dep-proceed" class="btn-primary" style="background:#f59e0b">Proceed Anyway</button>
+                </div>`;
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+
+            const cleanup = (val) => { overlay.remove(); resolve(val); };
+            document.getElementById('wf-dep-cancel').onclick = () => cleanup(false);
+            document.getElementById('wf-dep-proceed').onclick = () => cleanup(true);
+            overlay.onclick = (e) => { if (e.target === overlay) cleanup(false); };
+        });
+    },
+
+    /** Get status icon for a feature. */
+    _getFeatureStatusIcon(data) {
+        const actions = data.actions || {};
+        const statuses = Object.values(actions).map(a => a.status || 'pending');
+        if (statuses.length > 0 && statuses.every(s => s === 'done')) return '✅';
+        if (statuses.some(s => s === 'in_progress' || s === 'done')) return '🔄';
+        return '⏳';
+    },
+
+    /** Get current stage label for a feature. */
+    _getFeatureCurrentStage(data) {
+        const actions = data.actions || {};
+        for (const act of this.FEATURE_LANE_ACTIONS) {
+            const status = (actions[act.key] || {}).status || 'pending';
+            if (status !== 'done') return act.label;
+        }
+        return 'Completed';
     },
 
     _showToast(msg, type) {
