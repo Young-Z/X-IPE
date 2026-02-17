@@ -77,9 +77,13 @@ This board tracks all features across the project lifecycle.
 | FEATURE-031 | EPIC-031 | UIUX Reference Advanced Tools (Phase 2) | v1.0 | ❌ Cancelled | - | 02-14-2026 | 02-14-2026 07:06:00 |
 | FEATURE-032 | EPIC-032 | UIUX Reference Design System (Phase 3) | v1.0 | ❌ Cancelled | - | 02-14-2026 | 02-14-2026 07:06:00 |
 | FEATURE-033 | EPIC-033 | App-Agent Interaction MCP | v1.1 | Complete | [specification.md](../requirements/EPIC-033/FEATURE-033-A/specification.md) | 02-13-2026 | 02-15-2026 04:30:00 |
-| FEATURE-034 | EPIC-034 | Engineering Workflow View | v1.0 | Planned | - | 02-17-2026 | 02-17-2026 10:48:00 |
 | FEATURE-035-A | EPIC-035 | Epic Core Workflow Skills | v1.0 | Completed | [specification.md](../requirements/EPIC-035/FEATURE-035-A/specification.md) | 02-17-2026 | 02-17-2026 11:10:00 |
 | FEATURE-035-B | EPIC-035 | Feature Board Epic Tracking | v1.0 | Completed | [specification.md](../requirements/EPIC-035/FEATURE-035-B/specification.md) | 02-17-2026 | 02-17-2026 11:16:00 |
 | FEATURE-035-C | EPIC-035 | Feature Lifecycle Skill Updates | v1.0 | Completed | [specification.md](../requirements/EPIC-035/FEATURE-035-C/specification.md) | 02-17-2026 | 02-17-2026 11:18:00 |
 | FEATURE-035-D | EPIC-035 | Requirement-Details Epic Format | v1.0 | Completed | [specification.md](../requirements/EPIC-035/FEATURE-035-D/specification.md) | 02-17-2026 | 02-17-2026 11:19:00 |
 | FEATURE-035-E | EPIC-035 | Retroactive Feature Migration | v1.0 | Completed | [specification.md](../requirements/EPIC-035/FEATURE-035-E/specification.md) | 02-17-2026 | 02-17-2026 11:20:00 |
+| FEATURE-036-A | EPIC-036 | Workflow Manager & State Persistence | v1.0 | Implemented | [specification.md](../requirements/EPIC-036/FEATURE-036-A/specification.md), [technical-design.md](../requirements/EPIC-036/FEATURE-036-A/technical-design.md) | 02-17-2026 | 02-17-2026 12:30:00 |
+| FEATURE-036-B | EPIC-036 | Workflow View Shell & CRUD | v1.0 | Planned | - | 02-17-2026 | 02-17-2026 12:15:00 |
+| FEATURE-036-C | EPIC-036 | Stage Ribbon & Action Execution | v1.0 | Planned | - | 02-17-2026 | 02-17-2026 12:15:00 |
+| FEATURE-036-D | EPIC-036 | Feature Lanes & Dependencies | v1.0 | Planned | - | 02-17-2026 | 02-17-2026 12:15:00 |
+| FEATURE-036-E | EPIC-036 | Deliverables, Polling & Lifecycle | v1.0 | Planned | - | 02-17-2026 | 02-17-2026 12:15:00 |

@@ -182,6 +182,7 @@ def _register_blueprints(app):
     from x_ipe.routes.tracing_routes import tracing_bp
     from x_ipe.routes.quality_evaluation_routes import quality_evaluation_bp
     from x_ipe.routes.uiux_reference_routes import uiux_reference_bp
+    from x_ipe.routes.workflow_routes import workflow_bp
     
     # Initialize tracing middleware (FEATURE-023)
     from x_ipe.tracing.middleware import init_tracing_middleware
@@ -199,6 +200,7 @@ def _register_blueprints(app):
     app.register_blueprint(kb_bp)
     app.register_blueprint(config_bp)
     app.register_blueprint(uiux_reference_bp)
+    app.register_blueprint(workflow_bp)
 
 
 def _register_handlers():

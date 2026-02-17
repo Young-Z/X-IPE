@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-036-A: Workflow Manager & State Persistence** (EPIC-036)
+  - `WorkflowManagerService` with full workflow lifecycle: create, get, list, delete
+  - Data-driven stage gating: shared stages (Ideation, Requirement) and per-feature stages (Implement, Validation, Feedback)
+  - Feature lane management with dependency tracking and evaluation
+  - Atomic JSON persistence via temp-file + rename pattern
+  - Idea folder lazy linking with path validation
+  - Next-action suggestion engine based on gating state
+  - 9 REST API endpoints under `/api/workflow/` via Flask Blueprint
+  - 2 MCP tools: `get_workflow_state`, `update_workflow_action` on `x-ipe-app-and-agent-interaction` server
+  - 54 unit + API tests covering all 41 acceptance criteria
+
 - **FEATURE-030-B v2.0: UIUX Reference Toolbar — Two-Mode Wizard System**
   - Complete redesign from v1.x single-mode toolbar to v2.0 two-mode wizard system
   - **Core Shell** (`xipe-toolbar-core.js`): Hamburger icon, auto-collapse panel (expand on hover, 2s collapse timer), mode tabs, toast notifications (max 3, auto-dismiss 4s), draggable positioning, mode registry, bidirectional command system, CSS scoped with `.xipe-*` prefix

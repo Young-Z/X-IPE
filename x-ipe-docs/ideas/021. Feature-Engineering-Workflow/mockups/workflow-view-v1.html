@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X-IPE — Engineering Workflow</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   CSS VARIABLES — X-IPE BRAND THEME
+   ═══════════════════════════════════════ */
+:root {
+  --primary: #0f172a;
+  --secondary: #475569;
+  --accent: #10b981;
+  --accent-light: #d1fae5;
+  --accent-dark: #059669;
+  --neutral: #e2e8f0;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --slate-950: #020617;
+
+  --font-heading: 'Sora', 'Inter', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+  --shadow-lg: 0 12px 24px -4px rgb(0 0 0 / 0.1), 0 4px 8px -4px rgb(0 0 0 / 0.06);
+  --shadow-xl: 0 24px 48px -8px rgb(0 0 0 / 0.12);
+
+  --done-bg: #ecfdf5;
+  --done-border: #6ee7b7;
+  --done-text: #065f46;
+  --suggested-bg: #fffbeb;
+  --suggested-border: #fbbf24;
+  --suggested-text: #92400e;
+  --normal-bg: #ffffff;
+  --normal-border: #e2e8f0;
+  --normal-text: #475569;
+}
+
+/* ═══════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--slate-100);
+  color: var(--primary);
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════
+   TOP NAVIGATION BAR
+   ═══════════════════════════════════════ */
+.topnav {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  background: var(--slate-900);
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgb(0 0 0 / 0.3);
+}
+
+.topnav-brand {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 18px;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin-right: 32px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.topnav-brand .brand-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.topnav-items {
+  display: flex;
+  gap: 4px;
+}
+
+.topnav-btn {
+  padding: 7px 16px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--slate-400);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.topnav-btn:hover { color: #fff; background: rgb(255 255 255 / 0.08); }
+.topnav-btn.active {
+  color: #fff;
+  background: rgb(255 255 255 / 0.12);
+}
+.topnav-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.topnav-spacer { flex: 1; }
+
+.topnav-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.topnav-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: transparent;
+  color: var(--slate-400);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+.topnav-icon-btn:hover { background: rgb(255 255 255 / 0.08); color: #fff; }
+
+/* ═══════════════════════════════════════
+   WORKFLOW HEADER
+   ═══════════════════════════════════════ */
+.workflow-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px 16px;
+  background: var(--slate-50);
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.workflow-header h1 {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--slate-900);
+  letter-spacing: -0.5px;
+}
+.workflow-header-sub {
+  font-size: 13px;
+  color: var(--slate-500);
+  margin-top: 2px;
+}
+
+.btn-create-workflow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgb(16 185 129 / 0.25);
+}
+.btn-create-workflow:hover {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgb(16 185 129 / 0.3);
+}
+.btn-create-workflow .plus { font-size: 16px; font-weight: 400; }
+
+/* ═══════════════════════════════════════
+   WORKFLOW CONTENT AREA
+   ═══════════════════════════════════════ */
+.workflow-content {
+  padding: 24px 28px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ═══════════════════════════════════════
+   WORKFLOW PANEL (CARD)
+   ═══════════════════════════════════════ */
+.wf-panel {
+  background: #fff;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: box-shadow 0.3s;
+}
+.wf-panel:hover { box-shadow: var(--shadow-lg); }
+
+/* Panel Header */
+.wf-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px;
+  background: linear-gradient(135deg, var(--slate-50) 0%, #fff 100%);
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.wf-panel-title-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wf-panel-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+  box-shadow: 0 2px 8px rgb(16 185 129 / 0.25);
+}
+
+.wf-panel-name {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--slate-900);
+  letter-spacing: -0.3px;
+}
+
+.wf-panel-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--slate-500);
+  margin-top: 2px;
+}
+.wf-panel-meta .dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--slate-300);
+}
+
+.wf-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wf-action-btn {
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 500;
+  border: 1px solid var(--slate-200);
+  background: #fff;
+  color: var(--slate-600);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.wf-action-btn:hover { background: var(--slate-50); border-color: var(--slate-300); }
+.wf-action-btn.active-selector {
+  border-color: var(--accent);
+  color: var(--accent-dark);
+  background: var(--accent-light);
+}
+
+.wf-icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--slate-200);
+  background: #fff;
+  color: var(--slate-400);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.wf-icon-btn:hover { background: var(--slate-50); color: var(--slate-600); }
+
+/* ═══════════════════════════════════════
+   STAGE RIBBON
+   ═══════════════════════════════════════ */
+.stage-ribbon {
+  display: flex;
+  align-items: center;
+  padding: 14px 22px;
+  background: var(--slate-50);
+  border-bottom: 1px solid var(--slate-200);
+  gap: 0;
+  overflow-x: auto;
+}
+
+.stage-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: var(--radius-full, 9999px);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.3s;
+  cursor: default;
+  position: relative;
+}
+
+.stage-item.completed {
+  background: var(--done-bg);
+  color: var(--done-text);
+  border: 1px solid var(--done-border);
+}
+.stage-item.completed .stage-check {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 10px;
+}
+
+.stage-item.active {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  color: #fff;
+  border: 1px solid transparent;
+  box-shadow: 0 2px 8px rgb(16 185 129 / 0.3);
+}
+.stage-item.active .stage-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.6);
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+.stage-item.pending {
+  background: #fff;
+  color: var(--slate-400);
+  border: 1px solid var(--slate-200);
+}
+.stage-item.pending .stage-num {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--slate-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: var(--slate-400);
+}
+
+.stage-arrow {
+  display: flex;
+  align-items: center;
+  color: var(--slate-300);
+  font-size: 14px;
+  padding: 0 6px;
+}
+
+/* ═══════════════════════════════════════
+   ACTION BUTTONS AREA
+   ═══════════════════════════════════════ */
+.actions-area {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.actions-label {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--slate-400);
+  margin-bottom: 12px;
+}
+
+.actions-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s;
+  border: 1.5px solid;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Done state */
+.action-btn.done {
+  background: var(--done-bg);
+  border-color: var(--done-border);
+  color: var(--done-text);
+}
+.action-btn.done::before {
+  content: '✓';
+  font-size: 11px;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--success);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.action-btn.done:hover {
+  box-shadow: 0 2px 8px rgb(34 197 94 / 0.15);
+}
+
+/* Suggested state */
+.action-btn.suggested {
+  background: var(--suggested-bg);
+  border-color: var(--suggested-border);
+  border-style: dashed;
+  color: var(--suggested-text);
+  animation: gentle-glow 3s ease-in-out infinite;
+}
+.action-btn.suggested::before {
+  content: '→';
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--warning);
+  flex-shrink: 0;
+}
+.action-btn.suggested:hover {
+  border-style: solid;
+  background: #fef3c7;
+  box-shadow: 0 2px 12px rgb(245 158 11 / 0.2);
+  transform: translateY(-1px);
+}
+
+@keyframes gentle-glow {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50% { box-shadow: 0 0 0 3px rgb(251 191 36 / 0.12); }
+}
+
+/* Normal state */
+.action-btn.normal {
+  background: var(--normal-bg);
+  border-color: var(--normal-border);
+  color: var(--normal-text);
+}
+.action-btn.normal::before {
+  content: '○';
+  font-size: 12px;
+  color: var(--slate-300);
+  flex-shrink: 0;
+}
+.action-btn.normal:hover {
+  border-color: var(--slate-300);
+  background: var(--slate-50);
+}
+
+/* Locked state */
+.action-btn.locked {
+  background: var(--slate-50);
+  border-color: var(--slate-200);
+  color: var(--slate-300);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.action-btn.locked::before {
+  content: '🔒';
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+/* Action icon */
+.action-btn .action-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════
+   FEATURE LANES
+   ═══════════════════════════════════════ */
+.feature-lanes-area {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.lanes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.lanes-header .lanes-title {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--slate-400);
+}
+
+.lanes-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 11px;
+  color: var(--slate-400);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.legend-dot.done-dot { background: var(--success); }
+.legend-dot.active-dot { background: var(--accent); }
+.legend-dot.pending-dot { background: var(--slate-300); }
+
+.lanes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.feature-lane {
+  display: flex;
+  align-items: stretch;
+  background: var(--slate-50);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all 0.25s;
+  cursor: pointer;
+}
+.feature-lane:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgb(16 185 129 / 0.08);
+}
+.feature-lane.highlighted {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgb(16 185 129 / 0.15);
+  background: #fff;
+}
+
+.lane-label {
+  width: 180px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 12px 16px;
+  border-right: 1px solid var(--slate-200);
+  background: #fff;
+}
+.lane-feature-id {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--accent-dark);
+  letter-spacing: 0.3px;
+}
+.lane-feature-name {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--slate-800);
+  margin-top: 2px;
+}
+
+.lane-stages {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  padding: 10px 12px;
+  gap: 4px;
+}
+
+.lane-stage {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.lane-stage.done-stage {
+  background: var(--done-bg);
+  color: var(--done-text);
+}
+.lane-stage.done-stage .lane-stage-icon { color: var(--success); }
+
+.lane-stage.active-stage {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgb(16 185 129 / 0.12);
+}
+.lane-stage.active-stage .lane-stage-icon {
+  animation: pulse-dot 2s infinite;
+}
+
+.lane-stage.pending-stage {
+  color: var(--slate-400);
+}
+
+.lane-arrow {
+  color: var(--slate-300);
+  font-size: 10px;
+  padding: 0 2px;
+}
+
+.lane-next-action {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--suggested-text);
+  background: var(--suggested-bg);
+  border: 1px dashed var(--suggested-border);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════
+   DEPENDENCY & PARALLEL INDICATORS
+   ═══════════════════════════════════════ */
+.lanes-container {
+  position: relative;
+}
+
+.dep-svg-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  overflow: visible;
+}
+
+.dep-arrow-line {
+  stroke: var(--info);
+  stroke-width: 1.8;
+  fill: none;
+  stroke-dasharray: 5 3;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+.dep-arrow-head {
+  fill: var(--info);
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+.feature-lane:hover ~ .dep-svg-overlay .dep-arrow-line,
+.lanes-container:hover .dep-arrow-line {
+  opacity: 1;
+}
+.lanes-container:hover .dep-arrow-head {
+  opacity: 1;
+}
+
+.dep-badge {
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 9px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  padding: 2px 5px;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+  z-index: 3;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.parallel-group-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  margin-left: 6px;
+}
+.parallel-group-badge.parallel {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #93c5fd;
+}
+.parallel-group-badge.parallel .pg-icon {
+  font-size: 11px;
+}
+.parallel-group-badge.blocked {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.dep-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  font-size: 9px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  margin-left: 6px;
+  letter-spacing: 0.2px;
+}
+.dep-tag.depends {
+  background: #fefce8;
+  color: #a16207;
+  border: 1px solid #fde68a;
+}
+.dep-tag.enables {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.legend-dep-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--info);
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--info);
+  background: #eff6ff;
+  transition: all 0.2s;
+  user-select: none;
+}
+.legend-dep-toggle:hover {
+  background: #dbeafe;
+}
+.legend-dep-toggle.active {
+  background: var(--info);
+  color: #fff;
+}
+.legend-dep-toggle .dep-toggle-icon {
+  font-size: 12px;
+  transition: transform 0.2s;
+}
+
+.lanes-container.deps-hidden .dep-svg-overlay,
+.lanes-container.deps-hidden .dep-tag,
+.lanes-container.deps-hidden .parallel-group-badge {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+/* ═══════════════════════════════════════
+   DELIVERABLES SECTION
+   ═══════════════════════════════════════ */
+.deliverables-area {
+  padding: 18px 22px;
+}
+
+.deliverables-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  cursor: pointer;
+}
+
+.deliverables-title {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--slate-400);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.deliverables-count {
+  background: var(--slate-200);
+  color: var(--slate-600);
+  font-size: 10px;
+  padding: 1px 7px;
+  border-radius: var(--radius-full, 9999px);
+  font-weight: 600;
+}
+
+.deliverables-toggle {
+  font-size: 12px;
+  color: var(--slate-400);
+  transition: transform 0.3s;
+}
+
+.deliverables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.deliverable-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--slate-50);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.deliverable-card:hover {
+  background: #fff;
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.deliverable-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.deliverable-icon.ideas { background: #ede9fe; color: #7c3aed; }
+.deliverable-icon.mockups { background: #fce7f3; color: #db2777; }
+.deliverable-icon.requirements { background: #dbeafe; color: #2563eb; }
+.deliverable-icon.implementations { background: #fef3c7; color: #d97706; }
+.deliverable-icon.quality { background: #d1fae5; color: #059669; }
+
+.deliverable-info {
+  flex: 1;
+  min-width: 0;
+}
+.deliverable-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--slate-800);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.deliverable-path {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--slate-400);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.deliverable-new-badge {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--accent-dark);
+  background: var(--accent-light);
+  padding: 1px 6px;
+  border-radius: var(--radius-full, 9999px);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════
+   SECOND WORKFLOW PANEL (COLLAPSED)
+   ═══════════════════════════════════════ */
+.wf-panel.collapsed .wf-panel-header {
+  border-bottom: none;
+}
+.wf-panel.collapsed .wf-panel-body {
+  display: none;
+}
+.wf-panel.collapsed .wf-panel-header {
+  background: #fff;
+}
+
+/* ═══════════════════════════════════════
+   CREATE WORKFLOW MODAL
+   ═══════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgb(15 23 42 / 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.modal-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
+  background: #fff;
+  border-radius: var(--radius-2xl);
+  width: 440px;
+  box-shadow: var(--shadow-xl);
+  transform: translateY(20px) scale(0.97);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden;
+}
+.modal-overlay.visible .modal-card {
+  transform: translateY(0) scale(1);
+}
+
+.modal-header {
+  padding: 22px 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-title {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--slate-900);
+  letter-spacing: -0.3px;
+}
+.modal-close {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: transparent;
+  color: var(--slate-400);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.2s;
+}
+.modal-close:hover { background: var(--slate-100); color: var(--slate-600); }
+
+.modal-body {
+  padding: 20px 24px 24px;
+}
+
+.modal-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--slate-700);
+  margin-bottom: 6px;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--slate-900);
+  outline: none;
+  transition: all 0.2s;
+}
+.modal-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgb(16 185 129 / 0.12);
+}
+.modal-input::placeholder { color: var(--slate-400); }
+
+.modal-hint {
+  font-size: 12px;
+  color: var(--slate-400);
+  margin-top: 6px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 24px 22px;
+}
+
+.modal-btn {
+  padding: 9px 20px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+.modal-btn.cancel {
+  background: var(--slate-100);
+  color: var(--slate-600);
+}
+.modal-btn.cancel:hover { background: var(--slate-200); }
+.modal-btn.confirm {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px rgb(16 185 129 / 0.25);
+}
+.modal-btn.confirm:hover {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+}
+
+/* ═══════════════════════════════════════
+   WORKING ITEM SELECTOR DROPDOWN
+   ═══════════════════════════════════════ */
+.wis-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 340px;
+  background: #fff;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px);
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.wis-dropdown.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.wis-header {
+  padding: 12px 14px 8px;
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--slate-100);
+}
+
+.wis-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-bottom: 1px solid var(--slate-100);
+}
+.wis-item:last-child { border-bottom: none; }
+.wis-item:hover { background: var(--slate-50); }
+.wis-item.selected { background: var(--accent-light); }
+
+.wis-item-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.wis-item-icon.in-progress {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+}
+.wis-item-icon.completed {
+  background: var(--done-bg);
+  color: var(--success);
+}
+
+.wis-item-info { flex: 1; }
+.wis-item-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--slate-800);
+}
+.wis-item-stage {
+  font-size: 11px;
+  color: var(--slate-500);
+}
+.wis-item-next {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--suggested-text);
+  background: var(--suggested-bg);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+/* ═══════════════════════════════════════
+   CONSOLE STRIP (bottom)
+   ═══════════════════════════════════════ */
+.console-strip {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 36px;
+  background: var(--slate-900);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  z-index: 90;
+  border-top: 1px solid var(--slate-700);
+}
+
+.console-tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--slate-400);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.console-tab:hover { color: #fff; background: rgb(255 255 255 / 0.08); }
+.console-tab.active-tab { color: var(--accent); background: rgb(16 185 129 / 0.1); }
+
+.console-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.console-dot.running { background: var(--accent); animation: pulse-dot 2s infinite; }
+.console-dot.idle { background: var(--slate-500); }
+
+.console-expand {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--slate-500);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+}
+.console-expand:hover { color: #fff; background: rgb(255 255 255 / 0.08); }
+
+/* ═══════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════ */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.wf-panel { animation: fade-in-up 0.5s ease-out both; }
+.wf-panel:nth-child(2) { animation-delay: 0.1s; }
+
+.action-btn {
+  animation: fade-in-up 0.3s ease-out both;
+}
+.action-btn:nth-child(1) { animation-delay: 0.05s; }
+.action-btn:nth-child(2) { animation-delay: 0.1s; }
+.action-btn:nth-child(3) { animation-delay: 0.15s; }
+.action-btn:nth-child(4) { animation-delay: 0.2s; }
+
+.feature-lane {
+  animation: fade-in-up 0.4s ease-out both;
+}
+.feature-lane:nth-child(1) { animation-delay: 0.1s; }
+.feature-lane:nth-child(2) { animation-delay: 0.2s; }
+.feature-lane:nth-child(3) { animation-delay: 0.3s; }
+
+/* ═══════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--slate-400); }
+
+/* Utilities */
+.relative { position: relative; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     TOP NAVIGATION
+     ═══════════════════════════════════════ -->
+<nav class="topnav">
+  <div class="topnav-brand">
+    <div class="brand-icon">X</div>
+    X IPE
+  </div>
+  <div class="topnav-items">
+    <button class="topnav-btn active">⚙ Engineering Workflow</button>
+    <button class="topnav-btn">📚 Knowledge</button>
+    <button class="topnav-btn">🧰 Toolbox</button>
+    <button class="topnav-btn">🎯 Skills</button>
+  </div>
+  <div class="topnav-spacer"></div>
+  <div class="topnav-right">
+    <button class="topnav-icon-btn" title="Settings">⚙</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     WORKFLOW HEADER
+     ═══════════════════════════════════════ -->
+<div class="workflow-header">
+  <div>
+    <h1>Engineering Workflows</h1>
+    <div class="workflow-header-sub">Manage your project delivery lifecycle from ideation to feedback</div>
+  </div>
+  <button class="btn-create-workflow" id="btn-create-wf">
+    <span class="plus">+</span> Create Workflow
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════
+     WORKFLOW CONTENT
+     ═══════════════════════════════════════ -->
+<div class="workflow-content">
+
+  <!-- ═══════════ WORKFLOW 1: Active & Expanded ═══════════ -->
+  <div class="wf-panel">
+    <div class="wf-panel-header">
+      <div class="wf-panel-title-area">
+        <div class="wf-panel-icon">⚡</div>
+        <div>
+          <div class="wf-panel-name">Feature Engineering Workflow</div>
+          <div class="wf-panel-meta">
+            <span>Created Feb 14, 2026</span>
+            <span class="dot"></span>
+            <span>3 features</span>
+            <span class="dot"></span>
+            <span style="color: var(--accent); font-weight: 600;">Implement Stage</span>
+          </div>
+        </div>
+      </div>
+      <div class="wf-panel-actions relative">
+        <button class="wf-action-btn active-selector" id="btn-wis" title="Select a feature to work on">
+          🎯 Working Item
+          <span style="font-size: 10px; color: var(--slate-400);">▾</span>
+        </button>
+        <button class="wf-icon-btn" title="Collapse">▾</button>
+        <button class="wf-icon-btn" title="More options">⋯</button>
+
+        <!-- Working Item Selector Dropdown -->
+        <div class="wis-dropdown" id="wis-dropdown">
+          <div class="wis-header">Select Feature to Work On</div>
+          <div class="wis-item selected">
+            <div class="wis-item-icon in-progress">🔄</div>
+            <div class="wis-item-info">
+              <div class="wis-item-name">FEATURE-040 · Login Page</div>
+              <div class="wis-item-stage">Implement → Technical Design</div>
+            </div>
+            <span class="wis-item-next">→ Tech Design</span>
+          </div>
+          <div class="wis-item">
+            <div class="wis-item-icon in-progress">🔄</div>
+            <div class="wis-item-info">
+              <div class="wis-item-name">FEATURE-041 · Dashboard</div>
+              <div class="wis-item-stage">Implement → Implementation</div>
+            </div>
+            <span class="wis-item-next">→ Implement</span>
+          </div>
+          <div class="wis-item">
+            <div class="wis-item-icon in-progress">🔄</div>
+            <div class="wis-item-info">
+              <div class="wis-item-name">FEATURE-042 · Settings Panel</div>
+              <div class="wis-item-stage">Implement → Feature Refinement</div>
+            </div>
+            <span class="wis-item-next">→ Refine</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wf-panel-body">
+      <!-- Stage Ribbon -->
+      <div class="stage-ribbon">
+        <div class="stage-item completed">
+          <span class="stage-check">✓</span>
+          Ideation
+        </div>
+        <span class="stage-arrow">›</span>
+        <div class="stage-item completed">
+          <span class="stage-check">✓</span>
+          Requirement
+        </div>
+        <span class="stage-arrow">›</span>
+        <div class="stage-item active">
+          <span class="stage-dot"></span>
+          Implement
+        </div>
+        <span class="stage-arrow">›</span>
+        <div class="stage-item pending">
+          <span class="stage-num">4</span>
+          Validation
+        </div>
+        <span class="stage-arrow">›</span>
+        <div class="stage-item pending">
+          <span class="stage-num">5</span>
+          Feedback
+        </div>
+      </div>
+
+      <!-- Shared Stage Actions (completed) -->
+      <div class="actions-area">
+        <div class="actions-label">Completed Actions</div>
+        <div class="actions-grid">
+          <div class="action-btn done">
+            <span class="action-icon">📝</span> Compose Idea
+          </div>
+          <div class="action-btn done">
+            <span class="action-icon">🎨</span> Reference UIUX
+          </div>
+          <div class="action-btn done">
+            <span class="action-icon">💡</span> Refine Idea
+          </div>
+          <div class="action-btn done">
+            <span class="action-icon">🖼</span> Design Mockup
+          </div>
+          <div class="action-btn done">
+            <span class="action-icon">📋</span> Requirement Gathering
+          </div>
+          <div class="action-btn done">
+            <span class="action-icon">🔀</span> Feature Breakdown
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Lanes -->
+      <div class="feature-lanes-area">
+        <div class="lanes-header">
+          <span class="lanes-title">Feature Lanes — Per-Feature Progress</span>
+          <div class="lanes-legend">
+            <div class="legend-item"><span class="legend-dot done-dot"></span> Done</div>
+            <div class="legend-item"><span class="legend-dot active-dot"></span> Active</div>
+            <div class="legend-item"><span class="legend-dot pending-dot"></span> Pending</div>
+            <div class="legend-dep-toggle active" id="dep-toggle" onclick="toggleDeps()">
+              <span class="dep-toggle-icon">⑆</span> Dependencies
+            </div>
+          </div>
+        </div>
+        <div class="lanes-container" id="lanes-container">
+          <!-- Feature A — no dependencies, can run in parallel with C -->
+          <div class="feature-lane highlighted" data-feature="FEATURE-040" data-parallel-group="A">
+            <div class="lane-label">
+              <div class="lane-feature-id">FEATURE-040</div>
+              <div class="lane-feature-name">Login Page</div>
+              <span class="parallel-group-badge parallel"><span class="pg-icon">⇉</span> Parallel</span>
+            </div>
+            <div class="lane-stages">
+              <div class="lane-stage done-stage">
+                <span class="lane-stage-icon">✓</span> Refinement
+              </div>
+              <span class="lane-arrow">›</span>
+              <div class="lane-stage active-stage">
+                <span class="lane-stage-icon">●</span> Tech Design
+              </div>
+              <span class="lane-arrow">›</span>
+              <div class="lane-stage pending-stage">Implement</div>
+              <span class="lane-arrow">›</span>
+              <div class="lane-stage pending-stage">Testing</div>
+              <span class="lane-arrow">›</span>
+              <div class="lane-stage pending-stage">Quality</div>
+              <span class="lane-arrow">›</span>
+              <div class="lane-stage pending-stage">CR</div>
+              <div class="lane-next-action">→ Technical Design</div>
+            </div>
+          </div>
+
+          <!-- Feature B — depends on Login Page (FEATURE-040) -->
+          <div class="feature-lane" data-feature="FEATURE-041" data-depends-on="FEATURE-040" data-parallel-group="B">
+            <div class="lane-label">
+              <div class="lane-feature-id">FEATURE-041</div>
+              <div class="lane-feature-name">Dashboard</div>
+              <span class="dep-tag depends">⛓ needs 040</span>
+            </div>
+            <div class="lane-stages">
+              <div class="lane-stage done-stage">
+                <span class="lane-stage-icon">✓</span> Refinement
+              </div>
+              <span class="lane-arrow">›</span>
+              <div class="lane-stage done-stage">
+                <span class="lane-stage-icon">✓</span> Tech Design
+              </div>
+              <span class="lane-arrow">›</span>
+              <div class="lane-stage active-stage">
+                <span class="lane-stage-icon">●</span> Implement
+              </div>
+              <span class="lane-arrow">›</span>
+              <div class="lane-stage pending-stage">Testing</div>
+              <span class="lane-arrow">›</span>
+              <div class="lane-stage pending-stage">Quality</div>
+              <span class="lane-arrow">›</span>
+              <div class="lane-stage pending-stage">CR</div>
+              <div class="lane-next-action">→ Implementation</div>
+            </div>
+          </div>
+
+          <!-- Feature C — no dependencies, can run in parallel with A -->
+          <div class="feature-lane" data-feature="FEATURE-042" data-parallel-group="A">
+            <div class="lane-label">
+              <div class="lane-feature-id">FEATURE-042</div>
+              <div class="lane-feature-name">Settings Panel</div>
+              <span class="parallel-group-badge parallel"><span class="pg-icon">⇉</span> Parallel</span>
+            </div>
+            <div class="lane-stages">
+              <div class="lane-stage active-stage">
+                <span class="lane-stage-icon">●</span> Refinement
+              </div>
+              <span class="lane-arrow">›</span>
+              <div class="lane-stage pending-stage">Tech Design</div>
+              <span class="lane-arrow">›</span>
+              <div class="lane-stage pending-stage">Implement</div>
+              <span class="lane-arrow">›</span>
+              <div class="lane-stage pending-stage">Testing</div>
+              <span class="lane-arrow">›</span>
+              <div class="lane-stage pending-stage">Quality</div>
+              <span class="lane-arrow">›</span>
+              <div class="lane-stage pending-stage">CR</div>
+              <div class="lane-next-action">→ Feature Refinement</div>
+            </div>
+          </div>
+
+          <!-- Dependency SVG Overlay -->
+          <svg class="dep-svg-overlay" id="dep-svg"></svg>
+        </div>
+      </div>
+
+      <!-- Deliverables -->
+      <div class="deliverables-area" id="deliverables">
+        <div class="deliverables-header" onclick="toggleDeliverables()">
+          <div class="deliverables-title">
+            Deliverables <span class="deliverables-count">8</span>
+          </div>
+          <span class="deliverables-toggle" id="deliv-toggle">▾</span>
+        </div>
+        <div class="deliverables-grid" id="deliv-grid">
+          <div class="deliverable-card">
+            <div class="deliverable-icon ideas">💡</div>
+            <div class="deliverable-info">
+              <div class="deliverable-name">idea-summary-v2.md</div>
+              <div class="deliverable-path">ideas/021/idea-summary-v2.md</div>
+            </div>
+          </div>
+          <div class="deliverable-card">
+            <div class="deliverable-icon mockups">🎨</div>
+            <div class="deliverable-info">
+              <div class="deliverable-name">workflow-view-v1.html</div>
+              <div class="deliverable-path">ideas/021/mockups/</div>
+            </div>
+            <span class="deliverable-new-badge">New</span>
+          </div>
+          <div class="deliverable-card">
+            <div class="deliverable-icon ideas">🌐</div>
+            <div class="deliverable-info">
+              <div class="deliverable-name">UIUX Reference</div>
+              <div class="deliverable-path">ideas/021/uiux-references/</div>
+            </div>
+          </div>
+          <div class="deliverable-card">
+            <div class="deliverable-icon requirements">📋</div>
+            <div class="deliverable-info">
+              <div class="deliverable-name">requirement-details.md</div>
+              <div class="deliverable-path">requirements/part-9.md</div>
+            </div>
+          </div>
+          <div class="deliverable-card">
+            <div class="deliverable-icon requirements">🔀</div>
+            <div class="deliverable-info">
+              <div class="deliverable-name">features.md</div>
+              <div class="deliverable-path">requirements/features.md</div>
+            </div>
+          </div>
+          <div class="deliverable-card">
+            <div class="deliverable-icon requirements">📐</div>
+            <div class="deliverable-info">
+              <div class="deliverable-name">specification.md</div>
+              <div class="deliverable-path">FEATURE-040/specification.md</div>
+            </div>
+          </div>
+          <div class="deliverable-card">
+            <div class="deliverable-icon implementations">⚙</div>
+            <div class="deliverable-info">
+              <div class="deliverable-name">technical-design.md</div>
+              <div class="deliverable-path">FEATURE-041/technical-design.md</div>
+            </div>
+          </div>
+          <div class="deliverable-card">
+            <div class="deliverable-icon implementations">💻</div>
+            <div class="deliverable-info">
+              <div class="deliverable-name">Implementation</div>
+              <div class="deliverable-path">FEATURE-041/src/</div>
+            </div>
+            <span class="deliverable-new-badge">New</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ WORKFLOW 2: Early Stage ═══════════ -->
+  <div class="wf-panel">
+    <div class="wf-panel-header">
+      <div class="wf-panel-title-area">
+        <div class="wf-panel-icon" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">🔮</div>
+        <div>
+          <div class="wf-panel-name">Mobile App Prototype</div>
+          <div class="wf-panel-meta">
+            <span>Created Feb 16, 2026</span>
+            <span class="dot"></span>
+            <span>0 features</span>
+            <span class="dot"></span>
+            <span style="color: var(--warning); font-weight: 600;">Ideation Stage</span>
+          </div>
+        </div>
+      </div>
+      <div class="wf-panel-actions">
+        <button class="wf-action-btn" disabled style="opacity:0.4; cursor:not-allowed;">🎯 Working Item</button>
+        <button class="wf-icon-btn">▾</button>
+        <button class="wf-icon-btn">⋯</button>
+      </div>
+    </div>
+
+    <div class="wf-panel-body">
+      <!-- Stage Ribbon -->
+      <div class="stage-ribbon">
+        <div class="stage-item active">
+          <span class="stage-dot"></span>
+          Ideation
+        </div>
+        <span class="stage-arrow">›</span>
+        <div class="stage-item pending">
+          <span class="stage-num">2</span>
+          Requirement
+        </div>
+        <span class="stage-arrow">›</span>
+        <div class="stage-item pending">
+          <span class="stage-num">3</span>
+          Implement
+        </div>
+        <span class="stage-arrow">›</span>
+        <div class="stage-item pending">
+          <span class="stage-num">4</span>
+          Validation
+        </div>
+        <span class="stage-arrow">›</span>
+        <div class="stage-item pending">
+          <span class="stage-num">5</span>
+          Feedback
+        </div>
+      </div>
+
+      <!-- Ideation Actions -->
+      <div class="actions-area">
+        <div class="actions-label">Ideation Actions</div>
+        <div class="actions-grid">
+          <div class="action-btn done">
+            <span class="action-icon">📝</span> Compose Idea
+          </div>
+          <div class="action-btn suggested">
+            <span class="action-icon">💡</span> Refine Idea
+          </div>
+          <div class="action-btn normal">
+            <span class="action-icon">🎨</span> Reference UIUX
+          </div>
+          <div class="action-btn normal">
+            <span class="action-icon">🖼</span> Design Mockup
+          </div>
+        </div>
+      </div>
+
+      <!-- Locked Actions -->
+      <div class="actions-area" style="border-bottom: none;">
+        <div class="actions-label">Requirement Actions <span style="font-weight: 400; text-transform: none; letter-spacing: 0;">— complete Ideation to unlock</span></div>
+        <div class="actions-grid">
+          <div class="action-btn locked">
+            <span class="action-icon">📋</span> Requirement Gathering
+          </div>
+          <div class="action-btn locked">
+            <span class="action-icon">🔀</span> Feature Breakdown
+          </div>
+        </div>
+      </div>
+
+      <!-- Deliverables -->
+      <div class="deliverables-area">
+        <div class="deliverables-header">
+          <div class="deliverables-title">
+            Deliverables <span class="deliverables-count">1</span>
+          </div>
+        </div>
+        <div class="deliverables-grid">
+          <div class="deliverable-card">
+            <div class="deliverable-icon ideas">💡</div>
+            <div class="deliverable-info">
+              <div class="deliverable-name">new idea.md</div>
+              <div class="deliverable-path">ideas/022/new idea.md</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     CONSOLE STRIP
+     ═══════════════════════════════════════ -->
+<div class="console-strip">
+  <div class="console-tab active-tab">
+    <span class="console-dot running"></span>
+    wf-refine-idea
+  </div>
+  <div class="console-tab">
+    <span class="console-dot idle"></span>
+    session-2
+  </div>
+  <div class="console-tab">
+    <span class="console-dot idle"></span>
+    session-3
+  </div>
+  <span class="console-expand" title="Expand console">▲ Console</span>
+</div>
+
+<!-- ═══════════════════════════════════════
+     CREATE WORKFLOW MODAL
+     ═══════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span class="modal-title">Create New Workflow</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <label class="modal-label">Workflow Name</label>
+      <input class="modal-input" type="text" placeholder="e.g., E-Commerce Checkout Flow" autofocus>
+      <div class="modal-hint">Choose a descriptive name for your project delivery workflow</div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-btn confirm" onclick="closeModal()">Create Workflow</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     INTERACTIONS
+     ═══════════════════════════════════════ -->
+<script>
+// Create Workflow Modal
+document.getElementById('btn-create-wf').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.add('visible');
+  setTimeout(() => {
+    document.querySelector('.modal-input').focus();
+  }, 100);
+});
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('visible');
+}
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// Working Item Selector
+document.getElementById('btn-wis').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const dd = document.getElementById('wis-dropdown');
+  dd.classList.toggle('open');
+});
+document.addEventListener('click', () => {
+  document.getElementById('wis-dropdown').classList.remove('open');
+});
+
+// WIS item selection
+document.querySelectorAll('.wis-item').forEach(item => {
+  item.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.querySelectorAll('.wis-item').forEach(i => i.classList.remove('selected'));
+    item.classList.add('selected');
+    // Highlight corresponding lane
+    const idx = Array.from(item.parentElement.querySelectorAll('.wis-item')).indexOf(item);
+    document.querySelectorAll('.feature-lane').forEach((lane, i) => {
+      lane.classList.toggle('highlighted', i === idx);
+    });
+    document.getElementById('wis-dropdown').classList.remove('open');
+  });
+});
+
+// Deliverables toggle
+function toggleDeliverables() {
+  const grid = document.getElementById('deliv-grid');
+  const toggle = document.getElementById('deliv-toggle');
+  if (grid.style.display === 'none') {
+    grid.style.display = 'grid';
+    toggle.textContent = '▾';
+  } else {
+    grid.style.display = 'none';
+    toggle.textContent = '▸';
+  }
+}
+
+// Action button click simulation
+document.querySelectorAll('.action-btn.suggested').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.style.borderStyle = 'solid';
+    btn.style.background = '#fef3c7';
+    btn.style.transform = 'scale(0.97)';
+    setTimeout(() => {
+      btn.style.transform = 'scale(1)';
+    }, 150);
+  });
+});
+
+// Feature lane hover highlight
+document.querySelectorAll('.feature-lane').forEach(lane => {
+  lane.addEventListener('click', () => {
+    document.querySelectorAll('.feature-lane').forEach(l => l.classList.remove('highlighted'));
+    lane.classList.add('highlighted');
+  });
+});
+
+// Dependency SVG arrow drawing
+function drawDependencyArrows() {
+  const svg = document.getElementById('dep-svg');
+  if (!svg) return;
+  const container = document.getElementById('lanes-container');
+  if (!container) return;
+
+  svg.innerHTML = '';
+  const cRect = container.getBoundingClientRect();
+
+  // Find all lanes with data-depends-on
+  const lanes = container.querySelectorAll('.feature-lane[data-feature]');
+  const laneMap = {};
+  lanes.forEach(lane => {
+    laneMap[lane.dataset.feature] = lane;
+  });
+
+  lanes.forEach(lane => {
+    const dep = lane.dataset.dependsOn;
+    if (!dep) return;
+    const srcLane = laneMap[dep];
+    if (!srcLane) return;
+
+    const srcLabel = srcLane.querySelector('.lane-label');
+    const tgtLabel = lane.querySelector('.lane-label');
+    if (!srcLabel || !tgtLabel) return;
+
+    const srcRect = srcLabel.getBoundingClientRect();
+    const tgtRect = tgtLabel.getBoundingClientRect();
+
+    // Arrow from bottom-center of source label to top-center of target label
+    const x1 = srcRect.left + srcRect.width / 2 - cRect.left;
+    const y1 = srcRect.bottom - cRect.top;
+    const x2 = tgtRect.left + tgtRect.width / 2 - cRect.left;
+    const y2 = tgtRect.top - cRect.top;
+
+    // Curved path
+    const midY = (y1 + y2) / 2;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2 - 4}`);
+    path.setAttribute('class', 'dep-arrow-line');
+    svg.appendChild(path);
+
+    // Arrowhead
+    const arrowSize = 5;
+    const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    arrow.setAttribute('points', `${x2},${y2} ${x2 - arrowSize},${y2 - arrowSize * 1.6} ${x2 + arrowSize},${y2 - arrowSize * 1.6}`);
+    arrow.setAttribute('class', 'dep-arrow-head');
+    svg.appendChild(arrow);
+  });
+}
+
+// Draw arrows after layout
+setTimeout(drawDependencyArrows, 400);
+window.addEventListener('resize', drawDependencyArrows);
+
+// Toggle dependency visibility
+function toggleDeps() {
+  const container = document.getElementById('lanes-container');
+  const toggle = document.getElementById('dep-toggle');
+  container.classList.toggle('deps-hidden');
+  toggle.classList.toggle('active');
+}
+
+// Keyboard: Escape closes modal
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+
+</body>
+</html>

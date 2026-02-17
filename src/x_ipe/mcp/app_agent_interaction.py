@@ -79,5 +79,66 @@ def save_uiux_reference(data: dict) -> dict:
         }
 
 
+@mcp.tool
+def get_workflow_state(workflow_name: str) -> dict:
+    """Get the full state of an engineering workflow.
+
+    Returns the current stage, action statuses, feature lanes,
+    and dependency information for the named workflow.
+
+    Args:
+        workflow_name: Name of the workflow (alphanumeric with hyphens).
+    """
+    try:
+        resp = requests.get(
+            f"{BASE_URL}/api/workflow/{workflow_name}",
+            timeout=10,
+        )
+        return resp.json()
+    except requests.ConnectionError:
+        return {
+            "success": False,
+            "error": "BACKEND_UNREACHABLE",
+            "message": f"Cannot connect to X-IPE backend at {BASE_URL}",
+        }
+
+
+@mcp.tool
+def update_workflow_action(workflow_name: str, action: str, status: str,
+                           feature_id: str = None,
+                           deliverables: list = None) -> dict:
+    """Update the status of a workflow action.
+
+    Moves an action (e.g. compose_idea, technical_design) to a new status
+    and triggers stage gating re-evaluation.
+
+    Args:
+        workflow_name: Name of the workflow.
+        action: Action identifier (e.g. compose_idea, feature_refinement).
+        status: New status — one of: pending, in_progress, done, skipped, failed.
+        feature_id: Required for per-feature actions (implement/validation/feedback stages).
+        deliverables: Optional list of deliverable paths produced by the action.
+    """
+    payload = {"action": action, "status": status}
+    if feature_id:
+        payload["feature_id"] = feature_id
+    if deliverables:
+        payload["deliverables"] = deliverables
+
+    try:
+        resp = requests.post(
+            f"{BASE_URL}/api/workflow/{workflow_name}/action",
+            json=payload,
+            timeout=10,
+        )
+        return resp.json()
+    except requests.ConnectionError:
+        return {
+            "success": False,
+            "error": "BACKEND_UNREACHABLE",
+            "message": f"Cannot connect to X-IPE backend at {BASE_URL}",
+        }
+
+
 if __name__ == "__main__":
     mcp.run()
