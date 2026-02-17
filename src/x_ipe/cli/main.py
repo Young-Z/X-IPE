@@ -736,6 +736,7 @@ def serve(ctx: click.Context, host: Optional[str], port: Optional[int],
             port=final_port,
             debug=final_debug,
             use_reloader=final_debug,
+            allow_unsafe_werkzeug=True,
         )
     except (KeyboardInterrupt, SystemExit):
         pass

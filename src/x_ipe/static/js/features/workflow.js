@@ -116,25 +116,53 @@ const workflow = {
         actionsWrap.appendChild(menu);
         header.appendChild(actionsWrap);
 
-        header.onclick = () => {
-            const exp = panel.classList.toggle('expanded');
-            if (exp) this.expandedPanels.add(wf.name);
-            else this.expandedPanels.delete(wf.name);
-        };
-        panel.appendChild(header);
-
         // Body
         const body = document.createElement('div');
         body.className = 'workflow-panel-body';
-        const lastAct = wf.last_activity ? new Date(wf.last_activity).toLocaleString() : 'N/A';
-        body.innerHTML = `
-            <div class="workflow-panel-body-row"><span class="workflow-panel-body-label">Created</span><span>${created || 'N/A'}</span></div>
-            <div class="workflow-panel-body-row"><span class="workflow-panel-body-label">Last Activity</span><span>${lastAct}</span></div>
-            <div class="workflow-panel-body-row"><span class="workflow-panel-body-label">Current Stage</span><span>${wf.current_stage}</span></div>
-            <div class="workflow-panel-body-row"><span class="workflow-panel-body-label">Features</span><span>${wf.feature_count}</span></div>`;
+
+        header.onclick = async () => {
+            const exp = panel.classList.toggle('expanded');
+            if (exp) {
+                this.expandedPanels.add(wf.name);
+                body.innerHTML = '';
+                await this._renderPanelBody(wf, body);
+            } else {
+                this.expandedPanels.delete(wf.name);
+            }
+        };
+        panel.appendChild(header);
         panel.appendChild(body);
 
+        // Auto-load body if already expanded
+        if (this.expandedPanels.has(wf.name)) {
+            this._renderPanelBody(wf, body);
+        }
+
         return panel;
+    },
+
+    async _renderPanelBody(wf, body) {
+        try {
+            const [stateResp, nextResp] = await Promise.all([
+                fetch(`/api/workflow/${encodeURIComponent(wf.name)}`).then(r => r.json()),
+                fetch(`/api/workflow/${encodeURIComponent(wf.name)}/next-action`).then(r => r.json())
+            ]);
+            if (stateResp.success && typeof workflowStage !== 'undefined') {
+                workflowStage.render(body, stateResp.data, nextResp.data, wf.name);
+            }
+        } catch (err) {
+            body.innerHTML = `<div class="workflow-error">Failed to load workflow details. <button>Retry</button></div>`;
+            body.querySelector('button').onclick = () => { body.innerHTML = ''; this._renderPanelBody(wf, body); };
+        }
+        // Metadata
+        const meta = document.createElement('div');
+        meta.className = 'workflow-panel-meta-section';
+        const created = wf.created ? new Date(wf.created).toLocaleDateString() : 'N/A';
+        const lastAct = wf.last_activity ? new Date(wf.last_activity).toLocaleString() : 'N/A';
+        meta.innerHTML = `
+            <div class="workflow-panel-body-row"><span class="workflow-panel-body-label">Created</span><span>${created}</span></div>
+            <div class="workflow-panel-body-row"><span class="workflow-panel-body-label">Last Activity</span><span>${lastAct}</span></div>`;
+        body.appendChild(meta);
     },
 
     _renderEmptyState() {
@@ -228,7 +256,8 @@ const workflow = {
     },
 
     async _handleDelete(name) {
-        if (!confirm(`Delete workflow '${name}'? This cannot be undone.`)) return;
+        const confirmed = await this._showConfirmModal(`Delete workflow '${name}'?`, 'This cannot be undone.');
+        if (!confirmed) return;
         try {
             const resp = await fetch(`/api/workflow/${encodeURIComponent(name)}`, { method: 'DELETE' });
             const json = await resp.json();
@@ -249,5 +278,30 @@ const workflow = {
         toast.textContent = msg;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 4000);
+    },
+
+    /** Show a confirm modal (replaces native confirm()). Returns a Promise<boolean>. */
+    _showConfirmModal(title, message) {
+        return new Promise(resolve => {
+            const overlay = document.createElement('div');
+            overlay.className = 'workflow-modal-overlay';
+
+            const modal = document.createElement('div');
+            modal.className = 'workflow-modal';
+            modal.innerHTML = `
+                <h3>${title}</h3>
+                <p style="color:#94a3b8;margin:8px 0 16px">${message}</p>
+                <div class="workflow-modal-actions">
+                    <button id="wf-confirm-cancel">Cancel</button>
+                    <button id="wf-confirm-ok" class="btn-primary btn-danger">Delete</button>
+                </div>`;
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+
+            const cleanup = (result) => { overlay.remove(); resolve(result); };
+            document.getElementById('wf-confirm-cancel').onclick = () => cleanup(false);
+            document.getElementById('wf-confirm-ok').onclick = () => cleanup(true);
+            overlay.onclick = (e) => { if (e.target === overlay) cleanup(false); };
+        });
     },
 };
