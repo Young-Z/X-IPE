@@ -7,9 +7,9 @@
 
 ## Feature List
 
-| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
-|------------|---------------|---------|-------------------|-------------------|
-| FEATURE-024 | Project Quality Evaluation UI | v1.0 | Dedicated UI for viewing quality evaluations and triggering refactoring actions | FEATURE-008 |
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-024 | EPIC-024 | Project Quality Evaluation UI | v1.0 | Dedicated UI for viewing quality evaluations and triggering refactoring actions | FEATURE-008 |
 
 ---
 

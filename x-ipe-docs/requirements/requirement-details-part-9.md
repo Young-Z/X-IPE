@@ -7,14 +7,14 @@
 
 ## Feature List
 
-| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
-|------------|---------------|---------|-------------------|-------------------|
-| FEATURE-034 | Engineering Workflow View | v1.0 | Centralized workflow view orchestrating project delivery lifecycle (Ideation → Requirement → Implement → Validation → Feedback) with workflow panels, stage ribbons, feature lanes, dependency visualization, parallel execution, and backend Workflow Manager | FEATURE-001, FEATURE-005, FEATURE-008, FEATURE-029, FEATURE-033 |
-| FEATURE-035-A | Epic Core Workflow Skills | v1.0 | Update requirement-gathering and feature-breakdown skills for Epic folder/naming support | None |
-| FEATURE-035-B | Feature Board Epic Tracking | v1.0 | Add Epic ID column to features.md, update feature-board-management skill | FEATURE-035-A |
-| FEATURE-035-C | Feature Lifecycle Skill Updates | v1.0 | Update 10+ lifecycle skills for Epic-aware paths | FEATURE-035-A, FEATURE-035-B |
-| FEATURE-035-D | Requirement-Details Epic Format | v1.0 | Update requirement-details to use EPIC-{nnn} headers and templates | FEATURE-035-A |
-| FEATURE-035-E | Retroactive Feature Migration | v1.0 | Migrate all existing features into EPIC-{nnn}/FEATURE-{nnn}-{X} structure | FEATURE-035-A, FEATURE-035-B, FEATURE-035-C, FEATURE-035-D |
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| EPIC-036 | EPIC-036 | Engineering Workflow View | v1.0 | Centralized workflow view orchestrating project delivery lifecycle (Ideation → Requirement → Implement → Validation → Feedback) with workflow panels, stage ribbons, feature lanes, dependency visualization, parallel execution, and backend Workflow Manager | EPIC-001, EPIC-005, EPIC-008, EPIC-029, EPIC-033 |
+| FEATURE-035-A | EPIC-035 | Epic Core Workflow Skills | v1.0 | Update requirement-gathering and feature-breakdown skills for Epic folder/naming support | None |
+| FEATURE-035-B | EPIC-035 | Feature Board Epic Tracking | v1.0 | Add Epic ID column to features.md, update feature-board-management skill | FEATURE-035-A |
+| FEATURE-035-C | EPIC-035 | Feature Lifecycle Skill Updates | v1.0 | Update 10+ lifecycle skills for Epic-aware paths | FEATURE-035-A, FEATURE-035-B |
+| FEATURE-035-D | EPIC-035 | Requirement-Details Epic Format | v1.0 | Update requirement-details to use EPIC-{nnn} headers and templates | FEATURE-035-A |
+| FEATURE-035-E | EPIC-035 | Retroactive Feature Migration | v1.0 | Migrate all existing features into EPIC-{nnn}/FEATURE-{nnn}-{X} structure | FEATURE-035-A, FEATURE-035-B, FEATURE-035-C, FEATURE-035-D |
 
 ---
 
@@ -22,7 +22,7 @@
 
 | Mockup Function Name | Feature | Mockup Link |
 |---------------------|---------|-------------|
-| Engineering Workflow View (full interactive) | FEATURE-034 | [workflow-view-v1.html](../ideas/021.%20Feature-Engineering-Workflow/mockups/workflow-view-v1.html) |
+| Engineering Workflow View (full interactive) | EPIC-036 | [workflow-view-v1.html](EPIC-036/mockups/workflow-view-v1.html) |
 | Introduce Epic Layer (idea summary) | CR-EPIC | [idea-summary-v2.md](../ideas/022.%20CR-Introduce%20Epic/idea-summary-v2.md) |
 
 ---
@@ -31,7 +31,7 @@
 
 ---
 
-### FEATURE-034: Engineering Workflow View
+## EPIC-036: Engineering Workflow View
 
 **Version:** v1.0
 **Brief Description:** A centralized Engineering Workflow view integrated into the X-IPE application that orchestrates the full project value delivery lifecycle — from ideation through requirement, implementation, validation, and feedback — in a single, visual, panel-based interface.
@@ -39,7 +39,7 @@
 > Source: IDEA-021 (Feature-Engineering-Workflow)
 > Status: Proposed
 > Priority: High
-> Mockup: [workflow-view-v1.html](../ideas/021.%20Feature-Engineering-Workflow/mockups/workflow-view-v1.html)
+> Mockup: [workflow-view-v1.html](EPIC-036/mockups/workflow-view-v1.html)
 
 #### Project Overview
 
@@ -78,64 +78,64 @@ The user wants:
 
 | ID | Requirement | Priority |
 |----|-------------|----------|
-| FR-034.1 | **Top-nav entry** — "Engineering Workflow" menu item in top navigation bar, opens dedicated workflow view replacing the middle content area | P0 |
-| FR-034.2 | **Workflow CRUD** — Create, view, delete/archive workflows. "+" button opens modal with name input. No idea folder required at creation. | P0 |
-| FR-034.3 | **Workflow Panel** — Each workflow displayed as expandable panel with header (name, creation date, feature count, current stage), stage ribbon, action buttons, feature lanes, and deliverables section | P0 |
-| FR-034.4 | **Stage Ribbon** — Horizontal progression bar: Ideation → Requirement → Implement → Validation → Feedback. Visual states: completed (✓ green), active (animated dot), pending (numbered) | P0 |
-| FR-034.5 | **Action Buttons** — Stage-specific action buttons with three states: Done (green), Suggested (dashed yellow), Normal (default). Each action maps to an X-IPE skill | P0 |
-| FR-034.6 | **Stage Gating (Workflow-Level)** — Shared stages (Ideation, Requirement) must complete before per-feature stages unlock. Mandatory actions must complete before next stage. Optional actions can be skipped. | P0 |
-| FR-034.7 | **Feature Lanes** — After Feature Breakdown, Implement/Validation/Feedback stages split into horizontal swimlanes per feature. Each lane shows feature ID, name, per-stage progress, and next suggested action | P0 |
-| FR-034.8 | **Feature-Level Stage Gating** — Each feature lane has independent stage gating. Feature A can be in Validation while Feature B is in Implement | P0 |
-| FR-034.9 | **Feature Dependencies** — Dependency data auto-populated from Feature Breakdown output. Displayed as SVG curved connector arrows between dependent lanes. Dependency tags (`⛓ needs {ID}`) on dependent features. Parallel badges (`⇉ Parallel`) on independent features | P0 |
-| FR-034.10 | **Dependencies Toggle** — Button in lanes legend to show/hide dependency visualizations (arrows, tags, badges) | P1 |
-| FR-034.11 | **Working Item Selector** — Dropdown panel listing features with current stage and next action. Selecting a feature highlights its lane. Disabled before Feature Breakdown | P1 |
-| FR-034.12 | **Action Execution — Modal** — Compose/Upload Idea actions open existing modal UI | P0 |
-| FR-034.13 | **Action Execution — CLI Agent** — All other actions: (1) check dependencies via Workflow Manager, (2) if dependency unfinished → confirm dialog, (3) if clear → open console, find idle session, auto-type skill command (user presses Enter to confirm) | P0 |
-| FR-034.14 | **True Parallel Execution** — Multiple agent sessions can run simultaneously for independent features. No restriction on concurrent sessions | P0 |
-| FR-034.15 | **Idea Folder Linking** — No folder required at workflow creation. When user triggers Compose/Upload Idea, prompt to create new or select existing idea folder. Linked via `idea_folder` field in workflow JSON | P0 |
-| FR-034.16 | **Deliverables Section** — Collapsible section showing categorized artifacts (Ideas, Mockups, Requirements, Implementations, Quality Reports) with clickable links. Missing files show "⚠️ not found" | P1 |
-| FR-034.17 | **Auto-Archive** — Workflows auto-archive after 30 days of inactivity. Archived workflows move to `engineering-workflow/archive/`. Deliverables remain in original locations | P1 |
+| FR-036.1 | **Top-nav entry** — "Engineering Workflow" menu item in top navigation bar, opens dedicated workflow view replacing the middle content area | P0 |
+| FR-036.2 | **Workflow CRUD** — Create, view, delete/archive workflows. "+" button opens modal with name input. No idea folder required at creation. | P0 |
+| FR-036.3 | **Workflow Panel** — Each workflow displayed as expandable panel with header (name, creation date, feature count, current stage), stage ribbon, action buttons, feature lanes, and deliverables section | P0 |
+| FR-036.4 | **Stage Ribbon** — Horizontal progression bar: Ideation → Requirement → Implement → Validation → Feedback. Visual states: completed (✓ green), active (animated dot), pending (numbered) | P0 |
+| FR-036.5 | **Action Buttons** — Stage-specific action buttons with three states: Done (green), Suggested (dashed yellow), Normal (default). Each action maps to an X-IPE skill | P0 |
+| FR-036.6 | **Stage Gating (Workflow-Level)** — Shared stages (Ideation, Requirement) must complete before per-feature stages unlock. Mandatory actions must complete before next stage. Optional actions can be skipped. | P0 |
+| FR-036.7 | **Feature Lanes** — After Feature Breakdown, Implement/Validation/Feedback stages split into horizontal swimlanes per feature. Each lane shows feature ID, name, per-stage progress, and next suggested action | P0 |
+| FR-036.8 | **Feature-Level Stage Gating** — Each feature lane has independent stage gating. Feature A can be in Validation while Feature B is in Implement | P0 |
+| FR-036.9 | **Feature Dependencies** — Dependency data auto-populated from Feature Breakdown output. Displayed as SVG curved connector arrows between dependent lanes. Dependency tags (`⛓ needs {ID}`) on dependent features. Parallel badges (`⇉ Parallel`) on independent features | P0 |
+| FR-036.10 | **Dependencies Toggle** — Button in lanes legend to show/hide dependency visualizations (arrows, tags, badges) | P1 |
+| FR-036.11 | **Working Item Selector** — Dropdown panel listing features with current stage and next action. Selecting a feature highlights its lane. Disabled before Feature Breakdown | P1 |
+| FR-036.12 | **Action Execution — Modal** — Compose/Upload Idea actions open existing modal UI | P0 |
+| FR-036.13 | **Action Execution — CLI Agent** — All other actions: (1) check dependencies via Workflow Manager, (2) if dependency unfinished → confirm dialog, (3) if clear → open console, find idle session, auto-type skill command (user presses Enter to confirm) | P0 |
+| FR-036.14 | **True Parallel Execution** — Multiple agent sessions can run simultaneously for independent features. No restriction on concurrent sessions | P0 |
+| FR-036.15 | **Idea Folder Linking** — No folder required at workflow creation. When user triggers Compose/Upload Idea, prompt to create new or select existing idea folder. Linked via `idea_folder` field in workflow JSON | P0 |
+| FR-036.16 | **Deliverables Section** — Collapsible section showing categorized artifacts (Ideas, Mockups, Requirements, Implementations, Quality Reports) with clickable links. Missing files show "⚠️ not found" | P1 |
+| FR-036.17 | **Auto-Archive** — Workflows auto-archive after 30 days of inactivity. Archived workflows move to `engineering-workflow/archive/`. Deliverables remain in original locations | P1 |
 
 ##### Backend & Integration Requirements
 
 | ID | Requirement | Priority |
 |----|-------------|----------|
-| FR-034.18 | **Engineering Workflow Manager** — New backend service: workflow CRUD, stage gating logic, dependency evaluation, next-action suggestion, state persistence, notification dispatch | P0 |
-| FR-034.19 | **MCP Tools** — New tools on existing app-agent-interaction MCP: `update_workflow_status(workflow_name, action, status, deliverables[])` and `get_workflow_state(workflow_name)` | P0 |
-| FR-034.20 | **State Persistence** — Workflow state in `x-ipe-docs/engineering-workflow/workflow-{name}.json` with `schema_version` field for future migrations | P0 |
-| FR-034.21 | **Polling Updates** — Frontend polls for workflow state changes every 7 seconds. On change detected, UI refreshes affected panels/lanes | P0 |
-| FR-034.22 | **Dependency Check Before Action** — Workflow Manager evaluates feature dependencies before allowing action execution. Blocked features trigger confirm dialog | P0 |
-| FR-034.23 | **Deliverables Resolver** — Reads deliverable paths from workflow JSON → verifies file existence → returns resolved links or "⚠️ not found" | P1 |
+| FR-036.18 | **Engineering Workflow Manager** — New backend service: workflow CRUD, stage gating logic, dependency evaluation, next-action suggestion, state persistence, notification dispatch | P0 |
+| FR-036.19 | **MCP Tools** — New tools on existing app-agent-interaction MCP: `update_workflow_status(workflow_name, action, status, deliverables[])` and `get_workflow_state(workflow_name)` | P0 |
+| FR-036.20 | **State Persistence** — Workflow state in `x-ipe-docs/engineering-workflow/workflow-{name}.json` with `schema_version` field for future migrations | P0 |
+| FR-036.21 | **Polling Updates** — Frontend polls for workflow state changes every 7 seconds. On change detected, UI refreshes affected panels/lanes | P0 |
+| FR-036.22 | **Dependency Check Before Action** — Workflow Manager evaluates feature dependencies before allowing action execution. Blocked features trigger confirm dialog | P0 |
+| FR-036.23 | **Deliverables Resolver** — Reads deliverable paths from workflow JSON → verifies file existence → returns resolved links or "⚠️ not found" | P1 |
 
 ##### Non-Functional Requirements
 
 | ID | Requirement | Priority |
 |----|-------------|----------|
-| NFR-034.1 | Workflow View must load within 2 seconds for up to 10 active workflows | P0 |
-| NFR-034.2 | Polling must not cause noticeable UI lag or CPU usage | P0 |
-| NFR-034.3 | Workflow JSON schema must include `schema_version` for forward-compatible migrations | P0 |
-| NFR-034.4 | Only Engineering Workflow Manager (via MCP) writes to workflow JSON — ensures data integrity | P0 |
-| NFR-034.5 | No modification to existing X-IPE skills — orchestration only | P0 |
-| NFR-034.6 | Console integration reuses existing session APIs without modification | P0 |
+| NFR-036.1 | Workflow View must load within 2 seconds for up to 10 active workflows | P0 |
+| NFR-036.2 | Polling must not cause noticeable UI lag or CPU usage | P0 |
+| NFR-036.3 | Workflow JSON schema must include `schema_version` for forward-compatible migrations | P0 |
+| NFR-036.4 | Only Engineering Workflow Manager (via MCP) writes to workflow JSON — ensures data integrity | P0 |
+| NFR-036.5 | No modification to existing X-IPE skills — orchestration only | P0 |
+| NFR-036.6 | Console integration reuses existing session APIs without modification | P0 |
 
 #### Acceptance Criteria
 
 | AC ID | Given | When | Then |
 |-------|-------|------|------|
-| AC-034.1 | User is on any X-IPE page | User clicks "Engineering Workflow" in top nav | Middle content area replaced with workflow view showing all workflows |
-| AC-034.2 | Workflow view is visible | User clicks "+ Create Workflow" and enters a name | New workflow panel created with Ideation stage active, no idea folder linked |
-| AC-034.3 | Workflow at Ideation stage | User clicks "Compose Idea" action | Prompt to create/select idea folder, then modal opens for idea composition |
-| AC-034.4 | Workflow at Ideation stage, all mandatory actions done | Workflow Manager evaluates stage | Requirement stage unlocks; stage ribbon updates |
-| AC-034.5 | Workflow at Requirement stage | User completes Feature Breakdown skill | Feature lanes appear; dependency data auto-populated from skill output via MCP |
-| AC-034.6 | Feature lanes visible with dependencies | User looks at the lanes | Dependent features show `⛓ needs {ID}` tags; independent features show `⇉ Parallel` badges; SVG arrows connect dependent lanes |
-| AC-034.7 | User clicks Dependencies toggle | Toggle button clicked | All dependency visualizations (arrows, tags, badges) hide/show |
-| AC-034.8 | Feature A has no unfinished dependencies | User clicks action on Feature A | Action starts immediately — console opens, idle session found, skill command auto-typed |
-| AC-034.9 | Feature B depends on Feature A (unfinished) | User clicks action on Feature B | Confirm dialog warns about unfinished dependency; user can proceed or cancel |
-| AC-034.10 | Two independent features | User starts actions on both | Two concurrent agent sessions run in separate console sessions |
-| AC-034.11 | Agent skill completes | Skill calls `update_workflow_status` via MCP | Workflow JSON updated; UI refreshes within 7 seconds (next poll); action button turns green |
-| AC-034.12 | All features reach Feedback stage completion | 30 days pass with no activity | Workflow auto-archived; deliverables remain accessible in original locations |
-| AC-034.13 | Deliverable file has been deleted | Deliverables section renders | Missing file shows "⚠️ not found" instead of broken link |
-| AC-034.14 | Working Item Selector opened | User clicks a feature in dropdown | Corresponding feature lane highlights; dropdown closes |
+| AC-036.1 | User is on any X-IPE page | User clicks "Engineering Workflow" in top nav | Middle content area replaced with workflow view showing all workflows |
+| AC-036.2 | Workflow view is visible | User clicks "+ Create Workflow" and enters a name | New workflow panel created with Ideation stage active, no idea folder linked |
+| AC-036.3 | Workflow at Ideation stage | User clicks "Compose Idea" action | Prompt to create/select idea folder, then modal opens for idea composition |
+| AC-036.4 | Workflow at Ideation stage, all mandatory actions done | Workflow Manager evaluates stage | Requirement stage unlocks; stage ribbon updates |
+| AC-036.5 | Workflow at Requirement stage | User completes Feature Breakdown skill | Feature lanes appear; dependency data auto-populated from skill output via MCP |
+| AC-036.6 | Feature lanes visible with dependencies | User looks at the lanes | Dependent features show `⛓ needs {ID}` tags; independent features show `⇉ Parallel` badges; SVG arrows connect dependent lanes |
+| AC-036.7 | User clicks Dependencies toggle | Toggle button clicked | All dependency visualizations (arrows, tags, badges) hide/show |
+| AC-036.8 | Feature A has no unfinished dependencies | User clicks action on Feature A | Action starts immediately — console opens, idle session found, skill command auto-typed |
+| AC-036.9 | Feature B depends on Feature A (unfinished) | User clicks action on Feature B | Confirm dialog warns about unfinished dependency; user can proceed or cancel |
+| AC-036.10 | Two independent features | User starts actions on both | Two concurrent agent sessions run in separate console sessions |
+| AC-036.11 | Agent skill completes | Skill calls `update_workflow_status` via MCP | Workflow JSON updated; UI refreshes within 7 seconds (next poll); action button turns green |
+| AC-036.12 | All features reach Feedback stage completion | 30 days pass with no activity | Workflow auto-archived; deliverables remain accessible in original locations |
+| AC-036.13 | Deliverable file has been deleted | Deliverables section renders | Missing file shows "⚠️ not found" instead of broken link |
+| AC-036.14 | Working Item Selector opened | User clicks a feature in dropdown | Corresponding feature lane highlights; dropdown closes |
 
 #### Action-to-Stage Mapping
 
@@ -254,6 +254,164 @@ The user wants:
 - **JSON-only persistence** — No database for v1; JSON files are sufficient for single-user scope
 - **Console sessions are reused** — Action execution finds idle session or creates new one; multiple concurrent sessions allowed
 - **Single-user scope** — Multi-user concurrent access not addressed in v1
+
+#### Feature Breakdown (EPIC-036)
+
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-036-A | EPIC-036 | Workflow Manager & State Persistence | v1.0 | Backend service: workflow CRUD, stage gating logic, dependency evaluation, next-action suggestion; JSON state persistence in `engineering-workflow/workflow-{name}.json`; new MCP tools (`update_workflow_status`, `get_workflow_state`) | None (depends on FEATURE-033 externally) |
+| FEATURE-036-B | EPIC-036 | Workflow View Shell & CRUD | v1.0 | New top-nav entry "Engineering Workflow"; workflow list view with expandable panels; "+" Create Workflow modal; workflow header with name, date, feature count, stage indicator; delete/archive actions | FEATURE-036-A |
+| FEATURE-036-C | EPIC-036 | Stage Ribbon & Action Execution | v1.0 | Horizontal stage progression bar (Ideation→Feedback) with done/active/pending states; stage-specific action buttons (done/suggested/normal); CLI agent action execution (find idle session, auto-type command); modal actions for Compose/Upload; stage gating enforcement | FEATURE-036-A, FEATURE-036-B |
+| FEATURE-036-D | EPIC-036 | Feature Lanes & Dependencies | v1.0 | Horizontal feature swimlanes after Feature Breakdown; per-lane stage progress; SVG dependency arrows, `⛓ needs` tags, `⇉ Parallel` badges; dependencies toggle; Working Item Selector dropdown; true parallel session execution with dependency check + confirm dialog | FEATURE-036-A, FEATURE-036-B, FEATURE-036-C |
+| FEATURE-036-E | EPIC-036 | Deliverables, Polling & Lifecycle | v1.0 | Collapsible deliverables section with categorized artifacts and "⚠️ not found" handling; Deliverables Resolver; 7-second polling for state updates; auto-archive after 30 days inactivity; error recovery (retry button, manual override) | FEATURE-036-A, FEATURE-036-B |
+
+**Implementation Order:** A (foundation) → B (UI shell) → C (stage execution) → D (feature lanes) → E (deliverables & lifecycle)
+
+#### Linked Mockups
+
+| Mockup Function Name | Feature | Mockup List |
+|---------------------|---------|-------------|
+| Engineering Workflow View (Full) | All FEATURE-036-* | [workflow-view-v1.html](EPIC-036/mockups/workflow-view-v1.html) |
+
+---
+
+### FEATURE-036-A: Workflow Manager & State Persistence
+
+**Version:** v1.0
+**Brief Description:** Backend foundation — Engineering Workflow Manager service with workflow CRUD, stage gating logic, dependency evaluation, next-action suggestion, and JSON state persistence. Includes new MCP tools for skill-to-workflow communication.
+
+**Acceptance Criteria:**
+- [ ] Engineering Workflow Manager service initializes on app startup
+- [ ] Create workflow: generates `engineering-workflow/workflow-{name}.json` with schema_version 1.0, all stages locked except Ideation
+- [ ] Read workflow: returns parsed state with action statuses, feature data, and dependencies
+- [ ] Delete workflow: removes JSON file from disk
+- [ ] Stage gating: evaluates mandatory action completion to determine if next stage unlocks
+- [ ] Dependency evaluation: given a feature ID, returns list of blocking dependencies and their completion status
+- [ ] Next-action suggestion: determines which action across all features should be worked on next
+- [ ] MCP tool `update_workflow_status`: accepts workflow name, action, status, deliverables; updates JSON atomically
+- [ ] MCP tool `get_workflow_state`: returns current workflow state for agent context
+- [ ] State file validation: detects corrupted JSON, falls back to last known good state
+- [ ] `last_activity` timestamp updated on every write operation
+
+**Dependencies:**
+- FEATURE-033 (App-Agent Interaction MCP) — MCP infrastructure for registering new tools
+
+**Technical Considerations:**
+- State writes must be atomic (write to temp file, then rename) to prevent corruption
+- JSON schema includes `schema_version` for forward-compatible migrations
+- Only Workflow Manager writes to state files — no direct file access from frontend
+- Stage gating rules defined as configuration, not hardcoded logic
+
+---
+
+### FEATURE-036-B: Workflow View Shell & CRUD
+
+**Version:** v1.0
+**Brief Description:** Frontend workflow view — new top-nav entry, workflow list with expandable panels, create/delete workflows via modal, workflow header with metadata display.
+
+**Acceptance Criteria:**
+- [ ] "Engineering Workflow" menu item visible in top navigation bar
+- [ ] Clicking menu item replaces middle content area with workflow view
+- [ ] Workflow view displays all active workflows as vertically stacked expandable panels
+- [ ] Each panel header shows: workflow name, creation date, feature count, current stage indicator
+- [ ] "+ Create Workflow" button opens modal with name input field
+- [ ] Creating workflow calls Workflow Manager API; new panel appears in list
+- [ ] No idea folder required at creation; `idea_folder` field is null initially
+- [ ] Delete/archive workflow via panel header action menu
+- [ ] Panels expand/collapse on click
+
+**Dependencies:**
+- FEATURE-036-A (Workflow Manager — provides CRUD API)
+
+**Technical Considerations:**
+- Follows existing X-IPE top-nav pattern (positioned alongside Knowledge, Toolbox, Skills)
+- Reuses existing modal dialog component patterns
+- Panel list rendered from Workflow Manager API response
+
+---
+
+### FEATURE-036-C: Stage Ribbon & Action Execution
+
+**Version:** v1.0
+**Brief Description:** Stage progression visualization and action execution — horizontal stage ribbon with gating, action buttons with skill mapping, console integration for CLI agent actions, modal actions for Compose/Upload Idea.
+
+**Acceptance Criteria:**
+- [ ] Stage ribbon shows 5 stages: Ideation → Requirement → Implement → Validation → Feedback
+- [ ] Stage visual states: completed (✓ green), active (animated dot), pending (numbered), locked (grayed)
+- [ ] Stage gating enforced: locked stages show "complete {previous} to unlock" message
+- [ ] Action buttons displayed per-stage with three states: Done (green), Suggested (dashed yellow), Normal (default)
+- [ ] Clicking CLI Agent action: calls Workflow Manager to check if action is allowed → opens console → finds idle session → auto-types skill command
+- [ ] Clicking Compose/Upload Idea action: prompts to create/select idea folder (if not linked) → opens existing modal UI
+- [ ] After idea folder linked, `idea_folder` field updated in workflow JSON
+- [ ] Action-to-skill mapping follows the defined table (12 actions across 5 stages)
+
+**Dependencies:**
+- FEATURE-036-A (Workflow Manager — gating logic, action validation)
+- FEATURE-036-B (Workflow View Shell — panel container for ribbon and buttons)
+
+**Technical Considerations:**
+- Console integration reuses existing session APIs (same pattern as copilot button in ideation view)
+- Action execution does NOT auto-press Enter — user confirms
+- Stage gating queries Workflow Manager API for allowed actions
+
+---
+
+### FEATURE-036-D: Feature Lanes & Dependencies
+
+**Version:** v1.0
+**Brief Description:** Feature swimlanes, dependency visualization, and parallel execution — horizontal feature lanes after Feature Breakdown, SVG dependency arrows, parallel/blocked badges, Working Item Selector, true parallel agent session support.
+
+**Acceptance Criteria:**
+- [ ] After Feature Breakdown completes (via MCP callback), feature lanes appear in workflow panel
+- [ ] Each lane shows: feature ID, feature name, per-stage progress (done/active/pending), next suggested action
+- [ ] Feature-level stage gating: each feature progresses independently through Implement → Validation → Feedback
+- [ ] Dependency data auto-populated from Feature Breakdown output (persisted in workflow JSON `depends_on` arrays)
+- [ ] SVG curved connector arrows drawn between dependent feature lanes (source → target)
+- [ ] Dependent features show `⛓ needs {ID}` tag in lane label
+- [ ] Independent features show `⇉ Parallel` badge in lane label
+- [ ] Dependencies toggle button shows/hides all dependency visualizations
+- [ ] Working Item Selector dropdown: lists features with current stage and next action; selecting highlights lane
+- [ ] Clicking action on independent feature: starts immediately (no dependency check needed)
+- [ ] Clicking action on dependent feature with unfinished dependency: confirm dialog with warning
+- [ ] True parallel execution: multiple concurrent agent sessions allowed for independent features
+
+**Dependencies:**
+- FEATURE-036-A (Workflow Manager — dependency data, feature state)
+- FEATURE-036-B (Workflow View Shell — panel container)
+- FEATURE-036-C (Stage Ribbon & Action Execution — action button mechanics)
+
+**Technical Considerations:**
+- SVG arrows rendered dynamically based on lane positions; re-drawn on window resize
+- Dependency check is synchronous API call before action dispatch
+- Working Item Selector disabled before Feature Breakdown (no features to show)
+
+---
+
+### FEATURE-036-E: Deliverables, Polling & Lifecycle
+
+**Version:** v1.0
+**Brief Description:** Deliverables display, real-time polling, and workflow lifecycle management — categorized artifact links, file existence verification, 7-second polling for state updates, auto-archive after 30 days, error recovery.
+
+**Acceptance Criteria:**
+- [ ] Collapsible deliverables section shows categorized artifacts: Ideas, Mockups, Requirements, Implementations, Quality Reports
+- [ ] Each deliverable links to original file location; missing files show "⚠️ not found"
+- [ ] Deliverables Resolver reads paths from workflow JSON, verifies file existence on disk
+- [ ] Frontend polls Workflow Manager API every 7 seconds for state changes
+- [ ] On state change detected, UI refreshes affected panels/lanes without full page reload
+- [ ] Polling does not cause noticeable UI lag or CPU usage
+- [ ] Workflows with no activity for 30 days auto-archived to `engineering-workflow/archive/`
+- [ ] Archived workflows not shown in active list (separate archive view optional for v2)
+- [ ] Error recovery: failed actions show retry button; status unknown after 10min shows manual override
+- [ ] Manual override: right-click action → "Mark as Done" or "Reset to Pending"
+
+**Dependencies:**
+- FEATURE-036-A (Workflow Manager — state API, deliverable paths)
+- FEATURE-036-B (Workflow View Shell — panel container for deliverables section)
+
+**Technical Considerations:**
+- Polling uses `setInterval` with change detection (compare JSON hash or `last_activity` timestamp)
+- Auto-archive runs on app startup and periodically (check `last_activity` vs current time)
+- Deliverables Resolver is a backend endpoint, not frontend file system access
 
 ---
 
@@ -401,7 +559,7 @@ The user wants:
 #### Dependencies
 
 - All existing features (source data for migration)
-- FEATURE-034 (Engineering Workflow View) — should incorporate Epic concept in its feature lanes when designed
+- EPIC-036 (Engineering Workflow View) — should incorporate Epic concept in its feature lanes when designed
 
 #### Constraints
 
@@ -413,13 +571,13 @@ The user wants:
 
 #### Feature List
 
-| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
-|------------|---------------|---------|-------------------|-------------------|
-| FEATURE-035-A | Epic Core Workflow Skills | v1.0 | Update requirement-gathering and feature-breakdown skills to create Epic folders, Feature sub-folders, and Epic-level naming conventions | None |
-| FEATURE-035-B | Feature Board Epic Tracking | v1.0 | Add Epic ID column to features.md, update feature-board-management skill, Epic-based sorting and derived status | FEATURE-035-A |
-| FEATURE-035-C | Feature Lifecycle Skill Updates | v1.0 | Update change-request, feature-refinement, technical-design, test-generation, code-implementation, feature-acceptance-test, feature-closing, and git-version-control skills for Epic-aware paths | FEATURE-035-A, FEATURE-035-B |
-| FEATURE-035-D | Requirement-Details Epic Format | v1.0 | Update requirement-details files to use EPIC-{nnn} headers, update splitting heuristic, update index format | FEATURE-035-A |
-| FEATURE-035-E | Retroactive Feature Migration | v1.0 | Migrate all existing features into EPIC-{nnn}/FEATURE-{nnn}-{X} folder structure, update all references, validate link integrity | FEATURE-035-A, FEATURE-035-B, FEATURE-035-C, FEATURE-035-D |
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-035-A | EPIC-035 | Epic Core Workflow Skills | v1.0 | Update requirement-gathering and feature-breakdown skills to create Epic folders, Feature sub-folders, and Epic-level naming conventions | None |
+| FEATURE-035-B | EPIC-035 | Feature Board Epic Tracking | v1.0 | Add Epic ID column to features.md, update feature-board-management skill, Epic-based sorting and derived status | FEATURE-035-A |
+| FEATURE-035-C | EPIC-035 | Feature Lifecycle Skill Updates | v1.0 | Update change-request, feature-refinement, technical-design, test-generation, code-implementation, feature-acceptance-test, feature-closing, and git-version-control skills for Epic-aware paths | FEATURE-035-A, FEATURE-035-B |
+| FEATURE-035-D | EPIC-035 | Requirement-Details Epic Format | v1.0 | Update requirement-details files to use EPIC-{nnn} headers, update splitting heuristic, update index format | FEATURE-035-A |
+| FEATURE-035-E | EPIC-035 | Retroactive Feature Migration | v1.0 | Migrate all existing features into EPIC-{nnn}/FEATURE-{nnn}-{X} folder structure, update all references, validate link integrity | FEATURE-035-A, FEATURE-035-B, FEATURE-035-C, FEATURE-035-D |
 
 #### Feature Details
 

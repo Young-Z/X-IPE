@@ -7,17 +7,17 @@
 
 ## Feature List
 
-| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
-|------------|---------------|---------|-------------------|-------------------|
-| FEATURE-021 | Console Voice Input | v1.0 | Push-to-talk voice input for terminal with Alibaba Cloud speech recognition | FEATURE-005 |
-| FEATURE-022-A | Browser Simulator & Proxy | v1.0 | Localhost proxy backend and browser simulator UI for viewing local web pages | FEATURE-008 |
-| FEATURE-022-B | Element Inspector | v1.0 | Hover highlighting and multi-select element inspection within browser simulator | FEATURE-022-A |
-| FEATURE-022-C | Feedback Capture & Panel | v1.0 | Right-click context menu and feedback entry panel with screenshot capture | FEATURE-022-B |
-| FEATURE-022-D | Feedback Storage & Submission | v1.0 | Save feedback to structured folders and generate terminal command for agent | FEATURE-022-C |
-| FEATURE-023-A | Application Action Tracing - Core | v1.0 | Decorator-based tracing framework for Python & TypeScript with log storage | None |
-| FEATURE-023-B | Tracing Dashboard UI | v1.0 | Web UI for viewing and managing trace sessions | FEATURE-023-A |
-| FEATURE-023-C | Trace Viewer & DAG Visualization | v1.0 | DAG-based call graph visualization with drill-down | FEATURE-023-B |
-| FEATURE-023-D | Tracing Skill Integration | v1.0 | Auto-instrumentation skill for adding tracing to code | FEATURE-023-A |
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-021 | EPIC-021 | Console Voice Input | v1.0 | Push-to-talk voice input for terminal with Alibaba Cloud speech recognition | FEATURE-005 |
+| FEATURE-022-A | EPIC-022 | Browser Simulator & Proxy | v1.0 | Localhost proxy backend and browser simulator UI for viewing local web pages | FEATURE-008 |
+| FEATURE-022-B | EPIC-022 | Element Inspector | v1.0 | Hover highlighting and multi-select element inspection within browser simulator | FEATURE-022-A |
+| FEATURE-022-C | EPIC-022 | Feedback Capture & Panel | v1.0 | Right-click context menu and feedback entry panel with screenshot capture | FEATURE-022-B |
+| FEATURE-022-D | EPIC-022 | Feedback Storage & Submission | v1.0 | Save feedback to structured folders and generate terminal command for agent | FEATURE-022-C |
+| FEATURE-023-A | EPIC-023 | Application Action Tracing - Core | v1.0 | Decorator-based tracing framework for Python & TypeScript with log storage | None |
+| FEATURE-023-B | EPIC-023 | Tracing Dashboard UI | v1.0 | Web UI for viewing and managing trace sessions | FEATURE-023-A |
+| FEATURE-023-C | EPIC-023 | Trace Viewer & DAG Visualization | v1.0 | DAG-based call graph visualization with drill-down | FEATURE-023-B |
+| FEATURE-023-D | EPIC-023 | Tracing Skill Integration | v1.0 | Auto-instrumentation skill for adding tracing to code | FEATURE-023-A |
 
 ---
 

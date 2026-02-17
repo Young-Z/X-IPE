@@ -220,10 +220,10 @@ BLOCKING: Human MUST approve feature list before refinement proceeds.
          - ELSE -- update x-ipe-docs/requirements/requirement-details.md
       2. Add Feature List table:
 
-         | Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
-         |------------|---------------|---------|-------------------|-------------------|
-         | FEATURE-001-A | ... | v1.0 | ... | None |
-         | FEATURE-001-B | ... | v1.0 | ... | FEATURE-001-A |
+         | Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+         |------------|---------|---------------|---------|-------------------|-------------------|
+         | FEATURE-001-A | EPIC-001 | ... | v1.0 | ... | None |
+         | FEATURE-001-B | EPIC-001 | ... | v1.0 | ... | FEATURE-001-A |
 
       3. Add detailed sections for each feature
 

@@ -266,9 +266,9 @@ x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/mockups/ → NOT used (mockups ar
 
 ## Feature List
 
-| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
-|------------|---------------|---------|-------------------|-------------------|
-| FEATURE-012-A | Design Themes | v1.0 | Theme folder structure | FEATURE-011-A |
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-012-A | EPIC-012 | Design Themes | v1.0 | Theme folder structure | FEATURE-011-A |
 
 ---
 

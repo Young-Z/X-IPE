@@ -7,17 +7,17 @@
 
 ## Feature List
 
-| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
-|------------|---------------|---------|-------------------|-------------------|
-| FEATURE-012 | Design Themes | v1.0 | Theme folder structure, sidebar menu, toolbox integration with visual theme cards | FEATURE-011 |
-| FEATURE-013 | Default Theme Content | v1.0 | Pre-built default theme with design-system.md and component-visualization.html | FEATURE-012 |
-| FEATURE-014 | Theme-Aware Frontend Design Skill | v1.0 | New x-ipe-tool-frontend-design skill that reads selected theme and applies design tokens | FEATURE-012 |
-| FEATURE-015 | Architecture DSL Skill | v1.0 | Tool skill for NL ↔ DSL translation of architecture descriptions | FEATURE-011 |
-| FEATURE-016 | Architecture Diagram Renderer | v1.0 | Tool skill that renders Architecture DSL into visual HTML canvas diagrams | FEATURE-015 |
-| FEATURE-017 | Architecture DSL JavaScript Library | v1.0 | Standalone JS library that parses Architecture DSL and renders to Canvas | FEATURE-015, FEATURE-016 |
-| FEATURE-018 | X-IPE CLI Tool | v1.0 | PyPI package with CLI commands: init, serve, upgrade, status, info | None |
-| FEATURE-019 | Simplified Project Setup | v1.0 | `x-ipe init` creates x-ipe-docs/, .github/skills/, .x-ipe/ structure | FEATURE-018 |
-| FEATURE-020 | Skills Discovery & Override | v1.0 | Skills loaded from package, local overrides in .github/skills/ | FEATURE-018, FEATURE-019 |
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-012 | EPIC-012 | Design Themes | v1.0 | Theme folder structure, sidebar menu, toolbox integration with visual theme cards | FEATURE-011 |
+| FEATURE-013 | EPIC-013 | Default Theme Content | v1.0 | Pre-built default theme with design-system.md and component-visualization.html | FEATURE-012 |
+| FEATURE-014 | EPIC-014 | Theme-Aware Frontend Design Skill | v1.0 | New x-ipe-tool-frontend-design skill that reads selected theme and applies design tokens | FEATURE-012 |
+| FEATURE-015 | EPIC-015 | Architecture DSL Skill | v1.0 | Tool skill for NL ↔ DSL translation of architecture descriptions | FEATURE-011 |
+| FEATURE-016 | EPIC-016 | Architecture Diagram Renderer | v1.0 | Tool skill that renders Architecture DSL into visual HTML canvas diagrams | FEATURE-015 |
+| FEATURE-017 | EPIC-017 | Architecture DSL JavaScript Library | v1.0 | Standalone JS library that parses Architecture DSL and renders to Canvas | FEATURE-015, FEATURE-016 |
+| FEATURE-018 | EPIC-018 | X-IPE CLI Tool | v1.0 | PyPI package with CLI commands: init, serve, upgrade, status, info | None |
+| FEATURE-019 | EPIC-019 | Simplified Project Setup | v1.0 | `x-ipe init` creates x-ipe-docs/, .github/skills/, .x-ipe/ structure | FEATURE-018 |
+| FEATURE-020 | EPIC-020 | Skills Discovery & Override | v1.0 | Skills loaded from package, local overrides in .github/skills/ | FEATURE-018, FEATURE-019 |
 
 ---
 

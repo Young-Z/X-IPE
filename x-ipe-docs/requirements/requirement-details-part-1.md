@@ -33,19 +33,19 @@ Create a web viewer for AI-created project documentation with:
 
 ## Feature List
 
-| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
-|------------|---------------|---------|-------------------|-------------------|
-| FEATURE-001 | Project Navigation | v1.0 | Dynamic sidebar with folder tree navigation for project structure | None |
-| FEATURE-002 | Content Viewer | v1.0 | Markdown and code file rendering with syntax highlighting | FEATURE-001 |
-| FEATURE-003 | Content Editor | v1.0 | Edit mode for modifying files with direct save to filesystem | FEATURE-002 |
-| FEATURE-004 | Live Refresh | v1.0 | Auto-detect file changes and refresh content in browser | FEATURE-002 |
-| FEATURE-005 | Interactive Console | v1.0 | Collapsible terminal panel for shell command execution | FEATURE-001 |
-| FEATURE-006 | Settings & Configuration | v1.0 | Settings page for project root path and app configuration | FEATURE-001 |
-| FEATURE-007 | Git Integration | v1.0 | Version history and side-by-side diff comparison | FEATURE-002 |
-| FEATURE-008 | Workplace (Idea Management) | v1.0 | Idea upload, tree view, inline editing with auto-save, folder rename | None |
-| FEATURE-009 | File Change Indicator | v1.0 | Yellow dot indicator for changed files/folders in sidebar | FEATURE-001 |
-| FEATURE-010 | Project Root Configuration | v1.0 | .x-ipe.yaml config file for nested project structure support | FEATURE-006 |
-| FEATURE-011 | Stage Toolbox | v1.0 | Comprehensive tool management modal with accordion UI for all development stages | None |
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-001 | EPIC-001 | Project Navigation | v1.0 | Dynamic sidebar with folder tree navigation for project structure | None |
+| FEATURE-002 | EPIC-002 | Content Viewer | v1.0 | Markdown and code file rendering with syntax highlighting | FEATURE-001 |
+| FEATURE-003 | EPIC-003 | Content Editor | v1.0 | Edit mode for modifying files with direct save to filesystem | FEATURE-002 |
+| FEATURE-004 | EPIC-004 | Live Refresh | v1.0 | Auto-detect file changes and refresh content in browser | FEATURE-002 |
+| FEATURE-005 | EPIC-005 | Interactive Console | v1.0 | Collapsible terminal panel for shell command execution | FEATURE-001 |
+| FEATURE-006 | EPIC-006 | Settings & Configuration | v1.0 | Settings page for project root path and app configuration | FEATURE-001 |
+| FEATURE-007 | EPIC-007 | Git Integration | v1.0 | Version history and side-by-side diff comparison | FEATURE-002 |
+| FEATURE-008 | EPIC-008 | Workplace (Idea Management) | v1.0 | Idea upload, tree view, inline editing with auto-save, folder rename | None |
+| FEATURE-009 | EPIC-009 | File Change Indicator | v1.0 | Yellow dot indicator for changed files/folders in sidebar | FEATURE-001 |
+| FEATURE-010 | EPIC-010 | Project Root Configuration | v1.0 | .x-ipe.yaml config file for nested project structure support | FEATURE-006 |
+| FEATURE-011 | EPIC-011 | Stage Toolbox | v1.0 | Comprehensive tool management modal with accordion UI for all development stages | None |
 
 ---
 

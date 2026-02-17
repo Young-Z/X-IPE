@@ -141,12 +141,12 @@ The user wants to:
 
 ### Feature List
 
-| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
-|------------|---------------|---------|-------------------|-------------------|
-| FEATURE-029-A | Session Explorer Core | v1.0 | Explorer panel UI, session create/switch, single-session view, auto-default session | FEATURE-005 |
-| FEATURE-029-B | Session Actions | v1.0 | Inline rename, delete with auto-recreate, sequential naming, limit toast, visual indicators | FEATURE-029-A |
-| FEATURE-029-C | Session Hover Preview | v1.0 | Live mini-terminal preview modal on hover with grace period, configurable size | FEATURE-029-A |
-| FEATURE-029-D | Explorer UI Controls | v1.0 | Collapse/expand toggle, drag-to-resize, width/state persistence in localStorage | FEATURE-029-A |
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-029-A | EPIC-029 | Session Explorer Core | v1.0 | Explorer panel UI, session create/switch, single-session view, auto-default session | FEATURE-005 |
+| FEATURE-029-B | EPIC-029 | Session Actions | v1.0 | Inline rename, delete with auto-recreate, sequential naming, limit toast, visual indicators | FEATURE-029-A |
+| FEATURE-029-C | EPIC-029 | Session Hover Preview | v1.0 | Live mini-terminal preview modal on hover with grace period, configurable size | FEATURE-029-A |
+| FEATURE-029-D | EPIC-029 | Explorer UI Controls | v1.0 | Collapse/expand toggle, drag-to-resize, width/state persistence in localStorage | FEATURE-029-A |
 
 ### Linked Mockups
 

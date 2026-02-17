@@ -7,15 +7,15 @@
 
 ## Feature List
 
-| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
-|------------|---------------|---------|-------------------|-------------------|
-| FEATURE-025-A | KB Core Infrastructure | v1.0 | Core folder structure, file index, metadata management, and sidebar integration | FEATURE-008 |
-| FEATURE-025-B | KB Landing Zone | v1.0 | File upload, drag-drop, landing view grid, and landing actions (delete, move) | FEATURE-025-A |
-| FEATURE-025-C | KB Manager Skill | v1.0 | AI-powered processing skill: classify, summarize, reorganize, search commands | FEATURE-025-A |
-| FEATURE-025-D | KB Topics & Summaries | v1.0 | Topics view, AI summary cards with versioning, topic detail display | FEATURE-025-B, FEATURE-025-C |
-| FEATURE-025-E | KB Search & Preview | v1.0 | Inline sidebar search, filters, preview panel for selected items | FEATURE-025-A |
-| FEATURE-025-F | KB Navigation & Polish | v1.0 | Section tabs (Landing/Topics), badges, tree views, UX refinements | FEATURE-025-D, FEATURE-025-E |
-| FEATURE-026 | Homepage Infinity Loop | v1.0 | Interactive infinity loop visualization as X-IPE homepage with sidebar integration | FEATURE-001 |
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-025-A | EPIC-025 | KB Core Infrastructure | v1.0 | Core folder structure, file index, metadata management, and sidebar integration | FEATURE-008 |
+| FEATURE-025-B | EPIC-025 | KB Landing Zone | v1.0 | File upload, drag-drop, landing view grid, and landing actions (delete, move) | FEATURE-025-A |
+| FEATURE-025-C | EPIC-025 | KB Manager Skill | v1.0 | AI-powered processing skill: classify, summarize, reorganize, search commands | FEATURE-025-A |
+| FEATURE-025-D | EPIC-025 | KB Topics & Summaries | v1.0 | Topics view, AI summary cards with versioning, topic detail display | FEATURE-025-B, FEATURE-025-C |
+| FEATURE-025-E | EPIC-025 | KB Search & Preview | v1.0 | Inline sidebar search, filters, preview panel for selected items | FEATURE-025-A |
+| FEATURE-025-F | EPIC-025 | KB Navigation & Polish | v1.0 | Section tabs (Landing/Topics), badges, tree views, UX refinements | FEATURE-025-D, FEATURE-025-E |
+| FEATURE-026 | EPIC-026 | Homepage Infinity Loop | v1.0 | Interactive infinity loop visualization as X-IPE homepage with sidebar integration | FEATURE-001 |
 
 ---
 

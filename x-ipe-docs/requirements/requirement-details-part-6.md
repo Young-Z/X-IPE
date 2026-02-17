@@ -7,17 +7,17 @@
 
 ## Feature List
 
-| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
-|------------|---------------|---------|-------------------|-------------------|
-| FEATURE-027-A | CLI Adapter Registry & Service | v1.0 | Core adapter registry, service layer, API endpoint, auto-detection, and backward compatibility for multi-CLI support | FEATURE-018 |
-| FEATURE-027-B | CLI Init & Selection | v1.0 | Update `x-ipe init` to auto-detect CLIs, present selection, deploy CLI-specific artifacts | FEATURE-027-A, FEATURE-019 |
-| FEATURE-027-C | Skill & Instruction Translation | v1.0 | Translate canonical X-IPE skills to Copilot, OpenCode, and Claude Code native formats | FEATURE-027-A |
-| FEATURE-027-D | MCP Configuration Deployment | v1.0 | Deploy MCP server config in each CLI's native format and location | FEATURE-027-A |
-| FEATURE-027-E | CLI Migration & Upgrade | v1.0 | `x-ipe upgrade --cli` to switch between CLIs with non-destructive backup and redeployment | FEATURE-027-B, FEATURE-027-C, FEATURE-027-D |
-| FEATURE-028-A | Bilingual Prompt Schema & Migration | v1.0 | copilot-prompt.json v3.0 schema with prompt-details array, bilingual prompt content, v2.0→v3.0 auto-migration | None |
-| FEATURE-028-B | CLI Language Selection & Instructions | v1.0 | Language selection at init/upgrade, bilingual copilot-instructions.md template with ---LANG:xx--- markers, extraction logic | FEATURE-028-A |
-| FEATURE-028-C | Frontend Prompt Language Filtering | v1.0 | Client-side prompt-details filtering by language, API language field, fallback chain for v2.0 compat | FEATURE-028-A, FEATURE-028-B |
-| FEATURE-028-D | Settings Language Switch (Web UI) | v1.0 | Language dropdown in Settings page with confirmation dialog, AJAX switch via POST /api/config/language, reuses ScaffoldManager logic | FEATURE-028-B |
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-027-A | EPIC-027 | CLI Adapter Registry & Service | v1.0 | Core adapter registry, service layer, API endpoint, auto-detection, and backward compatibility for multi-CLI support | FEATURE-018 |
+| FEATURE-027-B | EPIC-027 | CLI Init & Selection | v1.0 | Update `x-ipe init` to auto-detect CLIs, present selection, deploy CLI-specific artifacts | FEATURE-027-A, FEATURE-019 |
+| FEATURE-027-C | EPIC-027 | Skill & Instruction Translation | v1.0 | Translate canonical X-IPE skills to Copilot, OpenCode, and Claude Code native formats | FEATURE-027-A |
+| FEATURE-027-D | EPIC-027 | MCP Configuration Deployment | v1.0 | Deploy MCP server config in each CLI's native format and location | FEATURE-027-A |
+| FEATURE-027-E | EPIC-027 | CLI Migration & Upgrade | v1.0 | `x-ipe upgrade --cli` to switch between CLIs with non-destructive backup and redeployment | FEATURE-027-B, FEATURE-027-C, FEATURE-027-D |
+| FEATURE-028-A | EPIC-028 | Bilingual Prompt Schema & Migration | v1.0 | copilot-prompt.json v3.0 schema with prompt-details array, bilingual prompt content, v2.0→v3.0 auto-migration | None |
+| FEATURE-028-B | EPIC-028 | CLI Language Selection & Instructions | v1.0 | Language selection at init/upgrade, bilingual copilot-instructions.md template with ---LANG:xx--- markers, extraction logic | FEATURE-028-A |
+| FEATURE-028-C | EPIC-028 | Frontend Prompt Language Filtering | v1.0 | Client-side prompt-details filtering by language, API language field, fallback chain for v2.0 compat | FEATURE-028-A, FEATURE-028-B |
+| FEATURE-028-D | EPIC-028 | Settings Language Switch (Web UI) | v1.0 | Language dropdown in Settings page with confirmation dialog, AJAX switch via POST /api/config/language, reuses ScaffoldManager logic | FEATURE-028-B |
 
 ---
 
