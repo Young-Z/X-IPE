@@ -152,7 +152,7 @@ The user wants to:
 
 | Mockup Function Name | Feature | Mockup Link |
 |---------------------|---------|-------------|
-| Console Explorer — all scenarios | FEATURE-029-A to D | [console-explorer-v1.html](FEATURE-029-A/mockups/console-explorer-v1.html) |
+| Console Explorer — all scenarios | FEATURE-029-A to D | [console-explorer-v1.html](EPIC-029/mockups/console-explorer-v1.html) |
 
 ---
 

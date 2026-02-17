@@ -23,11 +23,11 @@
 
 | Mockup Function Name | Feature | Mockup Link |
 |---------------------|---------|-------------|
-| UIUX Reference Tab (light) | FEATURE-030-A | [uiux-reference-tab-v2.html](FEATURE-030-A/mockups/uiux-reference-tab-v2.html) |
-| UIUX Reference Tab (dark alt) | FEATURE-030-A | [uiux-reference-tab-v1.html](FEATURE-030-A/mockups/uiux-reference-tab-v1.html) |
-| Injected Reference Toolbar (light) | FEATURE-030-B | [injected-toolbar-v2.html](FEATURE-030-B/mockups/injected-toolbar-v2.html) |
-| Injected Reference Toolbar (dark alt) | FEATURE-030-B | [injected-toolbar-v1.html](FEATURE-030-B/mockups/injected-toolbar-v1.html) |
-| Injected Toolbar with Phase 2 tools | FEATURE-031 | [injected-toolbar-v2.html](FEATURE-031/mockups/injected-toolbar-v2.html) |
+| UIUX Reference Tab (light) | FEATURE-030-A | [uiux-reference-tab-v2.html](EPIC-030/mockups/uiux-reference-tab-v2.html) |
+| UIUX Reference Tab (dark alt) | FEATURE-030-A | [uiux-reference-tab-v1.html](EPIC-030/mockups/uiux-reference-tab-v1.html) |
+| Injected Reference Toolbar (light) | FEATURE-030-B | [injected-toolbar-v2.html](EPIC-030/mockups/injected-toolbar-v2.html) |
+| Injected Reference Toolbar (dark alt) | FEATURE-030-B | [injected-toolbar-v1.html](EPIC-030/mockups/injected-toolbar-v1.html) |
+| Injected Toolbar with Phase 2 tools | FEATURE-031 | [injected-toolbar-v2.html](EPIC-031/mockups/injected-toolbar-v2.html) |
 
 ---
 
@@ -43,7 +43,7 @@
 > Source: IDEA-018 (Feature-UIUX Reference)
 > Status: Proposed
 > Priority: High (MVP — entry point for the entire UIUX Reference workflow)
-> Mockup: [uiux-reference-tab-v2.html](FEATURE-030-A/mockups/uiux-reference-tab-v2.html)
+> Mockup: [uiux-reference-tab-v2.html](EPIC-030/mockups/uiux-reference-tab-v2.html)
 > Phase: 1 of 3
 
 **Acceptance Criteria:**
@@ -73,7 +73,7 @@
 > Source: IDEA-018 (Feature-UIUX Reference)
 > Status: Proposed
 > Priority: High
-> Mockup: [injected-toolbar-v2.html](FEATURE-030-B/mockups/injected-toolbar-v2.html)
+> Mockup: [injected-toolbar-v2.html](EPIC-030/mockups/injected-toolbar-v2.html)
 > Phase: 1 of 3
 
 **Acceptance Criteria:**

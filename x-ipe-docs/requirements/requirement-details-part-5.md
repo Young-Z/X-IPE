@@ -25,7 +25,7 @@
 |---------------------|---------|-------------|
 | kb-landing-view | FEATURE-025-A, FEATURE-025-B | [knowledge-base-v1.html](../ideas/012.%20Feature-KnowledgeBase/mockups/knowledge-base-v1.html) |
 | kb-processed-view | FEATURE-025-D, FEATURE-025-E | [knowledge-base-processed-v1.html](../ideas/012.%20Feature-KnowledgeBase/mockups/knowledge-base-processed-v1.html) |
-| homepage-infinity-loop | FEATURE-026 | [homepage-infinity-v4.html](FEATURE-026/mockups/homepage-infinity-v4.html) |
+| homepage-infinity-loop | FEATURE-026 | [homepage-infinity-v4.html](EPIC-026/mockups/homepage-infinity-v4.html) |
 
 ---
 

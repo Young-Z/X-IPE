@@ -25,9 +25,9 @@
 
 | Mockup Function Name | Feature | Mockup Link |
 |---------------------|---------|-------------|
-| themes-toolbox-modal | FEATURE-012 | [themes-toolbox-modal.html](FEATURE-012/mockups/themes-toolbox-modal.html) |
-| architecture-dsl-demo | FEATURE-015 | [architecture-dsl-demo.html](FEATURE-015/mockups/architecture-dsl-demo.html) |
-| architecture-diagram-renderer | FEATURE-016 | [architecture-diagram-renderer.html](FEATURE-016/mockups/architecture-diagram-renderer.html) |
+| themes-toolbox-modal | FEATURE-012 | [themes-toolbox-modal.html](EPIC-012/mockups/themes-toolbox-modal.html) |
+| architecture-dsl-demo | FEATURE-015 | [architecture-dsl-demo.html](EPIC-015/mockups/architecture-dsl-demo.html) |
+| architecture-diagram-renderer | FEATURE-016 | [architecture-diagram-renderer.html](EPIC-016/mockups/architecture-diagram-renderer.html) |
 
 ---
 
