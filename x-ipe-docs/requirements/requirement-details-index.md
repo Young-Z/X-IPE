@@ -2,16 +2,18 @@
 
 > Last Updated: 02-17-2026
 
+> **Note:** Current requirement-details content uses legacy Feature-based headers. These will be migrated to Epic-based headers (`## EPIC-{nnn}:`) in FEATURE-035-E. The index below maps parts to their Epic coverage ranges.
+
 ## Parts Overview
 
-| Part | File | Features Covered | Lines |
-|------|------|------------------|-------|
-| 1 | [Part 1](requirement-details-part-1.md) | FEATURE-001 to FEATURE-011 | ~420 |
-| 2 | [Part 2](requirement-details-part-2.md) | FEATURE-012 to FEATURE-020 | ~611 |
-| 3 | [Part 3](requirement-details-part-3.md) | FEATURE-021, FEATURE-022-A to D, FEATURE-023 | ~667 |
-| 4 | [Part 4](requirement-details-part-4.md) | FEATURE-024 | ~230 |
-| 5 | [Part 5](requirement-details-part-5.md) | FEATURE-025-A to F, FEATURE-026 | ~465 |
-| 6 | [Part 6](requirement-details-part-6.md) | FEATURE-027-A to E, FEATURE-028-A to D | ~473 |
-| 7 | [Part 7](requirement-details-part-7.md) | FEATURE-029-A to D | ~240 |
-| 8 | [Part 8](requirement-details-part-8.md) | FEATURE-030-A, FEATURE-030-B (v2.0), FEATURE-030-B-THEME, FEATURE-030-B-MOCKUP, FEATURE-031 (❌), FEATURE-032 (❌), FEATURE-033 | ~320 |
-| 9 | [Part 9](requirement-details-part-9.md) | FEATURE-034 (Engineering Workflow View), FEATURE-035-A to E (Epic Layer) | ~537 |
+| Part | File | Epics Covered | Lines |
+|------|------|---------------|-------|
+| 1 | [Part 1](requirement-details-part-1.md) | EPIC-001 to EPIC-011 | ~420 |
+| 2 | [Part 2](requirement-details-part-2.md) | EPIC-012 to EPIC-020 | ~611 |
+| 3 | [Part 3](requirement-details-part-3.md) | EPIC-021, EPIC-022, EPIC-023 | ~667 |
+| 4 | [Part 4](requirement-details-part-4.md) | EPIC-024 | ~230 |
+| 5 | [Part 5](requirement-details-part-5.md) | EPIC-025, EPIC-026 | ~465 |
+| 6 | [Part 6](requirement-details-part-6.md) | EPIC-027, EPIC-028 | ~473 |
+| 7 | [Part 7](requirement-details-part-7.md) | EPIC-029 | ~240 |
+| 8 | [Part 8](requirement-details-part-8.md) | EPIC-030, EPIC-031, EPIC-032, EPIC-033 | ~320 |
+| 9 | [Part 9](requirement-details-part-9.md) | EPIC-034, EPIC-035 | ~537 |
