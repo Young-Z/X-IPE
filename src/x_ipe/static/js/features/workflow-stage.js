@@ -1,7 +1,8 @@
 /**
  * FEATURE-036-C: Stage Ribbon & Action Execution
  * FEATURE-036-D: Feature Lanes & Dependencies
- * Renders stage progression ribbon, action buttons, and feature lanes.
+ * FEATURE-036-E: Deliverables, Polling & Lifecycle
+ * Renders stage progression ribbon, action buttons, feature lanes, and deliverables.
  */
 const workflowStage = {
     STAGE_ORDER: ['ideation', 'requirement', 'implement', 'validation', 'feedback'],
@@ -14,6 +15,14 @@ const workflowStage = {
         { key: 'quality_evaluation', label: 'Quality',     icon: '📊' },
         { key: 'change_request',     label: 'CR',          icon: '🔄' },
     ],
+
+    DELIVERABLE_ICONS: {
+        ideas:           { icon: '💡', label: 'Ideas' },
+        mockups:         { icon: '🎨', label: 'Mockups' },
+        requirements:    { icon: '📋', label: 'Requirements' },
+        implementations: { icon: '💻', label: 'Implementations' },
+        quality:         { icon: '📊', label: 'Quality' },
+    },
 
     ACTION_MAP: {
         ideation: {
@@ -55,7 +64,7 @@ const workflowStage = {
         }
     },
 
-    /** Main entry: render stage ribbon + actions (or feature lanes) into container. */
+    /** Main entry: render stage ribbon + actions (or feature lanes) + deliverables into container. */
     render(container, workflowState, nextAction, workflowName) {
         container.appendChild(this._renderRibbon(workflowState.stages));
         if (this._hasFeatures(workflowState.stages)) {
@@ -64,6 +73,7 @@ const workflowStage = {
         } else {
             container.appendChild(this._renderActionsArea(workflowState.stages, nextAction, workflowName));
         }
+        this._renderDeliverables(container, workflowName);
     },
 
     /** Check if any stage has features. */
@@ -212,6 +222,13 @@ const workflowStage = {
         }
 
         btn.innerHTML = `<span class="action-icon">${actionDef.icon}</span> ${actionDef.label}`;
+
+        // Context menu for manual override (FEATURE-036-E)
+        btn.oncontextmenu = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._renderContextMenu(e.clientX, e.clientY, actionKey, wfName, null);
+        };
 
         btn.onclick = (e) => {
             e.stopPropagation();
@@ -642,6 +659,145 @@ const workflowStage = {
             if (status !== 'done') return act.label;
         }
         return 'Completed';
+    },
+
+    /** Render deliverables section (FEATURE-036-E). */
+    async _renderDeliverables(container, wfName) {
+        const area = document.createElement('div');
+        area.className = 'deliverables-area';
+
+        const header = document.createElement('div');
+        header.className = 'deliverables-header';
+        const title = document.createElement('span');
+        title.className = 'deliverables-title';
+        title.textContent = 'Deliverables';
+        const countBadge = document.createElement('span');
+        countBadge.className = 'deliverables-count';
+        countBadge.textContent = '…';
+        title.appendChild(countBadge);
+        header.appendChild(title);
+        const toggle = document.createElement('span');
+        toggle.className = 'deliverables-toggle';
+        toggle.textContent = '▾';
+        header.appendChild(toggle);
+        area.appendChild(header);
+
+        const grid = document.createElement('div');
+        grid.className = 'deliverables-grid';
+        area.appendChild(grid);
+
+        header.onclick = () => {
+            const hidden = grid.style.display === 'none';
+            grid.style.display = hidden ? '' : 'none';
+            toggle.textContent = hidden ? '▾' : '▸';
+        };
+
+        container.appendChild(area);
+
+        try {
+            const resp = await fetch(`/api/workflow/${encodeURIComponent(wfName)}/deliverables`);
+            const json = await resp.json();
+            const data = json.data || {};
+            const items = data.deliverables || [];
+            countBadge.textContent = items.length;
+            if (items.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'deliverables-empty';
+                empty.textContent = 'No deliverables yet';
+                grid.appendChild(empty);
+            } else {
+                items.forEach(item => grid.appendChild(this._renderDeliverableCard(item)));
+            }
+        } catch {
+            countBadge.textContent = '!';
+            const err = document.createElement('div');
+            err.className = 'deliverables-empty';
+            err.textContent = 'Failed to load deliverables';
+            grid.appendChild(err);
+        }
+    },
+
+    /** Render a single deliverable card. */
+    _renderDeliverableCard(item) {
+        const card = document.createElement('div');
+        card.className = `deliverable-card${item.exists ? '' : ' missing'}`;
+
+        const catConfig = this.DELIVERABLE_ICONS[item.category] || { icon: '📄', label: 'Other' };
+        const iconEl = document.createElement('div');
+        iconEl.className = `deliverable-icon ${item.category || ''}`;
+        iconEl.textContent = catConfig.icon;
+        card.appendChild(iconEl);
+
+        const info = document.createElement('div');
+        info.className = 'deliverable-info';
+        const nameEl = document.createElement('div');
+        nameEl.className = 'deliverable-name';
+        nameEl.textContent = item.name;
+        info.appendChild(nameEl);
+        const pathEl = document.createElement('div');
+        pathEl.className = 'deliverable-path';
+        pathEl.textContent = item.path;
+        info.appendChild(pathEl);
+        if (!item.exists) {
+            const badge = document.createElement('div');
+            badge.className = 'deliverable-missing-badge';
+            badge.textContent = '⚠️ not found';
+            info.appendChild(badge);
+        }
+        card.appendChild(info);
+        return card;
+    },
+
+    /** Render context menu for manual override (FEATURE-036-E). */
+    _renderContextMenu(x, y, actionKey, wfName, featureId) {
+        // Remove any existing context menu
+        document.querySelectorAll('.wf-context-menu').forEach(m => m.remove());
+
+        const menu = document.createElement('div');
+        menu.className = 'wf-context-menu';
+        menu.style.left = `${Math.min(x, window.innerWidth - 180)}px`;
+        menu.style.top = `${Math.min(y, window.innerHeight - 80)}px`;
+
+        const items = [
+            { label: '✅ Mark as Done', status: 'done' },
+            { label: '🔄 Reset to Pending', status: 'pending' },
+        ];
+        items.forEach(opt => {
+            const item = document.createElement('button');
+            item.className = 'wf-context-menu-item';
+            item.textContent = opt.label;
+            item.onclick = async (e) => {
+                e.stopPropagation();
+                menu.remove();
+                const body = { action: actionKey, status: opt.status };
+                if (featureId) body.feature_id = featureId;
+                try {
+                    const resp = await fetch(`/api/workflow/${encodeURIComponent(wfName)}/action`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body),
+                    });
+                    if (resp.ok) {
+                        this._showToast(`${actionKey} → ${opt.status}`, 'success');
+                    } else {
+                        const err = await resp.json();
+                        this._showToast(err.message || 'Failed', 'error');
+                    }
+                } catch {
+                    this._showToast('Network error', 'error');
+                }
+            };
+            menu.appendChild(item);
+        });
+
+        document.body.appendChild(menu);
+        const closeHandler = (e) => {
+            if (!menu.contains(e.target)) {
+                menu.remove();
+                document.removeEventListener('click', closeHandler);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', closeHandler), 10);
     },
 
     _showToast(msg, type) {

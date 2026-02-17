@@ -122,3 +122,12 @@ def get_next_action(name):
     if 'error' in result and result.get('success') is False:
         return jsonify(result), 404
     return jsonify({'success': True, 'data': result})
+
+
+@workflow_bp.route('/api/workflow/<name>/deliverables', methods=['GET'])
+@x_ipe_tracing()
+def get_deliverables(name):
+    result = _get_service().resolve_deliverables(name)
+    if 'error' in result and result.get('success') is False:
+        return jsonify(result), 404
+    return jsonify({'success': True, 'data': result})

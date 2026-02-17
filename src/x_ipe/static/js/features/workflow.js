@@ -8,6 +8,8 @@ const workflow = {
     container: null,
     expandedPanels: new Set(),
     isSubmitting: false,
+    _pollingIntervals: {},
+    _lastActivity: {},
 
     /** Entry point — render the full workflow view into container. */
     render(container) {
@@ -126,8 +128,10 @@ const workflow = {
                 this.expandedPanels.add(wf.name);
                 body.innerHTML = '';
                 await this._renderPanelBody(wf, body);
+                this._startPolling(wf.name, wf, body);
             } else {
                 this.expandedPanels.delete(wf.name);
+                this._stopPolling(wf.name);
             }
         };
         panel.appendChild(header);
@@ -136,6 +140,7 @@ const workflow = {
         // Auto-load body if already expanded
         if (this.expandedPanels.has(wf.name)) {
             this._renderPanelBody(wf, body);
+            this._startPolling(wf.name, wf, body);
         }
 
         return panel;
@@ -148,6 +153,7 @@ const workflow = {
                 fetch(`/api/workflow/${encodeURIComponent(wf.name)}/next-action`).then(r => r.json())
             ]);
             if (stateResp.success && typeof workflowStage !== 'undefined') {
+                this._lastActivity[wf.name] = stateResp.data.last_activity || '';
                 workflowStage.render(body, stateResp.data, nextResp.data, wf.name);
             }
         } catch (err) {
@@ -303,5 +309,31 @@ const workflow = {
             document.getElementById('wf-confirm-ok').onclick = () => cleanup(true);
             overlay.onclick = (e) => { if (e.target === overlay) cleanup(false); };
         });
+    },
+
+    /** Start polling for workflow state changes (FEATURE-036-E). */
+    _startPolling(wfName, wf, body) {
+        this._stopPolling(wfName);
+        this._pollingIntervals[wfName] = setInterval(async () => {
+            try {
+                const resp = await fetch(`/api/workflow/${encodeURIComponent(wfName)}`);
+                const json = await resp.json();
+                if (!json.success) return;
+                const newLA = json.data.last_activity || '';
+                if (newLA && newLA !== this._lastActivity[wfName]) {
+                    this._lastActivity[wfName] = newLA;
+                    body.innerHTML = '';
+                    await this._renderPanelBody(wf, body);
+                }
+            } catch { /* silently skip */ }
+        }, 7000);
+    },
+
+    /** Stop polling for a workflow (FEATURE-036-E). */
+    _stopPolling(wfName) {
+        if (this._pollingIntervals[wfName]) {
+            clearInterval(this._pollingIntervals[wfName]);
+            delete this._pollingIntervals[wfName];
+        }
     },
 };

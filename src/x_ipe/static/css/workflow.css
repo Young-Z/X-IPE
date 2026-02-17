@@ -388,3 +388,34 @@
 .dep-arrow-head { fill: #3b82f6; opacity: 0.7; transition: opacity 0.3s; }
 .lanes-container:hover .dep-arrow-line,
 .lanes-container:hover .dep-arrow-head { opacity: 1; }
+
+/* =================================================================
+ * FEATURE-036-E: Deliverables, Polling & Lifecycle
+ * ================================================================= */
+
+/* Deliverables Section */
+.deliverables-area { padding: 16px 0; border-top: 1px solid var(--border-color); margin-top: 12px; }
+.deliverables-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 4px 0; }
+.deliverables-title { font-size: 13px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+.deliverables-count { font-size: 11px; padding: 1px 8px; background: rgba(59,130,246,0.15); color: #3b82f6; border-radius: 10px; }
+.deliverables-toggle { font-size: 14px; color: var(--text-muted); transition: transform 0.2s; }
+.deliverables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-top: 10px; }
+.deliverables-empty { color: var(--text-muted); font-size: 12px; padding: 12px 0; }
+.deliverable-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; transition: all 0.2s; cursor: default; }
+.deliverable-card:hover { border-color: var(--accent); }
+.deliverable-card.missing { opacity: 0.6; }
+.deliverable-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 16px; flex-shrink: 0; }
+.deliverable-icon.ideas { background: rgba(168,85,247,0.15); }
+.deliverable-icon.mockups { background: rgba(236,72,153,0.15); }
+.deliverable-icon.requirements { background: rgba(59,130,246,0.15); }
+.deliverable-icon.implementations { background: rgba(245,158,11,0.15); }
+.deliverable-icon.quality { background: rgba(16,185,129,0.15); }
+.deliverable-info { flex: 1; min-width: 0; }
+.deliverable-name { font-size: 12px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.deliverable-path { font-size: 10px; font-family: monospace; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.deliverable-missing-badge { font-size: 10px; color: #ef4444; white-space: nowrap; }
+
+/* Context Menu */
+.wf-context-menu { position: fixed; z-index: 100; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.3); min-width: 160px; padding: 4px 0; }
+.wf-context-menu-item { display: block; width: 100%; padding: 8px 14px; font-size: 12px; color: var(--text-primary); background: none; border: none; cursor: pointer; text-align: left; }
+.wf-context-menu-item:hover { background: rgba(255,255,255,0.08); }

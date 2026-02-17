@@ -7,13 +7,16 @@ Manages the full lifecycle of engineering workflows:
 - Feature dependency evaluation
 - Next-action suggestion
 - Atomic writes for data integrity
+- Deliverables resolution (FEATURE-036-E)
+- Auto-archive of stale workflows (FEATURE-036-E)
 """
 
 import json
 import os
 import re
+import shutil
 import tempfile
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 from x_ipe.tracing import x_ipe_tracing
@@ -56,6 +59,22 @@ STAGE_CONFIG = {
 }
 
 STAGE_ORDER = ["ideation", "requirement", "implement", "validation", "feedback"]
+
+# Map actions to deliverable categories (FEATURE-036-E)
+DELIVERABLE_CATEGORIES = {
+    "compose_idea": "ideas",
+    "refine_idea": "ideas",
+    "reference_uiux": "mockups",
+    "design_mockup": "mockups",
+    "requirement_gathering": "requirements",
+    "feature_breakdown": "requirements",
+    "feature_refinement": "requirements",
+    "technical_design": "requirements",
+    "implementation": "implementations",
+    "acceptance_testing": "quality",
+    "quality_evaluation": "quality",
+    "change_request": "requirements",
+}
 
 # Name validation
 NAME_PATTERN = re.compile(r"^[a-zA-Z0-9-]+$")
@@ -210,6 +229,71 @@ class WorkflowManagerService:
         if "error" in state and state.get("success") is False:
             return state
         return self._compute_next_action(state)
+
+    @x_ipe_tracing()
+    def resolve_deliverables(self, workflow_name: str) -> dict:
+        """Collect all deliverables from all actions, check file existence."""
+        state = self._read_state(workflow_name)
+        if "error" in state and state.get("success") is False:
+            return state
+
+        deliverables = []
+
+        # Shared stages (ideation, requirement)
+        for stage_name in ("ideation", "requirement"):
+            stage = state["stages"].get(stage_name, {})
+            for action_key, action_data in stage.get("actions", {}).items():
+                category = DELIVERABLE_CATEGORIES.get(action_key, "implementations")
+                for path_str in action_data.get("deliverables", []):
+                    full_path = self._project_root / path_str
+                    deliverables.append({
+                        "name": os.path.basename(path_str),
+                        "path": path_str,
+                        "category": category,
+                        "exists": full_path.exists(),
+                    })
+
+        # Per-feature stages (implement, validation, feedback)
+        for stage_name in ("implement", "validation", "feedback"):
+            features = state["stages"].get(stage_name, {}).get("features", {})
+            for feat_id, feat_data in features.items():
+                for action_key, action_data in feat_data.get("actions", {}).items():
+                    category = DELIVERABLE_CATEGORIES.get(action_key, "implementations")
+                    for path_str in action_data.get("deliverables", []):
+                        full_path = self._project_root / path_str
+                        deliverables.append({
+                            "name": os.path.basename(path_str),
+                            "path": path_str,
+                            "category": category,
+                            "exists": full_path.exists(),
+                        })
+
+        return {"deliverables": deliverables, "count": len(deliverables)}
+
+    @x_ipe_tracing()
+    def archive_stale_workflows(self, days: int = 30) -> dict:
+        """Move workflows inactive for >days to archive/."""
+        archive_dir = self._workflow_dir / "archive"
+        archive_dir.mkdir(parents=True, exist_ok=True)
+
+        archived = 0
+        if not self._workflow_dir.exists():
+            return {"archived_count": 0}
+
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+        for f in list(self._workflow_dir.glob("workflow-*.json")):
+            try:
+                state = json.loads(f.read_text(encoding="utf-8"))
+                last_activity = state.get("last_activity", "")
+                if last_activity:
+                    la_dt = datetime.fromisoformat(last_activity)
+                    if la_dt < cutoff:
+                        shutil.move(str(f), str(archive_dir / f.name))
+                        archived += 1
+            except (json.JSONDecodeError, ValueError, KeyError):
+                continue
+
+        return {"archived_count": archived}
 
     @x_ipe_tracing()
     def add_features(self, workflow_name: str, features: list) -> dict:
