@@ -25,6 +25,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 MANDATORY: Every requirement MUST create an Epic with ID format `EPIC-{nnn}` (e.g., EPIC-001, EPIC-035). Features created during Feature Breakdown use format `FEATURE-{nnn}-{X}` (e.g., FEATURE-035-A). The `{nnn}` in Feature IDs always matches the parent Epic number.
 
+⛔ **NEVER use an EPIC ID as a Feature ID.** `EPIC-{nnn}` identifies a grouping container; `FEATURE-{nnn}-{X}` identifies a deliverable unit of work. They are separate concepts. Do NOT place EPIC IDs in Feature ID columns, Feature List tables, or feature board entries.
+
 > **Transition Note:** During migration, both old (`FEATURE-{nnn}/`) and new (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`) folder structures may coexist. Skills must handle both formats when scanning existing files.
 
 ---

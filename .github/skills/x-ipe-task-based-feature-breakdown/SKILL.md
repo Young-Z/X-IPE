@@ -225,6 +225,8 @@ BLOCKING: Human MUST approve feature list before refinement proceeds.
          | FEATURE-001-A | EPIC-001 | ... | v1.0 | ... | None |
          | FEATURE-001-B | EPIC-001 | ... | v1.0 | ... | FEATURE-001-A |
 
+         ⛔ **Feature ID column MUST only contain `FEATURE-{nnn}-{X}` values — NEVER `EPIC-{nnn}`.** Epic IDs go in the Epic ID column only.
+
       3. Add detailed sections for each feature
 
       See: references/breakdown-guidelines.md for file structure templates.

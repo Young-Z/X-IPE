@@ -78,6 +78,7 @@ Rules:
 1. Feature {NNN} ALWAYS matches parent Epic {NNN}
 2. Suffix assigned alphabetically: first feature = A, second = B
 3. Scan x-ipe-docs/requirements/ for highest existing EPIC-{NNN} to determine next number
+4. ⛔ NEVER use `EPIC-{NNN}` as a Feature ID — they are separate concepts. Epic IDs identify grouping containers; Feature IDs identify deliverable units of work.
 
 ### Assignment Rules
 
