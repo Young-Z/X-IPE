@@ -1,5 +1,7 @@
 # Code Implementation - Examples
 
+> **Legacy Note:** Examples below use the Epic-aware folder structure (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`). Projects created before the Epic migration may still use the legacy format (`FEATURE-{nnn}/`). Both formats are supported during the transition period.
+
 > Reference from SKILL.md: `See [references/examples.md](references/examples.md)`
 
 ---
@@ -8,7 +10,7 @@
 
 **Context:**
 - Feature: FEATURE-001 (User Authentication)
-- Technical Design: `x-ipe-docs/requirements/FEATURE-001/technical-design.md`
+- Technical Design: `x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/technical-design.md`
 - Test file exists: `tests/test_auth.py` (17 tests, all RED)
 
 ### Execution Flow
@@ -17,7 +19,7 @@
 1. Execute Task Flow from x-ipe-workflow-task-execution skill
 
 2. Read Technical Design:
-   - Load x-ipe-docs/requirements/FEATURE-001/technical-design.md
+   - Load x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/technical-design.md
    - Components to implement:
      - AuthService (password hashing, token generation)
      - UserRepository (user CRUD operations)

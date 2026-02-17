@@ -29,7 +29,7 @@ This document contains detailed templates and examples for creating technical de
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `UserRepository` | FEATURE-001 | [technical-design.md](../FEATURE-001/technical-design.md) | Query user records for credential validation |
+| `UserRepository` | FEATURE-001 | [technical-design.md](../EPIC-001/FEATURE-001-A/technical-design.md) | Query user records for credential validation |
 | `ConfigManager` | Foundation | [config.md](../../architecture/technical-designs/config.md) | Load JWT secret and token expiry settings |
 
 ### Major Flow
@@ -136,7 +136,7 @@ Enable AI agents to quickly understand and reference designs across large projec
 
 | Dependency | Source | Design Link | Usage Description (≤50 words) |
 |------------|--------|-------------|-------------------------------|
-| `AuthService` | FEATURE-001 | [technical-design.md](../FEATURE-001/technical-design.md) | Used for user authentication before accessing protected endpoints |
+| `AuthService` | FEATURE-001 | [technical-design.md](../EPIC-001/FEATURE-001-A/technical-design.md) | Used for user authentication before accessing protected endpoints |
 | `DatabaseManager` | Foundation | [database.md](../../architecture/technical-designs/database.md) | Provides connection pooling and query execution |
 
 ### Format Guidelines

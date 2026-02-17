@@ -65,7 +65,7 @@ input:
   task_data:                             # commit only
     task_id: "TASK-XXX"
     task_description: "<description>"
-    feature_id: "FEATURE-XXX | null"
+    feature_id: "FEATURE-XXX-X | null"
   remote: "origin | <remote-name>"       # push/pull only; default: origin
   branch: "main | <branch-name>"         # push/pull/ensure_branch only; default: current branch
   create_from: "main | <base-branch>"    # ensure_branch only; base branch to create from
@@ -316,7 +316,7 @@ operation_output:
   </checkpoint>
   <checkpoint required="true">
     <name>Commit message follows format (commit operation)</name>
-    <verification>Message matches pattern: TASK-XXX commit for [Feature-FEATURE-XXX]: summary</verification>
+    <verification>Message matches pattern: TASK-XXX commit for [Feature-FEATURE-XXX-X]: summary</verification>
   </checkpoint>
 </definition_of_done>
 ```

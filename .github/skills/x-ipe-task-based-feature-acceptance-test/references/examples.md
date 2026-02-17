@@ -1,5 +1,7 @@
 # Feature Acceptance Test Examples
 
+> **Legacy Note:** Examples below use the Epic-aware folder structure (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`). Projects created before the Epic migration may still use the legacy format (`FEATURE-{nnn}/`). Both formats are supported during the transition period.
+
 This document provides concrete execution examples for the Feature Acceptance Test skill.
 
 ---
@@ -301,7 +303,7 @@ Output:
   status: blocked
   next_task_based_skill: Feature Closing
   require_human_review: Yes  # Human should manually test or configure MCP
-  task_output_links: [x-ipe-docs/requirements/FEATURE-008/acceptance-test-cases.md]
+  task_output_links: [x-ipe-docs/requirements/EPIC-008/FEATURE-008-A/acceptance-test-cases.md]
   feature_id: FEATURE-008
   feature_title: Idea Viewer
   feature_version: v1.4
@@ -378,7 +380,7 @@ Output:
   status: completed  # Tests ran, even with failures
   next_task_based_skill: Feature Closing
   require_human_review: Yes  # Due to test failures
-  task_output_links: [x-ipe-docs/requirements/FEATURE-010/acceptance-test-cases.md]
+  task_output_links: [x-ipe-docs/requirements/EPIC-010/FEATURE-010-A/acceptance-test-cases.md]
   feature_id: FEATURE-010
   feature_title: Dashboard
   feature_version: v1.0

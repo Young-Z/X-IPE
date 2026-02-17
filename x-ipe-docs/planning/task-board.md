@@ -178,4 +178,6 @@ auto_proceed: true  # Change to false for manual control
 | TASK-503 | Technical Design | FEATURE-035-B: Feature Board Epic Tracking — technical design for skill file edits | Quill ✅ | ✅ completed | 02-17-2026 11:12:00 | FEATURE-035-B/technical-design.md | Code Implementation |
 | TASK-504 | Code Implementation | FEATURE-035-B: Feature Board Epic Tracking — update feature-board-management skill files | Quill ✅ | ✅ completed | 02-17-2026 11:13:00 | SKILL.md, templates/features.md, references/examples.md | Feature Acceptance Test |
 | TASK-505 | Feature Acceptance Test | FEATURE-035-B: Feature Board Epic Tracking — verify all 10 ACs | Quill ✅ | ✅ completed | 02-17-2026 11:15:00 | FEATURE-035-B/acceptance-test-cases.md (10/10 PASS) | Feature Closing |
-| TASK-506 | Feature Closing | FEATURE-035-B: Feature Board Epic Tracking — commit and update board | Quill 🔄 | 🔄 in_progress | 02-17-2026 11:16:00 | - | - |
+| TASK-506 | Feature Closing | FEATURE-035-B: Feature Board Epic Tracking — commit and update board | Quill ✅ | ✅ completed | 02-17-2026 11:16:00 | commit 126c2c6 | - |
+| TASK-507 | Feature Refinement | FEATURE-035-C: Feature Lifecycle Skill Updates — specification | Quill ✅ | ✅ completed | 02-17-2026 11:17:00 | FEATURE-035-C/specification.md | Code Implementation |
+| TASK-508 | Code Implementation | FEATURE-035-C: Feature Lifecycle Skill Updates — update paths in 12 reference files across 8 skills | Quill 🔄 | 🔄 in_progress | 02-17-2026 11:18:00 | - | Feature Acceptance Test |

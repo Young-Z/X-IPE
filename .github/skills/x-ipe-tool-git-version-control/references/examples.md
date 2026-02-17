@@ -1,5 +1,7 @@
 # Git Version Control - Usage Examples
 
+> **Legacy Note:** Examples below use the Epic-aware folder structure (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`). Projects created before the Epic migration may still use the legacy format (`FEATURE-{nnn}/`). Both formats are supported during the transition period.
+
 ## Example 1: New Project Setup
 
 ```yaml
@@ -47,10 +49,10 @@ directory: /path/to/project
 task_data:
   task_id: TASK-023
   task_description: Implement user authentication with JWT tokens
-  feature_id: FEATURE-005
+  feature_id: FEATURE-005-A
 
 # Generated message:
-# "TASK-023 commit for Feature-FEATURE-005: Implement user authentication with JWT tokens"
+# "TASK-023 commit for Feature-FEATURE-005-A: Implement user authentication with JWT tokens"
 ```
 
 ---

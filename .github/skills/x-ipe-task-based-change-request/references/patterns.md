@@ -154,9 +154,9 @@ CR-002: Add import validation   → ENHANCEMENT to FEATURE-015
 CR-003: Add import error report → ENHANCEMENT to FEATURE-015
 ```
 
-All CRs live in `x-ipe-docs/requirements/FEATURE-015/`:
+All CRs live in `x-ipe-docs/requirements/EPIC-015/FEATURE-015-A/`:
 ```
-FEATURE-015/
+EPIC-015/FEATURE-015-A/
 ├── specification.md
 ├── CR-001.md  (original)
 ├── CR-002.md  (enhancement)

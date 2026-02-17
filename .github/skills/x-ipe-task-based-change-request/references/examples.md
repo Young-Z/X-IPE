@@ -1,5 +1,7 @@
 # Change Request - Examples
 
+> **Legacy Note:** Examples below use the Epic-aware folder structure (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`). Projects created before the Epic migration may still use the legacy format (`FEATURE-{nnn}/`). Both formats are supported during the transition period.
+
 > Reference from SKILL.md: `See [references/examples.md](references/examples.md)`
 
 ---
@@ -54,10 +56,10 @@ reasoning: |
   
 affected_artifacts:
   - x-ipe-docs/planning/features.md (new feature to add)
-  - x-ipe-docs/requirements/FEATURE-013/ (new folder to create)
+  - x-ipe-docs/requirements/EPIC-013/FEATURE-013-A/ (new folder to create)
 
 task_output_links:
-  - x-ipe-docs/requirements/FEATURE-013/ (pending creation in Feature Breakdown)
+  - x-ipe-docs/requirements/EPIC-013/FEATURE-013-A/ (pending creation in Feature Breakdown)
 ```
 
 ---
@@ -87,7 +89,7 @@ Step 3.3: Classify Scope
 
 Step 3.4: Route CR
   - Classification: ENHANCEMENT
-  - Action: Update FEATURE-005/specification.md
+  - Action: Update EPIC-005/FEATURE-005-A/specification.md
   - Next Task: Feature Refinement
 ```
 
@@ -104,11 +106,11 @@ reasoning: |
   Same user goal, improved UX implementation.
   
 affected_artifacts:
-  - x-ipe-docs/requirements/FEATURE-005/specification.md
-  - x-ipe-docs/requirements/FEATURE-005/technical-design.md
+  - x-ipe-docs/requirements/EPIC-005/FEATURE-005-A/specification.md
+  - x-ipe-docs/requirements/EPIC-005/FEATURE-005-A/technical-design.md
 
 task_output_links:
-  - x-ipe-docs/requirements/FEATURE-005/specification.md (to update)
+  - x-ipe-docs/requirements/EPIC-005/FEATURE-005-A/specification.md (to update)
 ```
 
 ---

@@ -1,5 +1,7 @@
 # Commit Message Format
 
+> **Legacy Note:** Examples below use the Epic-aware folder structure (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`). Projects created before the Epic migration may still use the legacy format (`FEATURE-{nnn}/`). Both formats are supported during the transition period.
+
 ## Overview
 
 This document provides detailed examples and guidelines for the structured commit message format used by the x-ipe-tool-git-version-control skill.
@@ -40,8 +42,8 @@ This document provides detailed examples and guidelines for the structured commi
 - If `task_data.feature_id` is null → Omit (just "commit for:")
 
 **Examples:**
-- With feature: `Feature-FEATURE-003`
-- With feature: `Feature-FEATURE-015`
+- With feature: `Feature-FEATURE-003-A`
+- With feature: `Feature-FEATURE-015-A`
 - Without feature: (omitted, becomes "commit for:")
 
 ---
@@ -124,11 +126,11 @@ TASK-099 commit for: Fix memory leak in background worker process
 task_data:
   task_id: TASK-015
   task_description: Create technical design for user authentication system
-  feature_id: FEATURE-003
+  feature_id: FEATURE-003-A
 ```
 **Generated Message:**
 ```
-TASK-015 commit for Feature-FEATURE-003: Create technical design for user authentication system
+TASK-015 commit for Feature-FEATURE-003-A: Create technical design for user authentication system
 ```
 
 ---
@@ -138,11 +140,11 @@ TASK-015 commit for Feature-FEATURE-003: Create technical design for user authen
 task_data:
   task_id: TASK-023
   task_description: Implement JWT token generation and validation endpoints
-  feature_id: FEATURE-005
+  feature_id: FEATURE-005-A
 ```
 **Generated Message:**
 ```
-TASK-023 commit for Feature-FEATURE-005: Implement JWT token generation and validation endpoints
+TASK-023 commit for Feature-FEATURE-005-A: Implement JWT token generation and validation endpoints
 ```
 
 ---
@@ -152,11 +154,11 @@ TASK-023 commit for Feature-FEATURE-005: Implement JWT token generation and vali
 task_data:
   task_id: TASK-031
   task_description: Generate unit tests for payment processing module
-  feature_id: FEATURE-008
+  feature_id: FEATURE-008-A
 ```
 **Generated Message:**
 ```
-TASK-031 commit for Feature-FEATURE-008: Generate unit tests for payment processing module
+TASK-031 commit for Feature-FEATURE-008-A: Generate unit tests for payment processing module
 ```
 
 ---
@@ -166,11 +168,11 @@ TASK-031 commit for Feature-FEATURE-008: Generate unit tests for payment process
 task_data:
   task_id: TASK-042
   task_description: Fix authentication token validation in login endpoint
-  feature_id: FEATURE-007
+  feature_id: FEATURE-007-A
 ```
 **Generated Message:**
 ```
-TASK-042 commit for Feature-FEATURE-007: Fix authentication token validation in login endpoint
+TASK-042 commit for Feature-FEATURE-007-A: Fix authentication token validation in login endpoint
 ```
 
 ---
@@ -180,11 +182,11 @@ TASK-042 commit for Feature-FEATURE-007: Fix authentication token validation in 
 task_data:
   task_id: TASK-056
   task_description: Complete user profile management feature with documentation
-  feature_id: FEATURE-012
+  feature_id: FEATURE-012-A
 ```
 **Generated Message:**
 ```
-TASK-056 commit for Feature-FEATURE-012: Complete user profile management feature with documentation
+TASK-056 commit for Feature-FEATURE-012-A: Complete user profile management feature with documentation
 ```
 
 ---
@@ -267,11 +269,11 @@ If task_description is very short, use it as-is:
 task_data:
   task_id: TASK-100
   task_description: Add logging
-  feature_id: FEATURE-020
+  feature_id: FEATURE-020-A
 ```
 **Generated Message:**
 ```
-TASK-100 commit for Feature-FEATURE-020: Add logging
+TASK-100 commit for Feature-FEATURE-020-A: Add logging
 ```
 
 ---
@@ -282,11 +284,11 @@ Summarize multiple changes concisely:
 task_data:
   task_id: TASK-055
   task_description: Update database schema, add migrations, and modify API endpoints for user preferences
-  feature_id: FEATURE-011
+  feature_id: FEATURE-011-A
 ```
 **Generated Message:**
 ```
-TASK-055 commit for Feature-FEATURE-011: Update database schema and API endpoints for user preferences
+TASK-055 commit for Feature-FEATURE-011-A: Update database schema and API endpoints for user preferences
 ```
 
 ---
@@ -295,8 +297,8 @@ TASK-055 commit for Feature-FEATURE-011: Update database schema and API endpoint
 
 ### ❌ Don't Include Implementation Details
 ```
-Bad: TASK-042 commit for Feature-FEATURE-007: Fix bug by adding null check on line 156 in auth.py
-Good: TASK-042 commit for Feature-FEATURE-007: Fix authentication token validation
+Bad: TASK-042 commit for Feature-FEATURE-007-A: Fix bug by adding null check on line 156 in auth.py
+Good: TASK-042 commit for Feature-FEATURE-007-A: Fix authentication token validation
 ```
 
 ### ❌ Don't Use Vague Terms
@@ -313,8 +315,8 @@ Good: TASK-015 commit for: Create technical design for authentication
 
 ### ❌ Don't Exceed 50 Words
 ```
-Bad: TASK-031 commit for Feature-FEATURE-008: Generate comprehensive unit tests for the payment processing module including credit card validation, payment gateway integration, transaction logging, error handling, retry logic, and notification system
-Good: TASK-031 commit for Feature-FEATURE-008: Generate unit tests for payment processing module
+Bad: TASK-031 commit for Feature-FEATURE-008-A: Generate comprehensive unit tests for the payment processing module including credit card validation, payment gateway integration, transaction logging, error handling, retry logic, and notification system
+Good: TASK-031 commit for Feature-FEATURE-008-A: Generate unit tests for payment processing module
 ```
 
 ---
@@ -340,11 +342,11 @@ Good: TASK-031 commit for Feature-FEATURE-008: Generate unit tests for payment p
 After several commits, `git log --oneline` might look like:
 
 ```
-a3f8c92 TASK-056 commit for Feature-FEATURE-012: Complete user profile management feature with documentation
-b2e7d81 TASK-042 commit for Feature-FEATURE-007: Fix authentication token validation in login endpoint
-c9a1f34 TASK-031 commit for Feature-FEATURE-008: Generate unit tests for payment processing module
-d4b2c56 TASK-023 commit for Feature-FEATURE-005: Implement JWT token generation and validation endpoints
-e8d3a72 TASK-015 commit for Feature-FEATURE-003: Create technical design for user authentication system
+a3f8c92 TASK-056 commit for Feature-FEATURE-012-A: Complete user profile management feature with documentation
+b2e7d81 TASK-042 commit for Feature-FEATURE-007-A: Fix authentication token validation in login endpoint
+c9a1f34 TASK-031 commit for Feature-FEATURE-008-A: Generate unit tests for payment processing module
+d4b2c56 TASK-023 commit for Feature-FEATURE-005-A: Implement JWT token generation and validation endpoints
+e8d3a72 TASK-015 commit for Feature-FEATURE-003-A: Create technical design for user authentication system
 f1c4b89 TASK-007 commit for: Break down shopping cart feature into implementation tasks
 g2e5d91 TASK-002 commit for: Set up Node.js development environment with npm and testing framework
 h7f3a46 TASK-001 commit for: Initialize Python project with uv

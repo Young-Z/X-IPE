@@ -1,5 +1,7 @@
 # Technical Design - Examples
 
+> **Legacy Note:** Examples below use the Epic-aware folder structure (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`). Projects created before the Epic migration may still use the legacy format (`FEATURE-{nnn}/`). Both formats are supported during the transition period.
+
 > Reference from SKILL.md: `See [references/examples.md](references/examples.md)`
 
 ---
@@ -8,7 +10,7 @@
 
 **Context:**
 - Feature: FEATURE-001 (User Authentication)
-- Specification: `x-ipe-docs/requirements/FEATURE-001/specification.md`
+- Specification: `x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/specification.md`
 
 ### Execution Flow
 
@@ -56,7 +58,7 @@
    - Token Refresh: Request → Verify Old → Generate New → Response
 
 7. Create technical-design.md at:
-   x-ipe-docs/requirements/FEATURE-001/technical-design.md
+   x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/technical-design.md
 
 8. Resume Task Flow from x-ipe-workflow-task-execution skill
 ```
@@ -80,7 +82,7 @@ interfaces_defined: 3
 data_flows_documented: 2
 
 task_output_links:
-  - x-ipe-docs/requirements/FEATURE-001/technical-design.md
+  - x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/technical-design.md
 ```
 
 ---
@@ -135,7 +137,7 @@ task_output_links:
 
 ```
 1. Check for Specification:
-   - Expected: x-ipe-docs/requirements/FEATURE-007/specification.md
+   - Expected: x-ipe-docs/requirements/EPIC-007/FEATURE-007-A/specification.md
    - Result: FILE NOT FOUND
 
 2. BLOCKED - Cannot proceed:
@@ -150,7 +152,7 @@ task_output_links:
 
 3. Status: blocked
    Reason: Missing specification
-   Required: x-ipe-docs/requirements/FEATURE-007/specification.md
+   Required: x-ipe-docs/requirements/EPIC-007/FEATURE-007-A/specification.md
 ```
 
 ---
@@ -164,7 +166,7 @@ task_output_links:
    - Add rate limiting to AuthService
 
 2. Read Existing Design:
-   - x-ipe-docs/requirements/FEATURE-001/technical-design.md exists
+   - x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/technical-design.md exists
    - Current components: AuthController, AuthService, etc.
 
 3. Update Design:

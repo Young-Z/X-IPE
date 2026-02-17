@@ -1,5 +1,7 @@
 # Feature Refinement - Examples
 
+> **Legacy Note:** Examples below use the Epic-aware folder structure (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`). Projects created before the Epic migration may still use the legacy format (`FEATURE-{nnn}/`). Both formats are supported during the transition period.
+
 > Reference from SKILL.md: `See [references/examples.md](references/examples.md)`
 
 ---
@@ -53,7 +55,7 @@
    - [ ] Token contains user ID and expiry
 
 6. Create Specification:
-   x-ipe-docs/requirements/FEATURE-001/specification.md
+   x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/specification.md
 
 7. Update features.md:
    - Status: Draft → Specified
@@ -79,7 +81,7 @@ user_stories: 4
 acceptance_criteria: 16
 
 task_output_links:
-  - x-ipe-docs/requirements/FEATURE-001/specification.md
+  - x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/specification.md
   - x-ipe-docs/planning/features.md (status updated)
 ```
 

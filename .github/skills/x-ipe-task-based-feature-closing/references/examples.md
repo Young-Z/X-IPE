@@ -1,5 +1,7 @@
 # Feature Closing Examples
 
+> **Legacy Note:** Examples below use the Epic-aware folder structure (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`). Projects created before the Epic migration may still use the legacy format (`FEATURE-{nnn}/`). Both formats are supported during the transition period.
+
 ## Example: Email/Password Login (FEATURE-002)
 
 ```
@@ -61,7 +63,7 @@
    task_output_links:
      - PR #42
      - CHANGELOG.md
-     - x-ipe-docs/features/FEATURE-002/
+     - x-ipe-docs/features/EPIC-002/FEATURE-002-A/
 
 8. Resume Task Flow from x-ipe-workflow-task-execution skill
    (Feature chain COMPLETE)
