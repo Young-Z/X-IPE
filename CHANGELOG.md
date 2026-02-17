@@ -19,6 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 2 MCP tools: `get_workflow_state`, `update_workflow_action` on `x-ipe-app-and-agent-interaction` server
   - 54 unit + API tests covering all 41 acceptance criteria
 
+- **FEATURE-036-B: Workflow View Shell & CRUD** (EPIC-036)
+  - "Workflow" button in top navigation bar with `bi-diagram-3` icon
+  - Full workflow list view replacing content area (sidebar hidden)
+  - Expandable panels with name, stage pill, creation date, feature count
+  - Empty state placeholder when no workflows exist
+  - Create workflow modal with name validation (alphanumeric + hyphens, ≤100 chars)
+  - Delete workflow via ⋮ action menu with confirmation dialog
+  - Toast notifications for errors
+  - 18 tests (template, module structure, init handler, API integration)
+
 - **FEATURE-030-B v2.0: UIUX Reference Toolbar — Two-Mode Wizard System**
   - Complete redesign from v1.x single-mode toolbar to v2.0 two-mode wizard system
   - **Core Shell** (`xipe-toolbar-core.js`): Hamburger icon, auto-collapse panel (expand on hover, 2s collapse timer), mode tabs, toast notifications (max 3, auto-dismiss 4s), draggable positioning, mode registry, bidirectional command system, CSS scoped with `.xipe-*` prefix

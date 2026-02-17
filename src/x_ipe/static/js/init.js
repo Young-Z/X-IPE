@@ -142,6 +142,27 @@ function initializeApp() {
     
     // FEATURE-025-A: Knowledge Base button click handler
     const kbBtn = document.getElementById('btn-knowledge-base');
+
+    // FEATURE-036-B: Engineering Workflow button click handler
+    const workflowBtn = document.getElementById('btn-workflow');
+    if (workflowBtn) {
+        workflowBtn.addEventListener('click', () => {
+            console.log('[Workflow] Workflow button clicked');
+            const container = document.getElementById('content-body');
+            const sidebar = document.getElementById('sidebar');
+            const resizeHandle = document.querySelector('.sidebar-resize-handle');
+            const contentHeader = document.querySelector('.content-header');
+            if (sidebar) sidebar.style.display = 'none';
+            if (resizeHandle) resizeHandle.style.display = 'none';
+            if (contentHeader) contentHeader.style.display = 'none';
+            if (container && typeof workflow !== 'undefined') {
+                workflow.render(container);
+            } else if (container) {
+                container.innerHTML = '<div class="p-4 text-muted">Workflow module not loaded</div>';
+            }
+        });
+    }
+
     if (kbBtn) {
         kbBtn.addEventListener('click', () => {
             console.log('[KB] Knowledge Base button clicked');
