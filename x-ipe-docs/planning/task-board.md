@@ -110,7 +110,7 @@
 
 ## Quick Stats
 
-- **Total Active:** 26
+- **Total Active:** 27
 - **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
@@ -157,3 +157,20 @@ auto_proceed: true  # Change to false for manual control
 | TASK-482 | UIUX Reference | Execute UIUX reference workflow on https://github.com — save to idea folder 206. Github-Reference-v3 | Flux ✅ | ✅ completed | 02-15-2026 13:45:00 | mockup-v1.html, referenced-elements.json, summarized-uiux-reference.md, mimic-strategy.md, area-1.png | - |
 | TASK-483 | UIUX Reference | Execute UIUX reference workflow on https://google.com — save to idea folder 207. Google-Reference-v1 | Flux 🔄 | 🔄 in_progress | 02-15-2026 13:57:00 | - | - |
 | TASK-484 | UIUX Reference | Execute UIUX reference workflow on https://google.com — save to idea folder 207. Google-Reference | Ember ✅ | ✅ completed | 02-15-2026 14:25:00 | referenced-elements.json, summarized-uiux-reference.md, mimic-strategy.md, area-1.png | - |
+| TASK-485 | UIUX Reference | Execute UIUX reference workflow on https://www.bilibili.com/ — save to idea folder 210. Bilibili-Reference-v1 | Bolt | 🔄 in_progress | 02-16-2026 02:58:00 | - | - |
+| TASK-486 | UIUX Reference | Execute UIUX reference workflow on https://app.diagrams.net/ — save to idea folder 021. Feature-Engineering-Workflow | Zephyr 🔄 | 🔄 in_progress | 02-16-2026 06:35:00 | - | - |
+| TASK-487 | UIUX Reference | Execute UIUX reference workflow on https://app.diagrams.net/ — save to idea folder 021. Feature-Engineering-Workflow | Onyx ✅ | ✅ completed | 02-16-2026 06:50:00 | mockup-v1.html, referenced-elements.json, summarized-uiux-reference.md, mimic-strategy.md, area-1.png | - |
+| TASK-488 | UIUX Reference | Execute UIUX reference workflow on https://app.diagrams.net/ — save to idea folder 021. Feature-Engineering-Workflow | Drift ✅ | ✅ completed | 02-16-2026 07:50:00 | mockup-v1.html, referenced-elements.json, summarized-uiux-reference.md, mimic-strategy.md, area-1.png | - |
+| TASK-489 | Ideation | Refine idea 021: Feature-Engineering-Workflow — centralized workflow view for project value delivery from ideation to feedback | Spark ✅ | ✅ completed | 02-16-2026 08:13:00 | x-ipe-docs/ideas/021. Feature-Engineering-Workflow/idea-summary-v2.md | Idea Mockup |
+| TASK-490 | Idea Mockup | IDEA-021: Create workflow view mockup for Engineering Workflow (panels, stage ribbon, feature lanes, action states) | Spark 🔄 | 🔄 in_progress | 02-16-2026 08:48:00 | - | Requirement Gathering |
+| TASK-491 | Bug Fix | Fix 2 UIUX feedback bugs: (1) screenshot capture should use iframe element screenshot instead of html2canvas DOM parsing, (2) previously submitted feedback entries don't load their screenshots (Feedback-20260216-171908) | Sage ✅ | ✅ completed | 02-16-2026 09:25:00 | uiux-feedback.js, uiux_feedback_service.py, uiux_feedback_routes.py, test_uiux_feedback_storage.py | - |
+| TASK-492 | Idea Mockup | Update workflow-view-v1.html mockup + idea-summary-v3.md: add feature dependency arrows and parallel run indicators in feature lanes (Feedback-20260217-170833) | Cipher ✅ | ✅ completed | 02-17-2026 09:11:00 | workflow-view-v1.html, idea-summary-v3.md | - |
+| TASK-493 | Requirement Gathering | IDEA-021: Engineering Workflow — gather and document requirements for centralized workflow view from ideation to feedback | Cipher ✅ | ✅ completed | 02-17-2026 09:17:00 | requirement-details-part-9.md, requirement-details-index.md | Feature Breakdown |
+| TASK-494 | Ideation | Refine idea 022: CR-Introduce Epic — add Epic layer above Features in requirement management workflow | Quill ✅ | ✅ completed | 02-17-2026 10:11:00 | x-ipe-docs/ideas/022. CR-Introduce Epic/idea-summary-v2.md | Requirement Gathering |
+| TASK-495 | Requirement Gathering | IDEA-022: CR-Introduce Epic — document requirements for Epic layer in requirement management workflow | Quill ✅ | ✅ completed | 02-17-2026 10:48:00 | requirement-details-part-9.md (CR-EPIC section), requirement-details-index.md | Feature Breakdown |
+| TASK-496 | Feature Breakdown | CR-EPIC: Break Epic layer requirements into features for skill updates, tracking changes, and migration | Quill ✅ | ✅ completed | 02-17-2026 10:48:00 | requirement-details-part-9.md (FEATURE-035-A to E), features.md, requirement-details-index.md | Feature Refinement |
+| TASK-497 | Feature Refinement | FEATURE-035-A: Epic Core Workflow Skills — specification for requirement-gathering and feature-breakdown skill updates | Quill ✅ | ✅ completed | 02-17-2026 10:56:00 | FEATURE-035-A/specification.md | Technical Design |
+| TASK-498 | Technical Design | FEATURE-035-A: Epic Core Workflow Skills — technical design for skill file edits | Quill ✅ | ✅ completed | 02-17-2026 10:56:00 | FEATURE-035-A/technical-design.md | Code Implementation |
+| TASK-499 | Code Implementation | FEATURE-035-A: Epic Core Workflow Skills — update requirement-gathering and feature-breakdown SKILL.md + references | Quill ✅ | ✅ completed | 02-17-2026 11:00:00 | SKILL.md (2), references (5) | Feature Acceptance Test |
+| TASK-500 | Feature Acceptance Test | FEATURE-035-A: Epic Core Workflow Skills — verify all ACs against modified skill files | Quill ✅ | ✅ completed | 02-17-2026 11:05:00 | FEATURE-035-A/acceptance-test-cases.md (14/14 PASS) | Feature Closing |
+| TASK-501 | Feature Closing | FEATURE-035-A: Epic Core Workflow Skills — commit changes, update board | Quill 🔄 | 🔄 in_progress | 02-17-2026 11:10:00 | - | - |

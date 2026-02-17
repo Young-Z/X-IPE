@@ -1,6 +1,6 @@
 # Requirement Details Index
 
-> Last Updated: 02-13-2026
+> Last Updated: 02-17-2026
 
 ## Parts Overview
 
@@ -14,3 +14,4 @@
 | 6 | [Part 6](requirement-details-part-6.md) | FEATURE-027-A to E, FEATURE-028-A to D | ~473 |
 | 7 | [Part 7](requirement-details-part-7.md) | FEATURE-029-A to D | ~240 |
 | 8 | [Part 8](requirement-details-part-8.md) | FEATURE-030-A, FEATURE-030-B (v2.0), FEATURE-030-B-THEME, FEATURE-030-B-MOCKUP, FEATURE-031 (❌), FEATURE-032 (❌), FEATURE-033 | ~320 |
+| 9 | [Part 9](requirement-details-part-9.md) | FEATURE-034 (Engineering Workflow View), FEATURE-035-A to E (Epic Layer) | ~537 |

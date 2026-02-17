@@ -23,48 +23,48 @@
 3. Break Down Each Capability:
 
    Product Management:
-   - FEATURE-001: Product Catalog Display
-   - FEATURE-002: Product Search & Filter
-   - FEATURE-003: Product Details Page
-   - FEATURE-004: Inventory Management
+   - FEATURE-001-A: Product Catalog Display
+   - FEATURE-001-B: Product Search & Filter
+   - FEATURE-001-C: Product Details Page
+   - FEATURE-001-D: Inventory Management
 
    Shopping Cart:
-   - FEATURE-005: Add to Cart
-   - FEATURE-006: Cart Management (update qty, remove)
-   - FEATURE-007: Cart Persistence
+   - FEATURE-002-A: Add to Cart
+   - FEATURE-002-B: Cart Management (update qty, remove)
+   - FEATURE-002-C: Cart Persistence
 
    Checkout & Payment:
-   - FEATURE-008: Checkout Flow
-   - FEATURE-009: Payment Integration
-   - FEATURE-010: Order Confirmation
+   - FEATURE-003-A: Checkout Flow
+   - FEATURE-003-B: Payment Integration
+   - FEATURE-003-C: Order Confirmation
 
 4. Define Dependencies:
 
    ```
-   FEATURE-001 (Catalog) 
+   FEATURE-001-A (Catalog) 
         ↓
-   FEATURE-005 (Add to Cart) → FEATURE-006 (Cart Management)
+   FEATURE-002-A (Add to Cart) → FEATURE-002-B (Cart Management)
         ↓                              ↓
-   FEATURE-007 (Persistence) ←─────────┘
+   FEATURE-002-C (Persistence) ←─────────┘
         ↓
-   FEATURE-008 (Checkout) → FEATURE-009 (Payment)
+   FEATURE-003-A (Checkout) → FEATURE-003-B (Payment)
         ↓
-   FEATURE-010 (Confirmation)
+   FEATURE-003-C (Confirmation)
    ```
 
 5. Update features.md:
 
    | ID | Name | Status | Dependencies | Priority |
    |----|------|--------|--------------|----------|
-   | FEATURE-001 | Product Catalog | Draft | None | P1 |
-   | FEATURE-002 | Product Search | Draft | FEATURE-001 | P2 |
-   | FEATURE-005 | Add to Cart | Draft | FEATURE-001 | P1 |
-   | FEATURE-008 | Checkout Flow | Draft | FEATURE-007 | P1 |
+   | FEATURE-001-A | Product Catalog | Draft | None | P1 |
+   | FEATURE-001-B | Product Search | Draft | FEATURE-001-A | P2 |
+   | FEATURE-002-A | Add to Cart | Draft | FEATURE-001-A | P1 |
+   | FEATURE-003-A | Checkout Flow | Draft | FEATURE-002-C | P1 |
 
-6. Create Feature Folders:
-   - x-ipe-docs/requirements/FEATURE-001/
-   - x-ipe-docs/requirements/FEATURE-002/
-   - ... (one folder per feature)
+6. Create Feature Folders (under Epic):
+   - x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/
+   - x-ipe-docs/requirements/EPIC-001/FEATURE-001-B/
+   - ... (one folder per feature, under parent Epic)
 
 7. Resume Task Flow from x-ipe-workflow-task-execution skill
 ```
@@ -87,9 +87,9 @@ priority_assigned: Yes
 
 task_output_links:
   - x-ipe-docs/planning/features.md
-  - x-ipe-docs/requirements/FEATURE-001/
-  - x-ipe-docs/requirements/FEATURE-002/
-  - ... (10 feature folders)
+  - x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/
+  - x-ipe-docs/requirements/EPIC-001/FEATURE-001-B/
+  - ... (10 feature folders across 3 Epics)
 ```
 
 ---
@@ -104,23 +104,23 @@ task_output_links:
    - Need abstraction layer
 
 2. Break Down:
-   - FEATURE-020: Shipping Provider Interface
-   - FEATURE-021: FedEx Integration
-   - FEATURE-022: UPS Integration
-   - FEATURE-023: USPS Integration
-   - FEATURE-024: Rate Comparison UI
+   - FEATURE-020-A: Shipping Provider Interface
+   - FEATURE-020-B: FedEx Integration
+   - FEATURE-020-C: UPS Integration
+   - FEATURE-020-D: USPS Integration
+   - FEATURE-020-E: Rate Comparison UI
 
 3. Define Dependencies:
 
-   FEATURE-020 (Interface) ──┬──→ FEATURE-021 (FedEx)
-                             ├──→ FEATURE-022 (UPS)
-                             └──→ FEATURE-023 (USPS)
+   FEATURE-020-A (Interface) ──┬──→ FEATURE-020-B (FedEx)
+                             ├──→ FEATURE-020-C (UPS)
+                             └──→ FEATURE-020-D (USPS)
                                       ↓
-                             FEATURE-024 (Rate UI)
+                             FEATURE-020-E (Rate UI)
 
 4. Output:
    features_created: 5
-   base_dependency: FEATURE-020
+   base_dependency: FEATURE-020-A
 ```
 
 ---
@@ -135,20 +135,20 @@ task_output_links:
    - Classification: NEW_FEATURE
 
 2. Break Down:
-   - FEATURE-025: CSV Import Parser
-   - FEATURE-026: Import Validation Pipeline
-   - FEATURE-027: Import Error Handling
-   - FEATURE-028: Import Progress UI
+   - FEATURE-025-A: CSV Import Parser
+   - FEATURE-025-B: Import Validation Pipeline
+   - FEATURE-025-C: Import Error Handling
+   - FEATURE-025-D: Import Progress UI
 
 3. Link to Existing:
-   - All depend on FEATURE-004 (Product Management - existing)
+   - All depend on FEATURE-004-A (Product Management - existing)
 
 4. Update features.md with new entries
 
 5. Output:
    source: Change Request
    features_created: 4
-   linked_to_existing: FEATURE-004
+   linked_to_existing: FEATURE-004-A
 ```
 
 ---

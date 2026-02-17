@@ -82,8 +82,8 @@ When parts exist, create/update `requirement-details-index.md`:
 
 | Part | File | Features Covered | Lines |
 |------|------|------------------|-------|
-| 1 | [Part 1](requirement-details-part-1.md) | FEATURE-001 to FEATURE-005 | ~420 |
-| 2 | [Part 2](requirement-details-part-2.md) | FEATURE-006 to FEATURE-010 | ~380 |
+| 1 | [Part 1](requirement-details-part-1.md) | EPIC-001 to EPIC-005 | ~420 |
+| 2 | [Part 2](requirement-details-part-2.md) | EPIC-006 to EPIC-010 | ~380 |
 ```
 
 NOTE: Feature List is NOT in index - each part file has its own Feature List section.

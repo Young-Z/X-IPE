@@ -23,7 +23,9 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 MANDATORY: This skill MUST call feature-board-management to create features on the board. Never edit features.md manually.
 
-MANDATORY: Every feature MUST have a feature ID in the format `FEATURE-{nnn}` (e.g., FEATURE-001, FEATURE-027). This applies regardless of the output language used.
+MANDATORY: Every feature MUST have a feature ID in the format `FEATURE-{nnn}-{X}` (e.g., FEATURE-035-A, FEATURE-035-B) where `{nnn}` matches the parent Epic number. Features are created as sub-folders under the parent `EPIC-{nnn}/` folder.
+
+> **Transition Note:** During migration, both old (`FEATURE-{nnn}/`) and new (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`) folder structures may coexist. Skills must handle both formats when scanning existing files.
 
 See [references/breakdown-guidelines.md](references/breakdown-guidelines.md) for:
 - Feature dependency patterns (sequential, parallel, multiple) and rules (no cycles, foundation first)
@@ -171,7 +173,9 @@ BLOCKING: Human MUST approve feature list before refinement proceeds.
     <name>Identify Features</name>
     <action>
       Apply feature identification criteria:
-      1. Prioritize MVP: first feature MUST be the "Minimum Runnable Feature"
+      1. Assign Feature IDs as FEATURE-{nnn}-{A|B|C...} where {nnn} matches parent Epic number.
+         First feature gets suffix A, second gets B, etc.
+      2. Prioritize MVP: first feature MUST be the "Minimum Runnable Feature"
          - Small but sufficient to demonstrate the core value loop
       2. Iterative Expansion: subsequent features build upon the first
       3. Single Responsibility: each feature does one thing well
@@ -192,10 +196,12 @@ BLOCKING: Human MUST approve feature list before refinement proceeds.
     <action>
       MANDATORY: Auto-detect mockups if not provided.
 
-      1. IF mockup_list empty -- scan x-ipe-docs/ideas/{idea-folder}/mockups/
-      2. IF still empty -- skip to Step 5
-      3. Create x-ipe-docs/requirements/{FEATURE-ID}/mockups/ for each feature
-      4. Copy mockups, link in requirement-details.md
+      1. IF mockup_list empty -- scan EPIC-{nnn}/mockups/ (shared Epic-level mockups)
+      2. IF still empty -- scan x-ipe-docs/ideas/{idea-folder}/mockups/
+      3. IF still empty -- skip to Step 5
+      4. Mockups remain at EPIC-{nnn}/mockups/ (shared) — do NOT create per-feature mockup folders
+      5. Features reference mockups via ../mockups/ relative path
+      6. Link in requirement-details.md
 
       See: references/breakdown-guidelines.md for detailed procedures.
     </action>
@@ -216,8 +222,8 @@ BLOCKING: Human MUST approve feature list before refinement proceeds.
 
          | Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
          |------------|---------------|---------|-------------------|-------------------|
-         | FEATURE-001 | ... | v1.0 | ... | None |
-         | FEATURE-002 | ... | v1.0 | ... | FEATURE-001 |
+         | FEATURE-001-A | ... | v1.0 | ... | None |
+         | FEATURE-001-B | ... | v1.0 | ... | FEATURE-001-A |
 
       3. Add detailed sections for each feature
 
@@ -236,7 +242,8 @@ BLOCKING: Human MUST approve feature list before refinement proceeds.
       CALL x-ipe+feature+feature-board-management skill:
         operation: create_or_update_features
         features:
-          - feature_id: FEATURE-001
+          - feature_id: FEATURE-001-A
+            epic_id: EPIC-001
             title: "{title}"
             version: v1.0
             description: "{description}"
@@ -325,14 +332,15 @@ task_completion_output:
   mockup_list: "{inherited from input or N/A}"
   # Dynamic attributes
   requirement_id: "REQ-XXX"
-  feature_ids: ["FEATURE-001", "FEATURE-002", "FEATURE-003"]
+  feature_ids: ["FEATURE-001-A", "FEATURE-001-B", "FEATURE-001-C"]
   feature_count: 3
+  epic_id: "EPIC-{nnn}"  # Parent Epic
   requirement_details_part: null | 1 | 2  # current active part number (null if no parts)
   parent_features_removed: []  # list of parent FEATURE-XXX IDs removed due to full sub-feature coverage
   dedup_gaps: []  # list of partially covered parents with uncovered FRs
   linked_mockups:
     - mockup_name: "Description of mockup function"
-      mockup_path: "x-ipe-docs/requirements/FEATURE-XXX/mockups/mockup-name.html"
+      mockup_path: "x-ipe-docs/requirements/EPIC-XXX/mockups/mockup-name.html"
 ```
 
 ---
@@ -365,7 +373,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Mockups copied to feature folders</name>
-    <verification>Mockup files exist in x-ipe-docs/requirements/{FEATURE-ID}/mockups/</verification>
+    <verification>Mockup files exist in x-ipe-docs/requirements/EPIC-{nnn}/mockups/ (shared at Epic level)</verification>
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Linked Mockups section updated</name>

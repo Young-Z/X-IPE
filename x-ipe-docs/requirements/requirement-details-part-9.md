@@ -1,0 +1,537 @@
+# Requirement Details - Part 9
+
+> Continued from: [requirement-details-part-8.md](requirement-details-part-8.md)
+> Created: 02-17-2026
+
+---
+
+## Feature List
+
+| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------------|---------|-------------------|-------------------|
+| FEATURE-034 | Engineering Workflow View | v1.0 | Centralized workflow view orchestrating project delivery lifecycle (Ideation → Requirement → Implement → Validation → Feedback) with workflow panels, stage ribbons, feature lanes, dependency visualization, parallel execution, and backend Workflow Manager | FEATURE-001, FEATURE-005, FEATURE-008, FEATURE-029, FEATURE-033 |
+| FEATURE-035-A | Epic Core Workflow Skills | v1.0 | Update requirement-gathering and feature-breakdown skills for Epic folder/naming support | None |
+| FEATURE-035-B | Feature Board Epic Tracking | v1.0 | Add Epic ID column to features.md, update feature-board-management skill | FEATURE-035-A |
+| FEATURE-035-C | Feature Lifecycle Skill Updates | v1.0 | Update 10+ lifecycle skills for Epic-aware paths | FEATURE-035-A, FEATURE-035-B |
+| FEATURE-035-D | Requirement-Details Epic Format | v1.0 | Update requirement-details to use EPIC-{nnn} headers and templates | FEATURE-035-A |
+| FEATURE-035-E | Retroactive Feature Migration | v1.0 | Migrate all existing features into EPIC-{nnn}/FEATURE-{nnn}-{X} structure | FEATURE-035-A, FEATURE-035-B, FEATURE-035-C, FEATURE-035-D |
+
+---
+
+## Linked Mockups
+
+| Mockup Function Name | Feature | Mockup Link |
+|---------------------|---------|-------------|
+| Engineering Workflow View (full interactive) | FEATURE-034 | [workflow-view-v1.html](../ideas/021.%20Feature-Engineering-Workflow/mockups/workflow-view-v1.html) |
+| Introduce Epic Layer (idea summary) | CR-EPIC | [idea-summary-v2.md](../ideas/022.%20CR-Introduce%20Epic/idea-summary-v2.md) |
+
+---
+
+## Feature Details
+
+---
+
+### FEATURE-034: Engineering Workflow View
+
+**Version:** v1.0
+**Brief Description:** A centralized Engineering Workflow view integrated into the X-IPE application that orchestrates the full project value delivery lifecycle — from ideation through requirement, implementation, validation, and feedback — in a single, visual, panel-based interface.
+
+> Source: IDEA-021 (Feature-Engineering-Workflow)
+> Status: Proposed
+> Priority: High
+> Mockup: [workflow-view-v1.html](../ideas/021.%20Feature-Engineering-Workflow/mockups/workflow-view-v1.html)
+
+#### Project Overview
+
+Currently, X-IPE provides powerful skills for each stage of software delivery (ideation, requirements, design, implementation, testing, feedback), but they are accessed in isolation. Users manually navigate between the console, sidebar, knowledge base, and idea views to track progress. There is no unified view that shows where you are in the delivery lifecycle, what to do next, what deliverables exist, or which features can progress in parallel.
+
+The Engineering Workflow View solves this by providing a centralized, visual, panel-based interface that orchestrates the full project delivery lifecycle using existing X-IPE skills and infrastructure.
+
+#### User Request
+
+The user wants:
+1. A new "Engineering Workflow" top-nav entry that opens a dedicated workflow management view
+2. Workflow panels with stage ribbons, action buttons, and feature lanes
+3. Feature dependency tracking and parallel run indicators
+4. True parallel agent session execution for independent features
+5. Backend Workflow Manager with state persistence in JSON
+6. MCP integration for skill-to-workflow communication
+7. Auto-archive of completed workflows after 30 days of inactivity
+
+#### Clarifications
+
+| Question | Answer |
+|----------|--------|
+| Workflow-to-idea folder mapping | No idea folder required upfront at creation. When user clicks Compose/Upload Idea, prompt to create or select an existing idea folder |
+| Feature dependency source | Auto-populated from Feature Breakdown skill output via agent skill → MCP → Workflow Manager → persisted in workflow JSON |
+| Parallel execution | True parallel agent sessions allowed for independent features. Before starting an action, Workflow Manager checks dependencies; if dependency unfinished → show confirm dialog; if clear → start directly |
+| Stage gating granularity | Both: shared stages (Ideation, Requirement) are workflow-level gated; per-feature stages (Implement, Validation, Feedback) are independently gated |
+| Workflow end state | Auto-archive after 30 days inactivity; deliverables remain in their original locations |
+| Console integration | Reuse existing console function — same pattern as copilot button in ideation view (find idle session, auto-type skill command) |
+| State persistence | JSON files only (`x-ipe-docs/engineering-workflow/workflow-{name}.json`) for v1 |
+| Real-time updates | Polling with 7-second interval to detect state changes |
+| MCP tool ownership | New MCP tools (`update_workflow_status`, `get_workflow_state`) owned by this feature; dependency on FEATURE-033 for MCP infrastructure |
+
+#### High-Level Requirements
+
+##### Functional Requirements
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-034.1 | **Top-nav entry** — "Engineering Workflow" menu item in top navigation bar, opens dedicated workflow view replacing the middle content area | P0 |
+| FR-034.2 | **Workflow CRUD** — Create, view, delete/archive workflows. "+" button opens modal with name input. No idea folder required at creation. | P0 |
+| FR-034.3 | **Workflow Panel** — Each workflow displayed as expandable panel with header (name, creation date, feature count, current stage), stage ribbon, action buttons, feature lanes, and deliverables section | P0 |
+| FR-034.4 | **Stage Ribbon** — Horizontal progression bar: Ideation → Requirement → Implement → Validation → Feedback. Visual states: completed (✓ green), active (animated dot), pending (numbered) | P0 |
+| FR-034.5 | **Action Buttons** — Stage-specific action buttons with three states: Done (green), Suggested (dashed yellow), Normal (default). Each action maps to an X-IPE skill | P0 |
+| FR-034.6 | **Stage Gating (Workflow-Level)** — Shared stages (Ideation, Requirement) must complete before per-feature stages unlock. Mandatory actions must complete before next stage. Optional actions can be skipped. | P0 |
+| FR-034.7 | **Feature Lanes** — After Feature Breakdown, Implement/Validation/Feedback stages split into horizontal swimlanes per feature. Each lane shows feature ID, name, per-stage progress, and next suggested action | P0 |
+| FR-034.8 | **Feature-Level Stage Gating** — Each feature lane has independent stage gating. Feature A can be in Validation while Feature B is in Implement | P0 |
+| FR-034.9 | **Feature Dependencies** — Dependency data auto-populated from Feature Breakdown output. Displayed as SVG curved connector arrows between dependent lanes. Dependency tags (`⛓ needs {ID}`) on dependent features. Parallel badges (`⇉ Parallel`) on independent features | P0 |
+| FR-034.10 | **Dependencies Toggle** — Button in lanes legend to show/hide dependency visualizations (arrows, tags, badges) | P1 |
+| FR-034.11 | **Working Item Selector** — Dropdown panel listing features with current stage and next action. Selecting a feature highlights its lane. Disabled before Feature Breakdown | P1 |
+| FR-034.12 | **Action Execution — Modal** — Compose/Upload Idea actions open existing modal UI | P0 |
+| FR-034.13 | **Action Execution — CLI Agent** — All other actions: (1) check dependencies via Workflow Manager, (2) if dependency unfinished → confirm dialog, (3) if clear → open console, find idle session, auto-type skill command (user presses Enter to confirm) | P0 |
+| FR-034.14 | **True Parallel Execution** — Multiple agent sessions can run simultaneously for independent features. No restriction on concurrent sessions | P0 |
+| FR-034.15 | **Idea Folder Linking** — No folder required at workflow creation. When user triggers Compose/Upload Idea, prompt to create new or select existing idea folder. Linked via `idea_folder` field in workflow JSON | P0 |
+| FR-034.16 | **Deliverables Section** — Collapsible section showing categorized artifacts (Ideas, Mockups, Requirements, Implementations, Quality Reports) with clickable links. Missing files show "⚠️ not found" | P1 |
+| FR-034.17 | **Auto-Archive** — Workflows auto-archive after 30 days of inactivity. Archived workflows move to `engineering-workflow/archive/`. Deliverables remain in original locations | P1 |
+
+##### Backend & Integration Requirements
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-034.18 | **Engineering Workflow Manager** — New backend service: workflow CRUD, stage gating logic, dependency evaluation, next-action suggestion, state persistence, notification dispatch | P0 |
+| FR-034.19 | **MCP Tools** — New tools on existing app-agent-interaction MCP: `update_workflow_status(workflow_name, action, status, deliverables[])` and `get_workflow_state(workflow_name)` | P0 |
+| FR-034.20 | **State Persistence** — Workflow state in `x-ipe-docs/engineering-workflow/workflow-{name}.json` with `schema_version` field for future migrations | P0 |
+| FR-034.21 | **Polling Updates** — Frontend polls for workflow state changes every 7 seconds. On change detected, UI refreshes affected panels/lanes | P0 |
+| FR-034.22 | **Dependency Check Before Action** — Workflow Manager evaluates feature dependencies before allowing action execution. Blocked features trigger confirm dialog | P0 |
+| FR-034.23 | **Deliverables Resolver** — Reads deliverable paths from workflow JSON → verifies file existence → returns resolved links or "⚠️ not found" | P1 |
+
+##### Non-Functional Requirements
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| NFR-034.1 | Workflow View must load within 2 seconds for up to 10 active workflows | P0 |
+| NFR-034.2 | Polling must not cause noticeable UI lag or CPU usage | P0 |
+| NFR-034.3 | Workflow JSON schema must include `schema_version` for forward-compatible migrations | P0 |
+| NFR-034.4 | Only Engineering Workflow Manager (via MCP) writes to workflow JSON — ensures data integrity | P0 |
+| NFR-034.5 | No modification to existing X-IPE skills — orchestration only | P0 |
+| NFR-034.6 | Console integration reuses existing session APIs without modification | P0 |
+
+#### Acceptance Criteria
+
+| AC ID | Given | When | Then |
+|-------|-------|------|------|
+| AC-034.1 | User is on any X-IPE page | User clicks "Engineering Workflow" in top nav | Middle content area replaced with workflow view showing all workflows |
+| AC-034.2 | Workflow view is visible | User clicks "+ Create Workflow" and enters a name | New workflow panel created with Ideation stage active, no idea folder linked |
+| AC-034.3 | Workflow at Ideation stage | User clicks "Compose Idea" action | Prompt to create/select idea folder, then modal opens for idea composition |
+| AC-034.4 | Workflow at Ideation stage, all mandatory actions done | Workflow Manager evaluates stage | Requirement stage unlocks; stage ribbon updates |
+| AC-034.5 | Workflow at Requirement stage | User completes Feature Breakdown skill | Feature lanes appear; dependency data auto-populated from skill output via MCP |
+| AC-034.6 | Feature lanes visible with dependencies | User looks at the lanes | Dependent features show `⛓ needs {ID}` tags; independent features show `⇉ Parallel` badges; SVG arrows connect dependent lanes |
+| AC-034.7 | User clicks Dependencies toggle | Toggle button clicked | All dependency visualizations (arrows, tags, badges) hide/show |
+| AC-034.8 | Feature A has no unfinished dependencies | User clicks action on Feature A | Action starts immediately — console opens, idle session found, skill command auto-typed |
+| AC-034.9 | Feature B depends on Feature A (unfinished) | User clicks action on Feature B | Confirm dialog warns about unfinished dependency; user can proceed or cancel |
+| AC-034.10 | Two independent features | User starts actions on both | Two concurrent agent sessions run in separate console sessions |
+| AC-034.11 | Agent skill completes | Skill calls `update_workflow_status` via MCP | Workflow JSON updated; UI refreshes within 7 seconds (next poll); action button turns green |
+| AC-034.12 | All features reach Feedback stage completion | 30 days pass with no activity | Workflow auto-archived; deliverables remain accessible in original locations |
+| AC-034.13 | Deliverable file has been deleted | Deliverables section renders | Missing file shows "⚠️ not found" instead of broken link |
+| AC-034.14 | Working Item Selector opened | User clicks a feature in dropdown | Corresponding feature lane highlights; dropdown closes |
+
+#### Action-to-Stage Mapping
+
+| Stage | Action | Mandatory | Interaction | Skill |
+|-------|--------|-----------|-------------|-------|
+| Ideation | Compose/Upload Idea | ✅ | Modal | (built-in) |
+| Ideation | Reference UIUX | ❌ | CLI Agent | x-ipe-tool-uiux-reference |
+| Ideation | Refine Idea | ✅ | CLI Agent | x-ipe-task-based-ideation-v2 |
+| Ideation | Design Mockup | ❌ | CLI Agent | x-ipe-task-based-idea-mockup |
+| Requirement | Requirement Gathering | ✅ | CLI Agent | x-ipe-task-based-requirement-gathering |
+| Requirement | Feature Breakdown | ✅ | CLI Agent | x-ipe-task-based-feature-breakdown |
+| Implement | Feature Refinement | ✅ | CLI Agent | x-ipe-task-based-feature-refinement |
+| Implement | Technical Design | ✅ | CLI Agent | x-ipe-task-based-technical-design |
+| Implement | Implementation | ✅ | CLI Agent | x-ipe-task-based-code-implementation |
+| Validation | Acceptance Testing | ✅ | CLI Agent | x-ipe-task-based-feature-acceptance-test |
+| Validation | Feature Quality Evaluation | ❌ | CLI Agent | (deferred to v2 — skill TBD) |
+| Feedback | Change Request | ❌ | CLI Agent | x-ipe-task-based-change-request |
+
+#### Stage Completion Rules
+
+| Stage | Mandatory Actions | Optional Actions | Gate to Next |
+|-------|-------------------|------------------|--------------|
+| Ideation | Compose/Upload Idea, Refine Idea | Reference UIUX, Design Mockup | All mandatory done |
+| Requirement | Requirement Gathering, Feature Breakdown | — | All mandatory done |
+| Implement (per-feature) | Feature Refinement, Technical Design, Implementation | — | All mandatory done |
+| Validation (per-feature) | Acceptance Testing | Feature Quality Evaluation | Acceptance Testing done |
+| Feedback (per-feature) | — | Change Request | Stage auto-completes; CR loops back to Implement |
+
+#### Error Handling & Recovery
+
+| Scenario | Behavior |
+|----------|----------|
+| Skill fails mid-action | Action stays `in_progress`; user sees retry button; error logged in workflow JSON |
+| MCP callback never arrives | After 10-minute timeout, action shows "status unknown" with manual override options (mark done / retry) |
+| Workflow JSON corrupted | Workflow Manager validates JSON on read; falls back to last known good state |
+| Deliverable file missing | Deliverables Resolver marks link as "⚠️ not found" |
+| Manual override | User can right-click action → "Mark as Done" or "Reset to Pending" for recovery |
+
+#### Workflow State JSON Schema (v1.0)
+
+```json
+{
+  "schema_version": "1.0",
+  "name": "My Feature Workflow",
+  "created": "2026-02-16T08:00:00Z",
+  "last_activity": "2026-02-17T09:00:00Z",
+  "idea_folder": null,
+  "current_stage": "ideation",
+  "stages": {
+    "ideation": {
+      "status": "in_progress",
+      "actions": {
+        "compose_idea": { "status": "pending", "deliverables": [] },
+        "reference_uiux": { "status": "skipped", "deliverables": [] },
+        "refine_idea": { "status": "pending", "deliverables": [] },
+        "design_mockup": { "status": "pending", "deliverables": [] }
+      }
+    },
+    "requirement": {
+      "status": "locked",
+      "actions": {
+        "requirement_gathering": { "status": "pending", "deliverables": [] },
+        "feature_breakdown": { "status": "pending", "deliverables": [], "features_created": [] }
+      }
+    },
+    "implement": {
+      "status": "locked",
+      "features": {}
+    },
+    "validation": {
+      "status": "locked",
+      "features": {}
+    },
+    "feedback": {
+      "status": "locked",
+      "features": {}
+    }
+  }
+}
+```
+
+**Post-Feature Breakdown, per-feature structure:**
+
+```json
+{
+  "FEATURE-040": {
+    "name": "Login Page",
+    "depends_on": [],
+    "actions": {
+      "feature_refinement": { "status": "pending", "deliverables": [] },
+      "technical_design": { "status": "pending", "deliverables": [] },
+      "implementation": { "status": "pending", "deliverables": [] },
+      "acceptance_testing": { "status": "pending", "deliverables": [] },
+      "quality_evaluation": { "status": "skipped", "deliverables": [] },
+      "change_request": { "status": "pending", "deliverables": [] }
+    }
+  }
+}
+```
+
+#### Dependencies
+
+- **FEATURE-001** (Project Navigation) — top-nav entry positioning
+- **FEATURE-005** (Interactive Console) — console session APIs for action execution
+- **FEATURE-008** (Workplace/Idea Management) — idea folder creation/selection
+- **FEATURE-029-A/B/C/D** (Console Session Explorer) — session management model
+- **FEATURE-033** (App-Agent Interaction MCP) — MCP infrastructure for new workflow tools
+
+#### Constraints
+
+- **No skill refactoring** — Existing skills remain unchanged; the Workflow Manager orchestrates them
+- **Reuse existing UI** — Console, idea compose/upload, sidebar patterns are reused
+- **State file authority** — Only the Engineering Workflow Manager (via MCP) writes to workflow JSON
+- **Sequential gating for shared stages** — Ideation and Requirement must complete before per-feature stages unlock
+- **Independent gating for feature stages** — Each feature progresses independently through Implement → Validation → Feedback
+- **JSON-only persistence** — No database for v1; JSON files are sufficient for single-user scope
+- **Console sessions are reused** — Action execution finds idle session or creates new one; multiple concurrent sessions allowed
+- **Single-user scope** — Multi-user concurrent access not addressed in v1
+
+---
+
+## Conflict Review Summary
+
+| Existing Feature | Overlap Type | Decision | Rationale |
+|-----------------|--------------|----------|-----------|
+| FEATURE-008 (Workplace/Idea Management) | Navigation competition — both occupy middle content area | **New standalone feature** | Different lifecycle: Workplace creates ideas; Engineering Workflow orchestrates delivery of those ideas. Coexist as separate top-nav entries. |
+| FEATURE-033 (App-Agent Interaction MCP) | Infrastructure reuse — both use app↔agent MCP communication | **New standalone feature with dependency** | New MCP tools (`update_workflow_status`, `get_workflow_state`) owned by this feature; depends on FEATURE-033 for MCP infrastructure. No CR on FEATURE-033. |
+| FEATURE-005/029 (Console/Terminal) | Session management — both create/manage console sessions | **New standalone feature with dependency** | Engineering Workflow reuses console APIs without modification. Dependency ensures console refactoring is flagged. |
+
+---
+
+### CR-EPIC: Introduce Epic Layer
+
+**Version:** v1.0
+**Brief Description:** Introduce an Epic grouping layer into X-IPE's requirement management workflow. Epics sit above Features, providing a formal hierarchy (`EPIC-{nnn}` → `FEATURE-{nnn}-{A|B|C}`) that replaces ad-hoc sub-feature patterns. This is a **process/skill Change Request** affecting the entire requirement-to-feature workflow.
+
+> Source: IDEA-022 (CR-Introduce Epic)
+> Status: Proposed
+> Priority: High
+> Idea Summary: [idea-summary-v2.md](../ideas/022.%20CR-Introduce%20Epic/idea-summary-v2.md)
+
+#### Project Overview
+
+Currently, X-IPE uses a flat feature structure (`FEATURE-{nnn}`) that organically splits into sub-features when scope grows (e.g., `FEATURE-030-B-THEME`, `FEATURE-030-B-MOCKUP`). This ad-hoc splitting lacks a formal parent concept, shared artifact storage, and consistent naming. The Epic layer formalizes this grouping.
+
+#### User Request
+
+The user wants:
+1. An Epic layer above Features in the requirement management workflow
+2. Requirement Gathering creates Epic folders (not Feature folders)
+3. Feature Breakdown creates Feature sub-folders under Epics
+4. Mockups stored at Epic level, referenced (not duplicated) by Features
+5. Every requirement always gets an Epic (even single-feature requirements)
+6. All existing features retroactively organized under Epics
+7. All related skills updated to support the Epic hierarchy
+
+#### Clarifications
+
+| Question | Answer |
+|----------|--------|
+| Migration of existing features | Update all skills first, then retroactively re-organize all existing features under Epics |
+| Epic-level artifacts | Epic folder holds mockups only; no specification.md at Epic level; all functional specs live in Features |
+| Standalone features | Always Epic — every requirement creates an Epic, even for single-feature work (consistency) |
+| Feature folder naming inside Epic | Full ID: `EPIC-030/FEATURE-030-A/` (not abbreviated) |
+| features.md tracking | Add Epic ID column to flat table, sorted by Epic ID |
+| Skills to update | All skills that reference FEATURE- patterns, plus requirement-details templates, change-request skill, git commit format |
+
+#### High-Level Requirements
+
+##### Folder Structure Requirements
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-EPIC.1 | **Epic folder creation** — Requirement Gathering skill creates `EPIC-{nnn}/` folder under `x-ipe-docs/requirements/` with `mockups/` sub-directory | P0 |
+| FR-EPIC.2 | **Feature sub-folders** — Feature Breakdown skill creates `FEATURE-{nnn}-{X}/` sub-folders under `EPIC-{nnn}/` | P0 |
+| FR-EPIC.3 | **Mockup storage** — Mockups created during Requirement Gathering stored in `EPIC-{nnn}/mockups/`; Features reference `../mockups/` | P0 |
+| FR-EPIC.4 | **No Epic-level specification** — No `specification.md` at Epic level; all functional specs live in Feature sub-folders | P0 |
+
+##### Naming Convention Requirements
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-EPIC.5 | **Epic naming** — Epics use `EPIC-{nnn}` format (e.g., `EPIC-030`) | P0 |
+| FR-EPIC.6 | **Feature naming** — Features use `FEATURE-{nnn}-{A|B|C...}` format where `{nnn}` matches parent Epic | P0 |
+| FR-EPIC.7 | **Always Epic** — Every requirement creates an Epic, including single-feature requirements | P0 |
+
+##### Tracking Requirements
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-EPIC.8 | **features.md Epic column** — Add `Epic ID` column to features.md flat table; sort rows by Epic ID | P0 |
+| FR-EPIC.9 | **Epic status derivation** — Epic status computed dynamically from constituent Feature statuses (all completed → completed; any in_progress → in_progress; etc.) | P1 |
+
+##### Skill Update Requirements
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-EPIC.10 | **Requirement Gathering skill** — Create `EPIC-{nnn}/` folder; define Epic-level ACs in requirement-details; store mockups at Epic level | P0 |
+| FR-EPIC.11 | **Feature Breakdown skill** — Create `FEATURE-{nnn}-{X}/` sub-folders under Epic; distribute Epic ACs to Features | P0 |
+| FR-EPIC.12 | **Feature Board Management skill** — Support Epic ID column in features.md; Epic-based sorting | P0 |
+| FR-EPIC.13 | **Change Request skill** — Support Epic-aware CR handling; CRs reference `EPIC-{nnn}/FEATURE-{nnn}-{X}/` paths | P0 |
+| FR-EPIC.14 | **Feature lifecycle skills** — Update path references in: feature-refinement, technical-design, test-generation, code-implementation, feature-acceptance-test, feature-closing | P0 |
+| FR-EPIC.15 | **Git version control skill** — Update commit message format to support Epic references | P1 |
+
+##### Requirement-Details Requirements
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-EPIC.16 | **Epic headers** — requirement-details files use `## EPIC-{nnn}` headers instead of `## FEATURE-{nnn}` | P0 |
+| FR-EPIC.17 | **Splitting heuristic** — Keep range-based splitting but with Epic headers | P0 |
+| FR-EPIC.18 | **Index update** — requirement-details-index.md references Epic ranges, not Feature ranges | P0 |
+
+##### Migration Requirements
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-EPIC.19 | **Retroactive migration** — All existing features organized under Epics after skill updates complete | P0 |
+| FR-EPIC.20 | **Legacy grouping** — Standalone features (e.g., `FEATURE-001`) → `EPIC-001/FEATURE-001-A/`; existing sub-features (e.g., `FEATURE-022-A/B/C/D`) → `EPIC-022/FEATURE-022-A/B/C/D/` | P0 |
+| FR-EPIC.21 | **Link integrity** — All spec links in features.md and skill examples must resolve after migration | P0 |
+| FR-EPIC.22 | **Archive preservation** — Task board archives (`task-board-archive-*.md`) are NOT modified; historical `FEATURE-XXX` references preserved | P0 |
+
+#### Acceptance Criteria
+
+| AC ID | Given | When | Then |
+|-------|-------|------|------|
+| AC-EPIC.1 | Requirement Gathering skill is invoked | Agent creates new requirement | `EPIC-{nnn}/` folder created with `mockups/` sub-directory |
+| AC-EPIC.2 | Epic folder exists | Feature Breakdown skill runs | `FEATURE-{nnn}-{A}/` sub-folder created under `EPIC-{nnn}/` |
+| AC-EPIC.3 | Features exist under Epic | User opens features.md | Epic ID column visible, rows sorted by Epic ID |
+| AC-EPIC.4 | Single-feature requirement created | Requirement Gathering completes | Epic folder created even for single feature (consistency) |
+| AC-EPIC.5 | Feature spec references mockup | Agent opens specification | Path resolves to `../mockups/` in parent Epic folder |
+| AC-EPIC.6 | Change Request filed on existing feature | CR skill runs | CR references `EPIC-{nnn}/FEATURE-{nnn}-{X}/` paths correctly |
+| AC-EPIC.7 | All skills updated | Migration runs | All existing features reorganized under `EPIC-{nnn}/` folders |
+| AC-EPIC.8 | Migration completed | All links in features.md checked | Every specification link resolves to correct file |
+| AC-EPIC.9 | Migration completed | Task board archives inspected | Historical `FEATURE-XXX` references unchanged |
+| AC-EPIC.10 | requirement-details file opened | Reader inspects headers | `## EPIC-{nnn}` headers used instead of `## FEATURE-{nnn}` |
+
+#### Migration Strategy
+
+**Phase 1:** Update all skills to support Epic-based folder structure for new requirements (backward-compatible — can still read old `FEATURE-XXX/` paths)
+
+**Phase 2:** Migrate existing feature folders:
+- `FEATURE-001/` → `EPIC-001/FEATURE-001-A/`
+- `FEATURE-022-A/B/C/D/` → `EPIC-022/FEATURE-022-A/B/C/D/`
+- `FEATURE-030-B/`, `FEATURE-030-B-THEME/`, `FEATURE-030-B-MOCKUP/` → `EPIC-030/FEATURE-030-B/`, `EPIC-030/FEATURE-030-B-THEME/`, `EPIC-030/FEATURE-030-B-MOCKUP/`
+
+**Phase 3:** Update references in features.md, requirement-details-index.md, requirement-details parts
+
+**Phase 4:** Validate all links resolve correctly
+
+**Phase 5:** (Deferred) Remove old-path compatibility from skills
+
+**Rollback:** Each phase is a single atomic commit; revert restores previous state.
+
+#### Skills Blast Radius
+
+| Impact Level | Skills | Changes Needed |
+|--------------|--------|----------------|
+| Critical | requirement-gathering, feature-breakdown, feature-board-management, change-request | Core workflow changes: Epic folder creation, Feature sub-folder creation, features.md column, CR paths |
+| High | feature-refinement, feature-acceptance-test, feature-closing, technical-design, code-implementation, test-generation | Path updates: `FEATURE-XXX/` → `EPIC-XXX/FEATURE-XXX-X/` |
+| Medium | git-version-control, requirement-details templates | Commit message format, file-splitting heuristic |
+| Low | Various skill references/examples | Pattern updates in documentation |
+
+#### Dependencies
+
+- All existing features (source data for migration)
+- FEATURE-034 (Engineering Workflow View) — should incorporate Epic concept in its feature lanes when designed
+
+#### Constraints
+
+- **Phased rollout** — Skills updated first, then data migrated (never simultaneously)
+- **No archive modification** — Task board archives preserve historical `FEATURE-XXX` references
+- **Single-feature Epics** — Consistency rule: every requirement gets an Epic, no exceptions
+- **In-flight features** — Features with active tasks should complete current workflow before migration
+- **Epic is a namespace, not a spec** — No specification.md at Epic level; Epic folder is a container for mockups and Feature sub-folders
+
+#### Feature List
+
+| Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------------|---------|-------------------|-------------------|
+| FEATURE-035-A | Epic Core Workflow Skills | v1.0 | Update requirement-gathering and feature-breakdown skills to create Epic folders, Feature sub-folders, and Epic-level naming conventions | None |
+| FEATURE-035-B | Feature Board Epic Tracking | v1.0 | Add Epic ID column to features.md, update feature-board-management skill, Epic-based sorting and derived status | FEATURE-035-A |
+| FEATURE-035-C | Feature Lifecycle Skill Updates | v1.0 | Update change-request, feature-refinement, technical-design, test-generation, code-implementation, feature-acceptance-test, feature-closing, and git-version-control skills for Epic-aware paths | FEATURE-035-A, FEATURE-035-B |
+| FEATURE-035-D | Requirement-Details Epic Format | v1.0 | Update requirement-details files to use EPIC-{nnn} headers, update splitting heuristic, update index format | FEATURE-035-A |
+| FEATURE-035-E | Retroactive Feature Migration | v1.0 | Migrate all existing features into EPIC-{nnn}/FEATURE-{nnn}-{X} folder structure, update all references, validate link integrity | FEATURE-035-A, FEATURE-035-B, FEATURE-035-C, FEATURE-035-D |
+
+#### Feature Details
+
+---
+
+##### FEATURE-035-A: Epic Core Workflow Skills
+
+**Version:** v1.0
+**Brief Description:** Update the two core workflow skills (requirement-gathering and feature-breakdown) to support the Epic layer. This is the foundation — all other features depend on it.
+
+**Acceptance Criteria:**
+- [ ] Requirement Gathering skill creates `EPIC-{nnn}/` folder with `mockups/` sub-directory
+- [ ] Requirement Gathering skill defines Epic-level ACs in requirement-details using `## EPIC-{nnn}` headers
+- [ ] Requirement Gathering stores mockups in `EPIC-{nnn}/mockups/`
+- [ ] Feature Breakdown skill creates `FEATURE-{nnn}-{X}/` sub-folders under `EPIC-{nnn}/`
+- [ ] Every requirement always creates an Epic (single-feature Epics for simple requirements)
+- [ ] Epic naming follows `EPIC-{nnn}` format; Feature naming follows `FEATURE-{nnn}-{A|B|C}` format
+- [ ] Feature `{nnn}` always matches parent Epic's number
+
+**Dependencies:** None (foundation)
+
+**Technical Considerations:**
+- Modify SKILL.md files for both skills
+- Update references, templates, and examples in both skills
+- Backward compatibility: skills should still work with old `FEATURE-XXX/` paths during transition
+
+---
+
+##### FEATURE-035-B: Feature Board Epic Tracking
+
+**Version:** v1.0
+**Brief Description:** Add Epic ID column to the features.md tracking table and update the feature-board-management skill to support Epic-based organization.
+
+**Acceptance Criteria:**
+- [ ] features.md table includes `Epic ID` column
+- [ ] features.md rows sorted by Epic ID
+- [ ] feature-board-management skill populates Epic ID when creating features
+- [ ] Epic status derivable from constituent Feature statuses (all completed → completed, any in_progress → in_progress)
+- [ ] Specification links updated to `EPIC-{nnn}/FEATURE-{nnn}-{X}/specification.md` paths
+
+**Dependencies:** FEATURE-035-A
+
+**Technical Considerations:**
+- Epic status is computed, not stored — no separate column needed
+- Sort order: primary by Epic ID, secondary by Feature suffix letter
+
+---
+
+##### FEATURE-035-C: Feature Lifecycle Skill Updates
+
+**Version:** v1.0
+**Brief Description:** Update all feature lifecycle skills to use Epic-aware paths (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`) instead of flat `FEATURE-{nnn}/` paths.
+
+**Acceptance Criteria:**
+- [ ] Change Request skill uses `EPIC-{nnn}/FEATURE-{nnn}-{X}/` paths for CR files
+- [ ] Feature Refinement skill reads/writes specs at `EPIC-{nnn}/FEATURE-{nnn}-{X}/specification.md`
+- [ ] Technical Design skill uses Epic-aware paths
+- [ ] Test Generation skill uses Epic-aware paths
+- [ ] Code Implementation skill uses Epic-aware paths
+- [ ] Feature Acceptance Test skill uses Epic-aware paths
+- [ ] Feature Closing skill uses Epic-aware paths
+- [ ] Git version control skill supports Epic references in commit messages
+
+**Dependencies:** FEATURE-035-A, FEATURE-035-B
+
+**Technical Considerations:**
+- 10+ skills to update — mostly path references in SKILL.md files and examples
+- All changes are to agent skills (SKILL.md), not application code
+- Commit message format may include `[EPIC-{nnn}]` prefix
+
+---
+
+##### FEATURE-035-D: Requirement-Details Epic Format
+
+**Version:** v1.0
+**Brief Description:** Update requirement-details files and templates to use `EPIC-{nnn}` headers instead of `FEATURE-{nnn}` headers. Update the splitting heuristic and index format.
+
+**Acceptance Criteria:**
+- [ ] requirement-details files use `## EPIC-{nnn}` section headers
+- [ ] requirement-details-template.md updated for Epic format
+- [ ] File splitting heuristic works with Epic-based grouping
+- [ ] requirement-details-index.md references Epic ranges instead of Feature ranges
+- [ ] Feature sub-sections nest under Epic headers
+
+**Dependencies:** FEATURE-035-A
+
+**Technical Considerations:**
+- Update the requirement-gathering skill's template reference
+- Update the feature-breakdown skill's file-splitting reference
+- Index format: `EPIC-001 to EPIC-011` instead of `FEATURE-001 to FEATURE-011`
+
+---
+
+##### FEATURE-035-E: Retroactive Feature Migration
+
+**Version:** v1.0
+**Brief Description:** Migrate all existing features into the `EPIC-{nnn}/FEATURE-{nnn}-{X}/` folder structure. Update features.md, requirement-details files, and validate all links.
+
+**Acceptance Criteria:**
+- [ ] All standalone features (e.g., `FEATURE-001/`) moved to `EPIC-001/FEATURE-001-A/`
+- [ ] All existing sub-features (e.g., `FEATURE-022-A/B/C/D/`) moved to `EPIC-022/FEATURE-022-A/B/C/D/`
+- [ ] features.md updated with Epic ID column for all existing features
+- [ ] requirement-details parts 1-9 updated with Epic headers
+- [ ] requirement-details-index.md updated with Epic ranges
+- [ ] All specification links in features.md resolve correctly after migration
+- [ ] Task board archives (`task-board-archive-*.md`) are NOT modified
+- [ ] Active task board references updated for in-progress features only
+
+**Dependencies:** FEATURE-035-A, FEATURE-035-B, FEATURE-035-C, FEATURE-035-D
+
+**Technical Considerations:**
+- This is a data migration, not a code change
+- Must be executed after ALL skill updates are complete
+- Atomic commit per migration phase for rollback safety
+- In-flight features should complete current workflow before migration

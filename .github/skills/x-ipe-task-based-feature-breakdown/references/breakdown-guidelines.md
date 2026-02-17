@@ -67,10 +67,17 @@ Features that should be combined:
 ### ID Format
 
 ```
-FEATURE-{NNN}
+Epic: EPIC-{NNN}
+Feature: FEATURE-{NNN}-{X}
 ```
 
-Where NNN is a zero-padded 3-digit number (001, 002, etc.)
+Where NNN is a zero-padded 3-digit number matching the parent Epic (001, 002, etc.)
+and X is an uppercase letter suffix (A, B, C, ...).
+
+Rules:
+1. Feature {NNN} ALWAYS matches parent Epic {NNN}
+2. Suffix assigned alphabetically: first feature = A, second = B
+3. Scan x-ipe-docs/requirements/ for highest existing EPIC-{NNN} to determine next number
 
 ### Assignment Rules
 
@@ -78,8 +85,8 @@ Where NNN is a zero-padded 3-digit number (001, 002, etc.)
 2. **No Gaps** - Do not skip numbers
 3. **No Reuse** - Deleted features keep their IDs
 4. **Part-Specific Ranges** - When using parts, each part covers a range:
-   - Part 1: FEATURE-001 to FEATURE-011
-   - Part 2: FEATURE-012 to FEATURE-017
+   - Part 1: EPIC-001 to EPIC-011
+   - Part 2: EPIC-012 to EPIC-017
    - etc.
 
 ### Continuation Numbering
@@ -207,8 +214,9 @@ mockup_list:
     mockup_list: "x-ipe-docs/ideas/Draft Idea - 01232026/mockups/settings.html"
 
 # Result: Files created
-x-ipe-docs/requirements/FEATURE-001/mockups/main-dashboard.html
-x-ipe-docs/requirements/FEATURE-001/mockups/settings-panel.html
+x-ipe-docs/requirements/EPIC-001/mockups/main-dashboard.html
+(Shared at Epic level — Features reference via ../mockups/)
+x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/mockups/ → NOT used (mockups are at Epic level)
 ```
 
 ### Linking Mockups in Documents
@@ -223,8 +231,8 @@ x-ipe-docs/requirements/FEATURE-001/mockups/settings-panel.html
 
 | Mockup Function Name | Mockup List |
 |---------------------|-------------|
-| main-dashboard | [main-dashboard.html](FEATURE-001/mockups/main-dashboard.html) |
-| settings-panel | [settings-panel.html](FEATURE-001/mockups/settings-panel.html) |
+| main-dashboard | [main-dashboard.html](EPIC-001/mockups/main-dashboard.html) |
+| settings-panel | [settings-panel.html](EPIC-001/mockups/settings-panel.html) |
 ```
 
 ### Mockup Rules
@@ -260,7 +268,7 @@ x-ipe-docs/requirements/FEATURE-001/mockups/settings-panel.html
 
 | Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
 |------------|---------------|---------|-------------------|-------------------|
-| FEATURE-012 | Design Themes | v1.0 | Theme folder structure | FEATURE-011 |
+| FEATURE-012-A | Design Themes | v1.0 | Theme folder structure | FEATURE-011-A |
 
 ---
 
@@ -268,13 +276,13 @@ x-ipe-docs/requirements/FEATURE-001/mockups/settings-panel.html
 
 | Mockup Function Name | Feature | Mockup List |
 |---------------------|---------|-------------|
-| themes-toolbox | FEATURE-012 | [themes-toolbox.html](FEATURE-012/mockups/themes-toolbox.html) |
+| themes-toolbox | FEATURE-012-A | [themes-toolbox.html](EPIC-012/mockups/themes-toolbox.html) |
 
 ---
 
 ## Feature Details (Continued)
 
-### FEATURE-012: Design Themes
+### FEATURE-012-A: Design Themes
 [Feature details...]
 ```
 
@@ -289,8 +297,8 @@ x-ipe-docs/requirements/FEATURE-001/mockups/settings-panel.html
 
 | Part | File | Features Covered | Lines |
 |------|------|------------------|-------|
-| 1 | [Part 1](requirement-details-part-1.md) | FEATURE-001 to FEATURE-011 | ~420 |
-| 2 | [Part 2](requirement-details-part-2.md) | FEATURE-012 to FEATURE-017 | ~415 |
+| 1 | [Part 1](requirement-details-part-1.md) | EPIC-001 to EPIC-011 | ~420 |
+| 2 | [Part 2](requirement-details-part-2.md) | EPIC-012 to EPIC-017 | ~415 |
 ```
 
 **⚠️ IMPORTANT:** Index file contains ONLY Parts Overview table. NO Feature List in index - each part has its own.
@@ -300,7 +308,7 @@ x-ipe-docs/requirements/FEATURE-001/mockups/settings-panel.html
 ## Feature Details Template
 
 ```markdown
-### {FEATURE-ID}: {Feature Title}
+### {FEATURE-NNN-X}: {Feature Title}
 
 **Version:** v{X.Y}  
 **Brief Description:** [1-2 sentence description]
@@ -346,16 +354,18 @@ This skill **MUST** call the feature-board-management skill to create features o
 CALL x-ipe+feature+feature-board-management skill:
   operation: create_or_update_features
   features:
-    - feature_id: FEATURE-001
+    - feature_id: FEATURE-001-A
+      epic_id: EPIC-001
       title: User Authentication
       version: v1.0
       description: JWT-based user authentication
       dependencies: []
-    - feature_id: FEATURE-002
+    - feature_id: FEATURE-001-B
+      epic_id: EPIC-001
       title: User Profile  
       version: v1.0
       description: User profile management
-      dependencies: [FEATURE-001]
+      dependencies: [FEATURE-001-A]
 ```
 
 **See:** `skills/x-ipe+feature+feature-board-management/SKILL.md` for full operation details

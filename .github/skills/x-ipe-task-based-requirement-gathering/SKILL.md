@@ -23,7 +23,9 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-MANDATORY: Every feature mentioned or identified in the output MUST have a feature ID in the format `FEATURE-{nnn}` (e.g., FEATURE-001, FEATURE-027). This applies regardless of the output language used.
+MANDATORY: Every requirement MUST create an Epic with ID format `EPIC-{nnn}` (e.g., EPIC-001, EPIC-035). Features created during Feature Breakdown use format `FEATURE-{nnn}-{X}` (e.g., FEATURE-035-A). The `{nnn}` in Feature IDs always matches the parent Epic number.
+
+> **Transition Note:** During migration, both old (`FEATURE-{nnn}/`) and new (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`) folder structures may coexist. Skills must handle both formats when scanning existing files.
 
 ---
 
@@ -42,6 +44,7 @@ input:
 
   # Required inputs
   auto_proceed: false
+  epic_id: "EPIC-{nnn}"  # Auto-assigned: scan x-ipe-docs/requirements/ for highest EPIC-{nnn}, next is EPIC-{nnn+1}
   mockup_list:
     - mockup_name: "Description of what function the mockup is for"
       mockup_link: "URL to the mockup"
@@ -175,7 +178,7 @@ BLOCKING: Human MUST approve requirements before proceeding to Feature Breakdown
            > - **Change:** {brief description of what changes}
            > - **Affected FRs:** {list of FR IDs that need updating}
            > - **Action Required:** Feature specification refactoring needed before implementation
-           > - **New Feature Ref:** {FEATURE-XXX} — see {requirement-details-part-N.md}
+           > - **New Feature Ref:** EPIC-{nnn} — see {requirement-details-part-N.md}
            ```
          - Do NOT modify the existing FRs/ACs themselves — only add the marker
       3. For each conflict where human decided "new standalone feature":
@@ -206,8 +209,13 @@ BLOCKING: Human MUST approve requirements before proceeding to Feature Breakdown
   <step_6>
     <name>Create Requirement Details Document</name>
     <action>
-      1. Use [references/requirement-details-template.md](references/requirement-details-template.md) as template for new files
-      2. Fill all sections based on gathered information
+      1. Create Epic folder structure:
+         - Create x-ipe-docs/requirements/EPIC-{nnn}/ directory
+         - Create x-ipe-docs/requirements/EPIC-{nnn}/mockups/ sub-directory
+         - If mockup_list is provided, copy mockups to EPIC-{nnn}/mockups/
+      2. Use [references/requirement-details-template.md](references/requirement-details-template.md) as template for new files
+      3. Use ## EPIC-{nnn}: {Epic Title} as the section header in requirement-details (NOT ## FEATURE-{nnn})
+      4. Fill all sections based on gathered information
       3. Include all clarifications and decisions from Step 2
       4. IF conflicts were found in Step 3:
          - Add a "Related Features" section listing all overlapping features and human decisions
@@ -256,6 +264,7 @@ task_completion_output:
   conflict_review_completed: true | false
   conflicts_found: 0  # number of conflicts identified
   impacted_features: []  # list of FEATURE-XXX IDs marked with CR impact
+  epic_id: "EPIC-{nnn}"  # The Epic created by this requirement gathering
 ```
 
 ---
@@ -341,6 +350,19 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
    - Independent lifecycle → new feature
 3. Wait for human decision
 4. Add CR impact marker or cross-reference dependency
+```
+
+### Pattern: Epic Folder Creation
+
+**When:** Creating any new requirement
+**Then:**
+```
+1. Determine next EPIC-{nnn} (scan x-ipe-docs/requirements/ for highest existing)
+2. Create EPIC-{nnn}/ folder
+3. Create EPIC-{nnn}/mockups/ sub-directory
+4. Store any mockups in EPIC-{nnn}/mockups/
+5. Write requirement-details section with ## EPIC-{nnn}: {Title} header
+6. Note: Feature sub-folders are created later during Feature Breakdown
 ```
 
 ### Anti-Patterns
