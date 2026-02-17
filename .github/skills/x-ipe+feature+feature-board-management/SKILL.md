@@ -31,10 +31,11 @@ The feature board at `x-ipe-docs/planning/features.md` tracks all features acros
 
 **Key Concepts:**
 
-- **Feature Data Model** — Structured record containing feature_id, title, version, status, description, dependencies, artifact links, and task history. See [references/examples.md](references/examples.md) for full schema.
+- **Feature Data Model** — Structured record containing epic_id, feature_id, title, version, status, description, dependencies, artifact links, and task history. See [references/examples.md](references/examples.md) for full schema.
+- **Epic ID** — `EPIC-{nnn}` matching parent Epic, or `-` for legacy features without an Epic
 - **Feature Statuses** — `Planned`, `Refined`, `Designed`, `Implemented`, `Tested`, `Completed`
 - **Status Lifecycle** — `Planned -> Refined -> Designed -> Implemented -> Tested -> Completed`. Each transition is triggered by completing a specific feature-stage task phase.
-- **Board Sections** — Overview, Feature Tracking Table
+- **Board Sections** — Overview, Feature Tracking Table (with Epic ID column)
 - **Category-Level Skill** — Called automatically during Step 4 (Category Closing) for feature-stage tasks to update feature status and return category_level_change_summary
 - **Query Interface** — Provides Feature Data Model to any skill needing feature context
 
@@ -74,7 +75,8 @@ not_for:
 input:
   operation: "create_or_update_features | query_feature | update_feature_status"
   features:  # For create_or_update_features
-    - feature_id: "FEATURE-XXX"
+    - feature_id: "FEATURE-XXX-X"
+      epic_id: "EPIC-XXX"  # Parent Epic ID (use "-" for legacy features)
       title: "{Feature Title}"
       version: "v1.0"
       description: "{Brief description, max 100 words}"
@@ -130,6 +132,7 @@ input:
        ELSE:
          Add new feature to tracking table
          Set status = "Planned"
+         Set epic_id from input (or "-" if not provided)
          Set created = today's date
        Set last_updated = current timestamp
   </action>
@@ -153,7 +156,7 @@ input:
     3. Extract all feature information
     4. Build and return Feature Data Model
   </action>
-  <output>Complete Feature Data Model (feature_id, title, version, status, description, dependencies, specification_link, technical_design_link, created, last_updated, tasks)</output>
+  <output>Complete Feature Data Model (epic_id, feature_id, title, version, status, description, dependencies, specification_link, technical_design_link, created, last_updated, tasks)</output>
 </operation>
 ```
 
@@ -242,6 +245,22 @@ operation_output:
 | `BOARD_NOT_FOUND` | Board file missing on first operation | Auto-create from template at `templates/features.md` |
 | `MISSING_FEATURE_ID` | Task Data Model incomplete | Ensure task-based skill outputs feature_id and feature_phase |
 | `INVALID_STATUS_TRANSITION` | Skipped lifecycle phase | Follow lifecycle order: Planned -> Refined -> Designed -> Implemented -> Completed |
+
+---
+
+## Epic Status Derivation
+
+Epic status is NOT stored in the table. It is derived from constituent Feature statuses:
+
+| Condition | Derived Epic Status |
+|-----------|-------------------|
+| All Features `Completed` | Epic complete |
+| Any Feature active (Refined/Designed/Implemented) | Epic in progress |
+| All Features `Planned` | Epic planned |
+
+**Note:** There are no standalone Epic rows in the table. Epics are represented only via the `Epic ID` column on Feature rows.
+
+**Sort Order:** Features MUST be sorted by Epic ID (ascending, `-` legacy features at top), then by Feature suffix letter within the same Epic (A, B, C...).
 
 ---
 

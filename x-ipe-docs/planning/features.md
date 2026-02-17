@@ -78,8 +78,8 @@ This board tracks all features across the project lifecycle.
 | FEATURE-032 | UIUX Reference Design System (Phase 3) | v1.0 | ❌ Cancelled | - | 02-14-2026 | 02-14-2026 07:06:00 |
 | FEATURE-033 | App-Agent Interaction MCP | v1.1 | Complete | [specification.md](../requirements/FEATURE-033/specification.md) | 02-13-2026 | 02-15-2026 04:30:00 |
 | FEATURE-034 | Engineering Workflow View | v1.0 | Planned | - | 02-17-2026 | 02-17-2026 10:48:00 |
-| FEATURE-035-A | Epic Core Workflow Skills | v1.0 | Implemented | [specification.md](../requirements/FEATURE-035-A/specification.md) | 02-17-2026 | 02-17-2026 11:00:00 |
-| FEATURE-035-B | Feature Board Epic Tracking | v1.0 | Planned | - | 02-17-2026 | 02-17-2026 10:48:00 |
+| FEATURE-035-A | Epic Core Workflow Skills | v1.0 | Completed | [specification.md](../requirements/FEATURE-035-A/specification.md) | 02-17-2026 | 02-17-2026 11:10:00 |
+| FEATURE-035-B | Feature Board Epic Tracking | v1.0 | Completed | [specification.md](../requirements/FEATURE-035-B/specification.md) | 02-17-2026 | 02-17-2026 11:16:00 |
 | FEATURE-035-C | Feature Lifecycle Skill Updates | v1.0 | Planned | - | 02-17-2026 | 02-17-2026 10:48:00 |
 | FEATURE-035-D | Requirement-Details Epic Format | v1.0 | Planned | - | 02-17-2026 | 02-17-2026 10:48:00 |
 | FEATURE-035-E | Retroactive Feature Migration | v1.0 | Planned | - | 02-17-2026 | 02-17-2026 10:48:00 |

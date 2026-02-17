@@ -18,8 +18,8 @@ This board tracks all features across the project lifecycle.
 
 ## Feature Tracking
 
-| Feature ID | Feature Title | Version | Status | Specification Link | Created | Last Updated |
-|------------|---------------|---------|--------|-------------------|---------|--------------|
-| _No features yet_ | | | | | | |
+| Epic ID | Feature ID | Feature Title | Version | Status | Specification Link | Created | Last Updated |
+|---------|------------|---------------|---------|--------|-------------------|---------|--------------|
+| _No features yet_ | | | | | | | |
 
 ---

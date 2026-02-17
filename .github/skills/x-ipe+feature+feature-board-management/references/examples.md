@@ -7,7 +7,8 @@ Core structure used throughout the system:
 ```yaml
 Feature:
   # Core identification
-  feature_id: FEATURE-XXX
+  epic_id: EPIC-XXX  # Parent Epic ID (or "-" for legacy features)
+  feature_id: FEATURE-XXX-X
   title: <Feature Title>
   version: v1.0
   
@@ -16,11 +17,11 @@ Feature:
   description: <Brief description, ≤100 words>
   
   # Dependencies
-  dependencies: [FEATURE-XXX, ...]  # List of feature IDs
+  dependencies: [FEATURE-XXX-X, ...]  # List of feature IDs
   
   # Artifact links
-  specification_link: x-ipe-docs/requirements/FEATURE-XXX/specification.md | null
-  technical_design_link: x-ipe-docs/requirements/FEATURE-XXX/technical-design.md | null
+  specification_link: x-ipe-docs/requirements/EPIC-XXX/FEATURE-XXX-X/specification.md | null
+  technical_design_link: x-ipe-docs/requirements/EPIC-XXX/FEATURE-XXX-X/technical-design.md | null
   
   # Metadata
   created: MM-DD-YYYY
@@ -73,9 +74,9 @@ This board tracks all features across the project lifecycle.
 
 ## Feature Tracking
 
-| Feature ID | Feature Title | Version | Status | Specification Link | Created | Last Updated |
-|------------|---------------|---------|--------|-------------------|---------|--------------|
-| FEATURE-001 | User Authentication | v1.0 | Designed | [spec](FEATURE-001/specification.md) | 01-15-2026 | 01-17-2026 |
+| Epic ID | Feature ID | Feature Title | Version | Status | Specification Link | Created | Last Updated |
+|---------|------------|---------------|---------|--------|-------------------|---------|--------------|
+| EPIC-001 | FEATURE-001-A | User Authentication | v1.0 | Designed | [spec](EPIC-001/FEATURE-001-A/specification.md) | 01-15-2026 | 01-17-2026 |
 
 ---
 ```
@@ -90,16 +91,18 @@ This board tracks all features across the project lifecycle.
 # Feature Breakdown skill calls:
 operation: create_or_update_features
 features:
-  - feature_id: FEATURE-001
+  - feature_id: FEATURE-001-A
+    epic_id: EPIC-001
     title: User Authentication
     version: v1.0
     description: JWT-based authentication
     dependencies: []
-  - feature_id: FEATURE-002
+  - feature_id: FEATURE-001-B
+    epic_id: EPIC-001
     title: User Profile
     version: v1.0
     description: Profile management
-    dependencies: [FEATURE-001]
+    dependencies: [FEATURE-001-A]
 
 # Result:
 # - Board created if not exists
@@ -111,10 +114,11 @@ features:
 ```yaml
 # Feature Refinement skill calls:
 operation: query_feature
-feature_id: FEATURE-001
+feature_id: FEATURE-001-A
 
 # Receives full Feature Data Model:
-feature_id: FEATURE-001
+epic_id: EPIC-001
+feature_id: FEATURE-001-A
 title: User Authentication
 version: v1.0
 status: Planned
@@ -132,14 +136,14 @@ tasks: []
 ```yaml
 # After Feature Refinement task completes:
 # Task Data Model has:
-feature_id: FEATURE-001
+feature_id: FEATURE-001-A
 feature_phase: Feature Refinement
-task_output_links: [x-ipe-docs/requirements/FEATURE-001/specification.md]
+task_output_links: [x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/specification.md]
 
 # Category skill (Step 4) calls update_feature_status:
 # - Status changes: Planned → Refined
 # - Specification link added
-# - Returns: "Updated FEATURE-001 (User Authentication) status to Refined"
+# - Returns: "Updated FEATURE-001-A (User Authentication) status to Refined"
 ```
 
 ### Example 4: Full Category-Level Execution (Step 4)
@@ -150,14 +154,14 @@ task_id: TASK-023
 task_based_skill: Technical Design
 category: feature-stage
 status: completed
-feature_id: FEATURE-001
+feature_id: FEATURE-001-A
 feature_title: User Authentication
 feature_version: v1.0
 feature_phase: Technical Design
-task_output_links: [x-ipe-docs/requirements/FEATURE-001/technical-design.md]
+task_output_links: [x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/technical-design.md]
 
 # Output
-category_level_change_summary: "Updated FEATURE-001 (User Authentication) status from Refined to Designed, added technical design link"
+category_level_change_summary: "Updated FEATURE-001-A (User Authentication) status from Refined to Designed, added technical design link"
 ```
 
 ---
