@@ -82,7 +82,6 @@ html, body {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    margin-left: 1.25rem;
 }
 .mode-label {
     font-size: 0.7rem;
