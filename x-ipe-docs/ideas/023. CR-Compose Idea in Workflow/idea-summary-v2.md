@@ -228,52 +228,97 @@ sequenceDiagram
 ## Architecture Context
 
 ```architecture-dsl
-view: module
-title: Compose Idea Modal — Module View
+@startuml module-view
+title "Compose Idea Modal — Module View"
+theme "theme-default"
+direction top-to-bottom
+grid 12 x 6
 
-layer UI {
-  [Compose Idea Modal] {
-    desc: Full-screen modal with toggle, tabs, tree, preview
-    tech: JavaScript, HTML, CSS
+layer "UI" {
+  color "#dbeafe"
+  border-color "#3b82f6"
+  rows 2
+
+  module "Compose Idea Modal" {
+    cols 5
+    rows 2
+    grid 1 x 1
+    align center center
+    gap 8px
+    component "Toggle / Tabs / Tree / Preview" { cols 1, rows 1 }
   }
-  [Workflow Stage View] {
-    desc: Existing workflow stage renderer
-    tech: workflow-stage.js
+
+  module "Workflow Stage View" {
+    cols 4
+    rows 2
+    grid 1 x 1
+    align center center
+    gap 8px
+    component "workflow-stage.js" { cols 1, rows 1 }
   }
-  [Workplace Components] {
-    desc: Refactored Compose/Upload/UIUX tabs (parameterized container)
-    tech: workplace.js
+
+  module "Workplace Components" {
+    cols 3
+    rows 2
+    grid 1 x 1
+    align center center
+    gap 8px
+    component "workplace.js" { cols 1, rows 1 }
   }
 }
 
-layer API {
-  [Ideas API] {
-    desc: /api/ideas/tree, /api/ideas/upload, /api/ideas/download
-    tech: Flask, ideas_routes.py
+layer "API" {
+  color "#fef9c3"
+  border-color "#eab308"
+  rows 2
+
+  module "Ideas API" {
+    cols 6
+    rows 2
+    grid 3 x 1
+    align center center
+    gap 8px
+    component "/api/ideas/tree" { cols 1, rows 1 }
+    component "/api/ideas/upload" { cols 1, rows 1 }
+    component "/api/ideas/download" { cols 1, rows 1 }
   }
-  [Workflow API] {
-    desc: /api/workflow/{name}/link-idea, /api/workflow/{name}/action
-    tech: Flask, workflow_routes.py
+
+  module "Workflow API" {
+    cols 6
+    rows 2
+    grid 2 x 1
+    align center center
+    gap 8px
+    component "/api/workflow/link-idea" { cols 1, rows 1 }
+    component "/api/workflow/action" { cols 1, rows 1 }
   }
 }
 
-layer Service {
-  [Workflow Manager] {
-    desc: State machine, deliverables, action tracking
-    tech: workflow_manager_service.py
+layer "Service" {
+  color "#dcfce7"
+  border-color "#22c55e"
+  rows 2
+
+  module "Workflow Manager" {
+    cols 6
+    rows 2
+    grid 1 x 1
+    align center center
+    gap 8px
+    component "workflow_manager_service.py" { cols 1, rows 1 }
   }
-  [Ideas Service] {
-    desc: File management, tree building, search
-    tech: ideas service
+
+  module "Ideas Service" {
+    cols 6
+    rows 2
+    grid 1 x 1
+    align center center
+    gap 8px
+    component "ideas_routes.py" { cols 1, rows 1 }
   }
 }
 
-Compose Idea Modal -> Ideas API
-Compose Idea Modal -> Workflow API
-Workflow Stage View -> Compose Idea Modal
-Compose Idea Modal -> Workplace Components
-Ideas API -> Ideas Service
-Workflow API -> Workflow Manager
+@enduml
 ```
 
 ## Source Files
