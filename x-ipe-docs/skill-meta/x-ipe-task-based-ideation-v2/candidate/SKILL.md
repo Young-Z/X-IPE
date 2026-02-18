@@ -115,10 +115,12 @@ BLOCKING: Step 10 - Human MUST approve idea summary before proceeding.
       3. If NOT exists: create default config with all tools disabled
       4. Load Extra Instructions (human → config → N/A)
       5. Build and output the enabled tool list -- only tools with value `true` count as enabled; `false`, absent, or any other value means DISABLED
-      6. Output format:
+      6. BLOCKING: For each enabled tool that has a corresponding skill at .github/skills/{tool-name}/SKILL.md, LOAD that skill now. This ensures correct syntax and grammar are available before any content generation.
+      7. Output format:
          ```
          Enabled tools: [list of enabled tool names]
          Disabled tools: [list of disabled tool names]
+         Loaded tool skills: [list of skills loaded in step 6]
          ```
     </action>
     <output>tool_config, enabled_tool_list, extra_instructions</output>
