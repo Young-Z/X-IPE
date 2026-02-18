@@ -336,4 +336,8 @@ const workflow = {
             delete this._pollingIntervals[wfName];
         }
     },
+
+    _stopAllPolling() {
+        Object.keys(this._pollingIntervals).forEach(k => this._stopPolling(k));
+    },
 };

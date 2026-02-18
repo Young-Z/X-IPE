@@ -210,3 +210,4 @@ auto_proceed: true  # Change to false for manual control
 | TASK-508 | Code Implementation | FEATURE-035-C: Feature Lifecycle Skill Updates — update paths in 12 reference files across 8 skills | Quill ✅ | ✅ completed | 02-17-2026 11:18:00 | commit bfa6b88 | - |
 | TASK-509 | Code Implementation | FEATURE-035-D: Requirement-Details Epic Format — update index to EPIC ranges | Quill ✅ | ✅ completed | 02-17-2026 11:19:00 | requirement-details-index.md | Feature Closing |
 | TASK-510 | Code Implementation | FEATURE-035-E: Retroactive Feature Migration — move all folders, update features.md | Quill ✅ | ✅ completed | 02-17-2026 11:20:00 | commit a59fea6 | - |
+| TASK-537 | Code Implementation | FEATURE-036-B: Move workflow to left of top bar with toggle switch (workflow/free mode) | Spark | 🔄 in_progress | 02-18-2026 02:56:00 | - | - |

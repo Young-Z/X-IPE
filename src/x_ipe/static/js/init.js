@@ -143,22 +143,55 @@ function initializeApp() {
     // FEATURE-025-A: Knowledge Base button click handler
     const kbBtn = document.getElementById('btn-knowledge-base');
 
-    // FEATURE-036-B: Engineering Workflow button click handler
-    const workflowBtn = document.getElementById('btn-workflow');
-    if (workflowBtn) {
-        workflowBtn.addEventListener('click', () => {
-            console.log('[Workflow] Workflow button clicked');
+    // FEATURE-036-B: Engineering Workflow / Free mode toggle handler
+    const modeToggleBtn = document.getElementById('mode-toggle-btn');
+    const modeLabelFree = document.getElementById('mode-label-free');
+    const modeLabelWorkflow = document.getElementById('mode-label-workflow');
+    if (modeToggleBtn) {
+        // Initialize: free mode active
+        if (modeLabelFree) modeLabelFree.classList.add('active');
+
+        modeToggleBtn.addEventListener('click', () => {
+            const isWorkflow = modeToggleBtn.getAttribute('aria-checked') === 'true';
             const container = document.getElementById('content-body');
             const sidebar = document.getElementById('sidebar');
             const resizeHandle = document.querySelector('.sidebar-resize-handle');
             const contentHeader = document.querySelector('.content-header');
-            if (sidebar) sidebar.style.display = 'none';
-            if (resizeHandle) resizeHandle.style.display = 'none';
-            if (contentHeader) contentHeader.style.display = 'none';
-            if (container && typeof workflow !== 'undefined') {
-                workflow.render(container);
-            } else if (container) {
-                container.innerHTML = '<div class="p-4 text-muted">Workflow module not loaded</div>';
+
+            if (!isWorkflow) {
+                // Switch TO workflow mode
+                modeToggleBtn.setAttribute('aria-checked', 'true');
+                if (modeLabelFree) modeLabelFree.classList.remove('active');
+                if (modeLabelWorkflow) modeLabelWorkflow.classList.add('active');
+                if (sidebar) sidebar.style.display = 'none';
+                if (resizeHandle) resizeHandle.style.display = 'none';
+                if (contentHeader) contentHeader.style.display = 'none';
+                if (container && typeof workflow !== 'undefined') {
+                    workflow.render(container);
+                }
+            } else {
+                // Switch TO free mode — restore normal IDE view
+                modeToggleBtn.setAttribute('aria-checked', 'false');
+                if (modeLabelWorkflow) modeLabelWorkflow.classList.remove('active');
+                if (modeLabelFree) modeLabelFree.classList.add('active');
+                if (sidebar) sidebar.style.display = '';
+                if (resizeHandle) resizeHandle.style.display = '';
+                if (contentHeader) contentHeader.style.display = '';
+                // Stop any workflow polling
+                if (typeof workflow !== 'undefined' && workflow._stopAllPolling) {
+                    workflow._stopAllPolling();
+                }
+                // Restore homepage
+                if (container && typeof window.HomepageInfinity !== 'undefined') {
+                    container.className = '';
+                    container.innerHTML = window.HomepageInfinity.getTemplate();
+                    window.HomepageInfinity.init(window.projectSidebar);
+                } else if (container) {
+                    container.className = '';
+                    container.innerHTML = '';
+                }
+                const breadcrumb = document.getElementById('breadcrumb');
+                if (breadcrumb) breadcrumb.innerHTML = '<li class="breadcrumb-item active">Home</li>';
             }
         });
     }
