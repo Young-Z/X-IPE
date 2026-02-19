@@ -1,0 +1,307 @@
+/**
+ * FEATURE-025-E: KB Search & Preview — Styles
+ */
+
+/* ── Search Modal ──────────────────────────────────────────── */
+
+.kb-search-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.kb-search-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.kb-search-modal-content {
+    width: min(640px, 90vw);
+    margin-top: 120px;
+    background: var(--bg-secondary, #252526);
+    border: 1px solid var(--border-color, #3d3d3d);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+    transform: translateY(-10px);
+    transition: transform 0.2s ease;
+}
+
+.kb-search-modal.active .kb-search-modal-content {
+    transform: translateY(0);
+}
+
+/* Header */
+.kb-search-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color, #3d3d3d);
+}
+
+.kb-search-modal-header i {
+    color: var(--text-secondary, #999);
+    font-size: 16px;
+}
+
+.kb-search-modal-header input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary, #e0e0e0);
+    font-size: 16px;
+}
+
+.kb-search-modal-header input::placeholder {
+    color: var(--text-tertiary, #666);
+}
+
+.kb-search-modal-header kbd {
+    padding: 2px 8px;
+    background: var(--bg-tertiary, #333);
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--text-secondary, #999);
+}
+
+/* Filter Bar */
+.kb-search-filter-bar {
+    display: flex;
+    gap: 6px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border-color, #3d3d3d);
+}
+
+.kb-filter-chip {
+    padding: 4px 12px;
+    border: 1px solid var(--border-color, #3d3d3d);
+    border-radius: 16px;
+    background: transparent;
+    color: var(--text-secondary, #999);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.kb-filter-chip:hover {
+    border-color: var(--text-secondary, #999);
+}
+
+.kb-filter-chip.active {
+    background: var(--accent-primary, #007acc);
+    border-color: var(--accent-primary, #007acc);
+    color: #fff;
+}
+
+/* Body (results) */
+.kb-search-modal-body {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+.search-section-title {
+    padding: 8px 16px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-tertiary, #666);
+    letter-spacing: 0.5px;
+}
+
+.search-result {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background 0.1s ease;
+}
+
+.search-result:hover,
+.search-result.active {
+    background: var(--bg-tertiary, #333);
+}
+
+.search-result-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: var(--bg-tertiary, #333);
+    color: var(--text-secondary, #999);
+}
+
+.search-result-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.search-result-title {
+    font-size: 14px;
+    color: var(--text-primary, #e0e0e0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.search-result-path {
+    font-size: 12px;
+    color: var(--text-tertiary, #666);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.search-result-highlight {
+    color: var(--accent-primary, #007acc);
+    font-weight: 600;
+}
+
+.search-no-results {
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--text-tertiary, #666);
+    font-size: 14px;
+}
+
+/* Footer */
+.kb-search-modal-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 16px;
+    border-top: 1px solid var(--border-color, #3d3d3d);
+    font-size: 12px;
+    color: var(--text-tertiary, #666);
+}
+
+.kb-search-modal-footer kbd {
+    padding: 1px 6px;
+    background: var(--bg-tertiary, #333);
+    border-radius: 3px;
+    font-size: 11px;
+}
+
+/* ── Preview Panel ─────────────────────────────────────────── */
+
+.kb-preview-panel {
+    width: 360px;
+    min-width: 360px;
+    background: var(--bg-secondary, #252526);
+    border-left: 1px solid var(--border-color, #3d3d3d);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.kb-preview-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color, #3d3d3d);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.kb-preview-header h6 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-primary, #e0e0e0);
+}
+
+.kb-preview-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.kb-preview-thumbnail {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    background: var(--bg-tertiary, #333);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-tertiary, #666);
+    font-size: 48px;
+}
+
+.kb-preview-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.kb-preview-info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+}
+
+.kb-preview-info-label {
+    color: var(--text-tertiary, #666);
+}
+
+.kb-preview-info-value {
+    color: var(--text-primary, #e0e0e0);
+    text-align: right;
+}
+
+.kb-preview-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.kb-preview-tag {
+    padding: 2px 10px;
+    border-radius: 12px;
+    background: var(--bg-tertiary, #333);
+    color: var(--text-secondary, #999);
+    font-size: 12px;
+}
+
+.kb-preview-actions {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border-color, #3d3d3d);
+    display: flex;
+    gap: 8px;
+}
+
+.kb-preview-actions .btn {
+    flex: 1;
+}
+
+/* ── Sidebar Search Highlight ──────────────────────────────── */
+
+.kb-search-highlight,
+mark.kb-search-highlight {
+    background: rgba(0, 122, 204, 0.25);
+    color: var(--accent-primary, #007acc);
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+    .kb-preview-panel {
+        display: none !important;
+    }
+}

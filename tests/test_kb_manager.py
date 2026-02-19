@@ -557,8 +557,9 @@ class TestKBManagerSearch:
         manager = KBManagerService(kb_service=kb, llm_service=llm)
 
         results = manager.search("api")
-        assert len(results) >= 1
-        assert any("api" in r["name"].lower() for r in results)
+        files = results["files"]
+        assert len(files) >= 1
+        assert any("api" in r["name"].lower() for r in files)
 
     def test_search_case_insensitive(self, kb_with_landing_files):
         from x_ipe.services.kb_manager_service import KBManagerService
@@ -571,7 +572,7 @@ class TestKBManagerSearch:
 
         results_lower = manager.search("api")
         results_upper = manager.search("API")
-        assert len(results_lower) == len(results_upper)
+        assert len(results_lower["files"]) == len(results_upper["files"])
 
     def test_search_no_results(self, kb_with_landing_files):
         from x_ipe.services.kb_manager_service import KBManagerService
@@ -583,7 +584,7 @@ class TestKBManagerSearch:
         manager = KBManagerService(kb_service=kb, llm_service=llm)
 
         results = manager.search("nonexistent-xyz-123")
-        assert len(results) == 0
+        assert len(results["files"]) == 0
 
     def test_search_empty_query(self, kb_with_landing_files):
         from x_ipe.services.kb_manager_service import KBManagerService
@@ -595,7 +596,7 @@ class TestKBManagerSearch:
         manager = KBManagerService(kb_service=kb, llm_service=llm)
 
         results = manager.search("")
-        assert isinstance(results, list)
+        assert isinstance(results, dict)
 
 
 # ============================================================================

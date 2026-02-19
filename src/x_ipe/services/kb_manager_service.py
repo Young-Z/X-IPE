@@ -258,29 +258,67 @@ class KBManagerService:
         }
 
     @x_ipe_tracing()
-    def search(self, query: str) -> list:
-        """Search file index for matching entries (case-insensitive).
+    def search(self, query: str, file_type: str = None, topic_filter: str = None) -> dict:
+        """Search KB index for matching entries (case-insensitive).
 
-        Returns:
-            List of matching file entries
+        Returns grouped results: { files: [...], topics: [...], summaries: [...] }
         """
-        if not query:
-            return []
-
-        query_lower = query.lower()
+        query_lower = (query or "").lower()
         index = self.kb_service.get_index()
-        results = []
+        files = []
 
         for entry in index.get("files", []):
             name = entry.get("name", "").lower()
             path = entry.get("path", "").lower()
-            topic = entry.get("topic", "").lower() if "topic" in entry else ""
+            entry_topic = (entry.get("topic") or "").lower()
+            keywords = entry.get("keywords", [])
 
-            if (query_lower in name or query_lower in path or
-                    query_lower in topic):
-                results.append(entry)
+            # Apply type filter
+            if file_type and entry.get("type", "").lower() != file_type.lower():
+                continue
+            # Apply topic filter
+            if topic_filter and entry_topic != topic_filter.lower():
+                continue
+            # Apply text query (empty query matches all — browse mode)
+            if query_lower and not (
+                query_lower in name
+                or query_lower in path
+                or query_lower in entry_topic
+                or any(query_lower in k.lower() for k in keywords)
+            ):
+                continue
 
-        return results
+            files.append(entry)
+
+        # Search topic names
+        topics = []
+        for t in self.kb_service.get_topics():
+            if not query_lower or query_lower in t.lower():
+                meta = self.kb_service.get_topic_metadata(t)
+                topics.append(
+                    {"name": t, "file_count": meta.get("file_count", 0) if meta else 0}
+                )
+
+        # Search summaries
+        summaries = []
+        kb_root = self.kb_service.kb_root
+        processed = kb_root / "processed"
+        if processed.exists():
+            for topic_dir in processed.iterdir():
+                if not topic_dir.is_dir():
+                    continue
+                if query_lower and query_lower not in topic_dir.name.lower():
+                    continue
+                for summary_file in sorted(topic_dir.glob("summary-v*.md"), reverse=True):
+                    summaries.append(
+                        {
+                            "topic": topic_dir.name,
+                            "version": summary_file.stem.replace("summary-", ""),
+                            "path": str(summary_file.relative_to(kb_root)),
+                        }
+                    )
+
+        return {"files": files, "topics": topics, "summaries": summaries}
 
     @x_ipe_tracing()
     def reorganize(self) -> dict:

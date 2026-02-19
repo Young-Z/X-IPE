@@ -105,6 +105,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.kbCore) {
         window.kbCore.init();
     }
+    if (window.kbSearch) {
+        window.kbSearch.init();
+        window.kbSearch.enhanceSidebarSearch();
+    }
 });
 </script>
 {% endblock %}

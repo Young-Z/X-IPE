@@ -272,16 +272,20 @@ def search_kb():
     """
     Search knowledge base file index.
 
-    Query params: q=search_query
-    Response: { query, results: [...], total }
+    Query params: q=search_query, type=file_type, topic=topic_name
+    Response: { query, results: { files, topics, summaries }, total }
     """
     query = request.args.get('q', '').strip()
-    if not query:
-        return jsonify({'error': 'Query parameter q is required'}), 400
+    file_type = request.args.get('type', '').strip() or None
+    topic_filter = request.args.get('topic', '').strip() or None
+
+    if not query and not file_type and not topic_filter:
+        return jsonify({'error': 'Query parameter q, type, or topic is required'}), 400
 
     manager = _get_manager()
-    results = manager.search(query)
-    return jsonify({'query': query, 'results': results, 'total': len(results)})
+    grouped = manager.search(query, file_type=file_type, topic_filter=topic_filter)
+    total = len(grouped.get('files', [])) + len(grouped.get('topics', [])) + len(grouped.get('summaries', []))
+    return jsonify({'query': query, 'results': grouped, 'total': total})
 
 
 @kb_bp.route('/reorganize', methods=['POST'])
