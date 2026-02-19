@@ -17,3 +17,4 @@
 | 7 | [Part 7](requirement-details-part-7.md) | EPIC-029 | ~240 |
 | 8 | [Part 8](requirement-details-part-8.md) | EPIC-030, EPIC-031, EPIC-032, EPIC-033 | ~320 |
 | 9 | [Part 9](requirement-details-part-9.md) | EPIC-035, EPIC-036 | ~695 |
+| 10 | [Part 10](requirement-details-part-10.md) | EPIC-037 | ~130 |

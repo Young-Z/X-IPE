@@ -349,6 +349,12 @@ The user wants:
 - [ ] After idea folder linked, `idea_folder` field updated in workflow JSON
 - [ ] Action-to-skill mapping follows the defined table (12 actions across 5 stages)
 
+> **⚠️ CR Impact Note** (added 2026-02-19, ref: EPIC-037)
+> - **Change:** The "existing modal UI" for Compose/Upload Idea is now fully specified in EPIC-037 as a rich modal with Create New / Link Existing toggle, file tree browser with preview, auto-naming (wf-NNN), and re-edit capability
+> - **Affected FRs:** FR-036.12 (Modal Action Execution), FR-036.15 (Idea Folder Linking), AC-036.3
+> - **Action Required:** FEATURE-036-C specification update needed to reference EPIC-037 modal spec instead of generic "opens existing modal UI"
+> - **New Feature Ref:** EPIC-037 — see requirement-details-part-10.md
+
 **Dependencies:**
 - FEATURE-036-A (Workflow Manager — gating logic, action validation)
 - FEATURE-036-B (Workflow View Shell — panel container for ribbon and buttons)
