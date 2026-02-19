@@ -1273,30 +1273,25 @@ class UIUXFeedbackManager {
             // Clone the DOM tree
             const clone = iframeDoc.documentElement.cloneNode(true);
             
-            // Inline all computed styles so the SVG renders without external stylesheets
-            const srcEls = iframeDoc.documentElement.querySelectorAll('*');
-            const cloneEls = clone.querySelectorAll('*');
-            for (let i = 0; i < srcEls.length; i++) {
-                const cs = iframeDoc.defaultView.getComputedStyle(srcEls[i]);
-                let styleStr = '';
-                for (let j = 0; j < cs.length; j++) {
-                    const prop = cs[j];
-                    styleStr += `${prop}:${cs.getPropertyValue(prop)};`;
-                }
-                cloneEls[i].setAttribute('style', styleStr);
-            }
+            // Remove scripts and inspector artifacts
+            clone.querySelectorAll('script, [data-x-ipe-inspector]').forEach(el => el.remove());
             
-            // Inline computed style on the <html> element
-            const htmlCs = iframeDoc.defaultView.getComputedStyle(iframeDoc.documentElement);
-            let htmlStyle = '';
-            for (let j = 0; j < htmlCs.length; j++) {
-                const prop = htmlCs[j];
-                htmlStyle += `${prop}:${htmlCs.getPropertyValue(prop)};`;
+            // Inline stylesheet rules as a single <style> block
+            // (replaces the expensive per-element getComputedStyle loop)
+            let cssText = '';
+            for (const sheet of iframeDoc.styleSheets) {
+                try {
+                    for (const rule of sheet.cssRules) {
+                        cssText += rule.cssText + '\n';
+                    }
+                } catch (e) { /* skip cross-origin sheets */ }
             }
-            clone.setAttribute('style', htmlStyle);
-            
-            // Remove scripts, inspector artifacts, stylesheets (styles are inlined)
-            clone.querySelectorAll('script, [data-x-ipe-inspector], link[rel="stylesheet"], style').forEach(el => el.remove());
+            clone.querySelectorAll('link[rel="stylesheet"], style').forEach(el => el.remove());
+            if (cssText) {
+                const styleEl = iframeDoc.createElementNS('http://www.w3.org/1999/xhtml', 'style');
+                styleEl.textContent = cssText;
+                (clone.querySelector('head') || clone).appendChild(styleEl);
+            }
             
             // Convert <img> src to inline data URLs to avoid taint
             const cloneImgs = clone.querySelectorAll('img[src]');
@@ -1314,18 +1309,14 @@ class UIUXFeedbackManager {
                 } catch (e) { /* skip tainted images */ }
             }
             
-            // Serialize to XML-safe XHTML
-            const serializer = new XMLSerializer();
-            let htmlStr = serializer.serializeToString(clone);
-            
-            // Build SVG with foreignObject
+            // Serialize to XML-safe XHTML and render via SVG foreignObject
+            const htmlStr = new XMLSerializer().serializeToString(clone);
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
                 <foreignObject width="100%" height="100%">
                     ${htmlStr}
                 </foreignObject>
             </svg>`;
             
-            // Use data: URL instead of blob: URL to avoid canvas taint
             const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
             
             const img = new Image();
