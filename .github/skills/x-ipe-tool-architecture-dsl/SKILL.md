@@ -26,6 +26,42 @@ CRITICAL: Do NOT invent keywords. Only use keywords defined in the grammar (`lay
 
 ---
 
+## Quick Syntax Reference
+
+BLOCKING: Use this as a checklist when generating architecture-dsl code blocks.
+
+**Module View — Minimal Valid Structure:**
+```
+@startuml module-view          ← MUST start with this (NOT `view: module`)
+title "Your Title"             ← MUST use double quotes
+theme "theme-default"
+direction top-to-bottom
+grid 12 x {total_rows}         ← MUST declare at document level
+
+layer "Layer Name" {            ← MUST use double quotes
+  color "#hex"
+  border-color "#hex"
+  rows N
+
+  module "Module Name" {        ← optional grouping; cols MUST sum to 12 per layer
+    cols N
+    rows N
+    grid CxR                    ← internal layout (cols x rows >= component count)
+    align center center
+    gap 8px
+    component "Name" { cols 1, rows 1 }   ← MANDATORY smallest unit
+  }
+}
+
+@enduml                         ← MUST end with this
+```
+
+**Valid keywords:** `layer`, `module`, `component`, `cols`, `rows`, `grid`, `align`, `gap`, `color`, `border-color`, `text-align`, `title`, `theme`, `direction`, `canvas`, `side-column`
+
+**INVALID keywords (silently ignored — NEVER use):** `view`, `desc`, `description`, `tech`, `note`, `[Name]`
+
+---
+
 ## About
 
 Architecture DSL is a domain-specific language for defining software architecture diagrams using a Bootstrap-inspired 12-column grid system. It supports two view types: Module View (layered decomposition) and Landscape View (application integration).

@@ -7,7 +7,7 @@
 **Date:** 2026-02-18
 **Severity:** major
 **Source:** agent_observed
-**Status:** raw
+**Status:** applied
 **Task ID:** TASK-457
 
 ### Context
