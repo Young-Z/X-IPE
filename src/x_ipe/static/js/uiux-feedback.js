@@ -243,7 +243,7 @@ class UIUXFeedbackManager {
                         name: entry.name,
                         url: entry.url,
                         elements: [],  // Not stored in feedback.md
-                        screenshot: null,  // Would need to load from file
+                        screenshot: entry.screenshot_url || null,
                         description: entry.description || '',
                         createdAt: entry.date ? new Date(entry.date) : new Date(),
                         status: 'submitted'  // Already saved
@@ -1021,7 +1021,8 @@ class UIUXFeedbackManager {
     }
     
     /**
-     * Capture screenshot of selected elements
+     * Capture screenshot of the browser viewport area using canvas drawImage on the iframe element.
+     * This avoids html2canvas DOM parsing issues and CORS problems.
      */
     async _captureScreenshot() {
         if (this.inspector.selectedElements.length === 0) {
@@ -1029,46 +1030,7 @@ class UIUXFeedbackManager {
             return null;
         }
         
-        try {
-            // Check if html2canvas is available
-            if (typeof html2canvas === 'undefined') {
-                throw new Error('html2canvas library not loaded');
-            }
-            
-            // Get iframe and its content document
-            const iframe = this.elements.iframe;
-            if (!iframe || !iframe.contentDocument || !iframe.contentDocument.body) {
-                throw new Error('Cannot access iframe content');
-            }
-            
-            console.log('[UIUXFeedback] Capturing iframe content screenshot...');
-            
-            // Capture the entire iframe body
-            const canvas = await html2canvas(iframe.contentDocument.body, {
-                useCORS: true,
-                allowTaint: true,
-                logging: false,
-                backgroundColor: '#ffffff',
-                width: iframe.contentDocument.body.scrollWidth,
-                height: iframe.contentDocument.body.scrollHeight
-            });
-            
-            const dataUrl = canvas.toDataURL('image/png');
-            console.log('[UIUXFeedback] Screenshot captured, length:', dataUrl.length);
-            
-            if (dataUrl && dataUrl.length > 1000) {
-                this.updateStatus('Screenshot captured');
-                return dataUrl;
-            } else {
-                console.warn('[UIUXFeedback] Screenshot appears empty');
-                return null;
-            }
-            
-        } catch (error) {
-            console.error('Screenshot capture failed:', error);
-            this.updateStatus('Screenshot unavailable');
-            return null;
-        }
+        return this._captureViewportScreenshot();
     }
     
     /**
@@ -1278,28 +1240,123 @@ class UIUXFeedbackManager {
     }
     
     /**
-     * Capture full page screenshot (no element bounding box)
+     * Capture full page screenshot (no element bounding box).
+     * Uses canvas drawImage on the iframe element for simplicity and reliability.
      */
     async _captureFullPageScreenshot() {
+        return this._captureViewportScreenshot();
+    }
+    
+    /**
+     * Capture screenshot of the browser viewport using SVG foreignObject.
+     * Serializes the iframe's HTML into an SVG foreignObject, renders it to
+     * an Image via a data: URL (not blob: to avoid canvas taint), then draws
+     * onto a canvas.
+     */
+    async _captureViewportScreenshot() {
         const iframe = this.elements.iframe;
-        if (!iframe || !iframe.contentDocument) {
-            throw new Error('Cannot access iframe content');
+        if (!iframe) {
+            throw new Error('Iframe not available');
         }
         
-        // Check if html2canvas is available
-        if (typeof html2canvas === 'undefined') {
-            throw new Error('html2canvas library not loaded');
+        try {
+            console.log('[UIUXFeedback] Capturing viewport screenshot via SVG foreignObject...');
+            
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+            if (!iframeDoc || !iframeDoc.documentElement) {
+                throw new Error('Cannot access iframe content');
+            }
+            
+            const w = iframe.clientWidth;
+            const h = iframe.clientHeight;
+            
+            // Clone the DOM tree
+            const clone = iframeDoc.documentElement.cloneNode(true);
+            
+            // Inline all computed styles so the SVG renders without external stylesheets
+            const srcEls = iframeDoc.documentElement.querySelectorAll('*');
+            const cloneEls = clone.querySelectorAll('*');
+            for (let i = 0; i < srcEls.length; i++) {
+                const cs = iframeDoc.defaultView.getComputedStyle(srcEls[i]);
+                let styleStr = '';
+                for (let j = 0; j < cs.length; j++) {
+                    const prop = cs[j];
+                    styleStr += `${prop}:${cs.getPropertyValue(prop)};`;
+                }
+                cloneEls[i].setAttribute('style', styleStr);
+            }
+            
+            // Inline computed style on the <html> element
+            const htmlCs = iframeDoc.defaultView.getComputedStyle(iframeDoc.documentElement);
+            let htmlStyle = '';
+            for (let j = 0; j < htmlCs.length; j++) {
+                const prop = htmlCs[j];
+                htmlStyle += `${prop}:${htmlCs.getPropertyValue(prop)};`;
+            }
+            clone.setAttribute('style', htmlStyle);
+            
+            // Remove scripts, inspector artifacts, stylesheets (styles are inlined)
+            clone.querySelectorAll('script, [data-x-ipe-inspector], link[rel="stylesheet"], style').forEach(el => el.remove());
+            
+            // Convert <img> src to inline data URLs to avoid taint
+            const cloneImgs = clone.querySelectorAll('img[src]');
+            const srcImgs = iframeDoc.documentElement.querySelectorAll('img[src]');
+            for (let i = 0; i < srcImgs.length; i++) {
+                try {
+                    const imgEl = srcImgs[i];
+                    if (imgEl.naturalWidth > 0) {
+                        const c = document.createElement('canvas');
+                        c.width = imgEl.naturalWidth;
+                        c.height = imgEl.naturalHeight;
+                        c.getContext('2d').drawImage(imgEl, 0, 0);
+                        cloneImgs[i].setAttribute('src', c.toDataURL());
+                    }
+                } catch (e) { /* skip tainted images */ }
+            }
+            
+            // Serialize to XML-safe XHTML
+            const serializer = new XMLSerializer();
+            let htmlStr = serializer.serializeToString(clone);
+            
+            // Build SVG with foreignObject
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
+                <foreignObject width="100%" height="100%">
+                    ${htmlStr}
+                </foreignObject>
+            </svg>`;
+            
+            // Use data: URL instead of blob: URL to avoid canvas taint
+            const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+            
+            const img = new Image();
+            const dataUrl = await new Promise((resolve, reject) => {
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const dpr = window.devicePixelRatio || 1;
+                    canvas.width = w * dpr;
+                    canvas.height = h * dpr;
+                    const ctx = canvas.getContext('2d');
+                    ctx.scale(dpr, dpr);
+                    ctx.drawImage(img, 0, 0, w, h);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.onerror = () => reject(new Error('SVG foreignObject render failed'));
+                img.src = svgDataUrl;
+            });
+            
+            if (dataUrl && dataUrl.length > 1000) {
+                console.log('[UIUXFeedback] Viewport screenshot captured, length:', dataUrl.length);
+                this.updateStatus('Screenshot captured');
+                return dataUrl;
+            }
+            
+            console.warn('[UIUXFeedback] Screenshot appears empty');
+            return null;
+        } catch (error) {
+            console.error('[UIUXFeedback] Viewport screenshot capture failed:', error);
+            this.updateStatus('Screenshot unavailable');
+            return null;
         }
-        
-        // Capture the entire iframe content
-        const canvas = await html2canvas(iframe.contentDocument.body, {
-            useCORS: true,
-            allowTaint: true,
-            logging: false,
-            backgroundColor: '#ffffff'
-        });
-        
-        return canvas.toDataURL('image/png');
     }
     
     /**

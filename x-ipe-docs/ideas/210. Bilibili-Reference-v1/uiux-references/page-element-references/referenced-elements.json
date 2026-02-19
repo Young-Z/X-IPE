@@ -1,0 +1,588 @@
+{
+  "version": "2.0",
+  "source_url": "https://www.bilibili.com/",
+  "timestamp": "2026-02-16T03:08:38Z",
+  "idea_folder": "210. Bilibili-Reference-v1",
+  "areas": [
+    {
+      "id": "area-1",
+      "snap_selector": "body > div:nth-of-type(2) > div.bili-feed4 > div.bili-header.large-header > div:nth-of-type(3) > div.channel-icons",
+      "bounding_box": {
+        "x": 121,
+        "y": 102.531,
+        "width": 1517,
+        "height": 589
+      },
+      "instruction": "",
+      "key_elements_identified_from_screenshot": [
+        {
+          "element": "category-nav-bar",
+          "purpose": "Two-row grid of rounded pill-shaped category links for content filtering",
+          "examined_from_screenshot": "area-1.png"
+        },
+        {
+          "element": "dynamic-icon",
+          "purpose": "Orange circular icon linking to user's dynamic/activity feed",
+          "examined_from_screenshot": "area-1.png"
+        },
+        {
+          "element": "popular-icon",
+          "purpose": "Pink/coral circular icon linking to trending/popular content",
+          "examined_from_screenshot": "area-1.png"
+        },
+        {
+          "element": "right-sidebar-links",
+          "purpose": "Secondary navigation links (专栏, 活动, 社区中心, 直播, 课堂, 新歌热榜) on the right side",
+          "examined_from_screenshot": "area-1.png"
+        },
+        {
+          "element": "hero-carousel",
+          "purpose": "Large featured content carousel/banner with anime artwork, navigation dots, and prev/next arrows",
+          "examined_from_screenshot": "area-1.png"
+        },
+        {
+          "element": "video-card-grid",
+          "purpose": "3×2 grid of video recommendation cards with thumbnails, stats overlay, titles, and author info",
+          "examined_from_screenshot": "area-1.png"
+        },
+        {
+          "element": "video-thumbnail",
+          "purpose": "Video cover image with rounded corners (6px), duration overlay, and gradient stats bar at bottom",
+          "examined_from_screenshot": "area-1.png"
+        },
+        {
+          "element": "video-stats-overlay",
+          "purpose": "Bottom gradient overlay on thumbnails showing play count, danmaku count, and duration in white text",
+          "examined_from_screenshot": "area-1.png"
+        },
+        {
+          "element": "video-title",
+          "purpose": "Video title text in dark color below thumbnail",
+          "examined_from_screenshot": "area-1.png"
+        },
+        {
+          "element": "video-author-date",
+          "purpose": "Author name with UP icon and date, in gray text below title",
+          "examined_from_screenshot": "area-1.png"
+        },
+        {
+          "element": "refresh-button",
+          "purpose": "换一换 (refresh) button on far right for loading new video recommendations",
+          "examined_from_screenshot": "area-1.png"
+        },
+        {
+          "element": "white-background",
+          "purpose": "White background from bili-header__channel container",
+          "examined_from_screenshot": "full-page.png"
+        },
+        {
+          "element": "body-background",
+          "purpose": "Light gray (#f1f2f3) page background visible at edges",
+          "examined_from_screenshot": "full-page.png"
+        }
+      ],
+      "discovered_elements": [
+        {
+          "element_name": "category-nav-grid",
+          "purpose_of_the_element": "Two-row grid layout of content category links allowing users to filter by genre",
+          "relationships_to_other_elements": [
+            {
+              "element": "category-link",
+              "relationship": "parent container",
+              "mimic_tips": "to_element_itself: display:grid, gap:10px, padding:0 140px, background-color:rgb(255,255,255), height:120px, to_relevant_elements: contains all category-link pills in 2 rows, positioned below header banner"
+            }
+          ],
+          "element_details": {
+            "tag": "div",
+            "classes": [
+              "channel-items__left"
+            ],
+            "styles": {
+              "display": "grid",
+              "gap": "10px",
+              "background": "transparent"
+            }
+          }
+        },
+        {
+          "element_name": "category-link",
+          "purpose_of_the_element": "Individual category pill button with rounded border for content genre navigation",
+          "relationships_to_other_elements": [
+            {
+              "element": "category-nav-grid",
+              "relationship": "child of grid container",
+              "mimic_tips": "to_element_itself: color:rgb(97,102,109), background-color:rgb(246,247,248), border:1px solid rgb(241,242,243), border-radius:6px, font-size:14px, font-weight:400, height:30px, width:~74px, text-align:center, display:flex, align-items:center, justify-content:center, font-family:'PingFang SC' system-ui sans-serif, to_relevant_elements: arranged in 2-row grid with 10px gap, 14 items per row"
+            }
+          ],
+          "element_details": {
+            "tag": "a",
+            "text_content": "番剧, 国创, 综艺, 动画, 鬼畜, 舞蹈, 娱乐, 科技数码, 美食, 汽车, 体育运动, vlog, 电影, 电视剧, 纪录片, 游戏, 音乐, 影视, 知识, 资讯, 小剧场, 时尚美妆, 动物",
+            "classes": [
+              "channel-link"
+            ],
+            "styles": {
+              "color": "rgb(97, 102, 109)",
+              "backgroundColor": "rgb(246, 247, 248)",
+              "border": "1px solid rgb(241, 242, 243)",
+              "borderRadius": "6px",
+              "fontSize": "14px",
+              "fontWeight": "400",
+              "height": "30px",
+              "width": "73.66px"
+            }
+          }
+        },
+        {
+          "element_name": "more-dropdown",
+          "purpose_of_the_element": "Expandable dropdown to show additional category links beyond the visible grid",
+          "relationships_to_other_elements": [
+            {
+              "element": "category-nav-grid",
+              "relationship": "last item in grid",
+              "mimic_tips": "to_element_itself: color:rgb(97,102,109), font-size:14px, width:76px, height:30px, displays '更多' text with down arrow icon, to_relevant_elements: positioned at end of category grid row 2"
+            }
+          ],
+          "element_details": {
+            "tag": "div",
+            "text_content": "更多",
+            "classes": [
+              "channel-entry-more__link"
+            ],
+            "styles": {
+              "color": "rgb(97, 102, 109)",
+              "fontSize": "14px"
+            }
+          }
+        },
+        {
+          "element_name": "dynamic-icon",
+          "purpose_of_the_element": "Orange circular icon button linking to user's activity/dynamic feed",
+          "relationships_to_other_elements": [
+            {
+              "element": "popular-icon",
+              "relationship": "sibling to the left",
+              "mimic_tips": "to_element_itself: width:46px, height:46px, border-radius:50%, background-color:rgb(255,146,18) (orange), contains white SVG icon (25x25), to_relevant_elements: paired with popular-icon to the right, both above category grid, with '动态' label below"
+            }
+          ],
+          "element_details": {
+            "tag": "div",
+            "classes": [
+              "icon-bg",
+              "icon-bg__dynamic"
+            ],
+            "styles": {
+              "backgroundColor": "rgb(255, 146, 18)",
+              "borderRadius": "50%",
+              "width": "46px",
+              "height": "46px"
+            }
+          }
+        },
+        {
+          "element_name": "popular-icon",
+          "purpose_of_the_element": "Pink/coral circular icon button linking to popular/trending content",
+          "relationships_to_other_elements": [
+            {
+              "element": "dynamic-icon",
+              "relationship": "sibling to the right",
+              "mimic_tips": "to_element_itself: width:46px, height:46px, border-radius:50%, background-color:rgb(240,119,117) (coral/pink), contains white SVG icon (25x25), to_relevant_elements: paired with dynamic-icon to the left, with '热门' label below"
+            }
+          ],
+          "element_details": {
+            "tag": "div",
+            "classes": [
+              "icon-bg",
+              "icon-bg__popular"
+            ],
+            "styles": {
+              "backgroundColor": "rgb(240, 119, 117)",
+              "borderRadius": "50%",
+              "width": "46px",
+              "height": "46px"
+            }
+          }
+        },
+        {
+          "element_name": "icon-label",
+          "purpose_of_the_element": "Text label below circular icons reading '动态' or '热门'",
+          "relationships_to_other_elements": [
+            {
+              "element": "dynamic-icon",
+              "relationship": "label below icon",
+              "mimic_tips": "to_element_itself: font-size:14px, color:rgb(24,25,28), text-align:center, width:46px, height:20px, to_relevant_elements: centered below its parent icon circle"
+            }
+          ],
+          "element_details": {
+            "tag": "span",
+            "text_content": "动态 / 热门",
+            "classes": [
+              "icon-title"
+            ],
+            "styles": {
+              "fontSize": "14px",
+              "color": "rgb(24, 25, 28)"
+            }
+          }
+        },
+        {
+          "element_name": "right-sidebar-links",
+          "purpose_of_the_element": "Secondary navigation links on the right side with icons (专栏, 活动, 社区中心, 直播, 课堂, 新歌热榜)",
+          "relationships_to_other_elements": [
+            {
+              "element": "category-nav-grid",
+              "relationship": "positioned to the right of category grid",
+              "mimic_tips": "to_element_itself: width:258px, height:74px, display:flex, contains links with SVG icons (20x20) + text labels, to_relevant_elements: right-aligned in header channel section, opposite to category grid"
+            }
+          ],
+          "element_details": {
+            "tag": "div",
+            "classes": [
+              "channel-items__right"
+            ],
+            "styles": {
+              "width": "258px",
+              "height": "74px"
+            }
+          }
+        },
+        {
+          "element_name": "right-link",
+          "purpose_of_the_element": "Individual right sidebar navigation link with icon and text",
+          "relationships_to_other_elements": [
+            {
+              "element": "right-sidebar-links",
+              "relationship": "child item",
+              "mimic_tips": "to_element_itself: color:rgb(97,102,109), font-size:14px, display:flex, align-items:center, gap:4px, contains SVG icon (20x20) + span text, width:78px, height:32px, to_relevant_elements: arranged in 2 rows within right-sidebar-links container"
+            }
+          ],
+          "element_details": {
+            "tag": "a",
+            "text_content": "专栏 / 直播 / etc.",
+            "classes": [
+              "channel-link__right"
+            ],
+            "styles": {
+              "color": "rgb(97, 102, 109)",
+              "fontSize": "14px"
+            }
+          }
+        },
+        {
+          "element_name": "hero-carousel",
+          "purpose_of_the_element": "Large featured content carousel with auto-rotating slides showing featured videos/events with anime artwork",
+          "relationships_to_other_elements": [
+            {
+              "element": "video-card-grid",
+              "relationship": "positioned to the left of video grid",
+              "mimic_tips": "to_element_itself: width:565px, height:477px(total)/402px(body), border-radius:6px, overflow:hidden, background-color:rgb(241,242,243), to_relevant_elements: takes up left ~37% of content area, video cards fill the remaining ~63% to the right"
+            }
+          ],
+          "element_details": {
+            "tag": "div",
+            "classes": [
+              "recommended-swipe"
+            ],
+            "styles": {
+              "width": "565px",
+              "height": "477px",
+              "borderRadius": "6px",
+              "overflow": "hidden"
+            }
+          }
+        },
+        {
+          "element_name": "carousel-dots",
+          "purpose_of_the_element": "Pagination indicator dots at bottom of carousel showing current slide position",
+          "relationships_to_other_elements": [
+            {
+              "element": "hero-carousel",
+              "relationship": "child positioned at bottom",
+              "mimic_tips": "to_element_itself: list of 9 circular dots (14x14px each, border-radius:50%), background transparent, margin:1px between dots, active dot uses .is-active class with filled style, to_relevant_elements: centered at bottom of carousel, above carousel arrows"
+            }
+          ],
+          "element_details": {
+            "tag": "div",
+            "classes": [
+              "carousel-dots"
+            ],
+            "styles": {
+              "dotSize": "14px",
+              "borderRadius": "50%"
+            }
+          }
+        },
+        {
+          "element_name": "carousel-arrows",
+          "purpose_of_the_element": "Previous/next navigation buttons for manually advancing carousel slides",
+          "relationships_to_other_elements": [
+            {
+              "element": "hero-carousel",
+              "relationship": "child at bottom right",
+              "mimic_tips": "to_element_itself: two buttons, each 28x28px, border-radius:8px, background:rgba(255,255,255,0.1), semi-transparent white, to_relevant_elements: positioned at bottom-right of carousel body, next to pagination dots"
+            }
+          ],
+          "element_details": {
+            "tag": "div",
+            "classes": [
+              "carousel-arrows"
+            ],
+            "styles": {
+              "width": "68px",
+              "height": "28px"
+            }
+          }
+        },
+        {
+          "element_name": "video-card",
+          "purpose_of_the_element": "Individual video recommendation card containing thumbnail, stats overlay, title, and author info",
+          "relationships_to_other_elements": [
+            {
+              "element": "video-card-grid",
+              "relationship": "child card item",
+              "mimic_tips": "to_element_itself: width:273px, height:228px, background:transparent, display:flex, flex-direction:column, border-radius on cover:6px, to_relevant_elements: arranged in 3-column grid with gap, 2 rows visible, each card ~273px wide"
+            }
+          ],
+          "element_details": {
+            "tag": "div",
+            "classes": [
+              "bili-video-card",
+              "is-rcmd"
+            ],
+            "styles": {
+              "width": "273px",
+              "height": "228px"
+            }
+          }
+        },
+        {
+          "element_name": "video-thumbnail",
+          "purpose_of_the_element": "Video cover image with rounded corners showing a preview frame",
+          "relationships_to_other_elements": [
+            {
+              "element": "video-card",
+              "relationship": "top section of card",
+              "mimic_tips": "to_element_itself: border-radius:6px, overflow:hidden, aspect-ratio approximately 16:9, img covers full area with object-fit:cover, to_relevant_elements: occupies top ~65% of video-card, stats-overlay positioned absolutely at bottom of this"
+            }
+          ],
+          "element_details": {
+            "tag": "div",
+            "classes": [
+              "bili-video-card__cover"
+            ],
+            "styles": {
+              "borderRadius": "6px",
+              "overflow": "hidden"
+            },
+            "resources": [
+              "https://i0.hdslb.com/bfs/archive/928e01507284599726c115eeed72f6b4740b7f2b.jpg@672w_378h_1c_!web-home-common-cover",
+              "https://i2.hdslb.com/bfs/archive/09459e8d0665fe7a5b3c302bb2d86d42ad1af04b.jpg@672w_378h_1c_!web-home-common-cover",
+              "https://i1.hdslb.com/bfs/archive/2f208f96bcbb2063a11637b9b5013f38b2e8df14.jpg@672w_378h_1c_!web-home-common-cover",
+              "https://i2.hdslb.com/bfs/archive/118467242037cf1db0f3354051a259eabef50d1e.jpg@672w_378h_1c_!web-home-common-cover",
+              "https://i1.hdslb.com/bfs/archive/023b5a221dee9c4bd1a013f48d76be0f1803f46c.jpg@672w_378h_1c_!web-home-common-cover",
+              "https://i1.hdslb.com/bfs/archive/c4f729b6fce7e2945475d10491b3ad04462cb39f.jpg@672w_378h_1c_!web-home-common-cover"
+            ]
+          }
+        },
+        {
+          "element_name": "stats-overlay",
+          "purpose_of_the_element": "Semi-transparent gradient overlay at bottom of thumbnail showing play count, danmaku count, and duration",
+          "relationships_to_other_elements": [
+            {
+              "element": "video-thumbnail",
+              "relationship": "absolutely positioned at bottom of cover",
+              "mimic_tips": "to_element_itself: position:absolute, bottom:0, width:100%, height:38px, background:linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.8)), padding:16px 8px 6px, display:flex, align-items:center, to_relevant_elements: overlays bottom of video-thumbnail, contains play-count, danmaku-count, and duration as children"
+            }
+          ],
+          "element_details": {
+            "tag": "div",
+            "classes": [
+              "bili-video-card__stats"
+            ],
+            "styles": {
+              "position": "absolute",
+              "bottom": "0px",
+              "background": "linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.8))",
+              "height": "38px",
+              "padding": "16px 8px 6px"
+            }
+          }
+        },
+        {
+          "element_name": "stats-text",
+          "purpose_of_the_element": "White text showing play count (e.g., '73.1万') and danmaku count (e.g., '639') with small icons",
+          "relationships_to_other_elements": [
+            {
+              "element": "stats-overlay",
+              "relationship": "child text items",
+              "mimic_tips": "to_element_itself: color:rgb(255,255,255), font-size:13px, display:flex, align-items:center, gap:4px, each stat has SVG icon + number text, to_relevant_elements: play count on left, danmaku count in middle, duration on right within stats-overlay"
+            }
+          ],
+          "element_details": {
+            "tag": "span",
+            "classes": [
+              "bili-video-card__stats--text"
+            ],
+            "styles": {
+              "color": "rgb(255, 255, 255)",
+              "fontSize": "13px"
+            }
+          }
+        },
+        {
+          "element_name": "duration-badge",
+          "purpose_of_the_element": "Video duration text (e.g., '00:46') displayed in stats overlay",
+          "relationships_to_other_elements": [
+            {
+              "element": "stats-overlay",
+              "relationship": "child positioned at right",
+              "mimic_tips": "to_element_itself: color:rgb(255,255,255), font-size:13px, to_relevant_elements: right-aligned within stats-overlay, after play and danmaku counts"
+            }
+          ],
+          "element_details": {
+            "tag": "span",
+            "classes": [
+              "bili-video-card__stats__duration"
+            ],
+            "styles": {
+              "color": "rgb(255, 255, 255)",
+              "fontSize": "13px"
+            }
+          }
+        },
+        {
+          "element_name": "video-title",
+          "purpose_of_the_element": "Video title text displayed below the thumbnail",
+          "relationships_to_other_elements": [
+            {
+              "element": "video-card",
+              "relationship": "child in info section",
+              "mimic_tips": "to_element_itself: color:rgb(24,25,28), font-size:15px, font-weight:500, line-height:22px, max 2 lines with text-overflow:ellipsis, to_relevant_elements: positioned below video-thumbnail, above video-author-info"
+            }
+          ],
+          "element_details": {
+            "tag": "a",
+            "text_content": "越 看 越 好 看 ~ / 没人在我就这样.. / \"当你再次想起我时，你还会选择我吗\" / \"人民叫师\" / 专研之路 / 第一视角解锁顶配梦境...",
+            "classes": [
+              "bili-video-card__info--tit"
+            ],
+            "styles": {
+              "color": "rgb(24, 25, 28)",
+              "fontSize": "15px",
+              "fontWeight": "500",
+              "lineHeight": "22px"
+            }
+          }
+        },
+        {
+          "element_name": "video-author-info",
+          "purpose_of_the_element": "Author name with UP icon and publication date in gray text",
+          "relationships_to_other_elements": [
+            {
+              "element": "video-title",
+              "relationship": "positioned below title",
+              "mimic_tips": "to_element_itself: color:rgb(148,153,160), font-size:13px, display:flex, align-items:center, contains UP icon SVG + author name + date string, to_relevant_elements: last element in video-card info section, below video-title"
+            }
+          ],
+          "element_details": {
+            "tag": "span",
+            "classes": [
+              "bili-video-card__info--author"
+            ],
+            "styles": {
+              "color": "rgb(148, 153, 160)",
+              "fontSize": "13px"
+            }
+          }
+        },
+        {
+          "element_name": "refresh-button",
+          "purpose_of_the_element": "换一换 (refresh/change) button to load new video recommendations",
+          "relationships_to_other_elements": [
+            {
+              "element": "video-card-grid",
+              "relationship": "positioned to the far right of grid",
+              "mimic_tips": "to_element_itself: color:rgb(24,25,28), font-size:16px, background:transparent, positioned at x:1593 y:282, contains refresh icon + '换一换' text vertically, to_relevant_elements: right edge of content area, vertically centered relative to video cards"
+            }
+          ],
+          "element_details": {
+            "tag": "div",
+            "classes": [
+              "feed-roll-btn"
+            ],
+            "styles": {
+              "color": "rgb(24, 25, 28)",
+              "fontSize": "16px"
+            }
+          }
+        },
+        {
+          "element_name": "section-background",
+          "purpose_of_the_element": "White background container for the header channel section",
+          "relationships_to_other_elements": [
+            {
+              "element": "category-nav-grid",
+              "relationship": "ancestor providing background",
+              "mimic_tips": "to_element_itself: background-color:rgb(255,255,255), padding:0 140px, height:120px, to_relevant_elements: wraps the entire category navigation + icons section"
+            }
+          ],
+          "element_details": {
+            "tag": "div",
+            "classes": [
+              "bili-header__channel"
+            ],
+            "styles": {
+              "backgroundColor": "rgb(255, 255, 255)",
+              "padding": "0px 140px",
+              "height": "120px"
+            }
+          }
+        },
+        {
+          "element_name": "page-background",
+          "purpose_of_the_element": "Light gray page background visible around content sections",
+          "relationships_to_other_elements": [
+            {
+              "element": "section-background",
+              "relationship": "body-level ancestor background",
+              "mimic_tips": "to_element_itself: background-color:rgb(241,242,243), to_relevant_elements: visible as edge color around white content sections"
+            }
+          ],
+          "element_details": {
+            "tag": "body",
+            "classes": [
+              "mac"
+            ],
+            "styles": {
+              "backgroundColor": "rgb(241, 242, 243)"
+            }
+          }
+        }
+      ],
+      "agent_analysis": {
+        "layout": "confident",
+        "typography": "confident",
+        "color_palette": "confident",
+        "spacing": "confident",
+        "visual_effects": "confident",
+        "static_resources": "confident"
+      }
+    }
+  ],
+  "colors": [],
+  "design_tokens": {
+    "font_family": "PingFang SC, HarmonyOS_Regular, Helvetica Neue, Microsoft YaHei, sans-serif",
+    "colors": {
+      "text_primary": "rgb(24, 25, 28)",
+      "text_secondary": "rgb(97, 102, 109)",
+      "text_tertiary": "rgb(148, 153, 160)",
+      "bg_primary": "rgb(255, 255, 255)",
+      "bg_secondary": "rgb(241, 242, 243)",
+      "bg_tag": "rgb(246, 247, 248)",
+      "border_tag": "rgb(241, 242, 243)",
+      "icon_dynamic": "rgb(255, 146, 18)",
+      "icon_popular": "rgb(240, 119, 117)",
+      "text_on_dark": "rgb(255, 255, 255)",
+      "gradient_overlay": "linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.8))"
+    }
+  }
+}

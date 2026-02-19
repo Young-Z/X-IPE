@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0",
+  "name": "hello",
+  "created": "2026-02-17T15:08:47.711533+00:00",
+  "last_activity": "2026-02-17T15:08:47.711533+00:00",
+  "idea_folder": null,
+  "current_stage": "ideation",
+  "stages": {
+    "ideation": {
+      "status": "in_progress",
+      "actions": {
+        "compose_idea": {
+          "status": "pending",
+          "deliverables": []
+        },
+        "reference_uiux": {
+          "status": "pending",
+          "deliverables": []
+        },
+        "refine_idea": {
+          "status": "pending",
+          "deliverables": []
+        },
+        "design_mockup": {
+          "status": "pending",
+          "deliverables": []
+        }
+      }
+    },
+    "requirement": {
+      "status": "locked",
+      "actions": {
+        "requirement_gathering": {
+          "status": "pending",
+          "deliverables": []
+        },
+        "feature_breakdown": {
+          "status": "pending",
+          "deliverables": [],
+          "features_created": []
+        }
+      }
+    },
+    "implement": {
+      "status": "locked",
+      "features": {}
+    },
+    "validation": {
+      "status": "locked",
+      "features": {}
+    },
+    "feedback": {
+      "status": "locked",
+      "features": {}
+    }
+  }
+}

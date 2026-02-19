@@ -700,3 +700,77 @@ class TestStartupCleanupConfiguration:
         # 5 days old is within 7-day default, so should not be deleted
         assert deleted == 0
         assert folder_path.exists()
+
+
+class TestFeedbackScreenshot:
+    """Tests for feedback screenshot serving (TASK-491)"""
+    
+    @pytest.fixture
+    def client(self, tmp_path):
+        """Create test client with temp project root"""
+        from x_ipe.app import create_app
+        
+        app = create_app()
+        app.config['TESTING'] = True
+        app.config['PROJECT_ROOT'] = str(tmp_path)
+        
+        with app.test_client() as client:
+            yield client
+    
+    def test_screenshot_url_returned_when_screenshot_exists(self, tmp_path):
+        """list_feedback should return screenshot_url when page-screenshot.png exists"""
+        from x_ipe.services.uiux_feedback_service import UiuxFeedbackService
+        import base64
+        
+        service = UiuxFeedbackService(str(tmp_path))
+        
+        # Save feedback with screenshot
+        png_data = base64.b64encode(b'\x89PNG\r\n\x1a\n' + b'\x00' * 100).decode()
+        service.save_feedback({
+            'name': 'Feedback-WithScreenshot',
+            'url': 'http://localhost:3000',
+            'elements': ['button'],
+            'screenshot': f'data:image/png;base64,{png_data}'
+        })
+        
+        entries = service.list_feedback(days=2)
+        assert len(entries) == 1
+        assert entries[0]['screenshot_url'] == '/api/uiux-feedback/Feedback-WithScreenshot/screenshot'
+    
+    def test_screenshot_url_null_when_no_screenshot(self, tmp_path):
+        """list_feedback should return null screenshot_url when no screenshot file"""
+        from x_ipe.services.uiux_feedback_service import UiuxFeedbackService
+        
+        service = UiuxFeedbackService(str(tmp_path))
+        
+        service.save_feedback({
+            'name': 'Feedback-NoScreenshot',
+            'url': 'http://localhost:3000',
+            'elements': ['button']
+        })
+        
+        entries = service.list_feedback(days=2)
+        assert len(entries) == 1
+        assert entries[0]['screenshot_url'] is None
+    
+    def test_get_screenshot_endpoint_returns_image(self, client, tmp_path):
+        """GET /api/uiux-feedback/<id>/screenshot should return PNG"""
+        import base64
+        
+        # Create feedback with screenshot
+        feedback_dir = tmp_path / 'x-ipe-docs' / 'uiux-feedback' / 'Feedback-Img'
+        feedback_dir.mkdir(parents=True, exist_ok=True)
+        (feedback_dir / 'feedback.md').write_text('# Test')
+        
+        # Write a minimal PNG file
+        png_bytes = b'\x89PNG\r\n\x1a\n' + b'\x00' * 100
+        (feedback_dir / 'page-screenshot.png').write_bytes(png_bytes)
+        
+        response = client.get('/api/uiux-feedback/Feedback-Img/screenshot')
+        assert response.status_code == 200
+        assert response.content_type == 'image/png'
+    
+    def test_get_screenshot_endpoint_returns_404_when_missing(self, client, tmp_path):
+        """GET /api/uiux-feedback/<id>/screenshot should return 404 when no screenshot"""
+        response = client.get('/api/uiux-feedback/Nonexistent/screenshot')
+        assert response.status_code == 404

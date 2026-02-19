@@ -73,7 +73,7 @@ class UiuxFeedbackService:
             feedback_md: Path to feedback.md file
         
         Returns:
-            Dict with id, name, url, description, date
+            Dict with id, name, url, description, date, screenshot_url
         """
         try:
             content = feedback_md.read_text(encoding='utf-8')
@@ -92,12 +92,17 @@ class UiuxFeedbackService:
             if description == '_No description provided_':
                 description = ''
             
+            # Check if screenshot file exists
+            screenshot_file = feedback_md.parent / 'page-screenshot.png'
+            screenshot_url = f'/api/uiux-feedback/{folder_name}/screenshot' if screenshot_file.exists() else None
+            
             return {
                 'id': folder_name,
                 'name': folder_name,
                 'url': url,
                 'description': description,
-                'date': date
+                'date': date,
+                'screenshot_url': screenshot_url
             }
         except Exception:
             return None

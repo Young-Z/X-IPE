@@ -1,0 +1,141 @@
+{
+  "colors": [],
+  "elements": [
+    {
+      "id": "category-nav-grid",
+      "html_css": {
+        "outer_html": "<div class=\"channel-items__left\"></div>",
+        "computed_styles": {
+          "display": "grid",
+          "gap": "10px",
+          "background": "transparent"
+        }
+      }
+    },
+    {
+      "id": "category-link",
+      "html_css": {
+        "outer_html": "<a class=\"channel-link\">\u756a\u5267</a>",
+        "computed_styles": {
+          "color": "rgb(97, 102, 109)",
+          "backgroundColor": "rgb(246, 247, 248)",
+          "border": "1px solid rgb(241, 242, 243)",
+          "borderRadius": "6px",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "height": "30px",
+          "width": "73.66px"
+        }
+      }
+    },
+    {
+      "id": "dynamic-icon",
+      "html_css": {
+        "outer_html": "<div class=\"icon-bg icon-bg__dynamic\"></div>",
+        "computed_styles": {
+          "backgroundColor": "rgb(255, 146, 18)",
+          "borderRadius": "50%",
+          "width": "46px",
+          "height": "46px"
+        }
+      }
+    },
+    {
+      "id": "popular-icon",
+      "html_css": {
+        "outer_html": "<div class=\"icon-bg icon-bg__popular\"></div>",
+        "computed_styles": {
+          "backgroundColor": "rgb(240, 119, 117)",
+          "borderRadius": "50%",
+          "width": "46px",
+          "height": "46px"
+        }
+      }
+    },
+    {
+      "id": "video-card",
+      "html_css": {
+        "outer_html": "<div class=\"bili-video-card is-rcmd\"></div>",
+        "computed_styles": {
+          "width": "273px",
+          "height": "228px"
+        }
+      }
+    },
+    {
+      "id": "stats-overlay",
+      "html_css": {
+        "outer_html": "<div class=\"bili-video-card__stats\"></div>",
+        "computed_styles": {
+          "position": "absolute",
+          "bottom": "0px",
+          "background": "linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.8))",
+          "height": "38px",
+          "padding": "16px 8px 6px"
+        }
+      }
+    },
+    {
+      "id": "video-title",
+      "html_css": {
+        "outer_html": "<a class=\"bili-video-card__info--tit\">\u8d8a \u770b \u8d8a \u597d \u770b ~</a>",
+        "computed_styles": {
+          "color": "rgb(24, 25, 28)",
+          "fontSize": "15px",
+          "fontWeight": "500",
+          "lineHeight": "22px"
+        }
+      }
+    },
+    {
+      "id": "video-author-info",
+      "html_css": {
+        "outer_html": "<span class=\"bili-video-card__info--author\">\u54b8\u9c7c\u5c0f\u5e05\u54e5 \u00b7 02-13</span>",
+        "computed_styles": {
+          "color": "rgb(148, 153, 160)",
+          "fontSize": "13px"
+        }
+      }
+    },
+    {
+      "id": "section-background",
+      "html_css": {
+        "outer_html": "<div class=\"bili-header__channel\"></div>",
+        "computed_styles": {
+          "backgroundColor": "rgb(255, 255, 255)",
+          "padding": "0px 140px",
+          "height": "120px"
+        }
+      }
+    },
+    {
+      "id": "page-background",
+      "html_css": {
+        "outer_html": "<body class=\"mac\"></body>",
+        "computed_styles": {
+          "backgroundColor": "rgb(241, 242, 243)"
+        }
+      }
+    }
+  ],
+  "design_tokens": {
+    "font_family": "PingFang SC, HarmonyOS_Regular, Helvetica Neue, Microsoft YaHei, sans-serif",
+    "colors": {
+      "text_primary": "rgb(24, 25, 28)",
+      "text_secondary": "rgb(97, 102, 109)",
+      "text_tertiary": "rgb(148, 153, 160)",
+      "bg_primary": "rgb(255, 255, 255)",
+      "bg_secondary": "rgb(241, 242, 243)",
+      "bg_tag": "rgb(246, 247, 248)",
+      "border_tag": "rgb(241, 242, 243)",
+      "icon_dynamic": "rgb(255, 146, 18)",
+      "icon_popular": "rgb(240, 119, 117)",
+      "text_on_dark": "rgb(255, 255, 255)",
+      "gradient_overlay": "linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.8))"
+    }
+  },
+  "source_urls": [
+    "https://www.bilibili.com/"
+  ],
+  "last_updated": "2026-02-16T03:09:15.931289+00:00"
+}

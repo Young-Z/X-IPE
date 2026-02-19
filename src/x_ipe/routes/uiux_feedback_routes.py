@@ -3,9 +3,10 @@ FEATURE-022-D: UI/UX Feedback Routes
 
 API routes for submitting UI/UX feedback.
 """
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, send_file
 from ..services.uiux_feedback_service import UiuxFeedbackService
 from x_ipe.tracing import x_ipe_tracing
+from pathlib import Path
 
 
 uiux_feedback_bp = Blueprint('uiux_feedback', __name__)
@@ -105,3 +106,24 @@ def submit_feedback():
         return jsonify(result), 201
     else:
         return jsonify(result), 500
+
+
+@uiux_feedback_bp.route('/api/uiux-feedback/<feedback_id>/screenshot', methods=['GET'])
+@x_ipe_tracing()
+def get_feedback_screenshot(feedback_id):
+    """
+    Serve the screenshot image for a feedback entry.
+    
+    Path params:
+        feedback_id: The feedback folder name/ID
+    
+    Returns:
+        200: PNG image
+        404: Not found
+    """
+    project_root = current_app.config.get('PROJECT_ROOT', '.')
+    file_path = Path(project_root) / 'x-ipe-docs' / 'uiux-feedback' / feedback_id / 'page-screenshot.png'
+    
+    if file_path.exists():
+        return send_file(str(file_path), mimetype='image/png')
+    return jsonify({'error': 'Screenshot not found'}), 404
