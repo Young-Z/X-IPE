@@ -6,7 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-551 | Feature Closing | FEATURE-037-B: Close feature, finalize changelog, push to main | Zephyr 🔄 | 🔄 in_progress | 02-19-2026 12:39:00 | - | User Manual |
+| TASK-551 | Feature Closing | FEATURE-037-B: Close feature, finalize changelog, commit 2e57f16 + 72b2dd7 to main | Zephyr ✅ | ✅ completed | 02-19-2026 12:39:00 | CHANGELOG.md, commit 2e57f16 | - |
 | TASK-550 | Feature Acceptance Test | FEATURE-037-B: 8/8 acceptance tests passed via Chrome DevTools MCP. Link Existing panel, file preview, search, re-edit confirm, gate block, edit mode UI | Zephyr ✅ | ✅ completed | 02-19-2026 12:39:00 | x-ipe-docs/requirements/EPIC-037/FEATURE-037-B/acceptance-test-results.md | Feature Closing |
 | TASK-549 | Code Implementation | FEATURE-037-B: Implement LinkExistingPanel, StageGateChecker, edit mode, GET /api/ideas/file. 4 files changed. 44/44 tests pass, 0 regressions | Zephyr ✅ | ✅ completed | 02-19-2026 12:30:00 | compose-idea-modal.js, workflow-stage.js, ideas_routes.py, compose-idea-modal.css | Feature Acceptance Test |
 | TASK-548 | Test Generation | TDD tests for FEATURE-037-B: 44 tests (33 failing, 11 pre-pass from 037-A overlap). Covers LinkExistingPanel, StageGateChecker, edit mode, GET /api/ideas/file | Zephyr ✅ | ✅ completed | 02-19-2026 12:10:00 | tests/test_feature_037b.py | Code Implementation |
@@ -134,7 +134,7 @@
 ## Quick Stats
 
 - **Total Active:** 33
-- **In Progress:** 1
+- **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
 - **Completed (archived):** 442
