@@ -79,11 +79,13 @@ const kbSearch = {
         this._createModalDOM();
         this.modal.classList.add('active');
         this.activeResultIndex = -1;
+        this.activeFilters = { types: [], topic: null };
         const input = this.modal.querySelector('input');
         if (input) {
             input.value = '';
             setTimeout(() => input.focus(), 50);
         }
+        this._renderFilterChips();
         this._renderResults({ files: [], topics: [], summaries: [] });
     },
 
@@ -264,7 +266,7 @@ const kbSearch = {
 
     _createPreviewDOM() {
         if (this.previewPanel) return;
-        const container = document.querySelector('.kb-container') || document.getElementById('kb-container');
+        const container = document.querySelector('.kb-container') || document.getElementById('kb-container') || document.querySelector('.content-area');
         if (!container) return;
 
         const panel = document.createElement('aside');

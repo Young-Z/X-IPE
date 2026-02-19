@@ -216,6 +216,11 @@ function initializeApp() {
             const container = document.getElementById('content-body');
             if (container && window.kbCore) {
                 window.kbCore.render(container);
+                // Initialize search & preview (FEATURE-025-E)
+                if (window.kbSearch) {
+                    window.kbSearch.init();
+                    window.kbSearch.enhanceSidebarSearch();
+                }
             } else if (container) {
                 container.innerHTML = '<div class="p-4 text-muted">Knowledge Base module not loaded</div>';
             }

@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-025-E: KB Search & Preview** (EPIC-025)
+  - Global search modal (`Cmd+K` / `Ctrl+K`) with debounced API calls (300ms)
+  - Search results grouped by section (Files, Topics, Summaries) with highlighted matches
+  - Keyboard navigation (`↑`/`↓` to navigate, `Enter` to select, `Esc` to close)
+  - Filter chips for file type (PDF, Markdown, Code) with multi-select support
+  - Preview panel (360px right-side) with file metadata, AI tags, Process/Open buttons
+  - Sidebar search enhancement with kbSearch integration
+  - Grouped search API (`GET /api/kb/search`) with `type` and `topic` query params
+  - 21 backend tests + 36 frontend tests, 8/8 acceptance tests passed
 - **FEATURE-037-B: Compose Idea Modal — Link Existing & Re-Edit** (EPIC-037)
   - **Link Existing mode**: "Link Existing" tab in compose modal with two-column layout (file tree + preview)
   - File tree fetched from `/api/ideas/tree` with folder/file icons, expand/collapse
