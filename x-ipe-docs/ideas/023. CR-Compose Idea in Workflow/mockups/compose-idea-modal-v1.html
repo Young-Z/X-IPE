@@ -468,33 +468,6 @@ body {
   letter-spacing: 0.03em;
 }
 
-/* UIUX Reference Tab */
-.uiux-placeholder {
-  flex: 1;
-  margin: 16px;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  background: #fafbfc;
-}
-.uiux-placeholder .icon-lg {
-  font-size: 28px;
-  opacity: 0.5;
-}
-.uiux-placeholder p {
-  font-size: 13px;
-  color: var(--color-secondary);
-}
-.uiux-placeholder .link {
-  font-size: 12px;
-  color: var(--color-accent);
-  font-weight: 500;
-}
-
 /* ──────────────────────────
    LINK EXISTING MODE
    ────────────────────────── */
@@ -838,7 +811,6 @@ body {
             <div class="tab-bar">
               <button class="tab-btn active" onclick="switchTab('compose')">✏️ Compose</button>
               <button class="tab-btn" onclick="switchTab('upload')">📁 Upload</button>
-              <button class="tab-btn" onclick="switchTab('uiux')">🎨 UIUX Ref</button>
             </div>
             <div class="tab-content">
 
@@ -880,15 +852,6 @@ body {
                     <span class="tag">js</span>
                     <span class="tag">docx</span>
                   </div>
-                </div>
-              </div>
-
-              <!-- UIUX Ref Tab -->
-              <div class="tab-pane" id="tab-uiux">
-                <div class="uiux-placeholder">
-                  <span class="icon-lg">🎨</span>
-                  <p>Capture UIUX design references</p>
-                  <span class="link">Open reference toolbar →</span>
                 </div>
               </div>
 

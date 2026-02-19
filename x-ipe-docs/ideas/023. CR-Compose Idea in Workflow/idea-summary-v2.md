@@ -8,7 +8,7 @@
 
 ## Overview
 
-Replace the current simple prompt-based "Compose Idea" workflow action with a rich modal dialog that supports **creating new ideas** or **linking existing ideas** — all without leaving the workflow view. The modal embeds the full Workplace compose/upload/UIUX-reference tabs for new ideas and a mini file-tree browser with preview for linking existing ones.
+Replace the current simple prompt-based "Compose Idea" workflow action with a rich modal dialog that supports **creating new ideas** or **linking existing ideas** — all without leaving the workflow view. The modal embeds the Workplace compose/upload tabs for new ideas and a mini file-tree browser with preview for linking existing ones.
 
 ## Problem Statement
 
@@ -33,7 +33,7 @@ flowchart TD
     B --> C{"Top Bar Toggle"}
     C -->|"Create New"| D["Name Input < 10 words"]
     C -->|"Link Existing"| E["Mini File Tree + Preview"]
-    D --> F["Compose / Upload / UIUX Ref Tabs"]
+    D --> F["Compose / Upload Tabs"]
     F --> G["Submit Idea"]
     E --> H["Select Idea File"]
     H --> I["Preview Content"]
@@ -60,7 +60,7 @@ flowchart TD
 │  Idea Name: [________________________] < 10 words │
 │                                                   │
 │  ┌─────────┬─────────┬──────────────┐            │
-│  │ Compose │ Upload  │ UIUX Ref     │            │
+│  │ Compose │ Upload  │                    │
 │  ├─────────┴─────────┴──────────────┤            │
 │  │                                   │            │
 │  │  (Reused Workplace tabs content)  │            │
@@ -103,10 +103,9 @@ flowchart TD
 
 ### Feature 2: Create New Idea
 - **Name input** field (max 10 words) — required before submit
-- **Tabbed interface** reusing Workplace's Compose / Upload / UIUX Reference tabs
+- **Tabbed interface** reusing Workplace's Compose / Upload tabs
 - Compose tab: Markdown text editor (EasyMDE)
 - Upload tab: Drag-and-drop file upload zone
-- UIUX Reference tab: Design reference capture
 - **Note:** `setupComposer()` and `setupUploader()` in workplace.js currently use hardcoded DOM IDs (e.g., `#workplace-submit-idea`, `#workplace-compose-textarea`). These must be refactored to accept a container element parameter, enabling reuse in both the Workplace page and this modal.
 
 ### Feature 3: Link Existing Idea
@@ -134,7 +133,6 @@ Two deliverables produced by the compose_idea action:
 - After submit/link, the compose_idea action automatically marks as "done"
 - Deliverables are immediately visible in the workflow stage view
 - Workflow can auto-advance to the next action
-- **Note:** `reference_uiux` remains an independent action — embedding the UIUX Reference tab in this modal is for convenience only. Completing compose_idea does NOT auto-complete reference_uiux
 
 ### Feature 7: Error Handling
 - **Folder creation failure** (name collision, disk error): show error toast in modal, keep modal open, user can retry
@@ -146,7 +144,7 @@ Two deliverables produced by the compose_idea action:
 
 - [ ] Modal opens when clicking "Compose Idea" in workflow stage
 - [ ] Toggle between "Create New" and "Link Existing" modes works
-- [ ] "Create New" embeds the full Compose/Upload/UIUX Reference tabs
+- [ ] "Create New" embeds the full Compose/Upload tabs
 - [ ] "Link Existing" shows mini file tree with search and preview
 - [ ] Idea name validation enforces < 10 words
 - [ ] Name sanitization produces valid folder names (lowercase, hyphens, max 50 chars)
@@ -178,7 +176,7 @@ Key decisions made during brainstorming:
 4. **Folder naming**: Auto-generated `wf-{NNN}-{sanitized-idea-name}` with auto-increment
 5. **Numbering**: Auto-increment from highest existing `wf-XXX` folder in ideas directory
 6. **Auto-complete**: Yes — after submit, action auto-completes and deliverables appear
-7. **Create new tabs**: Embed the same Compose/Upload/UIUX Reference tabs from Workplace
+7. **Create new tabs**: Embed the same Compose/Upload tabs from Workplace
 
 ## User Flow Diagram
 
@@ -196,7 +194,7 @@ sequenceDiagram
     alt Create New Idea
         User->>Modal: Select "Create New" toggle
         User->>Modal: Enter idea name (< 10 words)
-        User->>Modal: Compose/Upload/UIUX Ref content
+        User->>Modal: Compose/Upload content
         User->>Modal: Click "Submit Idea"
         Modal->>API: POST /api/ideas/upload (folder: wf-NNN-name)
         API->>FS: Create folder & save files
@@ -329,7 +327,7 @@ layer "Service" {
 
 ### Mockup Coverage
 
-- ✅ **Create New mode** — Idea name input with word counter, Compose/Upload/UIUX Reference tabs, rich text editor toolbar
+- ✅ **Create New mode** — Idea name input with word counter, Compose/Upload tabs, rich text editor toolbar
 - ✅ **Link Existing mode** — Searchable file tree sidebar, markdown preview panel, file selection highlighting
 - ✅ **Top-bar toggle** — Create New / Link Existing pill-style toggle
 - ✅ **Modal chrome** — Header, close button, Cancel/Create action buttons
@@ -367,6 +365,6 @@ layer "Service" {
 | 7 | Sanitization rules undefined | Added explicit rules in Feature 4 |
 | 8 | EasyMDE cleanup not a success criterion | Added as success criterion |
 | Q1 | File vs folder linking granularity | Clarified: select file, deliverable records both file + root folder |
-| Q2 | reference_uiux independence | Clarified: UIUX tab is convenience only, actions remain independent |
+| Q2 | reference_uiux independence | Removed: UIUX Reference tab is not part of compose_idea modal — it remains a separate workflow action |
 | Q3 | `wf-NNN` naming reversibility | Clarified: permanent, rename is separate manual operation |
 | Q4 | Markdown renderer for preview | Specified: app's existing renderer (marked.js / EasyMDE preview) |
