@@ -402,6 +402,15 @@ class TestWorkflowIntegration:
         assert "ComposeIdeaModal" in content
 
 
+class TestTemplateAutoReload:
+    """BUG-539: Flask must always auto-reload templates so base.html changes are served."""
+
+    def test_flask_config_enables_templates_auto_reload(self):
+        """TEMPLATES_AUTO_RELOAD must be True in base Config to prevent stale template cache."""
+        from x_ipe.config import Config
+        assert getattr(Config, 'TEMPLATES_AUTO_RELOAD', None) is True
+
+
 # ============================================================================
 # 10. API ENDPOINT TESTS (Backend — Flask test client)
 # ============================================================================

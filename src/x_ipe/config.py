@@ -9,6 +9,9 @@ class Config:
     """Base configuration"""
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
     
+    # Always re-read templates from disk so HTML changes are served without restart
+    TEMPLATES_AUTO_RELOAD = True
+    
     # Project root to monitor - defaults to project root (3 levels up from src/x_ipe/config.py)
     PROJECT_ROOT = os.environ.get('X_IPE_PROJECT_ROOT', os.environ.get('PROJECT_ROOT', str(Path(__file__).parent.parent.parent)))
     
