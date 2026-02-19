@@ -183,11 +183,11 @@ function initializeApp() {
                 }
                 // Restore homepage
                 if (container && typeof window.HomepageInfinity !== 'undefined') {
-                    container.className = '';
+                    container.className = 'content-body';
                     container.innerHTML = window.HomepageInfinity.getTemplate();
                     window.HomepageInfinity.init(window.projectSidebar);
                 } else if (container) {
-                    container.className = '';
+                    container.className = 'content-body';
                     container.innerHTML = '';
                 }
                 const breadcrumb = document.getElementById('breadcrumb');

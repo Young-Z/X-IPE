@@ -52,7 +52,7 @@ From IDEA-023 (CR-Compose Idea in Workflow): The current Compose Idea workflow a
 | FR-037.9 | **Auto Folder Naming** — On submit (Create New): generate folder name `wf-{NNN}-{sanitized-name}`. NNN = highest existing `wf-XXX` folder + 1, zero-padded to 3 digits. Call `POST /api/ideas/upload` with generated folder name | P0 |
 | FR-037.10 | **Link Submit** — On confirm (Link Existing): record selected file path and its root idea folder name. Call existing link-idea API. No new folder creation | P0 |
 | FR-037.11 | **Auto-Complete** — After successful submit/link, update `compose_idea` action status to "done" via Workflow Manager with deliverables (file path + folder name) | P0 |
-| FR-037.12 | **Re-Edit** — If `compose_idea` is already "done", re-opening modal loads existing content. For new ideas: load from saved file. For linked ideas: show current linked file in preview mode with option to re-link | P1 |
+| FR-037.12 | **Re-Edit** — If `compose_idea` is already "done", re-opening modal loads existing content. For new ideas: load from saved file. For linked ideas: show current linked file in preview mode with option to re-link. **Stage gate:** re-open only allowed if no action in the *next* stage has moved to `in_progress` or `done`. **Confirmation dialog** shown before re-opening. **New API:** `GET /api/ideas/file?path=...` with path security validation. File path auto-detected from deliverables in workflow JSON. Overwrite-in-place on save (git as safety net). Submit button shows "Update Idea" in edit mode. *(Enriched by CR-001)* | P1 |
 | FR-037.13 | **Error Handling** — Folder name collision: show inline error, suggest alternative. API failure: toast with retry. Upload cancellation: clean up temp files. Empty name: prevent submit with inline validation | P0 |
 | FR-037.14 | **EasyMDE Cleanup** — Properly destroy EasyMDE instances on modal close to prevent memory leaks | P0 |
 | FR-037.15 | **Workplace JS Refactoring** — Refactor `setupComposer()` and `setupUploader()` in workplace.js to accept a container element parameter (currently hardcoded to `#workplace-*` DOM IDs) | P0 |
@@ -170,15 +170,15 @@ From IDEA-023 (CR-Compose Idea in Workflow): The current Compose Idea workflow a
 
 ### FEATURE-037-B: Compose Idea Modal — Link Existing & Re-Edit
 
-**Version:** v1.0
-**Brief Description:** Extends the modal with Link Existing mode (file tree browser + preview) and re-edit support for both modes.
+**Version:** v1.1 (CR-001)
+**Brief Description:** Extends the modal with Link Existing mode (file tree browser + preview) and re-edit support for both modes. CR-001 enriches re-edit with stage gating, confirmation dialog, and detailed edit mode design.
 
 **Functional Requirements Covered:**
 - FR-037.6 (File Tree Browser)
 - FR-037.7 (Tree Search/Filter)
 - FR-037.8 (Preview Panel)
 - FR-037.10 (Link Submit)
-- FR-037.12 (Re-Edit)
+- FR-037.12 (Re-Edit) — enriched by CR-001
 
 **Acceptance Criteria:**
 - [ ] Toggle to "Link Existing" shows file tree sidebar + preview panel
@@ -189,6 +189,14 @@ From IDEA-023 (CR-Compose Idea in Workflow): The current Compose Idea workflow a
 - [ ] Link submit records file path + root folder as deliverables, auto-completes action
 - [ ] Re-opening modal after compose_idea is "done" loads existing content for editing
 - [ ] Re-edit for linked ideas shows current linked file in preview with option to re-link
+- [ ] *(CR-001)* Stage gate: re-open blocked with error toast if any action in the next stage is `in_progress` or `done`
+- [ ] *(CR-001)* Confirmation dialog: "Re-open for editing?" with Confirm/Cancel before re-opening
+- [ ] *(CR-001)* Edit mode: modal opens with pre-loaded content (folder name, file content in EasyMDE)
+- [ ] *(CR-001)* File auto-detection: file path auto-detected from deliverables in workflow JSON
+- [ ] *(CR-001)* New `GET /api/ideas/file?path=...` endpoint with path-within-project-root validation
+- [ ] *(CR-001)* Submit button shows "Update Idea" in edit mode
+- [ ] *(CR-001)* Save overwrites original file in-place (no version increment)
+- [ ] *(CR-001)* Gate check implemented as reusable `_canReopenAction()` function (not hardcoded to compose_idea)
 
 **Dependencies:**
 - FEATURE-037-A (modal container, toggle UI, auto-complete mechanism)
@@ -198,5 +206,9 @@ From IDEA-023 (CR-Compose Idea in Workflow): The current Compose Idea workflow a
 - Preview uses `marked.js` for markdown rendering (already in app dependencies)
 - Re-edit loads content from the file path stored in workflow JSON deliverables
 - Any file type selectable (.md, .pdf, .png, .txt, etc.) — non-markdown shows file metadata
+- *(CR-001)* `_canReopenAction(actionKey, stages)` checks next-stage actions — reusable for any action type
+- *(CR-001)* `GET /api/ideas/file` validates path is within `project_root` to prevent path traversal
+- *(CR-001)* Git diff serves as rollback mechanism — no in-app version history needed
 
 **Linked Mockup:** [compose-idea-modal-v1.html](EPIC-037/mockups/compose-idea-modal-v1.html) — "Link Existing" mode
+**Change Requests:** [CR-001](EPIC-037/FEATURE-037-B/CR-001.md) — Re-Edit enrichment from IDEA-024

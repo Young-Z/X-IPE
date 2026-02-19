@@ -6,6 +6,18 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-551 | Feature Closing | FEATURE-037-B: Close feature, finalize changelog, push to main | Zephyr 🔄 | 🔄 in_progress | 02-19-2026 12:39:00 | - | User Manual |
+| TASK-550 | Feature Acceptance Test | FEATURE-037-B: 8/8 acceptance tests passed via Chrome DevTools MCP. Link Existing panel, file preview, search, re-edit confirm, gate block, edit mode UI | Zephyr ✅ | ✅ completed | 02-19-2026 12:39:00 | x-ipe-docs/requirements/EPIC-037/FEATURE-037-B/acceptance-test-results.md | Feature Closing |
+| TASK-549 | Code Implementation | FEATURE-037-B: Implement LinkExistingPanel, StageGateChecker, edit mode, GET /api/ideas/file. 4 files changed. 44/44 tests pass, 0 regressions | Zephyr ✅ | ✅ completed | 02-19-2026 12:30:00 | compose-idea-modal.js, workflow-stage.js, ideas_routes.py, compose-idea-modal.css | Feature Acceptance Test |
+| TASK-548 | Test Generation | TDD tests for FEATURE-037-B: 44 tests (33 failing, 11 pre-pass from 037-A overlap). Covers LinkExistingPanel, StageGateChecker, edit mode, GET /api/ideas/file | Zephyr ✅ | ✅ completed | 02-19-2026 12:10:00 | tests/test_feature_037b.py | Code Implementation |
+| TASK-547 | Technical Design | Technical design for FEATURE-037-B: Link Existing panel, edit mode, StageGateChecker, GET /api/ideas/file endpoint | Zephyr ✅ | ✅ completed | 02-19-2026 12:10:00 | x-ipe-docs/requirements/EPIC-037/FEATURE-037-B/technical-design.md | Test Generation |
+| TASK-546 | Feature Refinement | Create specification.md for FEATURE-037-B: Compose Idea Modal — Link Existing & Re-Edit. Covers FR-037.6–037.12. Re-Edit enriched by CR-001 (stage gate, confirmation, edit mode) | Zephyr ✅ | ✅ completed | 02-19-2026 12:05:00 | x-ipe-docs/requirements/EPIC-037/FEATURE-037-B/specification.md | Technical Design |
+| TASK-545 | Change Request | CR-001 for FEATURE-037-B: Re-Edit compose_idea with stage gate, confirmation dialog, edit mode, file auto-detection. From IDEA-024 | Zephyr ✅ | ✅ completed | 02-19-2026 12:01:00 | x-ipe-docs/requirements/EPIC-037/FEATURE-037-B/CR-001.md | Feature Refinement |
+| TASK-544 | Ideation | Refine idea 024: CR-Compose Idea Supporting Re-open — re-open completed compose_idea for editing/re-linking | Zephyr ✅ | ✅ completed | 02-19-2026 11:43:00 | x-ipe-docs/ideas/024. CR-Compose idea Supporting Re-open/idea-summary-v1.md | Requirement Gathering |
+| TASK-543 | Bug Fix | (1) No spacing between workflow panels (.workflow-panels missing CSS), (2) folder preview missing x-ipe-docs/ideas/ prefix. Feedback-20260219-180304 | Zephyr ✅ | ✅ completed | 02-19-2026 10:04:00 | workflow.css, compose-idea-modal.js, tests/test_workflow_view.py | - |
+| TASK-542 | Bug Fix | Compose idea deliverables use bare filenames instead of full relative paths; file named idea.md not new idea.md. Feedback-20260219-174743 | Zephyr ✅ | ✅ completed | 02-19-2026 09:56:00 | src/x_ipe/static/js/features/compose-idea-modal.js, tests/test_compose_idea_modal.py | - |
+| TASK-541 | Bug Fix | Idea tree scrollbar lost after Workflow→Free mode switch: init.js clears content-body class. Feedback-20260219-173237 | Zephyr ✅ | ✅ completed | 02-19-2026 09:35:00 | src/x_ipe/static/js/init.js, tests/test_workflow_view.py | - |
+| TASK-540 | Bug Fix | UIUX Feedback screenshot freezes on complex pages (ideation #workplace-tree): replace per-element getComputedStyle loop with stylesheet-level CSS inlining in SVG foreignObject capture. Feedback-20260219-171622 | Ember ✅ | ✅ completed | 02-19-2026 09:18:00 | src/x_ipe/static/js/uiux-feedback.js | - |
 | TASK-451 | Bug Fix | Fix 2 UIUX toolbar bugs: (1) button polling condition prevents re-enabling xb-proc buttons, (2) SKILL.md missing explicit button re-enable after analyze/generate | Cipher ✅ | ✅ completed | 02-15-2026 03:27:00 | xipe-toolbar-mockup.js, toolbar.min.js, SKILL.md, tests/test_uiux_reference_toolbar.py | - |
 | TASK-452 | UIUX Reference | Execute UIUX reference workflow on https://www.baidu.com — save to idea folder 209. Baidu-Reference-v5 | Sage ✅ | ✅ completed | 02-15-2026 03:58:00 | mockup-v1.html, ref-session-001.json, comp-001.png | - |
 | TASK-453 | Lesson Learned | Capture 4 feedback items for x-ipe-tool-uiux-reference: bounding box scope, 99% validation, analyze-phase data save, uiux-references folder structure template | Sage ✅ | ✅ completed | 02-15-2026 04:20:00 | x-ipe-docs/skill-meta/x-ipe-tool-uiux-reference/x-ipe-meta-lesson-learned.md (LL-008..LL-011) | - |
@@ -121,7 +133,7 @@
 
 ## Quick Stats
 
-- **Total Active:** 27
+- **Total Active:** 33
 - **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0

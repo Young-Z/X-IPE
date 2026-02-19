@@ -44,6 +44,12 @@
 .workflow-btn-create:hover { background: #2563eb; }
 
 /* --- Panels --- */
+.workflow-panels {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
 .workflow-panel-list {
     display: flex;
     flex-direction: column;

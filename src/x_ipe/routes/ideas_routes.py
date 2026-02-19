@@ -12,6 +12,7 @@ Provides:
 - Skills list
 """
 import os
+from pathlib import Path
 from flask import Blueprint, jsonify, request, current_app
 
 from x_ipe.services import IdeasService, SkillsService
@@ -550,6 +551,50 @@ def validate_drop_target():
     
     valid = service.is_valid_drop_target(source_path, target_folder)
     return jsonify({'valid': valid})
+
+
+# ==========================================================================
+# ==========================================================================
+# FILE CONTENT API (FEATURE-037-B)
+# ==========================================================================
+
+@ideas_bp.route('/api/ideas/file', methods=['GET'])
+@x_ipe_tracing()
+def get_idea_file():
+    """
+    GET /api/ideas/file?path=<relative-path>
+
+    Return raw file content. Path must be within project root.
+
+    Query params:
+        - path: string (required) - Relative path from project root
+
+    Response:
+        - 200: plain text file content
+        - 400: missing path parameter
+        - 403: path outside project root
+        - 404: file not found
+        - 415: binary file (cannot read as text)
+    """
+    rel_path = request.args.get('path', '')
+    if not rel_path:
+        return jsonify({'error': 'path parameter required'}), 400
+
+    project_root = Path(current_app.config.get('PROJECT_ROOT', '.')).resolve()
+    target = (project_root / rel_path).resolve()
+
+    # Security: path must be within project root
+    if not str(target).startswith(str(project_root)):
+        return jsonify({'error': 'Access denied'}), 403
+
+    if not target.is_file():
+        return jsonify({'error': 'File not found'}), 404
+
+    try:
+        content = target.read_text(encoding='utf-8')
+        return content, 200, {'Content-Type': 'text/plain; charset=utf-8'}
+    except UnicodeDecodeError:
+        return jsonify({'error': 'Binary file — cannot read as text'}), 415
 
 
 # ==========================================================================

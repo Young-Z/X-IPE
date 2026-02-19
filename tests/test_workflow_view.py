@@ -111,6 +111,47 @@ class TestWorkflowInitHandler:
         assert "workflow.render" in content
 
 
+class TestModeSwitchContentBodyClass:
+    """TASK-541: Verify init.js preserves content-body class when switching back from workflow."""
+
+    def test_free_mode_restores_content_body_class(self):
+        """Switching to free mode must reset className to 'content-body', not empty string."""
+        init_path = Path(__file__).parent.parent / "src" / "x_ipe" / "static" / "js" / "init.js"
+        content = init_path.read_text(encoding="utf-8")
+        # The free-mode branch must NOT clear className to '' — it must restore 'content-body'
+        # Find lines that set container.className in the free-mode branch
+        import re
+        # Match container.className = '' (with optional spaces)
+        bad_pattern = re.compile(r"container\.className\s*=\s*['\"]'?['\"]")
+        matches = bad_pattern.findall(content)
+        assert len(matches) == 0, (
+            f"init.js sets container.className to empty string ({len(matches)} occurrences). "
+            "This strips the 'content-body' CSS class, breaking flex layout and scrollbars. "
+            "Must use container.className = 'content-body' instead."
+        )
+
+
+class TestWorkflowPanelsSpacing:
+    """TASK-543: Verify workflow panels have CSS gap for visual spacing."""
+
+    def test_workflow_panels_has_css_rule(self):
+        """workflow.css must define .workflow-panels with gap for spacing between panels."""
+        css_path = Path(__file__).parent.parent / "src" / "x_ipe" / "static" / "css" / "workflow.css"
+        content = css_path.read_text(encoding="utf-8")
+        assert ".workflow-panels" in content, \
+            "workflow.css must have a .workflow-panels rule (JS uses this class but CSS is missing)"
+
+
+class TestComposeFolderPreviewPath:
+    """TASK-543: Verify folder preview shows full relative path."""
+
+    def test_folder_preview_shows_full_path(self):
+        """Folder preview must show x-ipe-docs/ideas/ prefix, not bare wf-???-name."""
+        content = (Path(__file__).parent.parent / "src" / "x_ipe" / "static" / "js" / "features" / "compose-idea-modal.js").read_text()
+        assert "x-ipe-docs/ideas/wf-" in content, \
+            "Folder preview must show full path like 'x-ipe-docs/ideas/wf-???-name'"
+
+
 class TestWorkflowAPIIntegration:
     """Test API endpoints return expected shapes via Flask test client."""
 

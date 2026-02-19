@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **FEATURE-037-B: Compose Idea Modal — Link Existing & Re-Edit** (EPIC-037)
+  - **Link Existing mode**: "Link Existing" tab in compose modal with two-column layout (file tree + preview)
+  - File tree fetched from `/api/ideas/tree` with folder/file icons, expand/collapse
+  - Client-side search filter on file tree items
+  - Markdown preview via `marked.js` for selected `.md` files
+  - "Confirm Link" button records selected file as deliverable
+  - **Re-Edit mode**: Clicking completed `compose_idea` action shows confirmation dialog
+  - `StageGateChecker` blocks re-open when next stage has `in_progress` or `done` actions
+  - Edit modal: "Edit Idea" heading, disabled name input, pre-filled EasyMDE editor, "Update Idea" button
+  - `loadEditContent()` fetches file via `GET /api/ideas/file` endpoint
+  - `handleUpdate()` overwrites file in place via upload API
+  - Auto-detection of folder/file paths from deliverables array
+  - `GET /api/ideas/file` API endpoint with path traversal protection
+  - 44 unit tests, 8/8 acceptance tests passed
+
+### Fixed
+- Scrollbar lost after Workflow→Free mode switch (`init.js` cleared `content-body` class)
+- Compose idea deliverables used bare filenames instead of full relative paths
+- Missing CSS gap between workflow panels
+- Folder preview missing `x-ipe-docs/ideas/` prefix
+
+### Added
 - **FEATURE-036-A: Workflow Manager & State Persistence** (EPIC-036)
   - `WorkflowManagerService` with full workflow lifecycle: create, get, list, delete
   - Data-driven stage gating: shared stages (Ideation, Requirement) and per-feature stages (Implement, Validation, Feedback)

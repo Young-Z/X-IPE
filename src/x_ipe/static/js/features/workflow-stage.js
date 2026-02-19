@@ -4,6 +4,42 @@
  * FEATURE-036-E: Deliverables, Polling & Lifecycle
  * Renders stage progression ribbon, action buttons, feature lanes, and deliverables.
  */
+
+/**
+ * FEATURE-037-B: Stage Gate Checker
+ * Determines whether a completed action can be re-opened.
+ * Rule: block re-open if ANY action in the NEXT stage is in_progress or done.
+ */
+class StageGateChecker {
+    static STAGE_ORDER = ['ideation', 'requirement', 'implement', 'validation', 'feedback'];
+
+    static canReopen(actionKey, stages) {
+        // Find which stage this action belongs to
+        let currentStageKey = null;
+        for (const [stageKey, stageDef] of Object.entries(stages)) {
+            if (stageDef.actions && stageDef.actions[actionKey]) {
+                currentStageKey = stageKey;
+                break;
+            }
+        }
+        if (!currentStageKey) return { allowed: true };
+
+        const idx = this.STAGE_ORDER.indexOf(currentStageKey);
+        if (idx < 0 || idx >= this.STAGE_ORDER.length - 1) return { allowed: true };
+
+        const nextStageKey = this.STAGE_ORDER[idx + 1];
+        const nextStage = stages[nextStageKey];
+        if (!nextStage || !nextStage.actions) return { allowed: true };
+
+        for (const [key, act] of Object.entries(nextStage.actions)) {
+            if (act.status === 'in_progress' || act.status === 'done') {
+                return { allowed: false, blocker: key, stage: nextStageKey };
+            }
+        }
+        return { allowed: true };
+    }
+}
+
 const workflowStage = {
     STAGE_ORDER: ['ideation', 'requirement', 'implement', 'validation', 'feedback'],
 
@@ -237,7 +273,7 @@ const workflowStage = {
                 return;
             }
             if (status === 'done') {
-                this._showToast(`${actionDef.label} is already completed`, 'info');
+                this._handleCompletedAction(wfName, actionKey, actionDef);
                 return;
             }
             if (actionDef.interaction === 'modal') {
@@ -248,6 +284,87 @@ const workflowStage = {
         };
 
         return btn;
+    },
+
+    /**
+     * FEATURE-037-B: Handle click on a completed action.
+     * Checks stage gate, shows confirm dialog, then re-opens in edit mode.
+     */
+    async _handleCompletedAction(wfName, actionKey, actionDef) {
+        try {
+            const resp = await fetch(`/api/workflow/${encodeURIComponent(wfName)}`);
+            const json = await resp.json();
+            const wfData = json.data || {};
+            const stages = wfData.stages || {};
+
+            const gate = StageGateChecker.canReopen(actionKey, stages);
+            if (!gate.allowed) {
+                this._showToast(`Cannot re-open: ${gate.blocker} in ${gate.stage} stage is already started`, 'error');
+                return;
+            }
+
+            const confirmed = confirm(`${actionDef.label} is already completed. Do you want to re-edit it?`);
+            if (!confirmed) return;
+
+            // Rollback action status to pending
+            await fetch(`/api/workflow/${encodeURIComponent(wfName)}/action`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: actionKey, status: 'pending' })
+            });
+
+            // Open in edit mode for modal actions, re-dispatch for CLI
+            if (actionDef.interaction === 'modal') {
+                this._dispatchEditModalAction(wfName, actionKey, wfData);
+            } else {
+                this._dispatchCliAction(wfName, actionKey, actionDef.skill);
+            }
+        } catch (err) {
+            this._showToast('Failed to check action status', 'error');
+        }
+    },
+
+    /**
+     * FEATURE-037-B: Open modal in edit mode with existing deliverables.
+     */
+    _dispatchEditModalAction(wfName, actionKey, wfData) {
+        if (actionKey === 'compose_idea' && typeof ComposeIdeaModal !== 'undefined') {
+            const stages = wfData.stages || {};
+            const action = (stages.ideation && stages.ideation.actions && stages.ideation.actions.compose_idea) || {};
+            const deliverables = action.deliverables || [];
+
+            // Auto-detect folder path and file from deliverables
+            let folderPath = '';
+            let folderName = '';
+            let filePath = '';
+            for (const d of deliverables) {
+                if (d.endsWith('.md')) {
+                    filePath = d;
+                    const parts = d.split('/');
+                    parts.pop(); // remove filename
+                    folderPath = parts.join('/');
+                    folderName = parts[parts.length - 1] || '';
+                }
+            }
+
+            const modal = new ComposeIdeaModal({
+                workflowName: wfName,
+                mode: 'edit',
+                filePath: filePath,
+                folderPath: folderPath,
+                folderName: folderName,
+                onComplete: () => {
+                    const container = document.getElementById('workflow-view');
+                    if (container && window.workflowView) {
+                        window.workflowView.render(container);
+                    }
+                }
+            });
+            modal.open();
+            return;
+        }
+        // Fallback: re-dispatch as normal modal action
+        this._dispatchModalAction(wfName, actionKey);
     },
 
     async _dispatchCliAction(wfName, actionKey, skillName) {

@@ -402,6 +402,33 @@ class TestWorkflowIntegration:
         assert "ComposeIdeaModal" in content
 
 
+    def test_deliverables_use_folder_path_from_api(self):
+        """TASK-542: Deliverables must use uploadData.folder_path (full relative path)
+        instead of bare folderName which lacks the x-ipe-docs/ideas/ prefix."""
+        content = (JS_FEATURES / "compose-idea-modal.js").read_text()
+        # The deliverables array must reference folder_path from the upload response
+        assert "folder_path" in content, \
+            "compose-idea-modal.js must use uploadData.folder_path for deliverable paths"
+
+    def test_deliverable_file_path_includes_folder(self):
+        """TASK-542: File deliverable must be full path (folder_path/filename),
+        not a bare filename like 'idea.md'."""
+        content = (JS_FEATURES / "compose-idea-modal.js").read_text()
+        import re
+        # Should NOT have deliverables: [filePath, folderName] with bare names
+        # The filePath used in deliverables should be built from folder_path
+        bad_pattern = re.compile(r"deliverables:\s*\[filePath,\s*folderName\]")
+        assert not bad_pattern.search(content), \
+            "deliverables must not use bare filePath/folderName; must use full relative paths from uploadData.folder_path"
+
+    def test_compose_tab_filename_is_new_idea(self):
+        """TASK-542: Composed idea file should be named 'new idea.md', not 'idea.md'."""
+        content = (JS_FEATURES / "compose-idea-modal.js").read_text()
+        # The blob filename for compose tab should be 'new idea.md'
+        assert "'new idea.md'" in content or '"new idea.md"' in content, \
+            "Composed idea file must be named 'new idea.md' for consistency"
+
+
 class TestTemplateAutoReload:
     """BUG-539: Flask must always auto-reload templates so base.html changes are served."""
 

@@ -421,3 +421,88 @@
     color: #16a34a;
     border: 1px solid #bbf7d0;
 }
+
+/* ==========================================================================
+   FEATURE-037-B: Link Existing Panel
+   ========================================================================== */
+
+.link-existing-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 100%;
+}
+
+.link-existing-search {
+    padding: 0 0 4px;
+}
+
+.link-existing-search-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    box-sizing: border-box;
+}
+
+.link-existing-columns {
+    display: flex;
+    gap: 12px;
+    min-height: 260px;
+    flex: 1;
+}
+
+.link-existing-tree {
+    flex: 1;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow-y: auto;
+    max-height: 340px;
+    background: #f8fafc;
+}
+
+.link-existing-preview {
+    flex: 1;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow-y: auto;
+    max-height: 340px;
+    padding: 12px;
+    background: #ffffff;
+}
+
+.link-existing-item {
+    padding: 5px 8px;
+    cursor: pointer;
+    font-size: 13px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.link-existing-item:hover {
+    background: #e0f2fe;
+}
+
+.link-existing-item.selected {
+    background: #dbeafe;
+    font-weight: 500;
+}
+
+.link-item-icon {
+    flex-shrink: 0;
+}
+
+.link-existing-empty {
+    color: #94a3b8;
+    text-align: center;
+    padding: 24px 12px;
+    font-size: 13px;
+}
+
+.link-existing-preview-content {
+    font-size: 13px;
+    line-height: 1.6;
+}
