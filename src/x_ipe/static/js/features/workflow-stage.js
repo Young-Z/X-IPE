@@ -303,7 +303,10 @@ const workflowStage = {
                 return;
             }
 
-            const confirmed = confirm(`${actionDef.label} is already completed. Do you want to re-edit it?`);
+            const confirmed = await this._showConfirmModal(
+                'Re-edit Action',
+                `<strong>${actionDef.label}</strong> is already completed. Do you want to re-edit it?`
+            );
             if (!confirmed) return;
 
             // Rollback action status to pending
@@ -322,6 +325,52 @@ const workflowStage = {
         } catch (err) {
             this._showToast('Failed to check action status', 'error');
         }
+    },
+
+    /**
+     * FEATURE-037-B: Show Bootstrap confirm modal, returns Promise<boolean>.
+     */
+    _showConfirmModal(title, bodyHtml) {
+        return new Promise(resolve => {
+            let modal = document.getElementById('wf-confirm-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'wf-confirm-modal';
+                modal.className = 'modal fade';
+                modal.tabIndex = -1;
+                modal.innerHTML = `
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"></h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body"></div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary wf-confirm-yes">Confirm</button>
+                            </div>
+                        </div>
+                    </div>`;
+                document.body.appendChild(modal);
+            }
+            modal.querySelector('.modal-title').textContent = title;
+            modal.querySelector('.modal-body').innerHTML = bodyHtml;
+
+            const bsModal = new bootstrap.Modal(modal, { backdrop: 'static' });
+            let resolved = false;
+
+            const confirmBtn = modal.querySelector('.wf-confirm-yes');
+            const onConfirm = () => { resolved = true; bsModal.hide(); };
+            confirmBtn.addEventListener('click', onConfirm, { once: true });
+
+            modal.addEventListener('hidden.bs.modal', () => {
+                confirmBtn.removeEventListener('click', onConfirm);
+                resolve(resolved);
+            }, { once: true });
+
+            bsModal.show();
+        });
     },
 
     /**

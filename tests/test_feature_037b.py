@@ -163,11 +163,12 @@ class TestCompletedActionReopen:
             "Completed modal actions must use gate check"
 
     def test_confirm_dialog_before_reopen(self):
-        """AC-013: Confirmation dialog shown before re-opening."""
+        """AC-013: Bootstrap confirmation modal shown before re-opening."""
         content = (JS_FEATURES / "workflow-stage.js").read_text()
-        assert "re-open" in content.lower() or "reopen" in content.lower() or \
-               "confirm" in content.lower(), \
-            "Must show confirmation dialog before re-opening"
+        assert "_showConfirmModal" in content, \
+            "Must show Bootstrap confirmation modal before re-opening"
+        assert "modal-dialog" in content, \
+            "Confirm modal must use Bootstrap modal markup"
 
     def test_status_rollback_to_pending(self):
         """AC-015: Action status rolled back to 'pending' on re-open."""
