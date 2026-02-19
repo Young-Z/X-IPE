@@ -60,7 +60,7 @@ input:
   git_main_branch: "{auto-detected}"
 
   # Tech context (from Technical Design output)
-  program_type: "frontend | backend | fullstack | cli | library"
+  program_type: "frontend | backend | fullstack | cli | library | skills | mcp | ..."  # non-exhaustive
   tech_stack: []  # e.g. ["Python/Flask", "JavaScript/Vanilla", "HTML/CSS"]
 ```
 

@@ -56,7 +56,7 @@ input:
   # See references/refactoring-techniques.md for full input structure definitions
 
   # Tech context (optional — auto-detected from refactoring scope if not provided)
-  program_type: "frontend | backend | fullstack | cli | library"
+  program_type: "frontend | backend | fullstack | cli | library | skills | mcp | ..."  # non-exhaustive
   tech_stack: []  # e.g. ["Python/Flask", "JavaScript/Vanilla"]
 ```
 

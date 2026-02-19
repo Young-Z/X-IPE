@@ -58,7 +58,7 @@ input:
   environment_info: "{environment details, if relevant}"
 
   # Tech context (optional — auto-detected from affected files if not provided)
-  program_type: "frontend | backend | fullstack | cli | library"
+  program_type: "frontend | backend | fullstack | cli | library | skills | mcp | ..."  # non-exhaustive
   tech_stack: []  # e.g. ["Python/Flask", "JavaScript/Vanilla"]
 ```
 

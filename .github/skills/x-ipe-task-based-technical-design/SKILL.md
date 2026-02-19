@@ -180,12 +180,15 @@ BLOCKING: Step 6 requires human approval before proceeding to Test Generation.
          ELSE: Focus on service architecture, data models, APIs
       5. INCLUDE Design Change Log section at end of document
       6. IDENTIFY and record program_type and tech_stack:
-         - program_type: classify as one of: "frontend" | "backend" | "fullstack" | "cli" | "library"
+         - program_type: classify using known types (non-exhaustive, extend as needed):
            - "frontend": Browser-only (HTML/CSS/JS, no server logic)
            - "backend": Server-only (API, services, data processing)
            - "fullstack": Both server routes AND browser UI (JS/CSS)
            - "cli": Command-line tool
            - "library": Reusable package/module
+           - "skills": Agent skill definitions (SKILL.md, prompt engineering)
+           - "mcp": MCP server tools/endpoints
+           - Other types may emerge as tech evolves — use descriptive lowercase names
          - tech_stack: list all technologies used (e.g. ["Python/Flask", "JavaScript/Vanilla", "HTML/CSS", "pytest"])
          - These are passed to downstream skills (Test Generation, Code Implementation) to determine test types
     </action>
@@ -235,7 +238,7 @@ task_completion_output:
   feature_version: "{version}"
   feature_phase: "Technical Design"
   # Tech context (determined in Step 5, passed to downstream skills)
-  program_type: "frontend | backend | fullstack | cli | library"
+  program_type: "frontend | backend | fullstack | cli | library | skills | mcp | ..."  # non-exhaustive
   tech_stack: ["Python/Flask", "JavaScript/Vanilla", "HTML/CSS"]  # example
 ```
 

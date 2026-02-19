@@ -44,7 +44,7 @@ input:
   feature_id: "{FEATURE-XXX}"
 
   # Tech context (from Technical Design output)
-  program_type: "frontend | backend | fullstack | cli | library"
+  program_type: "frontend | backend | fullstack | cli | library | skills | mcp | ..."  # non-exhaustive
   tech_stack: []  # e.g. ["Python/Flask", "JavaScript/Vanilla", "HTML/CSS"]
 
   # Context (from previous task or project)
@@ -165,9 +165,20 @@ BLOCKING: Step 7 - ALL tests MUST fail (no implementation exists). If any test p
            → Backend tests for API/service layer (pytest, etc.)
            → Frontend tests for JS modules (structural checks, DOM behavior)
            → Integration tests covering API↔UI contracts
+         - IF program_type = "skills" or "mcp" or other:
+           → Determine appropriate test approach from tech_stack
          - IDENTIFY test frameworks from tech_stack (e.g. pytest for Python, Jest/Vitest for JS)
          - IF no JS test runner configured but frontend code exists:
            → Use structural pytest checks (file content assertions on JS/CSS files)
+      5. DETERMINE test file organization:
+         - IF only ONE tech stack needs tests → place test files directly in tests/
+         - IF MULTIPLE tech stacks need separate tests → create subfolders:
+           → tests/backend-python/   (Python backend tests)
+           → tests/frontend-js/      (JavaScript frontend tests)
+           → tests/mcp-python/       (MCP server tests)
+           → Pattern: tests/{layer}-{language}/
+           → Each subfolder gets its own __init__.py (if Python) or config
+         - ALWAYS check existing test structure first — follow project conventions
     </action>
     <constraints>
       - CRITICAL: Research testing best practices for the project tech stack before designing strategy.
