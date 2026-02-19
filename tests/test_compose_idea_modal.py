@@ -171,16 +171,16 @@ class TestComposeIdeaModalCSS:
 # ============================================================================
 
 class TestTemplateIntegration:
-    """Verify index.html includes compose-idea-modal CSS and JS."""
+    """Verify base.html includes compose-idea-modal CSS and JS."""
 
     def test_index_has_compose_modal_css(self):
-        """FR-001: index.html links compose-idea-modal.css."""
-        content = (TEMPLATES / "index.html").read_text()
+        """FR-001: base.html links compose-idea-modal.css."""
+        content = (TEMPLATES / "base.html").read_text()
         assert "compose-idea-modal.css" in content
 
     def test_index_has_compose_modal_js(self):
-        """FR-001: index.html includes compose-idea-modal.js."""
-        content = (TEMPLATES / "index.html").read_text()
+        """FR-001: base.html includes compose-idea-modal.js."""
+        content = (TEMPLATES / "base.html").read_text()
         assert "compose-idea-modal.js" in content
 
 
@@ -389,17 +389,17 @@ class TestErrorHandling:
 # ============================================================================
 
 class TestWorkflowIntegration:
-    """Verify compose-idea-modal integrates with workflow view."""
+    """Verify compose-idea-modal integrates with workflow stage view."""
 
     def test_workflow_js_dispatches_to_compose_modal(self):
-        """AC-001: workflow.js dispatches compose_idea action to ComposeIdeaModal."""
-        content = (JS_FEATURES / "workflow.js").read_text()
-        assert "compose_idea" in content or "ComposeIdeaModal" in content
+        """AC-001: workflow-stage.js dispatches compose_idea action to ComposeIdeaModal."""
+        content = (JS_FEATURES / "workflow-stage.js").read_text()
+        assert "compose_idea" in content and "ComposeIdeaModal" in content
 
     def test_workflow_js_imports_compose_modal(self):
-        """AC-001: workflow.js references ComposeIdeaModal."""
-        content = (JS_FEATURES / "workflow.js").read_text()
-        assert "compose-idea-modal" in content or "ComposeIdeaModal" in content
+        """AC-001: workflow-stage.js references ComposeIdeaModal."""
+        content = (JS_FEATURES / "workflow-stage.js").read_text()
+        assert "ComposeIdeaModal" in content
 
 
 # ============================================================================
@@ -426,8 +426,12 @@ class TestIdeaUploadAPI:
     def app_client(self, temp_project_dir):
         """Create Flask test client."""
         try:
-            from x_ipe.app import create_app
-            app = create_app({"PROJECT_DIR": temp_project_dir, "TESTING": True})
+            from src.app import create_app
+            app = create_app({
+                "PROJECT_ROOT": temp_project_dir,
+                "TESTING": True,
+                "SETTINGS_DB_PATH": os.path.join(temp_project_dir, "test_settings.db")
+            })
             with app.test_client() as client:
                 yield client
         except ImportError:
@@ -445,7 +449,7 @@ class TestIdeaUploadAPI:
         from io import BytesIO
         data = {
             "target_folder": "wf-001-test-idea",
-            "file": (BytesIO(b"# Test Idea\n\nContent here"), "idea.md")
+            "files": (BytesIO(b"# Test Idea\n\nContent here"), "idea.md")
         }
         response = app_client.post(
             "/api/ideas/upload",
@@ -460,7 +464,7 @@ class TestIdeaUploadAPI:
         folder_name = "wf-001-my-test"
         data = {
             "target_folder": folder_name,
-            "file": (BytesIO(b"# Test"), "idea.md")
+            "files": (BytesIO(b"# Test"), "idea.md")
         }
         app_client.post("/api/ideas/upload", data=data, content_type="multipart/form-data")
         folder_path = Path(temp_project_dir) / "x-ipe-docs" / "ideas" / folder_name

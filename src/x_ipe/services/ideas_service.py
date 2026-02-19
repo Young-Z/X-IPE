@@ -127,10 +127,8 @@ class IdeasService:
             
             folder_path = self.ideas_root / target_folder
             if not folder_path.exists():
-                return {
-                    'success': False,
-                    'error': f"Target folder '{target_folder}' does not exist"
-                }
+                # FEATURE-037-A: Auto-create target folder for compose modal
+                folder_path.mkdir(parents=True, exist_ok=True)
             folder_name = target_folder
         else:
             # Original behavior: create new timestamped folder

@@ -1976,9 +1976,10 @@ class WorkplaceManager {
     /**
      * Setup compose event handlers
      */
-    setupComposer() {
-        const submitBtn = document.getElementById('workplace-submit-idea');
-        const textarea = document.getElementById('workplace-compose-textarea');
+    setupComposer(containerEl = null) {
+        const root = containerEl || document;
+        const submitBtn = root.querySelector('#workplace-submit-idea') || root.querySelector('[data-action="submit-idea"]');
+        const textarea = root.querySelector('#workplace-compose-textarea') || root.querySelector('[data-role="compose-textarea"]');
         
         if (!submitBtn || !textarea) return;
         
@@ -2129,9 +2130,10 @@ class WorkplaceManager {
     /**
      * Setup upload event handlers
      */
-    setupUploader() {
-        const dropzone = document.getElementById('workplace-dropzone');
-        const fileInput = document.getElementById('workplace-file-input');
+    setupUploader(containerEl = null) {
+        const root = containerEl || document;
+        const dropzone = root.querySelector('#workplace-dropzone') || root.querySelector('[data-role="dropzone"]');
+        const fileInput = root.querySelector('#workplace-file-input') || root.querySelector('[data-role="file-input"]');
         
         if (!dropzone || !fileInput) return;
         

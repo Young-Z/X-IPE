@@ -241,7 +241,7 @@ const workflowStage = {
                 return;
             }
             if (actionDef.interaction === 'modal') {
-                this._dispatchModalAction(wfName);
+                this._dispatchModalAction(wfName, actionKey);
             } else {
                 this._dispatchCliAction(wfName, actionKey, actionDef.skill);
             }
@@ -274,7 +274,23 @@ const workflowStage = {
         }, 300);
     },
 
-    async _dispatchModalAction(wfName) {
+    async _dispatchModalAction(wfName, actionKey) {
+        // FEATURE-037-A: Compose Idea Modal
+        if (actionKey === 'compose_idea' && typeof ComposeIdeaModal !== 'undefined') {
+            const modal = new ComposeIdeaModal({
+                workflowName: wfName,
+                onComplete: () => {
+                    // Re-render workflow view to reflect updated action state
+                    const container = document.getElementById('workflow-view');
+                    if (container && window.workflowView) {
+                        window.workflowView.render(container);
+                    }
+                }
+            });
+            modal.open();
+            return;
+        }
+
         try {
             const resp = await fetch(`/api/workflow/${encodeURIComponent(wfName)}`);
             const json = await resp.json();

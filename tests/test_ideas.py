@@ -292,13 +292,13 @@ class TestIdeasServiceUploadToExistingFolder:
         assert 'x-ipe-docs/ideas/mobile-app-idea' in result['folder_path']
 
     def test_upload_to_nonexistent_folder_fails(self, ideas_service_populated, populated_ideas_dir):
-        """upload() with nonexistent target_folder returns error"""
+        """upload() with nonexistent target_folder auto-creates the folder (FEATURE-037-A)"""
         files = [('test.md', b'# Test')]
         
         result = ideas_service_populated.upload(files, target_folder='nonexistent-folder')
         
-        assert result['success'] is False
-        assert 'does not exist' in result['error']
+        assert result['success'] is True
+        assert (populated_ideas_dir / 'nonexistent-folder' / 'test.md').exists()
 
     def test_upload_to_existing_folder_multiple_files(self, ideas_service_populated, populated_ideas_dir):
         """upload() with target_folder handles multiple files"""
@@ -576,7 +576,7 @@ class TestIdeasUploadToFolderAPI:
         assert file_path.exists()
 
     def test_upload_to_nonexistent_folder_returns_error(self, populated_client):
-        """POST /api/ideas/upload with nonexistent target_folder returns 400"""
+        """POST /api/ideas/upload with nonexistent target_folder auto-creates it (FEATURE-037-A)"""
         data = {
             'files': (BytesIO(b'test content'), 'test.md'),
             'target_folder': 'does-not-exist'
@@ -584,9 +584,8 @@ class TestIdeasUploadToFolderAPI:
         response = populated_client.post('/api/ideas/upload', data=data, content_type='multipart/form-data')
         result = json.loads(response.data)
         
-        assert response.status_code == 400
-        assert result['success'] is False
-        assert 'does not exist' in result['error']
+        assert response.status_code == 200
+        assert result['success'] is True
 
     def test_upload_to_existing_folder_multiple_files(self, populated_client, temp_project_dir):
         """POST /api/ideas/upload with target_folder handles multiple files"""
