@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-554 | Frontend Testing | Set up Vitest + jsdom for proper JS unit tests. Created 51 tests in tests/frontend-js/ covering StageGateChecker, ConfirmModal, ComposeIdeaModal modes, LinkExistingPanel. Updated 4 skills to mandate JS testing over string matching | Zephyr ✅ | ✅ completed | 02-19-2026 13:30:00 | tests/frontend-js/, vitest.config.js, 4x SKILL.md | - |
 | TASK-552 | Bug Fix | Update content modal windows to 80vw (4/5 viewport): compose-modal, toolbox-modal, tracing-modal. Skip dialog modals (workflow-modal) | Zephyr ✅ | ✅ completed | 02-19-2026 12:47:00 | compose-idea-modal.css, stage-toolbox.css, tracing-dashboard.css | - |
 | TASK-553 | Skill Update | Add program_type + tech_stack to 5 skills: technical-design (output), test-generation/bug-fix/implementation/refactor (input). Enables frontend test awareness | Zephyr ✅ | ✅ completed | 02-19-2026 12:47:00 | 5x SKILL.md files | - |
 | TASK-551 | Feature Closing | FEATURE-037-B: Close feature, finalize changelog, commit 2e57f16 + 72b2dd7 to main | Zephyr ✅ | ✅ completed | 02-19-2026 12:39:00 | CHANGELOG.md, commit 2e57f16 | - |
