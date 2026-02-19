@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.18",
+    "jsdom": "^28.1.0",
+    "terser": "^5.46.0",
+    "vitest": "^4.0.18"
+  }
+}

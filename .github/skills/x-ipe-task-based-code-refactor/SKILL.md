@@ -169,8 +169,8 @@ BLOCKING: Step 4 to 5 requires all references updated.
         2. Apply changes following principle_applied, update imports
         3. RUN tests after each change (based on program_type/tech_stack):
            - Backend/CLI: pytest (or equivalent)
-           - Frontend: JS test runner if configured, else pytest structural checks
-           - Fullstack: Run ALL test suites (backend + frontend)
+           - Frontend: Vitest/Jest for JS logic tests (npm test)
+           - Fullstack: Run ALL test suites (pytest + npm test)
         4. IF tests fail:
            - Fix if import issue
            - REVERT if behavior changed

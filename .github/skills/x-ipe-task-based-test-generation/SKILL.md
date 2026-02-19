@@ -159,17 +159,22 @@ BLOCKING: Step 7 - ALL tests MUST fail (no implementation exists). If any test p
          - IF program_type = "backend" or "cli" or "library":
            → Backend tests only (pytest for Python, go test for Go, etc.)
          - IF program_type = "frontend":
-           → Frontend tests (JS unit tests, DOM assertions, structural checks on JS/CSS files)
-           → Use project's JS test framework if exists, else structural pytest checks
+           → Frontend tests using a proper JS test framework (Vitest/Jest + jsdom)
+           → Test actual class/function behavior, NOT source code string matching
+           → Mock browser APIs (fetch, DOM, bootstrap) via jsdom environment
          - IF program_type = "fullstack":
            → Backend tests for API/service layer (pytest, etc.)
-           → Frontend tests for JS modules (structural checks, DOM behavior)
+           → Frontend tests for JS modules using JS test framework (Vitest/Jest + jsdom)
+           → Test actual logic: instantiate classes, call methods, assert behavior
            → Integration tests covering API↔UI contracts
          - IF program_type = "skills" or "mcp" or other:
            → Determine appropriate test approach from tech_stack
-         - IDENTIFY test frameworks from tech_stack (e.g. pytest for Python, Jest/Vitest for JS)
-         - IF no JS test runner configured but frontend code exists:
-           → Use structural pytest checks (file content assertions on JS/CSS files)
+         - IDENTIFY test frameworks from tech_stack (e.g. pytest for Python, Vitest/Jest for JS)
+         - CRITICAL: For frontend/fullstack JS code, ALWAYS use a JS test runner (Vitest preferred).
+           String-matching source code in pytest is NOT acceptable as frontend testing.
+           If Vitest/Jest is not yet configured, set it up (npm install, vitest.config.js).
+         - For browser-global JS (no ES modules), use a test helper that loads scripts
+           via `vm.runInThisContext()` and exposes classes to globalThis.
       5. DETERMINE test file organization:
          - IF only ONE tech stack needs tests → place test files directly in tests/
          - IF MULTIPLE tech stacks need separate tests → create subfolders:
@@ -177,7 +182,7 @@ BLOCKING: Step 7 - ALL tests MUST fail (no implementation exists). If any test p
            → tests/frontend-js/      (JavaScript frontend tests)
            → tests/mcp-python/       (MCP server tests)
            → Pattern: tests/{layer}-{language}/
-           → Each subfolder gets its own __init__.py (if Python) or config
+           → Each subfolder gets its own __init__.py (if Python) or vitest.config.js (if JS)
          - ALWAYS check existing test structure first — follow project conventions
     </action>
     <constraints>

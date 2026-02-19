@@ -187,8 +187,8 @@ BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE impl
       1. LOCATE test files: tests/unit/{feature}/, tests/integration/{feature}/, tests/test_{feature}.py
       2. RUN tests based on program_type and tech_stack:
          - Backend/CLI: pytest tests/ -v (or equivalent for tech_stack)
-         - Frontend: JS test runner if configured, else pytest structural checks
-         - Fullstack: Run BOTH backend and frontend test suites
+         - Frontend: Vitest/Jest for JS logic tests (npm test), NOT pytest string matching
+         - Fullstack: Run BOTH backend (pytest) and frontend (npm test) test suites
       3. VERIFY tests FAIL (proves TDD ready)
     </action>
     <constraints>
@@ -239,8 +239,8 @@ BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE impl
     <action>
       1. RUN tests based on program_type and tech_stack:
          - Backend/CLI: pytest tests/ -v (or equivalent)
-         - Frontend: JS test runner if configured, else pytest structural checks
-         - Fullstack: Run ALL test suites (backend + frontend)
+         - Frontend: Vitest/Jest for JS logic tests (npm test)
+         - Fullstack: Run ALL test suites (pytest + npm test)
       2. CHECK coverage: pytest --cov=src tests/ (aim 80%+)
       3. RUN linter: ruff check / eslint (based on tech_stack)
       4. RUN formatter: ruff format / prettier (based on tech_stack)

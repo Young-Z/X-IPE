@@ -394,3 +394,13 @@ class TestEditModeErrorHandling:
         # Should check deliverables length and fall back to create mode
         assert "deliverables" in content.lower(), \
             "Must check deliverables to determine edit vs create mode"
+
+
+# ============================================================================
+# FRONTEND LOGIC TESTS: See tests/frontend-js/ (Vitest + jsdom)
+# ============================================================================
+# StageGateChecker       → stage-gate-checker.test.js  (11 tests)
+# Bootstrap ConfirmModal → confirm-modal.test.js       (10 tests)
+# ComposeIdeaModal modes → compose-idea-modal.test.js  (15 tests)
+# LinkExistingPanel      → link-existing-panel.test.js (15 tests)
+# ============================================================================

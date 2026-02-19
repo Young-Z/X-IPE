@@ -178,9 +178,10 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
     <action>
       1. Determine test type from program_type/tech_stack and affected file:
          - Backend bug (Python/server code) → pytest test
-         - Frontend bug (JS/CSS file) → JS test if framework exists, else structural pytest check
-         - Fullstack bug → test both layers as needed
+         - Frontend bug (JS/CSS file) → JS test using Vitest/Jest + jsdom (NOT string matching in pytest)
+         - Fullstack bug → test both layers: pytest for backend, Vitest for frontend
          - If program_type not provided, auto-detect from affected file extensions
+         - CRITICAL: For JS logic bugs, use a proper JS test runner. If not configured, set it up.
       2. Locate existing test file in tests/ folder for the affected component
       3. If no test file exists, create one following project test conventions
       4. Write test case that reproduces the bug with descriptive name
