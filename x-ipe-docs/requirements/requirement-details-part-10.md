@@ -110,3 +110,93 @@ From IDEA-023 (CR-Compose Idea in Workflow): The current Compose Idea workflow a
 | Mockup Function Name | Mockup Link |
 |---------------------|-------------|
 | Compose Idea Modal (Create New + Link Existing) | [compose-idea-modal-v1.html](EPIC-037/mockups/compose-idea-modal-v1.html) |
+
+---
+
+## Feature List
+
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-037-A | EPIC-037 | Compose Idea Modal — Create New | v1.0 | MVP modal with Create New mode: name input, Compose/Upload tabs (refactored from Workplace JS), auto folder naming (wf-NNN), submit with auto-complete workflow action, error handling, EasyMDE cleanup | FEATURE-036-C |
+| FEATURE-037-B | EPIC-037 | Compose Idea Modal — Link Existing & Re-Edit | v1.0 | Link Existing mode: file tree browser from /api/ideas/tree, client-side search/filter, preview panel (markdown + images), link submit. Re-edit support for both modes (re-open modal with existing content) | FEATURE-037-A |
+
+---
+
+## Feature Details
+
+### FEATURE-037-A: Compose Idea Modal — Create New
+
+**Version:** v1.0
+**Brief Description:** Core modal dialog with Create New mode — the minimum runnable feature that replaces the current basic prompt with a full compose experience inside the workflow view.
+
+**Functional Requirements Covered:**
+- FR-037.1 (Modal Container)
+- FR-037.2 (Toggle Mode — UI shell only, Link Existing content delivered in FEATURE-037-B)
+- FR-037.3 (Idea Name Input)
+- FR-037.4 (Compose Tab)
+- FR-037.5 (Upload Tab)
+- FR-037.9 (Auto Folder Naming)
+- FR-037.11 (Auto-Complete Action)
+- FR-037.13 (Error Handling)
+- FR-037.14 (EasyMDE Cleanup)
+- FR-037.15 (Workplace JS Refactoring)
+
+**Acceptance Criteria:**
+- [ ] Modal opens when clicking "Compose Idea" in workflow Ideation stage
+- [ ] Toggle UI shows [Create New] / [Link Existing] buttons (Link Existing shows placeholder until FEATURE-037-B)
+- [ ] Name input validates max 10 words with live word counter
+- [ ] Compose tab provides Markdown editor (EasyMDE) with toolbar
+- [ ] Upload tab provides drag-and-drop file upload zone
+- [ ] Submit creates `wf-NNN-{sanitized-name}` folder via `/api/ideas/upload`
+- [ ] After submit, `compose_idea` action auto-completes with deliverables
+- [ ] Modal closes on successful submit
+- [ ] Folder name collision shows inline error, modal stays open
+- [ ] Empty/invalid name prevents submit with inline validation
+- [ ] EasyMDE destroyed on modal close (no memory leaks)
+- [ ] Cancel / × / Escape closes modal without saving
+- [ ] `setupComposer()` and `setupUploader()` refactored to accept container parameter
+
+**Dependencies:**
+- FEATURE-036-C (Stage Ribbon provides action button that opens this modal)
+
+**Technical Considerations:**
+- Workplace JS refactoring (FR-037.15) is prerequisite work within this feature — refactor `setupComposer()` / `setupUploader()` to accept container element before building modal
+- Modal overlay click does NOT close (prevent accidental content loss)
+- `wf-NNN` auto-increment: scan `/api/ideas/tree` response for highest `wf-XXX` folder
+
+**Linked Mockup:** [compose-idea-modal-v1.html](EPIC-037/mockups/compose-idea-modal-v1.html) — "Create New" mode
+
+---
+
+### FEATURE-037-B: Compose Idea Modal — Link Existing & Re-Edit
+
+**Version:** v1.0
+**Brief Description:** Extends the modal with Link Existing mode (file tree browser + preview) and re-edit support for both modes.
+
+**Functional Requirements Covered:**
+- FR-037.6 (File Tree Browser)
+- FR-037.7 (Tree Search/Filter)
+- FR-037.8 (Preview Panel)
+- FR-037.10 (Link Submit)
+- FR-037.12 (Re-Edit)
+
+**Acceptance Criteria:**
+- [ ] Toggle to "Link Existing" shows file tree sidebar + preview panel
+- [ ] File tree fetches from `/api/ideas/tree` with expandable folder/file hierarchy
+- [ ] Search input filters tree items client-side as user types
+- [ ] Clicking a file shows content in preview panel (markdown rendered, images inline)
+- [ ] "Confirm Link" button enabled only when a file is selected
+- [ ] Link submit records file path + root folder as deliverables, auto-completes action
+- [ ] Re-opening modal after compose_idea is "done" loads existing content for editing
+- [ ] Re-edit for linked ideas shows current linked file in preview with option to re-link
+
+**Dependencies:**
+- FEATURE-037-A (modal container, toggle UI, auto-complete mechanism)
+
+**Technical Considerations:**
+- File tree reuses same data source as Workplace sidebar (`/api/ideas/tree`)
+- Preview uses `marked.js` for markdown rendering (already in app dependencies)
+- Re-edit loads content from the file path stored in workflow JSON deliverables
+- Any file type selectable (.md, .pdf, .png, .txt, etc.) — non-markdown shows file metadata
+
+**Linked Mockup:** [compose-idea-modal-v1.html](EPIC-037/mockups/compose-idea-modal-v1.html) — "Link Existing" mode

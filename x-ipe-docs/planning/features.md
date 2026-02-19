@@ -87,3 +87,5 @@ This board tracks all features across the project lifecycle.
 | FEATURE-036-C | EPIC-036 | Stage Ribbon & Action Execution | v1.0 | Completed | [specification.md](../requirements/EPIC-036/FEATURE-036-C/specification.md) | 02-17-2026 | 02-17-2026 14:34:00 |
 | FEATURE-036-D | EPIC-036 | Feature Lanes & Dependencies | v1.0 | Completed | FEATURE-036-A, FEATURE-036-B, FEATURE-036-C | 02-17-2026 | 02-17-2026 15:25:00 |
 | FEATURE-036-E | EPIC-036 | Deliverables, Polling & Lifecycle | v1.0 | Completed | FEATURE-036-A, FEATURE-036-B | 02-17-2026 | 02-17-2026 15:40:00 |
+| FEATURE-037-A | EPIC-037 | Compose Idea Modal — Create New | v1.0 | Planned | - | 02-19-2026 | 02-19-2026 04:34:00 |
+| FEATURE-037-B | EPIC-037 | Compose Idea Modal — Link Existing & Re-Edit | v1.0 | Planned | - | 02-19-2026 | 02-19-2026 04:34:00 |
