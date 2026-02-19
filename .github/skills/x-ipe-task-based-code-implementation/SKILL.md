@@ -58,6 +58,10 @@ input:
   # Git strategy (from .x-ipe.yaml, passed by workflow)
   git_strategy: "main-branch-only | dev-session-based"
   git_main_branch: "{auto-detected}"
+
+  # Tech context (from Technical Design output)
+  program_type: "frontend | backend | fullstack | cli | library"
+  tech_stack: []  # e.g. ["Python/Flask", "JavaScript/Vanilla", "HTML/CSS"]
 ```
 
 ---
@@ -181,7 +185,10 @@ BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE impl
     <name>Load and Verify Tests</name>
     <action>
       1. LOCATE test files: tests/unit/{feature}/, tests/integration/{feature}/, tests/test_{feature}.py
-      2. RUN all tests: pytest tests/ -v or npm test
+      2. RUN tests based on program_type and tech_stack:
+         - Backend/CLI: pytest tests/ -v (or equivalent for tech_stack)
+         - Frontend: JS test runner if configured, else pytest structural checks
+         - Fullstack: Run BOTH backend and frontend test suites
       3. VERIFY tests FAIL (proves TDD ready)
     </action>
     <constraints>
@@ -230,10 +237,13 @@ BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE impl
   <step_6>
     <name>Verify and Ensure Quality</name>
     <action>
-      1. RUN tests: pytest tests/ -v or npm test
+      1. RUN tests based on program_type and tech_stack:
+         - Backend/CLI: pytest tests/ -v (or equivalent)
+         - Frontend: JS test runner if configured, else pytest structural checks
+         - Fullstack: Run ALL test suites (backend + frontend)
       2. CHECK coverage: pytest --cov=src tests/ (aim 80%+)
-      3. RUN linter: ruff check / eslint
-      4. RUN formatter: ruff format / prettier
+      3. RUN linter: ruff check / eslint (based on tech_stack)
+      4. RUN formatter: ruff format / prettier (based on tech_stack)
       5. VERIFY: All tests pass, no linter errors, code matches design
     </action>
     <success_criteria>

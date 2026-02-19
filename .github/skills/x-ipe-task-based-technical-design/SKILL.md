@@ -65,6 +65,8 @@ input:
   feature_id: "{FEATURE-XXX}"
 ```
 
+> **Note on `program_type` and `tech_stack`:** These fields are **determined during Step 5** (not provided as input). The agent identifies them from the design decisions and includes them in the Output Result for downstream skills.
+
 ---
 
 ## Definition of Ready
@@ -177,6 +179,15 @@ BLOCKING: Step 6 requires human approval before proceeding to Test Generation.
          Open mockup files, extract UI component requirements, design frontend components based on mockup layout, reference mockup in Part 2
          ELSE: Focus on service architecture, data models, APIs
       5. INCLUDE Design Change Log section at end of document
+      6. IDENTIFY and record program_type and tech_stack:
+         - program_type: classify as one of: "frontend" | "backend" | "fullstack" | "cli" | "library"
+           - "frontend": Browser-only (HTML/CSS/JS, no server logic)
+           - "backend": Server-only (API, services, data processing)
+           - "fullstack": Both server routes AND browser UI (JS/CSS)
+           - "cli": Command-line tool
+           - "library": Reusable package/module
+         - tech_stack: list all technologies used (e.g. ["Python/Flask", "JavaScript/Vanilla", "HTML/CSS", "pytest"])
+         - These are passed to downstream skills (Test Generation, Code Implementation) to determine test types
     </action>
     <constraints>
       - MANDATORY: Part 1 must have component table with Tags for semantic search
@@ -223,6 +234,9 @@ task_completion_output:
   feature_title: "{title}"
   feature_version: "{version}"
   feature_phase: "Technical Design"
+  # Tech context (determined in Step 5, passed to downstream skills)
+  program_type: "frontend | backend | fullstack | cli | library"
+  tech_stack: ["Python/Flask", "JavaScript/Vanilla", "HTML/CSS"]  # example
 ```
 
 ---

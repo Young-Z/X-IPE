@@ -33,8 +33,7 @@
 .compose-modal {
     background: #fff;
     border-radius: 12px;
-    width: 90%;
-    max-width: 720px;
+    width: 80vw;
     max-height: 85vh;
     display: flex;
     flex-direction: column;

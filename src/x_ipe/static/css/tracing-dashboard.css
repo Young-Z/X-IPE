@@ -574,8 +574,7 @@
     background: var(--tracing-bg-primary);
     border-radius: 12px;
     box-shadow: var(--tracing-shadow-md);
-    width: 90%;
-    max-width: 480px;
+    width: 80vw;
     max-height: 80vh;
     display: flex;
     flex-direction: column;

@@ -56,6 +56,10 @@ input:
   # Context (optional)
   reproduction_steps: "{steps to reproduce, if known}"
   environment_info: "{environment details, if relevant}"
+
+  # Tech context (optional — auto-detected from affected files if not provided)
+  program_type: "frontend | backend | fullstack | cli | library"
+  tech_stack: []  # e.g. ["Python/Flask", "JavaScript/Vanilla"]
 ```
 
 ---
@@ -172,15 +176,21 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
   <step_5>
     <name>Write Failing Test</name>
     <action>
-      1. Locate existing test file in tests/ folder for the affected component
-      2. If no test file exists, create one following project test conventions
-      3. Write test case that reproduces the bug with descriptive name
-      4. Run the test and confirm it FAILS
+      1. Determine test type from program_type/tech_stack and affected file:
+         - Backend bug (Python/server code) → pytest test
+         - Frontend bug (JS/CSS file) → JS test if framework exists, else structural pytest check
+         - Fullstack bug → test both layers as needed
+         - If program_type not provided, auto-detect from affected file extensions
+      2. Locate existing test file in tests/ folder for the affected component
+      3. If no test file exists, create one following project test conventions
+      4. Write test case that reproduces the bug with descriptive name
+      5. Run the test and confirm it FAILS
     </action>
     <constraints>
       - BLOCKING: Test MUST fail before proceeding to Step 6
       - BLOCKING: Do NOT write fix code before test fails
       - CRITICAL: If test passes, revise it - test does not capture the bug
+      - CRITICAL: For frontend bugs, ensure test covers the JS/CSS behavior, not just backend
     </constraints>
     <output>Failing test that reproduces the bug</output>
   </step_5>

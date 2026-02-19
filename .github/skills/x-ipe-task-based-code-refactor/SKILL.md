@@ -54,6 +54,10 @@ input:
 
   # Context (from previous task or project)
   # See references/refactoring-techniques.md for full input structure definitions
+
+  # Tech context (optional — auto-detected from refactoring scope if not provided)
+  program_type: "frontend | backend | fullstack | cli | library"
+  tech_stack: []  # e.g. ["Python/Flask", "JavaScript/Vanilla"]
 ```
 
 ---
@@ -163,7 +167,10 @@ BLOCKING: Step 4 to 5 requires all references updated.
       FOR EACH phase in refactoring_plan:
         1. CREATE checkpoint: git commit -m "checkpoint: before phase {N}"
         2. Apply changes following principle_applied, update imports
-        3. RUN tests after each change
+        3. RUN tests after each change (based on program_type/tech_stack):
+           - Backend/CLI: pytest (or equivalent)
+           - Frontend: JS test runner if configured, else pytest structural checks
+           - Fullstack: Run ALL test suites (backend + frontend)
         4. IF tests fail:
            - Fix if import issue
            - REVERT if behavior changed

@@ -160,10 +160,10 @@ class TestComposeIdeaModalCSS:
         content = (CSS_FEATURES / "compose-idea-modal.css").read_text()
         assert "1051" in content
 
-    def test_css_has_max_width_720(self):
-        """AC-002: Modal max-width ~720px per spec."""
+    def test_css_has_80vw_width(self):
+        """AC-002: Modal width is 80vw (4/5 viewport)."""
         content = (CSS_FEATURES / "compose-idea-modal.css").read_text()
-        assert "720px" in content
+        assert "80vw" in content
 
 
 # ============================================================================

@@ -43,6 +43,10 @@ input:
   auto_proceed: false
   feature_id: "{FEATURE-XXX}"
 
+  # Tech context (from Technical Design output)
+  program_type: "frontend | backend | fullstack | cli | library"
+  tech_stack: []  # e.g. ["Python/Flask", "JavaScript/Vanilla", "HTML/CSS"]
+
   # Context (from previous task or project)
   technical_design_link: "{path to technical design}"
   specification_link: "{path to feature specification}"
@@ -151,11 +155,25 @@ BLOCKING: Step 7 - ALL tests MUST fail (no implementation exists). If any test p
       1. CATEGORIZE: Unit (isolated), Integration (interactions), API (endpoints)
       2. PRIORITIZE: Core functionality, then happy path, then edge cases
       3. DEFINE test data: Mocks, fixtures, request/response samples
+      4. DETERMINE test types based on program_type and tech_stack:
+         - IF program_type = "backend" or "cli" or "library":
+           → Backend tests only (pytest for Python, go test for Go, etc.)
+         - IF program_type = "frontend":
+           → Frontend tests (JS unit tests, DOM assertions, structural checks on JS/CSS files)
+           → Use project's JS test framework if exists, else structural pytest checks
+         - IF program_type = "fullstack":
+           → Backend tests for API/service layer (pytest, etc.)
+           → Frontend tests for JS modules (structural checks, DOM behavior)
+           → Integration tests covering API↔UI contracts
+         - IDENTIFY test frameworks from tech_stack (e.g. pytest for Python, Jest/Vitest for JS)
+         - IF no JS test runner configured but frontend code exists:
+           → Use structural pytest checks (file content assertions on JS/CSS files)
     </action>
     <constraints>
       - CRITICAL: Research testing best practices for the project tech stack before designing strategy.
+      - CRITICAL: Do NOT skip frontend test coverage when program_type includes frontend code.
     </constraints>
-    <output>Test strategy with categorized test plan</output>
+    <output>Test strategy with categorized test plan covering all program layers</output>
   </step_5>
 
   <step_6>
