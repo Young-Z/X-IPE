@@ -2,9 +2,9 @@
 
 > Idea ID: IDEA-023
 > Folder: 023. CR-Compose Idea in Workflow
-> Version: v2
+> Version: v2.1
 > Created: 2026-02-18
-> Status: Refined
+> Status: Mockup Ready
 
 ## Overview
 
@@ -321,14 +321,28 @@ layer "Service" {
 @enduml
 ```
 
+## Mockups & Prototypes
+
+| Mockup | Description | File |
+|--------|-------------|------|
+| Compose Idea Modal | Interactive HTML prototype showing both Create New and Link Existing modes with tab navigation, file tree browser, and markdown preview | [compose-idea-modal-v1.html](mockups/compose-idea-modal-v1.html) |
+
+### Mockup Coverage
+
+- ✅ **Create New mode** — Idea name input with word counter, Compose/Upload/UIUX Reference tabs, rich text editor toolbar
+- ✅ **Link Existing mode** — Searchable file tree sidebar, markdown preview panel, file selection highlighting
+- ✅ **Top-bar toggle** — Create New / Link Existing pill-style toggle
+- ✅ **Modal chrome** — Header, close button, Cancel/Create action buttons
+- ✅ **Brand theme** — Uses X-IPE design system (Slate/Emerald palette, DM Sans typography)
+
 ## Source Files
 
 - new idea.md (original raw idea)
 
 ## Next Steps
 
-- [ ] Proceed to Idea Mockup (create visual prototype of the modal)
-- [ ] Or proceed to Requirement Gathering (formalize as CR for existing workflow feature)
+- [x] Proceed to Idea Mockup (create visual prototype of the modal)
+- [ ] Proceed to Requirement Gathering (formalize as CR for existing workflow feature)
 
 ## References & Common Principles
 
