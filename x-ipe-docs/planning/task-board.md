@@ -12,7 +12,10 @@
 | TASK-565 | Requirement Gathering | EPIC-038: CR-Refine Idea Action — gather requirements from IDEA-025 idea-summary, create requirement-details | Nova ✅ | ✅ completed | 02-20-2026 13:08:00 | requirement-details-part-11.md | Feature Breakdown |
 | TASK-566 | Feature Breakdown | EPIC-038: CR-Refine Idea Action — break requirements into features, update feature board | Nova ✅ | ✅ completed | 02-20-2026 13:50:00 | requirement-details-part-11.md, features.md | Feature Refinement |
 | TASK-567 | Feature Refinement | FEATURE-038-A: Action Execution Modal — create specification.md | Nova ✅ | ✅ completed | 02-20-2026 14:10:00 | specification.md | Technical Design |
-| TASK-568 | Feature Refinement | FEATURE-038-B: Session Idle Detection — create specification.md | Nova | 🔄 in_progress | 02-20-2026 14:10:00 | - | Technical Design |
+| TASK-568 | Feature Refinement | FEATURE-038-B: Session Idle Detection — create specification.md | Nova ✅ | ✅ completed | 02-20-2026 14:15:00 | specification.md | Technical Design |
+| TASK-569 | Feature Refinement | FEATURE-038-C: Enhanced Deliverable Viewer — create specification.md | Nova ✅ | ✅ completed | 02-20-2026 14:20:00 | specification.md | Technical Design |
+| TASK-570 | Feature Refinement | FEATURE-038-D: Refinement Skill Integration — create specification.md | Nova ✅ | ✅ completed | 02-20-2026 14:20:00 | specification.md | Technical Design |
+| TASK-571 | Feature Refinement | FEATURE-038-E: Execution Skill DoD Update — create specification.md | Nova ✅ | ✅ completed | 02-20-2026 14:20:00 | specification.md | Technical Design |
 | TASK-561 | Bug Fix | Deliverables show "not found" for bare filenames (legacy data before TASK-542). Fixed deliverable paths in workflow-hello.json. Feedback-20260220-133807 | Spark ✅ | ✅ completed | 02-20-2026 05:42:00 | workflow-hello.json | - |
 | TASK-560 | Feature Closing | FEATURE-025-E: KB Search & Preview — closed, acceptance tests 8/8, commit 679e40b | Zephyr ✅ | ✅ completed | 02-19-2026 15:35:00 | CHANGELOG.md, features.md, acceptance-test-results.md | - |
 | TASK-559 | Feature Acceptance Test | FEATURE-025-E: KB Search & Preview — 8/8 acceptance tests passed. Fixed 3 bugs: preview panel selector, filter chips init, SPA navigation init | Zephyr ✅ | ✅ completed | 02-19-2026 15:30:00 | acceptance-test-results.md | Feature Closing |
