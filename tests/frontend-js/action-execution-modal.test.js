@@ -9,15 +9,19 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { loadFeatureScript } from './helpers.js';
 
 /**
- * Guard: loads the feature script if it exists; returns false if not yet implemented.
+ * Guard: loads the feature script once. Returns true if class is available.
  */
-function tryLoadImpl() {
-  try {
-    loadFeatureScript('action-execution-modal.js');
-    return true;
-  } catch {
-    return false;
+let _implLoaded = false;
+function ensureImpl() {
+  if (!_implLoaded) {
+    try {
+      loadFeatureScript('action-execution-modal.js');
+      _implLoaded = true;
+    } catch {
+      // File not yet implemented — TDD
+    }
   }
+  return typeof globalThis.ActionExecutionModal !== 'undefined';
 }
 
 describe('FEATURE-038-A: Action Execution Modal', () => {
@@ -49,12 +53,11 @@ describe('FEATURE-038-A: Action Execution Modal', () => {
       }
     };
 
-    tryLoadImpl();
+    ensureImpl();
   });
 
   afterEach(() => {
     document.body.innerHTML = '';
-    delete globalThis.ActionExecutionModal;
   });
 
   describe('Modal Opening', () => {

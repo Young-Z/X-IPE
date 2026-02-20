@@ -1,0 +1,195 @@
+/* ==========================================================================
+   FEATURE-038-A: Action Execution Modal
+   Follows compose-idea-modal CSS pattern (z-index 1051)
+   ========================================================================== */
+
+/* --- Overlay --- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 1051;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Sans', sans-serif;
+}
+
+/* --- Container --- */
+.modal-overlay .modal-container {
+    background: #fff;
+    border-radius: 12px;
+    width: 500px;
+    max-width: 90vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+/* --- Header --- */
+.modal-overlay .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-overlay .modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.modal-overlay .modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #64748b;
+    padding: 0 4px;
+    line-height: 1;
+}
+.modal-overlay .modal-close-btn:hover {
+    color: #1e293b;
+}
+
+/* --- Body --- */
+.modal-overlay .modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-overlay .instructions-label,
+.modal-overlay .extra-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.modal-overlay .instructions-content {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #334155;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    white-space: pre-wrap;
+}
+
+.modal-overlay .extra-instructions-section {
+    position: relative;
+}
+
+.modal-overlay .extra-input {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+    color: #334155;
+    box-sizing: border-box;
+}
+.modal-overlay .extra-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.modal-overlay .char-counter {
+    text-align: right;
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 4px;
+}
+
+/* --- In-Progress Message --- */
+.modal-overlay .in-progress-message {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 24px;
+    color: #64748b;
+    font-size: 14px;
+    justify-content: center;
+}
+.modal-overlay .in-progress-message .spin {
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* --- Footer --- */
+.modal-overlay .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.modal-overlay .cancel-btn,
+.modal-overlay .copilot-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid #e2e8f0;
+}
+
+.modal-overlay .cancel-btn {
+    background: #fff;
+    color: #64748b;
+}
+.modal-overlay .cancel-btn:hover {
+    background: #f8fafc;
+}
+
+.modal-overlay .copilot-btn {
+    background: #6366f1;
+    color: #fff;
+    border-color: #6366f1;
+}
+.modal-overlay .copilot-btn:hover:not(:disabled) {
+    background: #4f46e5;
+}
+.modal-overlay .copilot-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* --- Spinner/Pulse on Action Buttons --- */
+.action-btn.in-progress {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.action-btn.in-progress::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    border: 2px solid currentColor;
+}
+
+@keyframes pulse-ring {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.1; transform: scale(1.05); }
+}

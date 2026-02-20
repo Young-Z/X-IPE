@@ -422,7 +422,24 @@ const workflowStage = {
             return;
         }
 
-        // Open console if hidden
+        // FEATURE-038-A: Use ActionExecutionModal if available
+        if (typeof ActionExecutionModal !== 'undefined') {
+            const modal = new ActionExecutionModal({
+                actionKey,
+                workflowName: wfName,
+                skillName,
+                onComplete: () => {
+                    const container = document.getElementById('workflow-view');
+                    if (container && window.workflowView) {
+                        window.workflowView.render(container);
+                    }
+                }
+            });
+            modal.open();
+            return;
+        }
+
+        // Fallback: direct terminal dispatch
         const consoleEl = document.querySelector('.console-container');
         if (consoleEl && consoleEl.classList.contains('hidden')) {
             const toggle = document.querySelector('[title*="Toggle terminal"]');
