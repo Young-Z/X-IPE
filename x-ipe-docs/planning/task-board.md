@@ -6,7 +6,9 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-560 | Feature Closing | FEATURE-025-E: KB Search & Preview — close feature, update changelog, commit | Zephyr | 🔄 in_progress | 02-19-2026 15:30:00 | - | - |
+| TASK-562 | Ideation | Refine idea 025: CR-Refine Idea Action — modal window, agent CLI integration, workflow manager API, deliverable viewer | Nova ✅ | ✅ completed | 02-20-2026 09:15:00 | idea-summary-v1.md | Requirement Gathering |
+| TASK-561 | Bug Fix | Deliverables show "not found" for bare filenames (legacy data before TASK-542). Fixed deliverable paths in workflow-hello.json. Feedback-20260220-133807 | Spark ✅ | ✅ completed | 02-20-2026 05:42:00 | workflow-hello.json | - |
+| TASK-560 | Feature Closing | FEATURE-025-E: KB Search & Preview — closed, acceptance tests 8/8, commit 679e40b | Zephyr ✅ | ✅ completed | 02-19-2026 15:35:00 | CHANGELOG.md, features.md, acceptance-test-results.md | - |
 | TASK-559 | Feature Acceptance Test | FEATURE-025-E: KB Search & Preview — 8/8 acceptance tests passed. Fixed 3 bugs: preview panel selector, filter chips init, SPA navigation init | Zephyr ✅ | ✅ completed | 02-19-2026 15:30:00 | acceptance-test-results.md | Feature Closing |
 | TASK-558 | Code Implementation | FEATURE-025-E: KB Search & Preview — search modal, preview panel, filter chips, sidebar highlight, grouped search API. 21 backend + 36 frontend tests, all passing. Commit 82647bb | Zephyr ✅ | ✅ completed | 02-19-2026 14:00:00 | kb-search.js, kb-search.css, kb_manager_service.py, kb_routes.py, test_kb_search.py, kb-search.test.js | Feature Acceptance Test |
 | TASK-557 | Test Generation | FEATURE-025-E: KB Search & Preview — TDD tests for search API, search modal, preview panel, sidebar highlight | Zephyr ✅ | ✅ completed | 02-19-2026 13:48:00 | test_kb_search.py, kb-search.test.js | Code Implementation |
