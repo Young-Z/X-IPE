@@ -7,13 +7,20 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { loadFeatureScript } from './helpers.js';
 
-function tryLoadImpl() {
-  try {
-    loadFeatureScript('deliverable-viewer.js');
-    return true;
-  } catch {
-    return false;
+/**
+ * Guard: loads the feature script once.
+ */
+let _implLoaded = false;
+function ensureImpl() {
+  if (!_implLoaded) {
+    try {
+      loadFeatureScript('deliverable-viewer.js');
+      _implLoaded = true;
+    } catch {
+      // File not yet implemented — TDD
+    }
   }
+  return typeof globalThis.DeliverableViewer !== 'undefined';
 }
 
 describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
@@ -21,12 +28,11 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
     document.body.innerHTML = '';
     globalThis.fetch = vi.fn();
     globalThis.marked = { parse: vi.fn((md) => `<p>${md}</p>`) };
-    tryLoadImpl();
+    ensureImpl();
   });
 
   afterEach(() => {
     document.body.innerHTML = '';
-    delete globalThis.DeliverableViewer;
   });
 
   describe('Folder Detection', () => {
@@ -210,11 +216,11 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
   });
 
   describe('Security', () => {
-    it('should not allow path traversal in file requests', () => {
+    it('should not allow path traversal in file requests', async () => {
       const DV = globalThis.DeliverableViewer;
       expect(DV).toBeDefined();
       const viewer = new DV({ workflowName: 'hello' });
-      expect(() => viewer.showPreview('../../etc/passwd')).toThrow();
+      await expect(viewer.showPreview('../../etc/passwd')).rejects.toThrow();
     });
   });
 });

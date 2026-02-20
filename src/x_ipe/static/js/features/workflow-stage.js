@@ -905,7 +905,15 @@ const workflowStage = {
                 empty.textContent = 'No deliverables yet';
                 grid.appendChild(empty);
             } else {
-                items.forEach(item => grid.appendChild(this._renderDeliverableCard(item)));
+                const viewer = typeof DeliverableViewer !== 'undefined'
+                    ? new DeliverableViewer({ workflowName: wfName }) : null;
+                items.forEach(item => {
+                    if (viewer && DeliverableViewer.isFolderType(item.path)) {
+                        grid.appendChild(viewer.renderFolderDeliverable(item));
+                    } else {
+                        grid.appendChild(this._renderDeliverableCard(item));
+                    }
+                });
             }
         } catch {
             countBadge.textContent = '!';

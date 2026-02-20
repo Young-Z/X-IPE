@@ -23,7 +23,7 @@ class TestDeliverableTreeEndpoint:
         sub.mkdir()
         (sub / "mockup.html").write_text("<html>")
 
-        with patch('src.x_ipe.routes.workflow_routes.get_project_root', return_value=str(tmp_path)):
+        with patch('x_ipe.routes.workflow_routes.get_project_root', return_value=str(tmp_path)):
             resp = client.get(f'/api/workflow/test/deliverables/tree?path=ideas/test-idea/refined-idea/')
         
         assert resp.status_code == 200
@@ -40,7 +40,7 @@ class TestDeliverableTreeEndpoint:
         (folder / "readme.md").write_text("# Test")
         (folder / "sub").mkdir()
 
-        with patch('src.x_ipe.routes.workflow_routes.get_project_root', return_value=str(tmp_path)):
+        with patch('x_ipe.routes.workflow_routes.get_project_root', return_value=str(tmp_path)):
             resp = client.get(f'/api/workflow/test/deliverables/tree?path=ideas/test/')
 
         data = resp.get_json()
@@ -54,7 +54,7 @@ class TestDeliverableTreeEndpoint:
         folder.mkdir(parents=True)
         (folder / "file.md").write_text("content")
 
-        with patch('src.x_ipe.routes.workflow_routes.get_project_root', return_value=str(tmp_path)):
+        with patch('x_ipe.routes.workflow_routes.get_project_root', return_value=str(tmp_path)):
             resp = client.get(f'/api/workflow/test/deliverables/tree?path=ideas/test/')
 
         data = resp.get_json()
@@ -63,14 +63,14 @@ class TestDeliverableTreeEndpoint:
 
     def test_tree_rejects_path_traversal(self, client, tmp_path):
         """Path traversal attempts (../) are rejected with 403."""
-        with patch('src.x_ipe.routes.workflow_routes.get_project_root', return_value=str(tmp_path)):
+        with patch('x_ipe.routes.workflow_routes.get_project_root', return_value=str(tmp_path)):
             resp = client.get('/api/workflow/test/deliverables/tree?path=../../etc/')
 
         assert resp.status_code == 403
 
     def test_tree_returns_404_for_missing_folder(self, client, tmp_path):
         """Nonexistent folder returns 404."""
-        with patch('src.x_ipe.routes.workflow_routes.get_project_root', return_value=str(tmp_path)):
+        with patch('x_ipe.routes.workflow_routes.get_project_root', return_value=str(tmp_path)):
             resp = client.get('/api/workflow/test/deliverables/tree?path=nonexistent/')
 
         assert resp.status_code == 404
@@ -87,7 +87,7 @@ class TestDeliverableTreeEndpoint:
         for i in range(60):
             (folder / f"file-{i:03d}.txt").write_text(f"content {i}")
 
-        with patch('src.x_ipe.routes.workflow_routes.get_project_root', return_value=str(tmp_path)):
+        with patch('x_ipe.routes.workflow_routes.get_project_root', return_value=str(tmp_path)):
             resp = client.get(f'/api/workflow/test/deliverables/tree?path=ideas/big/')
 
         data = resp.get_json()
@@ -98,7 +98,7 @@ class TestDeliverableTreeEndpoint:
         folder = tmp_path / "ideas" / "empty"
         folder.mkdir(parents=True)
 
-        with patch('src.x_ipe.routes.workflow_routes.get_project_root', return_value=str(tmp_path)):
+        with patch('x_ipe.routes.workflow_routes.get_project_root', return_value=str(tmp_path)):
             resp = client.get(f'/api/workflow/test/deliverables/tree?path=ideas/empty/')
 
         assert resp.status_code == 200

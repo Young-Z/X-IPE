@@ -131,3 +131,41 @@ def get_deliverables(name):
     if 'error' in result and result.get('success') is False:
         return jsonify(result), 404
     return jsonify({'success': True, 'data': result})
+
+
+def get_project_root():
+    return current_app.config.get('PROJECT_ROOT', os.getcwd())
+
+
+@workflow_bp.route('/api/workflow/<name>/deliverables/tree', methods=['GET'])
+def get_deliverable_tree(name):
+    """List folder contents for deliverable viewer (FEATURE-038-C)."""
+    folder_path = request.args.get('path')
+    if not folder_path:
+        return jsonify({'error': 'Missing path parameter'}), 400
+
+    root = get_project_root()
+    abs_path = os.path.normpath(os.path.join(root, folder_path))
+
+    # Security: prevent path traversal
+    if not abs_path.startswith(os.path.normpath(root)):
+        return jsonify({'error': 'Path traversal not allowed'}), 403
+
+    if not os.path.isdir(abs_path):
+        return jsonify({'error': 'Folder not found'}), 404
+
+    entries = []
+    try:
+        for entry_name in sorted(os.listdir(abs_path))[:50]:
+            entry_path = os.path.join(abs_path, entry_name)
+            rel = os.path.relpath(entry_path, root)
+            entry_type = 'dir' if os.path.isdir(entry_path) else 'file'
+            entries.append({
+                'name': entry_name,
+                'type': entry_type,
+                'path': rel + ('/' if entry_type == 'dir' else '')
+            })
+    except OSError:
+        return jsonify({'error': 'Cannot read folder'}), 500
+
+    return jsonify(entries)
