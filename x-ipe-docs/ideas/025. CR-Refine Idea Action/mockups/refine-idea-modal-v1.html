@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CR-025: Refine Idea Action — Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+  /* ═══════════════════════════════════════════
+     DESIGN TOKENS — X-IPE Default Theme + CR-025
+     ═══════════════════════════════════════════ */
+  :root {
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --emerald-50: #ecfdf5;
+    --emerald-100: #d1fae5;
+    --emerald-400: #34d399;
+    --emerald-500: #10b981;
+    --emerald-600: #059669;
+    --emerald-700: #047857;
+    --blue-50: #eff6ff;
+    --blue-100: #dbeafe;
+    --blue-500: #3b82f6;
+    --amber-50: #fffbeb;
+    --amber-500: #f59e0b;
+    --red-50: #fef2f2;
+    --red-500: #ef4444;
+    --font-heading: 'DM Sans', system-ui, sans-serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+    --font-display: 'Fraunces', Georgia, serif;
+    --shadow-modal: 0 24px 80px -12px rgba(0,0,0,0.28), 0 0 0 1px rgba(0,0,0,0.05);
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-card-hover: 0 8px 24px -4px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+    --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ═══════════════════════════════════════════
+     BASE & PAGE LAYOUT
+     ═══════════════════════════════════════════ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--slate-100);
+    color: var(--slate-800);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  .mockup-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 32px;
+  }
+
+  /* ═══════════════════════════════════════════
+     MOCKUP HEADER
+     ═══════════════════════════════════════════ */
+  .mockup-header {
+    text-align: center;
+    margin-bottom: 56px;
+    position: relative;
+  }
+  .mockup-header::after {
+    content: '';
+    position: absolute;
+    bottom: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--emerald-500), var(--emerald-400));
+    border-radius: 2px;
+  }
+  .mockup-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--emerald-50);
+    color: var(--emerald-700);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--emerald-100);
+    margin-bottom: 16px;
+  }
+  .mockup-badge svg { width: 14px; height: 14px; }
+  .mockup-title {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--slate-900);
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .mockup-subtitle {
+    font-size: 15px;
+    color: var(--slate-500);
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  /* ═══════════════════════════════════════════
+     SCENE SECTIONS
+     ═══════════════════════════════════════════ */
+  .scene {
+    margin-bottom: 72px;
+    position: relative;
+  }
+  .scene-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .scene-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--slate-800);
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+  .scene-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--slate-800);
+  }
+  .scene-desc {
+    font-size: 13px;
+    color: var(--slate-500);
+    margin-left: 38px;
+    margin-bottom: 20px;
+    max-width: 600px;
+  }
+
+  /* ═══════════════════════════════════════════
+     WORKFLOW BACKDROP (simulated)
+     ═══════════════════════════════════════════ */
+  .workflow-backdrop {
+    background: var(--slate-800);
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .workflow-backdrop::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+      radial-gradient(ellipse at 20% 50%, rgba(16,185,129,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(59,130,246,0.04) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* Stage ribbon */
+  .stage-ribbon {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+  }
+  .stage-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: var(--transition);
+    cursor: default;
+  }
+  .stage-pill.active {
+    background: rgba(16,185,129,0.15);
+    color: var(--emerald-400);
+    border: 1px solid rgba(16,185,129,0.25);
+  }
+  .stage-pill.inactive {
+    background: rgba(255,255,255,0.04);
+    color: var(--slate-400);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .stage-pill.completed {
+    background: rgba(16,185,129,0.08);
+    color: var(--emerald-500);
+    border: 1px solid rgba(16,185,129,0.12);
+    opacity: 0.7;
+  }
+  .stage-chevron {
+    color: var(--slate-600);
+    font-size: 11px;
+    margin: 0 2px;
+  }
+
+  /* Action buttons row */
+  .actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 16px 16px;
+  }
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 16px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font-body);
+    border: 1px solid;
+    cursor: pointer;
+    transition: all var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+  .action-btn .action-icon { font-size: 14px; }
+
+  /* Action button states */
+  .action-btn.normal {
+    background: rgba(255,255,255,0.06);
+    color: var(--slate-300);
+    border-color: rgba(255,255,255,0.1);
+  }
+  .action-btn.normal:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border-color: rgba(255,255,255,0.18);
+  }
+  .action-btn.suggested {
+    background: rgba(16,185,129,0.12);
+    color: var(--emerald-400);
+    border-color: rgba(16,185,129,0.3);
+    box-shadow: 0 0 0 1px rgba(16,185,129,0.1);
+  }
+  .action-btn.suggested:hover {
+    background: rgba(16,185,129,0.2);
+    box-shadow: 0 0 12px rgba(16,185,129,0.15);
+  }
+  .action-btn.suggested::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px; right: -1px; bottom: -1px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, rgba(16,185,129,0.3), transparent 60%);
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  .action-btn.done {
+    background: rgba(16,185,129,0.08);
+    color: var(--emerald-500);
+    border-color: rgba(16,185,129,0.15);
+    opacity: 0.65;
+  }
+  .action-btn.locked {
+    background: rgba(255,255,255,0.02);
+    color: var(--slate-600);
+    border-color: rgba(255,255,255,0.04);
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  /* Spinner state */
+  .action-btn.spinning {
+    background: rgba(16,185,129,0.12);
+    color: var(--emerald-400);
+    border-color: rgba(16,185,129,0.3);
+    pointer-events: none;
+  }
+  .action-btn.spinning .action-icon {
+    display: inline-block;
+    animation: spin 1.2s linear infinite;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .action-btn.spinning::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 9px;
+    background: linear-gradient(90deg, transparent, rgba(16,185,129,0.08), transparent);
+    animation: shimmer 2s infinite;
+  }
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  /* Pulse glow on spinning button */
+  .action-btn.spinning {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.2); }
+    50% { box-shadow: 0 0 16px 4px rgba(16,185,129,0.15); }
+  }
+
+  /* ═══════════════════════════════════════════
+     REFINE IDEA MODAL
+     ═══════════════════════════════════════════ */
+  .modal-overlay {
+    position: relative;
+    background: rgba(15,23,42,0.55);
+    backdrop-filter: blur(6px);
+    border-radius: var(--radius-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 620px;
+    padding: 40px;
+  }
+
+  .refine-modal {
+    background: white;
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 720px;
+    box-shadow: var(--shadow-modal);
+    display: flex;
+    flex-direction: column;
+    max-height: 580px;
+    animation: modal-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    position: relative;
+    overflow: hidden;
+  }
+  @keyframes modal-enter {
+    from { opacity: 0; transform: scale(0.96) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* Accent bar at top */
+  .refine-modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--emerald-500), var(--emerald-400), var(--blue-500));
+    z-index: 2;
+  }
+
+  /* Modal header */
+  .refine-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--slate-100);
+  }
+  .refine-modal-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .refine-modal-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--emerald-50), var(--blue-50));
+    border-radius: 10px;
+    font-size: 18px;
+    border: 1px solid var(--emerald-100);
+  }
+  .refine-modal-title-group {
+    display: flex;
+    flex-direction: column;
+  }
+  .refine-modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--slate-900);
+    line-height: 1.3;
+  }
+  .refine-modal-meta {
+    font-size: 12px;
+    color: var(--slate-400);
+    margin-top: 1px;
+  }
+  .refine-modal-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--slate-400);
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 18px;
+    transition: var(--transition);
+  }
+  .refine-modal-close:hover {
+    background: var(--slate-100);
+    color: var(--slate-700);
+  }
+
+  /* Modal body */
+  .refine-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Section blocks */
+  .refine-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .refine-section-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .refine-section-label .label-icon {
+    font-size: 13px;
+    opacity: 0.7;
+  }
+  .refine-section-hint {
+    font-size: 12px;
+    color: var(--slate-400);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-left: auto;
+  }
+
+  /* Readonly instructions display */
+  .instructions-display {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--slate-700);
+    position: relative;
+    max-height: 140px;
+    overflow-y: auto;
+  }
+  .instructions-display::before {
+    content: 'FROM COPILOT-PROMPT.JSON';
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--slate-400);
+    background: var(--slate-100);
+    padding: 4px 10px;
+    border-radius: 0 var(--radius-md) 0 6px;
+    font-family: var(--font-body);
+    border-left: 1px solid var(--slate-200);
+    border-bottom: 1px solid var(--slate-200);
+  }
+  .instructions-display .instruction-highlight {
+    color: var(--emerald-600);
+    font-weight: 500;
+  }
+
+  /* Extra instructions textarea */
+  .extra-textarea {
+    width: 100%;
+    min-height: 88px;
+    padding: 14px 16px;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--slate-800);
+    resize: vertical;
+    transition: var(--transition);
+    background: white;
+  }
+  .extra-textarea:focus {
+    outline: none;
+    border-color: var(--emerald-500);
+    box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
+  }
+  .extra-textarea::placeholder {
+    color: var(--slate-400);
+    font-style: italic;
+  }
+
+  /* Workflow context info bar */
+  .context-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 14px;
+    background: var(--blue-50);
+    border: 1px solid var(--blue-100);
+    border-radius: var(--radius-md);
+    font-size: 12.5px;
+    color: var(--slate-600);
+  }
+  .context-bar .context-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .context-bar .context-icon { font-size: 14px; }
+  .context-bar .context-value {
+    font-weight: 600;
+    color: var(--slate-800);
+  }
+  .context-bar .context-separator {
+    width: 1px;
+    height: 16px;
+    background: var(--blue-100);
+  }
+
+  /* Modal footer */
+  .refine-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-top: 1px solid var(--slate-100);
+    background: var(--slate-50);
+  }
+  .footer-hint {
+    font-size: 12px;
+    color: var(--slate-400);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .footer-hint svg { width: 14px; height: 14px; opacity: 0.5; }
+
+  .footer-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 20px;
+    border-radius: 9px;
+    font-size: 13.5px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all var(--transition);
+    border: 1px solid transparent;
+  }
+  .btn-cancel {
+    background: white;
+    color: var(--slate-600);
+    border-color: var(--slate-200);
+  }
+  .btn-cancel:hover {
+    background: var(--slate-50);
+    border-color: var(--slate-300);
+  }
+  .btn-copilot {
+    background: linear-gradient(135deg, var(--emerald-500), var(--emerald-600));
+    color: white;
+    box-shadow: 0 2px 8px rgba(16,185,129,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  .btn-copilot:hover {
+    background: linear-gradient(135deg, var(--emerald-400), var(--emerald-500));
+    box-shadow: 0 4px 16px rgba(16,185,129,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+    transform: translateY(-1px);
+  }
+  .btn-copilot:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(16,185,129,0.3);
+  }
+  .btn-copilot .copilot-sparkle {
+    font-size: 15px;
+    filter: brightness(1.3);
+  }
+
+  /* ═══════════════════════════════════════════
+     DELIVERABLE VIEWER MODAL
+     ═══════════════════════════════════════════ */
+  .deliverable-viewer {
+    background: white;
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 860px;
+    box-shadow: var(--shadow-modal);
+    display: flex;
+    flex-direction: column;
+    max-height: 560px;
+    animation: modal-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    position: relative;
+    overflow: hidden;
+  }
+  .deliverable-viewer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--blue-500), var(--emerald-500));
+    z-index: 2;
+  }
+
+  .viewer-columns {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* File tree sidebar */
+  .viewer-sidebar {
+    width: 240px;
+    border-right: 1px solid var(--slate-100);
+    display: flex;
+    flex-direction: column;
+    background: var(--slate-50);
+    flex-shrink: 0;
+  }
+  .viewer-sidebar-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--slate-100);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--slate-400);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .viewer-file-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px;
+  }
+  .viewer-file-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 7px;
+    font-size: 13px;
+    color: var(--slate-600);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .viewer-file-item:hover {
+    background: var(--slate-100);
+    color: var(--slate-800);
+  }
+  .viewer-file-item.selected {
+    background: var(--emerald-50);
+    color: var(--emerald-700);
+    font-weight: 500;
+  }
+  .viewer-file-item .file-icon { font-size: 15px; opacity: 0.7; }
+
+  /* Preview pane */
+  .viewer-preview {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .viewer-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--slate-100);
+    background: white;
+  }
+  .viewer-preview-filename {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--slate-700);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .viewer-preview-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: var(--emerald-50);
+    color: var(--emerald-600);
+    border: 1px solid var(--emerald-100);
+  }
+  .viewer-preview-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+  }
+
+  /* Markdown body preview styles */
+  .markdown-preview h1 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--slate-900);
+    margin-bottom: 8px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--slate-100);
+  }
+  .markdown-preview h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--slate-800);
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  .markdown-preview p {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--slate-600);
+    margin-bottom: 12px;
+  }
+  .markdown-preview ul {
+    padding-left: 20px;
+    margin-bottom: 12px;
+  }
+  .markdown-preview li {
+    font-size: 13.5px;
+    color: var(--slate-600);
+    line-height: 1.65;
+    margin-bottom: 4px;
+  }
+  .markdown-preview code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--slate-100);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--emerald-700);
+  }
+  .markdown-preview .meta-block {
+    background: var(--slate-50);
+    border-left: 3px solid var(--emerald-400);
+    padding: 12px 16px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin-bottom: 16px;
+  }
+  .markdown-preview .meta-block p {
+    font-size: 12.5px;
+    color: var(--slate-500);
+    margin-bottom: 2px;
+    font-family: var(--font-mono);
+  }
+
+  /* ═══════════════════════════════════════════
+     DELIVERABLES SECTION (in workflow view)
+     ═══════════════════════════════════════════ */
+  .deliverables-section {
+    padding: 0 16px 16px;
+  }
+  .deliverables-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0;
+    cursor: pointer;
+  }
+  .deliverables-header-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-400);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .deliverables-count {
+    background: rgba(16,185,129,0.15);
+    color: var(--emerald-400);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .deliverables-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .deliverable-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .deliverable-card:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(16,185,129,0.25);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .deliverable-card .del-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .deliverable-card .del-info {
+    min-width: 0;
+  }
+  .deliverable-card .del-name {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--slate-200);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .deliverable-card .del-path {
+    font-size: 11px;
+    color: var(--slate-500);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ═══════════════════════════════════════════
+     ANNOTATION CALLOUTS
+     ═══════════════════════════════════════════ */
+  .annotation {
+    position: absolute;
+    font-size: 11.5px;
+    color: var(--amber-500);
+    background: rgba(245,158,11,0.1);
+    border: 1px dashed rgba(245,158,11,0.35);
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-weight: 500;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 10;
+  }
+  .annotation::before {
+    content: '→ ';
+    opacity: 0.6;
+  }
+
+  /* ═══════════════════════════════════════════
+     FLOW CONNECTOR BETWEEN SCENES
+     ═══════════════════════════════════════════ */
+  .flow-connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0;
+    margin-bottom: 32px;
+  }
+  .flow-connector-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--slate-300);
+  }
+  .flow-connector-line .flow-dots {
+    font-size: 18px;
+    letter-spacing: 4px;
+    line-height: 1;
+  }
+  .flow-connector-line .flow-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate-400);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: var(--slate-100);
+    padding: 3px 12px;
+    border-radius: 10px;
+  }
+
+  /* ═══════════════════════════════════════════
+     STATE COMPARISON ROW
+     ═══════════════════════════════════════════ */
+  .state-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .state-card {
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    text-align: center;
+    transition: var(--transition);
+  }
+  .state-card:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+  }
+  .state-card-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--slate-400);
+    margin-bottom: 12px;
+  }
+  .state-card .action-btn-demo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 500;
+    font-family: var(--font-body);
+    border: 1px solid;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .state-card .state-desc {
+    font-size: 11.5px;
+    color: var(--slate-500);
+    line-height: 1.5;
+  }
+
+  .state-card.s-suggested .action-btn-demo {
+    background: rgba(16,185,129,0.1);
+    color: var(--emerald-600);
+    border-color: rgba(16,185,129,0.3);
+  }
+  .state-card.s-spinning .action-btn-demo {
+    background: rgba(16,185,129,0.1);
+    color: var(--emerald-600);
+    border-color: rgba(16,185,129,0.3);
+    animation: pulse-glow-light 2s ease-in-out infinite;
+  }
+  @keyframes pulse-glow-light {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.15); }
+    50% { box-shadow: 0 0 12px 3px rgba(16,185,129,0.12); }
+  }
+  .state-card.s-spinning .spin-icon {
+    display: inline-block;
+    animation: spin 1.2s linear infinite;
+  }
+  .state-card.s-done .action-btn-demo {
+    background: rgba(16,185,129,0.06);
+    color: var(--emerald-500);
+    border-color: rgba(16,185,129,0.15);
+    opacity: 0.7;
+  }
+  .state-card.s-locked .action-btn-demo {
+    background: var(--slate-50);
+    color: var(--slate-400);
+    border-color: var(--slate-200);
+    opacity: 0.45;
+  }
+
+  /* ═══════════════════════════════════════════
+     RESPONSIVE
+     ═══════════════════════════════════════════ */
+  @media (max-width: 800px) {
+    .state-row { grid-template-columns: repeat(2, 1fr); }
+    .viewer-columns { flex-direction: column; }
+    .viewer-sidebar { width: 100%; max-height: 150px; border-right: none; border-bottom: 1px solid var(--slate-100); }
+    .refine-modal { max-width: 95%; }
+    .deliverable-viewer { max-width: 95%; }
+    .modal-overlay { padding: 20px; min-height: 500px; }
+  }
+</style>
+</head>
+<body>
+<div class="mockup-page">
+
+  <!-- ═══════════════════════════════════════
+       MOCKUP HEADER
+       ═══════════════════════════════════════ -->
+  <header class="mockup-header">
+    <div class="mockup-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      IDEA-025 · CR Mockup v1
+    </div>
+    <h1 class="mockup-title">Refine Idea Action</h1>
+    <p class="mockup-subtitle">Modal window → Agent CLI execution → Workflow status sync → Deliverable preview</p>
+  </header>
+
+  <!-- ═══════════════════════════════════════
+       SCENE 1: ACTION BUTTON STATES
+       ═══════════════════════════════════════ -->
+  <section class="scene">
+    <div class="scene-label">
+      <div class="scene-number">1</div>
+      <div class="scene-title">Action Button States</div>
+    </div>
+    <p class="scene-desc">The "Refine Idea" button transitions through four states across the workflow lifecycle.</p>
+
+    <div class="state-row">
+      <div class="state-card s-suggested">
+        <div class="state-card-label">Suggested</div>
+        <div class="action-btn-demo">✨ Refine Idea</div>
+        <div class="state-desc">Next recommended action.<br>Click to open modal.</div>
+      </div>
+      <div class="state-card s-spinning">
+        <div class="state-card-label">In Progress</div>
+        <div class="action-btn-demo"><span class="spin-icon">⟳</span> Refining…</div>
+        <div class="state-desc">Agent working in console.<br>Pulse glow animation.</div>
+      </div>
+      <div class="state-card s-done">
+        <div class="state-card-label">Done</div>
+        <div class="action-btn-demo">✓ Refine Idea</div>
+        <div class="state-desc">Completed successfully.<br>Deliverables available.</div>
+      </div>
+      <div class="state-card s-locked">
+        <div class="state-card-label">Locked</div>
+        <div class="action-btn-demo">🔒 Refine Idea</div>
+        <div class="state-desc">Prior actions required.<br>Not yet available.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       SCENE 2: WORKFLOW VIEW + MODAL TRIGGER
+       ═══════════════════════════════════════ -->
+  <section class="scene">
+    <div class="scene-label">
+      <div class="scene-number">2</div>
+      <div class="scene-title">Refine Idea Modal</div>
+    </div>
+    <p class="scene-desc">User clicks the suggested "Refine Idea" action → modal opens with instructions and extra input.</p>
+
+    <div class="modal-overlay">
+      <div class="refine-modal">
+        <!-- Header -->
+        <div class="refine-modal-header">
+          <div class="refine-modal-header-left">
+            <div class="refine-modal-icon">✨</div>
+            <div class="refine-modal-title-group">
+              <div class="refine-modal-title">Refine Idea</div>
+              <div class="refine-modal-meta">Powered by AI agent via CLI</div>
+            </div>
+          </div>
+          <button class="refine-modal-close">×</button>
+        </div>
+
+        <!-- Body -->
+        <div class="refine-modal-body">
+          <!-- Workflow context -->
+          <div class="context-bar">
+            <div class="context-item">
+              <span class="context-icon">📂</span>
+              <span>Workflow:</span>
+              <span class="context-value">workflow-hello</span>
+            </div>
+            <div class="context-separator"></div>
+            <div class="context-item">
+              <span class="context-icon">💡</span>
+              <span>Idea:</span>
+              <span class="context-value">025. CR-Refine Idea Action</span>
+            </div>
+          </div>
+
+          <!-- Refinement instructions (readonly) -->
+          <div class="refine-section">
+            <div class="refine-section-label">
+              <span class="label-icon">📋</span>
+              Refinement Instructions
+              <span class="refine-section-hint">Read-only</span>
+            </div>
+            <div class="instructions-display">
+<span class="instruction-highlight">refine</span> the idea <span class="instruction-highlight">x-ipe-docs/ideas/025. CR-Refine Idea Action/new idea.md</span> with <span class="instruction-highlight">ideation skill</span>
+            </div>
+          </div>
+
+          <!-- Extra instructions -->
+          <div class="refine-section">
+            <div class="refine-section-label">
+              <span class="label-icon">✏️</span>
+              Extra Instructions
+              <span class="refine-section-hint">Optional</span>
+            </div>
+            <textarea class="extra-textarea" placeholder="Add any additional context or guidance for the AI agent…&#10;&#10;e.g., &quot;Focus on error handling patterns&quot; or &quot;Consider mobile-first approach&quot;"></textarea>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="refine-modal-footer">
+          <div class="footer-hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            Opens a console session and runs the agent CLI
+          </div>
+          <div class="footer-actions">
+            <button class="btn btn-cancel">Cancel</button>
+            <button class="btn btn-copilot">
+              <span class="copilot-sparkle">✦</span>
+              Copilot
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Flow connector -->
+  <div class="flow-connector">
+    <div class="flow-connector-line">
+      <span class="flow-dots">⋮</span>
+      <span class="flow-label">Agent executes in console</span>
+      <span class="flow-dots">⋮</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SCENE 3: WORKFLOW VIEW - POST REFINEMENT
+       ═══════════════════════════════════════ -->
+  <section class="scene">
+    <div class="scene-label">
+      <div class="scene-number">3</div>
+      <div class="scene-title">Post-Refinement Workflow View</div>
+    </div>
+    <p class="scene-desc">After agent completes → action shows ✓ done, deliverables appear, next action is suggested.</p>
+
+    <div class="workflow-backdrop">
+      <div class="workflow-backdrop-content" style="position: relative;">
+        <!-- Stage ribbon -->
+        <div class="stage-ribbon">
+          <div class="stage-pill active">
+            <span>💡</span> Ideation
+          </div>
+          <span class="stage-chevron">›</span>
+          <div class="stage-pill inactive">
+            <span>📋</span> Requirement
+          </div>
+          <span class="stage-chevron">›</span>
+          <div class="stage-pill inactive">
+            <span>⚙️</span> Implement
+          </div>
+          <span class="stage-chevron">›</span>
+          <div class="stage-pill inactive">
+            <span>✅</span> Validation
+          </div>
+          <span class="stage-chevron">›</span>
+          <div class="stage-pill inactive">
+            <span>💬</span> Feedback
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="actions-row">
+          <button class="action-btn done">
+            <span class="action-icon">✓</span> Compose Idea
+          </button>
+          <button class="action-btn done">
+            <span class="action-icon">✓</span> Refine Idea
+          </button>
+          <button class="action-btn suggested">
+            <span class="action-icon">🎨</span> Design Mockup
+          </button>
+          <button class="action-btn normal">
+            <span class="action-icon">🏗️</span> Architecture
+          </button>
+          <button class="action-btn normal">
+            <span class="action-icon">🔍</span> UIUX Reference
+          </button>
+        </div>
+
+        <!-- Deliverables -->
+        <div class="deliverables-section">
+          <div class="deliverables-header">
+            <span class="deliverables-header-text">Deliverables</span>
+            <span class="deliverables-count">3</span>
+          </div>
+          <div class="deliverables-grid">
+            <div class="deliverable-card">
+              <span class="del-icon">💡</span>
+              <div class="del-info">
+                <div class="del-name">new idea.md</div>
+                <div class="del-path">ideas/025/new idea.md</div>
+              </div>
+            </div>
+            <div class="deliverable-card" style="border-color: rgba(16,185,129,0.3);">
+              <span class="del-icon">📁</span>
+              <div class="del-info">
+                <div class="del-name">refined-idea/</div>
+                <div class="del-path">ideas/025/refined-idea/</div>
+              </div>
+            </div>
+            <div class="deliverable-card">
+              <span class="del-icon">💡</span>
+              <div class="del-info">
+                <div class="del-name">idea-summary-v1.md</div>
+                <div class="del-path">ideas/025/refined-idea/</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Flow connector -->
+  <div class="flow-connector">
+    <div class="flow-connector-line">
+      <span class="flow-dots">⋮</span>
+      <span class="flow-label">Click deliverable folder</span>
+      <span class="flow-dots">⋮</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SCENE 4: DELIVERABLE VIEWER MODAL
+       ═══════════════════════════════════════ -->
+  <section class="scene">
+    <div class="scene-label">
+      <div class="scene-number">4</div>
+      <div class="scene-title">Deliverable Viewer</div>
+    </div>
+    <p class="scene-desc">Clicking the refined-idea folder opens an inline preview modal — reuses the existing idea file viewer pattern.</p>
+
+    <div class="modal-overlay" style="min-height: 540px;">
+      <div class="deliverable-viewer">
+        <!-- Header -->
+        <div class="refine-modal-header">
+          <div class="refine-modal-header-left">
+            <div class="refine-modal-icon" style="background: linear-gradient(135deg, var(--blue-50), var(--emerald-50));">📁</div>
+            <div class="refine-modal-title-group">
+              <div class="refine-modal-title">refined-idea/</div>
+              <div class="refine-modal-meta">025. CR-Refine Idea Action</div>
+            </div>
+          </div>
+          <button class="refine-modal-close">×</button>
+        </div>
+
+        <!-- Columns layout -->
+        <div class="viewer-columns">
+          <!-- File tree -->
+          <div class="viewer-sidebar">
+            <div class="viewer-sidebar-header">Files (3)</div>
+            <div class="viewer-file-list">
+              <div class="viewer-file-item selected">
+                <span class="file-icon">📄</span>
+                idea-summary-v1.md
+              </div>
+              <div class="viewer-file-item">
+                <span class="file-icon">📄</span>
+                brainstorming-notes.md
+              </div>
+              <div class="viewer-file-item">
+                <span class="file-icon">📄</span>
+                research-principles.md
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview -->
+          <div class="viewer-preview">
+            <div class="viewer-preview-header">
+              <div class="viewer-preview-filename">
+                📄 idea-summary-v1.md
+                <span class="viewer-preview-badge">Refined</span>
+              </div>
+            </div>
+            <div class="viewer-preview-content">
+              <div class="markdown-preview">
+                <h1>Idea Summary</h1>
+                <div class="meta-block">
+                  <p>> Idea ID: IDEA-025</p>
+                  <p>> Folder: 025. CR-Refine Idea Action</p>
+                  <p>> Version: v1</p>
+                  <p>> Status: Refined</p>
+                </div>
+
+                <h2>Overview</h2>
+                <p>A Change Request to implement the <strong>"Refine Idea" workflow action</strong> end-to-end — from the user clicking the action button in the workflow UI, through agent-driven refinement via CLI in an integrated terminal session, to automatic workflow status updates and deliverable display.</p>
+
+                <h2>Key Features</h2>
+                <ul>
+                  <li><strong>Refine Idea Modal</strong> — readonly instructions + extra input + Copilot button</li>
+                  <li><strong>Console Session Management</strong> — find/create available terminal session</li>
+                  <li><strong>Skill Updates</strong> — accept <code>extra_instructions</code>, output to <code>refined-idea/</code></li>
+                  <li><strong>Workflow Manager MCP</strong> — call <code>update_workflow_action</code> in DoD</li>
+                  <li><strong>Deliverable Viewer</strong> — inline markdown preview of refined output</li>
+                </ul>
+
+                <h2>Success Criteria</h2>
+                <ul>
+                  <li>☐ Modal opens with readonly instructions from copilot-prompt.json</li>
+                  <li>☐ Agent CLI command typed into console session</li>
+                  <li>☐ Refined output saved to <code>{idea_folder}/refined-idea/</code></li>
+                  <li>☐ Workflow JSON updated via MCP</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
