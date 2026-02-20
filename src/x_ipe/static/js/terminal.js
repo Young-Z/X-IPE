@@ -578,6 +578,17 @@
                 this._updateStatus();
             });
 
+            socket.on('session_renamed', data => {
+                if (data && data.session_id && data.new_name) {
+                    const key = this._findKeyBySessionId(data.session_id);
+                    if (key) {
+                        const session = this.sessions.get(key);
+                        if (session) session.name = data.new_name;
+                        this._updateTabLabel(key, data.new_name);
+                    }
+                }
+            });
+
             return socket;
         }
 
@@ -663,6 +674,54 @@
             const s = this._getActiveSession();
             if (!s) return;
             this._sendWithTypingEffectNoEnter(s.key, this._buildCopilotCmd(promptCommand));
+        }
+
+        /**
+         * Find the first idle session via backend WebSocket call.
+         * @returns {Promise<{sessionId: string, key: string}|null>}
+         */
+        async findIdleSession() {
+            return new Promise((resolve) => {
+                this.socket.emit('find_idle_session', {}, (response) => {
+                    if (response && response.session_id) {
+                        const key = this._findKeyBySessionId(response.session_id);
+                        resolve(key ? { sessionId: response.session_id, key } : null);
+                    } else {
+                        resolve(null);
+                    }
+                });
+            });
+        }
+
+        /**
+         * Claim a session for a workflow action (rename it).
+         * @returns {Promise<boolean>}
+         */
+        async claimSessionForAction(sessionId, workflowName, actionName) {
+            return new Promise((resolve) => {
+                this.socket.emit('claim_session', {
+                    session_id: sessionId,
+                    workflow_name: workflowName,
+                    action_name: actionName
+                }, (response) => {
+                    resolve(response && response.success);
+                });
+            });
+        }
+
+        _findKeyBySessionId(sessionId) {
+            for (const [key, session] of this.sessions) {
+                if (session.sessionId === sessionId) return key;
+            }
+            return null;
+        }
+
+        _updateTabLabel(key, name) {
+            const bar = document.querySelector(`.session-bar[data-session-key="${key}"]`);
+            if (bar) {
+                const nameEl = bar.querySelector('.session-name');
+                if (nameEl) nameEl.textContent = name;
+            }
         }
 
         sendCopilotRefineCommand(filePath) { this._sendCopilotWithPrompt(`refine the idea ${filePath}`); }

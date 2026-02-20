@@ -7,7 +7,9 @@ SessionManager: Session lifecycle management
 PTYSession: PTY process wrapper
 """
 import os
+import re
 import threading
+import time
 import uuid
 from collections import deque
 from datetime import datetime
@@ -20,6 +22,17 @@ from x_ipe.tracing import x_ipe_tracing
 BUFFER_MAX_CHARS = 10240  # 10KB limit for output buffer
 SESSION_TIMEOUT = 3600   # 1 hour in seconds
 CLEANUP_INTERVAL = 300   # 5 minutes for cleanup task
+
+# ANSI escape sequence pattern for stripping terminal control codes
+_ANSI_RE = re.compile(r'\x1b\[[0-9;]*[a-zA-Z]|\x1b\][^\x07]*\x07|\x1b[()][AB012]')
+
+# Shell prompt suffixes used to detect idle state
+SHELL_PROMPT_SUFFIXES = ('$ ', '% ', '> ', '# ')
+
+
+def strip_ansi(text: str) -> str:
+    """Remove ANSI escape sequences from terminal output."""
+    return _ANSI_RE.sub('', text)
 
 
 class OutputBuffer:
@@ -64,6 +77,7 @@ class PersistentSession:
     
     def __init__(self, session_id: str):
         self.session_id = session_id
+        self.name: str = session_id
         self.pty_session: Optional[Any] = None
         self.output_buffer = OutputBuffer()
         self.socket_sid: Optional[str] = None
@@ -71,6 +85,7 @@ class PersistentSession:
         self.disconnect_time: Optional[datetime] = None
         self.state = 'disconnected'
         self.created_at = datetime.now()
+        self._last_output_time: float = 0.0
         self._lock = threading.Lock()
     
     @x_ipe_tracing()
@@ -79,6 +94,7 @@ class PersistentSession:
         def buffered_emit(data: str) -> None:
             # Always buffer output
             self.output_buffer.append(data)
+            self._last_output_time = time.time()
             # Emit under lock to avoid TOCTOU race with detach()
             with self._lock:
                 if self.emit_callback and self.state == 'connected':
@@ -135,6 +151,20 @@ class PersistentSession:
         elapsed = datetime.now() - self.disconnect_time
         return elapsed.total_seconds() > timeout_seconds
     
+    @x_ipe_tracing()
+    def is_idle(self, idle_timeout: float = 2.0) -> bool:
+        """Check if session is at a shell prompt and not producing output."""
+        if self.state != 'connected':
+            return False
+        contents = self.output_buffer.get_contents()
+        if not contents:
+            return False
+        if time.time() - self._last_output_time < idle_timeout:
+            return False
+        lines = contents.rstrip('\n\r').split('\n')
+        last_line = strip_ansi(lines[-1]) if lines else ''
+        return any(last_line.endswith(s) for s in SHELL_PROMPT_SUFFIXES)
+
     @x_ipe_tracing()
     def close(self) -> None:
         """Close session and cleanup resources."""
@@ -227,6 +257,25 @@ class SessionManager:
                 self.remove_session(session_id)
                 count += 1
         return count
+    
+    @x_ipe_tracing()
+    def find_idle_session(self) -> Optional[PersistentSession]:
+        """Find the first idle connected session."""
+        with self._lock:
+            for session in self.sessions.values():
+                if session.is_idle():
+                    return session
+        return None
+    
+    @x_ipe_tracing()
+    def claim_session_for_action(self, session_id: str, wf_name: str, action_name: str) -> bool:
+        """Rename a session for a workflow action. Returns True if successful."""
+        with self._lock:
+            session = self.sessions.get(session_id)
+            if not session or session.state != 'connected':
+                return False
+            session.name = f"wf-{wf_name}-{action_name}"
+            return True
     
     @x_ipe_tracing()
     def start_cleanup_task(self) -> None:

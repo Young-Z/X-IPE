@@ -161,12 +161,12 @@ class TestFindIdleSession:
         import threading
         manager = SessionManager.__new__(SessionManager)
         manager._lock = threading.Lock()
-        manager._sessions = {}
+        manager.sessions = {}
         for i, is_idle in enumerate(sessions_idle_states):
             session = MagicMock()
             session.session_id = f"session-{i}"
             session.is_idle.return_value = is_idle
-            manager._sessions[f"session-{i}"] = session
+            manager.sessions[f"session-{i}"] = session
         return manager
 
     def test_find_returns_first_idle(self):
@@ -219,7 +219,7 @@ class TestClaimSessionForAction:
         session.session_id = session_id
         session.state = state
         session.name = 'Session 1'
-        manager._sessions = {session_id: session}
+        manager.sessions = {session_id: session}
         return manager, session
 
     def test_claim_renames_session(self):

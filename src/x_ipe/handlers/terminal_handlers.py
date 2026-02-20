@@ -162,3 +162,34 @@ def register_terminal_handlers(socketio):
             socketio.emit('sessions_destroyed', {'count': count}, room=sid)
         except Exception as e:
             print(f"[Terminal] Error in destroy_sessions handler: {e}")
+    
+    @socketio.on('find_idle_session')
+    @x_ipe_tracing()
+    def handle_find_idle_session(data=None):
+        """Find the first idle session and return its ID."""
+        try:
+            session = session_manager.find_idle_session()
+            return {'session_id': session.session_id} if session else None
+        except Exception as e:
+            print(f"[Terminal] Error in find_idle_session handler: {e}")
+            return None
+    
+    @socketio.on('claim_session')
+    @x_ipe_tracing()
+    def handle_claim_session(data):
+        """Claim a session for a workflow action (rename it)."""
+        try:
+            session_id = data.get('session_id')
+            wf_name = data.get('workflow_name', '')
+            action_name = data.get('action_name', '')
+            success = session_manager.claim_session_for_action(session_id, wf_name, action_name)
+            if success:
+                session = session_manager.get_session(session_id)
+                socketio.emit('session_renamed', {
+                    'session_id': session_id,
+                    'new_name': session.name
+                })
+            return {'success': success}
+        except Exception as e:
+            print(f"[Terminal] Error in claim_session handler: {e}")
+            return {'success': False}
