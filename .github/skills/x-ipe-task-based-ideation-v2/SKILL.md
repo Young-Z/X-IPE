@@ -159,7 +159,10 @@ BLOCKING: Step 10 - Human MUST approve idea summary before proceeding.
       2. Wait for human response before proceeding
       3. Build on previous answers
       4. Challenge assumptions constructively
-      5. When the user describes something visual (UI layouts, flows, system structure), proactively generate visual artifacts to enrich the brainstorming -- select the most appropriate enabled tool from step 1's tool list for the content type
+      5. IF extra_instructions is provided and non-empty:
+         - Incorporate extra_instructions as additional context/guidance for the refinement
+         - Treat as user preference that supplements (not replaces) the idea content
+      6. When the user describes something visual (UI layouts, flows, system structure), proactively generate visual artifacts to enrich the brainstorming -- select the most appropriate enabled tool from step 1's tool list for the content type
     </action>
     <constraints>
       - BLOCKING: Continue until idea is well-defined
@@ -184,10 +187,14 @@ BLOCKING: Step 10 - Human MUST approve idea summary before proceeding.
     <action>
       1. Synthesize outputs from steps 3, 4, 5 (summary, brainstorming, research)
       2. Determine version number (auto-increment)
-      3. Create draft using template from templates/idea-summary.md
-      4. RECOMMENDED: Use enabled tools from step 1's tool list to create rich visual content (diagrams, infographics, architecture views) -- select the most appropriate tool for each content type
-      5. If no tools are enabled: use standard markdown (bullet lists, tables)
-      6. Link to artifacts created during brainstorming
+      3. IF invoked from Action Execution Modal (workflow context):
+         a. Clear {idea_folder}/refined-idea/ folder if it exists (overwrite mode)
+         b. Write all refined output files to {idea_folder}/refined-idea/
+         ELSE: Use standard output path ({idea_folder}/idea-summary-vN.md)
+      4. Create draft using template from templates/idea-summary.md
+      5. RECOMMENDED: Use enabled tools from step 1's tool list to create rich visual content (diagrams, infographics, architecture views) -- select the most appropriate tool for each content type
+      6. If no tools are enabled: use standard markdown (bullet lists, tables)
+      7. Link to artifacts created during brainstorming
     </action>
     <constraints>
       - CRITICAL: Only use tools that appear in the enabled tool list from step 1 -- if a tool is not in the enabled list, do NOT use it
@@ -288,7 +295,11 @@ task_completion_output:
   require_human_review: yes
   task_output_links:
     - "x-ipe-docs/ideas/{folder}/idea-summary-vN.md"
+    - "x-ipe-docs/ideas/{folder}/refined-idea/"
     - "x-ipe-docs/ideas/{folder}/mockups/mockup-vN.html"
+  # Dynamic attributes — include workflow_action when invoked from Action Execution Modal
+  workflow_action: "refine_idea"        # triggers Step 5 workflow status verification
+  workflow_name: "{from context}"       # used to locate workflow JSON
   idea_id: "IDEA-XXX"
   idea_status: Refined
   idea_version: "vN"
@@ -374,6 +385,10 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
     <name>Principles Researched</name>
     <verification>Common principles researched if topic is established</verification>
     <step_output>common_principles[], references[]</step_output>
+  </checkpoint>
+  <checkpoint required="if-applicable">
+    <name>Workflow Action Status Updated</name>
+    <verification>If invoked from Action Execution Modal, called update_workflow_action MCP with status "done" and deliverables list</verification>
   </checkpoint>
 </definition_of_done>
 ```
