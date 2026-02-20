@@ -184,6 +184,12 @@ The user wants to:
 - Backend SessionManager already supports N sessions; raise MAX_TERMINALS to 10
 - Must preserve WebSocket reconnection and buffer replay behavior
 
+> **⚠️ CR Impact Note** (added 2026-02-20, ref: EPIC-038)
+> - **Change:** Add session idle detection (`is_idle()`) to PersistentSession — detects if a session is at a shell prompt (not running a command or inside vi/ping/etc.) so workflow actions can reuse available sessions instead of always creating new ones
+> - **Affected FRs:** (new capability, no existing FR)
+> - **Action Required:** FEATURE-029-A specification update needed to add `is_idle()` method and session availability API
+> - **New Feature Ref:** EPIC-038 — see requirement-details-part-11.md
+
 ---
 
 ### FEATURE-029-B: Session Actions

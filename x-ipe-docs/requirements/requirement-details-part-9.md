@@ -364,6 +364,12 @@ The user wants:
 - Action execution does NOT auto-press Enter — user confirms
 - Stage gating queries Workflow Manager API for allowed actions
 
+> **⚠️ CR Impact Note** (added 2026-02-20, ref: EPIC-038)
+> - **Change:** CLI Agent actions now open a modal first (with readonly instructions from copilot-prompt.json + editable extra instructions, max 500 chars) before triggering the console session. This is a reusable pattern for all CLI Agent actions, not just Refine Idea.
+> - **Affected FRs:** FR-036.13 (CLI Agent Action Execution)
+> - **Action Required:** FEATURE-036-C specification update needed to add modal-before-CLI pattern, session idle detection (via `is_idle()`), and agent tool auto-detection from config
+> - **New Feature Ref:** EPIC-038 — see requirement-details-part-11.md
+
 ---
 
 ### FEATURE-036-D: Feature Lanes & Dependencies
@@ -422,6 +428,12 @@ The user wants:
 - Polling uses `setInterval` with change detection (compare JSON hash or `last_activity` timestamp)
 - Auto-archive runs on app startup and periodically (check `last_activity` vs current time)
 - Deliverables Resolver is a backend endpoint, not frontend file system access
+
+> **⚠️ CR Impact Note** (added 2026-02-20, ref: EPIC-038)
+> - **Change:** Deliverable viewer enhanced from basic artifact links to file-tree listing with clickable files and inline markdown preview for folder-type deliverables
+> - **Affected FRs:** FR-036.16 (Deliverables Section), FR-036.23 (Deliverables Resolver)
+> - **Action Required:** FEATURE-036-E specification update needed to add file-tree browsing and inline markdown preview capability for deliverable folders
+> - **New Feature Ref:** EPIC-038 — see requirement-details-part-11.md
 
 ---
 
