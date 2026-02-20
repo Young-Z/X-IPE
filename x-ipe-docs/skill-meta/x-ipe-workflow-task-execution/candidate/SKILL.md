@@ -327,7 +327,15 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
          OPTIONAL: IF auto_push = true:
            CALL x-ipe-tool-git-version-control skill: operation=push
 
-      3. Human Review Check:
+      3. Workflow Status Verification:
+         IF completed skill's task_completion_output contains workflow_action field:
+           a. Extract workflow_name and workflow_action from output
+           b. READ instance/workflows/workflow-{workflow_name}.json
+           c. CHECK that actions.{workflow_action}.status is NOT "pending"
+           d. IF status is "pending" → FLAG task as incomplete: "Workflow action '{workflow_action}' status not updated. Call update_workflow_action MCP tool before completing."
+           e. IF workflow JSON file not found → WARN and skip (non-blocking)
+
+      4. Human Review Check:
          IF require_human_review = true AND auto_proceed = false AND global_auto_proceed = false:
            → Output summary and STOP for human review
          ELSE:

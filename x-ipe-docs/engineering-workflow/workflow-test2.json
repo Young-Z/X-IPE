@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "name": "hello",
-  "created": "2026-02-17T15:08:47.711533+00:00",
-  "last_activity": "2026-02-20T05:54:36.137228+00:00",
+  "name": "test2",
+  "created": "2026-02-19T10:01:27.601274+00:00",
+  "last_activity": "2026-02-19T13:01:36.379298+00:00",
   "idea_folder": null,
   "current_stage": "ideation",
   "stages": {
@@ -10,11 +10,8 @@
       "status": "in_progress",
       "actions": {
         "compose_idea": {
-          "status": "done",
-          "deliverables": [
-            "x-ipe-docs/ideas/wf-001-test-the-workflow/idea.md",
-            "x-ipe-docs/ideas/wf-001-test-the-workflow"
-          ]
+          "status": "pending",
+          "deliverables": []
         },
         "reference_uiux": {
           "status": "pending",

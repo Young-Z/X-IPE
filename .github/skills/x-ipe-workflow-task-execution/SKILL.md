@@ -54,7 +54,7 @@ input:
 
   # Git strategy (read from .x-ipe.yaml at workflow start)
   git:
-    strategy: "main-branch-only | dev-session-based"  # from .x-ipe.yaml git.strategy (default: main-branch-only)
+    strategy: "main-branch-only | dev-session-based"  # from .x-ipe.yaml git.strategy (default: dev-session-based)
     main_branch: "{auto-detected}"                     # auto-detected from git, overridable via .x-ipe.yaml git.main-branch
 
   # Closing fields (set by category skill)
@@ -64,7 +64,7 @@ input:
 
 ### Git Strategy
 
-BLOCKING: At the start of every workflow execution, read `.x-ipe.yaml` from project root to determine `git.strategy` and `git.main-branch`. If `.x-ipe.yaml` does not exist or `git.strategy` is not specified, default to `main-branch-only`. If `git.main-branch` is not specified, auto-detect the main branch from git (see Step 2 procedure). Pass these values to all task-based skills that interact with git.
+BLOCKING: At the start of every workflow execution, read `.x-ipe.yaml` from project root to determine `git.strategy` and `git.main-branch`. If `.x-ipe.yaml` does not exist or `git.strategy` is not specified, default to `dev-session-based`. If `git.main-branch` is not specified, auto-detect the main branch from git (see Step 2 procedure). Pass these values to all task-based skills that interact with git.
 
 | Strategy | Branch Model | PR Required? | Description |
 |----------|-------------|--------------|-------------|
@@ -232,7 +232,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
 
       6. Read git strategy from .x-ipe.yaml:
          → Read .x-ipe.yaml from project root (if file exists)
-         → Set git.strategy = git.strategy (default: "main-branch-only" if not specified or file missing)
+         → Set git.strategy = git.strategy (default: "dev-session-based" if not specified or file missing)
          → Set git.main_branch:
            IF .x-ipe.yaml specifies git.main-branch → use that value
            ELSE → auto-detect: run `git remote show origin` to find HEAD branch,
@@ -327,7 +327,15 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
          OPTIONAL: IF auto_push = true:
            CALL x-ipe-tool-git-version-control skill: operation=push
 
-      3. Human Review Check:
+      3. Workflow Status Verification:
+         IF completed skill's task_completion_output contains workflow_action field:
+           a. Extract workflow_name and workflow_action from output
+           b. READ instance/workflows/workflow-{workflow_name}.json
+           c. CHECK that actions.{workflow_action}.status is NOT "pending"
+           d. IF status is "pending" → FLAG task as incomplete: "Workflow action '{workflow_action}' status not updated. Call update_workflow_action MCP tool before completing."
+           e. IF workflow JSON file not found → WARN and skip (non-blocking)
+
+      4. Human Review Check:
          IF require_human_review = true AND auto_proceed = false AND global_auto_proceed = false:
            → Output summary and STOP for human review
          ELSE:
