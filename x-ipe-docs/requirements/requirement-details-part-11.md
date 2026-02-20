@@ -174,15 +174,141 @@ Follow the same pattern as Compose Idea (EPIC-037):
 |---------------------|-------------|
 | Refine Idea Modal (4 scenes: action button states, modal dialog, post-refinement workflow, deliverable viewer) | [refine-idea-modal-v1.html](EPIC-038/mockups/refine-idea-modal-v1.html) |
 
-### Feature List (Proposed Breakdown — to be finalized in Feature Breakdown)
+### Feature List
 
-| Feature ID | Epic | Feature Name | Version | Brief Description | Dependencies |
-|-----------|------|--------------|---------|-------------------|-------------|
-| FEATURE-038-A | EPIC-038 | Action Execution Modal | v1.0 | Reusable modal for CLI Agent actions with instructions display, extra input, and Copilot execution button. CR on FEATURE-036-C. | FEATURE-036-C |
-| FEATURE-038-B | EPIC-038 | Session Idle Detection | v1.0 | Add `is_idle()` to PersistentSession and `find_idle_session()` to SessionManager. CR on FEATURE-029-A. | FEATURE-029-A |
-| FEATURE-038-C | EPIC-038 | Enhanced Deliverable Viewer | v1.0 | File-tree browsing and inline markdown preview for folder-type deliverables. CR on FEATURE-036-E. | FEATURE-036-E |
-| FEATURE-038-D | EPIC-038 | Refinement Skill Integration | v1.0 | Update ideation skill for extra_instructions, refined-idea/ output, and MCP workflow update. | FEATURE-038-A, FEATURE-038-B |
-| FEATURE-038-E | EPIC-038 | Execution Skill DoD Update | v1.0 | Add workflow status verification checkpoint to x-ipe-workflow-task-execution. | - |
+| Feature ID | Epic ID | Feature Name | Version | Brief Description | Dependencies |
+|-----------|---------|--------------|---------|-------------------|-------------|
+| FEATURE-038-A | EPIC-038 | Action Execution Modal | v1.0 | Reusable modal for CLI Agent actions: readonly instructions from copilot-prompt.json, extra instructions textarea (500 char), Copilot button triggers console session, agent tool auto-detect from .x-ipe.yaml. CR on FEATURE-036-C. | FEATURE-036-C |
+| FEATURE-038-B | EPIC-038 | Session Idle Detection | v1.0 | Add `is_idle()` to PersistentSession (shell-prompt detection, not in CLI tool) and `find_idle_session()` to SessionManager. Session rename to wf-{name}-{action}. CR on FEATURE-029-A. | FEATURE-029-A |
+| FEATURE-038-C | EPIC-038 | Enhanced Deliverable Viewer | v1.0 | Folder-type deliverables render as file-tree with clickable files and inline markdown/text preview. Path-scoped, reuses existing file API. CR on FEATURE-036-E. | FEATURE-036-E |
+| FEATURE-038-D | EPIC-038 | Refinement Skill Integration | v1.0 | Update ideation skill: accept extra_instructions param, output to refined-idea/ (overwrite mode), call update_workflow_action MCP in DoD. | FEATURE-038-A, FEATURE-038-B |
+| FEATURE-038-E | EPIC-038 | Execution Skill DoD Update | v1.0 | Add workflow status verification checkpoint to x-ipe-workflow-task-execution Step 5: verify update_workflow_action was called if skill declares workflow interaction. | None |
+
+### Feature Details
+
+#### FEATURE-038-A: Action Execution Modal
+
+**Version:** v1.0
+**Brief Description:** A reusable modal dialog that opens when any CLI Agent workflow action is clicked. Shows readonly instructions loaded from `copilot-prompt.json` (keyed by action ID), an editable extra-instructions textarea (ephemeral, max 500 chars with counter), and a "Copilot" button that triggers the console session + agent execution flow. Agent tool auto-detected from `.x-ipe.yaml`. Includes spinner/pulse on action button during execution and status refresh via agent → MCP → workflow-manager → UI chain. Follows `compose-idea-modal.js` lifecycle pattern. This is a CR on FEATURE-036-C.
+
+**Acceptance Criteria:**
+- [ ] AC-038.1: Clicking a CLI Agent action button opens the Action Execution Modal
+- [ ] AC-038.2: Modal title shows the action name (e.g., "Refine Idea")
+- [ ] AC-038.3: Readonly instructions textarea populated from `copilot-prompt.json` by action ID
+- [ ] AC-038.4: If action ID missing from config, error toast shown and Copilot button disabled
+- [ ] AC-038.5: Extra instructions textarea is editable, max 500 characters with live counter
+- [ ] AC-038.6: "Copilot" button triggers: find idle session → rename → construct CLI command → type into session
+- [ ] AC-038.7: Agent CLI tool auto-detected from `.x-ipe.yaml` configuration
+- [ ] AC-038.8: Action button shows spinner/pulse CSS animation when status is `in_progress`
+- [ ] AC-038.9: Spinner is non-blocking — user can interact with rest of UI
+- [ ] AC-038.10: Status refresh follows agent → MCP → workflow-manager → UI chain (same as Compose Idea)
+- [ ] AC-038.11: After status transitions to `done`, deliverables section shows output artifacts
+- [ ] AC-038.12: Modal can be re-opened while agent is running (shows "in progress" state)
+
+**Dependencies:**
+- FEATURE-036-C (Stage Ribbon & Action Execution — base action button mechanics)
+
+**Technical Considerations:**
+- Reuse `compose-idea-modal.js` lifecycle pattern (open → populate → submit → close)
+- `copilot-prompt.json` served from `src/x_ipe/resources/config/copilot-prompt.json` at runtime
+- Agent CLI command does NOT auto-press Enter — user confirms (existing pattern)
+
+**Linked Mockups:**
+- [refine-idea-modal-v1.html](EPIC-038/mockups/refine-idea-modal-v1.html) — Scene 1 (action button states), Scene 2 (modal dialog)
+
+---
+
+#### FEATURE-038-B: Session Idle Detection
+
+**Version:** v1.0
+**Brief Description:** Add session idle detection to the console session management. `PersistentSession` gains `is_idle()` method that checks if the session is at a shell prompt (not running a command, not in vi/ping/less/etc). `SessionManager` gains `find_idle_session()` that iterates and returns first idle session. Found sessions are renamed to `wf-{workflow_name}-{action_name}`. Handles edge cases: no idle session found, session limit reached. This is a CR on FEATURE-029-A.
+
+**Acceptance Criteria:**
+- [ ] AC-038.13: `PersistentSession.is_idle()` returns true when session is at shell prompt
+- [ ] AC-038.14: `is_idle()` returns false when session is executing a command or in a CLI tool
+- [ ] AC-038.15: Shell prompt detection: last output line matches known patterns (`$ `, `% `, `> `) + configurable idle timeout
+- [ ] AC-038.16: `SessionManager.find_idle_session()` returns first idle session or null
+- [ ] AC-038.17: Found idle session is renamed to `wf-{workflow_name}-{action_name}`
+- [ ] AC-038.18: If no idle session and limit not reached, new session created with action name
+- [ ] AC-038.19: If no idle session and limit reached (10/10), error toast: "No available sessions"
+- [ ] AC-038.20: Idle detection responds within 100ms (no blocking I/O)
+
+**Dependencies:**
+- FEATURE-029-A (Session Explorer Core — session management infrastructure)
+
+**Technical Considerations:**
+- Detection based on output buffer analysis — no backend API changes needed
+- Configurable prompt patterns via `.x-ipe.yaml` or hardcoded defaults
+- Must not interfere with existing session switching/management
+
+---
+
+#### FEATURE-038-C: Enhanced Deliverable Viewer
+
+**Version:** v1.0
+**Brief Description:** Extend the deliverables section to support folder-type deliverables. When a deliverable path ends with `/`, render an expandable file-tree listing. Clicking a file opens inline preview: markdown rendered via marked.js, text shown as-is. Tree and preview scoped to current idea/requirement folder (no path traversal). Reuses existing `GET /api/ideas/file` endpoint pattern. This is a CR on FEATURE-036-E.
+
+**Acceptance Criteria:**
+- [ ] AC-038.21: Deliverables section detects folder-type deliverables (path ending with `/`)
+- [ ] AC-038.22: Folder deliverables render as expandable file-tree
+- [ ] AC-038.23: Clicking a file in tree opens inline preview (markdown rendered, text as-is)
+- [ ] AC-038.24: File-tree and preview scoped to current folder only (no path traversal)
+- [ ] AC-038.25: File-tree handles up to 50 files per folder without performance degradation
+- [ ] AC-038.26: File content fetched via existing `GET /api/ideas/file` endpoint pattern
+
+**Dependencies:**
+- FEATURE-036-E (Deliverables, Polling & Lifecycle — base deliverables section)
+
+**Technical Considerations:**
+- File-tree component can be built with simple nested `<ul>` and CSS toggle
+- Markdown rendering reuses marked.js (already in project for FEATURE-037-B)
+- Backend needs a folder listing endpoint (or extend existing file endpoint)
+
+**Linked Mockups:**
+- [refine-idea-modal-v1.html](EPIC-038/mockups/refine-idea-modal-v1.html) — Scene 4 (deliverable viewer)
+
+---
+
+#### FEATURE-038-D: Refinement Skill Integration
+
+**Version:** v1.0
+**Brief Description:** Update the ideation/refinement skill to work with the new action execution flow. Skill accepts `extra_instructions` input parameter, outputs refined idea to `{idea_folder}/refined-idea/` subfolder (overwrite mode — clears folder on each run), and calls `update_workflow_action` MCP tool in its completion step with action=refine_idea, status=done, deliverables list.
+
+**Acceptance Criteria:**
+- [ ] AC-038.27: Ideation skill accepts `extra_instructions` as optional input parameter
+- [ ] AC-038.28: Skill outputs to `{idea_folder}/refined-idea/` subfolder
+- [ ] AC-038.29: On each execution, `refined-idea/` folder is cleared before writing (overwrite mode)
+- [ ] AC-038.30: Skill calls `update_workflow_action(workflow_name, "refine_idea", "done", deliverables=[...])` in completion step
+- [ ] AC-038.31: Skill outputs MCP response status for verification
+
+**Dependencies:**
+- FEATURE-038-A (Action Execution Modal — provides the execution trigger)
+- FEATURE-038-B (Session Idle Detection — provides session management)
+
+**Technical Considerations:**
+- This is a skill update, not a code implementation — modifies `.github/skills/` files
+- The `refined-idea/` subfolder coexists with `idea-summary-vN.md`
+- MCP `update_workflow_action` tool already exists — no new endpoints needed
+
+---
+
+#### FEATURE-038-E: Execution Skill DoD Update
+
+**Version:** v1.0
+**Brief Description:** Add a new workflow status verification checkpoint to `x-ipe-workflow-task-execution` skill's Step 5 (Check Global DoD). If the completed skill's `task_completion_output` declares workflow action interaction, verify that `update_workflow_action` was called (action status NOT still `pending` in workflow JSON). On failure, flag task as incomplete.
+
+**Acceptance Criteria:**
+- [ ] AC-038.32: x-ipe-workflow-task-execution Step 5 includes workflow status verification
+- [ ] AC-038.33: Verification checks: action status in workflow JSON is NOT `pending` after skill completion
+- [ ] AC-038.34: On verification failure, task flagged as incomplete with message
+
+**Dependencies:**
+- None (standalone skill update)
+
+**Technical Considerations:**
+- This is a skill update to `.github/skills/x-ipe-workflow-task-execution/SKILL.md`
+- Only applies when skill output declares workflow action interaction
+- Requires reading workflow JSON to verify status
 
 ### Open Questions
 
