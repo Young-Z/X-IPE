@@ -426,6 +426,13 @@
 .deliverable-name { font-size: 12px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .deliverable-path { font-size: 10px; font-family: monospace; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .deliverable-missing-badge { font-size: 10px; color: #ef4444; white-space: nowrap; }
+.deliverable-preview { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60vw; max-height: 70vh; background: var(--card-bg, #1e293b); border: 1px solid var(--border-color, #334155); border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 10000; display: flex; flex-direction: column; overflow: hidden; }
+.deliverable-preview .preview-header { padding: 12px 16px; font-size: 13px; font-weight: 600; color: var(--text-primary, #e2e8f0); border-bottom: 1px solid var(--border-color, #334155); flex-shrink: 0; }
+.deliverable-preview .preview-content { padding: 16px; overflow-y: auto; flex: 1; font-size: 13px; color: var(--text-primary, #e2e8f0); line-height: 1.6; }
+.deliverable-preview .preview-content pre { white-space: pre-wrap; word-wrap: break-word; font-size: 12px; }
+.deliverable-preview .preview-close { float: right; cursor: pointer; color: var(--text-muted); font-size: 14px; line-height: 1; }
+.deliverable-preview .preview-close:hover { color: var(--text-primary); }
+.deliverable-preview-backdrop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 9999; }
 
 /* Context Menu */
 .wf-context-menu { position: fixed; z-index: 100; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.3); min-width: 160px; padding: 4px 0; }

@@ -185,6 +185,13 @@ class DeliverableViewer {
         // Remove existing preview
         const existing = document.querySelector('.deliverable-preview');
         if (existing) existing.remove();
+        const existingBackdrop = document.querySelector('.deliverable-preview-backdrop');
+        if (existingBackdrop) existingBackdrop.remove();
+
+        // Backdrop overlay
+        const backdrop = document.createElement('div');
+        backdrop.className = 'deliverable-preview-backdrop';
+        document.body.appendChild(backdrop);
 
         const preview = document.createElement('div');
         preview.className = 'deliverable-preview';
@@ -192,7 +199,14 @@ class DeliverableViewer {
         const header = document.createElement('div');
         header.className = 'preview-header';
         header.textContent = filePath.split('/').pop();
+        const closeBtn = document.createElement('span');
+        closeBtn.className = 'preview-close';
+        closeBtn.textContent = '✕';
+        closeBtn.onclick = () => { preview.remove(); backdrop.remove(); };
+        header.appendChild(closeBtn);
         preview.appendChild(header);
+
+        backdrop.onclick = () => { preview.remove(); backdrop.remove(); };
 
         const content = document.createElement('div');
         content.className = 'preview-content';
