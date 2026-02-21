@@ -38,6 +38,7 @@ input:
   require_human_review: yes
   
   auto_proceed: false
+  execution_mode: "free-mode | workflow-mode"  # default: free-mode; set by x-ipe-workflow-task-execution
   idea_folder_path: "x-ipe-docs/ideas/{folder}"
   toolbox_meta_path: "x-ipe-docs/config/tools.json"
   extra_instructions: "{N/A | from config | from human}"
@@ -187,10 +188,10 @@ BLOCKING: Step 10 - Human MUST approve idea summary before proceeding.
     <action>
       1. Synthesize outputs from steps 3, 4, 5 (summary, brainstorming, research)
       2. Determine version number (auto-increment)
-      3. IF invoked from Action Execution Modal (workflow context):
-         a. Clear {idea_folder}/refined-idea/ folder if it exists (overwrite mode)
-         b. Write all refined output files to {idea_folder}/refined-idea/
-         ELSE: Use standard output path ({idea_folder}/idea-summary-vN.md)
+      3. Output path: {idea_folder}/refined-idea/idea-summary-vN.md
+         a. Create {idea_folder}/refined-idea/ folder if it does not exist
+         b. IF folder already exists and contains previous output: clear it (overwrite mode)
+         c. Write all refined output files to {idea_folder}/refined-idea/
       4. Create draft using template from templates/idea-summary.md
       5. RECOMMENDED: Use enabled tools from step 1's tool list to create rich visual content (diagrams, infographics, architecture views) -- select the most appropriate tool for each content type
       6. If no tools are enabled: use standard markdown (bullet lists, tables)
@@ -241,10 +242,10 @@ BLOCKING: Step 10 - Human MUST approve idea summary before proceeding.
       3. Resolve any questions raised
       4. RECOMMENDED: Use enabled tools from step 1's tool list to enhance or add visual content where feedback suggests improvements -- select the most appropriate tool for each content type
       5. IF feedback requires minor-to-moderate changes:
-         → Update the existing idea-summary-vN.md draft in-place
+         → Update the existing draft in-place
          IF feedback requires extensive rewrite (majority of sections affected):
          → Rewrite the file from scratch (same path)
-      6. Finalize idea-summary-vN.md at x-ipe-docs/ideas/{folder}/idea-summary-vN.md
+      6. Finalize at {idea_folder}/refined-idea/idea-summary-vN.md
     </action>
     <constraints>
       - MANDATORY: Update the existing draft file in-place — do NOT create a new versioned file for critique improvements
@@ -270,14 +271,21 @@ BLOCKING: Step 10 - Human MUST approve idea summary before proceeding.
   <step_10>
     <name>Complete and Request Review</name>
     <action>
-      1. Present final idea summary to human
-      2. Ask human to choose next task
-      3. Wait for approval
+      1. IF execution_mode == "workflow-mode":
+         a. Call update_workflow_action MCP with:
+            - workflow_name: {from context}
+            - action: "refine_idea"
+            - status: "done"
+            - deliverables: [list of output file paths]
+         b. Log: "Workflow action status updated to done"
+      2. Present final idea summary to human
+      3. Ask human to choose next task
+      4. Wait for approval
     </action>
     <constraints>
       - BLOCKING: Human MUST approve before proceeding
     </constraints>
-    <output>human_approval, next_task_choice</output>
+    <output>human_approval, next_task_choice, workflow_action_updated</output>
   </step_10>
 
 </procedure>
@@ -294,12 +302,13 @@ task_completion_output:
   next_task_based_skill: "Idea Mockup | Idea to Architecture"
   require_human_review: yes
   task_output_links:
-    - "x-ipe-docs/ideas/{folder}/idea-summary-vN.md"
-    - "x-ipe-docs/ideas/{folder}/refined-idea/"
+    - "x-ipe-docs/ideas/{folder}/refined-idea/idea-summary-vN.md"
     - "x-ipe-docs/ideas/{folder}/mockups/mockup-vN.html"
-  # Dynamic attributes — include workflow_action when invoked from Action Execution Modal
-  workflow_action: "refine_idea"        # triggers Step 5 workflow status verification
+  # Dynamic attributes
+  execution_mode: "free-mode | workflow-mode"  # propagated from input
+  workflow_action: "refine_idea"        # triggers workflow status update when execution_mode == workflow-mode
   workflow_name: "{from context}"       # used to locate workflow JSON
+  workflow_action_updated: true | false # true if update_workflow_action was called
   idea_id: "IDEA-XXX"
   idea_status: Refined
   idea_version: "vN"
@@ -368,7 +377,7 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
   </checkpoint>
   <checkpoint required="true">
     <name>Summary Created</name>
-    <verification>x-ipe-docs/ideas/{folder}/idea-summary-vN.md exists</verification>
+    <verification>x-ipe-docs/ideas/{folder}/refined-idea/idea-summary-vN.md exists</verification>
     <step_output>idea_summary_path</step_output>
   </checkpoint>
   <checkpoint required="true">
@@ -388,7 +397,7 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Workflow Action Status Updated</name>
-    <verification>If invoked from Action Execution Modal, called update_workflow_action MCP with status "done" and deliverables list</verification>
+    <verification>If execution_mode == "workflow-mode", called update_workflow_action MCP with status "done" and deliverables list</verification>
   </checkpoint>
 </definition_of_done>
 ```

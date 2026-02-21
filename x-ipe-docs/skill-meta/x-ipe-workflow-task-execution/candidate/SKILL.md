@@ -44,6 +44,11 @@ input:
     status: "pending | in_progress | blocked | deferred | completed | cancelled"
     last_updated: "{MM-DD-YYYY HH:MM:SS}"
 
+  # Execution mode (detected from instruction prefix)
+  execution_mode: "free-mode | workflow-mode"  # default: free-mode
+  # free-mode: agent invoked manually (no workflow UI context)
+  # workflow-mode: agent invoked from Action Execution Modal (has workflow UI context)
+
   # Execution fields (set by task-based skill)
   execution:
     next_task_based_skill: "{task_based_skill} | null"
@@ -194,18 +199,21 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
     <name>Task Planning</name>
     <trigger>Receive work request from human or system</trigger>
     <actions>
-      1. Match request to task-based skill using auto-discovery (scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions)
+      1. Detect execution mode from instruction prefix:
+         - IF instruction starts with `--workflow-mode` → set execution_mode = "workflow-mode", strip prefix from instruction
+         - ELSE → set execution_mode = "free-mode"
+      2. Match request to task-based skill using auto-discovery (scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions)
          See references/examples.md for request matching patterns.
-      2. Derive category from skill's Output Result `category` field
-      3. Check task:
+      3. Derive category from skill's Output Result `category` field
+      4. Check task:
          - IF task not exists → Create with status: pending
          - ELSE IF exists AND assigned to you → Continue
          - ELSE → STOP
-      4. MANDATORY: Load x-ipe+all+task-board-management skill to create/update tasks on board
+      5. MANDATORY: Load x-ipe+all+task-board-management skill to create/update tasks on board
          → This step CANNOT be skipped
          → Tasks MUST appear on board BEFORE proceeding to Step 2
-      5. IF task-based skill defines next_task_based_skill → Create ALL chained tasks upfront
-      6. VERIFICATION: Confirm all tasks are visible on task board before proceeding
+      6. IF task-based skill defines next_task_based_skill → Create ALL chained tasks upfront
+      7. VERIFICATION: Confirm all tasks are visible on task board before proceeding
     </actions>
     <output>Task Data Model with core fields populated AND tasks created on board</output>
     <gate>All tasks visible on task-board.md</gate>
@@ -269,7 +277,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
     <name>Task Work Execution</name>
     <actions>
       1. Load task-based skill: x-ipe-task-based-{task_based_skill}
-      2. Pass Task Data Model to skill
+      2. Pass Task Data Model to skill, including execution_mode
       3. Check task-based skill DoR (defined in skill)
       4. Execute core work (defined in skill)
       5. Check task-based skill DoD (defined in skill)
@@ -328,12 +336,14 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
            CALL x-ipe-tool-git-version-control skill: operation=push
 
       3. Workflow Status Verification:
-         IF completed skill's task_completion_output contains workflow_action field:
+         IF execution_mode == "workflow-mode" AND completed skill's task_completion_output contains workflow_action field:
            a. Extract workflow_name and workflow_action from output
            b. READ instance/workflows/workflow-{workflow_name}.json
            c. CHECK that actions.{workflow_action}.status is NOT "pending"
            d. IF status is "pending" → FLAG task as incomplete: "Workflow action '{workflow_action}' status not updated. Call update_workflow_action MCP tool before completing."
            e. IF workflow JSON file not found → WARN and skip (non-blocking)
+         ELSE IF execution_mode == "free-mode":
+           → Skip workflow status verification
 
       4. Human Review Check:
          IF require_human_review = true AND auto_proceed = false AND global_auto_proceed = false:

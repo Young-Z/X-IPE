@@ -176,7 +176,8 @@ class ActionExecutionModal {
         if (extraInstructions && extraInstructions.trim()) {
             prompt += ` with extra instructions: ${extraInstructions.trim()}`;
         }
-        return prompt;
+        // Prefix with --workflow-mode so the agent knows this was dispatched from the workflow UI
+        return `--workflow-mode ${prompt}`;
     }
 
     /* --- Execution Dispatch ----------------------------------------------- */
