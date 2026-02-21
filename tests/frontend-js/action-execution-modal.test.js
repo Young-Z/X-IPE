@@ -35,11 +35,22 @@ describe('FEATURE-038-A: Action Execution Modal', () => {
       claimSessionForAction: vi.fn().mockResolvedValue(true),
       switchSession: vi.fn(),
       sendCopilotPromptCommandNoEnter: vi.fn(),
-      _buildCopilotCmd: vi.fn((prompt) => `copilot --allow-all-tools -i "${prompt}"`),
       addSession: vi.fn().mockReturnValue('new-tab'),
     };
     globalThis.window = globalThis.window || {};
     globalThis.window.terminalManager = mockTerminalManager;
+
+    // Mock fetch for workflow API (resolves <current-idea-file> placeholder)
+    globalThis.fetch = vi.fn((url) => {
+      if (url.includes('/api/workflow/')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({
+          data: { stages: { ideation: { actions: { compose_idea: {
+            deliverables: ['x-ipe-docs/ideas/wf-hello/idea.md']
+          }}}}}
+        })});
+      }
+      return Promise.resolve({ ok: false });
+    });
 
     globalThis.window.__copilotPromptConfig = {
       ideation: {
@@ -91,6 +102,16 @@ describe('FEATURE-038-A: Action Execution Modal', () => {
       expect(instructions.textContent).toContain('refine the idea');
     });
 
+    it('should resolve <current-idea-file> placeholder with actual file path', async () => {
+      const Modal = globalThis.ActionExecutionModal;
+      expect(Modal).toBeDefined();
+      const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
+      await modal.open();
+      const instructions = document.querySelector('.instructions-content');
+      expect(instructions.textContent).toContain('x-ipe-docs/ideas/wf-hello/idea.md');
+      expect(instructions.textContent).not.toContain('<current-idea-file>');
+    });
+
     it('should show fallback message when action ID not in config', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
@@ -134,13 +155,14 @@ describe('FEATURE-038-A: Action Execution Modal', () => {
   });
 
   describe('Command Construction', () => {
-    it('should build CLI command from adapter config', async () => {
+    it('should build raw prompt from adapter config (no copilot wrapper)', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
       await modal._loadInstructions();
       const cmd = modal._buildCommand('');
       expect(cmd).toContain('refine the idea');
+      expect(cmd).not.toContain('copilot --allow-all-tools');
     });
 
     it('should append extra instructions to command when provided', async () => {

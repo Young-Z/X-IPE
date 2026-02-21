@@ -60,11 +60,29 @@ class ActionExecutionModal {
                 if (prompt) {
                     const detail = prompt['prompt-details'].find(d => d.language === 'en')
                         || prompt['prompt-details'][0];
-                    this._loadedInstructions = { label: detail.label, command: detail.command };
+                    let command = detail.command;
+                    // Resolve <current-idea-file> placeholder from workflow deliverables
+                    if (command.includes('<current-idea-file>') && this.workflowName) {
+                        const ideaFile = await this._resolveIdeaFile();
+                        if (ideaFile) command = command.replace('<current-idea-file>', ideaFile);
+                    }
+                    this._loadedInstructions = { label: detail.label, command };
                     return;
                 }
             }
         }
+    }
+
+    async _resolveIdeaFile() {
+        try {
+            const resp = await fetch(`/api/workflow/${encodeURIComponent(this.workflowName)}`);
+            if (!resp.ok) return null;
+            const json = await resp.json();
+            const stages = (json.data || {}).stages || {};
+            const composeAction = (stages.ideation && stages.ideation.actions && stages.ideation.actions.compose_idea) || {};
+            const deliverables = composeAction.deliverables || [];
+            return deliverables.find(d => d.endsWith('.md')) || deliverables[0] || null;
+        } catch (e) { return null; }
     }
 
     /* --- DOM Creation ----------------------------------------------------- */
@@ -158,10 +176,7 @@ class ActionExecutionModal {
         if (extraInstructions && extraInstructions.trim()) {
             prompt += ` with extra instructions: ${extraInstructions.trim()}`;
         }
-        if (window.terminalManager && window.terminalManager._buildCopilotCmd) {
-            return window.terminalManager._buildCopilotCmd(prompt);
-        }
-        return `copilot --allow-all-tools -i "${prompt.replace(/"/g, '\\"')}"`;
+        return prompt;
     }
 
     /* --- Execution Dispatch ----------------------------------------------- */

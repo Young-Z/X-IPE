@@ -20,8 +20,8 @@
 .modal-overlay .modal-container {
     background: #fff;
     border-radius: 12px;
-    width: 500px;
-    max-width: 90vw;
+    width: 80vw;
+    max-width: 80vw;
     max-height: 85vh;
     display: flex;
     flex-direction: column;
