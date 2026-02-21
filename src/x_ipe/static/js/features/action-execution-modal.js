@@ -20,8 +20,8 @@ class ActionExecutionModal {
 
     /* --- Lifecycle -------------------------------------------------------- */
 
-    open() {
-        this._loadInstructions();
+    async open() {
+        await this._loadInstructions();
         this._createDOM();
         this._bindEvents();
         document.body.appendChild(this.overlay);
@@ -40,8 +40,17 @@ class ActionExecutionModal {
 
     /* --- Instructions Loading --------------------------------------------- */
 
-    _loadInstructions() {
-        const config = window.__copilotPromptConfig;
+    async _loadInstructions() {
+        let config = window.__copilotPromptConfig;
+        if (!config) {
+            try {
+                const resp = await fetch('/api/config/copilot-prompt');
+                if (resp.ok) {
+                    config = await resp.json();
+                    window.__copilotPromptConfig = config;
+                }
+            } catch (e) { /* ignore */ }
+        }
         if (!config) return;
 
         const configId = this.actionKey.replace(/_/g, '-');
@@ -144,7 +153,6 @@ class ActionExecutionModal {
     /* --- Command Construction --------------------------------------------- */
 
     _buildCommand(extraInstructions) {
-        if (!this._loadedInstructions) this._loadInstructions();
         if (!this._loadedInstructions) return '';
         let prompt = this._loadedInstructions.command;
         if (extraInstructions && extraInstructions.trim()) {

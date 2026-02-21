@@ -65,67 +65,67 @@ describe('FEATURE-038-A: Action Execution Modal', () => {
       expect(globalThis.ActionExecutionModal).toBeDefined();
     });
 
-    it('should create modal overlay in DOM when opened', () => {
+    it('should create modal overlay in DOM when opened', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      modal.open();
+      await modal.open();
       expect(document.querySelector('.modal-overlay')).not.toBeNull();
     });
 
-    it('should display action title from ACTION_MAP label', () => {
+    it('should display action title from ACTION_MAP label', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      modal.open();
+      await modal.open();
       expect(document.querySelector('.modal-title').textContent).toContain('Refine Idea');
     });
 
-    it('should populate readonly instructions from copilot-prompt.json', () => {
+    it('should populate readonly instructions from copilot-prompt.json', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      modal.open();
+      await modal.open();
       const instructions = document.querySelector('.instructions-content');
       expect(instructions).not.toBeNull();
       expect(instructions.textContent).toContain('refine the idea');
     });
 
-    it('should show fallback message when action ID not in config', () => {
+    it('should show fallback message when action ID not in config', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'unknown_action', workflowName: 'hello' });
-      modal.open();
+      await modal.open();
       expect(document.querySelector('.copilot-btn').disabled).toBe(true);
     });
   });
 
   describe('Extra Instructions', () => {
-    it('should have editable textarea with character counter', () => {
+    it('should have editable textarea with character counter', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      modal.open();
+      await modal.open();
       expect(document.querySelector('.extra-input')).not.toBeNull();
       expect(document.querySelector('.char-counter').textContent).toBe('0/500');
     });
 
-    it('should update counter on input', () => {
+    it('should update counter on input', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      modal.open();
+      await modal.open();
       const textarea = document.querySelector('.extra-input');
       textarea.value = 'Focus on UX';
       textarea.dispatchEvent(new Event('input'));
       expect(document.querySelector('.char-counter').textContent).toBe('11/500');
     });
 
-    it('should enforce 500 character limit', () => {
+    it('should enforce 500 character limit', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      modal.open();
+      await modal.open();
       const textarea = document.querySelector('.extra-input');
       textarea.value = 'x'.repeat(600);
       textarea.dispatchEvent(new Event('input'));
@@ -134,26 +134,29 @@ describe('FEATURE-038-A: Action Execution Modal', () => {
   });
 
   describe('Command Construction', () => {
-    it('should build CLI command from adapter config', () => {
+    it('should build CLI command from adapter config', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
+      await modal._loadInstructions();
       const cmd = modal._buildCommand('');
       expect(cmd).toContain('refine the idea');
     });
 
-    it('should append extra instructions to command when provided', () => {
+    it('should append extra instructions to command when provided', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
+      await modal._loadInstructions();
       const cmd = modal._buildCommand('Focus on UX flow');
       expect(cmd).toContain('Focus on UX flow');
     });
 
-    it('should work without extra instructions', () => {
+    it('should work without extra instructions', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
+      await modal._loadInstructions();
       const cmd = modal._buildCommand('');
       expect(cmd).toContain('refine the idea');
     });
@@ -164,7 +167,7 @@ describe('FEATURE-038-A: Action Execution Modal', () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      modal.open();
+      await modal.open();
       await modal._handleExecute();
       expect(mockTerminalManager.findIdleSession).toHaveBeenCalled();
       expect(mockTerminalManager.claimSessionForAction).toHaveBeenCalledWith('sess-1', 'hello', 'refine_idea');
@@ -176,7 +179,7 @@ describe('FEATURE-038-A: Action Execution Modal', () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      modal.open();
+      await modal.open();
       await modal._handleExecute();
       expect(mockTerminalManager.addSession).toHaveBeenCalled();
     });
@@ -185,55 +188,55 @@ describe('FEATURE-038-A: Action Execution Modal', () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      modal.open();
+      await modal.open();
       await modal._handleExecute();
       expect(document.querySelector('.modal-overlay')).toBeNull();
     });
   });
 
   describe('Modal Lifecycle', () => {
-    it('should close on X button click', () => {
+    it('should close on X button click', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      modal.open();
+      await modal.open();
       document.querySelector('.modal-close-btn').click();
       expect(document.querySelector('.modal-overlay')).toBeNull();
     });
 
-    it('should close on Escape key', () => {
+    it('should close on Escape key', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      modal.open();
+      await modal.open();
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
       expect(document.querySelector('.modal-overlay')).toBeNull();
     });
 
-    it('should close on overlay backdrop click', () => {
+    it('should close on overlay backdrop click', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      modal.open();
+      await modal.open();
       document.querySelector('.modal-overlay').click();
       expect(document.querySelector('.modal-overlay')).toBeNull();
     });
 
-    it('should clean up event listeners on close', () => {
+    it('should clean up event listeners on close', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      modal.open();
+      await modal.open();
       modal.close();
       // Verify no error on repeated close
       expect(() => modal.close()).not.toThrow();
     });
 
-    it('should show in-progress message when reopened during execution', () => {
+    it('should show in-progress message when reopened during execution', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello', status: 'in_progress' });
-      modal.open();
+      await modal.open();
       expect(document.querySelector('.copilot-btn')).toBeNull();
       expect(document.querySelector('.in-progress-message')).not.toBeNull();
     });
@@ -248,7 +251,7 @@ describe('FEATURE-038-A: Action Execution Modal', () => {
       btn.classList.add('action-btn');
       document.body.appendChild(btn);
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello', triggerBtn: btn });
-      modal.open();
+      await modal.open();
       await modal._handleExecute();
       expect(btn.classList.contains('in-progress')).toBe(true);
     });

@@ -14,7 +14,11 @@ class DeliverableViewer {
      * Check if a deliverable path represents a folder.
      */
     static isFolderType(path) {
-        return typeof path === 'string' && path.endsWith('/');
+        if (typeof path !== 'string') return false;
+        if (path.endsWith('/')) return true;
+        // Paths without a file extension are likely folders
+        const basename = path.split('/').pop();
+        return basename && !basename.includes('.');
     }
 
     /**
@@ -81,6 +85,15 @@ class DeliverableViewer {
             const entries = await resp.json();
             const tree = DeliverableViewer.buildTreeDOM(entries);
             container.appendChild(tree);
+
+            // Wire up file-item click handlers for inline preview
+            tree.querySelectorAll('.file-item[data-path]').forEach(item => {
+                item.style.cursor = 'pointer';
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.showPreview(item.dataset.path);
+                });
+            });
         } catch {
             container.textContent = '⚠️ Failed to load folder';
         }

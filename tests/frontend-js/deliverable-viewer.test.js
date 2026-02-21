@@ -46,7 +46,13 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
       expect(DV.isFolderType('x-ipe-docs/ideas/025/refined-idea/')).toBe(true);
     });
 
-    it('should identify paths without / as file-type', () => {
+    it('should identify paths without extension as folder-type', () => {
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      expect(DV.isFolderType('x-ipe-docs/ideas/wf-001-test-the-workflow')).toBe(true);
+    });
+
+    it('should identify paths with extension as file-type', () => {
       const DV = globalThis.DeliverableViewer;
       expect(DV).toBeDefined();
       expect(DV.isFolderType('x-ipe-docs/ideas/025/idea-summary.md')).toBe(false);
