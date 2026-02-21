@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-588 | Bug Fix | Deliverable card styling: (1) folder icon missing background, (2) folder name/path on same line, (3) hide x-ipe-docs/ prefix in all deliverables. Feedback-20260221-174334 | Pulse 🔵 | ✅ completed | 02-21-2026 09:51:00 | deliverable-viewer.js, workflow-stage.js, workflow.css | - |
 | TASK-587 | Ideation | Refine idea wf-001-greedy-snake — 贪吃蛇 web app | Bolt ⚡ | ✅ completed | 02-21-2026 09:21:00 | idea-summary-v1.md | Idea Mockup / Idea to Architecture |
 | TASK-584 | Ideation | IDEA-026: Refine idea wf-001-test-the-workflow — Snake game (贪吃蛇) | Ember 🔥 | ✅ completed | 02-21-2026 07:08:00 | idea-summary-v1.md | Idea Mockup / Idea to Architecture |
 | TASK-585 | Code Implementation | EPIC-038: Add --workflow-mode execution context — frontend injects prefix, workflow skill detects and passes execution_mode, ideation skill conditionally calls update_workflow_action | Nova ✅ | ✅ completed | 02-21-2026 04:39:00 | action-execution-modal.js, x-ipe-workflow-task-execution/SKILL.md, x-ipe-task-based-ideation-v2/SKILL.md | - |
@@ -169,11 +170,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 36
+- **Total Active:** 37
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 445
+- **Completed (archived):** 446
 - **Reverted:** 7
 - **Pending Review:** 0
 - **Blocked:** 0
