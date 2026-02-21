@@ -320,8 +320,10 @@
 .action-btn { display: flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: 1.5px solid; background: none; }
 .action-btn .action-icon { font-size: 14px; flex-shrink: 0; }
 .action-btn.done { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.3); color: #22c55e; }
-.action-btn.suggested { background: rgba(245,158,11,0.1); border-color: #f59e0b; border-style: dashed; color: #f59e0b; animation: gentle-glow 3s ease-in-out infinite; }
-.action-btn.suggested:hover { border-style: solid; background: rgba(245,158,11,0.15); transform: translateY(-1px); }
+.action-btn.suggested { background: rgba(245,158,11,0.15); border-color: #334155; color: #94a3b8; animation: gentle-glow 3s ease-in-out infinite; }
+.action-btn.suggested:hover { background: rgba(245,158,11,0.25); border-color: #64748b; transform: translateY(-1px); }
+.action-btn.optional { background: rgba(255,255,255,0.05); border-color: #64748b; border-style: dashed; color: #94a3b8; }
+.action-btn.optional:hover { border-color: #94a3b8; background: rgba(255,255,255,0.08); }
 .action-btn.normal { background: rgba(255,255,255,0.05); border-color: #334155; color: #94a3b8; }
 .action-btn.normal:hover { border-color: #64748b; background: rgba(255,255,255,0.08); }
 .action-btn.locked { background: rgba(255,255,255,0.02); border-color: #1e293b; color: #475569; cursor: not-allowed; opacity: 0.5; }

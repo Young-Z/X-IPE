@@ -6,6 +6,8 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-591 | Bug Fix | Suggested action buttons should only change background color, not border style. Feedback-20260221-191915 | Zephyr 🌬️ | ✅ completed | 02-21-2026 11:22:00 | workflow.css | - |
+| TASK-590 | Bug Fix | next_actions_suggested not shown for actions in completed stages — design_mockup missing suggested highlight. Feedback-20260221-190457 | Rune 🔮 | ✅ completed | 02-21-2026 11:10:00 | workflow-stage.js, workflow-stage-suggestions.test.js | - |
 | TASK-589 | Bug Fix | Deliverable cards: (1) grid alignment — folder-type card misaligned with file cards, (2) no click-to-preview on regular file deliverables. Feedback-20260221-175407 | Drift 🌊 | ✅ completed | 02-21-2026 10:08:00 | workflow.css, deliverable-viewer.js, workflow-stage.js | - |
 | TASK-588 | Bug Fix | Deliverable card styling: (1) folder icon missing background, (2) folder name/path on same line, (3) hide x-ipe-docs/ prefix in all deliverables. Feedback-20260221-174334 | Pulse 🔵 | ✅ completed | 02-21-2026 09:51:00 | deliverable-viewer.js, workflow-stage.js, workflow.css | - |
 | TASK-587 | Ideation | Refine idea wf-001-greedy-snake — 贪吃蛇 web app | Bolt ⚡ | ✅ completed | 02-21-2026 09:21:00 | idea-summary-v1.md | Idea Mockup / Idea to Architecture |
@@ -171,7 +173,7 @@
 
 ## Quick Stats
 
-- **Total Active:** 37
+- **Total Active:** 38
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
