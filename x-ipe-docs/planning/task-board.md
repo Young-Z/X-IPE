@@ -6,7 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-587 | Ideation | Refine idea wf-001-greedy-snake — 贪吃蛇 web app | Bolt ⚡ | 🔄 in_progress | 02-21-2026 09:20:00 | - | Idea Mockup / Idea to Architecture |
+| TASK-587 | Ideation | Refine idea wf-001-greedy-snake — 贪吃蛇 web app | Bolt ⚡ | ✅ completed | 02-21-2026 09:21:00 | idea-summary-v1.md | Idea Mockup / Idea to Architecture |
 | TASK-584 | Ideation | IDEA-026: Refine idea wf-001-test-the-workflow — Snake game (贪吃蛇) | Ember 🔥 | ✅ completed | 02-21-2026 07:08:00 | idea-summary-v1.md | Idea Mockup / Idea to Architecture |
 | TASK-585 | Code Implementation | EPIC-038: Add --workflow-mode execution context — frontend injects prefix, workflow skill detects and passes execution_mode, ideation skill conditionally calls update_workflow_action | Nova ✅ | ✅ completed | 02-21-2026 04:39:00 | action-execution-modal.js, x-ipe-workflow-task-execution/SKILL.md, x-ipe-task-based-ideation-v2/SKILL.md | - |
 | TASK-586 | Bug Fix | EPIC-038: 5 user-reported bugs — modal size (80vw), placeholder resolution, double-wrapped command, console expand, in-progress indicator | Nova ✅ | ✅ completed | 02-21-2026 03:30:00 | action-execution-modal.js, workflow-stage.js, action-execution-modal.css | - |
@@ -170,7 +170,7 @@
 ## Quick Stats
 
 - **Total Active:** 36
-- **In Progress:** 1
+- **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
 - **Completed (archived):** 445
