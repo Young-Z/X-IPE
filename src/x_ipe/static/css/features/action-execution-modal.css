@@ -86,6 +86,29 @@
     white-space: pre-wrap;
 }
 
+/* --- Idea File Selector --- */
+.modal-overlay .idea-selector-section {
+    margin-bottom: 16px;
+}
+
+.modal-overlay .idea-selector {
+    width: 100%;
+    padding: 10px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: #334155;
+    background: #fff;
+    cursor: pointer;
+    appearance: auto;
+}
+.modal-overlay .idea-selector:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
 .modal-overlay .extra-instructions-section {
     position: relative;
 }

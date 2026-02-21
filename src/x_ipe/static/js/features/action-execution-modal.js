@@ -63,8 +63,11 @@ class ActionExecutionModal {
                     let command = detail.command;
                     // Resolve <current-idea-file> placeholder from workflow deliverables
                     if (command.includes('<current-idea-file>') && this.workflowName) {
-                        const ideaFile = await this._resolveIdeaFile();
-                        if (ideaFile) command = command.replace('<current-idea-file>', ideaFile);
+                        this._ideaFiles = await this._resolveIdeaFiles();
+                        this._commandTemplate = command;
+                        const selected = this._ideaFiles.length ? this._ideaFiles[0] : null;
+                        this._selectedIdeaFile = selected;
+                        if (selected) command = command.replace('<current-idea-file>', selected);
                     }
                     this._loadedInstructions = { label: detail.label, command };
                     return;
@@ -73,16 +76,37 @@ class ActionExecutionModal {
         }
     }
 
-    async _resolveIdeaFile() {
+    async _resolveIdeaFiles() {
+        const files = [];
         try {
             const resp = await fetch(`/api/workflow/${encodeURIComponent(this.workflowName)}`);
-            if (!resp.ok) return null;
+            if (!resp.ok) return files;
             const json = await resp.json();
             const stages = (json.data || {}).stages || {};
             const composeAction = (stages.ideation && stages.ideation.actions && stages.ideation.actions.compose_idea) || {};
             const deliverables = composeAction.deliverables || [];
-            return deliverables.find(d => d.endsWith('.md')) || deliverables[0] || null;
-        } catch (e) { return null; }
+            // Add compose_idea .md deliverable as primary option
+            const primaryMd = deliverables.find(d => d.endsWith('.md'));
+            if (primaryMd) files.push(primaryMd);
+            // Find the idea folder and look for refined-idea/ subfolder
+            const ideaFolder = deliverables.find(d => !d.endsWith('.md')) || (primaryMd ? primaryMd.substring(0, primaryMd.lastIndexOf('/')) : null);
+            if (ideaFolder) {
+                const refinedPath = ideaFolder.endsWith('/') ? `${ideaFolder}refined-idea` : `${ideaFolder}/refined-idea`;
+                try {
+                    const treeResp = await fetch(`/api/workflow/${encodeURIComponent(this.workflowName)}/deliverables/tree?path=${encodeURIComponent(refinedPath)}`);
+                    if (treeResp.ok) {
+                        const treeJson = await treeResp.json();
+                        const entries = Array.isArray(treeJson) ? treeJson : (treeJson.data || treeJson.entries || []);
+                        for (const entry of entries) {
+                            if (entry.type === 'file' && entry.path && entry.path.endsWith('.md')) {
+                                if (!files.includes(entry.path)) files.push(entry.path);
+                            }
+                        }
+                    }
+                } catch (e) { /* refined-idea folder may not exist */ }
+            }
+        } catch (e) { /* ignore */ }
+        return files;
     }
 
     /* --- DOM Creation ----------------------------------------------------- */
@@ -110,6 +134,14 @@ class ActionExecutionModal {
                             <span>Execution in progress…</span>
                         </div>
                     ` : `
+                        ${this._ideaFiles && this._ideaFiles.length > 0 ? `
+                        <div class="idea-selector-section">
+                            <div class="instructions-label">Current Selected Idea</div>
+                            <select class="idea-selector">
+                                ${this._ideaFiles.map((f, i) => `<option value="${this._escapeHtml(f)}" ${i === 0 ? 'selected' : ''}>${this._escapeHtml(f.split('/').pop())} <span class="idea-path-hint">(${this._escapeHtml(f)})</span></option>`).join('')}
+                            </select>
+                        </div>
+                        ` : ''}
                         <div class="instructions-section">
                             <div class="instructions-label">Instructions</div>
                             <div class="instructions-content">${hasInstructions
@@ -148,6 +180,18 @@ class ActionExecutionModal {
             if (e.key === 'Escape') this.close();
         };
         document.addEventListener('keydown', this._keyHandler);
+
+        // Idea file selector
+        const ideaSelector = this.overlay.querySelector('.idea-selector');
+        if (ideaSelector) {
+            ideaSelector.addEventListener('change', () => {
+                this._selectedIdeaFile = ideaSelector.value;
+                const newCommand = this._commandTemplate.replace('<current-idea-file>', this._selectedIdeaFile);
+                this._loadedInstructions.command = newCommand;
+                const contentEl = this.overlay.querySelector('.instructions-content');
+                if (contentEl) contentEl.textContent = newCommand;
+            });
+        }
 
         // Extra instructions counter
         const textarea = this.overlay.querySelector('.extra-input');
