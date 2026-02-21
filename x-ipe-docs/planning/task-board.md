@@ -6,7 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-591 | Bug Fix | Suggested action buttons should only change background color, not border style. Feedback-20260221-191915 | Zephyr 🌬️ | ✅ completed | 02-21-2026 11:22:00 | workflow.css | - |
+| TASK-591 | Bug Fix | ~~Suggested action btn: only change bg, not border.~~ REVERTED — dashed border already present. Feedback-20260221-191915 | Zephyr 🌬️ | 🔁 reverted | 02-21-2026 11:24:00 | workflow.css | - |
 | TASK-590 | Bug Fix | next_actions_suggested not shown for actions in completed stages — design_mockup missing suggested highlight. Feedback-20260221-190457 | Rune 🔮 | ✅ completed | 02-21-2026 11:10:00 | workflow-stage.js, workflow-stage-suggestions.test.js | - |
 | TASK-589 | Bug Fix | Deliverable cards: (1) grid alignment — folder-type card misaligned with file cards, (2) no click-to-preview on regular file deliverables. Feedback-20260221-175407 | Drift 🌊 | ✅ completed | 02-21-2026 10:08:00 | workflow.css, deliverable-viewer.js, workflow-stage.js | - |
 | TASK-588 | Bug Fix | Deliverable card styling: (1) folder icon missing background, (2) folder name/path on same line, (3) hide x-ipe-docs/ prefix in all deliverables. Feedback-20260221-174334 | Pulse 🔵 | ✅ completed | 02-21-2026 09:51:00 | deliverable-viewer.js, workflow-stage.js, workflow.css | - |
@@ -173,12 +173,12 @@
 
 ## Quick Stats
 
-- **Total Active:** 38
+- **Total Active:** 37
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
 - **Completed (archived):** 446
-- **Reverted:** 7
+- **Reverted:** 8
 - **Pending Review:** 0
 - **Blocked:** 0
 
