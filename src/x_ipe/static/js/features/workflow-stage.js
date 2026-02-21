@@ -112,6 +112,36 @@ const workflowStage = {
         this._renderDeliverables(container, workflowName);
     },
 
+    /**
+     * Return the set of action keys suggested by the latest done action
+     * (last in ACTION_MAP order within the latest stage that has done actions).
+     */
+    _getLatestSuggestions(stages) {
+        let latestSuggestions = [];
+        for (const stageName of this.STAGE_ORDER) {
+            const stageConfig = this.ACTION_MAP[stageName];
+            if (!stageConfig) continue;
+            const apiActions = (stages[stageName] || {}).actions || {};
+            for (const key of Object.keys(stageConfig.actions)) {
+                const a = apiActions[key];
+                if (a && a.status === 'done' && Array.isArray(a.next_actions_suggested) && a.next_actions_suggested.length > 0) {
+                    latestSuggestions = a.next_actions_suggested;
+                }
+            }
+        }
+        return new Set(latestSuggestions);
+    },
+
+    /** Check if all mandatory actions in a stage are done. */
+    _isStageMandatoryDone(stages, stageName) {
+        const stageConfig = this.ACTION_MAP[stageName];
+        if (!stageConfig) return false;
+        const apiActions = (stages[stageName] || {}).actions || {};
+        return Object.entries(stageConfig.actions)
+            .filter(([_, def]) => def.mandatory)
+            .every(([key]) => (apiActions[key] || {}).status === 'done');
+    },
+
     /** Check if any stage has features. */
     _hasFeatures(stages) {
         return this.STAGE_ORDER.some(s => {
@@ -163,6 +193,8 @@ const workflowStage = {
         const area = document.createElement('div');
         area.className = 'actions-area';
 
+        const latestSuggestions = this._getLatestSuggestions(stages);
+
         // Group completed stages together under "COMPLETED ACTIONS"
         const completedStages = this.STAGE_ORDER.filter(s => (stages[s] || {}).status === 'completed');
         if (completedStages.length > 0) {
@@ -182,14 +214,8 @@ const workflowStage = {
                     const apiAction = apiActions[key] || {};
                     const apiStatus = apiAction.status || 'pending';
                     const isOptional = apiAction.optional === true;
-                    // Check if this action is suggested by any done action's next_actions_suggested
-                    let isSuggestedByDone = false;
-                    Object.values(apiActions).forEach(a => {
-                        if (a.status === 'done' && Array.isArray(a.next_actions_suggested) && a.next_actions_suggested.includes(key)) {
-                            isSuggestedByDone = true;
-                        }
-                    });
-                    grid.appendChild(this._renderActionButton(key, def, apiStatus, isSuggestedByDone, false, wfName, isOptional));
+                    const isSuggestedByLatest = latestSuggestions.has(key);
+                    grid.appendChild(this._renderActionButton(key, def, apiStatus, isSuggestedByLatest, false, wfName, isOptional));
                 });
             });
             group.appendChild(grid);
@@ -201,23 +227,33 @@ const workflowStage = {
         if (activeStage) {
             const stageConfig = this.ACTION_MAP[activeStage];
             if (stageConfig) {
-                area.appendChild(this._renderActionGroup(activeStage, (stages[activeStage] || {}).actions || {}, nextAction, wfName, false, null));
+                area.appendChild(this._renderActionGroup(activeStage, (stages[activeStage] || {}).actions || {}, nextAction, wfName, false, null, latestSuggestions));
             }
         }
 
-        // First locked stage as preview
+        // First locked stage — render as ready (clickable) or locked
         const firstLocked = this.STAGE_ORDER.find(s => (stages[s] || {}).status === 'locked');
         if (firstLocked) {
-            // Find the previous stage name for the unlock hint
             const lockedIdx = this.STAGE_ORDER.indexOf(firstLocked);
-            const prevStageName = lockedIdx > 0 ? (this.ACTION_MAP[this.STAGE_ORDER[lockedIdx - 1]] || {}).label || this.STAGE_ORDER[lockedIdx - 1] : '';
-            area.appendChild(this._renderActionGroup(firstLocked, {}, nextAction, wfName, true, prevStageName));
+            const prevStageKey = lockedIdx > 0 ? this.STAGE_ORDER[lockedIdx - 1] : null;
+            const prevReady = prevStageKey && this._isStageMandatoryDone(stages, prevStageKey);
+
+            if (prevReady) {
+                // Previous stage mandatory done — show next stage as clickable
+                area.appendChild(this._renderActionGroup(
+                    firstLocked,
+                    (stages[firstLocked] || {}).actions || {},
+                    nextAction, wfName, false, null, latestSuggestions));
+            } else {
+                const prevLabel = lockedIdx > 0 ? (this.ACTION_MAP[this.STAGE_ORDER[lockedIdx - 1]] || {}).label || this.STAGE_ORDER[lockedIdx - 1] : '';
+                area.appendChild(this._renderActionGroup(firstLocked, {}, nextAction, wfName, true, prevLabel, latestSuggestions));
+            }
         }
 
         return area;
     },
 
-    _renderActionGroup(stageName, apiActions, nextAction, wfName, locked, prevStageName) {
+    _renderActionGroup(stageName, apiActions, nextAction, wfName, locked, prevStageName, latestSuggestions) {
         const group = document.createElement('div');
         group.className = 'action-group';
 
@@ -238,19 +274,14 @@ const workflowStage = {
         const grid = document.createElement('div');
         grid.className = 'actions-grid';
 
+        const suggestions = latestSuggestions || new Set();
         Object.entries(stageConfig.actions).forEach(([key, def]) => {
             const apiAction = apiActions[key] || {};
             const apiStatus = apiAction.status || 'pending';
             const isSuggested = nextAction && nextAction.action === key && nextAction.stage === stageName;
             const isOptional = apiAction.optional === true;
-            // Check if this action is suggested by any done action's next_actions_suggested
-            let isSuggestedByDone = false;
-            Object.values(apiActions).forEach(a => {
-                if (a.status === 'done' && Array.isArray(a.next_actions_suggested) && a.next_actions_suggested.includes(key)) {
-                    isSuggestedByDone = true;
-                }
-            });
-            grid.appendChild(this._renderActionButton(key, def, apiStatus, isSuggested || isSuggestedByDone, locked, wfName, isOptional));
+            const isSuggestedByLatest = suggestions.has(key);
+            grid.appendChild(this._renderActionButton(key, def, apiStatus, isSuggested || isSuggestedByLatest, locked, wfName, isOptional));
         });
 
         group.appendChild(grid);
