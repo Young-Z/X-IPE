@@ -190,10 +190,10 @@ class ActionExecutionModal {
         const tm = window.terminalManager;
         if (!tm) return;
 
-        // Open console if hidden
-        const consoleEl = document.querySelector('.console-container');
-        if (consoleEl && consoleEl.classList.contains('hidden')) {
-            const toggle = document.querySelector('[title*="Toggle terminal"]');
+        // Expand console if collapsed
+        const terminalPanel = document.getElementById('terminal-panel');
+        if (terminalPanel && terminalPanel.classList.contains('collapsed')) {
+            const toggle = document.getElementById('terminal-toggle');
             if (toggle) toggle.click();
         }
 
