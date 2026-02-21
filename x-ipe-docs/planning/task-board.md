@@ -6,6 +6,9 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-584 | Ideation | IDEA-026: Refine idea wf-001-test-the-workflow — Snake game (贪吃蛇) | Bolt 🔩 | 🔄 in_progress | 02-21-2026 04:01:00 | - | Idea Mockup / Idea to Architecture |
+| TASK-585 | Code Implementation | EPIC-038: Add --workflow-mode execution context — frontend injects prefix, workflow skill detects and passes execution_mode, ideation skill conditionally calls update_workflow_action | Nova ✅ | ✅ completed | 02-21-2026 04:39:00 | action-execution-modal.js, x-ipe-workflow-task-execution/SKILL.md, x-ipe-task-based-ideation-v2/SKILL.md | - |
+| TASK-586 | Bug Fix | EPIC-038: 5 user-reported bugs — modal size (80vw), placeholder resolution, double-wrapped command, console expand, in-progress indicator | Nova ✅ | ✅ completed | 02-21-2026 03:30:00 | action-execution-modal.js, workflow-stage.js, action-execution-modal.css | - |
 | TASK-562 | Ideation | Refine idea 025: CR-Refine Idea Action — modal window, agent CLI integration, workflow manager API, deliverable viewer | Nova ✅ | ✅ completed | 02-20-2026 09:15:00 | idea-summary-v1.md | Requirement Gathering |
 | TASK-563 | Idea Mockup | IDEA-025: Create visual mockup of Refine Idea modal (instructions display, extra input, Copilot button, deliverable viewer) | Nova ✅ | ✅ completed | 02-20-2026 12:26:00 | mockups/refine-idea-modal-v1.html, idea-summary-v2.md | Requirement Gathering |
 | TASK-564 | Skill Update | Update idea-mockup skill: Step 9 should update existing idea-summary in-place instead of creating new version | Nova ✅ | ✅ completed | 02-20-2026 13:01:00 | .github/skills/x-ipe-task-based-idea-mockup/SKILL.md | - |
@@ -165,11 +168,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 33
-- **In Progress:** 0
+- **Total Active:** 36
+- **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 442
+- **Completed (archived):** 444
 - **Reverted:** 7
 - **Pending Review:** 0
 - **Blocked:** 0
