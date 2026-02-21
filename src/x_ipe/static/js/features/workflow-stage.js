@@ -179,8 +179,17 @@ const workflowStage = {
                 if (!stageConfig) return;
                 const apiActions = (stages[stageName] || {}).actions || {};
                 Object.entries(stageConfig.actions).forEach(([key, def]) => {
-                    const apiStatus = (apiActions[key] || {}).status || 'pending';
-                    grid.appendChild(this._renderActionButton(key, def, apiStatus, false, false, wfName));
+                    const apiAction = apiActions[key] || {};
+                    const apiStatus = apiAction.status || 'pending';
+                    const isOptional = apiAction.optional === true;
+                    // Check if this action is suggested by any done action's next_actions_suggested
+                    let isSuggestedByDone = false;
+                    Object.values(apiActions).forEach(a => {
+                        if (a.status === 'done' && Array.isArray(a.next_actions_suggested) && a.next_actions_suggested.includes(key)) {
+                            isSuggestedByDone = true;
+                        }
+                    });
+                    grid.appendChild(this._renderActionButton(key, def, apiStatus, isSuggestedByDone, false, wfName, isOptional));
                 });
             });
             group.appendChild(grid);
@@ -230,22 +239,32 @@ const workflowStage = {
         grid.className = 'actions-grid';
 
         Object.entries(stageConfig.actions).forEach(([key, def]) => {
-            const apiStatus = (apiActions[key] || {}).status || 'pending';
+            const apiAction = apiActions[key] || {};
+            const apiStatus = apiAction.status || 'pending';
             const isSuggested = nextAction && nextAction.action === key && nextAction.stage === stageName;
-            grid.appendChild(this._renderActionButton(key, def, apiStatus, isSuggested, locked, wfName));
+            const isOptional = apiAction.optional === true;
+            // Check if this action is suggested by any done action's next_actions_suggested
+            let isSuggestedByDone = false;
+            Object.values(apiActions).forEach(a => {
+                if (a.status === 'done' && Array.isArray(a.next_actions_suggested) && a.next_actions_suggested.includes(key)) {
+                    isSuggestedByDone = true;
+                }
+            });
+            grid.appendChild(this._renderActionButton(key, def, apiStatus, isSuggested || isSuggestedByDone, locked, wfName, isOptional));
         });
 
         group.appendChild(grid);
         return group;
     },
 
-    _renderActionButton(actionKey, actionDef, status, isSuggested, locked, wfName) {
+    _renderActionButton(actionKey, actionDef, status, isSuggested, locked, wfName, isOptional) {
         const btn = document.createElement('button');
 
         let stateClass;
         if (locked) stateClass = 'locked';
         else if (status === 'done') stateClass = 'done';
         else if (isSuggested) stateClass = 'suggested';
+        else if (isOptional) stateClass = 'optional';
         else stateClass = 'normal';
 
         btn.className = `action-btn ${stateClass}`;
