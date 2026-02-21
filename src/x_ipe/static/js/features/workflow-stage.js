@@ -294,11 +294,11 @@ const workflowStage = {
         let stateClass;
         if (locked) stateClass = 'locked';
         else if (status === 'done') stateClass = 'done';
-        else if (isSuggested) stateClass = 'suggested';
         else if (isOptional) stateClass = 'optional';
         else stateClass = 'normal';
 
         btn.className = `action-btn ${stateClass}`;
+        if (isSuggested && stateClass !== 'done' && stateClass !== 'locked') btn.classList.add('suggested');
 
         if (actionDef.deferred) {
             btn.classList.add('locked');
