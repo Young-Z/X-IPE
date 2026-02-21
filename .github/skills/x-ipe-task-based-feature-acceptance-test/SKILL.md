@@ -37,6 +37,11 @@ input:
   task_id: "{TASK-XXX}"
   task_based_skill: "Feature Acceptance Test"
 
+  # Execution context (passed by x-ipe-workflow-task-execution)
+  execution_mode: "free-mode | workflow-mode"  # default: free-mode
+  workflow:
+    name: "N/A"  # workflow name, default: N/A
+
   # Task type attributes
   category: "standalone | feature-stage"
   next_task_based_skill: "Feature Closing | null"
@@ -253,6 +258,9 @@ task_completion_output:
   next_task_based_skill: "Feature Closing | null"
   require_human_review: "no"
   auto_proceed: "{from input}"
+  execution_mode: "{from input}"
+  workflow:
+    name: "{from input}"
   task_output_links:
     - "x-ipe-docs/requirements/FEATURE-XXX/acceptance-test-cases.md"
 

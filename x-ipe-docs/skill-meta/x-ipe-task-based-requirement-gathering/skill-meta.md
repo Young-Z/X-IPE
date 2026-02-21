@@ -136,7 +136,7 @@ acceptance_criteria:
       test: section_parse
       expected: |
         [Frontmatter, Purpose, Important Notes, Input Parameters, 
-         Definition of Ready, Execution Flow, Execution Procedure, 
+         Input Initialization, Definition of Ready, Execution Flow, Execution Procedure, 
          Output Result, Definition of Done, Patterns & Anti-Patterns, Examples]
 
     - id: AC-C02
@@ -199,6 +199,12 @@ acceptance_criteria:
       criterion: Anti-patterns include "skipping conflict review" scenario
       test: table_parse
       expected: anti-pattern table includes conflict-skipping row
+
+    - id: AC-C11
+      category: content
+      criterion: Input Initialization subsection present under Input Parameters
+      test: section_parse
+      expected: "### Input Initialization with <input_init> XML block"
 
   could:
     - id: AC-C10

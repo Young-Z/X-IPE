@@ -193,6 +193,12 @@ acceptance_criteria:
       test: content_check
       expected: "Consistent variable syntax"
 
+    - id: AC-S05
+      category: content
+      criterion: Input Initialization subsection present under Input Parameters
+      test: section_parse
+      expected: "### Input Initialization with <input_init> XML block"
+
   could:
     - id: AC-C01
       category: content

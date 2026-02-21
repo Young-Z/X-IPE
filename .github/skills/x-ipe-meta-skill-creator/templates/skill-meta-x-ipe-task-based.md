@@ -120,8 +120,9 @@ acceptance_criteria:
       test: section_parse
       expected: |
         [Frontmatter, Purpose, Important Notes, Input Parameters, 
-         Definition of Ready, Execution Flow, Execution Procedure, 
-         Output Result, Definition of Done, Patterns & Anti-Patterns, Examples]
+         Input Initialization, Definition of Ready, Execution Flow, 
+         Execution Procedure, Output Result, Definition of Done, 
+         Patterns & Anti-Patterns, Examples]
 
     - id: AC-C02
       category: content
@@ -163,11 +164,17 @@ acceptance_criteria:
 
     - id: AC-C05
       category: content
+      criterion: Input Initialization subsection present under Input Parameters
+      test: section_parse
+      expected: "### Input Initialization with <input_init> XML block"
+
+    - id: AC-C06
+      category: content
       criterion: Patterns cover common scenarios
       test: section_parse
       expected: ≥2 patterns with When/Then structure
 
-    - id: AC-C06
+    - id: AC-C07
       category: content
       criterion: Anti-patterns prevent common mistakes
       test: table_parse
@@ -180,13 +187,13 @@ acceptance_criteria:
       expected: skill blocks when preconditions not met
 
   could:
-    - id: AC-C07
+    - id: AC-C08
       category: content
       criterion: Web search guidance included
       test: content_check
       expected: Web search terms or references indicated
 
-    - id: AC-C08
+    - id: AC-C09
       category: content
       criterion: Freedom levels documented
       test: content_check

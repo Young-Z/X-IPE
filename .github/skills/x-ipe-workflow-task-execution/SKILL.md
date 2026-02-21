@@ -34,7 +34,6 @@ MANDATORY: NEVER use `manage_todo_list` (VS Code internal) as substitute for tas
 
 ```yaml
 input:
-  # Task Data Model - Core fields (set during planning)
   task:
     task_id: "TASK-XXX"
     task_based_skill: "{task_based_skill}"
@@ -44,62 +43,89 @@ input:
     status: "pending | in_progress | blocked | deferred | completed | cancelled"
     last_updated: "{MM-DD-YYYY HH:MM:SS}"
 
-  # Execution mode (detected from instruction prefix)
-  execution_mode: "free-mode | workflow-mode"  # default: free-mode
-  # free-mode: agent invoked manually (no workflow UI context)
-  # workflow-mode: agent invoked from Action Execution Modal (has workflow UI context)
+  execution_mode: "free-mode | workflow-mode"
+  workflow:
+    name: "N/A"
 
-  # Execution fields (set by task-based skill)
   execution:
     next_task_based_skill: "{task_based_skill} | null"
     require_human_review: true | false
     auto_proceed: true | false
     task_output_links: ["{links}"] | null
-    dynamic_attributes: {}  # Fully dynamic per task-based skill
+    dynamic_attributes: {}
 
-  # Git strategy (read from .x-ipe.yaml at workflow start)
   git:
-    strategy: "main-branch-only | dev-session-based"  # from .x-ipe.yaml git.strategy (default: dev-session-based)
-    main_branch: "{auto-detected}"                     # auto-detected from git, overridable via .x-ipe.yaml git.main-branch
+    strategy: "main-branch-only | dev-session-based"
+    main_branch: "{auto-detected}"
 
-  # Closing fields (set by category skill)
   closing:
     category_level_change_summary: "{summary, max 100 words} | null"
 ```
 
+### Input Initialization
+
+```xml
+<input_init>
+  <!-- Task fields (resolved during Step 1 Planning) -->
+  <field name="task.task_id" source="x-ipe+all+task-board-management (auto-generated on create)" />
+  <field name="task.task_based_skill" source="Auto-discovery: match request against .github/skills/x-ipe-task-based-*/SKILL.md descriptions" />
+  <field name="task.task_description" source="Summarize from human request (max 50 words)" />
+  <field name="task.category" source="Read from matched skill's Output Result `category` field" />
+  <field name="task.role_assigned" source="Current agent nickname" />
+  <field name="task.status" source="Set to 'pending' on creation" />
+  <field name="task.last_updated" source="Current timestamp on each status change" />
+
+  <!-- Execution mode (resolved at start of Step 1) -->
+  <field name="execution_mode">
+    <steps>
+      1. IF instruction starts with `--workflow-mode@{name}` → "workflow-mode"
+      2. IF instruction starts with `--workflow-mode` (no @) → "workflow-mode"
+      3. ELSE → "free-mode"
+    </steps>
+  </field>
+  <field name="workflow.name">
+    <steps>
+      1. IF instruction has `--workflow-mode@{name}` → extract {name}
+      2. ELSE → "N/A"
+    </steps>
+  </field>
+
+  <!-- Execution fields (populated after Step 3) -->
+  <field name="execution.next_task_based_skill" source="From task-based skill output" />
+  <field name="execution.require_human_review" source="From task-based skill output" />
+  <field name="execution.auto_proceed" source="From task-based skill output, OR global setting from task-board.md" />
+  <field name="execution.task_output_links" source="From task-based skill output" />
+
+  <!-- Git strategy (resolved during Step 2 DoR) -->
+  <field name="git.strategy">
+    <steps>
+      1. Read .x-ipe.yaml from project root
+      2. IF file exists AND git.strategy specified → use value
+      3. ELSE → "main-branch-only"
+    </steps>
+  </field>
+  <field name="git.main_branch">
+    <steps>
+      1. IF .x-ipe.yaml specifies git.main-branch → use value
+      2. ELSE → auto-detect from `git remote show origin` or fallback to main/master
+    </steps>
+  </field>
+
+  <!-- Closing fields (populated after Step 4) -->
+  <field name="closing.category_level_change_summary" source="From category skill output (or null if skipped)" />
+</input_init>
+```
+
 ### Git Strategy
 
-BLOCKING: At the start of every workflow execution, read `.x-ipe.yaml` from project root to determine `git.strategy` and `git.main-branch`. If `.x-ipe.yaml` does not exist or `git.strategy` is not specified, default to `dev-session-based`. If `git.main-branch` is not specified, auto-detect the main branch from git (see Step 2 procedure). Pass these values to all task-based skills that interact with git.
+BLOCKING: At the start of every workflow execution, read `.x-ipe.yaml` from project root to determine `git.strategy` and `git.main-branch`. If `.x-ipe.yaml` does not exist or `git.strategy` is not specified, default to `main-branch-only`. If `git.main-branch` is not specified, auto-detect the main branch from git (see Step 2 procedure). Pass these values to all task-based skills that interact with git.
 
 | Strategy | Branch Model | PR Required? | Description |
 |----------|-------------|--------------|-------------|
 | `main-branch-only` | Work directly on main branch | No | All commits go to main. No feature branches created. |
 | `dev-session-based` | `dev/{git_user_name}` branch per developer | Yes, on feature close | Each developer works on their own persistent branch. PR to main when a feature is closed. |
 
-**Rules by strategy:**
-
-**`main-branch-only`:**
-- Do NOT create any branches
-- All commits go directly to the main branch
-- No PRs needed — code lands on main immediately
-- `git push` pushes to main
-
-**`dev-session-based`:**
-- BLOCKING: Validate git identity before resolving branch name:
-  → Run: `git config user.name` and `git config user.email`
-  → Reject placeholder values: `"Your Name"`, `"you@example.com"`, empty, or any value matching common defaults
-  → IF placeholder detected: STOP and ask user to provide their actual git name/email
-  → Do NOT proceed with branch creation until valid identity confirmed
-- Resolve dev branch name from git identity (NOT agent nickname):
-  → Run: `git config user.name` (or `git config user.email` if user.name is empty)
-  → Sanitize: lowercase, replace spaces with hyphens, remove special chars
-  → Branch name: `dev/{sanitized_git_user_name}`
-- On first task execution, check if `dev/{git_user_name}` branch exists
-  - If not → create it from main: `git checkout -b dev/{git_user_name}`
-  - If exists → switch to it: `git checkout dev/{git_user_name}`
-- All work happens on this branch
-- On feature close → push branch, create PR targeting main
-- Branch persists across features (not deleted after PR)
+See [references/examples.md](references/examples.md) for detailed strategy rules and git identity validation.
 
 ### Category Derivation
 
@@ -199,9 +225,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
     <name>Task Planning</name>
     <trigger>Receive work request from human or system</trigger>
     <actions>
-      1. Detect execution mode from instruction prefix:
-         - IF instruction starts with `--workflow-mode` → set execution_mode = "workflow-mode", strip prefix from instruction
-         - ELSE → set execution_mode = "free-mode"
+      1. Resolve execution_mode and workflow.name from instruction prefix (see Input Initialization)
       2. Match request to task-based skill using auto-discovery (scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions)
          See references/examples.md for request matching patterns.
       3. Derive category from skill's Output Result `category` field
@@ -238,14 +262,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
            CALL x-ipe-tool-git-version-control skill: operation=init
            CALL x-ipe-tool-git-version-control skill: operation=create_gitignore
 
-      6. Read git strategy from .x-ipe.yaml:
-         → Read .x-ipe.yaml from project root (if file exists)
-         → Set git.strategy = git.strategy (default: "dev-session-based" if not specified or file missing)
-         → Set git.main_branch:
-           IF .x-ipe.yaml specifies git.main-branch → use that value
-           ELSE → auto-detect: run `git remote show origin` to find HEAD branch,
-                  or fallback to `git symbolic-ref refs/remotes/origin/HEAD` → parse branch name,
-                  or fallback to checking if `main` or `master` branch exists locally
+      6. Resolve git.strategy and git.main_branch (see Input Initialization)
 
       7. Apply git strategy:
          IF git.strategy == "main-branch-only":
@@ -277,7 +294,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
     <name>Task Work Execution</name>
     <actions>
       1. Load task-based skill: x-ipe-task-based-{task_based_skill}
-      2. Pass Task Data Model to skill, including execution_mode
+      2. Pass Task Data Model to skill, including execution_mode and workflow.name
       3. Check task-based skill DoR (defined in skill)
       4. Execute core work (defined in skill)
       5. Check task-based skill DoD (defined in skill)
@@ -338,7 +355,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
       3. Workflow Status Verification:
          IF execution_mode == "workflow-mode" AND completed skill's task_completion_output contains workflow_action field:
            a. Extract workflow_name and workflow_action from output
-           b. READ instance/workflows/workflow-{workflow_name}.json
+           b. READ instance/workflows/wf-{nnn}-{workflow_name}.json
            c. CHECK that actions.{workflow_action}.status is NOT "pending"
            d. IF status is "pending" → FLAG task as incomplete: "Workflow action '{workflow_action}' status not updated. Call update_workflow_action MCP tool before completing."
            e. IF workflow JSON file not found → WARN and skip (non-blocking)
@@ -358,6 +375,8 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
       > Category: {category}
       > Assignee: {role_assigned}
       > Status: {status}
+      > Execution Mode: {execution_mode}
+      > Workflow: {workflow.name}
       > Category Changes: {category_level_change_summary}
       > Require Human Review: {require_human_review}
       > Task Output Links: {task_output_links}
@@ -398,6 +417,9 @@ output:
   category: "{category}"
   role_assigned: "{role_assigned}"
   status: "completed | blocked | deferred"
+  execution_mode: "{execution_mode}"
+  workflow:
+    name: "{workflow.name}"
   category_level_change_summary: "{summary} | null"
   require_human_review: true | false
   task_output_links: ["{links}"] | null
@@ -463,13 +485,8 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 ---
 
-## Templates
+## Templates & Examples
 
 - `templates/task-record.yaml` - Task data template
 - `templates/task-board.md` - Task tracking board
-
----
-
-## Examples
-
-See [references/examples.md](references/examples.md) for full workflow examples and request matching patterns.
+- [references/examples.md](references/examples.md) - Full workflow examples, request matching patterns, and git strategy rules

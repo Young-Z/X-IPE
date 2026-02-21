@@ -70,6 +70,25 @@ input:
     {param_2}: "{type/desc}"
 ```
 
+### Input Initialization
+
+Describes how to resolve each input field value before execution begins. Acts as the skill's constructor — all resolution logic is centralized here instead of in execution steps.
+
+BLOCKING: All input fields with non-trivial initialization MUST be documented here. Do NOT embed field initialization logic in execution procedure steps.
+
+```xml
+<input_init>
+  <field name="operation" source="Caller specifies which operation to perform" />
+
+  <field name="{param_1}">
+    <steps>
+      1. {If condition, resolve value}
+      2. {Fallback action}
+    </steps>
+  </field>
+</input_init>
+```
+
 ---
 
 ## Definition of Ready

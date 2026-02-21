@@ -102,8 +102,8 @@ acceptance_criteria:
       test: section_parse
       expected: |
         [Frontmatter, Purpose, Important Notes, About, When to Use, 
-         Input Parameters, Definition of Ready, Operations, 
-         Output Result, Definition of Done, Error Handling, 
+         Input Parameters, Input Initialization, Definition of Ready, 
+         Operations, Output Result, Definition of Done, Error Handling, 
          Templates, Examples]
 
     - id: AC-C02
@@ -138,8 +138,14 @@ acceptance_criteria:
       test: content_check
       expected: "**Key Concepts:**"
 
-  could:
     - id: AC-C06
+      category: content
+      criterion: Input Initialization subsection present under Input Parameters
+      test: section_parse
+      expected: "### Input Initialization with <input_init> XML block"
+
+  could:
+    - id: AC-C07
       category: content
       criterion: Templates provided for outputs
       test: file_exists

@@ -51,6 +51,11 @@ input:
   task_id: "{TASK-XXX}"
   task_based_skill: "Technical Design"
 
+  # Execution context (passed by x-ipe-workflow-task-execution)
+  execution_mode: "free-mode | workflow-mode"  # default: free-mode
+  workflow:
+    name: "N/A"  # workflow name, default: N/A
+
   # Task type attributes
   category: "feature-stage"
   next_task_based_skill: "Code Implementation"
@@ -229,6 +234,9 @@ task_completion_output:
   next_task_based_skill: "Code Implementation"
   require_human_review: yes
   auto_proceed: {from input auto_proceed}
+  execution_mode: "{from input}"
+  workflow:
+    name: "{from input}"
   task_output_links:
     - "x-ipe-docs/requirements/FEATURE-XXX/technical-design.md"
   # Dynamic attributes

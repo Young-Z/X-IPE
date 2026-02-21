@@ -84,3 +84,9 @@ acceptance_criteria:
       criterion: Examples reflect in-place update pattern
       test: content_check
       expected: examples.md shows updating existing file, not creating v2
+
+    - id: AC-C05
+      category: content
+      criterion: Input Initialization subsection present under Input Parameters
+      test: section_parse
+      expected: "### Input Initialization with <input_init> XML block"

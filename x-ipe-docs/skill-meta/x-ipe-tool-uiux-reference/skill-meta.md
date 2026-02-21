@@ -103,8 +103,8 @@ acceptance_criteria:
       test: section_parse
       expected: |
         [Frontmatter, Purpose, Important Notes, About, When to Use,
-         Input Parameters, Definition of Ready, Operations,
-         Output Result, Definition of Done, Error Handling,
+         Input Parameters, Input Initialization, Definition of Ready,
+         Operations, Output Result, Definition of Done, Error Handling,
          Templates, Examples]
 
     - id: AC-C02
@@ -156,6 +156,12 @@ acceptance_criteria:
       criterion: Code snippets externalized to references/code-snippets.md
       test: file_exists
       expected: large JS blocks moved out of SKILL.md body
+
+    - id: AC-C08
+      category: content
+      criterion: Input Initialization subsection present under Input Parameters
+      test: section_parse
+      expected: "### Input Initialization with <input_init> XML block"
 
   could:
     - id: AC-C07

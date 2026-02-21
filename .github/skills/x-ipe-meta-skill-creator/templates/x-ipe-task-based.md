@@ -44,6 +44,11 @@ input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
   task_based_skill: "{task_based_skill}"
+
+  # Execution context (passed by x-ipe-workflow-task-execution)
+  execution_mode: "free-mode | workflow-mode"  # default: free-mode
+  workflow:
+    name: "N/A"  # workflow name, default: N/A
   
   # Task type attributes
   category: "{standalone | feature-stage | requirement-stage | ideation-stage}"
@@ -57,6 +62,32 @@ input:
   
   # Context (from previous task or project)
   {context_attr}: "{value_or_path}"
+```
+
+### Input Initialization
+
+Describes how to resolve each input field value before execution begins. Acts as the skill's constructor — all resolution logic is centralized here instead of in execution steps.
+
+BLOCKING: All input fields with non-trivial initialization MUST be documented here. Do NOT embed field initialization logic in execution procedure steps.
+
+```xml
+<input_init>
+  <!-- Standard fields (auto-populated by workflow) -->
+  <field name="task_id" source="task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="category" derive="Read from this skill's Output Result `category` field" />
+
+  <!-- Skill-specific fields (document resolution per field) -->
+  <field name="{input_1}">
+    <steps>
+      1. {If condition, use value from previous task output}
+      2. {Fallback action}
+    </steps>
+  </field>
+
+  <field name="{context_attr}" source="{previous task output or project config}" />
+</input_init>
 ```
 
 ---
@@ -154,6 +185,9 @@ task_completion_output:
   status: completed | blocked
   next_task_based_skill: "{Next Task-Based Skill}"
   require_human_review: "{yes | no}"
+  execution_mode: "{from input}"
+  workflow:
+    name: "{from input}"
   task_output_links:
     - "{output_file_path_1}"
     - "{output_file_path_2}"
@@ -244,6 +278,7 @@ task_based_skill_skills:
     2: Important Notes
     # DECISION
     3: Input Parameters
+    3a: "  └─ Input Initialization (### subsection)"
     4: Definition of Ready (DoR)
     # ACTION
     5: Execution Flow Summary

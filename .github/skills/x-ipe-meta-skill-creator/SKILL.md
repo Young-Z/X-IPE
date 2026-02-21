@@ -296,6 +296,7 @@ input:
       1. Verify skill's Output Result YAML declares: category, next_task_based_skill, require_human_review (x-ipe-task-based only)
       2. Verify skill description contains trigger keywords for auto-discovery (x-ipe-task-based only)
       3. Verify bidirectional references
+      4. Verify Input Initialization subsection exists under Input Parameters with <input_init> XML block
     </action>
     <constraints>
       - MANDATORY: Task-based skills must declare category, next_task_based_skill, require_human_review in Output Result for auto-discovery
@@ -450,6 +451,10 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   <checkpoint required="true">
     <name>Cross-References Valid</name>
     <verification>Auto-discovery fields present in Output Result (if x-ipe-task-based)</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Input Initialization Present</name>
+    <verification>Skills with non-trivial input resolution have ### Input Initialization subsection under Input Parameters</verification>
   </checkpoint>
 </definition_of_done>
 ```

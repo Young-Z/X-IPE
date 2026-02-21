@@ -77,6 +77,25 @@ input:
   {context_field}: "{value_or_path}"
 ```
 
+### Input Initialization
+
+Describes how to resolve each input field value before execution begins. Acts as the skill's constructor — all resolution logic is centralized here instead of in execution steps.
+
+BLOCKING: All input fields with non-trivial initialization MUST be documented here. Do NOT embed field initialization logic in execution procedure steps.
+
+```xml
+<input_init>
+  <field name="{primary_input}" source="{where the value comes from}" />
+
+  <field name="{context_field}">
+    <steps>
+      1. {If condition, resolve value}
+      2. {Fallback action}
+    </steps>
+  </field>
+</input_init>
+```
+
 ---
 
 ## Definition of Ready
@@ -242,6 +261,7 @@ meta_skills:
     3: Important Notes
     # DECISION
     4: Input Parameters
+    4a: "  └─ Input Initialization (### subsection)"
     5: Definition of Ready (DoR)
     # ACTION
     6: Execution Flow Summary

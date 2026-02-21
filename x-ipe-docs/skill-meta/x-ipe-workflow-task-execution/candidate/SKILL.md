@@ -34,7 +34,6 @@ MANDATORY: NEVER use `manage_todo_list` (VS Code internal) as substitute for tas
 
 ```yaml
 input:
-  # Task Data Model - Core fields (set during planning)
   task:
     task_id: "TASK-XXX"
     task_based_skill: "{task_based_skill}"
@@ -44,32 +43,28 @@ input:
     status: "pending | in_progress | blocked | deferred | completed | cancelled"
     last_updated: "{MM-DD-YYYY HH:MM:SS}"
 
-  # Execution mode (detected from instruction prefix)
-  execution_mode: "free-mode | workflow-mode"  # default: free-mode
-  # free-mode: agent invoked manually (no workflow UI context)
-  # workflow-mode: agent invoked from Action Execution Modal (has workflow UI context)
+  execution_mode: "free-mode | workflow-mode"
+  workflow:
+    name: "N/A"
 
-  # Execution fields (set by task-based skill)
   execution:
     next_task_based_skill: "{task_based_skill} | null"
     require_human_review: true | false
     auto_proceed: true | false
     task_output_links: ["{links}"] | null
-    dynamic_attributes: {}  # Fully dynamic per task-based skill
+    dynamic_attributes: {}
 
-  # Git strategy (read from .x-ipe.yaml at workflow start)
   git:
-    strategy: "main-branch-only | dev-session-based"  # from .x-ipe.yaml git.strategy (default: dev-session-based)
-    main_branch: "{auto-detected}"                     # auto-detected from git, overridable via .x-ipe.yaml git.main-branch
+    strategy: "main-branch-only | dev-session-based"
+    main_branch: "{auto-detected}"
 
-  # Closing fields (set by category skill)
   closing:
     category_level_change_summary: "{summary, max 100 words} | null"
 ```
 
 ### Git Strategy
 
-BLOCKING: At the start of every workflow execution, read `.x-ipe.yaml` from project root to determine `git.strategy` and `git.main-branch`. If `.x-ipe.yaml` does not exist or `git.strategy` is not specified, default to `dev-session-based`. If `git.main-branch` is not specified, auto-detect the main branch from git (see Step 2 procedure). Pass these values to all task-based skills that interact with git.
+BLOCKING: At the start of every workflow execution, read `.x-ipe.yaml` from project root to determine `git.strategy` and `git.main-branch`. If `.x-ipe.yaml` does not exist or `git.strategy` is not specified, default to `main-branch-only`. If `git.main-branch` is not specified, auto-detect the main branch from git (see Step 2 procedure). Pass these values to all task-based skills that interact with git.
 
 | Strategy | Branch Model | PR Required? | Description |
 |----------|-------------|--------------|-------------|
@@ -240,7 +235,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
 
       6. Read git strategy from .x-ipe.yaml:
          → Read .x-ipe.yaml from project root (if file exists)
-         → Set git.strategy = git.strategy (default: "dev-session-based" if not specified or file missing)
+         → Set git.strategy = git.strategy (default: "main-branch-only" if not specified or file missing)
          → Set git.main_branch:
            IF .x-ipe.yaml specifies git.main-branch → use that value
            ELSE → auto-detect: run `git remote show origin` to find HEAD branch,

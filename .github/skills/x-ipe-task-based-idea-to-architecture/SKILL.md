@@ -45,6 +45,11 @@ input:
   task_id: "{TASK-XXX}"
   task_based_skill: "Idea to Architecture"
 
+  # Execution context (passed by x-ipe-workflow-task-execution)
+  execution_mode: "free-mode | workflow-mode"  # default: free-mode
+  workflow:
+    name: "N/A"  # workflow name, default: N/A
+
   # Task type attributes
   category: "ideation-stage"
   next_task_based_skill: "Requirement Gathering"
@@ -249,6 +254,9 @@ task_completion_output:
   task_based_skill: "Idea to Architecture"
   status: "completed"
   auto_proceed: "{from input}"
+  execution_mode: "{from input}"
+  workflow:
+    name: "{from input}"
   idea_id: "IDEA-XXX"
   current_idea_folder: "{current_idea_folder}"
   architecture_tools_used:

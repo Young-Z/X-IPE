@@ -79,6 +79,7 @@ input:
     require_human_review: "true | false"
     task_output_links: "[{links}] | null"
     auto_proceed: "true | false"
+    workflow_name: "N/A"  # workflow name from execution context, default: N/A
 ```
 
 ---
@@ -144,7 +145,7 @@ input:
   <action>
     1. Locate task board
     2. Generate next task_id: find highest TASK-XXX number, increment by 1, zero-pad to 3 digits
-    3. Create task record with: task_id, task_based_skill, category, role_assigned, status: pending, last_updated: current timestamp
+    3. Create task record with: task_id, task_based_skill, category, role_assigned, status: pending, last_updated: current timestamp, workflow_name
     4. Add to Active Tasks section
     5. Update Quick Stats
     6. Run validate_integrity operation

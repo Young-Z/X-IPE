@@ -38,25 +38,38 @@ input:
   require_human_review: yes
   
   auto_proceed: false
-  execution_mode: "free-mode | workflow-mode"  # default: free-mode; set by x-ipe-workflow-task-execution
+  # Execution context (passed by x-ipe-workflow-task-execution)
+  execution_mode: "free-mode | workflow-mode"  # default: free-mode
+  workflow:
+    name: "N/A"  # workflow name, default: N/A
   idea_folder_path: "x-ipe-docs/ideas/{folder}"
   toolbox_meta_path: "x-ipe-docs/config/tools.json"
   extra_instructions: "{N/A | from config | from human}"
 ```
 
-### Extra Instructions Loading
+### Input Initialization
 
-```yaml
-loading_logic:
-  - step: 1
-    condition: "human provides explicit Extra Instructions"
-    action: "Use human-provided value"
-  - step: 2
-    condition: "x-ipe-docs/config/tools.json exists"
-    action: "Read stages.ideation.ideation._extra_instruction field"
-  - step: 3
-    condition: "field not found or empty"
-    action: "Set Extra Instructions = N/A"
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+
+  <field name="idea_folder_path">
+    <steps>
+      1. IF human specifies folder path → use provided path
+      2. ELSE scan x-ipe-docs/ideas/ for most recent folder
+    </steps>
+  </field>
+
+  <field name="extra_instructions">
+    <steps>
+      1. IF human provides explicit extra instructions → use human-provided value
+      2. ELSE IF x-ipe-docs/config/tools.json exists → read stages.ideation.ideation._extra_instruction field
+      3. ELSE → "N/A"
+    </steps>
+  </field>
+</input_init>
 ```
 
 ---
@@ -114,7 +127,7 @@ BLOCKING: Step 10 - Human MUST approve idea summary before proceeding.
       1. Check if x-ipe-docs/config/tools.json exists
       2. If exists: parse JSON, extract tools from stages.ideation
       3. If NOT exists: create default config with all tools disabled
-      4. Load Extra Instructions (human → config → N/A)
+      4. Resolve extra_instructions (see Input Initialization)
       5. Build and output the enabled tool list -- only tools with value `true` count as enabled; `false`, absent, or any other value means DISABLED
       6. BLOCKING: For each enabled tool that has a corresponding skill at .github/skills/{tool-name}/SKILL.md, LOAD that skill now. This ensures correct syntax and grammar are available before any content generation.
       7. Output format:
@@ -305,9 +318,10 @@ task_completion_output:
     - "x-ipe-docs/ideas/{folder}/refined-idea/idea-summary-vN.md"
     - "x-ipe-docs/ideas/{folder}/mockups/mockup-vN.html"
   # Dynamic attributes
-  execution_mode: "free-mode | workflow-mode"  # propagated from input
+  execution_mode: "{from input}"
+  workflow:
+    name: "{from input}"
   workflow_action: "refine_idea"        # triggers workflow status update when execution_mode == workflow-mode
-  workflow_name: "{from context}"       # used to locate workflow JSON
   workflow_action_updated: true | false # true if update_workflow_action was called
   idea_id: "IDEA-XXX"
   idea_status: Refined

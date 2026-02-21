@@ -133,9 +133,9 @@ acceptance_criteria:
       criterion: All 10 required sections present in v3 order
       test: section_parse
       expected: |
-        [Purpose, Important Notes, Input Parameters, Definition of Ready,
-         Execution Flow, Execution Procedure, Output Result,
-         Definition of Done, Patterns & Anti-Patterns, Examples]
+        [Purpose, Important Notes, Input Parameters, Input Initialization,
+         Definition of Ready, Execution Flow, Execution Procedure,
+         Output Result, Definition of Done, Patterns & Anti-Patterns, Examples]
 
     - id: AC-C02
       category: content
@@ -204,6 +204,12 @@ acceptance_criteria:
       criterion: Blocking rules prevent skip of brainstorming and human review
       test: execution
       expected: skill blocks when brainstorming incomplete or human not approved
+
+    - id: AC-C10
+      category: content
+      criterion: Input Initialization subsection present under Input Parameters
+      test: section_parse
+      expected: "### Input Initialization with <input_init> XML block"
 
   could:
     - id: AC-C09

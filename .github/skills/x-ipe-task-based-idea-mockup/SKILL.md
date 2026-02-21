@@ -34,6 +34,11 @@ input:
   task_id: "{TASK-XXX}"
   task_based_skill: "Idea Mockup"
 
+  # Execution context (passed by x-ipe-workflow-task-execution)
+  execution_mode: "free-mode | workflow-mode"  # default: free-mode
+  workflow:
+    name: "N/A"  # workflow name, default: N/A
+
   # Task type attributes
   category: "ideation-stage"
   next_task_based_skill: "Requirement Gathering"
@@ -267,6 +272,9 @@ task_completion_output:
   status: completed | blocked
   next_task_based_skill: "Requirement Gathering"
   require_human_review: "yes"
+  execution_mode: "{from input}"
+  workflow:
+    name: "{from input}"
   task_output_links:
     - "{current_idea_folder}/mockups/{mockup-type}-v1.html"
     - "{current_idea_folder}/idea-summary-vN.md"

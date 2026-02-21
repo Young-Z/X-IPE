@@ -29,6 +29,8 @@ status: pending                      # Task status:
                                      # - completed: Done (terminal)
                                      # - cancelled: Stopped (terminal)
 
+workflow_name: "N/A"                 # Workflow name from execution context, default: N/A
+
 # =============================================================================
 # OPTIONAL - ADVANCE CONTROL
 # =============================================================================

@@ -4,26 +4,25 @@
 
 ## Active Tasks
 
-| Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
-|---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-001 | | | | pending | | | |
+| Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task | Workflow |
+|---------|-----------|-------------|------|--------|--------------|--------------|----------|----------|
+| TASK-001 | | | | pending | | | | N/A |
 
 ---
 
 ## Completed Tasks
 
-| Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
-|---------|-----------|-------------|------|--------------|--------------|-------|
-| | | | | | | |
+| Task ID | Task | Description | Role | Last Updated | Output Links | Notes | Workflow |
+|---------|-----------|-------------|------|--------------|--------------|-------|----------|
+| | | | | | | | |
 
 ---
 
 ## Cancelled Tasks
 
-| Task ID | Task | Description | Reason | Last Updated | Output Links |
-|---------|-----------|-------------|--------|--------------|--------------|
-| | | | | | |
-| | | | | |
+| Task ID | Task | Description | Reason | Last Updated | Output Links | Workflow |
+|---------|-----------|-------------|--------|--------------|--------------|----------|
+| | | | | | | |
 
 ---
 

@@ -59,7 +59,7 @@ acceptance_criteria:
       category: content
       criterion: All required sections present in cognitive flow order
       test: section_parse
-      expected: Purpose, Important Notes, Input Parameters, DoR, Execution Flow, Execution Procedure, Output Result, DoD, Patterns, Examples
+      expected: Purpose, Important Notes, Input Parameters, Input Initialization, DoR, Execution Flow, Execution Procedure, Output Result, DoD, Patterns, Examples
 
     - id: AC-C02
       category: content
@@ -115,6 +115,12 @@ acceptance_criteria:
       criterion: Examples include dedup scenario
       test: content_check
       expected: examples.md has at least 1 dedup example
+
+    - id: AC-C10
+      category: content
+      criterion: Input Initialization subsection present under Input Parameters
+      test: section_parse
+      expected: "### Input Initialization with <input_init> XML block"
 
 test_scenarios:
   happy_path:
