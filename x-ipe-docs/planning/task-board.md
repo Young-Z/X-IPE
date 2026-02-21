@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-593 | Ideation | Refine idea wf-001-greedy-snake v2 — add multi-head snake concept, make it scary | Spark ⚡ | ✅ completed | 02-21-2026 12:14:00 | idea-summary-v2.md | Idea Mockup / Idea to Architecture |
 | TASK-592 | Bug Fix | Refine Idea modal: add idea file selector — default to compose_idea deliverable, list refined-idea/ folder files, update instructions on switch. Feedback-20260221-194456 | Zephyr 🌬️ | ✅ completed | 02-21-2026 11:50:00 | action-execution-modal.js, action-execution-modal.css | - |
 | TASK-591 | Bug Fix | ~~Suggested action btn: only change bg, not border.~~ REVERTED — dashed border already present. Feedback-20260221-191915 | Zephyr 🌬️ | 🔁 reverted | 02-21-2026 11:24:00 | workflow.css | - |
 | TASK-591 | Bug Fix | Suggested action: only change background, keep border style from base state (solid=mandatory, dashed=optional). Feedback-20260221-191915 | Zephyr 🌬️ | ✅ completed | 02-21-2026 11:27:00 | workflow.css, workflow-stage.js | - |
@@ -175,7 +176,7 @@
 
 ## Quick Stats
 
-- **Total Active:** 37
+- **Total Active:** 38
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
