@@ -164,6 +164,16 @@ class DeliverableViewer {
     }
 
     /**
+     * Make a deliverable card clickable for file preview.
+     */
+    makeClickableForPreview(card, filePath, opts = {}) {
+        if (opts.exists === false) return;
+        card.style.cursor = 'pointer';
+        card.classList.add('clickable');
+        card.addEventListener('click', () => this.showPreview(filePath));
+    }
+
+    /**
      * Show inline preview for a file.
      */
     async showPreview(filePath) {

@@ -259,6 +259,51 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
     });
   });
 
+  describe('TASK-589: File Deliverable Click-to-Preview', () => {
+    it('should have makeClickableForPreview method', () => {
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      expect(typeof viewer.makeClickableForPreview).toBe('function');
+    });
+
+    it('should set cursor pointer on card', () => {
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      const card = document.createElement('div');
+      viewer.makeClickableForPreview(card, 'ideas/test/idea-summary.md');
+      expect(card.style.cursor).toBe('pointer');
+    });
+
+    it('should call showPreview on click', async () => {
+      globalThis.fetch.mockResolvedValue({
+        ok: true,
+        text: async () => '# Content',
+      });
+
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      vi.spyOn(viewer, 'showPreview');
+      const card = document.createElement('div');
+      viewer.makeClickableForPreview(card, 'ideas/test/idea-summary.md');
+      document.body.appendChild(card);
+      card.click();
+      expect(viewer.showPreview).toHaveBeenCalledWith('ideas/test/idea-summary.md');
+    });
+
+    it('should not make missing deliverables clickable', () => {
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      const card = document.createElement('div');
+      card.classList.add('missing');
+      viewer.makeClickableForPreview(card, 'ideas/test/idea-summary.md', { exists: false });
+      expect(card.style.cursor).not.toBe('pointer');
+    });
+  });
+
   describe('Security', () => {
     it('should not allow path traversal in file requests', async () => {
       const DV = globalThis.DeliverableViewer;

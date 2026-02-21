@@ -912,7 +912,11 @@ const workflowStage = {
                     if (viewer && DeliverableViewer.isFolderType(item.path)) {
                         grid.appendChild(viewer.renderFolderDeliverable(item));
                     } else {
-                        grid.appendChild(this._renderDeliverableCard(item));
+                        const card = this._renderDeliverableCard(item);
+                        if (viewer && item.exists) {
+                            viewer.makeClickableForPreview(card, item.path, { exists: item.exists });
+                        }
+                        grid.appendChild(card);
                     }
                 });
             }
