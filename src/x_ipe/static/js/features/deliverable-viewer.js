@@ -11,6 +11,13 @@ class DeliverableViewer {
     }
 
     /**
+     * Strip x-ipe-docs/ prefix from display paths.
+     */
+    static stripDocsPrefix(path) {
+        return typeof path === 'string' ? path.replace(/^x-ipe-docs\//, '') : path;
+    }
+
+    /**
      * Check if a deliverable path represents a folder.
      */
     static isFolderType(path) {
@@ -28,6 +35,26 @@ class DeliverableViewer {
         const card = document.createElement('div');
         card.className = 'deliverable-card folder-type';
 
+        const iconEl = document.createElement('div');
+        iconEl.className = `deliverable-icon ${item.category || 'folders'}`;
+        iconEl.textContent = '📁';
+        card.appendChild(iconEl);
+
+        const info = document.createElement('div');
+        info.className = 'deliverable-info';
+
+        const nameEl = document.createElement('div');
+        nameEl.className = 'deliverable-name';
+        nameEl.textContent = item.name;
+        info.appendChild(nameEl);
+
+        const pathEl = document.createElement('div');
+        pathEl.className = 'deliverable-path';
+        pathEl.textContent = DeliverableViewer.stripDocsPrefix(item.path);
+        info.appendChild(pathEl);
+
+        card.appendChild(info);
+
         const header = document.createElement('div');
         header.className = 'deliverable-card-header';
 
@@ -35,20 +62,6 @@ class DeliverableViewer {
         toggle.className = 'toggle-icon';
         toggle.textContent = '▸';
         header.appendChild(toggle);
-
-        const icon = document.createElement('span');
-        icon.textContent = '📁';
-        header.appendChild(icon);
-
-        const nameEl = document.createElement('span');
-        nameEl.className = 'deliverable-name';
-        nameEl.textContent = item.name;
-        header.appendChild(nameEl);
-
-        const pathEl = document.createElement('span');
-        pathEl.className = 'deliverable-path';
-        pathEl.textContent = item.path;
-        header.appendChild(pathEl);
 
         card.appendChild(header);
 

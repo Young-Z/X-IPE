@@ -416,6 +416,11 @@
 .deliverable-icon.requirements { background: rgba(59,130,246,0.15); }
 .deliverable-icon.implementations { background: rgba(245,158,11,0.15); }
 .deliverable-icon.quality { background: rgba(16,185,129,0.15); }
+.deliverable-icon.folders { background: rgba(107,114,128,0.15); }
+.deliverable-card.folder-type { flex-wrap: wrap; }
+.deliverable-card-header { width: 100%; display: flex; align-items: center; }
+.deliverable-card-header .toggle-icon { cursor: pointer; font-size: 12px; color: var(--text-muted); margin-left: auto; user-select: none; }
+.deliverable-tree { width: 100%; }
 .deliverable-info { flex: 1; min-width: 0; }
 .deliverable-name { font-size: 12px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .deliverable-path { font-size: 10px; font-family: monospace; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

@@ -221,6 +221,44 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
     });
   });
 
+  describe('TASK-588: Deliverable Card Styling Fixes', () => {
+    it('should render folder icon with deliverable-icon class and background', () => {
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      const card = viewer.renderFolderDeliverable({ path: 'ideas/wf-001-greedy-snake', name: 'wf-001-greedy-snake', category: 'ideas' });
+      const icon = card.querySelector('.deliverable-icon');
+      expect(icon).not.toBeNull();
+      expect(icon.textContent).toBe('📁');
+    });
+
+    it('should render folder name and path on separate lines', () => {
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      const card = viewer.renderFolderDeliverable({ path: 'ideas/wf-001-greedy-snake', name: 'wf-001-greedy-snake', category: 'ideas' });
+      const info = card.querySelector('.deliverable-info');
+      expect(info).not.toBeNull();
+      const name = info.querySelector('.deliverable-name');
+      const path = info.querySelector('.deliverable-path');
+      expect(name).not.toBeNull();
+      expect(path).not.toBeNull();
+      // name and path should be block elements (div), not inline (span)
+      expect(name.tagName).toBe('DIV');
+      expect(path.tagName).toBe('DIV');
+    });
+
+    it('should strip x-ipe-docs/ prefix from folder deliverable path', () => {
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      const card = viewer.renderFolderDeliverable({ path: 'x-ipe-docs/ideas/wf-001-greedy-snake', name: 'wf-001-greedy-snake', category: 'ideas' });
+      const path = card.querySelector('.deliverable-path');
+      expect(path.textContent).not.toContain('x-ipe-docs/');
+      expect(path.textContent).toBe('ideas/wf-001-greedy-snake');
+    });
+  });
+
   describe('Security', () => {
     it('should not allow path traversal in file requests', async () => {
       const DV = globalThis.DeliverableViewer;

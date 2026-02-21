@@ -944,7 +944,7 @@ const workflowStage = {
         info.appendChild(nameEl);
         const pathEl = document.createElement('div');
         pathEl.className = 'deliverable-path';
-        pathEl.textContent = item.path;
+        pathEl.textContent = (item.path || '').replace(/^x-ipe-docs\//, '');
         info.appendChild(pathEl);
         if (!item.exists) {
             const badge = document.createElement('div');
