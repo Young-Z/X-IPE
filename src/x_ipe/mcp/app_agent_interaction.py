@@ -15,14 +15,32 @@ mcp = FastMCP(name="x-ipe-app-and-agent-interaction")
 
 
 def _resolve_base_url() -> str:
-    """Resolve backend URL from env var, .x-ipe.yaml config, or default."""
+    """Resolve backend URL from env var, .x-ipe.yaml config, or default.
+
+    Falls back to port 5858 if the configured port is unreachable.
+    """
     env_url = os.environ.get("X_IPE_BASE_URL")
     if env_url:
         return env_url
     try:
         from x_ipe.core.config import XIPEConfig
         config = XIPEConfig.load()
-        return f"http://{config.server_host}:{config.server_port}"
+        primary = f"http://{config.server_host}:{config.server_port}"
+        # Quick connectivity check on the configured port
+        try:
+            requests.head(primary, timeout=2)
+            return primary
+        except requests.ConnectionError:
+            pass
+        # Fallback to 5858 if different from configured port
+        if config.server_port != 5858:
+            fallback = f"http://{config.server_host}:5858"
+            try:
+                requests.head(fallback, timeout=2)
+                return fallback
+            except requests.ConnectionError:
+                pass
+        return primary
     except Exception:
         return "http://127.0.0.1:5858"
 
