@@ -71,14 +71,16 @@ class DeliverableViewer {
         card.appendChild(treeContainer);
 
         let expanded = false;
-        toggle.addEventListener('click', async () => {
+        const doToggle = async (e) => {
+            if (e.target.closest('.file-item')) return; // let file clicks through
             expanded = !expanded;
             toggle.textContent = expanded ? '▾' : '▸';
             treeContainer.style.display = expanded ? '' : 'none';
             if (expanded && treeContainer.children.length === 0) {
                 await this._expandFolderTree(treeContainer, item.path);
             }
-        });
+        };
+        card.addEventListener('click', doToggle);
 
         return card;
     }
@@ -183,36 +185,39 @@ class DeliverableViewer {
         }
 
         // Remove existing preview
-        const existing = document.querySelector('.deliverable-preview');
-        if (existing) existing.remove();
         const existingBackdrop = document.querySelector('.deliverable-preview-backdrop');
         if (existingBackdrop) existingBackdrop.remove();
 
-        // Backdrop overlay
+        const close = () => backdrop.remove();
+
+        // Backdrop overlay (contains the modal)
         const backdrop = document.createElement('div');
         backdrop.className = 'deliverable-preview-backdrop';
-        document.body.appendChild(backdrop);
+        backdrop.onclick = (e) => { if (e.target === backdrop) close(); };
 
         const preview = document.createElement('div');
         preview.className = 'deliverable-preview';
 
         const header = document.createElement('div');
         header.className = 'preview-header';
-        header.textContent = filePath.split('/').pop();
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = filePath.split('/').pop();
+        header.appendChild(titleSpan);
         const closeBtn = document.createElement('span');
         closeBtn.className = 'preview-close';
         closeBtn.textContent = '✕';
-        closeBtn.onclick = () => { preview.remove(); backdrop.remove(); };
+        closeBtn.onclick = close;
         header.appendChild(closeBtn);
         preview.appendChild(header);
-
-        backdrop.onclick = () => { preview.remove(); backdrop.remove(); };
 
         const content = document.createElement('div');
         content.className = 'preview-content';
         preview.appendChild(content);
 
-        document.body.appendChild(preview);
+        backdrop.appendChild(preview);
+        document.body.appendChild(backdrop);
+        // Trigger animation
+        requestAnimationFrame(() => backdrop.classList.add('active'));
         this._previewContainer = preview;
 
         try {
