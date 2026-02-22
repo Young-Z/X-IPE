@@ -183,6 +183,16 @@ describe('FEATURE-038-A: Action Execution Modal', () => {
       expect(cmd).toContain('Focus on UX flow');
     });
 
+    it('should use --extra-instructions flag format for extra instructions', async () => {
+      const Modal = globalThis.ActionExecutionModal;
+      expect(Modal).toBeDefined();
+      const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
+      await modal._loadInstructions();
+      const cmd = modal._buildCommand('let us do more');
+      expect(cmd).toContain('--extra-instructions');
+      expect(cmd).not.toContain('with extra instructions:');
+    });
+
     it('should work without extra instructions', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
