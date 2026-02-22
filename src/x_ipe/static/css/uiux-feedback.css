@@ -691,6 +691,11 @@
     background: #fef2f2;
 }
 
+.entry-action-btn.copy-path:hover {
+    color: var(--uiux-accent-dark);
+    background: var(--uiux-accent-light);
+}
+
 /* Entry Body */
 .feedback-entry-body {
     padding: 12px;

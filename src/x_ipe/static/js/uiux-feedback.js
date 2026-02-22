@@ -1423,6 +1423,9 @@ class UIUXFeedbackManager {
                         <span class="entry-status"><i class="bi ${statusIcon}"></i> ${statusText}</span>
                     </div>
                     <div class="entry-actions">
+                        ${entry.folder ? `<button class="entry-action-btn copy-path" title="Copy folder path" data-folder="${entry.folder}">
+                            <i class="bi bi-clipboard"></i>
+                        </button>` : ''}
                         <button class="entry-action-btn delete-entry" title="Delete">
                             <i class="bi bi-trash"></i>
                         </button>
@@ -1518,6 +1521,7 @@ class UIUXFeedbackManager {
             const id = entry.dataset.entryId;
             const header = entry.querySelector('.feedback-entry-header');
             const deleteBtn = entry.querySelector('.delete-entry');
+            const copyPathBtn = entry.querySelector('.copy-path');
             const descInput = entry.querySelector('.entry-description-input');
             const submitBtn = entry.querySelector('.btn-submit');
             const copilotBtn = entry.querySelector('.btn-copilot');
@@ -1528,6 +1532,20 @@ class UIUXFeedbackManager {
                     this._toggleEntry(id);
                 }
             });
+            
+            // Copy folder path
+            if (copyPathBtn) {
+                copyPathBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const folder = copyPathBtn.dataset.folder;
+                    navigator.clipboard.writeText(folder).then(() => {
+                        const icon = copyPathBtn.querySelector('i');
+                        icon.className = 'bi bi-clipboard-check';
+                        setTimeout(() => { icon.className = 'bi bi-clipboard'; }, 1500);
+                        this._showToast('Folder path copied', 'success');
+                    });
+                });
+            }
             
             // Delete entry
             deleteBtn.addEventListener('click', (e) => {
