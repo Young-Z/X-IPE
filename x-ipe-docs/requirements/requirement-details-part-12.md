@@ -146,3 +146,115 @@ All task-based skills referenced in ACTION_MAP MUST support workflow-mode execut
 | Mockup Function Name | Mockup Link |
 |---------------------|-------------|
 | N/A (extends existing modal pattern — no new visual mockup needed) | - |
+
+---
+
+## Feature List
+
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|--------------------|
+| FEATURE-040-A | EPIC-040 | Modal Generalization & Core Actions (MVP) | v1.0 | Replace `_resolveIdeaFiles()` with generic `_resolveInputFiles()`, add copilot-prompt configs for 3 primary actions, consistent modal UX | None |
+| FEATURE-040-B | EPIC-040 | Workflow Config & Remaining Actions | v1.0 | Add `deliverable_folder` to workflow template/config, add remaining prompt configs, per-feature resolution for implement stage | FEATURE-040-A |
+| FEATURE-040-C | EPIC-040 | Skill Workflow-Mode Compliance | v1.0 | Update 8 task-based skills with `execution_mode` input + `workflow_action` output for workflow-mode execution | None |
+
+---
+
+## Feature Details
+
+### FEATURE-040-A: Modal Generalization & Core Actions (MVP)
+
+**Summary:** The minimum viable change to make the Action Execution Modal work for design_mockup, requirement_gathering, and feature_breakdown — the 3 actions explicitly requested in the feedback. This is the core frontend refactoring.
+
+**Scope:**
+- Refactor `ActionExecutionModal._resolveIdeaFiles()` → `_resolveInputFiles(actionKey)` using `input_source` from copilot-prompt config
+- Add copilot-prompt.json entries for: `generate-mockup` (verify existing), `requirement-gathering`, `feature-breakdown` with `input_source` arrays
+- Generic `<input-file>` placeholder support in command templates
+- Multi-source grouped dropdown (deliverables from multiple source actions)
+- Fallback to manual path input when no deliverables found
+- "Configuration not yet available" message for unconfigured actions
+- Backward compatibility with existing `refine-idea` flow
+
+**Covered FRs:** FR-040.1, FR-040.2, FR-040.3, FR-040.4, FR-040.5, FR-040.6, FR-040.8 (3 core), FR-040.9, FR-040.11, FR-040.13, FR-040.14, FR-040.15, FR-040.16, FR-040.17, FR-040.18, FR-040.19
+
+**Acceptance Criteria:**
+- [ ] AC-040.1: Clicking "Design Mockup" opens modal with auto-resolved idea files from `refine_idea` deliverables
+- [ ] AC-040.2: Clicking "Requirement Gathering" opens modal with files from `refine_idea`/`design_mockup` deliverables
+- [ ] AC-040.3: Clicking "Feature Breakdown" opens modal with requirement docs from `requirement_gathering` deliverables
+- [ ] AC-040.9: All actions show instruction text from copilot-prompt.json
+- [ ] AC-040.10: All actions have extra-instructions textarea (500 char limit)
+- [ ] AC-040.11: All actions dispatch commands with `--workflow-mode@{name}` prefix
+- [ ] AC-040.12: Existing "Refine Idea" flow works without regression
+- [ ] AC-040.13: Missing copilot-prompt config shows "Configuration not yet available" message
+- [ ] AC-040.14: copilot-prompt.json entries exist for 3 core actions (requirement-gathering, feature-breakdown + verify generate-mockup)
+
+**Dependencies:** None (first feature, MVP)
+
+**Technical Considerations:**
+- `_resolveInputFiles()` reads `input_source` from copilot-prompt config to determine which source action(s) to fetch deliverables from
+- The existing `/api/workflow/{name}` endpoint already returns action deliverables — no backend change needed for this feature
+- `<current-idea-file>` placeholder should be aliased to `<input-file>` for backward compatibility
+- copilot-prompt.json `input_source` is a new field — existing entries without it should fall back to current behavior
+
+---
+
+### FEATURE-040-B: Workflow Config & Remaining Actions
+
+**Summary:** Extend the modal to support all remaining workflow actions (implement + validation + feedback stages) and add the `deliverable_folder` field to workflow template/config for auto-resolution.
+
+**Scope:**
+- Add `deliverable_folder` field to workflow template (workflow-template.json or equivalent config)
+- Propagate `deliverable_folder` through `/api/workflow/{name}` API response
+- Add copilot-prompt.json entries for: `feature-refinement`, `technical-design`, `test-generation`, `implementation`, `acceptance-testing`, `change-request`, `quality-evaluation` (deferred placeholder)
+- Per-feature resolution: for implement stage actions, use `deliverable_folder` + feature context to resolve the correct feature's deliverables
+- `change-request` action uses `user-selected` input_source (manual path input, no auto-resolution)
+
+**Covered FRs:** FR-040.7, FR-040.8 (remaining), FR-040.10, FR-040.12, FR-040.20, FR-040.21, FR-040.22, FR-040.23
+
+**Acceptance Criteria:**
+- [ ] AC-040.4: "Feature Refinement" opens modal with per-feature context
+- [ ] AC-040.5: "Technical Design" opens modal with feature spec from `feature_refinement` deliverables
+- [ ] AC-040.6: "Implementation" opens modal with technical design from `technical_design` deliverables
+- [ ] AC-040.7: "Acceptance Testing" opens modal with implementation deliverables
+- [ ] AC-040.8: "Change Request" opens modal with manual file path input
+- [ ] AC-040.15: `deliverable_folder` field present in workflow template and propagated via API
+- [ ] AC-040.17: Per-feature actions resolve feature context from workflow
+
+**Dependencies:** FEATURE-040-A (requires generalized modal infrastructure)
+
+**Technical Considerations:**
+- `deliverable_folder` is a relative path from the workflow's idea/epic root folder (e.g., `refined-idea/`, `EPIC-040/FEATURE-040-A/`)
+- For per-feature actions, `deliverable_folder` may include `{feature_id}` placeholder that resolves at runtime
+- Backend change: workflow template loader + API response must include `deliverable_folder`
+- `change_request` is special — always shows manual input, no auto-resolution
+
+---
+
+### FEATURE-040-C: Skill Workflow-Mode Compliance
+
+**Summary:** Update all 8 task-based skills that are not yet workflow-mode compliant. This is a documentation/config change (SKILL.md files), not a code change.
+
+**Scope:**
+- For each skill, add `execution_mode` and `workflow.name` to Input Parameters
+- Add `workflow_action` to Output Result YAML
+- Add conditional `update_workflow_action` MCP call in execution procedure (when `execution_mode == "workflow-mode"`)
+- Skills to update:
+  1. `x-ipe-task-based-idea-mockup` (partial → add workflow_action output)
+  2. `x-ipe-task-based-requirement-gathering`
+  3. `x-ipe-task-based-feature-breakdown`
+  4. `x-ipe-task-based-feature-refinement`
+  5. `x-ipe-task-based-technical-design`
+  6. `x-ipe-task-based-code-implementation`
+  7. `x-ipe-task-based-feature-acceptance-test`
+  8. `x-ipe-task-based-change-request`
+
+**Covered FRs:** FR-040.24, FR-040.25, FR-040.26, FR-040.27
+
+**Acceptance Criteria:**
+- [ ] AC-040.16: All 8 skills updated with `execution_mode` input + `workflow_action` output
+
+**Dependencies:** None (skill updates are independent of frontend/config changes)
+
+**Technical Considerations:**
+- Follow the pattern established by `x-ipe-task-based-ideation-v2` (updated in FEATURE-038-D) as the reference implementation
+- Each skill update is a SKILL.md file edit — no application code changes
+- Skills can be updated in parallel since they are independent files
