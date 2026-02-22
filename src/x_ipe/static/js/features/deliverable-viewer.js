@@ -77,6 +77,7 @@ class DeliverableViewer {
             const li = document.createElement('li');
             if (entry.type === 'dir') {
                 li.className = 'tree-item dir-item';
+                li.dataset.path = entry.path || '';
                 const dirIcon = document.createElement('span');
                 dirIcon.className = 'dir-icon';
                 dirIcon.textContent = '📁';

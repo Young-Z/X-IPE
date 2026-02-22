@@ -575,7 +575,7 @@
     border-radius: 12px;
     box-shadow: var(--tracing-shadow-md);
     width: 80vw;
-    max-height: 80vh;
+    max-height: 85vh;
     display: flex;
     flex-direction: column;
 }

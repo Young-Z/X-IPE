@@ -444,6 +444,93 @@ describe('FEATURE-039-A: Folder Browser Modal (MVP)', () => {
         expect(children.style.display).toBe('none');
       }
     });
+
+    it('should lazy-load sub-folder contents on click', async () => {
+      const FBM = globalThis.FolderBrowserModal;
+      expect(FBM).toBeDefined();
+
+      // First call: top-level tree (dir has no children from API)
+      const flatTree = [
+        { name: 'readme.md', type: 'file', path: 'folder/readme.md' },
+        { name: 'sub', type: 'dir', path: 'folder/sub/' },
+      ];
+      const subFolderContents = [
+        { name: 'inner.md', type: 'file', path: 'folder/sub/inner.md' },
+      ];
+
+      globalThis.fetch
+        .mockResolvedValueOnce({ ok: true, json: async () => flatTree })
+        .mockResolvedValueOnce({ ok: true, json: async () => subFolderContents });
+
+      const modal = new FBM({ workflowName: 'test-wf' });
+      modal.open('folder/');
+
+      await vi.waitFor(() => {
+        expect(document.querySelector('.file-tree')).not.toBeNull();
+      });
+
+      // Click the sub-folder dir-item
+      const dirItem = document.querySelector('.dir-item');
+      expect(dirItem).not.toBeNull();
+      dirItem.click();
+
+      // Should fetch sub-folder contents
+      await vi.waitFor(() => {
+        expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+        expect(globalThis.fetch).toHaveBeenLastCalledWith(
+          expect.stringContaining('path=folder%2Fsub%2F')
+        );
+      });
+
+      // Should render child tree
+      await vi.waitFor(() => {
+        const childTree = dirItem.querySelector('.file-tree');
+        expect(childTree).not.toBeNull();
+        expect(childTree.querySelector('.file-item')).not.toBeNull();
+      });
+    });
+
+    it('should toggle lazy-loaded sub-folder on second click', async () => {
+      const FBM = globalThis.FolderBrowserModal;
+      expect(FBM).toBeDefined();
+
+      const flatTree = [
+        { name: 'sub', type: 'dir', path: 'folder/sub/' },
+      ];
+      const subContents = [
+        { name: 'file.md', type: 'file', path: 'folder/sub/file.md' },
+      ];
+
+      globalThis.fetch
+        .mockResolvedValueOnce({ ok: true, json: async () => flatTree })
+        .mockResolvedValueOnce({ ok: true, json: async () => subContents });
+
+      const modal = new FBM({ workflowName: 'test-wf' });
+      modal.open('folder/');
+
+      await vi.waitFor(() => {
+        expect(document.querySelector('.dir-item')).not.toBeNull();
+      });
+
+      const dirItem = document.querySelector('.dir-item');
+      dirItem.click();
+
+      await vi.waitFor(() => {
+        expect(dirItem.querySelector('.file-tree')).not.toBeNull();
+      });
+
+      // Second click should hide (not re-fetch)
+      dirItem.click();
+      const childUl = dirItem.querySelector('ul');
+      expect(childUl.style.display).toBe('none');
+
+      // Third click should show again
+      dirItem.click();
+      expect(childUl.style.display).toBe('');
+
+      // fetch should still only have been called twice (no re-fetch)
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('Default Preview State', () => {

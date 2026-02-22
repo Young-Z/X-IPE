@@ -130,18 +130,80 @@ class FolderBrowserModal {
                 ? DeliverableViewer.buildTreeDOM(entries)
                 : this._buildSimpleTree(entries);
             this.treePanel.appendChild(tree);
-
-            // Wire file clicks
-            tree.querySelectorAll('.file-item[data-path]').forEach(item => {
-                item.style.cursor = 'pointer';
-                item.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this._selectFile(item.dataset.path, item);
-                });
-            });
+            this._wireTreeHandlers(tree);
         } catch (err) {
             if (err.name === 'AbortError') return;
             this._showTreeError(folderPath);
+        }
+    }
+
+    _wireTreeHandlers(tree) {
+        // Wire file clicks for preview
+        tree.querySelectorAll('.file-item[data-path]').forEach(item => {
+            item.style.cursor = 'pointer';
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this._selectFile(item.dataset.path, item);
+            });
+        });
+
+        // Wire dir clicks for lazy-load expand/collapse
+        tree.querySelectorAll('.dir-item').forEach(dirItem => {
+            // Skip dirs that buildTreeDOM already wired (have children UL)
+            if (dirItem.querySelector('ul')) return;
+
+            dirItem.style.cursor = 'pointer';
+            dirItem.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this._lazyLoadDir(dirItem);
+            });
+        });
+    }
+
+    async _lazyLoadDir(dirItem) {
+        const dirPath = dirItem.dataset.path;
+        if (!dirPath) return;
+
+        // If already loaded children, toggle visibility
+        const existingUl = dirItem.querySelector('ul');
+        if (existingUl) {
+            existingUl.style.display = existingUl.style.display === 'none' ? '' : 'none';
+            return;
+        }
+
+        // Show loading indicator
+        const loadingSpan = document.createElement('span');
+        loadingSpan.className = 'folder-browser-dir-loading';
+        loadingSpan.textContent = ' …';
+        dirItem.appendChild(loadingSpan);
+
+        try {
+            const resp = await fetch(
+                `/api/workflow/${encodeURIComponent(this.workflowName)}/deliverables/tree?path=${encodeURIComponent(dirPath)}`
+            );
+            loadingSpan.remove();
+
+            if (!resp.ok) return;
+            const entries = await resp.json();
+
+            if (!entries || entries.length === 0) {
+                const emptyUl = document.createElement('ul');
+                emptyUl.className = 'file-tree';
+                const li = document.createElement('li');
+                li.className = 'tree-item empty';
+                li.textContent = 'Empty folder';
+                emptyUl.appendChild(li);
+                dirItem.appendChild(emptyUl);
+                return;
+            }
+
+            const childTree = typeof DeliverableViewer !== 'undefined'
+                ? DeliverableViewer.buildTreeDOM(entries)
+                : this._buildSimpleTree(entries);
+            dirItem.appendChild(childTree);
+            this._wireTreeHandlers(childTree);
+        } catch {
+            loadingSpan.remove();
         }
     }
 
