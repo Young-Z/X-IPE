@@ -94,3 +94,5 @@ This board tracks all features across the project lifecycle.
 | FEATURE-038-C | EPIC-038 | Enhanced Deliverable Viewer | v1.0 | Implemented | [specification.md](../requirements/EPIC-038/FEATURE-038-C/specification.md), [technical-design.md](../requirements/EPIC-038/FEATURE-038-C/technical-design.md) | 02-20-2026 | 02-20-2026 22:46:00 |
 | FEATURE-038-D | EPIC-038 | Refinement Skill Integration | v1.0 | Implemented | [specification.md](../requirements/EPIC-038/FEATURE-038-D/specification.md), [technical-design.md](../requirements/EPIC-038/FEATURE-038-D/technical-design.md) | 02-20-2026 | 02-20-2026 22:20:00 |
 | FEATURE-038-E | EPIC-038 | Execution Skill DoD Update | v1.0 | Implemented | [specification.md](../requirements/EPIC-038/FEATURE-038-E/specification.md), [technical-design.md](../requirements/EPIC-038/FEATURE-038-E/technical-design.md) | 02-20-2026 | 02-20-2026 22:10:00 |
+| FEATURE-039-A | EPIC-039 | Folder Browser Modal (MVP) | v1.0 | Planned | - | 02-22-2026 | 02-22-2026 03:50:00 |
+| FEATURE-039-B | EPIC-039 | Enhanced Modal Features | v1.0 | Planned | FEATURE-039-A | 02-22-2026 | 02-22-2026 03:50:00 |

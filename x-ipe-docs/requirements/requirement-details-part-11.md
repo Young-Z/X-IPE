@@ -470,3 +470,77 @@ The user wants:
 ### Open Questions
 
 - None — all ambiguities resolved during ideation and clarification.
+
+---
+
+### Feature List
+
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-039-A | EPIC-039 | Folder Browser Modal (MVP) | v1.0 | Remove inline tree, add folder card distinct bg, click opens two-panel modal (tree left, preview right). Markdown+text preview, loading spinner, close via button/Escape/backdrop. | None |
+| FEATURE-039-B | EPIC-039 | Enhanced Modal Features | v1.0 | Add search/filter bar, breadcrumb navigation, typed file icons, image preview, download button, keyboard accessibility (Tab/arrows), ARIA roles. Edge cases: empty folder, load errors, large/binary files. | FEATURE-039-A |
+
+---
+
+### Feature Details
+
+#### FEATURE-039-A: Folder Browser Modal (MVP)
+
+**Version:** v1.0
+**Brief Description:** Core feature: remove inline folder tree code, give folder cards a distinct background color, and when a folder card is clicked, open a modal window (80vw) with tree panel (left 30%) and preview panel (right 70%). Preview supports markdown (via marked.js) and plain text. Modal has loading spinner, close button, Escape key, and backdrop click to close. Reuses existing API endpoints.
+
+**Acceptance Criteria:**
+- [ ] AC-039.1: Folder cards have visually distinct background from file cards (CSS variable `--deliverable-folder-bg`)
+- [ ] AC-039.2: Inline folder tree code fully removed (`_expandFolderTree()`, expand toggle, `.deliverable-tree`, inline preview backdrop)
+- [ ] AC-039.3: No dead CSS/JS remains from inline tree implementation
+- [ ] AC-039.4: Clicking folder card opens modal (80vw) with backdrop overlay
+- [ ] AC-039.5: Modal fetches folder tree from `GET /api/workflow/{wf}/deliverables/tree?path={folder}`
+- [ ] AC-039.6: Tree panel (left 30%) renders recursive folder structure with expand/collapse per folder
+- [ ] AC-039.7: Clicking a file in tree loads preview in right panel via `GET /api/ideas/file?path={file}`
+- [ ] AC-039.8: Markdown files rendered as HTML via `marked.parse()`; text/code files shown in `<pre>`
+- [ ] AC-039.9: Loading spinner shown while tree API call is in-flight
+- [ ] AC-039.10: Modal closes via close button, Escape key, or backdrop click
+
+**Dependencies:**
+- FEATURE-038-C (CR target — being replaced)
+- FEATURE-036-E (Deliverables base — folder detection remains)
+
+**Technical Considerations:**
+- Remove `_expandFolderTree()`, expand/collapse toggle, `.deliverable-tree` CSS, `.deliverable-preview-backdrop` from deliverable-viewer.js and workflow.css
+- New `FolderBrowserModal` class following same pattern as `ComposeIdeaModal` / `LinkExistingPanel`
+- Reuse existing API endpoints — no backend changes
+
+**Linked Mockups:**
+- N/A (text-based idea summary — no visual mockup)
+
+---
+
+#### FEATURE-039-B: Enhanced Modal Features
+
+**Version:** v1.0
+**Brief Description:** Extend the Folder Browser Modal with search/filter bar (case-insensitive, recursive), breadcrumb navigation, typed file icons (📝 .md, 🖼️ images, 💻 code, 📄 other), image preview (inline `<img>` for .png/.jpg/.svg), download button per file, keyboard accessibility (Tab between panels, arrow keys in tree), ARIA roles (`role="dialog"`, `role="tree"`). Handles edge cases: empty folder, file load errors, large files (>1MB truncate), binary files (download only).
+
+**Acceptance Criteria:**
+- [ ] AC-039.11: Search/filter bar filters file+folder names recursively (case-insensitive, debounced 200ms)
+- [ ] AC-039.12: Breadcrumb shows current folder path; truncates with "..." for >5 segments
+- [ ] AC-039.13: Files show type-specific icons (📝 .md, 🖼️ images, 💻 code, 📄 other)
+- [ ] AC-039.14: Image files (.png/.jpg/.svg) render inline in preview panel
+- [ ] AC-039.15: Download button downloads currently selected file; disabled when no file selected
+- [ ] AC-039.16: Binary/unsupported files show file info + "Download" button (no inline preview)
+- [ ] AC-039.17: Large files (>1MB text) truncated with "File too large — download instead"
+- [ ] AC-039.18: Empty folder shows "This folder is empty" message in tree panel
+- [ ] AC-039.19: File load failure shows error message with "Retry" button
+- [ ] AC-039.20: Keyboard: Escape closes, Tab moves between panels, arrow keys navigate tree
+- [ ] AC-039.21: ARIA roles: modal (`role="dialog"`), tree (`role="tree"`, `role="treeitem"`)
+
+**Dependencies:**
+- FEATURE-039-A (Folder Browser Modal MVP)
+
+**Technical Considerations:**
+- Search filter can reuse pattern from LinkExistingPanel's `_filterTree()`
+- Image preview: detect extension, render as `<img>` with file API URL or base64
+- Download: use `Content-Disposition: attachment` header or create blob URL
+- ARIA attributes added to modal container and tree elements
+
+**Linked Mockups:**
+- N/A (text-based idea summary — no visual mockup)
