@@ -216,6 +216,12 @@ Follow the same pattern as Compose Idea (EPIC-037):
 **Linked Mockups:**
 - [refine-idea-modal-v1.html](EPIC-038/mockups/refine-idea-modal-v1.html) — Scene 1 (action button states), Scene 2 (modal dialog)
 
+> **⚠️ CR Impact Note** (added 2026-02-22, ref: EPIC-040)
+> - **Change:** Generalize ActionExecutionModal to support ALL CLI workflow actions, not just Refine Idea. Replace `_resolveIdeaFiles()` with generic `_resolveInputFiles(actionKey)`. Add `input_source` / `deliverable_folder` fields to copilot-prompt.json.
+> - **Affected FRs:** FR-038.1 (modal instruction display), FR-038.4 (idea file selector → generic file selector), FR-038.6 (command construction → generalized command template)
+> - **Action Required:** Feature specification refactoring needed — modal must become action-agnostic
+> - **New Feature Ref:** EPIC-040 — see requirement-details-part-12.md
+
 ---
 
 #### FEATURE-038-B: Session Idle Detection
