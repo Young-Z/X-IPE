@@ -6,6 +6,9 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-607 | Ideation | IDEA-027: CR-Optimize Idea Mockup, Requirement Gathering and other workflow actions — extend Action Execution Modal to support design mockup, requirement gathering, feature breakdown etc. Feedback-20260222-132751 | Onyx 🖤 | 🔄 in_progress | 02-22-2026 06:38:00 | - | Idea Mockup / Idea to Architecture |
+| TASK-606 | Bug Fix | Feedback panel copy-path button missing on page reload — _parse_feedback_md omits `folder` field so entry.folder is undefined for loaded entries. Feedback-20260222-133420 | Sage 🔮 | ✅ completed | 02-22-2026 06:02:00 | uiux_feedback_service.py | - |
+| TASK-605 | Bug Fix | Action Execution Modal: extra instructions use wrong format — appends inline "with extra instructions:" instead of --extra-instructions flag | Bolt ⚡ | ✅ completed | 02-22-2026 05:55:00 | action-execution-modal.js, action-execution-modal.test.js | - |
 | TASK-594 | Ideation | IDEA-026: CR-Modal Window — folder card bg differs from file, remove inline folder tree, click folder opens modal with tree+preview. Feedback-20260222-110609 | Ember 🔥 | ✅ completed | 02-22-2026 03:15:00 | idea-summary-v1.md | Idea Mockup / Idea to Architecture |
 | TASK-595 | Requirement Gathering | EPIC-039: CR-Folder Browser Modal — replace inline tree with modal, folder card bg, search/breadcrumb/download. Based on IDEA-026 | Ember 🔥 | ✅ completed | 02-22-2026 03:48:00 | requirement-details-part-11.md | Feature Breakdown |
 | TASK-596 | Feature Breakdown | EPIC-039: Break CR-Folder Browser Modal into features | Ember 🔥 | ✅ completed | 02-22-2026 03:52:00 | requirement-details-part-11.md, features.md | Feature Refinement |
@@ -187,11 +190,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 39
+- **Total Active:** 41
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 446
+- **Completed (archived):** 447
 - **Reverted:** 8
 - **Pending Review:** 0
 - **Blocked:** 0
