@@ -261,7 +261,11 @@ const workflow = {
                     submitBtn.textContent = 'Create';
                 }
             } catch (e) {
-                errDiv.textContent = 'Network error — please try again';
+                let msg = 'Network error — please try again';
+                if (e instanceof SyntaxError) {
+                    msg = 'Server error — please check logs';
+                }
+                errDiv.textContent = msg;
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Create';
             } finally {

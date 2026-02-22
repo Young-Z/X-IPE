@@ -570,6 +570,44 @@ class TestWorkflowAPI:
         response = client.get("/api/workflow/next-test/next-action")
         assert response.status_code == 200
 
+    def test_create_workflow_server_error_returns_json(self, client, monkeypatch):
+        """POST /api/workflow/create returns JSON 500 even when service throws."""
+        from x_ipe.services import workflow_manager_service as wms
+        orig_create = wms.WorkflowManagerService.create_workflow
+        def boom(self, name):
+            raise RuntimeError("disk full")
+        monkeypatch.setattr(wms.WorkflowManagerService, "create_workflow", boom)
+        response = client.post("/api/workflow/create", json={"name": "err-test"})
+        assert response.status_code == 500
+        data = response.get_json()
+        assert data is not None, "Response must be JSON, not HTML"
+        assert data["success"] is False
+        assert "error" in data
+
+    def test_list_workflows_server_error_returns_json(self, client, monkeypatch):
+        """GET /api/workflow/list returns JSON 500 even when service throws."""
+        from x_ipe.services import workflow_manager_service as wms
+        def boom(self):
+            raise RuntimeError("oops")
+        monkeypatch.setattr(wms.WorkflowManagerService, "list_workflows", boom)
+        response = client.get("/api/workflow/list")
+        assert response.status_code == 500
+        data = response.get_json()
+        assert data is not None
+        assert data["success"] is False
+
+    def test_delete_workflow_server_error_returns_json(self, client, monkeypatch):
+        """DELETE /api/workflow/{name} returns JSON 500 even when service throws."""
+        from x_ipe.services import workflow_manager_service as wms
+        def boom(self, name):
+            raise RuntimeError("oops")
+        monkeypatch.setattr(wms.WorkflowManagerService, "delete_workflow", boom)
+        response = client.delete("/api/workflow/err-test")
+        assert response.status_code == 500
+        data = response.get_json()
+        assert data is not None
+        assert data["success"] is False
+
 
 # ==============================================================================
 # Tracing Tests

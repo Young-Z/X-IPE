@@ -11,6 +11,7 @@ Provides:
 - Dependency checking
 - Next-action suggestion
 """
+import logging
 import os
 from flask import Blueprint, jsonify, request, current_app
 
@@ -18,6 +19,18 @@ from x_ipe.services.workflow_manager_service import WorkflowManagerService
 from x_ipe.tracing import x_ipe_tracing
 
 workflow_bp = Blueprint('workflow', __name__)
+logger = logging.getLogger(__name__)
+
+
+@workflow_bp.errorhandler(Exception)
+def handle_workflow_error(e):
+    """Return JSON for any unhandled exception in workflow routes."""
+    logger.exception("Unhandled error in workflow route: %s", e)
+    return jsonify({
+        "success": False,
+        "error": "INTERNAL_ERROR",
+        "message": str(e) or "Internal server error",
+    }), 500
 
 
 def _get_service():
