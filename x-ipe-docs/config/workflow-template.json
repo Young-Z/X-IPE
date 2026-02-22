@@ -1,0 +1,95 @@
+{
+  "stage_order": ["ideation", "requirement", "implement", "validation", "feedback"],
+  "stages": {
+    "ideation": {
+      "type": "shared",
+      "next_stage": "requirement",
+      "actions": {
+        "compose_idea": {
+          "optional": false,
+          "deliverable_category": "ideas",
+          "next_actions_suggested": ["refine_idea", "reference_uiux"]
+        },
+        "reference_uiux": {
+          "optional": true,
+          "deliverable_category": "mockups",
+          "next_actions_suggested": ["design_mockup", "refine_idea"]
+        },
+        "refine_idea": {
+          "optional": false,
+          "deliverable_category": "ideas",
+          "next_actions_suggested": ["design_mockup", "requirement_gathering"]
+        },
+        "design_mockup": {
+          "optional": true,
+          "deliverable_category": "mockups",
+          "next_actions_suggested": ["requirement_gathering"]
+        }
+      }
+    },
+    "requirement": {
+      "type": "shared",
+      "next_stage": "implement",
+      "actions": {
+        "requirement_gathering": {
+          "optional": false,
+          "deliverable_category": "requirements",
+          "next_actions_suggested": ["feature_breakdown"]
+        },
+        "feature_breakdown": {
+          "optional": false,
+          "deliverable_category": "requirements",
+          "next_actions_suggested": []
+        }
+      }
+    },
+    "implement": {
+      "type": "per_feature",
+      "next_stage": "validation",
+      "actions": {
+        "feature_refinement": {
+          "optional": false,
+          "deliverable_category": "requirements",
+          "next_actions_suggested": ["technical_design"]
+        },
+        "technical_design": {
+          "optional": false,
+          "deliverable_category": "requirements",
+          "next_actions_suggested": ["implementation"]
+        },
+        "implementation": {
+          "optional": false,
+          "deliverable_category": "implementations",
+          "next_actions_suggested": ["acceptance_testing"]
+        }
+      }
+    },
+    "validation": {
+      "type": "per_feature",
+      "next_stage": "feedback",
+      "actions": {
+        "acceptance_testing": {
+          "optional": false,
+          "deliverable_category": "quality",
+          "next_actions_suggested": ["quality_evaluation"]
+        },
+        "quality_evaluation": {
+          "optional": true,
+          "deliverable_category": "quality",
+          "next_actions_suggested": ["change_request"]
+        }
+      }
+    },
+    "feedback": {
+      "type": "per_feature",
+      "next_stage": null,
+      "actions": {
+        "change_request": {
+          "optional": true,
+          "deliverable_category": "requirements",
+          "next_actions_suggested": []
+        }
+      }
+    }
+  }
+}

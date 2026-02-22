@@ -2,38 +2,48 @@
   "schema_version": "1.0",
   "name": "hello",
   "created": "2026-02-21T08:01:02.660474+00:00",
-  "last_activity": "2026-02-21T09:34:37.088804+00:00",
+  "last_activity": "2026-02-21T13:23:30.643416+00:00",
   "idea_folder": null,
   "current_stage": "requirement",
   "stages": {
     "ideation": {
-      "status": "completed",
+      "status": "in_progress",
       "actions": {
         "compose_idea": {
           "status": "done",
           "deliverables": [
             "x-ipe-docs/ideas/wf-001-greedy-snake/new idea.md",
             "x-ipe-docs/ideas/wf-001-greedy-snake"
+          ],
+          "next_actions_suggested": [
+            "refine_idea",
+            "reference_uiux"
           ]
         },
         "reference_uiux": {
           "status": "pending",
-          "deliverables": []
+          "deliverables": [],
+          "optional": true
         },
         "refine_idea": {
           "status": "done",
           "deliverables": [
-            "x-ipe-docs/ideas/wf-001-greedy-snake/refined-idea/idea-summary-v1.md"
+            "x-ipe-docs/ideas/wf-001-greedy-snake/refined-idea/idea-summary-v2.md"
+          ],
+          "next_actions_suggested": [
+            "design_mockup",
+            "requirement_gathering"
           ]
         },
         "design_mockup": {
           "status": "pending",
-          "deliverables": []
+          "deliverables": [],
+          "optional": true
         }
       }
     },
     "requirement": {
-      "status": "in_progress",
+      "status": "locked",
       "actions": {
         "requirement_gathering": {
           "status": "pending",
