@@ -23,6 +23,7 @@
     background: var(--card-bg, #fff);
     border-radius: 12px;
     width: 80vw;
+    height: 85vh;
     max-height: 85vh;
     display: flex;
     flex-direction: column;

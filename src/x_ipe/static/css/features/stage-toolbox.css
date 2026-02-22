@@ -28,6 +28,7 @@
 /* Modal Container */
 .toolbox-modal {
     width: 80vw;
+    height: 85vh;
     max-height: 85vh;
     background: #ffffff;
     border-radius: 16px;
