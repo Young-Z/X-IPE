@@ -1,7 +1,7 @@
 # Requirement Summary — Part 11
 
-> Last Updated: 02-20-2026
-> Covers: EPIC-038
+> Last Updated: 02-22-2026
+> Covers: EPIC-038, EPIC-039
 
 ---
 
@@ -267,6 +267,12 @@ Follow the same pattern as Compose Idea (EPIC-037):
 **Linked Mockups:**
 - [refine-idea-modal-v1.html](EPIC-038/mockups/refine-idea-modal-v1.html) — Scene 4 (deliverable viewer)
 
+> **⚠️ CR Impact Note** (added 2026-02-22, ref: EPIC-039)
+> - **Change:** Replace inline folder tree+preview with a dedicated Folder Browser Modal (two-panel: tree on left, preview on right). Add folder card distinct background, search/filter, breadcrumb, image preview, download button.
+> - **Affected FRs:** FR-038-C.2, FR-038-C.3, FR-038-C.4 (tree/preview rendering replaced with modal)
+> - **Action Required:** Feature specification refactoring needed — inline tree/preview ACs become modal-based ACs
+> - **New Feature Ref:** EPIC-039 — see requirement-details-part-11.md
+
 ---
 
 #### FEATURE-038-D: Refinement Skill Integration
@@ -313,3 +319,154 @@ Follow the same pattern as Compose Idea (EPIC-037):
 ### Open Questions
 
 - None — all ambiguities resolved during clarification.
+
+---
+
+## EPIC-039: CR-Folder Browser Modal
+
+### Project Overview
+
+A Change Request on **FEATURE-038-C** (Enhanced Deliverable Viewer) to replace the inline folder tree with a **Folder Browser Modal** — a two-panel file explorer (tree + preview) that opens when clicking a folder deliverable card. Additionally: distinct folder card background, search/filter, breadcrumb navigation, typed file icons, image preview, and file download.
+
+> Source: IDEA-026 (CR-Modal Window - Workflow-Deliverable Folder)
+> Status: Proposed
+> Priority: Medium
+> Idea Summary: [idea-summary-v1.md](../ideas/026.%20CR-Modal%20Window%20-%20Workflow-Deliverable%20Folder/refined-idea/idea-summary-v1.md)
+> Feedback: Feedback-20260222-110609
+
+### User Request
+
+The user wants:
+1. Folder deliverable cards to have a **different background color** from file cards for visual distinction
+2. **Remove all inline folder tree code** — no expandable tree within the card
+3. Clicking a folder card opens a **modal window (80vw)** with:
+   - Left panel (30%): folder tree navigation
+   - Right panel (70%): file preview
+   - Breadcrumb path above panels
+   - Search/filter bar
+   - Download button per file
+4. Pattern follows the **LinkExistingPanel** UX from compose-idea-modal (tree+preview, no editing)
+
+### Clarifications
+
+| # | Question | Answer |
+|---|----------|--------|
+| 1 | Search bar in modal? | Yes — filter files/folders recursively, case-insensitive on name |
+| 2 | File actions in preview? | Read-only preview + download button |
+| 3 | Modal size? | 80vw — consistent with other content modals |
+| 4 | Breadcrumb navigation? | Yes — shows full path context above panels |
+| 5 | File type icons? | Yes — 📝 .md, 🖼️ images, 💻 code, 📄 other |
+| 6 | Image preview support? | Yes — inline rendering of .png/.jpg/.svg |
+| 7 | Folder download as ZIP? | No — out of scope, individual file download only |
+
+### High-Level Requirements
+
+1. **HLR-039.1: Folder Card Visual Distinction** — Folder-type deliverable cards MUST have a visually distinct background color from file-type cards (e.g., CSS variable `--deliverable-folder-bg`)
+2. **HLR-039.2: Remove Inline Folder Tree** — All code for the expandable inline folder tree MUST be removed: `_expandFolderTree()`, expand/collapse toggle, `.deliverable-tree` container, inline preview backdrop. No dead code.
+3. **HLR-039.3: Folder Browser Modal** — Clicking a folder card opens a modal (80vw) with:
+   - Breadcrumb showing current folder path
+   - Search/filter bar (filters file+folder names recursively, case-insensitive)
+   - Tree panel (left 30%) with recursive folder tree, typed file icons
+   - Preview panel (right 70%) with auto-detected rendering:
+     - Markdown → HTML via marked.js
+     - Images (.png, .jpg, .svg) → inline `<img>`
+     - Code/text → preformatted `<pre>`
+     - Binary/unsupported → file info + download prompt
+   - Download button for currently previewed file
+4. **HLR-039.4: Modal Lifecycle** — Modal closes via close button, Escape key, or backdrop click. Loading spinner while tree API is in-flight.
+5. **HLR-039.5: Keyboard Accessibility** — Escape to close, Tab between panels, arrow keys for tree navigation. ARIA roles for modal and tree.
+6. **HLR-039.6: Reuse Existing APIs** — No new backend endpoints needed. Uses existing `GET /api/workflow/{wf}/deliverables/tree` and `GET /api/ideas/file`.
+
+### Functional Requirements
+
+**FR-039.1: Folder Card Styling**
+- Folder-type deliverable cards use a distinct background color via CSS variable
+- Folder icon and name displayed; no expand/collapse toggle
+- Click anywhere on card opens the Folder Browser Modal
+
+**FR-039.2: Dead Code Removal**
+- Remove `_expandFolderTree()` method from deliverable-viewer.js
+- Remove expand/collapse toggle button (▸/▾) from folder card rendering
+- Remove `.deliverable-tree` container and nested tree CSS
+- Remove `.deliverable-preview-backdrop` (inline preview overlay)
+- Remove all related event listeners and DOM manipulation code
+
+**FR-039.3: Folder Browser Modal — Structure**
+- Modal width: 80vw, centered, with backdrop overlay
+- Header: breadcrumb path + close button
+- Below header: search/filter input
+- Body: two-panel flexbox (left 30% tree, right 70% preview)
+- Footer: download button (enabled when file selected)
+
+**FR-039.4: Folder Browser Modal — Tree Panel**
+- Fetch folder tree from `GET /api/workflow/{wf}/deliverables/tree?path={folder}`
+- Render recursive tree with expand/collapse per folder node
+- File icons based on extension: 📝 `.md`, 🖼️ `.png/.jpg/.svg`, 💻 `.js/.py/.css/.html`, 📄 other
+- Click file → load preview in right panel
+- Click folder → expand/collapse
+
+**FR-039.5: Folder Browser Modal — Preview Panel**
+- Fetch file content from `GET /api/ideas/file?path={file}`
+- Auto-detect rendering:
+  - `.md` → `marked.parse()` into `<div class="markdown-body">`
+  - `.png/.jpg/.jpeg/.gif/.svg` → `<img src="data:..." />` or direct URL
+  - `.js/.py/.css/.html/.json/.yaml/.txt` → `<pre><code>` preformatted
+  - Binary/unknown → file name + size + "Download" button (no preview)
+- Show file name as preview header
+- Large files (>1MB text) → truncate with "File too large to preview — download instead"
+
+**FR-039.6: Search/Filter**
+- Input field above tree panel
+- Filters tree nodes (file and folder names) case-insensitive
+- Recursive: matches in nested folders expand parent folders
+- Real-time filtering on keyup (debounced 200ms)
+
+**FR-039.7: Breadcrumb Navigation**
+- Shows path segments separated by `/` (e.g., `ideas / 026 / refined-idea /`)
+- Truncates with "..." for paths > 5 segments
+- Display only; not clickable (modal is scoped to one folder)
+
+**FR-039.8: File Download**
+- Download button in preview panel footer
+- Downloads currently selected file via browser download (Content-Disposition)
+- Disabled when no file selected
+
+### Non-Functional Requirements
+
+- **NFR-039.1:** Modal tree render completes within 500ms for folders up to 50 files
+- **NFR-039.2:** File preview fetch and render completes within 1s for files up to 100KB
+- **NFR-039.3:** No additional JS libraries — uses native DOM + existing marked.js
+- **NFR-039.4:** CSS variables for folder card background (themeable)
+
+### Edge Cases
+
+| Edge Case | Expected Behavior |
+|-----------|-------------------|
+| Empty folder | Tree panel shows "This folder is empty" message |
+| File fails to load | Preview panel shows error with "Retry" button |
+| Large files (>1MB text) | Truncate preview, show "File too large — download instead" |
+| Binary files (.pdf, .zip) | Show file icon, name, size + "Download" (no inline preview) |
+| Deeply nested folders (>5 levels) | Tree supports unlimited nesting; breadcrumb truncates |
+| Special characters in filenames | URL-encode paths in API calls |
+| Folder path doesn't exist | Card shows existing "⚠️ not found" pattern |
+| Path traversal attempt | Rejected by backend path scoping (existing protection) |
+
+### Related Features (Conflict Review)
+
+| Existing Feature | Overlap Type | Decision |
+|-----------------|--------------|----------|
+| FEATURE-038-C (Enhanced Deliverable Viewer) | Functional replacement — inline tree+preview replaced by modal | **CR on FEATURE-038-C** — same responsibility, same users, same domain |
+| FEATURE-036-E (Deliverables, Polling & Lifecycle) | Indirect — base card grid, folder detection | No change needed — folder detection logic remains |
+| FEATURE-037-B (Compose Idea Modal — Link Existing) | Pattern reference — tree+preview layout | No change — reuse pattern only |
+
+### Constraints
+
+- Reuses existing backend APIs (no new endpoints)
+- Pattern follows LinkExistingPanel from compose-idea-modal
+- Dead code removal must be clean (no unused CSS/JS)
+- Folder card background uses CSS variable for themability
+- ARIA roles required for accessibility compliance
+
+### Open Questions
+
+- None — all ambiguities resolved during ideation and clarification.
