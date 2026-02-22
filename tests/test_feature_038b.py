@@ -58,7 +58,8 @@ class TestStripAnsi:
 class TestIsIdle:
     """Test PersistentSession.is_idle() method."""
 
-    def _make_session(self, state='connected', buffer_content='', last_output_age=5.0):
+    def _make_session(self, state='connected', buffer_content='', last_output_age=5.0,
+                      pty_alive=False, shell_foreground=False):
         """Create a mock PersistentSession with controlled state."""
         from src.x_ipe.services.terminal_service import PersistentSession
         session = PersistentSession.__new__(PersistentSession)
@@ -66,25 +67,57 @@ class TestIsIdle:
         session.output_buffer = MagicMock()
         session.output_buffer.get_contents.return_value = buffer_content
         session._last_output_time = time.time() - last_output_age
+        # Mock PTY session for process-based detection
+        if pty_alive:
+            session.pty_session = MagicMock()
+            session.pty_session.isalive.return_value = True
+            session.pty_session.is_shell_foreground.return_value = shell_foreground
+        else:
+            session.pty_session = None
         return session
 
+    # --- Process-based detection (primary path) ---
+
+    def test_idle_via_process_check_shell_foreground(self):
+        """Session is idle when shell is foreground process and no recent output."""
+        session = self._make_session(pty_alive=True, shell_foreground=True, last_output_age=5.0)
+        assert session.is_idle() is True
+
+    def test_not_idle_via_process_check_subprocess_running(self):
+        """Session is NOT idle when a subprocess (vim, build, etc.) is running."""
+        session = self._make_session(pty_alive=True, shell_foreground=False, last_output_age=5.0)
+        assert session.is_idle() is False
+
+    def test_not_idle_process_check_recent_output(self):
+        """Even with shell foreground, recent output means not idle."""
+        session = self._make_session(pty_alive=True, shell_foreground=True, last_output_age=0.5)
+        assert session.is_idle(idle_timeout=2.0) is False
+
+    def test_idle_process_check_custom_prompt(self):
+        """Process-based detection works regardless of prompt format."""
+        session = self._make_session(pty_alive=True, shell_foreground=True, last_output_age=5.0,
+                                     buffer_content="⚡ starship-prompt →")
+        assert session.is_idle() is True
+
+    # --- Buffer-based detection (fallback path) ---
+
     def test_idle_at_dollar_prompt(self):
-        """Session at '$ ' prompt with no recent output is idle."""
+        """Session at '$ ' prompt with no recent output is idle (fallback)."""
         session = self._make_session(buffer_content="user@host:~/project$ ", last_output_age=5.0)
         assert session.is_idle() is True
 
     def test_idle_at_percent_prompt(self):
-        """Session at '% ' prompt is idle."""
+        """Session at '% ' prompt is idle (fallback)."""
         session = self._make_session(buffer_content="user@host% ", last_output_age=5.0)
         assert session.is_idle() is True
 
     def test_idle_at_hash_prompt(self):
-        """Session at '# ' prompt (root) is idle."""
+        """Session at '# ' prompt (root) is idle (fallback)."""
         session = self._make_session(buffer_content="root@host# ", last_output_age=5.0)
         assert session.is_idle() is True
 
     def test_idle_at_angle_prompt(self):
-        """Session at '> ' prompt is idle."""
+        """Session at '> ' prompt is idle (fallback)."""
         session = self._make_session(buffer_content="PS C:\\> ", last_output_age=5.0)
         assert session.is_idle() is True
 
@@ -94,7 +127,7 @@ class TestIsIdle:
         assert session.is_idle() is False
 
     def test_not_idle_when_buffer_empty(self):
-        """Session with empty buffer is not idle."""
+        """Session with empty buffer is not idle (fallback path)."""
         session = self._make_session(buffer_content="", last_output_age=5.0)
         assert session.is_idle() is False
 
@@ -104,28 +137,28 @@ class TestIsIdle:
         assert session.is_idle(idle_timeout=2.0) is False
 
     def test_not_idle_when_running_command(self):
-        """Session showing command output (no prompt) is not idle."""
+        """Session showing command output (no prompt) is not idle (fallback)."""
         session = self._make_session(buffer_content="Running tests...\n  PASS test_foo.py", last_output_age=5.0)
         assert session.is_idle() is False
 
     def test_not_idle_in_vim(self):
-        """Session in vim is not idle (no shell prompt)."""
+        """Session in vim is not idle (no shell prompt, fallback)."""
         session = self._make_session(buffer_content="~\n~\n~\n-- INSERT --", last_output_age=5.0)
         assert session.is_idle() is False
 
     def test_not_idle_in_less(self):
-        """Session in less pager is not idle."""
+        """Session in less pager is not idle (fallback)."""
         session = self._make_session(buffer_content="(END)", last_output_age=5.0)
         assert session.is_idle() is False
 
     def test_idle_with_ansi_colored_prompt(self):
-        """Session with ANSI-colored prompt is correctly detected as idle."""
+        """Session with ANSI-colored prompt is correctly detected as idle (fallback)."""
         colored_prompt = "\x1b[32muser@host\x1b[0m:\x1b[34m~/project\x1b[0m$ "
         session = self._make_session(buffer_content=colored_prompt, last_output_age=5.0)
         assert session.is_idle() is True
 
     def test_idle_multiline_buffer_checks_last_line(self):
-        """Only the last non-empty line is checked for prompt."""
+        """Only the last non-empty line is checked for prompt (fallback)."""
         content = "previous command output\nmore output\nuser@host$ "
         session = self._make_session(buffer_content=content, last_output_age=5.0)
         assert session.is_idle() is True
@@ -144,6 +177,19 @@ class TestIsIdle:
         session.is_idle()
         elapsed = time.time() - start
         assert elapsed < 0.1
+
+    def test_process_based_takes_priority_over_buffer(self):
+        """When PTY is alive, process-based check is used even if buffer shows prompt."""
+        session = self._make_session(pty_alive=True, shell_foreground=False,
+                                     buffer_content="user@host$ ", last_output_age=5.0)
+        # Buffer shows prompt but subprocess is running — should NOT be idle
+        assert session.is_idle() is False
+
+    def test_fallback_to_buffer_when_pty_dead(self):
+        """When PTY is dead/None, falls back to buffer-based detection."""
+        session = self._make_session(pty_alive=False,
+                                     buffer_content="user@host$ ", last_output_age=5.0)
+        assert session.is_idle() is True
 
 
 # ---------------------------------------------------------------------------
@@ -248,3 +294,56 @@ class TestClaimSessionForAction:
         result = manager.claim_session_for_action('sess-1', 'hello', 'refine_idea')
         assert result is True
         assert session.name == 'wf-hello-refine_idea'
+
+
+# ---------------------------------------------------------------------------
+# PTYSession.is_shell_foreground()
+# ---------------------------------------------------------------------------
+
+class TestIsShellForeground:
+    """Test PTYSession.is_shell_foreground() method."""
+
+    def test_returns_false_when_fd_is_none(self):
+        """No PTY fd → not foreground."""
+        from src.x_ipe.services.terminal_service import PTYSession
+        pty = PTYSession.__new__(PTYSession)
+        pty.fd = None
+        pty.pid = 1234
+        assert pty.is_shell_foreground() is False
+
+    def test_returns_false_when_pid_is_none(self):
+        """No PID → not foreground."""
+        from src.x_ipe.services.terminal_service import PTYSession
+        pty = PTYSession.__new__(PTYSession)
+        pty.fd = 5
+        pty.pid = None
+        assert pty.is_shell_foreground() is False
+
+    @patch('os.tcgetpgrp', return_value=1234)
+    @patch('os.getpgid', return_value=1234)
+    def test_returns_true_when_shell_is_foreground(self, mock_getpgid, mock_tcgetpgrp):
+        """Shell PGID matches foreground PGID → foreground."""
+        from src.x_ipe.services.terminal_service import PTYSession
+        pty = PTYSession.__new__(PTYSession)
+        pty.fd = 5
+        pty.pid = 1234
+        assert pty.is_shell_foreground() is True
+
+    @patch('os.tcgetpgrp', return_value=5678)
+    @patch('os.getpgid', return_value=1234)
+    def test_returns_false_when_subprocess_is_foreground(self, mock_getpgid, mock_tcgetpgrp):
+        """Foreground PGID differs from shell PGID → subprocess running."""
+        from src.x_ipe.services.terminal_service import PTYSession
+        pty = PTYSession.__new__(PTYSession)
+        pty.fd = 5
+        pty.pid = 1234
+        assert pty.is_shell_foreground() is False
+
+    @patch('os.tcgetpgrp', side_effect=OSError("Bad file descriptor"))
+    def test_returns_false_on_os_error(self, mock_tcgetpgrp):
+        """OSError (closed fd, etc.) → False, no crash."""
+        from src.x_ipe.services.terminal_service import PTYSession
+        pty = PTYSession.__new__(PTYSession)
+        pty.fd = 5
+        pty.pid = 1234
+        assert pty.is_shell_foreground() is False

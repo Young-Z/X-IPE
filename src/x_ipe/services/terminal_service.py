@@ -153,13 +153,24 @@ class PersistentSession:
     
     @x_ipe_tracing()
     def is_idle(self, idle_timeout: float = 2.0) -> bool:
-        """Check if session is at a shell prompt and not producing output."""
+        """Check if session is idle (shell waiting for input, no subprocess).
+
+        Primary: OS-level check via tcgetpgrp — determines if the shell
+        (not a child process like vim/build) is the foreground process.
+        Fallback: prompt-suffix matching on the output buffer when the
+        PTY fd is unavailable.
+        Both paths require no output for *idle_timeout* seconds.
+        """
         if self.state != 'connected':
             return False
+        if time.time() - self._last_output_time < idle_timeout:
+            return False
+        # Primary: process-based detection via PTY
+        if self.pty_session and self.pty_session.isalive():
+            return self.pty_session.is_shell_foreground()
+        # Fallback: prompt-suffix matching on buffer
         contents = self.output_buffer.get_contents()
         if not contents:
-            return False
-        if time.time() - self._last_output_time < idle_timeout:
             return False
         lines = contents.rstrip('\n\r').split('\n')
         last_line = strip_ansi(lines[-1]) if lines else ''
@@ -451,6 +462,25 @@ class PTYSession:
                 pass
             self.pid = None
     
+    @x_ipe_tracing()
+    def is_shell_foreground(self) -> bool:
+        """Check if the shell is the foreground process of the PTY.
+
+        Uses os.tcgetpgrp() to get the foreground process group ID and
+        compares it to the shell's PID (which is also its PGID after
+        pty.fork + setsid). When the shell spawns a foreground command
+        (e.g. vim, a build script), the command's process group becomes
+        the foreground group, so this returns False.
+        """
+        if self.fd is None or self.pid is None:
+            return False
+        try:
+            fg_pgid = os.tcgetpgrp(self.fd)
+            shell_pgid = os.getpgid(self.pid)
+            return fg_pgid == shell_pgid
+        except OSError:
+            return False
+
     @x_ipe_tracing()
     def isalive(self) -> bool:
         """Check if the PTY process is still running."""

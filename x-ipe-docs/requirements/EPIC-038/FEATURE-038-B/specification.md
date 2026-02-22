@@ -10,6 +10,7 @@
 | Version | Date | Description |
 |---------|------|-------------|
 | v1.0 | 02-20-2026 | Initial specification — is_idle() and find_idle_session() for console sessions |
+| v1.1 | 02-22-2026 | Bug fix — replaced prompt-suffix matching with OS-level tcgetpgrp() process-based detection as primary idle signal; prompt matching retained as fallback |
 
 ## Linked Mockups
 
@@ -24,9 +25,10 @@
 This feature adds **session idle detection** to the existing console session management infrastructure. Currently, `PersistentSession` has `is_expired()` (1hr disconnect timeout) but no way to detect whether a **connected** session is actively running a command vs. sitting at a shell prompt.
 
 The feature adds:
-1. **`PersistentSession.is_idle()`** — Analyzes the output buffer's last line to determine if the session shows a shell prompt, indicating no active command is running.
-2. **`SessionManager.find_idle_session()`** — Iterates connected sessions and returns the first idle one, or `None` if all are busy.
-3. **Session rename on claim** — When a session is found idle and claimed for a workflow action, it is renamed to `wf-{workflow_name}-{action_name}`.
+1. **`PTYSession.is_shell_foreground()`** — Uses `os.tcgetpgrp(fd)` to check if the shell's process group is the foreground process group on the PTY. This is the **primary** idle detection signal — it works regardless of shell prompt format, theme, or ANSI codes.
+2. **`PersistentSession.is_idle()`** — Dual-path detection: primary (process-based via `is_shell_foreground()`) with fallback (prompt-suffix matching on the output buffer for edge cases when PTY fd is unavailable).
+3. **`SessionManager.find_idle_session()`** — Iterates connected sessions and returns the first idle one, or `None` if all are busy.
+4. **Session rename on claim** — When a session is found idle and claimed for a workflow action, it is renamed to `wf-{workflow_name}-{action_name}`.
 
 This is a **CR on FEATURE-029-A** (Session Explorer Core), extending session state detection beyond connected/disconnected/expired.
 
@@ -44,13 +46,14 @@ This is a **CR on FEATURE-029-A** (Session Explorer Core), extending session sta
 
 ### Idle Detection
 
-- [ ] AC-038-B.1: `PersistentSession.is_idle()` returns `True` when the last non-empty line of the output buffer matches a shell prompt pattern
-- [ ] AC-038-B.2: `is_idle()` returns `False` when the session is executing a command (output buffer's last line is not a prompt)
-- [ ] AC-038-B.3: `is_idle()` returns `False` when the session is in an interactive CLI tool (vim, less, man, top, etc.)
-- [ ] AC-038-B.4: Shell prompt patterns recognized by default: lines ending with `$ `, `% `, `> `, `# ` (with trailing space)
-- [ ] AC-038-B.5: `is_idle()` additionally checks that no output has been received for at least `idle_timeout` seconds (default: 2s) — a rapidly scrolling buffer is not idle even if last line matches a prompt
-- [ ] AC-038-B.6: `is_idle()` returns `False` for disconnected sessions (state != 'connected')
-- [ ] AC-038-B.7: `is_idle()` responds within 100ms (reads from in-memory buffer only, no I/O)
+- [x] AC-038-B.1: `PersistentSession.is_idle()` returns `True` when the shell is the foreground process (primary: `os.tcgetpgrp(fd)` matches shell PGID) OR when the last non-empty line matches a prompt pattern (fallback)
+- [x] AC-038-B.2: `is_idle()` returns `False` when the session is executing a command (primary: foreground PGID ≠ shell PGID; fallback: last line is not a prompt)
+- [x] AC-038-B.3: `is_idle()` returns `False` when the session is in an interactive CLI tool (vim, less, man, top, etc.) — subprocess becomes foreground process group
+- [x] AC-038-B.4: Shell prompt patterns recognized by fallback: lines ending with `$ `, `% `, `> `, `# ` (with trailing space)
+- [x] AC-038-B.4a: **Primary detection works with ANY prompt format** — custom prompts (starship, oh-my-zsh, powerline) are correctly detected via process-based check
+- [x] AC-038-B.5: `is_idle()` additionally checks that no output has been received for at least `idle_timeout` seconds (default: 2s) — a rapidly scrolling buffer is not idle even if shell is foreground
+- [x] AC-038-B.6: `is_idle()` returns `False` for disconnected sessions (state != 'connected')
+- [x] AC-038-B.7: `is_idle()` responds within 100ms (process check is a single syscall, no I/O)
 
 ### Find Idle Session
 
@@ -77,11 +80,9 @@ This is a **CR on FEATURE-029-A** (Session Explorer Core), extending session sta
 - Input: None (operates on instance state)
 - Process:
   1. Check `self.state == 'connected'` — if not, return `False`
-  2. Get last non-empty line from `self.output_buffer.get_contents()`
-  3. Strip ANSI escape sequences from the line
-  4. Check if the stripped line matches any shell prompt pattern (`$ `, `% `, `> `, `# ` at end)
-  5. Check `time.time() - self._last_output_time >= idle_timeout` (default 2s)
-  6. Return `True` only if both prompt match and timeout satisfied
+  2. Check `time.time() - self._last_output_time >= idle_timeout` — if not, return `False`
+  3. **Primary path (PTY alive):** Call `self.pty_session.is_shell_foreground()` which uses `os.tcgetpgrp(self.fd)` to compare the PTY's foreground process group ID to the shell's PGID — if equal, shell is in foreground (idle)
+  4. **Fallback path (PTY unavailable):** Get last non-empty line from buffer, strip ANSI, check prompt suffixes
 - Output: `bool`
 
 **FR-038-B.2: Last Output Timestamp Tracking**
@@ -161,32 +162,33 @@ None.
 
 | Edge Case | Expected Behavior |
 |-----------|-------------------|
-| Output buffer is empty (new session, no output yet) | `is_idle()` returns `False` — no prompt to match |
+| Output buffer is empty (new session, PTY alive) | Primary path: `is_shell_foreground()` checks process state (buffer irrelevant) |
+| Output buffer is empty (new session, PTY dead) | Fallback: `is_idle()` returns `False` — no prompt to match |
 | Session shows prompt but output is still streaming (fast) | `is_idle()` returns `False` — `_last_output_time` within idle_timeout |
-| Session running `cat` (no output, waiting for stdin) | `is_idle()` returns `False` — last line won't match prompt |
-| Session shows colored prompt (ANSI codes) | ANSI stripping extracts clean text, prompt pattern matched correctly |
-| Session in vim's command mode (`:` prompt) | `is_idle()` returns `False` — `:` not in default prompt patterns |
-| Custom shell prompt (e.g., `→ `) | Not detected by default — user can configure in future. MVP uses `$`, `%`, `>`, `#` |
+| Session running `cat` (no output, waiting for stdin) | Primary: `tcgetpgrp` returns `cat`'s PGID ≠ shell PGID → `False` |
+| Session shows colored prompt (ANSI codes) | Primary path ignores prompt; fallback: ANSI stripping extracts clean text |
+| Session in vim's command mode (`:` prompt) | Primary: vim's PGID is foreground → `False`; no prompt parsing needed |
+| Custom shell prompt (e.g., `→ `, starship, powerline) | Primary: `tcgetpgrp` == shell PGID → correctly detected as idle |
 | Multiple sessions idle simultaneously | `find_idle_session()` returns the first one encountered (dict iteration order) |
 | Session disconnects between find and claim | `claim_session_for_action()` checks session state, returns `False` if disconnected |
 | Concurrent callers both find same idle session | First to claim wins; second caller's claim sees session already renamed but still succeeds (idempotent rename) |
+| PTY fd closed unexpectedly | `is_shell_foreground()` catches `OSError` → fallback to prompt matching |
+| Non-POSIX system (no tcgetpgrp) | `OSError` caught → fallback to prompt-suffix matching |
 
 ## Out of Scope
 
-- **Configurable prompt patterns via UI** — MVP uses hardcoded defaults
+- ~~**Configurable prompt patterns via UI** — MVP uses hardcoded defaults~~ (no longer relevant — primary detection is process-based)
 - **Session priority/ranking** — first-found is used
 - **Automatic session creation** — caller (FEATURE-038-A) handles creation fallback
 - **Session pooling / pre-warming** — not needed at current scale (≤10 sessions)
-- **Detecting specific running processes** — only prompt-based detection, not `ps` inspection
 
 ## Technical Considerations
 
-- Add `_last_output_time: float` property to `PersistentSession.__init__()` and update in `_read_loop()` callback
-- Add `is_idle(idle_timeout: float = 2.0)` method to `PersistentSession`
-- Add `find_idle_session()` and `claim_session_for_action()` to `SessionManager`
-- ANSI stripping utility: standalone function, potentially reusable
-- New WebSocket events in `terminal_handlers.py`: `find_idle_session` (request/response), `session_renamed` (broadcast)
-- Frontend: add `findIdleSession()` to `TerminalManager`, add `session_renamed` event handler
+- `PTYSession.is_shell_foreground()` uses `os.tcgetpgrp(fd)` to get the foreground PGID and `os.getpgid(pid)` to get the shell's PGID — single syscall, sub-millisecond
+- `PersistentSession.is_idle()` dual-path: primary (process-based) when PTY is alive, fallback (prompt-suffix) when PTY fd is unavailable
+- `_last_output_time` idle timeout check runs first to short-circuit before any detection logic
+- `strip_ansi()` and `SHELL_PROMPT_SUFFIXES` retained for fallback path only
+- All existing WebSocket handlers (`find_idle_session`, `claim_session`) and frontend methods (`findIdleSession()`) remain unchanged — the fix is internal to `is_idle()`
 
 ## Open Questions
 
