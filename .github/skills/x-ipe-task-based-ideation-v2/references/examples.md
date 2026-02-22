@@ -166,30 +166,7 @@
 
 ---
 
-## Example 4: Draft Folder Rename
-
-**Scenario:** Idea folder is named "Draft Idea - 01232026 131611"
-
-**Execution:**
-```
-1. Complete ideation process...
-
-2. Idea refined to: "E-Commerce Checkout System"
-
-3. Rename Folder:
-   FROM: x-ipe-docs/ideas/Draft Idea - 01232026 131611/
-   TO:   x-ipe-docs/ideas/E-Commerce Checkout - 01232026 131611/
-
-4. Update all internal links in idea-summary-v1.md
-
-5. Output includes new folder path:
-   idea_folder: "E-Commerce Checkout - 01232026 131611"
-   folder_renamed: true
-```
-
----
-
-## Example 5: Brainstorming Question Batches
+## Example 4: Brainstorming Question Batches
 
 **Scenario:** Showing proper question batching technique
 

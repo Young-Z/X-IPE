@@ -53,27 +53,30 @@ class ActionExecutionModal {
         }
         if (!config) return;
 
-        const configId = this.actionKey.replace(/_/g, '-');
-        for (const [, stageData] of Object.entries(config)) {
-            if (stageData.prompts) {
-                const prompt = stageData.prompts.find(p => p.id === configId);
-                if (prompt) {
-                    const detail = prompt['prompt-details'].find(d => d.language === 'en')
-                        || prompt['prompt-details'][0];
-                    let command = detail.command;
-                    // Resolve <current-idea-file> placeholder from workflow deliverables
-                    if (command.includes('<current-idea-file>') && this.workflowName) {
-                        this._ideaFiles = await this._resolveIdeaFiles();
-                        this._commandTemplate = command;
-                        const selected = this._ideaFiles.length ? this._ideaFiles[0] : null;
-                        this._selectedIdeaFile = selected;
-                        if (selected) command = command.replace('<current-idea-file>', selected);
-                    }
-                    this._loadedInstructions = { label: detail.label, command };
-                    return;
-                }
+        const entry = this._getConfigEntry(config);
+        if (!entry) return;
+
+        const detail = entry['prompt-details'].find(d => d.language === 'en')
+            || entry['prompt-details'][0];
+        let command = detail.command;
+
+        // Resolve input files from input_source or legacy <current-idea-file>
+        const hasInputPlaceholder = command.includes('<input-file>') || command.includes('<current-idea-file>');
+        if (hasInputPlaceholder && this.workflowName) {
+            if (entry.input_source) {
+                this._inputFiles = await this._resolveInputFiles(entry.input_source);
+            } else {
+                this._inputFiles = await this._resolveIdeaFiles();
+            }
+            this._commandTemplate = command;
+            const selected = this._inputFiles.length ? this._inputFiles[0] : null;
+            this._selectedInputFile = selected;
+            if (selected) {
+                command = command.replace(/<input-file>|<current-idea-file>/g, selected);
             }
         }
+
+        this._loadedInstructions = { label: detail.label, command };
     }
 
     async _resolveIdeaFiles() {
@@ -109,6 +112,63 @@ class ActionExecutionModal {
         return files;
     }
 
+    _getConfigEntry(config) {
+        const configId = this.actionKey.replace(/_/g, '-');
+        for (const [, sectionData] of Object.entries(config)) {
+            if (sectionData && sectionData.prompts) {
+                const found = sectionData.prompts.find(p => p.id === configId);
+                if (found) return found;
+            }
+            if (sectionData && sectionData.id === configId) return sectionData;
+            if (Array.isArray(sectionData)) {
+                const found = sectionData.find(p => p.id === configId);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+
+    async _resolveInputFiles(inputSource) {
+        const files = [];
+        try {
+            const resp = await fetch(`/api/workflow/${encodeURIComponent(this.workflowName)}`);
+            if (!resp.ok) return files;
+            const json = await resp.json();
+            const stages = (json.data || {}).stages || {};
+
+            for (const sourceAction of inputSource) {
+                for (const [, stageData] of Object.entries(stages)) {
+                    const action = (stageData.actions || {})[sourceAction];
+                    if (!action || !action.deliverables) continue;
+
+                    for (const d of action.deliverables) {
+                        if (d.endsWith('.md') && !files.includes(d)) {
+                            files.push(d);
+                        }
+                        // If deliverable looks like a folder (no extension), scan it
+                        if (!d.includes('.')) {
+                            try {
+                                const treeResp = await fetch(
+                                    `/api/workflow/${encodeURIComponent(this.workflowName)}/deliverables/tree?path=${encodeURIComponent(d)}`
+                                );
+                                if (treeResp.ok) {
+                                    const treeJson = await treeResp.json();
+                                    const entries = Array.isArray(treeJson) ? treeJson : (treeJson.data || treeJson.entries || []);
+                                    for (const entry of entries) {
+                                        if (entry.type === 'file' && entry.path && entry.path.endsWith('.md')) {
+                                            if (!files.includes(entry.path)) files.push(entry.path);
+                                        }
+                                    }
+                                }
+                            } catch (e) { /* folder may not exist */ }
+                        }
+                    }
+                }
+            }
+        } catch (e) { /* ignore */ }
+        return files;
+    }
+
     /* --- DOM Creation ----------------------------------------------------- */
 
     _createDOM() {
@@ -134,12 +194,17 @@ class ActionExecutionModal {
                             <span>Execution in progress…</span>
                         </div>
                     ` : `
-                        ${this._ideaFiles && this._ideaFiles.length > 0 ? `
-                        <div class="idea-selector-section">
-                            <div class="instructions-label">Current Selected Idea</div>
-                            <select class="idea-selector">
-                                ${this._ideaFiles.map((f, i) => `<option value="${this._escapeHtml(f)}" ${i === 0 ? 'selected' : ''}>${this._escapeHtml(f.split('/').pop())} <span class="idea-path-hint">(${this._escapeHtml(f)})</span></option>`).join('')}
+                        ${this._inputFiles && this._inputFiles.length > 0 ? `
+                        <div class="input-selector-section">
+                            <div class="instructions-label">Input File</div>
+                            <select class="input-selector">
+                                ${this._inputFiles.map((f, i) => `<option value="${this._escapeHtml(f)}" ${i === 0 ? 'selected' : ''}>${this._escapeHtml(f.split('/').pop())} <span class="path-hint">(${this._escapeHtml(f)})</span></option>`).join('')}
                             </select>
+                        </div>
+                        ` : this._commandTemplate && (this._commandTemplate.includes('<input-file>') || this._commandTemplate.includes('<current-idea-file>')) ? `
+                        <div class="input-selector-section">
+                            <div class="instructions-label">Input File</div>
+                            <input type="text" class="input-path-manual" placeholder="Enter file path...">
                         </div>
                         ` : ''}
                         <div class="instructions-section">
@@ -181,15 +246,29 @@ class ActionExecutionModal {
         };
         document.addEventListener('keydown', this._keyHandler);
 
-        // Idea file selector
-        const ideaSelector = this.overlay.querySelector('.idea-selector');
-        if (ideaSelector) {
-            ideaSelector.addEventListener('change', () => {
-                this._selectedIdeaFile = ideaSelector.value;
-                const newCommand = this._commandTemplate.replace('<current-idea-file>', this._selectedIdeaFile);
+        // Input file selector (dropdown)
+        const inputSelector = this.overlay.querySelector('.input-selector');
+        if (inputSelector) {
+            inputSelector.addEventListener('change', () => {
+                this._selectedInputFile = inputSelector.value;
+                const newCommand = this._commandTemplate.replace(/<input-file>|<current-idea-file>/g, this._selectedInputFile);
                 this._loadedInstructions.command = newCommand;
                 const contentEl = this.overlay.querySelector('.instructions-content');
                 if (contentEl) contentEl.textContent = newCommand;
+            });
+        }
+
+        // Manual path input (fallback when no files auto-resolved)
+        const manualInput = this.overlay.querySelector('.input-path-manual');
+        if (manualInput) {
+            manualInput.addEventListener('input', () => {
+                this._selectedInputFile = manualInput.value;
+                if (manualInput.value.trim()) {
+                    const newCommand = this._commandTemplate.replace(/<input-file>|<current-idea-file>/g, manualInput.value.trim());
+                    this._loadedInstructions.command = newCommand;
+                    const contentEl = this.overlay.querySelector('.instructions-content');
+                    if (contentEl) contentEl.textContent = newCommand;
+                }
             });
         }
 

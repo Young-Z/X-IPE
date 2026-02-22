@@ -1,20 +1,21 @@
 {
-  "version": "3.0",
+  "version": "3.1",
   "ideation": {
     "prompts": [
       {
         "id": "refine-idea",
         "icon": "bi-stars",
+        "input_source": ["compose_idea"],
         "prompt-details": [
           {
             "language": "en",
             "label": "Refine Idea",
-            "command": "refine the idea <current-idea-file>"
+            "command": "refine the idea <current-idea-file> with ideation skill"
           },
           {
             "language": "zh",
             "label": "完善创意",
-            "command": "完善创意 <current-idea-file>"
+            "command": "使用创意技能, 完善创意 <current-idea-file> "
           }
         ]
       },
@@ -35,8 +36,25 @@
         ]
       },
       {
+        "id": "idea-reflection",
+        "icon": "bi-diagram-3",
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Idea Reflection",
+            "command": "Extra key points in <current-idea-file>, then create a sub-agent that uses these key points to learn from the project and give feedback to the idea file (the feedback should be critical but constructive), then you use the feedback to improve the idea."
+          },
+          {
+            "language": "zh",
+            "label": "创意反思",
+            "command": "提取<current-idea-file>中的关键点，然后创建一个子代理，使用这些关键点从项目中学习并给出对创意文件的反馈（反馈应当批判性但建设性），然后你使用反馈来改进创意。"
+          }
+        ]
+      },
+      {
         "id": "generate-mockup",
         "icon": "bi-palette",
+        "input_source": ["refine_idea", "compose_idea"],
         "prompt-details": [
           {
             "language": "en",
@@ -65,10 +83,182 @@
             "command": "基于<current-idea-file>进行协作，等待我的指示。"
           }
         ]
+      },
+      {
+        "id": "uiux-reference",
+        "icon": "bi-palette2",
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "UIUX Reference",
+            "command": "using uiux-reference skill to work on uiux reference --url <target-url>"
+          },
+          {
+            "language": "zh",
+            "label": "UIUX参考",
+            "command": "使用uiux-reference技能处理UIUX引用 --url <target-url>"
+          }
+        ]
+      }
+    ]
+  },
+  "evaluation": {
+    "evaluate": {
+      "icon": "bi-clipboard-check",
+      "id": "evaluate",
+      "prompt-details": [
+        {
+          "language": "en",
+          "label": "Evaluate Project Quality",
+          "command": "Evaluate project quality and generate report"
+        },
+        {
+          "language": "zh",
+          "label": "评估项目质量",
+          "command": "评估项目质量并生成报告"
+        }
+      ]
+    },
+    "refactoring": [
+      {
+        "id": "refactor-all",
+        "icon": "bi-arrow-repeat",
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Refactor All",
+            "command": "Refactor all with reference to its code and <evaluation-file>"
+          },
+          {
+            "language": "zh",
+            "label": "全面重构",
+            "command": "参照代码和<evaluation-file>进行全面重构"
+          }
+        ]
+      },
+      {
+        "id": "refactor-requirements",
+        "icon": "bi-file-text",
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Align Requirements to Features",
+            "command": "Update requirement docs to match current feature specification"
+          },
+          {
+            "language": "zh",
+            "label": "对齐需求与功能",
+            "command": "更新需求文档以匹配当前功能规范"
+          }
+        ]
+      },
+      {
+        "id": "refactor-features",
+        "icon": "bi-list-check",
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Align Features to Code",
+            "command": "Update feature specification docs to match current code implementation"
+          },
+          {
+            "language": "zh",
+            "label": "对齐功能与代码",
+            "command": "更新功能规范以匹配当前代码实现"
+          }
+        ]
+      },
+      {
+        "id": "refactor-tests",
+        "icon": "bi-bug",
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Align Tests to Code",
+            "command": "Update test cases to match current code implementation and reference <evaluation-file>"
+          },
+          {
+            "language": "zh",
+            "label": "对齐测试与代码",
+            "command": "更新测试用例以匹配当前代码实现，参照<evaluation-file>"
+          }
+        ]
+      },
+      {
+        "id": "refactor-tracing-tests",
+        "icon": "bi-graph-up",
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Align Tracing + Tests to Features",
+            "command": "Update tracing decorators and tests to match current feature specification"
+          },
+          {
+            "language": "zh",
+            "label": "对齐追踪与测试",
+            "command": "更新追踪装饰器和测试以匹配当前功能规范"
+          }
+        ]
+      },
+      {
+        "id": "refactor-code-tests",
+        "icon": "bi-code-slash",
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Refactor Code + Tracing + Tests",
+            "command": "Refactor code and tests to match current feature specification and reference <evaluation-file>"
+          },
+          {
+            "language": "zh",
+            "label": "重构代码+追踪+测试",
+            "command": "重构代码和测试以匹配当前功能规范，参照<evaluation-file>"
+          }
+        ]
+      }
+    ]
+  },
+  "workflow": {
+    "prompts": [
+      {
+        "id": "requirement-gathering",
+        "icon": "bi-clipboard-data",
+        "input_source": ["refine_idea", "design_mockup"],
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Requirement Gathering",
+            "command": "gather requirements from <input-file> with requirement gathering skill"
+          },
+          {
+            "language": "zh",
+            "label": "需求收集",
+            "command": "使用需求收集技能, 从 <input-file> 收集需求"
+          }
+        ]
+      },
+      {
+        "id": "feature-breakdown",
+        "icon": "bi-diagram-2",
+        "input_source": ["requirement_gathering"],
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Feature Breakdown",
+            "command": "break down features from <input-file> with feature breakdown skill"
+          },
+          {
+            "language": "zh",
+            "label": "功能拆分",
+            "command": "使用功能拆分技能, 从 <input-file> 拆分功能"
+          }
+        ]
       }
     ]
   },
   "placeholder": {
-    "current-idea-file": "Replaced with currently open file path"
+    "current-idea-file": "Replaced with currently open file path",
+    "input-file": "Replaced with selected input file path from source action deliverables",
+    "evaluation-file": "x-ipe-docs/quality-evaluation/project-quality-evaluation.md"
   }
 }

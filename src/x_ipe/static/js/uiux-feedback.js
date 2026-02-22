@@ -246,7 +246,8 @@ class UIUXFeedbackManager {
                         screenshot: entry.screenshot_url || null,
                         description: entry.description || '',
                         createdAt: entry.date ? new Date(entry.date) : new Date(),
-                        status: 'submitted'  // Already saved
+                        status: 'submitted',  // Already saved
+                        folder: entry.folder || `x-ipe-docs/uiux-feedback/${entry.id}`
                     });
                 }
                 this._renderFeedbackPanel();

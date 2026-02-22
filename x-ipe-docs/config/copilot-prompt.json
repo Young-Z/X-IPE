@@ -1,10 +1,11 @@
 {
-  "version": "3.0",
+  "version": "3.1",
   "ideation": {
     "prompts": [
       {
         "id": "refine-idea",
         "icon": "bi-stars",
+        "input_source": ["compose_idea"],
         "prompt-details": [
           {
             "language": "en",
@@ -53,6 +54,7 @@
       {
         "id": "generate-mockup",
         "icon": "bi-palette",
+        "input_source": ["refine_idea", "compose_idea"],
         "prompt-details": [
           {
             "language": "en",
@@ -216,8 +218,47 @@
       }
     ]
   },
+  "workflow": {
+    "prompts": [
+      {
+        "id": "requirement-gathering",
+        "icon": "bi-clipboard-data",
+        "input_source": ["refine_idea", "design_mockup"],
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Requirement Gathering",
+            "command": "gather requirements from <input-file> with requirement gathering skill"
+          },
+          {
+            "language": "zh",
+            "label": "需求收集",
+            "command": "使用需求收集技能, 从 <input-file> 收集需求"
+          }
+        ]
+      },
+      {
+        "id": "feature-breakdown",
+        "icon": "bi-diagram-2",
+        "input_source": ["requirement_gathering"],
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Feature Breakdown",
+            "command": "break down features from <input-file> with feature breakdown skill"
+          },
+          {
+            "language": "zh",
+            "label": "功能拆分",
+            "command": "使用功能拆分技能, 从 <input-file> 拆分功能"
+          }
+        ]
+      }
+    ]
+  },
   "placeholder": {
     "current-idea-file": "Replaced with currently open file path",
+    "input-file": "Replaced with selected input file path from source action deliverables",
     "evaluation-file": "x-ipe-docs/quality-evaluation/project-quality-evaluation.md"
   }
 }

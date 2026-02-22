@@ -107,8 +107,7 @@ input:
 | 6 | Generate Draft | Create idea draft, prefer enabled tools from step 1 | draft created |
 | 7 | Critique | Sub-agent provides constructive feedback | feedback received |
 | 8 | Improve Summary | Incorporate feedback, prefer enabled tools from step 1 | summary finalized |
-| 9 | Rename Folder | Rename if "Draft Idea - xxx" | folder renamed |
-| 10 | Complete | Request human review | human approves |
+| 9 | Complete | Request human review | human approves |
 
 BLOCKING: Step 4 - Continue brainstorming until idea is well-defined.
 
@@ -269,19 +268,6 @@ BLOCKING: Step 10 - Human MUST approve idea summary before proceeding.
   </step_8>
 
   <step_9>
-    <name>Rename Folder</name>
-    <action>
-      1. Check if folder matches "Draft Idea - MMDDYYYY HHMMSS"
-      2. IF folder matches draft pattern AND idea has clear identity:
-         a. Generate new name based on idea content (2-5 words, Title Case)
-         b. Rename folder to "{Idea Name} - {timestamp}"
-         c. Update internal links
-         ELSE: skip rename
-    </action>
-    <output>folder_renamed, new_folder_name</output>
-  </step_9>
-
-  <step_10>
     <name>Complete and Request Review</name>
     <action>
       1. IF execution_mode == "workflow-mode":
@@ -299,7 +285,7 @@ BLOCKING: Step 10 - Human MUST approve idea summary before proceeding.
       - BLOCKING: Human MUST approve before proceeding
     </constraints>
     <output>human_approval, next_task_choice, workflow_action_updated</output>
-  </step_10>
+  </step_9>
 
 </procedure>
 ```
@@ -326,8 +312,7 @@ task_completion_output:
   idea_id: "IDEA-XXX"
   idea_status: Refined
   idea_version: "vN"
-  idea_folder: "{renamed folder name or original}"
-  folder_renamed: true | false
+  idea_folder: "{original folder name}"
 ```
 
 ### Next Task Selection
@@ -400,11 +385,6 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
     <step_output>human_approval, next_task_choice</step_output>
   </checkpoint>
   <checkpoint required="recommended">
-    <name>Folder Renamed</name>
-    <verification>Draft folder renamed if applicable</verification>
-    <step_output>folder_renamed, new_folder_name</step_output>
-  </checkpoint>
-  <checkpoint required="recommended">
     <name>Principles Researched</name>
     <verification>Common principles researched if topic is established</verification>
     <step_output>common_principles[], references[]</step_output>
@@ -474,4 +454,3 @@ See [references/examples.md](references/examples.md) for concrete execution exam
 - Business plan ideation with tools enabled
 - Ideation without tools (all disabled)
 - Missing config file handling
-- Draft folder rename scenario

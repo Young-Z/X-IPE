@@ -99,6 +99,7 @@ class UiuxFeedbackService:
             return {
                 'id': folder_name,
                 'name': folder_name,
+                'folder': str(feedback_md.parent.relative_to(self.project_root)),
                 'url': url,
                 'description': description,
                 'date': date,
