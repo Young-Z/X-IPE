@@ -6,6 +6,8 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-611 | Technical Design | FEATURE-040-A: Modal Generalization & Core Actions (MVP) — create technical-design.md | Onyx 🖤 | 🔄 in_progress | 02-22-2026 07:50:00 | - | Test Generation |
+| TASK-610 | Feature Refinement | FEATURE-040-A: Modal Generalization & Core Actions (MVP) — create specification.md | Onyx 🖤 | ✅ completed | 02-22-2026 07:50:00 | specification.md | Technical Design |
 | TASK-609 | Feature Breakdown | EPIC-040: Break CR-Generalize Action Execution Modal into features | Onyx 🖤 | ✅ completed | 02-22-2026 07:16:00 | requirement-details-part-12.md, features.md | Feature Refinement |
 | TASK-608 | Requirement Gathering | IDEA-027/EPIC-040: CR-Generalize Action Execution Modal for all workflow actions — gather requirements from IDEA-027 | Onyx 🖤 | ✅ completed | 02-22-2026 07:16:00 | requirement-details-part-12.md | Feature Breakdown |
 | TASK-607 | Ideation | IDEA-027: CR-Optimize Idea Mockup, Requirement Gathering and other workflow actions — extend Action Execution Modal to support design mockup, requirement gathering, feature breakdown etc. Feedback-20260222-132751 | Onyx 🖤 | ✅ completed | 02-22-2026 07:16:00 | idea-summary-v1.md | Requirement Gathering |

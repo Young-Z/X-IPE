@@ -96,6 +96,6 @@ This board tracks all features across the project lifecycle.
 | FEATURE-038-E | EPIC-038 | Execution Skill DoD Update | v1.0 | Implemented | [specification.md](../requirements/EPIC-038/FEATURE-038-E/specification.md), [technical-design.md](../requirements/EPIC-038/FEATURE-038-E/technical-design.md) | 02-20-2026 | 02-20-2026 22:10:00 |
 | FEATURE-039-A | EPIC-039 | Folder Browser Modal (MVP) | v1.0 | Implementing | [specification.md](../requirements/EPIC-039/FEATURE-039-A/specification.md) | 02-22-2026 | 02-22-2026 04:20:00 |
 | FEATURE-039-B | EPIC-039 | Enhanced Modal Features | v1.0 | Planned | FEATURE-039-A | 02-22-2026 | 02-22-2026 03:50:00 |
-| FEATURE-040-A | EPIC-040 | Modal Generalization & Core Actions (MVP) | v1.0 | Planned | - | 02-22-2026 | 02-22-2026 07:16:00 |
+| FEATURE-040-A | EPIC-040 | Modal Generalization & Core Actions (MVP) | v1.0 | Refined | [specification.md](../requirements/EPIC-040/FEATURE-040-A/specification.md) | 02-22-2026 | 02-22-2026 07:33:00 |
 | FEATURE-040-B | EPIC-040 | Workflow Config & Remaining Actions | v1.0 | Planned | FEATURE-040-A | 02-22-2026 | 02-22-2026 07:16:00 |
 | FEATURE-040-C | EPIC-040 | Skill Workflow-Mode Compliance | v1.0 | Planned | - | 02-22-2026 | 02-22-2026 07:16:00 |
