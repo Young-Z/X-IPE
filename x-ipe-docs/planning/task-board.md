@@ -12,6 +12,7 @@
 | TASK-597 | Feature Refinement | FEATURE-039-A: Folder Browser Modal (MVP) — create specification.md | Ember 🔥 | ✅ completed | 02-22-2026 03:55:00 | specification.md | Technical Design |
 | TASK-598 | Technical Design | FEATURE-039-A: Folder Browser Modal (MVP) — create technical-design.md | Ember 🔥 | ✅ completed | 02-22-2026 04:05:00 | technical-design.md | Test Generation |
 | TASK-599 | Test Generation | FEATURE-039-A: Folder Browser Modal (MVP) — TDD tests | Ember 🔥 | ✅ completed | 02-22-2026 04:12:00 | folder-browser-modal.test.js | Code Implementation |
+| TASK-600 | Code Implementation | FEATURE-039-A: Folder Browser Modal (MVP) — implement JS+CSS, refactor deliverable-viewer | Ember 🔥 | ✅ completed | 02-22-2026 04:20:00 | folder-browser-modal.js, folder-browser-modal.css | Feature Acceptance Test |
 | TASK-593 | Ideation | Refine idea wf-001-greedy-snake v2 — add multi-head snake concept, make it scary | Spark ⚡ | ✅ completed | 02-21-2026 12:14:00 | idea-summary-v2.md | Idea Mockup / Idea to Architecture |
 | TASK-592 | Bug Fix | Refine Idea modal: add idea file selector — default to compose_idea deliverable, list refined-idea/ folder files, update instructions on switch. Feedback-20260221-194456 | Zephyr 🌬️ | ✅ completed | 02-21-2026 11:50:00 | action-execution-modal.js, action-execution-modal.css | - |
 | TASK-591 | Bug Fix | ~~Suggested action btn: only change bg, not border.~~ REVERTED — dashed border already present. Feedback-20260221-191915 | Zephyr 🌬️ | 🔁 reverted | 02-21-2026 11:24:00 | workflow.css | - |

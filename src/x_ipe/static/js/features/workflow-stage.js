@@ -958,9 +958,15 @@ const workflowStage = {
             } else {
                 const viewer = typeof DeliverableViewer !== 'undefined'
                     ? new DeliverableViewer({ workflowName: wfName }) : null;
+                const folderModal = typeof FolderBrowserModal !== 'undefined'
+                    ? new FolderBrowserModal({ workflowName: wfName }) : null;
                 items.forEach(item => {
                     if (viewer && DeliverableViewer.isFolderType(item.path)) {
-                        grid.appendChild(viewer.renderFolderDeliverable(item));
+                        const card = viewer.renderFolderDeliverable(item);
+                        if (folderModal) {
+                            card.addEventListener('click', () => folderModal.open(item.path));
+                        }
+                        grid.appendChild(card);
                     } else {
                         const card = this._renderDeliverableCard(item);
                         if (viewer && item.exists) {

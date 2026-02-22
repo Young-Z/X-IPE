@@ -1,0 +1,188 @@
+/* FEATURE-039-A: Folder Browser Modal */
+
+.folder-browser-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+    z-index: 1051;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    font-family: 'DM Sans', sans-serif;
+}
+.folder-browser-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.folder-browser-modal {
+    background: var(--card-bg, #fff);
+    border-radius: 12px;
+    width: 80vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: transform 0.2s ease;
+}
+.folder-browser-backdrop.active .folder-browser-modal {
+    transform: scale(1);
+}
+
+.folder-browser-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    flex-shrink: 0;
+}
+.folder-browser-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary, #1e293b);
+}
+.folder-browser-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: var(--text-muted, #94a3b8);
+    line-height: 1;
+    transition: all 0.15s;
+}
+.folder-browser-close:hover {
+    color: var(--text-primary, #1e293b);
+    background: rgba(0,0,0,0.06);
+}
+
+.folder-browser-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* Tree panel (left) */
+.folder-browser-tree {
+    width: 30%;
+    overflow-y: auto;
+    border-right: 1px solid var(--border-color, #e2e8f0);
+    padding: 12px 0;
+}
+.folder-browser-tree .file-tree {
+    list-style: none;
+    padding: 0 12px;
+    margin: 0;
+}
+.folder-browser-tree .file-tree .file-tree {
+    padding-left: 16px;
+}
+.folder-browser-tree .tree-item {
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.folder-browser-tree .tree-item:hover {
+    background: rgba(0,0,0,0.04);
+}
+.folder-browser-tree .tree-item.selected {
+    background: rgba(99,102,241,0.1);
+    color: var(--accent, #6366f1);
+}
+
+/* Preview panel (right) */
+.folder-browser-preview {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.folder-browser-preview-header {
+    padding: 10px 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted, #64748b);
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    flex-shrink: 0;
+}
+.folder-browser-preview-content {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+    font-size: 14px;
+    color: var(--text-primary, #334155);
+    line-height: 1.7;
+}
+.folder-browser-preview-content pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    border: 1px solid var(--border-color, #e2e8f0);
+}
+.folder-browser-preview-content h1, .folder-browser-preview-content h2, .folder-browser-preview-content h3 { color: #0f172a; margin-top: 1em; }
+.folder-browser-preview-content p { margin: 0.5em 0; }
+.folder-browser-preview-content ul, .folder-browser-preview-content ol { padding-left: 1.5em; }
+.folder-browser-preview-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-muted, #94a3b8);
+    font-size: 13px;
+}
+
+/* Spinner */
+.folder-browser-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+.folder-browser-spinner::after {
+    content: '';
+    width: 24px;
+    height: 24px;
+    border: 2px solid #e2e8f0;
+    border-top-color: var(--accent, #6366f1);
+    border-radius: 50%;
+    animation: fb-spin 0.6s linear infinite;
+}
+@keyframes fb-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Error state */
+.folder-browser-error {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted, #64748b);
+    font-size: 13px;
+}
+.folder-browser-error button {
+    margin-top: 12px;
+    padding: 6px 16px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+    font-size: 13px;
+}
+.folder-browser-error button:hover {
+    background: rgba(0,0,0,0.04);
+}

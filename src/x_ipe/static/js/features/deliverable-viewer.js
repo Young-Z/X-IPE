@@ -1,8 +1,9 @@
 /**
  * FEATURE-038-C: Enhanced Deliverable Viewer
+ * FEATURE-039-A: Folder card simplified — modal handled by FolderBrowserModal
  *
- * Provides folder-type deliverable rendering with expandable file tree
- * and inline preview (markdown via marked.js, text as pre).
+ * Provides folder-type deliverable card rendering, file-tree builder,
+ * and inline preview for individual file cards.
  */
 class DeliverableViewer {
     constructor({ workflowName }) {
@@ -23,17 +24,16 @@ class DeliverableViewer {
     static isFolderType(path) {
         if (typeof path !== 'string') return false;
         if (path.endsWith('/')) return true;
-        // Paths without a file extension are likely folders
         const basename = path.split('/').pop();
         return basename && !basename.includes('.');
     }
 
     /**
-     * Render a folder deliverable card with expand toggle.
+     * Render a folder deliverable card (click opens FolderBrowserModal externally).
      */
     renderFolderDeliverable(item) {
         const card = document.createElement('div');
-        card.className = 'deliverable-card folder-type';
+        card.className = 'deliverable-card folder-type clickable';
 
         const iconEl = document.createElement('div');
         iconEl.className = `deliverable-icon ${item.category || 'folders'}`;
@@ -46,6 +46,7 @@ class DeliverableViewer {
         const nameEl = document.createElement('div');
         nameEl.className = 'deliverable-name';
         nameEl.textContent = item.name;
+        nameEl.title = item.path;
         info.appendChild(nameEl);
 
         const pathEl = document.createElement('div');
@@ -54,64 +55,7 @@ class DeliverableViewer {
         info.appendChild(pathEl);
 
         card.appendChild(info);
-
-        const header = document.createElement('div');
-        header.className = 'deliverable-card-header';
-
-        const toggle = document.createElement('span');
-        toggle.className = 'toggle-icon';
-        toggle.textContent = '▸';
-        header.appendChild(toggle);
-
-        card.appendChild(header);
-
-        const treeContainer = document.createElement('div');
-        treeContainer.className = 'deliverable-tree';
-        treeContainer.style.display = 'none';
-        card.appendChild(treeContainer);
-
-        let expanded = false;
-        const doToggle = async (e) => {
-            if (e.target.closest('.file-item')) return; // let file clicks through
-            expanded = !expanded;
-            toggle.textContent = expanded ? '▾' : '▸';
-            treeContainer.style.display = expanded ? '' : 'none';
-            if (expanded && treeContainer.children.length === 0) {
-                await this._expandFolderTree(treeContainer, item.path);
-            }
-        };
-        card.addEventListener('click', doToggle);
-
         return card;
-    }
-
-    /**
-     * Fetch folder contents and build tree DOM.
-     */
-    async _expandFolderTree(container, folderPath) {
-        try {
-            const resp = await fetch(
-                `/api/workflow/${encodeURIComponent(this.workflowName)}/deliverables/tree?path=${encodeURIComponent(folderPath)}`
-            );
-            if (!resp.ok) {
-                container.textContent = '⚠️ Could not load folder';
-                return;
-            }
-            const entries = await resp.json();
-            const tree = DeliverableViewer.buildTreeDOM(entries);
-            container.appendChild(tree);
-
-            // Wire up file-item click handlers for inline preview
-            tree.querySelectorAll('.file-item[data-path]').forEach(item => {
-                item.style.cursor = 'pointer';
-                item.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.showPreview(item.dataset.path);
-                });
-            });
-        } catch {
-            container.textContent = '⚠️ Failed to load folder';
-        }
     }
 
     /**

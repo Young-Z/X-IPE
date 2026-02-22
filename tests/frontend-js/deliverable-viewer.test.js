@@ -60,32 +60,21 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
   });
 
   describe('File-Tree Rendering', () => {
-    it('should render expand toggle for folder deliverables', () => {
+    it('FEATURE-039-A: folder card no longer has expand toggle (modal replaces inline tree)', () => {
       const DV = globalThis.DeliverableViewer;
       expect(DV).toBeDefined();
       const viewer = new DV({ workflowName: 'hello' });
       const card = viewer.renderFolderDeliverable({ path: 'refined-idea/', name: 'refined-idea' });
-      expect(card.querySelector('.toggle-icon')).not.toBeNull();
+      expect(card.querySelector('.toggle-icon')).toBeNull();
+      expect(card.classList.contains('clickable')).toBe(true);
     });
 
-    it('should fetch folder contents on expand click', async () => {
-      globalThis.fetch.mockResolvedValue({
-        ok: true,
-        json: async () => [
-          { name: 'idea-summary.md', type: 'file', path: 'refined-idea/idea-summary.md' },
-          { name: 'mockups', type: 'dir', path: 'refined-idea/mockups/' },
-        ],
-      });
-
+    it('FEATURE-039-A: folder card no longer has inline tree container', () => {
       const DV = globalThis.DeliverableViewer;
       expect(DV).toBeDefined();
       const viewer = new DV({ workflowName: 'hello' });
       const card = viewer.renderFolderDeliverable({ path: 'refined-idea/', name: 'refined-idea' });
-      document.body.appendChild(card);
-      card.querySelector('.toggle-icon').click();
-      await vi.waitFor(() => {
-        expect(globalThis.fetch).toHaveBeenCalledWith(expect.stringContaining('/deliverables/tree'));
-      });
+      expect(card.querySelector('.deliverable-tree')).toBeNull();
     });
 
     it('should render nested ul/li structure for tree', () => {

@@ -24,57 +24,141 @@ from x_ipe.tracing import x_ipe_tracing
 # Valid action statuses
 VALID_STATUSES = {"pending", "in_progress", "done", "skipped", "failed"}
 
-# Data-driven stage configuration
-STAGE_CONFIG = {
-    "ideation": {
-        "type": "shared",
-        "mandatory_actions": ["compose_idea", "refine_idea"],
-        "optional_actions": ["reference_uiux", "design_mockup"],
-        "next_stage": "requirement",
-    },
-    "requirement": {
-        "type": "shared",
-        "mandatory_actions": ["requirement_gathering", "feature_breakdown"],
-        "optional_actions": [],
-        "next_stage": "implement",
-    },
-    "implement": {
-        "type": "per_feature",
-        "mandatory_actions": ["feature_refinement", "technical_design", "implementation"],
-        "optional_actions": [],
-        "next_stage": "validation",
-    },
-    "validation": {
-        "type": "per_feature",
-        "mandatory_actions": ["acceptance_testing"],
-        "optional_actions": ["quality_evaluation"],
-        "next_stage": "feedback",
-    },
-    "feedback": {
-        "type": "per_feature",
-        "mandatory_actions": [],
-        "optional_actions": ["change_request"],
-        "next_stage": None,
-    },
-}
 
-STAGE_ORDER = ["ideation", "requirement", "implement", "validation", "feedback"]
+def _load_workflow_template(project_root: str = None) -> dict:
+    """Load workflow template from x-ipe-docs/config/workflow-template.json."""
+    search_paths = []
+    if project_root:
+        search_paths.append(Path(project_root) / "x-ipe-docs" / "config" / "workflow-template.json")
+    # Also try relative to this file's location (src/x_ipe/services/ -> project root)
+    service_dir = Path(__file__).resolve().parent
+    search_paths.append(service_dir.parent.parent.parent / "x-ipe-docs" / "config" / "workflow-template.json")
 
-# Map actions to deliverable categories (FEATURE-036-E)
-DELIVERABLE_CATEGORIES = {
-    "compose_idea": "ideas",
-    "refine_idea": "ideas",
-    "reference_uiux": "mockups",
-    "design_mockup": "mockups",
-    "requirement_gathering": "requirements",
-    "feature_breakdown": "requirements",
-    "feature_refinement": "requirements",
-    "technical_design": "requirements",
-    "implementation": "implementations",
-    "acceptance_testing": "quality",
-    "quality_evaluation": "quality",
-    "change_request": "requirements",
-}
+    for config_path in search_paths:
+        if config_path.exists():
+            try:
+                return json.loads(config_path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                break
+    return {}
+
+
+def _init_config(project_root: str = None):
+    """Initialise config from template file, deriving internal structures.
+
+    The template uses a condensed per-action format::
+
+        stages.<stage>.actions.<action> = {
+            optional, deliverable_category, next_actions_suggested
+        }
+
+    We derive four internal structures the service needs:
+      stage_config  – type, mandatory/optional lists, next_stage
+      stage_order   – ordered stage names
+      deliverable_categories – action → category
+      next_actions_map       – action → [suggested next actions]
+    """
+    tpl = _load_workflow_template(project_root)
+    tpl_stages = tpl.get("stages", {})
+
+    if tpl_stages and all("actions" in s for s in tpl_stages.values()):
+        # New condensed format – derive internal structures
+        stage_order = tpl.get("stage_order",
+                              list(tpl_stages.keys()))
+        stage_config = {}
+        deliverable_categories = {}
+        next_actions_map = {}
+
+        for stage_name, stage_def in tpl_stages.items():
+            mandatory = []
+            optional = []
+            for action_name, action_def in stage_def.get("actions", {}).items():
+                if action_def.get("optional", False):
+                    optional.append(action_name)
+                else:
+                    mandatory.append(action_name)
+                cat = action_def.get("deliverable_category")
+                if cat:
+                    deliverable_categories[action_name] = cat
+                next_actions_map[action_name] = action_def.get(
+                    "next_actions_suggested", [])
+
+            stage_config[stage_name] = {
+                "type": stage_def.get("type", "shared"),
+                "mandatory_actions": mandatory,
+                "optional_actions": optional,
+                "next_stage": stage_def.get("next_stage"),
+            }
+
+        return stage_config, stage_order, deliverable_categories, next_actions_map
+
+    # Fallback – hardcoded defaults
+    return _default_config()
+
+
+def _default_config():
+    """Return hardcoded fallback configuration."""
+    stage_config = {
+        "ideation": {
+            "type": "shared",
+            "mandatory_actions": ["compose_idea", "refine_idea"],
+            "optional_actions": ["reference_uiux", "design_mockup"],
+            "next_stage": "requirement",
+        },
+        "requirement": {
+            "type": "shared",
+            "mandatory_actions": ["requirement_gathering", "feature_breakdown"],
+            "optional_actions": [],
+            "next_stage": "implement",
+        },
+        "implement": {
+            "type": "per_feature",
+            "mandatory_actions": ["feature_refinement", "technical_design", "implementation"],
+            "optional_actions": [],
+            "next_stage": "validation",
+        },
+        "validation": {
+            "type": "per_feature",
+            "mandatory_actions": ["acceptance_testing"],
+            "optional_actions": ["quality_evaluation"],
+            "next_stage": "feedback",
+        },
+        "feedback": {
+            "type": "per_feature",
+            "mandatory_actions": [],
+            "optional_actions": ["change_request"],
+            "next_stage": None,
+        },
+    }
+    stage_order = ["ideation", "requirement", "implement", "validation", "feedback"]
+    deliverable_categories = {
+        "compose_idea": "ideas", "refine_idea": "ideas",
+        "reference_uiux": "mockups", "design_mockup": "mockups",
+        "requirement_gathering": "requirements", "feature_breakdown": "requirements",
+        "feature_refinement": "requirements", "technical_design": "requirements",
+        "implementation": "implementations",
+        "acceptance_testing": "quality", "quality_evaluation": "quality",
+        "change_request": "requirements",
+    }
+    next_actions_map = {
+        "compose_idea": ["refine_idea", "reference_uiux"],
+        "refine_idea": ["design_mockup", "requirement_gathering"],
+        "reference_uiux": ["design_mockup", "refine_idea"],
+        "design_mockup": ["requirement_gathering"],
+        "requirement_gathering": ["feature_breakdown"],
+        "feature_breakdown": [],
+        "feature_refinement": ["technical_design"],
+        "technical_design": ["implementation"],
+        "implementation": ["acceptance_testing"],
+        "acceptance_testing": ["quality_evaluation"],
+        "quality_evaluation": ["change_request"],
+        "change_request": [],
+    }
+    return stage_config, stage_order, deliverable_categories, next_actions_map
+
+
+# Module-level defaults (overridden per-instance when project_root is known)
+STAGE_CONFIG, STAGE_ORDER, DELIVERABLE_CATEGORIES, NEXT_ACTIONS_MAP = _init_config()
 
 # Name validation
 NAME_PATTERN = re.compile(r"^[a-zA-Z0-9-]+$")
@@ -91,6 +175,12 @@ class WorkflowManagerService:
     def __init__(self, project_root: str):
         self._project_root = Path(project_root)
         self._workflow_dir = self._project_root / "x-ipe-docs" / "engineering-workflow"
+        # Reload config from project-level template if available
+        cfg = _init_config(project_root)
+        self._stage_config = cfg[0]
+        self._stage_order = cfg[1]
+        self._deliverable_categories = cfg[2]
+        self._next_actions_map = cfg[3]
 
     # ------------------------------------------------------------------
     # Public API
@@ -243,7 +333,7 @@ class WorkflowManagerService:
         for stage_name in ("ideation", "requirement"):
             stage = state["stages"].get(stage_name, {})
             for action_key, action_data in stage.get("actions", {}).items():
-                category = DELIVERABLE_CATEGORIES.get(action_key, "implementations")
+                category = self._deliverable_categories.get(action_key, "implementations")
                 for path_str in action_data.get("deliverables", []):
                     full_path = self._project_root / path_str
                     deliverables.append({
@@ -258,7 +348,7 @@ class WorkflowManagerService:
             features = state["stages"].get(stage_name, {}).get("features", {})
             for feat_id, feat_data in features.items():
                 for action_key, action_data in feat_data.get("actions", {}).items():
-                    category = DELIVERABLE_CATEGORIES.get(action_key, "implementations")
+                    category = self._deliverable_categories.get(action_key, "implementations")
                     for path_str in action_data.get("deliverables", []):
                         full_path = self._project_root / path_str
                         deliverables.append({
@@ -312,8 +402,8 @@ class WorkflowManagerService:
                     "technical_design": {"status": "pending", "deliverables": []},
                     "implementation": {"status": "pending", "deliverables": []},
                     "acceptance_testing": {"status": "pending", "deliverables": []},
-                    "quality_evaluation": {"status": "skipped", "deliverables": []},
-                    "change_request": {"status": "pending", "deliverables": []},
+                    "quality_evaluation": {"status": "skipped", "deliverables": [], "optional": True},
+                    "change_request": {"status": "pending", "deliverables": [], "optional": True},
                 },
             }
             for stage_name in ("implement", "validation", "feedback"):
@@ -361,6 +451,24 @@ class WorkflowManagerService:
 
     def _build_initial_state(self, name: str) -> dict:
         now = _now_iso()
+        stages = {}
+        for stage_name, config in self._stage_config.items():
+            if config["type"] == "shared":
+                actions = {}
+                all_optional = set(config.get("optional_actions", []))
+                for action_name in config["mandatory_actions"] + config["optional_actions"]:
+                    action_data = {"status": "pending", "deliverables": []}
+                    if action_name in all_optional:
+                        action_data["optional"] = True
+                    if action_name == "feature_breakdown":
+                        action_data["features_created"] = []
+                    actions[action_name] = action_data
+                stages[stage_name] = {
+                    "status": "in_progress" if stage_name == "ideation" else "locked",
+                    "actions": actions,
+                }
+            else:
+                stages[stage_name] = {"status": "locked", "features": {}}
         return {
             "schema_version": "1.0",
             "name": name,
@@ -368,28 +476,7 @@ class WorkflowManagerService:
             "last_activity": now,
             "idea_folder": None,
             "current_stage": "ideation",
-            "stages": {
-                "ideation": {
-                    "status": "in_progress",
-                    "actions": {
-                        "compose_idea": {"status": "pending", "deliverables": []},
-                        "reference_uiux": {"status": "pending", "deliverables": []},
-                        "refine_idea": {"status": "pending", "deliverables": []},
-                        "design_mockup": {"status": "pending", "deliverables": []},
-                    },
-                },
-                "requirement": {
-                    "status": "locked",
-                    "actions": {
-                        "requirement_gathering": {"status": "pending", "deliverables": []},
-                        "feature_breakdown": {"status": "pending", "deliverables": [],
-                                              "features_created": []},
-                    },
-                },
-                "implement": {"status": "locked", "features": {}},
-                "validation": {"status": "locked", "features": {}},
-                "feedback": {"status": "locked", "features": {}},
-            },
+            "stages": stages,
         }
 
     def _read_state(self, name: str) -> dict:
@@ -422,10 +509,16 @@ class WorkflowManagerService:
             stage = state["stages"][stage_name]
             if action in stage.get("actions", {}):
                 if stage["status"] == "locked":
-                    return False, {"success": False, "error": "STAGE_LOCKED",
-                                   "message": f"Stage '{stage_name}' is locked"}
+                    if not self._try_unlock_stage(state, stage_name):
+                        return False, {"success": False, "error": "STAGE_LOCKED",
+                                       "message": f"Stage '{stage_name}' is locked"}
                 stage["actions"][action]["status"] = status
                 stage["actions"][action]["deliverables"] = deliverables
+                # Add next_actions_suggested when action is done
+                if status == "done" and action in self._next_actions_map:
+                    stage["actions"][action]["next_actions_suggested"] = self._next_actions_map[action]
+                elif status != "done":
+                    stage["actions"][action].pop("next_actions_suggested", None)
                 return True, None
         return False, {"success": False, "error": "ACTION_NOT_FOUND",
                        "message": f"Action '{action}' not found in shared stages"}
@@ -436,47 +529,71 @@ class WorkflowManagerService:
             features = state["stages"][stage_name].get("features", {})
             if feature_id in features and action in features[feature_id].get("actions", {}):
                 if state["stages"][stage_name]["status"] == "locked":
-                    return False, {"success": False, "error": "STAGE_LOCKED",
-                                   "message": f"Stage '{stage_name}' is locked"}
+                    if not self._try_unlock_stage(state, stage_name):
+                        return False, {"success": False, "error": "STAGE_LOCKED",
+                                       "message": f"Stage '{stage_name}' is locked"}
                 features[feature_id]["actions"][action]["status"] = status
                 features[feature_id]["actions"][action]["deliverables"] = deliverables
+                # Add next_actions_suggested when action is done
+                if status == "done" and action in self._next_actions_map:
+                    features[feature_id]["actions"][action]["next_actions_suggested"] = self._next_actions_map[action]
+                elif status != "done":
+                    features[feature_id]["actions"][action].pop("next_actions_suggested", None)
                 return True, None
         return False, {"success": False, "error": "FEATURE_NOT_FOUND",
                        "message": f"Feature '{feature_id}' or action '{action}' not found"}
 
     def _evaluate_stage_gating(self, state):
-        """Re-evaluate which stages should be unlocked."""
-        for i, stage_name in enumerate(STAGE_ORDER):
-            config = STAGE_CONFIG[stage_name]
-            stage = state["stages"][stage_name]
+        """No-op: stage transitions are now on-demand via _try_unlock_stage."""
+        pass
 
-            if config["type"] == "shared":
-                actions = stage.get("actions", {})
-                mandatory_done = all(
-                    actions.get(a, {}).get("status") == "done"
-                    for a in config["mandatory_actions"]
+    def _is_stage_ready_to_unlock(self, state, stage_name):
+        """Check if a locked stage's predecessor has all mandatory actions done."""
+        idx = self._stage_order.index(stage_name) if stage_name in self._stage_order else -1
+        if idx <= 0:
+            return False
+
+        prev_name = self._stage_order[idx - 1]
+        prev_stage = state["stages"].get(prev_name, {})
+        prev_config = self._stage_config.get(prev_name, {})
+
+        if prev_stage.get("status") not in ("in_progress",):
+            return False
+
+        if prev_config.get("type") == "shared":
+            actions = prev_stage.get("actions", {})
+            return all(
+                actions.get(a, {}).get("status") == "done"
+                for a in prev_config.get("mandatory_actions", [])
+            )
+        elif prev_config.get("type") == "per_feature":
+            features = prev_stage.get("features", {})
+            if not features:
+                return False
+            return all(
+                all(
+                    feat_data.get("actions", {}).get(a, {}).get("status") == "done"
+                    for a in prev_config.get("mandatory_actions", [])
                 )
-                if mandatory_done and stage["status"] == "in_progress":
-                    stage["status"] = "completed"
-                    # Unlock next stage
-                    next_stage = config["next_stage"]
-                    if next_stage and state["stages"][next_stage]["status"] == "locked":
-                        state["stages"][next_stage]["status"] = "in_progress"
-                        state["current_stage"] = next_stage
+                for feat_data in features.values()
+            )
+        return False
 
-            elif config["type"] == "per_feature":
-                # Per-feature stages unlock when previous shared/per-feature stage completes
-                if i > 0:
-                    prev_stage = STAGE_ORDER[i - 1]
-                    prev_status = state["stages"][prev_stage]["status"]
-                    if prev_status in ("completed", "in_progress") and stage["status"] == "locked":
-                        if prev_status == "completed":
-                            stage["status"] = "in_progress"
-                            state["current_stage"] = stage_name
+    def _try_unlock_stage(self, state, stage_name):
+        """Complete the predecessor and unlock *stage_name* on demand."""
+        if not self._is_stage_ready_to_unlock(state, stage_name):
+            return False
+
+        idx = self._stage_order.index(stage_name)
+        prev_name = self._stage_order[idx - 1]
+        state["stages"][prev_name]["status"] = "completed"
+        state["stages"][stage_name]["status"] = "in_progress"
+        state["current_stage"] = stage_name
+        return True
 
     def _is_feature_stage_done(self, state, feature_id, stage_name):
         """Check if a feature has completed all mandatory actions in a stage."""
-        config = STAGE_CONFIG[stage_name]
+        config = self._stage_config[stage_name]
         features = state["stages"].get(stage_name, {}).get("features", {})
         if feature_id not in features:
             return False
@@ -488,11 +605,29 @@ class WorkflowManagerService:
 
     def _compute_next_action(self, state):
         """Determine the recommended next action."""
-        for stage_name in STAGE_ORDER:
-            config = STAGE_CONFIG[stage_name]
+        for stage_name in self._stage_order:
+            config = self._stage_config[stage_name]
             stage = state["stages"][stage_name]
 
             if stage["status"] == "locked":
+                # Check if this locked stage is ready to unlock
+                if self._is_stage_ready_to_unlock(state, stage_name):
+                    if config["type"] == "shared":
+                        for action_name in config["mandatory_actions"]:
+                            action = stage.get("actions", {}).get(action_name, {})
+                            if action.get("status") in ("pending", "failed"):
+                                return {"action": action_name, "stage": stage_name,
+                                        "feature_id": None,
+                                        "reason": "Next stage ready — click to start"}
+                    elif config["type"] == "per_feature":
+                        features = stage.get("features", {})
+                        for feat_id, feat_data in features.items():
+                            for action_name in config["mandatory_actions"]:
+                                action = feat_data.get("actions", {}).get(action_name, {})
+                                if action.get("status") in ("pending", "failed"):
+                                    return {"action": action_name, "stage": stage_name,
+                                            "feature_id": feat_id,
+                                            "reason": "Next stage ready — click to start"}
                 continue
 
             if config["type"] == "shared":

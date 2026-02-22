@@ -43,6 +43,15 @@ const workflow = {
             if (workflows.length === 0) {
                 panelsDiv.appendChild(this._renderEmptyState());
             } else {
+                // Auto-expand the most recently active workflow on initial load
+                if (this.expandedPanels.size === 0 && workflows.length > 0) {
+                    const sorted = [...workflows].filter(w => w.last_activity).sort((a, b) =>
+                        new Date(b.last_activity) - new Date(a.last_activity)
+                    );
+                    if (sorted.length > 0) {
+                        this.expandedPanels.add(sorted[0].name);
+                    }
+                }
                 workflows.forEach(wf => panelsDiv.appendChild(this._renderPanel(wf)));
             }
         } catch (e) {

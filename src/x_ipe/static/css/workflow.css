@@ -420,9 +420,6 @@
 .deliverable-icon.implementations { background: rgba(245,158,11,0.15); }
 .deliverable-icon.quality { background: rgba(16,185,129,0.15); }
 .deliverable-icon.folders { background: rgba(107,114,128,0.15); }
-.deliverable-card-header { width: 100%; display: flex; align-items: center; }
-.deliverable-card-header .toggle-icon { cursor: pointer; font-size: 12px; color: var(--text-muted); margin-left: auto; user-select: none; }
-.deliverable-tree { width: 100%; }
 .deliverable-info { flex: 1; min-width: 0; }
 .deliverable-name { font-size: 12px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .deliverable-path { font-size: 10px; font-family: monospace; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -439,7 +436,7 @@
 .deliverable-preview .preview-content h1, .deliverable-preview .preview-content h2, .deliverable-preview .preview-content h3 { color: #0f172a; margin-top: 1em; }
 .deliverable-preview .preview-content p { margin: 0.5em 0; }
 .deliverable-preview .preview-content ul, .deliverable-preview .preview-content ol { padding-left: 1.5em; }
-.deliverable-card.folder-type { flex-wrap: wrap; cursor: pointer; }
+.deliverable-card.folder-type { background: var(--deliverable-folder-bg, rgba(99, 102, 241, 0.06)); cursor: pointer; }
 
 /* Context Menu */
 .wf-context-menu { position: fixed; z-index: 100; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.3); min-width: 160px; padding: 4px 0; }
