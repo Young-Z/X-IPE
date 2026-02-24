@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-621 | Bug Fix | Deliverables overwritten with empty list when update_workflow_action called without explicit deliverables — route defaults to `[]`, service always overwrites. Feedback-20260224-155419 | Rune 🔮 | 🔄 in_progress | 02-24-2026 07:57:00 | - | - |
 | TASK-620 | Bug Fix | Action modal input file selector shows text input instead of dropdown — _resolveInputFiles/_resolveIdeaFiles look for `stages` but API returns `shared`. Feedback-20260224-153101 | Zephyr 🌬️ | ✅ completed | 02-24-2026 07:40:00 | action-execution-modal.js, action-execution-modal-040a.test.js | - |
 | TASK-619 | Bug Fix | Feature lanes UI: (1) dark mode → light mode, (2) dependency lines overlap panels → left gutter, (3) shared action panels hidden when features exist → show both. Feedback-20260224-131050 | Zephyr 🌬️ | ✅ completed | 02-24-2026 06:05:00 | workflow-stage.js, workflow.css | - |
 | TASK-618 | Bug Fix | Folder browser modal markdown preview missing mermaid/architecture DSL/infographic/syntax highlighting — uses bare marked.parse() instead of ContentRenderer. Feedback-20260224-125237 | Zephyr 🌬️ | ✅ completed | 02-24-2026 04:58:00 | content-renderer.js, folder-browser-modal.js, folder-browser-modal.test.js | - |

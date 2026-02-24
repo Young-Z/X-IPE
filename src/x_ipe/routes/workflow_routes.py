@@ -83,7 +83,7 @@ def update_action(name):
     action = data.get('action', '')
     status = data.get('status', '')
     feature_id = data.get('feature_id')
-    deliverables = data.get('deliverables', [])
+    deliverables = data.get('deliverables')
     features = data.get('features')
     result = _get_service().update_action_status(
         name, action, status, feature_id=feature_id, deliverables=deliverables,

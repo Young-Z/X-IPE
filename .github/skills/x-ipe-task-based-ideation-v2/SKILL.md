@@ -24,6 +24,8 @@ CRITICAL: Only use tools that are explicitly enabled (`true`) in `x-ipe-docs/con
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
+**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` list of output file paths. Verify the workflow state was updated before marking the task complete.
+
 ---
 
 ## Input Parameters
@@ -42,6 +44,7 @@ input:
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
   workflow:
     name: "N/A"  # workflow name, default: N/A
+    action: "refine_idea"  # hardcoded — this skill ALWAYS updates the refine_idea action
   idea_folder_path: "x-ipe-docs/ideas/{folder}"
   toolbox_meta_path: "x-ipe-docs/config/tools.json"
   extra_instructions: "{N/A | from config | from human}"
@@ -271,11 +274,11 @@ BLOCKING: Step 10 - Human MUST approve idea summary before proceeding.
     <name>Complete and Request Review</name>
     <action>
       1. IF execution_mode == "workflow-mode":
-         a. Call update_workflow_action MCP with:
+         a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
             - workflow_name: {from context}
-            - action: "refine_idea"
+            - action: "refine_idea"  ← HARDCODED: always use "refine_idea", NEVER "compose_idea" or any other action
             - status: "done"
-            - deliverables: [list of output file paths]
+            - deliverables: [list of output file paths AND the output folder path (e.g. {idea_folder}/refined-idea/)]
          b. Log: "Workflow action status updated to done"
       2. Present final idea summary to human
       3. Ask human to choose next task
@@ -302,12 +305,12 @@ task_completion_output:
   require_human_review: yes
   task_output_links:
     - "x-ipe-docs/ideas/{folder}/refined-idea/idea-summary-vN.md"
-    - "x-ipe-docs/ideas/{folder}/mockups/mockup-vN.html"
+    - "x-ipe-docs/ideas/{folder}/refined-idea/"
   # Dynamic attributes
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
-  workflow_action: "refine_idea"        # triggers workflow status update when execution_mode == workflow-mode
+  workflow_action: "{workflow.action}"   # triggers workflow status update when execution_mode == workflow-mode
   workflow_action_updated: true | false # true if update_workflow_action was called
   idea_id: "IDEA-XXX"
   idea_status: Refined
@@ -391,7 +394,7 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Workflow Action Status Updated</name>
-    <verification>If execution_mode == "workflow-mode", called update_workflow_action MCP with status "done" and deliverables list</verification>
+    <verification>If execution_mode == "workflow-mode", called the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with status "done" and deliverables list</verification>
   </checkpoint>
 </definition_of_done>
 ```

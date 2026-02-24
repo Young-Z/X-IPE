@@ -96,22 +96,20 @@ class TestWorkflowCRUD:
         assert os.path.exists(filepath)
 
     def test_create_workflow_has_schema_version(self, workflow_service, workflow_dir):
-        """AC: Workflow JSON includes schema_version: '1.0'."""
+        """AC: Workflow JSON includes schema_version: '2.0'."""
         workflow_service.create_workflow("my-project")
         filepath = os.path.join(workflow_dir, "workflow-my-project.json")
         with open(filepath) as f:
             state = json.load(f)
-        assert state["schema_version"] == "1.0"
+        assert state["schema_version"] == "2.0"
 
     def test_create_workflow_ideation_active(self, workflow_service):
         """AC: Ideation stage active, all other stages locked."""
         result = workflow_service.create_workflow("my-project")
         state = workflow_service.get_workflow("my-project")
-        assert state["stages"]["ideation"]["status"] == "in_progress"
-        assert state["stages"]["requirement"]["status"] == "locked"
-        assert state["stages"]["implement"]["status"] == "locked"
-        assert state["stages"]["validation"]["status"] == "locked"
-        assert state["stages"]["feedback"]["status"] == "locked"
+        assert state["shared"]["ideation"]["status"] == "in_progress"
+        assert state["shared"]["requirement"]["status"] == "locked"
+        assert state["features"] == []
 
     def test_create_workflow_duplicate_name_error(self, workflow_service, sample_workflow):
         """AC: create_workflow returns error if name already exists."""
@@ -135,7 +133,8 @@ class TestWorkflowCRUD:
         """AC: get_workflow returns full parsed workflow state."""
         state = workflow_service.get_workflow(sample_workflow)
         assert state["name"] == sample_workflow
-        assert "stages" in state
+        assert "shared" in state
+        assert "features" in state
         assert "created" in state
         assert "last_activity" in state
 
@@ -217,7 +216,7 @@ class TestStageGating:
         workflow_service.update_action_status(sample_workflow, "compose_idea", "done")
         workflow_service.update_action_status(sample_workflow, "refine_idea", "done")
         state = workflow_service.get_workflow(sample_workflow)
-        assert state["stages"]["requirement"]["status"] != "locked"
+        assert state["shared"]["requirement"]["status"] != "locked"
 
     def test_optional_actions_dont_block(self, workflow_service, sample_workflow):
         """AC: Optional actions (skipped/pending) do not block stage progression."""
@@ -225,14 +224,14 @@ class TestStageGating:
         workflow_service.update_action_status(sample_workflow, "refine_idea", "done")
         # reference_uiux and design_mockup are optional — left as pending
         state = workflow_service.get_workflow(sample_workflow)
-        assert state["stages"]["requirement"]["status"] != "locked"
+        assert state["shared"]["requirement"]["status"] != "locked"
 
     def test_partial_mandatory_keeps_locked(self, workflow_service, sample_workflow):
         """AC: Not all mandatory done → next stage stays locked."""
         workflow_service.update_action_status(sample_workflow, "compose_idea", "done")
         # refine_idea still pending
         state = workflow_service.get_workflow(sample_workflow)
-        assert state["stages"]["requirement"]["status"] == "locked"
+        assert state["shared"]["requirement"]["status"] == "locked"
 
     def test_locked_stage_action_rejected(self, workflow_service, sample_workflow):
         """AC: Update action on locked stage rejected."""
@@ -250,11 +249,11 @@ class TestStageGating:
         workflow_service.update_action_status(name, "implementation", "done", feature_id="FEATURE-040-A")
         state = workflow_service.get_workflow(name)
         # Feature A should be in validation, Feature B still in implement
-        feat_a = state["stages"]["implement"]["features"]["FEATURE-040-A"]
-        feat_b = state["stages"]["implement"]["features"]["FEATURE-040-B"]
+        feat_a = next(f for f in state["features"] if f["feature_id"] == "FEATURE-040-A")
+        feat_b = next(f for f in state["features"] if f["feature_id"] == "FEATURE-040-B")
         # Verify independent progression
-        assert feat_a["actions"]["implementation"]["status"] == "done"
-        assert feat_b["actions"]["feature_refinement"]["status"] == "pending"
+        assert feat_a["implement"]["actions"]["implementation"]["status"] == "done"
+        assert feat_b["implement"]["actions"]["feature_refinement"]["status"] == "pending"
 
 
 # ==============================================================================
@@ -271,7 +270,7 @@ class TestActionStatus:
             deliverables=["x-ipe-docs/ideas/my-idea/idea.md"]
         )
         state = workflow_service.get_workflow(sample_workflow)
-        assert state["stages"]["ideation"]["actions"]["compose_idea"]["status"] == "done"
+        assert state["shared"]["ideation"]["actions"]["compose_idea"]["status"] == "done"
 
     def test_update_action_saves_deliverables(self, workflow_service, sample_workflow):
         """AC: Deliverables list saved in action."""
@@ -280,7 +279,20 @@ class TestActionStatus:
             sample_workflow, "compose_idea", "done", deliverables=deliverables
         )
         state = workflow_service.get_workflow(sample_workflow)
-        assert state["stages"]["ideation"]["actions"]["compose_idea"]["deliverables"] == deliverables
+        assert state["shared"]["ideation"]["actions"]["compose_idea"]["deliverables"] == deliverables
+
+    def test_update_action_preserves_deliverables_when_not_provided(self, workflow_service, sample_workflow):
+        """AC: Updating action status without deliverables preserves existing ones."""
+        original = ["file1.md", "folder/"]
+        workflow_service.update_action_status(
+            sample_workflow, "compose_idea", "done", deliverables=original
+        )
+        # Update status again WITHOUT deliverables
+        workflow_service.update_action_status(
+            sample_workflow, "compose_idea", "pending"
+        )
+        state = workflow_service.get_workflow(sample_workflow)
+        assert state["shared"]["ideation"]["actions"]["compose_idea"]["deliverables"] == original
 
     def test_update_action_invalid_status_rejected(self, workflow_service, sample_workflow):
         """AC: Invalid status rejected."""
@@ -303,8 +315,8 @@ class TestActionStatus:
             name, "feature_refinement", "done", feature_id="FEATURE-040-A"
         )
         state = workflow_service.get_workflow(name)
-        feat = state["stages"]["implement"]["features"]["FEATURE-040-A"]
-        assert feat["actions"]["feature_refinement"]["status"] == "done"
+        feat = next(f for f in state["features"] if f["feature_id"] == "FEATURE-040-A")
+        assert feat["implement"]["actions"]["feature_refinement"]["status"] == "done"
 
     def test_update_feature_action_nonexistent_feature(self, workflow_service, workflow_with_features):
         """AC: Feature not in workflow → error."""
@@ -367,9 +379,11 @@ class TestFeatureLanes:
         features = [{"id": "FEATURE-040-A", "name": "Test Feature", "depends_on": []}]
         workflow_service.add_features(sample_workflow, features)
         state = workflow_service.get_workflow(sample_workflow)
-        assert "FEATURE-040-A" in state["stages"]["implement"]["features"]
-        assert "FEATURE-040-A" in state["stages"]["validation"]["features"]
-        assert "FEATURE-040-A" in state["stages"]["feedback"]["features"]
+        feat = next((f for f in state["features"] if f["feature_id"] == "FEATURE-040-A"), None)
+        assert feat is not None
+        assert "implement" in feat
+        assert "validation" in feat
+        assert "feedback" in feat
 
     def test_add_features_with_dependencies(self, workflow_service, sample_workflow):
         """AC: Feature entries include depends_on arrays."""
@@ -383,7 +397,7 @@ class TestFeatureLanes:
         ]
         workflow_service.add_features(sample_workflow, features)
         state = workflow_service.get_workflow(sample_workflow)
-        feat_b = state["stages"]["implement"]["features"]["FEATURE-040-B"]
+        feat_b = next(f for f in state["features"] if f["feature_id"] == "FEATURE-040-B")
         assert feat_b["depends_on"] == ["FEATURE-040-A"]
 
     def test_add_features_actions_initially_pending(self, workflow_service, sample_workflow):
@@ -395,9 +409,10 @@ class TestFeatureLanes:
         features = [{"id": "FEATURE-040-A", "name": "Test", "depends_on": []}]
         workflow_service.add_features(sample_workflow, features)
         state = workflow_service.get_workflow(sample_workflow)
-        feat = state["stages"]["implement"]["features"]["FEATURE-040-A"]
-        for action_name, action_data in feat["actions"].items():
-            assert action_data["status"] in ("pending", "skipped")
+        feat = next(f for f in state["features"] if f["feature_id"] == "FEATURE-040-A")
+        for stage_name in ("implement", "validation", "feedback"):
+            for action_name, action_data in feat[stage_name]["actions"].items():
+                assert action_data["status"] in ("pending", "skipped")
 
 
 # ==============================================================================
@@ -434,7 +449,7 @@ class TestStatePersistence:
         filepath = os.path.join(workflow_dir, f"workflow-{sample_workflow}.json")
         with open(filepath) as f:
             state = json.load(f)  # Should not raise
-        assert state["schema_version"] == "1.0"
+        assert state["schema_version"] == "2.0"
 
     def test_corrupted_json_returns_error(self, workflow_service, sample_workflow, workflow_dir):
         """AC: Corrupted JSON returns descriptive error."""

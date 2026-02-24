@@ -171,7 +171,7 @@ describe('FEATURE-038-A: Action Execution Modal', () => {
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
       await modal._loadInstructions();
       const cmd = modal._buildCommand('');
-      expect(cmd).toMatch(/^--workflow-mode /);
+      expect(cmd).toMatch(/^--workflow-mode(@\S+)? /);
     });
 
     it('should append extra instructions to command when provided', async () => {

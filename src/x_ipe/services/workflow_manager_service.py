@@ -219,12 +219,13 @@ class WorkflowManagerService:
         for f in sorted(self._workflow_dir.glob("workflow-*.json")):
             try:
                 state = json.loads(f.read_text(encoding="utf-8"))
-                feature_count = 0
-                for stage_name in ("implement", "validation", "feedback"):
-                    features = state.get("stages", {}).get(stage_name, {}).get("features", {})
-                    if features:
-                        feature_count = len(features)
-                        break
+                feature_count = len(state.get("features", []))
+                if not feature_count and "stages" in state:
+                    for sn in ("implement", "validation", "feedback"):
+                        feats = state.get("stages", {}).get(sn, {}).get("features", {})
+                        if feats:
+                            feature_count = len(feats)
+                            break
                 results.append({
                     "name": state.get("name", f.stem),
                     "created": state.get("created"),
@@ -260,9 +261,6 @@ class WorkflowManagerService:
         if "error" in state and state.get("success") is False:
             return state
 
-        if deliverables is None:
-            deliverables = []
-
         # Find the action in the state
         if feature_id:
             updated, err = self._update_feature_action(state, action, status, feature_id, deliverables)
@@ -275,7 +273,7 @@ class WorkflowManagerService:
         # If feature_breakdown done with features, populate per-feature structures
         if action == "feature_breakdown" and status == "done" and features:
             self._populate_features(state, features)
-            req_actions = state["stages"]["requirement"]["actions"]
+            req_actions = state["shared"]["requirement"]["actions"]
             req_actions["feature_breakdown"]["features_created"] = [
                 {"id": f["id"], "name": f["name"], "depends_on": f.get("depends_on", [])}
                 for f in features
@@ -302,12 +300,8 @@ class WorkflowManagerService:
             return state
 
         # Find feature's depends_on list
-        depends_on = []
-        for stage_name in ("implement", "validation", "feedback"):
-            features = state["stages"].get(stage_name, {}).get("features", {})
-            if feature_id in features:
-                depends_on = features[feature_id].get("depends_on", [])
-                break
+        feat = self._find_feature(state, feature_id)
+        depends_on = feat.get("depends_on", []) if feat else []
 
         if not depends_on:
             return {"blocked": False, "blockers": []}
@@ -343,7 +337,7 @@ class WorkflowManagerService:
 
         # Shared stages (ideation, requirement)
         for stage_name in ("ideation", "requirement"):
-            stage = state["stages"].get(stage_name, {})
+            stage = state["shared"].get(stage_name, {})
             for action_key, action_data in stage.get("actions", {}).items():
                 category = self._deliverable_categories.get(action_key, "implementations")
                 for path_str in action_data.get("deliverables", []):
@@ -355,11 +349,11 @@ class WorkflowManagerService:
                         "exists": full_path.exists(),
                     })
 
-        # Per-feature stages (implement, validation, feedback)
-        for stage_name in ("implement", "validation", "feedback"):
-            features = state["stages"].get(stage_name, {}).get("features", {})
-            for feat_id, feat_data in features.items():
-                for action_key, action_data in feat_data.get("actions", {}).items():
+        # Per-feature stages
+        for feat in state.get("features", []):
+            for stage_name in ("implement", "validation", "feedback"):
+                stage_data = feat.get(stage_name, {})
+                for action_key, action_data in stage_data.get("actions", {}).items():
                     category = self._deliverable_categories.get(action_key, "implementations")
                     for path_str in action_data.get("deliverables", []):
                         full_path = self._project_root / path_str
@@ -411,27 +405,25 @@ class WorkflowManagerService:
         return {"success": True, "data": {"features_added": len(features)}}
 
     def _populate_features(self, state: dict, features: list) -> None:
-        """Add feature entries to per-feature stages (implement/validation/feedback)."""
+        """Add feature entries to the features array with partitioned per-feature stages."""
         for feat in features:
-            feat_id = feat["id"]
-            entry = {
+            feat_obj = {
+                "feature_id": feat["id"],
                 "name": feat["name"],
                 "depends_on": feat.get("depends_on", []),
-                "actions": {
-                    "feature_refinement": {"status": "pending", "deliverables": []},
-                    "technical_design": {"status": "pending", "deliverables": []},
-                    "implementation": {"status": "pending", "deliverables": []},
-                    "acceptance_testing": {"status": "pending", "deliverables": []},
-                    "quality_evaluation": {"status": "skipped", "deliverables": [], "optional": True},
-                    "change_request": {"status": "pending", "deliverables": [], "optional": True},
-                },
             }
             for stage_name in ("implement", "validation", "feedback"):
-                state["stages"][stage_name]["features"][feat_id] = entry.copy()
-                # Deep-copy actions for each stage
-                state["stages"][stage_name]["features"][feat_id]["actions"] = {
-                    k: dict(v) for k, v in entry["actions"].items()
-                }
+                config = self._stage_config[stage_name]
+                actions = {}
+                optional_set = set(config.get("optional_actions", []))
+                for action_name in config["mandatory_actions"] + config["optional_actions"]:
+                    action_data = {"status": "pending", "deliverables": []}
+                    if action_name in optional_set:
+                        action_data["optional"] = True
+                        action_data["status"] = "skipped"
+                    actions[action_name] = action_data
+                feat_obj[stage_name] = {"status": "locked", "actions": actions}
+            state["features"].append(feat_obj)
 
     @x_ipe_tracing()
     def link_idea_folder(self, workflow_name: str, idea_folder_path: str) -> dict:
@@ -467,7 +459,7 @@ class WorkflowManagerService:
 
     def _build_initial_state(self, name: str) -> dict:
         now = _now_iso()
-        stages = {}
+        shared = {}
         for stage_name, config in self._stage_config.items():
             if config["type"] == "shared":
                 actions = {}
@@ -479,20 +471,19 @@ class WorkflowManagerService:
                     if action_name == "feature_breakdown":
                         action_data["features_created"] = []
                     actions[action_name] = action_data
-                stages[stage_name] = {
+                shared[stage_name] = {
                     "status": "in_progress" if stage_name == "ideation" else "locked",
                     "actions": actions,
                 }
-            else:
-                stages[stage_name] = {"status": "locked", "features": {}}
         return {
-            "schema_version": "1.0",
+            "schema_version": "2.0",
             "name": name,
             "created": now,
             "last_activity": now,
             "idea_folder": None,
             "current_stage": "ideation",
-            "stages": stages,
+            "shared": shared,
+            "features": [],
         }
 
     def _read_state(self, name: str) -> dict:
@@ -501,10 +492,14 @@ class WorkflowManagerService:
             return {"success": False, "error": "NOT_FOUND",
                     "message": f"Workflow '{name}' not found"}
         try:
-            return json.loads(path.read_text(encoding="utf-8"))
+            state = json.loads(path.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             return {"success": False, "error": "CORRUPTED_STATE",
                     "message": f"Workflow '{name}' has corrupted state — manual repair required"}
+        if state.get("schema_version") != "2.0" and "stages" in state:
+            state = self._migrate_v1_to_v2(state)
+            self._write_state(name, state)
+        return state
 
     def _write_state(self, name: str, state: dict):
         self._workflow_dir.mkdir(parents=True, exist_ok=True)
@@ -522,14 +517,15 @@ class WorkflowManagerService:
     def _update_shared_action(self, state, action, status, deliverables):
         """Update action in a shared stage (ideation/requirement)."""
         for stage_name in ("ideation", "requirement"):
-            stage = state["stages"][stage_name]
+            stage = state["shared"][stage_name]
             if action in stage.get("actions", {}):
                 if stage["status"] == "locked":
-                    if not self._try_unlock_stage(state, stage_name):
+                    if not self._try_unlock_shared_stage(state, stage_name):
                         return False, {"success": False, "error": "STAGE_LOCKED",
                                        "message": f"Stage '{stage_name}' is locked"}
                 stage["actions"][action]["status"] = status
-                stage["actions"][action]["deliverables"] = deliverables
+                if deliverables is not None:
+                    stage["actions"][action]["deliverables"] = deliverables
                 # Add next_actions_suggested when action is done
                 if status == "done" and action in self._next_actions_map:
                     stage["actions"][action]["next_actions_suggested"] = self._next_actions_map[action]
@@ -541,20 +537,24 @@ class WorkflowManagerService:
 
     def _update_feature_action(self, state, action, status, feature_id, deliverables):
         """Update action in a per-feature stage."""
+        feat = self._find_feature(state, feature_id)
+        if not feat:
+            return False, {"success": False, "error": "FEATURE_NOT_FOUND",
+                           "message": f"Feature '{feature_id}' or action '{action}' not found"}
         for stage_name in ("implement", "validation", "feedback"):
-            features = state["stages"][stage_name].get("features", {})
-            if feature_id in features and action in features[feature_id].get("actions", {}):
-                if state["stages"][stage_name]["status"] == "locked":
-                    if not self._try_unlock_stage(state, stage_name):
+            stage_data = feat.get(stage_name, {})
+            if action in stage_data.get("actions", {}):
+                if stage_data["status"] == "locked":
+                    if not self._try_unlock_feature_stage(state, feat, stage_name):
                         return False, {"success": False, "error": "STAGE_LOCKED",
                                        "message": f"Stage '{stage_name}' is locked"}
-                features[feature_id]["actions"][action]["status"] = status
-                features[feature_id]["actions"][action]["deliverables"] = deliverables
-                # Add next_actions_suggested when action is done
+                stage_data["actions"][action]["status"] = status
+                if deliverables is not None:
+                    stage_data["actions"][action]["deliverables"] = deliverables
                 if status == "done" and action in self._next_actions_map:
-                    features[feature_id]["actions"][action]["next_actions_suggested"] = self._next_actions_map[action]
+                    stage_data["actions"][action]["next_actions_suggested"] = self._next_actions_map[action]
                 elif status != "done":
-                    features[feature_id]["actions"][action].pop("next_actions_suggested", None)
+                    stage_data["actions"][action].pop("next_actions_suggested", None)
                 return True, None
         return False, {"success": False, "error": "FEATURE_NOT_FOUND",
                        "message": f"Feature '{feature_id}' or action '{action}' not found"}
@@ -563,57 +563,110 @@ class WorkflowManagerService:
         """No-op: stage transitions are now on-demand via _try_unlock_stage."""
         pass
 
-    def _is_stage_ready_to_unlock(self, state, stage_name):
-        """Check if a locked stage's predecessor has all mandatory actions done."""
-        idx = self._stage_order.index(stage_name) if stage_name in self._stage_order else -1
+    def _find_feature(self, state, feature_id):
+        """Find a feature dict in the features array by ID."""
+        for feat in state.get("features", []):
+            if feat.get("feature_id") == feature_id:
+                return feat
+        return None
+
+    def _is_shared_stage_ready_to_unlock(self, state, stage_name):
+        """Check if a shared stage's predecessor has all mandatory actions done."""
+        shared_stages = [s for s in self._stage_order
+                         if self._stage_config[s]["type"] == "shared"]
+        idx = shared_stages.index(stage_name) if stage_name in shared_stages else -1
         if idx <= 0:
             return False
-
-        prev_name = self._stage_order[idx - 1]
-        prev_stage = state["stages"].get(prev_name, {})
+        prev_name = shared_stages[idx - 1]
+        prev_stage = state["shared"].get(prev_name, {})
         prev_config = self._stage_config.get(prev_name, {})
-
         if prev_stage.get("status") not in ("in_progress",):
             return False
+        actions = prev_stage.get("actions", {})
+        return all(
+            actions.get(a, {}).get("status") == "done"
+            for a in prev_config.get("mandatory_actions", [])
+        )
 
-        if prev_config.get("type") == "shared":
-            actions = prev_stage.get("actions", {})
+    def _is_feature_stage_ready_to_unlock(self, state, feature, stage_name):
+        """Check if a feature's per-feature stage predecessor is ready."""
+        if stage_name == "implement":
+            req_config = self._stage_config.get("requirement", {})
+            req_stage = state["shared"].get("requirement", {})
+            actions = req_stage.get("actions", {})
             return all(
                 actions.get(a, {}).get("status") == "done"
-                for a in prev_config.get("mandatory_actions", [])
+                for a in req_config.get("mandatory_actions", [])
             )
-        elif prev_config.get("type") == "per_feature":
-            features = prev_stage.get("features", {})
-            if not features:
-                return False
-            return all(
-                all(
-                    feat_data.get("actions", {}).get(a, {}).get("status") == "done"
-                    for a in prev_config.get("mandatory_actions", [])
-                )
-                for feat_data in features.values()
-            )
-        return False
-
-    def _try_unlock_stage(self, state, stage_name):
-        """Complete the predecessor and unlock *stage_name* on demand."""
-        if not self._is_stage_ready_to_unlock(state, stage_name):
+        per_feature_stages = [s for s in self._stage_order
+                              if self._stage_config[s]["type"] == "per_feature"]
+        idx = per_feature_stages.index(stage_name) if stage_name in per_feature_stages else -1
+        if idx <= 0:
             return False
+        prev_name = per_feature_stages[idx - 1]
+        prev_config = self._stage_config.get(prev_name, {})
+        prev_stage = feature.get(prev_name, {})
+        if prev_stage.get("status") not in ("in_progress", "done"):
+            return False
+        actions = prev_stage.get("actions", {})
+        return all(
+            actions.get(a, {}).get("status") == "done"
+            for a in prev_config.get("mandatory_actions", [])
+        )
 
-        idx = self._stage_order.index(stage_name)
-        prev_name = self._stage_order[idx - 1]
-        state["stages"][prev_name]["status"] = "completed"
-        state["stages"][stage_name]["status"] = "in_progress"
+    def _try_unlock_shared_stage(self, state, stage_name):
+        """Complete the predecessor shared stage and unlock *stage_name*."""
+        if not self._is_shared_stage_ready_to_unlock(state, stage_name):
+            return False
+        shared_stages = [s for s in self._stage_order
+                         if self._stage_config[s]["type"] == "shared"]
+        idx = shared_stages.index(stage_name)
+        if idx > 0:
+            prev_name = shared_stages[idx - 1]
+            state["shared"][prev_name]["status"] = "completed"
+        state["shared"][stage_name]["status"] = "in_progress"
         state["current_stage"] = stage_name
         return True
+
+    def _try_unlock_feature_stage(self, state, feature, stage_name):
+        """Unlock a per-feature stage for a specific feature."""
+        if not self._is_feature_stage_ready_to_unlock(state, feature, stage_name):
+            return False
+        if stage_name == "implement":
+            req_stage = state["shared"].get("requirement", {})
+            if req_stage.get("status") == "in_progress":
+                req_stage["status"] = "completed"
+        else:
+            per_feature_stages = [s for s in self._stage_order
+                                  if self._stage_config[s]["type"] == "per_feature"]
+            idx = per_feature_stages.index(stage_name)
+            if idx > 0:
+                prev_name = per_feature_stages[idx - 1]
+                feature[prev_name]["status"] = "done"
+        feature[stage_name]["status"] = "in_progress"
+        self._update_current_stage(state)
+        return True
+
+    def _update_current_stage(self, state):
+        """Set current_stage to the highest stage with activity."""
+        for stage_name in self._stage_order:
+            config = self._stage_config[stage_name]
+            if config["type"] == "shared":
+                if state["shared"].get(stage_name, {}).get("status") == "in_progress":
+                    state["current_stage"] = stage_name
+            else:
+                for feat in state.get("features", []):
+                    if feat.get(stage_name, {}).get("status") in ("in_progress", "done"):
+                        state["current_stage"] = stage_name
+                        break
 
     def _is_feature_stage_done(self, state, feature_id, stage_name):
         """Check if a feature has completed all mandatory actions in a stage."""
         config = self._stage_config[stage_name]
-        features = state["stages"].get(stage_name, {}).get("features", {})
-        if feature_id not in features:
+        feat = self._find_feature(state, feature_id)
+        if not feat:
             return False
-        actions = features[feature_id].get("actions", {})
+        actions = feat.get(stage_name, {}).get("actions", {})
         return all(
             actions.get(a, {}).get("status") == "done"
             for a in config["mandatory_actions"]
@@ -623,46 +676,99 @@ class WorkflowManagerService:
         """Determine the recommended next action."""
         for stage_name in self._stage_order:
             config = self._stage_config[stage_name]
-            stage = state["stages"][stage_name]
 
-            if stage["status"] == "locked":
-                # Check if this locked stage is ready to unlock
-                if self._is_stage_ready_to_unlock(state, stage_name):
-                    if config["type"] == "shared":
+            if config["type"] == "shared":
+                stage = state["shared"].get(stage_name, {})
+                if stage.get("status") == "locked":
+                    if self._is_shared_stage_ready_to_unlock(state, stage_name):
                         for action_name in config["mandatory_actions"]:
                             action = stage.get("actions", {}).get(action_name, {})
                             if action.get("status") in ("pending", "failed"):
                                 return {"action": action_name, "stage": stage_name,
                                         "feature_id": None,
                                         "reason": "Next stage ready — click to start"}
-                    elif config["type"] == "per_feature":
-                        features = stage.get("features", {})
-                        for feat_id, feat_data in features.items():
-                            for action_name in config["mandatory_actions"]:
-                                action = feat_data.get("actions", {}).get(action_name, {})
-                                if action.get("status") in ("pending", "failed"):
-                                    return {"action": action_name, "stage": stage_name,
-                                            "feature_id": feat_id,
-                                            "reason": "Next stage ready — click to start"}
-                continue
-
-            if config["type"] == "shared":
-                for action_name in config["mandatory_actions"]:
-                    action = stage.get("actions", {}).get(action_name, {})
-                    if action.get("status") in ("pending", "failed"):
-                        return {"action": action_name, "stage": stage_name,
-                                "feature_id": None,
-                                "reason": "Next pending mandatory action"}
-
-            elif config["type"] == "per_feature":
-                features = stage.get("features", {})
-                for feat_id, feat_data in features.items():
+                    continue
+                if stage.get("status") == "in_progress":
                     for action_name in config["mandatory_actions"]:
-                        action = feat_data.get("actions", {}).get(action_name, {})
+                        action = stage.get("actions", {}).get(action_name, {})
                         if action.get("status") in ("pending", "failed"):
                             return {"action": action_name, "stage": stage_name,
-                                    "feature_id": feat_id,
-                                    "reason": "First unblocked feature with pending mandatory action"}
+                                    "feature_id": None,
+                                    "reason": "Next pending mandatory action"}
+
+            elif config["type"] == "per_feature":
+                for feat in state.get("features", []):
+                    feat_stage = feat.get(stage_name, {})
+                    if feat_stage.get("status") == "locked":
+                        if self._is_feature_stage_ready_to_unlock(state, feat, stage_name):
+                            for action_name in config["mandatory_actions"]:
+                                action = feat_stage.get("actions", {}).get(action_name, {})
+                                if action.get("status") in ("pending", "failed"):
+                                    return {"action": action_name, "stage": stage_name,
+                                            "feature_id": feat["feature_id"],
+                                            "reason": "Next stage ready — click to start"}
+                        continue
+                    if feat_stage.get("status") == "in_progress":
+                        for action_name in config["mandatory_actions"]:
+                            action = feat_stage.get("actions", {}).get(action_name, {})
+                            if action.get("status") in ("pending", "failed"):
+                                return {"action": action_name, "stage": stage_name,
+                                        "feature_id": feat["feature_id"],
+                                        "reason": "First unblocked feature with pending mandatory action"}
 
         return {"action": None, "stage": None, "feature_id": None,
                 "reason": "All actions complete"}
+
+    def _migrate_v1_to_v2(self, state):
+        """Migrate v1.0 (flat stages) to v2.0 (shared + features)."""
+        stages = state.get("stages", {})
+
+        shared = {}
+        for stage_name in ("ideation", "requirement"):
+            if stage_name in stages:
+                shared[stage_name] = stages[stage_name]
+
+        feature_ids = list(stages.get("implement", {}).get("features", {}).keys())
+        features = []
+        for feat_id in feature_ids:
+            impl_data = stages.get("implement", {}).get("features", {}).get(feat_id, {})
+            feat_obj = {
+                "feature_id": feat_id,
+                "name": impl_data.get("name", feat_id),
+                "depends_on": impl_data.get("depends_on", []),
+            }
+            for stage_name in ("implement", "validation", "feedback"):
+                config = self._stage_config.get(stage_name, {})
+                old_feat = stages.get(stage_name, {}).get("features", {}).get(feat_id, {})
+                old_actions = old_feat.get("actions", {})
+                optional_set = set(config.get("optional_actions", []))
+                all_stage_actions = config.get("mandatory_actions", []) + config.get("optional_actions", [])
+
+                stage_status = stages.get(stage_name, {}).get("status", "locked")
+                if stage_status == "completed":
+                    stage_status = "done"
+
+                new_actions = {}
+                for action_name in all_stage_actions:
+                    if action_name in old_actions:
+                        new_actions[action_name] = old_actions[action_name]
+                    else:
+                        action_data = {"status": "pending", "deliverables": []}
+                        if action_name in optional_set:
+                            action_data["optional"] = True
+                            action_data["status"] = "skipped"
+                        new_actions[action_name] = action_data
+
+                feat_obj[stage_name] = {"status": stage_status, "actions": new_actions}
+            features.append(feat_obj)
+
+        return {
+            "schema_version": "2.0",
+            "name": state.get("name", ""),
+            "created": state.get("created", ""),
+            "last_activity": state.get("last_activity", ""),
+            "idea_folder": state.get("idea_folder"),
+            "current_stage": state.get("current_stage", "ideation"),
+            "shared": shared,
+            "features": features,
+        }
