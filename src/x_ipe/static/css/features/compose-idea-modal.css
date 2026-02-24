@@ -33,9 +33,9 @@
 .compose-modal {
     background: #fff;
     border-radius: 12px;
-    width: 80vw;
-    height: 85vh;
-    max-height: 85vh;
+    width: 90vw;
+    height: 90vh;
+    max-height: 90vh;
     display: flex;
     flex-direction: column;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
