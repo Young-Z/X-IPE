@@ -249,7 +249,8 @@ class WorkflowManagerService:
     @x_ipe_tracing()
     def update_action_status(self, workflow_name: str, action: str,
                              status: str, feature_id: str = None,
-                             deliverables: list = None) -> dict:
+                             deliverables: list = None,
+                             features: list = None) -> dict:
         """Update an action's status and re-evaluate gating."""
         if status not in VALID_STATUSES:
             return {"success": False, "error": "INVALID_STATUS",
@@ -270,6 +271,17 @@ class WorkflowManagerService:
 
         if err:
             return err
+
+        # If feature_breakdown done with features, populate per-feature structures
+        if action == "feature_breakdown" and status == "done" and features:
+            self._populate_features(state, features)
+            req_actions = state["stages"]["requirement"]["actions"]
+            req_actions["feature_breakdown"]["features_created"] = [
+                {"id": f["id"], "name": f["name"], "depends_on": f.get("depends_on", [])}
+                for f in features
+            ]
+            no_dep_ids = [f["id"] for f in features if not f.get("depends_on")]
+            req_actions["feature_breakdown"]["next_actions_suggested"] = no_dep_ids
 
         # Re-evaluate stage gating
         self._evaluate_stage_gating(state)
@@ -392,6 +404,14 @@ class WorkflowManagerService:
         if "error" in state and state.get("success") is False:
             return state
 
+        self._populate_features(state, features)
+
+        state["last_activity"] = _now_iso()
+        self._write_state(workflow_name, state)
+        return {"success": True, "data": {"features_added": len(features)}}
+
+    def _populate_features(self, state: dict, features: list) -> None:
+        """Add feature entries to per-feature stages (implement/validation/feedback)."""
         for feat in features:
             feat_id = feat["id"]
             entry = {
@@ -412,10 +432,6 @@ class WorkflowManagerService:
                 state["stages"][stage_name]["features"][feat_id]["actions"] = {
                     k: dict(v) for k, v in entry["actions"].items()
                 }
-
-        state["last_activity"] = _now_iso()
-        self._write_state(workflow_name, state)
-        return {"success": True, "data": {"features_added": len(features)}}
 
     @x_ipe_tracing()
     def link_idea_folder(self, workflow_name: str, idea_folder_path: str) -> dict:

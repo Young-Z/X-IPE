@@ -21,6 +21,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
+**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` list of output file paths. Verify the workflow state was updated before marking the task complete.
+
 MANDATORY: This skill MUST call feature-board-management to create features on the board. Never edit features.md manually.
 
 MANDATORY: Every feature MUST have a feature ID in the format `FEATURE-{nnn}-{X}` (e.g., FEATURE-035-A, FEATURE-035-B) where `{nnn}` matches the parent Epic number. Features are created as sub-folders under the parent `EPIC-{nnn}/` folder.
@@ -54,6 +56,7 @@ input:
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
   workflow:
     name: "N/A"  # workflow name, default: N/A
+    action: "feature_breakdown"  # workflow action name for status updates
 
   # Task type attributes
   category: "requirement-stage"
@@ -313,11 +316,24 @@ BLOCKING: Human MUST approve feature list before refinement proceeds.
   <step_9>
     <name>Complete</name>
     <action>
-      1. Verify all DoD checkpoints
-      2. Output task completion summary
-      3. Request human review
+      1. IF execution_mode == "workflow-mode":
+         a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
+            - workflow_name: {from context}
+            - action: {workflow.action}
+            - status: "done"
+            - deliverables: [list of output file paths]
+            - features: [list of feature objects from Step 6, each with id, name, depends_on]
+              Example: [{"id": "FEATURE-001-A", "name": "Login Page", "depends_on": []},
+                        {"id": "FEATURE-001-B", "name": "Dashboard", "depends_on": ["FEATURE-001-A"]}]
+         b. Log: "Workflow action status updated to done with features"
+         NOTE: The tool automatically populates per-feature workflow structures and
+               sets next_actions_suggested to features with no dependencies.
+               No separate add_features API call is needed.
+      2. Verify all DoD checkpoints
+      3. Output task completion summary
+      4. Request human review
     </action>
-    <output>Task completion output</output>
+    <output>Task completion output, workflow_action_updated</output>
   </step_9>
 
 </procedure>
@@ -337,6 +353,8 @@ task_completion_output:
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
+  workflow_action: "{workflow.action}"      # triggers workflow status update when execution_mode == workflow-mode
+  workflow_action_updated: true | false # true if update_workflow_action was called
   task_output_links:
     - "x-ipe-docs/requirements/requirement-details.md"  # or requirement-details-part-X.md
   mockup_list: "{inherited from input or N/A}"
@@ -392,6 +410,10 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   <checkpoint required="if-applicable">
     <name>Parent feature deduplication verified</name>
     <verification>If features were split, parent coverage checked — fully covered parents removed, partial coverage gaps flagged</verification>
+  </checkpoint>
+  <checkpoint required="if-applicable">
+    <name>Workflow Action Status Updated</name>
+    <verification>If execution_mode == "workflow-mode", called the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with status "done" and deliverables list</verification>
   </checkpoint>
 </definition_of_done>
 ```

@@ -124,24 +124,39 @@ def get_workflow_state(workflow_name: str) -> dict:
 @mcp.tool
 def update_workflow_action(workflow_name: str, action: str, status: str,
                            feature_id: str = None,
-                           deliverables: list = None) -> dict:
+                           deliverables: list = None,
+                           features: list = None) -> dict:
     """Update the status of a workflow action.
 
-    Moves an action (e.g. compose_idea, technical_design) to a new status
-    and triggers stage gating re-evaluation.
+    Moves an action to a new status and triggers stage gating re-evaluation.
+    Supports all workflow actions across the engineering lifecycle including
+    ideation (compose_idea, idea_mockup, idea_architecture), requirements
+    (requirement_gathering, feature_breakdown, feature_refinement),
+    design (technical_design, test_generation), implementation
+    (code_implementation, acceptance_test), and delivery
+    (human_playground, feature_closing).
 
     Args:
         workflow_name: Name of the workflow.
-        action: Action identifier (e.g. compose_idea, feature_refinement).
+        action: Action identifier (e.g. compose_idea, idea_mockup, requirement_gathering,
+                feature_breakdown, feature_refinement, technical_design, test_generation,
+                code_implementation, acceptance_test, human_playground, feature_closing).
         status: New status — one of: pending, in_progress, done, skipped, failed.
         feature_id: Required for per-feature actions (implement/validation/feedback stages).
         deliverables: Optional list of deliverable paths produced by the action.
+        features: Optional list of feature objects for feature_breakdown action.
+            Each feature: {"id": "FEATURE-XXX", "name": "...", "depends_on": [...]}.
+            When provided with action=feature_breakdown and status=done, automatically
+            populates per-feature structures and sets next_actions_suggested to
+            features with no dependencies.
     """
     payload = {"action": action, "status": status}
     if feature_id:
         payload["feature_id"] = feature_id
     if deliverables:
         payload["deliverables"] = deliverables
+    if features:
+        payload["features"] = features
 
     try:
         resp = requests.post(
@@ -158,5 +173,10 @@ def update_workflow_action(workflow_name: str, action: str, status: str,
         }
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point for x-ipe-mcp console script (stdio transport)."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()

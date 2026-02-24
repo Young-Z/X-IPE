@@ -304,6 +304,71 @@ class TestFeatureAPIIntegration:
         assert feat040["actions"]["feature_refinement"]["status"] == "done"
         assert feat042["actions"]["feature_refinement"]["status"] == "done"
 
+    def test_feature_breakdown_with_inline_features(self, client):
+        """feature_breakdown action with features param creates per-feature structures."""
+        client.post("/api/workflow/create", json={"name": "inline-feat"})
+        client.post("/api/workflow/inline-feat/action", json={"action": "compose_idea", "status": "done"})
+        client.post("/api/workflow/inline-feat/action", json={"action": "refine_idea", "status": "done"})
+        client.post("/api/workflow/inline-feat/action", json={"action": "requirement_gathering", "status": "done"})
+        # Pass features inline with feature_breakdown action
+        resp = client.post("/api/workflow/inline-feat/action", json={
+            "action": "feature_breakdown",
+            "status": "done",
+            "deliverables": ["x-ipe-docs/requirements/requirement-details.md"],
+            "features": [
+                {"id": "FEAT-A", "name": "Auth Module", "depends_on": []},
+                {"id": "FEAT-B", "name": "Dashboard", "depends_on": ["FEAT-A"]},
+                {"id": "FEAT-C", "name": "Settings", "depends_on": []},
+            ]
+        })
+        assert resp.status_code == 200
+        state = client.get("/api/workflow/inline-feat").get_json()["data"]
+        # Features should be populated in implement stage
+        impl_features = state["stages"]["implement"]["features"]
+        assert "FEAT-A" in impl_features
+        assert "FEAT-B" in impl_features
+        assert "FEAT-C" in impl_features
+        assert impl_features["FEAT-B"]["depends_on"] == ["FEAT-A"]
+
+    def test_feature_breakdown_inline_sets_features_created(self, client):
+        """feature_breakdown with features param populates features_created field."""
+        client.post("/api/workflow/create", json={"name": "fc-test"})
+        client.post("/api/workflow/fc-test/action", json={"action": "compose_idea", "status": "done"})
+        client.post("/api/workflow/fc-test/action", json={"action": "refine_idea", "status": "done"})
+        client.post("/api/workflow/fc-test/action", json={"action": "requirement_gathering", "status": "done"})
+        client.post("/api/workflow/fc-test/action", json={
+            "action": "feature_breakdown", "status": "done",
+            "features": [
+                {"id": "FEAT-X", "name": "Feature X", "depends_on": []},
+                {"id": "FEAT-Y", "name": "Feature Y", "depends_on": ["FEAT-X"]},
+            ]
+        })
+        state = client.get("/api/workflow/fc-test").get_json()["data"]
+        fb = state["stages"]["requirement"]["actions"]["feature_breakdown"]
+        assert len(fb["features_created"]) == 2
+        assert fb["features_created"][0]["id"] == "FEAT-X"
+
+    def test_feature_breakdown_inline_next_actions_no_deps(self, client):
+        """next_actions_suggested contains only feature IDs with no dependencies."""
+        client.post("/api/workflow/create", json={"name": "na-test"})
+        client.post("/api/workflow/na-test/action", json={"action": "compose_idea", "status": "done"})
+        client.post("/api/workflow/na-test/action", json={"action": "refine_idea", "status": "done"})
+        client.post("/api/workflow/na-test/action", json={"action": "requirement_gathering", "status": "done"})
+        client.post("/api/workflow/na-test/action", json={
+            "action": "feature_breakdown", "status": "done",
+            "features": [
+                {"id": "FEAT-1", "name": "Base", "depends_on": []},
+                {"id": "FEAT-2", "name": "Dependent", "depends_on": ["FEAT-1"]},
+                {"id": "FEAT-3", "name": "Independent", "depends_on": []},
+            ]
+        })
+        state = client.get("/api/workflow/na-test").get_json()["data"]
+        fb = state["stages"]["requirement"]["actions"]["feature_breakdown"]
+        suggested = fb["next_actions_suggested"]
+        assert "FEAT-1" in suggested
+        assert "FEAT-3" in suggested
+        assert "FEAT-2" not in suggested
+
 
 # ─────────────────────────────────────────────
 # JS Integration — Feature Lanes Branching
