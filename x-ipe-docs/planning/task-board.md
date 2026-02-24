@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-619 | Bug Fix | Feature lanes UI: (1) dark mode → light mode, (2) dependency lines overlap panels → left gutter, (3) shared action panels hidden when features exist → show both. Feedback-20260224-131050 | Zephyr 🌬️ | ✅ completed | 02-24-2026 06:05:00 | workflow-stage.js, workflow.css | - |
 | TASK-618 | Bug Fix | Folder browser modal markdown preview missing mermaid/architecture DSL/infographic/syntax highlighting — uses bare marked.parse() instead of ContentRenderer. Feedback-20260224-125237 | Zephyr 🌬️ | ✅ completed | 02-24-2026 04:58:00 | content-renderer.js, folder-browser-modal.js, folder-browser-modal.test.js | - |
 | TASK-617 | Change Request | Consolidate features into update_workflow_action tool — add features param to MCP tool, auto-populate features on feature_breakdown done, set next_actions_suggested to no-dep features. Feedback-20260224-113724 | Cipher 🔐 | ✅ completed | 02-24-2026 04:14:00 | app_agent_interaction.py, workflow_routes.py, workflow_manager_service.py, SKILL.md, test_workflow_feature_lanes.py | - |
 | TASK-616 | Bug Fix | Deliverable preview modal height too small for HTML — missing explicit height; all workflow modals should be 90vw×90vh. Feedback-20260224-111639 | Pixel 🎨 | ✅ completed | 02-24-2026 03:30:00 | workflow.css, compose-idea-modal.css, action-execution-modal.css, folder-browser-modal.css, stage-toolbox.css, modal-sizing.test.js | - |
@@ -201,7 +202,7 @@
 
 ## Quick Stats
 
-- **Total Active:** 42
+- **Total Active:** 43
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0

@@ -102,14 +102,59 @@ const workflowStage = {
 
     /** Main entry: render stage ribbon + actions (or feature lanes) + deliverables into container. */
     render(container, workflowState, nextAction, workflowName) {
-        container.appendChild(this._renderRibbon(workflowState.stages));
-        if (this._hasFeatures(workflowState.stages)) {
-            container.appendChild(this._renderFeatureSelector(workflowState.stages, nextAction, workflowName));
-            container.appendChild(this._renderFeatureLanes(workflowState.stages, nextAction, workflowName));
+        const stages = this._buildStagesView(workflowState);
+        container.appendChild(this._renderRibbon(stages));
+        if (this._hasFeatures(stages)) {
+            // Show shared (non-feature) stage actions first
+            const sharedStageNames = this.STAGE_ORDER.filter(s => {
+                const st = stages[s] || {};
+                return !st.features || Object.keys(st.features).length === 0;
+            });
+            if (sharedStageNames.length > 0) {
+                container.appendChild(this._renderActionsArea(stages, nextAction, workflowName, sharedStageNames));
+            }
+            container.appendChild(this._renderFeatureSelector(stages, nextAction, workflowName));
+            container.appendChild(this._renderFeatureLanes(stages, nextAction, workflowName));
         } else {
-            container.appendChild(this._renderActionsArea(workflowState.stages, nextAction, workflowName));
+            container.appendChild(this._renderActionsArea(stages, nextAction, workflowName));
         }
         this._renderDeliverables(container, workflowName);
+    },
+
+    /**
+     * Build a backward-compatible stages view from the new shared + features structure.
+     * If the state already has 'stages' (v1 format), return as-is.
+     */
+    _buildStagesView(workflowState) {
+        if (workflowState.stages) return workflowState.stages;
+        const stages = {};
+        if (workflowState.shared) {
+            for (const [name, data] of Object.entries(workflowState.shared)) {
+                stages[name] = data;
+            }
+        }
+        const featuresList = workflowState.features || [];
+        for (const stageName of ['implement', 'validation', 'feedback']) {
+            const features = {};
+            let stageStatus = 'locked';
+            for (const feat of featuresList) {
+                const featStage = feat[stageName] || {};
+                const mergedActions = {};
+                for (const s of ['implement', 'validation', 'feedback']) {
+                    Object.assign(mergedActions, (feat[s] || {}).actions || {});
+                }
+                features[feat.feature_id] = {
+                    name: feat.name,
+                    depends_on: feat.depends_on || [],
+                    actions: mergedActions,
+                };
+                if (featStage.status === 'in_progress' || featStage.status === 'done') {
+                    stageStatus = 'in_progress';
+                }
+            }
+            stages[stageName] = { status: stageStatus, features };
+        }
+        return stages;
     },
 
     /**
@@ -189,14 +234,15 @@ const workflowStage = {
         return pill;
     },
 
-    _renderActionsArea(stages, nextAction, wfName) {
+    _renderActionsArea(stages, nextAction, wfName, stageFilter = null) {
         const area = document.createElement('div');
         area.className = 'actions-area';
 
+        const stageOrder = stageFilter || this.STAGE_ORDER;
         const latestSuggestions = this._getLatestSuggestions(stages);
 
         // Group completed stages together under "COMPLETED ACTIONS"
-        const completedStages = this.STAGE_ORDER.filter(s => (stages[s] || {}).status === 'completed');
+        const completedStages = stageOrder.filter(s => (stages[s] || {}).status === 'completed');
         if (completedStages.length > 0) {
             const group = document.createElement('div');
             group.className = 'action-group';
@@ -223,7 +269,7 @@ const workflowStage = {
         }
 
         // Active stage with "{STAGE_NAME} Actions" label
-        const activeStage = this.STAGE_ORDER.find(s => (stages[s] || {}).status === 'in_progress');
+        const activeStage = stageOrder.find(s => (stages[s] || {}).status === 'in_progress');
         if (activeStage) {
             const stageConfig = this.ACTION_MAP[activeStage];
             if (stageConfig) {
@@ -232,10 +278,10 @@ const workflowStage = {
         }
 
         // First locked stage — render as ready (clickable) or locked
-        const firstLocked = this.STAGE_ORDER.find(s => (stages[s] || {}).status === 'locked');
+        const firstLocked = stageOrder.find(s => (stages[s] || {}).status === 'locked');
         if (firstLocked) {
-            const lockedIdx = this.STAGE_ORDER.indexOf(firstLocked);
-            const prevStageKey = lockedIdx > 0 ? this.STAGE_ORDER[lockedIdx - 1] : null;
+            const lockedIdx = stageOrder.indexOf(firstLocked);
+            const prevStageKey = lockedIdx > 0 ? stageOrder[lockedIdx - 1] : null;
             const prevReady = prevStageKey && this._isStageMandatoryDone(stages, prevStageKey);
 
             if (prevReady) {
@@ -245,7 +291,7 @@ const workflowStage = {
                     (stages[firstLocked] || {}).actions || {},
                     nextAction, wfName, false, null, latestSuggestions));
             } else {
-                const prevLabel = lockedIdx > 0 ? (this.ACTION_MAP[this.STAGE_ORDER[lockedIdx - 1]] || {}).label || this.STAGE_ORDER[lockedIdx - 1] : '';
+                const prevLabel = lockedIdx > 0 ? (this.ACTION_MAP[stageOrder[lockedIdx - 1]] || {}).label || stageOrder[lockedIdx - 1] : '';
                 area.appendChild(this._renderActionGroup(firstLocked, {}, nextAction, wfName, true, prevLabel, latestSuggestions));
             }
         }
@@ -345,7 +391,7 @@ const workflowStage = {
             const resp = await fetch(`/api/workflow/${encodeURIComponent(wfName)}`);
             const json = await resp.json();
             const wfData = json.data || {};
-            const stages = wfData.stages || {};
+            const stages = this._buildStagesView(wfData);
 
             const gate = StageGateChecker.canReopen(actionKey, stages);
             if (!gate.allowed) {
@@ -788,12 +834,13 @@ const workflowStage = {
         return badge;
     },
 
-    /** Draw SVG dependency arrows between lanes. */
+    /** Draw SVG dependency arrows in left gutter between lanes. */
     _drawDepArrows(container) {
         const svg = container.querySelector('.dep-svg-overlay');
         if (!svg) return;
         svg.innerHTML = '';
         const cRect = container.getBoundingClientRect();
+        const gutterX = 12;
 
         const lanes = container.querySelectorAll('.feature-lane[data-feature]');
         const laneMap = {};
@@ -806,25 +853,20 @@ const workflowStage = {
                 const srcLane = laneMap[dep.trim()];
                 if (!srcLane) return;
 
-                const srcLabel = srcLane.querySelector('.lane-label');
-                const tgtLabel = lane.querySelector('.lane-label');
-                const srcRect = srcLabel.getBoundingClientRect();
-                const tgtRect = tgtLabel.getBoundingClientRect();
+                const srcRect = srcLane.getBoundingClientRect();
+                const tgtRect = lane.getBoundingClientRect();
 
-                const x1 = srcRect.left + srcRect.width / 2 - cRect.left;
                 const y1 = srcRect.bottom - cRect.top;
-                const x2 = tgtRect.left + tgtRect.width / 2 - cRect.left;
                 const y2 = tgtRect.top - cRect.top;
-                const midY = (y1 + y2) / 2;
 
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                path.setAttribute('d', `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2 - 4}`);
+                path.setAttribute('d', `M ${gutterX} ${y1} L ${gutterX} ${y2 - 4}`);
                 path.setAttribute('class', 'dep-arrow-line');
                 svg.appendChild(path);
 
                 const arrowSize = 5;
                 const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-                arrow.setAttribute('points', `${x2},${y2} ${x2 - arrowSize},${y2 - arrowSize * 1.6} ${x2 + arrowSize},${y2 - arrowSize * 1.6}`);
+                arrow.setAttribute('points', `${gutterX},${y2} ${gutterX - arrowSize},${y2 - arrowSize * 1.6} ${gutterX + arrowSize},${y2 - arrowSize * 1.6}`);
                 arrow.setAttribute('class', 'dep-arrow-head');
                 svg.appendChild(arrow);
             });
