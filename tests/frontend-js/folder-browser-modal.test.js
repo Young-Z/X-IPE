@@ -533,6 +533,68 @@ describe('FEATURE-039-A: Folder Browser Modal (MVP)', () => {
     });
   });
 
+  describe('TASK-615: HTML Preview as Iframe', () => {
+    it('should render HTML files in an iframe instead of raw text', async () => {
+      const FBM = globalThis.FolderBrowserModal;
+      expect(FBM).toBeDefined();
+
+      const TREE_WITH_HTML = [
+        { name: 'mockup.html', type: 'file', path: 'refined-idea/mockups/mockup.html' },
+      ];
+
+      globalThis.fetch
+        .mockResolvedValueOnce({ ok: true, json: async () => TREE_WITH_HTML })
+        .mockResolvedValueOnce({ ok: true, text: async () => '<html><body><h1>Mockup</h1></body></html>' });
+
+      const modal = new FBM({ workflowName: 'test-wf' });
+      modal.open('refined-idea/');
+
+      await vi.waitFor(() => {
+        expect(document.querySelector('.file-tree')).not.toBeNull();
+      });
+
+      const fileItem = document.querySelector('.file-item[data-path="refined-idea/mockups/mockup.html"]');
+      expect(fileItem).not.toBeNull();
+      fileItem.click();
+
+      await vi.waitFor(() => {
+        const iframe = document.querySelector('.folder-browser-preview-content iframe');
+        expect(iframe).not.toBeNull();
+        expect(iframe.getAttribute('sandbox')).toContain('allow-scripts');
+      });
+    });
+
+    it('should NOT show HTML files as preformatted text', async () => {
+      const FBM = globalThis.FolderBrowserModal;
+      expect(FBM).toBeDefined();
+
+      const TREE_WITH_HTML = [
+        { name: 'page.html', type: 'file', path: 'refined-idea/page.html' },
+      ];
+
+      globalThis.fetch
+        .mockResolvedValueOnce({ ok: true, json: async () => TREE_WITH_HTML })
+        .mockResolvedValueOnce({ ok: true, text: async () => '<html><body>Test</body></html>' });
+
+      const modal = new FBM({ workflowName: 'test-wf' });
+      modal.open('refined-idea/');
+
+      await vi.waitFor(() => {
+        expect(document.querySelector('.file-tree')).not.toBeNull();
+      });
+
+      const fileItem = document.querySelector('.file-item[data-path="refined-idea/page.html"]');
+      fileItem.click();
+
+      await vi.waitFor(() => {
+        const content = document.querySelector('.folder-browser-preview-content');
+        expect(content).not.toBeNull();
+        const pre = content.querySelector('pre');
+        expect(pre).toBeNull();
+      });
+    });
+  });
+
   describe('Default Preview State', () => {
     it('should show "Select a file to preview" initially', () => {
       const FBM = globalThis.FolderBrowserModal;

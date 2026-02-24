@@ -276,6 +276,16 @@ class FolderBrowserModal {
             contentEl.innerHTML = typeof marked !== 'undefined' && marked.parse
                 ? marked.parse(content)
                 : '<pre>' + this._escapeHtml(content) + '</pre>';
+        } else if (filePath.endsWith('.html') || filePath.endsWith('.htm')) {
+            const blob = new Blob([content], { type: 'text/html' });
+            const blobUrl = URL.createObjectURL(blob);
+            const iframe = document.createElement('iframe');
+            iframe.src = blobUrl;
+            iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            contentEl.appendChild(iframe);
         } else {
             const pre = document.createElement('pre');
             pre.textContent = content;

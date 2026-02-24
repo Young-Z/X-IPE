@@ -181,6 +181,16 @@ class DeliverableViewer {
                 content.innerHTML = typeof marked !== 'undefined' && marked.parse
                     ? marked.parse(text)
                     : `<pre>${this._escapeHtml(text)}</pre>`;
+            } else if (filePath.endsWith('.html') || filePath.endsWith('.htm')) {
+                const blob = new Blob([text], { type: 'text/html' });
+                const blobUrl = URL.createObjectURL(blob);
+                const iframe = document.createElement('iframe');
+                iframe.src = blobUrl;
+                iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.border = 'none';
+                content.appendChild(iframe);
             } else {
                 const pre = document.createElement('pre');
                 pre.textContent = text;

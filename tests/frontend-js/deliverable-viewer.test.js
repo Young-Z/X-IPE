@@ -293,6 +293,51 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
     });
   });
 
+  describe('TASK-615: HTML Preview as Iframe', () => {
+    it('should render HTML files in an iframe instead of raw text', async () => {
+      globalThis.fetch.mockResolvedValue({
+        ok: true,
+        text: async () => '<html><body><h1>Hello</h1></body></html>',
+      });
+
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      await viewer.showPreview('mockups/design.html');
+      const iframe = document.querySelector('.preview-content iframe');
+      expect(iframe).not.toBeNull();
+      expect(iframe.getAttribute('sandbox')).toContain('allow-scripts');
+    });
+
+    it('should render .htm files in an iframe', async () => {
+      globalThis.fetch.mockResolvedValue({
+        ok: true,
+        text: async () => '<html><body>Test</body></html>',
+      });
+
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      await viewer.showPreview('mockups/page.htm');
+      const iframe = document.querySelector('.preview-content iframe');
+      expect(iframe).not.toBeNull();
+    });
+
+    it('should NOT show HTML files as preformatted text', async () => {
+      globalThis.fetch.mockResolvedValue({
+        ok: true,
+        text: async () => '<html><body><h1>Hello</h1></body></html>',
+      });
+
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      await viewer.showPreview('mockups/design.html');
+      const pre = document.querySelector('.preview-content pre');
+      expect(pre).toBeNull();
+    });
+  });
+
   describe('Security', () => {
     it('should not allow path traversal in file requests', async () => {
       const DV = globalThis.DeliverableViewer;
