@@ -273,9 +273,17 @@ class FolderBrowserModal {
         contentEl.className = 'folder-browser-preview-content';
 
         if (filePath.endsWith('.md')) {
-            contentEl.innerHTML = typeof marked !== 'undefined' && marked.parse
-                ? marked.parse(content)
-                : '<pre>' + this._escapeHtml(content) + '</pre>';
+            // Reuse ContentRenderer for full markdown support (mermaid, architecture DSL, etc.)
+            this.previewPanel.appendChild(contentEl);
+            if (typeof ContentRenderer !== 'undefined') {
+                const renderer = new ContentRenderer(contentEl);
+                renderer.renderMarkdown(content);
+            } else {
+                contentEl.innerHTML = typeof marked !== 'undefined' && marked.parse
+                    ? '<div class="markdown-body">' + marked.parse(content) + '</div>'
+                    : '<pre>' + this._escapeHtml(content) + '</pre>';
+            }
+            return;
         } else if (filePath.endsWith('.html') || filePath.endsWith('.htm')) {
             const blob = new Blob([content], { type: 'text/html' });
             const blobUrl = URL.createObjectURL(blob);

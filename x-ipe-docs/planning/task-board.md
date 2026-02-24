@@ -6,7 +6,8 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-617 | Change Request | Consolidate features into update_workflow_action tool — add features param to MCP tool, auto-populate features on feature_breakdown done, set next_actions_suggested to no-dep features. Feedback-20260224-113724 | Cipher 🔐 | 🔄 in_progress | 02-24-2026 04:14:00 | app_agent_interaction.py, workflow_routes.py, workflow_manager_service.py, SKILL.md | - |
+| TASK-618 | Bug Fix | Folder browser modal markdown preview missing mermaid/architecture DSL/infographic/syntax highlighting — uses bare marked.parse() instead of ContentRenderer. Feedback-20260224-125237 | Zephyr 🌬️ | ✅ completed | 02-24-2026 04:58:00 | content-renderer.js, folder-browser-modal.js, folder-browser-modal.test.js | - |
+| TASK-617 | Change Request | Consolidate features into update_workflow_action tool — add features param to MCP tool, auto-populate features on feature_breakdown done, set next_actions_suggested to no-dep features. Feedback-20260224-113724 | Cipher 🔐 | ✅ completed | 02-24-2026 04:14:00 | app_agent_interaction.py, workflow_routes.py, workflow_manager_service.py, SKILL.md, test_workflow_feature_lanes.py | - |
 | TASK-616 | Bug Fix | Deliverable preview modal height too small for HTML — missing explicit height; all workflow modals should be 90vw×90vh. Feedback-20260224-111639 | Pixel 🎨 | ✅ completed | 02-24-2026 03:30:00 | workflow.css, compose-idea-modal.css, action-execution-modal.css, folder-browser-modal.css, stage-toolbox.css, modal-sizing.test.js | - |
 | TASK-615 | Bug Fix | Workflow deliverable preview shows raw HTML instead of rendered iframe — deliverable-viewer.js and folder-browser-modal.js lack HTML preview support (ideation workplace.js has it). Feedback-20260224-093341 | Pulse 🔵 | ✅ completed | 02-24-2026 02:52:00 | deliverable-viewer.js, folder-browser-modal.js | - |
 | TASK-614 | Bug Fix | Action Execution Modal: Idea Mockup action shows no input selector or instructions — copilot-prompt.json id "generate-mockup" mismatches action key "design_mockup". Feedback-20260222-161515 | Cipher 🔐 | ✅ completed | 02-22-2026 08:19:00 | copilot-prompt.json | - |
@@ -200,7 +201,7 @@
 
 ## Quick Stats
 
-- **Total Active:** 41
+- **Total Active:** 42
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0

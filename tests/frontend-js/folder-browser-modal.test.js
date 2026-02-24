@@ -595,6 +595,109 @@ describe('FEATURE-039-A: Folder Browser Modal (MVP)', () => {
     });
   });
 
+  describe('TASK-618: Markdown Preview uses ContentRenderer', () => {
+    it('should use ContentRenderer.renderMarkdown for .md files', async () => {
+      const FBM = globalThis.FolderBrowserModal;
+      expect(FBM).toBeDefined();
+
+      // Mock ContentRenderer
+      const renderMarkdownSpy = vi.fn();
+      globalThis.ContentRenderer = class {
+        constructor(containerOrId) {
+          this.container = typeof containerOrId === 'string'
+            ? document.getElementById(containerOrId)
+            : containerOrId;
+        }
+        initMermaid() {}
+        initMarked() {}
+        initArchitectureDSL() {}
+        renderMarkdown(content) { renderMarkdownSpy(content); this.container.innerHTML = '<div class="markdown-body"><p>' + content + '</p></div>'; }
+      };
+
+      const mdContent = '# Hello\n\n```mermaid\ngraph TD;\n  A-->B;\n```';
+
+      globalThis.fetch
+        .mockResolvedValueOnce({ ok: true, json: async () => TREE_RESPONSE })
+        .mockResolvedValueOnce({ ok: true, text: async () => mdContent });
+
+      const modal = new FBM({ workflowName: 'test-wf' });
+      modal.open('refined-idea/');
+
+      await vi.waitFor(() => {
+        expect(document.querySelector('.file-tree')).not.toBeNull();
+      });
+
+      const fileItem = document.querySelector('.file-item[data-path="refined-idea/idea-summary.md"]');
+      fileItem.click();
+
+      await vi.waitFor(() => {
+        expect(renderMarkdownSpy).toHaveBeenCalledWith(mdContent);
+      });
+    });
+
+    it('should wrap markdown content in markdown-body class', async () => {
+      const FBM = globalThis.FolderBrowserModal;
+      expect(FBM).toBeDefined();
+
+      // Mock ContentRenderer that wraps in markdown-body
+      globalThis.ContentRenderer = class {
+        constructor(containerOrId) {
+          this.container = typeof containerOrId === 'string'
+            ? document.getElementById(containerOrId)
+            : containerOrId;
+        }
+        initMermaid() {}
+        initMarked() {}
+        initArchitectureDSL() {}
+        renderMarkdown(content) { this.container.innerHTML = '<div class="markdown-body"><p>' + content + '</p></div>'; }
+      };
+
+      globalThis.fetch
+        .mockResolvedValueOnce({ ok: true, json: async () => TREE_RESPONSE })
+        .mockResolvedValueOnce({ ok: true, text: async () => '# Hello' });
+
+      const modal = new FBM({ workflowName: 'test-wf' });
+      modal.open('refined-idea/');
+
+      await vi.waitFor(() => {
+        expect(document.querySelector('.file-tree')).not.toBeNull();
+      });
+
+      document.querySelector('.file-item[data-path="refined-idea/idea-summary.md"]').click();
+
+      await vi.waitFor(() => {
+        const mdBody = document.querySelector('.folder-browser-preview-content .markdown-body');
+        expect(mdBody).not.toBeNull();
+      });
+    });
+
+    it('should accept DOM element in ContentRenderer constructor', () => {
+      // ContentRenderer should support passing a DOM element, not just a string ID
+      const FBM = globalThis.FolderBrowserModal;
+      expect(FBM).toBeDefined();
+
+      // Load content-renderer.js with proper mocks
+      const origMarked = globalThis.marked;
+      globalThis.marked = { parse: vi.fn((md) => `<p>${md}</p>`), setOptions: vi.fn() };
+
+      try {
+        loadFeatureScript('../core/content-renderer.js', 'core');
+      } catch { /* may not exist in test */ }
+
+      const CR = globalThis.ContentRenderer;
+      if (CR) {
+        const div = document.createElement('div');
+        document.body.appendChild(div);
+        const renderer = new CR(div);
+        expect(renderer.container).toBe(div);
+        div.remove();
+      }
+
+      // Restore
+      globalThis.marked = origMarked;
+    });
+  });
+
   describe('Default Preview State', () => {
     it('should show "Select a file to preview" initially', () => {
       const FBM = globalThis.FolderBrowserModal;

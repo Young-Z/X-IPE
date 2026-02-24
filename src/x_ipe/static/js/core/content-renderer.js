@@ -6,8 +6,10 @@
  * with syntax highlighting, Mermaid diagrams, Infographic DSL, and Architecture DSL.
  */
 class ContentRenderer {
-    constructor(containerId) {
-        this.container = document.getElementById(containerId);
+    constructor(containerOrId) {
+        this.container = typeof containerOrId === 'string'
+            ? document.getElementById(containerOrId)
+            : containerOrId;
         this.currentPath = null;
         this.initMermaid();
         this.initMarked();
