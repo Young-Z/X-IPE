@@ -85,7 +85,8 @@ class ActionExecutionModal {
             const resp = await fetch(`/api/workflow/${encodeURIComponent(this.workflowName)}`);
             if (!resp.ok) return files;
             const json = await resp.json();
-            const stages = (json.data || {}).stages || {};
+            const data = json.data || {};
+            const stages = data.stages || data.shared || {};
             const composeAction = (stages.ideation && stages.ideation.actions && stages.ideation.actions.compose_idea) || {};
             const deliverables = composeAction.deliverables || [];
             // Add compose_idea .md deliverable as primary option
@@ -134,7 +135,8 @@ class ActionExecutionModal {
             const resp = await fetch(`/api/workflow/${encodeURIComponent(this.workflowName)}`);
             if (!resp.ok) return files;
             const json = await resp.json();
-            const stages = (json.data || {}).stages || {};
+            const data = json.data || {};
+            const stages = data.stages || data.shared || {};
 
             for (const sourceAction of inputSource) {
                 for (const [, stageData] of Object.entries(stages)) {

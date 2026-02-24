@@ -288,6 +288,37 @@ describe('FEATURE-040-A: Modal Generalization & Core Actions', () => {
       const files = await modal._resolveInputFiles(['requirement_gathering']);
       expect(files).toContain('x-ipe-docs/requirements/requirement-details-part-5.md');
     });
+
+    it('should resolve files when API returns shared format instead of stages', async () => {
+      const Modal = globalThis.ActionExecutionModal;
+      if (!Modal) return;
+      // Override fetch to return shared format (real API format)
+      globalThis.fetch = vi.fn((url) => {
+        if (url.includes('/api/workflow/')) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              data: {
+                shared: {
+                  ideation: {
+                    actions: {
+                      compose_idea: {
+                        deliverables: ['x-ipe-docs/ideas/wf-test/new idea.md']
+                      }
+                    }
+                  }
+                },
+                features: []
+              }
+            })
+          });
+        }
+        return Promise.resolve({ ok: false });
+      });
+      const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'test' });
+      const files = await modal._resolveInputFiles(['compose_idea']);
+      expect(files).toContain('x-ipe-docs/ideas/wf-test/new idea.md');
+    });
   });
 
   /* ================================================================= */
