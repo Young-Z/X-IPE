@@ -6,6 +6,8 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-644 | Code Implementation | FEATURE-041-F: Frontend — action context modal dropdowns, context persistence, reopen pre-population, legacy fallback | Echo 🔊 | 🔄 in_progress | 02-26-2026 14:30:00 | - | Acceptance Testing |
+| TASK-643 | Code Implementation | FEATURE-041-G: Skills — extra_context_reference in 9 SKILL.md files, execution procedure updates, deprecation note | Echo 🔊 | ✅ completed | 02-26-2026 14:20:00 | 9 SKILL.md files, copilot-prompt.json | Acceptance Testing |
 | TASK-642 | Code Implementation | FEATURE-041-E: Backend — tagged deliverables, action_context, dual-format MCP, template/runtime validation, candidate resolution, folder-contents API | Echo 🔊 | ✅ completed | 02-26-2026 13:35:00 | workflow-template.json, workflow_manager_service.py, workflow_routes.py, app_agent_interaction.py | Acceptance Testing |
 | TASK-632 | Feature Breakdown | EPIC-041/CR-002: Break Action Context System into features. 5 HLRs, 31 FRs, 12 ACs | Echo 🔊 | ✅ completed | 02-26-2026 12:42:00 | requirement-details-part-13.md, features.md | Feature Refinement |
 | TASK-633 | Feature Refinement | FEATURE-041-E: Deliverable Tagging & Action Context Schema (MVP). Create specification.md | Echo 🔊 | ✅ completed | 02-26-2026 12:55:00 | FEATURE-041-E/specification.md | Technical Design |

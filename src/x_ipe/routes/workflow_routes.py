@@ -59,6 +59,15 @@ def list_workflows():
     return jsonify({'success': True, 'data': workflows})
 
 
+@workflow_bp.route('/api/workflow/template', methods=['GET'])
+@x_ipe_tracing()
+def get_template():
+    from x_ipe.services.workflow_manager_service import _load_workflow_template
+    project_root = current_app.config.get('PROJECT_ROOT', os.getcwd())
+    template = _load_workflow_template(project_root)
+    return jsonify(template)
+
+
 @workflow_bp.route('/api/workflow/<name>', methods=['GET'])
 @x_ipe_tracing()
 def get_workflow(name):

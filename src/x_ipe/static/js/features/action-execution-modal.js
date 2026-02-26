@@ -17,6 +17,8 @@ class ActionExecutionModal {
         this.overlay = null;
         this._loadedInstructions = null;
         this._keyHandler = null;
+        this._templateCache = null;
+        this._actionContextDef = null;
     }
 
     /* --- Lifecycle -------------------------------------------------------- */
@@ -26,6 +28,24 @@ class ActionExecutionModal {
         this._createDOM();
         this._bindEvents();
         document.body.appendChild(this.overlay);
+
+        // Template-driven action context (FEATURE-041-F)
+        if (this.workflowName) {
+            try {
+                const template = await this._fetchTemplate();
+                const actionDef = this._getActionDef(template, this.actionKey);
+                if (actionDef && actionDef.action_context) {
+                    this._actionContextDef = actionDef.action_context;
+                    await this._renderActionContext(actionDef.action_context);
+                    // Reopen: if action was done, restore previous context
+                    const instance = await this._fetchInstance();
+                    if (instance) {
+                        const ctx = this._getInstanceContext(instance, this.actionKey, this.featureId);
+                        if (ctx) await this._restoreContext(ctx);
+                    }
+                }
+            } catch (e) { /* fallback to legacy */ }
+        }
     }
 
     close() {
@@ -198,6 +218,182 @@ class ActionExecutionModal {
             }
         } catch (e) { /* ignore */ }
         return files;
+    }
+
+    /* --- Template-Driven Action Context (FEATURE-041-F) -------------------- */
+
+    async _fetchTemplate() {
+        if (this._templateCache) return this._templateCache;
+        const resp = await fetch('/api/workflow/template');
+        if (resp.ok) this._templateCache = await resp.json();
+        return this._templateCache || {};
+    }
+
+    _getActionDef(template, actionKey) {
+        if (!template || !template.stages) return null;
+        for (const stage of Object.values(template.stages)) {
+            if (stage.actions && stage.actions[actionKey]) {
+                return stage.actions[actionKey];
+            }
+        }
+        return null;
+    }
+
+    async _fetchInstance() {
+        try {
+            const resp = await fetch(`/api/workflow/${encodeURIComponent(this.workflowName)}`);
+            if (!resp.ok) return null;
+            const json = await resp.json();
+            return json.data || json;
+        } catch { return null; }
+    }
+
+    _getInstanceContext(instance, actionKey, featureId) {
+        if (!instance) return null;
+        const shared = instance.shared || {};
+        // Search shared stages
+        for (const stageData of Object.values(shared)) {
+            const action = (stageData.actions || {})[actionKey];
+            if (action && action.context) return action.context;
+        }
+        // Search feature lanes
+        if (featureId && instance.features) {
+            const feat = Array.isArray(instance.features)
+                ? instance.features.find(f => f.feature_id === featureId)
+                : instance.features[featureId];
+            if (feat) {
+                for (const stage of ['implement', 'validation', 'feedback']) {
+                    const action = (feat[stage] && feat[stage].actions || {})[actionKey];
+                    if (action && action.context) return action.context;
+                }
+            }
+        }
+        return null;
+    }
+
+    async _renderActionContext(actionContextDef) {
+        // Find or create the action context section
+        let container = this.overlay.querySelector('.input-files-section, .action-context-section');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'action-context-section';
+            const body = this.overlay.querySelector('.modal-body');
+            if (body) {
+                const instrSection = body.querySelector('.instructions-section');
+                if (instrSection) body.insertBefore(container, instrSection);
+                else body.appendChild(container);
+            }
+        }
+        container.className = 'action-context-section';
+        container.innerHTML = '';
+
+        const heading = document.createElement('h4');
+        heading.textContent = 'Action Context';
+        container.appendChild(heading);
+
+        for (const [refName, refDef] of Object.entries(actionContextDef)) {
+            const group = this._createDropdownGroup(refName, refDef);
+            container.appendChild(group);
+
+            if (refDef.candidates) {
+                await this._populateDropdown(group.querySelector('select'), refDef.candidates);
+            }
+        }
+    }
+
+    _createDropdownGroup(refName, refDef) {
+        const group = document.createElement('div');
+        group.className = 'context-ref-group';
+        group.dataset.refName = refName;
+
+        const label = document.createElement('label');
+        label.textContent = refName.replace(/-/g, ' ');
+        if (refDef.required) {
+            label.innerHTML += ' <span class="required">*</span>';
+        } else {
+            label.innerHTML += ' <span class="optional">(optional)</span>';
+        }
+        group.appendChild(label);
+
+        const select = document.createElement('select');
+        select.name = refName;
+        select.required = refDef.required;
+        select.add(new Option('auto-detect', 'auto-detect'));
+        if (!refDef.required) {
+            select.add(new Option('N/A', 'N/A'));
+        }
+        group.appendChild(select);
+        return group;
+    }
+
+    async _populateDropdown(selectEl, candidatesName) {
+        try {
+            const url = `/api/workflow/${encodeURIComponent(this.workflowName)}/candidates/${encodeURIComponent(this.actionKey)}/${encodeURIComponent(candidatesName)}`;
+            const params = this.featureId ? `?feature_id=${encodeURIComponent(this.featureId)}` : '';
+            const resp = await fetch(url + params);
+            if (!resp.ok) return;
+            const results = await resp.json();
+
+            for (const result of results) {
+                if (result.type === 'file') {
+                    selectEl.add(new Option(result.path, result.path));
+                } else if (result.type === 'folder') {
+                    const files = await this._listFolderContents(result.path);
+                    for (const file of files) {
+                        selectEl.add(new Option(file, file));
+                    }
+                }
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    async _listFolderContents(folderPath) {
+        try {
+            const resp = await fetch(`/api/workflow/${encodeURIComponent(this.workflowName)}/folder-contents?path=${encodeURIComponent(folderPath)}`);
+            if (resp.ok) return await resp.json();
+        } catch { /* ignore */ }
+        return [];
+    }
+
+    async _saveContext() {
+        const context = {};
+        const groups = this.overlay ? this.overlay.querySelectorAll('.context-ref-group') : [];
+        for (const group of groups) {
+            const refName = group.dataset.refName;
+            const select = group.querySelector('select');
+            if (select) context[refName] = select.value;
+        }
+
+        await fetch(`/api/workflow/${encodeURIComponent(this.workflowName)}/action`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: this.actionKey,
+                status: 'in_progress',
+                feature_id: this.featureId,
+                context: context
+            })
+        });
+
+        return context;
+    }
+
+    async _restoreContext(instanceContext) {
+        if (!instanceContext) return;
+        for (const [refName, value] of Object.entries(instanceContext)) {
+            const group = this.overlay.querySelector(`[data-ref-name="${refName}"]`);
+            if (!group) continue;
+            const select = group.querySelector('select');
+            if (!select) continue;
+            const option = Array.from(select.options).find(o => o.value === value);
+            if (option) {
+                select.value = value;
+            } else if (value && value !== 'auto-detect' && value !== 'N/A') {
+                const missingOpt = new Option(`${value} (missing)`, value);
+                select.add(missingOpt);
+                select.value = value;
+            }
+        }
     }
 
     /* --- DOM Creation ----------------------------------------------------- */
