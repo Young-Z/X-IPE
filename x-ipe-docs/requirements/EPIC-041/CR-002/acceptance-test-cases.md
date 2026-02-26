@@ -101,13 +101,58 @@
 
 ---
 
+## Browser-Based Acceptance Testing (Chrome DevTools)
+
+> Executed via Chrome DevTools MCP against live Flask server (localhost:5858)
+> Date: 2026-02-27
+
+### Test Environment
+- Server: `.venv/bin/python main.py` (Flask + SocketIO, port 5858)
+- Browser: Chrome via DevTools MCP
+- Test workflows: "hello" (ideation done, requirement unlocked), "my-test2" (ideation in progress)
+
+### Test Execution Results
+
+| TC | AC | Action Tested | Description | Status | Evidence |
+|----|-----|--------------|-------------|--------|----------|
+| BTC-1 | AC-F-1 | Refine Idea (my-test2) | "Action Context" heading renders, no "Input Files" | ✅ Pass | `screenshots/TC-01-action-context-refine-idea.png` |
+| BTC-2 | AC-F-2 | Refine Idea (my-test2) | Two dropdowns: raw-idea, uiux-reference | ✅ Pass | DOM snapshot: 2 combobox elements |
+| BTC-3 | AC-F-4 | Refine Idea (my-test2) | auto-detect is default in both dropdowns | ✅ Pass | Both selects show "auto-detect" selected |
+| BTC-4 | AC-F-5 | Refine Idea (my-test2) | "raw idea *" (required), "uiux reference (optional)" | ✅ Pass | Asterisk and "(optional)" labels visible |
+| BTC-5 | AC-F-5 | Refine Idea (my-test2) | N/A only on optional dropdown | ✅ Pass | uiux-reference has N/A; raw-idea does not |
+| BTC-6 | AC-F-3 | Refine Idea (my-test2) | Dropdown populated with files from compose_idea deliverable folder | ✅ Pass | raw-idea shows "x-ipe-docs/ideas/wf-001-dddd/new idea.md" |
+| BTC-7 | AC-F-9 | Compose Idea (hello) | Legacy fallback: dedicated Edit Idea modal, no Action Context | ✅ Pass | Compose Idea opens its own modal (not action-execution-modal) |
+| BTC-8 | AC-F-1 | Refine Idea (my-test2) | Legacy INPUT FILE hidden when action_context present | ✅ Pass | Bug found & fixed: `.input-selector-section` hidden via `display:none` |
+| BTC-9 | AC-F-2 | Design Mockup (hello) | Correct dropdowns: refined-idea*, uiux-reference(optional) | ✅ Pass | `screenshots/TC-02-design-mockup-context.png` |
+| BTC-10 | AC-F-2 | Requirement Gathering (hello) | Cross-stage context: mockup-html(optional), refined-idea* | ✅ Pass | `screenshots/TC-03-requirement-gathering-context.png` |
+| BTC-11 | N/A | All actions | No CR-002-related console errors | ✅ Pass | Only pre-existing 404 + aria-hidden warnings |
+
+### Bug Found & Fixed During Testing
+
+| Bug | Severity | Fix |
+|-----|----------|-----|
+| Legacy "INPUT FILE" section displayed alongside new "Action Context" section when `action_context` present | Medium | Added `legacyInput.style.display = 'none'` in `action-execution-modal.js` when `action_context` is rendered |
+
+### Browser Test Metrics
+
+| Metric | Value |
+|--------|-------|
+| Total browser TCs | 11 |
+| Passed | 11 |
+| Failed | 0 |
+| Pass Rate | **100%** |
+
+---
+
 ## Summary
 
 | Metric | Value |
 |--------|-------|
 | **Total ACs** | 29 (11 + 11 + 7) |
-| **Passed** | 29 |
+| **Passed (Unit)** | 29 |
 | **Failed** | 0 |
-| **Total Tests** | 84 (30 + 17 + 37) |
+| **Total Unit Tests** | 84 (30 + 17 + 37) |
 | **All Tests Pass** | ✅ Yes |
+| **Browser TCs** | 11 (all pass) |
+| **Bugs Found** | 1 (legacy INPUT FILE section visible — fixed) |
 | **No Regression** | ✅ Confirmed — 29 existing modal tests pass (`action-execution-modal-040a.test.js`) + existing workflow tests pass |

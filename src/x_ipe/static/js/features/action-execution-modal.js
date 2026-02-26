@@ -36,6 +36,9 @@ class ActionExecutionModal {
                 const actionDef = this._getActionDef(template, this.actionKey);
                 if (actionDef && actionDef.action_context) {
                     this._actionContextDef = actionDef.action_context;
+                    // Hide legacy input file section when action_context is present
+                    const legacyInput = this.overlay.querySelector('.input-selector-section');
+                    if (legacyInput) legacyInput.style.display = 'none';
                     await this._renderActionContext(actionDef.action_context);
                     // Reopen: if action was done, restore previous context
                     const instance = await this._fetchInstance();
