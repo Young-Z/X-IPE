@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-648 | Feature Acceptance Test | CR-002/FEATURE-041-F: Browser-based acceptance testing via Chrome DevTools — 11 TCs all pass, 1 bug found & fixed (legacy INPUT FILE visible alongside Action Context) | Echo 🔊 | ✅ completed | 02-27-2026 23:00:00 | acceptance-test-cases.md, screenshots/ | Feature Closing |
 | TASK-647 | Feature Closing | CR-002: Close all 3 features (FEATURE-041-E/F/G) — update features.md, task-board, final commit | Echo 🔊 | ✅ completed | 02-26-2026 14:50:00 | features.md, task-board.md | - |
 | TASK-646 | Feature Acceptance Test | CR-002: All 3 features acceptance tested — 29 ACs verified, 84 tests pass, no regression | Echo 🔊 | ✅ completed | 02-26-2026 14:45:00 | acceptance-test-cases.md | Feature Closing |
 | TASK-644 | Code Implementation | FEATURE-041-F: Frontend — action context modal dropdowns, context persistence, reopen pre-population, legacy fallback | Echo 🔊 | ✅ completed | 02-26-2026 14:30:00 | action-execution-modal.js, workflow_routes.py | Acceptance Testing |
