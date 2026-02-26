@@ -77,7 +77,23 @@ def _init_config(project_root: str = None):
                     optional.append(action_name)
                 else:
                     mandatory.append(action_name)
+                # Support both old deliverable_category and new deliverables array
                 cat = action_def.get("deliverable_category")
+                if not cat and "deliverables" in action_def:
+                    # Derive category from action name for backward compat
+                    action_to_category = {
+                        "compose_idea": "ideas", "refine_idea": "ideas",
+                        "reference_uiux": "mockups", "design_mockup": "mockups",
+                        "requirement_gathering": "requirements",
+                        "feature_breakdown": "requirements",
+                        "feature_refinement": "requirements",
+                        "technical_design": "requirements",
+                        "implementation": "implementations",
+                        "acceptance_testing": "quality",
+                        "quality_evaluation": "quality",
+                        "change_request": "requirements",
+                    }
+                    cat = action_to_category.get(action_name, stage_name)
                 if cat:
                     deliverable_categories[action_name] = cat
                 next_actions_map[action_name] = action_def.get(
@@ -250,12 +266,17 @@ class WorkflowManagerService:
     @x_ipe_tracing()
     def update_action_status(self, workflow_name: str, action: str,
                              status: str, feature_id: str = None,
-                             deliverables: list = None,
+                             deliverables=None,
+                             context: dict = None,
                              features: list = None) -> dict:
         """Update an action's status and re-evaluate gating."""
         if status not in VALID_STATUSES:
             return {"success": False, "error": "INVALID_STATUS",
                     "message": f"Status must be one of: {VALID_STATUSES}"}
+
+        # Dual-format deliverables: convert list to keyed dict using template tags
+        if deliverables is not None and isinstance(deliverables, list):
+            deliverables = self._convert_list_to_keyed(action, deliverables)
 
         state = self._read_state(workflow_name)
         if "error" in state and state.get("success") is False:
@@ -263,9 +284,9 @@ class WorkflowManagerService:
 
         # Find the action in the state
         if feature_id:
-            updated, err = self._update_feature_action(state, action, status, feature_id, deliverables)
+            updated, err = self._update_feature_action(state, action, status, feature_id, deliverables, context)
         else:
-            updated, err = self._update_shared_action(state, action, status, deliverables)
+            updated, err = self._update_shared_action(state, action, status, deliverables, context)
 
         if err:
             return err
@@ -340,22 +361,18 @@ class WorkflowManagerService:
             stage = state["shared"].get(stage_name, {})
             for action_key, action_data in stage.get("actions", {}).items():
                 category = self._deliverable_categories.get(action_key, "implementations")
-                for path_str in action_data.get("deliverables", []):
-                    full_path = self._project_root / path_str
-                    deliverables.append({
-                        "name": os.path.basename(path_str),
-                        "path": path_str,
-                        "category": category,
-                        "exists": full_path.exists(),
-                    })
-
-        # Per-feature stages
-        for feat in state.get("features", []):
-            for stage_name in ("implement", "validation", "feedback"):
-                stage_data = feat.get(stage_name, {})
-                for action_key, action_data in stage_data.get("actions", {}).items():
-                    category = self._deliverable_categories.get(action_key, "implementations")
-                    for path_str in action_data.get("deliverables", []):
+                raw_deliverables = action_data.get("deliverables", [])
+                if isinstance(raw_deliverables, dict):
+                    for tag_name, path_str in raw_deliverables.items():
+                        full_path = self._project_root / path_str
+                        deliverables.append({
+                            "name": tag_name,
+                            "path": path_str,
+                            "category": category,
+                            "exists": full_path.exists(),
+                        })
+                elif isinstance(raw_deliverables, list):
+                    for path_str in raw_deliverables:
                         full_path = self._project_root / path_str
                         deliverables.append({
                             "name": os.path.basename(path_str),
@@ -364,7 +381,200 @@ class WorkflowManagerService:
                             "exists": full_path.exists(),
                         })
 
+        # Per-feature stages
+        for feat in state.get("features", []):
+            for stage_name in ("implement", "validation", "feedback"):
+                stage_data = feat.get(stage_name, {})
+                for action_key, action_data in stage_data.get("actions", {}).items():
+                    category = self._deliverable_categories.get(action_key, "implementations")
+                    raw_deliverables = action_data.get("deliverables", [])
+                    if isinstance(raw_deliverables, dict):
+                        for tag_name, path_str in raw_deliverables.items():
+                            full_path = self._project_root / path_str
+                            deliverables.append({
+                                "name": tag_name,
+                                "path": path_str,
+                                "category": category,
+                                "exists": full_path.exists(),
+                            })
+                    elif isinstance(raw_deliverables, list):
+                        for path_str in raw_deliverables:
+                            full_path = self._project_root / path_str
+                            deliverables.append({
+                            "name": os.path.basename(path_str),
+                            "path": path_str,
+                            "category": category,
+                            "exists": full_path.exists(),
+                        })
+
         return {"deliverables": deliverables, "count": len(deliverables)}
+
+    @x_ipe_tracing()
+    def validate_template(self) -> bool:
+        """Static validation of tagged template at load time."""
+        template = _load_workflow_template(str(self._project_root))
+        stage_order = template.get("stage_order", [])
+        stages = template.get("stages", {})
+        all_folder_tags = {}  # {tag_name: (stage_name, action_name)}
+
+        for stage_name in stage_order:
+            stage = stages.get(stage_name, {})
+            for action_name, action_def in stage.get("actions", {}).items():
+                action_tags = set()
+                for tag_str in action_def.get("deliverables", []):
+                    if ":" not in tag_str:
+                        continue
+                    prefix, name = tag_str.split(":", 1)
+                    if name in action_tags:
+                        raise ValueError(
+                            f"Duplicate tag '{name}' in action '{action_name}' "
+                            f"of stage '{stage_name}'"
+                        )
+                    action_tags.add(name)
+                    if prefix == "$output-folder":
+                        all_folder_tags[name] = (stage_name, action_name)
+
+                # Validate action_context candidates references
+                for ref_name, ref_def in action_def.get("action_context", {}).items():
+                    candidates = ref_def.get("candidates")
+                    if candidates and candidates not in all_folder_tags:
+                        raise ValueError(
+                            f"action_context '{ref_name}' in '{action_name}' references "
+                            f"unknown candidates '{candidates}'"
+                        )
+        return True
+
+    @x_ipe_tracing()
+    def validate_action_deliverables(self, action: str, deliverables) -> bool:
+        """Runtime validation: check instance keys match template tags."""
+        if not isinstance(deliverables, dict):
+            return True  # skip validation for legacy list format
+        expected_tags = set(self._get_template_tags(action))
+        actual_tags = set(deliverables.keys())
+        missing = expected_tags - actual_tags
+        if missing:
+            import logging
+            logging.getLogger(__name__).warning(
+                f"Action '{action}' missing deliverable tags: {missing}"
+            )
+        return len(missing) == 0
+
+    @x_ipe_tracing()
+    def resolve_candidates(self, workflow_name: str, action: str,
+                           candidates_name: str, feature_id: str = None) -> list:
+        """Resolve candidates to list of file paths for dropdown population."""
+        state = self._read_state(workflow_name)
+        if "error" in state and state.get("success") is False:
+            return []
+        template = _load_workflow_template(str(self._project_root))
+        stage_order = template.get("stage_order", [])
+        stages = template.get("stages", {})
+
+        # Find current action's stage index
+        current_stage_idx = len(stage_order)
+        for i, sn in enumerate(stage_order):
+            stage_def = stages.get(sn, {})
+            if action in stage_def.get("actions", {}):
+                current_stage_idx = i
+                break
+
+        results = []
+        # Walk stages from first to current (inclusive) to find matching tags
+        for i in range(current_stage_idx + 1):
+            stage_name = stage_order[i]
+            stage_def = stages.get(stage_name, {})
+            for act_name, act_def in stage_def.get("actions", {}).items():
+                # Skip the target action itself
+                if i == current_stage_idx and act_name == action:
+                    continue
+                for tag_str in act_def.get("deliverables", []):
+                    if ":" not in tag_str:
+                        continue
+                    prefix, name = tag_str.split(":", 1)
+                    if name == candidates_name:
+                        path = self._get_instance_deliverable(
+                            state, stage_name, act_name, name, feature_id
+                        )
+                        if path:
+                            rtype = "file" if prefix == "$output" else "folder"
+                            results.append({"type": rtype, "path": path})
+
+        # Per-feature scoping: check feature lane for matching tags
+        if feature_id:
+            feat_results = self._resolve_in_feature(
+                state, feature_id, candidates_name, template
+            )
+            if feat_results:
+                results = feat_results + results
+
+        return results
+
+    def _get_instance_deliverable(self, state, stage_name, action_name,
+                                  tag_name, feature_id=None):
+        """Get a specific deliverable path from instance state."""
+        # Check shared stages
+        shared = state.get("shared", {}).get(stage_name, {})
+        if shared:
+            action_data = shared.get("actions", {}).get(action_name, {})
+            deliverables = action_data.get("deliverables", {})
+            if isinstance(deliverables, dict):
+                return deliverables.get(tag_name)
+            elif isinstance(deliverables, list):
+                # Legacy: try to match by template tag order
+                tags = self._get_template_tags(action_name)
+                if tag_name in tags:
+                    idx = tags.index(tag_name)
+                    return deliverables[idx] if idx < len(deliverables) else None
+        return None
+
+    def _resolve_in_feature(self, state, feature_id, candidates_name, template):
+        """Resolve candidates within a feature lane."""
+        feat = self._find_feature(state, feature_id)
+        if not feat:
+            return []
+        results = []
+        stages = template.get("stages", {})
+        for stage_name in ("implement", "validation", "feedback"):
+            stage_def = stages.get(stage_name, {})
+            stage_data = feat.get(stage_name, {})
+            for act_name, act_def in stage_def.get("actions", {}).items():
+                for tag_str in act_def.get("deliverables", []):
+                    if ":" not in tag_str:
+                        continue
+                    prefix, name = tag_str.split(":", 1)
+                    if name == candidates_name:
+                        action_data = stage_data.get("actions", {}).get(act_name, {})
+                        deliverables = action_data.get("deliverables", {})
+                        if isinstance(deliverables, dict):
+                            path = deliverables.get(name)
+                        else:
+                            path = None
+                        if path:
+                            rtype = "file" if prefix == "$output" else "folder"
+                            results.append({"type": rtype, "path": path})
+        return results
+
+    def _convert_list_to_keyed(self, action: str, deliverables_list: list) -> dict:
+        """Convert legacy list format to keyed object using template tags."""
+        tags = self._get_template_tags(action)
+        result = {}
+        for i, path in enumerate(deliverables_list):
+            if i < len(tags):
+                result[tags[i]] = path
+        return result
+
+    def _get_template_tags(self, action: str) -> list:
+        """Extract tag names from template deliverables array for an action."""
+        template = _load_workflow_template(str(self._project_root))
+        for stage in template.get("stages", {}).values():
+            if action in stage.get("actions", {}):
+                deliverables = stage["actions"][action].get("deliverables", [])
+                tags = []
+                for tag_str in deliverables:
+                    if ":" in tag_str:
+                        tags.append(tag_str.split(":", 1)[1])
+                return tags
+        return []
 
     @x_ipe_tracing()
     def archive_stale_workflows(self, days: int = 30) -> dict:
@@ -514,7 +724,7 @@ class WorkflowManagerService:
                 os.unlink(tmp_path)
             raise
 
-    def _update_shared_action(self, state, action, status, deliverables):
+    def _update_shared_action(self, state, action, status, deliverables, context=None):
         """Update action in a shared stage (ideation/requirement)."""
         for stage_name in ("ideation", "requirement"):
             stage = state["shared"][stage_name]
@@ -526,6 +736,10 @@ class WorkflowManagerService:
                 stage["actions"][action]["status"] = status
                 if deliverables is not None:
                     stage["actions"][action]["deliverables"] = deliverables
+                    if isinstance(deliverables, dict):
+                        state["schema_version"] = "3.0"
+                if context is not None:
+                    stage["actions"][action]["context"] = context
                 # Add next_actions_suggested when action is done
                 if status == "done" and action in self._next_actions_map:
                     stage["actions"][action]["next_actions_suggested"] = self._next_actions_map[action]
@@ -535,7 +749,7 @@ class WorkflowManagerService:
         return False, {"success": False, "error": "ACTION_NOT_FOUND",
                        "message": f"Action '{action}' not found in shared stages"}
 
-    def _update_feature_action(self, state, action, status, feature_id, deliverables):
+    def _update_feature_action(self, state, action, status, feature_id, deliverables, context=None):
         """Update action in a per-feature stage."""
         feat = self._find_feature(state, feature_id)
         if not feat:
@@ -551,6 +765,10 @@ class WorkflowManagerService:
                 stage_data["actions"][action]["status"] = status
                 if deliverables is not None:
                     stage_data["actions"][action]["deliverables"] = deliverables
+                    if isinstance(deliverables, dict):
+                        state["schema_version"] = "3.0"
+                if context is not None:
+                    stage_data["actions"][action]["context"] = context
                 if status == "done" and action in self._next_actions_map:
                     stage_data["actions"][action]["next_actions_suggested"] = self._next_actions_map[action]
                 elif status != "done":

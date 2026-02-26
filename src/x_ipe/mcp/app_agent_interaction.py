@@ -124,7 +124,8 @@ def get_workflow_state(workflow_name: str) -> dict:
 @mcp.tool
 def update_workflow_action(workflow_name: str, action: str, status: str,
                            feature_id: str = None,
-                           deliverables: list = None,
+                           deliverables=None,
+                           context: dict = None,
                            features: list = None) -> dict:
     """Update the status of a workflow action.
 
@@ -143,7 +144,11 @@ def update_workflow_action(workflow_name: str, action: str, status: str,
                 code_implementation, acceptance_test, human_playground, feature_closing).
         status: New status — one of: pending, in_progress, done, skipped, failed.
         feature_id: Required for per-feature actions (implement/validation/feedback stages).
-        deliverables: Optional list of deliverable paths produced by the action.
+        deliverables: Optional deliverable paths — either a keyed dict (new format:
+            {"tag-name": "path/to/file"}) or a list of paths (legacy format, auto-converted
+            to keyed dict using template tag order).
+        context: Optional dict of action context selections (e.g.
+            {"raw-idea": "path/to/idea.md", "uiux-reference": "N/A"}).
         features: Optional list of feature objects for feature_breakdown action.
             Each feature: {"id": "FEATURE-XXX", "name": "...", "depends_on": [...]}.
             When provided with action=feature_breakdown and status=done, automatically
@@ -155,6 +160,8 @@ def update_workflow_action(workflow_name: str, action: str, status: str,
         payload["feature_id"] = feature_id
     if deliverables:
         payload["deliverables"] = deliverables
+    if context:
+        payload["context"] = context
     if features:
         payload["features"] = features
 

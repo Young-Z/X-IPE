@@ -7,22 +7,30 @@
       "actions": {
         "compose_idea": {
           "optional": false,
-          "deliverable_category": "ideas",
+          "deliverables": ["$output:raw-idea", "$output-folder:ideas-folder"],
           "next_actions_suggested": ["refine_idea", "reference_uiux"]
         },
         "reference_uiux": {
           "optional": true,
-          "deliverable_category": "mockups",
+          "deliverables": ["$output:uiux-reference"],
           "next_actions_suggested": ["design_mockup", "refine_idea"]
         },
         "refine_idea": {
           "optional": false,
-          "deliverable_category": "ideas",
+          "action_context": {
+            "raw-idea": { "required": true, "candidates": "ideas-folder" },
+            "uiux-reference": { "required": false }
+          },
+          "deliverables": ["$output:refined-idea", "$output-folder:refined-ideas-folder"],
           "next_actions_suggested": ["design_mockup", "requirement_gathering"]
         },
         "design_mockup": {
           "optional": true,
-          "deliverable_category": "mockups",
+          "action_context": {
+            "refined-idea": { "required": true, "candidates": "refined-ideas-folder" },
+            "uiux-reference": { "required": false }
+          },
+          "deliverables": ["$output:mockup-html", "$output-folder:mockups-folder"],
           "next_actions_suggested": ["requirement_gathering"]
         }
       }
@@ -33,12 +41,19 @@
       "actions": {
         "requirement_gathering": {
           "optional": false,
-          "deliverable_category": "requirements",
+          "action_context": {
+            "refined-idea": { "required": true, "candidates": "refined-ideas-folder" },
+            "mockup-html": { "required": false }
+          },
+          "deliverables": ["$output:requirement-doc", "$output-folder:requirements-folder"],
           "next_actions_suggested": ["feature_breakdown"]
         },
         "feature_breakdown": {
           "optional": false,
-          "deliverable_category": "requirements",
+          "action_context": {
+            "requirement-doc": { "required": true, "candidates": "requirements-folder" }
+          },
+          "deliverables": ["$output:features-list", "$output-folder:breakdown-folder"],
           "next_actions_suggested": []
         }
       }
@@ -49,17 +64,28 @@
       "actions": {
         "feature_refinement": {
           "optional": false,
-          "deliverable_category": "requirements",
+          "action_context": {
+            "requirement-doc": { "required": true, "candidates": "requirements-folder" },
+            "features-list": { "required": true }
+          },
+          "deliverables": ["$output:specification", "$output-folder:feature-docs-folder"],
           "next_actions_suggested": ["technical_design"]
         },
         "technical_design": {
           "optional": false,
-          "deliverable_category": "requirements",
+          "action_context": {
+            "specification": { "required": true, "candidates": "feature-docs-folder" }
+          },
+          "deliverables": ["$output:tech-design", "$output-folder:feature-docs-folder"],
           "next_actions_suggested": ["implementation"]
         },
         "implementation": {
           "optional": false,
-          "deliverable_category": "implementations",
+          "action_context": {
+            "tech-design": { "required": true, "candidates": "feature-docs-folder" },
+            "specification": { "required": true, "candidates": "feature-docs-folder" }
+          },
+          "deliverables": ["$output:impl-files", "$output-folder:impl-folder"],
           "next_actions_suggested": ["acceptance_testing"]
         }
       }
@@ -70,12 +96,19 @@
       "actions": {
         "acceptance_testing": {
           "optional": false,
-          "deliverable_category": "quality",
+          "action_context": {
+            "specification": { "required": true, "candidates": "feature-docs-folder" },
+            "impl-files": { "required": true, "candidates": "impl-folder" }
+          },
+          "deliverables": ["$output:test-report", "$output-folder:test-folder"],
           "next_actions_suggested": ["quality_evaluation"]
         },
         "quality_evaluation": {
           "optional": true,
-          "deliverable_category": "quality",
+          "action_context": {
+            "test-report": { "required": true, "candidates": "test-folder" }
+          },
+          "deliverables": ["$output:eval-report"],
           "next_actions_suggested": ["change_request"]
         }
       }
@@ -86,7 +119,11 @@
       "actions": {
         "change_request": {
           "optional": true,
-          "deliverable_category": "requirements",
+          "action_context": {
+            "eval-report": { "required": false },
+            "specification": { "required": true, "candidates": "feature-docs-folder" }
+          },
+          "deliverables": ["$output:cr-doc", "$output-folder:cr-folder"],
           "next_actions_suggested": []
         }
       }

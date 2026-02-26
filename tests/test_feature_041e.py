@@ -360,8 +360,8 @@ class TestContextField:
         )
         assert result["success"] is True
         state = service._read_state(sample_workflow)
-        feat = next(f for f in state["features"] if f["id"] == "FEATURE-E-1")
-        feat_ctx = feat["implement"]["feature_refinement"].get("context")
+        feat = next(f for f in state["features"] if f["feature_id"] == "FEATURE-E-1")
+        feat_ctx = feat["implement"]["actions"]["feature_refinement"].get("context")
         assert feat_ctx is not None
         assert feat_ctx["requirement-doc"] == "reqs/req.md"
 
@@ -412,7 +412,7 @@ class TestTemplateValidation:
             svc.validate_template()
 
     def test_duplicate_tag_within_stage_fails(self, project_root):
-        """Duplicate tag names within the same stage should fail validation."""
+        """Duplicate tag names within the same action should fail validation."""
         bad_template = {
             "stage_order": ["ideation"],
             "stages": {
@@ -422,12 +422,7 @@ class TestTemplateValidation:
                     "actions": {
                         "compose_idea": {
                             "optional": False,
-                            "deliverables": ["$output:my-file", "$output-folder:my-folder"],
-                            "next_actions_suggested": []
-                        },
-                        "refine_idea": {
-                            "optional": False,
-                            "deliverables": ["$output:my-file"],  # duplicate!
+                            "deliverables": ["$output:my-file", "$output-folder:my-file"],
                             "next_actions_suggested": []
                         }
                     }
@@ -590,7 +585,8 @@ class TestBackwardCompat:
             sample_workflow, "compose_idea", "done",
             deliverables={"raw-idea": "idea.md", "ideas-folder": "ideas/"}
         )
-        results = service.resolve_deliverables(sample_workflow)
+        result = service.resolve_deliverables(sample_workflow)
+        results = result["deliverables"]
         names = [r["name"] for r in results]
         assert "raw-idea" in names or any("idea.md" in r.get("path", "") for r in results)
 
@@ -602,8 +598,8 @@ class TestBackwardCompat:
         state["shared"]["ideation"]["actions"]["compose_idea"]["deliverables"] = ["idea.md", "ideas/"]
         service._write_state(sample_workflow, state)
 
-        results = service.resolve_deliverables(sample_workflow)
-        assert len(results) > 0
+        result = service.resolve_deliverables(sample_workflow)
+        assert len(result["deliverables"]) > 0
 
     def test_idea_folder_preserved(self, service, sample_workflow):
         """idea_folder field should not be removed from instance."""

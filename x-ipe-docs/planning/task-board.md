@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-642 | Code Implementation | FEATURE-041-E: Backend — tagged deliverables, action_context, dual-format MCP, template/runtime validation, candidate resolution, folder-contents API | Echo 🔊 | 🔄 in_progress | 02-26-2026 13:35:00 | - | Acceptance Testing |
 | TASK-632 | Feature Breakdown | EPIC-041/CR-002: Break Action Context System into features. 5 HLRs, 31 FRs, 12 ACs | Echo 🔊 | ✅ completed | 02-26-2026 12:42:00 | requirement-details-part-13.md, features.md | Feature Refinement |
 | TASK-633 | Feature Refinement | FEATURE-041-E: Deliverable Tagging & Action Context Schema (MVP). Create specification.md | Echo 🔊 | ✅ completed | 02-26-2026 12:55:00 | FEATURE-041-E/specification.md | Technical Design |
 | TASK-634 | Feature Refinement | FEATURE-041-G: Skill Extra Context Reference. Create specification.md | Echo 🔊 | ✅ completed | 02-26-2026 12:55:00 | FEATURE-041-G/specification.md | Technical Design |
@@ -13,6 +14,9 @@
 | TASK-636 | Technical Design | FEATURE-041-E: Deliverable Tagging & Action Context Schema (MVP). Create technical-design.md | Echo 🔊 | ✅ completed | 02-26-2026 13:20:00 | FEATURE-041-E/technical-design.md | Test Generation |
 | TASK-637 | Technical Design | FEATURE-041-G: Skill Extra Context Reference. Create technical-design.md | Echo 🔊 | ✅ completed | 02-26-2026 13:20:00 | FEATURE-041-G/technical-design.md | Test Generation |
 | TASK-638 | Technical Design | FEATURE-041-F: Action Context Modal UI & Persistence. Create technical-design.md | Echo 🔊 | ✅ completed | 02-26-2026 13:20:00 | FEATURE-041-F/technical-design.md | Test Generation |
+| TASK-639 | Test Generation | FEATURE-041-E: Backend tests for deliverable tagging, dual-format, validation, candidate resolution | Echo 🔊 | ✅ completed | 02-26-2026 13:25:00 | tests/test_feature_041e.py | Code Implementation |
+| TASK-640 | Test Generation | FEATURE-041-F: Frontend tests for action context modal, dropdowns, persistence, reopen | Echo 🔊 | ✅ completed | 02-26-2026 13:25:00 | tests/frontend-js/action-execution-modal-041f.test.js | Code Implementation |
+| TASK-641 | Test Generation | FEATURE-041-G: Skill SKILL.md validation tests (extra_context_reference presence) | Echo 🔊 | ✅ completed | 02-26-2026 13:25:00 | tests/test_feature_041g.py | Code Implementation |
 | TASK-631 | Requirement Gathering | EPIC-041/CR-002: Action Context System — deliverable tagging, action_context schema, modal context UI, instance persistence, skill extra_context_reference. 5 HLRs, 31 FRs, 12 ACs. Based on IDEA-029 | Echo 🔊 | ✅ completed | 02-26-2026 12:42:00 | requirement-details-part-13.md, CR-002.md | Feature Breakdown |
 | TASK-630 | Ideation | IDEA-029: CR-Optimize Feature Implementation Part 2 — refine idea for action context in workflow-template.json, deliverable tagging syntax, action modal multi-input, skill workflow.action context reference | Echo 🔊 | ✅ completed | 02-26-2026 11:44:00 | idea-summary-v1.md | Requirement Gathering |
 | TASK-629 | Feature Acceptance Test | FEATURE-041-A: Per-Feature Config & Core Resolution (MVP) — execute acceptance tests for 9 ACs: per-feature config entries, feature ID propagation, deliverable resolution with cross-stage fallback | Ember 🔥 | ✅ completed | 02-26-2026 04:50:00 | acceptance-test-cases.md | Feature Closing |
@@ -222,10 +226,10 @@
 ## Quick Stats
 
 - **Total Active:** 47
-- **In Progress:** 1
+- **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 451
+- **Completed (archived):** 454
 - **Reverted:** 8
 - **Pending Review:** 0
 - **Blocked:** 0

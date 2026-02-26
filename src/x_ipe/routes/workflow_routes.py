@@ -13,6 +13,7 @@ Provides:
 """
 import logging
 import os
+from pathlib import Path
 from flask import Blueprint, jsonify, request, current_app
 
 from x_ipe.services.workflow_manager_service import WorkflowManagerService
@@ -84,16 +85,39 @@ def update_action(name):
     status = data.get('status', '')
     feature_id = data.get('feature_id')
     deliverables = data.get('deliverables')
+    context = data.get('context')
     features = data.get('features')
     result = _get_service().update_action_status(
         name, action, status, feature_id=feature_id, deliverables=deliverables,
-        features=features)
+        context=context, features=features)
     if result.get('success'):
         return jsonify(result)
     error = result.get('error', '')
     if error == 'NOT_FOUND':
         return jsonify(result), 404
     return jsonify(result), 400
+
+
+@workflow_bp.route('/api/workflow/<name>/candidates/<action>/<candidates_name>', methods=['GET'])
+@x_ipe_tracing()
+def get_candidates(name, action, candidates_name):
+    feature_id = request.args.get('feature_id')
+    results = _get_service().resolve_candidates(
+        name, action, candidates_name, feature_id=feature_id)
+    return jsonify(results)
+
+
+@workflow_bp.route('/api/workflow/<name>/folder-contents', methods=['GET'])
+@x_ipe_tracing()
+def get_folder_contents(name):
+    folder_path = request.args.get('path', '')
+    if not folder_path or not os.path.isdir(folder_path):
+        return jsonify([])
+    files = []
+    for entry in sorted(Path(folder_path).iterdir()):
+        if entry.is_file():
+            files.append(str(entry))
+    return jsonify(files)
 
 
 @workflow_bp.route('/api/workflow/<name>/features', methods=['POST'])
