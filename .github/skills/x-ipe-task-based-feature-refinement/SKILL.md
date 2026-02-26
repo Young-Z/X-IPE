@@ -37,6 +37,9 @@ input:
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
   workflow:
     name: "N/A"  # workflow name, default: N/A
+    extra_context_reference:  # optional, default: N/A for all refs
+      requirement-doc: "path | N/A | auto-detect"
+      features-list: "path | N/A | auto-detect"
 
   # Task type attributes
   category: "feature-stage"
@@ -122,6 +125,16 @@ BLOCKING: Human MUST approve specification before Technical Design proceeds.
   <step_2>
     <name>Gather Context</name>
     <action>
+      0. Resolve extra_context_reference inputs:
+         - FOR EACH ref in [requirement-doc, features-list]:
+           IF workflow mode AND extra_context_reference.{ref} is a file path:
+             READ the file at that path
+           ELIF extra_context_reference.{ref} is "auto-detect":
+             Use existing discovery logic below
+           ELIF extra_context_reference.{ref} is "N/A":
+             Skip this context input
+           ELSE (free-mode / absent):
+             Use existing behavior
       1. IF x-ipe-docs/requirements/requirement-details.md exists:
          READ for overall context, related features, business goals
       2. IF feature has dependencies:

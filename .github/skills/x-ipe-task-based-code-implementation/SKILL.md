@@ -49,6 +49,9 @@ input:
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
   workflow:
     name: "N/A"  # workflow name, default: N/A
+    extra_context_reference:  # optional, default: N/A for all refs
+      tech-design: "path | N/A | auto-detect"
+      specification: "path | N/A | auto-detect"
 
   # Task type attributes
   category: "feature-stage"
@@ -149,6 +152,16 @@ BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE impl
   <step_2>
     <name>Learn Technical Design</name>
     <action>
+      0. Resolve extra_context_reference inputs:
+         - FOR EACH ref in [tech-design, specification]:
+           IF workflow mode AND extra_context_reference.{ref} is a file path:
+             READ the file at that path (use instead of corresponding *_link)
+           ELIF extra_context_reference.{ref} is "auto-detect":
+             Use existing discovery logic below
+           ELIF extra_context_reference.{ref} is "N/A":
+             Skip this context input
+           ELSE (free-mode / absent):
+             Use existing behavior
       1. READ technical_design_link from Feature Data Model
       2. UNDERSTAND Part 1 (Agent-Facing Summary) and Part 2 (Implementation Guide)
       3. NOTE references to architecture designs

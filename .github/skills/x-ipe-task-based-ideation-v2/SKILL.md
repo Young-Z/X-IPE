@@ -45,6 +45,9 @@ input:
   workflow:
     name: "N/A"  # workflow name, default: N/A
     action: "refine_idea"  # hardcoded — this skill ALWAYS updates the refine_idea action
+    extra_context_reference:  # optional, default: N/A for all refs
+      raw-idea: "path | N/A | auto-detect"
+      uiux-reference: "path | N/A | auto-detect"
   idea_folder_path: "x-ipe-docs/ideas/{folder}"
   toolbox_meta_path: "x-ipe-docs/config/tools.json"
   extra_instructions: "{N/A | from config | from human}"
@@ -145,6 +148,16 @@ BLOCKING: Step 10 - Human MUST approve idea summary before proceeding.
   <step_2>
     <name>Analyze Idea Files</name>
     <action>
+      0. Resolve extra_context_reference inputs:
+         - FOR EACH ref in [raw-idea, uiux-reference]:
+           IF workflow mode AND extra_context_reference.{ref} is a file path:
+             READ the file at that path
+           ELIF extra_context_reference.{ref} is "auto-detect":
+             Use existing discovery logic below
+           ELIF extra_context_reference.{ref} is "N/A":
+             Skip this context input
+           ELSE (free-mode / absent):
+             Use existing behavior
       1. Navigate to x-ipe-docs/ideas/{folder}/files/
       2. Read each file (text, markdown, code, etc.)
       3. Identify key themes, concepts, and goals

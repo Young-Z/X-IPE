@@ -1,5 +1,8 @@
 {
   "version": "3.2",
+  "_deprecated": {
+    "input_source": "DEPRECATED: input_source is deprecated for actions with action_context in workflow-template.json. Use extra_context_reference instead. Will be removed after full migration to action_context system."
+  },
   "ideation": {
     "prompts": [
       {

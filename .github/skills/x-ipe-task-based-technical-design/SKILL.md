@@ -55,6 +55,8 @@ input:
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
   workflow:
     name: "N/A"  # workflow name, default: N/A
+    extra_context_reference:  # optional, default: N/A for all refs
+      specification: "path | N/A | auto-detect"
 
   # Task type attributes
   category: "feature-stage"
@@ -137,6 +139,16 @@ BLOCKING: Step 6 requires human approval before proceeding to Test Generation.
   <step_2>
     <name>Read Specification</name>
     <action>
+      0. Resolve extra_context_reference inputs:
+         - FOR ref specification:
+           IF workflow mode AND extra_context_reference.specification is a file path:
+             READ the file at that path (use instead of specification_link)
+           ELIF extra_context_reference.specification is "auto-detect":
+             Use existing discovery logic below
+           ELIF extra_context_reference.specification is "N/A":
+             Skip this context input
+           ELSE (free-mode / absent):
+             Use existing behavior
       1. READ {specification_link} from Feature Data Model
       2. UNDERSTAND:
          - User stories and acceptance criteria

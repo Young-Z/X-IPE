@@ -41,6 +41,9 @@ input:
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
   workflow:
     name: "N/A"  # workflow name, default: N/A
+    extra_context_reference:  # optional, default: N/A for all refs
+      specification: "path | N/A | auto-detect"
+      impl-files: "path | N/A | auto-detect"
 
   # Task type attributes
   category: "standalone | feature-stage"
@@ -129,6 +132,16 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
   <step_2>
     <name>Generate Acceptance Test Plan</name>
     <action>
+      0. Resolve extra_context_reference inputs:
+         - FOR EACH ref in [specification, impl-files]:
+           IF workflow mode AND extra_context_reference.{ref} is a file path:
+             READ the file at that path
+           ELIF extra_context_reference.{ref} is "auto-detect":
+             Use existing discovery logic below
+           ELIF extra_context_reference.{ref} is "N/A":
+             Skip this context input
+           ELSE (free-mode / absent):
+             Use existing behavior
       1. READ specification.md at x-ipe-docs/requirements/FEATURE-XXX/specification.md
       2. EXTRACT all acceptance criteria (AC-X) with testable conditions
       3. CHECK specification.md for Linked Mockups section:

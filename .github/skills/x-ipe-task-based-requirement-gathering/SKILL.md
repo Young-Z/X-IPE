@@ -46,6 +46,9 @@ input:
   workflow:
     name: "N/A"  # workflow name, default: N/A
     action: "requirement_gathering"  # workflow action name for status updates
+    extra_context_reference:  # optional, default: N/A for all refs
+      refined-idea: "path | N/A | auto-detect"
+      mockup-html: "path | N/A | auto-detect"
 
   # Task type attributes
   category: "requirement-stage"
@@ -114,6 +117,16 @@ BLOCKING: Human MUST approve requirements before proceeding to Feature Breakdown
   <step_1>
     <name>Understand User Request</name>
     <action>
+      0. Resolve extra_context_reference inputs:
+         - FOR EACH ref in [refined-idea, mockup-html]:
+           IF workflow mode AND extra_context_reference.{ref} is a file path:
+             READ the file at that path
+           ELIF extra_context_reference.{ref} is "auto-detect":
+             Use existing discovery logic
+           ELIF extra_context_reference.{ref} is "N/A":
+             Skip this context input
+           ELSE (free-mode / absent):
+             Use existing behavior
       1. Identify WHAT is being requested
       2. Identify WHO will use the feature
       3. Identify WHY this is needed (business value)

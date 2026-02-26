@@ -41,6 +41,9 @@ input:
   workflow:
     name: "N/A"  # workflow name, default: N/A
     action: "design_mockup"  # workflow action name for status updates
+    extra_context_reference:  # optional, default: N/A for all refs
+      refined-idea: "path | N/A | auto-detect"
+      uiux-reference: "path | N/A | auto-detect"
 
   # Task type attributes
   category: "ideation-stage"
@@ -150,6 +153,16 @@ BLOCKING: Step 7 halts if no tools available AND human declines manual mode.
   <step_3>
     <name>Read Idea Summary</name>
     <action>
+      0. Resolve extra_context_reference inputs:
+         - FOR EACH ref in [refined-idea, uiux-reference]:
+           IF workflow mode AND extra_context_reference.{ref} is a file path:
+             READ the file at that path
+           ELIF extra_context_reference.{ref} is "auto-detect":
+             Use existing discovery logic below
+           ELIF extra_context_reference.{ref} is "N/A":
+             Skip this context input
+           ELSE (free-mode / absent):
+             Use existing behavior
       1. Navigate to {current_idea_folder}/
       2. Find latest idea-summary-vN.md (highest version number)
       3. Parse summary content

@@ -57,6 +57,8 @@ input:
   workflow:
     name: "N/A"  # workflow name, default: N/A
     action: "feature_breakdown"  # workflow action name for status updates
+    extra_context_reference:  # optional, default: N/A for all refs
+      requirement-doc: "path | N/A | auto-detect"
 
   # Task type attributes
   category: "requirement-stage"
@@ -128,6 +130,16 @@ BLOCKING: Human MUST approve feature list before refinement proceeds.
   <step_1>
     <name>Analyze Requirements</name>
     <action>
+      0. Resolve extra_context_reference inputs:
+         - FOR ref requirement-doc:
+           IF workflow mode AND extra_context_reference.requirement-doc is a file path:
+             READ the file at that path (skip auto-detection in sub-step 1)
+           ELIF extra_context_reference.requirement-doc is "auto-detect":
+             Use existing discovery logic below
+           ELIF extra_context_reference.requirement-doc is "N/A":
+             Skip this context input
+           ELSE (free-mode / absent):
+             Use existing behavior
       1. Determine which file to read:
          a. Check if x-ipe-docs/requirements/requirement-details-part-X.md files exist
          b. IF parts exist -- read the CURRENT ACTIVE PART (highest part number)

@@ -35,6 +35,9 @@ input:
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
   workflow:
     name: "N/A"  # workflow name, default: N/A
+    extra_context_reference:  # optional, default: N/A for all refs
+      eval-report: "path | N/A | auto-detect"
+      specification: "path | N/A | auto-detect"
 
   # Task type attributes
   category: "standalone"
@@ -123,6 +126,16 @@ BLOCKING: Step 4 must complete before Step 5. Do NOT proceed without explicit hu
   <step_2>
     <name>Review Existing Requirements and Features</name>
     <action>
+      0. Resolve extra_context_reference inputs:
+         - FOR EACH ref in [eval-report, specification]:
+           IF workflow mode AND extra_context_reference.{ref} is a file path:
+             READ the file at that path
+           ELIF extra_context_reference.{ref} is "auto-detect":
+             Use existing discovery logic below
+           ELIF extra_context_reference.{ref} is "N/A":
+             Skip this context input
+           ELSE (free-mode / absent):
+             Use existing behavior
       1. READ x-ipe-docs/requirements/requirement-details.md
          - Understand overall project scope
          - Identify related high-level requirements
