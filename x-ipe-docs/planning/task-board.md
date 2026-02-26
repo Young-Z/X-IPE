@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-631 | Requirement Gathering | EPIC-041/CR-002: Action Context System — deliverable tagging, action_context schema, modal context UI, instance persistence, skill extra_context_reference. 5 HLRs, 31 FRs, 12 ACs. Based on IDEA-029 | Echo 🔊 | ✅ completed | 02-26-2026 12:42:00 | requirement-details-part-13.md, CR-002.md | Feature Breakdown |
 | TASK-630 | Ideation | IDEA-029: CR-Optimize Feature Implementation Part 2 — refine idea for action context in workflow-template.json, deliverable tagging syntax, action modal multi-input, skill workflow.action context reference | Echo 🔊 | ✅ completed | 02-26-2026 11:44:00 | idea-summary-v1.md | Requirement Gathering |
 | TASK-629 | Feature Acceptance Test | FEATURE-041-A: Per-Feature Config & Core Resolution (MVP) — execute acceptance tests for 9 ACs: per-feature config entries, feature ID propagation, deliverable resolution with cross-stage fallback | Ember 🔥 | ✅ completed | 02-26-2026 04:50:00 | acceptance-test-cases.md | Feature Closing |
 | TASK-628 | Code Implementation | FEATURE-041-A: Implement per-feature config in copilot-prompt.json, feature ID propagation, per-feature deliverable resolution with cross-stage fallback | Ember 🔥 | ✅ completed | 02-25-2026 14:50:00 | copilot-prompt.json, action-execution-modal.js, workflow-stage.js | Acceptance Testing |
