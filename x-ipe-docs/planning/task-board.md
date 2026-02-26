@@ -6,7 +6,9 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-644 | Code Implementation | FEATURE-041-F: Frontend — action context modal dropdowns, context persistence, reopen pre-population, legacy fallback | Echo 🔊 | 🔄 in_progress | 02-26-2026 14:30:00 | - | Acceptance Testing |
+| TASK-647 | Feature Closing | CR-002: Close all 3 features (FEATURE-041-E/F/G) — update features.md, task-board, final commit | Echo 🔊 | ✅ completed | 02-26-2026 14:50:00 | features.md, task-board.md | - |
+| TASK-646 | Feature Acceptance Test | CR-002: All 3 features acceptance tested — 29 ACs verified, 84 tests pass, no regression | Echo 🔊 | ✅ completed | 02-26-2026 14:45:00 | acceptance-test-cases.md | Feature Closing |
+| TASK-644 | Code Implementation | FEATURE-041-F: Frontend — action context modal dropdowns, context persistence, reopen pre-population, legacy fallback | Echo 🔊 | ✅ completed | 02-26-2026 14:30:00 | action-execution-modal.js, workflow_routes.py | Acceptance Testing |
 | TASK-643 | Code Implementation | FEATURE-041-G: Skills — extra_context_reference in 9 SKILL.md files, execution procedure updates, deprecation note | Echo 🔊 | ✅ completed | 02-26-2026 14:20:00 | 9 SKILL.md files, copilot-prompt.json | Acceptance Testing |
 | TASK-642 | Code Implementation | FEATURE-041-E: Backend — tagged deliverables, action_context, dual-format MCP, template/runtime validation, candidate resolution, folder-contents API | Echo 🔊 | ✅ completed | 02-26-2026 13:35:00 | workflow-template.json, workflow_manager_service.py, workflow_routes.py, app_agent_interaction.py | Acceptance Testing |
 | TASK-632 | Feature Breakdown | EPIC-041/CR-002: Break Action Context System into features. 5 HLRs, 31 FRs, 12 ACs | Echo 🔊 | ✅ completed | 02-26-2026 12:42:00 | requirement-details-part-13.md, features.md | Feature Refinement |
