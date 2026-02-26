@@ -156,6 +156,62 @@
     margin-top: 4px;
 }
 
+/* --- Action Context Section (FEATURE-041-F) --- */
+.modal-overlay .action-context-section {
+    margin-bottom: 16px;
+}
+
+.modal-overlay .action-context-section h4 {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 12px 0;
+}
+
+.modal-overlay .context-ref-group {
+    margin-bottom: 12px;
+}
+
+.modal-overlay .context-ref-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.modal-overlay .context-ref-group .required {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.modal-overlay .context-ref-group .optional {
+    color: #94a3b8;
+    font-weight: 400;
+    font-size: 11px;
+}
+
+.modal-overlay .context-ref-group select {
+    width: 100%;
+    padding: 10px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: #334155;
+    background: #fff;
+    cursor: pointer;
+    appearance: auto;
+}
+
+.modal-overlay .context-ref-group select:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
 /* --- In-Progress Message --- */
 .modal-overlay .in-progress-message {
     display: flex;
