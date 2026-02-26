@@ -103,6 +103,6 @@ This board tracks all features across the project lifecycle.
 | FEATURE-041-B | EPIC-041 | Multi-Source UI & Auto-Suggest | v1.0 | Planned | FEATURE-041-A | 02-25-2026 | 02-25-2026 14:00:00 |
 | FEATURE-041-C | EPIC-041 | Skill Workflow Action Updates | v1.0 | Planned | - | 02-25-2026 | 02-25-2026 14:00:00 |
 | FEATURE-041-D | EPIC-041 | New Workflow Actions (Phase 5) | v1.0 | Planned | FEATURE-041-A, FEATURE-041-C | 02-25-2026 | 02-25-2026 14:00:00 |
-| FEATURE-041-E | EPIC-041 | Deliverable Tagging & Action Context Schema (MVP) | v1.0 | Planned | - | 02-26-2026 | 02-26-2026 12:50:00 |
-| FEATURE-041-F | EPIC-041 | Action Context Modal UI & Persistence | v1.0 | Planned | FEATURE-041-E | 02-26-2026 | 02-26-2026 12:50:00 |
-| FEATURE-041-G | EPIC-041 | Skill Extra Context Reference | v1.0 | Planned | - | 02-26-2026 | 02-26-2026 12:50:00 |
+| FEATURE-041-E | EPIC-041 | Deliverable Tagging & Action Context Schema (MVP) | v1.0 | Refined | - | 02-26-2026 | 02-26-2026 13:10:00 |
+| FEATURE-041-F | EPIC-041 | Action Context Modal UI & Persistence | v1.0 | Refined | FEATURE-041-E | 02-26-2026 | 02-26-2026 13:10:00 |
+| FEATURE-041-G | EPIC-041 | Skill Extra Context Reference | v1.0 | Refined | - | 02-26-2026 | 02-26-2026 13:10:00 |
