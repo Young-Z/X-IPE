@@ -57,16 +57,31 @@ class SkillsManager:
         """Find package skills path."""
         try:
             from importlib import resources
-            skills_ref = resources.files("x_ipe") / "skills"
-            if hasattr(skills_ref, 'is_dir') and skills_ref.is_dir():
-                return Path(str(skills_ref))
+            # Package bundles skills under resources/skills
+            for subpath in ("resources/skills", "skills"):
+                skills_ref = resources.files("x_ipe") / subpath
+                if hasattr(skills_ref, 'is_dir') and skills_ref.is_dir():
+                    return Path(str(skills_ref))
         except (ImportError, TypeError, AttributeError):
             pass
         
         # Fall back to src layout for development
-        dev_path = Path(__file__).parent.parent / "skills"
-        if dev_path.exists():
-            return dev_path
+        pkg_dir = Path(__file__).parent.parent
+        for subpath in ("resources/skills", "skills"):
+            dev_path = pkg_dir / subpath
+            if dev_path.exists():
+                return dev_path
+        
+        # Fall back to site-packages (editable installs may not resolve via importlib)
+        try:
+            import site
+            for sp in site.getsitepackages():
+                for subpath in ("resources/skills", "skills"):
+                    candidate = Path(sp) / "x_ipe" / subpath
+                    if candidate.is_dir():
+                        return candidate
+        except Exception:
+            pass
         
         return None
     
@@ -162,12 +177,14 @@ class SkillsManager:
         return [s for s in self.get_local_skills() if s.modified]
     
     def sync_from_package(self, skill_name: Optional[str] = None, 
-                          backup: bool = True) -> List[str]:
+                          backup: bool = True,
+                          new_only: bool = False) -> List[str]:
         """Sync skills from package to local.
         
         Args:
             skill_name: Specific skill to sync. If None, sync all.
             backup: If True, backup existing skills before overwriting.
+            new_only: If True, only sync skills that don't exist locally.
             
         Returns:
             List of synced skill names.
@@ -183,6 +200,10 @@ class SkillsManager:
                 continue
             
             target = self.local_skills_path / skill.name
+            
+            # Skip existing skills if new_only mode
+            if new_only and target.exists():
+                continue
             
             # Backup if exists and requested
             if target.exists() and backup:

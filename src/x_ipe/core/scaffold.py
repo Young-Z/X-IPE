@@ -211,7 +211,13 @@ class ScaffoldManager:
         
         if not self.dry_run:
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(source_file, target)
+            # Resolve template variables
+            content = source_file.read_text()
+            resolved = content.replace(
+                "${workspaceFolder}", str(self.project_root)
+            )
+            target.write_text(resolved)
+            shutil.copystat(source_file, target)
         self.created.append(target)
     
     def get_project_mcp_servers(self) -> dict:
@@ -241,7 +247,7 @@ class ScaffoldManager:
         
         Args:
             servers_to_merge: List of server names to merge. If None, merges all.
-            target_path: Path to target mcp-config.json. Defaults to ~/.copilot/mcp-config.json.
+            target_path: Path to target mcp-config.json. Defaults to {project_root}/.copilot/mcp-config.json.
             source_servers: Dict of server configs. If None, reads from .github/copilot/mcp-config.json.
             mcp_format: Config format - 'global'/'project' use mcpServers, 'nested' uses mcp key.
         """
@@ -255,9 +261,9 @@ class ScaffoldManager:
             if not project_servers:
                 return
         
-        # Target: configurable or default to ~/.copilot/mcp-config.json
+        # Target: configurable or default to {project_root}/.copilot/mcp-config.json
         if target_path is None:
-            global_copilot_dir = Path.home() / ".copilot"
+            global_copilot_dir = self.project_root / ".copilot"
             global_mcp = global_copilot_dir / "mcp-config.json"
         else:
             global_mcp = Path(target_path)

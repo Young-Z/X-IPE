@@ -443,3 +443,111 @@ Skills receive explicit context file paths in workflow mode.
 > - **Change:** Deliverable format changes from `deliverable_category` + array to tagged `$output:name` + keyed object; `action_context` replaces `input_source` for context resolution; skills receive `extra_context_reference`
 > - **Affected FRs:** FR-041.1-7 (copilot-prompt input_source → deprecated), FR-041.8-13 (_resolveInputFiles → template-driven), FR-041.14-18 (multi-source UI → action_context dropdowns), FR-041.25-28 (skills gain extra_context_reference)
 > - **Action Required:** Feature specifications for FEATURE-041-B, FEATURE-041-C, FEATURE-041-D need updating before implementation
+
+---
+
+## Feature List (CR-002)
+
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|--------------------|
+| FEATURE-041-E | EPIC-041 | Deliverable Tagging & Action Context Schema (MVP) | v1.0 | Replace `deliverable_category` with `$output:name`/`$output-folder:name` tags, add `action_context` to template, keyed deliverables in instance, MCP tool dual-format support | None |
+| FEATURE-041-F | EPIC-041 | Action Context Modal UI & Persistence | v1.0 | Rename "Input Files" to "Action Context", render template-driven dropdowns with auto-detect, persist context in instance, support reopen with pre-populated selections | FEATURE-041-E |
+| FEATURE-041-G | EPIC-041 | Skill Extra Context Reference | v1.0 | Add `extra_context_reference` to skill workflow input, receive explicit context paths, handle N/A (skip) and auto-detect (self-discover), deprecate `input_source` | None |
+
+---
+
+## Feature Details (CR-002)
+
+### FEATURE-041-E: Deliverable Tagging & Action Context Schema (MVP)
+
+**Summary:** The foundational data model change. Replaces `deliverable_category` strings with tagged `$output:name` / `$output-folder:name` syntax in `workflow-template.json`, adds `action_context` declarations per action, changes workflow instance deliverables from arrays to keyed objects, and updates the MCP tool to accept both formats.
+
+**Scope:**
+- Replace `deliverable_category` with `deliverables: ["$output:name", "$output-folder:name"]` in ALL actions of `workflow-template.json`
+- Add `action_context` block to every action with prior dependencies (required/optional refs with candidate sources)
+- Change workflow instance `deliverables` from `string[]` to `{ tagName: path }` object
+- Add `context` field to instance actions: `{ refName: path | "N/A" | "auto-detect" }`
+- Update `update_workflow_action` MCP tool to accept both list (legacy) and keyed-object (new) formats
+- Add `"schema_version": "3.0"` for instances using new format
+- Static validation: `candidates` references must match existing `$output-folder:name` from prior actions
+- Runtime validation: instance deliverables keys must match template tags
+- Unique tag names within each stage; cross-stage duplicates allowed with stage precedence
+- Per-feature scoping: resolve within current feature first, fallback to shared stages
+
+**Covered FRs:** FR-CR2.1, FR-CR2.2, FR-CR2.3, FR-CR2.4, FR-CR2.5, FR-CR2.6, FR-CR2.7, FR-CR2.8, FR-CR2.9, FR-CR2.10, FR-CR2.11, FR-CR2.12, FR-CR2.20
+
+**Acceptance Criteria:**
+- [ ] AC-CR2.1: All actions in `workflow-template.json` use `$output:name` / `$output-folder:name` syntax
+- [ ] AC-CR2.2: `action_context` defined for every action with prior dependencies
+- [ ] AC-CR2.3: Workflow instance stores `deliverables` as `{ name: path }` and `context` as `{ ref: path | N/A | auto-detect }`
+- [ ] AC-CR2.11: Existing instances with `deliverables: []` arrays still work
+
+**Dependencies:** None (MVP — foundational)
+
+**Technical Considerations:**
+- Backend: `workflow_manager_service.py` deliverables parsing needs duck-typing (list vs dict)
+- Backend: `app_agent_interaction.py` `update_workflow_action` needs dual-format support
+- Config: `workflow-template.json` full rewrite with tagged deliverables + action_context
+- Candidate resolution algorithm: walk `stage_order`, later-stage precedence, per-feature scoping
+
+---
+
+### FEATURE-041-F: Action Context Modal UI & Persistence
+
+**Summary:** Frontend changes to render template-driven context dropdowns in the Action Execution Modal, persist selections in the workflow instance, and support reopening actions with pre-populated context.
+
+**Scope:**
+- Rename "Input Files" section to "Action Context" in modal UI
+- Read `action_context` from `workflow-template.json` to render one dropdown per context ref
+- Populate dropdowns: `$output` file + `$output-folder` contents from prior action deliverables (all file types, not just `.md`)
+- Add "auto-detect" option to every dropdown
+- Enforce required/optional: `required: true` must have selection or auto-detect; `required: false` allows N/A
+- Save context selections to instance `context` field before launching CLI command
+- On reopen: read `context` from instance to pre-populate dropdowns
+- Feature-level actions store context within feature lane
+- Fallback: if `action_context` absent in template → use legacy `input_source` from `copilot-prompt.json`
+- Reopen state machine: status → `in_progress`, old deliverables preserved, no downstream cascade
+
+**Covered FRs:** FR-CR2.13, FR-CR2.14, FR-CR2.15, FR-CR2.16, FR-CR2.17, FR-CR2.18, FR-CR2.19, FR-CR2.21, FR-CR2.22, FR-CR2.23, FR-CR2.24, FR-CR2.25
+
+**Acceptance Criteria:**
+- [ ] AC-CR2.4: Modal "Action Context" renders dropdowns from template schema
+- [ ] AC-CR2.5: Dropdowns list `$output` file + `$output-folder` contents
+- [ ] AC-CR2.6: Every dropdown includes "auto-detect" option
+- [ ] AC-CR2.7: Reopening an action pre-populates dropdowns from instance `context`
+- [ ] AC-CR2.8: Feature-level actions support reopen with context restoration
+- [ ] AC-CR2.12: `input_source` used as fallback when `action_context` absent
+
+**Dependencies:** FEATURE-041-E (template schema + instance format must exist first)
+
+**Technical Considerations:**
+- `action-execution-modal.js`: replace `_resolveInputFiles()` with template-driven context resolution
+- Need API to list files within a folder path (for `$output-folder` contents)
+- `workflow-stage.js`: feature-level action reopen support
+- NFR-CR2.3: lazy load for large folders (100+ files)
+
+---
+
+### FEATURE-041-G: Skill Extra Context Reference
+
+**Summary:** Update all workflow-aware skills to receive `extra_context_reference` map with explicit context file paths, and deprecate `copilot-prompt.json` `input_source`.
+
+**Scope:**
+- Add `extra_context_reference` to skill `workflow` input block
+- In workflow mode, skill reads context from workflow instance's `context` field
+- File path → use as direct input; "N/A" → skip; "auto-detect" → self-discover
+- Update all per-feature skills + shared-level skills with `extra_context_reference` parameter
+- Deprecate `input_source` in `copilot-prompt.json` for actions with `action_context`
+
+**Covered FRs:** FR-CR2.26, FR-CR2.27, FR-CR2.28, FR-CR2.29, FR-CR2.30, FR-CR2.31
+
+**Acceptance Criteria:**
+- [ ] AC-CR2.9: Skills receive `extra_context_reference` map with resolved paths
+- [ ] AC-CR2.10: Skills handle N/A (skip) and auto-detect (self-discover)
+
+**Dependencies:** None (SKILL.md documentation changes are independent of backend/frontend)
+
+**Technical Considerations:**
+- Pure SKILL.md file edits (no application code changes)
+- Each skill needs existing or new steps to consume context paths
+- Backward compat: skills must still work when `extra_context_reference` is not provided (free-mode)

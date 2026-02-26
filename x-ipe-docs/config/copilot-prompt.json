@@ -1,11 +1,13 @@
 {
-  "version": "3.1",
+  "version": "3.2",
   "ideation": {
     "prompts": [
       {
         "id": "refine-idea",
         "icon": "bi-stars",
-        "input_source": ["compose_idea"],
+        "input_source": [
+          "compose_idea"
+        ],
         "prompt-details": [
           {
             "language": "en",
@@ -52,9 +54,12 @@
         ]
       },
       {
-        "id": "generate-mockup",
+        "id": "design-mockup",
         "icon": "bi-palette",
-        "input_source": ["refine_idea", "compose_idea"],
+        "input_source": [
+          "refine_idea",
+          "compose_idea"
+        ],
         "prompt-details": [
           {
             "language": "en",
@@ -223,7 +228,10 @@
       {
         "id": "requirement-gathering",
         "icon": "bi-clipboard-data",
-        "input_source": ["refine_idea", "design_mockup"],
+        "input_source": [
+          "refine_idea",
+          "design_mockup"
+        ],
         "prompt-details": [
           {
             "language": "en",
@@ -240,7 +248,9 @@
       {
         "id": "feature-breakdown",
         "icon": "bi-diagram-2",
-        "input_source": ["requirement_gathering"],
+        "input_source": [
+          "requirement_gathering"
+        ],
         "prompt-details": [
           {
             "language": "en",
@@ -259,6 +269,78 @@
   "placeholder": {
     "current-idea-file": "Replaced with currently open file path",
     "input-file": "Replaced with selected input file path from source action deliverables",
+    "feature-id": "Replaced with the target feature ID (e.g. FEATURE-041-A) for per-feature actions",
     "evaluation-file": "x-ipe-docs/quality-evaluation/project-quality-evaluation.md"
+  },
+  "feature": {
+    "prompts": [
+      {
+        "id": "feature-refinement",
+        "icon": "bi-rulers",
+        "input_source": [
+          "feature_breakdown"
+        ],
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Feature Refinement",
+            "command": "refine feature <feature-id> from <input-file> with feature refinement skill"
+          }
+        ]
+      },
+      {
+        "id": "technical-design",
+        "icon": "bi-gear",
+        "input_source": [
+          "feature_refinement"
+        ],
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Technical Design",
+            "command": "create technical design for <feature-id> from <input-file> with technical design skill"
+          }
+        ]
+      },
+      {
+        "id": "implementation",
+        "icon": "bi-code-slash",
+        "input_source": [
+          "technical_design"
+        ],
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Implementation",
+            "command": "implement <feature-id> from <input-file> with code implementation skill"
+          }
+        ]
+      },
+      {
+        "id": "acceptance-testing",
+        "icon": "bi-check2-circle",
+        "input_source": [
+          "implementation"
+        ],
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Acceptance Testing",
+            "command": "run acceptance tests for <feature-id> from <input-file> with feature acceptance test skill"
+          }
+        ]
+      },
+      {
+        "id": "change-request",
+        "icon": "bi-arrow-repeat",
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "Change Request",
+            "command": "process change request for <feature-id> with change request skill"
+          }
+        ]
+      }
+    ]
   }
 }

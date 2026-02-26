@@ -249,18 +249,20 @@ class TestFeatureAPIIntegration:
         """Features added via API appear in workflow state."""
         resp = client.get("/api/workflow/feat-test")
         data = resp.get_json()["data"]
-        implement = data["stages"].get("implement", {})
-        features = implement.get("features", {})
-        assert "FEATURE-040" in features
-        assert features["FEATURE-040"]["name"] == "Login Page"
+        features = data.get("features", [])
+        feat_040 = next((f for f in features if f["feature_id"] == "FEATURE-040"), None)
+        assert feat_040 is not None
+        assert feat_040["name"] == "Login Page"
 
     def test_feature_has_depends_on(self, client, workflow_with_features):
         """Feature dependency data is preserved in state."""
         resp = client.get("/api/workflow/feat-test")
         data = resp.get_json()["data"]
-        features = data["stages"]["implement"]["features"]
-        assert features["FEATURE-041"]["depends_on"] == ["FEATURE-040"]
-        assert features["FEATURE-040"]["depends_on"] == []
+        features = data.get("features", [])
+        feat_041 = next(f for f in features if f["feature_id"] == "FEATURE-041")
+        feat_040 = next(f for f in features if f["feature_id"] == "FEATURE-040")
+        assert feat_041["depends_on"] == ["FEATURE-040"]
+        assert feat_040["depends_on"] == []
 
     def test_dependency_check_blocked(self, client, workflow_with_features):
         """GET /api/workflow/{name}/dependencies/{id} returns blocked status for dependent feature."""
@@ -287,8 +289,8 @@ class TestFeatureAPIIntegration:
         assert resp.status_code == 200
         # Verify in state
         state = client.get("/api/workflow/feat-test").get_json()["data"]
-        feat = state["stages"]["implement"]["features"]["FEATURE-040"]
-        assert feat["actions"]["feature_refinement"]["status"] == "done"
+        feat = next(f for f in state["features"] if f["feature_id"] == "FEATURE-040")
+        assert feat["implement"]["actions"]["feature_refinement"]["status"] == "done"
 
     def test_multiple_independent_features(self, client, workflow_with_features):
         """Independent features can be updated independently."""
@@ -299,10 +301,10 @@ class TestFeatureAPIIntegration:
             "action": "feature_refinement", "status": "done", "feature_id": "FEATURE-042"
         })
         state = client.get("/api/workflow/feat-test").get_json()["data"]
-        feat040 = state["stages"]["implement"]["features"]["FEATURE-040"]
-        feat042 = state["stages"]["implement"]["features"]["FEATURE-042"]
-        assert feat040["actions"]["feature_refinement"]["status"] == "done"
-        assert feat042["actions"]["feature_refinement"]["status"] == "done"
+        feat040 = next(f for f in state["features"] if f["feature_id"] == "FEATURE-040")
+        feat042 = next(f for f in state["features"] if f["feature_id"] == "FEATURE-042")
+        assert feat040["implement"]["actions"]["feature_refinement"]["status"] == "done"
+        assert feat042["implement"]["actions"]["feature_refinement"]["status"] == "done"
 
     def test_feature_breakdown_with_inline_features(self, client):
         """feature_breakdown action with features param creates per-feature structures."""
@@ -323,12 +325,13 @@ class TestFeatureAPIIntegration:
         })
         assert resp.status_code == 200
         state = client.get("/api/workflow/inline-feat").get_json()["data"]
-        # Features should be populated in implement stage
-        impl_features = state["stages"]["implement"]["features"]
-        assert "FEAT-A" in impl_features
-        assert "FEAT-B" in impl_features
-        assert "FEAT-C" in impl_features
-        assert impl_features["FEAT-B"]["depends_on"] == ["FEAT-A"]
+        # Features should be populated in features array
+        feat_ids = [f["feature_id"] for f in state["features"]]
+        assert "FEAT-A" in feat_ids
+        assert "FEAT-B" in feat_ids
+        assert "FEAT-C" in feat_ids
+        feat_b = next(f for f in state["features"] if f["feature_id"] == "FEAT-B")
+        assert feat_b["depends_on"] == ["FEAT-A"]
 
     def test_feature_breakdown_inline_sets_features_created(self, client):
         """feature_breakdown with features param populates features_created field."""
@@ -344,7 +347,7 @@ class TestFeatureAPIIntegration:
             ]
         })
         state = client.get("/api/workflow/fc-test").get_json()["data"]
-        fb = state["stages"]["requirement"]["actions"]["feature_breakdown"]
+        fb = state["shared"]["requirement"]["actions"]["feature_breakdown"]
         assert len(fb["features_created"]) == 2
         assert fb["features_created"][0]["id"] == "FEAT-X"
 
@@ -363,7 +366,7 @@ class TestFeatureAPIIntegration:
             ]
         })
         state = client.get("/api/workflow/na-test").get_json()["data"]
-        fb = state["stages"]["requirement"]["actions"]["feature_breakdown"]
+        fb = state["shared"]["requirement"]["actions"]["feature_breakdown"]
         suggested = fb["next_actions_suggested"]
         assert "FEAT-1" in suggested
         assert "FEAT-3" in suggested

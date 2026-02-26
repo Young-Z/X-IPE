@@ -17,7 +17,7 @@ beforeEach(() => {
 describe('next_actions_suggested in completed stages', () => {
   function buildState(overrides = {}) {
     return {
-      stages: {
+      shared: {
         ideation: {
           status: 'completed',
           actions: {
@@ -41,7 +41,8 @@ describe('next_actions_suggested in completed stages', () => {
           }
         },
         ...overrides
-      }
+      },
+      features: []
     };
   }
 

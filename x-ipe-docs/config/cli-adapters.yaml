@@ -7,8 +7,8 @@ adapters:
     prompt_format: '{command} {run_args} {inline_prompt_flag} "{escaped_prompt}"'
     instructions_file: ".github/copilot-instructions.md"
     skills_folder: ".github/skills/"
-    mcp_config_path: "~/.copilot/mcp-config.json"
-    mcp_config_format: "global"
+    mcp_config_path: ".copilot/mcp-config.json"
+    mcp_config_format: "project"
     detection_command: "copilot"
 
   opencode:

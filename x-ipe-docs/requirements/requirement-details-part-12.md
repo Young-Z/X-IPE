@@ -258,3 +258,4 @@ All task-based skills referenced in ACTION_MAP MUST support workflow-mode execut
 - Follow the pattern established by `x-ipe-task-based-ideation-v2` (updated in FEATURE-038-D) as the reference implementation
 - Each skill update is a SKILL.md file edit — no application code changes
 - Skills can be updated in parallel since they are independent files
+

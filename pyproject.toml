@@ -1,6 +1,6 @@
 [project]
 name = "x-ipe"
-version = "1.0.49"
+version = "1.0.65"
 description = "An AI native integrated project environment for end to end business value delivery"
 requires-python = ">=3.12"
 dependencies = [
@@ -23,6 +23,7 @@ dependencies = [
 
 [project.scripts]
 x-ipe = "x_ipe.cli:main"
+x-ipe-mcp = "x_ipe.mcp.app_agent_interaction:main"
 
 [build-system]
 requires = ["hatchling"]

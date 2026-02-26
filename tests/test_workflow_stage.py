@@ -206,34 +206,34 @@ class TestWorkflowStateAPI:
         response = client.get("/api/workflow/state-test")
         assert response.status_code == 200
         data = response.get_json()["data"]
-        assert "stages" in data
-        assert "ideation" in data["stages"]
+        assert "shared" in data
+        assert "ideation" in data["shared"]
 
     def test_workflow_stages_have_status(self, client):
         """AC-004: Each stage has a status field."""
         client.post("/api/workflow/create", json={"name": "status-test"})
         data = client.get("/api/workflow/status-test").get_json()["data"]
-        for stage_name, stage_data in data["stages"].items():
+        for stage_name, stage_data in data["shared"].items():
             assert "status" in stage_data, f"Stage '{stage_name}' must have status field"
 
     def test_ideation_stage_active_on_create(self, client):
         """New workflow has ideation stage as in_progress."""
         client.post("/api/workflow/create", json={"name": "active-test"})
         data = client.get("/api/workflow/active-test").get_json()["data"]
-        assert data["stages"]["ideation"]["status"] == "in_progress"
+        assert data["shared"]["ideation"]["status"] == "in_progress"
 
     def test_other_stages_locked_on_create(self, client):
-        """New workflow has requirement/implement/validation/feedback stages locked."""
+        """New workflow has requirement locked and no features yet."""
         client.post("/api/workflow/create", json={"name": "locked-test"})
         data = client.get("/api/workflow/locked-test").get_json()["data"]
-        for stage in ["requirement", "implement", "validation", "feedback"]:
-            assert data["stages"][stage]["status"] == "locked", f"Stage '{stage}' should be locked"
+        assert data["shared"]["requirement"]["status"] == "locked"
+        assert data["features"] == []
 
     def test_ideation_has_action_statuses(self, client):
         """AC-004: Ideation stage has action statuses."""
         client.post("/api/workflow/create", json={"name": "actions-test"})
         data = client.get("/api/workflow/actions-test").get_json()["data"]
-        ideation = data["stages"]["ideation"]
+        ideation = data["shared"]["ideation"]
         assert "actions" in ideation
         assert "compose_idea" in ideation["actions"]
 
@@ -254,7 +254,7 @@ class TestWorkflowStateAPI:
             "status": "done"
         })
         data = client.get("/api/workflow/update-test").get_json()["data"]
-        assert data["stages"]["ideation"]["actions"]["compose_idea"]["status"] == "done"
+        assert data["shared"]["ideation"]["actions"]["compose_idea"]["status"] == "done"
 
 
 # ─────────────────────────────────────────────

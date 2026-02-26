@@ -508,7 +508,7 @@ class TestUpgradeCommand:
         """Upgrade in non-initialized project works with warning."""
         from src.x_ipe.cli.main import cli
         # Use --no-mcp to avoid interactive prompt
-        result = runner.invoke(cli, ["-p", str(temp_project), "upgrade", "--no-mcp"])
+        result = runner.invoke(cli, ["-p", str(temp_project), "upgrade", "--no-mcp", "--force"])
         # Should complete (may show no skills available)
         assert result.exit_code == 0
 

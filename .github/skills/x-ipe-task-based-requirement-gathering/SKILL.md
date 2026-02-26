@@ -23,6 +23,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
+**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` list of output file paths. Verify the workflow state was updated before marking the task complete.
+
 MANDATORY: Every requirement MUST create an Epic with ID format `EPIC-{nnn}` (e.g., EPIC-001, EPIC-035). Features created during Feature Breakdown use format `FEATURE-{nnn}-{X}` (e.g., FEATURE-035-A). The `{nnn}` in Feature IDs always matches the parent Epic number.
 
 ⛔ **NEVER use an EPIC ID as a Feature ID.** `EPIC-{nnn}` identifies a grouping container; `FEATURE-{nnn}-{X}` identifies a deliverable unit of work. They are separate concepts. Do NOT place EPIC IDs in Feature ID columns, Feature List tables, or feature board entries.
@@ -43,6 +45,7 @@ input:
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
   workflow:
     name: "N/A"  # workflow name, default: N/A
+    action: "requirement_gathering"  # workflow action name for status updates
 
   # Task type attributes
   category: "requirement-stage"
@@ -242,10 +245,17 @@ BLOCKING: Human MUST approve requirements before proceeding to Feature Breakdown
   <step_7>
     <name>Complete</name>
     <action>
-      1. Verify all DoD checkpoints
-      2. Request human review
+      1. IF execution_mode == "workflow-mode":
+         a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
+            - workflow_name: {from context}
+            - action: {workflow.action}
+            - status: "done"
+            - deliverables: [list of output file paths]
+         b. Log: "Workflow action status updated to done"
+      2. Verify all DoD checkpoints
+      3. Request human review
     </action>
-    <output>Task completion output</output>
+    <output>Task completion output, workflow_action_updated</output>
   </step_7>
 
 </procedure>
@@ -265,6 +275,8 @@ task_completion_output:
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
+  workflow_action: "{workflow.action}"       # triggers workflow status update when execution_mode == workflow-mode
+  workflow_action_updated: true | false # true if update_workflow_action was called
   task_output_links:
     - "x-ipe-docs/requirements/requirement-details.md"  # or requirement-details-part-X.md
   mockup_list: "{inherited from input or N/A}"
@@ -304,6 +316,10 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   <checkpoint required="conditional">
     <name>File split handled correctly</name>
     <verification>If split occurred, old file renamed and index updated per references/file-splitting.md</verification>
+  </checkpoint>
+  <checkpoint required="if-applicable">
+    <name>Workflow Action Status Updated</name>
+    <verification>If execution_mode == "workflow-mode", called the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with status "done" and deliverables list</verification>
   </checkpoint>
 </definition_of_done>
 ```

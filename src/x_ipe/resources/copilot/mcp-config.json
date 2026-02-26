@@ -13,17 +13,14 @@
     },
     "x-ipe-app-and-agent-interaction": {
       "type": "local",
-      "command": "uv",
+      "command": "uvx",
       "tools": [
         "*"
       ],
       "args": [
-        "run",
-        "--directory",
-        "${workspaceFolder}",
-        "python",
-        "-m",
-        "x_ipe.mcp.app_agent_interaction"
+        "--from",
+        "x-ipe",
+        "x-ipe-mcp"
       ]
     }
   }

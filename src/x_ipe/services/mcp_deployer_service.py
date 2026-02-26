@@ -32,12 +32,18 @@ class MCPDeployerService:
 
     @x_ipe_tracing()
     def get_source_servers(self) -> dict:
-        """Read MCP servers from project's .github/copilot/mcp-config.json."""
+        """Read MCP servers from project's .github/copilot/mcp-config.json.
+
+        Resolves ``${workspaceFolder}`` placeholders to ``self.project_root``.
+        """
         source = self.project_root / self.SOURCE_PATH
         if not source.exists():
             return {}
         try:
-            config = json.loads(source.read_text())
+            raw = source.read_text().replace(
+                "${workspaceFolder}", str(self.project_root)
+            )
+            config = json.loads(raw)
             return config.get("mcpServers", {})
         except (json.JSONDecodeError, IOError):
             return {}

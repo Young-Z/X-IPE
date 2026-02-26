@@ -6,13 +6,14 @@
  * constructs CLI command, dispatches to terminal via idle session detection.
  */
 class ActionExecutionModal {
-    constructor({ actionKey, workflowName, skillName, onComplete, status, triggerBtn }) {
+    constructor({ actionKey, workflowName, skillName, onComplete, status, triggerBtn, featureId }) {
         this.actionKey = actionKey;
         this.workflowName = workflowName;
         this.skillName = skillName || '';
         this.onComplete = onComplete || (() => {});
         this.status = status || null;
         this.triggerBtn = triggerBtn || null;
+        this.featureId = featureId || null;
         this.overlay = null;
         this._loadedInstructions = null;
         this._keyHandler = null;
@@ -76,6 +77,11 @@ class ActionExecutionModal {
             }
         }
 
+        // Replace <feature-id> placeholder with actual feature ID
+        if (this.featureId && command.includes('<feature-id>')) {
+            command = command.replace(/<feature-id>/g, this.featureId);
+        }
+
         this._loadedInstructions = { label: detail.label, command };
     }
 
@@ -136,34 +142,57 @@ class ActionExecutionModal {
             if (!resp.ok) return files;
             const json = await resp.json();
             const data = json.data || {};
-            const stages = data.stages || data.shared || {};
+            const shared = data.stages || data.shared || {};
+            const featureData = this.featureId && data.features
+                ? (Array.isArray(data.features)
+                    ? data.features.find(f => f.feature_id === this.featureId)
+                    : data.features[this.featureId])
+                : null;
 
             for (const sourceAction of inputSource) {
-                for (const [, stageData] of Object.entries(stages)) {
-                    const action = (stageData.actions || {})[sourceAction];
-                    if (!action || !action.deliverables) continue;
+                let actionObj = null;
 
-                    for (const d of action.deliverables) {
-                        if (d.endsWith('.md') && !files.includes(d)) {
-                            files.push(d);
-                        }
-                        // If deliverable looks like a folder (no extension), scan it
-                        if (!d.includes('.')) {
-                            try {
-                                const treeResp = await fetch(
-                                    `/api/workflow/${encodeURIComponent(this.workflowName)}/deliverables/tree?path=${encodeURIComponent(d)}`
-                                );
-                                if (treeResp.ok) {
-                                    const treeJson = await treeResp.json();
-                                    const entries = Array.isArray(treeJson) ? treeJson : (treeJson.data || treeJson.entries || []);
-                                    for (const entry of entries) {
-                                        if (entry.type === 'file' && entry.path && entry.path.endsWith('.md')) {
-                                            if (!files.includes(entry.path)) files.push(entry.path);
-                                        }
+                // 1. Per-feature stages (if featureId present)
+                if (featureData) {
+                    for (const stage of ['implement', 'validation', 'feedback']) {
+                        const stageData = featureData[stage];
+                        actionObj = (stageData && stageData.actions || {})[sourceAction];
+                        if (actionObj && actionObj.deliverables && actionObj.deliverables.length) break;
+                        actionObj = null;
+                    }
+                }
+
+                // 2. Fallback to shared stages
+                if (!actionObj) {
+                    for (const [, stageData] of Object.entries(shared)) {
+                        actionObj = (stageData.actions || {})[sourceAction];
+                        if (actionObj && actionObj.deliverables && actionObj.deliverables.length) break;
+                        actionObj = null;
+                    }
+                }
+
+                if (!actionObj || !actionObj.deliverables) continue;
+
+                for (const d of actionObj.deliverables) {
+                    if (d.endsWith('.md') && !files.includes(d)) {
+                        files.push(d);
+                    }
+                    // Scan folder deliverables
+                    if (!d.includes('.')) {
+                        try {
+                            const treeResp = await fetch(
+                                `/api/workflow/${encodeURIComponent(this.workflowName)}/deliverables/tree?path=${encodeURIComponent(d)}`
+                            );
+                            if (treeResp.ok) {
+                                const treeJson = await treeResp.json();
+                                const entries = Array.isArray(treeJson) ? treeJson : (treeJson.data || treeJson.entries || []);
+                                for (const entry of entries) {
+                                    if (entry.type === 'file' && entry.path && entry.path.endsWith('.md')) {
+                                        if (!files.includes(entry.path)) files.push(entry.path);
                                     }
                                 }
-                            } catch (e) { /* folder may not exist */ }
-                        }
+                            }
+                        } catch (e) { /* folder may not exist */ }
                     }
                 }
             }
@@ -298,9 +327,11 @@ class ActionExecutionModal {
     _buildCommand(extraInstructions) {
         if (!this._loadedInstructions) return '';
         let prompt = this._loadedInstructions.command;
-        // Prefix with --workflow-mode@{name} so the agent knows this was dispatched from the workflow UI
         const wfSuffix = this.workflowName ? `@${this.workflowName}` : '';
         let cmd = `--workflow-mode${wfSuffix} ${prompt}`;
+        if (this.featureId) {
+            cmd += ` --feature-id ${this.featureId}`;
+        }
         if (extraInstructions && extraInstructions.trim()) {
             cmd += ` --extra-instructions ${extraInstructions.trim()}`;
         }

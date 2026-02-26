@@ -207,7 +207,7 @@ Agent: Here are my questions:
 
 ---
 
-## Example 6: Tool-Enhanced Brainstorming Flow
+## Example 5: Tool-Enhanced Brainstorming Flow
 
 **Scenario:** Using tools during conversation
 
@@ -242,7 +242,7 @@ Does this match your vision? Any adjustments needed?
 
 ---
 
-## Example 7: Draft → Critique → Improve Flow
+## Example 6: Draft → Critique → Improve Flow
 
 **Scenario:** Showing the new 3-step summary refinement process
 

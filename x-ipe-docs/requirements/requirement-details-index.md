@@ -20,4 +20,4 @@
 | 10 | [Part 10](requirement-details-part-10.md) | EPIC-037 | ~210 |
 | 11 | [Part 11](requirement-details-part-11.md) | EPIC-038, EPIC-039 | ~552 |
 | 12 | [Part 12](requirement-details-part-12.md) | EPIC-040 | ~260 |
-| 13 | [Part 13](requirement-details-part-13.md) | EPIC-041, CR-002 | ~445 |
+| 13 | [Part 13](requirement-details-part-13.md) | EPIC-041, CR-002 | ~553 |

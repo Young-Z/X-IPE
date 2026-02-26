@@ -276,13 +276,13 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp
                 servers_to_merge.append(name)
         
         if servers_to_merge:
-            mcp_format = 'global'
+            mcp_format = 'project'
             try:
                 adapter = CLIAdapterService().get_adapter(selected_cli)
                 target_path = deployer.resolve_target_path(adapter)
                 mcp_format = adapter.mcp_config_format
             except Exception:
-                target_path = Path.home() / ".copilot" / "mcp-config.json"
+                target_path = project_root / ".copilot" / "mcp-config.json"
             
             target_path = click.prompt(
                 "\nTarget MCP config path",
@@ -797,7 +797,7 @@ def upgrade(ctx: click.Context, force: bool, dry_run: bool,
     
     # CLI selection flow (FEATURE-027-E)
     # If --cli provided, use it directly; otherwise prompt like init
-    if not cli_name:
+    if not cli_name and not force:
         existing_cli = _read_existing_cli(project_root)
         if existing_cli:
             selected_cli = _resolve_cli_selection(project_root, None)
@@ -832,12 +832,13 @@ def upgrade(ctx: click.Context, force: bool, dry_run: bool,
     if has_skills:
         # Check local skills
         local_skills = skills_manager.get_local_skills()
-        modified = skills_manager.detect_modifications()
+        local_skill_names = {s.name for s in local_skills}
+        new_skills = [s for s in package_skills if s.name not in local_skill_names]
         
         if local_skills:
             click.echo(f"Local skills: {len(local_skills)}")
-            if modified:
-                click.echo(f"Modified skills: {len(modified)}")
+            if new_skills:
+                click.echo(f"New skills available: {len(new_skills)}")
         
         # Filter by specific skill if requested
         if skill:
@@ -846,45 +847,67 @@ def upgrade(ctx: click.Context, force: bool, dry_run: bool,
                 click.echo(f"\nError: Skill '{skill}' not found in package.")
                 raise click.Abort()
             click.echo(f"\nUpgrading skill: {skill}")
-        
-        # Check for modifications that would be overwritten
-        skills_to_warn = []
-        if not force:
-            for pkg_skill in package_skills:
-                local_skill = skills_manager.get_skill_info(pkg_skill.name)
-                if local_skill and local_skill.source == "local" and local_skill.modified:
-                    skills_to_warn.append(local_skill)
-        
-        if skills_to_warn:
-            click.echo(f"\nThe following skills have local modifications:")
-            for s in skills_to_warn:
-                click.echo(f"  ⚠ {s.name}")
-            
-            if not dry_run:
-                if not force:
-                    if not click.confirm("\nOverwrite modified skills?"):
-                        click.echo("Aborted.")
-                        # Continue to MCP config section
-        
-        if not dry_run:
-            # Perform the sync
-            synced = skills_manager.sync_from_package(
-                skill_name=skill,
-                backup=backup
+            skill_update_choice = "all"
+        elif force or dry_run:
+            skill_update_choice = "all"
+        else:
+            # Prompt user for skill update strategy
+            click.echo("\nHow would you like to update skills?")
+            click.echo("  1) No - skip skill updates")
+            click.echo("  2) Add new skills only (keep existing skills unchanged)")
+            click.echo("  3) Update all skills (overwrite existing with package versions)")
+            choice = click.prompt(
+                "Choose an option",
+                type=click.Choice(["1", "2", "3"]),
+                default="2",
             )
+            skill_update_choice = {"1": "none", "2": "new_only", "3": "all"}[choice]
+        
+        if skill_update_choice == "none":
+            click.echo("\nSkipping skill updates.")
+        elif not dry_run:
+            new_only = skill_update_choice == "new_only"
+            skills_to_warn = []
             
-            if synced:
-                click.echo(f"\n✓ Synced {len(synced)} skill(s):")
-                for name in synced:
-                    click.echo(f"  ✓ {name}")
-            else:
-                click.echo("\nNo skills were synced.")
+            # Warn about modified skills when updating all
+            if not new_only and not force:
+                modified = skills_manager.detect_modifications()
+                skills_to_warn = []
+                for pkg_skill in package_skills:
+                    local_skill = skills_manager.get_skill_info(pkg_skill.name)
+                    if local_skill and local_skill.source == "local" and local_skill.modified:
+                        skills_to_warn.append(local_skill)
+                
+                if skills_to_warn:
+                    click.echo(f"\nThe following skills have local modifications:")
+                    for s in skills_to_warn:
+                        click.echo(f"  ⚠ {s.name}")
+                    if not click.confirm("\nOverwrite modified skills?"):
+                        click.echo("Aborted skill update.")
+                        new_only = None  # signal to skip
             
-            if backup and skills_to_warn:
-                click.echo(f"\nBackups created in: {project_root / '.x-ipe' / 'backups'}")
+            if new_only is not None:
+                synced = skills_manager.sync_from_package(
+                    skill_name=skill,
+                    backup=backup,
+                    new_only=bool(new_only),
+                )
+                
+                if synced:
+                    click.echo(f"\n✓ Synced {len(synced)} skill(s):")
+                    for name in synced:
+                        click.echo(f"  ✓ {name}")
+                else:
+                    label = "new " if new_only else ""
+                    click.echo(f"\nNo {label}skills to sync.")
+                
+                if not new_only and backup and skills_to_warn:
+                    click.echo(f"\nBackups created in: {project_root / '.x-ipe' / 'backups'}")
         else:
             click.echo("\nDry run - would sync:")
             for pkg_skill in package_skills:
+                if skill_update_choice == "new_only" and pkg_skill.name in local_skill_names:
+                    continue
                 click.echo(f"  → {pkg_skill.name}")
     
     # Copy/update MCP config from package, then merge using active CLI's path
@@ -904,28 +927,29 @@ def upgrade(ctx: click.Context, force: bool, dry_run: bool,
         for name in mcp_servers:
             click.echo(f"  • {name}")
         
-        # Confirm each server
+        # Confirm each server (--force auto-accepts all)
         servers_to_merge = []
         for name in mcp_servers:
-            if click.confirm(f"\nAdd '{name}' to MCP config?", default=True):
+            if force or click.confirm(f"\nAdd '{name}' to MCP config?", default=True):
                 servers_to_merge.append(name)
         
         if servers_to_merge:
             # Resolve target path from active CLI
             active_cli = _read_existing_cli(project_root) or 'copilot'
-            mcp_format = 'global'
+            mcp_format = 'project'
             try:
                 adapter = CLIAdapterService().get_adapter(active_cli)
                 target_path = deployer.resolve_target_path(adapter)
                 mcp_format = adapter.mcp_config_format
             except Exception:
-                target_path = Path.home() / ".copilot" / "mcp-config.json"
+                target_path = project_root / ".copilot" / "mcp-config.json"
             
-            target_path = click.prompt(
-                "\nTarget MCP config path",
-                default=str(target_path),
-                type=click.Path(dir_okay=False, path_type=Path)
-            )
+            if not force:
+                target_path = click.prompt(
+                    "\nTarget MCP config path",
+                    default=str(target_path),
+                    type=click.Path(dir_okay=False, path_type=Path)
+                )
             
             scaffold.merge_mcp_config(
                 servers_to_merge=servers_to_merge,

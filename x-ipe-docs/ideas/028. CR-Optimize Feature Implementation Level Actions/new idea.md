@@ -1,0 +1,1 @@
+please learn the CR from x-ipe-docs/uiux-feedback/Feedback-20260225-160442 and optimize the idea

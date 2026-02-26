@@ -24,6 +24,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` and `x-ipe+all+task-board-manage
 
 CRITICAL: Focus ONLY on UI/UX presentation -- ignore all tech stack mentions. See [references/mockup-guidelines.md](references/mockup-guidelines.md) for detailed focus guidelines.
 
+**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` list of output file paths. Verify the workflow state was updated before marking the task complete.
+
 ---
 
 ## Input Parameters
@@ -38,11 +40,12 @@ input:
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
   workflow:
     name: "N/A"  # workflow name, default: N/A
+    action: "design_mockup"  # workflow action name for status updates
 
   # Task type attributes
   category: "ideation-stage"
   next_task_based_skill: "Requirement Gathering"
-  require_human_review: "yes"
+  require_human_review: "no"
 
   # Required inputs
   auto_proceed: false
@@ -97,11 +100,11 @@ MANDATORY: See [references/mockup-guidelines.md](references/mockup-guidelines.md
 | 7 | Create Mockups | Invoke enabled mockup tools with creative, distinctive designs | Mockups created |
 | 8 | Save Artifacts | Store mockups in `{current_idea_folder}/mockups/` | Artifacts saved |
 | 9 | Update Summary | Add mockup links to idea summary | Summary updated |
-| 10 | Complete | Verify DoD, request human review | Human approves |
+| 10 | Complete | Verify DoD, update workflow status | DoD verified |
 
 BLOCKING: Step 1 halts if current_idea_folder is N/A -- ask human for folder path.
 BLOCKING: Step 7 halts if no tools available AND human declines manual mode.
-BLOCKING: Step 10 requires human approval before proceeding.
+
 
 ---
 
@@ -247,14 +250,17 @@ BLOCKING: Step 10 requires human approval before proceeding.
   <step_10>
     <name>Complete</name>
     <action>
-      1. Verify all DoD checkpoints pass
-      2. Present mockups to human for review
-      3. Wait for human approval
+      1. IF execution_mode == "workflow-mode":
+         a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
+            - workflow_name: {from context}
+            - action: {workflow.action}
+            - status: "done"
+            - deliverables: [list of output file paths]
+         b. Log: "Workflow action status updated to done"
+      2. Verify all DoD checkpoints pass
+      3. Present mockups summary to human
     </action>
-    <constraints>
-      - BLOCKING: Human MUST approve mockups before proceeding
-    </constraints>
-    <output>human approval status</output>
+    <output>workflow_action_updated</output>
   </step_10>
 
 </procedure>
@@ -271,10 +277,12 @@ task_completion_output:
   category: "ideation-stage"
   status: completed | blocked
   next_task_based_skill: "Requirement Gathering"
-  require_human_review: "yes"
+  require_human_review: "no"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
+  workflow_action: "{workflow.action}"     # triggers workflow status update when execution_mode == workflow-mode
+  workflow_action_updated: true | false # true if update_workflow_action was called
   task_output_links:
     - "{current_idea_folder}/mockups/{mockup-type}-v1.html"
     - "{current_idea_folder}/idea-summary-vN.md"
@@ -334,9 +342,9 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <name>Summary Updated</name>
     <verification>Existing idea-summary-vN.md updated in-place with mockup links</verification>
   </checkpoint>
-  <checkpoint required="true">
-    <name>Human Approved</name>
-    <verification>Human has reviewed and approved mockups</verification>
+  <checkpoint required="if-applicable">
+    <name>Workflow Action Status Updated</name>
+    <verification>If execution_mode == "workflow-mode", called the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with status "done" and deliverables list</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -394,7 +402,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Creating mockup before reading idea | May miss requirements | Always analyze idea first |
 | Ignoring tools.json config | Inconsistent tool usage | Always check config |
 | Overwriting existing mockups | Loses previous versions | Use version numbering |
-| Skipping human review | May create wrong visuals | Always get approval |
+
 | Using disabled tools | Violates config rules | Only use enabled tools |
 | Creating too many mockups at once | Overwhelms review | Start with 1-3 key mockups |
 | Including tech stack in mockups | Mockups are for UI/UX only | Focus on visual presentation |

@@ -512,7 +512,7 @@ const workflowStage = {
         this._dispatchModalAction(wfName, actionKey);
     },
 
-    async _dispatchCliAction(wfName, actionKey, skillName, triggerBtn) {
+    async _dispatchCliAction(wfName, actionKey, skillName, triggerBtn, featureId) {
         if (!skillName) {
             this._showToast('This action is not yet available', 'error');
             return;
@@ -524,6 +524,7 @@ const workflowStage = {
                 actionKey,
                 workflowName: wfName,
                 skillName,
+                featureId,
                 triggerBtn,
                 onComplete: () => {
                     const container = document.getElementById('workflow-view');
@@ -899,7 +900,7 @@ const workflowStage = {
         }
         const skill = skillMap[actionKey];
         if (skill) {
-            this._dispatchCliAction(wfName, actionKey, skill);
+            this._dispatchCliAction(wfName, actionKey, skill, null, featureId);
         } else {
             this._showToast(`Action ${actionKey} not yet available`, 'info');
         }

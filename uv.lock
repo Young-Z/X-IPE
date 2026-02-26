@@ -2373,7 +2373,7 @@ wheels = [
 
 [[package]]
 name = "x-ipe"
-version = "1.0.49"
+version = "1.0.65"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
