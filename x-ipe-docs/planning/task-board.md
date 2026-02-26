@@ -6,7 +6,16 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-621 | Bug Fix | Deliverables overwritten with empty list when update_workflow_action called without explicit deliverables — route defaults to `[]`, service always overwrites. Feedback-20260224-155419 | Rune 🔮 | 🔄 in_progress | 02-24-2026 07:57:00 | - | - |
+| TASK-630 | Ideation | IDEA-029: CR-Optimize Feature Implementation Part 2 — refine idea for action context in workflow-template.json, deliverable tagging syntax, action modal multi-input, skill workflow.action context reference | Echo 🔊 | 🔄 in_progress | 02-26-2026 11:44:00 | - | Idea Mockup / Idea to Architecture |
+| TASK-629 | Feature Acceptance Test | FEATURE-041-A: Per-Feature Config & Core Resolution (MVP) — execute acceptance tests for 9 ACs: per-feature config entries, feature ID propagation, deliverable resolution with cross-stage fallback | Ember 🔥 | ✅ completed | 02-26-2026 04:50:00 | acceptance-test-cases.md | Feature Closing |
+| TASK-628 | Code Implementation | FEATURE-041-A: Implement per-feature config in copilot-prompt.json, feature ID propagation, per-feature deliverable resolution with cross-stage fallback | Ember 🔥 | ✅ completed | 02-25-2026 14:50:00 | copilot-prompt.json, action-execution-modal.js, workflow-stage.js | Acceptance Testing |
+| TASK-627 | Technical Design | FEATURE-041-A: Per-Feature Config & Core Resolution (MVP) — design copilot-prompt.json changes, feature ID propagation plumbing, per-feature deliverable resolution with cross-stage fallback | Ember 🔥 | ✅ completed | 02-25-2026 14:30:00 | EPIC-041/FEATURE-041-A/technical-design.md | Code Implementation |
+| TASK-626 | Feature Refinement | FEATURE-041-A: Per-Feature Config & Core Resolution (MVP) — create specification for copilot-prompt feature section, feature ID propagation, per-feature deliverable resolution with cross-stage fallback | Ember 🔥 | ✅ completed | 02-25-2026 14:20:00 | EPIC-041/FEATURE-041-A/specification.md | Technical Design |
+| TASK-625 | Feature Breakdown | EPIC-041: Break down CR-Optimize Feature Implementation Level Actions into features. 14 ACs, 33 FRs across 6 HLRs. Split into MVP (config+resolution+ID propagation), multi-source UI, skill updates, and Phase 5 new actions | Ember 🔥 | ✅ completed | 02-25-2026 14:10:00 | requirement-details-part-13.md, features.md | Feature Refinement |
+| TASK-624 | Requirement Gathering | EPIC-041: CR-Optimize Feature Implementation Level Actions — gather requirements from IDEA-028. Extends EPIC-040 for per-feature actions (feature_refinement, technical_design, implementation, acceptance_testing) + feature ID propagation + multi-source input UI + skill workflow.action updates | Ember 🔥 | ✅ completed | 02-25-2026 13:36:00 | requirement-details-part-12.md | Feature Breakdown |
+| TASK-623 | Ideation | IDEA-028: CR-Optimize Feature Implementation Level Actions — extend Action Execution Modal + copilot-prompt config for per-feature actions (feature_refinement, technical_design, test_generation, implementation, acceptance_testing) with input file dependencies and feature ID context. Feedback-20260225-160442 | Ember 🔥 | ✅ completed | 02-25-2026 12:56:00 | idea-summary-v1.md | Requirement Gathering |
+| TASK-622 | Skill Update | Update x-ipe-task-based-bug-fix: add Conflict Analysis step between Design Fix and Write Test — sub-agent identifies conflicts with existing logic, second agent validates if conflicts are expected from user request, asks user to clarify if unexpected | Nova ✅ | ✅ completed | 02-24-2026 08:01:00 | SKILL.md (x-ipe-task-based-bug-fix), references/examples.md | - |
+| TASK-621 | Bug Fix | Workflow action deliverables overwritten — ActionExecutionModal missing --action key allows LLM to update wrong action; also route defaults deliverables to [] wiping existing. Feedback-20260224-155419 | Rune 🔮 | ✅ completed | 02-24-2026 08:20:00 | action-execution-modal.js, workflow_routes.py, workflow_manager_service.py, SKILL.md (workflow-task-execution, ideation-v2) | - |
 | TASK-620 | Bug Fix | Action modal input file selector shows text input instead of dropdown — _resolveInputFiles/_resolveIdeaFiles look for `stages` but API returns `shared`. Feedback-20260224-153101 | Zephyr 🌬️ | ✅ completed | 02-24-2026 07:40:00 | action-execution-modal.js, action-execution-modal-040a.test.js | - |
 | TASK-619 | Bug Fix | Feature lanes UI: (1) dark mode → light mode, (2) dependency lines overlap panels → left gutter, (3) shared action panels hidden when features exist → show both. Feedback-20260224-131050 | Zephyr 🌬️ | ✅ completed | 02-24-2026 06:05:00 | workflow-stage.js, workflow.css | - |
 | TASK-618 | Bug Fix | Folder browser modal markdown preview missing mermaid/architecture DSL/infographic/syntax highlighting — uses bare marked.parse() instead of ContentRenderer. Feedback-20260224-125237 | Zephyr 🌬️ | ✅ completed | 02-24-2026 04:58:00 | content-renderer.js, folder-browser-modal.js, folder-browser-modal.test.js | - |
@@ -204,11 +213,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 44
-- **In Progress:** 0
+- **Total Active:** 47
+- **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 447
+- **Completed (archived):** 451
 - **Reverted:** 8
 - **Pending Review:** 0
 - **Blocked:** 0
