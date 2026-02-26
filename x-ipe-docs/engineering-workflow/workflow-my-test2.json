@@ -1,5 +1,5 @@
 {
-  "schema_version": "2.0",
+  "schema_version": "3.0",
   "name": "my-test2",
   "created": "2026-02-22T05:45:46.549636+00:00",
   "last_activity": "2026-02-22T05:49:38.572780+00:00",
@@ -11,10 +11,10 @@
       "actions": {
         "compose_idea": {
           "status": "done",
-          "deliverables": [
-            "x-ipe-docs/ideas/wf-001-dddd/new idea.md",
-            "x-ipe-docs/ideas/wf-001-dddd"
-          ],
+          "deliverables": {
+            "raw-idea": "x-ipe-docs/ideas/wf-001-dddd/new idea.md",
+            "ideas-folder": "x-ipe-docs/ideas/wf-001-dddd"
+          },
           "next_actions_suggested": [
             "refine_idea",
             "reference_uiux"
@@ -22,16 +22,16 @@
         },
         "refine_idea": {
           "status": "pending",
-          "deliverables": []
+          "deliverables": {}
         },
         "reference_uiux": {
           "status": "pending",
-          "deliverables": [],
+          "deliverables": {},
           "optional": true
         },
         "design_mockup": {
           "status": "pending",
-          "deliverables": [],
+          "deliverables": {},
           "optional": true
         }
       }
@@ -41,11 +41,11 @@
       "actions": {
         "requirement_gathering": {
           "status": "pending",
-          "deliverables": []
+          "deliverables": {}
         },
         "feature_breakdown": {
           "status": "pending",
-          "deliverables": [],
+          "deliverables": {},
           "features_created": []
         }
       }
