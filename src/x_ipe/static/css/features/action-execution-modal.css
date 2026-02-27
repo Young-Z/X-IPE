@@ -290,3 +290,25 @@
     0%, 100% { opacity: 0.3; transform: scale(1); }
     50% { opacity: 0.1; transform: scale(1.05); }
 }
+
+/* --- FEATURE-042-B: Unresolved Variable Warning --- */
+.unresolved-warning {
+    background: rgba(255, 193, 7, 0.25);
+    color: #b8860b;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 0.85em;
+}
+
+/* --- FEATURE-042-C: Read-Only Instructions --- */
+.instructions-readonly {
+    opacity: 0.85;
+    cursor: default;
+    user-select: text;
+    pointer-events: auto;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    padding: 8px;
+}

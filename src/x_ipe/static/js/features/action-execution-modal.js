@@ -40,11 +40,28 @@ class ActionExecutionModal {
                     const legacyInput = this.overlay.querySelector('.input-selector-section');
                     if (legacyInput) legacyInput.style.display = 'none';
                     await this._renderActionContext(actionDef.action_context);
-                    // Reopen: if action was done, restore previous context
-                    const instance = await this._fetchInstance();
+
+                    // FEATURE-042-C: Cache deliverables & set dropdown defaults (before restore)
+                    await this._cacheDeliverables();
+                    this._setDeliverableDefaults();
+
+                    // Reopen: if action was done, restore previous context (overrides defaults)
+                    const instance = this._cachedInstance || await this._fetchInstance();
+                    this._cachedInstance = instance;
                     if (instance) {
                         const ctx = this._getInstanceContext(instance, this.actionKey, this.featureId);
                         if (ctx) await this._restoreContext(ctx);
+                    }
+
+                    // FEATURE-042-A/C: Resolve workflow prompt with context values
+                    if (this._workflowCommandTemplate) {
+                        this._resolveAndDisplayWorkflowPrompt();
+                        this._makeInstructionsReadOnly();
+                        // Add change listeners for live preview
+                        const selects = this.overlay.querySelectorAll('.context-ref-group select');
+                        for (const sel of selects) {
+                            sel.addEventListener('change', () => this._resolveAndDisplayWorkflowPrompt());
+                        }
                     }
                 }
             } catch (e) { /* fallback to legacy */ }
@@ -77,6 +94,22 @@ class ActionExecutionModal {
         }
         if (!config) return;
 
+        // FEATURE-042-A: Workflow-mode branch — use workflow-prompts array
+        if (this.workflowName) {
+            const wpEntry = this._getWorkflowPrompt(this.actionKey);
+            if (wpEntry && wpEntry['prompt-details']) {
+                const detail = wpEntry['prompt-details'].find(d => d.language === 'en')
+                    || wpEntry['prompt-details'][0];
+                if (detail) {
+                    this._workflowCommandTemplate = detail.command;
+                    this._loadedInstructions = { label: detail.label, command: detail.command };
+                    return;
+                }
+            }
+            // No workflow-prompt found → fall through to legacy path
+        }
+
+        // Legacy prompt path (unchanged)
         const entry = this._getConfigEntry(config);
         if (!entry) return;
 
@@ -144,7 +177,8 @@ class ActionExecutionModal {
 
     _getConfigEntry(config) {
         const configId = this.actionKey.replace(/_/g, '-');
-        for (const [, sectionData] of Object.entries(config)) {
+        for (const [key, sectionData] of Object.entries(config)) {
+            if (key === 'workflow-prompts' || key === 'version') continue;
             if (sectionData && sectionData.prompts) {
                 const found = sectionData.prompts.find(p => p.id === configId);
                 if (found) return found;
@@ -156,6 +190,214 @@ class ActionExecutionModal {
             }
         }
         return null;
+    }
+
+    /* --- FEATURE-042-A: Workflow Prompt Lookup & Template Resolution ------ */
+
+    _getWorkflowPrompt(actionKey) {
+        const config = window.__copilotPromptConfig;
+        const prompts = config?.['workflow-prompts'];
+        if (!Array.isArray(prompts) || prompts.length === 0) {
+            return null;
+        }
+        return prompts.find(p => p.action === actionKey) || null;
+    }
+
+    _resolveTemplate(template, contextValues) {
+        if (!template) return '';
+        let resolved = template;
+
+        // $output:tag-name$
+        resolved = resolved.replace(/\$output:([a-z0-9-]+)\$/g, (match, tag) => {
+            return contextValues[tag] ?? match;
+        });
+
+        // $output-folder:tag-name$
+        resolved = resolved.replace(/\$output-folder:([a-z0-9-]+)\$/g, (match, tag) => {
+            return contextValues[tag] ?? match;
+        });
+
+        // $feature-id$
+        resolved = resolved.replace(/\$feature-id\$/g, () => {
+            const fid = contextValues['$feature-id'];
+            return (fid !== undefined && fid !== null) ? fid : '';
+        });
+
+        return resolved;
+    }
+
+    _collectContextValues() {
+        const values = {};
+        if (this.overlay) {
+            const groups = this.overlay.querySelectorAll('.context-ref-group');
+            for (const group of groups) {
+                const refName = group.dataset.refName;
+                const select = group.querySelector('select');
+                if (refName && select) {
+                    values[refName] = select.value;
+                }
+            }
+        }
+        if (this.featureId) {
+            values['$feature-id'] = this.featureId;
+        }
+        return values;
+    }
+
+    /* --- FEATURE-042-B: Conditional Block Parsing & Error Handling -------- */
+
+    _resolveConditionalBlocks(template, contextValues) {
+        if (!template) return '';
+        let resolved = template.replace(/<([^<>]*)>/g, (match, content) => {
+            const varRefs = content.match(/\$(?:output:|output-folder:|feature-id)[a-z0-9-]*\$/g);
+            if (!varRefs || varRefs.length === 0) return content;
+
+            for (const ref of varRefs) {
+                let tag = null;
+                const outputMatch = ref.match(/\$output:([a-z0-9-]+)\$/);
+                const folderMatch = ref.match(/\$output-folder:([a-z0-9-]+)\$/);
+                if (outputMatch) tag = outputMatch[1];
+                else if (folderMatch) tag = folderMatch[1];
+                else if (ref === '$feature-id$') tag = '$feature-id';
+
+                const val = tag ? contextValues[tag] : undefined;
+                if (!val || val === 'N/A' || val === '') return '';
+            }
+            return content;
+        });
+
+        // Collapse double-spaces and trim
+        resolved = resolved.replace(/\s{2,}/g, ' ').trim();
+        return resolved;
+    }
+
+    _formatUnresolvedWarnings(html) {
+        if (!html) return '';
+        return html.replace(/\$output:([a-z0-9-]+)\$/g,
+            '<span class="unresolved-warning">$output:$1$</span>');
+    }
+
+    /* --- FEATURE-042-C: Deliverable Defaults & Preview ------------------- */
+
+    async _cacheDeliverables() {
+        this._deliverableCache = {};
+        if (!this.workflowName) { this._deliverableCache = undefined; return; }
+
+        // Reuse already-fetched instance to avoid extra API call
+        if (!this._cachedInstance) {
+            this._cachedInstance = await this._fetchInstance();
+        }
+        const instance = this._cachedInstance;
+        if (!instance) return;
+
+        // Collect deliverables from all shared stage actions
+        const shared = instance.shared || {};
+        for (const stageData of Object.values(shared)) {
+            const actions = stageData.actions || {};
+            for (const actionDef of Object.values(actions)) {
+                const deliverables = actionDef.deliverables || {};
+                if (typeof deliverables === 'object' && !Array.isArray(deliverables)) {
+                    for (const [tag, path] of Object.entries(deliverables)) {
+                        this._deliverableCache[tag] = path || null;
+                    }
+                }
+            }
+        }
+
+        // Collect from feature lanes if applicable
+        if (this.featureId && instance.features) {
+            const features = Array.isArray(instance.features)
+                ? instance.features
+                : Object.values(instance.features);
+            for (const feat of features) {
+                if (feat.feature_id === this.featureId) {
+                    for (const stage of ['implement', 'validation', 'feedback']) {
+                        const stageData = feat[stage] || {};
+                        const actions = stageData.actions || {};
+                        for (const actionDef of Object.values(actions)) {
+                            const deliverables = actionDef.deliverables || {};
+                            if (typeof deliverables === 'object' && !Array.isArray(deliverables)) {
+                                for (const [tag, path] of Object.entries(deliverables)) {
+                                    this._deliverableCache[tag] = path || null;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // For action_context refs that have no cached deliverable, set to null
+        if (this._actionContextDef) {
+            for (const refName of Object.keys(this._actionContextDef)) {
+                if (!(refName in this._deliverableCache)) {
+                    this._deliverableCache[refName] = null;
+                }
+            }
+        }
+    }
+
+    _setDeliverableDefaults() {
+        if (!this._deliverableCache || !this.overlay) return;
+        const groups = this.overlay.querySelectorAll('.context-ref-group');
+        for (const group of groups) {
+            const refName = group.dataset.refName;
+            const select = group.querySelector('select');
+            if (!refName || !select) continue;
+
+            // Only set default if dropdown is still at auto-detect (not already restored)
+            if (select.value !== 'auto-detect') continue;
+
+            const cached = this._deliverableCache[refName];
+            if (cached) {
+                const opt = Array.from(select.options).find(o => o.value === cached);
+                if (opt) {
+                    select.value = opt.value;
+                }
+            }
+        }
+    }
+
+    _resolveAndDisplayWorkflowPrompt() {
+        if (!this._workflowCommandTemplate || !this.overlay) return;
+
+        const contextValues = this._collectContextValues();
+        // Resolve conditionals first (needs raw $output:tag$ tokens to detect N/A)
+        let resolved = this._resolveConditionalBlocks(this._workflowCommandTemplate, contextValues);
+        // Then substitute remaining tokens with actual values
+        resolved = this._resolveTemplate(resolved, contextValues);
+
+        this._loadedInstructions.command = resolved;
+        const contentEl = this.overlay.querySelector('.instructions-content');
+        if (contentEl) {
+            const formatted = this._formatUnresolvedWarnings(this._escapeHtml(resolved));
+            contentEl.innerHTML = formatted;
+        }
+    }
+
+    _updatePreview() {
+        return this._resolveAndDisplayWorkflowPrompt();
+    }
+
+    _composeCommand() {
+        if (!this._loadedInstructions) return '';
+        const resolved = this._loadedInstructions.command;
+        const textarea = this.overlay ? this.overlay.querySelector('.extra-input') : null;
+        const extra = textarea ? textarea.value.trim() : '';
+        if (extra) {
+            return resolved + '\n\n' + extra;
+        }
+        return resolved;
+    }
+
+    _makeInstructionsReadOnly() {
+        if (!this.overlay) return;
+        const contentEl = this.overlay.querySelector('.instructions-content');
+        if (contentEl) {
+            contentEl.setAttribute('readonly', '');
+            contentEl.classList.add('instructions-readonly');
+            contentEl.contentEditable = 'false';
+        }
     }
 
     async _resolveInputFiles(inputSource) {
@@ -542,7 +784,14 @@ class ActionExecutionModal {
     async _handleExecute() {
         const textarea = this.overlay ? this.overlay.querySelector('.extra-input') : null;
         const extraText = textarea ? textarea.value : '';
-        const cmd = this._buildCommand(extraText);
+
+        // FEATURE-042-C: Use workflow command composition in workflow mode
+        let cmd;
+        if (this._workflowCommandTemplate) {
+            cmd = this._composeCommand();
+        } else {
+            cmd = this._buildCommand(extraText);
+        }
         if (!cmd) return;
 
         const tm = window.terminalManager;

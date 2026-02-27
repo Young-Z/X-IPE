@@ -106,3 +106,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-041-E | EPIC-041 | Deliverable Tagging & Action Context Schema (MVP) | v1.0 | Done | - | 02-26-2026 | 02-26-2026 14:50:00 |
 | FEATURE-041-F | EPIC-041 | Action Context Modal UI & Persistence | v1.0 | Done | FEATURE-041-E | 02-26-2026 | 02-26-2026 14:50:00 |
 | FEATURE-041-G | EPIC-041 | Skill Extra Context Reference | v1.0 | Done | - | 02-26-2026 | 02-26-2026 14:50:00 |
+| FEATURE-042-A | EPIC-042 | Workflow Prompts Config & Basic Template Resolution | v1.0 | Acceptance Tested | [specification.md](../requirements/EPIC-042/FEATURE-042-A/specification.md) | 02-27-2026 | 02-27-2026 12:15:00 |
+| FEATURE-042-B | EPIC-042 | Conditional Block Parsing & Error Handling | v1.0 | Acceptance Tested | [specification.md](../requirements/EPIC-042/FEATURE-042-B/specification.md) | 02-27-2026 | 02-27-2026 12:15:00 |
+| FEATURE-042-C | EPIC-042 | Deliverable-Default Dropdowns & Read-Only Preview | v1.0 | Acceptance Tested | [specification.md](../requirements/EPIC-042/FEATURE-042-C/specification.md) | 02-27-2026 | 02-27-2026 12:15:00 |
+| FEATURE-042-D | EPIC-042 | Full Migration & i18n | v1.0 | Acceptance Tested | [specification.md](../requirements/EPIC-042/FEATURE-042-D/specification.md) | 02-27-2026 | 02-27-2026 12:15:00 |

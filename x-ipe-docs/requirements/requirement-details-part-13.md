@@ -444,6 +444,12 @@ Skills receive explicit context file paths in workflow mode.
 > - **Affected FRs:** FR-041.1-7 (copilot-prompt input_source → deprecated), FR-041.8-13 (_resolveInputFiles → template-driven), FR-041.14-18 (multi-source UI → action_context dropdowns), FR-041.25-28 (skills gain extra_context_reference)
 > - **Action Required:** Feature specifications for FEATURE-041-B, FEATURE-041-C, FEATURE-041-D need updating before implementation
 
+> **⚠️ CR Impact Note** (added 2026-02-27, ref: EPIC-042/CR-003)
+> - **Change:** `$output:tag$` syntax replaces `<input-file>` / `<feature-id>` in workflow mode; context dropdowns default to deliverables; instructions become read-only resolved preview; new `workflow-prompts` array separates workflow prompts
+> - **Affected FRs:** FR-041.3 (prompt structure extended), FR-041.5 (placeholders replaced), FR-041.14 (dropdown source → action_context), FR-041.16 (preview updates → template resolution)
+> - **Action Required:** Workflow-mode placeholder and dropdown behavior superseded by EPIC-042; free-mode remains unchanged
+> - **New Feature Ref:** EPIC-042 — see [requirement-details-part-14.md](requirement-details-part-14.md)
+
 ---
 
 ## Feature List (CR-002)

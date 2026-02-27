@@ -259,3 +259,9 @@ All task-based skills referenced in ACTION_MAP MUST support workflow-mode execut
 - Each skill update is a SKILL.md file edit — no application code changes
 - Skills can be updated in parallel since they are independent files
 
+> **⚠️ CR Impact Note** (added 2026-02-27, ref: EPIC-042/CR-003)
+> - **Change:** Legacy `<input-file>` placeholder replaced by `$output:tag$` syntax in workflow mode; instructions become read-only resolved preview; new `workflow-prompts` array in copilot-prompt.json
+> - **Affected FRs:** FR-040.6 (placeholder replaced), FR-040.9 (prompt structure extended), FR-040.14 (instructions display → read-only preview)
+> - **Action Required:** Workflow-mode behavior superseded by EPIC-042 `workflow-prompts`; free-mode remains unchanged
+> - **New Feature Ref:** EPIC-042 — see [requirement-details-part-14.md](requirement-details-part-14.md)
+

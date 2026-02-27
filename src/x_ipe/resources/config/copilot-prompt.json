@@ -1,9 +1,174 @@
 {
-  "version": "3.2",
+  "version": "3.3",
+  "workflow-prompts": [
+    {
+      "id": "refine-idea",
+      "action": "refine_idea",
+      "icon": "bi-stars",
+      "input_source": ["compose_idea"],
+      "prompt-details": [
+        {
+          "language": "en",
+          "label": "Refine Idea",
+          "command": "refine the idea $output:raw-idea$ <and uiux reference: $output:uiux-reference$> with ideation skill"
+        },
+        {
+          "language": "zh",
+          "label": "完善创意",
+          "command": "使用创意技能, 完善创意 $output:raw-idea$ <并参考UIUX: $output:uiux-reference$>"
+        }
+      ]
+    },
+    {
+      "id": "design-mockup",
+      "action": "design_mockup",
+      "icon": "bi-palette",
+      "input_source": ["refine_idea", "compose_idea"],
+      "prompt-details": [
+        {
+          "language": "en",
+          "label": "Generate Mockup",
+          "command": "Base on $output:refined-idea$ to generate mockups <and uiux reference: $output:uiux-reference$>"
+        },
+        {
+          "language": "zh",
+          "label": "生成原型",
+          "command": "基于 $output:refined-idea$ 生成原型设计 <并参考UIUX: $output:uiux-reference$>"
+        }
+      ]
+    },
+    {
+      "id": "requirement-gathering",
+      "action": "requirement_gathering",
+      "icon": "bi-clipboard-data",
+      "input_source": ["refine_idea", "design_mockup"],
+      "prompt-details": [
+        {
+          "language": "en",
+          "label": "Requirement Gathering",
+          "command": "gather requirements from $output:refined-idea$ <mockup reference: $output:mockup-html$> with requirement gathering skill"
+        },
+        {
+          "language": "zh",
+          "label": "需求收集",
+          "command": "使用需求收集技能, 从 $output:refined-idea$ 收集需求 <原型参考: $output:mockup-html$>"
+        }
+      ]
+    },
+    {
+      "id": "feature-breakdown",
+      "action": "feature_breakdown",
+      "icon": "bi-diagram-2",
+      "input_source": ["requirement_gathering"],
+      "prompt-details": [
+        {
+          "language": "en",
+          "label": "Feature Breakdown",
+          "command": "break down features from $output:requirement-doc$ with feature breakdown skill"
+        },
+        {
+          "language": "zh",
+          "label": "功能拆分",
+          "command": "使用功能拆分技能, 从 $output:requirement-doc$ 拆分功能"
+        }
+      ]
+    },
+    {
+      "id": "feature-refinement",
+      "action": "feature_refinement",
+      "icon": "bi-rulers",
+      "input_source": ["feature_breakdown"],
+      "prompt-details": [
+        {
+          "language": "en",
+          "label": "Feature Refinement",
+          "command": "refine feature $feature-id$ from $output:requirement-doc$ with feature refinement skill"
+        },
+        {
+          "language": "zh",
+          "label": "功能细化",
+          "command": "使用功能细化技能, 从 $output:requirement-doc$ 细化功能 $feature-id$"
+        }
+      ]
+    },
+    {
+      "id": "technical-design",
+      "action": "technical_design",
+      "icon": "bi-gear",
+      "input_source": ["feature_refinement"],
+      "prompt-details": [
+        {
+          "language": "en",
+          "label": "Technical Design",
+          "command": "create technical design for $feature-id$ from $output:specification$ with technical design skill"
+        },
+        {
+          "language": "zh",
+          "label": "技术设计",
+          "command": "使用技术设计技能, 从 $output:specification$ 为 $feature-id$ 创建技术设计"
+        }
+      ]
+    },
+    {
+      "id": "test-generation",
+      "action": "test_generation",
+      "icon": "bi-journal-code",
+      "input_source": ["technical_design"],
+      "prompt-details": [
+        {
+          "language": "en",
+          "label": "Test Generation",
+          "command": "generate tests for $feature-id$ from $output:tech-design$ with test generation skill"
+        },
+        {
+          "language": "zh",
+          "label": "测试生成",
+          "command": "使用测试生成技能, 从 $output:tech-design$ 为 $feature-id$ 生成测试"
+        }
+      ]
+    },
+    {
+      "id": "implementation",
+      "action": "implementation",
+      "icon": "bi-code-slash",
+      "input_source": ["technical_design"],
+      "prompt-details": [
+        {
+          "language": "en",
+          "label": "Implementation",
+          "command": "implement $feature-id$ from $output:tech-design$ and $output:specification$ with code implementation skill"
+        },
+        {
+          "language": "zh",
+          "label": "代码实现",
+          "command": "使用代码实现技能, 从 $output:tech-design$ 和 $output:specification$ 实现 $feature-id$"
+        }
+      ]
+    },
+    {
+      "id": "acceptance-testing",
+      "action": "acceptance_testing",
+      "icon": "bi-check2-circle",
+      "input_source": ["implementation"],
+      "prompt-details": [
+        {
+          "language": "en",
+          "label": "Acceptance Testing",
+          "command": "run acceptance tests for $feature-id$ from $output:specification$ with feature acceptance test skill"
+        },
+        {
+          "language": "zh",
+          "label": "验收测试",
+          "command": "使用功能验收测试技能, 从 $output:specification$ 为 $feature-id$ 运行验收测试"
+        }
+      ]
+    }
+  ],
   "ideation": {
     "prompts": [
       {
         "id": "refine-idea",
+        "_deprecated": "superseded by workflow-prompts[refine_idea]",
         "icon": "bi-stars",
         "input_source": ["compose_idea"],
         "prompt-details": [
@@ -53,6 +218,7 @@
       },
       {
         "id": "design-mockup",
+        "_deprecated": "superseded by workflow-prompts[design_mockup]",
         "icon": "bi-palette",
         "input_source": ["refine_idea", "compose_idea"],
         "prompt-details": [
@@ -222,6 +388,7 @@
     "prompts": [
       {
         "id": "requirement-gathering",
+        "_deprecated": "superseded by workflow-prompts[requirement_gathering]",
         "icon": "bi-clipboard-data",
         "input_source": ["refine_idea", "design_mockup"],
         "prompt-details": [
@@ -239,6 +406,7 @@
       },
       {
         "id": "feature-breakdown",
+        "_deprecated": "superseded by workflow-prompts[feature_breakdown]",
         "icon": "bi-diagram-2",
         "input_source": ["requirement_gathering"],
         "prompt-details": [
@@ -260,6 +428,7 @@
     "prompts": [
       {
         "id": "feature-refinement",
+        "_deprecated": "superseded by workflow-prompts[feature_refinement]",
         "icon": "bi-rulers",
         "input_source": ["feature_breakdown"],
         "prompt-details": [
@@ -272,6 +441,7 @@
       },
       {
         "id": "technical-design",
+        "_deprecated": "superseded by workflow-prompts[technical_design]",
         "icon": "bi-gear",
         "input_source": ["feature_refinement"],
         "prompt-details": [
@@ -284,6 +454,7 @@
       },
       {
         "id": "implementation",
+        "_deprecated": "superseded by workflow-prompts[implementation]",
         "icon": "bi-code-slash",
         "input_source": ["technical_design"],
         "prompt-details": [
@@ -296,6 +467,7 @@
       },
       {
         "id": "acceptance-testing",
+        "_deprecated": "superseded by workflow-prompts[acceptance_testing]",
         "icon": "bi-check2-circle",
         "input_source": ["implementation"],
         "prompt-details": [
