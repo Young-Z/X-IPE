@@ -382,12 +382,17 @@ class ActionExecutionModal {
     _composeCommand() {
         if (!this._loadedInstructions) return '';
         const resolved = this._loadedInstructions.command;
+        const wfSuffix = this.workflowName ? `@${this.workflowName}` : '';
+        let cmd = `--workflow-mode${wfSuffix} ${resolved}`;
+        if (this.featureId) {
+            cmd += ` --feature-id ${this.featureId}`;
+        }
         const textarea = this.overlay ? this.overlay.querySelector('.extra-input') : null;
         const extra = textarea ? textarea.value.trim() : '';
         if (extra) {
-            return resolved + '\n\n' + extra;
+            cmd += ` --extra-instructions ${extra}`;
         }
-        return resolved;
+        return cmd;
     }
 
     _makeInstructionsReadOnly() {

@@ -564,10 +564,9 @@ describe('FEATURE-042-C: command composition', () => {
     const composed = modal._composeCommand();
     expect(composed).toBeDefined();
 
-    // Should contain resolved instructions + separator + extra
-    const instructionsEl = document.querySelector('.instructions-content');
-    const resolved = instructionsEl.textContent || instructionsEl.value || '';
-    expect(composed).toBe(resolved + '\n\n' + 'Please focus on architecture');
+    // Should contain --workflow-mode flag + resolved instructions + --extra-instructions flag
+    expect(composed).toContain('--workflow-mode@test-wf');
+    expect(composed).toContain('--extra-instructions Please focus on architecture');
   });
 
   it('Final command = resolved instructions only when extra is empty', async () => {
@@ -586,7 +585,10 @@ describe('FEATURE-042-C: command composition', () => {
     const instructionsEl = document.querySelector('.instructions-content');
     const resolved = instructionsEl.textContent || instructionsEl.value || '';
 
-    expect(composed).toBe(resolved);
+    // Should contain --workflow-mode flag + resolved prompt, no --extra-instructions
+    expect(composed).toContain('--workflow-mode@test-wf');
+    expect(composed).toContain(resolved);
+    expect(composed).not.toContain('--extra-instructions');
     // No trailing newlines
     expect(composed).not.toMatch(/\n+$/);
   });
@@ -704,8 +706,10 @@ describe('FEATURE-042-C: edge cases', () => {
     const instructionsEl = document.querySelector('.instructions-content');
     const resolved = instructionsEl.textContent || instructionsEl.value || '';
 
-    // Should equal resolved only — no trailing \n\n or whitespace appended
-    expect(composed).toBe(resolved);
+    // Should contain --workflow-mode flag + resolved, no --extra-instructions
+    expect(composed).toContain('--workflow-mode@test-wf');
+    expect(composed).toContain(resolved);
+    expect(composed).not.toContain('--extra-instructions');
   });
 
   it('Rapid dropdown changes don\'t cause race conditions', async () => {
