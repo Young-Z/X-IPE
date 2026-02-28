@@ -280,6 +280,60 @@ class TestKeyedDeliverables:
         stored = state["shared"]["ideation"]["actions"]["compose_idea"]["deliverables"]
         assert len(stored) == 2  # Only 2 tags defined for compose_idea
 
+    def test_dict_with_wrong_keys_auto_corrected(self, service, sample_workflow):
+        """Dict deliverables with wrong tag keys should be re-keyed to template tags."""
+        # Agent passes wrong tag names — should be auto-corrected to template tags
+        deliverables = {
+            "idea-summary": "x-ipe-docs/ideas/test/refined-idea/idea-summary-v1.md",
+            "refined-idea-folder": "x-ipe-docs/ideas/test/refined-idea/"
+        }
+        result = service.update_action_status(
+            sample_workflow, "refine_idea", "done",
+            deliverables=deliverables
+        )
+        assert result["success"] is True
+        state = service._read_state(sample_workflow)
+        stored = state["shared"]["ideation"]["actions"]["refine_idea"]["deliverables"]
+        assert isinstance(stored, dict)
+        # Keys should be corrected to template tag names
+        assert "refined-idea" in stored
+        assert "refined-ideas-folder" in stored
+        assert stored["refined-idea"] == "x-ipe-docs/ideas/test/refined-idea/idea-summary-v1.md"
+        assert stored["refined-ideas-folder"] == "x-ipe-docs/ideas/test/refined-idea/"
+
+    def test_dict_with_correct_keys_stored_as_is(self, service, sample_workflow):
+        """Dict deliverables with correct tag keys should pass through unchanged."""
+        deliverables = {
+            "refined-idea": "x-ipe-docs/ideas/test/refined-idea/idea-summary-v1.md",
+            "refined-ideas-folder": "x-ipe-docs/ideas/test/refined-idea/"
+        }
+        result = service.update_action_status(
+            sample_workflow, "refine_idea", "done",
+            deliverables=deliverables
+        )
+        assert result["success"] is True
+        state = service._read_state(sample_workflow)
+        stored = state["shared"]["ideation"]["actions"]["refine_idea"]["deliverables"]
+        assert stored["refined-idea"] == "x-ipe-docs/ideas/test/refined-idea/idea-summary-v1.md"
+        assert stored["refined-ideas-folder"] == "x-ipe-docs/ideas/test/refined-idea/"
+
+    def test_dict_with_partial_wrong_keys_auto_corrected(self, service, sample_workflow):
+        """Dict with some correct and some wrong keys should still be re-keyed."""
+        deliverables = {
+            "raw-idea": "idea.md",          # correct key
+            "wrong-folder": "ideas/"         # wrong key
+        }
+        result = service.update_action_status(
+            sample_workflow, "compose_idea", "done",
+            deliverables=deliverables
+        )
+        assert result["success"] is True
+        state = service._read_state(sample_workflow)
+        stored = state["shared"]["ideation"]["actions"]["compose_idea"]["deliverables"]
+        # When any key doesn't match, re-key all by position
+        assert "raw-idea" in stored
+        assert "ideas-folder" in stored
+
 
 # ==============================================================================
 # Unit Tests: Context Field

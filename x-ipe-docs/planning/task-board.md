@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-669 | Bug Fix | Deliverable dict keys not validated in update_action — agents can store wrong tag names, breaking candidate resolution & deliverable defaults. Feedback-20260228-230813 | Drift 🌊 | 🔄 in_progress | 02-28-2026 15:11:00 | - | - |
 | TASK-668 | Ideation | Refine idea wf-001-dddd — 五子棋 (Gomoku) web game. UIUX reference: auto-detect | Frost ❄️ | ✅ completed | 02-28-2026 14:57:00 | idea-summary-v1.md, refined-idea/ | Idea Mockup / Idea to Architecture |
 | TASK-652 | Feature Refinement | FEATURE-042-A: Workflow Prompts Config & Basic Template Resolution — create specification | Spark ⚡ | ✅ completed | 02-27-2026 02:38:00 | FEATURE-042-A/specification.md | Technical Design |
 | TASK-653 | Feature Refinement | FEATURE-042-B: Conditional Block Parsing & Error Handling — create specification | Spark ⚡ | ✅ completed | 02-27-2026 02:38:00 | FEATURE-042-B/specification.md | Technical Design |
