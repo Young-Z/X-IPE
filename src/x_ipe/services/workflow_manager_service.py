@@ -280,10 +280,6 @@ class WorkflowManagerService:
         if deliverables is not None and isinstance(deliverables, list):
             deliverables = self._convert_list_to_keyed(action, deliverables)
 
-        # Auto-correct dict deliverables with wrong tag keys
-        if deliverables is not None and isinstance(deliverables, dict):
-            deliverables = self._normalize_deliverable_keys(action, deliverables)
-
         state = self._read_state(workflow_name)
         if "error" in state and state.get("success") is False:
             return state
@@ -568,24 +564,6 @@ class WorkflowManagerService:
             if i < len(tags):
                 result[tags[i]] = path
         return result
-
-    def _normalize_deliverable_keys(self, action: str, deliverables: dict) -> dict:
-        """Re-key dict deliverables to match template tags if keys don't match."""
-        expected_tags = self._get_template_tags(action)
-        if not expected_tags:
-            return deliverables
-        actual_keys = set(deliverables.keys())
-        expected_set = set(expected_tags)
-        if actual_keys <= expected_set or actual_keys == expected_set:
-            return deliverables  # all keys valid
-        # Keys don't match template — re-key by position using template tag order
-        import logging
-        logging.getLogger(__name__).warning(
-            "Action '%s' deliverable keys %s don't match template tags %s — auto-correcting",
-            action, sorted(actual_keys), sorted(expected_set)
-        )
-        values = list(deliverables.values())
-        return self._convert_list_to_keyed(action, values)
 
     def _get_template_tags(self, action: str) -> list:
         """Extract tag names from template deliverables array for an action."""

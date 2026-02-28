@@ -341,6 +341,42 @@ describe('FEATURE-042-C: deliverable defaults', () => {
     const fetchCountAfter = globalThis.fetch.mock.calls.length;
     expect(fetchCountAfter).toBe(fetchCountBefore);
   });
+
+  it('Cached deliverable added to dropdown when not in candidates listing', async () => {
+    if (!ensureImpl()) return;
+    // Candidates return folder files that do NOT include the cached deliverable
+    setupFetchMocks({
+      candidates: [
+        { type: 'folder', path: 'x-ipe-docs/ideas/test' }
+      ],
+      folderContents: [
+        'x-ipe-docs/ideas/test/other-file.md',
+        'x-ipe-docs/ideas/test/notes.txt'
+      ]
+    });
+
+    const modal = new ActionExecutionModal({
+      actionKey: 'refine_idea',
+      workflowName: 'test-wf',
+    });
+    await modal.open();
+
+    // Cache should have the deliverable from compose_idea
+    expect(modal._deliverableCache['raw-idea']).toBe('x-ipe-docs/ideas/test/new-idea.md');
+
+    const groups = document.querySelectorAll('.context-ref-group');
+    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const select = rawGroup.querySelector('select');
+
+    // The cached deliverable should be added as an option and selected as default
+    const options = Array.from(select.options).map(o => o.value);
+    expect(options).toContain('x-ipe-docs/ideas/test/new-idea.md');
+    expect(select.value).toBe('x-ipe-docs/ideas/test/new-idea.md');
+
+    // Folder contents should also be in the dropdown
+    expect(options).toContain('x-ipe-docs/ideas/test/other-file.md');
+    expect(options).toContain('x-ipe-docs/ideas/test/notes.txt');
+  });
 });
 
 // ==============================================================================

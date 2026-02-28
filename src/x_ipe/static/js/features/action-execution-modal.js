@@ -350,10 +350,13 @@ class ActionExecutionModal {
 
             const cached = this._deliverableCache[refName];
             if (cached) {
-                const opt = Array.from(select.options).find(o => o.value === cached);
-                if (opt) {
-                    select.value = opt.value;
+                let opt = Array.from(select.options).find(o => o.value === cached);
+                if (!opt) {
+                    // Cached deliverable not in candidates listing — add it explicitly
+                    select.add(new Option(cached, cached));
+                    opt = select.options[select.options.length - 1];
                 }
+                select.value = opt.value;
             }
         }
     }
