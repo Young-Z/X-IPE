@@ -2,7 +2,7 @@
   "schema_version": "3.0",
   "name": "my-test2",
   "created": "2026-02-22T05:45:46.549636+00:00",
-  "last_activity": "2026-02-28T15:06:12.245750+00:00",
+  "last_activity": "2026-02-28T15:35:40.841417+00:00",
   "idea_folder": null,
   "current_stage": "ideation",
   "shared": {
@@ -21,15 +21,11 @@
           ]
         },
         "refine_idea": {
-          "status": "done",
+          "status": "pending",
           "deliverables": {
             "refined-idea": "x-ipe-docs/ideas/wf-001-dddd/refined-idea/idea-summary-v1.md",
             "refined-ideas-folder": "x-ipe-docs/ideas/wf-001-dddd/refined-idea/"
-          },
-          "next_actions_suggested": [
-            "design_mockup",
-            "requirement_gathering"
-          ]
+          }
         },
         "reference_uiux": {
           "status": "pending",
@@ -38,7 +34,9 @@
         },
         "design_mockup": {
           "status": "pending",
-          "deliverables": {},
+          "deliverables": {
+            "mockup-html": "x-ipe-docs/ideas/wf-001-dddd/mockups/gomoku-game-v1.html"
+          },
           "optional": true
         }
       }
