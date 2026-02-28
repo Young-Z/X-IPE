@@ -486,9 +486,6 @@ class WorkflowManagerService:
             stage_name = stage_order[i]
             stage_def = stages.get(stage_name, {})
             for act_name, act_def in stage_def.get("actions", {}).items():
-                # Skip the target action itself
-                if i == current_stage_idx and act_name == action:
-                    continue
                 for tag_str in act_def.get("deliverables", []):
                     if ":" not in tag_str:
                         continue

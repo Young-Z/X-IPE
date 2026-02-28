@@ -1,0 +1,132 @@
+{
+  "stage_order": ["ideation", "requirement", "implement", "validation", "feedback"],
+  "stages": {
+    "ideation": {
+      "type": "shared",
+      "next_stage": "requirement",
+      "actions": {
+        "compose_idea": {
+          "optional": false,
+          "deliverables": ["$output:raw-idea", "$output-folder:ideas-folder"],
+          "next_actions_suggested": ["refine_idea", "reference_uiux"]
+        },
+        "reference_uiux": {
+          "optional": true,
+          "deliverables": ["$output:uiux-reference"],
+          "next_actions_suggested": ["design_mockup", "refine_idea"]
+        },
+        "refine_idea": {
+          "optional": false,
+          "action_context": {
+            "raw-idea": { "required": true, "candidates": "refined-ideas-folder" },
+            "uiux-reference": { "required": false }
+          },
+          "deliverables": ["$output:refined-idea", "$output-folder:refined-ideas-folder"],
+          "next_actions_suggested": ["design_mockup", "requirement_gathering"]
+        },
+        "design_mockup": {
+          "optional": true,
+          "action_context": {
+            "refined-idea": { "required": true, "candidates": "refined-ideas-folder" },
+            "uiux-reference": { "required": false }
+          },
+          "deliverables": ["$output:mockup-html", "$output-folder:mockups-folder"],
+          "next_actions_suggested": ["requirement_gathering"]
+        }
+      }
+    },
+    "requirement": {
+      "type": "shared",
+      "next_stage": "implement",
+      "actions": {
+        "requirement_gathering": {
+          "optional": false,
+          "action_context": {
+            "refined-idea": { "required": true, "candidates": "refined-ideas-folder" },
+            "mockup-html": { "required": false }
+          },
+          "deliverables": ["$output:requirement-doc", "$output-folder:requirements-folder"],
+          "next_actions_suggested": ["feature_breakdown"]
+        },
+        "feature_breakdown": {
+          "optional": false,
+          "action_context": {
+            "requirement-doc": { "required": true, "candidates": "requirements-folder" }
+          },
+          "deliverables": ["$output:features-list", "$output-folder:breakdown-folder"],
+          "next_actions_suggested": []
+        }
+      }
+    },
+    "implement": {
+      "type": "per_feature",
+      "next_stage": "validation",
+      "actions": {
+        "feature_refinement": {
+          "optional": false,
+          "action_context": {
+            "requirement-doc": { "required": true, "candidates": "requirements-folder" },
+            "features-list": { "required": true }
+          },
+          "deliverables": ["$output:specification", "$output-folder:feature-docs-folder"],
+          "next_actions_suggested": ["technical_design"]
+        },
+        "technical_design": {
+          "optional": false,
+          "action_context": {
+            "specification": { "required": true, "candidates": "feature-docs-folder" }
+          },
+          "deliverables": ["$output:tech-design", "$output-folder:feature-docs-folder"],
+          "next_actions_suggested": ["implementation"]
+        },
+        "implementation": {
+          "optional": false,
+          "action_context": {
+            "tech-design": { "required": true, "candidates": "feature-docs-folder" },
+            "specification": { "required": true, "candidates": "feature-docs-folder" }
+          },
+          "deliverables": ["$output:impl-files", "$output-folder:impl-folder"],
+          "next_actions_suggested": ["acceptance_testing"]
+        }
+      }
+    },
+    "validation": {
+      "type": "per_feature",
+      "next_stage": "feedback",
+      "actions": {
+        "acceptance_testing": {
+          "optional": false,
+          "action_context": {
+            "specification": { "required": true, "candidates": "feature-docs-folder" },
+            "impl-files": { "required": true, "candidates": "impl-folder" }
+          },
+          "deliverables": ["$output:test-report", "$output-folder:test-folder"],
+          "next_actions_suggested": ["quality_evaluation"]
+        },
+        "quality_evaluation": {
+          "optional": true,
+          "action_context": {
+            "test-report": { "required": true, "candidates": "test-folder" }
+          },
+          "deliverables": ["$output:eval-report"],
+          "next_actions_suggested": ["change_request"]
+        }
+      }
+    },
+    "feedback": {
+      "type": "per_feature",
+      "next_stage": null,
+      "actions": {
+        "change_request": {
+          "optional": true,
+          "action_context": {
+            "eval-report": { "required": false },
+            "specification": { "required": true, "candidates": "feature-docs-folder" }
+          },
+          "deliverables": ["$output:cr-doc", "$output-folder:cr-folder"],
+          "next_actions_suggested": []
+        }
+      }
+    }
+  }
+}
