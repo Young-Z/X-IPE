@@ -125,8 +125,10 @@
             this._initialFitDone = false;
             this._scrollResumeTimers = new Map();
             this._activeTyping = null;
+            this._cliAdapter = null;
 
             this._loadAutoExecuteConfig();
+            this._loadCliAdapterConfig();
             this._setupEventListeners();
             this._setupResizeObserver();
         }
@@ -139,6 +141,18 @@
                 if (resp.ok) {
                     const data = await resp.json();
                     this.autoExecutePrompt = data.auto_execute_prompt || false;
+                }
+            } catch {}
+        }
+
+        async _loadCliAdapterConfig() {
+            try {
+                const resp = await fetch('/api/config/cli-adapter');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data.success) {
+                        this._cliAdapter = data;
+                    }
                 }
             } catch {}
         }
@@ -738,7 +752,16 @@
         }
 
         _buildCopilotCmd(prompt) {
-            return `copilot --allow-all-tools --allow-all-paths --allow-all-urls -i "${prompt.replace(/"/g, '\\"')}"`;
+            const escaped = prompt.replace(/"/g, '\\"');
+            if (this._cliAdapter && this._cliAdapter.prompt_format) {
+                return this._cliAdapter.prompt_format
+                    .replace('{command}', this._cliAdapter.command || 'copilot')
+                    .replace('{run_args}', this._cliAdapter.run_args || '')
+                    .replace('{inline_prompt_flag}', this._cliAdapter.inline_prompt_flag || '-i')
+                    .replace('{escaped_prompt}', escaped)
+                    .replace(/\s+/g, ' ').trim();
+            }
+            return `copilot --allow-all-tools -i "${escaped}"`;
         }
 
         _waitForCopilotReady(sessionKey, callback, maxAttempts = 30) {
@@ -1321,7 +1344,11 @@
             if (this.terminalManager.sessions.size === 0) this.terminalManager.addSession();
             const s = this.terminalManager._getActiveSession();
             if (!s) return;
-            this.terminalManager._sendWithTypingEffect(s.key, 'copilot --allow-all-tools --allow-all-paths --allow-all-urls', null);
+            const adapter = this.terminalManager._cliAdapter;
+            const cmd = adapter
+                ? `${adapter.command}${adapter.run_args ? ' ' + adapter.run_args : ''}`.trim()
+                : 'copilot --allow-all-tools';
+            this.terminalManager._sendWithTypingEffect(s.key, cmd, null);
         }
     }
 
