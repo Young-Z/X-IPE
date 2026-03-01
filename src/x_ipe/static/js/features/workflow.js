@@ -223,11 +223,11 @@ const workflow = {
 
         nameInput.focus();
 
-        const namePattern = /^[a-zA-Z0-9-]+$/;
+        const namePattern = /^[\p{L}\p{N}_-]+$/u;
         const validate = () => {
             const v = nameInput.value.trim();
             if (!v) { errDiv.textContent = 'Name is required'; return false; }
-            if (!namePattern.test(v)) { errDiv.textContent = 'Only letters, numbers, and hyphens allowed'; return false; }
+            if (!namePattern.test(v)) { errDiv.textContent = 'Only letters, numbers, hyphens, and underscores allowed'; return false; }
             if (v.length > 100) { errDiv.textContent = 'Max 100 characters'; return false; }
             errDiv.textContent = '';
             return true;

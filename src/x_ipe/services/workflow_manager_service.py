@@ -179,7 +179,7 @@ def _default_config():
 STAGE_CONFIG, STAGE_ORDER, DELIVERABLE_CATEGORIES, NEXT_ACTIONS_MAP = _init_config()
 
 # Name validation
-NAME_PATTERN = re.compile(r"^[a-zA-Z0-9-]+$")
+NAME_PATTERN = re.compile(r"^[\w-]+$")
 MAX_NAME_LENGTH = 100
 
 
@@ -657,7 +657,7 @@ class WorkflowManagerService:
     def _validate_workflow_name(self, name: str):
         if not name or not NAME_PATTERN.match(name):
             return {"success": False, "error": "INVALID_NAME",
-                    "message": "Workflow name must be alphanumeric with hyphens only"}
+                    "message": "Workflow name must contain only letters, numbers, hyphens, or underscores"}
         if len(name) > MAX_NAME_LENGTH:
             return {"success": False, "error": "INVALID_NAME",
                     "message": f"Workflow name must not exceed {MAX_NAME_LENGTH} characters"}

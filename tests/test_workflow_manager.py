@@ -203,6 +203,26 @@ class TestWorkflowNameValidation:
         result = workflow_service.create_workflow("a" * 100)
         assert result.get("success") is not False
 
+    def test_accept_chinese_characters(self, workflow_service, workflow_dir):
+        """AC: Chinese characters accepted in workflow names."""
+        result = workflow_service.create_workflow("五子棋游戏")
+        assert result.get("success") is not False
+        filepath = os.path.join(workflow_dir, "workflow-五子棋游戏.json")
+        assert os.path.exists(filepath)
+
+    def test_accept_mixed_chinese_and_ascii(self, workflow_service, workflow_dir):
+        """AC: Mixed Chinese + ASCII + hyphens accepted."""
+        result = workflow_service.create_workflow("my-项目-v1")
+        assert result.get("success") is not False
+        filepath = os.path.join(workflow_dir, "workflow-my-项目-v1.json")
+        assert os.path.exists(filepath)
+
+    def test_reject_filesystem_unsafe_chars(self, workflow_service):
+        """AC: Filesystem-unsafe characters still rejected."""
+        for name in ["bad/name", "bad\\name", "bad:name", 'bad"name', "bad*name", "bad<name", "bad>name", "bad|name"]:
+            result = workflow_service.create_workflow(name)
+            assert result["success"] is False, f"Should reject: {name}"
+
 
 # ==============================================================================
 # Unit Tests: WorkflowManagerService — Stage Gating

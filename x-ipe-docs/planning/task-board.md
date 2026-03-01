@@ -6,7 +6,9 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-669 | Bug Fix | Deliverable dict keys not validated in update_action — agents can store wrong tag names, breaking candidate resolution & deliverable defaults. Feedback-20260228-230813 | Drift 🌊 | 🔄 in_progress | 02-28-2026 15:11:00 | - | - |
+| TASK-671 | Bug Fix | Workflow name validation rejects Chinese characters — frontend regex and backend NAME_PATTERN only allow [a-zA-Z0-9-]. Need Unicode letter support. Feedback-20260301-155900-1 | Zephyr 🌬️ | 🔄 in_progress | 03-01-2026 08:10:00 | - | - |
+| TASK-670 | Idea Mockup | Generate mockups for IDEA-031 五子棋 (Gomoku) web game — wf-001-dddd. Interactive HTML mockup with Canvas board, stone rendering, AI, undo, win detection. Workflow: my-test2 | Flux ⚡ | ✅ completed | 02-28-2026 15:30:00 | mockups/gomoku-game-v1.html, idea-summary-v1.md | Requirement Gathering |
+| TASK-669 | Bug Fix | Action context dropdown not showing cached deliverable when file not in candidates folder listing. Frontend fix: _setDeliverableDefaults() adds cached deliverable as option when missing. Reverted backend auto-correction. Commit 4229be6, 337 JS tests pass. Feedback-20260228-230813 | Drift 🌊 | ✅ completed | 02-28-2026 15:49:00 | action-execution-modal.js, action-execution-modal-042c.test.js | - |
 | TASK-668 | Ideation | Refine idea wf-001-dddd — 五子棋 (Gomoku) web game. UIUX reference: auto-detect | Frost ❄️ | ✅ completed | 02-28-2026 14:57:00 | idea-summary-v1.md, refined-idea/ | Idea Mockup / Idea to Architecture |
 | TASK-652 | Feature Refinement | FEATURE-042-A: Workflow Prompts Config & Basic Template Resolution — create specification | Spark ⚡ | ✅ completed | 02-27-2026 02:38:00 | FEATURE-042-A/specification.md | Technical Design |
 | TASK-653 | Feature Refinement | FEATURE-042-B: Conditional Block Parsing & Error Handling — create specification | Spark ⚡ | ✅ completed | 02-27-2026 02:38:00 | FEATURE-042-B/specification.md | Technical Design |
@@ -251,11 +253,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 48
+- **Total Active:** 49
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 454
+- **Completed (archived):** 455
 - **Reverted:** 8
 - **Pending Review:** 0
 - **Blocked:** 0
