@@ -157,3 +157,47 @@ describe('ComposeIdeaModal — _linkedPath tracking', () => {
     expect(modal._linkedPath).toBe('x-ipe-docs/ideas/Test/file.md');
   });
 });
+
+describe('IdeaNameValidator — sanitize with Unicode', () => {
+  it('preserves Chinese characters in sanitized output', () => {
+    const validator = new IdeaNameValidator(
+      document.createElement('input'),
+      document.createElement('span'),
+      document.createElement('span')
+    );
+    const result = validator.sanitize('五子棋');
+    expect(result).toBe('五子棋');
+  });
+
+  it('preserves mixed Chinese and ASCII', () => {
+    const validator = new IdeaNameValidator(
+      document.createElement('input'),
+      document.createElement('span'),
+      document.createElement('span')
+    );
+    const result = validator.sanitize('My 五子棋 Game');
+    expect(result).toBe('my-五子棋-game');
+  });
+
+  it('still strips filesystem-unsafe characters', () => {
+    const validator = new IdeaNameValidator(
+      document.createElement('input'),
+      document.createElement('span'),
+      document.createElement('span')
+    );
+    const result = validator.sanitize('bad/name*test');
+    expect(result).not.toContain('/');
+    expect(result).not.toContain('*');
+  });
+
+  it('produces valid folder name for pure Chinese input', () => {
+    const validator = new IdeaNameValidator(
+      document.createElement('input'),
+      document.createElement('span'),
+      document.createElement('span')
+    );
+    const result = validator.sanitize('五子棋游戏');
+    expect(result.length).toBeGreaterThan(0);
+    expect(result).not.toMatch(/^-|-$/);
+  });
+});

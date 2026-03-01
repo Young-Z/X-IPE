@@ -27,7 +27,7 @@ class IdeaNameValidator {
     sanitize(text) {
         return text
             .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/[^\p{L}\p{N}\s-]/gu, '')
             .replace(/\s+/g, '-')
             .replace(/-+/g, '-')
             .substring(0, 50)
