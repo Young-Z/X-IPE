@@ -21,6 +21,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
+**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the workflow state was updated before marking the task complete.
+
 MANDATORY: Every feature MUST have a feature ID in the format `FEATURE-{nnn}` (e.g., FEATURE-001, FEATURE-027). This applies regardless of the output language used.
 
 ---
@@ -217,11 +219,19 @@ BLOCKING: Human MUST approve specification before Technical Design proceeds.
   <step_5>
     <name>Complete</name>
     <action>
-      1. Verify all DoD checkpoints
-      2. Output task completion summary
-      3. Request human review
+      1. IF execution_mode == "workflow-mode":
+         a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
+            - workflow_name: {from context}
+            - action: {workflow.action}
+            - status: "done"
+            - feature_id: {feature_id}
+            - deliverables: {"specification": "{path to specification.md}", "feature-docs-folder": "{path to FEATURE-XXX/ folder}"}
+         b. Log: "Workflow action status updated to done"
+      2. Verify all DoD checkpoints
+      3. Output task completion summary
+      4. Request human review
     </action>
-    <output>Task completion output with specification path</output>
+    <output>Task completion output with specification path, workflow_action_updated</output>
   </step_5>
 
 </procedure>
@@ -241,6 +251,8 @@ task_completion_output:
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
+  workflow_action: "{workflow.action}"   # triggers workflow status update when execution_mode == workflow-mode
+  workflow_action_updated: true | false # true if update_workflow_action was called
   task_output_links:
     - "x-ipe-docs/requirements/FEATURE-XXX/specification.md"
   feature_id: "FEATURE-XXX"
@@ -292,6 +304,10 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   <checkpoint required="if-applicable">
     <name>Mockup-comparison ACs added</name>
     <verification>If current (non-outdated) mockups exist, acceptance criteria reference mockup comparison for UI layout, styling, and interactive elements</verification>
+  </checkpoint>
+  <checkpoint required="if-applicable">
+    <name>Workflow Action Updated</name>
+    <verification>If execution_mode == "workflow-mode", called the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with status "done" and deliverables keyed dict</verification>
   </checkpoint>
 </definition_of_done>
 ```

@@ -24,7 +24,7 @@ CRITICAL: Only use tools that are explicitly enabled (`true`) in `x-ipe-docs/con
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` list of output file paths. Verify the workflow state was updated before marking the task complete.
+**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the workflow state was updated before marking the task complete.
 
 ---
 
@@ -291,7 +291,7 @@ BLOCKING: Step 10 - Human MUST approve idea summary before proceeding.
             - workflow_name: {from context}
             - action: "refine_idea"  ← HARDCODED: always use "refine_idea", NEVER "compose_idea" or any other action
             - status: "done"
-            - deliverables: [list of output file paths AND the output folder path (e.g. {idea_folder}/refined-idea/)]
+            - deliverables: {"refined-idea": "{path to idea-summary file}", "refined-ideas-folder": "{path to refined-idea/ folder}"}
          b. Log: "Workflow action status updated to done"
       2. Present final idea summary to human
       3. Ask human to choose next task
@@ -407,7 +407,7 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Workflow Action Status Updated</name>
-    <verification>If execution_mode == "workflow-mode", called the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with status "done" and deliverables list</verification>
+    <verification>If execution_mode == "workflow-mode", called the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with status "done" and deliverables keyed dict</verification>
   </checkpoint>
 </definition_of_done>
 ```

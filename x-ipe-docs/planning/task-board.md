@@ -6,9 +6,11 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-675 | Skill Update | Update all workflow-participating task-based skills: deliverables in update_workflow_action must use keyed dict with extract tags from workflow-template.json, not flat file path lists. 8 skills affected. | Drift 🌊 | ✅ completed | 03-01-2026 15:45:00 | 8 SKILL.md files, x-ipe-workflow-task-execution/SKILL.md | - |
+| TASK-674 | Skill Update | Update x-ipe-task-based-bug-fix v1.2.0: add logic_conflict_reaction param (notify/approval_required), move conflict analysis to Step 3, add Define Fix Scope (Step 5), add Fix Related Docs (Step 7), update Diagnose to assess doc gaps | Nova ✨ | ✅ completed | 03-01-2026 15:30:00 | .github/skills/x-ipe-task-based-bug-fix/SKILL.md, skill-meta.md | - |
 | TASK-671 | Bug Fix | Workflow name validation rejects Chinese characters — frontend regex and backend NAME_PATTERN only allow [a-zA-Z0-9-]. Need Unicode letter support. Feedback-20260301-155900-1 | Zephyr 🌬️ | ✅ completed | 03-01-2026 08:15:00 | workflow_manager_service.py, workflow.js, test_workflow_manager.py | - |
 | TASK-672 | Bug Fix | Compose idea sanitize() strips Chinese chars — regex [^a-z0-9\s-] removes non-ASCII, producing empty folder names like 'wf-001-'. Feedback-20260301-155900-1 | Zephyr 🌬️ | ✅ completed | 03-01-2026 11:56:00 | compose-idea-modal.js, compose-idea-modal.test.js | - |
-| TASK-673 | Bug Fix | Terminal _buildCopilotCmd hardcodes 'copilot' CLI — should use active CLI adapter from /api/config/cli-adapter. Also _insertCopilotCommand hardcodes same. Feedback-20260301 | Zephyr 🌬️ | 🔄 in_progress | 03-01-2026 12:08:00 | - | - |
+| TASK-673 | Bug Fix | Terminal _buildCopilotCmd hardcodes 'copilot' CLI — should use active CLI adapter from /api/config/cli-adapter. Also _insertCopilotCommand hardcodes same. Feedback-20260301 | Zephyr 🌬️ | ✅ completed | 03-01-2026 12:12:00 | terminal.js, terminal-cli-adapter.test.js | - |
 | TASK-670 | Idea Mockup | Generate mockups for IDEA-031 五子棋 (Gomoku) web game — wf-001-dddd. Interactive HTML mockup with Canvas board, stone rendering, AI, undo, win detection. Workflow: my-test2 | Flux ⚡ | ✅ completed | 02-28-2026 15:30:00 | mockups/gomoku-game-v1.html, idea-summary-v1.md | Requirement Gathering |
 | TASK-669 | Bug Fix | Action context dropdown not showing cached deliverable when file not in candidates folder listing. Frontend fix: _setDeliverableDefaults() adds cached deliverable as option when missing. Reverted backend auto-correction. Commit 4229be6, 337 JS tests pass. Feedback-20260228-230813 | Drift 🌊 | ✅ completed | 02-28-2026 15:49:00 | action-execution-modal.js, action-execution-modal-042c.test.js | - |
 | TASK-668 | Ideation | Refine idea wf-001-dddd — 五子棋 (Gomoku) web game. UIUX reference: auto-detect | Frost ❄️ | ✅ completed | 02-28-2026 14:57:00 | idea-summary-v1.md, refined-idea/ | Idea Mockup / Idea to Architecture |
@@ -255,7 +257,7 @@
 
 ## Quick Stats
 
-- **Total Active:** 49
+- **Total Active:** 50
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0

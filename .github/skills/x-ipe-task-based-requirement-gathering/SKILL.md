@@ -23,7 +23,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` list of output file paths. Verify the workflow state was updated before marking the task complete.
+**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the workflow state was updated before marking the task complete.
 
 MANDATORY: Every requirement MUST create an Epic with ID format `EPIC-{nnn}` (e.g., EPIC-001, EPIC-035). Features created during Feature Breakdown use format `FEATURE-{nnn}-{X}` (e.g., FEATURE-035-A). The `{nnn}` in Feature IDs always matches the parent Epic number.
 
@@ -263,7 +263,7 @@ BLOCKING: Human MUST approve requirements before proceeding to Feature Breakdown
             - workflow_name: {from context}
             - action: {workflow.action}
             - status: "done"
-            - deliverables: [list of output file paths]
+            - deliverables: {"requirement-doc": "{path to requirement doc}", "requirements-folder": "{path to requirements/ folder}"}
          b. Log: "Workflow action status updated to done"
       2. Verify all DoD checkpoints
       3. Request human review
@@ -332,7 +332,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Workflow Action Status Updated</name>
-    <verification>If execution_mode == "workflow-mode", called the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with status "done" and deliverables list</verification>
+    <verification>If execution_mode == "workflow-mode", called the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with status "done" and deliverables keyed dict</verification>
   </checkpoint>
 </definition_of_done>
 ```

@@ -24,7 +24,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` and `x-ipe+all+task-board-manage
 
 CRITICAL: Focus ONLY on UI/UX presentation -- ignore all tech stack mentions. See [references/mockup-guidelines.md](references/mockup-guidelines.md) for detailed focus guidelines.
 
-**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` list of output file paths. Verify the workflow state was updated before marking the task complete.
+**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the workflow state was updated before marking the task complete.
 
 ---
 
@@ -268,7 +268,7 @@ BLOCKING: Step 7 halts if no tools available AND human declines manual mode.
             - workflow_name: {from context}
             - action: {workflow.action}
             - status: "done"
-            - deliverables: [list of output file paths]
+            - deliverables: {"mockup-html": "{path to mockup HTML file}", "mockups-folder": "{path to mockups/ folder}"}
          b. Log: "Workflow action status updated to done"
       2. Verify all DoD checkpoints pass
       3. Present mockups summary to human
@@ -357,7 +357,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Workflow Action Status Updated</name>
-    <verification>If execution_mode == "workflow-mode", called the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with status "done" and deliverables list</verification>
+    <verification>If execution_mode == "workflow-mode", called the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with status "done" and deliverables keyed dict</verification>
   </checkpoint>
 </definition_of_done>
 ```
