@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-676 | Bug Fix | Workflow panel ⋮ button not aligned to right side — missing flex:1 on .workflow-panel-info and position:relative on .workflow-panel-actions. Dropdown menu also mispositioned. Feedback-20260302-102137 | Ember 🔥 | 🔄 in_progress | 03-02-2026 02:24:00 | - | - |
 | TASK-675 | Skill Update | Update all workflow-participating task-based skills: deliverables in update_workflow_action must use keyed dict with extract tags from workflow-template.json, not flat file path lists. 8 skills affected. | Drift 🌊 | ✅ completed | 03-01-2026 15:45:00 | 8 SKILL.md files, x-ipe-workflow-task-execution/SKILL.md | - |
 | TASK-674 | Skill Update | Update x-ipe-task-based-bug-fix v1.2.0: add logic_conflict_reaction param (notify/approval_required), move conflict analysis to Step 3, add Define Fix Scope (Step 5), add Fix Related Docs (Step 7), update Diagnose to assess doc gaps | Nova ✨ | ✅ completed | 03-01-2026 15:30:00 | .github/skills/x-ipe-task-based-bug-fix/SKILL.md, skill-meta.md | - |
 | TASK-671 | Bug Fix | Workflow name validation rejects Chinese characters — frontend regex and backend NAME_PATTERN only allow [a-zA-Z0-9-]. Need Unicode letter support. Feedback-20260301-155900-1 | Zephyr 🌬️ | ✅ completed | 03-01-2026 08:15:00 | workflow_manager_service.py, workflow.js, test_workflow_manager.py | - |
@@ -257,8 +258,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 50
-- **In Progress:** 0
+- **Total Active:** 51
+- **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
 - **Completed (archived):** 455

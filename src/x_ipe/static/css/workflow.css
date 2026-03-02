@@ -84,6 +84,11 @@
     transform: rotate(90deg);
 }
 
+.workflow-panel-info {
+    flex: 1;
+    min-width: 0;
+}
+
 .workflow-panel-name {
     font-weight: 600;
     font-size: 0.95rem;
@@ -123,6 +128,11 @@
 .workflow-stage-pill.active    { background: #dbeafe; color: #1e40af; }
 .workflow-stage-pill.locked    { background: #f1f5f9; color: #64748b; }
 
+.workflow-panel-actions {
+    position: relative;
+    flex-shrink: 0;
+}
+
 .workflow-action-btn {
     background: none;
     border: none;
@@ -131,7 +141,6 @@
     cursor: pointer;
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
-    position: relative;
 }
 .workflow-action-btn:hover { color: #475569; background: #f1f5f9; }
 
