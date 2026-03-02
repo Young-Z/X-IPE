@@ -1004,14 +1004,19 @@ const workflowStage = {
                 const folderModal = typeof FolderBrowserModal !== 'undefined'
                     ? new FolderBrowserModal({ workflowName: wfName }) : null;
 
-                const STAGE_ORDER = ['ideation', 'requirement', 'implement', 'validation', 'feedback'];
-                const STAGE_LABELS = { ideation: 'Ideation', requirement: 'Requirement', implement: 'Implement', validation: 'Validation', feedback: 'Feedback' };
+                // Map deliverable category → stage, mirroring ACTION_MAP grouping
+                const CATEGORY_STAGE = {
+                    ideas: 'ideation', mockups: 'ideation',
+                    requirements: 'requirement',
+                    implementations: 'implement',
+                    quality: 'validation',
+                };
                 const SHARED_STAGES = new Set(['ideation', 'requirement']);
 
                 const sharedByStage = {};
                 const featureByStage = {};
                 items.forEach(item => {
-                    const stage = item.stage || 'other';
+                    const stage = CATEGORY_STAGE[item.category] || item.stage || 'other';
                     if (SHARED_STAGES.has(stage) || !item.feature_id) {
                         if (!sharedByStage[stage]) sharedByStage[stage] = [];
                         sharedByStage[stage].push(item);
@@ -1039,16 +1044,22 @@ const workflowStage = {
                     }
                 };
 
-                for (const stage of STAGE_ORDER) {
+                // Render in STAGE_ORDER (same as actions), then any extras
+                const allStages = [...this.STAGE_ORDER, ...Object.keys(sharedByStage).filter(s => !this.STAGE_ORDER.includes(s)), ...Object.keys(featureByStage).filter(s => !this.STAGE_ORDER.includes(s))];
+                const seen = new Set();
+                for (const stage of allStages) {
+                    if (seen.has(stage)) continue;
+                    seen.add(stage);
                     const hasShared = sharedByStage[stage] && sharedByStage[stage].length > 0;
                     const hasFeature = featureByStage[stage] && Object.keys(featureByStage[stage]).length > 0;
                     if (!hasShared && !hasFeature) continue;
 
+                    const stageLabel = (this.ACTION_MAP[stage] || {}).label || stage;
                     const section = document.createElement('div');
                     section.className = 'deliverables-stage-section';
                     const stageTitle = document.createElement('div');
                     stageTitle.className = 'deliverables-stage-title';
-                    stageTitle.textContent = STAGE_LABELS[stage] || stage;
+                    stageTitle.textContent = `${stageLabel} Deliverables`;
                     section.appendChild(stageTitle);
 
                     if (hasShared) {
