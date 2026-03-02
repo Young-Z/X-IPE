@@ -338,6 +338,44 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
     });
   });
 
+  describe('TASK-680: Markdown preview uses ContentRenderer (same as folder browser)', () => {
+    it('should use ContentRenderer for markdown files when available', async () => {
+      const renderMarkdownSpy = vi.fn();
+      globalThis.ContentRenderer = class {
+        constructor() {}
+        renderMarkdown(text) { renderMarkdownSpy(text); }
+      };
+
+      globalThis.fetch.mockResolvedValue({
+        ok: true,
+        text: async () => '# Heading with mermaid',
+      });
+
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      await viewer.showPreview('refined-idea/readme.md');
+      expect(renderMarkdownSpy).toHaveBeenCalledWith('# Heading with mermaid');
+
+      delete globalThis.ContentRenderer;
+    });
+
+    it('should fall back to marked.parse when ContentRenderer is not available', async () => {
+      delete globalThis.ContentRenderer;
+
+      globalThis.fetch.mockResolvedValue({
+        ok: true,
+        text: async () => '# Fallback',
+      });
+
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      await viewer.showPreview('refined-idea/readme.md');
+      expect(globalThis.marked.parse).toHaveBeenCalledWith('# Fallback');
+    });
+  });
+
   describe('Security', () => {
     it('should not allow path traversal in file requests', async () => {
       const DV = globalThis.DeliverableViewer;

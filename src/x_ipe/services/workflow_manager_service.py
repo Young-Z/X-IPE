@@ -371,6 +371,7 @@ class WorkflowManagerService:
                             "name": tag_name,
                             "path": path_str,
                             "category": category,
+                            "stage": stage_name,
                             "exists": full_path.exists(),
                         })
                 elif isinstance(raw_deliverables, list):
@@ -380,11 +381,14 @@ class WorkflowManagerService:
                             "name": os.path.basename(path_str),
                             "path": path_str,
                             "category": category,
+                            "stage": stage_name,
                             "exists": full_path.exists(),
                         })
 
         # Per-feature stages
         for feat in state.get("features", []):
+            feat_id = feat.get("feature_id", "")
+            feat_name = feat.get("name", "")
             for stage_name in ("implement", "validation", "feedback"):
                 stage_data = feat.get(stage_name, {})
                 for action_key, action_data in stage_data.get("actions", {}).items():
@@ -397,17 +401,23 @@ class WorkflowManagerService:
                                 "name": tag_name,
                                 "path": path_str,
                                 "category": category,
+                                "stage": stage_name,
+                                "feature_id": feat_id,
+                                "feature_name": feat_name,
                                 "exists": full_path.exists(),
                             })
                     elif isinstance(raw_deliverables, list):
                         for path_str in raw_deliverables:
                             full_path = self._project_root / path_str
                             deliverables.append({
-                            "name": os.path.basename(path_str),
-                            "path": path_str,
-                            "category": category,
-                            "exists": full_path.exists(),
-                        })
+                                "name": os.path.basename(path_str),
+                                "path": path_str,
+                                "category": category,
+                                "stage": stage_name,
+                                "feature_id": feat_id,
+                                "feature_name": feat_name,
+                                "exists": full_path.exists(),
+                            })
 
         return {"deliverables": deliverables, "count": len(deliverables)}
 

@@ -127,6 +127,42 @@ class TestResolveDeliverables:
         assert result["deliverables"] == []
         assert result["count"] == 0
 
+    def test_resolve_includes_stage_field(self, service, project_root):
+        """Each deliverable includes a 'stage' field indicating which stage it belongs to."""
+        name = _create_workflow_with_deliverables(service, project_root)
+        result = service.resolve_deliverables(name)
+        for d in result["deliverables"]:
+            assert "stage" in d
+            assert d["stage"] in ("ideation", "requirement", "implement", "validation", "feedback")
+
+    def test_resolve_compose_idea_stage_is_ideation(self, service, project_root):
+        """compose_idea deliverables have stage='ideation'."""
+        name = _create_workflow_with_deliverables(service, project_root)
+        result = service.resolve_deliverables(name)
+        ideas = [d for d in result["deliverables"] if d["category"] == "ideas"]
+        assert all(d["stage"] == "ideation" for d in ideas)
+
+    def test_resolve_per_feature_deliverable_has_stage_and_feature(self, service, project_root):
+        """Per-feature deliverables include correct stage, feature_id, and feature_name."""
+        name = "feat-stage"
+        service.create_workflow(name)
+        service.update_action_status(name, "compose_idea", "done")
+        service.update_action_status(name, "refine_idea", "done")
+        service.update_action_status(name, "requirement_gathering", "done")
+        service.update_action_status(name, "feature_breakdown", "done")
+        service.add_features(name, [{"id": "FEATURE-200", "name": "Stage Test", "depends_on": []}])
+        service.update_action_status(
+            name, "feature_refinement", "done",
+            feature_id="FEATURE-200",
+            deliverables=["x-ipe-docs/requirements/FEATURE-200/specification.md"]
+        )
+        result = service.resolve_deliverables(name)
+        reqs = [d for d in result["deliverables"] if d["category"] == "requirements"]
+        assert len(reqs) >= 1
+        assert all(d["stage"] == "implement" for d in reqs)
+        assert all(d["feature_id"] == "FEATURE-200" for d in reqs)
+        assert all(d["feature_name"] == "Stage Test" for d in reqs)
+
     def test_resolve_workflow_not_found(self, service):
         """Returns error for nonexistent workflow."""
         result = service.resolve_deliverables("nope")
@@ -369,6 +405,29 @@ class TestDeliverablesCSSClasses:
 
     def test_deliverables_empty(self):
         assert ".deliverables-empty" in self._css_content()
+
+
+class TestDeliverablesStageSectionCSS:
+    """TASK-680: Verify workflow.css has deliverables stage section CSS classes."""
+
+    def _css_content(self):
+        css_path = Path(__file__).parent.parent / "src" / "x_ipe" / "static" / "css" / "workflow.css"
+        return css_path.read_text(encoding="utf-8")
+
+    def test_deliverables_stage_section(self):
+        assert ".deliverables-stage-section" in self._css_content()
+
+    def test_deliverables_stage_title(self):
+        assert ".deliverables-stage-title" in self._css_content()
+
+    def test_deliverables_row(self):
+        assert ".deliverables-row" in self._css_content()
+
+    def test_deliverables_feature_group(self):
+        assert ".deliverables-feature-group" in self._css_content()
+
+    def test_deliverables_feature_label(self):
+        assert ".deliverables-feature-label" in self._css_content()
 
 
 # ─────────────────────────────────────────────

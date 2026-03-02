@@ -178,9 +178,14 @@ class DeliverableViewer {
 
             const text = await resp.text();
             if (filePath.endsWith('.md')) {
-                content.innerHTML = typeof marked !== 'undefined' && marked.parse
-                    ? marked.parse(text)
-                    : `<pre>${this._escapeHtml(text)}</pre>`;
+                if (typeof ContentRenderer !== 'undefined') {
+                    const renderer = new ContentRenderer(content);
+                    renderer.renderMarkdown(text);
+                } else {
+                    content.innerHTML = typeof marked !== 'undefined' && marked.parse
+                        ? marked.parse(text)
+                        : `<pre>${this._escapeHtml(text)}</pre>`;
+                }
             } else if (filePath.endsWith('.html') || filePath.endsWith('.htm')) {
                 const blob = new Blob([text], { type: 'text/html' });
                 const blobUrl = URL.createObjectURL(blob);

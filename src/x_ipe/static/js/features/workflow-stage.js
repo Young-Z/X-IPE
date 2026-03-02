@@ -1003,21 +1003,78 @@ const workflowStage = {
                     ? new DeliverableViewer({ workflowName: wfName }) : null;
                 const folderModal = typeof FolderBrowserModal !== 'undefined'
                     ? new FolderBrowserModal({ workflowName: wfName }) : null;
+
+                const STAGE_ORDER = ['ideation', 'requirement', 'implement', 'validation', 'feedback'];
+                const STAGE_LABELS = { ideation: 'Ideation', requirement: 'Requirement', implement: 'Implement', validation: 'Validation', feedback: 'Feedback' };
+                const SHARED_STAGES = new Set(['ideation', 'requirement']);
+
+                const sharedByStage = {};
+                const featureByStage = {};
                 items.forEach(item => {
+                    const stage = item.stage || 'other';
+                    if (SHARED_STAGES.has(stage) || !item.feature_id) {
+                        if (!sharedByStage[stage]) sharedByStage[stage] = [];
+                        sharedByStage[stage].push(item);
+                    } else {
+                        if (!featureByStage[stage]) featureByStage[stage] = {};
+                        const fid = item.feature_id;
+                        if (!featureByStage[stage][fid]) featureByStage[stage][fid] = { name: item.feature_name || fid, items: [] };
+                        featureByStage[stage][fid].items.push(item);
+                    }
+                });
+
+                const renderCard = (item) => {
                     if (viewer && DeliverableViewer.isFolderType(item.path)) {
                         const card = viewer.renderFolderDeliverable(item);
                         if (folderModal) {
                             card.addEventListener('click', () => folderModal.open(item.path));
                         }
-                        grid.appendChild(card);
+                        return card;
                     } else {
                         const card = this._renderDeliverableCard(item);
                         if (viewer && item.exists) {
                             viewer.makeClickableForPreview(card, item.path, { exists: item.exists });
                         }
-                        grid.appendChild(card);
+                        return card;
                     }
-                });
+                };
+
+                for (const stage of STAGE_ORDER) {
+                    const hasShared = sharedByStage[stage] && sharedByStage[stage].length > 0;
+                    const hasFeature = featureByStage[stage] && Object.keys(featureByStage[stage]).length > 0;
+                    if (!hasShared && !hasFeature) continue;
+
+                    const section = document.createElement('div');
+                    section.className = 'deliverables-stage-section';
+                    const stageTitle = document.createElement('div');
+                    stageTitle.className = 'deliverables-stage-title';
+                    stageTitle.textContent = STAGE_LABELS[stage] || stage;
+                    section.appendChild(stageTitle);
+
+                    if (hasShared) {
+                        const row = document.createElement('div');
+                        row.className = 'deliverables-row';
+                        sharedByStage[stage].forEach(item => row.appendChild(renderCard(item)));
+                        section.appendChild(row);
+                    }
+
+                    if (hasFeature) {
+                        for (const [fid, fdata] of Object.entries(featureByStage[stage])) {
+                            const featGroup = document.createElement('div');
+                            featGroup.className = 'deliverables-feature-group';
+                            const featLabel = document.createElement('div');
+                            featLabel.className = 'deliverables-feature-label';
+                            featLabel.textContent = fdata.name || fid;
+                            featGroup.appendChild(featLabel);
+                            const row = document.createElement('div');
+                            row.className = 'deliverables-row';
+                            fdata.items.forEach(item => row.appendChild(renderCard(item)));
+                            featGroup.appendChild(row);
+                            section.appendChild(featGroup);
+                        }
+                    }
+                    grid.appendChild(section);
+                }
             }
         } catch {
             countBadge.textContent = '!';

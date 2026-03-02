@@ -415,7 +415,13 @@
 .deliverables-title { font-size: 13px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
 .deliverables-count { font-size: 11px; padding: 1px 8px; background: rgba(59,130,246,0.15); color: #3b82f6; border-radius: 10px; }
 .deliverables-toggle { font-size: 14px; color: var(--text-muted); transition: transform 0.2s; }
-.deliverables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-top: 10px; align-items: start; }
+.deliverables-grid { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; }
+.deliverables-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.deliverables-stage-section { margin-bottom: 8px; }
+.deliverables-stage-section:last-child { margin-bottom: 0; }
+.deliverables-stage-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 6px 0 2px; border-bottom: 1px solid var(--border-color); margin-bottom: 4px; }
+.deliverables-feature-group { margin-top: 4px; }
+.deliverables-feature-label { font-size: 11px; color: var(--text-secondary); padding: 2px 0; }
 .deliverables-empty { color: var(--text-muted); font-size: 12px; padding: 12px 0; }
 .deliverable-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; transition: all 0.2s; cursor: default; }
 .deliverable-card.clickable { cursor: pointer; }
