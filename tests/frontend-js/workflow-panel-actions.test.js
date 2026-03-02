@@ -34,6 +34,16 @@ describe('workflow panel ⋮ button alignment (CSS)', () => {
   });
 });
 
+describe('TASK-677: workflow panel must not clip dropdown menu', () => {
+  it('.workflow-panel should NOT have overflow:hidden (clips dropdown)', () => {
+    const css = readFileSync(CSS_PATH, 'utf-8');
+    // Match the .workflow-panel rule (not .workflow-panel-xxx sub-rules)
+    const panelRule = css.match(/\.workflow-panel\s*\{[^}]*\}/);
+    expect(panelRule).not.toBeNull();
+    expect(panelRule[0]).not.toMatch(/overflow\s*:\s*hidden/);
+  });
+});
+
 describe('workflow panel action menu behavior', () => {
   let panel;
 

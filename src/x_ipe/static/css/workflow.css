@@ -60,7 +60,6 @@
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     background: #fff;
-    overflow: hidden;
     transition: box-shadow 0.15s;
 }
 .workflow-panel:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
