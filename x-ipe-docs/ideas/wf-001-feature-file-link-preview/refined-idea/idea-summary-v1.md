@@ -191,7 +191,29 @@ Scan all markdown files in `x-ipe-docs/` and `.github/skills/` for relative or p
 
 ## Next Steps
 
-- [ ] Proceed to Idea Mockup / Idea to Architecture / Requirement Gathering
+- [ ] Proceed to Requirement Gathering
+
+## Mockups & Prototypes
+
+| Mockup | Type | Path | Tool Used |
+|--------|------|------|-----------|
+| File Link Preview — Full Interactive | HTML | mockups/file-link-preview-v1.html | frontend-design |
+
+### Scenarios Covered
+
+The mockup includes 5 interactive scenarios switchable via tabs at the bottom:
+
+1. **① Link Distinction** — Shows rendered markdown with visual difference between internal links (📄 icon, green dashed underline, "Open preview" tooltip) and external links (blue, normal behavior)
+2. **② Preview Modal** — Click any internal link to open the DeliverableViewer-style modal with rendered file content
+3. **③ Breadcrumb Nav** — Shows 3-level deep navigation with breadcrumb trail and ← Back button
+4. **④ Error State** — "File not found" inline error with path display and hint text
+5. **⑤ Loading State** — Spinner with file path being loaded
+
+### Preview Instructions
+- Open `mockups/file-link-preview-v1.html` in a browser to view the interactive mockup
+- Click scenario tabs at the bottom to switch between states
+- Click internal links (green with 📄) to trigger the preview modal
+- Click links inside the preview to test nested breadcrumb navigation
 
 ## References & Common Principles
 

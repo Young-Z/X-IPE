@@ -6,9 +6,11 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-685 | Technical Design | FEATURE-025-F: KB Navigation & Polish — design section tabs, tab switching, badge rendering, tree filtering | Nova ✨ | 🔄 in_progress | 03-03-2026 13:50:00 | - | Test Generation |
+| TASK-686 | Test Generation | FEATURE-025-F: KB Navigation & Polish — TDD tests for section tabs, tab switching, badges, tree filtering | Nova ✨ | 🔄 in_progress | 03-03-2026 13:57:00 | - | Code Implementation |
+| TASK-685 | Technical Design | FEATURE-025-F: KB Navigation & Polish — design section tabs, tab switching, badge rendering, tree filtering | Nova ✨ | ✅ completed | 03-03-2026 13:50:00 | technical-design.md | Test Generation |
 | TASK-684 | Feature Refinement | FEATURE-025-F: KB Navigation & Polish — create specification.md with section tabs, badges, tree views, UX refinements | Nova ✨ | ✅ completed | 03-03-2026 13:22:00 | specification.md | Technical Design |
 | TASK-683 | Ideation | Refine idea wf-001-feature-file-link-preview — File link preview: full relative paths in markdown, x-ipe-docs links open preview window, update skills & existing files. UIUX reference: auto-detect. Workflow: update-file-link-preview | Sage 🌿 | ✅ completed | 03-03-2026 13:50:00 | idea-summary-v1.md, refined-idea/ | Idea Mockup / Idea to Architecture |
+| TASK-684 | Idea Mockup | IDEA-033: Create mockup for File Link Preview — preview modal with breadcrumb nav, visual link distinction, error states. Workflow: update-file-link-preview | Sage 🌿 | ✅ completed | 03-03-2026 14:00:00 | file-link-preview-v1.html, idea-summary-v1.md | Requirement Gathering |
 | TASK-682 | Bug Fix | Terminal handle_attach creates new backend PTY for each stale localStorage session ID on page load (e.g., after server restart). Should emit session_not_found and let frontend clean up stale tabs, creating only 1 new session. | Bolt ⚡ | ✅ completed | 03-03-2026 12:45:00 | terminal_handlers.py, terminal.js, test_terminal.py | - |
 | TASK-681 | Bug Fix | _read_active_cli() returns raw dict when .x-ipe.yaml has legacy cli format {name: "opencode", args: "--prompt"} — causes TypeError or silent fallback to copilot. Fixed with isinstance check. | Cipher 🔑 | ✅ completed | 03-02-2026 09:20:00 | cli_adapter_service.py, test_cli_adapter.py | - |
 | TASK-680 | Bug Fix | Deliverables: (1) file preview uses ContentRenderer, (2) grouped by stage with horizontal layout, (3) per-feature deliverables grouped by feature under stage. Feedback-20260302-144742 | Pulse 🔵 | ✅ completed | 03-02-2026 07:22:00 | deliverable-viewer.js, workflow-stage.js, workflow_manager_service.py, workflow.css | - |
@@ -264,7 +266,7 @@
 
 ## Quick Stats
 
-- **Total Active:** 55
+- **Total Active:** 56
 - **In Progress:** 3
 - **Pending:** 0
 - **Deferred:** 0
