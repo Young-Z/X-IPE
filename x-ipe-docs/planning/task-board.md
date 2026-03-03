@@ -6,7 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-690 | Feature Closing | FEATURE-025-F: KB Navigation & Polish — verify ACs, code-to-docs review, update project files, push to main | Nova ✨ | 🔄 in_progress | 03-03-2026 14:30:00 | - | - |
+| TASK-690 | Feature Closing | FEATURE-025-F: KB Navigation & Polish — verify ACs, code-to-docs review, update project files, push to main | Nova ✨ | ✅ completed | 03-03-2026 14:35:00 | features.md, specification.md, technical-design.md | - |
 | TASK-689 | Feature Acceptance Test | FEATURE-025-F: KB Navigation & Polish — browser acceptance test for section tabs, switching, badges via Chrome DevTools | Nova ✨ | ⚠️ blocked | 03-03-2026 14:25:00 | acceptance-test-cases.md | Feature Closing |
 | TASK-688 | Requirement Gathering | EPIC-043: File Link Preview — gather requirements from IDEA-033 refined idea. 4-part solution: link path standard, frontend preview modal, skill updates, file migration. Workflow: update-file-link-preview | Sage 🌿 | ✅ completed | 03-03-2026 14:11:00 | requirement-details-part-15.md, EPIC-043/ | Feature Breakdown |
 | TASK-691 | Technical Design | FEATURE-043-A: Link Interception & Preview Modal — create technical-design.md. Frontend: custom link renderer, delegated click handler, modal display. Workflow: update-file-link-preview | Sage 🌿 | 🔄 in_progress | 03-03-2026 15:16:00 | - | Test Generation |
