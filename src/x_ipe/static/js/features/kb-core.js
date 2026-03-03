@@ -10,6 +10,7 @@ const kbCore = {
     topics: [],
     searchTerm: '',
     container: null,
+    activeTab: 'landing',
 
     /**
      * Render the Knowledge Base view in a container (like WorkplaceManager)
@@ -25,6 +26,7 @@ const kbCore = {
                             <i class="bi bi-arrow-clockwise"></i>
                         </button>
                     </div>
+                    <div class="kb-section-tabs" id="kb-section-tabs"></div>
                     <div class="kb-search-box">
                         <input type="text" class="kb-search-input" id="kb-search" placeholder="Search files...">
                     </div>
@@ -58,8 +60,9 @@ const kbCore = {
         await this.loadIndex();
         
         // Render UI
-        this.renderTree();
-        this.renderWelcome();
+        this.activeTab = this.topics.length > 0 ? 'topics' : 'landing';
+        this.renderTabs();
+        this.switchTab(this.activeTab);
     },
 
     /**
@@ -134,6 +137,11 @@ const kbCore = {
                 
                 // Re-render
                 this.renderTree();
+                this.updateBadges();
+                // If topics were deleted and we're on topics tab, switch to landing
+                if (this.activeTab === 'topics' && this.topics.length === 0) {
+                    this.switchTab('landing');
+                }
             }
         } catch (error) {
             console.error('[KB] Error refreshing index:', error);
@@ -146,7 +154,7 @@ const kbCore = {
     },
 
     /**
-     * Render the tree in kb-sidebar (within content area).
+     * Render the tree in kb-sidebar, filtered by activeTab.
      */
     renderTree() {
         const container = document.getElementById('kb-tree');
@@ -163,82 +171,56 @@ const kbCore = {
               )
             : files;
 
-        // Group by folder structure
-        const landing = filteredFiles.filter(f => f.path.startsWith('landing/'));
-        const byTopic = {};
-        
-        filteredFiles.forEach(f => {
-            if (f.topic && !f.path.startsWith('landing/')) {
-                if (!byTopic[f.topic]) byTopic[f.topic] = [];
-                byTopic[f.topic].push(f);
-            }
-        });
-
-        // Build HTML
         let html = '';
-        
-        // Landing folder
-        html += `
-            <div class="kb-folder">
-                <div class="kb-folder-header" data-folder="landing">
-                    <i class="bi bi-chevron-down"></i>
-                    <i class="bi bi-inbox text-warning"></i>
-                    <span>Landing (${landing.length})</span>
-                </div>
-                <div class="kb-folder-files">
-                    ${landing.map(f => this.renderFileItem(f)).join('')}
-                    ${landing.length === 0 ? '<div class="kb-empty">No files</div>' : ''}
-                </div>
-            </div>
-        `;
 
-        // Topic folders
-        const sortedTopics = Object.keys(byTopic).sort();
-        sortedTopics.forEach(topic => {
-            const topicFiles = byTopic[topic];
+        if (this.activeTab === 'landing') {
+            const landing = filteredFiles.filter(f => f.path.startsWith('landing/'));
             html += `
                 <div class="kb-folder">
-                    <div class="kb-folder-header" data-folder="${topic}">
+                    <div class="kb-folder-header" data-folder="landing">
                         <i class="bi bi-chevron-down"></i>
-                        <i class="bi bi-folder text-info"></i>
-                        <span>${topic} (${topicFiles.length})</span>
+                        <i class="bi bi-inbox text-warning"></i>
+                        <span>Landing (${landing.length})</span>
                     </div>
                     <div class="kb-folder-files">
-                        ${topicFiles.map(f => this.renderFileItem(f)).join('')}
+                        ${landing.map(f => this.renderFileItem(f)).join('')}
+                        ${landing.length === 0 ? '<div class="kb-empty">No files</div>' : ''}
                     </div>
                 </div>
             `;
-        });
+        } else {
+            const byTopic = {};
+            filteredFiles.forEach(f => {
+                if (f.topic && !f.path.startsWith('landing/')) {
+                    if (!byTopic[f.topic]) byTopic[f.topic] = [];
+                    byTopic[f.topic].push(f);
+                }
+            });
 
-        // Empty topics placeholder
-        if (sortedTopics.length === 0 && landing.length === 0) {
-            html += '<div class="kb-empty-state"><i class="bi bi-archive"></i><p>No files in Knowledge Base</p></div>';
+            const sortedTopics = Object.keys(byTopic).sort();
+            sortedTopics.forEach(topic => {
+                const topicFiles = byTopic[topic];
+                html += `
+                    <div class="kb-folder">
+                        <div class="kb-folder-header" data-folder="${topic}">
+                            <i class="bi bi-chevron-down"></i>
+                            <i class="bi bi-folder text-info"></i>
+                            <span>${topic} (${topicFiles.length})</span>
+                        </div>
+                        <div class="kb-folder-files">
+                            ${topicFiles.map(f => this.renderFileItem(f)).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (sortedTopics.length === 0) {
+                html += '<div class="kb-empty-state"><i class="bi bi-archive"></i><p>No topics yet</p></div>';
+            }
         }
 
         container.innerHTML = html;
-
-        // Bind folder toggle events
-        container.querySelectorAll('.kb-folder-header').forEach(header => {
-            header.addEventListener('click', (e) => {
-                const folder = e.currentTarget.closest('.kb-folder');
-                folder.classList.toggle('collapsed');
-                const icon = e.currentTarget.querySelector('i:first-child');
-                icon.classList.toggle('bi-chevron-down');
-                icon.classList.toggle('bi-chevron-right');
-            });
-        });
-
-        // Bind file click events
-        container.querySelectorAll('.kb-file-item').forEach(item => {
-            item.addEventListener('click', () => {
-                // Remove active from others
-                container.querySelectorAll('.kb-file-item').forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-                
-                const path = item.dataset.path;
-                this.showFilePreview(path);
-            });
-        });
+        this._bindTreeEvents(container);
     },
 
     /**
@@ -278,36 +260,93 @@ const kbCore = {
     },
 
     /**
-     * Render welcome/placeholder in content area.
-     * Delegates to kbTopics if topics exist, else kbLanding.
+     * FEATURE-025-F: Render section tabs (Landing/Topics) in sidebar.
      */
-    renderWelcome() {
+    renderTabs() {
+        const container = document.getElementById('kb-section-tabs');
+        if (!container) return;
+
+        const landingCount = (this.index?.files || []).filter(f => f.path.startsWith('landing/')).length;
+        const topicsCount = this.topics.length;
+
+        container.innerHTML = `
+            <button class="kb-section-tab${this.activeTab === 'landing' ? ' active' : ''}" data-tab="landing">
+                <i class="bi bi-inbox"></i>
+                Landing
+                <span class="kb-tab-badge" id="kb-badge-landing">${landingCount}</span>
+            </button>
+            <button class="kb-section-tab${this.activeTab === 'topics' ? ' active' : ''}" data-tab="topics">
+                <i class="bi bi-layers"></i>
+                Topics
+                <span class="kb-tab-badge" id="kb-badge-topics">${topicsCount}</span>
+            </button>
+        `;
+
+        container.querySelectorAll('.kb-section-tab').forEach(tab => {
+            tab.addEventListener('click', () => this.switchTab(tab.dataset.tab));
+        });
+    },
+
+    /**
+     * FEATURE-025-F: Switch active tab, re-render tree and content view.
+     */
+    switchTab(tabName) {
+        this.activeTab = tabName;
+
+        document.querySelectorAll('.kb-section-tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.tab === tabName);
+        });
+
+        this.renderTree();
+
         const content = document.getElementById('kb-content');
         if (!content) return;
-        
-        const files = this.index?.files || [];
-        const landing = files.filter(f => f.path.startsWith('landing/'));
-        
-        // FEATURE-025-D: If topics exist, show topics view
-        if (this.topics.length > 0 && typeof kbTopics !== 'undefined') {
-            kbTopics.render(content, this.topics);
-            return;
-        }
 
-        // Delegate landing view to kbLanding module
-        if (typeof kbLanding !== 'undefined') {
-            kbLanding.render(content, landing);
-        } else {
-            content.innerHTML = `
-                <div class="kb-welcome">
-                    <div class="kb-stats mb-4">
-                        <span class="badge bg-secondary me-2">${files.length} files</span>
-                        <span class="badge bg-info">${this.topics.length} topics</span>
-                    </div>
-                    <p class="text-muted">Landing view module not loaded.</p>
-                </div>
-            `;
+        if (tabName === 'landing') {
+            const landing = (this.index?.files || []).filter(f => f.path.startsWith('landing/'));
+            if (typeof kbLanding !== 'undefined') {
+                kbLanding.render(content, landing);
+            }
+        } else if (tabName === 'topics') {
+            if (typeof kbTopics !== 'undefined') {
+                kbTopics.render(content, this.topics);
+            }
         }
+    },
+
+    /**
+     * FEATURE-025-F: Update badge counts without re-rendering tabs.
+     */
+    updateBadges() {
+        const landingBadge = document.getElementById('kb-badge-landing');
+        const topicsBadge = document.getElementById('kb-badge-topics');
+        const landingCount = (this.index?.files || []).filter(f => f.path.startsWith('landing/')).length;
+
+        if (landingBadge) landingBadge.textContent = landingCount;
+        if (topicsBadge) topicsBadge.textContent = this.topics.length;
+    },
+
+    /**
+     * FEATURE-025-F: Bind folder toggle and file click events on tree container.
+     */
+    _bindTreeEvents(container) {
+        container.querySelectorAll('.kb-folder-header').forEach(header => {
+            header.addEventListener('click', (e) => {
+                const folder = e.currentTarget.closest('.kb-folder');
+                folder.classList.toggle('collapsed');
+                const icon = e.currentTarget.querySelector('i:first-child');
+                icon.classList.toggle('bi-chevron-down');
+                icon.classList.toggle('bi-chevron-right');
+            });
+        });
+
+        container.querySelectorAll('.kb-file-item').forEach(item => {
+            item.addEventListener('click', () => {
+                container.querySelectorAll('.kb-file-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                this.showFilePreview(item.dataset.path);
+            });
+        });
     },
 
     /**
