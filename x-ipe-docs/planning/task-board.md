@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-681 | Bug Fix | _read_active_cli() returns raw dict when .x-ipe.yaml has legacy cli format {name: "opencode", args: "--prompt"} — causes TypeError or silent fallback to copilot. Fixed with isinstance check. | Cipher 🔑 | ✅ completed | 03-02-2026 09:20:00 | cli_adapter_service.py, test_cli_adapter.py | - |
 | TASK-680 | Bug Fix | Deliverables: (1) file preview uses ContentRenderer, (2) grouped by stage with horizontal layout, (3) per-feature deliverables grouped by feature under stage. Feedback-20260302-144742 | Pulse 🔵 | ✅ completed | 03-02-2026 07:22:00 | deliverable-viewer.js, workflow-stage.js, workflow_manager_service.py, workflow.css | - |
 | TASK-676 | Bug Fix | Workflow panel ⋮ button not aligned to right side — missing flex:1 on .workflow-panel-info and position:relative on .workflow-panel-actions. Dropdown menu also mispositioned. Feedback-20260302-102137 | Ember 🔥 | ✅ completed | 03-02-2026 02:27:00 | workflow.css, workflow-panel-actions.test.js | - |
 | TASK-675 | Skill Update | Update all workflow-participating task-based skills: deliverables in update_workflow_action must use keyed dict with extract tags from workflow-template.json, not flat file path lists. 8 skills affected. | Drift 🌊 | ✅ completed | 03-01-2026 15:45:00 | 8 SKILL.md files, x-ipe-workflow-task-execution/SKILL.md | - |
@@ -259,11 +260,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 51
+- **Total Active:** 52
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 456
+- **Completed (archived):** 457
 - **Reverted:** 8
 - **Pending Review:** 0
 - **Blocked:** 0

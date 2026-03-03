@@ -226,8 +226,6 @@ const workflowStage = {
             pill.innerHTML = `<span class="stage-check">✓</span> ${label}`;
         } else if (status === 'in_progress') {
             pill.innerHTML = `<span class="stage-dot"></span> ${label}`;
-        } else if (status === 'locked') {
-            pill.innerHTML = `<span class="stage-num">🔒</span> ${label}`;
         } else {
             pill.innerHTML = `<span class="stage-num">${index + 1}</span> ${label}`;
         }
@@ -728,6 +726,21 @@ const workflowStage = {
 
     /** Render feature lanes container with SVG overlay. */
     _renderFeatureLanes(stages, nextAction, wfName) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'feature-lanes-area';
+
+        // Header with title and legend
+        const hdr = document.createElement('div');
+        hdr.className = 'feature-lanes-header';
+        hdr.innerHTML = `
+            <span class="feature-lanes-title">Feature Lanes — Per-Feature Progress</span>
+            <div class="feature-lanes-legend">
+                <div class="feature-lanes-legend-item"><span class="feature-lanes-legend-dot done"></span> Done</div>
+                <div class="feature-lanes-legend-item"><span class="feature-lanes-legend-dot active"></span> Active</div>
+                <div class="feature-lanes-legend-item"><span class="feature-lanes-legend-dot pending"></span> Pending</div>
+            </div>`;
+        wrapper.appendChild(hdr);
+
         const container = document.createElement('div');
         container.className = 'lanes-container';
 
@@ -752,7 +765,8 @@ const workflowStage = {
             resizeTimer = setTimeout(() => this._drawDepArrows(container), 200);
         });
 
-        return container;
+        wrapper.appendChild(container);
+        return wrapper;
     },
 
     /** Render a single feature lane. */

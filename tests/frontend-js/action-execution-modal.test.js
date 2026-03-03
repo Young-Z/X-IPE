@@ -165,13 +165,13 @@ describe('FEATURE-038-A: Action Execution Modal', () => {
       expect(cmd).not.toContain('copilot --allow-all-tools');
     });
 
-    it('should prepend --workflow-mode to command', async () => {
+    it('should append --workflow-mode to command', async () => {
       const Modal = globalThis.ActionExecutionModal;
       expect(Modal).toBeDefined();
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
       await modal._loadInstructions();
       const cmd = modal._buildCommand('');
-      expect(cmd).toMatch(/^--workflow-mode(@\S+)? /);
+      expect(cmd).toMatch(/--workflow-mode(@\S+)?$/);
     });
 
     it('should append extra instructions to command when provided', async () => {

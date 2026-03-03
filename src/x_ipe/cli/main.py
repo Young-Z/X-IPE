@@ -362,6 +362,9 @@ def _handle_cli_migration(project_root: Path, cli_name: str, dry_run: bool, forc
     with open(config_path) as f:
         config = yaml.safe_load(f) or {}
     current_cli = config.get('cli', 'copilot')
+    # Handle legacy format where cli is a dict (e.g. {'name': 'opencode', 'args': '--prompt'})
+    if isinstance(current_cli, dict):
+        current_cli = current_cli.get('name', 'copilot')
 
     if current_cli == cli_name and not force:
         click.echo(f"Already using '{cli_name}'. No migration needed.")
@@ -561,7 +564,10 @@ def _read_existing_cli(project_root: Path) -> Optional[str]:
         import yaml
         with open(config_path) as f:
             config = yaml.safe_load(f)
-        return config.get('cli') if config else None
+        cli_val = config.get('cli') if config else None
+        if isinstance(cli_val, dict):
+            cli_val = cli_val.get('name')
+        return cli_val
     except Exception:
         return None
 
@@ -626,6 +632,8 @@ def _handle_language_switch(project_root: Path, language: str, dry_run: bool = F
         
         # Re-extract instructions
         existing_cli = config.get('cli', 'copilot')
+        if isinstance(existing_cli, dict):
+            existing_cli = existing_cli.get('name', 'copilot')
         scaffold = ScaffoldManager(project_root, dry_run=False, force=True)
         scaffold.copy_copilot_instructions(cli_name=existing_cli, language=language)
     
@@ -658,7 +666,7 @@ def _kill_port(port: int) -> None:
     "--port", "-P",  # Using -P because -p is already used for --project
     type=int,
     default=None,
-    help="Port to bind to (default: from config or 5959).",
+    help="Port to bind to (default: from config or 5858).",
 )
 @click.option(
     "--debug/--no-debug",

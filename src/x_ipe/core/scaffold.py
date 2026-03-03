@@ -437,7 +437,7 @@ paths:
 
 server:
   host: "127.0.0.1"
-  port: 5959
+  port: 5858
   debug: false
 
 git:

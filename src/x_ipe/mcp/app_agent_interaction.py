@@ -45,7 +45,6 @@ def _resolve_base_url() -> str:
         return "http://127.0.0.1:5858"
 
 
-BASE_URL = _resolve_base_url()
 
 REQUIRED_FIELDS = ["version", "source_url", "timestamp", "idea_folder"]
 
@@ -77,8 +76,9 @@ def save_uiux_reference(data: dict) -> dict:
         }
 
     try:
+        base = _resolve_base_url()
         resp = requests.post(
-            f"{BASE_URL}/api/ideas/uiux-reference",
+            f"{base}/api/ideas/uiux-reference",
             json=data,
             timeout=30,
         )
@@ -87,7 +87,7 @@ def save_uiux_reference(data: dict) -> dict:
         return {
             "success": False,
             "error": "BACKEND_UNREACHABLE",
-            "message": f"Cannot connect to X-IPE backend at {BASE_URL}",
+            "message": f"Cannot connect to X-IPE backend at {base}",
         }
     except requests.Timeout:
         return {
@@ -107,9 +107,10 @@ def get_workflow_state(workflow_name: str) -> dict:
     Args:
         workflow_name: Name of the workflow (alphanumeric with hyphens).
     """
+    base = _resolve_base_url()
     try:
         resp = requests.get(
-            f"{BASE_URL}/api/workflow/{workflow_name}",
+            f"{base}/api/workflow/{workflow_name}",
             timeout=10,
         )
         return resp.json()
@@ -117,7 +118,7 @@ def get_workflow_state(workflow_name: str) -> dict:
         return {
             "success": False,
             "error": "BACKEND_UNREACHABLE",
-            "message": f"Cannot connect to X-IPE backend at {BASE_URL}",
+            "message": f"Cannot connect to X-IPE backend at {base}",
         }
 
 
@@ -165,9 +166,10 @@ def update_workflow_action(workflow_name: str, action: str, status: str,
     if features:
         payload["features"] = features
 
+    base = _resolve_base_url()
     try:
         resp = requests.post(
-            f"{BASE_URL}/api/workflow/{workflow_name}/action",
+            f"{base}/api/workflow/{workflow_name}/action",
             json=payload,
             timeout=10,
         )
@@ -176,7 +178,7 @@ def update_workflow_action(workflow_name: str, action: str, status: str,
         return {
             "success": False,
             "error": "BACKEND_UNREACHABLE",
-            "message": f"Cannot connect to X-IPE backend at {BASE_URL}",
+            "message": f"Cannot connect to X-IPE backend at {base}",
         }
 
 

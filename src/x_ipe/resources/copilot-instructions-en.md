@@ -26,6 +26,41 @@
 
 ---
 
+## ⚠️ CRITICAL: Skill-First, Not Code-First
+
+**When a user asks you to do something, do NOT jump straight into coding or making changes.**
+
+### Analyze the Request First
+
+1. **Read and understand** the user's message carefully
+2. **Classify the intent** — is this a bug fix? A feature? A refactor? A config change?
+3. **Match to an x-ipe skill** — scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions to find the right skill
+4. **Load and follow that skill** — the skill defines the proper procedure, prerequisites, and Definition of Done
+
+### Why This Matters
+
+Even if a fix seems simple (e.g., "change the default port"), the correct approach is:
+- User says "fix this bug" → use `x-ipe-task-based-bug-fix` (write failing test first, then fix)
+- User says "this config is wrong" → still a bug fix → use `x-ipe-task-based-bug-fix`
+- User says "add a new endpoint" → use `x-ipe-task-based-code-implementation`
+- User says "refactor this module" → use `x-ipe-task-based-code-refactor`
+
+**The skill ensures quality** — it enforces test coverage, proper documentation, and review steps that ad-hoc coding skips.
+
+### ⛔ Anti-Pattern: Direct Fix Without Skill
+
+```
+❌ User: "the default port is wrong, fix it"
+   Agent: *immediately edits config.py and updates 3 files*
+
+✅ User: "the default port is wrong, fix it"
+   Agent: *identifies this as a bug fix → loads x-ipe-task-based-bug-fix →
+           creates task on board → writes failing test → fixes code →
+           verifies tests pass → updates board*
+```
+
+---
+
 ## ⚠️ CRITICAL: Task Board is THE Source of Truth
 
 **The task board (`x-ipe-docs/planning/task-board.md`) is MANDATORY for ALL work.**

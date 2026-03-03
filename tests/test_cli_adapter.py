@@ -293,6 +293,20 @@ class TestActiveCLISelection:
             with pytest.raises(ValueError, match="Unknown CLI adapter"):
                 cli_adapter_service.get_active_adapter()
 
+    def test_legacy_dict_cli_format_resolved(self, cli_adapter_service):
+        """Legacy dict format {'name': 'opencode', 'args': '...'} in .x-ipe.yaml is handled."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config_content = """version: 1
+cli:
+  name: "opencode"
+  args: "--prompt"
+"""
+            config_path = Path(tmpdir) / ".x-ipe.yaml"
+            config_path.write_text(config_content)
+            with patch.object(cli_adapter_service, '_find_config_yaml', return_value=config_path):
+                adapter = cli_adapter_service.get_active_adapter()
+                assert adapter.name == 'opencode'
+
 
 # ============================================================================
 # AC-4: API ENDPOINT TESTS

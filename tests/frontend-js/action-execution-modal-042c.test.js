@@ -600,9 +600,9 @@ describe('FEATURE-042-C: command composition', () => {
     const composed = modal._composeCommand();
     expect(composed).toBeDefined();
 
-    // Should contain --workflow-mode flag + resolved instructions + --extra-instructions flag
-    expect(composed).toContain('--workflow-mode@test-wf');
-    expect(composed).toContain('--extra-instructions Please focus on architecture');
+    // _composeCommand returns pure prompt content (no flags)
+    expect(composed).not.toContain('--workflow-mode');
+    expect(composed).toContain('Please focus on architecture');
   });
 
   it('Final command = resolved instructions only when extra is empty', async () => {
@@ -621,8 +621,8 @@ describe('FEATURE-042-C: command composition', () => {
     const instructionsEl = document.querySelector('.instructions-content');
     const resolved = instructionsEl.textContent || instructionsEl.value || '';
 
-    // Should contain --workflow-mode flag + resolved prompt, no --extra-instructions
-    expect(composed).toContain('--workflow-mode@test-wf');
+    // _composeCommand returns pure prompt content (no flags)
+    expect(composed).not.toContain('--workflow-mode');
     expect(composed).toContain(resolved);
     expect(composed).not.toContain('--extra-instructions');
     // No trailing newlines
@@ -742,8 +742,8 @@ describe('FEATURE-042-C: edge cases', () => {
     const instructionsEl = document.querySelector('.instructions-content');
     const resolved = instructionsEl.textContent || instructionsEl.value || '';
 
-    // Should contain --workflow-mode flag + resolved, no --extra-instructions
-    expect(composed).toContain('--workflow-mode@test-wf');
+    // _composeCommand returns pure prompt content (no flags)
+    expect(composed).not.toContain('--workflow-mode');
     expect(composed).toContain(resolved);
     expect(composed).not.toContain('--extra-instructions');
   });

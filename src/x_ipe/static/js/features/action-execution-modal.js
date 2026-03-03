@@ -385,17 +385,12 @@ class ActionExecutionModal {
     _composeCommand() {
         if (!this._loadedInstructions) return '';
         const resolved = this._loadedInstructions.command;
-        const wfSuffix = this.workflowName ? `@${this.workflowName}` : '';
-        let cmd = `--workflow-mode${wfSuffix} ${resolved}`;
-        if (this.featureId) {
-            cmd += ` --feature-id ${this.featureId}`;
-        }
         const textarea = this.overlay ? this.overlay.querySelector('.extra-input') : null;
         const extra = textarea ? textarea.value.trim() : '';
         if (extra) {
-            cmd += ` --extra-instructions ${extra}`;
+            return resolved + '\n\n' + extra;
         }
-        return cmd;
+        return resolved;
     }
 
     _makeInstructionsReadOnly() {
@@ -777,13 +772,14 @@ class ActionExecutionModal {
         if (!this._loadedInstructions) return '';
         let prompt = this._loadedInstructions.command;
         const wfSuffix = this.workflowName ? `@${this.workflowName}` : '';
-        let cmd = `--workflow-mode${wfSuffix} ${prompt}`;
+        let cmd = prompt;
         if (this.featureId) {
             cmd += ` --feature-id ${this.featureId}`;
         }
         if (extraInstructions && extraInstructions.trim()) {
             cmd += ` --extra-instructions ${extraInstructions.trim()}`;
         }
+        cmd += ` --workflow-mode${wfSuffix}`;
         return cmd;
     }
 
@@ -796,7 +792,13 @@ class ActionExecutionModal {
         // FEATURE-042-C: Use workflow command composition in workflow mode
         let cmd;
         if (this._workflowCommandTemplate) {
-            cmd = this._composeCommand();
+            const composed = this._composeCommand();
+            const wfSuffix = this.workflowName ? `@${this.workflowName}` : '';
+            cmd = composed;
+            if (this.featureId) {
+                cmd += ` --feature-id ${this.featureId}`;
+            }
+            cmd += ` --workflow-mode${wfSuffix}`;
         } else {
             cmd = this._buildCommand(extraText);
         }

@@ -471,13 +471,13 @@ describe('FEATURE-040-A: Modal Generalization & Core Actions', () => {
   /*  Command Construction with <input-file>                            */
   /* ================================================================= */
   describe('Command Construction with input-file', () => {
-    it('should include --workflow-mode prefix for all actions', async () => {
+    it('should include --workflow-mode suffix for all actions', async () => {
       const Modal = globalThis.ActionExecutionModal;
       if (!Modal) return;
       const modal = new Modal({ actionKey: 'requirement_gathering', workflowName: 'test' });
       await modal._loadInstructions();
       const cmd = modal._buildCommand('');
-      expect(cmd).toMatch(/^--workflow-mode@test /);
+      expect(cmd).toMatch(/--workflow-mode@test$/);
     });
 
     it('should replace <input-file> in built command', async () => {

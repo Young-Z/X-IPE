@@ -70,7 +70,7 @@ const workflow = {
     _renderHeader() {
         const header = document.createElement('div');
         header.className = 'workflow-header';
-        header.innerHTML = `<h2>Engineering Workflows</h2>`;
+        header.innerHTML = `<div><h2>Engineering Workflows</h2><p class="workflow-header-sub">Manage your project delivery lifecycle from ideation to feedback</p></div>`;
         const btn = document.createElement('button');
         btn.className = 'workflow-btn-create';
         btn.innerHTML = '<i class="bi bi-plus-lg"></i> Create Workflow';
@@ -91,6 +91,11 @@ const workflow = {
         const info = document.createElement('div');
         info.className = 'workflow-panel-info';
 
+        const icon = document.createElement('div');
+        icon.className = 'workflow-panel-icon';
+        icon.textContent = '⚡';
+        info.appendChild(icon);
+
         const name = document.createElement('span');
         name.className = 'workflow-panel-name';
         name.textContent = wf.name;
@@ -99,12 +104,12 @@ const workflow = {
 
         const meta = document.createElement('span');
         meta.className = 'workflow-panel-meta';
-        meta.innerHTML = `<span class="workflow-stage-pill" data-stage="${wf.current_stage}">${wf.current_stage}</span>`;
-        if (wf.feature_count > 0) {
-            meta.innerHTML += `<span class="workflow-feature-badge">${wf.feature_count} feature${wf.feature_count !== 1 ? 's' : ''}</span>`;
-        }
-        const created = wf.created ? new Date(wf.created).toLocaleDateString() : '';
-        if (created) meta.innerHTML += `<span>${created}</span>`;
+        const createdDate = wf.created ? new Date(wf.created) : null;
+        const fmtDate = createdDate ? `Created ${createdDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}` : '';
+        if (fmtDate) meta.innerHTML = `<span>${fmtDate}</span>`;
+        const fc = wf.feature_count || 0;
+        meta.innerHTML += `<span class="meta-dot">·</span><span>${fc} feature${fc !== 1 ? 's' : ''}</span>`;
+        meta.innerHTML += `<span class="meta-dot">·</span><span class="meta-stage">${wf.current_stage} Stage</span>`;
         info.appendChild(meta);
         header.appendChild(info);
 
@@ -206,12 +211,19 @@ const workflow = {
         const modal = document.createElement('div');
         modal.className = 'workflow-modal';
         modal.innerHTML = `
-            <h3>Create Workflow</h3>
-            <input type="text" id="wf-create-name" placeholder="my-workflow" maxlength="100" autocomplete="off" />
-            <div class="workflow-modal-error" id="wf-create-error"></div>
+            <div class="workflow-modal-header">
+                <span class="workflow-modal-title">Create New Workflow</span>
+                <button class="workflow-modal-close" id="wf-create-close">×</button>
+            </div>
+            <div class="workflow-modal-body">
+                <label class="workflow-modal-label">Workflow Name</label>
+                <input type="text" id="wf-create-name" placeholder="e.g., E-Commerce Checkout Flow" maxlength="100" autocomplete="off" />
+                <div class="workflow-modal-hint">Choose a descriptive name for your project delivery workflow</div>
+                <div class="workflow-modal-error" id="wf-create-error"></div>
+            </div>
             <div class="workflow-modal-actions">
-                <button id="wf-create-cancel">Cancel</button>
-                <button id="wf-create-submit" class="btn-primary">Create</button>
+                <button id="wf-create-cancel" class="btn-cancel">Cancel</button>
+                <button id="wf-create-submit" class="btn-primary">Create Workflow</button>
             </div>`;
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
@@ -237,6 +249,7 @@ const workflow = {
         nameInput.onkeydown = (e) => { if (e.key === 'Enter') submitBtn.click(); };
 
         cancelBtn.onclick = () => overlay.remove();
+        document.getElementById('wf-create-close').onclick = () => overlay.remove();
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
 
         submitBtn.onclick = async () => {

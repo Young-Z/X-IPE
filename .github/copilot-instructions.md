@@ -26,6 +26,68 @@
 
 ---
 
+## ⚠️ CRITICAL: Skill-First, Not Code-First
+
+**When a user asks you to do something, do NOT jump straight into coding or making changes.**
+
+### 🚫 HARD GATE: No `edit` / `create` Tool Calls Without a Loaded Skill
+
+Before calling **any** file-editing tool (`edit`, `create`, or writing code via `bash`), you MUST have:
+1. ✅ Classified the request into a task-based skill
+2. ✅ Created a task on `task-board.md`
+3. ✅ Loaded the corresponding skill (via `skill` tool or by reading its `SKILL.md`)
+4. ✅ Reached the skill's implementation step that permits code changes
+
+If ANY of these are missing → **STOP. Do not touch code.**
+
+### Analyze the Request First
+
+1. **Read and understand** the user's message carefully
+2. **Classify the intent** — is this a bug fix? A feature? A refactor? A config change?
+3. **Match to an x-ipe skill** — scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions to find the right skill
+4. **Load and follow that skill** — the skill defines the proper procedure, prerequisites, and Definition of Done
+
+### Why This Matters
+
+Even if a fix seems simple (e.g., "change the default port"), the correct approach is:
+- User says "fix this bug" → use `x-ipe-task-based-bug-fix` (write failing test first, then fix)
+- User says "this config is wrong" → still a bug fix → use `x-ipe-task-based-bug-fix`
+- User says "add a new endpoint" → use `x-ipe-task-based-code-implementation`
+- User says "refactor this module" → use `x-ipe-task-based-code-refactor`
+
+**The skill ensures quality** — it enforces test coverage, proper documentation, and review steps that ad-hoc coding skips.
+
+### ⛔ Anti-Pattern: Direct Fix Without Skill
+
+```
+❌ User: "the default port is wrong, fix it"
+   Agent: *immediately edits config.py and updates 3 files*
+
+✅ User: "the default port is wrong, fix it"
+   Agent: *identifies this as a bug fix → loads x-ipe-task-based-bug-fix →
+           creates task on board → writes failing test → fixes code →
+           verifies tests pass → updates board*
+```
+
+### ⛔ Real-World Lesson: TASK-681
+
+```
+❌ What happened:
+   User: "CLI adapter returns copilot instead of opencode"
+   Agent: *immediately found _read_active_cli(), added isinstance check,
+           wrote test AFTER the fix, no task board entry*
+
+✅ What should have happened:
+   Agent: *classifies as bug fix → loads x-ipe-task-based-bug-fix →
+           creates TASK-681 on board → diagnoses root cause →
+           runs conflict analysis → writes FAILING test first →
+           implements fix → verifies test passes → updates board*
+```
+
+The skill caught things the direct fix missed: conflict analysis (checking all callers), TDD verification (proving the test fails without the fix), and task tracking.
+
+---
+
 ## ⚠️ CRITICAL: Task Board is THE Source of Truth
 
 **The task board (`x-ipe-docs/planning/task-board.md`) is MANDATORY for ALL work.**
@@ -83,11 +145,14 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 2. Did I create a task on task-board.md? → If NO, STOP and create it
 3. Did I load the corresponding skill? → If NO, STOP and load it
 4. Am I following the skill's procedure? → If NO, STOP and read it
+5. Has the skill reached the step that permits code changes? → If NO, STOP
 ```
+
+**If you catch yourself about to call `edit`, `create`, or write code via `bash` without completing steps 1–4 above — STOP IMMEDIATELY. Go back and follow the process.**
 
 **Common Mistakes to Avoid:**
 - User says "refactor this" → You must use `x-ipe-task-based-code-refactor` skill, NOT just start coding
-- User says "fix this bug" → You must use `x-ipe-task-based-bug-fix` skill, NOT just fix it
+- User says "fix this" → You must use `x-ipe-task-based-bug-fix` skill, NOT just fix it
 - User says "add this feature" → You must identify the right task-based skill first
 
 ### ⚠️ DO NOT Skip Skills
