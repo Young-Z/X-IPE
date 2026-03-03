@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 02-20-2026 13:50:00
+> Last Updated: 03-03-2026 13:55:00
 
 ## Overview
 
@@ -87,26 +87,30 @@ This board tracks all features across the project lifecycle.
 | FEATURE-036-C | EPIC-036 | Stage Ribbon & Action Execution | v1.0 | Completed | [specification.md](../requirements/EPIC-036/FEATURE-036-C/specification.md) | 02-17-2026 | 02-17-2026 14:34:00 |
 | FEATURE-036-D | EPIC-036 | Feature Lanes & Dependencies | v1.0 | Completed | FEATURE-036-A, FEATURE-036-B, FEATURE-036-C | 02-17-2026 | 02-17-2026 15:25:00 |
 | FEATURE-036-E | EPIC-036 | Deliverables, Polling & Lifecycle | v1.0 | Completed | FEATURE-036-A, FEATURE-036-B | 02-17-2026 | 02-17-2026 15:40:00 |
-| FEATURE-037-A | EPIC-037 | Compose Idea Modal — Create New | v1.0 | Implemented | [specification.md](../requirements/EPIC-037/FEATURE-037-A/specification.md), [technical-design.md](../requirements/EPIC-037/FEATURE-037-A/technical-design.md) | 02-19-2026 | 02-19-2026 06:30:00 |
+| FEATURE-037-A | EPIC-037 | Compose Idea Modal — Create New | v1.0 | Completed | [specification.md](../requirements/EPIC-037/FEATURE-037-A/specification.md), [technical-design.md](../requirements/EPIC-037/FEATURE-037-A/technical-design.md) | 02-19-2026 | 03-03-2026 13:55:00 |
 | FEATURE-037-B | EPIC-037 | Compose Idea Modal — Link Existing & Re-Edit | v1.1 | Closed | [specification.md](../requirements/EPIC-037/FEATURE-037-B/specification.md), [CR-001.md](../requirements/EPIC-037/FEATURE-037-B/CR-001.md), [technical-design.md](../requirements/EPIC-037/FEATURE-037-B/technical-design.md), [acceptance-test-results.md](../requirements/EPIC-037/FEATURE-037-B/acceptance-test-results.md) | 02-19-2026 | 02-19-2026 12:39:00 |
-| FEATURE-038-A | EPIC-038 | Action Execution Modal | v1.0 | Implemented | [specification.md](../requirements/EPIC-038/FEATURE-038-A/specification.md), [technical-design.md](../requirements/EPIC-038/FEATURE-038-A/technical-design.md) | 02-20-2026 | 02-20-2026 22:40:00 |
-| FEATURE-038-B | EPIC-038 | Session Idle Detection | v1.0 | Implemented | [specification.md](../requirements/EPIC-038/FEATURE-038-B/specification.md), [technical-design.md](../requirements/EPIC-038/FEATURE-038-B/technical-design.md) | 02-20-2026 | 02-20-2026 22:35:00 |
-| FEATURE-038-C | EPIC-038 | Enhanced Deliverable Viewer | v1.0 | Implemented | [specification.md](../requirements/EPIC-038/FEATURE-038-C/specification.md), [technical-design.md](../requirements/EPIC-038/FEATURE-038-C/technical-design.md) | 02-20-2026 | 02-20-2026 22:46:00 |
-| FEATURE-038-D | EPIC-038 | Refinement Skill Integration | v1.0 | Implemented | [specification.md](../requirements/EPIC-038/FEATURE-038-D/specification.md), [technical-design.md](../requirements/EPIC-038/FEATURE-038-D/technical-design.md) | 02-20-2026 | 02-20-2026 22:20:00 |
-| FEATURE-038-E | EPIC-038 | Execution Skill DoD Update | v1.0 | Implemented | [specification.md](../requirements/EPIC-038/FEATURE-038-E/specification.md), [technical-design.md](../requirements/EPIC-038/FEATURE-038-E/technical-design.md) | 02-20-2026 | 02-20-2026 22:10:00 |
-| FEATURE-039-A | EPIC-039 | Folder Browser Modal (MVP) | v1.0 | Implementing | [specification.md](../requirements/EPIC-039/FEATURE-039-A/specification.md) | 02-22-2026 | 02-22-2026 04:20:00 |
+| FEATURE-038-A | EPIC-038 | Action Execution Modal | v1.0 | Completed | [specification.md](../requirements/EPIC-038/FEATURE-038-A/specification.md), [technical-design.md](../requirements/EPIC-038/FEATURE-038-A/technical-design.md) | 02-20-2026 | 03-03-2026 13:55:00 |
+| FEATURE-038-B | EPIC-038 | Session Idle Detection | v1.0 | Completed | [specification.md](../requirements/EPIC-038/FEATURE-038-B/specification.md), [technical-design.md](../requirements/EPIC-038/FEATURE-038-B/technical-design.md) | 02-20-2026 | 03-03-2026 13:55:00 |
+| FEATURE-038-C | EPIC-038 | Enhanced Deliverable Viewer | v1.0 | Completed | [specification.md](../requirements/EPIC-038/FEATURE-038-C/specification.md), [technical-design.md](../requirements/EPIC-038/FEATURE-038-C/technical-design.md) | 02-20-2026 | 03-03-2026 13:55:00 |
+| FEATURE-038-D | EPIC-038 | Refinement Skill Integration | v1.0 | Completed | [specification.md](../requirements/EPIC-038/FEATURE-038-D/specification.md), [technical-design.md](../requirements/EPIC-038/FEATURE-038-D/technical-design.md) | 02-20-2026 | 03-03-2026 13:55:00 |
+| FEATURE-038-E | EPIC-038 | Execution Skill DoD Update | v1.0 | Completed | [specification.md](../requirements/EPIC-038/FEATURE-038-E/specification.md), [technical-design.md](../requirements/EPIC-038/FEATURE-038-E/technical-design.md) | 02-20-2026 | 03-03-2026 13:55:00 |
+| FEATURE-039-A | EPIC-039 | Folder Browser Modal (MVP) | v1.0 | Completed | [specification.md](../requirements/EPIC-039/FEATURE-039-A/specification.md) | 02-22-2026 | 03-03-2026 13:55:00 |
 | FEATURE-039-B | EPIC-039 | Enhanced Modal Features | v1.0 | Planned | FEATURE-039-A | 02-22-2026 | 02-22-2026 03:50:00 |
-| FEATURE-040-A | EPIC-040 | Modal Generalization & Core Actions (MVP) | v1.0 | Done Implementation | [specification.md](../requirements/EPIC-040/FEATURE-040-A/specification.md) | 02-22-2026 | 02-22-2026 08:05:00 |
-| FEATURE-040-B | EPIC-040 | Workflow Config & Remaining Actions | v1.0 | Planned | FEATURE-040-A | 02-22-2026 | 02-22-2026 07:16:00 |
-| FEATURE-040-C | EPIC-040 | Skill Workflow-Mode Compliance | v1.0 | Planned | - | 02-22-2026 | 02-22-2026 07:16:00 |
-| FEATURE-041-A | EPIC-041 | Per-Feature Config & Core Resolution (MVP) | v1.0 | Testing Complete | [specification.md](../requirements/EPIC-041/FEATURE-041-A/specification.md) | 02-25-2026 | 02-26-2026 04:50:00 |
-| FEATURE-041-B | EPIC-041 | Multi-Source UI & Auto-Suggest | v1.0 | Planned | FEATURE-041-A | 02-25-2026 | 02-25-2026 14:00:00 |
-| FEATURE-041-C | EPIC-041 | Skill Workflow Action Updates | v1.0 | Planned | - | 02-25-2026 | 02-25-2026 14:00:00 |
+| FEATURE-040-A | EPIC-040 | Modal Generalization & Core Actions (MVP) | v1.0 | Completed | [specification.md](../requirements/EPIC-040/FEATURE-040-A/specification.md) | 02-22-2026 | 03-03-2026 13:55:00 |
+| FEATURE-040-B | EPIC-040 | Workflow Config & Remaining Actions | v1.0 | ❌ Superseded | Superseded by EPIC-041 | 02-22-2026 | 03-03-2026 13:55:00 |
+| FEATURE-040-C | EPIC-040 | Skill Workflow-Mode Compliance | v1.0 | Completed | All 8 skills verified with execution_mode + extra_context_reference + update_workflow_action | 02-22-2026 | 03-03-2026 13:55:00 |
+| FEATURE-041-A | EPIC-041 | Per-Feature Config & Core Resolution (MVP) | v1.0 | Completed | [specification.md](../requirements/EPIC-041/FEATURE-041-A/specification.md) | 02-25-2026 | 03-03-2026 13:55:00 |
+| FEATURE-041-B | EPIC-041 | Multi-Source UI & Auto-Suggest | v1.0 | ❌ Superseded | Superseded by CR-002 | 02-25-2026 | 03-03-2026 13:55:00 |
+| FEATURE-041-C | EPIC-041 | Skill Workflow Action Updates | v1.0 | Completed | All 8 skills verified with workflow.action + feature_id handling | 02-25-2026 | 03-03-2026 13:55:00 |
 | FEATURE-041-D | EPIC-041 | New Workflow Actions (Phase 5) | v1.0 | Planned | FEATURE-041-A, FEATURE-041-C | 02-25-2026 | 02-25-2026 14:00:00 |
-| FEATURE-041-E | EPIC-041 | Deliverable Tagging & Action Context Schema (MVP) | v1.0 | Done | - | 02-26-2026 | 02-26-2026 14:50:00 |
-| FEATURE-041-F | EPIC-041 | Action Context Modal UI & Persistence | v1.0 | Done | FEATURE-041-E | 02-26-2026 | 02-26-2026 14:50:00 |
-| FEATURE-041-G | EPIC-041 | Skill Extra Context Reference | v1.0 | Done | - | 02-26-2026 | 02-26-2026 14:50:00 |
-| FEATURE-042-A | EPIC-042 | Workflow Prompts Config & Basic Template Resolution | v1.0 | Acceptance Tested | [specification.md](../requirements/EPIC-042/FEATURE-042-A/specification.md) | 02-27-2026 | 02-27-2026 12:15:00 |
-| FEATURE-042-B | EPIC-042 | Conditional Block Parsing & Error Handling | v1.0 | Acceptance Tested | [specification.md](../requirements/EPIC-042/FEATURE-042-B/specification.md) | 02-27-2026 | 02-27-2026 12:15:00 |
-| FEATURE-042-C | EPIC-042 | Deliverable-Default Dropdowns & Read-Only Preview | v1.0 | Acceptance Tested | [specification.md](../requirements/EPIC-042/FEATURE-042-C/specification.md) | 02-27-2026 | 02-27-2026 12:15:00 |
-| FEATURE-042-D | EPIC-042 | Full Migration & i18n | v1.0 | Acceptance Tested | [specification.md](../requirements/EPIC-042/FEATURE-042-D/specification.md) | 02-27-2026 | 02-27-2026 12:15:00 |
+| FEATURE-041-E | EPIC-041 | Deliverable Tagging & Action Context Schema (MVP) | v1.0 | Completed | - | 02-26-2026 | 03-03-2026 13:55:00 |
+| FEATURE-041-F | EPIC-041 | Action Context Modal UI & Persistence | v1.0 | Completed | FEATURE-041-E | 02-26-2026 | 03-03-2026 13:55:00 |
+| FEATURE-041-G | EPIC-041 | Skill Extra Context Reference | v1.0 | Completed | - | 02-26-2026 | 03-03-2026 13:55:00 |
+| FEATURE-042-A | EPIC-042 | Workflow Prompts Config & Basic Template Resolution | v1.0 | Completed | [specification.md](../requirements/EPIC-042/FEATURE-042-A/specification.md) | 02-27-2026 | 03-03-2026 13:55:00 |
+| FEATURE-042-B | EPIC-042 | Conditional Block Parsing & Error Handling | v1.0 | Completed | [specification.md](../requirements/EPIC-042/FEATURE-042-B/specification.md) | 02-27-2026 | 03-03-2026 13:55:00 |
+| FEATURE-042-C | EPIC-042 | Deliverable-Default Dropdowns & Read-Only Preview | v1.0 | Completed | [specification.md](../requirements/EPIC-042/FEATURE-042-C/specification.md) | 02-27-2026 | 03-03-2026 13:55:00 |
+| FEATURE-042-D | EPIC-042 | Full Migration & i18n | v1.0 | Completed | [specification.md](../requirements/EPIC-042/FEATURE-042-D/specification.md) | 02-27-2026 | 03-03-2026 13:55:00 |
+| FEATURE-043-A | EPIC-043 | Link Interception & Preview Modal | v1.0 | Planned | - | 03-03-2026 | 03-03-2026 15:10:00 |
+| FEATURE-043-B | EPIC-043 | Breadcrumb Navigation & Visual Distinction | v1.0 | Planned | FEATURE-043-A | 03-03-2026 | 03-03-2026 15:10:00 |
+| FEATURE-043-C | EPIC-043 | Skill Path Convention Updates | v1.0 | Planned | - | 03-03-2026 | 03-03-2026 15:10:00 |
+| FEATURE-043-D | EPIC-043 | Existing File Migration | v1.0 | Planned | FEATURE-043-C | 03-03-2026 | 03-03-2026 15:10:00 |

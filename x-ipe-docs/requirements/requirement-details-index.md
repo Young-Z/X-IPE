@@ -22,4 +22,4 @@
 | 12 | [Part 12](requirement-details-part-12.md) | EPIC-040 | ~260 |
 | 13 | [Part 13](requirement-details-part-13.md) | EPIC-041, CR-002 | ~553 |
 | 14 | [Part 14](requirement-details-part-14.md) | EPIC-042 | ~241 |
-| 15 | [Part 15](requirement-details-part-15.md) | EPIC-043 | ~165 |
+| 15 | [Part 15](requirement-details-part-15.md) | EPIC-043 (FEATURE-043-A to FEATURE-043-D) | ~323 |

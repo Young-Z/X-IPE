@@ -183,3 +183,141 @@ From user feedback (Feedback-20260303-212659): links in rendered markdown (idea 
 ### Open Questions
 
 - None — all clarifications resolved during ideation and requirement gathering
+
+---
+
+## Feature List
+
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-043-A | EPIC-043 | Link Interception & Preview Modal | v1.0 | Click-to-preview for `x-ipe-docs/` and `.github/skills/` links in rendered markdown. Opens DeliverableViewer modal with error/loading states. MVP. | None |
+| FEATURE-043-B | EPIC-043 | Breadcrumb Navigation & Visual Distinction | v1.0 | Breadcrumb back-navigation within preview modal (capped at 5 levels) and visual link distinction (📄 icon, tooltip, dashed underline). | FEATURE-043-A |
+| FEATURE-043-C | EPIC-043 | Skill Path Convention Updates | v1.0 | Add full root-relative path constraint to 12 markdown-generating skills and skill creator template via CRs. | None |
+| FEATURE-043-D | EPIC-043 | Existing File Migration | v1.0 | Migrate existing markdown files in `x-ipe-docs/` and `.github/skills/` to full root-relative paths via per-file/folder CRs. | FEATURE-043-C |
+
+---
+
+## Linked Mockups
+
+| Mockup Function Name | Feature | Mockup Link |
+|---------------------|---------|-------------|
+| File Link Preview — Full Interactive (5 scenarios) | FEATURE-043-A, FEATURE-043-B | [file-link-preview-v1.html](EPIC-043/mockups/file-link-preview-v1.html) |
+
+---
+
+## Feature Details
+
+### FEATURE-043-A: Link Interception & Preview Modal
+
+**Version:** v1.0
+**Priority:** P0 (MVP)
+**Brief Description:** Core click-to-preview functionality. Intercept clicks on internal links (`x-ipe-docs/`, `.github/skills/`) in rendered markdown and open DeliverableViewer modal with file content. Includes error/loading states and abort handling.
+
+**Acceptance Criteria:**
+- [ ] AC-043-A.1: Clicking a link whose `href` starts with `x-ipe-docs/` in any rendered markdown opens a preview modal (not navigate away)
+- [ ] AC-043-A.2: Clicking a link whose `href` starts with `.github/skills/` in any rendered markdown opens a preview modal
+- [ ] AC-043-A.3: Preview modal renders markdown, HTML, and code files correctly using ContentRenderer
+- [ ] AC-043-A.4: File-not-found (404) shows inline error message in modal: "File not found: {path}"
+- [ ] AC-043-A.5: Network error shows inline error with retry button
+- [ ] AC-043-A.6: Loading state shows spinner with "Loading {path}..." text
+- [ ] AC-043-A.7: Clicking a new link while loading aborts the pending request (AbortController)
+- [ ] AC-043-A.8: External links (not starting with `x-ipe-docs/` or `.github/skills/`) continue to behave normally
+- [ ] AC-043-A.9: No regression in existing ContentRenderer, DeliverableViewer, or FolderBrowserModal functionality
+- [ ] AC-043-A.10: Link interception uses event delegation on `.markdown-body` containers
+
+**Dependencies:**
+- None (MVP — no prior features required)
+
+**Technical Considerations:**
+- Custom link renderer in marked.js adds `data-preview-path` attribute to internal links
+- Delegated click handler on `.markdown-body` containers intercepts `[data-preview-path]` clicks
+- Fetches file content via existing `GET /api/file/content?path={path}` endpoint
+- Reuses DeliverableViewer modal component as-is for display
+- AbortController instance per modal for request cancellation
+- Progressive enhancement — links remain standard `<a>` tags if JS fails
+
+**Relevant FRs:** FR-043.1 (Link Interception), FR-043.4 (Error & Loading States)
+**Relevant HRs:** HR-043.3–043.5, HR-043.10–043.14
+
+---
+
+### FEATURE-043-B: Breadcrumb Navigation & Visual Distinction
+
+**Version:** v1.0
+**Priority:** P1
+**Brief Description:** Enhance preview modal with breadcrumb back-navigation for nested link traversal (capped at 5 levels) and visual distinction for internal links (📄 icon, tooltip, dashed underline).
+
+**Acceptance Criteria:**
+- [ ] AC-043-B.1: Clicking a link inside the preview modal replaces modal content and adds breadcrumb entry
+- [ ] AC-043-B.2: Breadcrumb bar shows full navigation path (file titles/names)
+- [ ] AC-043-B.3: "← Back" button returns to previous file in the stack
+- [ ] AC-043-B.4: Clicking a breadcrumb entry navigates directly to that level (truncates stack)
+- [ ] AC-043-B.5: Breadcrumb depth capped at 5 levels — shows warning tooltip at max depth
+- [ ] AC-043-B.6: Internal links show 📄 emoji prefix
+- [ ] AC-043-B.7: Internal links show `title="Open preview"` tooltip on hover
+- [ ] AC-043-B.8: Internal links styled with dashed underline and accent color (Emerald 500)
+- [ ] AC-043-B.9: External links remain unchanged (blue, solid underline, no icon)
+
+**Dependencies:**
+- FEATURE-043-A: Preview modal must exist before breadcrumb can be added
+
+**Technical Considerations:**
+- Navigation stack: array of `{path, title}` objects, max 5 entries
+- Breadcrumb bar added to DeliverableViewer header area
+- Visual distinction via CSS `::before` pseudo-element or markdown render-time insertion
+- Dashed underline uses brand theme accent color (Emerald 500)
+
+**Relevant FRs:** FR-043.2 (Preview Modal Enhancement), FR-043.3 (Visual Link Distinction)
+**Relevant HRs:** HR-043.6–043.9
+
+---
+
+### FEATURE-043-C: Skill Path Convention Updates
+
+**Version:** v1.0
+**Priority:** P1
+**Brief Description:** Add the full root-relative path constraint to all 12 markdown-generating skills and the skill creator template. Executed as CRs on each skill's SKILL.md file.
+
+**Acceptance Criteria:**
+- [ ] AC-043-C.1: All 12 skills listed in HR-043.16 have path convention constraint in their `<constraints>` sections
+- [ ] AC-043-C.2: Constraint text: "All internal links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`)"
+- [ ] AC-043-C.3: `x-ipe-meta-skill-creator` template updated with path convention in output template
+- [ ] AC-043-C.4: Newly generated skill outputs use full root-relative paths
+
+**Dependencies:**
+- None (skill file changes are independent of frontend work)
+
+**Technical Considerations:**
+- Each skill CR is a small, targeted change to the `<constraints>` section
+- Skill creator template change ensures future skills auto-comply
+- Implementation via `x-ipe-task-based-change-request` skill per-skill or batched
+
+**Relevant FRs:** FR-043.5 (Skill Path Convention Constraint)
+**Relevant HRs:** HR-043.15–043.17
+
+---
+
+### FEATURE-043-D: Existing File Migration
+
+**Version:** v1.0
+**Priority:** P2
+**Brief Description:** Migrate all existing markdown files in `x-ipe-docs/` and `.github/skills/` from relative/partial paths to full root-relative format. Executed as CRs per-file or per-folder.
+
+**Acceptance Criteria:**
+- [ ] AC-043-D.1: All `.md` files in `x-ipe-docs/` and `.github/skills/` use full root-relative internal paths
+- [ ] AC-043-D.2: Paths inside fenced code blocks and inline code are NOT rewritten
+- [ ] AC-043-D.3: Unresolvable paths (target file doesn't exist) flagged for manual review, not auto-rewritten
+- [ ] AC-043-D.4: Each migration executed as a separate CR task via `x-ipe-task-based-change-request`
+
+**Dependencies:**
+- FEATURE-043-C: Convention must be defined in skills first so migration follows the same standard
+
+**Technical Considerations:**
+- Scope: `.md` files under `x-ipe-docs/` and `.github/skills/` only
+- Rule: replace `../path`, `./path`, and bare `path` references with `x-ipe-docs/...` or `.github/skills/...`
+- Code block exclusion: regex/parser must skip fenced (` ``` `) and inline (`` ` ``) code sections
+- Ambiguous paths: flag for review if target doesn't exist at computed location
+- Large blast radius but each CR is small and reviewable
+
+**Relevant FRs:** FR-043.6 (File Migration Convention)
+**Relevant HRs:** HR-043.18–043.21
