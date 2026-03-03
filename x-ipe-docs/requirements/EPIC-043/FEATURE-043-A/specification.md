@@ -54,7 +54,7 @@ This is the MVP (P0) feature of EPIC-043 (File Link Preview). It covers link int
 
 ### Error & Loading States
 
-- [ ] **AC-043-A.9:** While file is loading, modal shows a spinner with "Loading {path}..." text
+- [ ] **AC-043-A.9:** While file is loading, modal shows a spinner with the file path displayed below it
 - [ ] **AC-043-A.10:** On 404 response, modal shows inline error: "File not found: {path}" with hint text
 - [ ] **AC-043-A.11:** On network error, modal shows inline error: "Failed to load file" with a retry button
 - [ ] **AC-043-A.12:** Clicking retry button re-fetches the same file
@@ -166,7 +166,7 @@ Derived from mockup (file-link-preview-v1.html):
 ### Loading State
 
 - Centered spinner in content area
-- Text below spinner: "Loading {file-path}..."
+- File path text displayed below spinner
 - No flickering — spinner appears immediately on link click
 
 ### Error State
@@ -174,7 +174,6 @@ Derived from mockup (file-link-preview-v1.html):
 - Centered error icon/illustration
 - Primary text: "File not found" or "Failed to load file"
 - Secondary text: full file path attempted
-- Hint text: "Check the file path or ensure the file exists"
 - Retry button (for network errors only)
 
 ### Interactive Elements

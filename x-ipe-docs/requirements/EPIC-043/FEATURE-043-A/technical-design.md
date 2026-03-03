@@ -109,8 +109,10 @@ classDiagram
         -_modal: HTMLElement
         -_backdrop: HTMLElement
         -_contentArea: HTMLElement
+        -_titleEl: HTMLElement
         -_abortController: AbortController
         -_isOpen: boolean
+        -_escHandler: Function
         +open(filePath): Promise
         +close()
         +attachTo(container)$
@@ -120,7 +122,7 @@ classDiagram
         -_showContent(data): void
         -_renderByType(content, type, extension): string
         -_fetchFile(path): Promise
-        -_handleLinkClick(event): void
+        -_escapeHtml(text): string
     }
 
     ContentRenderer --> LinkPreviewManager : delegates link clicks to
@@ -146,7 +148,7 @@ New file at `src/x_ipe/static/js/features/link-preview-manager.js`.
 
 **Constructor:**
 - No constructor arguments needed (singleton-like, manages its own modal)
-- Initialize: `_modal = null`, `_backdrop = null`, `_abortController = null`, `_isOpen = false`
+- Initialize: `_modal = null`, `_backdrop = null`, `_contentArea = null`, `_titleEl = null`, `_abortController = null`, `_isOpen = false`, `_escHandler = null`
 
 **`_createModal()` method:**
 - Creates modal DOM matching DeliverableViewer pattern:
@@ -186,7 +188,7 @@ New file at `src/x_ipe/static/js/features/link-preview-manager.js`.
 5. Catch `AbortError` silently (request was intentionally cancelled)
 
 **`_showLoading(path)` method:**
-- Set content area HTML to spinner + "Loading {path}..." text
+- Set content area HTML to spinner + file path text below it
 - Match mockup "⑤ Loading State" scenario
 
 **`_showError(message, path, retryable)` method:**
@@ -234,7 +236,9 @@ const renderer = new marked.Renderer();
 const originalLink = renderer.link.bind(renderer);
 renderer.link = function(href, title, text) {
     if (href && (href.startsWith('x-ipe-docs/') || href.startsWith('.github/skills/'))) {
-        return `<a href="${href}" data-preview-path="${href}" title="${title || 'Open preview'}">${text}</a>`;
+        const safeHref = href.replace(/"/g, '&quot;');
+        const safeTitle = title ? ` title="${title.replace(/"/g, '&quot;')}"` : '';
+        return `<a href="${safeHref}" data-preview-path="${safeHref}"${safeTitle}>${text}</a>`;
     }
     return originalLink(href, title, text);
 };

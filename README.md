@@ -861,6 +861,7 @@ Improvements include:
 | **File Change Indicator** | Visual indicator showing unsaved changes in navigation | ✅ Completed |
 | **Interactive Console v2** | Full xterm.js terminal with session persistence, auto-reconnection, split-pane support | ✅ Completed |
 | **Application Action Tracing** | Python function tracing with @x_ipe_tracing decorator, sensitive data redaction, duration-based control, dashboard UI | ✅ Completed |
+| **File Link Preview** | Click internal links (`x-ipe-docs/`, `.github/skills/`) in rendered markdown to preview files in-place via modal overlay | ✅ Completed |
 
 ### 🔜 Planned
 
