@@ -64,6 +64,38 @@ input:
     # or N/A if no mockups
 ```
 
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="epic_id" source="auto-assigned">
+    <steps>
+      1. Scan x-ipe-docs/requirements/ for existing EPIC-{nnn} folders
+      2. Find the highest {nnn} value
+      3. Assign EPIC-{nnn+1} (e.g., if EPIC-003 exists, assign EPIC-004)
+      4. If no EPICs exist, assign EPIC-001
+    </steps>
+  </field>
+  <field name="mockup_list" source="previous task | human input | N/A">
+    <steps>
+      1. Check previous task (Idea Mockup) output for task_output_links
+      2. If not available, ask human for mockup links
+      3. If none provided, set to N/A
+    </steps>
+  </field>
+  <field name="extra_context_reference" source="workflow context | auto-detect">
+    <steps>
+      1. If workflow-mode: read from workflow context extra_context_reference
+      2. If free-mode: auto-detect from existing project files
+      3. Default: N/A for all refs
+    </steps>
+  </field>
+</input_init>
+```
+
 ---
 
 ## Definition of Ready

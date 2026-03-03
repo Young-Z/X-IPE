@@ -34,7 +34,18 @@ class ContentRenderer {
      */
     initMarked() {
         if (typeof marked !== 'undefined') {
+            const renderer = new marked.Renderer();
+            const originalLink = renderer.link.bind(renderer);
+            renderer.link = function(href, title, text) {
+                if (href && (href.startsWith('x-ipe-docs/') || href.startsWith('.github/skills/'))) {
+                    const safeHref = href.replace(/"/g, '&quot;');
+                    const safeTitle = title ? ` title="${title.replace(/"/g, '&quot;')}"` : '';
+                    return `<a href="${safeHref}" data-preview-path="${safeHref}"${safeTitle}>${text}</a>`;
+                }
+                return originalLink(href, title, text);
+            };
             marked.setOptions({
+                renderer,
                 highlight: function(code, lang) {
                     if (typeof hljs !== 'undefined' && lang && hljs.getLanguage(lang)) {
                         try {
@@ -159,6 +170,21 @@ class ContentRenderer {
         
         // Apply syntax highlighting to code blocks
         this.highlightCodeBlocks();
+        
+        // Auto-attach link preview interception
+        this.attachLinkPreview(this.container);
+    }
+    
+    /**
+     * Attach link preview to markdown-body containers within parent.
+     * FEATURE-043-A: Enables click interception on internal links.
+     */
+    attachLinkPreview(container) {
+        if (typeof LinkPreviewManager === 'undefined') return;
+        const markdownBody = container.querySelector('.markdown-body') || container;
+        if (markdownBody._linkPreviewAttached) return;
+        LinkPreviewManager.attachTo(markdownBody);
+        markdownBody._linkPreviewAttached = true;
     }
     
     /**

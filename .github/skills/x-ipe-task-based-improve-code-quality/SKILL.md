@@ -85,6 +85,33 @@ input:
   refactoring_principle: "{from previous task}"
 ```
 
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+
+  <field name="refactoring_scope" source="x-ipe-task-based-refactoring-analysis output">
+    <steps>
+      1. IF previous task (Refactoring Analysis) output contains refactoring_scope → use directly
+      2. ELSE → STOP — REDIRECT to x-ipe-task-based-refactoring-analysis
+    </steps>
+  </field>
+
+  <field name="code_quality_evaluated" source="x-ipe-task-based-refactoring-analysis output">
+    <steps>
+      1. IF previous task output contains code_quality_evaluated → use directly
+      2. ELSE → STOP — REDIRECT to x-ipe-task-based-refactoring-analysis
+    </steps>
+  </field>
+
+  <field name="refactoring_suggestion" source="x-ipe-task-based-refactoring-analysis output (pass-through)" />
+  <field name="refactoring_principle" source="x-ipe-task-based-refactoring-analysis output (pass-through)" />
+</input_init>
+```
+
 ---
 
 ## Definition of Ready

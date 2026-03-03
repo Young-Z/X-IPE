@@ -23,6 +23,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
+**BLOCKING: Single Feature Only.** This skill operates on exactly ONE feature at a time. Do NOT batch or combine multiple features in a single execution. If multiple features need processing, run this skill separately for each feature.
+
 ---
 
 ## Input Parameters
@@ -58,6 +60,62 @@ input:
   # Context (from previous task or project)
   specification_path: "x-ipe-docs/features/{FEATURE-XXX}/specification.md"
   test_results: "all passing"
+```
+
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="feature_id" source="previous task (Acceptance Test) output OR task board OR human input">
+    <steps>
+      1. IF previous task was "Feature Acceptance Test" → extract from task_output_links.feature_id
+      2. ELIF task board has feature_id in task data → use it
+      3. ELSE → ask human for feature_id
+    </steps>
+  </field>
+  <field name="feature_title" source="feature specification OR features.md">
+    <steps>
+      1. Query feature board for feature_id → extract title
+      2. ELIF x-ipe-docs/features/{feature_id}/specification.md exists → extract title from header
+      3. ELSE → ask human
+    </steps>
+  </field>
+  <field name="feature_version" source="features.md OR default '1.0.0'">
+    <steps>
+      1. Query feature board for feature_id → extract version
+      2. ELIF not found → default to "1.0.0"
+    </steps>
+  </field>
+  <field name="git_strategy" source=".x-ipe.yaml configuration">
+    <steps>
+      1. Read .x-ipe.yaml → extract git.strategy value
+      2. Expected values: "main-branch-only" | "dev-session-based"
+    </steps>
+  </field>
+  <field name="git_main_branch" source="auto-detect from git">
+    <steps>
+      1. Run: git symbolic-ref refs/remotes/origin/HEAD → extract branch name
+      2. Fallback: "main"
+    </steps>
+  </field>
+  <field name="git_dev_branch" source="derived from git config user.name (sanitized)">
+    <steps>
+      1. Run: git config user.name → sanitize (lowercase, spaces→hyphens, remove special chars)
+      2. Branch name: dev/{sanitized_git_user_name}
+      3. Only used when git_strategy == "dev-session-based"
+    </steps>
+  </field>
+  <field name="specification_path" source="auto-detect from feature folder">
+    <steps>
+      1. Check x-ipe-docs/features/{feature_id}/specification.md
+      2. IF exists → use path
+      3. ELSE → check x-ipe-docs/requirements/{feature_id}/specification.md (legacy)
+    </steps>
+  </field>
+</input_init>
 ```
 
 ---

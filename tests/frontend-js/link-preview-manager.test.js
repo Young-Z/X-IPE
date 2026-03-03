@@ -18,16 +18,32 @@ function ensureContentRenderer() {
   if (!_crLoaded) {
     try {
       // marked.js must be available before ContentRenderer loads
+      // Renderer must be a class (used with `new`)
+      class MockRenderer {
+        link(href, title, text) {
+          return `<a href="${href}">${text}</a>`;
+        }
+      }
+
+      let activeRenderer = null;
+
       globalThis.marked = {
-        parse: vi.fn((md) => `<p>${md}</p>`),
-        setOptions: vi.fn(),
-        Renderer: vi.fn(() => ({
-          link: vi.fn(),
-        })),
+        parse: vi.fn((md) => {
+          // Use active renderer for links if available
+          const renderer = activeRenderer || new MockRenderer();
+          return md.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, href) => {
+            return renderer.link(href, null, text);
+          });
+        }),
+        setOptions: vi.fn((opts) => {
+          if (opts && opts.renderer) activeRenderer = opts.renderer;
+        }),
+        Renderer: MockRenderer,
       };
       globalThis.hljs = {
         getLanguage: vi.fn(() => true),
         highlight: vi.fn((code) => ({ value: code })),
+        highlightElement: vi.fn(),
       };
       loadFeatureScript('../core/content-renderer.js');
       _crLoaded = true;
@@ -60,6 +76,10 @@ describe('FEATURE-043-A: Link Interception & Preview Modal', () => {
     globalThis.fetch = vi.fn();
     _crLoaded = false;
     _lpmLoaded = false;
+    // Reset singleton state
+    if (globalThis.LinkPreviewManager) {
+      globalThis.LinkPreviewManager.instance = null;
+    }
   });
 
   afterEach(() => {
@@ -197,12 +217,11 @@ describe('FEATURE-043-A: Link Interception & Preview Modal', () => {
       container.innerHTML = '<a href="x-ipe-docs/test.md" data-preview-path="x-ipe-docs/test.md">test</a>';
       document.body.appendChild(container);
 
-      // Mock the open method
-      const instance = LPM.instance || new LPM();
-      const openSpy = vi.spyOn(instance, 'open').mockResolvedValue();
-      if (LPM.instance) LPM.instance = instance;
-
+      // attachTo creates the singleton if needed
       LPM.attachTo(container);
+
+      // Spy on the singleton's open method
+      const openSpy = vi.spyOn(LPM.instance, 'open').mockResolvedValue();
 
       const link = container.querySelector('a');
       const event = new Event('click', { bubbles: true });
@@ -337,9 +356,7 @@ describe('FEATURE-043-A: Link Interception & Preview Modal', () => {
       globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        headers: { get: () => 'application/octet-stream' },
-        json: async () => { throw new Error('not json'); },
-        text: async () => 'binary data',
+        json: async () => ({ content: null, type: 'binary', path: 'x-ipe-docs/image.png', extension: '.png' }),
       });
 
       const instance = LPM.instance || new LPM();
@@ -368,10 +385,10 @@ describe('FEATURE-043-A: Link Interception & Preview Modal', () => {
       expect(closeBtn).not.toBeNull();
       closeBtn.click();
 
-      // After close, backdrop should be removed or hidden
-      await new Promise(r => setTimeout(r, 50));
-      const backdrop = document.querySelector('.link-preview-backdrop.active, .deliverable-preview-backdrop.active');
-      expect(backdrop).toBeNull();
+      // After close, backdrop should not have active class
+      const backdrop = document.querySelector('.link-preview-backdrop');
+      expect(backdrop).not.toBeNull();
+      expect(backdrop.classList.contains('active')).toBe(false);
     });
 
     it('should close modal on backdrop click', async () => {

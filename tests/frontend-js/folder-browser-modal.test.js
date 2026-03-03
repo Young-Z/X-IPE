@@ -678,7 +678,8 @@ describe('FEATURE-039-A: Folder Browser Modal (MVP)', () => {
 
       // Load content-renderer.js with proper mocks
       const origMarked = globalThis.marked;
-      globalThis.marked = { parse: vi.fn((md) => `<p>${md}</p>`), setOptions: vi.fn() };
+      class MockRenderer { link(h, t, x) { return `<a href="${h}">${x}</a>`; } }
+      globalThis.marked = { parse: vi.fn((md) => `<p>${md}</p>`), setOptions: vi.fn(), Renderer: MockRenderer };
 
       try {
         loadFeatureScript('../core/content-renderer.js', 'core');

@@ -30,6 +30,7 @@
     const SCROLL_RESUME_MS       = 5000;
     const HEALTH_CHECK_MS        = 60000;
     const STALE_THRESHOLD_MS     = 180000;
+    const HEARTBEAT_INTERVAL_MS  = 30000;
     const TYPING_BASE_DELAY      = 30;
     const TYPING_JITTER          = 50;
 
@@ -477,6 +478,19 @@
             };
             const stopHealthCheck = () => { if (healthCheckId) { clearInterval(healthCheckId); healthCheckId = null; } };
 
+            // -- heartbeat: ping backend every 30s so it knows we're alive
+            let heartbeatId = null;
+            const startHeartbeat = () => {
+                if (heartbeatId) clearInterval(heartbeatId);
+                heartbeatId = setInterval(() => {
+                    const s = getSession();
+                    if (socket.connected && s?.sessionId) {
+                        socket.emit('heartbeat', { session_id: s.sessionId });
+                    }
+                }, HEARTBEAT_INTERVAL_MS);
+            };
+            const stopHeartbeat = () => { if (heartbeatId) { clearInterval(heartbeatId); heartbeatId = null; } };
+
             const emitAttach = (sessionId) => {
                 const s = getSession();
                 const dims = s?.fitAddon?.proposeDimensions();
@@ -493,6 +507,7 @@
                 if (!s) return;
                 lastPongTime = Date.now();
                 startHealthCheck();
+                startHeartbeat();
                 this._updateStatus();
                 emitAttach(existingSessionId);
             });
@@ -566,6 +581,7 @@
             socket.on('disconnect', reason => {
                 const s = getSession();
                 stopHealthCheck();
+                stopHeartbeat();
                 this._updateStatus();
                 if (reason !== 'io client disconnect' && s) {
                     const msg = reason === 'ping timeout'
@@ -581,6 +597,7 @@
                 if (!s) return;
                 lastPongTime = Date.now();
                 startHealthCheck();
+                startHeartbeat();
                 this._updateStatus();
                 emitAttach(s.sessionId);
             });
@@ -592,6 +609,7 @@
 
             socket.io.on('reconnect_failed', () => {
                 stopHealthCheck();
+                stopHeartbeat();
                 getSession()?.terminal.write('\r\n\x1b[31m[Connection lost - please refresh page]\x1b[0m\r\n');
             });
 

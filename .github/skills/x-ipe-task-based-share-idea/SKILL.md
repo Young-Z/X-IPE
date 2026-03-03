@@ -53,6 +53,31 @@ input:
   # When set, apply to content structure, format selection, document styling, and conversion.
 ```
 
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="idea_folder" source="human input | auto-detect">
+    <steps>
+      1. If human provides explicit folder path, use it
+      2. Otherwise, scan x-ipe-docs/ideas/ for most recent folder (by modification time)
+      3. Confirm resolved folder with human before proceeding
+    </steps>
+  </field>
+  <field name="toolbox_meta" source="default: x-ipe-docs/config/tools.json" />
+  <field name="extra_instructions" source="human input | config | null">
+    <steps>
+      1. If human provides explicit extra instructions, use them
+      2. Else if stages.ideation.sharing._extra_instruction exists in toolbox_meta config, use that
+      3. Otherwise, set to null
+    </steps>
+  </field>
+</input_init>
+```
+
 ---
 
 ## Definition of Ready

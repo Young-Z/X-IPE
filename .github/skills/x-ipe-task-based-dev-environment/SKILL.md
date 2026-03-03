@@ -53,6 +53,20 @@ input:
   project_name: "{project name}"
 ```
 
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="git_strategy" source="from .x-ipe.yaml" />
+  <field name="git_main_branch" source="auto-detect via `git symbolic-ref refs/remotes/origin/HEAD`" />
+  <field name="project_root" source="current working directory" />
+  <field name="project_name" source="from package.json/pyproject.toml name field or directory name" />
+</input_init>
+```
+
 ---
 
 ## Definition of Ready

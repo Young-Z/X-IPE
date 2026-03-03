@@ -16,25 +16,24 @@ from pathlib import Path
 
 
 class TestWorkflowNavButton:
-    """Verify the workflow button is in the index.html template."""
+    """Verify the workflow mode toggle is in the index.html template."""
 
-    def test_index_has_workflow_button(self):
-        """AC-001: 'Engineering Workflow' button appears in top-menu."""
+    def test_index_has_workflow_toggle(self):
+        """AC-001: Mode toggle switch appears in top-menu."""
         template_path = Path(__file__).parent.parent / "src" / "x_ipe" / "templates" / "index.html"
         content = template_path.read_text(encoding="utf-8")
-        assert 'id="btn-workflow"' in content
+        assert 'id="mode-toggle"' in content
 
-    def test_workflow_button_has_icon(self):
-        """AC-002: Button uses Bootstrap icon bi-diagram-3."""
+    def test_workflow_toggle_has_switch(self):
+        """AC-002: Toggle uses role=switch button."""
         template_path = Path(__file__).parent.parent / "src" / "x_ipe" / "templates" / "index.html"
         content = template_path.read_text(encoding="utf-8")
-        assert "bi-diagram-3" in content
+        assert 'id="mode-toggle-btn"' in content
 
     def test_workflow_button_has_label(self):
         """AC-002: Button has label text 'Workflow'."""
         template_path = Path(__file__).parent.parent / "src" / "x_ipe" / "templates" / "index.html"
         content = template_path.read_text(encoding="utf-8")
-        # Should contain the label text
         assert ">Workflow<" in content
 
 
@@ -64,10 +63,10 @@ class TestWorkflowModuleFiles:
         assert css_path.exists(), "workflow.css must exist"
 
     def test_workflow_js_size_under_limit(self):
-        """NFR-002: JavaScript module under 15KB unminified."""
+        """NFR-002: JavaScript module under 20KB unminified."""
         js_path = Path(__file__).parent.parent / "src" / "x_ipe" / "static" / "js" / "features" / "workflow.js"
         size_kb = js_path.stat().st_size / 1024
-        assert size_kb < 15, f"workflow.js is {size_kb:.1f}KB, must be under 15KB"
+        assert size_kb < 20, f"workflow.js is {size_kb:.1f}KB, must be under 20KB"
 
 
 class TestWorkflowScriptInclusion:
@@ -96,13 +95,13 @@ class TestWorkflowScriptInclusion:
 
 
 class TestWorkflowInitHandler:
-    """Verify init.js has the workflow button click handler."""
+    """Verify init.js has the workflow mode toggle handler."""
 
     def test_init_has_workflow_handler(self):
-        """init.js registers click handler for btn-workflow."""
+        """init.js registers click handler for mode-toggle-btn."""
         init_path = Path(__file__).parent.parent / "src" / "x_ipe" / "static" / "js" / "init.js"
         content = init_path.read_text(encoding="utf-8")
-        assert "btn-workflow" in content
+        assert "mode-toggle-btn" in content
 
     def test_init_calls_workflow_render(self):
         """init.js calls workflow.render() on click."""

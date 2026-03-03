@@ -23,6 +23,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
+**BLOCKING: Single Feature Only.** This skill operates on exactly ONE feature at a time. Do NOT batch or combine multiple features in a single execution. If multiple features need processing, run this skill separately for each feature.
+
 **Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the workflow state was updated before marking the task complete.
 
 CRITICAL: This skill is ONLY for features with web UI. If the feature is backend API only, CLI tool only, or library/SDK only, skip this skill and proceed to Feature Closing.
@@ -60,6 +62,21 @@ input:
   # Context (from previous task or project)
   specification_link: "x-ipe-docs/requirements/FEATURE-XXX/specification.md"
   technical_design_link: "x-ipe-docs/requirements/FEATURE-XXX/technical-design.md"
+```
+
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="feature_id" source="from previous task output or task board or human input" />
+  <field name="target_url" source="IF feature-stage, resolve from feature's dev server config; IF standalone, from human input" />
+  <field name="specification_link" source="auto-detect from x-ipe-docs/requirements/{feature_id}/specification.md" />
+  <field name="technical_design_link" source="auto-detect from x-ipe-docs/requirements/{feature_id}/technical-design.md" />
+  <field name="extra_context_reference" source="from workflow context or auto-detect from feature artifacts" />
+</input_init>
 ```
 
 ---

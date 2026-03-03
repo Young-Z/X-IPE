@@ -64,23 +64,39 @@ input:
   ideation_toolbox_meta: "x-ipe-docs/config/tools.json"
 ```
 
-### Input Resolution Rules
+### Input Initialization
 
-**current_idea_folder:**
-- Source: previous Ideation task output, task board, or human input
-- IF null: list folders under `x-ipe-docs/ideas/` and ask human to select
-- Validate: folder exists AND contains `idea-summary-vN.md`
-
-**extra_instructions:**
-- Priority: human-provided value > `stages.ideation.architecture._extra_instruction` from config > null
-- When set: incorporate into component identification and diagram creation
-
-**ideation_toolbox_meta** config section:
-```json
-{ "stages": { "ideation": { "architecture": { "mermaid": true, "excalidraw": false } } } }
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="current_idea_folder" source="previous Ideation task output OR human input">
+    <steps>
+      1. IF previous task was "Ideation" → extract from task_output_links.current_idea_folder
+      2. ELIF human provides path → use it
+      3. IF null → list folders under x-ipe-docs/ideas/ and ask human to select
+      4. Validate: folder exists AND contains idea-summary-vN.md
+    </steps>
+  </field>
+  <field name="extra_instructions" source="human-provided > config > null">
+    <steps>
+      1. IF human provides extra_instructions → use human value
+      2. ELIF tools.json stages.ideation.architecture._extra_instruction exists → use config value
+      3. ELSE → set to null
+      4. When set: incorporate into component identification and diagram creation
+    </steps>
+  </field>
+  <field name="ideation_toolbox_meta" source="default: x-ipe-docs/config/tools.json">
+    <steps>
+      1. Default path: x-ipe-docs/config/tools.json
+      2. Config section: stages.ideation.architecture (e.g., {"mermaid": true, "excalidraw": false})
+      3. IF file exists → parse and use enabled tools (value = true)
+      4. IF file missing → inform user, offer manual architecture description mode
+    </steps>
+  </field>
+</input_init>
 ```
-- File exists: parse and use enabled tools (value = `true`)
-- File missing: inform user, offer manual architecture description mode
 
 ---
 

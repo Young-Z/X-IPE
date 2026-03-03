@@ -58,6 +58,21 @@ input:
   features_path: "x-ipe-docs/planning/features.md"
 ```
 
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="change_request_description" source="from human input" />
+  <field name="business_justification" source="from human input" />
+  <field name="extra_context_reference" source="from workflow context or N/A" />
+  <field name="requirement_details_path" source="auto-detect from x-ipe-docs/requirements/ (default: x-ipe-docs/requirements/requirement-details.md)" />
+  <field name="features_path" source="default x-ipe-docs/planning/features.md" />
+</input_init>
+```
+
 ---
 
 ## Definition of Ready

@@ -65,6 +65,58 @@ input:
   tech_stack: []  # e.g. ["Python/Flask", "JavaScript/Vanilla"]
 ```
 
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+
+  <field name="refactoring_scope" source="x-ipe-task-based-improve-code-quality output (pass-through from analysis)">
+    <steps>
+      1. IF previous task (Improve Code Quality) output contains refactoring_scope → use directly
+      2. ELSE → STOP — REDIRECT to x-ipe-task-based-refactoring-analysis to start the proper chain
+    </steps>
+  </field>
+
+  <field name="refactoring_suggestion" source="x-ipe-task-based-refactoring-analysis output (pass-through)">
+    <steps>
+      1. IF previous task output contains refactoring_suggestion → use directly
+      2. ELSE → STOP — REDIRECT to x-ipe-task-based-refactoring-analysis
+    </steps>
+  </field>
+
+  <field name="refactoring_principle" source="x-ipe-task-based-refactoring-analysis output (pass-through)">
+    <steps>
+      1. IF previous task output contains refactoring_principle → use directly
+      2. ELSE → STOP — REDIRECT to x-ipe-task-based-refactoring-analysis
+    </steps>
+  </field>
+
+  <field name="code_quality_evaluated" source="x-ipe-task-based-improve-code-quality output">
+    <steps>
+      1. IF previous task (Improve Code Quality) output contains code_quality_evaluated → use directly
+      2. ELSE → STOP — REDIRECT to x-ipe-task-based-improve-code-quality
+    </steps>
+  </field>
+
+  <field name="program_type">
+    <steps>
+      1. IF caller provides program_type → use provided value
+      2. ELSE → auto-detect from refactoring_scope files (check extensions, frameworks, project structure)
+    </steps>
+  </field>
+
+  <field name="tech_stack">
+    <steps>
+      1. IF caller provides tech_stack → use provided value
+      2. ELSE → auto-detect from package.json, pyproject.toml, go.mod, etc. within scope
+    </steps>
+  </field>
+</input_init>
+```
+
 ---
 
 ## Definition of Ready

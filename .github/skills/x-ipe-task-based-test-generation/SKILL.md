@@ -23,6 +23,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
+**BLOCKING: Single Feature Only.** This skill operates on exactly ONE feature at a time. Do NOT batch or combine multiple features in a single execution. If multiple features need processing, run this skill separately for each feature.
+
 ---
 
 ## Input Parameters
@@ -55,6 +57,47 @@ input:
   # Context (from previous task or project)
   technical_design_link: "{path to technical design}"
   specification_link: "{path to feature specification}"
+```
+
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="feature_id" source="previous task | task board | human input">
+    <steps>
+      1. Check previous task (Technical Design) output for feature_id
+      2. If not available, query task board for current feature context
+      3. If still unresolved, ask human for feature_id
+    </steps>
+  </field>
+  <field name="program_type" source="Technical Design output">
+    <steps>
+      1. Read program_type from Technical Design task_completion_output
+      2. If not available, read from technical-design.md document
+    </steps>
+  </field>
+  <field name="tech_stack" source="Technical Design output">
+    <steps>
+      1. Read tech_stack from Technical Design task_completion_output
+      2. If not available, read from technical-design.md document
+    </steps>
+  </field>
+  <field name="technical_design_link" source="auto-detect">
+    <steps>
+      1. Auto-detect from x-ipe-docs/requirements/{feature_id}/technical-design.md
+      2. Verify file exists before proceeding
+    </steps>
+  </field>
+  <field name="specification_link" source="auto-detect">
+    <steps>
+      1. Auto-detect from x-ipe-docs/requirements/{feature_id}/specification.md
+      2. Verify file exists before proceeding
+    </steps>
+  </field>
+</input_init>
 ```
 
 ---

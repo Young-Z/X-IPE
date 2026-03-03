@@ -61,6 +61,48 @@ input:
   # extra_instructions sourced from: human input > config._extra_instruction > N/A
 ```
 
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="current_idea_folder" source="previous Ideation task output OR task board OR human input">
+    <steps>
+      1. IF previous task was "Ideation" → extract from task_output_links.current_idea_folder
+      2. ELIF task board has current_idea_folder in task data → use it
+      3. ELIF human provides path → use it
+      4. IF null → list folders under x-ipe-docs/ideas/ and ask human to select
+    </steps>
+  </field>
+  <field name="extra_instructions" source="human-provided > config > N/A">
+    <steps>
+      1. IF human provides extra_instructions → use human value
+      2. ELIF tools.json stages.ideation.mockup._extra_instruction exists → use config value
+      3. ELSE → set to "N/A"
+    </steps>
+  </field>
+  <field name="ideation_toolbox_meta" source="default: x-ipe-docs/config/tools.json">
+    <steps>
+      1. Default path: {project_root}/x-ipe-docs/config/tools.json
+      2. IF file exists → use it
+      3. ELSE → inform user, offer manual mode
+    </steps>
+  </field>
+  <field name="extra_context_reference" source="workflow context OR auto-detect">
+    <steps>
+      1. IF workflow-mode → use workflow.extra_context_reference values
+      2. FOR EACH ref in [refined-idea, uiux-reference]:
+         IF ref is a file path → use it
+         ELIF "auto-detect" → use existing discovery logic
+         ELIF "N/A" → skip
+      3. ELSE (free-mode) → use existing behavior
+    </steps>
+  </field>
+</input_init>
+```
+
 MANDATORY: See [references/mockup-guidelines.md](references/mockup-guidelines.md) for Extra Instructions loading logic, Current Idea Folder validation, and tool configuration details.
 
 ---

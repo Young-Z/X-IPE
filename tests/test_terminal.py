@@ -230,28 +230,37 @@ class TestPersistentSession:
         assert session.is_expired() is False
 
     def test_persistent_session_is_expired_after_timeout(self):
-        """is_expired() returns True after 1 hour."""
-        from x_ipe.services import PersistentSession, SESSION_TIMEOUT
+        """is_expired() returns True when heartbeat is stale."""
+        from x_ipe.services import PersistentSession
+        from x_ipe.services.terminal_service import HEARTBEAT_TIMEOUT
+        import time
         
         session = PersistentSession("test")
         session.attach("socket", Mock())
         session.detach()
         
-        # Simulate time passage
-        session.disconnect_time = datetime.now() - timedelta(seconds=SESSION_TIMEOUT + 1)
+        # Simulate stale heartbeat
+        session.last_heartbeat = time.time() - HEARTBEAT_TIMEOUT - 1
         
         assert session.is_expired() is True
 
     def test_persistent_session_is_expired_custom_timeout(self):
-        """is_expired() accepts custom timeout."""
+        """is_expired() uses HEARTBEAT_TIMEOUT for expiry check."""
         from x_ipe.services import PersistentSession
+        from x_ipe.services.terminal_service import HEARTBEAT_TIMEOUT
+        import time
         
         session = PersistentSession("test")
         session.detach()
-        session.disconnect_time = datetime.now() - timedelta(seconds=10)
+        # Heartbeat is 10s old
+        session.last_heartbeat = time.time() - 10
         
-        assert session.is_expired(timeout_seconds=5) is True
-        assert session.is_expired(timeout_seconds=60) is False
+        # Not expired (10s < HEARTBEAT_TIMEOUT)
+        assert session.is_expired() is False
+        
+        # Make heartbeat stale
+        session.last_heartbeat = time.time() - HEARTBEAT_TIMEOUT - 1
+        assert session.is_expired() is True
 
 
 # =============================================================================
@@ -344,10 +353,10 @@ class TestConstants:
         assert SESSION_TIMEOUT == 3600
 
     def test_cleanup_interval_constant(self):
-        """CLEANUP_INTERVAL is 5 minutes (300 seconds)."""
+        """CLEANUP_INTERVAL is 60 seconds for heartbeat detection."""
         from x_ipe.services import CLEANUP_INTERVAL
         
-        assert CLEANUP_INTERVAL == 300
+        assert CLEANUP_INTERVAL == 60
 
 
 # =============================================================================
@@ -1072,17 +1081,17 @@ class TestStaleSessionRecreation:
     def test_expired_session_only_destroyed_by_cleanup(self):
         """Expired sessions should only be destroyed by the background
         cleanup_expired task, not by handle_attach."""
-        from x_ipe.services.terminal_service import SessionManager, PersistentSession
+        from x_ipe.services.terminal_service import SessionManager, PersistentSession, HEARTBEAT_TIMEOUT
         from unittest.mock import Mock
-        from datetime import datetime, timedelta
+        import time
 
         manager = SessionManager()
         session = PersistentSession("test-expired")
         mock_emit = Mock()
         session.attach("socket-1", mock_emit)
         session.detach()
-        # Force expiry
-        session.disconnect_time = datetime.now() - timedelta(hours=2)
+        # Force expiry via stale heartbeat
+        session.last_heartbeat = time.time() - HEARTBEAT_TIMEOUT - 1
 
         with manager._lock:
             manager.sessions["test-expired"] = session
@@ -1096,17 +1105,17 @@ class TestStaleSessionRecreation:
 
     def test_expired_session_renewed_on_attach(self):
         """When attach() is called on an expired session, it renews it:
-        disconnect_time is reset to None, state becomes connected."""
-        from x_ipe.services.terminal_service import PersistentSession
+        last_heartbeat is reset, state becomes connected."""
+        from x_ipe.services.terminal_service import PersistentSession, HEARTBEAT_TIMEOUT
         from unittest.mock import Mock
-        from datetime import datetime, timedelta
+        import time
 
         session = PersistentSession("test-renew")
         mock_emit = Mock()
         session.attach("socket-1", mock_emit)
         session.detach()
-        # Force expiry
-        session.disconnect_time = datetime.now() - timedelta(hours=2)
+        # Force expiry via stale heartbeat
+        session.last_heartbeat = time.time() - HEARTBEAT_TIMEOUT - 1
         assert session.is_expired()
 
         # Frontend reconnects — should renew
@@ -1168,3 +1177,220 @@ class TestStaleSessionRecreation:
         # Must call removeSession to clean up frontend tab
         assert 'removeSession' in handler_block, \
             "session_not_found handler must call removeSession to clean up stale tab"
+
+
+# =============================================================================
+# Heartbeat-based Session Cleanup (TASK-691)
+# =============================================================================
+
+class TestHeartbeatConstants:
+    """Tests for heartbeat-related constants."""
+
+    def test_heartbeat_timeout_constant(self):
+        """HEARTBEAT_TIMEOUT should be 120 seconds."""
+        from x_ipe.services.terminal_service import HEARTBEAT_TIMEOUT
+        assert HEARTBEAT_TIMEOUT == 120
+
+    def test_cleanup_interval_shortened(self):
+        """CLEANUP_INTERVAL should be 60 seconds for faster heartbeat detection."""
+        from x_ipe.services import CLEANUP_INTERVAL
+        assert CLEANUP_INTERVAL == 60
+
+
+class TestPersistentSessionHeartbeat:
+    """Tests for heartbeat tracking on PersistentSession."""
+
+    def test_session_has_last_heartbeat(self):
+        """PersistentSession should have last_heartbeat field initialized to current time."""
+        from x_ipe.services.terminal_service import PersistentSession
+        import time
+
+        before = time.time()
+        session = PersistentSession("test-hb")
+        after = time.time()
+
+        assert hasattr(session, 'last_heartbeat')
+        assert before <= session.last_heartbeat <= after
+
+    def test_heartbeat_method_updates_timestamp(self):
+        """heartbeat() should update last_heartbeat to current time."""
+        from x_ipe.services.terminal_service import PersistentSession
+        import time
+
+        session = PersistentSession("test-hb")
+        old_time = session.last_heartbeat
+        time.sleep(0.05)
+        session.heartbeat()
+
+        assert session.last_heartbeat > old_time
+
+    def test_attach_resets_heartbeat(self):
+        """attach() should reset last_heartbeat to current time."""
+        from x_ipe.services.terminal_service import PersistentSession
+        from unittest.mock import Mock
+        import time
+
+        session = PersistentSession("test-hb")
+        # Simulate stale heartbeat
+        session.last_heartbeat = time.time() - 999
+        session.attach("socket-1", Mock())
+
+        assert time.time() - session.last_heartbeat < 1
+
+    def test_connected_session_expires_without_heartbeat(self):
+        """A connected session with stale heartbeat should be considered expired."""
+        from x_ipe.services.terminal_service import PersistentSession, HEARTBEAT_TIMEOUT
+        from unittest.mock import Mock
+        import time
+
+        session = PersistentSession("test-hb")
+        session.attach("socket-1", Mock())
+        # Simulate stale heartbeat (no frontend pinging)
+        session.last_heartbeat = time.time() - HEARTBEAT_TIMEOUT - 1
+
+        assert session.is_expired() is True
+
+    def test_connected_session_with_recent_heartbeat_not_expired(self):
+        """A connected session with recent heartbeat should NOT be expired."""
+        from x_ipe.services.terminal_service import PersistentSession
+        from unittest.mock import Mock
+
+        session = PersistentSession("test-hb")
+        session.attach("socket-1", Mock())
+        session.heartbeat()
+
+        assert session.is_expired() is False
+
+    def test_disconnected_session_expires_after_heartbeat_timeout(self):
+        """A disconnected session should expire based on heartbeat timeout, not SESSION_TIMEOUT."""
+        from x_ipe.services.terminal_service import PersistentSession, HEARTBEAT_TIMEOUT
+        from unittest.mock import Mock
+        import time
+
+        session = PersistentSession("test-hb")
+        session.attach("socket-1", Mock())
+        session.detach()
+        # Simulate stale heartbeat
+        session.last_heartbeat = time.time() - HEARTBEAT_TIMEOUT - 1
+
+        assert session.is_expired() is True
+
+
+class TestSessionManagerHeartbeatCleanup:
+    """Tests for SessionManager cleanup with heartbeat."""
+
+    def test_cleanup_removes_stale_connected_sessions(self):
+        """cleanup_expired should remove connected sessions with stale heartbeat."""
+        from x_ipe.services.terminal_service import SessionManager, PersistentSession, HEARTBEAT_TIMEOUT
+        from unittest.mock import Mock
+        import time
+
+        manager = SessionManager()
+        session = PersistentSession("stale-connected")
+        session.attach("socket-1", Mock())
+        # Simulate stale heartbeat
+        session.last_heartbeat = time.time() - HEARTBEAT_TIMEOUT - 1
+
+        with manager._lock:
+            manager.sessions["stale-connected"] = session
+
+        removed = manager.cleanup_expired()
+        assert removed == 1
+        assert not manager.has_session("stale-connected")
+
+    def test_cleanup_keeps_active_sessions(self):
+        """cleanup_expired should NOT remove connected sessions with recent heartbeat."""
+        from x_ipe.services.terminal_service import SessionManager, PersistentSession
+        from unittest.mock import Mock
+
+        manager = SessionManager()
+        session = PersistentSession("active")
+        session.attach("socket-1", Mock())
+        session.heartbeat()
+
+        with manager._lock:
+            manager.sessions["active"] = session
+
+        removed = manager.cleanup_expired()
+        assert removed == 0
+        assert manager.has_session("active")
+
+
+class TestHeartbeatHandler:
+    """Tests for the heartbeat WebSocket handler."""
+
+    def test_heartbeat_handler_registered(self):
+        """terminal_handlers.py should register a 'heartbeat' event handler."""
+        import os
+        handlers_path = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'handlers', 'terminal_handlers.py'
+        )
+        with open(handlers_path, 'r') as f:
+            content = f.read()
+
+        assert "'heartbeat'" in content or '"heartbeat"' in content, \
+            "terminal_handlers.py must register a heartbeat event handler"
+
+    def test_heartbeat_handler_calls_session_heartbeat(self):
+        """Heartbeat handler should call session.heartbeat() to update timestamp."""
+        import os
+        handlers_path = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'handlers', 'terminal_handlers.py'
+        )
+        with open(handlers_path, 'r') as f:
+            content = f.read()
+
+        # Find the heartbeat handler function
+        hb_idx = content.find('def handle_heartbeat')
+        assert hb_idx != -1
+        hb_block = content[hb_idx:hb_idx + 500]
+
+        assert '.heartbeat()' in hb_block, \
+            "heartbeat handler must call session.heartbeat()"
+
+
+class TestFrontendHeartbeat:
+    """Tests for frontend heartbeat emission."""
+
+    def test_frontend_emits_heartbeat_event(self):
+        """Frontend terminal.js should emit 'heartbeat' events."""
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        assert "'heartbeat'" in content or '"heartbeat"' in content, \
+            "Frontend must emit heartbeat events"
+
+    def test_frontend_heartbeat_has_interval(self):
+        """Frontend should have a heartbeat interval constant."""
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        assert 'HEARTBEAT' in content, \
+            "Frontend must define a HEARTBEAT interval constant"
+
+    def test_frontend_heartbeat_sends_session_id(self):
+        """Frontend heartbeat should include session_id so backend knows which session."""
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        # Find heartbeat emit
+        hb_idx = content.find("'heartbeat'")
+        if hb_idx == -1:
+            hb_idx = content.find('"heartbeat"')
+        assert hb_idx != -1, "Must have heartbeat emit"
+        hb_block = content[hb_idx:hb_idx + 200]
+
+        assert 'session_id' in hb_block or 'sessionId' in hb_block, \
+            "Heartbeat must include session_id"

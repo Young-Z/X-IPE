@@ -73,6 +73,39 @@ input:
   requirement_doc: "x-ipe-docs/requirements/requirement-details.md"  # or requirement-details-part-X.md
 ```
 
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="extra_context_reference.requirement-doc" source="workflow context OR auto-detect">
+    <steps>
+      1. IF workflow-mode AND workflow.extra_context_reference.requirement-doc is a file path → use it
+      2. ELIF "auto-detect" → scan x-ipe-docs/requirements/ for requirement-details*.md
+      3. ELIF "N/A" → skip
+      4. ELSE (free-mode) → use existing discovery logic
+    </steps>
+  </field>
+  <field name="mockup_list" source="previous task (Idea Mockup) output links OR human input OR N/A">
+    <steps>
+      1. IF previous task was "Idea Mockup" → extract from task_output_links.mockup_list
+      2. ELIF human provides explicit mockup paths → use human-provided value
+      3. ELSE → set to "N/A"
+    </steps>
+  </field>
+  <field name="requirement_doc" source="auto-detect from x-ipe-docs/requirements/">
+    <steps>
+      1. Check if x-ipe-docs/requirements/requirement-details-part-X.md files exist
+      2. IF parts exist → use current active part (highest part number)
+      3. ELIF x-ipe-docs/requirements/requirement-details.md exists → use it
+      4. ELSE → analyze user request directly
+    </steps>
+  </field>
+</input_init>
+```
+
 ### Mockup List Structure
 
 ```yaml

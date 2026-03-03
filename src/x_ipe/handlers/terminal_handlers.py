@@ -187,6 +187,21 @@ def register_terminal_handlers(socketio):
             print(f"[Terminal] Error in find_idle_session handler: {e}")
             return None
     
+    @socketio.on('heartbeat')
+    def handle_heartbeat(data):
+        """Update session heartbeat timestamp — frontend pings every 30s."""
+        try:
+            sid = request.sid
+            session_id = data.get('session_id') if data else None
+            if not session_id:
+                session_id = socket_to_session.get(sid)
+            if session_id:
+                session = session_manager.get_session(session_id)
+                if session:
+                    session.heartbeat()
+        except Exception as e:
+            print(f"[Terminal] Error in heartbeat handler: {e}")
+    
     @socketio.on('claim_session')
     @x_ipe_tracing()
     def handle_claim_session(data):

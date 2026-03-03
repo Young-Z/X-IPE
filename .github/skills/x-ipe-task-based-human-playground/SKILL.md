@@ -51,6 +51,36 @@ input:
   feature_version: "{version}"
 ```
 
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="feature_id" source="previous task output OR task board OR human input">
+    <steps>
+      1. IF previous task output contains feature_id → use it
+      2. ELIF task board has feature_id in task data → use it
+      3. ELSE → ask human for feature_id
+    </steps>
+  </field>
+  <field name="feature_title" source="feature specification OR features.md">
+    <steps>
+      1. Query feature board for feature_id → extract title
+      2. ELIF x-ipe-docs/features/{feature_id}/specification.md exists → extract title
+      3. ELSE → ask human
+    </steps>
+  </field>
+  <field name="feature_version" source="features.md OR default '1.0.0'">
+    <steps>
+      1. Query feature board for feature_id → extract version
+      2. ELIF not found → default to "1.0.0"
+    </steps>
+  </field>
+</input_init>
+```
+
 ---
 
 ## Definition of Ready

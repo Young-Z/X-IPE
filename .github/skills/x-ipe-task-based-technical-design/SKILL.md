@@ -22,6 +22,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
+**BLOCKING: Single Feature Only.** This skill operates on exactly ONE feature at a time. Do NOT batch or combine multiple features in a single execution. If multiple features need processing, run this skill separately for each feature.
+
 **Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the workflow state was updated before marking the task complete.
 
 ### Key Rules
@@ -72,6 +74,37 @@ input:
 
   # Context (from previous task or project)
   feature_id: "{FEATURE-XXX}"
+```
+
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="feature_id" source="previous task | task board | human input">
+    <steps>
+      1. Check previous task (Feature Refinement) output for feature_id
+      2. If not available, query task board for current feature context
+      3. If still unresolved, ask human for feature_id
+    </steps>
+  </field>
+  <field name="extra_context_reference.specification" source="workflow context | auto-detect">
+    <steps>
+      1. If workflow-mode: read from workflow context extra_context_reference.specification
+      2. If free-mode or auto-detect: resolve from x-ipe-docs/requirements/{feature_id}/specification.md
+      3. Default: N/A
+    </steps>
+  </field>
+  <field name="mockup_list" source="previous task | human input | N/A">
+    <steps>
+      1. Check previous task output for mockup links (task_output_links)
+      2. If not available, ask human for mockup links
+      3. If none provided, set to N/A
+    </steps>
+  </field>
+</input_init>
 ```
 
 > **Note on `program_type` and `tech_stack`:** These fields are **determined during Step 5** (not provided as input). The agent identifies them from the design decisions and includes them in the Output Result for downstream skills.

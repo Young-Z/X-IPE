@@ -21,7 +21,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the workflow state was updated before marking the task complete.
+**BLOCKING: Single Feature Only.** This skill operates on exactly ONE feature at a time. Do NOT batch or combine multiple features in a single execution. If multiple features need processing, run this skill separately for each feature.
 
 MANDATORY: Every feature MUST have a feature ID in the format `FEATURE-{nnn}` (e.g., FEATURE-001, FEATURE-027). This applies regardless of the output language used.
 
@@ -55,6 +55,41 @@ input:
 
   # Context (from previous task or project)
   feature_id: "{FEATURE-XXX}"
+```
+
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="feature_id" source="previous task (Feature Breakdown) output OR task board OR human input">
+    <steps>
+      1. IF previous task was "Feature Breakdown" → extract from task_output_links.feature_ids
+      2. ELIF task board has feature_id in task data → use it
+      3. ELSE → ask human for feature_id
+    </steps>
+  </field>
+  <field name="extra_context_reference" source="workflow context OR auto-detect">
+    <steps>
+      1. IF workflow-mode → use workflow.extra_context_reference values
+      2. FOR EACH ref in [requirement-doc, features-list]:
+         IF ref is a file path → use it
+         ELIF "auto-detect" → use existing discovery logic
+         ELIF "N/A" → skip
+      3. ELSE (free-mode) → use existing behavior
+    </steps>
+  </field>
+  <field name="mockup_list" source="see Mockup List Resolution section below">
+    <steps>
+      1. IF previous task was "Idea Mockup" → extract from task_output_links
+      2. ELIF human provides explicit path → use human-provided value
+      3. ELIF idea-summary-vN.md exists → extract from "Mockups &amp; Prototypes" section
+      4. ELSE → set to "N/A"
+    </steps>
+  </field>
+</input_init>
 ```
 
 ### Mockup List Resolution

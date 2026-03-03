@@ -20,8 +20,9 @@ from x_ipe.tracing import x_ipe_tracing
 
 # Constants for session management
 BUFFER_MAX_CHARS = 10240  # 10KB limit for output buffer
-SESSION_TIMEOUT = 3600   # 1 hour in seconds
-CLEANUP_INTERVAL = 300   # 5 minutes for cleanup task
+SESSION_TIMEOUT = 3600   # 1 hour in seconds (fallback for legacy)
+HEARTBEAT_TIMEOUT = 120  # 2 minutes — session considered dead if no heartbeat
+CLEANUP_INTERVAL = 60    # 1 minute for cleanup task (faster heartbeat detection)
 
 # ANSI escape sequence pattern for stripping terminal control codes
 _ANSI_RE = re.compile(r'\x1b\[[0-9;]*[a-zA-Z]|\x1b\][^\x07]*\x07|\x1b[()][AB012]')
@@ -86,6 +87,7 @@ class PersistentSession:
         self.state = 'disconnected'
         self.created_at = datetime.now()
         self._last_output_time: float = 0.0
+        self.last_heartbeat: float = time.time()
         self._lock = threading.Lock()
     
     @x_ipe_tracing()
@@ -114,6 +116,7 @@ class PersistentSession:
             self.emit_callback = emit_callback
             self.state = 'connected'
             self.disconnect_time = None
+            self.last_heartbeat = time.time()
     
     @x_ipe_tracing()
     def detach(self) -> None:
@@ -123,6 +126,11 @@ class PersistentSession:
             self.emit_callback = None
             self.state = 'disconnected'
             self.disconnect_time = datetime.now()
+    
+    @x_ipe_tracing()
+    def heartbeat(self) -> None:
+        """Update heartbeat timestamp — called by frontend ping."""
+        self.last_heartbeat = time.time()
     
     @x_ipe_tracing()
     def get_buffer(self) -> str:
@@ -143,13 +151,14 @@ class PersistentSession:
     
     @x_ipe_tracing()
     def is_expired(self, timeout_seconds: int = SESSION_TIMEOUT) -> bool:
-        """Check if session has expired (1hr after disconnect)."""
-        if self.state == 'connected':
-            return False
-        if self.disconnect_time is None:
-            return False
-        elapsed = datetime.now() - self.disconnect_time
-        return elapsed.total_seconds() > timeout_seconds
+        """Check if session has expired based on heartbeat.
+        
+        A session is expired if no heartbeat has been received within
+        HEARTBEAT_TIMEOUT, regardless of connected/disconnected state.
+        This catches both graceful disconnects and crashed frontends.
+        """
+        heartbeat_age = time.time() - self.last_heartbeat
+        return heartbeat_age > HEARTBEAT_TIMEOUT
     
     @x_ipe_tracing()
     def is_idle(self, idle_timeout: float = 2.0) -> bool:

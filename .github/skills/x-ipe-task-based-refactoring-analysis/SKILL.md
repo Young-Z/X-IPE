@@ -69,6 +69,62 @@ input:
   quality_baseline_path: "x-ipe-docs/planning/project-quality-evaluation.md"
 ```
 
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+
+  <field name="initial_refactoring_scope.scope_level">
+    <steps>
+      1. IF caller provides scope_level → use provided value
+      2. IF feature_id is provided but scope_level is not → default to "feature"
+      3. IF files[] is provided but feature_id is not → default to "custom"
+      4. ELSE → default to "custom"
+    </steps>
+  </field>
+
+  <field name="initial_refactoring_scope.feature_id">
+    <steps>
+      1. IF caller provides feature_id → use provided value
+      2. IF scope_level == "feature" AND feature_id is null → ASK human for feature_id
+      3. IF scope_level == "custom" → set to null
+    </steps>
+  </field>
+
+  <field name="initial_refactoring_scope.refactoring_purpose">
+    <steps>
+      1. IF caller provides refactoring_purpose → use provided value
+      2. IF human describes intent → derive purpose from description
+      3. ELSE → ASK human: "What is the purpose of this refactoring?"
+    </steps>
+  </field>
+
+  <field name="initial_refactoring_scope.files">
+    <steps>
+      1. IF scope_level == "feature" → auto-resolve from feature artifacts:
+         a. Read x-ipe-docs/features/{feature_id}/specification.md → extract file references
+         b. Read x-ipe-docs/features/{feature_id}/technical-design.md → extract component files
+         c. Collect test files referenced in technical design
+      2. IF scope_level == "custom" AND caller provides files[] → use provided list
+      3. IF scope_level == "custom" AND files[] is empty → ASK human for file paths
+    </steps>
+  </field>
+
+  <field name="initial_refactoring_scope.modules">
+    <steps>
+      1. IF scope_level == "feature" → auto-resolve from technical design module boundaries
+      2. IF scope_level == "custom" AND caller provides modules[] → use provided list
+      3. ELSE → derive from files[] directory structure
+    </steps>
+  </field>
+
+  <field name="quality_baseline_path" source="default: x-ipe-docs/planning/project-quality-evaluation.md" />
+</input_init>
+```
+
 ---
 
 ## Definition of Ready

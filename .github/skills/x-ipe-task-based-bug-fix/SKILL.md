@@ -68,6 +68,22 @@ input:
   tech_stack: []  # e.g. ["Python/Flask", "JavaScript/Vanilla"]
 ```
 
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="bug_description" source="from human input" />
+  <field name="expected_behavior" source="from human input" />
+  <field name="actual_behavior" source="from human input" />
+  <field name="reproduction_steps" source="from human input or 'N/A'" />
+  <field name="program_type" source="auto-detect from affected files if not provided (check file extensions: .py→backend, .js/.ts/.css/.html→frontend)" />
+  <field name="tech_stack" source="auto-detect from project config files (pyproject.toml, package.json) if not provided" />
+</input_init>
+```
+
 ---
 
 ## Definition of Ready

@@ -38,6 +38,7 @@ from .terminal_service import (
     session_manager,
     BUFFER_MAX_CHARS,
     SESSION_TIMEOUT,
+    HEARTBEAT_TIMEOUT,
     CLEANUP_INTERVAL,
 )
 

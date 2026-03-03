@@ -232,9 +232,14 @@ class TestStageGating:
     """Tests for stage gating logic."""
 
     def test_complete_mandatory_ideation_unlocks_requirement(self, workflow_service, sample_workflow):
-        """AC: All mandatory ideation actions done → requirement unlocks."""
+        """AC: All mandatory ideation actions done → requirement unlocks on-demand."""
         workflow_service.update_action_status(sample_workflow, "compose_idea", "done")
         workflow_service.update_action_status(sample_workflow, "refine_idea", "done")
+        # Stage gating is on-demand: attempting to update an action in the locked
+        # stage triggers the unlock check.
+        result = workflow_service.update_action_status(
+            sample_workflow, "requirement_gathering", "in_progress"
+        )
         state = workflow_service.get_workflow(sample_workflow)
         assert state["shared"]["requirement"]["status"] != "locked"
 
@@ -243,6 +248,10 @@ class TestStageGating:
         workflow_service.update_action_status(sample_workflow, "compose_idea", "done")
         workflow_service.update_action_status(sample_workflow, "refine_idea", "done")
         # reference_uiux and design_mockup are optional — left as pending
+        # On-demand unlock: attempting a requirement action triggers unlock.
+        result = workflow_service.update_action_status(
+            sample_workflow, "requirement_gathering", "in_progress"
+        )
         state = workflow_service.get_workflow(sample_workflow)
         assert state["shared"]["requirement"]["status"] != "locked"
 
