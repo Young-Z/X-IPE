@@ -1,0 +1,1 @@
+please read the feedback from x-ipe-docs/uiux-feedback/Feedback-20260303-212659 to create a new requirement to x-ipe. BTW the modal window you can refer to the file preview modal window in workflow and we should able to view makrdwon, html the same.

@@ -27,6 +27,9 @@ Output:
     test_coverage: <percentage if available>
   
   refactoring_scope:
+    scope_level: feature | custom
+    feature_id: <FEATURE-XXX or null>
+    refactoring_purpose: "<purpose string>"
     files: [<expanded list of files>]
     modules: [<expanded list of modules>]
     dependencies: [<identified dependencies>]

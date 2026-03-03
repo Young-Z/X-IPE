@@ -6,8 +6,9 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-690 | Feature Closing | FEATURE-025-F: KB Navigation & Polish — verify ACs, code-to-docs review, update project files, push to main | Nova ✨ | 🔄 in_progress | 03-03-2026 14:30:00 | - | - |
 | TASK-689 | Feature Acceptance Test | FEATURE-025-F: KB Navigation & Polish — browser acceptance test for section tabs, switching, badges via Chrome DevTools | Nova ✨ | ⚠️ blocked | 03-03-2026 14:25:00 | acceptance-test-cases.md | Feature Closing |
-| TASK-688 | Requirement Gathering | EPIC-043: File Link Preview — gather requirements from IDEA-033 refined idea. 4-part solution: link path standard, frontend preview modal, skill updates, file migration. Workflow: update-file-link-preview | Sage 🌿 | 🔄 in_progress | 03-03-2026 14:11:00 | - | Feature Breakdown |
+| TASK-688 | Requirement Gathering | EPIC-043: File Link Preview — gather requirements from IDEA-033 refined idea. 4-part solution: link path standard, frontend preview modal, skill updates, file migration. Workflow: update-file-link-preview | Sage 🌿 | ✅ completed | 03-03-2026 14:11:00 | requirement-details-part-15.md, EPIC-043/ | Feature Breakdown |
 | TASK-687 | Code Implementation | FEATURE-025-F: KB Navigation & Polish — implement section tabs, switchTab, badges, tree filtering in kb-core.js + kb-nav.css | Nova ✨ | ✅ completed | 03-03-2026 14:20:00 | kb-core.js, kb-nav.css, base.html | Feature Acceptance Test |
 | TASK-686 | Test Generation | FEATURE-025-F: KB Navigation & Polish — TDD tests for section tabs, tab switching, badges, tree filtering | Nova ✨ | ✅ completed | 03-03-2026 13:57:00 | kb-nav.test.js | Code Implementation |
 | TASK-685 | Technical Design | FEATURE-025-F: KB Navigation & Polish — design section tabs, tab switching, badge rendering, tree filtering | Nova ✨ | ✅ completed | 03-03-2026 13:50:00 | technical-design.md | Test Generation |

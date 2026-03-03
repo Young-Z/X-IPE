@@ -52,7 +52,7 @@ input:
 
   # Required inputs
   auto_proceed: false
-  refactoring_scope: "{from previous task}"
+  refactoring_scope: "{from previous task}"  # includes scope_level, feature_id, refactoring_purpose
   refactoring_suggestion: "{from Refactoring Analysis task}"
   refactoring_principle: "{from Refactoring Analysis task}"
   code_quality_evaluated: "{from Improve Code Quality task}"

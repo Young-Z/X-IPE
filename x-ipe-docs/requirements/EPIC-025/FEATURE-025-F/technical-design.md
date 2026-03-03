@@ -23,7 +23,7 @@
 | Tech Stack | JavaScript/Vanilla, CSS |
 | Feature ID | FEATURE-025-F |
 | Files to Create | `src/x_ipe/static/css/kb-nav.css` |
-| Files to Modify | `src/x_ipe/static/js/features/kb-core.js`, `src/x_ipe/static/css/kb-core.css` or new `kb-nav.css`, `src/x_ipe/templates/knowledge-base.html` |
+| Files to Modify | `src/x_ipe/static/js/features/kb-core.js`, `src/x_ipe/templates/base.html` |
 | Dependencies | FEATURE-025-A (kbCore), FEATURE-025-B (kbLanding), FEATURE-025-D (kbTopics), FEATURE-025-E (kbSearch) |
 
 ### Key Components Implemented
@@ -443,25 +443,26 @@ Derived from mockup `knowledge-base-v1.html` section tab styles:
 }
 ```
 
-### Template Change (`knowledge-base.html`)
+### Template Change (`base.html`)
 
-Add the new CSS file to the template's stylesheet includes:
+Add the new CSS file to the base template's stylesheet includes (after `kb-search.css`):
 
 ```html
-<link rel="stylesheet" href="{{ url_for('static', filename='css/kb-nav.css') }}">
+<!-- FEATURE-025-F: KB Navigation & Polish -->
+<link href="/static/css/kb-nav.css" rel="stylesheet">
 ```
 
 ### Implementation Steps
 
 1. **CSS:** Create `src/x_ipe/static/css/kb-nav.css` with tab styling
-2. **Template:** Add `kb-nav.css` link to `knowledge-base.html`
+2. **Template:** Add `kb-nav.css` link to `base.html` after `kb-search.css`
 3. **JS — HTML:** Update `kbCore.render()` to include `#kb-section-tabs` div between header and search box
 4. **JS — New property:** Add `activeTab: 'landing'` to `kbCore` object
 5. **JS — New methods:** Add `renderTabs()`, `switchTab()`, `updateBadges()`, `_bindTreeEvents()`
 6. **JS — Modify `init()`:** Replace `renderWelcome()` call with `renderTabs()` + `switchTab(defaultTab)`
 7. **JS — Modify `renderTree()`:** Filter tree items based on `this.activeTab`
 8. **JS — Modify `refreshIndex()`:** Add `updateBadges()` call + topic deletion edge case
-9. **JS — Remove `renderWelcome()`:** Delete the method entirely
+9. **JS — Remove `renderWelcome()`:** Delete the method (replaced by tab-driven navigation)
 
 ### Edge Cases & Error Handling
 

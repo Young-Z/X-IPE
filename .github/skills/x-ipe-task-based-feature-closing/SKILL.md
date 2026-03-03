@@ -9,9 +9,11 @@ description: Close completed feature and create pull request. Use when human has
 
 Close a completed feature and ship it by:
 1. Verifying all acceptance criteria are met
-2. Finalizing documentation and changelog
-3. Creating a pull request with proper description
-4. Outputting completion summary
+2. Reviewing code to sync documentation artifacts (specification, technical design, tests)
+3. Updating project files (e.g., README) if needed
+4. Running refactoring analysis scoped to the feature
+5. Creating a pull request with proper description
+6. Outputting completion summary with refactoring recommendations
 
 ---
 
@@ -86,9 +88,11 @@ input:
 | Step | Name | Action | Gate |
 |------|------|--------|------|
 | 1 | Verify Criteria | Check all acceptance criteria are met | All criteria met |
-| 2 | Finalize Docs | Update README, API docs, CHANGELOG | Docs complete |
-| 3 | Ship | Push to main (main-branch-only) or push dev branch & create PR (dev-session-based) | Shipped |
-| 4 | Output Summary | Provide completion summary to human | Summary delivered |
+| 2 | Code-to-Docs Review | Subagent reviews code and suggests updates to specification, technical design, and tests | Review complete |
+| 3 | Update Project Files | Update README or other project files if needed | Files updated |
+| 4 | Refactoring Analysis | Subagent runs refactoring analysis scoped to feature | Analysis complete |
+| 5 | Ship | Push to main (main-branch-only) or push dev branch & create PR (dev-session-based) | Shipped |
+| 6 | Output Summary | Provide completion summary with refactoring recommendations | Summary delivered |
 
 BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP and report to human.
 
@@ -108,7 +112,8 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
       1. Read acceptance criteria from feature specification
       2. Check each criterion against implementation
       3. IF Technical Scope includes [Frontend] or [Full Stack]:
-         Also verify UI against linked mockups — layout matches design, all UI elements present, interactions work as shown, visual styling is consistent, document any approved deviations
+         Also verify UI against linked mockups — layout matches design, all UI elements present, interactions work as shown, visual styling is consistent, document any approved deviations.
+         TIP: Use Chrome DevTools MCP with multi-session mode to perform UI validation (navigate pages, take screenshots, inspect elements, verify interactions).
       4. Document verification results in table format (see references/examples.md)
       5. Flag any unmet criteria
     </action>
@@ -121,22 +126,68 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
   </step_1>
 
   <step_2>
-    <name>Finalize Documentation</name>
+    <name>Code-to-Docs Review</name>
+    <action>
+      1. Launch a sub-agent to perform a constructive critique of the implemented code
+      2. The sub-agent compares actual code against:
+         - Feature specification (x-ipe-docs/features/{FEATURE-XXX}/specification.md)
+         - Technical design (x-ipe-docs/features/{FEATURE-XXX}/technical-design.md)
+         - Test cases (test files referenced in technical design)
+      3. For each artifact, the sub-agent identifies:
+         - Behavioral differences: code does something the doc doesn't describe, or vice versa
+         - Missing coverage: code paths or edge cases not reflected in tests
+         - Stale references: renamed functions, changed APIs, removed parameters
+      4. Sub-agent produces a change report with concrete suggestions per artifact
+      5. Apply necessary updates to specification, technical design, and test files so they accurately reflect the shipped code
+      6. Skip trivial or cosmetic differences — only update when the doc would mislead a future reader
+    </action>
+    <constraints>
+      - CRITICAL: This is a constructive review, not a refactoring step — do NOT change implementation code
+      - CRITICAL: Only update docs/tests to match what the code actually does, not the other way around
+      - MANDATORY: Use a sub-agent for the review to get an independent perspective
+    </constraints>
+    <output>Change report listing updated artifacts and what changed in each</output>
+  </step_2>
+
+  <step_3>
+    <name>Update Project Files</name>
     <action>
       1. Update README if feature is user-facing
       2. Update API docs if endpoints were added/changed
       3. Ensure complex logic has code comments
-      4. Add changelog entry using template from references/templates/changelog-template.md
-      5. Verify all feature doc artifacts are present in x-ipe-docs/features/{FEATURE-XXX}/
+      4. Verify all feature doc artifacts are present in x-ipe-docs/features/{FEATURE-XXX}/
     </action>
     <constraints>
-      - MANDATORY: Changelog entry must follow Keep a Changelog format
-      - CRITICAL: All user-facing changes must be documented
+      - CRITICAL: All user-facing changes must be documented in README
     </constraints>
-    <output>Updated documentation files and changelog entry</output>
-  </step_2>
+    <output>Updated project files</output>
+  </step_3>
 
-  <step_3>
+  <step_4>
+    <name>Refactoring Analysis</name>
+    <action>
+      1. Launch a sub-agent to execute x-ipe-task-based-refactoring-analysis with:
+         - initial_refactoring_scope:
+             scope_level: "feature"
+             feature_id: "{feature_id}"
+             refactoring_purpose: "Optimize technical design and code maintainability based on best coding practices at project-wide level"
+      2. The sub-agent resolves feature files from x-ipe-docs/features/{feature_id}/
+      3. Sub-agent performs scope expansion, quality evaluation, and generates suggestions
+      4. Collect the analysis result:
+         - overall_quality_score
+         - refactoring_suggestion (goals, priorities)
+         - key gaps identified
+      5. Store analysis result for inclusion in Output Summary (step 6)
+    </action>
+    <constraints>
+      - CRITICAL: This is analysis only — do NOT execute any refactoring in this step
+      - CRITICAL: The sub-agent should complete the full refactoring-analysis skill but stop at output (do NOT proceed to improve-code-quality or code-refactor)
+      - NOTE: If analysis finds no actionable suggestions, record "no refactoring needed" and proceed
+    </constraints>
+    <output>Refactoring analysis result with quality score and suggestions</output>
+  </step_4>
+
+  <step_5>
     <name>Create Pull Request (conditional)</name>
     <action>
       IF git_strategy == "main-branch-only":
@@ -167,17 +218,22 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
       - BLOCKING (main-branch-only): Do NOT create branches or PRs
     </constraints>
     <output>Pull request URL and number (dev-session-based) or push confirmation (main-branch-only)</output>
-  </step_3>
+  </step_5>
 
-  <step_4>
+  <step_6>
     <name>Output Summary</name>
     <action>
       1. Compile completion summary (see references/examples.md for template)
       2. Include: deliverables, files changed, criteria status, PR link
-      3. Present summary to human
+      3. Include refactoring analysis results:
+         - Overall quality score from analysis
+         - IF refactoring suggestions exist: list top suggestions with priority
+         - IF overall_quality_score < 7: flag "Refactoring recommended" with summary of key improvements
+         - IF overall_quality_score >= 7: note "Code quality is acceptable, optional improvements listed"
+      4. Present summary to human with clear recommendation on whether refactoring is needed
     </action>
-    <output>Feature completion summary delivered to human</output>
-  </step_4>
+    <output>Feature completion summary with refactoring recommendation delivered to human</output>
+  </step_6>
 
 </procedure>
 ```
@@ -198,12 +254,16 @@ task_completion_output:
     name: "{from input}"
   task_output_links:
     - "{PR link (dev-session-based) or 'pushed to main' (main-branch-only)}"
-    - "CHANGELOG.md"
-    - "x-ipe-docs/features/{FEATURE-XXX}/changelog.md"
+    - "x-ipe-docs/features/{FEATURE-XXX}/"
+    - "x-ipe-docs/refactoring/analysis-{task_id}.md"
   feature_id: "{FEATURE-XXX}"
   feature_title: "{title}"
   feature_version: "{version}"
   feature_phase: "Feature Closing"
+  refactoring_analysis:
+    overall_quality_score: "{1-10}"
+    refactoring_recommended: "true | false"
+    top_suggestions: ["{summary of key suggestions}"]
 ```
 
 ---
@@ -219,8 +279,16 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <verification>Verification table shows all criteria met with evidence</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Documentation finalized</name>
-    <verification>README, API docs, and changelog updated where applicable</verification>
+    <name>Code-to-docs review completed</name>
+    <verification>Sub-agent reviewed code against specification, technical design, and tests; necessary updates applied</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Project files updated</name>
+    <verification>README and other project files updated where applicable</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Refactoring analysis completed</name>
+    <verification>Sub-agent ran refactoring analysis on feature scope; results stored for summary</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>PR created or code pushed to main</name>
@@ -228,7 +296,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>Summary provided to human</name>
-    <verification>Completion summary with deliverables, files, and PR link presented</verification>
+    <verification>Completion summary with deliverables, files, PR link, and refactoring recommendation presented</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -245,10 +313,12 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 **Then:**
 ```
 1. Verify criteria - all met
-2. Update docs - complete
-3. Create PR - PR #123
-4. Output summary
-5. DONE
+2. Code-to-docs review - no gaps found
+3. Update project files - complete
+4. Refactoring analysis - score 8/10, no urgent issues
+5. Create PR - PR #123
+6. Output summary (refactoring: optional improvements only)
+7. DONE
 ```
 
 ### Pattern: Criteria Not Met
@@ -273,7 +343,9 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 1. Verify criteria - met with minor issues
 2. Fix minor issues inline
 3. Re-verify - all met
-4. Continue to PR
+4. Code-to-docs review - updated spec
+5. Refactoring analysis - score 5/10, refactoring recommended
+6. Continue to PR (with refactoring flag in summary)
 ```
 
 ### Anti-Patterns
@@ -284,7 +356,6 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Empty PR description | Reviewer cannot understand changes | Use PR template from references/ |
 | Skipping criteria check | Incomplete feature shipped | Verify each criterion with evidence |
 | Giant multi-feature PR | Hard to review and revert | Keep PR scoped to single feature |
-| No changelog entry | Lost version history | Always update CHANGELOG.md |
 | Creating feature branches in main-branch-only mode | Unnecessary complexity, violates strategy | BLOCKING: Check git_strategy BEFORE any branch operations; if main-branch-only, stay on main |
 | Using agent nickname for dev branch name | Branch not tied to git identity | Use `git config user.name` (sanitized) for dev branch name, NOT agent nickname |
 

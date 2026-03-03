@@ -1,28 +1,69 @@
 {
   "version": "1.0",
-  "last_updated": "2026-02-12T14:39:54.061210Z",
+  "last_updated": "2026-03-03T13:41:58.579891Z",
   "files": [
     {
-      "path": "topics/uncategorized/raw/research.pdf",
-      "name": "research.pdf",
+      "path": "topics/uncategorized/raw/research-1-1-1-1.pdf",
+      "name": "research-1-1-1-1.pdf",
       "type": "pdf",
       "size": 10,
       "topic": "uncategorized",
       "created_date": "2026-02-12T14:24:14.744968Z",
       "keywords": [
-        "research"
+        "research",
+        "1",
+        "1",
+        "1",
+        "1"
       ]
     },
     {
-      "path": "topics/uncategorized/raw/sample-doc.md",
-      "name": "sample-doc.md",
+      "path": "topics/uncategorized/raw/sample-doc-1-1-1-1-1.md",
+      "name": "sample-doc-1-1-1-1-1.md",
+      "type": "markdown",
+      "size": 60,
+      "topic": "uncategorized",
+      "created_date": "2026-02-12T14:40:45.499032Z",
+      "keywords": [
+        "sample",
+        "doc",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ]
+    },
+    {
+      "path": "topics/uncategorized/raw/sample-doc-1-1-1-1.md",
+      "name": "sample-doc-1-1-1-1.md",
       "type": "markdown",
       "size": 60,
       "topic": "uncategorized",
       "created_date": "2026-02-12T14:24:14.744787Z",
       "keywords": [
         "sample",
-        "doc"
+        "doc",
+        "1",
+        "1",
+        "1",
+        "1"
+      ]
+    },
+    {
+      "path": "topics/uncategorized/raw/research-1-1-1-1-1.pdf",
+      "name": "research-1-1-1-1-1.pdf",
+      "type": "pdf",
+      "size": 17,
+      "topic": "uncategorized",
+      "created_date": "2026-02-12T14:40:45.499308Z",
+      "keywords": [
+        "research",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
       ]
     },
     {

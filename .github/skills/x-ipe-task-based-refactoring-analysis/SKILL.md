@@ -54,8 +54,14 @@ input:
   # Required inputs
   auto_proceed: false
   initial_refactoring_scope:
-    files: [<list of file paths>]
-    modules: [<list of module names>]
+    # Scope level: "feature" or "custom"
+    # When "feature": auto-resolve files/modules from feature artifacts
+    # When "custom": use explicit files/modules lists
+    scope_level: "feature | custom"  # default: custom
+    feature_id: "{FEATURE-XXX}"  # required when scope_level=feature
+    refactoring_purpose: "<why refactoring is needed — e.g., optimize technical design and code maintainability>"
+    files: [<list of file paths>]  # optional when scope_level=feature (auto-resolved)
+    modules: [<list of module names>]  # optional when scope_level=feature (auto-resolved)
     description: "<user's refactoring intent>"
     reason: "<why refactoring is needed>"
 
@@ -71,7 +77,7 @@ input:
 <definition_of_ready>
   <checkpoint required="true">
     <name>initial_refactoring_scope provided</name>
-    <verification>Validate files exist, modules identifiable, description present</verification>
+    <verification>If scope_level=feature: feature_id exists and feature artifacts are accessible. If scope_level=custom: files exist, modules identifiable, description present.</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Target code exists and is accessible</name>
@@ -130,14 +136,24 @@ CRITICAL: For detailed sub-steps, scoring formulas, and gap type definitions, se
   <step_1>
     <name>Parse Initial Scope</name>
     <action>
-      1. VALIDATE initial_refactoring_scope (files are valid paths, modules identifiable, description present)
-      2. IF validation fails: ASK human for clarification, WAIT for response
-      3. INITIALIZE working_scope with files, modules, empty dependencies and expansion log
+      1. IF scope_level == "feature":
+         a. RESOLVE feature artifacts from x-ipe-docs/features/{feature_id}/
+         b. READ specification.md → extract implementation file references
+         c. READ technical-design.md → extract component files, module boundaries
+         d. COLLECT test files referenced in technical design
+         e. POPULATE files[] and modules[] from resolved artifacts
+         f. SET description from refactoring_purpose
+         g. SET reason from refactoring_purpose
+      2. VALIDATE initial_refactoring_scope (files are valid paths, modules identifiable, description present)
+      3. IF validation fails: ASK human for clarification, WAIT for response
+      4. INITIALIZE working_scope with files, modules, empty dependencies and expansion log
+      5. STORE feature_id and refactoring_purpose in working_scope for downstream use
     </action>
     <constraints>
       - BLOCKING: All file paths must resolve to existing files
+      - CRITICAL: When scope_level=feature, feature artifacts MUST exist
     </constraints>
-    <output>Validated working_scope</output>
+    <output>Validated working_scope with feature context</output>
   </step_1>
 
   <step_2>
@@ -158,11 +174,19 @@ CRITICAL: For detailed sub-steps, scoring formulas, and gap type definitions, se
   <step_3_to_6>
     <name>Evaluate Quality Perspectives</name>
     <action>
-      Step 3 - Requirements: SEARCH x-ipe-docs/requirements/**/*.md, extract criteria, compare with code, identify gaps
-      Step 4 - Features: SEARCH x-ipe-docs/requirements/FEATURE-XXX/, read specs, compare behavior, identify gaps
-      Step 5 - Tech Spec: SEARCH for technical-design.md and architecture docs, compare structure/interfaces/patterns
+      FOUNDATION: When scope_level=feature, use feature_id as the primary anchor.
+      Load specification.md and technical-design.md for {feature_id} first, then evaluate against code.
+      When scope_level=custom, search broadly across x-ipe-docs/.
+
+      Step 3 - Requirements: SEARCH x-ipe-docs/requirements/**/*.md (or feature-specific docs if scope_level=feature), extract criteria, compare with code, identify gaps
+      Step 4 - Features: SEARCH x-ipe-docs/features/{feature_id}/ (or all FEATURE-XXX/ if custom), read specs, compare behavior, identify gaps
+      Step 5 - Tech Spec: SEARCH for technical-design.md (feature-specific first if scope_level=feature), compare structure/interfaces/patterns
       Step 6 - Test Coverage: RUN coverage tool (pytest/npm/go), analyze line/branch coverage, identify critical gaps
       Step 6b - Tracing: SCAN for @x_ipe_tracing decorators, check coverage and sensitive param redaction
+
+      When refactoring_purpose is provided, weight evaluation toward that purpose:
+      - e.g., "optimize technical design" → emphasize tech spec alignment and code structure
+      - e.g., "code maintainability" → emphasize SOLID, KISS, modular design assessment
     </action>
     <constraints>
       - CRITICAL: Evaluate ALL 5 perspectives even if docs are missing (set status: not_found)
@@ -237,6 +261,9 @@ task_completion_output:
     evaluated_date: "<date>"
     overall_score: "<1-10>"
   refactoring_scope:
+    scope_level: "feature | custom"
+    feature_id: "{FEATURE-XXX or null}"
+    refactoring_purpose: "<purpose string>"
     files: [<expanded file list>]
     modules: [<expanded module list>]
     dependencies: [<identified dependencies>]

@@ -72,7 +72,7 @@
 | AC-3.2 | Clicking the "Topics" tab MUST show the topics list in the sidebar and render the Topics content view (kbTopics) | Click Topics tab → topics sidebar and detail panel appear in content area |
 | AC-3.3 | The active tab MUST have a visually distinct style (filled background, white text) matching the mockup | Click tab → active class applied with accent background |
 | AC-3.4 | Inactive tabs MUST have subtle tertiary text color and transparent background | Inspect inactive tab → no background, muted text |
-| AC-3.5 | Tab state MUST persist within the same session (switching to another workplace submenu and back should restore the last active tab) | Switch away and back → same tab active |
+| AC-3.5 | Tab state resets to the default tab (based on topic availability) when the KB view is re-initialized | Switch away and back → default tab selected based on topics |
 
 ### 4. Sidebar Tree View Updates (AC-4.x)
 
@@ -106,7 +106,7 @@
 | FR-2 | Badge calculation | KB index files + topics list | Count `landing/` files for Landing badge; count topics array length for Topics badge | Badge numbers displayed |
 | FR-3 | Tab switch handler | Tab click event | Update active tab class, re-render sidebar tree for selected section, render corresponding content view | UI updated to show selected section |
 | FR-4 | Badge refresh | File upload/delete/topic change | Recalculate badge counts from latest index data | Badge values updated |
-| FR-5 | Tab state persistence | Tab selection | Store active tab in kbCore state | Restored on re-navigation |
+| FR-5 | Tab state storage | Tab selection | Store active tab in kbCore.activeTab property | Active tab stored in memory (reset to default on re-initialization) |
 
 ## Non-Functional Requirements
 

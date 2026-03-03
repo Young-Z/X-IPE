@@ -45,6 +45,9 @@ input:
   # Required inputs
   auto_proceed: false
   refactoring_scope:
+    scope_level: "feature | custom"  # from refactoring analysis
+    feature_id: "{FEATURE-XXX or null}"
+    refactoring_purpose: "<purpose string>"
     files: ["{list of file paths}"]
     modules: ["{list of module names}"]
     dependencies: ["{identified dependencies}"]

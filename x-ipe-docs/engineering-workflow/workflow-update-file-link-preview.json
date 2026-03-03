@@ -1,0 +1,68 @@
+{
+  "schema_version": "3.0",
+  "name": "update-file-link-preview",
+  "created": "2026-03-03T13:33:34.127819+00:00",
+  "last_activity": "2026-03-03T14:12:28.088352+00:00",
+  "idea_folder": null,
+  "current_stage": "requirement",
+  "shared": {
+    "ideation": {
+      "status": "completed",
+      "actions": {
+        "compose_idea": {
+          "status": "done",
+          "deliverables": {
+            "raw-idea": "x-ipe-docs/ideas/wf-001-feature-file-link-preview/new idea.md",
+            "ideas-folder": "x-ipe-docs/ideas/wf-001-feature-file-link-preview"
+          },
+          "next_actions_suggested": [
+            "refine_idea",
+            "reference_uiux"
+          ]
+        },
+        "refine_idea": {
+          "status": "done",
+          "deliverables": {
+            "refined-idea": "x-ipe-docs/ideas/wf-001-feature-file-link-preview/refined-idea/idea-summary-v1.md",
+            "refined-ideas-folder": "x-ipe-docs/ideas/wf-001-feature-file-link-preview/refined-idea/"
+          },
+          "next_actions_suggested": [
+            "design_mockup",
+            "requirement_gathering"
+          ]
+        },
+        "reference_uiux": {
+          "status": "pending",
+          "deliverables": [],
+          "optional": true
+        },
+        "design_mockup": {
+          "status": "done",
+          "deliverables": {
+            "mockup-html": "x-ipe-docs/ideas/wf-001-feature-file-link-preview/mockups/file-link-preview-v1.html",
+            "mockups-folder": "x-ipe-docs/ideas/wf-001-feature-file-link-preview/mockups/"
+          },
+          "optional": true,
+          "next_actions_suggested": [
+            "requirement_gathering"
+          ]
+        }
+      }
+    },
+    "requirement": {
+      "status": "in_progress",
+      "actions": {
+        "requirement_gathering": {
+          "status": "in_progress",
+          "deliverables": []
+        },
+        "feature_breakdown": {
+          "status": "pending",
+          "deliverables": [],
+          "features_created": []
+        }
+      }
+    }
+  },
+  "features": []
+}
