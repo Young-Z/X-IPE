@@ -1162,6 +1162,14 @@ class WorkplaceManager {
         if (this.fileType === 'markdown') {
             this._renderArchitectureDiagrams();
         }
+        
+        // Attach link preview interception for markdown content
+        if (this.fileType === 'markdown' && typeof LinkPreviewManager !== 'undefined') {
+            const contentBody = document.getElementById('workplace-content-body');
+            if (contentBody) {
+                LinkPreviewManager.attachTo(contentBody);
+            }
+        }
     }
     
     /**
