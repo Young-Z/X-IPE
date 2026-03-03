@@ -110,7 +110,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-042-B | EPIC-042 | Conditional Block Parsing & Error Handling | v1.0 | Completed | [specification.md](../requirements/EPIC-042/FEATURE-042-B/specification.md) | 02-27-2026 | 03-03-2026 13:55:00 |
 | FEATURE-042-C | EPIC-042 | Deliverable-Default Dropdowns & Read-Only Preview | v1.0 | Completed | [specification.md](../requirements/EPIC-042/FEATURE-042-C/specification.md) | 02-27-2026 | 03-03-2026 13:55:00 |
 | FEATURE-042-D | EPIC-042 | Full Migration & i18n | v1.0 | Completed | [specification.md](../requirements/EPIC-042/FEATURE-042-D/specification.md) | 02-27-2026 | 03-03-2026 13:55:00 |
-| FEATURE-043-A | EPIC-043 | Link Interception & Preview Modal | v1.0 | Planned | - | 03-03-2026 | 03-03-2026 15:10:00 |
+| FEATURE-043-A | EPIC-043 | Link Interception & Preview Modal | v1.0 | Refined | [specification.md](../requirements/EPIC-043/FEATURE-043-A/specification.md) | 03-03-2026 | 03-03-2026 15:16:00 |
 | FEATURE-043-B | EPIC-043 | Breadcrumb Navigation & Visual Distinction | v1.0 | Planned | FEATURE-043-A | 03-03-2026 | 03-03-2026 15:10:00 |
 | FEATURE-043-C | EPIC-043 | Skill Path Convention Updates | v1.0 | Planned | - | 03-03-2026 | 03-03-2026 15:10:00 |
 | FEATURE-043-D | EPIC-043 | Existing File Migration | v1.0 | Planned | FEATURE-043-C | 03-03-2026 | 03-03-2026 15:10:00 |

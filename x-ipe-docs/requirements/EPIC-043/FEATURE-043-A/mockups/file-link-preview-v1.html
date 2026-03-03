@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>File Link Preview — Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ═══════════════════════════════════════════════════
+     CSS VARIABLES — Brand Theme (Default) + Overrides
+     ═══════════════════════════════════════════════════ */
+  :root {
+    --color-primary: #0f172a;
+    --color-secondary: #475569;
+    --color-accent: #10b981;
+    --color-accent-dark: #059669;
+    --color-accent-light: #d1fae5;
+    --color-neutral: #e2e8f0;
+    --color-error: #ef4444;
+    --color-info: #3b82f6;
+    --color-warning: #f59e0b;
+
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+
+    --font-heading: 'DM Sans', system-ui, sans-serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+    --font-mono: 'DM Mono', 'JetBrains Mono', monospace;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-dramatic: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  }
+
+  /* ═══════════════════════════════════════════════════
+     RESET & BASE
+     ═══════════════════════════════════════════════════ */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  html { font-size: 15px; scroll-behavior: smooth; }
+  
+  body {
+    font-family: var(--font-body);
+    color: var(--slate-700);
+    background: var(--slate-50);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     LAYOUT — Simulated X-IPE App Shell
+     ═══════════════════════════════════════════════════ */
+  .app-shell {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    grid-template-rows: 48px 1fr;
+    height: 100vh;
+    background: var(--slate-900);
+  }
+
+  /* Top bar */
+  .top-bar {
+    grid-column: 1 / -1;
+    background: var(--slate-900);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .top-bar .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: -0.02em;
+  }
+  .top-bar .logo-icon {
+    width: 22px; height: 22px;
+    background: var(--color-accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #fff; font-weight: 700;
+  }
+  .top-bar .breadcrumb-nav {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--slate-400);
+    margin-left: 16px;
+  }
+  .top-bar .breadcrumb-nav .sep { opacity: 0.4; font-size: 10px; }
+  .top-bar .breadcrumb-nav .current { color: var(--slate-200); }
+
+  /* Sidebar */
+  .sidebar {
+    background: var(--slate-900);
+    border-right: 1px solid rgba(255,255,255,0.06);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 12px 0; gap: 4px;
+  }
+  .sidebar-icon {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px; color: var(--slate-400);
+    cursor: pointer; transition: all 0.15s;
+    font-size: 16px;
+  }
+  .sidebar-icon:hover { background: rgba(255,255,255,0.08); color: var(--slate-200); }
+  .sidebar-icon.active { background: rgba(16,185,129,0.12); color: var(--color-accent); }
+
+  /* Main content */
+  .main-content {
+    background: #fff;
+    border-radius: 12px 0 0 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .content-header {
+    padding: 20px 28px 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .content-title {
+    font-size: 20px; font-weight: 700;
+    color: var(--slate-900);
+    letter-spacing: -0.03em;
+  }
+  .content-badge {
+    font-size: 11px; font-weight: 600;
+    background: var(--color-accent-light);
+    color: var(--color-accent-dark);
+    padding: 3px 10px;
+    border-radius: 99px;
+    letter-spacing: 0.02em;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     MARKDOWN BODY — Simulated rendered content
+     ═══════════════════════════════════════════════════ */
+  .markdown-body {
+    padding: 24px 28px 40px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .markdown-body h2 {
+    font-size: 17px; font-weight: 700;
+    color: var(--slate-800);
+    margin: 28px 0 12px;
+    letter-spacing: -0.02em;
+  }
+  .markdown-body h2:first-child { margin-top: 0; }
+  .markdown-body p {
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--slate-600);
+    line-height: 1.7;
+  }
+  .markdown-body ul {
+    margin: 0 0 14px 20px;
+    font-size: 14px;
+    color: var(--slate-600);
+  }
+  .markdown-body li { margin-bottom: 6px; line-height: 1.6; }
+  .markdown-body code {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    background: var(--slate-100);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--slate-700);
+  }
+  .markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 16px;
+    font-size: 13px;
+  }
+  .markdown-body th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--slate-700);
+    padding: 8px 12px;
+    border-bottom: 2px solid var(--slate-200);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .markdown-body td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--slate-100);
+    color: var(--slate-600);
+  }
+  .markdown-body tr:hover td { background: var(--slate-50); }
+
+  /* ═══════════════════════════════════════════════════
+     LINK STYLES — Visual distinction for internal links
+     ═══════════════════════════════════════════════════ */
+
+  /* External links — normal */
+  .markdown-body a.ext-link {
+    color: var(--color-info);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+  .markdown-body a.ext-link:hover {
+    border-bottom-color: var(--color-info);
+  }
+
+  /* Internal preview links — visually distinct */
+  .markdown-body a.preview-link {
+    color: var(--color-accent-dark);
+    text-decoration: none;
+    font-weight: 500;
+    position: relative;
+    padding-left: 20px;
+    border-bottom: 1px dashed rgba(16,185,129,0.3);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .markdown-body a.preview-link::before {
+    content: '📄';
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .markdown-body a.preview-link:hover {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+    background: rgba(16,185,129,0.05);
+    border-radius: 2px;
+  }
+
+  /* Tooltip on hover */
+  .markdown-body a.preview-link .link-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.92);
+    background: var(--slate-800);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 10;
+  }
+  .markdown-body a.preview-link .link-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--slate-800);
+  }
+  .markdown-body a.preview-link:hover .link-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+
+  /* ═══════════════════════════════════════════════════
+     SCENARIO TABS — Switch between states
+     ═══════════════════════════════════════════════════ */
+  .scenario-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    background: var(--slate-800);
+    border-radius: 14px;
+    padding: 5px;
+    gap: 3px;
+    z-index: 9999;
+    box-shadow: var(--shadow-dramatic), 0 0 0 1px rgba(255,255,255,0.06);
+  }
+  .scenario-tab {
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--slate-400);
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+  }
+  .scenario-tab:hover { color: var(--slate-200); }
+  .scenario-tab.active {
+    background: var(--color-accent);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(16,185,129,0.3);
+  }
+
+  /* ═══════════════════════════════════════════════════
+     PREVIEW MODAL — The core feature
+     ═══════════════════════════════════════════════════ */
+  .preview-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.55);
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+  }
+  .preview-backdrop.visible { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .preview-modal {
+    width: 90vw;
+    max-width: 900px;
+    height: 80vh;
+    background: #fff;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: var(--shadow-dramatic);
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Modal header */
+  .preview-header {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    height: 54px;
+    min-height: 54px;
+    border-bottom: 1px solid var(--slate-100);
+    gap: 8px;
+    background: var(--slate-50);
+  }
+
+  .preview-back-btn {
+    display: flex; align-items: center; gap: 5px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--slate-200);
+    background: #fff;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--slate-600);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--font-body);
+    white-space: nowrap;
+  }
+  .preview-back-btn:hover {
+    background: var(--slate-100);
+    color: var(--slate-800);
+    border-color: var(--slate-300);
+  }
+  .preview-back-btn .arrow { font-size: 14px; }
+  .preview-back-btn.hidden { display: none; }
+
+  .preview-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 0 4px;
+  }
+  .preview-breadcrumb::-webkit-scrollbar { display: none; }
+
+  .crumb {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--slate-400);
+    white-space: nowrap;
+    cursor: pointer;
+    padding: 3px 6px;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .crumb:hover { color: var(--slate-700); background: var(--slate-100); }
+  .crumb.current {
+    color: var(--slate-800);
+    font-weight: 600;
+    cursor: default;
+    background: none;
+  }
+  .crumb-sep {
+    color: var(--slate-300);
+    font-size: 11px;
+    margin: 0 1px;
+    user-select: none;
+  }
+
+  .preview-close-btn {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--slate-400);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .preview-close-btn:hover { background: var(--slate-100); color: var(--slate-700); }
+
+  /* Modal content */
+  .preview-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 32px 40px;
+    scroll-behavior: smooth;
+  }
+  .preview-content::-webkit-scrollbar { width: 6px; }
+  .preview-content::-webkit-scrollbar-track { background: transparent; }
+  .preview-content::-webkit-scrollbar-thumb { background: var(--slate-200); border-radius: 3px; }
+  .preview-content::-webkit-scrollbar-thumb:hover { background: var(--slate-300); }
+
+  /* Rendered content inside preview */
+  .preview-content h1 {
+    font-size: 22px; font-weight: 700;
+    color: var(--slate-900);
+    letter-spacing: -0.03em;
+    margin-bottom: 6px;
+  }
+  .preview-content .meta-line {
+    font-size: 12.5px;
+    color: var(--slate-400);
+    font-family: var(--font-mono);
+    margin-bottom: 4px;
+  }
+  .preview-content h2 {
+    font-size: 16px; font-weight: 700;
+    color: var(--slate-800);
+    margin: 24px 0 10px;
+    letter-spacing: -0.02em;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--slate-100);
+  }
+  .preview-content p {
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: var(--slate-600);
+    line-height: 1.7;
+  }
+  .preview-content ul {
+    margin: 0 0 12px 20px;
+    font-size: 14px;
+    color: var(--slate-600);
+  }
+  .preview-content li { margin-bottom: 5px; line-height: 1.6; }
+  .preview-content code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--slate-100);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: var(--slate-700);
+  }
+
+  /* ═══════════════════════════════════════════════════
+     ERROR STATE
+     ═══════════════════════════════════════════════════ */
+  .error-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 12px;
+    padding: 40px;
+    text-align: center;
+  }
+  .error-state.visible { display: flex; }
+  .error-icon {
+    width: 56px; height: 56px;
+    border-radius: 16px;
+    background: #fef2f2;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+  }
+  .error-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--slate-800);
+    letter-spacing: -0.02em;
+  }
+  .error-path {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--color-error);
+    background: #fef2f2;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid #fecaca;
+  }
+  .error-hint {
+    font-size: 13px;
+    color: var(--slate-400);
+    max-width: 340px;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     LOADING STATE
+     ═══════════════════════════════════════════════════ */
+  .loading-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 16px;
+  }
+  .loading-state.visible { display: flex; }
+
+  .loading-spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--slate-200);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-size: 13px;
+    color: var(--slate-400);
+    font-weight: 500;
+  }
+  .loading-path {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--slate-500);
+    background: var(--slate-100);
+    padding: 4px 12px;
+    border-radius: 6px;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     LINK LEGEND — callout card
+     ═══════════════════════════════════════════════════ */
+  .link-legend {
+    margin: 20px 0 16px;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, var(--slate-50) 0%, rgba(16,185,129,0.03) 100%);
+    border: 1px solid var(--slate-200);
+    border-left: 3px solid var(--color-accent);
+    border-radius: 0 10px 10px 0;
+    font-size: 13px;
+    color: var(--slate-600);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .link-legend strong { color: var(--slate-800); font-weight: 600; }
+  .legend-row {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .legend-sample {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12.5px; font-weight: 500;
+  }
+  .legend-sample.internal {
+    color: var(--color-accent-dark);
+    background: rgba(16,185,129,0.08);
+    border-bottom: 1px dashed rgba(16,185,129,0.3);
+  }
+  .legend-sample.internal::before { content: '📄 '; font-size: 12px; }
+  .legend-sample.external {
+    color: var(--color-info);
+  }
+  .legend-desc { color: var(--slate-500); font-size: 12.5px; }
+
+  /* ═══════════════════════════════════════════════════
+     PULSE DOT — interaction hint
+     ═══════════════════════════════════════════════════ */
+  .pulse-hint {
+    position: absolute;
+    width: 10px; height: 10px;
+    background: var(--color-accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .pulse-hint::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 2px solid var(--color-accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.8); opacity: 0; }
+  }
+
+  /* ═══════════════════════════════════════════════════
+     STATE LABEL
+     ═══════════════════════════════════════════════════ */
+  .state-label {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    z-index: 9998;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 99px;
+    background: var(--slate-800);
+    color: var(--color-accent);
+    box-shadow: var(--shadow-lg);
+    opacity: 0.9;
+    display: none;
+  }
+  .state-label.visible { display: block; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     APP SHELL — Simulated X-IPE layout
+     ═══════════════════════════════════════════════════ -->
+<div class="app-shell">
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="logo">
+      <div class="logo-icon">X</div>
+      X-IPE
+    </div>
+    <div class="breadcrumb-nav">
+      <span class="sep">›</span>
+      <span>Ideas</span>
+      <span class="sep">›</span>
+      <span>wf-001-feature-file-link-preview</span>
+      <span class="sep">›</span>
+      <span class="current">idea-summary-v1.md</span>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-icon" title="Home">⌂</div>
+    <div class="sidebar-icon active" title="Ideas">💡</div>
+    <div class="sidebar-icon" title="Workflow">⚙</div>
+    <div class="sidebar-icon" title="Knowledge Base">📚</div>
+    <div class="sidebar-icon" title="Terminal">⬛</div>
+  </div>
+
+  <!-- Main content area -->
+  <div class="main-content">
+    <div class="content-header">
+      <div class="content-title">idea-summary-v1.md</div>
+      <div class="content-badge">IDEA-033 · Refined</div>
+    </div>
+
+    <!-- Simulated rendered markdown -->
+    <div class="markdown-body" id="markdownBody">
+
+      <h2>Overview</h2>
+      <p>Enhance X-IPE's handling of internal file links in rendered markdown content. When markdown files reference project resources via <code>x-ipe-docs/</code> or <code>.github/skills/</code> paths, clicking those links opens an in-app preview modal.</p>
+
+      <!-- Link legend callout -->
+      <div class="link-legend">
+        <strong>Link types in this document</strong>
+        <div class="legend-row">
+          <span class="legend-sample internal">Internal link</span>
+          <span class="legend-desc">→ Opens in-app preview modal</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-sample external">External link</span>
+          <span class="legend-desc">→ Opens in new tab (normal behavior)</span>
+        </div>
+      </div>
+
+      <h2>Related Documents</h2>
+      <p>This idea refines the feedback captured in
+        <a class="preview-link" href="#" data-path="x-ipe-docs/uiux-feedback/Feedback-20260303-212659/feedback.md" onclick="openPreview('specification')">
+          feedback.md
+          <span class="link-tooltip">Open preview</span>
+        </a> and builds on the existing
+        <a class="preview-link" href="#" data-path="x-ipe-docs/requirements/EPIC-041/features.md" onclick="openPreview('specification')">
+          EPIC-041 features.md
+          <span class="link-tooltip">Open preview</span>
+        </a>.
+        For background on the rendering engine, see
+        <a class="preview-link" href="#" data-path=".github/skills/x-ipe-task-based-technical-design/SKILL.md" onclick="openPreview('specification')">
+          technical-design SKILL.md
+          <span class="link-tooltip">Open preview</span>
+        </a>.
+      </p>
+
+      <h2>Affected Skills</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Skill</th>
+            <th>Output</th>
+            <th>Change</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a class="preview-link" href="#" data-path=".github/skills/x-ipe-task-based-ideation-v2/SKILL.md" onclick="openPreview('specification')">ideation-v2<span class="link-tooltip">Open preview</span></a></td>
+            <td><code>idea-summary-vN.md</code></td>
+            <td>Full paths for cross-references</td>
+          </tr>
+          <tr>
+            <td><a class="preview-link" href="#" data-path=".github/skills/x-ipe-task-based-feature-refinement/SKILL.md" onclick="openPreview('specification')">feature-refinement<span class="link-tooltip">Open preview</span></a></td>
+            <td><code>specification.md</code></td>
+            <td>Full paths to related features</td>
+          </tr>
+          <tr>
+            <td><a class="preview-link" href="#" data-path=".github/skills/x-ipe-task-based-technical-design/SKILL.md" onclick="openPreview('specification')">technical-design<span class="link-tooltip">Open preview</span></a></td>
+            <td><code>technical-design.md</code></td>
+            <td>Full paths to spec, architecture</td>
+          </tr>
+          <tr>
+            <td><a class="preview-link" href="#" data-path=".github/skills/x-ipe-task-based-requirement-gathering/SKILL.md" onclick="openPreview('specification')">requirement-gathering<span class="link-tooltip">Open preview</span></a></td>
+            <td><code>requirement-details.md</code></td>
+            <td>Full paths to idea summaries</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>External References</h2>
+      <p>The rendering pipeline uses <a class="ext-link" href="https://marked.js.org" target="_blank">marked.js</a> for markdown parsing and <a class="ext-link" href="https://highlightjs.org" target="_blank">highlight.js</a> for syntax highlighting. These are external dependencies and open normally.</p>
+
+      <h2>Architecture</h2>
+      <p>See the
+        <a class="preview-link" href="#" data-path="x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/technical-design.md" onclick="openPreview('deep-nav')">
+          FEATURE-041-E technical design
+          <span class="link-tooltip">Open preview</span>
+        </a>
+        for the deliverable tagging architecture that this feature extends.
+      </p>
+
+    </div><!-- /markdown-body -->
+  </div><!-- /main-content -->
+</div><!-- /app-shell -->
+
+<!-- ═══════════════════════════════════════════════════
+     STATE LABEL
+     ═══════════════════════════════════════════════════ -->
+<div class="state-label" id="stateLabel"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     PREVIEW MODAL BACKDROP
+     ═══════════════════════════════════════════════════ -->
+<div class="preview-backdrop" id="previewBackdrop" onclick="handleBackdropClick(event)">
+  <div class="preview-modal" onclick="event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="preview-header">
+      <button class="preview-back-btn hidden" id="backBtn" onclick="goBack()">
+        <span class="arrow">←</span> Back
+      </button>
+
+      <div class="preview-breadcrumb" id="breadcrumb">
+        <!-- Populated dynamically -->
+      </div>
+
+      <button class="preview-close-btn" onclick="closePreview()" title="Close">✕</button>
+    </div>
+
+    <!-- Content (normal) -->
+    <div class="preview-content" id="previewContent">
+      <!-- Populated dynamically per scenario -->
+    </div>
+
+    <!-- Error state -->
+    <div class="error-state" id="errorState">
+      <div class="error-icon">⚠</div>
+      <div class="error-title">File not found</div>
+      <div class="error-path" id="errorPath">x-ipe-docs/planning/old-spec.md</div>
+      <div class="error-hint">The file may have been moved, renamed, or deleted. Check the path and try again.</div>
+    </div>
+
+    <!-- Loading state -->
+    <div class="loading-state" id="loadingState">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading file preview…</div>
+      <div class="loading-path" id="loadingPath">x-ipe-docs/requirements/specification.md</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SCENARIO TABS
+     ═══════════════════════════════════════════════════ -->
+<div class="scenario-bar">
+  <div class="scenario-tab active" onclick="showScenario('links')">① Link Distinction</div>
+  <div class="scenario-tab" onclick="showScenario('preview')">② Preview Modal</div>
+  <div class="scenario-tab" onclick="showScenario('breadcrumb')">③ Breadcrumb Nav</div>
+  <div class="scenario-tab" onclick="showScenario('error')">④ Error State</div>
+  <div class="scenario-tab" onclick="showScenario('loading')">⑤ Loading</div>
+</div>
+
+<script>
+  // ═══════════════════════════════════════════════════
+  // STATE MANAGEMENT
+  // ═══════════════════════════════════════════════════
+  let navStack = [];
+  let currentScenario = 'links';
+
+  // ═══════════════════════════════════════════════════
+  // PREVIEW CONTENT TEMPLATES
+  // ═══════════════════════════════════════════════════
+  const previewContents = {
+    specification: `
+      <h1>FEATURE-041-E: Deliverable Tagging & Action Context Schema</h1>
+      <p class="meta-line">> Path: x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/specification.md</p>
+      <p class="meta-line">> Status: Accepted &nbsp;|&nbsp; Priority: P0</p>
+
+      <h2>Overview</h2>
+      <p>Define a structured schema for deliverable tagging in workflow actions. Each deliverable produced by a skill is tagged with a semantic key (e.g., <code>refined-idea</code>, <code>mockup-html</code>) rather than a flat file path.</p>
+
+      <h2>Functional Requirements</h2>
+      <ul>
+        <li>FR-1: Each workflow action in <code>workflow-template.json</code> declares an <code>extract</code> array of tag names</li>
+        <li>FR-2: Skills report deliverables as <code>{"tag-name": "path/to/file"}</code> keyed dicts</li>
+        <li>FR-3: The <code>update_workflow_action</code> MCP tool validates deliverable keys against extract tags</li>
+        <li>FR-4: Action context dropdowns source candidates from tagged deliverables of upstream actions</li>
+      </ul>
+
+      <h2>Related Documents</h2>
+      <p>See the
+        <a class="preview-link" href="#" data-path="x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/technical-design.md" onclick="navigateInPreview('tech-design'); return false;">
+          technical design
+          <span class="link-tooltip">Open preview</span>
+        </a> for implementation details and the
+        <a class="preview-link" href="#" data-path="x-ipe-docs/requirements/EPIC-041/features.md" onclick="navigateInPreview('features-list'); return false;">
+          features list
+          <span class="link-tooltip">Open preview</span>
+        </a> for the full EPIC-041 breakdown.
+      </p>
+
+      <h2>Acceptance Criteria</h2>
+      <ul>
+        <li>AC-1: Deliverables stored as keyed dict in workflow JSON</li>
+        <li>AC-2: Validation rejects unknown tag keys</li>
+        <li>AC-3: Action context dropdowns show tagged deliverables from prior stages</li>
+      </ul>
+    `,
+
+    'tech-design': `
+      <h1>Technical Design: Deliverable Tagging</h1>
+      <p class="meta-line">> Path: x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/technical-design.md</p>
+      <p class="meta-line">> Author: Echo 🔊 &nbsp;|&nbsp; Date: 2026-02-26</p>
+
+      <h2>Architecture</h2>
+      <p>The deliverable tagging system consists of three layers: template definition, runtime validation, and frontend resolution.</p>
+
+      <h2>Data Flow</h2>
+      <ul>
+        <li><strong>Template:</strong> <code>workflow-template.json</code> defines <code>extract</code> tags per action</li>
+        <li><strong>Runtime:</strong> <code>update_workflow_action</code> MCP tool stores keyed deliverables in workflow instance JSON</li>
+        <li><strong>Frontend:</strong> Action context modal reads upstream deliverables and populates dropdowns</li>
+      </ul>
+
+      <h2>Implementation Notes</h2>
+      <p>The <code>WorkflowManagerService</code> validates deliverable keys against the template's extract array. Unknown keys are rejected with a descriptive error. The dual-format approach (keyed dict + legacy list) maintains backward compatibility during migration.</p>
+    `,
+
+    'features-list': `
+      <h1>EPIC-041: Action Context System — Features</h1>
+      <p class="meta-line">> Path: x-ipe-docs/requirements/EPIC-041/features.md</p>
+
+      <h2>Feature List</h2>
+      <ul>
+        <li><strong>FEATURE-041-E:</strong> Deliverable Tagging & Action Context Schema (MVP) — ✅ Done</li>
+        <li><strong>FEATURE-041-F:</strong> Action Context Modal UI & Persistence — ✅ Done</li>
+        <li><strong>FEATURE-041-G:</strong> Skill Extra Context Reference — ✅ Done</li>
+      </ul>
+    `,
+
+    'deep-nav': `
+      <h1>FEATURE-041-E: Technical Design</h1>
+      <p class="meta-line">> Path: x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/technical-design.md</p>
+
+      <h2>Component Architecture</h2>
+      <p>The deliverable tagging architecture consists of backend validation, MCP protocol updates, and frontend action context integration.</p>
+
+      <h2>References</h2>
+      <p>This extends the workflow system described in
+        <a class="preview-link" href="#" data-path="x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/specification.md" onclick="navigateInPreview('specification'); return false;">
+          the specification
+          <span class="link-tooltip">Open preview</span>
+        </a>.
+      </p>
+    `
+  };
+
+  const breadcrumbNames = {
+    specification: 'specification.md',
+    'tech-design': 'technical-design.md',
+    'features-list': 'features.md',
+    'deep-nav': 'technical-design.md'
+  };
+
+  // ═══════════════════════════════════════════════════
+  // SCENARIO SWITCHING
+  // ═══════════════════════════════════════════════════
+  function showScenario(scenario) {
+    currentScenario = scenario;
+    document.querySelectorAll('.scenario-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+
+    const label = document.getElementById('stateLabel');
+    const backdrop = document.getElementById('previewBackdrop');
+
+    // Reset all states
+    closePreview();
+    label.classList.remove('visible');
+
+    switch(scenario) {
+      case 'links':
+        label.textContent = 'Viewing: Link Distinction';
+        label.classList.add('visible');
+        break;
+
+      case 'preview':
+        navStack = ['specification'];
+        showPreviewContent('specification');
+        backdrop.classList.add('visible');
+        label.textContent = 'Viewing: Preview Modal';
+        label.classList.add('visible');
+        break;
+
+      case 'breadcrumb':
+        navStack = ['specification', 'tech-design', 'features-list'];
+        showPreviewContent('features-list');
+        document.getElementById('backBtn').classList.remove('hidden');
+        backdrop.classList.add('visible');
+        label.textContent = 'Viewing: Breadcrumb Navigation (3 levels deep)';
+        label.classList.add('visible');
+        break;
+
+      case 'error':
+        navStack = ['specification'];
+        backdrop.classList.add('visible');
+        document.getElementById('previewContent').style.display = 'none';
+        document.getElementById('errorState').classList.add('visible');
+        updateBreadcrumb();
+        label.textContent = 'Viewing: Error State';
+        label.classList.add('visible');
+        break;
+
+      case 'loading':
+        navStack = ['specification'];
+        backdrop.classList.add('visible');
+        document.getElementById('previewContent').style.display = 'none';
+        document.getElementById('loadingState').classList.add('visible');
+        updateBreadcrumb();
+        label.textContent = 'Viewing: Loading State';
+        label.classList.add('visible');
+        break;
+    }
+  }
+
+  // ═══════════════════════════════════════════════════
+  // PREVIEW MODAL LOGIC
+  // ═══════════════════════════════════════════════════
+  function openPreview(contentKey) {
+    if (currentScenario === 'links') {
+      // Switch to preview scenario
+      currentScenario = 'preview';
+      document.querySelectorAll('.scenario-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.scenario-tab')[1].classList.add('active');
+    }
+    navStack = [contentKey];
+    showPreviewContent(contentKey);
+    document.getElementById('previewBackdrop').classList.add('visible');
+
+    const label = document.getElementById('stateLabel');
+    label.textContent = 'Viewing: Preview Modal';
+    label.classList.add('visible');
+  }
+
+  function navigateInPreview(contentKey) {
+    navStack.push(contentKey);
+    showPreviewContent(contentKey);
+  }
+
+  function goBack() {
+    if (navStack.length > 1) {
+      navStack.pop();
+      showPreviewContent(navStack[navStack.length - 1]);
+    }
+  }
+
+  function showPreviewContent(contentKey) {
+    const content = document.getElementById('previewContent');
+    const error = document.getElementById('errorState');
+    const loading = document.getElementById('loadingState');
+
+    content.style.display = 'block';
+    error.classList.remove('visible');
+    loading.classList.remove('visible');
+
+    content.innerHTML = previewContents[contentKey] || '<p>Content not found</p>';
+    content.scrollTop = 0;
+
+    // Show/hide back button
+    const backBtn = document.getElementById('backBtn');
+    if (navStack.length > 1) {
+      backBtn.classList.remove('hidden');
+    } else {
+      backBtn.classList.add('hidden');
+    }
+
+    updateBreadcrumb();
+  }
+
+  function updateBreadcrumb() {
+    const bc = document.getElementById('breadcrumb');
+    bc.innerHTML = navStack.map((key, i) => {
+      const name = breadcrumbNames[key] || key;
+      const isLast = i === navStack.length - 1;
+      const sep = i < navStack.length - 1 ? '<span class="crumb-sep">›</span>' : '';
+      if (isLast) {
+        return `<span class="crumb current">${name}</span>`;
+      } else {
+        return `<span class="crumb" onclick="jumpTo(${i})">${name}</span>${sep}`;
+      }
+    }).join('');
+  }
+
+  function jumpTo(index) {
+    navStack = navStack.slice(0, index + 1);
+    showPreviewContent(navStack[navStack.length - 1]);
+  }
+
+  function closePreview() {
+    document.getElementById('previewBackdrop').classList.remove('visible');
+    document.getElementById('previewContent').style.display = 'block';
+    document.getElementById('errorState').classList.remove('visible');
+    document.getElementById('loadingState').classList.remove('visible');
+    document.getElementById('backBtn').classList.add('hidden');
+    navStack = [];
+  }
+
+  function handleBackdropClick(e) {
+    if (e.target === e.currentTarget) closePreview();
+  }
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePreview();
+  });
+</script>
+
+</body>
+</html>
