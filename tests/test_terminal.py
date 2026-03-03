@@ -995,3 +995,176 @@ class TestSessionPreviewDismissOnLeave:
             "Session bar mouseleave must call _dismissPreview"
         assert '_graceTimer' not in handler_block, \
             "Session bar mouseleave must NOT use grace timer - must dismiss immediately"
+
+
+# =============================================================================
+# Bug Fix Tests: Stale Session Recreation (TASK-682)
+# =============================================================================
+
+class TestStaleSessionRecreation:
+    """
+    Tests for TASK-682: Terminal handle_attach creates new backend PTY for
+    each stale localStorage session ID on page load.
+
+    When frontend sends attach with a session_id that doesn't exist on the
+    backend (e.g., after server restart), the handler should emit
+    session_not_found instead of creating a new session.
+    """
+
+    def test_attach_nonexistent_session_emits_session_not_found(self):
+        """handle_attach with non-existent session_id must emit session_not_found,
+        NOT create a new backend session."""
+        import os
+        handlers_path = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'handlers', 'terminal_handlers.py'
+        )
+        with open(handlers_path, 'r') as f:
+            content = f.read()
+
+        # The handler must emit 'session_not_found' when requested session doesn't exist
+        assert 'session_not_found' in content, \
+            "handle_attach must emit session_not_found when requested session doesn't exist"
+
+    def test_attach_nonexistent_session_does_not_create_new(self):
+        """When a requested session_id doesn't exist, no new session should be created."""
+        import os
+        handlers_path = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'handlers', 'terminal_handlers.py'
+        )
+        with open(handlers_path, 'r') as f:
+            content = f.read()
+
+        # Find the handle_attach function
+        attach_idx = content.find('def handle_attach')
+        assert attach_idx != -1
+        attach_block = content[attach_idx:attach_idx + 2500]
+
+        # When requested_session_id is set but session doesn't exist,
+        # the code should return before reaching create_session
+        # Look for the pattern: if requested_session_id but not found -> return early
+        assert 'session_not_found' in attach_block, \
+            "handle_attach must have session_not_found path for non-existent sessions"
+
+    def test_attach_expired_session_renews_instead_of_destroying(self):
+        """When a frontend reconnects to an expired session, the session should
+        be renewed (re-attached), NOT destroyed. Expiry only applies when no
+        frontend reconnects (background cleanup)."""
+        import os
+        handlers_path = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'handlers', 'terminal_handlers.py'
+        )
+        with open(handlers_path, 'r') as f:
+            content = f.read()
+
+        attach_idx = content.find('def handle_attach')
+        assert attach_idx != -1
+        attach_block = content[attach_idx:attach_idx + 2500]
+
+        # handle_attach should NOT check is_expired() — expired sessions
+        # are renewed when a frontend attaches (attach resets disconnect_time)
+        assert 'is_expired' not in attach_block, \
+            "handle_attach must NOT check is_expired — expired sessions are renewed on attach"
+
+        # Should reconnect expired sessions the same as disconnected ones
+        assert 'renewing expired' in attach_block.lower() or 'expired' in attach_block.lower(), \
+            "handle_attach reconnect path should mention expired session handling"
+
+    def test_expired_session_only_destroyed_by_cleanup(self):
+        """Expired sessions should only be destroyed by the background
+        cleanup_expired task, not by handle_attach."""
+        from x_ipe.services.terminal_service import SessionManager, PersistentSession
+        from unittest.mock import Mock
+        from datetime import datetime, timedelta
+
+        manager = SessionManager()
+        session = PersistentSession("test-expired")
+        mock_emit = Mock()
+        session.attach("socket-1", mock_emit)
+        session.detach()
+        # Force expiry
+        session.disconnect_time = datetime.now() - timedelta(hours=2)
+
+        with manager._lock:
+            manager.sessions["test-expired"] = session
+
+        assert session.is_expired(), "Session should be expired"
+
+        # cleanup_expired should destroy it (no frontend connected)
+        removed = manager.cleanup_expired()
+        assert removed == 1
+        assert not manager.has_session("test-expired")
+
+    def test_expired_session_renewed_on_attach(self):
+        """When attach() is called on an expired session, it renews it:
+        disconnect_time is reset to None, state becomes connected."""
+        from x_ipe.services.terminal_service import PersistentSession
+        from unittest.mock import Mock
+        from datetime import datetime, timedelta
+
+        session = PersistentSession("test-renew")
+        mock_emit = Mock()
+        session.attach("socket-1", mock_emit)
+        session.detach()
+        # Force expiry
+        session.disconnect_time = datetime.now() - timedelta(hours=2)
+        assert session.is_expired()
+
+        # Frontend reconnects — should renew
+        session.attach("socket-2", mock_emit)
+        assert session.state == 'connected'
+        assert session.disconnect_time is None
+        assert not session.is_expired(), "Session must be renewed after attach"
+
+    def test_attach_no_session_id_creates_new(self):
+        """When no session_id is requested, should create a new session as before."""
+        import os
+        handlers_path = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'handlers', 'terminal_handlers.py'
+        )
+        with open(handlers_path, 'r') as f:
+            content = f.read()
+
+        attach_idx = content.find('def handle_attach')
+        assert attach_idx != -1
+        attach_block = content[attach_idx:attach_idx + 2500]
+
+        # Should still have create_session for when no session_id is provided
+        assert 'create_session' in attach_block, \
+            "handle_attach must still create sessions when no session_id is requested"
+
+    def test_frontend_handles_session_not_found(self):
+        """Frontend _createSocket must listen for session_not_found and clean up stale tab."""
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        # Frontend must have a session_not_found handler
+        assert "session_not_found" in content, \
+            "Frontend must handle session_not_found event from backend"
+
+    def test_frontend_session_not_found_removes_stale_session(self):
+        """On session_not_found, frontend must remove the stale session
+        (set sessionId to null so removeSession skips backend destroy)."""
+        import os
+        terminal_js = os.path.join(
+            os.path.dirname(__file__), '..', 'src', 'x_ipe', 'static', 'js', 'terminal.js'
+        )
+        with open(terminal_js, 'r') as f:
+            content = f.read()
+
+        # Find the session_not_found handler
+        handler_idx = content.find("session_not_found")
+        assert handler_idx != -1, "Must have session_not_found handler"
+
+        handler_block = content[handler_idx:handler_idx + 300]
+
+        # Must nullify sessionId to prevent destroy_sessions call
+        assert 'sessionId' in handler_block and 'null' in handler_block, \
+            "session_not_found handler must set sessionId to null before removing"
+
+        # Must call removeSession to clean up frontend tab
+        assert 'removeSession' in handler_block, \
+            "session_not_found handler must call removeSession to clean up stale tab"

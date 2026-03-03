@@ -521,6 +521,14 @@
                 }
             });
 
+            // -- stale session cleanup (TASK-682)
+            socket.on('session_not_found', () => {
+                const s = getSession();
+                if (!s) return;
+                s.sessionId = null;
+                this.removeSession(sessionKey);
+            });
+
             // -- output with scroll-lock when user has scrolled up
             socket.on('output', data => {
                 const s = getSession();

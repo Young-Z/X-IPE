@@ -33,6 +33,12 @@ def register_terminal_handlers(socketio):
         """
         Handle session attachment.
         Creates new session or reconnects to existing one.
+
+        Expiry rules:
+        - If session exists and frontend is attaching → reconnect (renew).
+          attach() resets disconnect_time, so expired sessions are renewed.
+        - If session doesn't exist (e.g., server restart) → session_not_found.
+        - Only background cleanup_expired destroys sessions with no frontend.
         """
         try:
             sid = request.sid
@@ -50,9 +56,7 @@ def register_terminal_handlers(socketio):
             if requested_session_id and session_manager.has_session(requested_session_id):
                 session = session_manager.get_session(requested_session_id)
                 
-                if session.is_expired():
-                    session_manager.remove_session(requested_session_id)
-                elif session.state == 'connected' and session.socket_sid and session.socket_sid != sid:
+                if session.state == 'connected' and session.socket_sid and session.socket_sid != sid:
                     # Session is actively used by another tab — create new session for this tab
                     print(f"[Terminal] Session {requested_session_id[:8]} active on another tab, creating new session for {sid}")
                     session_id = session_manager.create_session(emit_output, rows, cols)
@@ -64,7 +68,8 @@ def register_terminal_handlers(socketio):
                     socketio.emit('new_session', {'session_id': session_id}, room=sid)
                     return
                 else:
-                    # Reconnect to existing session (disconnected or same SID reconnecting)
+                    # Reconnect to existing session (disconnected, expired, or same SID)
+                    # attach() resets disconnect_time and state, renewing expired sessions
                     session.attach(sid, emit_output)
                     socket_to_session[sid] = requested_session_id
                     
@@ -79,7 +84,15 @@ def register_terminal_handlers(socketio):
                     }, room=sid)
                     return
             
-            # Create new session
+            # Session was requested but doesn't exist on backend
+            if requested_session_id:
+                print(f"[Terminal] Session {requested_session_id[:8]} not found, notifying client")
+                socketio.emit('session_not_found', {
+                    'session_id': requested_session_id
+                }, room=sid)
+                return
+            
+            # Create new session (only when no specific session was requested)
             session_id = session_manager.create_session(emit_output, rows, cols)
             session = session_manager.get_session(session_id)
             session.attach(sid, emit_output)
