@@ -489,6 +489,7 @@
 .workflow-panel-meta-section { padding: 12px 22px; border-top: 1px solid var(--wf-slate-200); }
 .workflow-panel-meta-section .workflow-panel-body-row { font-size: 12px; display: flex; gap: 8px; color: var(--wf-slate-500); }
 .workflow-panel-meta-section .workflow-panel-body-label { font-weight: 600; color: var(--wf-slate-400); }
+.workflow-settings-select { font-size: 12px; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--wf-slate-200); background: var(--wf-white); color: var(--wf-slate-600); cursor: pointer; }
 
 /* Error state */
 .workflow-error { padding: 20px; text-align: center; color: #ef4444; }

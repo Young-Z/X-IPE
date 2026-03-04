@@ -183,6 +183,34 @@ const workflow = {
             <div class="workflow-panel-body-row"><span class="workflow-panel-body-label">Created</span><span>${created}</span></div>
             <div class="workflow-panel-body-row"><span class="workflow-panel-body-label">Last Activity</span><span>${lastAct}</span></div>`;
         body.appendChild(meta);
+
+        // Settings: Process Preference dropdown
+        const currentMode = stateResp?.data?.global?.process_preference?.auto_proceed || 'manual';
+        const settingsDiv = document.createElement('div');
+        settingsDiv.className = 'workflow-panel-meta-section';
+        settingsDiv.innerHTML = `
+            <div class="workflow-panel-body-row">
+                <span class="workflow-panel-body-label">Auto-Proceed</span>
+                <select class="workflow-settings-select" data-wf="${wf.name}">
+                    <option value="manual"${currentMode === 'manual' ? ' selected' : ''}>Manual</option>
+                    <option value="auto"${currentMode === 'auto' ? ' selected' : ''}>Auto</option>
+                    <option value="stop_for_question"${currentMode === 'stop_for_question' ? ' selected' : ''}>Stop for Question</option>
+                </select>
+            </div>`;
+        const select = settingsDiv.querySelector('select');
+        select.onchange = async () => {
+            try {
+                const resp = await fetch(`/api/workflow/${encodeURIComponent(wf.name)}/settings`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ process_preference: { auto_proceed: select.value } })
+                });
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            } catch (e) {
+                select.value = currentMode;
+            }
+        };
+        body.appendChild(settingsDiv);
     },
 
     _renderEmptyState() {
