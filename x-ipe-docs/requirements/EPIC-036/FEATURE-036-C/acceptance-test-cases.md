@@ -122,3 +122,42 @@
 - AC-014 (verify action allowed before dispatch): Implementation checks status client-side from already-fetched state rather than making a separate API call — functionally equivalent
 - AC-017 (no idle session toast): Covered by code path but not directly testable since terminal manager is always available in the test environment
 - AC-022/AC-023 (workplace opens after idea link): Code path verified; full integration requires valid idea folder in project workspace
+
+---
+
+## CR-001: Action Running State Test Cases (v1.1)
+
+> Added: 03-04-2026 | CR: [CR-001](x-ipe-docs/requirements/EPIC-036/FEATURE-036-C/CR-001.md)
+
+### CR-001 Summary
+
+| Metric | Value |
+|--------|-------|
+| Total Test Cases | 6 |
+| Passed | 6 |
+| Failed | 0 |
+| Pass Rate | 100% |
+
+### TC-CR-001: Action button remains clickable during execution (AC-030) — P0
+
+**Status:** ✅ Pass — Clicked "Reference UIUX" button, click handler fired, `.running` class added. No `pointer-events: none` blocking.
+
+### TC-CR-002: Running action displays pulse-ring animation (AC-031) — P0
+
+**Status:** ✅ Pass — After click, button class became `action-btn optional running`. CSS `::after` pseudo with `border: 2px solid #38bdf8` and `animation: action-running-pulse 1.5s` confirmed via stylesheet inspection.
+
+### TC-CR-003: Running state tracked client-side, resets on refresh (AC-032) — P0
+
+**Status:** ✅ Pass — `_runningActions` is a Set, contained `reference_uiux` after click (size=1). After page refresh, `_runningActions.size` returned 0 and zero `.action-btn.running` elements found.
+
+### TC-CR-004: Multiple actions can run simultaneously (AC-033) — P1
+
+**Status:** ✅ Pass — Clicked "Refine Idea" then "Design Mockup". Both got `.running` class. `_runningActions` contained `['refine_idea', 'design_mockup']` (size=2). Both showed pulse-ring animation simultaneously.
+
+### TC-CR-005: Running CSS rules exist in stylesheet (AC-031, UIR-007) — P1
+
+**Status:** ✅ Pass — `.action-btn.running` ✓, `.action-btn.running::after` ✓, `@keyframes action-running-pulse` ✓. No `pointer-events: none` on `.running` or `.in-progress` rules.
+
+### TC-CR-006: Only locked buttons block clicks (AC-030, AC-014) — P2
+
+**Status:** ✅ Pass — Locked "Requirement Gathering" button has `cursor: not-allowed`, clicking it showed toast, did NOT add `.running`. Normal "Reference UIUX" button has `cursor: pointer` and is clickable.

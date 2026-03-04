@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-710 | Feature Acceptance Test | FEATURE-036-C v1.1: Acceptance test CR-001 action running state — verify .running animation, clickable buttons, _runningActions Set behavior via Chrome DevTools | Bolt ⚡ | ✅ completed | 03-04-2026 07:35:00 | acceptance-test-cases.md (CR-001 section) | Feature Closing |
 | TASK-709 | Code Implementation | FEATURE-036-C v1.1: Implement CR-001 action running state — add _runningActions Set to workflow-stage.js, .running CSS to workflow.css, remove pointer-events:none from action-execution-modal.css | Bolt ⚡ | ✅ completed | 03-04-2026 07:25:00 | workflow-stage.js, workflow.css, action-execution-modal.css, workflow-stage-running.test.js | Feature Acceptance Test |
 | TASK-708 | Technical Design | FEATURE-036-C v1.1: Action Running State — client-side _runningActions Set, .running CSS animation, remove pointer-events:none, updated click handler (CR-001) | Bolt ⚡ | ✅ completed | 03-04-2026 07:15:00 | technical-design.md (v1.1) | Code Implementation |
 | TASK-707 | Feature Refinement | FEATURE-036-C v1.1: Apply CR-001 spec changes — AC-010 Running state, AC-014 allow re-click, AC-030-033 running state ACs, UIR-007 animation | Bolt ⚡ | ✅ completed | 03-04-2026 07:13:00 | specification.md (v1.1) | Technical Design |
