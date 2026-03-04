@@ -274,6 +274,31 @@ class WorkflowManagerService:
         return {"success": True, "message": f"Workflow '{name}' deleted"}
 
     @x_ipe_tracing()
+    def update_settings(self, name: str, settings: dict) -> dict:
+        """Update global settings (e.g. process_preference) for a workflow."""
+        state = self._read_state(name)
+        if not state or state.get("error"):
+            return state
+
+        if "global" not in state:
+            state["global"] = {}
+
+        # Merge process_preference if provided
+        pp = settings.get("process_preference")
+        if pp:
+            valid_modes = ("manual", "auto", "stop_for_question")
+            ap = pp.get("auto_proceed")
+            if ap and ap not in valid_modes:
+                return {"success": False, "error": "INVALID_VALUE",
+                        "message": f"auto_proceed must be one of: {valid_modes}"}
+            state["global"].setdefault("process_preference", {})
+            state["global"]["process_preference"].update(pp)
+
+        state["last_activity"] = _now_iso()
+        self._write_state(name, state)
+        return {"success": True, "data": state["global"]}
+
+    @x_ipe_tracing()
     def update_action_status(self, workflow_name: str, action: str,
                              status: str, feature_id: str = None,
                              deliverables=None,
@@ -709,6 +734,11 @@ class WorkflowManagerService:
             "last_activity": now,
             "idea_folder": None,
             "current_stage": "ideation",
+            "global": {
+                "process_preference": {
+                    "auto_proceed": "manual",
+                },
+            },
             "shared": shared,
             "features": [],
         }

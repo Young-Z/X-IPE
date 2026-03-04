@@ -86,6 +86,18 @@ def delete_workflow(name):
     return jsonify(result), 404
 
 
+@workflow_bp.route('/api/workflow/<name>/settings', methods=['PATCH'])
+@x_ipe_tracing()
+def update_settings(name):
+    data = request.get_json(force=True)
+    result = _get_service().update_settings(name, data)
+    if result.get('success'):
+        return jsonify(result)
+    if result.get('error') == 'NOT_FOUND':
+        return jsonify(result), 404
+    return jsonify(result), 400
+
+
 @workflow_bp.route('/api/workflow/<name>/action', methods=['POST'])
 @x_ipe_tracing()
 def update_action(name):
