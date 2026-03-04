@@ -6,6 +6,10 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-705 | Change Request | Action buttons become unclickable during execution with no progress animation. CR: keep buttons clickable, add running animation, persist running state (reset on refresh). Feedback-20260304-134328 | Bolt ⚡ | ✅ completed | 03-04-2026 06:05:00 | CR-001.md, specification.md (v1.1) | Feature Refinement |
+| TASK-704 | Code Implementation | FEATURE-043-C: Skill Path Convention Updates — add root-relative path constraint to 12 skills + skill creator template. Workflow: update-file-link-preview | Sage 🌿 | 🔄 in_progress | 03-04-2026 05:43:00 | - | Feature Acceptance Test |
+| TASK-703 | Technical Design | FEATURE-043-C: Skill Path Convention Updates — design constraint placement strategy for 12 skills + template. Workflow: update-file-link-preview | Sage 🌿 | ✅ completed | 03-04-2026 05:42:00 | technical-design.md | Code Implementation |
+| TASK-702 | Feature Refinement | FEATURE-043-C: Skill Path Convention Updates — create specification.md. Add root-relative path constraint to 12 skills + skill creator template. Workflow: update-file-link-preview | Sage 🌿 | ✅ completed | 03-04-2026 05:40:00 | specification.md | Technical Design |
 | TASK-701 | Bug Fix | AutoFolderNamer.fetchTree() returns full API response {success,tree} instead of tree array — findHighestWfNumber always sees max=0, generating wf-001 every time. Feedback-20260304-105440 | Cipher 🔑 | ✅ completed | 03-04-2026 02:56:00 | compose-idea-modal.js, compose-idea-modal.test.js | - |
 | TASK-690 | Feature Closing | FEATURE-025-F: KB Navigation & Polish — verify ACs, code-to-docs review, update project files, push to main | Nova ✨ | ✅ completed | 03-03-2026 14:35:00 | features.md, specification.md, technical-design.md | - |
 | TASK-689 | Feature Acceptance Test | FEATURE-025-F: KB Navigation & Polish — browser acceptance test for section tabs, switching, badges via Chrome DevTools | Nova ✨ | ⚠️ blocked | 03-03-2026 14:25:00 | acceptance-test-cases.md | Feature Closing |
@@ -283,9 +287,9 @@
 
 ## Quick Stats
 
-- **Total Active:** 57
+- **Total Active:** 58
 - **In Progress:** 3
-- **Pending:** 0
+- **Pending:** 1
 - **Deferred:** 0
 - **Completed (archived):** 457
 - **Reverted:** 8

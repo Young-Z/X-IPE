@@ -2,15 +2,16 @@
 
 > Feature ID: FEATURE-036-C  
 > Epic: EPIC-036 (Engineering Workflow View)  
-> Version: v1.0  
+> Version: v1.1  
 > Status: Refined  
 > Last Updated: 02-17-2026
 
 ## Version History
 
-| Version | Date | Description |
-|---------|------|-------------|
-| v1.0 | 02-17-2026 | Initial specification |
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| v1.1 | 03-04-2026 | Action buttons remain clickable during execution, add running animation, client-side running state | [CR-001](./CR-001.md) |
+| v1.0 | 02-17-2026 | Initial specification | - |
 
 ## Linked Mockups
 
