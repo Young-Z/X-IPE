@@ -238,6 +238,7 @@ BLOCKING: Human MUST approve specification before Technical Design proceeds.
       - MANDATORY: Single file with version history (no versioned filenames)
       - CRITICAL: Focus on WHAT not HOW in Technical Considerations
       - CRITICAL: Only add mockup-comparison ACs for current mockups, never for outdated ones
+      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
       - See references/specification-template.md for full structure
       - See references/specification-writing-guide.md for detailed guidance
     </constraints>

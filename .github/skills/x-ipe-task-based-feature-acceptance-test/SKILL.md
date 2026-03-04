@@ -227,6 +227,7 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
     </action>
     <constraints>
       - MANDATORY: Every test case must pass reflection checklist (see references/detailed-procedures.md)
+      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
     </constraints>
     <output>Refined and validated test cases, including mockup UI/UX validation (if applicable)</output>
   </step_5>

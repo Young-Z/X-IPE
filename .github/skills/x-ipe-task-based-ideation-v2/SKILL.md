@@ -228,6 +228,7 @@ BLOCKING: Step 10 - Human MUST approve idea summary before proceeding.
     <constraints>
       - CRITICAL: Only use tools that appear in the enabled tool list from step 1 -- if a tool is not in the enabled list, do NOT use it
       - MANDATORY: Include all sections from template
+      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
       - RECOMMENDED: Prefer enabled tools over plain markdown for richer idea presentation
     </constraints>
     <output>idea_draft</output>

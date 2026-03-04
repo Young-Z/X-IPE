@@ -212,6 +212,7 @@ input:
       - BLOCKING: skill-meta.md MUST be created from template, not from scratch
       - BLOCKING: SKILL.md MUST be created from template, not from scratch
       - BLOCKING: ALL bundled resources (references/, scripts/, templates/) MUST be created inside candidate/ — never directly in .github/skills/{skill-name}/
+      - MANDATORY: All internal markdown links in generated skill files MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
     </constraints>
     <success_criteria>
       - skill-meta.md exists (created from {skill_meta_template_path})

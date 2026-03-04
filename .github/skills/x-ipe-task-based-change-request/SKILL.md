@@ -239,6 +239,7 @@ BLOCKING: Step 4 must complete before Step 5. Do NOT proceed without explicit hu
     </action>
     <constraints>
       - CRITICAL: Never override or delete existing mockup files -- always create new versions
+      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
     </constraints>
     <output>Updated documents, next_task_based_skill set, updated mockups (if applicable)</output>
   </step_5>

@@ -247,6 +247,7 @@ BLOCKING: Step 6 requires human approval before proceeding to Test Generation.
     <constraints>
       - MANDATORY: Part 1 must have component table with Tags for semantic search
       - MANDATORY: Part 1 must have usage example
+      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
       - CRITICAL: Follow KISS/YAGNI/DRY principles
     </constraints>
     <output>Complete two-part technical design document</output>

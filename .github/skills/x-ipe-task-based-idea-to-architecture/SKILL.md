@@ -215,6 +215,7 @@ BLOCKING: Step 8 requires human approval before proceeding.
     </action>
     <constraints>
       - CRITICAL: Focus on system-level components, not implementation details
+      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
       - BLOCKING: Stop if no tools AND human declines manual mode
     </constraints>
     <output>Generated diagram files</output>

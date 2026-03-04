@@ -267,6 +267,7 @@ BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE impl
       - CRITICAL: Keep code simple (KISS)
       - CRITICAL: Do NOT modify existing tests; if test fails due to design gap, report to human
       - CRITICAL: For UI/frontend code with current mockups, the mockup is the visual spec -- implementation MUST match it
+      - MANDATORY: All internal markdown links in generated documentation or code comments MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
       - Use web search for library APIs, error messages, best practices
     </constraints>
     <output>All feature tests passing</output>

@@ -235,6 +235,7 @@ BLOCKING: Step 6 blocked if any alignment status is not "aligned".
       - BLOCKING: Coverage must reach 80% before proceeding
       - CRITICAL: If test fails due to code bug, DO NOT fix the bug.
         Document it, mark test as @skip, add to refactoring_scope
+      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
     </constraints>
     <output>test_coverage.status = "sufficient", tests_added count, tests_updated count</output>
   </step_5>

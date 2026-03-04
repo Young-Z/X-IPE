@@ -287,6 +287,7 @@ BLOCKING: Human MUST approve feature list before refinement proceeds.
     <constraints>
       - BLOCKING: Feature List goes into the PART FILE, NOT the index
       - Each part file has its OWN Feature List section
+      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
     </constraints>
     <output>Requirement-details file updated with feature list and details</output>
   </step_5>

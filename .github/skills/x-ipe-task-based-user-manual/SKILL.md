@@ -128,6 +128,9 @@ BLOCKING: Step 2 to 3 is blocked until run command executes successfully.
       4. Include Running: the verified command to start the app.
       5. Include Testing: command to run tests (e.g., uv run pytest).
     </action>
+    <constraints>
+      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
+    </constraints>
     <success_criteria>
       - README contains Prerequisites, Installation, Running, and Testing subsections.
       - All documented commands are verified working.

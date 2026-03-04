@@ -283,6 +283,7 @@ BLOCKING: Human MUST approve requirements before proceeding to Feature Breakdown
       - CRITICAL: Be thorough - vague requirements lead to incorrect implementations
       - CRITICAL: Include examples and edge cases discussed with the human
       - CRITICAL: Capture constraints, assumptions, and dependencies
+      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
     </constraints>
     <output>requirement-details.md created or updated</output>
   </step_6>

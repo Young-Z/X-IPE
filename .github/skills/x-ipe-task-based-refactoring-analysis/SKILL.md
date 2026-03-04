@@ -268,6 +268,7 @@ CRITICAL: For detailed sub-steps, scoring formulas, and gap type definitions, se
     <constraints>
       - BLOCKING: Every suggestion must trace back to a documented gap
       - CRITICAL: Constraints must include backward compatibility and API stability
+      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
     </constraints>
     <output>refactoring_suggestion and refactoring_principle data models</output>
   </step_7>
