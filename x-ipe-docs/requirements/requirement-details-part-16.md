@@ -189,13 +189,202 @@ No CR impact markers needed — all overlaps are extensions (new fields added al
 
 ---
 
-### Feature Candidates (for Feature Breakdown)
+## Feature List
 
-| # | Candidate Feature | Scope | Dependencies |
-|---|------------------|-------|--------------|
-| A | Decision Making Tool Skill | Create `x-ipe-tool-decision-making` SKILL.md with 6-step process, templates, decision log format | None |
-| B | Skill Creator Template Update | Update `x-ipe-meta-skill-creator` template: add `process_preference` input, mode-aware blocks, remove `require_human_review` | A |
-| C | Update All 22 Task-Based Skills | Batch update all skills: replace booleans with enum, add mode-aware conditional blocks, update output | A, B |
-| D | Workflow Orchestrator Update | Update `x-ipe-workflow-task-execution`: 3-mode routing, consolidate flow control, resolve from config/CLI | A |
-| E | Workflow Template & Backend | Add `global.process_preference` to template + runtime JSON, backend API for settings update | D |
-| F | Workflow UI Toggle | Frontend toggle in workflow panel header, calls backend API | E |
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-044-A | EPIC-044 | Decision Making Tool Skill | v1.0 | Create `x-ipe-tool-decision-making` SKILL.md with 6-step decision process, multi-problem input, decision log template, and UNRESOLVED handling | None |
+| FEATURE-044-B | EPIC-044 | Skill Creator Template Update | v1.0 | Update `x-ipe-meta-skill-creator` task-based template to replace boolean flags with `process_preference.auto_proceed` enum, add mode-aware conditional blocks, remove `require_human_review` output | FEATURE-044-A |
+| FEATURE-044-C | EPIC-044 | Batch Update All 22 Task-Based Skills | v1.0 | Update all 22 task-based skill SKILL.md files: replace `auto_proceed` boolean + `require_human_review` with `process_preference.auto_proceed` enum in input/output, add mode-aware conditional blocks | FEATURE-044-A, FEATURE-044-B |
+| FEATURE-044-D | EPIC-044 | Workflow Orchestrator Update | v1.0 | Update `x-ipe-workflow-task-execution` with 3-mode routing logic, consolidate all flow-control to single gate, resolve mode from workflow JSON/CLI flags, handle multi-next-step routing via decision skill | FEATURE-044-A |
+| FEATURE-044-E | EPIC-044 | Workflow Template & Backend API | v1.0 | Add `global.process_preference.auto_proceed` to workflow-template.json and runtime workflow JSON, create backend PATCH endpoint for settings update, persist across restarts | FEATURE-044-D |
+| FEATURE-044-F | EPIC-044 | Workflow UI Toggle | v1.0 | Add execution mode dropdown to workflow panel header (manual/auto/stop_for_question), wire to backend PATCH API, reflect current state on load | FEATURE-044-E |
+
+---
+
+## Linked Mockups
+
+| Mockup Function Name | Feature | Mockup Link |
+|---------------------|---------|-------------|
+| N/A | — | No mockups (config/skill changes, no visual UI except FEATURE-044-F toggle) |
+
+---
+
+## Feature Details
+
+### FEATURE-044-A: Decision Making Tool Skill
+
+**Version:** v1.0
+**Priority:** P0 (MVP — Foundation)
+**Brief Description:** Create the `x-ipe-tool-decision-making` tool skill that AI agents invoke to autonomously resolve questions, conflicts, and routing decisions. Includes the decision log template (`decision_made_by_ai.md`).
+
+**Acceptance Criteria:**
+- [ ] AC-044-A.1: `x-ipe-tool-decision-making` SKILL.md exists at `.github/skills/x-ipe-tool-decision-making/SKILL.md` with valid tool-skill structure
+- [ ] AC-044-A.2: Skill accepts `decision_context` input with `calling_skill`, `task_id`, `feature_id` (optional), `workflow_name`, and `problems` array
+- [ ] AC-044-A.3: Each problem in `problems` has `problem_id`, `description`, `type` (question|conflict|routing), `options` (optional), `related_files` (optional)
+- [ ] AC-044-A.4: Skill executes 6-step process: identify, study docs, web search (optional), sub-agent critique, refine, record
+- [ ] AC-044-A.5: Skill returns structured response per problem: `{ problem_id, status: "resolved|unresolved", decision, rationale }`
+- [ ] AC-044-A.6: Unresolvable problems logged as UNRESOLVED in `decision_made_by_ai.md`, execution continues
+- [ ] AC-044-A.7: Decision log template exists at `.github/skills/x-ipe-tool-decision-making/templates/decision-log-template.md`
+- [ ] AC-044-A.8: Template includes Decision Registry table (columns: #, Date, Task ID, Feature ID, Skill, Workflow, Problem Type, Status, Section link)
+- [ ] AC-044-A.9: Template includes detail section structure with metadata, problem description, analysis, decision, rationale, follow-up
+- [ ] AC-044-A.10: Decision IDs (D-001, D-002, ...) are globally unique per project (auto-incremented from existing registry)
+- [ ] AC-044-A.11: Skill passes `x-ipe-meta-skill-creator` validation for tool-skill type
+
+**Dependencies:**
+- None (MVP — no prior features required)
+
+**Technical Considerations:**
+- Tool skill type — no task board entry, invoked inline by other skills
+- Single shared `x-ipe-docs/decision_made_by_ai.md` per project
+- Multi-agent atomicity: each agent appends; registry table + detail sections
+- Web search step is optional and context-dependent (skip for project-specific)
+
+**Relevant FRs:** FR-044.11–FR-044.16 (Decision Making Tool Skill), FR-044.17–FR-044.22 (Decision Audit Log)
+**Relevant ACs:** AC-044.3, AC-044.4, AC-044.16
+
+---
+
+### FEATURE-044-B: Skill Creator Template Update
+
+**Version:** v1.0
+**Priority:** P1
+**Brief Description:** Update the `x-ipe-meta-skill-creator` task-based template so all future skills are generated with `process_preference.auto_proceed` enum instead of boolean flags, and include mode-aware conditional block patterns.
+
+**Acceptance Criteria:**
+- [ ] AC-044-B.1: Task-based template input section includes `process_preference.auto_proceed: "manual | auto | stop_for_question"` with default `manual`
+- [ ] AC-044-B.2: Task-based template does NOT contain `auto_proceed: false` (boolean) in input
+- [ ] AC-044-B.3: Task-based template Output Result does NOT contain `require_human_review: yes`
+- [ ] AC-044-B.4: Task-based template Output Result includes `process_preference.auto_proceed: "{from input}"` pass-through
+- [ ] AC-044-B.5: Task-based template Execution Procedure includes a mode-aware conditional block pattern for human-review steps
+- [ ] AC-044-B.6: Mode-aware block pattern shows: `IF auto → skip review / call decision_making_skill`, `IF manual|stop_for_question → ask human`
+- [ ] AC-044-B.7: Updated template passes `x-ipe-meta-skill-creator` self-validation
+
+**Dependencies:**
+- FEATURE-044-A (decision making skill must exist for template to reference it)
+
+**Technical Considerations:**
+- Template at `.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-task-based.md`
+- Must also update skill-creator's own documentation to describe the new field
+- Backward-compatible: `manual` default preserves existing behavior
+
+**Relevant FRs:** FR-044.35–FR-044.37 (Skill Creator Template)
+**Relevant ACs:** AC-044.11, AC-044.18
+
+---
+
+### FEATURE-044-C: Batch Update All 22 Task-Based Skills
+
+**Version:** v1.0
+**Priority:** P1
+**Brief Description:** Update all 22 existing task-based skill SKILL.md files to replace `auto_proceed` (boolean) + `require_human_review` (boolean) with `process_preference.auto_proceed` enum in both input and output sections, and add mode-aware conditional blocks at human-review steps.
+
+**Acceptance Criteria:**
+- [ ] AC-044-C.1: All 22 task-based skill SKILL.md files have `process_preference.auto_proceed: "manual | auto | stop_for_question"` in Input Parameters
+- [ ] AC-044-C.2: No skill SKILL.md contains `auto_proceed: false` (boolean) in Input Parameters
+- [ ] AC-044-C.3: No skill SKILL.md contains `require_human_review: yes` in Output Result YAML
+- [ ] AC-044-C.4: All skill Output Result YAML blocks include `process_preference.auto_proceed: "{from input}"` pass-through
+- [ ] AC-044-C.5: All skills with human-review steps in Execution Procedure include mode-aware conditional blocks
+- [ ] AC-044-C.6: Mode-aware blocks reference `x-ipe-tool-decision-making` for `auto` mode
+- [ ] AC-044-C.7: All 22 updated SKILL.md files pass `x-ipe-meta-skill-creator` structural validation
+- [ ] AC-044-C.8: `manual` mode behavior in each skill is identical to pre-update behavior (backward compatible)
+
+**Dependencies:**
+- FEATURE-044-A (decision making skill must exist to reference)
+- FEATURE-044-B (template updated first to establish the pattern)
+
+**Technical Considerations:**
+- All 22 task-based skills listed in `.github/skills/x-ipe-task-based-*/SKILL.md`
+- Each skill has slightly different human-review points (some at completion, some mid-procedure)
+- Batch operation — scripted or systematic update to minimize inconsistency
+- Test: verify each updated skill against template structure
+
+**Relevant FRs:** FR-044.1–FR-044.10 (Process Preference Input + Mode-Aware Execution)
+**Relevant ACs:** AC-044.1, AC-044.2, AC-044.13, AC-044.14, AC-044.15, AC-044.18
+
+---
+
+### FEATURE-044-D: Workflow Orchestrator Update
+
+**Version:** v1.0
+**Priority:** P0 (MVP — Core Routing)
+**Brief Description:** Update `x-ipe-workflow-task-execution` to use 3-mode routing logic. Replace boolean `auto_proceed` with `process_preference.auto_proceed` enum. Consolidate all flow-control to a single gate. Resolve mode from workflow JSON (workflow-mode) or CLI flags (free-mode). Invoke decision skill for multi-next-step routing.
+
+**Acceptance Criteria:**
+- [ ] AC-044-D.1: Orchestrator Input Parameters replace `auto_proceed: true | false` with `process_preference.auto_proceed: "manual | auto | stop_for_question"`
+- [ ] AC-044-D.2: Step 6 (Task Routing) uses 3-mode logic: manual=stop, stop_for_question=auto-proceed, auto=auto-proceed
+- [ ] AC-044-D.3: In `auto`/`stop_for_question` modes with multiple `next_actions_suggested`, orchestrator invokes `x-ipe-tool-decision-making` (type: routing)
+- [ ] AC-044-D.4: All other flow-control logic (boolean auto_proceed, require_human_review checks) consolidated to single `process_preference.auto_proceed` gate
+- [ ] AC-044-D.5: Mode resolved from: (a) `workflow-{name}.json` global section in workflow-mode, (b) CLI flag in free-mode, (c) default `manual`
+- [ ] AC-044-D.6: CLI flags `--proceed@auto` and `--proceed@stop-for-question` recognized and mapped
+- [ ] AC-044-D.7: `manual` mode produces identical routing behavior to current orchestrator (backward compatible)
+- [ ] AC-044-D.8: Orchestrator output includes `process_preference.auto_proceed` for downstream propagation
+
+**Dependencies:**
+- FEATURE-044-A (decision making skill must exist for multi-step routing)
+
+**Technical Considerations:**
+- `x-ipe-workflow-task-execution` is the central orchestrator — changes here affect all task execution
+- Must preserve existing workflow state management (stage gating, feature lanes)
+- CLI flag parsing: `--proceed@auto` → `auto`, `--proceed@stop-for-question` → `stop_for_question`
+- Resolution priority: explicit CLI flag > workflow JSON > default `manual`
+
+**Relevant FRs:** FR-044.23–FR-044.26 (Workflow Orchestrator), FR-044.38–FR-044.40 (Free-Mode CLI)
+**Relevant ACs:** AC-044.9, AC-044.10, AC-044.12, AC-044.13, AC-044.17
+
+---
+
+### FEATURE-044-E: Workflow Template & Backend API
+
+**Version:** v1.0
+**Priority:** P2
+**Brief Description:** Add `global.process_preference.auto_proceed` field to `workflow-template.json` (both config locations), ensure new workflow instances inherit it, create backend PATCH endpoint for runtime settings update, persist across server restarts.
+
+**Acceptance Criteria:**
+- [ ] AC-044-E.1: `x-ipe-docs/config/workflow-template.json` has `global.process_preference.auto_proceed: "manual"` field
+- [ ] AC-044-E.2: `src/x_ipe/resources/config/workflow-template.json` has matching `global.process_preference.auto_proceed: "manual"` field
+- [ ] AC-044-E.3: New workflow instances (`workflow-{name}.json`) inherit `global.process_preference` from template
+- [ ] AC-044-E.4: Backend exposes `PATCH /api/workflow/{name}/settings` endpoint accepting `{ "process_preference": { "auto_proceed": "manual|auto|stop_for_question" } }`
+- [ ] AC-044-E.5: PATCH endpoint validates `auto_proceed` value against allowed enum values
+- [ ] AC-044-E.6: Updated `workflow-{name}.json` persists `global.process_preference.auto_proceed` across server restarts
+- [ ] AC-044-E.7: GET `/api/workflow/{name}` response includes `global.process_preference` section
+
+**Dependencies:**
+- FEATURE-044-D (orchestrator must read the new field)
+
+**Technical Considerations:**
+- Two template locations: `x-ipe-docs/config/` (user-facing) and `src/x_ipe/resources/config/` (bundled)
+- Backend API in Python (Flask) — add route to existing workflow blueprint
+- File-based persistence (JSON read/write) — no database needed
+- Validation: reject unknown enum values, return 400
+
+**Relevant FRs:** FR-044.27–FR-044.30 (Workflow Template & Runtime)
+**Relevant ACs:** AC-044.5, AC-044.6, AC-044.7
+
+---
+
+### FEATURE-044-F: Workflow UI Toggle
+
+**Version:** v1.0
+**Priority:** P2
+**Brief Description:** Add execution mode dropdown/toggle to the workflow panel header. Options: Manual, Auto, Stop for Question. Calls backend PATCH API on change. Reflects current value from workflow JSON on load. Workflow-global (applies to all features).
+
+**Acceptance Criteria:**
+- [ ] AC-044-F.1: Workflow panel header displays "Execution Mode" dropdown with 3 options: Manual, Auto, Stop for Question
+- [ ] AC-044-F.2: Changing the dropdown calls `PATCH /api/workflow/{name}/settings` with new auto_proceed value
+- [ ] AC-044-F.3: Toggle state reflects current value from `workflow-{name}.json` on page load
+- [ ] AC-044-F.4: Toggle is workflow-global (single toggle, applies to all features)
+- [ ] AC-044-F.5: Optimistic update — UI updates immediately, reverts on API error
+- [ ] AC-044-F.6: Dropdown uses consistent styling with existing workflow panel controls
+
+**Dependencies:**
+- FEATURE-044-E (backend API must exist)
+
+**Technical Considerations:**
+- Frontend: JavaScript component in existing workflow panel
+- Uses fetch() to call PATCH endpoint
+- Error handling: show toast/notification on API failure, revert selection
+- Default label mapping: `manual` → "Manual", `auto` → "Auto", `stop_for_question` → "Stop for Question"
+
+**Relevant FRs:** FR-044.31–FR-044.34 (Workflow UI Toggle)
+**Relevant ACs:** AC-044.8

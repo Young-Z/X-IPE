@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 03-03-2026 13:55:00
+> Last Updated: 03-04-2026 10:55:00
 
 ## Overview
 
@@ -114,3 +114,9 @@ This board tracks all features across the project lifecycle.
 | FEATURE-043-B | EPIC-043 | Breadcrumb Navigation & Visual Distinction | v1.0 | Closed | [specification.md](x-ipe-docs/requirements/EPIC-043/FEATURE-043-B/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-043/FEATURE-043-B/technical-design.md), [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-043/FEATURE-043-B/acceptance-test-cases.md) | 03-03-2026 | 03-04-2026 03:15:00 |
 | FEATURE-043-C | EPIC-043 | Skill Path Convention Updates | v1.0 | Closed | [specification.md](x-ipe-docs/requirements/EPIC-043/FEATURE-043-C/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-043/FEATURE-043-C/technical-design.md) | 03-03-2026 | 03-04-2026 05:45:00 |
 | FEATURE-043-D | EPIC-043 | Existing File Migration | v1.0 | Closed | [specification.md](x-ipe-docs/requirements/EPIC-043/FEATURE-043-D/specification.md) | 03-03-2026 | 03-04-2026 05:50:00 |
+| FEATURE-044-A | EPIC-044 | Decision Making Tool Skill | v1.0 | Planned | — | 03-04-2026 | 03-04-2026 10:55:00 |
+| FEATURE-044-B | EPIC-044 | Skill Creator Template Update | v1.0 | Planned | — | 03-04-2026 | 03-04-2026 10:55:00 |
+| FEATURE-044-C | EPIC-044 | Batch Update All 22 Task-Based Skills | v1.0 | Planned | — | 03-04-2026 | 03-04-2026 10:55:00 |
+| FEATURE-044-D | EPIC-044 | Workflow Orchestrator Update | v1.0 | Planned | — | 03-04-2026 | 03-04-2026 10:55:00 |
+| FEATURE-044-E | EPIC-044 | Workflow Template & Backend API | v1.0 | Planned | — | 03-04-2026 | 03-04-2026 10:55:00 |
+| FEATURE-044-F | EPIC-044 | Workflow UI Toggle | v1.0 | Planned | — | 03-04-2026 | 03-04-2026 10:55:00 |

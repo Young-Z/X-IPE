@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-721 | Feature Breakdown | EPIC-044: CR-Adding Auto Proceed option — break requirements into features (decision tool skill, template update, bulk skill update, orchestrator, backend, UI) | Rune 🔮 | ✅ done | 03-04-2026 10:50:00 | x-ipe-docs/requirements/requirement-details-part-16.md | Feature Refinement |
 | TASK-720 | Requirement Gathering | EPIC-044: CR-Adding Auto Proceed option — gather requirements from IDEA-031 refined idea. Unified 3-mode process_preference, decision_making tool skill, update 22 skills + orchestrator | Rune 🔮 | ✅ done | 03-04-2026 10:12:00 | 03-04-2026 10:45:00 | Feature Breakdown |
 | TASK-719 | Code Implementation | FEATURE-039-B: Enhanced Modal Features — implement all 9 AC groups in folder-browser-modal.js + CSS | Zephyr 🌬️ | 🔄 in_progress | 03-04-2026 08:44:00 | - | Feature Acceptance Test |
 | TASK-718 | Technical Design | FEATURE-039-B: Enhanced Modal Features — design changes to folder-browser-modal.js + CSS | Zephyr 🌬️ | ✅ completed | 03-04-2026 08:44:00 | x-ipe-docs/requirements/EPIC-039/FEATURE-039-B/technical-design.md | Code Implementation |
