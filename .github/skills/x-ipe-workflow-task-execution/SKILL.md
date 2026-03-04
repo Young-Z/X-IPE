@@ -49,8 +49,8 @@ input:
 
   execution:
     next_task_based_skill: "{task_based_skill} | null"
-    require_human_review: true | false
-    auto_proceed: true | false
+    process_preference:
+      auto_proceed: "manual | auto | stop_for_question"  # default: manual
     task_output_links: ["{links}"] | null
     dynamic_attributes: {}
 
@@ -92,8 +92,7 @@ input:
 
   <!-- Execution fields (populated after Step 3) -->
   <field name="execution.next_task_based_skill" source="From task-based skill output" />
-  <field name="execution.require_human_review" source="From task-based skill output" />
-  <field name="execution.auto_proceed" source="From task-based skill output, OR global setting from task-board.md" />
+  <field name="execution.process_preference.auto_proceed" source="Resolved from: (a) workflow-{name}.json global.process_preference in workflow-mode, (b) CLI flag --proceed@auto or --proceed@stop-for-question in free-mode, (c) Global Settings in task-board.md, (d) default: manual" />
   <field name="execution.task_output_links" source="From task-based skill output" />
 
   <!-- Git strategy (resolved during Step 2 DoR) -->
@@ -205,8 +204,8 @@ deferred → in_progress
 | 2 | Global DoR | Verify prerequisites | All checks pass | → Step 3 (pass) or STOP (fail) |
 | 3 | Execute | Load task-based skill, do work | Skill output collected | → Step 4 |
 | 4 | Closing | Load category skills, update boards | Boards updated | → Step 5 |
-| 5 | Global DoD | Validate, output summary | Summary displayed | → Step 6 (pass) or STOP (review) |
-| 6 | Routing | Check auto_proceed, next task or STOP | Next action decided | → Step 2 (next) or END |
+| 5 | Global DoD | Validate, output summary | Summary displayed | → Step 6 (pass) or STOP (manual) |
+| 6 | Routing | Resolve process_preference mode, route next | Next action decided | → Step 2 (auto/stop_for_question) or END (manual) |
 
 BLOCKING: Step 1 → Step 2: task must be created on task-board.md.
 BLOCKING: Step 3 → Step 4: x-ipe+all+task-board-management skill must be loaded.
@@ -304,7 +303,8 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
       Each task-based skill MUST return:
         status: {new_status}
         next_task_based_skill: {task_based_skill} | null
-        require_human_review: true | false
+        process_preference:
+          auto_proceed: "{from input process_preference.auto_proceed}"
         task_output_links: [{links}] | null
         {dynamic_attributes}: per skill definition
     </skill_output_contract>
@@ -363,11 +363,11 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
          ELSE IF execution_mode == "free-mode":
            → Skip workflow status verification
 
-      4. Human Review Check:
-         IF require_human_review = true AND auto_proceed = false AND global_auto_proceed = false:
+      4. Human Review Check (mode-aware):
+         IF process_preference.auto_proceed == "auto":
+           → Skip human review, proceed directly
+         ELIF process_preference.auto_proceed == "stop_for_question" OR "manual":
            → Output summary and STOP for human review
-         ELSE:
-           → Skip human review (auto-proceed overrides)
     </actions>
     <output_template>
       > Task ID: {task_id}
@@ -379,9 +379,8 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
       > Execution Mode: {execution_mode}
       > Workflow: {workflow.name}
       > Category Changes: {category_level_change_summary}
-      > Require Human Review: {require_human_review}
+      > Process Preference: {process_preference.auto_proceed}
       > Task Output Links: {task_output_links}
-      > Auto Proceed: {auto_proceed}
       > --- Dynamic Attributes ---
       > {attr_1}: {value}
     </output_template>
@@ -391,15 +390,25 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
   <step_6>
     <name>Task Routing</name>
     <actions>
-      1. Read Global Auto-Proceed setting from task-board.md (Global Settings section)
-         → Default to false if not found
-      2. Set effective_auto_proceed = auto_proceed OR global_auto_proceed
+      1. Resolve effective process_preference.auto_proceed:
+         a. IF execution_mode == "workflow-mode":
+            Read workflow-{name}.json → global.process_preference.auto_proceed
+         b. ELIF CLI flags present:
+            --proceed@auto → "auto"
+            --proceed@stop-for-question → "stop_for_question"
+         c. ELIF Global Settings in task-board.md has auto_proceed: true → "auto"
+         d. ELSE → "manual" (default)
 
-      IF effective_auto_proceed = true AND next_task_based_skill EXISTS:
-        → Find next task on board (already created in Step 1)
-        → Start execution from Step 2
-      ELSE:
-        → STOP (wait for human)
+      IF process_preference.auto_proceed == "auto" OR "stop_for_question":
+        IF next_task_based_skill EXISTS:
+          IF multiple next_actions_suggested (workflow-mode):
+            → Invoke x-ipe-tool-decision-making (type: routing) to choose
+          → Find next task on board (already created in Step 1)
+          → Start execution from Step 2
+        ELSE:
+          → STOP (no next task defined)
+      ELSE (manual):
+        → STOP (wait for human instruction)
     </actions>
     <gate>Routing decision made</gate>
   </step_6>
@@ -422,9 +431,9 @@ output:
   workflow:
     name: "{workflow.name}"
   category_level_change_summary: "{summary} | null"
-  require_human_review: true | false
+  process_preference:
+    auto_proceed: "manual | auto | stop_for_question"
   task_output_links: ["{links}"] | null
-  auto_proceed: true | false
   next_task_based_skill: "{task_based_skill} | null"
   dynamic_attributes: {}  # Per task-based skill
 ```
@@ -462,7 +471,7 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 **Discovery rule:**
 1. Scan `.github/skills/x-ipe-task-based-*/SKILL.md`
-2. Each skill's Output Result YAML declares: `category`, `next_task_based_skill`, `require_human_review`
+2. Each skill's Output Result YAML declares: `category`, `next_task_based_skill`, `process_preference.auto_proceed`
 3. Each skill's `description` in frontmatter contains trigger keywords for request matching
 
 **Request matching:**
@@ -470,7 +479,7 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 2. Match user request against trigger keywords (e.g., "fix bug" matches `x-ipe-task-based-bug-fix`)
 3. See [references/examples.md](.github/skills/x-ipe-workflow-task-execution/references/examples.md) for common request-to-skill patterns
 
-> **Note:** When Auto-Proceed is enabled (global or task-level), `require_human_review` is skipped regardless of the skill's default.
+> **Note:** When `process_preference.auto_proceed` is `auto` or `stop_for_question`, human review at skill completion is handled by the mode-aware gate in Step 5. In `auto` mode, review is skipped entirely. In `stop_for_question` mode, review still stops for human approval.
 
 ---
 
