@@ -44,6 +44,37 @@ Verify all selectors are:
 
 ## MCP Command Patterns
 
+### Chrome Launch Prerequisites
+
+MANDATORY: Before using Chrome DevTools MCP, ensure Chrome is running with a dedicated user data directory:
+
+```bash
+# macOS
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+  --remote-debugging-port=9222 \
+  --user-data-dir=/tmp/x-ipe-chrome-profile
+
+# Linux
+google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/x-ipe-chrome-profile
+```
+
+Or configure the chrome-devtools-mcp server with `--user-data-dir` or `--isolated=true`:
+
+```json
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["chrome-devtools-mcp@latest", "--user-data-dir=/tmp/x-ipe-chrome-profile"]
+    }
+  }
+}
+```
+
+This prevents conflicts with existing Chrome sessions and ensures a clean test environment.
+
+### Test Execution Commands
+
 Chrome DevTools MCP commands used during test execution:
 
 ```javascript

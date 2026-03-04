@@ -35,6 +35,9 @@ input:
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
   workflow:
     name: "N/A"  # workflow name, default: N/A
+    extra_context_reference:  # optional, default: N/A for all refs
+      specification: "path | N/A | auto-detect"
+      impl-files: "path | N/A | auto-detect"
 
   # Task type attributes
   category: "standalone"
@@ -204,11 +207,19 @@ BLOCKING: Step 6 requires human validation before Feature Closing.
   <step_6>
     <name>Enable Interaction</name>
     <action>
-      1. Provide start/stop commands
-      2. Include sample data
-      3. Add reset capability
-      4. Log outputs for debugging
-      5. Inform human that playground is ready for review
+      1. IF execution_mode == "workflow-mode":
+         a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
+            - workflow_name: {from context}
+            - action: "human_playground"
+            - status: "done"
+            - feature_id: {feature_id}
+            - deliverables: {"playground-url": "{path}"}
+         b. Log: "Workflow action status updated to done"
+      2. Provide start/stop commands
+      3. Include sample data
+      4. Add reset capability
+      5. Log outputs for debugging
+      6. Inform human that playground is ready for review
     </action>
     <output>Playground ready for human validation</output>
   </step_6>

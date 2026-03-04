@@ -1,6 +1,6 @@
 ---
 name: x-ipe-task-based-change-request
-description: Process change requests by analyzing impact on existing requirements and features. Determines if CR modifies existing feature (-> refinement) or requires new feature (-> requirement update + feature breakdown). Triggers on "change request", "CR", "modify feature", "update requirement".
+description: Process change requests by analyzing impact on existing requirements and features, detecting conflicts with specs/designs/code. Determines if CR modifies existing feature (-> refinement) or requires new feature (-> requirement update + feature breakdown). Triggers on "change request", "CR", "modify feature", "update requirement".
 ---
 
 # Task-Based Skill: Change Request
@@ -10,8 +10,9 @@ description: Process change requests by analyzing impact on existing requirement
 Process change requests (CRs) systematically by:
 1. Analyzing the change request against existing requirements and features
 2. Classifying the CR as modification to existing feature or new feature
-3. Routing to appropriate workflow (Feature Refinement or Requirement Update + Feature Breakdown)
-4. Maintaining traceability and documentation
+3. Detecting conflicts with existing specifications, technical designs, and dependencies
+4. Routing to appropriate workflow (Feature Refinement or Requirement Update + Feature Breakdown)
+5. Maintaining traceability and documentation
 
 ---
 
@@ -111,11 +112,13 @@ input:
 | 1 | Understand CR | Parse what, who, why, when of the change request | CR context documented |
 | 2 | Review Existing | Read requirement-details.md and features.md | Related features identified |
 | 3 | Classify CR | Apply classification criteria (modification vs new feature) | Classification determined |
-| 4 | Human Approval | Present classification and reasoning to human | Human approves |
-| 5 | Execute Path | Update spec (modification) or requirements (new feature) | Documents updated |
-| 6 | Document CR | Create CR-XXX.md in feature folder, update version history | CR documented |
+| 4 | Conflict Analysis | Detect spec/design/dependency conflicts with existing features | Conflicts resolved or documented |
+| 5 | Human Approval | Present classification, conflicts, and reasoning to human | Human approves |
+| 6 | Execute Path | Update spec (modification) or requirements (new feature) | Documents updated |
+| 7 | Document CR | Create CR-XXX.md in feature folder, update version history | CR documented |
 
-BLOCKING: Step 4 must complete before Step 5. Do NOT proceed without explicit human approval of classification.
+BLOCKING: Step 4 must complete before Step 5 — do NOT present to human with unanalyzed conflicts.
+BLOCKING: Step 5 must complete before Step 6. Do NOT proceed without explicit human approval of classification.
 
 ---
 
@@ -163,7 +166,7 @@ BLOCKING: Step 4 must complete before Step 5. Do NOT proceed without explicit hu
            READ specification (functionality, user stories, acceptance criteria, out-of-scope)
       4. IF CR involves UI/UX changes:
          a. CHECK x-ipe-docs/requirements/FEATURE-XXX/mockups/ for existing mockup files
-         b. IF mockups exist: note them for reference in Step 5
+         b. IF mockups exist: note them for reference in Step 6
          c. CHECK specification.md Linked Mockups section for mockup status (current/outdated)
     </action>
     <output>Related features list with relevance notes, existing mockups identified (if UI/UX CR)</output>
@@ -192,18 +195,53 @@ BLOCKING: Step 4 must complete before Step 5. Do NOT proceed without explicit hu
   </step_3>
 
   <step_4>
+    <name>Conflict Analysis</name>
+    <action>
+      1. Spawn sub-agent (Conflict Detector) to analyze proposed CR changes against existing artifacts:
+         - Read specifications and technical designs of related features (from Step 2)
+         - Read implemented code for affected features (if code exists)
+         - Identify specification conflicts: acceptance criteria, user stories, or out-of-scope items the CR would violate
+         - Identify design conflicts: technical designs or architecture decisions the CR would break
+         - Identify dependency conflicts: features that depend on the affected feature(s) and would be impacted
+         - Identify pending CR conflicts: other open CRs that modify the same feature(s)
+         - Output: list of conflicts with description, severity, and affected artifacts (empty if none)
+      2. IF no conflicts found: proceed to Step 5
+      3. IF conflicts found: classify each conflict as:
+         - "expected": the CR's stated goal explicitly or implicitly requires this change
+         - "unexpected": the change goes beyond the CR's scope or creates unintended side effects
+         - Output: classified conflict list with mitigation suggestions for unexpected conflicts
+      4. IF all conflicts are "expected": proceed to Step 5 (include in human approval)
+      5. IF any conflicts are "unexpected":
+         - Document unexpected conflicts with clear explanation of what would change
+         - Suggest mitigations: scope adjustment, additional CRs for affected features, or design alternatives
+         - Include all conflicts (expected + unexpected) in Step 5 presentation
+    </action>
+    <constraints>
+      - BLOCKING: Do NOT proceed to Step 5 with unanalyzed conflicts
+      - CRITICAL: Conflict Detector must examine actual project artifacts (specs, designs, code), not just the CR description
+      - CRITICAL: For modification CRs, check ALL features that depend on the affected feature
+    </constraints>
+    <output>Conflict analysis report with classified conflicts and mitigations</output>
+  </step_4>
+
+  <step_5>
     <name>Human Approval</name>
     <action>
-      1. Present CR summary, classification, reasoning, affected features, proposed approach
+      1. Present to human:
+         - CR summary and classification reasoning
+         - Conflict analysis results (if any conflicts found)
+         - For unexpected conflicts: explain what would change and proposed mitigations
+         - Affected features and proposed approach
       2. Wait for explicit human approval
+      3. IF human requests changes based on conflicts: return to Step 3 or Step 4 as appropriate
     </action>
     <constraints>
       - BLOCKING: Do NOT proceed without explicit human approval
     </constraints>
-    <output>Human-approved classification</output>
-  </step_4>
+    <output>Human-approved classification and conflict resolution</output>
+  </step_5>
 
-  <step_5>
+  <step_6>
     <name>Execute Based on Classification</name>
     <action>
       1. IF classification = "modification":
@@ -239,12 +277,11 @@ BLOCKING: Step 4 must complete before Step 5. Do NOT proceed without explicit hu
     </action>
     <constraints>
       - CRITICAL: Never override or delete existing mockup files -- always create new versions
-      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
     </constraints>
     <output>Updated documents, next_task_based_skill set, updated mockups (if applicable)</output>
-  </step_5>
+  </step_6>
 
-  <step_6>
+  <step_7>
     <name>Document CR</name>
     <action>
       1. Create CR record at x-ipe-docs/requirements/FEATURE-XXX/CR-XXX.md
@@ -257,7 +294,7 @@ BLOCKING: Step 4 must complete before Step 5. Do NOT proceed without explicit hu
       - For new features, CR is created after feature breakdown creates the folder
     </constraints>
     <output>CR-XXX.md created and linked</output>
-  </step_6>
+  </step_7>
 
 </procedure>
 ```
@@ -333,6 +370,8 @@ task_completion_output:
   requirement_updated: true | false
   mockup_updated: true | false          # Whether a new mockup version was created
   updated_mockup_paths: []              # Paths to new mockup versions (if applicable)
+  conflicts_found: []                   # List of conflicts identified (empty if none)
+  conflicts_resolution: "none | all_expected | mitigated"  # How conflicts were resolved
 ```
 
 ---
@@ -352,8 +391,12 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <verification>CR classified as modification or new_feature with documented reasoning</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Human approved classification</name>
-    <verification>Explicit human approval recorded before execution</verification>
+    <name>Conflict analysis completed</name>
+    <verification>Conflicts checked against specs, designs, and dependencies; all unexpected conflicts resolved with human</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Human approved classification and conflicts</name>
+    <verification>Explicit human approval recorded before execution, including conflict resolution</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Version history updated</name>
@@ -391,7 +434,19 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 4. Document the decision rationale
 ```
 
-See [references/patterns.md](.github/skills/x-ipe-task-based-change-request/references/patterns.md) for detailed patterns: Enhancement CR, New Capability CR, Scope Expansion CR, Multi-Feature CR, Boundary Cases, CR Chain.
+### Pattern: Conflict Resolution
+
+**When:** Unexpected conflicts found during conflict analysis
+**Then:**
+```
+1. Present each unexpected conflict with clear impact description
+2. Suggest mitigations: scope adjustment, additional CRs, design alternatives
+3. If conflicts are severe: recommend splitting CR into smaller scoped changes
+4. If user confirms changes are acceptable: classify as "expected" and proceed
+5. If user wants to adjust: return to classification with updated scope
+```
+
+See [references/patterns.md](references/patterns.md) for detailed patterns: Enhancement CR, New Capability CR, Scope Expansion CR, Multi-Feature CR, Boundary Cases, CR Chain.
 
 ### Anti-Patterns
 
@@ -399,7 +454,8 @@ See [references/patterns.md](.github/skills/x-ipe-task-based-change-request/refe
 |--------------|---------|------------|
 | Skip classification | Wrong workflow chosen | Always classify explicitly |
 | Assume modification | May miss scope expansion | Use decision tree |
-| No human approval | Risk of wrong direction | Always get approval at Step 4 |
+| No human approval | Risk of wrong direction | Always get approval at Step 5 |
+| Skip conflict analysis | May break existing features silently | Always analyze conflicts before human approval |
 | Skip documentation | Lost traceability | Create CR document |
 | Modify multiple features at once | Hard to track | One CR = one classification |
 | No version history update | Lost change history | Update specification version |
@@ -410,8 +466,9 @@ See [references/patterns.md](.github/skills/x-ipe-task-based-change-request/refe
 
 ## Examples
 
-See [references/examples.md](.github/skills/x-ipe-task-based-change-request/references/examples.md) for concrete execution examples:
+See [references/examples.md](references/examples.md) for concrete execution examples:
 - Bulk import CR classification (NEW_FEATURE)
 - UI enhancement CR classification (MODIFICATION)
+- CR with dependency conflict (MODIFICATION with conflict analysis)
 - Ambiguous request requiring clarification
 - Bug report redirection (NOT_A_CR)

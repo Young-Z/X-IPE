@@ -26,6 +26,10 @@ const EXPECTED_ACTIONS = [
   'test_generation',
   'implementation',
   'acceptance_testing',
+  'code_refactor',
+  'feature_closing',
+  'human_playground',
+  'change_request',
 ];
 
 // ==============================================================================
@@ -33,12 +37,12 @@ const EXPECTED_ACTIONS = [
 // ==============================================================================
 
 describe('FEATURE-042-D: workflow-prompts completeness', () => {
-  it('workflow-prompts array has exactly 9 entries', () => {
+  it('workflow-prompts array has exactly 13 entries', () => {
     expect(config['workflow-prompts']).toBeDefined();
-    expect(config['workflow-prompts']).toHaveLength(9);
+    expect(config['workflow-prompts']).toHaveLength(13);
   });
 
-  it('all 9 action keys present', () => {
+  it('all 13 action keys present', () => {
     const actions = config['workflow-prompts'].map((e) => e.action);
     for (const key of EXPECTED_ACTIONS) {
       expect(actions).toContain(key);

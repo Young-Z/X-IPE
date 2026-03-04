@@ -102,7 +102,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-041-A | EPIC-041 | Per-Feature Config & Core Resolution (MVP) | v1.0 | Completed | [specification.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-A/specification.md) | 02-25-2026 | 03-03-2026 13:55:00 |
 | FEATURE-041-B | EPIC-041 | Multi-Source UI & Auto-Suggest | v1.0 | ❌ Superseded | Superseded by CR-002 | 02-25-2026 | 03-03-2026 13:55:00 |
 | FEATURE-041-C | EPIC-041 | Skill Workflow Action Updates | v1.0 | Completed | All 8 skills verified with workflow.action + feature_id handling | 02-25-2026 | 03-03-2026 13:55:00 |
-| FEATURE-041-D | EPIC-041 | New Workflow Actions (Phase 5) | v1.0 | Planned | FEATURE-041-A, FEATURE-041-C | 02-25-2026 | 02-25-2026 14:00:00 |
+| FEATURE-041-D | EPIC-041 | New Workflow Actions (Phase 5) | v1.1 | Completed | FEATURE-041-A, FEATURE-041-C | 03-04-2026 | 03-04-2026 08:23:00 |
 | FEATURE-041-E | EPIC-041 | Deliverable Tagging & Action Context Schema (MVP) | v1.0 | Completed | - | 02-26-2026 | 03-03-2026 13:55:00 |
 | FEATURE-041-F | EPIC-041 | Action Context Modal UI & Persistence | v1.0 | Completed | FEATURE-041-E | 02-26-2026 | 03-03-2026 13:55:00 |
 | FEATURE-041-G | EPIC-041 | Skill Extra Context Reference | v1.0 | Completed | - | 02-26-2026 | 03-03-2026 13:55:00 |

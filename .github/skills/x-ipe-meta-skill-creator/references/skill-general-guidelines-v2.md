@@ -611,3 +611,72 @@ See [11. reference-quality-standards.md](.github/skills/x-ipe-meta-skill-creator
 - Full importance keywords reference
 - Common mistakes (anti-patterns)
 - What NOT to include in skills
+
+---
+
+# Part 6: Chrome DevTools MCP Guidelines
+
+## Chrome User Data Directory
+
+MANDATORY: Any skill that uses Chrome DevTools MCP tools (navigate_page, evaluate_script, take_screenshot, take_snapshot, etc.) MUST instruct agents to launch Chrome with a dedicated `--user-data-dir` to avoid conflicts with the user's existing Chrome session.
+
+### Why --user-data-dir?
+
+- Prevents conflicts with user's existing Chrome sessions and profiles
+- Ensures clean, reproducible test/capture environment
+- Avoids browser lock issues when Chrome is already running
+- The `--isolated=true` flag is an alternative that creates temporary dirs with auto-cleanup
+
+### Launch Chrome with Dedicated Profile
+
+```bash
+# macOS
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+  --remote-debugging-port=9222 \
+  --user-data-dir=/tmp/x-ipe-chrome-profile
+
+# Linux
+google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/x-ipe-chrome-profile
+```
+
+### MCP Server Configuration
+
+When configuring chrome-devtools-mcp as an MCP server, use `--user-data-dir` or `--isolated=true`:
+
+```json
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "chrome-devtools-mcp@latest",
+        "--user-data-dir=/tmp/x-ipe-chrome-profile"
+      ]
+    }
+  }
+}
+```
+
+Or use `--isolated=true` for automatic temporary directory with cleanup:
+
+```json
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "chrome-devtools-mcp@latest",
+        "--isolated=true"
+      ]
+    }
+  }
+}
+```
+
+### Skill Authoring Rule
+
+When creating or updating a skill that references Chrome DevTools MCP, include a note in the skill's **Important Notes** or **Definition of Ready** section:
+
+```
+MANDATORY: Chrome must be launched with `--user-data-dir` (dedicated profile) or the chrome-devtools-mcp server must be configured with `--user-data-dir` or `--isolated=true` to avoid conflicts with existing Chrome sessions.
+```

@@ -44,6 +44,9 @@ input:
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
   workflow:
     name: "N/A"  # workflow name, default: N/A
+    extra_context_reference:  # optional, default: N/A for all refs
+      test-report: "path | N/A | auto-detect"
+      specification: "path | N/A | auto-detect"
 
   # Task type attributes
   category: "code-refactoring-stage"
@@ -258,17 +261,25 @@ BLOCKING: Step 4 to 5 requires all references updated.
   <step_5>
     <name>Validate and Complete</name>
     <action>
-      1. RUN final test suite (coverage maintained or improved)
-      2. VALIDATE goals achieved from refactoring_suggestion
-      3. VALIDATE principles applied and constraints respected
-      4. CALCULATE quality improvements (before/after scores)
-      5. CHECK tracing preserved on moved/renamed functions
-      6. IDENTIFY new code needing tracing
-      7. IF tracing infrastructure exists:
+      1. IF execution_mode == "workflow-mode":
+         a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
+            - workflow_name: {from context}
+            - action: "code_refactor"
+            - status: "done"
+            - feature_id: {feature_id}
+            - deliverables: {"refactor-report": "{path}"}
+         b. Log: "Workflow action status updated to done"
+      2. RUN final test suite (coverage maintained or improved)
+      3. VALIDATE goals achieved from refactoring_suggestion
+      4. VALIDATE principles applied and constraints respected
+      5. CALCULATE quality improvements (before/after scores)
+      6. CHECK tracing preserved on moved/renamed functions
+      7. IDENTIFY new code needing tracing
+      8. IF tracing infrastructure exists:
          - INVOKE x-ipe-tool-tracing-instrumentation skill for new files/functions
          - RE-RUN tests, UPDATE tracing counts in summary
-      8. PRESENT summary to human, WAIT for approval
-      9. CREATE final commit
+      9. PRESENT summary to human, WAIT for approval
+      10. CREATE final commit
     </action>
 
     <success_criteria>

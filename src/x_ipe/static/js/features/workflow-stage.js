@@ -49,9 +49,12 @@ const workflowStage = {
     FEATURE_LANE_ACTIONS: [
         { key: 'feature_refinement', label: 'Refinement',  icon: '📐' },
         { key: 'technical_design',   label: 'Tech Design', icon: '⚙' },
+        { key: 'test_generation',    label: 'Tests',       icon: '🧪' },
         { key: 'implementation',     label: 'Implement',   icon: '💻' },
         { key: 'acceptance_testing', label: 'Testing',     icon: '✅' },
-        { key: 'quality_evaluation', label: 'Quality',     icon: '📊' },
+        { key: 'code_refactor',      label: 'Refactor',    icon: '🔧' },
+        { key: 'feature_closing',    label: 'Closing',     icon: '🏁' },
+        { key: 'human_playground',   label: 'Playground',  icon: '🎮' },
         { key: 'change_request',     label: 'CR',          icon: '🔄' },
     ],
 
@@ -85,6 +88,7 @@ const workflowStage = {
             actions: {
                 feature_refinement: { label: 'Feature Refinement', icon: '📐', mandatory: true, interaction: 'cli', skill: 'x-ipe-task-based-feature-refinement' },
                 technical_design:   { label: 'Technical Design',   icon: '⚙',  mandatory: true, interaction: 'cli', skill: 'x-ipe-task-based-technical-design' },
+                test_generation:    { label: 'Test Generation',    icon: '🧪', mandatory: true, interaction: 'cli', skill: 'x-ipe-task-based-test-generation' },
                 implementation:     { label: 'Implementation',     icon: '💻', mandatory: true, interaction: 'cli', skill: 'x-ipe-task-based-code-implementation' },
             }
         },
@@ -92,13 +96,15 @@ const workflowStage = {
             label: 'Validation',
             actions: {
                 acceptance_testing: { label: 'Acceptance Testing', icon: '✅', mandatory: true,  interaction: 'cli', skill: 'x-ipe-task-based-feature-acceptance-test' },
-                quality_evaluation: { label: 'Quality Evaluation', icon: '📊', mandatory: false, interaction: 'cli', skill: null, deferred: true },
+                code_refactor:      { label: 'Code Refactor',      icon: '🔧', mandatory: true,  interaction: 'cli', skill: 'x-ipe-task-based-code-refactor' },
+                feature_closing:    { label: 'Feature Closing',    icon: '🏁', mandatory: true,  interaction: 'cli', skill: 'x-ipe-task-based-feature-closing' },
             }
         },
         feedback: {
             label: 'Feedback',
             actions: {
-                change_request: { label: 'Change Request', icon: '🔄', mandatory: false, interaction: 'cli', skill: 'x-ipe-task-based-change-request' },
+                human_playground: { label: 'Human Playground', icon: '🎮', mandatory: false, interaction: 'cli', skill: 'x-ipe-task-based-human-playground' },
+                change_request:   { label: 'Change Request',   icon: '🔄', mandatory: false, interaction: 'cli', skill: 'x-ipe-task-based-change-request' },
             }
         }
     },

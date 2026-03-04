@@ -39,6 +39,9 @@ input:
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
   workflow:
     name: "N/A"  # workflow name, default: N/A
+    extra_context_reference:  # optional, default: N/A for all refs
+      specification: "path | N/A | auto-detect"
+      refactor-report: "path | N/A | auto-detect"
 
   # Task type attributes
   category: "feature-stage"
@@ -171,7 +174,7 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
       2. Check each criterion against implementation
       3. IF Technical Scope includes [Frontend] or [Full Stack]:
          Also verify UI against linked mockups — layout matches design, all UI elements present, interactions work as shown, visual styling is consistent, document any approved deviations.
-         TIP: Use Chrome DevTools MCP with multi-session mode to perform UI validation (navigate pages, take screenshots, inspect elements, verify interactions).
+         TIP: Use Chrome DevTools MCP with multi-session mode to perform UI validation (navigate pages, take screenshots, inspect elements, verify interactions). Chrome must be launched with `--user-data-dir` (dedicated profile) or the MCP server configured with `--user-data-dir` or `--isolated=true` to avoid conflicts with existing Chrome sessions.
       4. Document verification results in table format (see references/examples.md)
       5. Flag any unmet criteria
     </action>
@@ -281,14 +284,22 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
   <step_6>
     <name>Output Summary</name>
     <action>
-      1. Compile completion summary (see references/examples.md for template)
-      2. Include: deliverables, files changed, criteria status, PR link
-      3. Include refactoring analysis results:
+      1. IF execution_mode == "workflow-mode":
+         a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
+            - workflow_name: {from context}
+            - action: "feature_closing"
+            - status: "done"
+            - feature_id: {feature_id}
+            - deliverables: {"closing-report": "{path}"}
+         b. Log: "Workflow action status updated to done"
+      2. Compile completion summary (see references/examples.md for template)
+      3. Include: deliverables, files changed, criteria status, PR link
+      4. Include refactoring analysis results:
          - Overall quality score from analysis
          - IF refactoring suggestions exist: list top suggestions with priority
          - IF overall_quality_score < 7: flag "Refactoring recommended" with summary of key improvements
          - IF overall_quality_score >= 7: note "Code quality is acceptable, optional improvements listed"
-      4. Present summary to human with clear recommendation on whether refactoring is needed
+      5. Present summary to human with clear recommendation on whether refactoring is needed
     </action>
     <output>Feature completion summary with refactoring recommendation delivered to human</output>
   </step_6>

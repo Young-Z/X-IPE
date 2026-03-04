@@ -39,6 +39,9 @@ input:
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
   workflow:
     name: "N/A"  # workflow name, default: N/A
+    extra_context_reference:  # optional, default: N/A for all refs
+      tech-design: "path | N/A | auto-detect"
+      specification: "path | N/A | auto-detect"
 
   # Task type attributes
   category: "feature-stage"
@@ -276,8 +279,16 @@ BLOCKING: Step 7 - ALL tests MUST fail (no implementation exists). If any test p
   <step_8>
     <name>Generate Tracing Tests</name>
     <action>
-      1. See references/test-patterns.md for tracing test templates
-      2. Skip if: No tracing infrastructure OR pure utility modules
+      1. IF execution_mode == "workflow-mode":
+         a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
+            - workflow_name: {from context}
+            - action: "test_generation"
+            - status: "done"
+            - feature_id: {feature_id}
+            - deliverables: {"test-plan": "{path}", "test-folder": "{path}"}
+         b. Log: "Workflow action status updated to done"
+      2. See references/test-patterns.md for tracing test templates
+      3. Skip if: No tracing infrastructure OR pure utility modules
     </action>
     <output>Tracing test files (if applicable)</output>
   </step_8>

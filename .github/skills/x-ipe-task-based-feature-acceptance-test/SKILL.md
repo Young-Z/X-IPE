@@ -31,6 +31,8 @@ CRITICAL: This skill is ONLY for features with web UI. If the feature is backend
 
 MANDATORY: This skill requires Chrome DevTools MCP for test execution. If MCP is not available, generate test cases but mark execution as blocked.
 
+MANDATORY: Chrome must be launched with `--user-data-dir` (dedicated profile) or the chrome-devtools-mcp server must be configured with `--user-data-dir` or `--isolated=true` to avoid conflicts with existing Chrome sessions. Example: `chrome --remote-debugging-port=9222 --user-data-dir=/tmp/x-ipe-chrome-profile` or configure MCP with `--user-data-dir=/tmp/x-ipe-chrome-profile`.
+
 ---
 
 ## Input Parameters

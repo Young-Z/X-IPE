@@ -77,6 +77,15 @@
             "specification": { "required": true, "candidates": "feature-docs-folder" }
           },
           "deliverables": ["$output:tech-design", "$output-folder:feature-docs-folder"],
+          "next_actions_suggested": ["test_generation"]
+        },
+        "test_generation": {
+          "optional": false,
+          "action_context": {
+            "tech-design": { "required": true, "candidates": "feature-docs-folder" },
+            "specification": { "required": true, "candidates": "feature-docs-folder" }
+          },
+          "deliverables": ["$output:test-plan", "$output-folder:test-folder"],
           "next_actions_suggested": ["implementation"]
         },
         "implementation": {
@@ -101,15 +110,25 @@
             "impl-files": { "required": true, "candidates": "impl-folder" }
           },
           "deliverables": ["$output:test-report", "$output-folder:test-folder"],
-          "next_actions_suggested": ["quality_evaluation"]
+          "next_actions_suggested": ["code_refactor"]
         },
-        "quality_evaluation": {
-          "optional": true,
+        "code_refactor": {
+          "optional": false,
           "action_context": {
-            "test-report": { "required": true, "candidates": "test-folder" }
+            "test-report": { "required": false, "candidates": "test-folder" },
+            "specification": { "required": true, "candidates": "feature-docs-folder" }
           },
-          "deliverables": ["$output:eval-report"],
-          "next_actions_suggested": ["change_request"]
+          "deliverables": ["$output:refactor-report"],
+          "next_actions_suggested": ["feature_closing"]
+        },
+        "feature_closing": {
+          "optional": false,
+          "action_context": {
+            "specification": { "required": true, "candidates": "feature-docs-folder" },
+            "refactor-report": { "required": false }
+          },
+          "deliverables": ["$output:closing-report"],
+          "next_actions_suggested": ["human_playground", "change_request"]
         }
       }
     },
@@ -117,10 +136,19 @@
       "type": "per_feature",
       "next_stage": null,
       "actions": {
+        "human_playground": {
+          "optional": true,
+          "action_context": {
+            "specification": { "required": true, "candidates": "feature-docs-folder" },
+            "impl-files": { "required": false, "candidates": "impl-folder" }
+          },
+          "deliverables": ["$output:playground-url"],
+          "next_actions_suggested": ["change_request"]
+        },
         "change_request": {
           "optional": true,
           "action_context": {
-            "eval-report": { "required": false },
+            "closing-report": { "required": false },
             "specification": { "required": true, "candidates": "feature-docs-folder" }
           },
           "deliverables": ["$output:cr-doc", "$output-folder:cr-folder"],

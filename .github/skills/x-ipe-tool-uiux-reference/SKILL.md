@@ -20,6 +20,8 @@ AI Agents follow this skill to execute the UIUX reference workflow:
 
 BLOCKING: Chrome DevTools MCP must be configured and Chrome must be open with DevTools MCP connected before executing this skill.
 
+MANDATORY: Chrome must be launched with `--user-data-dir` (dedicated profile) or the chrome-devtools-mcp server must be configured with `--user-data-dir` or `--isolated=true` to avoid conflicts with existing Chrome sessions. Example: `chrome --remote-debugging-port=9222 --user-data-dir=/tmp/x-ipe-chrome-profile` or configure MCP with `--user-data-dir=/tmp/x-ipe-chrome-profile`.
+
 CRITICAL: The toolbar source is at `references/toolbar.min.js`. The agent must READ this file, wrap its entire contents in an arrow function `() => { <contents> }`, and pass that as the `function` parameter to `evaluate_script`. No parsing or IIFE stripping needed. This works because CDP's `Runtime.evaluate` bypasses page CSP. Do NOT use `eval()`, compressed injection, or `<script>` tags.
 
 CRITICAL: Do NOT modify the toolbar code. Read and inject exactly as provided.

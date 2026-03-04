@@ -90,9 +90,12 @@ def _init_config(project_root: str = None):
                         "feature_breakdown": "requirements",
                         "feature_refinement": "requirements",
                         "technical_design": "requirements",
+                        "test_generation": "quality",
                         "implementation": "implementations",
                         "acceptance_testing": "quality",
-                        "quality_evaluation": "quality",
+                        "code_refactor": "quality",
+                        "feature_closing": "quality",
+                        "human_playground": "quality",
                         "change_request": "requirements",
                     }
                     cat = action_to_category.get(action_name, stage_name)
@@ -131,20 +134,20 @@ def _default_config():
         },
         "implement": {
             "type": "per_feature",
-            "mandatory_actions": ["feature_refinement", "technical_design", "implementation"],
+            "mandatory_actions": ["feature_refinement", "technical_design", "test_generation", "implementation"],
             "optional_actions": [],
             "next_stage": "validation",
         },
         "validation": {
             "type": "per_feature",
-            "mandatory_actions": ["acceptance_testing"],
-            "optional_actions": ["quality_evaluation"],
+            "mandatory_actions": ["acceptance_testing", "code_refactor", "feature_closing"],
+            "optional_actions": [],
             "next_stage": "feedback",
         },
         "feedback": {
             "type": "per_feature",
             "mandatory_actions": [],
-            "optional_actions": ["change_request"],
+            "optional_actions": ["human_playground", "change_request"],
             "next_stage": None,
         },
     }
@@ -154,8 +157,10 @@ def _default_config():
         "reference_uiux": "mockups", "design_mockup": "mockups",
         "requirement_gathering": "requirements", "feature_breakdown": "requirements",
         "feature_refinement": "requirements", "technical_design": "requirements",
+        "test_generation": "quality",
         "implementation": "implementations",
-        "acceptance_testing": "quality", "quality_evaluation": "quality",
+        "acceptance_testing": "quality", "code_refactor": "quality",
+        "feature_closing": "quality", "human_playground": "quality",
         "change_request": "requirements",
     }
     next_actions_map = {
@@ -166,10 +171,13 @@ def _default_config():
         "requirement_gathering": ["feature_breakdown"],
         "feature_breakdown": [],
         "feature_refinement": ["technical_design"],
-        "technical_design": ["implementation"],
+        "technical_design": ["test_generation"],
+        "test_generation": ["implementation"],
         "implementation": ["acceptance_testing"],
-        "acceptance_testing": ["quality_evaluation"],
-        "quality_evaluation": ["change_request"],
+        "acceptance_testing": ["code_refactor"],
+        "code_refactor": ["feature_closing"],
+        "feature_closing": ["human_playground", "change_request"],
+        "human_playground": ["change_request"],
         "change_request": [],
     }
     return stage_config, stage_order, deliverable_categories, next_actions_map
