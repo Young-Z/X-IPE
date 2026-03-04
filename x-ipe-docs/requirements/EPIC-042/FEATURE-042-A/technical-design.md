@@ -22,8 +22,8 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `ActionExecutionModal` (action context dropdowns) | FEATURE-041-F | [technical-design.md](../../EPIC-041/FEATURE-041-F/technical-design.md) | Provides `_renderActionContext()`, dropdown groups with `data-ref-name`, and context persistence. Template resolution reads dropdown values from these elements. |
-| `workflow-template.json` (action_context) | FEATURE-041-E | [technical-design.md](../../EPIC-041/FEATURE-041-E/technical-design.md) | `action_context` ref names (e.g., `raw-idea`, `uiux-reference`) are the canonical tag names that `$output:tag$` tokens resolve against. |
+| `ActionExecutionModal` (action context dropdowns) | FEATURE-041-F | [technical-design.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-F/technical-design.md) | Provides `_renderActionContext()`, dropdown groups with `data-ref-name`, and context persistence. Template resolution reads dropdown values from these elements. |
+| `workflow-template.json` (action_context) | FEATURE-041-E | [technical-design.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/technical-design.md) | `action_context` ref names (e.g., `raw-idea`, `uiux-reference`) are the canonical tag names that `$output:tag$` tokens resolve against. |
 | `copilot-prompt.json` (existing sections) | FEATURE-038-A | N/A | Legacy prompt sections (`ideation.prompts`, `workflow.prompts`, `feature.prompts`) remain unchanged for free-mode fallback. |
 
 ### Major Flow

@@ -300,13 +300,13 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for concrete execution examples including:
+See [references/examples.md](.github/skills/x-ipe-task-based-dev-environment/references/examples.md) for concrete execution examples including:
 - Python project setup with uv and venv
 - Node.js project setup with npm
 - Missing setup guide (blocked scenario)
 - Existing VS Code config (merge mode)
 
-See [references/tech-stack-details.md](references/tech-stack-details.md) for:
+See [references/tech-stack-details.md](.github/skills/x-ipe-task-based-dev-environment/references/tech-stack-details.md) for:
 - Auto-detection hints table
 - Detailed initialization commands per stack
 - Setup document templates

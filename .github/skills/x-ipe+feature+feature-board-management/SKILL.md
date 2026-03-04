@@ -31,7 +31,7 @@ The feature board at `x-ipe-docs/planning/features.md` tracks all features acros
 
 **Key Concepts:**
 
-- **Feature Data Model** — Structured record containing epic_id, feature_id, title, version, status, description, dependencies, artifact links, and task history. See [references/examples.md](references/examples.md) for full schema.
+- **Feature Data Model** — Structured record containing epic_id, feature_id, title, version, status, description, dependencies, artifact links, and task history. See [references/examples.md](.github/skills/x-ipe+feature+feature-board-management/references/examples.md) for full schema.
 - **Epic ID** — `EPIC-{nnn}` matching parent Epic, or `-` for legacy features without an Epic
 - ⛔ **Epic ≠ Feature** — `EPIC-{nnn}` is a grouping container; `FEATURE-{nnn}-{X}` is a deliverable unit. Never use an Epic ID in the Feature ID column.
 - **Feature Statuses** — `Planned`, `Refined`, `Designed`, `Implemented`, `Tested`, `Completed`
@@ -275,4 +275,4 @@ Epic status is NOT stored in the table. It is derived from constituent Feature s
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for usage examples including Feature Data Model schema, Status Lifecycle diagram, Board Template Structure, and integration examples.
+See [references/examples.md](.github/skills/x-ipe+feature+feature-board-management/references/examples.md) for usage examples including Feature Data Model schema, Status Lifecycle diagram, Board Template Structure, and integration examples.

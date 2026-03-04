@@ -32,10 +32,10 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `TracingService` | FEATURE-023-A | [technical-design.md](../FEATURE-023-A/technical-design.md) | Backend tracing service, log storage |
-| `TracingDashboard` | FEATURE-023-B | [technical-design.md](../FEATURE-023-B/technical-design.md) | Parent dashboard component, trace selection |
+| `TracingService` | FEATURE-023-A | [technical-design.md](x-ipe-docs/requirements/EPIC-023/FEATURE-023-A/technical-design.md) | Backend tracing service, log storage |
+| `TracingDashboard` | FEATURE-023-B | [technical-design.md](x-ipe-docs/requirements/EPIC-023/FEATURE-023-B/technical-design.md) | Parent dashboard component, trace selection |
 | `G6 by AntV` | External | [g6.antv.vision](https://g6.antv.vision/) | Canvas-based graph rendering library |
-| `tracing_routes.py` | FEATURE-023-A | [technical-design.md](../FEATURE-023-A/technical-design.md) | REST API blueprint |
+| `tracing_routes.py` | FEATURE-023-A | [technical-design.md](x-ipe-docs/requirements/EPIC-023/FEATURE-023-A/technical-design.md) | REST API blueprint |
 
 ### Major Flow
 

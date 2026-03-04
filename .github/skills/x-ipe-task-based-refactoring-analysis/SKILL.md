@@ -171,7 +171,7 @@ BLOCKING: Step 8 MUST include all output data models.
 
 ## Execution Procedure
 
-CRITICAL: For detailed sub-steps, scoring formulas, and gap type definitions, see [references/detailed-procedures.md](references/detailed-procedures.md).
+CRITICAL: For detailed sub-steps, scoring formulas, and gap type definitions, see [references/detailed-procedures.md](.github/skills/x-ipe-task-based-refactoring-analysis/references/detailed-procedures.md).
 
 ```xml
 <procedure name="refactoring-analysis">
@@ -298,7 +298,7 @@ CRITICAL: For detailed sub-steps, scoring formulas, and gap type definitions, se
 
 ## Output Result
 
-See [references/output-schema.md](references/output-schema.md) for complete output data model schema.
+See [references/output-schema.md](.github/skills/x-ipe-task-based-refactoring-analysis/references/output-schema.md) for complete output data model schema.
 
 ```yaml
 task_completion_output:
@@ -419,4 +419,4 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for concrete execution examples.
+See [references/examples.md](.github/skills/x-ipe-task-based-refactoring-analysis/references/examples.md) for concrete execution examples.

@@ -2,7 +2,7 @@
   "schema_version": "3.0",
   "name": "test",
   "created": "2026-03-02T03:22:30.064960+00:00",
-  "last_activity": "2026-03-02T06:26:33.226921+00:00",
+  "last_activity": "2026-03-04T04:18:14.288287+00:00",
   "idea_folder": null,
   "current_stage": "ideation",
   "shared": {
@@ -21,15 +21,11 @@
           ]
         },
         "refine_idea": {
-          "status": "done",
+          "status": "pending",
           "deliverables": {
             "refined-idea": "x-ipe-docs/ideas/wf-001-五子棋/refined-idea/idea-summary-v1.md",
             "refined-ideas-folder": "x-ipe-docs/ideas/wf-001-五子棋/refined-idea/"
-          },
-          "next_actions_suggested": [
-            "design_mockup",
-            "requirement_gathering"
-          ]
+          }
         },
         "reference_uiux": {
           "status": "pending",

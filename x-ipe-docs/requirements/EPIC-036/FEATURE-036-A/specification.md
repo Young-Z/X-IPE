@@ -16,7 +16,7 @@
 
 | Mockup | Type | Path | Description | Status |
 |--------|------|------|-------------|--------|
-| Engineering Workflow View | HTML | [../mockups/workflow-view-v1.html](../mockups/workflow-view-v1.html) | Full workflow view with panels, stages, lanes | outdated — use as directional reference only |
+| Engineering Workflow View | HTML | [../mockups/workflow-view-v1.html](x-ipe-docs/requirements/EPIC-036/mockups/workflow-view-v1.html) | Full workflow view with panels, stages, lanes | outdated — use as directional reference only |
 
 > **Note:** The shared mockup covers the full EPIC-036 UI. FEATURE-036-A is a backend service with no direct UI. The mockup is directional reference for understanding data structures and state transitions.
 

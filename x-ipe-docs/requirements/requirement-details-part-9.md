@@ -1,6 +1,6 @@
 # Requirement Details - Part 9
 
-> Continued from: [requirement-details-part-8.md](requirement-details-part-8.md)
+> Continued from: [requirement-details-part-8.md](x-ipe-docs/requirements/requirement-details-part-8.md)
 > Created: 02-17-2026
 
 ---
@@ -26,8 +26,8 @@
 
 | Mockup Function Name | Feature | Mockup Link |
 |---------------------|---------|-------------|
-| Engineering Workflow View (full interactive) | All FEATURE-036-* | [workflow-view-v1.html](EPIC-036/mockups/workflow-view-v1.html) |
-| Introduce Epic Layer (idea summary) | CR-EPIC | [idea-summary-v2.md](../ideas/022.%20CR-Introduce%20Epic/idea-summary-v2.md) |
+| Engineering Workflow View (full interactive) | All FEATURE-036-* | [workflow-view-v1.html](x-ipe-docs/requirements/EPIC-036/mockups/workflow-view-v1.html) |
+| Introduce Epic Layer (idea summary) | CR-EPIC | [idea-summary-v2.md](x-ipe-docs/ideas/022. CR-Introduce Epic/idea-summary-v2.md) |
 
 ---
 
@@ -43,7 +43,7 @@
 > Source: IDEA-021 (Feature-Engineering-Workflow)
 > Status: Proposed
 > Priority: High
-> Mockup: [workflow-view-v1.html](EPIC-036/mockups/workflow-view-v1.html)
+> Mockup: [workflow-view-v1.html](x-ipe-docs/requirements/EPIC-036/mockups/workflow-view-v1.html)
 
 #### Project Overview
 
@@ -275,7 +275,7 @@ The user wants:
 
 | Mockup Function Name | Feature | Mockup List |
 |---------------------|---------|-------------|
-| Engineering Workflow View (Full) | All FEATURE-036-* | [workflow-view-v1.html](EPIC-036/mockups/workflow-view-v1.html) |
+| Engineering Workflow View (Full) | All FEATURE-036-* | [workflow-view-v1.html](x-ipe-docs/requirements/EPIC-036/mockups/workflow-view-v1.html) |
 
 ---
 
@@ -455,7 +455,7 @@ The user wants:
 > Source: IDEA-022 (CR-Introduce Epic)
 > Status: Proposed
 > Priority: High
-> Idea Summary: [idea-summary-v2.md](../ideas/022.%20CR-Introduce%20Epic/idea-summary-v2.md)
+> Idea Summary: [idea-summary-v2.md](x-ipe-docs/ideas/022. CR-Introduce Epic/idea-summary-v2.md)
 
 #### Project Overview
 

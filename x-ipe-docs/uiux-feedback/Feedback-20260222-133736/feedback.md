@@ -14,4 +14,4 @@ when creating workflow, it says network error, but the network is good
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260222-133736/page-screenshot.png)

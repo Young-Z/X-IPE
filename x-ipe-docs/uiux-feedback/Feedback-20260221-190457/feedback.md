@@ -14,4 +14,4 @@ in the workflow-hello.json it says "next_actions_suggested": ["design_mockup", "
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260221-190457/page-screenshot.png)

@@ -16,7 +16,7 @@
 
 | Mockup | Type | Path | Description | Status |
 |--------|------|------|-------------|--------|
-| Refine Idea Modal | HTML | [refine-idea-modal-v1.html](../mockups/refine-idea-modal-v1.html) | Scene 2 references session dispatch flow | current |
+| Refine Idea Modal | HTML | [refine-idea-modal-v1.html](x-ipe-docs/requirements/EPIC-038/mockups/refine-idea-modal-v1.html) | Scene 2 references session dispatch flow | current |
 
 > **Note:** This feature has no dedicated UI mockup. The session detection logic is backend/service-layer only, consumed by FEATURE-038-A's modal.
 

@@ -159,7 +159,7 @@ mindmap
 
 ## Ideation Artifacts
 
-- Source: [new idea.md](new%20idea.md)
+- Source: [new idea.md](x-ipe-docs/ideas/022. CR-Introduce Epic/new idea.md)
 
 ## Source Files
 

@@ -24,11 +24,11 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `ActionExecutionModal._resolveTemplate()` | FEATURE-042-A | [specification.md](../FEATURE-042-A/specification.md) | Template resolver: `$output:tag$`, `$output-folder:tag$`, `$feature-id$` substitution |
-| `ActionExecutionModal._getWorkflowPrompt()` | FEATURE-042-A | [specification.md](../FEATURE-042-A/specification.md) | Fetch workflow-mode prompt template from `copilot-prompt.json` `workflow-prompts` array |
-| `_resolveConditionalBlocks()` | FEATURE-042-B | [specification.md](../FEATURE-042-B/specification.md) | `<>` conditional block evaluation — skip block when any variable is N/A, strip delimiters when all resolve |
-| `ActionExecutionModal._renderActionContext()` | FEATURE-041-F | [technical-design.md](../../EPIC-041/FEATURE-041-F/technical-design.md) | Creates context dropdowns from `action_context` in workflow-template.json |
-| `ActionExecutionModal._populateDropdown()` | FEATURE-041-F | [technical-design.md](../../EPIC-041/FEATURE-041-F/technical-design.md) | Populates dropdowns with candidate files from candidate resolution API |
+| `ActionExecutionModal._resolveTemplate()` | FEATURE-042-A | [specification.md](x-ipe-docs/requirements/EPIC-042/FEATURE-042-A/specification.md) | Template resolver: `$output:tag$`, `$output-folder:tag$`, `$feature-id$` substitution |
+| `ActionExecutionModal._getWorkflowPrompt()` | FEATURE-042-A | [specification.md](x-ipe-docs/requirements/EPIC-042/FEATURE-042-A/specification.md) | Fetch workflow-mode prompt template from `copilot-prompt.json` `workflow-prompts` array |
+| `_resolveConditionalBlocks()` | FEATURE-042-B | [specification.md](x-ipe-docs/requirements/EPIC-042/FEATURE-042-B/specification.md) | `<>` conditional block evaluation — skip block when any variable is N/A, strip delimiters when all resolve |
+| `ActionExecutionModal._renderActionContext()` | FEATURE-041-F | [technical-design.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-F/technical-design.md) | Creates context dropdowns from `action_context` in workflow-template.json |
+| `ActionExecutionModal._populateDropdown()` | FEATURE-041-F | [technical-design.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-F/technical-design.md) | Populates dropdowns with candidate files from candidate resolution API |
 | Workflow Instance API | Foundation | `GET /api/workflow/{name}` | Source of prior action deliverable paths |
 
 ### Major Flow

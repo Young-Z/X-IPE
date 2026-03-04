@@ -125,7 +125,7 @@ BLOCKING: At the start of every workflow execution, read `.x-ipe.yaml` from proj
 | `main-branch-only` | Work directly on main branch | No | All commits go to main. No feature branches created. |
 | `dev-session-based` | `dev/{git_user_name}` branch per developer | Yes, on feature close | Each developer works on their own persistent branch. PR to main when a feature is closed. |
 
-See [references/examples.md](references/examples.md) for detailed strategy rules and git identity validation.
+See [references/examples.md](.github/skills/x-ipe-workflow-task-execution/references/examples.md) for detailed strategy rules and git identity validation.
 
 ### Category Derivation
 
@@ -468,7 +468,7 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 **Request matching:**
 1. Read the `description` field from each `x-ipe-task-based-*/SKILL.md` frontmatter
 2. Match user request against trigger keywords (e.g., "fix bug" matches `x-ipe-task-based-bug-fix`)
-3. See [references/examples.md](references/examples.md) for common request-to-skill patterns
+3. See [references/examples.md](.github/skills/x-ipe-workflow-task-execution/references/examples.md) for common request-to-skill patterns
 
 > **Note:** When Auto-Proceed is enabled (global or task-level), `require_human_review` is skipped regardless of the skill's default.
 
@@ -490,4 +490,4 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 - `templates/task-record.yaml` - Task data template
 - `templates/task-board.md` - Task tracking board
-- [references/examples.md](references/examples.md) - Full workflow examples, request matching patterns, and git strategy rules
+- [references/examples.md](.github/skills/x-ipe-workflow-task-execution/references/examples.md) - Full workflow examples, request matching patterns, and git strategy rules

@@ -1,6 +1,6 @@
 # Requirement Details - Part 2
 
-> Continued from: [requirement-details-part-1.md](requirement-details-part-1.md)  
+> Continued from: [requirement-details-part-1.md](x-ipe-docs/requirements/requirement-details-part-1.md)  
 > Created: 01-24-2026
 
 ---
@@ -25,7 +25,7 @@
 
 | Mockup Function Name | Feature | Mockup Link |
 |---------------------|---------|-------------|
-| themes-toolbox-modal | FEATURE-012 | [themes-toolbox-modal.html](EPIC-012/mockups/themes-toolbox-modal.html) |
+| themes-toolbox-modal | FEATURE-012 | [themes-toolbox-modal.html](x-ipe-docs/requirements/EPIC-012/mockups/themes-toolbox-modal.html) |
 | architecture-dsl-demo | FEATURE-015 | [architecture-dsl-demo.html](EPIC-015/mockups/architecture-dsl-demo.html) |
 | architecture-diagram-renderer | FEATURE-016 | [architecture-diagram-renderer.html](EPIC-016/mockups/architecture-diagram-renderer.html) |
 

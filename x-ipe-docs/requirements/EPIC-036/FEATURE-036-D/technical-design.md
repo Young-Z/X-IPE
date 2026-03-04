@@ -8,9 +8,9 @@
 
 ## References
 
-- [Specification](specification.md)
-- [FEATURE-036-C Technical Design](../FEATURE-036-C/technical-design.md)
-- [Mockup](../mockups/workflow-view-v1.html) (lines ~640–800)
+- [Specification](x-ipe-docs/requirements/EPIC-036/FEATURE-036-D/specification.md)
+- [FEATURE-036-C Technical Design](x-ipe-docs/requirements/EPIC-036/FEATURE-036-C/technical-design.md)
+- [Mockup](x-ipe-docs/requirements/EPIC-036/mockups/workflow-view-v1.html) (lines ~640–800)
 
 ---
 

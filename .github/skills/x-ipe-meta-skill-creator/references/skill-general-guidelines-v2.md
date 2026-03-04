@@ -292,7 +292,7 @@ directory_structure: |
 
 ## Section Order Reference
 
-See [2. reference-section-order.md](2.%20reference-section-order.md) for full section order by skill type.
+See [2. reference-section-order.md](.github/skills/x-ipe-meta-skill-creator/references/2. reference-section-order.md) for full section order by skill type.
 
 ---
 
@@ -383,8 +383,8 @@ CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL action
 ### Examples
 
 See examples in this folder:
-- [3. example-step-based-code-review.md](3.%20example-step-based-code-review.md) - Code review with multi-component steps
-- [4. example-step-based-feature-implementation.md](4.%20example-step-based-feature-implementation.md) - TDD-based feature implementation
+- [3. example-step-based-code-review.md](.github/skills/x-ipe-meta-skill-creator/references/3. example-step-based-code-review.md) - Code review with multi-component steps
+- [4. example-step-based-feature-implementation.md](.github/skills/x-ipe-meta-skill-creator/references/4. example-step-based-feature-implementation.md) - TDD-based feature implementation
 
 ---
 
@@ -471,8 +471,8 @@ CRITICAL: Only XML elements defined in the template below are allowed. Do NOT in
 ### Examples
 
 See examples in this folder:
-- [5. example-function-based-validation.md](5.%20example-function-based-validation.md) - Validation utilities library
-- [6. example-function-based-analysis.md](6.%20example-function-based-analysis.md) - Code analysis toolkit
+- [5. example-function-based-validation.md](.github/skills/x-ipe-meta-skill-creator/references/5. example-function-based-validation.md) - Validation utilities library
+- [6. example-function-based-analysis.md](.github/skills/x-ipe-meta-skill-creator/references/6. example-function-based-analysis.md) - Code analysis toolkit
 
 ---
 
@@ -509,7 +509,7 @@ task_completion_output:
   "{attr_name}": "{value}"
 ```
 
-See [7. example-task-io-code-implementation.md](7.%20example-task-io-code-implementation.md) for complete input/output example.
+See [7. example-task-io-code-implementation.md](.github/skills/x-ipe-meta-skill-creator/references/7. example-task-io-code-implementation.md) for complete input/output example.
 
 ## Structured Summary
 
@@ -523,7 +523,7 @@ Use markdown table for skill outputs that summarize multiple items with consiste
 | {value}   | {value}   | {value}   | {value}   |
 ```
 
-See [8. example-structured-summary.md](8.%20example-structured-summary.md) for examples (Feature, Dependency, Requirement, Test Coverage).
+See [8. example-structured-summary.md](.github/skills/x-ipe-meta-skill-creator/references/8. example-structured-summary.md) for examples (Feature, Dependency, Requirement, Test Coverage).
 
 ## DoR/DoD Pattern
 
@@ -557,7 +557,7 @@ Use XML format for Definition of Ready (DoR) and Definition of Done (DoD) sectio
 </definition_of_done>
 ```
 
-See [9. example-dor-dod.md](9.%20example-dor-dod.md) for examples (Code Implementation, Feature Refinement).
+See [9. example-dor-dod.md](.github/skills/x-ipe-meta-skill-creator/references/9. example-dor-dod.md) for examples (Code Implementation, Feature Refinement).
 
 ## Gate Conditions
 
@@ -593,7 +593,7 @@ gate:
   on_fail: "{action_if_fail}"
 ```
 
-See [10. example-gate-conditions.md](10.%20example-gate-conditions.md) for examples (Quality Gate, Approval Gate, Release Gate).
+See [10. example-gate-conditions.md](.github/skills/x-ipe-meta-skill-creator/references/10. example-gate-conditions.md) for examples (Quality Gate, Approval Gate, Release Gate).
 
 ---
 
@@ -607,7 +607,7 @@ CRITICAL: Use keywords (BLOCKING, CRITICAL, MANDATORY) for importance signals in
 | `CRITICAL:` | High priority, affects correctness |
 | `MANDATORY:` | Required, continue with warning if missing |
 
-See [11. reference-quality-standards.md](11.%20reference-quality-standards.md) for:
+See [11. reference-quality-standards.md](.github/skills/x-ipe-meta-skill-creator/references/11. reference-quality-standards.md) for:
 - Full importance keywords reference
 - Common mistakes (anti-patterns)
 - What NOT to include in skills

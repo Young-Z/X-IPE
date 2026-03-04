@@ -20,7 +20,7 @@ When users click on "X-IPE" in the application header, the right content panel d
 | Mockup | Description | Path |
 |--------|-------------|------|
 | **Homepage Infinity Loop v1** | SVG-based infinity loop with all elements drawn in code | [`mockups/homepage-infinity-v1.html`](mockups/homepage-infinity-v1.html) |
-| **Homepage Infinity Loop v2** ⭐ | PNG background (`Control&Transparency.png`) with overlay buttons matching stage colors (blue/purple gradient) | [`mockups/homepage-infinity-v2.html`](mockups/homepage-infinity-v2.html) |
+| **Homepage Infinity Loop v2** ⭐ | PNG background (`Control&Transparency.png`) with overlay buttons matching stage colors (blue/purple gradient) | [`mockups/homepage-infinity-v2.html`](x-ipe-docs/ideas/TBC008. Feature-Homepage/mockups/homepage-infinity-v2.html) |
 
 ### Mockup Features Implemented
 

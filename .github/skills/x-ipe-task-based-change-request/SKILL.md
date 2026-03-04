@@ -391,7 +391,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 4. Document the decision rationale
 ```
 
-See [references/patterns.md](references/patterns.md) for detailed patterns: Enhancement CR, New Capability CR, Scope Expansion CR, Multi-Feature CR, Boundary Cases, CR Chain.
+See [references/patterns.md](.github/skills/x-ipe-task-based-change-request/references/patterns.md) for detailed patterns: Enhancement CR, New Capability CR, Scope Expansion CR, Multi-Feature CR, Boundary Cases, CR Chain.
 
 ### Anti-Patterns
 
@@ -410,7 +410,7 @@ See [references/patterns.md](references/patterns.md) for detailed patterns: Enha
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for concrete execution examples:
+See [references/examples.md](.github/skills/x-ipe-task-based-change-request/references/examples.md) for concrete execution examples:
 - Bulk import CR classification (NEW_FEATURE)
 - UI enhancement CR classification (MODIFICATION)
 - Ambiguous request requiring clarification

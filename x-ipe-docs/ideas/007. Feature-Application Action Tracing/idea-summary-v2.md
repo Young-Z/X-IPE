@@ -427,11 +427,11 @@ Quality reports will include a new section:
 
 | Mockup | Version | Path | Tool Used |
 |--------|---------|------|-----------|
-| Tracing Dashboard | v4 (current) | [mockups/tracing-dashboard-v4.html](mockups/tracing-dashboard-v4.html) | G6 by AntV (canvas) |
-| Tracing Dashboard | v3 (archived) | [mockups/tracing-dashboard-v3.html](mockups/tracing-dashboard-v3.html) | G6 by AntV (canvas) |
-| Tracing Dashboard | v2 (archived) | [mockups/tracing-dashboard-v2.html](mockups/tracing-dashboard-v2.html) | G6 by AntV (canvas) |
-| Tracing Dashboard | v1 (archived) | [mockups/tracing-dashboard-v1.html](mockups/tracing-dashboard-v1.html) | Pure HTML/CSS |
-| Error Trace Detail | v1 | [mockups/error-trace-detail-v1.html](mockups/error-trace-detail-v1.html) | Pure HTML/CSS |
+| Tracing Dashboard | v4 (current) | [mockups/tracing-dashboard-v4.html](x-ipe-docs/ideas/007. Feature-Application Action Tracing/mockups/tracing-dashboard-v4.html) | G6 by AntV (canvas) |
+| Tracing Dashboard | v3 (archived) | [mockups/tracing-dashboard-v3.html](x-ipe-docs/ideas/007. Feature-Application Action Tracing/mockups/tracing-dashboard-v3.html) | G6 by AntV (canvas) |
+| Tracing Dashboard | v2 (archived) | [mockups/tracing-dashboard-v2.html](x-ipe-docs/ideas/007. Feature-Application Action Tracing/mockups/tracing-dashboard-v2.html) | G6 by AntV (canvas) |
+| Tracing Dashboard | v1 (archived) | [mockups/tracing-dashboard-v1.html](x-ipe-docs/ideas/007. Feature-Application Action Tracing/mockups/tracing-dashboard-v1.html) | Pure HTML/CSS |
+| Error Trace Detail | v1 | [mockups/error-trace-detail-v1.html](x-ipe-docs/ideas/007. Feature-Application Action Tracing/mockups/error-trace-detail-v1.html) | Pure HTML/CSS |
 
 ### Mockup Descriptions
 

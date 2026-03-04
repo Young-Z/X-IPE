@@ -171,7 +171,7 @@ From user feedback (Feedback-20260303-212659): links in rendered markdown (idea 
 
 | Mockup Function Name | Mockup Link |
 |---------------------|-------------|
-| File Link Preview — Full Interactive (5 scenarios) | [file-link-preview-v1.html](EPIC-043/mockups/file-link-preview-v1.html) |
+| File Link Preview — Full Interactive (5 scenarios) | [file-link-preview-v1.html](x-ipe-docs/requirements/EPIC-043/mockups/file-link-preview-v1.html) |
 
 ### Related Features
 
@@ -201,7 +201,7 @@ From user feedback (Feedback-20260303-212659): links in rendered markdown (idea 
 
 | Mockup Function Name | Feature | Mockup Link |
 |---------------------|---------|-------------|
-| File Link Preview — Full Interactive (5 scenarios) | FEATURE-043-A, FEATURE-043-B | [file-link-preview-v1.html](EPIC-043/mockups/file-link-preview-v1.html) |
+| File Link Preview — Full Interactive (5 scenarios) | FEATURE-043-A, FEATURE-043-B | [file-link-preview-v1.html](x-ipe-docs/requirements/EPIC-043/mockups/file-link-preview-v1.html) |
 
 ---
 

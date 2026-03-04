@@ -24,11 +24,11 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `ActionExecutionModal` | FEATURE-038-A | [specification.md](../../EPIC-038/FEATURE-038-A/specification.md) | Base modal class being extended |
-| `_resolveInputFiles()` | FEATURE-041-A | [technical-design.md](../FEATURE-041-A/technical-design.md) | Method being REPLACED (not extended) |
-| `workflow-template.json` (action_context) | FEATURE-041-E | [technical-design.md](../FEATURE-041-E/technical-design.md) | Template schema driving dropdown rendering |
-| `resolve_candidates()` API | FEATURE-041-E | [technical-design.md](../FEATURE-041-E/technical-design.md) | Backend API resolving candidate deliverables |
-| Instance `context` field | FEATURE-041-E | [technical-design.md](../FEATURE-041-E/technical-design.md) | Where selections are stored/read |
+| `ActionExecutionModal` | FEATURE-038-A | [specification.md](x-ipe-docs/requirements/EPIC-038/FEATURE-038-A/specification.md) | Base modal class being extended |
+| `_resolveInputFiles()` | FEATURE-041-A | [technical-design.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-A/technical-design.md) | Method being REPLACED (not extended) |
+| `workflow-template.json` (action_context) | FEATURE-041-E | [technical-design.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/technical-design.md) | Template schema driving dropdown rendering |
+| `resolve_candidates()` API | FEATURE-041-E | [technical-design.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/technical-design.md) | Backend API resolving candidate deliverables |
+| Instance `context` field | FEATURE-041-E | [technical-design.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/technical-design.md) | Where selections are stored/read |
 
 ### Major Flow
 

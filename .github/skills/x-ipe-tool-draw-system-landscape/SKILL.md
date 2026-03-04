@@ -228,10 +228,10 @@ operation_output:
 
 ## Examples
 
-See [examples/](examples/) for complete DSL-to-HTML rendering examples.
-See [references/landscape-mapping.md](references/landscape-mapping.md) for DSL-to-CSS element mapping rules.
+See [examples/](.github/skills/x-ipe-tool-draw-system-landscape/examples) for complete DSL-to-HTML rendering examples.
+See [references/landscape-mapping.md](.github/skills/x-ipe-tool-draw-system-landscape/references/landscape-mapping.md) for DSL-to-CSS element mapping rules.
 
 **Related Skills:**
-- [x-ipe-tool-architecture-dsl](../x-ipe-tool-architecture-dsl/SKILL.md) - DSL syntax reference
-- [x-ipe-tool-draw-layered-architecture](../x-ipe-tool-draw-layered-architecture/SKILL.md) - Module view diagrams
-- [theme-factory](../theme-factory/SKILL.md) - Theme management
+- [x-ipe-tool-architecture-dsl](.github/skills/x-ipe-tool-architecture-dsl/SKILL.md) - DSL syntax reference
+- [x-ipe-tool-draw-layered-architecture](.github/skills/x-ipe-tool-draw-layered-architecture/SKILL.md) - Module view diagrams
+- [theme-factory](.github/skills/theme-factory/SKILL.md) - Theme management

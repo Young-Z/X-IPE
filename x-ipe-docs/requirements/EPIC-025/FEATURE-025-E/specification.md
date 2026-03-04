@@ -15,7 +15,7 @@
 
 | Mockup | Type | Path | Description | Status |
 |--------|------|------|-------------|--------|
-| KB Landing View | HTML | [mockups/knowledge-base-v1.html](mockups/knowledge-base-v1.html) | KB landing with search modal, sidebar search, and preview panel | current |
+| KB Landing View | HTML | [mockups/knowledge-base-v1.html](x-ipe-docs/requirements/EPIC-025/FEATURE-025-E/mockups/knowledge-base-v1.html) | KB landing with search modal, sidebar search, and preview panel | current |
 
 > **Note:** UI/UX requirements and acceptance criteria below are derived from the mockup marked as "current".
 

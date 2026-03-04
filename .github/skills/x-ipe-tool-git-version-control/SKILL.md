@@ -28,7 +28,7 @@ A standardized interface for git operations used throughout the development life
 
 **Key Concepts:**
 - **Task Data Model** - Commit messages are generated from task_id, feature_id, and task_description fields
-- **Commit Message Format** - `{task_id} commit for {feature_context}: {summary}` (see [references/commit-message-format.md](references/commit-message-format.md))
+- **Commit Message Format** - `{task_id} commit for {feature_context}: {summary}` (see [references/commit-message-format.md](.github/skills/x-ipe-tool-git-version-control/references/commit-message-format.md))
 - **.gitignore Templates** - Pre-built patterns for Python and Node.js projects
 
 ---
@@ -346,5 +346,5 @@ operation_output:
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for usage examples and integration patterns.
-See [references/commit-message-format.md](references/commit-message-format.md) for detailed commit message guidelines.
+See [references/examples.md](.github/skills/x-ipe-tool-git-version-control/references/examples.md) for usage examples and integration patterns.
+See [references/commit-message-format.md](.github/skills/x-ipe-tool-git-version-control/references/commit-message-format.md) for detailed commit message guidelines.

@@ -22,8 +22,8 @@
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
 | `ActionExecutionModal._resolveTemplate()` | FEATURE-042-A | (same epic) | Basic `$output:tag$` / `$output-folder:tag$` / `$feature-id$` resolution — runs BEFORE conditional block parsing |
-| `ActionExecutionModal` | FEATURE-041-F | [technical-design.md](../../EPIC-041/FEATURE-041-F/technical-design.md) | Base modal class with action context dropdowns, mode detection, and context persistence |
-| `workflow-template.json` (action_context) | FEATURE-041-E | [technical-design.md](../../EPIC-041/FEATURE-041-E/technical-design.md) | Template schema providing context ref definitions |
+| `ActionExecutionModal` | FEATURE-041-F | [technical-design.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-F/technical-design.md) | Base modal class with action context dropdowns, mode detection, and context persistence |
+| `workflow-template.json` (action_context) | FEATURE-041-E | [technical-design.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/technical-design.md) | Template schema providing context ref definitions |
 
 ### Major Flow
 

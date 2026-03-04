@@ -14,4 +14,4 @@ the folder in the deliverable, looks like the style is not correct, you can refe
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260221-174334/page-screenshot.png)

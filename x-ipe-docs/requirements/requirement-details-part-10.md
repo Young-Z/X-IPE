@@ -109,7 +109,7 @@ From IDEA-023 (CR-Compose Idea in Workflow): The current Compose Idea workflow a
 
 | Mockup Function Name | Mockup Link |
 |---------------------|-------------|
-| Compose Idea Modal (Create New + Link Existing) | [compose-idea-modal-v1.html](EPIC-037/mockups/compose-idea-modal-v1.html) |
+| Compose Idea Modal (Create New + Link Existing) | [compose-idea-modal-v1.html](x-ipe-docs/requirements/EPIC-037/mockups/compose-idea-modal-v1.html) |
 
 ---
 
@@ -164,7 +164,7 @@ From IDEA-023 (CR-Compose Idea in Workflow): The current Compose Idea workflow a
 - Modal overlay click does NOT close (prevent accidental content loss)
 - `wf-NNN` auto-increment: scan `/api/ideas/tree` response for highest `wf-XXX` folder
 
-**Linked Mockup:** [compose-idea-modal-v1.html](EPIC-037/mockups/compose-idea-modal-v1.html) — "Create New" mode
+**Linked Mockup:** [compose-idea-modal-v1.html](x-ipe-docs/requirements/EPIC-037/mockups/compose-idea-modal-v1.html) — "Create New" mode
 
 ---
 
@@ -210,5 +210,5 @@ From IDEA-023 (CR-Compose Idea in Workflow): The current Compose Idea workflow a
 - *(CR-001)* `GET /api/ideas/file` validates path is within `project_root` to prevent path traversal
 - *(CR-001)* Git diff serves as rollback mechanism — no in-app version history needed
 
-**Linked Mockup:** [compose-idea-modal-v1.html](EPIC-037/mockups/compose-idea-modal-v1.html) — "Link Existing" mode
-**Change Requests:** [CR-001](EPIC-037/FEATURE-037-B/CR-001.md) — Re-Edit enrichment from IDEA-024
+**Linked Mockup:** [compose-idea-modal-v1.html](x-ipe-docs/requirements/EPIC-037/mockups/compose-idea-modal-v1.html) — "Link Existing" mode
+**Change Requests:** [CR-001](x-ipe-docs/requirements/EPIC-037/FEATURE-037-B/CR-001.md) — Re-Edit enrichment from IDEA-024

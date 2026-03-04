@@ -447,7 +447,7 @@ Add `<link>` and `<script>` tags for the new files.
 
 ### Mockup Reference
 
-**Source:** [../mockups/compose-idea-modal-v1.html](../mockups/compose-idea-modal-v1.html) (status: current)
+**Source:** [../mockups/compose-idea-modal-v1.html](x-ipe-docs/requirements/EPIC-037/mockups/compose-idea-modal-v1.html) (status: current)
 
 **Mockup-to-Component Mapping:**
 

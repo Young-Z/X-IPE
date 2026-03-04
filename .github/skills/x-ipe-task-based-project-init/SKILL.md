@@ -145,7 +145,7 @@ BLOCKING: Existing projects - only ADD missing files, do NOT restructure.
 </procedure>
 ```
 
-See [references/examples.md](references/examples.md) for the standard project structure diagram and lessons learned template.
+See [references/examples.md](.github/skills/x-ipe-task-based-project-init/references/examples.md) for the standard project structure diagram and lessons learned template.
 
 ---
 
@@ -228,4 +228,4 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for concrete execution examples.
+See [references/examples.md](.github/skills/x-ipe-task-based-project-init/references/examples.md) for concrete execution examples.

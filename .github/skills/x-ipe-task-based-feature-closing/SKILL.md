@@ -421,4 +421,4 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for concrete execution examples, verification templates, and human communication templates.
+See [references/examples.md](.github/skills/x-ipe-task-based-feature-closing/references/examples.md) for concrete execution examples, verification templates, and human communication templates.

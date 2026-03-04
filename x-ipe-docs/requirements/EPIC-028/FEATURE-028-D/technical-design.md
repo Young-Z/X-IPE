@@ -22,7 +22,7 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `ScaffoldManager` | FEATURE-028-B | [technical-design.md](../FEATURE-028-B/technical-design.md) | `copy_copilot_instructions(cli_name, language)` for instruction extraction |
+| `ScaffoldManager` | FEATURE-028-B | [technical-design.md](x-ipe-docs/requirements/EPIC-028/FEATURE-028-B/technical-design.md) | `copy_copilot_instructions(cli_name, language)` for instruction extraction |
 | `ConfigService` / `ConfigData` | FEATURE-010 | — | Extended to include `language` field |
 | `SUPPORTED_LANGUAGES` | FEATURE-028-B | — | `['en', 'zh']` list from `cli/main.py`, duplicated as constant in route |
 | `settings_routes.py` | FEATURE-006 | — | Blueprint for settings routes; new endpoint added here |

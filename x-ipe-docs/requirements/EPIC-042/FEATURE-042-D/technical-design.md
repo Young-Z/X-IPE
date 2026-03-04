@@ -21,10 +21,10 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `workflow-prompts` schema | FEATURE-042-A | [specification.md](../FEATURE-042-A/specification.md) | Defines the `workflow-prompts` array structure, `$output:tag$`/`$feature-id$` variable syntax, and the template resolver that consumes entries |
-| Conditional `<>` block parser | FEATURE-042-B | [specification.md](../FEATURE-042-B/specification.md) | Parses `<>` conditional blocks in command templates; 3 of the 9 entries use conditional blocks for optional context |
-| Deliverable-default dropdowns | FEATURE-042-C | [specification.md](../FEATURE-042-C/specification.md) | Provides dropdown defaulting from `input_source` and read-only instructions preview that displays resolved commands |
-| `workflow-template.json` | EPIC-041 | [workflow-template.json](../../../config/workflow-template.json) | Authoritative source for action keys (snake_case) and `action_context` refs — all `$output:tag$` variables must align |
+| `workflow-prompts` schema | FEATURE-042-A | [specification.md](x-ipe-docs/requirements/EPIC-042/FEATURE-042-A/specification.md) | Defines the `workflow-prompts` array structure, `$output:tag$`/`$feature-id$` variable syntax, and the template resolver that consumes entries |
+| Conditional `<>` block parser | FEATURE-042-B | [specification.md](x-ipe-docs/requirements/EPIC-042/FEATURE-042-B/specification.md) | Parses `<>` conditional blocks in command templates; 3 of the 9 entries use conditional blocks for optional context |
+| Deliverable-default dropdowns | FEATURE-042-C | [specification.md](x-ipe-docs/requirements/EPIC-042/FEATURE-042-C/specification.md) | Provides dropdown defaulting from `input_source` and read-only instructions preview that displays resolved commands |
+| `workflow-template.json` | EPIC-041 | [workflow-template.json](x-ipe-docs/config/workflow-template.json) | Authoritative source for action keys (snake_case) and `action_context` refs — all `$output:tag$` variables must align |
 
 ### Major Flow
 

@@ -334,4 +334,4 @@ playground/
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for concrete execution examples.
+See [references/examples.md](.github/skills/x-ipe-task-based-human-playground/references/examples.md) for concrete execution examples.

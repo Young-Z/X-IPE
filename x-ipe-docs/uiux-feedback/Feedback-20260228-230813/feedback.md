@@ -14,4 +14,4 @@ base on the workflow, I finished refine action, I move on mockup action, so when
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260228-230813/page-screenshot.png)

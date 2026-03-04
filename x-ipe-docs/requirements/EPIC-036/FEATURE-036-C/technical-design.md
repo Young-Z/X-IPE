@@ -1,15 +1,25 @@
 # FEATURE-036-C: Stage Ribbon & Action Execution — Technical Design
 
+> Feature ID: FEATURE-036-C | Version: v1.1 | Last Updated: 03-04-2026
+
+## Version History
+
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| v1.1 | 03-04-2026 | Action running state: clickable buttons during execution, CSS pulse-ring animation, client-side running state tracking | [CR-001](x-ipe-docs/requirements/EPIC-036/FEATURE-036-C/CR-001.md) |
+| v1.0 | 02-17-2026 | Initial technical design | - |
+
 ## Part 1: Design Overview
 
-### Key Components
+### Key Components Implemented
 
-| Component | File | Responsibility |
-|-----------|------|----------------|
-| Stage Ribbon Module | `src/x_ipe/static/js/features/workflow-stage.js` | Render stage ribbon, action buttons, handle action dispatch |
-| Workflow View (updated) | `src/x_ipe/static/js/features/workflow.js` | Integrate stage module into panel body |
-| Stage Styles | `src/x_ipe/static/css/workflow.css` (appended) | Stage ribbon and action button CSS |
-| Base Template (updated) | `src/x_ipe/templates/base.html` | Add `<script>` tag for workflow-stage.js |
+| Component | Responsibility | Scope/Impact | Tags |
+|-----------|----------------|--------------|------|
+| Stage Ribbon Module | Render stage ribbon, action buttons, handle action dispatch, track client-side running state | `src/x_ipe/static/js/features/workflow-stage.js` | #workflow #stage #action-btn #running-state |
+| Workflow View | Integrate stage module into panel body | `src/x_ipe/static/js/features/workflow.js` | #workflow #panel |
+| Stage Styles | Stage ribbon, action button CSS, running animation | `src/x_ipe/static/css/workflow.css` | #css #animation #running |
+| Action Execution Modal | Modal UI for action configuration before dispatch | `src/x_ipe/static/js/features/action-execution-modal.js` | #modal #action-execution |
+| Action Modal Styles | Modal styles, remove in-progress click-blocking | `src/x_ipe/static/css/features/action-execution-modal.css` | #css #modal |
 
 ### Dependencies
 
@@ -28,9 +38,11 @@ Panel expanded → workflow.js calls workflow._fetchFullState(name)
   → workflowStage.renderRibbon(panelBody, workflowState, nextAction)
     → Renders stage pills (completed/active/pending/locked)
     → Renders action button groups per stage
+    → Applies .running class to buttons in _runningActions Set
   → User clicks CLI Agent action button
     → workflowStage._dispatchCliAction(actionKey, skillName)
-    → Verify action allowed (not done/locked)
+    → Button click allowed regardless of current status (only locked blocked)
+    → Add actionKey to _runningActions Set → apply .running class
     → Find idle console session via terminal API
     → Auto-type skill command (no Enter)
   → User clicks Compose/Upload Idea
@@ -38,6 +50,7 @@ Panel expanded → workflow.js calls workflow._fetchFullState(name)
     → Check idea_folder linked
     → If not: prompt → POST /api/workflow/{name}/link-idea
     → Open idea creation UI
+  → On page refresh → _runningActions Set is empty → all buttons show API-derived state
 ```
 
 ### Usage Example
@@ -78,23 +91,18 @@ sequenceDiagram
     API-->>WorkflowJS: {action, stage, feature_id?}
     WorkflowJS->>StageJS: render(body, state, nextAction, name)
     StageJS->>StageJS: Build ribbon pills + action buttons
+    StageJS->>StageJS: Apply .running class from _runningActions Set
     StageJS-->>User: Stage ribbon + action buttons displayed
 
-    User->>StageJS: Click CLI Agent action
-    StageJS->>StageJS: Verify action allowed
+    User->>StageJS: Click CLI Agent action (even if running)
+    StageJS->>StageJS: Check locked only (allow done/running)
+    StageJS->>StageJS: Add actionKey to _runningActions Set
+    StageJS->>StageJS: Apply .running CSS class to button
     StageJS->>Terminal: sendCopilotPromptCommand(skillCmd)
     Terminal->>Terminal: Auto-type command (no Enter)
-    Terminal-->>User: Command visible in console
+    Terminal-->>User: Command visible in console + button shows running animation
 
-    User->>StageJS: Click Compose/Upload Idea
-    StageJS->>StageJS: Check idea_folder
-    alt No idea folder
-        StageJS->>User: Prompt for folder name
-        User->>StageJS: Enter folder name
-        StageJS->>API: POST /api/workflow/{name}/link-idea
-        API-->>StageJS: {success}
-    end
-    StageJS->>StageJS: Open idea creation UI
+    Note over StageJS: On page refresh, _runningActions Set is empty<br/>All buttons show API-derived state only
 ```
 
 ### Component Diagram
@@ -104,6 +112,7 @@ classDiagram
     class workflowStage {
         +ACTION_MAP: Object
         +STAGE_ORDER: string[]
+        -_runningActions: Set~string~
         +render(container, state, nextAction, wfName): void
         -_renderRibbon(stages): HTMLElement
         -_renderStagePill(name, status, index): HTMLElement
@@ -112,6 +121,7 @@ classDiagram
         -_renderActionButton(actionKey, actionDef, status, isSuggested, locked): HTMLElement
         -_dispatchCliAction(wfName, actionKey, skillName): Promise
         -_dispatchModalAction(wfName): Promise
+        -_markRunning(actionKey, btnElement): void
         -_findIdleSession(): object|null
         -_showToast(msg, type): void
     }
@@ -210,15 +220,19 @@ const ACTION_MAP = {
 /**
  * FEATURE-036-C: Stage Ribbon & Action Execution
  * Renders stage progression ribbon and action buttons inside workflow panels.
+ * v1.1: Client-side running state tracking (CR-001)
  */
 const workflowStage = {
     STAGE_ORDER: ['ideation', 'requirement', 'implement', 'validation', 'feedback'],
     ACTION_MAP: { /* as defined above */ },
 
+    // CR-001: Client-side running state — resets on page refresh
+    _runningActions: new Set(),
+
     render(container, workflowState, nextAction, workflowName) {
         // 1. Render stage ribbon
         container.appendChild(this._renderRibbon(workflowState.stages));
-        // 2. Render action button areas
+        // 2. Render action button areas (applies .running from _runningActions Set)
         container.appendChild(this._renderActionsArea(workflowState.stages, nextAction, workflowName));
     },
 
@@ -228,7 +242,6 @@ const workflowStage = {
 
     _renderStagePill(name, status, index) {
         // Create a stage pill with appropriate visual state
-        // completed: green + ✓, active: accent + pulsing dot, pending: white + number, locked: gray + 🔒
     },
 
     _renderActionsArea(stages, nextAction, wfName) {
@@ -239,12 +252,32 @@ const workflowStage = {
         // Render label + action button grid for one stage
     },
 
-    _renderActionButton(actionKey, actionDef, status, isSuggested, locked) {
+    _renderActionButton(actionKey, actionDef, status, isSuggested, locked, wfName, isOptional) {
         // Create button with state: done/suggested/normal/locked
+        // CR-001: After applying API-derived class, also apply .running if actionKey in _runningActions
+        const btn = document.createElement('button');
+        // ... set base class from API status ...
+        if (this._runningActions.has(actionKey)) {
+            btn.classList.add('running');
+        }
+        // Click handler — only block locked actions
+        btn.onclick = () => {
+            if (locked || actionDef.deferred) return;
+            // Allow clicks even on done/running actions
+            this._markRunning(actionKey, btn);
+            // ... dispatch to modal or CLI ...
+        };
+        return btn;
+    },
+
+    // CR-001: Mark action as running (client-side only)
+    _markRunning(actionKey, btnElement) {
+        this._runningActions.add(actionKey);
+        btnElement.classList.add('running');
     },
 
     async _dispatchCliAction(wfName, actionKey, skillName) {
-        // 1. Verify not done/locked
+        // 1. Only block locked (not done/in_progress)
         // 2. Find idle session
         // 3. Auto-type skill command
     },
@@ -257,11 +290,10 @@ const workflowStage = {
 
     _findIdleSession() {
         // Inspect terminal pane manager for idle session
-        // Return session object or null
     },
 
     _showToast(msg, type) {
-        // Reuse workflow toast pattern from workflow.js
+        // Reuse workflow toast pattern
     }
 };
 ```

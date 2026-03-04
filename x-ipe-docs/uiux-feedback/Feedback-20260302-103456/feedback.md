@@ -14,4 +14,4 @@ the popup menu has been covered  by panel
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260302-103456/page-screenshot.png)

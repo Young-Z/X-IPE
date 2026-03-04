@@ -14,4 +14,4 @@ let's make a change to the refine idea modal window that, add a section called c
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260221-194456/page-screenshot.png)

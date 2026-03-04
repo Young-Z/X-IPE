@@ -233,7 +233,7 @@ operation_output:
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for usage examples including:
+See [references/examples.md](.github/skills/x-ipe-tool-tracing-instrumentation/references/examples.md) for usage examples including:
 - Single file instrumentation
 - Auth service with sensitive parameter redaction
 - Module/directory batch processing

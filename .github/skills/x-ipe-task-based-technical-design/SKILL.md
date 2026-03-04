@@ -28,11 +28,11 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 ### Key Rules
 
-- **Two-Part Document:** All technical designs use Part 1 (Agent-Facing Summary) + Part 2 (Implementation Guide). See [references/design-principles.md](references/design-principles.md) for structure details.
+- **Two-Part Document:** All technical designs use Part 1 (Agent-Facing Summary) + Part 2 (Implementation Guide). See [references/design-principles.md](.github/skills/x-ipe-task-based-technical-design/references/design-principles.md) for structure details.
 - **Single File:** Maintain ONE `technical-design.md` per feature. Do NOT create versioned files. Use Version History table inside the document.
-- **Design Principles:** Follow KISS, YAGNI, DRY, and 800-line module threshold. See [references/design-principles.md](references/design-principles.md) for details.
+- **Design Principles:** Follow KISS, YAGNI, DRY, and 800-line module threshold. See [references/design-principles.md](.github/skills/x-ipe-task-based-technical-design/references/design-principles.md) for details.
 - **Document Location:** Feature-specific at `x-ipe-docs/requirements/FEATURE-XXX/technical-design.md`; cross-feature at `x-ipe-docs/architecture/technical-designs/{component}.md`.
-- **Templates:** See [references/design-templates.md](references/design-templates.md) for full document template, Part 1/Part 2 guidelines, dependency table format, mockup reference guidelines, and diagram examples.
+- **Templates:** See [references/design-templates.md](.github/skills/x-ipe-task-based-technical-design/references/design-templates.md) for full document template, Part 1/Part 2 guidelines, dependency table format, mockup reference guidelines, and diagram examples.
 
 ### Mockup List Loading
 
@@ -414,7 +414,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for detailed execution examples including:
+See [references/examples.md](.github/skills/x-ipe-task-based-technical-design/references/examples.md) for detailed execution examples including:
 - User authentication technical design
 - Complex feature with multiple modules
 - Missing specification (blocked)

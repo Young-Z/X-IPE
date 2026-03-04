@@ -1,7 +1,7 @@
 # Requirement Details - Part 7
 
 > Continuation of requirement documentation.
-> See [requirement-details-index.md](requirement-details-index.md) for full index.
+> See [requirement-details-index.md](x-ipe-docs/requirements/requirement-details-index.md) for full index.
 
 ---
 
@@ -10,7 +10,7 @@
 > Source: IDEA-021 (CR to FEATURE-005 Interactive Console)
 > Status: Proposed
 > Priority: High
-> Mockup: [console-explorer-v1.html](../ideas/017.%20CR-Console%20Window%20Explorer/mockups/console-explorer-v1.html)
+> Mockup: [console-explorer-v1.html](x-ipe-docs/ideas/017. CR-Console Window Explorer/mockups/console-explorer-v1.html)
 
 ### Overview
 
@@ -152,7 +152,7 @@ The user wants to:
 
 | Mockup Function Name | Feature | Mockup Link |
 |---------------------|---------|-------------|
-| Console Explorer — all scenarios | FEATURE-029-A to D | [console-explorer-v1.html](EPIC-029/mockups/console-explorer-v1.html) |
+| Console Explorer — all scenarios | FEATURE-029-A to D | [console-explorer-v1.html](x-ipe-docs/requirements/EPIC-029/mockups/console-explorer-v1.html) |
 
 ---
 

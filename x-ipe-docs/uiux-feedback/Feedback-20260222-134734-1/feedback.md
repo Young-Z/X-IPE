@@ -14,4 +14,4 @@ I found an issue, for creating workflow, and compose the idea, and creating idea
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260222-134734-1/page-screenshot.png)

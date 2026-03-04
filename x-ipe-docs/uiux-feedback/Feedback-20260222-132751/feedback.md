@@ -16,4 +16,4 @@ they should be just like Refine idea action, when clicks on it, should show the 
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260222-132751/page-screenshot.png)

@@ -433,4 +433,4 @@ operation_output:
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for usage examples.
+See [references/examples.md](.github/skills/x-ipe-tool-uiux-reference/references/examples.md) for usage examples.

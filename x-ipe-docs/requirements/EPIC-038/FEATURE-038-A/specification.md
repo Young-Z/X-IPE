@@ -15,7 +15,7 @@
 
 | Mockup | Type | Path | Description | Status |
 |--------|------|------|-------------|--------|
-| Refine Idea Modal | HTML | [refine-idea-modal-v1.html](../mockups/refine-idea-modal-v1.html) | 4 scenes: action button states, modal dialog, post-refinement workflow, deliverable viewer | current |
+| Refine Idea Modal | HTML | [refine-idea-modal-v1.html](x-ipe-docs/requirements/EPIC-038/mockups/refine-idea-modal-v1.html) | 4 scenes: action button states, modal dialog, post-refinement workflow, deliverable viewer | current |
 
 > **Note:** UI/UX requirements and acceptance criteria below are derived from mockups marked as "current".
 > Mockups marked as "outdated" are directional references only — do not use for AC comparison.

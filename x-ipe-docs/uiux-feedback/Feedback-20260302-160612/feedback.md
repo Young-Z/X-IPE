@@ -148,4 +148,4 @@ the feature listed here is not correct, it should have features from A-E. the da
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260302-160612/page-screenshot.png)

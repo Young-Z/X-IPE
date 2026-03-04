@@ -435,13 +435,13 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for concrete execution examples including:
+See [references/examples.md](.github/skills/x-ipe-task-based-feature-acceptance-test/references/examples.md) for concrete execution examples including:
 - Standard feature acceptance test flow
 - Skipped execution (no web UI)
 - Blocked execution (no MCP available)
 - Partial test failure handling
 
-See [references/detailed-procedures.md](references/detailed-procedures.md) for:
+See [references/detailed-procedures.md](.github/skills/x-ipe-task-based-feature-acceptance-test/references/detailed-procedures.md) for:
 - Selector best practices and priority order
 - MCP command patterns
 - Test data collection process

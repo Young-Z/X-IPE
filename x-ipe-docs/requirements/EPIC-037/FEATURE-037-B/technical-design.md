@@ -22,7 +22,7 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `ComposeIdeaModal` | FEATURE-037-A | [technical-design.md](../FEATURE-037-A/technical-design.md) | Extend with edit mode + Link Existing panel |
+| `ComposeIdeaModal` | FEATURE-037-A | [technical-design.md](x-ipe-docs/requirements/EPIC-037/FEATURE-037-A/technical-design.md) | Extend with edit mode + Link Existing panel |
 | `WorkflowStage` | FEATURE-036-C | workflow-stage.js | Modify completed-action click handler to use gate check + confirmation |
 | `WorkflowManager` | FEATURE-036-A | workflow_manager_service.py | Call update_action_status to rollback to "pending" and re-complete |
 | `/api/ideas/tree` | FEATURE-008 | ideas_routes.py | Fetch tree for Link Existing file browser |
@@ -731,7 +731,7 @@ class LinkExistingPanel {
 
 ### Mockup Reference
 
-**Source:** [../mockups/compose-idea-modal-v1.html](../mockups/compose-idea-modal-v1.html) (status: current)
+**Source:** [../mockups/compose-idea-modal-v1.html](x-ipe-docs/requirements/EPIC-037/mockups/compose-idea-modal-v1.html) (status: current)
 
 **Mockup-to-Component Mapping (Link Existing additions):**
 

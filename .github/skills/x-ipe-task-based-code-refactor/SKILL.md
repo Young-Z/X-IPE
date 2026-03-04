@@ -446,6 +446,6 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for concrete execution examples.
+See [references/examples.md](.github/skills/x-ipe-task-based-code-refactor/references/examples.md) for concrete execution examples.
 
-See [references/refactoring-techniques.md](references/refactoring-techniques.md) for detailed procedures, input/output structures, and tracing rules.
+See [references/refactoring-techniques.md](.github/skills/x-ipe-task-based-code-refactor/references/refactoring-techniques.md) for detailed procedures, input/output structures, and tracing rules.

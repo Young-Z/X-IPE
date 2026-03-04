@@ -280,4 +280,4 @@ GET /api/config/tools        -- Get config including themes.selected
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for theme-integrated mockup examples.
+See [references/examples.md](.github/skills/x-ipe-tool-frontend-design/references/examples.md) for theme-integrated mockup examples.

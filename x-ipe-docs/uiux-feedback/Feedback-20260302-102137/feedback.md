@@ -14,4 +14,4 @@ the three dots should align on the right side. and when we click on 3 dots, it s
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260302-102137/page-screenshot.png)

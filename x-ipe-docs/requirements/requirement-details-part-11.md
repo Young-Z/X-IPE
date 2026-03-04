@@ -14,7 +14,7 @@ A Change Request to implement the **"Refine Idea" workflow action** end-to-end �
 > Source: IDEA-025 (CR-Refine Idea Action)
 > Status: Proposed
 > Priority: High
-> Idea Summary: [idea-summary-v1.md](../ideas/025.%20CR-Refine%20Idea%20Action/idea-summary-v1.md)
+> Idea Summary: [idea-summary-v1.md](x-ipe-docs/ideas/025. CR-Refine Idea Action/idea-summary-v1.md)
 
 ### User Request
 
@@ -172,7 +172,7 @@ Follow the same pattern as Compose Idea (EPIC-037):
 
 | Mockup Function Name | Mockup Link |
 |---------------------|-------------|
-| Refine Idea Modal (4 scenes: action button states, modal dialog, post-refinement workflow, deliverable viewer) | [refine-idea-modal-v1.html](EPIC-038/mockups/refine-idea-modal-v1.html) |
+| Refine Idea Modal (4 scenes: action button states, modal dialog, post-refinement workflow, deliverable viewer) | [refine-idea-modal-v1.html](x-ipe-docs/requirements/EPIC-038/mockups/refine-idea-modal-v1.html) |
 
 ### Feature List
 
@@ -214,7 +214,7 @@ Follow the same pattern as Compose Idea (EPIC-037):
 - Agent CLI command does NOT auto-press Enter — user confirms (existing pattern)
 
 **Linked Mockups:**
-- [refine-idea-modal-v1.html](EPIC-038/mockups/refine-idea-modal-v1.html) — Scene 1 (action button states), Scene 2 (modal dialog)
+- [refine-idea-modal-v1.html](x-ipe-docs/requirements/EPIC-038/mockups/refine-idea-modal-v1.html) — Scene 1 (action button states), Scene 2 (modal dialog)
 
 > **⚠️ CR Impact Note** (added 2026-02-22, ref: EPIC-040)
 > - **Change:** Generalize ActionExecutionModal to support ALL CLI workflow actions, not just Refine Idea. Replace `_resolveIdeaFiles()` with generic `_resolveInputFiles(actionKey)`. Add `input_source` / `deliverable_folder` fields to copilot-prompt.json.
@@ -271,7 +271,7 @@ Follow the same pattern as Compose Idea (EPIC-037):
 - Backend needs a folder listing endpoint (or extend existing file endpoint)
 
 **Linked Mockups:**
-- [refine-idea-modal-v1.html](EPIC-038/mockups/refine-idea-modal-v1.html) — Scene 4 (deliverable viewer)
+- [refine-idea-modal-v1.html](x-ipe-docs/requirements/EPIC-038/mockups/refine-idea-modal-v1.html) — Scene 4 (deliverable viewer)
 
 > **⚠️ CR Impact Note** (added 2026-02-22, ref: EPIC-039)
 > - **Change:** Replace inline folder tree+preview with a dedicated Folder Browser Modal (two-panel: tree on left, preview on right). Add folder card distinct background, search/filter, breadcrumb, image preview, download button.
@@ -337,7 +337,7 @@ A Change Request on **FEATURE-038-C** (Enhanced Deliverable Viewer) to replace t
 > Source: IDEA-026 (CR-Modal Window - Workflow-Deliverable Folder)
 > Status: Proposed
 > Priority: Medium
-> Idea Summary: [idea-summary-v1.md](../ideas/026.%20CR-Modal%20Window%20-%20Workflow-Deliverable%20Folder/refined-idea/idea-summary-v1.md)
+> Idea Summary: [idea-summary-v1.md](x-ipe-docs/ideas/026. CR-Modal Window - Workflow-Deliverable Folder/refined-idea/idea-summary-v1.md)
 > Feedback: Feedback-20260222-110609
 
 ### User Request

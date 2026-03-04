@@ -16,7 +16,7 @@
 
 | Mockup | Type | Path | Description | Status |
 |--------|------|------|-------------|--------|
-| File Link Preview — Full Interactive | HTML | [mockups/file-link-preview-v1.html](mockups/file-link-preview-v1.html) | Scenarios ① (link distinction), ③ (breadcrumb nav) are primary references | current |
+| File Link Preview — Full Interactive | HTML | [mockups/file-link-preview-v1.html](x-ipe-docs/requirements/EPIC-043/FEATURE-043-B/mockups/file-link-preview-v1.html) | Scenarios ① (link distinction), ③ (breadcrumb nav) are primary references | current |
 
 > **Note:** UI/UX requirements and acceptance criteria below are derived from mockups marked as "current".
 

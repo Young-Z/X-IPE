@@ -69,8 +69,8 @@ Shows X-IPE's connections to external systems:
 
 | Diagram | Type | DSL File | HTML File | Tool Used |
 |---------|------|----------|-----------|-----------|
-| X-IPE Application Architecture | Module View | [module-view.dsl](architecture/module-view.dsl) | [module-view.html](architecture/module-view.html) | x-ipe-tool-architecture-dsl + tool-architecture-draw |
-| X-IPE Integration Landscape | Landscape View | [landscape-view.dsl](architecture/landscape-view.dsl) | [landscape-view.html](architecture/landscape-view.html) | x-ipe-tool-architecture-dsl + tool-architecture-draw |
+| X-IPE Application Architecture | Module View | [module-view.dsl](architecture/module-view.dsl) | [module-view.html](x-ipe-docs/ideas/201. Playground-Draw Architecture Diagram for itself/architecture/module-view.html) | x-ipe-tool-architecture-dsl + tool-architecture-draw |
+| X-IPE Integration Landscape | Landscape View | [landscape-view.dsl](x-ipe-docs/ideas/201. Playground-Draw Architecture Diagram for itself/architecture/landscape-view.dsl) | [landscape-view.html](x-ipe-docs/ideas/201. Playground-Draw Architecture Diagram for itself/architecture/landscape-view.html) | x-ipe-tool-architecture-dsl + tool-architecture-draw |
 
 ### Canvas Rendering (PNG Export)
 

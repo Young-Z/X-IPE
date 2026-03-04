@@ -22,7 +22,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` and `x-ipe+all+task-board-manage
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-CRITICAL: Focus ONLY on UI/UX presentation -- ignore all tech stack mentions. See [references/mockup-guidelines.md](references/mockup-guidelines.md) for detailed focus guidelines.
+CRITICAL: Focus ONLY on UI/UX presentation -- ignore all tech stack mentions. See [references/mockup-guidelines.md](.github/skills/x-ipe-task-based-idea-mockup/references/mockup-guidelines.md) for detailed focus guidelines.
 
 **Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the workflow state was updated before marking the task complete.
 
@@ -103,7 +103,7 @@ input:
 </input_init>
 ```
 
-MANDATORY: See [references/mockup-guidelines.md](references/mockup-guidelines.md) for Extra Instructions loading logic, Current Idea Folder validation, and tool configuration details.
+MANDATORY: See [references/mockup-guidelines.md](.github/skills/x-ipe-task-based-idea-mockup/references/mockup-guidelines.md) for Extra Instructions loading logic, Current Idea Folder validation, and tool configuration details.
 
 ---
 
@@ -321,7 +321,7 @@ BLOCKING: Step 7 halts if no tools available AND human declines manual mode.
 </procedure>
 ```
 
-MANDATORY: See [references/mockup-guidelines.md](references/mockup-guidelines.md) for tool mapping table, mockup type priorities, tool invocation formats, directory structure, naming conventions, and summary update template.
+MANDATORY: See [references/mockup-guidelines.md](.github/skills/x-ipe-task-based-idea-mockup/references/mockup-guidelines.md) for tool mapping table, mockup type priorities, tool invocation formats, directory structure, naming conventions, and summary update template.
 
 ---
 
@@ -467,7 +467,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for detailed execution examples including:
+See [references/examples.md](.github/skills/x-ipe-task-based-idea-mockup/references/examples.md) for detailed execution examples including:
 - Mockup with frontend-design tool enabled
 - Mockup without tools (manual mode)
 - Missing idea folder (blocked scenario)

@@ -1,6 +1,6 @@
 # Requirement Details - Part 5
 
-> Continued from: [requirement-details-part-4.md](requirement-details-part-4.md)  
+> Continued from: [requirement-details-part-4.md](x-ipe-docs/requirements/requirement-details-part-4.md)  
 > Created: 02-05-2026
 
 ---
@@ -23,9 +23,9 @@
 
 | Mockup Function Name | Feature | Mockup Link |
 |---------------------|---------|-------------|
-| kb-landing-view | FEATURE-025-A, FEATURE-025-B | [knowledge-base-v1.html](../ideas/012.%20Feature-KnowledgeBase/mockups/knowledge-base-v1.html) |
-| kb-processed-view | FEATURE-025-D, FEATURE-025-E | [knowledge-base-processed-v1.html](../ideas/012.%20Feature-KnowledgeBase/mockups/knowledge-base-processed-v1.html) |
-| homepage-infinity-loop | FEATURE-026 | [homepage-infinity-v4.html](EPIC-026/mockups/homepage-infinity-v4.html) |
+| kb-landing-view | FEATURE-025-A, FEATURE-025-B | [knowledge-base-v1.html](x-ipe-docs/ideas/012. Feature-KnowledgeBase/mockups/knowledge-base-v1.html) |
+| kb-processed-view | FEATURE-025-D, FEATURE-025-E | [knowledge-base-processed-v1.html](x-ipe-docs/ideas/012. Feature-KnowledgeBase/mockups/knowledge-base-processed-v1.html) |
+| homepage-infinity-loop | FEATURE-026 | [homepage-infinity-v4.html](x-ipe-docs/requirements/EPIC-026/mockups/homepage-infinity-v4.html) |
 
 ---
 
@@ -33,10 +33,10 @@
 
 ### Knowledge Base Overview
 
-**Source:** [Idea Summary v2](../ideas/012.%20Feature-KnowledgeBase/idea-summary-v2.md)  
+**Source:** [Idea Summary v2](x-ipe-docs/ideas/012. Feature-KnowledgeBase/idea-summary-v2.md)  
 **Mockups:** 
-- [Landing View](../ideas/012.%20Feature-KnowledgeBase/mockups/knowledge-base-v1.html)
-- [Processed View](../ideas/012.%20Feature-KnowledgeBase/mockups/knowledge-base-processed-v1.html)
+- [Landing View](x-ipe-docs/ideas/012. Feature-KnowledgeBase/mockups/knowledge-base-v1.html)
+- [Processed View](x-ipe-docs/ideas/012. Feature-KnowledgeBase/mockups/knowledge-base-processed-v1.html)
 
 #### Problem Statement
 
@@ -345,8 +345,8 @@ x-ipe-docs/
 
 ### FEATURE-026: Homepage Infinity Loop
 
-**Source:** [Idea Summary v2](../ideas/TBC008.%20Feature-Homepage/idea-summary-v2.md)  
-**Mockup:** [homepage-infinity-v4.html](../ideas/TBC008.%20Feature-Homepage/mockups/homepage-infinity-v4.html)
+**Source:** [Idea Summary v2](x-ipe-docs/ideas/TBC008. Feature-Homepage/idea-summary-v2.md)  
+**Mockup:** [homepage-infinity-v4.html](x-ipe-docs/ideas/TBC008. Feature-Homepage/mockups/homepage-infinity-v4.html)
 
 #### Problem Statement
 

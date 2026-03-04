@@ -29,8 +29,8 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `CLIAdapterData` | FEATURE-027-A | [technical-design.md](../FEATURE-027-A/technical-design.md) | Provides `skills_folder`, `instructions_file`, and adapter `name` for strategy dispatch |
-| `CLIAdapterService` | FEATURE-027-A | [technical-design.md](../FEATURE-027-A/technical-design.md) | Used to resolve active adapter when caller doesn't provide one |
+| `CLIAdapterData` | FEATURE-027-A | [technical-design.md](x-ipe-docs/requirements/EPIC-027/FEATURE-027-A/technical-design.md) | Provides `skills_folder`, `instructions_file`, and adapter `name` for strategy dispatch |
+| `CLIAdapterService` | FEATURE-027-A | [technical-design.md](x-ipe-docs/requirements/EPIC-027/FEATURE-027-A/technical-design.md) | Used to resolve active adapter when caller doesn't provide one |
 | PyYAML | External | pyproject.toml | Parses SKILL.md frontmatter YAML blocks |
 | `shutil` / `pathlib` | stdlib | — | Directory copying and path manipulation |
 

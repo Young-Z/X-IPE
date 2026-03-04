@@ -9,7 +9,7 @@
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
-| v2.0 | 02-14-2026 | Initial specification — 3-step wizard for extracting design themes | [CR-002](../FEATURE-030-B/CR-002.md) |
+| v2.0 | 02-14-2026 | Initial specification — 3-step wizard for extracting design themes | [CR-002](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B/CR-002.md) |
 
 ## Linked Mockups
 

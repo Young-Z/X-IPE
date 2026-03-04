@@ -150,8 +150,8 @@ These placeholders allow the UI to be built now while tools are added incrementa
 
 | Mockup | Type | Path | Tool Used |
 |--------|------|------|-----------|
-| Stage Toolbox Modal v1 (dark) | HTML | [mockups/stage-toolbox-modal-v1.html](mockups/stage-toolbox-modal-v1.html) | frontend-design |
-| Stage Toolbox Modal v2 (light) ✅ | HTML | [mockups/stage-toolbox-modal-v2.html](mockups/stage-toolbox-modal-v2.html) | frontend-design |
+| Stage Toolbox Modal v1 (dark) | HTML | [mockups/stage-toolbox-modal-v1.html](x-ipe-docs/ideas/003. Feature-Toolbox Design/mockups/stage-toolbox-modal-v1.html) | frontend-design |
+| Stage Toolbox Modal v2 (light) ✅ | HTML | [mockups/stage-toolbox-modal-v2.html](x-ipe-docs/ideas/003. Feature-Toolbox Design/mockups/stage-toolbox-modal-v2.html) | frontend-design |
 
 ### Preview Instructions
 1. Open `mockups/stage-toolbox-modal-v2.html` in a browser (approved version)

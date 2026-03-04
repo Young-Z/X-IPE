@@ -1,7 +1,7 @@
 # Requirement Details - Part 8
 
 > Continuation of requirement documentation.
-> See [requirement-details-index.md](requirement-details-index.md) for full index.
+> See [requirement-details-index.md](x-ipe-docs/requirements/requirement-details-index.md) for full index.
 
 ---
 
@@ -23,11 +23,11 @@
 
 | Mockup Function Name | Feature | Mockup Link |
 |---------------------|---------|-------------|
-| UIUX Reference Tab (light) | FEATURE-030-A | [uiux-reference-tab-v2.html](EPIC-030/mockups/uiux-reference-tab-v2.html) |
-| UIUX Reference Tab (dark alt) | FEATURE-030-A | [uiux-reference-tab-v1.html](EPIC-030/mockups/uiux-reference-tab-v1.html) |
-| Injected Reference Toolbar (light) | FEATURE-030-B | [injected-toolbar-v2.html](EPIC-030/mockups/injected-toolbar-v2.html) |
-| Injected Reference Toolbar (dark alt) | FEATURE-030-B | [injected-toolbar-v1.html](EPIC-030/mockups/injected-toolbar-v1.html) |
-| Injected Toolbar with Phase 2 tools | FEATURE-031 | [injected-toolbar-v2.html](EPIC-031/mockups/injected-toolbar-v2.html) |
+| UIUX Reference Tab (light) | FEATURE-030-A | [uiux-reference-tab-v2.html](x-ipe-docs/requirements/EPIC-030/mockups/uiux-reference-tab-v2.html) |
+| UIUX Reference Tab (dark alt) | FEATURE-030-A | [uiux-reference-tab-v1.html](x-ipe-docs/requirements/EPIC-030/mockups/uiux-reference-tab-v1.html) |
+| Injected Reference Toolbar (light) | FEATURE-030-B | [injected-toolbar-v2.html](x-ipe-docs/requirements/EPIC-030/mockups/injected-toolbar-v2.html) |
+| Injected Reference Toolbar (dark alt) | FEATURE-030-B | [injected-toolbar-v1.html](x-ipe-docs/requirements/EPIC-030/mockups/injected-toolbar-v1.html) |
+| Injected Toolbar with Phase 2 tools | FEATURE-031 | [injected-toolbar-v2.html](x-ipe-docs/requirements/EPIC-031/mockups/injected-toolbar-v2.html) |
 
 ---
 
@@ -43,7 +43,7 @@
 > Source: IDEA-018 (Feature-UIUX Reference)
 > Status: Proposed
 > Priority: High (MVP — entry point for the entire UIUX Reference workflow)
-> Mockup: [uiux-reference-tab-v2.html](EPIC-030/mockups/uiux-reference-tab-v2.html)
+> Mockup: [uiux-reference-tab-v2.html](x-ipe-docs/requirements/EPIC-030/mockups/uiux-reference-tab-v2.html)
 > Phase: 1 of 3
 
 **Acceptance Criteria:**
@@ -73,7 +73,7 @@
 > Source: IDEA-018 (Feature-UIUX Reference)
 > Status: Proposed
 > Priority: High
-> Mockup: [injected-toolbar-v2.html](EPIC-030/mockups/injected-toolbar-v2.html)
+> Mockup: [injected-toolbar-v2.html](x-ipe-docs/requirements/EPIC-030/mockups/injected-toolbar-v2.html)
 > Phase: 1 of 3
 
 **Acceptance Criteria:**
@@ -112,7 +112,7 @@
 > - **Change:** Complete toolbar redesign — v1.1 standalone tools replaced by two-mode wizard (Catch Design Theme + Copy Design as Mockup)
 > - **Affected FRs:** All existing FRs (FR-1 through FR-37) — v1.x user stories and FRs to be deprecated and replaced
 > - **Action Required:** Feature specification refactoring to v2.0 needed before implementation
-> - **Source:** IDEA-019 (CR-UIUX Reference) — see [idea-summary-v3.md](../ideas/019.%20CR-UIUX%20Reference/idea-summary-v3.md)
+> - **Source:** IDEA-019 (CR-UIUX Reference) — see [idea-summary-v3.md](x-ipe-docs/ideas/019. CR-UIUX Reference/idea-summary-v3.md)
 
 #### v2.0 Feature Breakdown (CR-002)
 
@@ -124,7 +124,7 @@
 
 **Implementation order:** FEATURE-030-B (foundation) → FEATURE-030-B-THEME (simpler mode) → FEATURE-030-B-MOCKUP (complex mode)
 
-**Mockup:** [toolbar-v2-v1.html](../ideas/019.%20CR-UIUX%20Reference/mockups/toolbar-v2-v1.html)
+**Mockup:** [toolbar-v2-v1.html](x-ipe-docs/ideas/019. CR-UIUX Reference/mockups/toolbar-v2-v1.html)
 
 ---
 
@@ -135,7 +135,7 @@
 > Cancelled: 02-14-2026
 > Reason: Absorbed into IDEA-019 (CR-UIUX Reference). Element Commenter → "Copy Design as Mockup" Step 2 (per-component instructions). Asset Extractor → agent analysis loop (rubric-driven deep capture on demand).
 > Priority: Medium
-> Mockup: [injected-toolbar-v2.html](../ideas/018.%20Feature-UIUX%20Reference/mockups/injected-toolbar-v2.html)
+> Mockup: [injected-toolbar-v2.html](x-ipe-docs/ideas/018. Feature-UIUX Reference/mockups/injected-toolbar-v2.html)
 > Phase: 2 of 3
 > Depends on: FEATURE-030
 
@@ -311,8 +311,8 @@ The user wants:
 
 | Mockup Function Name | Mockup Link |
 |---------------------|-------------|
-| UIUX Reference Tab (light editorial theme) | [uiux-reference-tab-v2.html](../ideas/018.%20Feature-UIUX%20Reference/mockups/uiux-reference-tab-v2.html) |
-| Injected Reference Toolbar (light editorial theme) | [injected-toolbar-v2.html](../ideas/018.%20Feature-UIUX%20Reference/mockups/injected-toolbar-v2.html) |
-| UIUX Reference Tab (dark alt) | [uiux-reference-tab-v1.html](../ideas/018.%20Feature-UIUX%20Reference/mockups/uiux-reference-tab-v1.html) |
-| Injected Reference Toolbar (dark alt) | [injected-toolbar-v1.html](../ideas/018.%20Feature-UIUX%20Reference/mockups/injected-toolbar-v1.html) |
-| Toolbar v2.0 — Two-mode wizard (IDEA-019) | [toolbar-v2-v1.html](../ideas/019.%20CR-UIUX%20Reference/mockups/toolbar-v2-v1.html) |
+| UIUX Reference Tab (light editorial theme) | [uiux-reference-tab-v2.html](x-ipe-docs/ideas/018. Feature-UIUX Reference/mockups/uiux-reference-tab-v2.html) |
+| Injected Reference Toolbar (light editorial theme) | [injected-toolbar-v2.html](x-ipe-docs/ideas/018. Feature-UIUX Reference/mockups/injected-toolbar-v2.html) |
+| UIUX Reference Tab (dark alt) | [uiux-reference-tab-v1.html](x-ipe-docs/ideas/018. Feature-UIUX Reference/mockups/uiux-reference-tab-v1.html) |
+| Injected Reference Toolbar (dark alt) | [injected-toolbar-v1.html](x-ipe-docs/ideas/018. Feature-UIUX Reference/mockups/injected-toolbar-v1.html) |
+| Toolbar v2.0 — Two-mode wizard (IDEA-019) | [toolbar-v2-v1.html](x-ipe-docs/ideas/019. CR-UIUX Reference/mockups/toolbar-v2-v1.html) |

@@ -9,10 +9,10 @@
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
-| v2.0 | 02-14-2026 | Initial specification — 4-step wizard for component capture and mockup generation | [CR-002](../FEATURE-030-B/CR-002.md) |
-| v2.1 | 02-14-2026 | Button lifecycle, screenshot validation, decoupled analyze/generate, agent auto-collection | [CR-001](./CR-001.md) |
-| v2.2 | 02-15-2026 | Bounding box scope enforcement, 99% validation with property-level checks, analyze-phase data persistence, 6-dimension rubric (add Static Resources) | [CR-002](./CR-002.md) |
-| v2.3 | 02-15-2026 | Area semantics (snap as anchor + discover all elements), exact area screenshots, structured folder output, resource auto-download | [CR-003](./CR-003.md) |
+| v2.0 | 02-14-2026 | Initial specification — 4-step wizard for component capture and mockup generation | [CR-002](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B/CR-002.md) |
+| v2.1 | 02-14-2026 | Button lifecycle, screenshot validation, decoupled analyze/generate, agent auto-collection | [CR-001](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B-MOCKUP/CR-001.md) |
+| v2.2 | 02-15-2026 | Bounding box scope enforcement, 99% validation with property-level checks, analyze-phase data persistence, 6-dimension rubric (add Static Resources) | [CR-002](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B-MOCKUP/CR-002.md) |
+| v2.3 | 02-15-2026 | Area semantics (snap as anchor + discover all elements), exact area screenshots, structured folder output, resource auto-download | [CR-003](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B-MOCKUP/CR-003.md) |
 
 ## Linked Mockups
 

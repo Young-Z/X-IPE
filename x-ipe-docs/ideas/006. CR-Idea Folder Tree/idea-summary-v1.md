@@ -188,7 +188,7 @@ Key decisions made during ideation:
 
 ## Ideation Artifacts
 
-- [Mockup v1](./mockup-v1.html) - Interactive HTML prototype showing:
+- [Mockup v1](x-ipe-docs/ideas/006. CR-Idea Folder Tree/mockup-v1.html) - Interactive HTML prototype showing:
   - Folder tree with search bar and ">" icons
   - Detailed folder view panel with breadcrumb and actions
   - File/folder list with hover actions (rename, delete, duplicate, download)

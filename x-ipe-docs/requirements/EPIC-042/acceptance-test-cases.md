@@ -167,4 +167,4 @@
 
 ## Screenshot Evidence
 
-![Action Execution Modal - Workflow Mode](acceptance-screenshot-modal.png)
+![Action Execution Modal - Workflow Mode](x-ipe-docs/requirements/EPIC-042/acceptance-screenshot-modal.png)

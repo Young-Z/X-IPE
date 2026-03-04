@@ -28,7 +28,7 @@
 | `workflow-stage.js` | FEATURE-036-C | `src/x_ipe/static/js/features/workflow-stage.js` | Integration point: `_dispatchCliAction()` updated |
 | `copilot-prompt.json` | Foundation | `src/x_ipe/resources/config/copilot-prompt.json` | Instructions text source, keyed by action ID |
 | `cli-adapters.yaml` | Foundation | `src/x_ipe/resources/config/cli-adapters.yaml` | Agent CLI tool configuration |
-| FEATURE-038-B | EPIC-038 | [technical-design.md](../FEATURE-038-B/technical-design.md) | `findIdleSession()` and `claimSessionForAction()` |
+| FEATURE-038-B | EPIC-038 | [technical-design.md](x-ipe-docs/requirements/EPIC-038/FEATURE-038-B/technical-design.md) | `findIdleSession()` and `claimSessionForAction()` |
 | `TerminalManager` | FEATURE-029-A | `src/x_ipe/static/js/terminal.js` | `sendCopilotPromptCommandNoEnter()` for command dispatch |
 
 ### Major Flow

@@ -9,7 +9,7 @@
 
 | Version | Date | Description | Specification |
 |---------|------|-------------|---------------|
-| v2.0 | 02-14-2026 | Complete redesign — two-mode wizard shell, staged injection, offscreen canvas, smart-snap, agent rubric analysis | [specification.md](specification.md), [THEME/specification.md](../FEATURE-030-B-THEME/specification.md), [MOCKUP/specification.md](../FEATURE-030-B-MOCKUP/specification.md) |
+| v2.0 | 02-14-2026 | Complete redesign — two-mode wizard shell, staged injection, offscreen canvas, smart-snap, agent rubric analysis | [specification.md](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B/specification.md), [THEME/specification.md](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B-THEME/specification.md), [MOCKUP/specification.md](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B-MOCKUP/specification.md) |
 | v1.1 | 02-14-2026 | ~~CR-001 enhancements~~ (deprecated by v2.0) | - |
 | v1.0 | 02-13-2026 | ~~Initial design~~ (deprecated by v2.0) | - |
 

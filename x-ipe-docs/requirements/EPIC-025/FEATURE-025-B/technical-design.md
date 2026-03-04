@@ -36,9 +36,9 @@ FEATURE-025-B adds file upload, drag-and-drop, a file grid with selection, and d
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `KBService` | FEATURE-025-A | [technical-design.md](../FEATURE-025-A/technical-design.md) | Extends existing service with upload/delete methods. Uses `refresh_index()`, `get_index()`, `FILE_TYPE_MAP` |
-| `kb_routes` | FEATURE-025-A | [technical-design.md](../FEATURE-025-A/technical-design.md) | Extends existing blueprint with new endpoints |
-| `kb-core.js` | FEATURE-025-A | [technical-design.md](../FEATURE-025-A/technical-design.md) | Landing module integrates with core's `render()` method and replaces welcome view |
+| `KBService` | FEATURE-025-A | [technical-design.md](x-ipe-docs/requirements/EPIC-025/FEATURE-025-A/technical-design.md) | Extends existing service with upload/delete methods. Uses `refresh_index()`, `get_index()`, `FILE_TYPE_MAP` |
+| `kb_routes` | FEATURE-025-A | [technical-design.md](x-ipe-docs/requirements/EPIC-025/FEATURE-025-A/technical-design.md) | Extends existing blueprint with new endpoints |
+| `kb-core.js` | FEATURE-025-A | [technical-design.md](x-ipe-docs/requirements/EPIC-025/FEATURE-025-A/technical-design.md) | Landing module integrates with core's `render()` method and replaces welcome view |
 | `ideas_routes.py` | FEATURE-008 | — | Upload pattern reference (multipart form-data with `request.files.getlist`) |
 | Flask | Library | — | `request.files`, `secure_filename` from werkzeug |
 | Bootstrap Icons | Library | — | File type icons, action button icons |

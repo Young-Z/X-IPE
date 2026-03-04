@@ -37,7 +37,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 | Standards | Use linters, formatters, meaningful names |
 | Mockups | For frontend work, reference mockups from specification.md and match layout, components, and visual states |
 
-See [references/implementation-guidelines.md](references/implementation-guidelines.md) for detailed principles, coding standards, and error handling patterns.
+See [references/implementation-guidelines.md](.github/skills/x-ipe-task-based-code-implementation/references/implementation-guidelines.md) for detailed principles, coding standards, and error handling patterns.
 
 ---
 
@@ -328,7 +328,7 @@ BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE impl
 </procedure>
 ```
 
-See [references/implementation-guidelines.md](references/implementation-guidelines.md) for detailed sub-procedures per step.
+See [references/implementation-guidelines.md](.github/skills/x-ipe-task-based-code-implementation/references/implementation-guidelines.md) for detailed sub-procedures per step.
 
 ---
 
@@ -481,7 +481,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for detailed execution examples including:
+See [references/examples.md](.github/skills/x-ipe-task-based-code-implementation/references/examples.md) for detailed execution examples including:
 - Authentication service implementation (TDD)
 - Test failure during implementation (design gap)
 - Missing tests (blocked scenario)

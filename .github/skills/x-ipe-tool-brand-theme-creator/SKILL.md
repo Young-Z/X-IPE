@@ -45,7 +45,7 @@ BLOCKING: Output location is `x-ipe-docs/themes/theme-{name}/`. The folder name 
 
 CRITICAL: Both `design-system.md` and `component-visualization.html` must be generated. Never produce only one file.
 
-CRITICAL: Minimum input is one accent/brand color. All other tokens can be derived. See [references/color-derivation.md](references/color-derivation.md).
+CRITICAL: Minimum input is one accent/brand color. All other tokens can be derived. See [references/color-derivation.md](.github/skills/x-ipe-tool-brand-theme-creator/references/color-derivation.md).
 
 CRITICAL: If the user provides a theme name without the `theme-` prefix, prepend it automatically (e.g., user says "bilibili-brand" → folder is `theme-bilibili-brand`).
 
@@ -75,7 +75,7 @@ input:
   border_radius_md: "8px"
 ```
 
-For detailed extraction procedures per source type, see [references/input-sources.md](references/input-sources.md).
+For detailed extraction procedures per source type, see [references/input-sources.md](.github/skills/x-ipe-tool-brand-theme-creator/references/input-sources.md).
 
 ---
 
@@ -292,11 +292,11 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for concrete theme generation examples covering web link, image, text, and minimal input scenarios.
+See [references/examples.md](.github/skills/x-ipe-tool-brand-theme-creator/references/examples.md) for concrete theme generation examples covering web link, image, text, and minimal input scenarios.
 
 ### References
 
-- [references/input-sources.md](references/input-sources.md) - Detailed extraction procedures per source type
-- [references/color-derivation.md](references/color-derivation.md) - Color derivation rules, defaults, and Tailwind scale mapping
-- [references/color-scales.md](references/color-scales.md) - Full Tailwind CSS color scale values
-- [references/template-placeholders.md](references/template-placeholders.md) - Complete placeholder table and output file structure
+- [references/input-sources.md](.github/skills/x-ipe-tool-brand-theme-creator/references/input-sources.md) - Detailed extraction procedures per source type
+- [references/color-derivation.md](.github/skills/x-ipe-tool-brand-theme-creator/references/color-derivation.md) - Color derivation rules, defaults, and Tailwind scale mapping
+- [references/color-scales.md](.github/skills/x-ipe-tool-brand-theme-creator/references/color-scales.md) - Full Tailwind CSS color scale values
+- [references/template-placeholders.md](.github/skills/x-ipe-tool-brand-theme-creator/references/template-placeholders.md) - Complete placeholder table and output file structure

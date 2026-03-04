@@ -299,7 +299,7 @@
 
 ## Mockup Validation
 
-**Mockup:** [compose-idea-modal-v1.html](../mockups/compose-idea-modal-v1.html) — Status: **current**
+**Mockup:** [compose-idea-modal-v1.html](x-ipe-docs/requirements/EPIC-037/mockups/compose-idea-modal-v1.html) — Status: **current**
 
 > Visual validation deferred (MCP unavailable). When executed, compare:
 > - Layout structure: modal container, toggle, name input, tabs, editor, footer

@@ -14,4 +14,4 @@ for feature refinement, technicial design ... all the actions we need the modal 
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260225-160442/page-screenshot.png)

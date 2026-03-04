@@ -398,10 +398,10 @@ operation_output:
 
 ## Examples
 
-See [examples/](examples/) for complete diagram examples:
+See [examples/](.github/skills/x-ipe-tool-architecture-draw/examples) for complete diagram examples:
 - `module-view-webapp.dsl` - Standard web application
 - `landscape-view-enterprise.dsl` - Enterprise integration map
 
-See [references/](references/) for additional documentation:
+See [references/](.github/skills/x-ipe-tool-architecture-draw/references) for additional documentation:
 - `dsl-cheatsheet.md` - DSL syntax quick reference
 - `patterns.md` - Architecture patterns and anti-patterns

@@ -14,4 +14,4 @@ as you can see the modal window for gethering is correct, but for idea mockup ac
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260222-161515/page-screenshot.png)

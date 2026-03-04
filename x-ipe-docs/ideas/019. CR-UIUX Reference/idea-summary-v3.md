@@ -249,7 +249,7 @@ Key decisions made during brainstorming:
 
 ### Toolbar v2.0 — Interactive HTML Mockup
 
-**File:** [`mockups/toolbar-v2-v1.html`](mockups/toolbar-v2-v1.html)
+**File:** [`mockups/toolbar-v2-v1.html`](x-ipe-docs/ideas/019. CR-UIUX Reference/mockups/toolbar-v2-v1.html)
 
 An interactive HTML mockup demonstrating the redesigned two-mode toolbar overlaid on a sample "Acme Studio" landing page. Open the file in a browser to explore all states.
 

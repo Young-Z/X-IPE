@@ -21,7 +21,7 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `@x_ipe_tracing` | FEATURE-023-A | [technical-design.md](../FEATURE-023-A/technical-design.md) | Decorator to apply to functions |
+| `@x_ipe_tracing` | FEATURE-023-A | [technical-design.md](x-ipe-docs/requirements/EPIC-023/FEATURE-023-A/technical-design.md) | Decorator to apply to functions |
 | `Redactor.SENSITIVE_KEY_PATTERNS` | FEATURE-023-A | [redactor.py](../../../src/x_ipe/tracing/redactor.py) | Reference patterns for detection |
 
 ### Major Flow

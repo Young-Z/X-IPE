@@ -27,7 +27,7 @@
 |------------|--------|-------------|-------------------|
 | `WorkflowManagerService` | FEATURE-036-A | [technical-design.md](../../architecture/technical-designs/workflow.md) | Base service being extended with new deliverables logic |
 | `app_agent_interaction` | FEATURE-036-A | Same | MCP tool module being extended |
-| `FEATURE-041-A` | EPIC-041 | [technical-design.md](../FEATURE-041-A/technical-design.md) | Per-feature instance structure (`features[].implement.{action}`) |
+| `FEATURE-041-A` | EPIC-041 | [technical-design.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-A/technical-design.md) | Per-feature instance structure (`features[].implement.{action}`) |
 
 ### Major Flow
 

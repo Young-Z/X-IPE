@@ -222,7 +222,7 @@ Create a web viewer for AI-created project documentation with:
 > - **Change:** Replace 2-pane split-terminal layout with Session Explorer sidebar; raise MAX_TERMINALS from 2 to 10; switch to single-session view model
 > - **Affected FRs:** All ACs referencing split-pane layout, terminal expansion, and 2-terminal limit
 > - **Action Required:** Feature specification refactoring needed before FEATURE-029 implementation
-> - **New Feature Ref:** FEATURE-029 (Console Session Explorer) — see [requirement-details-part-7.md](requirement-details-part-7.md)
+> - **New Feature Ref:** FEATURE-029 (Console Session Explorer) — see [requirement-details-part-7.md](x-ipe-docs/requirements/requirement-details-part-7.md)
 
 ---
 
@@ -420,4 +420,4 @@ project-root/           ← project_root (shown in file tree by default)
 
 ---
 
-> **Continued in:** [requirement-details-part-2.md](requirement-details-part-2.md) (FEATURE-012 to FEATURE-014)
+> **Continued in:** [requirement-details-part-2.md](x-ipe-docs/requirements/requirement-details-part-2.md) (FEATURE-012 to FEATURE-014)

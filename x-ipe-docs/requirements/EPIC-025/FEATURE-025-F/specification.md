@@ -15,7 +15,7 @@
 
 | Mockup | Type | Path | Description | Status |
 |--------|------|------|-------------|--------|
-| KB Landing View | HTML | [mockups/knowledge-base-v1.html](mockups/knowledge-base-v1.html) | KB sidebar with section tabs (Landing/Topics), badges, tree views | current |
+| KB Landing View | HTML | [mockups/knowledge-base-v1.html](x-ipe-docs/requirements/EPIC-025/FEATURE-025-F/mockups/knowledge-base-v1.html) | KB sidebar with section tabs (Landing/Topics), badges, tree views | current |
 
 > **Note:** UI/UX requirements and acceptance criteria below are derived from mockups marked as "current".  
 > Mockups marked as "outdated" are directional references only — do not use for AC comparison.

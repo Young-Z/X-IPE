@@ -22,7 +22,7 @@
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
 | Skill SKILL.md structure | Framework convention | `.github/skills/x-ipe-task-based-*/SKILL.md` | Standard skill input YAML block being extended |
-| Workflow instance `context` field | FEATURE-041-E | [technical-design.md](../FEATURE-041-E/technical-design.md) | Source of context values passed to skills at runtime |
+| Workflow instance `context` field | FEATURE-041-E | [technical-design.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/technical-design.md) | Source of context values passed to skills at runtime |
 
 ### Major Flow
 

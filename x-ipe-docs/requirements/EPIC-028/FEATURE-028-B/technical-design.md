@@ -23,8 +23,8 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `prompt_config_service.py` | FEATURE-028-A | [technical-design.md](../FEATURE-028-A/technical-design.md) | Reuse module for language extraction utility |
-| `copilot-prompt.json` v3.0 | FEATURE-028-A | [technical-design.md](../FEATURE-028-A/technical-design.md) | Init scaffolds v3.0 template |
+| `prompt_config_service.py` | FEATURE-028-A | [technical-design.md](x-ipe-docs/requirements/EPIC-028/FEATURE-028-A/technical-design.md) | Reuse module for language extraction utility |
+| `copilot-prompt.json` v3.0 | FEATURE-028-A | [technical-design.md](x-ipe-docs/requirements/EPIC-028/FEATURE-028-A/technical-design.md) | Init scaffolds v3.0 template |
 | `cli_adapter_service.py` | Existing | - | CLI adapter resolution for instructions path |
 | `skill_translator.py` | Existing | - | Non-copilot CLI instructions generation |
 

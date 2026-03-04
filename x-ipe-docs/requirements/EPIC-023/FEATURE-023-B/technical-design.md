@@ -33,8 +33,8 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `TracingService` | FEATURE-023-A | [technical-design.md](../FEATURE-023-A/technical-design.md) | Backend tracing control and log retrieval |
-| `tracing_routes.py` | FEATURE-023-A | [technical-design.md](../FEATURE-023-A/technical-design.md) | REST API endpoints for tracing |
+| `TracingService` | FEATURE-023-A | [technical-design.md](x-ipe-docs/requirements/EPIC-023/FEATURE-023-A/technical-design.md) | Backend tracing control and log retrieval |
+| `tracing_routes.py` | FEATURE-023-A | [technical-design.md](x-ipe-docs/requirements/EPIC-023/FEATURE-023-A/technical-design.md) | REST API endpoints for tracing |
 | `workplace.js` | FEATURE-008 | [technical-design.md](../FEATURE-008/technical-design.md) | Workplace view registration pattern |
 
 ### Major Flow

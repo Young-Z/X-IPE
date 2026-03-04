@@ -357,7 +357,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 3. Save to {current_idea_folder}/architecture/
 ```
 
-See [references/architecture-patterns.md](references/architecture-patterns.md#architecture-patterns) for additional patterns (microservices, simple web app, data pipeline, no technical details).
+See [references/architecture-patterns.md](.github/skills/x-ipe-task-based-idea-to-architecture/references/architecture-patterns.md#architecture-patterns) for additional patterns (microservices, simple web app, data pipeline, no technical details).
 
 ### Anti-Patterns
 
@@ -375,7 +375,7 @@ See [references/architecture-patterns.md](references/architecture-patterns.md#ar
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for concrete execution examples:
+See [references/examples.md](.github/skills/x-ipe-task-based-idea-to-architecture/references/examples.md) for concrete execution examples:
 - Architecture with mermaid tool enabled
 - Architecture without tools (manual mode)
 - Missing idea folder (blocked scenario)

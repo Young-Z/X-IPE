@@ -8,8 +8,8 @@
 
 ## References
 
-- [Specification](specification.md)
-- [Mockup](../mockups/workflow-view-v1.html) (deliverables: lines ~856–964, 1537–1605)
+- [Specification](x-ipe-docs/requirements/EPIC-036/FEATURE-036-E/specification.md)
+- [Mockup](x-ipe-docs/requirements/EPIC-036/mockups/workflow-view-v1.html) (deliverables: lines ~856–964, 1537–1605)
 
 ---
 

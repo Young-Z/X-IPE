@@ -239,7 +239,7 @@ operation_output:
 
 ## Definition of Done
 
-CRITICAL: Use a sub-agent to validate DoD checkpoints independently. The sub-agent MUST parse the generated DSL and verify every checkpoint below against the grammar specification at [references/grammar.md](references/grammar.md).
+CRITICAL: Use a sub-agent to validate DoD checkpoints independently. The sub-agent MUST parse the generated DSL and verify every checkpoint below against the grammar specification at [references/grammar.md](.github/skills/x-ipe-tool-architecture-dsl/references/grammar.md).
 
 ```xml
 <definition_of_done>
@@ -374,7 +374,7 @@ alias1 --> alias2 : "Action Description"
 
 ## Examples
 
-- [references/grammar.md](references/grammar.md) - Complete DSL grammar specification
-- [references/layout-principles.md](references/layout-principles.md) - Grid layout guidelines and color suggestions
-- [examples/module-view-v2.dsl](examples/module-view-v2.dsl) - Module View example
-- [examples/landscape-view.dsl](examples/landscape-view.dsl) - Landscape View example
+- [references/grammar.md](.github/skills/x-ipe-tool-architecture-dsl/references/grammar.md) - Complete DSL grammar specification
+- [references/layout-principles.md](.github/skills/x-ipe-tool-architecture-dsl/references/layout-principles.md) - Grid layout guidelines and color suggestions
+- [examples/module-view-v2.dsl](.github/skills/x-ipe-tool-architecture-dsl/examples/module-view-v2.dsl) - Module View example
+- [examples/landscape-view.dsl](.github/skills/x-ipe-tool-architecture-dsl/examples/landscape-view.dsl) - Landscape View example

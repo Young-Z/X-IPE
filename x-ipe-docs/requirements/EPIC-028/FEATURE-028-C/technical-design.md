@@ -19,9 +19,9 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `copilot-prompt.json` v3.0 | FEATURE-028-A | [technical-design.md](../FEATURE-028-A/technical-design.md) | Provides `prompt-details` array to filter |
+| `copilot-prompt.json` v3.0 | FEATURE-028-A | [technical-design.md](x-ipe-docs/requirements/EPIC-028/FEATURE-028-A/technical-design.md) | Provides `prompt-details` array to filter |
 | `/api/config` | Existing | - | Serves `.x-ipe.yaml` including `language` field |
-| FEATURE-028-B | FEATURE-028-B | [technical-design.md](../FEATURE-028-B/technical-design.md) | Stores `language` in `.x-ipe.yaml` |
+| FEATURE-028-B | FEATURE-028-B | [technical-design.md](x-ipe-docs/requirements/EPIC-028/FEATURE-028-B/technical-design.md) | Stores `language` in `.x-ipe.yaml` |
 
 ### Major Flow
 

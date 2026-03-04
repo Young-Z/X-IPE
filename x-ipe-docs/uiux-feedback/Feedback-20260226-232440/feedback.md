@@ -40,4 +40,4 @@ Migrate all workflow-mode prompts into workflow-prompts.
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260226-232440/page-screenshot.png)

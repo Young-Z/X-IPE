@@ -188,7 +188,7 @@ flowchart TD
 
 ### Console Explorer Interactive Mockup
 
-- **File:** [mockups/console-explorer-v1.html](mockups/console-explorer-v1.html)
+- **File:** [mockups/console-explorer-v1.html](x-ipe-docs/ideas/017. CR-Console Window Explorer/mockups/console-explorer-v1.html)
 - **Tool:** x-ipe-tool-frontend-design
 - **Theme:** Default (Slate/Emerald) adapted to terminal-dark aesthetic
 

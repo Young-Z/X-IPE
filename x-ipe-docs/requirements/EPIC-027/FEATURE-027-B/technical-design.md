@@ -28,7 +28,7 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `CLIAdapterService` | FEATURE-027-A | [technical-design.md](../FEATURE-027-A/technical-design.md) | `detect_installed_clis()`, `list_adapters()` for detection and selection |
+| `CLIAdapterService` | FEATURE-027-A | [technical-design.md](x-ipe-docs/requirements/EPIC-027/FEATURE-027-A/technical-design.md) | `detect_installed_clis()`, `list_adapters()` for detection and selection |
 | `ScaffoldManager` | Foundation | `src/x_ipe/core/scaffold.py` | Extended to accept CLI name for config file |
 | Click | External | pyproject.toml | `click.prompt` with `click.Choice` for CLI selection |
 

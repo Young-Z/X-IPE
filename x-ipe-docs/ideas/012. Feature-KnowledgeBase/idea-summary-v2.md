@@ -12,8 +12,8 @@
 
 | Mockup | Type | Path | Description |
 |--------|------|------|-------------|
-| Landing View | HTML | [mockups/knowledge-base-v1.html](mockups/knowledge-base-v1.html) | Main KB view with file grid, sidebar tree, search modal |
-| Processed View | HTML | [mockups/knowledge-base-processed-v1.html](mockups/knowledge-base-processed-v1.html) | Topic detail with AI summary, knowledge graph, source files |
+| Landing View | HTML | [mockups/knowledge-base-v1.html](x-ipe-docs/ideas/012. Feature-KnowledgeBase/mockups/knowledge-base-v1.html) | Main KB view with file grid, sidebar tree, search modal |
+| Processed View | HTML | [mockups/knowledge-base-processed-v1.html](x-ipe-docs/ideas/012. Feature-KnowledgeBase/mockups/knowledge-base-processed-v1.html) | Topic detail with AI summary, knowledge graph, source files |
 
 ### Preview Instructions
 - Open HTML files in browser to view interactive mockups

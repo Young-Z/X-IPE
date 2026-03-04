@@ -128,7 +128,7 @@ x-ipe-docs/themes/
 
 | Mockup | Type | Path | Tool Used |
 |--------|------|------|-----------|
-| Themes in Toolbox Modal | HTML | [mockups/themes-toolbox-v1.html](mockups/themes-toolbox-v1.html) | frontend-design |
+| Themes in Toolbox Modal | HTML | [mockups/themes-toolbox-v1.html](x-ipe-docs/ideas/002. Feature-Brand Themes/mockups/themes-toolbox-v1.html) | frontend-design |
 
 ### Preview Instructions
 - Open the HTML file in a browser to view the interactive mockup

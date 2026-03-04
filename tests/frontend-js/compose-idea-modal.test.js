@@ -158,6 +158,43 @@ describe('ComposeIdeaModal — _linkedPath tracking', () => {
   });
 });
 
+describe('AutoFolderNamer — incremental wf-NNN naming', () => {
+  it('extracts tree array from API response and increments highest wf number', async () => {
+    const namer = new AutoFolderNamer();
+    // Mock fetch to return the actual API response shape: { success: true, tree: [...] }
+    globalThis.fetch = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        success: true,
+        tree: [
+          { name: 'wf-001-first-idea', type: 'folder', children: [] },
+          { name: 'wf-002-second-idea', type: 'folder', children: [] },
+          { name: '003. Some Other Idea', type: 'folder', children: [] },
+        ]
+      })
+    }));
+
+    const result = await namer.generate('my-idea');
+    expect(result).toBe('wf-003-my-idea');
+  });
+
+  it('returns wf-001 when no existing wf folders', async () => {
+    const namer = new AutoFolderNamer();
+    globalThis.fetch = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        success: true,
+        tree: [
+          { name: '001. Regular Folder', type: 'folder', children: [] },
+        ]
+      })
+    }));
+
+    const result = await namer.generate('fresh-idea');
+    expect(result).toBe('wf-001-fresh-idea');
+  });
+});
+
 describe('IdeaNameValidator — sanitize with Unicode', () => {
   it('preserves Chinese characters in sanitized output', () => {
     const validator = new IdeaNameValidator(

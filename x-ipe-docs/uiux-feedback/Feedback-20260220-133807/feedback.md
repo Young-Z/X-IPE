@@ -14,4 +14,4 @@ i see the deliverables exists but it still says not found
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260220-133807/page-screenshot.png)

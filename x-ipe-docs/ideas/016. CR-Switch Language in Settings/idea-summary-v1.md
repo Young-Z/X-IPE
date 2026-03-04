@@ -184,7 +184,7 @@ Response (error):   { "success": false, "error": "Failed to extract instructions
 
 ## Mockups and Prototypes
 
-- [Settings Language Switch Mockup v1](mockups/settings-language-v1.html) — Interactive mockup showing all 4 scenarios: Default State, Confirmation Dialog, Success Toast, Same-Language Guard
+- [Settings Language Switch Mockup v1](x-ipe-docs/ideas/016. CR-Switch Language in Settings/mockups/settings-language-v1.html) — Interactive mockup showing all 4 scenarios: Default State, Confirmation Dialog, Success Toast, Same-Language Guard
 
 ## Next Steps
 

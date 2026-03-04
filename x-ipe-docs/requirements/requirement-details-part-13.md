@@ -10,7 +10,7 @@ A Change Request to extend the Action Execution Modal to fully support **per-fea
 > Status: Proposed
 > Priority: High
 > Predecessor: EPIC-040 (CR-Generalize Action Execution Modal)
-> Idea Summary: [idea-summary-v1.md](../ideas/028.%20CR-Optimize%20Feature%20Implementation%20Level%20Actions/refined-idea/idea-summary-v1.md)
+> Idea Summary: [idea-summary-v1.md](x-ipe-docs/ideas/028. CR-Optimize Feature Implementation Level Actions/refined-idea/idea-summary-v1.md)
 
 ### User Request
 
@@ -307,7 +307,7 @@ Three new action keys MUST be added to the workflow template and frontend.
 > Status: Proposed
 > Priority: High
 > Predecessor: EPIC-041 (CR-Optimize Feature Implementation Level Actions)
-> Idea Summary: [idea-summary-v1.md](../ideas/029.%20CR-Optimize%20Feature%20Implementation-Part%202/refined-idea/idea-summary-v1.md)
+> Idea Summary: [idea-summary-v1.md](x-ipe-docs/ideas/029. CR-Optimize Feature Implementation-Part 2/refined-idea/idea-summary-v1.md)
 
 ### CR Overview
 
@@ -448,7 +448,7 @@ Skills receive explicit context file paths in workflow mode.
 > - **Change:** `$output:tag$` syntax replaces `<input-file>` / `<feature-id>` in workflow mode; context dropdowns default to deliverables; instructions become read-only resolved preview; new `workflow-prompts` array separates workflow prompts
 > - **Affected FRs:** FR-041.3 (prompt structure extended), FR-041.5 (placeholders replaced), FR-041.14 (dropdown source → action_context), FR-041.16 (preview updates → template resolution)
 > - **Action Required:** Workflow-mode placeholder and dropdown behavior superseded by EPIC-042; free-mode remains unchanged
-> - **New Feature Ref:** EPIC-042 — see [requirement-details-part-14.md](requirement-details-part-14.md)
+> - **New Feature Ref:** EPIC-042 — see [requirement-details-part-14.md](x-ipe-docs/requirements/requirement-details-part-14.md)
 
 ---
 

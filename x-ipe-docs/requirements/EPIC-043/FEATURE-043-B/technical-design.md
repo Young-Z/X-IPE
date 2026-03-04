@@ -4,7 +4,7 @@
 > Epic ID: EPIC-043
 > Version: v1.0
 > Last Updated: 03-04-2026
-> Specification: [specification.md](specification.md)
+> Specification: [specification.md](x-ipe-docs/requirements/EPIC-043/FEATURE-043-B/specification.md)
 
 ---
 

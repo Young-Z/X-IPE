@@ -323,7 +323,7 @@ layer "Service" {
 
 | Mockup | Description | File |
 |--------|-------------|------|
-| Compose Idea Modal | Interactive HTML prototype showing both Create New and Link Existing modes with tab navigation, file tree browser, and markdown preview | [compose-idea-modal-v1.html](mockups/compose-idea-modal-v1.html) |
+| Compose Idea Modal | Interactive HTML prototype showing both Create New and Link Existing modes with tab navigation, file tree browser, and markdown preview | [compose-idea-modal-v1.html](x-ipe-docs/ideas/023. CR-Compose Idea in Workflow/mockups/compose-idea-modal-v1.html) |
 
 ### Mockup Coverage
 

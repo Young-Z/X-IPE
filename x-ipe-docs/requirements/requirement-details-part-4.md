@@ -1,6 +1,6 @@
 # Requirement Details - Part 4
 
-> Continued from: [requirement-details-part-3.md](requirement-details-part-3.md)  
+> Continued from: [requirement-details-part-3.md](x-ipe-docs/requirements/requirement-details-part-3.md)  
 > Created: 02-01-2026
 
 ---

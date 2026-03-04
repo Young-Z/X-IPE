@@ -412,6 +412,6 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for concrete execution examples including standard TDD, incremental tests, and blocked scenarios.
+See [references/examples.md](.github/skills/x-ipe-task-based-test-generation/references/examples.md) for concrete execution examples including standard TDD, incremental tests, and blocked scenarios.
 
-See [references/test-patterns.md](references/test-patterns.md) for templates, naming conventions, and mock examples.
+See [references/test-patterns.md](.github/skills/x-ipe-task-based-test-generation/references/test-patterns.md) for templates, naming conventions, and mock examples.

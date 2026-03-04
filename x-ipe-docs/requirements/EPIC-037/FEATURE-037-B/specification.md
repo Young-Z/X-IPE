@@ -17,7 +17,7 @@
 
 | Mockup | Type | Path | Description | Status |
 |--------|------|------|-------------|--------|
-| Compose Idea Modal | HTML | [../mockups/compose-idea-modal-v1.html](../mockups/compose-idea-modal-v1.html) | Shared mockup — Create New and Link Existing modes | current |
+| Compose Idea Modal | HTML | [../mockups/compose-idea-modal-v1.html](x-ipe-docs/requirements/EPIC-037/mockups/compose-idea-modal-v1.html) | Shared mockup — Create New and Link Existing modes | current |
 
 > **Note:** Shared mockup at Epic level covers FEATURE-037-A (Create New) and this feature (Link Existing + Re-Edit). The Link Existing tab in the mockup is the primary reference. Re-Edit mode reuses the same modal layout with pre-populated content — no separate mockup needed.
 

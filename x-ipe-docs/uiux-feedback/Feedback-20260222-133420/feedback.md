@@ -14,4 +14,4 @@ for the feedback panel, let's have a copy icon beside delete icon, so I can copy
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260222-133420/page-screenshot.png)

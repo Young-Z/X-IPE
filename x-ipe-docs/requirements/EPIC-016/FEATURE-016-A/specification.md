@@ -10,7 +10,7 @@
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
 | v1.2 | 02-02-2026 | Verified implementation - skill fully available, live preview deferred | - |
-| v1.1 | 01-24-2026 | CR-001: JS Library for Canvas rendering → spawned FEATURE-017 | [CR-001](./CR-001.md) |
+| v1.1 | 01-24-2026 | CR-001: JS Library for Canvas rendering → spawned FEATURE-017 | [CR-001](x-ipe-docs/requirements/EPIC-016/FEATURE-016-A/CR-001.md) |
 | v1.0 | 01-24-2026 | Initial specification | - |
 
 ---

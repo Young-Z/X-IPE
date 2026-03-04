@@ -9,7 +9,7 @@
 
 This feature's technical design is documented in the parent design document:
 
-→ **[FEATURE-030-B Technical Design](../FEATURE-030-B/technical-design.md#23-theme-mode-xipe-toolbar-themejs)**
+→ **[FEATURE-030-B Technical Design](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B/technical-design.md#23-theme-mode-xipe-toolbar-themejs)**
 
 See sections:
 - **2.3** Theme Mode (xipe-toolbar-theme.js) — module structure, offscreen canvas, magnifier, color sampling, role annotation

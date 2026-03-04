@@ -9,8 +9,8 @@
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
-| v2.0 | 02-14-2026 | Complete toolbar redesign — two-mode wizard shell with auto-collapse, mode switcher, toast system, new data schema, bi-directional comms, optimized injection. All v1.x user stories and ACs deprecated. | [CR-002](./CR-002.md) |
-| v1.1 | 02-13-2026 | ~~Eyedropper cursor, expandable lists, hover-highlight, screenshot accuracy, post-send reset~~ (deprecated by v2.0) | [CR-001](./CR-001.md) |
+| v2.0 | 02-14-2026 | Complete toolbar redesign — two-mode wizard shell with auto-collapse, mode switcher, toast system, new data schema, bi-directional comms, optimized injection. All v1.x user stories and ACs deprecated. | [CR-002](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B/CR-002.md) |
+| v1.1 | 02-13-2026 | ~~Eyedropper cursor, expandable lists, hover-highlight, screenshot accuracy, post-send reset~~ (deprecated by v2.0) | [CR-001](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B/CR-001.md) |
 | v1.0 | 02-13-2026 | ~~Initial specification~~ (deprecated by v2.0) | - |
 
 ## Linked Mockups

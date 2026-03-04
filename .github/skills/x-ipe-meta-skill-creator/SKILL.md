@@ -43,17 +43,17 @@ Skills are modular, self-contained packages that extend AI Agent capabilities by
 
 | Type | Purpose | Naming Convention | SKILL.md Template | skill-meta.md Template |
 |------|---------|-------------------|-------------------|------------------------|
-| x-ipe-task-based | Belong to end-to-end project lifecycle workflows | `x-ipe-task-based-{name}` | [x-ipe-task-based.md](templates/x-ipe-task-based.md) | [skill-meta-x-ipe-task-based.md](templates/skill-meta-x-ipe-task-based.md) |
-| x-ipe-task-category | Category orchestration when related tasks complete | `x-ipe+{category}+{name}` (`all` for cross-category) | [x-ipe-workflow-orchestration.md](templates/x-ipe-workflow-orchestration.md) | [skill-meta-x-ipe-task-category.md](templates/skill-meta-x-ipe-task-category.md) |
-| x-ipe-tool | Utility functions and tool integrations | `x-ipe-tool-{name}` | [x-ipe-tool.md](templates/x-ipe-tool.md) | [skill-meta-x-ipe-tool.md](templates/skill-meta-x-ipe-tool.md) |
-| x-ipe-workflow-orchestration | Multi-skill coordination | `x-ipe-workflow-{name}` | [x-ipe-workflow-orchestration.md](templates/x-ipe-workflow-orchestration.md) | [skill-meta-x-ipe-task-based.md](templates/skill-meta-x-ipe-task-based.md) |
-| x-ipe-meta | Creates/manages skills | `x-ipe-meta-{name}` | [x-ipe-meta.md](templates/x-ipe-meta.md) | [skill-meta-x-ipe-meta.md](templates/skill-meta-x-ipe-meta.md) |
+| x-ipe-task-based | Belong to end-to-end project lifecycle workflows | `x-ipe-task-based-{name}` | [x-ipe-task-based.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-task-based.md) | [skill-meta-x-ipe-task-based.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-task-based.md) |
+| x-ipe-task-category | Category orchestration when related tasks complete | `x-ipe+{category}+{name}` (`all` for cross-category) | [x-ipe-workflow-orchestration.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-workflow-orchestration.md) | [skill-meta-x-ipe-task-category.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-task-category.md) |
+| x-ipe-tool | Utility functions and tool integrations | `x-ipe-tool-{name}` | [x-ipe-tool.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-tool.md) | [skill-meta-x-ipe-tool.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-tool.md) |
+| x-ipe-workflow-orchestration | Multi-skill coordination | `x-ipe-workflow-{name}` | [x-ipe-workflow-orchestration.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-workflow-orchestration.md) | [skill-meta-x-ipe-task-based.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-task-based.md) |
+| x-ipe-meta | Creates/manages skills | `x-ipe-meta-{name}` | [x-ipe-meta.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-meta.md) | [skill-meta-x-ipe-meta.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-meta.md) |
 
 ---
 
 ## Important Notes
 
-BLOCKING: Read [skill-general-guidelines-v2.md](references/skill-general-guidelines-v2.md) for core principles and patterns before creating skills.
+BLOCKING: Read [skill-general-guidelines-v2.md](.github/skills/x-ipe-meta-skill-creator/references/skill-general-guidelines-v2.md) for core principles and patterns before creating skills.
 
 CRITICAL: SKILL.md body must stay under 500 lines. Move examples to references/.
 
@@ -466,14 +466,14 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 
 | Template | Purpose |
 |----------|---------|
-| [x-ipe-task-based.md](templates/x-ipe-task-based.md) | SKILL.md for task-based skills |
-| [x-ipe-tool.md](templates/x-ipe-tool.md) | SKILL.md for tool skills |
-| [x-ipe-workflow-orchestration.md](templates/x-ipe-workflow-orchestration.md) | SKILL.md for workflow/task-category skills |
-| [x-ipe-meta.md](templates/x-ipe-meta.md) | SKILL.md for meta skills |
-| [skill-meta-x-ipe-task-based.md](templates/skill-meta-x-ipe-task-based.md) | skill-meta for task-based/workflow skills |
-| [skill-meta-x-ipe-tool.md](templates/skill-meta-x-ipe-tool.md) | skill-meta for tool skills |
-| [skill-meta-x-ipe-task-category.md](templates/skill-meta-x-ipe-task-category.md) | skill-meta for task-category skills |
-| [skill-meta-x-ipe-meta.md](templates/skill-meta-x-ipe-meta.md) | skill-meta for meta skills |
+| [x-ipe-task-based.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-task-based.md) | SKILL.md for task-based skills |
+| [x-ipe-tool.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-tool.md) | SKILL.md for tool skills |
+| [x-ipe-workflow-orchestration.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-workflow-orchestration.md) | SKILL.md for workflow/task-category skills |
+| [x-ipe-meta.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-meta.md) | SKILL.md for meta skills |
+| [skill-meta-x-ipe-task-based.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-task-based.md) | skill-meta for task-based/workflow skills |
+| [skill-meta-x-ipe-tool.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-tool.md) | skill-meta for tool skills |
+| [skill-meta-x-ipe-task-category.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-task-category.md) | skill-meta for task-category skills |
+| [skill-meta-x-ipe-meta.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-meta.md) | skill-meta for meta skills |
 
 BLOCKING: Always use the appropriate template. Never create SKILL.md or skill-meta.md from scratch.
 
@@ -483,18 +483,18 @@ BLOCKING: Always use the appropriate template. Never create SKILL.md or skill-me
 
 | File | Purpose |
 |------|---------|
-| [skill-general-guidelines-v2.md](references/skill-general-guidelines-v2.md) | Core principles, patterns, standards |
-| [2. reference-section-order.md](references/2.%20reference-section-order.md) | Section ordering guide |
-| [3-6. example-*.md](references/) | Workflow pattern examples (step-based, function-based) |
-| [7-10. example-*.md](references/) | Task IO, structured summary, DoR/DoD, gate conditions |
-| [11. reference-quality-standards.md](references/11.%20reference-quality-standards.md) | Quality standards |
-| [examples.md](references/examples.md) | Concrete execution examples |
+| [skill-general-guidelines-v2.md](.github/skills/x-ipe-meta-skill-creator/references/skill-general-guidelines-v2.md) | Core principles, patterns, standards |
+| [2. reference-section-order.md](.github/skills/x-ipe-meta-skill-creator/references/2. reference-section-order.md) | Section ordering guide |
+| [3-6. example-*.md](.github/skills/x-ipe-meta-skill-creator/references) | Workflow pattern examples (step-based, function-based) |
+| [7-10. example-*.md](.github/skills/x-ipe-meta-skill-creator/references) | Task IO, structured summary, DoR/DoD, gate conditions |
+| [11. reference-quality-standards.md](.github/skills/x-ipe-meta-skill-creator/references/11. reference-quality-standards.md) | Quality standards |
+| [examples.md](.github/skills/x-ipe-meta-skill-creator/references/examples.md) | Concrete execution examples |
 
 ---
 
 ## Example
 
-See [references/examples.md](references/examples.md) for concrete execution examples.
+See [references/examples.md](.github/skills/x-ipe-meta-skill-creator/references/examples.md) for concrete execution examples.
 
 ---
 

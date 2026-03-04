@@ -14,4 +14,4 @@ let's create a CR, 1. background of folder should not be the same as file. 2. le
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260222-110609/page-screenshot.png)

@@ -96,4 +96,4 @@ Technical design documents MUST use this two-part structure. Adapt content based
 - Include dependency table linking to other feature/foundation designs
 - Prioritize Mermaid diagrams for visual comprehension
 
-See [design-templates.md](design-templates.md) for full document template with examples.
+See [design-templates.md](.github/skills/x-ipe-task-based-technical-design/references/design-templates.md) for full document template with examples.

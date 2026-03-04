@@ -10,12 +10,12 @@
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
 | v1.7 | 2026-02-02 | Updated AC status - core + CR-001 through CR-005 implemented, CR-006 pending | - |
-| v1.6 | 2026-01-31 | CR-006: Folder tree UX enhancement - drag-drop, folder view, search, UI upgrade | [CR-006](./CR-006.md) |
-| v1.5 | 2026-01-28 | CR-005: Copy URL button for file access | [CR-005](./CR-005.md) |
-| v1.4 | 2026-01-28 | CR-004: Rename to Ideation, sidebar submenu, Copilot hover menu | [CR-004](./CR-004.md) |
-| v1.3 | 2026-01-23 | CR-003: Add Ideation Toolbox for skill configuration | [CR-003](./CR-003.md) |
-| v1.2 | 2026-01-23 | CR-002: Add drag-drop file upload to existing folders | [CR-002](./CR-002.md) |
-| v1.1 | 2026-01-22 | CR-001: Added Copilot button for idea refinement | [CR-001](./CR-001.md) |
+| v1.6 | 2026-01-31 | CR-006: Folder tree UX enhancement - drag-drop, folder view, search, UI upgrade | [CR-006](x-ipe-docs/requirements/EPIC-008/FEATURE-008-A/CR-006.md) |
+| v1.5 | 2026-01-28 | CR-005: Copy URL button for file access | [CR-005](x-ipe-docs/requirements/EPIC-008/FEATURE-008-A/CR-005.md) |
+| v1.4 | 2026-01-28 | CR-004: Rename to Ideation, sidebar submenu, Copilot hover menu | [CR-004](x-ipe-docs/requirements/EPIC-008/FEATURE-008-A/CR-004.md) |
+| v1.3 | 2026-01-23 | CR-003: Add Ideation Toolbox for skill configuration | [CR-003](x-ipe-docs/requirements/EPIC-008/FEATURE-008-A/CR-003.md) |
+| v1.2 | 2026-01-23 | CR-002: Add drag-drop file upload to existing folders | [CR-002](x-ipe-docs/requirements/EPIC-008/FEATURE-008-A/CR-002.md) |
+| v1.1 | 2026-01-22 | CR-001: Added Copilot button for idea refinement | [CR-001](x-ipe-docs/requirements/EPIC-008/FEATURE-008-A/CR-001.md) |
 | v1.0 | 2026-01-22 | Initial specification | - |
 
 ## Overview

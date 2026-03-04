@@ -265,4 +265,4 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for concrete execution examples.
+See [references/examples.md](.github/skills/x-ipe-meta-lesson-learned/references/examples.md) for concrete execution examples.

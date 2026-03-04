@@ -16,7 +16,7 @@
 
 | Mockup | Type | Path | Description | Status |
 |--------|------|------|-------------|--------|
-| Compose Idea Modal | HTML | [../mockups/compose-idea-modal-v1.html](../mockups/compose-idea-modal-v1.html) | Interactive modal with Create New and Link Existing modes | current |
+| Compose Idea Modal | HTML | [../mockups/compose-idea-modal-v1.html](x-ipe-docs/requirements/EPIC-037/mockups/compose-idea-modal-v1.html) | Interactive modal with Create New and Link Existing modes | current |
 
 > **Note:** Shared mockup at Epic level covers both FEATURE-037-A (Create New mode) and FEATURE-037-B (Link Existing mode). This specification focuses on the Create New mode elements.
 

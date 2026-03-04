@@ -162,7 +162,7 @@ flowchart TB
 
 ## Ideation Artifacts
 
-- **UI Mockup:** [mockup-v1.html](./mockup-v1.html) - Interactive prototype with classic wood/stone aesthetic
+- **UI Mockup:** [mockup-v1.html](x-ipe-docs/ideas/202. Playground-Go Board Game - 01242026 191518/mockup-v1.html) - Interactive prototype with classic wood/stone aesthetic
 
 ## Next Steps
 

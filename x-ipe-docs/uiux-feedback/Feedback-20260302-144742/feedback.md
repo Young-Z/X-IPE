@@ -14,4 +14,4 @@ lets do follwing changes, 1. the markdown preview in the modal window that direc
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260302-144742/page-screenshot.png)

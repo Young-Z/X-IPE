@@ -426,7 +426,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for detailed execution examples including:
+See [references/examples.md](.github/skills/x-ipe-task-based-feature-refinement/references/examples.md) for detailed execution examples including:
 - User authentication specification
 - Enhancement refinement from change request
 - Missing feature entry (blocked)

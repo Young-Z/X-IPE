@@ -29,7 +29,7 @@ MANDATORY: Every feature MUST have a feature ID in the format `FEATURE-{nnn}-{X}
 
 > **Transition Note:** During migration, both old (`FEATURE-{nnn}/`) and new (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`) folder structures may coexist. Skills must handle both formats when scanning existing files.
 
-See [references/breakdown-guidelines.md](references/breakdown-guidelines.md) for:
+See [references/breakdown-guidelines.md](.github/skills/x-ipe-task-based-feature-breakdown/references/breakdown-guidelines.md) for:
 - Feature dependency patterns (sequential, parallel, multiple) and rules (no cycles, foundation first)
 - Feature sizing guidelines, naming conventions, version numbering rules
 - Mockup processing procedures and examples
@@ -530,7 +530,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for detailed execution examples including:
+See [references/examples.md](.github/skills/x-ipe-task-based-feature-breakdown/references/examples.md) for detailed execution examples including:
 - E-commerce platform feature breakdown
 - API integration feature breakdown
 - Change request (NEW_FEATURE) breakdown

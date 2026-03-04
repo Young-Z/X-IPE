@@ -365,7 +365,7 @@ flowchart TD
 
 ## Mockups and Prototypes
 
-- [Refine Idea Modal Mockup (v1)](mockups/refine-idea-modal-v1.html) — Interactive HTML mockup covering all 4 scenes:
+- [Refine Idea Modal Mockup (v1)](x-ipe-docs/ideas/025. CR-Refine Idea Action/mockups/refine-idea-modal-v1.html) — Interactive HTML mockup covering all 4 scenes:
   1. **Action Button States** — Suggested, In Progress (spinner/pulse), Done, Locked
   2. **Refine Idea Modal** — Readonly instructions from copilot-prompt.json, extra instructions textarea, Copilot button
   3. **Post-Refinement Workflow View** — Done state, deliverables grid, next action suggested

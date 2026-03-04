@@ -2,7 +2,7 @@
   "schema_version": "3.0",
   "name": "update-file-link-preview",
   "created": "2026-03-03T13:33:34.127819+00:00",
-  "last_activity": "2026-03-04T02:44:01.258136+00:00",
+  "last_activity": "2026-03-04T06:48:10.766589+00:00",
   "idea_folder": null,
   "current_stage": "validation",
   "shared": {
@@ -180,7 +180,7 @@
         "FEATURE-043-A"
       ],
       "implement": {
-        "status": "in_progress",
+        "status": "done",
         "actions": {
           "feature_refinement": {
             "status": "done",
@@ -203,17 +203,29 @@
             ]
           },
           "implementation": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "impl-files": "src/x_ipe/static/js/features/link-preview-manager.js",
+              "impl-folder": "src/x_ipe/static/js/features/"
+            },
+            "next_actions_suggested": [
+              "acceptance_testing"
+            ]
           }
         }
       },
       "validation": {
-        "status": "locked",
+        "status": "in_progress",
         "actions": {
           "acceptance_testing": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "test-folder": "tests/frontend-js/",
+              "test-report": "x-ipe-docs/requirements/EPIC-043/FEATURE-043-B/acceptance-test-cases.md"
+            },
+            "next_actions_suggested": [
+              "quality_evaluation"
+            ]
           },
           "quality_evaluation": {
             "status": "skipped",
@@ -238,19 +250,37 @@
       "name": "Skill Path Convention Updates",
       "depends_on": [],
       "implement": {
-        "status": "locked",
+        "status": "in_progress",
         "actions": {
           "feature_refinement": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-043/FEATURE-043-C/",
+              "specification": "x-ipe-docs/requirements/EPIC-043/FEATURE-043-C/specification.md"
+            },
+            "next_actions_suggested": [
+              "technical_design"
+            ]
           },
           "technical_design": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-043/FEATURE-043-C/",
+              "tech-design": "x-ipe-docs/requirements/EPIC-043/FEATURE-043-C/technical-design.md"
+            },
+            "next_actions_suggested": [
+              "implementation"
+            ]
           },
           "implementation": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "impl-files": ".github/skills/",
+              "impl-folder": ".github/skills/"
+            },
+            "next_actions_suggested": [
+              "acceptance_testing"
+            ]
           }
         }
       },

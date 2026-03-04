@@ -314,7 +314,7 @@ Proceed with applying decorators? [Yes/No]
 
 | Document | Link |
 |----------|------|
-| FEATURE-023-A Specification | [specification.md](../FEATURE-023-A/specification.md) |
-| FEATURE-023-A Technical Design | [technical-design.md](../FEATURE-023-A/technical-design.md) |
+| FEATURE-023-A Specification | [specification.md](x-ipe-docs/requirements/EPIC-023/FEATURE-023-A/specification.md) |
+| FEATURE-023-A Technical Design | [technical-design.md](x-ipe-docs/requirements/EPIC-023/FEATURE-023-A/technical-design.md) |
 | Tracing Decorator Source | [decorator.py](../../../src/x_ipe/tracing/decorator.py) |
 | Redactor Patterns | [redactor.py](../../../src/x_ipe/tracing/redactor.py) |

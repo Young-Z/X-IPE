@@ -9,15 +9,15 @@
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
-| v2.0 | 02-14-2026 | Initial design — reference to parent FEATURE-030-B technical design | [CR-002](../FEATURE-030-B/CR-002.md) |
-| v2.1 | 02-14-2026 | Button lifecycle, screenshot validation, decoupled analyze/generate, agent auto-collection | [CR-001](./CR-001.md) |
-| v2.3 | 02-15-2026 | Area semantics (snap as anchor), exact area screenshots, element discovery, resource download, structured folder output | [CR-003](./CR-003.md) |
+| v2.0 | 02-14-2026 | Initial design — reference to parent FEATURE-030-B technical design | [CR-002](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B/CR-002.md) |
+| v2.1 | 02-14-2026 | Button lifecycle, screenshot validation, decoupled analyze/generate, agent auto-collection | [CR-001](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B-MOCKUP/CR-001.md) |
+| v2.3 | 02-15-2026 | Area semantics (snap as anchor), exact area screenshots, element discovery, resource download, structured folder output | [CR-003](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B-MOCKUP/CR-003.md) |
 
 ## Reference
 
 This feature builds upon the parent design:
 
-→ **[FEATURE-030-B Technical Design](../FEATURE-030-B/technical-design.md#24-mockup-mode-xipe-toolbar-mockupjs)**
+→ **[FEATURE-030-B Technical Design](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B/technical-design.md#24-mockup-mode-xipe-toolbar-mockupjs)**
 
 Sections 2.4, 2.6, 2.7, 2.9 remain applicable for base functionality. This document covers the v2.1 enhancements.
 

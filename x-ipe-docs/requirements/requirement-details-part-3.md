@@ -1,6 +1,6 @@
 # Requirement Details - Part 3
 
-> Continued from: [requirement-details-part-2.md](requirement-details-part-2.md)  
+> Continued from: [requirement-details-part-2.md](x-ipe-docs/requirements/requirement-details-part-2.md)  
 > Created: 01-25-2026
 
 ---
@@ -26,8 +26,8 @@
 | Mockup Function Name | Feature | Mockup Link |
 |---------------------|---------|-------------|
 | voice-input-console | FEATURE-021 | [mockup.html](../ideas/Console%20Voice%20Input%20-%2001242026%20000728/mockup.html) |
-| uiux-feedback-view | FEATURE-022 | [uiux-feedback-v1.html](../ideas/005.%20Feature-UIUX%20Feedback/mockups/uiux-feedback-v1.html) |
-| tracing-dashboard | FEATURE-023-B/C | [tracing-dashboard-v4.html](../ideas/007.%20Feature-Application%20Action%20Tracing/mockups/tracing-dashboard-v4.html) |
+| uiux-feedback-view | FEATURE-022 | [uiux-feedback-v1.html](x-ipe-docs/ideas/005. Feature-UIUX Feedback/mockups/uiux-feedback-v1.html) |
+| tracing-dashboard | FEATURE-023-B/C | [tracing-dashboard-v4.html](x-ipe-docs/ideas/007. Feature-Application Action Tracing/mockups/tracing-dashboard-v4.html) |
 
 ---
 
@@ -188,7 +188,7 @@ The following are explicitly out of scope for the initial version:
 > - **Change:** FEATURE-029 replaces multi-pane terminal model with single-session view + Session Explorer sidebar. "Focused terminal pane" → "active session"; "Add Terminal" button → session explorer "+" button; console header layout changes.
 > - **Affected FRs:** AC-1.2 (mic button placement), AC-1.4 (Add Terminal button), AC-5.2 (focused pane injection), AC-5.3 (last active pane fallback), EC-2 (pane focus switching)
 > - **Action Required:** Feature specification refactoring needed — update all "terminal pane" references to "active session", adjust UI placement specs for new console header layout
-> - **New Feature Ref:** FEATURE-029 (Console Session Explorer) — see [requirement-details-part-7.md](requirement-details-part-7.md)
+> - **New Feature Ref:** FEATURE-029 (Console Session Explorer) — see [requirement-details-part-7.md](x-ipe-docs/requirements/requirement-details-part-7.md)
 
 ---
 
@@ -197,8 +197,8 @@ The following are explicitly out of scope for the initial version:
 **Version:** v1.0  
 **Brief Description:** Localhost proxy backend and browser simulator UI that enables viewing local web pages within X-IPE Workplace. This is the minimum runnable feature - users can load and view their localhost dev server.
 
-**Source:** [Idea Summary v2 - UI/UX Feedback System](../ideas/005.%20Feature-UIUX%20Feedback/idea-summary-v2.md)  
-**Mockup:** [UI/UX Feedback View Mockup](../ideas/005.%20Feature-UIUX%20Feedback/mockups/uiux-feedback-v1.html)
+**Source:** [Idea Summary v2 - UI/UX Feedback System](x-ipe-docs/ideas/005. Feature-UIUX Feedback/idea-summary-v2.md)  
+**Mockup:** [UI/UX Feedback View Mockup](x-ipe-docs/ideas/005. Feature-UIUX Feedback/mockups/uiux-feedback-v1.html)
 
 #### Acceptance Criteria
 
@@ -392,8 +392,8 @@ Get uiux feedback, please visit feedback folder x-ipe/uiux-feedback/Feedback-YYY
 **Version:** v1.0  
 **Brief Description:** Decorator-based tracing framework for Python and TypeScript that automatically logs function calls, parameters, return values, and execution times with structured log files.
 
-**Source:** [Idea Summary v1 - Application Action Tracing](../ideas/007.%20Feature-Application%20Action%20Tracing/idea-summary-v1.md)  
-**Mockup:** [Tracing Dashboard v4](../ideas/007.%20Feature-Application%20Action%20Tracing/mockups/tracing-dashboard-v4.html)
+**Source:** [Idea Summary v1 - Application Action Tracing](x-ipe-docs/ideas/007. Feature-Application Action Tracing/idea-summary-v1.md)  
+**Mockup:** [Tracing Dashboard v4](x-ipe-docs/ideas/007. Feature-Application Action Tracing/mockups/tracing-dashboard-v4.html)
 
 #### Problem Statement
 
@@ -571,7 +571,7 @@ As applications grow in complexity, understanding execution flow becomes challen
 **Brief Description:** Web-based dashboard for viewing tracing status, managing trace sessions (start/stop), browsing trace logs, and monitoring active traces.
 
 **Dependencies:** FEATURE-023-A  
-**Mockup:** [Tracing Dashboard v4](../ideas/007.%20Feature-Application%20Action%20Tracing/mockups/tracing-dashboard-v4.html)  
+**Mockup:** [Tracing Dashboard v4](x-ipe-docs/ideas/007. Feature-Application Action Tracing/mockups/tracing-dashboard-v4.html)  
 **Full Specification:** [specification.md](FEATURE-023-B/specification.md)
 
 #### Acceptance Criteria Summary
@@ -597,7 +597,7 @@ As applications grow in complexity, understanding execution flow becomes challen
 **Brief Description:** Interactive DAG (Directed Acyclic Graph) visualization of traced function calls, showing call hierarchy, timing, and parameters with click-to-expand details.
 
 **Dependencies:** FEATURE-023-B  
-**Mockup:** [Tracing Dashboard v4](../ideas/007.%20Feature-Application%20Action%20Tracing/mockups/tracing-dashboard-v4.html)  
+**Mockup:** [Tracing Dashboard v4](x-ipe-docs/ideas/007. Feature-Application Action Tracing/mockups/tracing-dashboard-v4.html)  
 **Full Specification:** [specification.md](FEATURE-023-C/specification.md)
 
 #### Acceptance Criteria Summary

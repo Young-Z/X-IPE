@@ -246,7 +246,7 @@ operation_output:
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for usage examples including:
+See [references/examples.md](.github/skills/x-ipe-tool-kb-manager/references/examples.md) for usage examples including:
 - Classify landing files with AI suggestions
 - Search knowledge base
 - Reorganize topics

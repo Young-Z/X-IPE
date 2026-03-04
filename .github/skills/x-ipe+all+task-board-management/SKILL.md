@@ -302,4 +302,4 @@ operation_output:
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for usage examples.
+See [references/examples.md](.github/skills/x-ipe+all+task-board-management/references/examples.md) for usage examples.

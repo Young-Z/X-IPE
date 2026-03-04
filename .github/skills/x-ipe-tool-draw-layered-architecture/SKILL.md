@@ -200,8 +200,8 @@ operation_output:
 
 ## Examples
 
-See [examples/](examples/) for DSL-to-HTML examples and [references/dsl-to-css.md](references/dsl-to-css.md) for the complete property mapping.
+See [examples/](.github/skills/x-ipe-tool-draw-layered-architecture/examples) for DSL-to-HTML examples and [references/dsl-to-css.md](.github/skills/x-ipe-tool-draw-layered-architecture/references/dsl-to-css.md) for the complete property mapping.
 
 **Related Skills:**
-- [x-ipe-tool-architecture-dsl](../x-ipe-tool-architecture-dsl/SKILL.md) - DSL syntax generation
-- [x-ipe-tool-draw-system-landscape](../x-ipe-tool-draw-system-landscape/SKILL.md) - Landscape diagrams
+- [x-ipe-tool-architecture-dsl](.github/skills/x-ipe-tool-architecture-dsl/SKILL.md) - DSL syntax generation
+- [x-ipe-tool-draw-system-landscape](.github/skills/x-ipe-tool-draw-system-landscape/SKILL.md) - Landscape diagrams

@@ -14,4 +14,4 @@ let's create a new requirement, 1. for all the docs linked in markdown file whic
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260303-212659/page-screenshot.png)

@@ -10,7 +10,7 @@
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
 | v1.0 | 02-13-2026 | Initial specification — MCP server with save_uiux_reference tool | - |
-| v1.1 | 02-15-2026 | Extended data schema (html_css, static_resources), auto-generated structured output (page-element-references, summarized-uiux-reference.md, mimic-strategy.md) | [CR-001](./CR-001.md) |
+| v1.1 | 02-15-2026 | Extended data schema (html_css, static_resources), auto-generated structured output (page-element-references, summarized-uiux-reference.md, mimic-strategy.md) | [CR-001](x-ipe-docs/requirements/EPIC-033/FEATURE-033-A/CR-001.md) |
 
 ## Overview
 

@@ -57,7 +57,7 @@ For the neutral scale, use the Tailwind color scale closest to the derived color
 | Fuchsia/Pink | Fuchsia or Slate |
 | Gray/Slate/Zinc | Same family |
 
-See [color-scales.md](color-scales.md) for full Tailwind scale values.
+See [color-scales.md](.github/skills/x-ipe-tool-brand-theme-creator/references/color-scales.md) for full Tailwind scale values.
 
 ---
 

@@ -269,4 +269,4 @@ Adapt from X-IPE's own tracing modules:
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for detailed examples.
+See [references/examples.md](.github/skills/x-ipe-tool-tracing-creator/references/examples.md) for detailed examples.

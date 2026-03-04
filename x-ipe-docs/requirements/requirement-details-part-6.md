@@ -1,6 +1,6 @@
 # Requirement Details - Part 6
 
-> Continued from: [requirement-details-part-5.md](requirement-details-part-5.md)  
+> Continued from: [requirement-details-part-5.md](x-ipe-docs/requirements/requirement-details-part-5.md)  
 > Created: 02-07-2026
 
 ---
@@ -33,7 +33,7 @@
 
 ### Multi-CLI Adapter Support Overview
 
-**Source:** [Idea Summary v1](../ideas/013.%20Feature-Adding%20Support%20to%20OpenCode%20CLI/idea-summary-v1.md)
+**Source:** [Idea Summary v1](x-ipe-docs/ideas/013. Feature-Adding Support to OpenCode CLI/idea-summary-v1.md)
 
 #### Problem Statement
 
@@ -254,7 +254,7 @@ FEATURE-027-A (Registry & Service) ──┬── FEATURE-027-B (Init & Selecti
 
 ## References
 
-- [IDEA-013: Multi-CLI Support](../ideas/013.%20Feature-Adding%20Support%20to%20OpenCode%20CLI/idea-summary-v1.md)
+- [IDEA-013: Multi-CLI Support](x-ipe-docs/ideas/013. Feature-Adding Support to OpenCode CLI/idea-summary-v1.md)
 - [OpenCode Documentation](https://opencode.ai/docs)
 - [OpenCode Skills](https://opencode.ai/docs/skills/)
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
@@ -264,7 +264,7 @@ FEATURE-027-A (Registry & Service) ──┬── FEATURE-027-B (Init & Selecti
 
 ## FEATURE-028: Prompt Bi-language Support
 
-**Source:** [IDEA-019: Prompt Bi-language Support](../ideas/015.%20Feature-Prompt%20Bi-language%20Support/idea-summary-v1.md)
+**Source:** [IDEA-019: Prompt Bi-language Support](x-ipe-docs/ideas/015. Feature-Prompt Bi-language Support/idea-summary-v1.md)
 
 ### Problem Statement
 

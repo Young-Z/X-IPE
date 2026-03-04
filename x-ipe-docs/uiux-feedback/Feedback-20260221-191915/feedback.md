@@ -14,4 +14,4 @@ suggested action should only change background color, not changing the border st
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260221-191915/page-screenshot.png)

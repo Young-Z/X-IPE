@@ -14,4 +14,4 @@ it's not aligned with other deliverables, and looks like I cannot click on any d
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260221-175407/page-screenshot.png)

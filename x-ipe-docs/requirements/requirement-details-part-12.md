@@ -263,5 +263,5 @@ All task-based skills referenced in ACTION_MAP MUST support workflow-mode execut
 > - **Change:** Legacy `<input-file>` placeholder replaced by `$output:tag$` syntax in workflow mode; instructions become read-only resolved preview; new `workflow-prompts` array in copilot-prompt.json
 > - **Affected FRs:** FR-040.6 (placeholder replaced), FR-040.9 (prompt structure extended), FR-040.14 (instructions display → read-only preview)
 > - **Action Required:** Workflow-mode behavior superseded by EPIC-042 `workflow-prompts`; free-mode remains unchanged
-> - **New Feature Ref:** EPIC-042 — see [requirement-details-part-14.md](requirement-details-part-14.md)
+> - **New Feature Ref:** EPIC-042 — see [requirement-details-part-14.md](x-ipe-docs/requirements/requirement-details-part-14.md)
 

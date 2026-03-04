@@ -31,8 +31,8 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `KBService` | FEATURE-025-A | [technical-design.md](../FEATURE-025-A/technical-design.md) | Folder structure, index management, file operations, metadata |
-| `KBService.get_landing_files()` | FEATURE-025-B | [technical-design.md](../FEATURE-025-B/technical-design.md) | List landing files for processing selection |
+| `KBService` | FEATURE-025-A | [technical-design.md](x-ipe-docs/requirements/EPIC-025/FEATURE-025-A/technical-design.md) | Folder structure, index management, file operations, metadata |
+| `KBService.get_landing_files()` | FEATURE-025-B | [technical-design.md](x-ipe-docs/requirements/EPIC-025/FEATURE-025-B/technical-design.md) | List landing files for processing selection |
 | `dashscope.Generation` | External (pyproject.toml) | [DashScope docs](https://help.aliyun.com/zh/dashscope/) | LLM API for classification and summarization |
 | `ConfigService` | FEATURE-010 | config_service.py | Config discovery pattern (reused for LLM config) |
 | Processing indicator | FEATURE-025-B | kb-landing.js | `_showProcessing()` / `_hideProcessing()` methods |

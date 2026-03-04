@@ -15,7 +15,7 @@
 
 | Mockup | Type | Path | Description | Status |
 |--------|------|------|-------------|--------|
-| Refine Idea Modal | HTML | [refine-idea-modal-v1.html](../mockups/refine-idea-modal-v1.html) | Scene 4: deliverable viewer with file-tree and inline preview | current |
+| Refine Idea Modal | HTML | [refine-idea-modal-v1.html](x-ipe-docs/requirements/EPIC-038/mockups/refine-idea-modal-v1.html) | Scene 4: deliverable viewer with file-tree and inline preview | current |
 
 > **Note:** UI/UX requirements and acceptance criteria below are derived from mockups marked as "current".
 

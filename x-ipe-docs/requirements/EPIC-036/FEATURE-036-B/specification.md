@@ -10,7 +10,7 @@
 
 | Mockup | Status | Notes |
 |--------|--------|-------|
-| [workflow-view-v1.html](../mockups/workflow-view-v1.html) | current | Shared EPIC-036 mockup — shows workflow list panel, create button, expandable panels |
+| [workflow-view-v1.html](x-ipe-docs/requirements/EPIC-036/mockups/workflow-view-v1.html) | current | Shared EPIC-036 mockup — shows workflow list panel, create button, expandable panels |
 
 ## Overview
 

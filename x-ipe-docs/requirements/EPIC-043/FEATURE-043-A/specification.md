@@ -16,7 +16,7 @@
 
 | Mockup | Type | Path | Description | Status |
 |--------|------|------|-------------|--------|
-| File Link Preview — Full Interactive | HTML | [mockups/file-link-preview-v1.html](mockups/file-link-preview-v1.html) | 5-scenario mockup covering link distinction, preview modal, breadcrumb nav, error/loading states | current |
+| File Link Preview — Full Interactive | HTML | [mockups/file-link-preview-v1.html](x-ipe-docs/requirements/EPIC-043/FEATURE-043-A/mockups/file-link-preview-v1.html) | 5-scenario mockup covering link distinction, preview modal, breadcrumb nav, error/loading states | current |
 
 > **Note:** UI/UX requirements and acceptance criteria below are derived from mockups marked as "current".
 > Mockups marked as "outdated" are directional references only — do not use for AC comparison.

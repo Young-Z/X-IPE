@@ -76,7 +76,8 @@ class AutoFolderNamer {
     async fetchTree() {
         const res = await fetch('/api/ideas/tree');
         if (!res.ok) throw new Error('Failed to fetch ideas tree');
-        return res.json();
+        const data = await res.json();
+        return data.tree || [];
     }
 
     findHighestWfNumber(tree) {

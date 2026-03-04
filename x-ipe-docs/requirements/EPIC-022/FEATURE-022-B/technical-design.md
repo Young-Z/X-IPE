@@ -22,8 +22,8 @@
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `UIUXFeedbackManager` | FEATURE-022-A | [technical-design.md](../FEATURE-022-A/technical-design.md) | Extends to add inspect toggle and selection state |
-| `ProxyService._rewrite_html()` | FEATURE-022-A | [technical-design.md](../FEATURE-022-A/technical-design.md) | Inject inspector script into proxied HTML |
+| `UIUXFeedbackManager` | FEATURE-022-A | [technical-design.md](x-ipe-docs/requirements/EPIC-022/FEATURE-022-A/technical-design.md) | Extends to add inspect toggle and selection state |
+| `ProxyService._rewrite_html()` | FEATURE-022-A | [technical-design.md](x-ipe-docs/requirements/EPIC-022/FEATURE-022-A/technical-design.md) | Inject inspector script into proxied HTML |
 | `postMessage API` | Browser | MDN | Cross-frame communication between iframe and parent |
 
 ### Scope & Boundaries

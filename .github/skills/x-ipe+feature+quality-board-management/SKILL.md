@@ -34,8 +34,8 @@ This skill evaluates the project from a **feature perspective**, analyzing four 
 - **Score-to-Status** -- 8-10: aligned, 6-7: needs_attention, 1-5: critical, N/A: planned
 - **Report Versioning** -- Up to 5 most recent reports retained (1 current + 4 historical)
 - **Output Location** -- `x-ipe-docs/quality-evaluation/project-quality-evaluation.md`
-- **Evaluation Principles** -- See [references/evaluation-principles.md](references/evaluation-principles.md)
-- **Evaluation Procedures** -- See [references/evaluation-procedures.md](references/evaluation-procedures.md)
+- **Evaluation Principles** -- See [references/evaluation-principles.md](.github/skills/x-ipe+feature+quality-board-management/references/evaluation-principles.md)
+- **Evaluation Procedures** -- See [references/evaluation-procedures.md](.github/skills/x-ipe+feature+quality-board-management/references/evaluation-procedures.md)
 
 ---
 
@@ -70,7 +70,7 @@ input:
     version_b: "previous | v{N}"
 ```
 
-**Quality Evaluation Data Model:** See [references/quality-evaluation-data-model.yaml](references/quality-evaluation-data-model.yaml) for the complete data model structure.
+**Quality Evaluation Data Model:** See [references/quality-evaluation-data-model.yaml](.github/skills/x-ipe+feature+quality-board-management/references/quality-evaluation-data-model.yaml) for the complete data model structure.
 
 ---
 

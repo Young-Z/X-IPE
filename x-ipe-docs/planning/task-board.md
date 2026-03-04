@@ -6,9 +6,10 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-706 | Feature Refinement | FEATURE-036-C: Stage Ribbon & Action Execution — apply CR-001 spec changes: clickable buttons during execution, running animation, client-side running state | Bolt ⚡ | ✅ completed | 03-04-2026 07:13:00 | specification.md (v1.1) | Technical Design |
+| TASK-706 | Skill Update | Update x-ipe-task-based-change-request: add Conflict Analysis step (Step 4) between Classify CR and Human Approval — detect spec/code/design conflicts with existing features before human reviews classification | Echo 🔊 | 🔄 in_progress | 03-04-2026 06:07:00 | - | - |
 | TASK-705 | Change Request | Action buttons become unclickable during execution with no progress animation. CR: keep buttons clickable, add running animation, persist running state (reset on refresh). Feedback-20260304-134328 | Bolt ⚡ | ✅ completed | 03-04-2026 06:05:00 | CR-001.md, specification.md (v1.1) | Feature Refinement |
-| TASK-704 | Code Implementation | FEATURE-043-C: Skill Path Convention Updates — add root-relative path constraint to 12 skills + skill creator template. 13 SKILL.md files updated. Workflow: update-file-link-preview | Sage 🌿 | ✅ completed | 03-04-2026 05:45:00 | 13 SKILL.md files | Feature Closing |
+| TASK-705 | Feature Refinement + Implementation | FEATURE-043-D: Existing File Migration — spec + migration script. 174 files, 654 links converted, 366 flagged for review. Workflow: update-file-link-preview | Sage 🌿 | ✅ completed | 03-04-2026 05:50:00 | specification.md, 174 .md files | Feature Closing |
+| TASK-704 | Code Implementation | FEATURE-043-C: Skill Path Convention Updates — add root-relative path constraint to 12 skills + skill creator template. Workflow: update-file-link-preview | Sage 🌿 | 🔄 in_progress | 03-04-2026 05:43:00 | - | Feature Acceptance Test |
 | TASK-703 | Technical Design | FEATURE-043-C: Skill Path Convention Updates — design constraint placement strategy for 12 skills + template. Workflow: update-file-link-preview | Sage 🌿 | ✅ completed | 03-04-2026 05:42:00 | technical-design.md | Code Implementation |
 | TASK-702 | Feature Refinement | FEATURE-043-C: Skill Path Convention Updates — create specification.md. Add root-relative path constraint to 12 skills + skill creator template. Workflow: update-file-link-preview | Sage 🌿 | ✅ completed | 03-04-2026 05:40:00 | specification.md | Technical Design |
 | TASK-701 | Bug Fix | AutoFolderNamer.fetchTree() returns full API response {success,tree} instead of tree array — findHighestWfNumber always sees max=0, generating wf-001 every time. Feedback-20260304-105440 | Cipher 🔑 | ✅ completed | 03-04-2026 02:56:00 | compose-idea-modal.js, compose-idea-modal.test.js | - |
@@ -242,7 +243,7 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
-| | | *See [task-board-archive-1.md](x-ipe-docs/planning/task-board-archive-1.md) for all completed tasks (405 total)* | | | | |
+| | | *See [task-board-archive-1.md](task-board-archive-1.md) for all completed tasks (405 total)* | | | | |
 
 ---
 

@@ -14,4 +14,4 @@ workflow need to support Chinese Name, when we create idea, it also need to supp
 
 ## Screenshot
 
-![Screenshot](./page-screenshot.png)
+![Screenshot](x-ipe-docs/uiux-feedback/Feedback-20260301-155900-1/page-screenshot.png)

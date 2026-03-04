@@ -467,7 +467,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for concrete execution examples:
+See [references/examples.md](.github/skills/x-ipe-task-based-ideation-v2/references/examples.md) for concrete execution examples:
 - Business plan ideation with tools enabled
 - Ideation without tools (all disabled)
 - Missing config file handling
