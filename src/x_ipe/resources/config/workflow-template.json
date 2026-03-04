@@ -42,7 +42,7 @@
           "action_context": {
             "raw-idea": {
               "required": true,
-              "candidates": "refined-ideas-folder"
+              "candidates": "ideas-folder"
             },
             "uiux-reference": {
               "required": false

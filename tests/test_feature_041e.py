@@ -711,6 +711,26 @@ class TestFolderContentsAPI:
         assert any("idea.md" in f for f in files)
         assert any("notes.txt" in f for f in files)
 
+    def test_list_folder_contents_relative_path(self, client, project_root):
+        """GET folder-contents with relative path resolves against PROJECT_ROOT."""
+        folder = project_root / "x-ipe-docs" / "ideas" / "wf-test"
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / "summary-v1.md").write_text("# Summary v1")
+        (folder / "summary-v2.md").write_text("# Summary v2")
+
+        # Use RELATIVE path (as stored in workflow instance deliverables)
+        resp = client.get(
+            "/api/workflow/test/folder-contents?path=x-ipe-docs/ideas/wf-test"
+        )
+        assert resp.status_code == 200
+        files = resp.get_json()
+        assert len(files) >= 2
+        assert any("summary-v1.md" in f for f in files)
+        assert any("summary-v2.md" in f for f in files)
+        # Verify paths preserve relative format
+        for f in files:
+            assert not os.path.isabs(f), f"Expected relative path, got: {f}"
+
     def test_list_nonexistent_folder(self, client):
         """GET folder-contents for nonexistent path returns empty list."""
         resp = client.get(

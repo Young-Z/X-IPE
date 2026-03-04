@@ -132,12 +132,19 @@ def get_candidates(name, action, candidates_name):
 @x_ipe_tracing()
 def get_folder_contents(name):
     folder_path = request.args.get('path', '')
-    if not folder_path or not os.path.isdir(folder_path):
+    if not folder_path:
+        return jsonify([])
+    # Resolve relative paths against PROJECT_ROOT
+    resolved = Path(folder_path)
+    if not resolved.is_absolute():
+        project_root = current_app.config.get('PROJECT_ROOT', os.getcwd())
+        resolved = Path(project_root) / folder_path
+    if not resolved.is_dir():
         return jsonify([])
     files = []
-    for entry in sorted(Path(folder_path).iterdir()):
+    for entry in sorted(resolved.iterdir()):
         if entry.is_file():
-            files.append(str(entry))
+            files.append(str(Path(folder_path) / entry.name))
     return jsonify(files)
 
 
