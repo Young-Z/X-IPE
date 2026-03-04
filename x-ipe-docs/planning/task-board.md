@@ -7,7 +7,7 @@
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
 | TASK-716 | Skill Update | Add Chrome --user-data-dir guidance to skill creator guidelines and all skills using Chrome DevTools MCP (acceptance-test, uiux-reference, feature-closing) | Spark ⚡ | ✅ completed | 03-04-2026 07:50:00 | skill-general-guidelines-v2.md, 3 SKILL.md files, detailed-procedures.md | - |
-| TASK-716 | Feature Closing | FEATURE-041-D: New Workflow Actions — update feature board, commit all changes | Zephyr 🌬️ | 🔄 in_progress | 03-04-2026 08:23:00 | - | - |
+| TASK-716 | Feature Closing | FEATURE-041-D: New Workflow Actions — update feature board, verify commit | Zephyr 🌬️ | ✅ completed | 03-04-2026 08:25:00 | features.md updated, all changes in HEAD (ff8cd73) | - |
 | TASK-715 | Feature Acceptance Test | FEATURE-041-D: New Workflow Actions — verify all 7 AC groups against specification | Zephyr 🌬️ | ✅ completed | 03-04-2026 08:22:00 | 44/44 ACs PASS | Feature Closing |
 | TASK-714 | Ideation | Refine idea 031. CR-Adding Auto Proceed option to workflow mode — process_preference.auto_proceed, decision_making_skill, update all task-based skills and workflow skill | Rune 🔮 | ⏳ pending | 03-04-2026 07:55:00 | - | Idea Mockup / Idea to Architecture |
 | TASK-713 | Code Implementation | FEATURE-041-D: New Workflow Actions — implement all 11 components (template, backend, frontend, prompts, tests, 5 skills) | Zephyr 🌬️ | ✅ completed | 03-04-2026 08:10:00 | workflow-template.json, workflow_manager_service.py, workflow-stage.js, copilot-prompt.json, 5 SKILL.md files | Feature Acceptance Test |
