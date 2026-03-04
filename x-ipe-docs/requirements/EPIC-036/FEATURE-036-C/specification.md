@@ -110,7 +110,7 @@ The primary user is a developer using X-IPE who wants to see where they are in t
 - **AC-015**: If action is allowed, the console panel opens (if not already visible) and an idle session is selected.
 - **AC-016**: The skill command is auto-typed into the selected console session (e.g., the skill trigger phrase). The command is NOT auto-submitted — user must press Enter to confirm.
 - **AC-017**: If no idle session is available, a toast notification informs the user: "No idle console session available. Open a new session first."
-- **AC-018**: If the action is locked or already done, clicking the button shows a toast with the reason (e.g., "Action already completed" or "Stage is locked").
+- **AC-018**: If the action is locked, clicking the button shows a toast with the reason (e.g., "Complete previous stages to unlock"). Done actions show a confirmation dialog (FEATURE-037-B) and can be re-opened in edit mode.
 
 ### AC Group: Modal Action Execution (Compose/Upload Idea)
 
@@ -229,7 +229,7 @@ The primary user is a developer using X-IPE who wants to see where they are in t
 | 2 | No idle console session available for CLI action | Toast: "No idle console session available. Open a new session first." |
 | 3 | API returns error when fetching workflow state | Stage ribbon area shows error message with retry button |
 | 4 | Action execution triggered while another action is in_progress | Allow it — buttons remain clickable with running animation. Multiple actions can run simultaneously (different console sessions). Running state is client-side only and resets on refresh. |
-| 5 | User clicks done action | Toast: "Action already completed" — no re-execution |
+| 5 | User clicks done action | Confirm dialog (FEATURE-037-B). If confirmed, rolls back to pending and re-opens in edit mode |
 | 6 | User clicks locked action | Toast: "Complete {required_stage} to unlock this action" — no execution |
 | 7 | Quality Evaluation action (deferred to v2) | Render button with "Coming Soon" tooltip, disabled state |
 | 8 | Workflow has no features yet (pre-Feature Breakdown) | Implement/Validation/Feedback stages show as locked with message "Complete Requirement to unlock" |

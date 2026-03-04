@@ -118,8 +118,8 @@ classDiagram
         -_renderStagePill(name, status, index): HTMLElement
         -_renderActionsArea(stages, nextAction, wfName): HTMLElement
         -_renderActionGroup(stageName, actions, nextAction, wfName, locked): HTMLElement
-        -_renderActionButton(actionKey, actionDef, status, isSuggested, locked): HTMLElement
-        -_dispatchCliAction(wfName, actionKey, skillName): Promise
+        -_renderActionButton(actionKey, actionDef, status, isSuggested, locked, wfName, isOptional): HTMLElement
+        -_dispatchCliAction(wfName, actionKey, skillName, triggerBtn, featureId): Promise
         -_dispatchModalAction(wfName): Promise
         -_markRunning(actionKey, btnElement): void
         -_findIdleSession(): object|null
@@ -489,7 +489,7 @@ async _dispatchCliAction(wfName, actionKey, skillName) {
 
 1. **Update `workflow-stage.js`** — Add `_runningActions: new Set()` property; add `_markRunning(actionKey, btn)` method; update `_renderActionButton` to apply `.running` class from Set; update click handler to only block locked actions (~15 lines changed)
 2. **Update `workflow.css`** — Add `.action-btn.running` and `.action-btn.running::after` CSS rules with `action-running-pulse` keyframes (~15 lines added)
-3. **Update `action-execution-modal.css`** — Remove `pointer-events: none` and `opacity: 0.8` from `.action-btn.in-progress`; remove `.action-btn.in-progress::after` pulse-ring (~20 lines removed)
+3. **Update `action-execution-modal.css`** — Remove `pointer-events: none` from `.action-btn.in-progress` (retain `opacity` and `::after` pulse-ring for modal's own in-progress state)
 4. **Run tests** — verify existing workflow tests pass, run new tests for running state
 
 ### Edge Cases
