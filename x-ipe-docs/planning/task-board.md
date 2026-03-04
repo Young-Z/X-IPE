@@ -6,7 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-730 | Bug Fix | Context dropdown in action modal doesn't load candidates from folder-tagged sources — raw_idea dropdown should include files from candidates folder (e.g., ideas-folder) not just direct file tag | Nova ⭐ | 🔄 in_progress | 03-04-2026 14:53:00 | - | - |
+| TASK-730 | Bug Fix | Context dropdown in action modal doesn't load candidates from folder-tagged sources — raw_idea dropdown should include files from candidates folder (e.g., ideas-folder) not just direct file tag | Nova ⭐ | ✅ completed | 03-04-2026 15:10:00 | workflow_routes.py, workflow-template.json, test_feature_041e.py | - |
 | TASK-725 | Feature Refinement + Implementation | FEATURE-044-B: Skill Creator Template Update — update x-ipe-meta-skill-creator task-based template (replace booleans, add mode-aware blocks) | Rune 🔮 | ✅ done | 03-04-2026 13:38:00 | .github/skills/x-ipe-meta-skill-creator/templates/x-ipe-task-based.md | - |
 | TASK-726 | Implementation | FEATURE-044-D: Workflow Orchestrator Update — replace boolean auto_proceed/require_human_review with 3-mode process_preference.auto_proceed, add CLI flag parsing, mode-aware routing in step 5/6 | Rune 🔮 | ✅ done | 03-04-2026 13:50:00 | .github/skills/x-ipe-workflow-task-execution/SKILL.md | - |
 | TASK-727 | Implementation | FEATURE-044-C: Batch Update All 22 Task-Based Skills — replace require_human_review + auto_proceed booleans with process_preference.auto_proceed enum in all 22 x-ipe-task-based-* SKILL.md files + copilot-instructions.md | Rune 🔮 | ✅ done | 03-04-2026 14:10:00 | 22 SKILL.md files, copilot-instructions.md | - |
