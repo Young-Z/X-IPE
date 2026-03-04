@@ -53,10 +53,12 @@ input:
   # Task type attributes
   category: "{standalone | feature-stage | requirement-stage | ideation-stage}"
   next_task_based_skill: "{Next Task-Based Skill | null}"
-  require_human_review: "{yes | no}"
+  
+  # Process preference (3-mode auto-proceed system)
+  process_preference:
+    auto_proceed: "manual | auto | stop_for_question"  # default: manual
   
   # Required inputs
-  auto_proceed: false
   {input_1}: "{default_value}"
   {input_2}: "{default_value}"
   
@@ -172,6 +174,22 @@ BLOCKING: {Rule that must not be skipped}
     <output>{What this step produces}</output>
   </step_3>
 
+  <!-- MODE-AWARE COMPLETION PATTERN (include in final step): -->
+  <step_N_complete>
+    <name>Complete</name>
+    <action>
+      1. Verify all DoD checkpoints
+      2. Output task completion summary
+      3. Mode-aware review gate:
+         IF process_preference.auto_proceed == "auto":
+           Skip human review. If any open questions remain, invoke
+           x-ipe-tool-decision-making to resolve them autonomously.
+         ELIF process_preference.auto_proceed == "stop_for_question" OR "manual":
+           Present results to human and wait for approval.
+    </action>
+    <output>Task completion output</output>
+  </step_N_complete>
+
 </procedure>
 ```
 
@@ -184,7 +202,8 @@ task_completion_output:
   category: "{standalone | feature-stage | requirement-stage | ideation-stage}"
   status: completed | blocked
   next_task_based_skill: "{Next Task-Based Skill}"
-  require_human_review: "{yes | no}"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
