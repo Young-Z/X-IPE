@@ -1,10 +1,11 @@
 /**
  * Link Preview Manager
  * FEATURE-043-A: Link Interception & Preview Modal
+ * FEATURE-043-B: Breadcrumb Navigation & Visual Distinction
  *
  * Intercepts clicks on internal links (x-ipe-docs/, .github/skills/)
  * and displays file content in a preview modal.
- * Reuses DeliverableViewer modal pattern from FEATURE-038-C.
+ * Supports nested navigation with breadcrumb trail (max depth 5).
  */
 class LinkPreviewManager {
     constructor() {
@@ -15,6 +16,12 @@ class LinkPreviewManager {
         this._abortController = null;
         this._isOpen = false;
         this._escHandler = null;
+        // FEATURE-043-B: Navigation stack
+        this._navStack = [];
+        this._maxDepth = 5;
+        this._backBtn = null;
+        this._breadcrumbBar = null;
+        this._currentPath = null;
     }
 
     /**
@@ -33,18 +40,32 @@ class LinkPreviewManager {
         this._titleEl = document.createElement('span');
         this._titleEl.className = 'link-preview-title';
 
+        // FEATURE-043-B: Back button (left of title)
+        this._backBtn = document.createElement('span');
+        this._backBtn.className = 'link-preview-back';
+        this._backBtn.innerHTML = '← Back';
+        this._backBtn.style.display = 'none';
+        this._backBtn.addEventListener('click', () => this._goBack());
+
         const closeBtn = document.createElement('span');
         closeBtn.className = 'link-preview-close';
         closeBtn.textContent = '✕';
         closeBtn.addEventListener('click', () => this.close());
 
+        header.appendChild(this._backBtn);
         header.appendChild(this._titleEl);
         header.appendChild(closeBtn);
 
         this._contentArea = document.createElement('div');
         this._contentArea.className = 'link-preview-content';
 
+        // FEATURE-043-B: Breadcrumb bar (between header and content)
+        this._breadcrumbBar = document.createElement('div');
+        this._breadcrumbBar.className = 'link-preview-breadcrumb';
+        this._breadcrumbBar.style.display = 'none';
+
         modal.appendChild(header);
+        modal.appendChild(this._breadcrumbBar);
         modal.appendChild(this._contentArea);
         this._backdrop.appendChild(modal);
         this._modal = modal;
@@ -62,6 +83,7 @@ class LinkPreviewManager {
     async open(filePath) {
         // Strip query params and anchors
         const cleanPath = filePath.split('?')[0].split('#')[0];
+        this._currentPath = cleanPath;
 
         if (!this._backdrop) {
             this._createModal();
@@ -89,7 +111,10 @@ class LinkPreviewManager {
         // Fetch and display
         try {
             const data = await this._fetchFile(cleanPath);
-            if (data) this._showContent(data);
+            if (data) {
+                this._showContent(data);
+                this._updateBreadcrumb();
+            }
         } catch (err) {
             if (err.name === 'AbortError') return; // intentional cancel
             if (err.type === 'not_found') {
@@ -209,6 +234,73 @@ class LinkPreviewManager {
             this._abortController = null;
         }
         this._isOpen = false;
+        // FEATURE-043-B: Clear navigation state
+        this._navStack = [];
+        this._currentPath = null;
+        if (this._breadcrumbBar) this._breadcrumbBar.style.display = 'none';
+        if (this._backBtn) this._backBtn.style.display = 'none';
+    }
+
+    /**
+     * FEATURE-043-B: Navigate to a new file from within the modal (preserves stack).
+     */
+    async _navigateFromModal(path) {
+        if (this._currentPath) {
+            if (this._navStack.length >= this._maxDepth) {
+                this._navStack.shift();
+            }
+            this._navStack.push({
+                path: this._currentPath,
+                title: this._currentPath.split('/').pop()
+            });
+        }
+        await this.open(path);
+    }
+
+    /**
+     * FEATURE-043-B: Go back to previous file in stack.
+     */
+    async _goBack() {
+        if (this._navStack.length === 0) return;
+        const prev = this._navStack.pop();
+        await this.open(prev.path);
+    }
+
+    /**
+     * FEATURE-043-B: Navigate to a specific breadcrumb entry (truncates stack).
+     */
+    async _goToBreadcrumb(index) {
+        const entry = this._navStack[index];
+        this._navStack = this._navStack.slice(0, index);
+        await this.open(entry.path);
+    }
+
+    /**
+     * FEATURE-043-B: Re-render breadcrumb bar based on current stack.
+     */
+    _updateBreadcrumb() {
+        if (!this._breadcrumbBar) return;
+        if (this._navStack.length === 0) {
+            this._breadcrumbBar.style.display = 'none';
+            if (this._backBtn) this._backBtn.style.display = 'none';
+            return;
+        }
+        this._breadcrumbBar.style.display = 'flex';
+        if (this._backBtn) this._backBtn.style.display = '';
+
+        let html = '';
+        this._navStack.forEach((entry, i) => {
+            html += `<span class="breadcrumb-entry" data-index="${i}">${this._escapeHtml(entry.title)}</span>`;
+            html += '<span class="breadcrumb-sep">›</span>';
+        });
+        html += `<span class="breadcrumb-current">${this._escapeHtml(this._currentPath.split('/').pop())}</span>`;
+        this._breadcrumbBar.innerHTML = html;
+
+        this._breadcrumbBar.querySelectorAll('.breadcrumb-entry').forEach(el => {
+            el.addEventListener('click', () => {
+                this._goToBreadcrumb(parseInt(el.dataset.index));
+            });
+        });
     }
 
     /**
@@ -236,7 +328,15 @@ class LinkPreviewManager {
             const link = e.target.closest('a[data-preview-path]');
             if (!link) return;
             e.preventDefault();
-            LinkPreviewManager.instance.open(link.getAttribute('data-preview-path'));
+            const path = link.getAttribute('data-preview-path');
+            const instance = LinkPreviewManager.instance;
+            // FEATURE-043-B: If click is inside modal content, navigate (preserves stack)
+            if (instance._isOpen && instance._contentArea && instance._contentArea.contains(link)) {
+                instance._navigateFromModal(path);
+            } else {
+                instance._navStack = [];
+                instance.open(path);
+            }
         });
 
         container._linkPreviewAttached = true;

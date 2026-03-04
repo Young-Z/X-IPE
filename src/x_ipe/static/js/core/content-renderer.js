@@ -39,7 +39,9 @@ class ContentRenderer {
             renderer.link = function(href, title, text) {
                 if (href && (href.startsWith('x-ipe-docs/') || href.startsWith('.github/skills/'))) {
                     const safeHref = href.replace(/"/g, '&quot;');
-                    const safeTitle = title ? ` title="${title.replace(/"/g, '&quot;')}"` : '';
+                    const safeTitle = title
+                        ? ` title="${title.replace(/"/g, '&quot;')}"`
+                        : ' title="Open preview"';
                     return `<a href="${safeHref}" data-preview-path="${safeHref}"${safeTitle}>${text}</a>`;
                 }
                 return originalLink(href, title, text);
