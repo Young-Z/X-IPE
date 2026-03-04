@@ -53,10 +53,10 @@ input:
   # Task type attributes
   category: "requirement-stage"
   next_task_based_skill: "Feature Breakdown"
-  require_human_review: "yes"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
 
   # Required inputs
-  auto_proceed: false
   epic_id: "EPIC-{nnn}"  # Auto-assigned: scan x-ipe-docs/requirements/ for highest EPIC-{nnn}, next is EPIC-{nnn+1}
   mockup_list:
     - mockup_name: "Description of what function the mockup is for"
@@ -316,8 +316,8 @@ task_completion_output:
   category: "requirement-stage"
   status: completed | blocked
   next_task_based_skill: "Feature Breakdown"
-  require_human_review: "yes"
-  auto_proceed: "{from input auto_proceed}"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"

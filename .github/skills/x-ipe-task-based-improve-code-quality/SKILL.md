@@ -40,10 +40,10 @@ input:
   # Task type attributes
   category: "code-refactoring-stage"
   next_task_based_skill: "Code Refactor V2"
-  require_human_review: "yes"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
 
   # Required inputs
-  auto_proceed: false
   refactoring_scope:
     scope_level: "feature | custom"  # from refactoring analysis
     feature_id: "{FEATURE-XXX or null}"
@@ -269,8 +269,8 @@ task_completion_output:
   category: "code-refactoring-stage"
   status: "completed | blocked"
   next_task_based_skill: "Code Refactor V2"
-  require_human_review: "yes"
-  auto_proceed: "{from input}"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"

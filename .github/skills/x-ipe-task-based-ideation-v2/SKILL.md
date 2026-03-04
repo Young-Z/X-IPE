@@ -37,9 +37,9 @@ input:
   
   category: ideation-stage
   next_task_based_skill: "Idea Mockup | Idea to Architecture"
-  require_human_review: yes
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   
-  auto_proceed: false
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
   workflow:
@@ -316,7 +316,8 @@ task_completion_output:
   category: ideation-stage
   status: completed | blocked
   next_task_based_skill: "Idea Mockup | Idea to Architecture"
-  require_human_review: yes
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   task_output_links:
     - "x-ipe-docs/ideas/{folder}/refined-idea/idea-summary-vN.md"
     - "x-ipe-docs/ideas/{folder}/refined-idea/"

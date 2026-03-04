@@ -40,10 +40,10 @@ input:
   # Task type attributes
   category: "standalone"
   next_task_based_skill: null
-  require_human_review: true
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
 
   # Required inputs
-  auto_proceed: false
   idea_folder: "x-ipe-docs/ideas/{folder}"
   toolbox_meta: "x-ipe-docs/config/tools.json"
 
@@ -245,8 +245,8 @@ task_completion_output:
   status: completed | blocked
   task_based_skill: "Share Idea"
   next_task_based_skill: null
-  require_human_review: true
-  auto_proceed: "{from input auto_proceed}"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"

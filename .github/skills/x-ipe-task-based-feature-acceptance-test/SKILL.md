@@ -54,10 +54,10 @@ input:
   # Task type attributes
   category: "standalone | feature-stage"
   next_task_based_skill: "Feature Closing | null"
-  require_human_review: "no"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
 
   # Required inputs
-  auto_proceed: false
   feature_id: "{FEATURE-XXX}"       # Required (feature-stage) OR Optional (standalone)
   target_url: "{URL}"               # Required (standalone) OR from feature (feature-stage)
 
@@ -119,13 +119,13 @@ input:
 | 1 | Check UI Scope | Determine if feature has web UI | Has web UI OR skip |
 | 2 | Generate Plan | Create test cases from acceptance criteria | Test cases defined |
 | 3 | Analyze HTML | Extract element selectors from UI code | Selectors identified |
-| 4 | Test Data Prep | Ask user for test data (if auto_proceed=false) | Data collected OR skipped |
+| 4 | Test Data Prep | Ask user for test data (if process_preference.auto_proceed=="manual") | Data collected OR skipped |
 | 5 | Reflect & Refine | Review and update test cases | Cases validated |
 | 6 | Execute Tests | Run tests via Chrome DevTools MCP | Tests complete |
 | 7 | Report Results | Document test results and metrics | Results documented |
 
 BLOCKING: Step 1 - If no web UI, output status=skipped and proceed to next_task_based_skill.
-BLOCKING: Step 4 - If auto_proceed=true, skip this step and use placeholder/generated data.
+BLOCKING: Step 4 - If process_preference.auto_proceed=="auto", skip this step and use placeholder/generated data.
 BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready for manual execution.
 
 ---
@@ -202,7 +202,7 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
   <step_4>
     <name>Test Data Preparation</name>
     <action>
-      1. IF auto_proceed = true: skip this step, use placeholder/generated test data
+      1. IF process_preference.auto_proceed == "auto": skip this step, use placeholder/generated test data
       2. ELSE:
          a. ANALYZE each test case for data requirements (Input, Selection, Expected, Compare)
          b. ASK user for test data per test case (see references/detailed-procedures.md)
@@ -306,8 +306,8 @@ task_completion_output:
   category: "{standalone | feature-stage}"
   status: completed | blocked | skipped
   next_task_based_skill: "Feature Closing | null"
-  require_human_review: "no"
-  auto_proceed: "{from input}"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
@@ -352,7 +352,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="conditional">
     <name>Test data collected from user</name>
-    <verification>Test Data tables populated (if auto_proceed=false and has UI)</verification>
+    <verification>Test Data tables populated (if process_preference.auto_proceed=="manual" and has UI)</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Test cases reflected and refined</name>

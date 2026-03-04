@@ -60,11 +60,11 @@ input:
   # Task type attributes
   category: "feature-stage"
   next_task_based_skill: "Feature Acceptance Test"
-  require_human_review: no
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   feature_phase: "Code Implementation"
 
   # Required inputs
-  auto_proceed: false
   feature_id: "{FEATURE-XXX}"
 
   # Git strategy (from .x-ipe.yaml, passed by workflow)
@@ -339,8 +339,8 @@ task_completion_output:
   category: "feature-stage"
   status: completed | blocked
   next_task_based_skill: "Feature Acceptance Test"
-  require_human_review: no
-  auto_proceed: "{from input auto_proceed}"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"

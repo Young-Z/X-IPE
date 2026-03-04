@@ -65,11 +65,11 @@ input:
   # Task type attributes
   category: "feature-stage"
   next_task_based_skill: "Code Implementation"
-  require_human_review: yes
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   feature_phase: "Technical Design"
 
   # Required inputs
-  auto_proceed: false
   mockup_list: "N/A"
 
   # Context (from previous task or project)
@@ -288,8 +288,9 @@ task_completion_output:
   category: "feature-stage"
   status: completed | blocked
   next_task_based_skill: "Code Implementation"
-  require_human_review: yes
-  auto_proceed: {from input auto_proceed}
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
+  auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"

@@ -46,11 +46,11 @@ input:
   # Task type attributes
   category: "feature-stage"
   next_task_based_skill: "Code Implementation"
-  require_human_review: "no"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   feature_phase: "Test Generation"
 
   # Required inputs
-  auto_proceed: false
   feature_id: "{FEATURE-XXX}"
 
   # Tech context (from Technical Design output)
@@ -305,8 +305,8 @@ task_completion_output:
   category: "feature-stage"
   status: completed | blocked
   next_task_based_skill: "Code Implementation"
-  require_human_review: "no"
-  auto_proceed: {from input}
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"

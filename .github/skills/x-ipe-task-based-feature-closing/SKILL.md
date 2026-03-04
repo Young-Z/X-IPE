@@ -46,11 +46,11 @@ input:
   # Task type attributes
   category: "feature-stage"
   next_task_based_skill: "User Manual"
-  require_human_review: false
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   feature_phase: "Feature Closing"
 
   # Required inputs
-  auto_proceed: false
   feature_id: "{FEATURE-XXX}"
   feature_title: "{title}"
   feature_version: "{version}"
@@ -316,8 +316,8 @@ task_completion_output:
   category: "feature-stage"
   status: completed | blocked
   next_task_based_skill: "User Manual"
-  require_human_review: false
-  auto_proceed: "{from input auto_proceed}"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"

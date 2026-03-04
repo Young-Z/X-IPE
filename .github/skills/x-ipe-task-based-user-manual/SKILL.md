@@ -38,10 +38,10 @@ input:
   # Task type attributes
   category: "standalone"
   next_task_based_skill: null
-  require_human_review: "yes"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
 
   # Required inputs
-  auto_proceed: false
 ```
 
 ### Input Initialization
@@ -150,7 +150,8 @@ task_completion_output:
   category: "standalone"
   status: completed | blocked
   next_task_based_skill: null
-  require_human_review: "yes"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"

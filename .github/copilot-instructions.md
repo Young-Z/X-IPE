@@ -129,12 +129,12 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 **Discovery rule:**
 1. Scan `.github/skills/x-ipe-task-based-*/SKILL.md`
-2. Each skill's Output Result YAML declares: `category`, `next_task_based_skill`, `require_human_review`
+2. Each skill's Output Result YAML declares: `category`, `next_task_based_skill`, `process_preference.auto_proceed`
 3. Each skill's `description` in frontmatter contains trigger keywords for request matching
 
 **Request matching:** Match user request against trigger keywords in each skill's description (e.g., "fix bug" → `x-ipe-task-based-bug-fix`, "implement feature" → `x-ipe-task-based-code-implementation`).
 
-> **Note:** When **Auto-Proceed is enabled** (global or task-level), `require_human_review` is **skipped** regardless of the skill's default.
+> **Note:** When **Auto-Proceed is enabled** (global or task-level), `require_human_review` is **skipped** regardless of the skill's default. The `process_preference.auto_proceed` enum (`manual | auto | stop_for_question`) controls this behavior.
 
 ### 🛑 STOP AND THINK: Pre-Flight Checklist
 

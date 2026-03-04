@@ -63,10 +63,10 @@ input:
   # Task type attributes
   category: "requirement-stage"
   next_task_based_skill: "Feature Refinement"
-  require_human_review: yes
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
 
   # Required inputs
-  auto_proceed: false
   mockup_list: "N/A"  # List of mockups from previous task or context
 
   # Context (from previous task or project)
@@ -394,8 +394,8 @@ task_completion_output:
   category: "requirement-stage"
   status: completed | blocked
   next_task_based_skill: "x-ipe-task-based-feature-refinement"
-  require_human_review: yes
-  auto_proceed: "{from input auto_proceed}"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"

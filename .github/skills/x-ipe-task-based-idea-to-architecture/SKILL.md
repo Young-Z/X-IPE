@@ -53,10 +53,10 @@ input:
   # Task type attributes
   category: "ideation-stage"
   next_task_based_skill: "Requirement Gathering"
-  require_human_review: true
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
 
   # Required inputs
-  auto_proceed: false
   current_idea_folder: "{path}"   # e.g., x-ipe-docs/ideas/mobile-app-idea
   extra_instructions: null        # Additional context for diagram creation
 
@@ -270,7 +270,8 @@ task_completion_output:
   category: "ideation-stage"
   task_based_skill: "Idea to Architecture"
   status: "completed"
-  auto_proceed: "{from input}"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
@@ -285,7 +286,8 @@ task_completion_output:
       path: "{current_idea_folder}/architecture/data-flow-v1.md"
   idea_summary_version: "v{N+1}"
   next_task_based_skill: "Requirement Gathering"
-  require_human_review: true
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   task_output_links:
     - "{current_idea_folder}/architecture/system-architecture-v1.md"
     - "{current_idea_folder}/architecture/data-flow-v1.md"

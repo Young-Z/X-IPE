@@ -48,10 +48,10 @@ input:
   # Task type attributes
   category: "ideation-stage"
   next_task_based_skill: "Requirement Gathering"
-  require_human_review: "no"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
 
   # Required inputs
-  auto_proceed: false
   ideation_toolbox_meta: "{project_root}/x-ipe-docs/config/tools.json"
   current_idea_folder: "N/A"  # REQUIRED from context - path to current idea folder
   extra_instructions: "N/A"   # Additional context for mockup creation
@@ -332,7 +332,8 @@ task_completion_output:
   category: "ideation-stage"
   status: completed | blocked
   next_task_based_skill: "Requirement Gathering"
-  require_human_review: "no"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
