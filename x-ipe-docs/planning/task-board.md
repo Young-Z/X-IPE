@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-706 | Feature Refinement | FEATURE-036-C: Stage Ribbon & Action Execution — apply CR-001 spec changes: clickable buttons during execution, running animation, client-side running state | Bolt ⚡ | ✅ completed | 03-04-2026 07:13:00 | specification.md (v1.1) | Technical Design |
 | TASK-705 | Change Request | Action buttons become unclickable during execution with no progress animation. CR: keep buttons clickable, add running animation, persist running state (reset on refresh). Feedback-20260304-134328 | Bolt ⚡ | ✅ completed | 03-04-2026 06:05:00 | CR-001.md, specification.md (v1.1) | Feature Refinement |
 | TASK-704 | Code Implementation | FEATURE-043-C: Skill Path Convention Updates — add root-relative path constraint to 12 skills + skill creator template. 13 SKILL.md files updated. Workflow: update-file-link-preview | Sage 🌿 | ✅ completed | 03-04-2026 05:45:00 | 13 SKILL.md files | Feature Closing |
 | TASK-703 | Technical Design | FEATURE-043-C: Skill Path Convention Updates — design constraint placement strategy for 12 skills + template. Workflow: update-file-link-preview | Sage 🌿 | ✅ completed | 03-04-2026 05:42:00 | technical-design.md | Code Implementation |
@@ -241,7 +242,7 @@
 
 | Task ID | Task | Description | Role | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------------|--------------|-------|
-| | | *See [task-board-archive-1.md](task-board-archive-1.md) for all completed tasks (405 total)* | | | | |
+| | | *See [task-board-archive-1.md](x-ipe-docs/planning/task-board-archive-1.md) for all completed tasks (405 total)* | | | | |
 
 ---
 

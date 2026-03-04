@@ -4,20 +4,20 @@
 > Epic: EPIC-036 (Engineering Workflow View)  
 > Version: v1.1  
 > Status: Refined  
-> Last Updated: 02-17-2026
+> Last Updated: 03-04-2026
 
 ## Version History
 
 | Version | Date | Description | Change Request |
 |---------|------|-------------|----------------|
-| v1.1 | 03-04-2026 | Action buttons remain clickable during execution, add running animation, client-side running state | [CR-001](./CR-001.md) |
+| v1.1 | 03-04-2026 | Action buttons remain clickable during execution, add running animation, client-side running state | [CR-001](x-ipe-docs/requirements/EPIC-036/FEATURE-036-C/CR-001.md) |
 | v1.0 | 02-17-2026 | Initial specification | - |
 
 ## Linked Mockups
 
 | Mockup | Type | Path | Description | Status |
 |--------|------|------|-------------|--------|
-| Engineering Workflow View | HTML | [../mockups/workflow-view-v1.html](../mockups/workflow-view-v1.html) | Full workflow view — stage ribbon section, action buttons area | current |
+| Engineering Workflow View | HTML | [../mockups/workflow-view-v1.html](x-ipe-docs/requirements/EPIC-036/mockups/workflow-view-v1.html) | Full workflow view — stage ribbon section, action buttons area | current |
 
 > **Note:** The shared mockup covers the full EPIC-036 UI. FEATURE-036-C focuses on the stage ribbon bar and action buttons area within each expanded workflow panel.
 
@@ -80,6 +80,7 @@ The primary user is a developer using X-IPE who wants to see where they are in t
   - Done: green background/border, ✓ prefix, green text
   - Suggested (next recommended): yellow dashed border, → prefix, amber text, subtle glow animation
   - Normal (available but not suggested): white background, gray border, ○ prefix
+  - Running (in-progress execution): visible pulse-ring animation overlay, button remains fully clickable, slightly elevated appearance
   - Locked: gray background, lock icon prefix, reduced opacity, `cursor: not-allowed`
 - **AC-011**: Each action button displays an emoji icon and action name matching the action-to-skill mapping table.
 - **AC-012**: The "suggested" action is determined by `GET /api/workflow/{name}/next-action` response.
@@ -105,7 +106,7 @@ The primary user is a developer using X-IPE who wants to see where they are in t
 
 ### AC Group: CLI Agent Action Execution
 
-- **AC-014**: Clicking a CLI Agent action button calls `GET /api/workflow/{name}/next-action` to verify the action is allowed (not locked/already done).
+- **AC-014**: Clicking a CLI Agent action button checks if the action is locked. If locked, shows a toast with the reason. Otherwise, proceeds with execution regardless of current action status (including `in_progress` or `done`).
 - **AC-015**: If action is allowed, the console panel opens (if not already visible) and an idle session is selected.
 - **AC-016**: The skill command is auto-typed into the selected console session (e.g., the skill trigger phrase). The command is NOT auto-submitted — user must press Enter to confirm.
 - **AC-017**: If no idle session is available, a toast notification informs the user: "No idle console session available. Open a new session first."
@@ -124,6 +125,13 @@ The primary user is a developer using X-IPE who wants to see where they are in t
 - **AC-024**: Locked stages in the ribbon have reduced opacity and show a lock icon instead of a number.
 - **AC-025**: Action buttons for locked stages show the lock prefix icon and are non-clickable (`cursor: not-allowed`).
 - **AC-026**: Hovering a locked action button shows a tooltip: "Complete {required_stage} to unlock this action."
+
+### AC Group: Action Running State (CR-001)
+
+- **AC-030**: Action buttons remain fully clickable during execution — `pointer-events` is NOT set to `none` for in-progress/running buttons. Only locked buttons are non-clickable.
+- **AC-031**: A running action displays a visible CSS pulse-ring animation on the button, visually distinct from the "suggested" glow animation (different color, different rhythm).
+- **AC-032**: Running state is tracked client-side only using a JavaScript `Set` or `Map`. The running state is NOT persisted to the backend. On page refresh, all buttons reset to their API-derived status (done/pending/suggested/normal/locked).
+- **AC-033**: Multiple actions can display the running animation simultaneously — each action button independently tracks its own running state.
 
 ### AC Group: Mockup Alignment
 
@@ -182,7 +190,7 @@ The primary user is a developer using X-IPE who wants to see where they are in t
 
 - **NFR-001**: Stage ribbon and action buttons must render within 200ms after workflow data is available.
 - **NFR-002**: Action button click-to-console-type latency must be under 500ms.
-- **NFR-003**: CSS animations (pulsing dot, suggested glow) must not cause noticeable CPU usage.
+- **NFR-003**: CSS animations (pulsing dot, suggested glow, running pulse-ring) must not cause noticeable CPU usage.
 - **NFR-004**: Must work in latest Chrome (primary target).
 - **NFR-005**: Stage ribbon must be horizontally scrollable on narrow viewports without breaking layout.
 
@@ -194,6 +202,7 @@ The primary user is a developer using X-IPE who wants to see where they are in t
 - **UIR-004**: Action buttons use consistent emoji icons from the action-to-skill mapping table.
 - **UIR-005**: Completed/active/pending stages use the color system: green (#22c55e / #ecfdf5) for done, accent (#10b981) for active, gray (#94a3b8 / #e2e8f0) for pending.
 - **UIR-006**: Action area sections have uppercase label headers (e.g., "COMPLETED ACTIONS", "IDEATION ACTIONS") matching the mockup's `.actions-label` style.
+- **UIR-007**: Running action button has a pulse-ring animation (CSS `::after` pseudo-element, ~1.5s infinite cycle) using a distinct color (e.g., blue/cyan) to differentiate from the suggested glow (amber). The button remains interactive with normal cursor.
 
 ## Dependencies
 
@@ -219,7 +228,7 @@ The primary user is a developer using X-IPE who wants to see where they are in t
 | 1 | All actions in a stage are done but stage not yet marked completed | Frontend shows actions as done; stage status comes from API (may still be "active" until gating re-evaluation) |
 | 2 | No idle console session available for CLI action | Toast: "No idle console session available. Open a new session first." |
 | 3 | API returns error when fetching workflow state | Stage ribbon area shows error message with retry button |
-| 4 | Action execution triggered while another action is in_progress | Allow it — multiple actions can be in_progress simultaneously (different console sessions) |
+| 4 | Action execution triggered while another action is in_progress | Allow it — buttons remain clickable with running animation. Multiple actions can run simultaneously (different console sessions). Running state is client-side only and resets on refresh. |
 | 5 | User clicks done action | Toast: "Action already completed" — no re-execution |
 | 6 | User clicks locked action | Toast: "Complete {required_stage} to unlock this action" — no execution |
 | 7 | Quality Evaluation action (deferred to v2) | Render button with "Coming Soon" tooltip, disabled state |
@@ -244,6 +253,7 @@ The primary user is a developer using X-IPE who wants to see where they are in t
 - Console integration should reuse the same pattern as the existing copilot button in the ideation view — find an idle session via DOM inspection or session API, then programmatically type into the terminal input.
 - Action-to-skill mapping is a static configuration object in the JS module — no API call needed for the mapping itself.
 - The stage ribbon CSS should be added to `workflow.css` to keep styles co-located with the feature module.
+- Running state for action buttons is tracked client-side only (JavaScript `Set` keyed by action name). This set is populated when an action is dispatched and cleared on page refresh. The running animation CSS class (`.action-btn.running`) is applied/removed based on this set, independently from the API-derived action status.
 
 ## Open Questions
 
