@@ -161,11 +161,13 @@ const workflow = {
     },
 
     async _renderPanelBody(wf, body) {
+        let stateResp = null;
         try {
-            const [stateResp, nextResp] = await Promise.all([
+            const [sr, nextResp] = await Promise.all([
                 fetch(`/api/workflow/${encodeURIComponent(wf.name)}`).then(r => r.json()),
                 fetch(`/api/workflow/${encodeURIComponent(wf.name)}/next-action`).then(r => r.json())
             ]);
+            stateResp = sr;
             if (stateResp.success && typeof workflowStage !== 'undefined') {
                 this._lastActivity[wf.name] = stateResp.data.last_activity || '';
                 workflowStage.render(body, stateResp.data, nextResp.data, wf.name);
