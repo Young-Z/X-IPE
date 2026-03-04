@@ -390,6 +390,27 @@ header.onclick = async () => {
 .action-btn.locked { background: rgba(255,255,255,0.02); border-color: #1e293b; color: #475569; cursor: not-allowed; opacity: 0.5; }
 .action-btn.locked::before { content: '🔒'; font-size: 10px; }
 
+/* CR-001: Running state animation — button remains clickable */
+.action-btn.running {
+    position: relative;
+    /* NO pointer-events: none — button stays clickable */
+    cursor: pointer;
+}
+.action-btn.running::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: inherit;
+    border: 2px solid #38bdf8;  /* blue/cyan — distinct from amber suggested glow */
+    animation: action-running-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    pointer-events: none;  /* pseudo-element doesn't block clicks */
+}
+
+@keyframes action-running-pulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 0.2; transform: scale(1.06); }
+}
+
 @keyframes gentle-glow { 0%,100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 0 3px rgba(245,158,11,0.15); } }
 
 /* Meta section below ribbon */
@@ -399,6 +420,19 @@ header.onclick = async () => {
 /* Error state */
 .workflow-error { padding: 20px; text-align: center; color: #ef4444; }
 .workflow-error button { margin-top: 8px; padding: 4px 12px; border-radius: 4px; border: 1px solid #ef4444; background: transparent; color: #ef4444; cursor: pointer; }
+```
+
+### CSS Changes to `action-execution-modal.css` (CR-001)
+
+```css
+/* REMOVE or replace the old .action-btn.in-progress block: */
+
+/* OLD (v1.0) — blocks clicks: */
+/* .action-btn.in-progress { pointer-events: none; opacity: 0.8; } */
+
+/* NEW (v1.1) — no longer needed in action-execution-modal.css */
+/* Running state is now handled by .action-btn.running in workflow.css */
+/* The .in-progress class is no longer applied to action buttons */
 ```
 
 ### Script Tag Addition
@@ -451,13 +485,12 @@ async _dispatchCliAction(wfName, actionKey, skillName) {
 }
 ```
 
-### Implementation Steps
+### Implementation Steps (CR-001 v1.1 Changes Only)
 
-1. **Create `workflow-stage.js`** — module with render, ribbon, actions, dispatch logic (~200 lines)
-2. **Update `workflow.css`** — append stage ribbon and action button styles (~80 lines)
-3. **Update `workflow.js`** — modify `_renderPanel` to use `_renderPanelBody` with lazy-load on expand (~30 lines changed)
-4. **Update `base.html`** — add `<script>` tag for `workflow-stage.js`
-5. **Run tests** — verify existing workflow tests pass, run new tests
+1. **Update `workflow-stage.js`** — Add `_runningActions: new Set()` property; add `_markRunning(actionKey, btn)` method; update `_renderActionButton` to apply `.running` class from Set; update click handler to only block locked actions (~15 lines changed)
+2. **Update `workflow.css`** — Add `.action-btn.running` and `.action-btn.running::after` CSS rules with `action-running-pulse` keyframes (~15 lines added)
+3. **Update `action-execution-modal.css`** — Remove `pointer-events: none` and `opacity: 0.8` from `.action-btn.in-progress`; remove `.action-btn.in-progress::after` pulse-ring (~20 lines removed)
+4. **Run tests** — verify existing workflow tests pass, run new tests for running state
 
 ### Edge Cases
 
@@ -465,8 +498,20 @@ async _dispatchCliAction(wfName, actionKey, skillName) {
 |----------|----------|
 | API error fetching full state | Show error div in panel body with retry button |
 | No idle console session | Toast: "No idle console session available" |
-| Action already done | Toast: "Action already completed" |
-| Locked action clicked | Toast: "Complete {stage} to unlock this action" |
+| Action already done | Allow re-click — opens modal/CLI as normal. Button keeps .done class, .running added on top |
+| Locked action clicked | Toast: "Complete {stage} to unlock this action" — only locked blocks clicks |
 | Quality Evaluation (deferred) | Button rendered with disabled state + "Coming Soon" tooltip |
 | Workflow has no features yet | Implement/Validation/Feedback stages show as locked |
 | Rapid panel expand/collapse | Debounce API calls; abort previous fetch on re-expand |
+| Multiple actions running simultaneously | Each has independent .running class from _runningActions Set; all show pulse-ring animation |
+| Page refresh while actions running | _runningActions Set is empty on load; all buttons show API-derived state only |
+| Button re-clicked while already running | Allowed — dispatches another CLI command; _runningActions already contains the key |
+
+---
+
+## Design Change Log
+
+| Version | Date | Changes | CR |
+|---------|------|---------|----|
+| v1.1 | 03-04-2026 | Added `_runningActions` Set for client-side running state; added `.action-btn.running` CSS class with pulse-ring animation; removed `pointer-events: none` from in-progress buttons; updated click handler to only block locked actions; removed `.action-btn.in-progress` from action-execution-modal.css | [CR-001](x-ipe-docs/requirements/EPIC-036/FEATURE-036-C/CR-001.md) |
+| v1.0 | 02-17-2026 | Initial design — stage ribbon, action buttons, CLI/modal dispatch | - |
