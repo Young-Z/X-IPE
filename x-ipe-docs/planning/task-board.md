@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-709 | Code Implementation | FEATURE-036-C v1.1: Implement CR-001 action running state — add _runningActions Set to workflow-stage.js, .running CSS to workflow.css, remove pointer-events:none from action-execution-modal.css | Bolt ⚡ | 🔄 in_progress | 03-04-2026 07:20:00 | - | Feature Acceptance Test |
 | TASK-708 | Technical Design | FEATURE-036-C v1.1: Action Running State — client-side _runningActions Set, .running CSS animation, remove pointer-events:none, updated click handler (CR-001) | Bolt ⚡ | ✅ completed | 03-04-2026 07:15:00 | technical-design.md (v1.1) | Code Implementation |
 | TASK-707 | Feature Refinement | FEATURE-036-C v1.1: Apply CR-001 spec changes — AC-010 Running state, AC-014 allow re-click, AC-030-033 running state ACs, UIR-007 animation | Bolt ⚡ | ✅ completed | 03-04-2026 07:13:00 | specification.md (v1.1) | Technical Design |
 | TASK-706 | Skill Update | Update x-ipe-task-based-change-request: add Conflict Analysis step (Step 4) between Classify CR and Human Approval — detect spec/code/design conflicts with existing features before human reviews classification | Echo 🔊 | 🔄 in_progress | 03-04-2026 06:07:00 | - | - |

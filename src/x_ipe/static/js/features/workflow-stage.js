@@ -43,6 +43,9 @@ class StageGateChecker {
 const workflowStage = {
     STAGE_ORDER: ['ideation', 'requirement', 'implement', 'validation', 'feedback'],
 
+    // CR-001: Client-side running state — resets on page refresh
+    _runningActions: new Set(),
+
     FEATURE_LANE_ACTIONS: [
         { key: 'feature_refinement', label: 'Refinement',  icon: '📐' },
         { key: 'technical_design',   label: 'Tech Design', icon: '⚙' },
@@ -343,6 +346,8 @@ const workflowStage = {
 
         btn.className = `action-btn ${stateClass}`;
         if (isSuggested && stateClass !== 'done' && stateClass !== 'locked') btn.classList.add('suggested');
+        // CR-001: Apply .running class from client-side running state
+        if (this._runningActions.has(actionKey)) btn.classList.add('running');
 
         if (actionDef.deferred) {
             btn.classList.add('locked');
@@ -370,6 +375,8 @@ const workflowStage = {
                 this._handleCompletedAction(wfName, actionKey, actionDef);
                 return;
             }
+            // CR-001: Mark running before dispatch (client-side only)
+            this._markRunning(actionKey, btn);
             if (actionDef.interaction === 'modal') {
                 this._dispatchModalAction(wfName, actionKey);
             } else {
@@ -378,6 +385,12 @@ const workflowStage = {
         };
 
         return btn;
+    },
+
+    // CR-001: Mark action as running (client-side only, resets on page refresh)
+    _markRunning(actionKey, btnElement) {
+        this._runningActions.add(actionKey);
+        btnElement.classList.add('running');
     },
 
     /**
