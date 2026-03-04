@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-723 | Technical Design | FEATURE-044-A: Decision Making Tool Skill — design the tool skill structure, 6-step process, decision log template | Rune 🔮 | ✅ done | 03-04-2026 11:15:00 | x-ipe-docs/requirements/EPIC-044/FEATURE-044-A/technical-design.md | Code Implementation |
 | TASK-722 | Feature Refinement | FEATURE-044-A: Decision Making Tool Skill — create detailed specification for the x-ipe-tool-decision-making tool skill | Rune 🔮 | ✅ done | 03-04-2026 11:00:00 | x-ipe-docs/requirements/EPIC-044/FEATURE-044-A/specification.md | Technical Design |
 | TASK-721 | Feature Breakdown | EPIC-044: CR-Adding Auto Proceed option — break requirements into features (decision tool skill, template update, bulk skill update, orchestrator, backend, UI) | Rune 🔮 | ✅ done | 03-04-2026 10:50:00 | x-ipe-docs/requirements/requirement-details-part-16.md | Feature Refinement |
 | TASK-720 | Requirement Gathering | EPIC-044: CR-Adding Auto Proceed option — gather requirements from IDEA-031 refined idea. Unified 3-mode process_preference, decision_making tool skill, update 22 skills + orchestrator | Rune 🔮 | ✅ done | 03-04-2026 10:12:00 | 03-04-2026 10:45:00 | Feature Breakdown |
