@@ -122,7 +122,7 @@ const workflowStage = {
             if (sharedStageNames.length > 0) {
                 container.appendChild(this._renderActionsArea(stages, nextAction, workflowName, sharedStageNames));
             }
-            container.appendChild(this._renderFeatureSelector(stages, nextAction, workflowName));
+            container.appendChild(this._renderToolbar(stages, nextAction, workflowName, workflowState));
             container.appendChild(this._renderFeatureLanes(stages, nextAction, workflowName));
         } else {
             container.appendChild(this._renderActionsArea(stages, nextAction, workflowName));
@@ -668,63 +668,46 @@ const workflowStage = {
         return feats;
     },
 
-    /** Render feature selector dropdown. */
-    _renderFeatureSelector(stages, nextAction, wfName) {
+    /** Render toolbar with Auto-Proceed dropdown and Dependencies toggle. */
+    _renderToolbar(stages, nextAction, wfName, workflowState) {
         const wrap = document.createElement('div');
         wrap.className = 'feature-selector-wrap';
 
-        const btn = document.createElement('button');
-        btn.className = 'feature-selector-btn';
-        btn.innerHTML = 'Select Feature to Work On ▼';
+        // Auto-Proceed dropdown (Bootstrap styled)
+        const currentMode = workflowState?.global?.process_preference?.auto_proceed || 'manual';
+        const modeLabels = { manual: 'Manual', auto: 'Auto', stop_for_question: 'Stop for Question' };
+        const modeIcons = { manual: 'bi-hand-index', auto: 'bi-lightning-charge-fill', stop_for_question: 'bi-pause-circle' };
+        const modeBadges = { manual: 'text-bg-secondary', auto: 'text-bg-success', stop_for_question: 'text-bg-warning' };
 
-        const dropdown = document.createElement('div');
-        dropdown.className = 'feature-selector-dropdown';
-
-        const header = document.createElement('div');
-        header.className = 'feature-selector-header';
-        header.textContent = 'Select Feature to Work On';
-        dropdown.appendChild(header);
-
-        const feats = this._collectFeatures(stages);
-        Object.entries(feats).forEach(([id, data], idx) => {
-            const item = document.createElement('div');
-            item.className = 'feature-selector-item';
-            item.dataset.featureId = id;
-            if (idx === 0) item.classList.add('selected');
-
-            const icon = this._getFeatureStatusIcon(data);
-            const stageName = this._getFeatureCurrentStage(data);
-            const nextAct = nextAction && nextAction.feature_id === id ? nextAction.action : '';
-
-            item.innerHTML = `
-                <span class="feature-selector-icon">${icon}</span>
-                <div class="feature-selector-info">
-                    <div class="feature-selector-name">${id} · ${data.name || id}</div>
-                    <div class="feature-selector-stage">${stageName}</div>
-                </div>
-                ${nextAct ? `<span class="feature-selector-next">→ ${nextAct.replace(/_/g, ' ')}</span>` : ''}`;
-
-            item.onclick = (e) => {
-                e.stopPropagation();
-                dropdown.querySelectorAll('.feature-selector-item').forEach(i => i.classList.remove('selected'));
-                item.classList.add('selected');
-                const lanes = wrap.parentElement.querySelectorAll('.feature-lane');
-                lanes.forEach((lane, i) => {
-                    lane.classList.toggle('highlighted', lane.dataset.feature === id);
-                });
-                dropdown.classList.remove('open');
+        const apWrap = document.createElement('div');
+        apWrap.className = 'dropdown d-inline-block';
+        apWrap.innerHTML = `
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi ${modeIcons[currentMode]}"></i> Auto-Proceed: <span class="badge ${modeBadges[currentMode]}">${modeLabels[currentMode]}</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark">
+                <li><button class="dropdown-item${currentMode === 'manual' ? ' active' : ''}" data-mode="manual"><i class="bi bi-hand-index"></i> Manual</button></li>
+                <li><button class="dropdown-item${currentMode === 'auto' ? ' active' : ''}" data-mode="auto"><i class="bi bi-lightning-charge-fill"></i> Auto</button></li>
+                <li><button class="dropdown-item${currentMode === 'stop_for_question' ? ' active' : ''}" data-mode="stop_for_question"><i class="bi bi-pause-circle"></i> Stop for Question</button></li>
+            </ul>`;
+        const btnLabel = apWrap.querySelector('.dropdown-toggle');
+        apWrap.querySelectorAll('.dropdown-item').forEach(item => {
+            item.onclick = async () => {
+                const mode = item.dataset.mode;
+                try {
+                    const resp = await fetch(`/api/workflow/${encodeURIComponent(wfName)}/settings`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ process_preference: { auto_proceed: mode } })
+                    });
+                    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                    apWrap.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    btnLabel.innerHTML = `<i class="bi ${modeIcons[mode]}"></i> Auto-Proceed: <span class="badge ${modeBadges[mode]}">${modeLabels[mode]}</span>`;
+                } catch (e) { /* revert silently */ }
             };
-            dropdown.appendChild(item);
         });
-
-        btn.onclick = (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle('open');
-        };
-        document.addEventListener('click', () => dropdown.classList.remove('open'));
-
-        wrap.appendChild(btn);
-        wrap.appendChild(dropdown);
+        wrap.appendChild(apWrap);
 
         // Dependencies toggle
         const depToggle = document.createElement('span');
