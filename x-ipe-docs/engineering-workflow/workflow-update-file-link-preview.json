@@ -2,7 +2,7 @@
   "schema_version": "3.0",
   "name": "update-file-link-preview",
   "created": "2026-03-03T13:33:34.127819+00:00",
-  "last_activity": "2026-03-04T02:42:07.413831+00:00",
+  "last_activity": "2026-03-04T02:44:01.258136+00:00",
   "idea_folder": null,
   "current_stage": "validation",
   "shared": {
@@ -193,8 +193,14 @@
             ]
           },
           "technical_design": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-043/FEATURE-043-B/",
+              "tech-design": "x-ipe-docs/requirements/EPIC-043/FEATURE-043-B/technical-design.md"
+            },
+            "next_actions_suggested": [
+              "implementation"
+            ]
           },
           "implementation": {
             "status": "pending",
