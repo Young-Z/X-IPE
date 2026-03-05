@@ -26,9 +26,6 @@ from .file_service import (
 # Ideas Service (FEATURE-008)
 from .ideas_service import IdeasService
 
-# KB Service (FEATURE-025-A)
-from .kb_service import KBService
-
 # Terminal Service (FEATURE-005)
 from .terminal_service import (
     OutputBuffer,
@@ -96,8 +93,6 @@ __all__ = [
     'ContentService',
     # Ideas
     'IdeasService',
-    # KB
-    'KBService',
     # Terminal
     'OutputBuffer',
     'PersistentSession',

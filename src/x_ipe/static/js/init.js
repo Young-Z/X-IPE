@@ -140,9 +140,6 @@ function initializeApp() {
         }
     }
     
-    // FEATURE-025-A: Knowledge Base button click handler
-    const kbBtn = document.getElementById('btn-knowledge-base');
-
     // FEATURE-036-B: Engineering Workflow / Free mode toggle handler
     const modeToggleBtn = document.getElementById('mode-toggle-btn');
     const modeLabelFree = document.getElementById('mode-label-free');
@@ -196,37 +193,6 @@ function initializeApp() {
         });
     }
 
-    if (kbBtn) {
-        kbBtn.addEventListener('click', () => {
-            console.log('[KB] Knowledge Base button clicked');
-            
-            // Update breadcrumb
-            const breadcrumb = document.getElementById('breadcrumb');
-            if (breadcrumb) {
-                breadcrumb.innerHTML = '<li class="breadcrumb-item active">Knowledge Base</li>';
-            }
-            
-            // Hide Create Idea button
-            const createIdeaBtn = document.getElementById('btn-create-idea');
-            if (createIdeaBtn) {
-                createIdeaBtn.classList.add('d-none');
-            }
-            
-            // Render Knowledge Base view in content area (two-column layout like Ideation)
-            const container = document.getElementById('content-body');
-            if (container && window.kbCore) {
-                window.kbCore.render(container);
-                // Initialize search & preview (FEATURE-025-E)
-                if (window.kbSearch) {
-                    window.kbSearch.init();
-                    window.kbSearch.enhanceSidebarSearch();
-                }
-            } else if (container) {
-                container.innerHTML = '<div class="p-4 text-muted">Knowledge Base module not loaded</div>';
-            }
-        });
-    }
-    
     // Initialize terminal panel (FEATURE-005, FEATURE-029-A)
     if (typeof TerminalManager !== 'undefined') {
         window.terminalManager = new TerminalManager('terminal-content');

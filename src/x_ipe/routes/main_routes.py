@@ -50,17 +50,6 @@ def workplace():
     return render_template('workplace.html')
 
 
-@main_bp.route('/knowledge-base')
-@x_ipe_tracing()
-def knowledge_base():
-    """
-    GET /knowledge-base
-    
-    FEATURE-025-A: Knowledge Base page
-    """
-    return render_template('knowledge-base.html')
-
-
 @main_bp.route('/api/project/structure')
 @x_ipe_tracing()
 def get_project_structure():

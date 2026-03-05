@@ -177,7 +177,7 @@ def _init_services(app):
 
 def _register_blueprints(app):
     """Register all Flask Blueprints."""
-    from x_ipe.routes import main_bp, settings_bp, project_bp, ideas_bp, tools_bp, proxy_bp, kb_bp, config_bp
+    from x_ipe.routes import main_bp, settings_bp, project_bp, ideas_bp, tools_bp, proxy_bp, config_bp
     from x_ipe.routes.uiux_feedback_routes import uiux_feedback_bp
     from x_ipe.routes.tracing_routes import tracing_bp
     from x_ipe.routes.quality_evaluation_routes import quality_evaluation_bp
@@ -197,7 +197,6 @@ def _register_blueprints(app):
     app.register_blueprint(uiux_feedback_bp)
     app.register_blueprint(tracing_bp)
     app.register_blueprint(quality_evaluation_bp)
-    app.register_blueprint(kb_bp)
     app.register_blueprint(config_bp)
     app.register_blueprint(uiux_reference_bp)
     app.register_blueprint(workflow_bp)
