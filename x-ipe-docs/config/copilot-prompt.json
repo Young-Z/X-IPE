@@ -172,12 +172,12 @@
         {
           "language": "en",
           "label": "Code Refactor",
-          "command": "refactor code for $feature-id$ based on $output:test-report$ and $output:specification$ with code refactor skill"
+          "command": "refactor code for $feature-id$ based on $output:tech-design$, $output:test-report$ and $output:specification$ with code refactor skill"
         },
         {
           "language": "zh",
           "label": "代码重构",
-          "command": "使用代码重构技能, 基于 $output:test-report$ 和 $output:specification$ 为 $feature-id$ 重构代码"
+          "command": "使用代码重构技能, 基于 $output:tech-design$, $output:test-report$ 和 $output:specification$ 为 $feature-id$ 重构代码"
         }
       ]
     },

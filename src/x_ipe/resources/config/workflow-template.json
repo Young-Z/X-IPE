@@ -225,6 +225,10 @@
         "code_refactor": {
           "optional": false,
           "action_context": {
+            "tech-design": {
+              "required": true,
+              "candidates": "feature-docs-folder"
+            },
             "test-report": {
               "required": false,
               "candidates": "test-folder"
