@@ -851,7 +851,7 @@ class WorkflowManagerService:
             return False
         actions = prev_stage.get("actions", {})
         return all(
-            actions.get(a, {}).get("status") == "done"
+            actions.get(a, {}).get("status") in ("done", "skipped")
             for a in prev_config.get("mandatory_actions", [])
         )
 
@@ -862,7 +862,7 @@ class WorkflowManagerService:
             req_stage = state["shared"].get("requirement", {})
             actions = req_stage.get("actions", {})
             return all(
-                actions.get(a, {}).get("status") == "done"
+                actions.get(a, {}).get("status") in ("done", "skipped")
                 for a in req_config.get("mandatory_actions", [])
             )
         per_feature_stages = [s for s in self._stage_order
@@ -877,7 +877,7 @@ class WorkflowManagerService:
             return False
         actions = prev_stage.get("actions", {})
         return all(
-            actions.get(a, {}).get("status") == "done"
+            actions.get(a, {}).get("status") in ("done", "skipped")
             for a in prev_config.get("mandatory_actions", [])
         )
 
@@ -935,7 +935,7 @@ class WorkflowManagerService:
             return False
         actions = feat.get(stage_name, {}).get("actions", {})
         return all(
-            actions.get(a, {}).get("status") == "done"
+            actions.get(a, {}).get("status") in ("done", "skipped")
             for a in config["mandatory_actions"]
         )
 
