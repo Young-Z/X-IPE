@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-741 | Bug Fix | Workflow template migration: old workflows missing new actions (test_generation, code_refactor, feature_closing) — add on-read migration to backfill missing per-feature actions from current template | Pulse 🔵 | 🔄 in_progress | 03-05-2026 06:11:00 | - | - |
 | TASK-740 | Skill Reorganization | Reorganize 3 refactoring skills: convert refactoring-analysis and improve-code-quality from task-based to tool skills; restructure code-refactor as single orchestrating task-based skill that calls the 2 tool skills | Pulse 🔵 | ✅ completed | 03-05-2026 06:10:00 | x-ipe-tool-refactoring-analysis, x-ipe-tool-code-quality-sync, x-ipe-task-based-code-refactor | - |
 | TASK-739 | Bug Fix | UIUX feedback screenshot capture not rendering page content properly — SVG foreignObject approach fails to capture dynamic/styled content. Feedback-20260305-125521 | Nova ⭐ | ✅ completed | 03-05-2026 05:10:00 | homepage_service.py, homepage-infinity.js, uiux-feedback.js | - |
 | TASK-734 | Skill Update | Update x-ipe-task-based-feature-breakdown: add Epic-level granularity assessment — skill should evaluate whether to group requirements into Epics before breaking into features, based on scope/complexity best practices | Ember 🔥 | ✅ done | 03-05-2026 04:15:00 | .github/skills/x-ipe-task-based-feature-breakdown/SKILL.md | - |

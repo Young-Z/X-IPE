@@ -756,6 +756,8 @@ class WorkflowManagerService:
         if state.get("schema_version") != "2.0" and "stages" in state:
             state = self._migrate_v1_to_v2(state)
             self._write_state(name, state)
+        if self._migrate_sync_feature_actions(state):
+            self._write_state(name, state)
         return state
 
     def _write_state(self, name: str, state: dict):
@@ -1037,3 +1039,40 @@ class WorkflowManagerService:
             "shared": shared,
             "features": features,
         }
+
+    def _migrate_sync_feature_actions(self, state: dict) -> bool:
+        """Sync per-feature actions with current template — backfill missing, remove obsolete.
+
+        Returns True if state was modified (caller should persist).
+        """
+        changed = False
+        for feat in state.get("features", []):
+            for stage_name in ("implement", "validation", "feedback"):
+                config = self._stage_config.get(stage_name, {})
+                if not config:
+                    continue
+                stage_data = feat.get(stage_name)
+                if not stage_data or "actions" not in stage_data:
+                    continue
+
+                template_mandatory = set(config.get("mandatory_actions", []))
+                template_optional = set(config.get("optional_actions", []))
+                template_all = template_mandatory | template_optional
+                current_actions = stage_data["actions"]
+
+                # Add missing actions
+                for action_name in template_all:
+                    if action_name not in current_actions:
+                        action_data = {"status": "pending", "deliverables": []}
+                        if action_name in template_optional:
+                            action_data["optional"] = True
+                            action_data["status"] = "skipped"
+                        current_actions[action_name] = action_data
+                        changed = True
+
+                # Remove obsolete actions
+                obsolete = [a for a in current_actions if a not in template_all]
+                for a in obsolete:
+                    del current_actions[a]
+                    changed = True
+        return changed

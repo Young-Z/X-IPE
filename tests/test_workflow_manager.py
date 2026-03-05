@@ -668,6 +668,136 @@ class TestWorkflowAPI:
 # Tracing Tests
 # ==============================================================================
 
+class TestWorkflowTemplateMigration:
+    """TASK-741: Old workflows missing new actions should be backfilled on read."""
+
+    def test_missing_feature_actions_backfilled_on_read(self, workflow_service, workflow_dir):
+        """When a persisted workflow is missing actions from the current template,
+        _read_state should inject them with status='pending' (mandatory) or 'skipped' (optional)."""
+        # Create workflow and add features normally
+        workflow_service.create_workflow("old-wf")
+        workflow_service.update_action_status("old-wf", "compose_idea", "done")
+        workflow_service.update_action_status("old-wf", "refine_idea", "done")
+        workflow_service.update_action_status("old-wf", "requirement_gathering", "done")
+        workflow_service.update_action_status("old-wf", "feature_breakdown", "done")
+        workflow_service.add_features("old-wf", [
+            {"id": "FEAT-A", "name": "Feature A", "depends_on": []},
+        ])
+
+        # Simulate old schema: remove test_generation, code_refactor, feature_closing
+        path = os.path.join(workflow_dir, "workflow-old-wf.json")
+        with open(path) as f:
+            state = json.load(f)
+
+        feat = state["features"][0]
+        feat["implement"]["actions"].pop("test_generation", None)
+        feat["validation"]["actions"].pop("code_refactor", None)
+        feat["validation"]["actions"].pop("feature_closing", None)
+
+        with open(path, "w") as f:
+            json.dump(state, f)
+
+        # Read should backfill
+        refreshed = workflow_service.get_workflow("old-wf")
+        impl_actions = refreshed["features"][0]["implement"]["actions"]
+        val_actions = refreshed["features"][0]["validation"]["actions"]
+
+        assert "test_generation" in impl_actions, "test_generation should be backfilled"
+        assert impl_actions["test_generation"]["status"] == "pending"
+        assert "code_refactor" in val_actions, "code_refactor should be backfilled"
+        assert val_actions["code_refactor"]["status"] == "pending"
+        assert "feature_closing" in val_actions, "feature_closing should be backfilled"
+        assert val_actions["feature_closing"]["status"] == "pending"
+
+    def test_backfill_preserves_existing_action_status(self, workflow_service, workflow_dir):
+        """Backfill should NOT overwrite existing actions that already have status."""
+        workflow_service.create_workflow("old-wf2")
+        workflow_service.update_action_status("old-wf2", "compose_idea", "done")
+        workflow_service.update_action_status("old-wf2", "refine_idea", "done")
+        workflow_service.update_action_status("old-wf2", "requirement_gathering", "done")
+        workflow_service.update_action_status("old-wf2", "feature_breakdown", "done")
+        workflow_service.add_features("old-wf2", [
+            {"id": "FEAT-B", "name": "Feature B", "depends_on": []},
+        ])
+
+        # Simulate: mark implementation as done, remove test_generation
+        path = os.path.join(workflow_dir, "workflow-old-wf2.json")
+        with open(path) as f:
+            state = json.load(f)
+
+        feat = state["features"][0]
+        feat["implement"]["actions"]["implementation"]["status"] = "done"
+        feat["implement"]["actions"].pop("test_generation", None)
+
+        with open(path, "w") as f:
+            json.dump(state, f)
+
+        refreshed = workflow_service.get_workflow("old-wf2")
+        impl = refreshed["features"][0]["implement"]["actions"]
+        assert impl["implementation"]["status"] == "done", "Existing action status preserved"
+        assert "test_generation" in impl, "Missing action backfilled"
+
+    def test_backfill_removes_obsolete_actions(self, workflow_service, workflow_dir):
+        """Actions in state but NOT in template should be removed."""
+        workflow_service.create_workflow("old-wf3")
+        workflow_service.update_action_status("old-wf3", "compose_idea", "done")
+        workflow_service.update_action_status("old-wf3", "refine_idea", "done")
+        workflow_service.update_action_status("old-wf3", "requirement_gathering", "done")
+        workflow_service.update_action_status("old-wf3", "feature_breakdown", "done")
+        workflow_service.add_features("old-wf3", [
+            {"id": "FEAT-C", "name": "Feature C", "depends_on": []},
+        ])
+
+        # Simulate: add obsolete 'quality_evaluation' action
+        path = os.path.join(workflow_dir, "workflow-old-wf3.json")
+        with open(path) as f:
+            state = json.load(f)
+
+        feat = state["features"][0]
+        feat["validation"]["actions"]["quality_evaluation"] = {
+            "status": "pending", "deliverables": []
+        }
+
+        with open(path, "w") as f:
+            json.dump(state, f)
+
+        refreshed = workflow_service.get_workflow("old-wf3")
+        val = refreshed["features"][0]["validation"]["actions"]
+        assert "quality_evaluation" not in val, "Obsolete action should be removed"
+
+    def test_update_action_works_after_backfill(self, workflow_service, workflow_dir):
+        """After backfill, updating a previously-missing action should succeed."""
+        workflow_service.create_workflow("old-wf4")
+        workflow_service.update_action_status("old-wf4", "compose_idea", "done")
+        workflow_service.update_action_status("old-wf4", "refine_idea", "done")
+        workflow_service.update_action_status("old-wf4", "requirement_gathering", "done")
+        workflow_service.update_action_status("old-wf4", "feature_breakdown", "done")
+        workflow_service.add_features("old-wf4", [
+            {"id": "FEAT-D", "name": "Feature D", "depends_on": []},
+        ])
+
+        # Simulate: remove code_refactor from validation
+        path = os.path.join(workflow_dir, "workflow-old-wf4.json")
+        with open(path) as f:
+            state = json.load(f)
+        feat = state["features"][0]
+        feat["validation"]["actions"].pop("code_refactor", None)
+        feat["validation"]["actions"].pop("feature_closing", None)
+        with open(path, "w") as f:
+            json.dump(state, f)
+
+        # Should be able to update the backfilled action
+        # First complete implement stage prerequisites
+        workflow_service.update_action_status("old-wf4", "feature_refinement", "done", feature_id="FEAT-D")
+        workflow_service.update_action_status("old-wf4", "technical_design", "done", feature_id="FEAT-D")
+        workflow_service.update_action_status("old-wf4", "test_generation", "done", feature_id="FEAT-D")
+        workflow_service.update_action_status("old-wf4", "implementation", "done", feature_id="FEAT-D")
+        workflow_service.update_action_status("old-wf4", "acceptance_testing", "done", feature_id="FEAT-D")
+
+        result = workflow_service.update_action_status("old-wf4", "code_refactor", "done", feature_id="FEAT-D")
+        assert result["success"] is True, f"Should succeed but got: {result}"
+
+
 class TestWorkflowTracing:
     """Verify tracing decorators are applied to public methods."""
 
