@@ -273,27 +273,15 @@ During refactoring, tracing instrumentation MUST be preserved:
 
 ## Safety Check Procedures
 
-### Prerequisite Chain Enforcement
+### Prerequisite Verification
 
-**Before executing this skill, verify the refactoring chain was followed:**
+**The code-refactor skill orchestrates both tool skills internally (Steps 1-2). These attributes are produced automatically:**
 
 ```
-1. CHECK if refactoring_suggestion AND refactoring_principle exist:
-   - These attributes are ONLY produced by x-ipe-task-based-refactoring-analysis
-   
-2. IF refactoring_suggestion OR refactoring_principle is MISSING:
-   → ⛔ STOP execution of this skill
-   → LOG: "Missing prerequisite: x-ipe-task-based-refactoring-analysis not executed"
-   → REDIRECT: Load and execute `x-ipe-task-based-refactoring-analysis` skill first
-   → After completion, chain will auto-proceed through:
-     x-ipe-task-based-refactoring-analysis → x-ipe-task-based-improve-code-quality → x-ipe-task-based-code-refactor
+- refactoring_scope, refactoring_suggestion, refactoring_principle → from Step 1 (x-ipe-tool-refactoring-analysis)
+- code_quality_evaluated (aligned) → from Step 2 (x-ipe-tool-code-quality-sync)
 
-3. IF code_quality_evaluated is MISSING:
-   → ⛔ STOP execution of this skill
-   → LOG: "Missing prerequisite: x-ipe-task-based-improve-code-quality not executed"
-   → REDIRECT: Load and execute `x-ipe-task-based-improve-code-quality` skill first
-
-4. ONLY proceed to Execution Flow if ALL prerequisites are present
+If executing Step 3+ and any attribute is missing, re-run the corresponding tool step.
 ```
 
 ### Rollback Procedure

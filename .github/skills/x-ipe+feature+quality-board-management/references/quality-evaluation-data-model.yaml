@@ -67,7 +67,7 @@ QualityEvaluation:
     medium: [<gap references>]
     low: [<gap references>]
 
-  # Refactoring Suggestions (from x-ipe-task-based-refactoring-analysis)
+  # Refactoring Suggestions (from x-ipe-tool-refactoring-analysis)
   refactoring_suggestions:
     has_suggestions: true | false
     source: "<evaluation_id or task_id that generated suggestions>"

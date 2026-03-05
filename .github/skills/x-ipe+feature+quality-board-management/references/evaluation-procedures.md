@@ -165,7 +165,7 @@ This document contains detailed evaluation procedures for each perspective.
 
 ## Procedure: Generate Refactoring Suggestions
 
-**Integrates with:** `x-ipe-task-based-refactoring-analysis` skill
+**Integrates with:** `x-ipe-tool-refactoring-analysis` skill
 
 ```
 1. ANALYZE gaps from all perspectives:

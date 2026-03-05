@@ -153,8 +153,8 @@
 | 关闭功能、创建PR、发布功能 | x-ipe-task-based-feature-closing |
 | 创建演示、人工测试、交互演示 | x-ipe-task-based-human-playground |
 | 分享想法、转换为PPT、制作演示 | x-ipe-task-based-share-idea |
-| 重构分析、评估重构范围 | x-ipe-task-based-refactoring-analysis |
-| 提升代码质量、同步文档与代码 | x-ipe-task-based-improve-code-quality |
+| 重构分析、评估重构范围 | x-ipe-tool-refactoring-analysis |
+| 提升代码质量、同步文档与代码 | x-ipe-tool-code-quality-sync |
 
 > **注意：** 当**自动继续已启用**（全局或任务级别）时，无论技能的默认设置如何，`require_human_review` 都会被**跳过**。
 

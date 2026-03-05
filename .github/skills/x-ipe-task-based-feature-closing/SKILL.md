@@ -227,7 +227,7 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
   <step_4>
     <name>Refactoring Analysis</name>
     <action>
-      1. Launch a sub-agent to execute x-ipe-task-based-refactoring-analysis with:
+      1. Launch a sub-agent to execute x-ipe-tool-refactoring-analysis with:
          - initial_refactoring_scope:
              scope_level: "feature"
              feature_id: "{feature_id}"

@@ -19,7 +19,7 @@ AI Agents follow this skill to generate and manage project-wide quality evaluati
 
 BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill. If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point for each skill.
 
-CRITICAL: Learn `x-ipe-task-based-refactoring-analysis` skill to understand `refactoring_suggestion` and `refactoring_principle` data models for integration.
+CRITICAL: Learn `x-ipe-tool-refactoring-analysis` skill to understand `refactoring_suggestion` and `refactoring_principle` data models for integration.
 
 ---
 
@@ -317,8 +317,8 @@ input:
 ### Integration with Code Refactoring Stage
 
 ```
-Quality Report (baseline) -> x-ipe-task-based-refactoring-analysis
-  -> x-ipe-task-based-improve-code-quality
+Quality Report (baseline) -> x-ipe-tool-refactoring-analysis
+  -> x-ipe-tool-code-quality-sync
   -> Quality Report (mid-point)
   -> x-ipe-task-based-code-refactor
   -> Quality Report (final) + Compare
