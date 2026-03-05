@@ -6,6 +6,16 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-753 | Feature Closing | FEATURE-045-A: Close Orchestrator Core + AAA Generator + General Fallback — verify ACs, code-to-docs review, commit, output summary | Ember 🔥 | 🔄 in_progress | 03-05-2026 16:05:00 | - | - |
+| TASK-752 | Ideation | IDEA-102: Refine idea — apply Chinese 5-phase learning method (博学审问慎思明辨笃行) to restructure Ideation-stage and Requirement-stage skills, reordering steps to match the method's sequence | Sage 🧠 | 🔄 in_progress | 03-05-2026 15:22:00 | - | Idea Mockup |
+| TASK-751 | Research | IDEA-102: Research X-IPE task-based skills against Chinese learning method (博学之，审问之，慎思之，明辨之，笃行之) — classify skills by criticality, compare approaches, propose improvements | Sage 🧠 | ✅ completed | 03-05-2026 15:10:00 | x-ipe-docs/ideas/102. Research-Software Engineering/research-report.md | - |
+| TASK-750 | Code Implementation | FEATURE-045-A: Implement orchestrator refactoring (Steps 4-6 replacement) + general fallback tool skill via x-ipe-meta-skill-creator | Ember 🔥 | ✅ completed | 03-05-2026 15:05:00 | .github/skills/x-ipe-task-based-code-implementation/SKILL.md, .github/skills/x-ipe-tool-implementation-general/SKILL.md | Feature Acceptance Test |
+| TASK-749 | Technical Design | FEATURE-045-A: Technical design for Orchestrator Core + AAA Generator + General Fallback | Ember 🔥 | ✅ completed | 03-05-2026 15:30:00 | x-ipe-docs/requirements/EPIC-045/FEATURE-045-A/technical-design.md | Code Implementation |
+| TASK-748 | Feature Refinement | FEATURE-045-A: Orchestrator Core + AAA Generator + General Fallback — specification for MVP | Ember 🔥 | ✅ completed | 03-05-2026 15:25:00 | x-ipe-docs/requirements/EPIC-045/FEATURE-045-A/specification.md | Technical Design |
+| TASK-747 | Feature Breakdown | EPIC-045: Break CR-Restructure Implementation Skill into features — orchestrator + AAA generator + 6 tool skills + test-gen deprecation | Ember 🔥 | ✅ completed | 03-05-2026 15:10:00 | requirement-details-part-17.md, features.md | Feature Refinement |
+| TASK-746 | Change Request | CR: Add WeChat ID below email in customer info card — mockup chat-widget-v1.html (IDEA-015, folder 204). Feedback-20260305-222052 | Pixel 🎨 | ✅ completed | 03-05-2026 14:21:00 | CR-001.md, chat-widget-v2.html | Feature Refinement |
+| TASK-745 | UIUX Reference | Execute UIUX reference workflow on https://www.doubao.com/chat/ — save to idea folder 301. Doubao-Chat-Reference | Nova ⭐ | 🔄 in_progress | 03-05-2026 14:09:00 | referenced-elements.json, mockup-v1.html, summarized-uiux-reference.md, mimic-strategy.md | - |
+| TASK-744 | Requirement Gathering | EPIC-045: CR-Restructure Implementation Skill — transform code-implementation into orchestrator + language-specific tool skills (python, html5, typescript, java, mcp, general); AAA test scenarios; AI semantic routing | Ember 🔥 | ✅ completed | 03-05-2026 13:05:00 | x-ipe-docs/requirements/requirement-details-part-17.md | Feature Breakdown |
 | TASK-742 | Skill Reorganization | Convert test-generation from task-based to tool skill; integrate into code-implementation as orchestrated step; remove test_generation from workflow stage config | Pulse 🔵 | ✅ completed | 03-05-2026 07:25:00 | x-ipe-tool-test-generation, x-ipe-task-based-code-implementation | - |
 | TASK-741 | Bug Fix | Workflow template migration: old workflows missing new actions (test_generation, code_refactor, feature_closing) — add on-read migration to backfill missing per-feature actions from current template | Pulse 🔵 | ✅ completed | 03-05-2026 06:15:00 | workflow_manager_service.py, test_workflow_manager.py | - |
 | TASK-740 | Skill Reorganization | Reorganize 3 refactoring skills: convert refactoring-analysis and improve-code-quality from task-based to tool skills; restructure code-refactor as single orchestrating task-based skill that calls the 2 tool skills | Pulse 🔵 | ✅ completed | 03-05-2026 06:10:00 | x-ipe-tool-refactoring-analysis, x-ipe-tool-code-quality-sync, x-ipe-task-based-code-refactor | - |
@@ -326,11 +336,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 58
-- **In Progress:** 3
+- **Total Active:** 60
+- **In Progress:** 4
 - **Pending:** 1
 - **Deferred:** 0
-- **Completed (archived):** 457
+- **Completed (archived):** 458
 - **Reverted:** 8
 - **Pending Review:** 0
 - **Blocked:** 0

@@ -1,0 +1,81 @@
+test_cases:
+  - id: TC-001
+    name: "Standard fullstack feature with AAA"
+    type: happy_path
+    given: "Feature with tech_stack [Python/Flask, HTML/CSS] and specification with 3 ACs"
+    when: "Execute code-implementation skill"
+    then: "AAA scenarios generated, routed to python + html5 tool skills, all Asserts pass"
+    acceptance_criteria: [AC-B01]
+    status: not_run
+
+  - id: TC-002
+    name: "Skills-type feature delegation"
+    type: happy_path
+    given: "Feature with program_type 'skills' and tech_stack [Markdown/SKILL.md]"
+    when: "Execute code-implementation skill"
+    then: "Delegates to x-ipe-meta-skill-creator, skips AAA generation and validation"
+    acceptance_criteria: [AC-B02, AC-C04]
+    status: not_run
+
+  - id: TC-003
+    name: "AAA generation fallback"
+    type: edge_case
+    given: "Specification has vague acceptance criteria"
+    when: "AAA generation fails"
+    then: "Falls back to x-ipe-tool-test-generation (Phase 1)"
+    acceptance_criteria: [AC-C06]
+    status: not_run
+
+  - id: TC-004
+    name: "No matching tool skill"
+    type: edge_case
+    given: "tech_stack entry 'Rust/Actix' with no matching tool skill"
+    when: "Semantic routing runs"
+    then: "Assigns x-ipe-tool-implementation-general as fallback"
+    acceptance_criteria: [AC-C03]
+    status: not_run
+
+  - id: TC-005
+    name: "Large feature (>20 components)"
+    type: edge_case
+    given: "Technical design with 25 components"
+    when: "AAA generation runs"
+    then: "Per-layer batching: backend first, then frontend"
+    acceptance_criteria: [AC-C10]
+    status: not_run
+
+  - id: TC-006
+    name: "Tool skill fails on retry"
+    type: error_case
+    given: "Backend tool skill fails twice"
+    when: "Retry attempted"
+    then: "Preserves passing results from other skills, escalates to human"
+    acceptance_criteria: [AC-C09]
+    status: not_run
+
+  - id: TC-007
+    name: "Integration failure"
+    type: error_case
+    given: "Unit-level tool skills pass but @integration fails"
+    when: "Validation gate runs @integration scenarios"
+    then: "Reports cross-layer contract mismatch to human"
+    acceptance_criteria: [AC-C05]
+    status: not_run
+
+  - id: TC-008
+    name: "Feature not designed"
+    type: blocking
+    given: "Feature status is 'Refined' (not 'Designed')"
+    when: "DoR check runs"
+    then: "BLOCKED with 'Feature status must be Designed'"
+    acceptance_criteria: [AC-B01]
+    status: not_run
+
+  - id: TC-009
+    name: "Technical design missing"
+    type: blocking
+    given: "No technical-design.md file"
+    when: "DoR check runs"
+    then: "BLOCKED with 'Technical design document not found'"
+    acceptance_criteria: [AC-B01]
+    status: not_run

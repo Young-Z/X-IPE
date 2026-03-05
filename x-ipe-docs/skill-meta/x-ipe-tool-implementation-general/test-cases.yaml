@@ -1,0 +1,36 @@
+test_cases:
+  - id: TC-001
+    name: "Go/Gin API implementation"
+    type: happy_path
+    given: "source_code_path with go.mod, 3 @backend scenarios"
+    when: "Execute implement operation"
+    then: "Identifies Go/Gin, implements handlers, 3/3 tests pass"
+    acceptance_criteria: [AC-B01, AC-B02, AC-C01]
+    status: not_run
+
+  - id: TC-002
+    name: "Rust/Actix implementation"
+    type: happy_path
+    given: "source_code_path with Cargo.toml, 2 @backend scenarios"
+    when: "Execute implement operation"
+    then: "Identifies Rust/Actix, implements handlers, 2/2 tests pass"
+    acceptance_criteria: [AC-B01, AC-B02, AC-C02]
+    status: not_run
+
+  - id: TC-003
+    name: "Stack unidentifiable"
+    type: error_case
+    given: "Empty source_code_path, generic scenarios"
+    when: "Execute implement operation"
+    then: "Returns STACK_UNIDENTIFIABLE error, signals orchestrator"
+    acceptance_criteria: [AC-C04, AC-C07]
+    status: not_run
+
+  - id: TC-004
+    name: "No test framework available"
+    type: error_case
+    given: "Rare language with no standard test framework"
+    when: "Execute implement operation"
+    then: "Returns NO_TEST_FRAMEWORK error"
+    acceptance_criteria: [AC-C04]
+    status: not_run

@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 03-04-2026 10:55:00
+> Last Updated: 03-05-2026 15:45:00
 
 ## Overview
 
@@ -120,3 +120,9 @@ This board tracks all features across the project lifecycle.
 | FEATURE-044-D | EPIC-044 | Workflow Orchestrator Update | v1.0 | Completed | — | 03-04-2026 | 03-04-2026 14:00:00 |
 | FEATURE-044-E | EPIC-044 | Workflow Template & Backend API | v1.0 | Completed | — | 03-04-2026 | 03-04-2026 14:30:00 |
 | FEATURE-044-F | EPIC-044 | Workflow UI Toggle | v1.0 | Completed | — | 03-04-2026 | 03-04-2026 14:40:00 |
+| FEATURE-045-A | EPIC-045 | Orchestrator Core + AAA Generator + General Fallback | v1.0 | Completed | [specification.md](x-ipe-docs/requirements/EPIC-045/FEATURE-045-A/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-045/FEATURE-045-A/technical-design.md) | 03-05-2026 | 03-05-2026 16:00:00 |
+| FEATURE-045-B | EPIC-045 | Python Implementation Tool Skill | v1.0 | Planned | - | 03-05-2026 | 03-05-2026 15:05:00 |
+| FEATURE-045-C | EPIC-045 | HTML5 Implementation Tool Skill | v1.0 | Planned | - | 03-05-2026 | 03-05-2026 15:05:00 |
+| FEATURE-045-D | EPIC-045 | TypeScript Implementation Tool Skill | v1.0 | Planned | - | 03-05-2026 | 03-05-2026 15:05:00 |
+| FEATURE-045-E | EPIC-045 | Java & MCP Implementation Tool Skills | v1.0 | Planned | - | 03-05-2026 | 03-05-2026 15:05:00 |
+| FEATURE-045-F | EPIC-045 | Test Generation Deprecation Migration | v1.0 | Planned | - | 03-05-2026 | 03-05-2026 15:05:00 |
