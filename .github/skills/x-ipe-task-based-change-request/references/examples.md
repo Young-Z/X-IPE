@@ -29,11 +29,19 @@ Step 3.3: Classify Scope
   4. Estimated complexity? → High (parsing, validation, error handling)
   
   Classification: NEW_FEATURE
+```
 
-Step 3.4: Route CR
-  - Classification: NEW_FEATURE
-  - Action: Create FEATURE-013
-  - Next Task: Feature Breakdown
+### Conflict Analysis (Step 4)
+
+```
+Step 4.1: Spawn Conflict Detector
+  - Read FEATURE-012 specification (product management)
+  - No other features depend on FEATURE-012's data model
+  - No pending CRs for FEATURE-012
+  
+  Conflicts found: 0
+
+Step 4.2: No conflicts → proceed to Human Approval
 ```
 
 ### Output
@@ -44,6 +52,8 @@ next_task_based_skill: Feature Breakdown
 require_human_review: Yes
 
 cr_classification: NEW_FEATURE
+conflicts_found: []
+conflicts_resolution: none
 reasoning: |
   Bulk import requires:
   - New ImportService component
@@ -86,11 +96,22 @@ Step 3.3: Classify Scope
   4. Estimated complexity? → Medium (debouncing, state management)
   
   Classification: ENHANCEMENT
+```
 
-Step 3.4: Route CR
-  - Classification: ENHANCEMENT
-  - Action: Update EPIC-005/FEATURE-005-A/specification.md
-  - Next Task: Feature Refinement
+### Conflict Analysis (Step 4)
+
+```
+Step 4.1: Spawn Conflict Detector
+  - Read FEATURE-005 specification
+  - Read FEATURE-005 technical design
+  - Check features depending on FEATURE-005: FEATURE-010 (Dashboard) uses saved settings
+  - Spec conflict: none (settings data model unchanged)
+  - Design conflict: none (SettingsService API contract preserved)
+  - Dependency conflict: none (FEATURE-010 reads settings, not writes)
+  
+  Conflicts found: 0
+
+Step 4.2: No conflicts → proceed to Human Approval
 ```
 
 ### Output
@@ -101,6 +122,8 @@ next_task_based_skill: Feature Refinement
 require_human_review: Yes
 
 cr_classification: ENHANCEMENT
+conflicts_found: []
+conflicts_resolution: none
 reasoning: |
   Auto-save modifies existing behavior without adding new capabilities.
   Same user goal, improved UX implementation.
@@ -115,7 +138,99 @@ task_output_links:
 
 ---
 
-## Example 3: Ambiguous Request - Human Decision Required
+## Example 3: CR with Dependency Conflict
+
+**Request:** "Change the user profile data model to use a flat structure instead of nested objects"
+
+### CR Classification
+
+```
+Step 3.1: Read Change Request
+  change_request: "Flatten user profile data model"
+
+Step 3.2: Identify Affected Features
+  - Found: FEATURE-003 (User Profile Management)
+  - FEATURE-003 is used by: FEATURE-007 (User Search), FEATURE-010 (Dashboard), FEATURE-015 (Admin Panel)
+  
+Step 3.3: Classify Scope
+  - Modifies existing data model within same feature → MODIFICATION
+```
+
+### Conflict Analysis (Step 4)
+
+```
+Step 4.1: Spawn Conflict Detector
+  - Read FEATURE-003 specification and technical design
+  - Read FEATURE-007 specification: uses profile.address.city for location search
+  - Read FEATURE-010 specification: renders profile.preferences.theme
+  - Read FEATURE-015 specification: bulk-edits profile.permissions.roles[]
+
+  Conflicts found: 3
+    1. SPEC CONFLICT: FEATURE-007 acceptance criteria references "profile.address.city"
+       → Flattening would change to "profile_address_city", breaking AC-007-03
+       Severity: High
+    2. DESIGN CONFLICT: FEATURE-010 technical design uses nested destructuring
+       → Code assumes nested structure: const { preferences: { theme } } = profile
+       Severity: Medium
+    3. DEPENDENCY CONFLICT: FEATURE-015 bulk edit logic iterates profile.permissions.roles[]
+       → Flattening arrays requires different iteration pattern
+       Severity: High
+
+Step 4.2: Classify conflicts
+  - Conflict 1: "expected" — flattening necessarily changes field paths
+  - Conflict 2: "expected" — code changes are implied by data model change
+  - Conflict 3: "unexpected" — CR did not mention changing array handling, this is a side effect
+
+Step 4.3: Unexpected conflict found
+  - Present to human: "Flattening the profile model would also require changing
+    how FEATURE-015 (Admin Panel) handles role arrays. The current nested
+    profile.permissions.roles[] would become profile_permissions_roles (a single
+    field), losing array semantics."
+  - Suggest mitigation: "Consider a hybrid approach — flatten scalar fields but
+    preserve nested arrays. Or create a separate CR for FEATURE-015 admin panel."
+```
+
+### Human Decision
+
+```
+Human: "Keep arrays nested, only flatten scalar fields. Update the CR scope."
+→ Return to Step 3 with narrowed scope
+→ Re-run conflict analysis: all remaining conflicts now "expected"
+```
+
+### Output
+
+```yaml
+category: Standalone
+next_task_based_skill: Feature Refinement
+require_human_review: Yes
+
+cr_classification: MODIFICATION
+conflicts_found:
+  - feature: FEATURE-007
+    type: specification
+    severity: high
+    classification: expected
+    description: "Field path references change from nested to flat"
+  - feature: FEATURE-010
+    type: design
+    severity: medium
+    classification: expected
+    description: "Technical design code patterns change"
+conflicts_resolution: mitigated
+reasoning: |
+  Data model flattening for scalar fields only (arrays preserved).
+  Scope narrowed after conflict analysis revealed array handling issues.
+  
+affected_artifacts:
+  - x-ipe-docs/requirements/EPIC-003/FEATURE-003-A/specification.md
+  - x-ipe-docs/requirements/EPIC-007/FEATURE-007-A/specification.md (AC updates)
+  - x-ipe-docs/requirements/EPIC-010/FEATURE-010-A/technical-design.md (code pattern updates)
+```
+
+---
+
+## Example 4: Ambiguous Request - Human Decision Required
 
 **Request:** "We need better error handling"
 
@@ -151,7 +266,7 @@ Step 3.4: Route CR
 
 ---
 
-## Example 4: Bug Report - NOT a Change Request
+## Example 5: Bug Report - NOT a Change Request
 
 **Request:** "The login page crashes on Safari"
 

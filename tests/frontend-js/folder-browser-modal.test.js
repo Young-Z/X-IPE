@@ -152,7 +152,7 @@ describe('FEATURE-039-A: Folder Browser Modal (MVP)', () => {
       });
     });
 
-    it('should show "No files" for empty folder', async () => {
+    it('should show "This folder is empty" for empty folder', async () => {
       const FBM = globalThis.FolderBrowserModal;
       expect(FBM).toBeDefined();
       globalThis.fetch.mockResolvedValue({ ok: true, json: async () => [] });
@@ -161,7 +161,7 @@ describe('FEATURE-039-A: Folder Browser Modal (MVP)', () => {
       modal.open('empty-folder/');
       await vi.waitFor(() => {
         const tree = document.querySelector('.folder-browser-tree');
-        expect(tree.textContent).toContain('No files');
+        expect(tree.textContent).toContain('This folder is empty');
       });
     });
 
@@ -279,7 +279,7 @@ describe('FEATURE-039-A: Folder Browser Modal (MVP)', () => {
       });
     });
 
-    it('should show "Binary file" for binary extensions', async () => {
+    it('should show image preview for image extensions', async () => {
       const FBM = globalThis.FolderBrowserModal;
       expect(FBM).toBeDefined();
 
@@ -298,8 +298,9 @@ describe('FEATURE-039-A: Folder Browser Modal (MVP)', () => {
       imgItem.click();
 
       await vi.waitFor(() => {
-        const content = document.querySelector('.folder-browser-preview-content');
-        expect(content.textContent).toContain('Binary');
+        const img = document.querySelector('.folder-browser-image-preview img');
+        expect(img).not.toBeNull();
+        expect(img.src).toContain('sketch.png');
       });
     });
 
@@ -709,6 +710,203 @@ describe('FEATURE-039-A: Folder Browser Modal (MVP)', () => {
       modal.open('refined-idea/');
       const preview = document.querySelector('.folder-browser-preview');
       expect(preview.textContent).toContain('Select a file');
+    });
+  });
+
+  describe('FEATURE-039-B: Enhanced Modal Features', () => {
+    describe('ARIA Roles', () => {
+      it('should set role="dialog" and aria-modal on modal container', () => {
+        const FBM = globalThis.FolderBrowserModal;
+        globalThis.fetch.mockResolvedValue({ ok: true, json: async () => TREE_RESPONSE });
+        const modal = new FBM({ workflowName: 'test-wf' });
+        modal.open('refined-idea/');
+        const m = document.querySelector('.folder-browser-modal');
+        expect(m.getAttribute('role')).toBe('dialog');
+        expect(m.getAttribute('aria-modal')).toBe('true');
+      });
+
+      it('should set role="tree" on tree root and role="treeitem" on items', async () => {
+        const FBM = globalThis.FolderBrowserModal;
+        globalThis.fetch.mockResolvedValue({ ok: true, json: async () => TREE_RESPONSE });
+        const modal = new FBM({ workflowName: 'test-wf' });
+        modal.open('refined-idea/');
+        await vi.waitFor(() => {
+          const tree = document.querySelector('.file-tree');
+          expect(tree).not.toBeNull();
+          expect(tree.getAttribute('role')).toBe('tree');
+          const items = tree.querySelectorAll('[role="treeitem"]');
+          expect(items.length).toBeGreaterThan(0);
+        });
+      });
+    });
+
+    describe('Search / Filter', () => {
+      it('should render search input in tree panel', () => {
+        const FBM = globalThis.FolderBrowserModal;
+        globalThis.fetch.mockResolvedValue({ ok: true, json: async () => TREE_RESPONSE });
+        const modal = new FBM({ workflowName: 'test-wf' });
+        modal.open('refined-idea/');
+        expect(document.querySelector('.folder-browser-search-input')).not.toBeNull();
+      });
+
+      it('should filter tree items on input', async () => {
+        const FBM = globalThis.FolderBrowserModal;
+        globalThis.fetch.mockResolvedValue({ ok: true, json: async () => TREE_RESPONSE });
+        const modal = new FBM({ workflowName: 'test-wf' });
+        modal.open('refined-idea/');
+        await vi.waitFor(() => {
+          expect(document.querySelector('.file-tree')).not.toBeNull();
+        });
+        const input = document.querySelector('.folder-browser-search-input');
+        input.value = 'notes';
+        input.dispatchEvent(new Event('input'));
+        // Wait debounce
+        await new Promise(r => setTimeout(r, 250));
+        const items = document.querySelectorAll('.tree-item');
+        const visibleItems = [...items].filter(i => i.style.display !== 'none');
+        expect(visibleItems.some(i => i.textContent.includes('notes'))).toBe(true);
+      });
+
+      it('should show "No matching files" when nothing matches', async () => {
+        const FBM = globalThis.FolderBrowserModal;
+        globalThis.fetch.mockResolvedValue({ ok: true, json: async () => TREE_RESPONSE });
+        const modal = new FBM({ workflowName: 'test-wf' });
+        modal.open('refined-idea/');
+        await vi.waitFor(() => {
+          expect(document.querySelector('.file-tree')).not.toBeNull();
+        });
+        const input = document.querySelector('.folder-browser-search-input');
+        input.value = 'zzzznonexistent';
+        input.dispatchEvent(new Event('input'));
+        await new Promise(r => setTimeout(r, 250));
+        expect(document.querySelector('.folder-browser-no-match')).not.toBeNull();
+      });
+    });
+
+    describe('Breadcrumb Navigation', () => {
+      it('should render breadcrumb on open', () => {
+        const FBM = globalThis.FolderBrowserModal;
+        globalThis.fetch.mockResolvedValue({ ok: true, json: async () => TREE_RESPONSE });
+        const modal = new FBM({ workflowName: 'test-wf' });
+        modal.open('refined-idea/');
+        expect(document.querySelector('.folder-browser-breadcrumb')).not.toBeNull();
+        expect(document.querySelector('.folder-browser-breadcrumb').textContent).toContain('refined-idea');
+      });
+
+      it('should truncate >5 segments with ellipsis', () => {
+        const FBM = globalThis.FolderBrowserModal;
+        globalThis.fetch.mockResolvedValue({ ok: true, json: async () => TREE_RESPONSE });
+        const modal = new FBM({ workflowName: 'test-wf' });
+        modal.open('a/b/c/d/e/f/g/');
+        const bc = document.querySelector('.folder-browser-breadcrumb');
+        expect(bc.textContent).toContain('\u2026');
+      });
+    });
+
+    describe('Typed File Icons', () => {
+      it('should show 📝 for .md files', async () => {
+        const FBM = globalThis.FolderBrowserModal;
+        globalThis.fetch.mockResolvedValue({ ok: true, json: async () => TREE_RESPONSE });
+        const modal = new FBM({ workflowName: 'test-wf' });
+        modal.open('refined-idea/');
+        await vi.waitFor(() => {
+          const mdItem = document.querySelector('.file-item[data-path="refined-idea/idea-summary.md"]');
+          expect(mdItem).not.toBeNull();
+          expect(mdItem.textContent).toMatch(/📝/);
+        });
+      });
+
+      it('should show 🖼️ for image files', async () => {
+        const FBM = globalThis.FolderBrowserModal;
+        globalThis.fetch.mockResolvedValue({ ok: true, json: async () => TREE_RESPONSE });
+        const modal = new FBM({ workflowName: 'test-wf' });
+        modal.open('refined-idea/');
+        await vi.waitFor(() => {
+          const imgItem = document.querySelector('.file-item[data-path="refined-idea/mockups/sketch.png"]');
+          expect(imgItem).not.toBeNull();
+          expect(imgItem.textContent).toMatch(/🖼️/);
+        });
+      });
+    });
+
+    describe('Download Button', () => {
+      it('should show download button in preview header', async () => {
+        const FBM = globalThis.FolderBrowserModal;
+        globalThis.fetch
+          .mockResolvedValueOnce({ ok: true, json: async () => TREE_RESPONSE })
+          .mockResolvedValueOnce({ ok: true, text: async () => 'content' });
+        const modal = new FBM({ workflowName: 'test-wf' });
+        modal.open('refined-idea/');
+        await vi.waitFor(() => expect(document.querySelector('.file-tree')).not.toBeNull());
+        document.querySelector('.file-item[data-path="refined-idea/notes.txt"]').click();
+        await vi.waitFor(() => {
+          const dl = document.querySelector('.folder-browser-download-btn');
+          expect(dl).not.toBeNull();
+          expect(dl.getAttribute('download')).toBe('notes.txt');
+        });
+      });
+    });
+
+    describe('Binary File Enhancement', () => {
+      it('should show download link for binary (non-image) files', async () => {
+        const FBM = globalThis.FolderBrowserModal;
+        const binaryTree = [
+          { name: 'archive.zip', type: 'file', path: 'refined-idea/archive.zip' },
+        ];
+        globalThis.fetch.mockResolvedValueOnce({ ok: true, json: async () => binaryTree });
+        const modal = new FBM({ workflowName: 'test-wf' });
+        modal.open('refined-idea/');
+        await vi.waitFor(() => expect(document.querySelector('.file-tree')).not.toBeNull());
+        document.querySelector('.file-item[data-path="refined-idea/archive.zip"]').click();
+        await vi.waitFor(() => {
+          const dl = document.querySelector('.folder-browser-download-link');
+          expect(dl).not.toBeNull();
+          expect(dl.getAttribute('download')).toBe('archive.zip');
+        });
+      });
+    });
+
+    describe('Large File Handling', () => {
+      it('should show "File too large" for >1MB text files', async () => {
+        const FBM = globalThis.FolderBrowserModal;
+        const bigContent = 'x'.repeat(1_100_000);
+        globalThis.fetch
+          .mockResolvedValueOnce({ ok: true, json: async () => TREE_RESPONSE })
+          .mockResolvedValueOnce({ ok: true, text: async () => bigContent });
+        const modal = new FBM({ workflowName: 'test-wf' });
+        modal.open('refined-idea/');
+        await vi.waitFor(() => expect(document.querySelector('.file-tree')).not.toBeNull());
+        document.querySelector('.file-item[data-path="refined-idea/notes.txt"]').click();
+        await vi.waitFor(() => {
+          const content = document.querySelector('.folder-browser-binary-info');
+          expect(content).not.toBeNull();
+          expect(content.textContent).toContain('too large');
+        });
+      });
+    });
+
+    describe('Keyboard Navigation', () => {
+      it('should have tabindex on tree and preview panels', () => {
+        const FBM = globalThis.FolderBrowserModal;
+        globalThis.fetch.mockResolvedValue({ ok: true, json: async () => TREE_RESPONSE });
+        const modal = new FBM({ workflowName: 'test-wf' });
+        modal.open('refined-idea/');
+        expect(document.querySelector('.folder-browser-tree').getAttribute('tabindex')).toBe('0');
+        expect(document.querySelector('.folder-browser-preview').getAttribute('tabindex')).toBe('0');
+      });
+
+      it('should navigate tree items with arrow keys', async () => {
+        const FBM = globalThis.FolderBrowserModal;
+        globalThis.fetch.mockResolvedValue({ ok: true, json: async () => TREE_RESPONSE });
+        const modal = new FBM({ workflowName: 'test-wf' });
+        modal.open('refined-idea/');
+        await vi.waitFor(() => expect(document.querySelector('.file-tree')).not.toBeNull());
+
+        const treePanel = document.querySelector('.folder-browser-tree');
+        treePanel.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+        const focused = document.querySelector('.tree-item.keyboard-focus');
+        expect(focused).not.toBeNull();
+      });
     });
   });
 });

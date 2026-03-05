@@ -38,6 +38,20 @@
 | UI Elements | [new screens] | [existing screens] |
 | API Endpoints | [new APIs] | [existing APIs] |
 
+### Conflict Analysis
+
+**Conflicts Found:** [Yes / No]
+
+| # | Type | Affected Feature | Severity | Classification | Description |
+|---|------|-----------------|----------|----------------|-------------|
+| 1 | specification / design / dependency / pending-CR | FEATURE-XXX | High/Medium/Low | expected / unexpected | [What conflicts and why] |
+
+**Unexpected Conflict Resolution:**
+- [How unexpected conflicts were resolved: scope adjustment, additional CRs, design alternatives, or user confirmation]
+
+**Mitigation Strategy:**
+- [If applicable: what was changed to avoid breaking existing features]
+
 ### Affected Components
 
 | Component | Impact Level | Details |
@@ -72,15 +86,18 @@
 ## Approval
 
 - [ ] Classification approved by human
+- [ ] Conflict analysis reviewed by human
 - [ ] Approach approved by human
 - [ ] Ready for execution
 
 ## Execution
 
 **Classification Result:** [modification | new_feature]
+**Conflicts Resolution:** [none | all_expected | mitigated]
 
 **Actions Taken:**
 - [ ] CR document created in feature folder
+- [ ] Conflict analysis completed and documented
 - [ ] [If modification] Specification Version History updated with CR link
 - [ ] [If new feature] Requirement details updated
 - [ ] [If UI/UX CR] Existing mockups referenced, new mockup version created (if needed)

@@ -2,7 +2,7 @@
   "schema_version": "3.0",
   "name": "hello",
   "created": "2026-02-21T08:01:02.660474+00:00",
-  "last_activity": "2026-02-26T15:10:59.022213+00:00",
+  "last_activity": "2026-03-04T14:18:01.717101+00:00",
   "idea_folder": null,
   "current_stage": "requirement",
   "shared": {
@@ -54,5 +54,10 @@
       }
     }
   },
-  "features": []
+  "features": [],
+  "global": {
+    "process_preference": {
+      "auto_proceed": "stop_for_question"
+    }
+  }
 }
