@@ -391,7 +391,6 @@ class TestDependencyEvaluation:
         # Complete Feature A through implement (all mandatory actions)
         workflow_service.update_action_status(name, "feature_refinement", "done", feature_id="FEATURE-040-A")
         workflow_service.update_action_status(name, "technical_design", "done", feature_id="FEATURE-040-A")
-        workflow_service.update_action_status(name, "test_generation", "done", feature_id="FEATURE-040-A")
         workflow_service.update_action_status(name, "implementation", "done", feature_id="FEATURE-040-A")
         result = workflow_service.check_dependencies(name, "FEATURE-040-B")
         assert result["blocked"] is False
@@ -684,13 +683,12 @@ class TestWorkflowTemplateMigration:
             {"id": "FEAT-A", "name": "Feature A", "depends_on": []},
         ])
 
-        # Simulate old schema: remove test_generation, code_refactor, feature_closing
+        # Simulate old schema: remove code_refactor, feature_closing from validation
         path = os.path.join(workflow_dir, "workflow-old-wf.json")
         with open(path) as f:
             state = json.load(f)
 
         feat = state["features"][0]
-        feat["implement"]["actions"].pop("test_generation", None)
         feat["validation"]["actions"].pop("code_refactor", None)
         feat["validation"]["actions"].pop("feature_closing", None)
 
@@ -699,11 +697,8 @@ class TestWorkflowTemplateMigration:
 
         # Read should backfill
         refreshed = workflow_service.get_workflow("old-wf")
-        impl_actions = refreshed["features"][0]["implement"]["actions"]
         val_actions = refreshed["features"][0]["validation"]["actions"]
 
-        assert "test_generation" in impl_actions, "test_generation should be backfilled"
-        assert impl_actions["test_generation"]["status"] == "pending"
         assert "code_refactor" in val_actions, "code_refactor should be backfilled"
         assert val_actions["code_refactor"]["status"] == "pending"
         assert "feature_closing" in val_actions, "feature_closing should be backfilled"
@@ -720,22 +715,23 @@ class TestWorkflowTemplateMigration:
             {"id": "FEAT-B", "name": "Feature B", "depends_on": []},
         ])
 
-        # Simulate: mark implementation as done, remove test_generation
+        # Simulate: mark implementation as done, remove code_refactor from validation
         path = os.path.join(workflow_dir, "workflow-old-wf2.json")
         with open(path) as f:
             state = json.load(f)
 
         feat = state["features"][0]
         feat["implement"]["actions"]["implementation"]["status"] = "done"
-        feat["implement"]["actions"].pop("test_generation", None)
+        feat["validation"]["actions"].pop("code_refactor", None)
 
         with open(path, "w") as f:
             json.dump(state, f)
 
         refreshed = workflow_service.get_workflow("old-wf2")
         impl = refreshed["features"][0]["implement"]["actions"]
+        val = refreshed["features"][0]["validation"]["actions"]
         assert impl["implementation"]["status"] == "done", "Existing action status preserved"
-        assert "test_generation" in impl, "Missing action backfilled"
+        assert "code_refactor" in val, "Missing action backfilled"
 
     def test_backfill_removes_obsolete_actions(self, workflow_service, workflow_dir):
         """Actions in state but NOT in template should be removed."""
@@ -790,7 +786,6 @@ class TestWorkflowTemplateMigration:
         # First complete implement stage prerequisites
         workflow_service.update_action_status("old-wf4", "feature_refinement", "done", feature_id="FEAT-D")
         workflow_service.update_action_status("old-wf4", "technical_design", "done", feature_id="FEAT-D")
-        workflow_service.update_action_status("old-wf4", "test_generation", "done", feature_id="FEAT-D")
         workflow_service.update_action_status("old-wf4", "implementation", "done", feature_id="FEAT-D")
         workflow_service.update_action_status("old-wf4", "acceptance_testing", "done", feature_id="FEAT-D")
 

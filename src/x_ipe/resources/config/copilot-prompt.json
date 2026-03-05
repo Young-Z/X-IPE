@@ -110,28 +110,10 @@
       ]
     },
     {
-      "id": "test-generation",
-      "action": "test_generation",
-      "icon": "bi-journal-code",
-      "input_source": ["technical_design"],
-      "prompt-details": [
-        {
-          "language": "en",
-          "label": "Test Generation",
-          "command": "generate tests for $feature-id$ from $output:tech-design$ with test generation skill"
-        },
-        {
-          "language": "zh",
-          "label": "测试生成",
-          "command": "使用测试生成技能, 从 $output:tech-design$ 为 $feature-id$ 生成测试"
-        }
-      ]
-    },
-    {
       "id": "implementation",
       "action": "implementation",
       "icon": "bi-code-slash",
-      "input_source": ["test_generation"],
+      "input_source": ["technical_design"],
       "prompt-details": [
         {
           "language": "en",

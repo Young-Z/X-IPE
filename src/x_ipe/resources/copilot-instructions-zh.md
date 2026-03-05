@@ -139,7 +139,6 @@
 | 分解功能、拆分功能、创建功能列表 | x-ipe-task-based-feature-breakdown |
 | 细化功能、详细规格、明确需求 | x-ipe-task-based-feature-refinement |
 | 技术设计、架构规划、设计功能 | x-ipe-task-based-technical-design |
-| 生成测试、编写测试、TDD | x-ipe-task-based-test-generation |
 | 实现功能、编写代码、开发功能 | x-ipe-task-based-code-implementation |
 | 修复bug、出错了、不工作 | x-ipe-task-based-bug-fix |
 | 重构代码、代码重构 | x-ipe-task-based-code-refactor |

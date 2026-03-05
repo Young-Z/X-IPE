@@ -1,6 +1,6 @@
 ---
 name: x-ipe-task-based-code-implementation
-description: Implement code based on technical design for a single feature. First queries feature board, then learns technical design (and architecture if referenced). Follows TDD workflow and KISS/YAGNI principles. Triggers on requests like "implement feature", "write code", "develop feature".
+description: Implement code based on technical design for a single feature. First queries feature board, then learns technical design (and architecture if referenced). Generates tests via x-ipe-tool-test-generation, then implements code following TDD workflow and KISS/YAGNI principles. Triggers on requests like "implement feature", "write code", "develop feature".
 ---
 
 # Task-Based Skill: Code Implementation
@@ -11,8 +11,9 @@ Implement code for a single feature by:
 1. Querying feature board for full Feature Data Model
 2. Learning technical design document thoroughly
 3. Reading architecture designs (if referenced in technical design)
-4. Following TDD - write tests first, then implementation
-5. NO board status update (handled by category skill)
+4. **Generating tests via `x-ipe-tool-test-generation`** (TDD: tests first)
+5. Implementing code to make tests pass
+6. NO board status update (handled by category skill)
 
 ---
 
@@ -111,24 +112,13 @@ input:
     <verification>File exists at x-ipe-docs/requirements/FEATURE-XXX/technical-design.md</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Tests exist from Test Generation task</name>
-    <verification>Run test suite; test files found and execute</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>All tests currently FAIL (TDD ready)</name>
-    <verification>Run pytest/npm test; all feature tests must FAIL (no implementation yet)</verification>
-  </checkpoint>
-  <checkpoint required="true">
     <name>Tracing utility exists in project</name>
     <verification>Check for tracing/ directory or x_ipe.tracing import; if missing, use x-ipe-tool-tracing-creator skill first</verification>
   </checkpoint>
 </definition_of_ready>
 ```
 
-BLOCKING: Before writing ANY implementation code, agent MUST:
-1. Run the test suite to confirm tests exist
-2. Verify tests FAIL (proving no implementation yet)
-3. If tests pass or do not exist -> STOP and complete Test Generation first
+BLOCKING: Before writing ANY implementation code, agent MUST first invoke `x-ipe-tool-test-generation` and verify all tests FAIL.
 
 ---
 
@@ -139,13 +129,13 @@ BLOCKING: Before writing ANY implementation code, agent MUST:
 | 1 | Query Board | Get Feature Data Model from feature board | Feature data received |
 | 2 | Learn Design | Read technical design document thoroughly | Design understood |
 | 3 | Read Architecture | Read referenced architecture designs (if any) | Architecture understood |
-| 4 | Load Tests | Locate and run tests, verify they FAIL | Tests fail (TDD ready) |
+| 4 | Generate Tests | INVOKE `x-ipe-tool-test-generation` to create TDD tests | All tests fail (TDD ready) |
 | 5 | Implement | Write minimum code to pass tests | Tests pass |
 | 6 | Verify | Run all tests, linter, check coverage | All checks pass |
 | 7 | Tracing | Add tracing decorators to implemented code | Tests still pass |
 
-BLOCKING: Step 4 -> 5 is BLOCKED until tests exist AND fail. If tests pass or do not exist -> STOP, complete Test Generation first.
-BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE implementing.
+BLOCKING: Step 4 → 5 is BLOCKED until tests are generated AND fail.
+BLOCKING: Step 5: If design needs changes → UPDATE technical design BEFORE implementing.
 
 ---
 
@@ -220,21 +210,25 @@ BLOCKING: Step 5: If design needs changes -> UPDATE technical design BEFORE impl
   </step_3>
 
   <step_4>
-    <name>Load and Verify Tests</name>
+    <name>Generate Tests (TDD)</name>
     <action>
-      1. LOCATE test files: tests/unit/{feature}/, tests/integration/{feature}/, tests/test_{feature}.py
-      2. RUN tests based on program_type and tech_stack:
-         - Backend/CLI: pytest tests/ -v (or equivalent for tech_stack)
-         - Frontend: Vitest/Jest for JS logic tests (npm test), NOT pytest string matching
-         - Fullstack: Run BOTH backend (pytest) and frontend (npm test) test suites
-      3. VERIFY tests FAIL (proves TDD ready)
+      1. INVOKE `x-ipe-tool-test-generation` skill with:
+         - operation: "generate_tests"
+         - feature_id: {feature_id}
+         - feature_title: {from Feature Data Model}
+         - technical_design_link: {from Feature Data Model}
+         - specification_link: {from Feature Data Model}
+         - program_type: {from input}
+         - tech_stack: {from input}
+      2. RECEIVE: tests_created, test_count, baseline_status, test_folder
+      3. VERIFY all tests FAIL (TDD ready state)
+      4. IF tool reports blocked → STOP and report design issues to human
     </action>
     <constraints>
-      - MANDATORY: Do NOT write implementation code until tests exist AND fail
-      - BLOCKING: If tests pass -> STOP, implementation may already exist
-      - BLOCKING: If tests do not exist -> STOP, complete Test Generation first
+      - MANDATORY: Do NOT write implementation code until tests are generated AND all fail
+      - BLOCKING: If any test passes → investigate (implementation may already exist)
     </constraints>
-    <output>Confirmed: N tests exist and all FAIL</output>
+    <output>Confirmed: N tests generated and all FAIL (TDD ready)</output>
   </step_4>
 
   <step_5>
@@ -372,6 +366,10 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <verification>Agent can describe implementation plan from design</verification>
   </checkpoint>
   <checkpoint required="true">
+    <name>Tests generated via x-ipe-tool-test-generation</name>
+    <verification>Test generation tool was invoked and tests were created before implementation</verification>
+  </checkpoint>
+  <checkpoint required="true">
     <name>All tests pass</name>
     <verification>Run pytest/npm test; zero failures</verification>
   </checkpoint>
@@ -430,14 +428,15 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ### Pattern: TDD Flow
 
-**When:** Tests exist from Test Generation
+**When:** Starting implementation for a feature
 **Then:**
 ```
-1. Run tests - confirm all FAIL
-2. Implement smallest unit first
-3. Run tests - some pass
-4. Continue until all pass
-5. Refactor if needed
+1. INVOKE x-ipe-tool-test-generation - generates all tests
+2. Verify all tests FAIL (TDD ready)
+3. Implement smallest unit first
+4. Run tests - some pass
+5. Continue until all pass
+6. Refactor if needed
 ```
 
 ### Pattern: Design Reference
@@ -451,24 +450,13 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 4. Ask if patterns unclear
 ```
 
-### Pattern: Blocked by Tests
-
-**When:** Tests do not exist or pass unexpectedly
-**Then:**
-```
-1. STOP implementation
-2. Return to Test Generation task
-3. Create/fix failing tests
-4. Resume implementation
-```
-
 ### Anti-Patterns
 
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
 | Skip reading design | Wrong implementation | Learn technical design first |
 | Ignore architecture docs | Inconsistent patterns | Read referenced architecture |
-| Code first, test later | Not TDD, miss edge cases | Tests must exist and fail first |
+| Code first, test later | Not TDD, miss edge cases | x-ipe-tool-test-generation generates tests first |
 | Add "nice to have" features | YAGNI violation | Only implement what is in design |
 | Complex code for coverage | Maintenance nightmare | Keep simple, accept 80% coverage |
 | Over-engineering | KISS violation | Simplest solution that works |

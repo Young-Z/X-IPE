@@ -218,7 +218,7 @@ resources_plan:
 orchestrated_skills:
   - x-ipe-task-based-feature-refinement
   - x-ipe-task-based-technical-design
-  - x-ipe-task-based-test-generation
+  - x-ipe-tool-test-generation
   - x-ipe-task-based-code-implementation
   - x-ipe-task-based-feature-acceptance-test
   - x-ipe-task-based-feature-closing
@@ -270,7 +270,7 @@ skill_registry:
     input: specification_path
     output: design_path
     
-  - skill: x-ipe-task-based-test-generation
+  - skill: x-ipe-tool-test-generation
     phase: 3
     input: design_path
     output: test_files[]

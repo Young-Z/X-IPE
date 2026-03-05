@@ -153,26 +153,6 @@
             "$output-folder:feature-docs-folder"
           ],
           "next_actions_suggested": [
-            "test_generation"
-          ]
-        },
-        "test_generation": {
-          "optional": false,
-          "action_context": {
-            "tech-design": {
-              "required": true,
-              "candidates": "feature-docs-folder"
-            },
-            "specification": {
-              "required": true,
-              "candidates": "feature-docs-folder"
-            }
-          },
-          "deliverables": [
-            "$output:test-plan",
-            "$output-folder:test-folder"
-          ],
-          "next_actions_suggested": [
             "implementation"
           ]
         },

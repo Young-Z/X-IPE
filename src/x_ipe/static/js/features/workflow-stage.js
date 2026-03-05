@@ -49,7 +49,6 @@ const workflowStage = {
     FEATURE_LANE_ACTIONS: [
         { key: 'feature_refinement', label: 'Refinement',  icon: '📐' },
         { key: 'technical_design',   label: 'Tech Design', icon: '⚙' },
-        { key: 'test_generation',    label: 'Tests',       icon: '🧪' },
         { key: 'implementation',     label: 'Implement',   icon: '💻' },
         { key: 'acceptance_testing', label: 'Testing',     icon: '✅' },
         { key: 'code_refactor',      label: 'Refactor',    icon: '🔧' },
@@ -88,7 +87,6 @@ const workflowStage = {
             actions: {
                 feature_refinement: { label: 'Feature Refinement', icon: '📐', mandatory: true, interaction: 'cli', skill: 'x-ipe-task-based-feature-refinement' },
                 technical_design:   { label: 'Technical Design',   icon: '⚙',  mandatory: true, interaction: 'cli', skill: 'x-ipe-task-based-technical-design' },
-                test_generation:    { label: 'Test Generation',    icon: '🧪', mandatory: true, interaction: 'cli', skill: 'x-ipe-task-based-test-generation' },
                 implementation:     { label: 'Implementation',     icon: '💻', mandatory: true, interaction: 'cli', skill: 'x-ipe-task-based-code-implementation' },
             }
         },
@@ -1020,27 +1018,16 @@ const workflowStage = {
                 const folderModal = typeof FolderBrowserModal !== 'undefined'
                     ? new FolderBrowserModal({ workflowName: wfName }) : null;
 
-                // Map deliverable category → stage, mirroring ACTION_MAP grouping
-                const CATEGORY_STAGE = {
-                    ideas: 'ideation', mockups: 'ideation',
-                    requirements: 'requirement',
-                    implementations: 'implement',
-                    quality: 'validation',
-                };
-                const SHARED_STAGES = new Set(['ideation', 'requirement']);
-
-                const sharedByStage = {};
-                const featureByStage = {};
+                // CR-001: Group deliverables by feature instead of by stage
+                const shared = [];
+                const byFeature = {};
                 items.forEach(item => {
-                    const stage = CATEGORY_STAGE[item.category] || item.stage || 'other';
-                    if (SHARED_STAGES.has(stage) || !item.feature_id) {
-                        if (!sharedByStage[stage]) sharedByStage[stage] = [];
-                        sharedByStage[stage].push(item);
+                    if (!item.feature_id) {
+                        shared.push(item);
                     } else {
-                        if (!featureByStage[stage]) featureByStage[stage] = {};
                         const fid = item.feature_id;
-                        if (!featureByStage[stage][fid]) featureByStage[stage][fid] = { name: item.feature_name || fid, items: [] };
-                        featureByStage[stage][fid].items.push(item);
+                        if (!byFeature[fid]) byFeature[fid] = { name: item.feature_name || fid, items: [] };
+                        byFeature[fid].items.push(item);
                     }
                 });
 
@@ -1060,47 +1047,27 @@ const workflowStage = {
                     }
                 };
 
-                // Render in STAGE_ORDER (same as actions), then any extras
-                const allStages = [...this.STAGE_ORDER, ...Object.keys(sharedByStage).filter(s => !this.STAGE_ORDER.includes(s)), ...Object.keys(featureByStage).filter(s => !this.STAGE_ORDER.includes(s))];
-                const seen = new Set();
-                for (const stage of allStages) {
-                    if (seen.has(stage)) continue;
-                    seen.add(stage);
-                    const hasShared = sharedByStage[stage] && sharedByStage[stage].length > 0;
-                    const hasFeature = featureByStage[stage] && Object.keys(featureByStage[stage]).length > 0;
-                    if (!hasShared && !hasFeature) continue;
-
-                    const stageLabel = (this.ACTION_MAP[stage] || {}).label || stage;
+                // CR-001: Render shared section, then per-feature sections
+                const createSection = (titleText, sectionItems) => {
                     const section = document.createElement('div');
-                    section.className = 'deliverables-stage-section';
-                    const stageTitle = document.createElement('div');
-                    stageTitle.className = 'deliverables-stage-title';
-                    stageTitle.textContent = `${stageLabel} Deliverables`;
-                    section.appendChild(stageTitle);
+                    section.className = 'deliverables-feature-section';
+                    const sTitle = document.createElement('div');
+                    sTitle.className = 'deliverables-feature-section-title';
+                    sTitle.textContent = titleText;
+                    section.appendChild(sTitle);
+                    const row = document.createElement('div');
+                    row.className = 'deliverables-row';
+                    sectionItems.forEach(item => row.appendChild(renderCard(item)));
+                    section.appendChild(row);
+                    return section;
+                };
 
-                    if (hasShared) {
-                        const row = document.createElement('div');
-                        row.className = 'deliverables-row';
-                        sharedByStage[stage].forEach(item => row.appendChild(renderCard(item)));
-                        section.appendChild(row);
-                    }
-
-                    if (hasFeature) {
-                        for (const [fid, fdata] of Object.entries(featureByStage[stage])) {
-                            const featGroup = document.createElement('div');
-                            featGroup.className = 'deliverables-feature-group';
-                            const featLabel = document.createElement('div');
-                            featLabel.className = 'deliverables-feature-label';
-                            featLabel.textContent = fdata.name || fid;
-                            featGroup.appendChild(featLabel);
-                            const row = document.createElement('div');
-                            row.className = 'deliverables-row';
-                            fdata.items.forEach(item => row.appendChild(renderCard(item)));
-                            featGroup.appendChild(row);
-                            section.appendChild(featGroup);
-                        }
-                    }
-                    grid.appendChild(section);
+                if (shared.length > 0) {
+                    grid.appendChild(createSection('Shared Deliverables', shared));
+                }
+                for (const [fid, fdata] of Object.entries(byFeature)) {
+                    const sectionTitle = fdata.name === fid ? fid : `${fid} — ${fdata.name}`;
+                    grid.appendChild(createSection(sectionTitle, fdata.items));
                 }
             }
         } catch {

@@ -144,7 +144,7 @@ input:
 | 6 | Complete | Verify DoD, output summary, request human review | Human review |
 
 BLOCKING: Step 1 is BLOCKED if feature not on board or status not "Done Feature Refinement".
-BLOCKING: Step 6 requires human approval before proceeding to Test Generation.
+BLOCKING: Step 6 requires human approval before proceeding to Code Implementation.
 
 ---
 

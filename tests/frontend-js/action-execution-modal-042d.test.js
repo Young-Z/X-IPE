@@ -23,7 +23,6 @@ const EXPECTED_ACTIONS = [
   'feature_breakdown',
   'feature_refinement',
   'technical_design',
-  'test_generation',
   'implementation',
   'acceptance_testing',
   'code_refactor',
@@ -37,12 +36,12 @@ const EXPECTED_ACTIONS = [
 // ==============================================================================
 
 describe('FEATURE-042-D: workflow-prompts completeness', () => {
-  it('workflow-prompts array has exactly 13 entries', () => {
+  it('workflow-prompts array has exactly 12 entries', () => {
     expect(config['workflow-prompts']).toBeDefined();
-    expect(config['workflow-prompts']).toHaveLength(13);
+    expect(config['workflow-prompts']).toHaveLength(12);
   });
 
-  it('all 13 action keys present', () => {
+  it('all 12 action keys present', () => {
     const actions = config['workflow-prompts'].map((e) => e.action);
     for (const key of EXPECTED_ACTIONS) {
       expect(actions).toContain(key);
@@ -165,12 +164,6 @@ describe('FEATURE-042-D: tag correctness', () => {
     const cmd = getEnCommand('technical_design');
     expect(cmd).toContain('$feature-id$');
     expect(cmd).toContain('$output:specification$');
-  });
-
-  it('test_generation uses $feature-id$ and $output:tech-design$', () => {
-    const cmd = getEnCommand('test_generation');
-    expect(cmd).toContain('$feature-id$');
-    expect(cmd).toContain('$output:tech-design$');
   });
 
   it('implementation uses $feature-id$, $output:tech-design$, $output:specification$', () => {

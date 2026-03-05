@@ -53,8 +53,7 @@ auto_proceed: false  # Set to true for automatic task chaining
 |-----------|-------|--------------|
 | Requirement Gathering | x-ipe-task-based-requirement-gathering | Feature Breakdown |
 | Feature Breakdown | x-ipe-task-based-feature-breakdown | Technical Design |
-| Technical Design | x-ipe-task-based-technical-design | Test Generation |
-| Test Generation | x-ipe-task-based-test-generation | Code Implementation |
+| Technical Design | x-ipe-task-based-technical-design | Code Implementation |
 | Code Implementation | x-ipe-task-based-code-implementation | Human Playground |
 | Human Playground | x-ipe-task-based-human-playground | Feature Closing |
 | Feature Closing | x-ipe-task-based-feature-closing | - |

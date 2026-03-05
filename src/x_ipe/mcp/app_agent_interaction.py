@@ -134,14 +134,14 @@ def update_workflow_action(workflow_name: str, action: str, status: str,
     Supports all workflow actions across the engineering lifecycle including
     ideation (compose_idea, idea_mockup, idea_architecture), requirements
     (requirement_gathering, feature_breakdown, feature_refinement),
-    design (technical_design, test_generation), implementation
+    design (technical_design), implementation
     (code_implementation, acceptance_test), and delivery
     (human_playground, feature_closing).
 
     Args:
         workflow_name: Name of the workflow.
         action: Action identifier (e.g. compose_idea, idea_mockup, requirement_gathering,
-                feature_breakdown, feature_refinement, technical_design, test_generation,
+                feature_breakdown, feature_refinement, technical_design,
                 code_implementation, acceptance_test, human_playground, feature_closing).
         status: New status — one of: pending, in_progress, done, skipped, failed.
         feature_id: Required for per-feature actions (implement/validation/feedback stages).
