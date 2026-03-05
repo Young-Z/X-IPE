@@ -1,9 +1,9 @@
 """
-Test: Verify x-ipe-docs/config/workflow-template.json is in sync with
-src/x_ipe/resources/config/workflow-template.json (the source of truth).
+Test: Verify x-ipe-docs/config/ files are in sync with
+src/x_ipe/resources/config/ (the source of truth).
 
 TASK-731: Feedback-20260305-093837 — some actions missing action_context
-because the docs config was outdated.
+and instructions because the docs config was outdated.
 """
 
 import json
@@ -13,8 +13,14 @@ import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-DOCS_TEMPLATE = PROJECT_ROOT / "x-ipe-docs" / "config" / "workflow-template.json"
-BUNDLED_TEMPLATE = PROJECT_ROOT / "src" / "x_ipe" / "resources" / "config" / "workflow-template.json"
+DOCS_CONFIG = PROJECT_ROOT / "x-ipe-docs" / "config"
+BUNDLED_CONFIG = PROJECT_ROOT / "src" / "x_ipe" / "resources" / "config"
+
+DOCS_TEMPLATE = DOCS_CONFIG / "workflow-template.json"
+BUNDLED_TEMPLATE = BUNDLED_CONFIG / "workflow-template.json"
+
+DOCS_PROMPT = DOCS_CONFIG / "copilot-prompt.json"
+BUNDLED_PROMPT = BUNDLED_CONFIG / "copilot-prompt.json"
 
 
 @pytest.fixture
@@ -25,6 +31,16 @@ def docs_template():
 @pytest.fixture
 def bundled_template():
     return json.loads(BUNDLED_TEMPLATE.read_text(encoding="utf-8"))
+
+
+@pytest.fixture
+def docs_prompt():
+    return json.loads(DOCS_PROMPT.read_text(encoding="utf-8"))
+
+
+@pytest.fixture
+def bundled_prompt():
+    return json.loads(BUNDLED_PROMPT.read_text(encoding="utf-8"))
 
 
 class TestWorkflowTemplateSync:
@@ -50,4 +66,34 @@ class TestWorkflowTemplateSync:
                     missing.append(f"{stage_name}.{action_name}")
         assert not missing, (
             f"Actions missing action_context: {missing}"
+        )
+
+
+class TestCopilotPromptSync:
+    """Ensure docs copilot-prompt.json and bundled resource are identical."""
+
+    def test_prompts_are_identical(self, docs_prompt, bundled_prompt):
+        """Both copilot-prompt.json files must have identical content."""
+        assert docs_prompt == bundled_prompt, (
+            "x-ipe-docs/config/copilot-prompt.json is out of sync with "
+            "src/x_ipe/resources/config/copilot-prompt.json"
+        )
+
+    def test_all_workflow_actions_have_instructions(self, docs_prompt, docs_template):
+        """Every action in the workflow template must have a matching
+        instruction entry in copilot-prompt.json workflow-prompts."""
+        NO_CONTEXT_ACTIONS = {"compose_idea", "reference_uiux"}
+        prompt_actions = {
+            p["action"] for p in docs_prompt.get("workflow-prompts", [])
+        }
+        template_actions = set()
+        for stage in docs_template.get("stages", {}).values():
+            for action_name in stage.get("actions", {}):
+                if action_name not in NO_CONTEXT_ACTIONS:
+                    template_actions.add(action_name)
+
+        missing = template_actions - prompt_actions
+        assert not missing, (
+            f"Actions in workflow-template.json without instructions "
+            f"in copilot-prompt.json: {missing}"
         )

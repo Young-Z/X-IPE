@@ -131,7 +131,7 @@
       "id": "implementation",
       "action": "implementation",
       "icon": "bi-code-slash",
-      "input_source": ["technical_design"],
+      "input_source": ["test_generation"],
       "prompt-details": [
         {
           "language": "en",
@@ -160,6 +160,78 @@
           "language": "zh",
           "label": "验收测试",
           "command": "使用功能验收测试技能, 从 $output:specification$ 为 $feature-id$ 运行验收测试"
+        }
+      ]
+    },
+    {
+      "id": "code-refactor",
+      "action": "code_refactor",
+      "icon": "bi-wrench-adjustable",
+      "input_source": ["acceptance_testing"],
+      "prompt-details": [
+        {
+          "language": "en",
+          "label": "Code Refactor",
+          "command": "refactor code for $feature-id$ based on $output:test-report$ and $output:specification$ with code refactor skill"
+        },
+        {
+          "language": "zh",
+          "label": "代码重构",
+          "command": "使用代码重构技能, 基于 $output:test-report$ 和 $output:specification$ 为 $feature-id$ 重构代码"
+        }
+      ]
+    },
+    {
+      "id": "feature-closing",
+      "action": "feature_closing",
+      "icon": "bi-flag-fill",
+      "input_source": ["code_refactor"],
+      "prompt-details": [
+        {
+          "language": "en",
+          "label": "Feature Closing",
+          "command": "close feature $feature-id$ with $output:specification$ and $output:refactor-report$ using feature closing skill"
+        },
+        {
+          "language": "zh",
+          "label": "功能关闭",
+          "command": "使用功能关闭技能, 基于 $output:specification$ 和 $output:refactor-report$ 关闭 $feature-id$"
+        }
+      ]
+    },
+    {
+      "id": "human-playground",
+      "action": "human_playground",
+      "icon": "bi-controller",
+      "input_source": ["implementation"],
+      "prompt-details": [
+        {
+          "language": "en",
+          "label": "Human Playground",
+          "command": "create interactive playground for $feature-id$ from $output:specification$ and $output:impl-files$ with human playground skill"
+        },
+        {
+          "language": "zh",
+          "label": "人工验证",
+          "command": "使用人工验证技能, 从 $output:specification$ 和 $output:impl-files$ 为 $feature-id$ 创建交互式验证环境"
+        }
+      ]
+    },
+    {
+      "id": "change-request",
+      "action": "change_request",
+      "icon": "bi-arrow-repeat",
+      "input_source": ["feature_closing"],
+      "prompt-details": [
+        {
+          "language": "en",
+          "label": "Change Request",
+          "command": "create change request for $feature-id$ based on $output:closing-report$ and $output:specification$ with change request skill"
+        },
+        {
+          "language": "zh",
+          "label": "变更请求",
+          "command": "使用变更请求技能, 基于 $output:closing-report$ 和 $output:specification$ 为 $feature-id$ 创建变更请求"
         }
       ]
     }
