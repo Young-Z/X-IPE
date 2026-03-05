@@ -388,9 +388,10 @@ class TestDependencyEvaluation:
     def test_finished_dependency_unblocked(self, workflow_service, workflow_with_features):
         """AC: Finished dependency → not blocked."""
         name = workflow_with_features
-        # Complete Feature A through implement
+        # Complete Feature A through implement (all mandatory actions)
         workflow_service.update_action_status(name, "feature_refinement", "done", feature_id="FEATURE-040-A")
         workflow_service.update_action_status(name, "technical_design", "done", feature_id="FEATURE-040-A")
+        workflow_service.update_action_status(name, "test_generation", "done", feature_id="FEATURE-040-A")
         workflow_service.update_action_status(name, "implementation", "done", feature_id="FEATURE-040-A")
         result = workflow_service.check_dependencies(name, "FEATURE-040-B")
         assert result["blocked"] is False
