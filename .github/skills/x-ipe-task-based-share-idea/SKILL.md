@@ -116,7 +116,7 @@ input:
 | | 5.2 | Convert | Generate output files via pandoc, MCP, or manual fallback | Files generated |
 | | 5.3 | Verify & Complete | Confirm output files exist with size > 0; report to human | DoD validated |
 
-BLOCKING: Step 2.1 requires human confirmation of target format(s).
+BLOCKING: Step 2.1 requires confirmation of target format(s) (manual/stop_for_question: human confirms; auto: DAO confirms via x-ipe-dao-end-user-representative).
 BLOCKING: Step 5.3 fails if any output file is empty or missing.
 
 ---
@@ -335,8 +335,8 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <verification>Files exist in {idea_folder} directory</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Human confirmed receipt</name>
-    <verification>Human acknowledged generated files</verification>
+    <name>Receipt confirmed (human or auto)</name>
+    <verification>Generated files acknowledged (manual/stop_for_question: human confirms; auto: auto-acknowledged)</verification>
   </checkpoint>
 </definition_of_done>
 ```

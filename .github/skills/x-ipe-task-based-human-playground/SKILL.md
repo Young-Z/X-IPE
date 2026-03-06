@@ -122,7 +122,7 @@ input:
 
 BLOCKING: Step 4 is blocked until playground command runs without error.
 BLOCKING: Step 5 is blocked until human simulation tests pass.
-BLOCKING: Step 6 requires human validation before Feature Closing (skipped in auto mode).
+BLOCKING: Step 6 requires validation before Feature Closing (manual/stop_for_question: human validation; auto: skipped).
 
 ---
 

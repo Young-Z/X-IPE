@@ -118,7 +118,7 @@ input:
 | 5. 笃行之 — Practice Earnestly | 5.1 Execute & Document | Update documents, create CR record | CR documented |
 
 BLOCKING: Phase 3 must complete before Phase 4 — do NOT classify without conflict analysis.
-BLOCKING: Human MUST approve classification before Phase 5 execution (skipped in auto mode).
+BLOCKING: Classification MUST be approved before Phase 5 execution (manual/stop_for_question: human approval; auto: DAO approval via x-ipe-dao-end-user-representative).
 
 ---
 
@@ -168,7 +168,7 @@ BLOCKING: Human MUST approve classification before Phase 5 execution (skipped in
            - Could the existing feature already handle this with configuration?
            - Is the requested approach the best solution, or are there alternatives?
            - What is the impact if this CR is NOT implemented?
-        2. IF auto_proceed: use decision-making tool to self-resolve challenges
+        2. IF auto_proceed: use x-ipe-dao-end-user-representative to resolve challenges
         3. ELSE: present challenges to human, ask for confirmation
         4. Document challenge outcomes and confirmed scope
       </action>
@@ -232,7 +232,7 @@ BLOCKING: Human MUST approve classification before Phase 5 execution (skipped in
     <step_4_2>
       <name>Route Workflow</name>
       <action>
-        1. IF auto_proceed: log classification and conflicts via decision-making tool, proceed
+        1. IF auto_proceed: log classification and conflicts via x-ipe-dao-end-user-representative, proceed
         2. ELSE:
            a. Present to human: CR summary, classification, conflict results, affected features
            b. Wait for explicit human approval
@@ -383,11 +383,11 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>Conflict analysis completed</name>
-    <verification>Conflicts checked against specs, designs, and dependencies; all unexpected conflicts resolved with human</verification>
+    <verification>Conflicts checked against specs, designs, and dependencies; all unexpected conflicts resolved (manual/stop_for_question: with human; auto: via DAO)</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Human approved classification and conflicts</name>
-    <verification>Explicit human approval recorded before execution, including conflict resolution</verification>
+    <verification>Approval recorded before execution (manual/stop_for_question: explicit human approval; auto: DAO approval-like guidance), including conflict resolution</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Version history updated</name>
@@ -420,7 +420,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 | Pattern | When | Then |
 |---------|------|------|
-| Classification Decision | Classification unclear | Score against criteria, if score diff ≤2 ask human |
+| Classification Decision | Classification unclear | Score against criteria, if score diff ≤2 ask human (manual/stop_for_question) or DAO (auto) |
 | Conflict Resolution | Unexpected conflicts found | Present with impact, suggest mitigations, split CR if severe |
 | Enhancement CR | See [references/patterns.md] | Match existing feature, classify modification |
 | Multi-Feature CR | CR touches many features | One CR = one classification; split if needed |
@@ -429,7 +429,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 |--------------|---------|------------|
 | Skip classification | Wrong workflow chosen | Always classify explicitly |
 | Classify before conflicts | May miss scope issues | Phase 3 (conflicts) before Phase 4 (classify) |
-| No human approval | Risk wrong direction | Always get approval at Phase 4.2 |
+| No human approval | Risk wrong direction | Always get approval at Phase 4.2 (human in manual/stop_for_question; DAO in auto) |
 | Skip conflict analysis | Break existing features | Always detect conflicts in Phase 3 |
 | Override existing mockup | Lost design history | Create new version (v{N+1}), keep original |
 | Leave conflicting docs unresolved | Stale docs mislead future work | Minor → update inline; major → mark retired |

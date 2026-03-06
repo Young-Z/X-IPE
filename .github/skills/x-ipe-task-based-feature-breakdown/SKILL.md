@@ -208,7 +208,7 @@ BLOCKING (manual/stop_for_question): Human MUST approve feature list before refi
            - Is this capability truly needed for the MVP?
            - Can this be deferred to a later version?
            - Does this overlap with existing features in the system?
-        2. IF auto_proceed: use decision-making tool to self-resolve scope questions
+        2. IF auto_proceed: use x-ipe-dao-end-user-representative to resolve scope questions
         3. ELSE: present scope challenges to human, ask for confirmation
         4. Document scope decisions and rationale
       </action>
@@ -264,7 +264,7 @@ BLOCKING (manual/stop_for_question): Human MUST approve feature list before refi
         1. Review feature list across all Epics
         2. Validate MVP selection: does first feature provide minimum runnable value?
         3. Validate dependency DAG: no circular dependencies, clear implementation order
-        4. IF auto_proceed: confirm via decision-making tool
+        4. IF auto_proceed: confirm via x-ipe-dao-end-user-representative
         5. ELSE: present prioritized list to human for confirmation
         6. Finalize feature order and dependency graph
       </action>
@@ -332,7 +332,6 @@ task_completion_output:
   category: "requirement-stage"
   status: completed | blocked
   next_task_based_skill: "x-ipe-task-based-feature-refinement"
-  require_human_review: yes
   process_preference:
     auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"

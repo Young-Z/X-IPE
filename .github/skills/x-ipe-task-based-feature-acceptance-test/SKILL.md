@@ -268,7 +268,9 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
       4. IF outdated mockups were flagged in Step 2:
          a. Add prominent notice: "⚠ Outdated Mockup(s) Detected"
          b. List outdated mockup files and recommend updating them
-         c. IF process_preference.auto_proceed != "auto":
+         c. IF process_preference.auto_proceed == "auto":
+            → Log outdated mockup notice via x-ipe-dao-end-user-representative
+         d. ELSE:
             → INFORM human: "The following mockup(s) are outdated and were NOT used for UI/UX validation: {filenames}. Consider updating mockups to enable visual comparison in future acceptance tests."
       5. CALCULATE metrics: total, passed, failed, blocked, pass_rate = (passed/total)*100
       6. RETURN task completion output with results

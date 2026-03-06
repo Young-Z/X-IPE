@@ -207,7 +207,7 @@ BLOCKING (manual/stop_for_question): Human MUST approve specification before Tec
            - Are edge cases documented?
            - Are dependencies clearly identified?
            - Are non-functional requirements addressed?
-        2. IF auto_proceed: use decision-making tool to self-resolve questions, log answers
+        2. IF auto_proceed: use x-ipe-dao-end-user-representative to resolve questions, log answers
         3. ELSE: ask human about identified gaps (batch 3-5 questions)
         4. Document all answers and clarifications
       </action>
@@ -247,7 +247,7 @@ BLOCKING (manual/stop_for_question): Human MUST approve specification before Tec
         2. Decide final scope: what's IN scope vs OUT of scope
         3. Resolve any remaining edge case decisions
         4. IF mockups exist: decide freshness status (current vs outdated)
-        5. IF auto_proceed: log scope decisions via decision-making tool
+        5. IF auto_proceed: log scope decisions via x-ipe-dao-end-user-representative
         6. ELSE: present scope summary to human for confirmation
       </action>
       <output>Final specification scope with all decisions documented</output>

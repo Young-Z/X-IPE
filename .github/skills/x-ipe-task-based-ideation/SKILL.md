@@ -388,7 +388,7 @@ task_completion_output:
 
 ### Next Task Selection
 
-After ideation completes, ask human to choose:
+After ideation completes, ask human to choose (auto mode: auto-select from next_task_based_skill):
 
 ```yaml
 next_task_options:
@@ -451,8 +451,8 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
     <step_output>idea_summary_path</step_output>
   </checkpoint>
   <checkpoint required="true">
-    <name>Human Approved</name>
-    <verification>Human has reviewed and approved idea summary</verification>
+    <name>Approved (human or DAO)</name>
+    <verification>Idea summary reviewed and approved (manual/stop_for_question: human; auto: DAO approval-like guidance or skipped)</verification>
     <step_output>human_approval, next_task_choice</step_output>
   </checkpoint>
   <checkpoint required="recommended">

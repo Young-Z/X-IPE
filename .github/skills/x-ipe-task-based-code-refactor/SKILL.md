@@ -81,7 +81,7 @@ input:
       1. IF caller provides scope_level → use provided value
       2. IF feature_id is provided → default to "feature"
       3. IF files[] is provided → default to "custom"
-      4. ELSE → ASK human for scope
+      4. ELSE → IF auto_proceed == "auto": ASK x-ipe-dao-end-user-representative for scope; ELSE: ASK human for scope
     </steps>
   </field>
 
@@ -89,7 +89,7 @@ input:
     <steps>
       1. IF caller provides → use provided value
       2. IF human describes intent → derive from description
-      3. ELSE → ASK human: "What is the purpose of this refactoring?"
+      3. ELSE → IF auto_proceed == "auto": ASK x-ipe-dao-end-user-representative; ELSE: ASK human: "What is the purpose of this refactoring?"
     </steps>
   </field>
 
@@ -142,8 +142,8 @@ input:
 | 4 | Execute Refactoring | Apply changes incrementally with tests | All tests pass |
 | 5 | Validate & Complete | Verify improvement, update refs, apply tracing | Human approves |
 
-BLOCKING: Step 1 → 2 requires human review of analysis results.
-BLOCKING: Step 3 → 4 requires human approval of refactoring plan.
+BLOCKING: Step 1 → 2 requires review of analysis results (manual/stop_for_question: human review; auto: DAO review).
+BLOCKING: Step 3 → 4 requires approval of refactoring plan (manual/stop_for_question: human approval; auto: DAO approval).
 BLOCKING: Step 4 halts if any test fails (must fix or revert).
 
 ---
@@ -404,7 +404,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 ```
 1. Step 1: Invoke analysis tool → get scope, quality, suggestions
 2. Step 2: Invoke sync tool → align docs, reach 80% coverage
-3. Step 3: Generate plan from suggestions → human approval
+3. Step 3: Generate plan from suggestions → approval (human or DAO per mode)
 4. Step 4: Execute incrementally with tests
 5. Step 5: Validate, update refs, commit
 ```

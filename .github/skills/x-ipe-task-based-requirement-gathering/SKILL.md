@@ -132,7 +132,7 @@ input:
 | 5. 笃行之 — Practice Earnestly | 5.1 Create Requirement Document, 5.2 Complete & Verify | Create/update requirement-details, verify DoD | Document created |
 
 BLOCKING: Continue asking in Phase 2 until ALL ambiguities are resolved.
-BLOCKING: Human MUST decide on each conflict in step 2.2 before proceeding.
+BLOCKING: Each conflict in step 2.2 MUST be decided before proceeding (manual/stop_for_question: human decides; auto: x-ipe-dao-end-user-representative decides).
 BLOCKING (manual/stop_for_question): Human MUST approve requirements before proceeding to Feature Breakdown. Skipped in auto mode.
 
 ---
@@ -236,12 +236,12 @@ BLOCKING (manual/stop_for_question): Human MUST approve requirements before proc
         5. IF conflicts found, for EACH conflict:
            - Present conflict summary table
            - Provide recommendation based on: Single Responsibility, Cohesion, Independence, Minimal Coupling
-           - IF auto_proceed: use decision-making tool
+           - IF auto_proceed: use x-ipe-dao-end-user-representative
            - ELSE: ask human "CR on existing or new standalone feature?"
         6. Record decisions for each conflict
       </action>
       <constraints>
-        - BLOCKING: Do not proceed until human decided on EVERY conflict
+        - BLOCKING: Do not proceed until EVERY conflict is decided (manual/stop_for_question: human decides; auto: x-ipe-dao-end-user-representative decides)
         - CRITICAL: Scan ALL requirement-details parts, not just the latest
       </constraints>
       <output>Conflict review result with human decisions</output>
@@ -297,7 +297,7 @@ BLOCKING (manual/stop_for_question): Human MUST approve requirements before proc
       <action>
         1. Review all gathered requirements, conflicts, and feasibility assessment
         2. Explicitly define what is IN scope and OUT of scope
-        3. IF auto_proceed: make scope decision via decision-making tool, log rationale
+        3. IF auto_proceed: make scope decision via x-ipe-dao-end-user-representative, log rationale
         4. ELSE: present scope summary to human for confirmation
         5. Document final scope boundaries
       </action>
@@ -399,7 +399,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>Conflict review completed</name>
-    <verification>All existing requirement-details files scanned for overlaps; conflicts (if any) presented to human with decisions recorded</verification>
+    <verification>All existing requirement-details files scanned for overlaps; conflicts (if any) decided and recorded (manual/stop_for_question: human decides; auto: DAO decides)</verification>
   </checkpoint>
   <checkpoint required="conditional">
     <name>Impacted features marked</name>
@@ -441,7 +441,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Too many questions at once | Overwhelms human | Batch 3-5 questions |
 | Skipping conflict review | Duplicate/conflicting features | Always scan existing requirements |
 | Modifying existing FRs | Breaks existing specs | Only append CR impact markers + resolve conflicts |
-| Deciding CR vs new without human | Wrong architectural decision | Always ask human with recommendation |
+| Deciding CR vs new without human | Wrong architectural decision | Always ask human with recommendation (manual/stop_for_question); use DAO in auto mode |
 | Leave conflicting docs unresolved | Stale docs mislead future work | Minor → update inline; major → mark retired |
 
 ---

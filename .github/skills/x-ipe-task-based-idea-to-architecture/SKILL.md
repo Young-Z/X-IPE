@@ -144,7 +144,7 @@ input:
 
 BLOCKING: Step 1.1 halts if current_idea_folder is null -- ask human for folder path.
 BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
-BLOCKING: Step 5.4 requires human approval before proceeding.
+BLOCKING: Step 5.4 requires approval before proceeding (manual/stop_for_question: human approval; auto: skipped).
 
 ---
 
@@ -265,7 +265,7 @@ BLOCKING: Step 5.4 requires human approval before proceeding.
       <constraints>
         - CRITICAL: Focus on system-level components, not implementation details
         - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
-        - BLOCKING: Stop if no tools AND human declines manual mode
+        - BLOCKING: Stop if no tools AND human declines manual mode (auto: DAO decides whether to proceed with manual mode)
       </constraints>
       <output>Generated diagram files</output>
     </step_5_1>
@@ -382,8 +382,8 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <verification>New idea-summary-v{N+1}.md created with diagram links</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Human approved</name>
-    <verification>Human has reviewed and approved the architecture diagrams</verification>
+    <name>Approved (human or DAO)</name>
+    <verification>Architecture diagrams reviewed and approved (manual/stop_for_question: human; auto: DAO approval-like guidance or skipped)</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -423,7 +423,7 @@ See [references/architecture-patterns.md](.github/skills/x-ipe-task-based-idea-t
 | Creating diagrams before reading idea | May miss requirements | Always analyze idea first |
 | Ignoring tools.json config | Inconsistent tool usage | Always check config |
 | Too much detail in initial diagrams | Overwhelms review | Start high-level, add detail if requested |
-| Skipping human review | May create wrong architecture | Always get approval |
+| Skipping review | May create wrong architecture | Always get approval (human in manual/stop_for_question; auto: DAO or skip) |
 | Using disabled tools | Violates config rules | Only use enabled tools |
 | Including implementation details | Architecture is high-level | Focus on components and relationships |
 | Creating only one diagram type | May miss important views | Consider multiple perspectives |
