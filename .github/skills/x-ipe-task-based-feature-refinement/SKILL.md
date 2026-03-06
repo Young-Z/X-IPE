@@ -66,6 +66,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
   <field name="feature_id" source="previous task (Feature Breakdown) output OR task board OR human input">
     <steps>
       1. IF previous task was "Feature Breakdown" → extract from task_output_links.feature_ids

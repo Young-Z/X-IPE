@@ -46,3 +46,28 @@
 
 ### Follow-up
 > None
+
+| DAO-003 | 2026-03-06T16:45:00Z | N/A | copilot-instructions | answer | 0.92 | User asks "what can we do next" — provide prioritized menu of available next steps |
+
+## DAO-003
+
+- **Timestamp:** 2026-03-06T16:45:00Z
+- **Task ID:** N/A
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** copilot-instructions
+- **Source:** human
+- **Disposition:** answer
+- **Confidence:** 0.92
+
+### Message
+> what can we do next
+
+### Guidance Returned
+> Three prioritized options: (1) **EPIC-048 Feature Refinement** — FEATURE-048-A (Tool Skill Contract Extension) and FEATURE-048-B (Consultation Integration) are both Planned with no dependencies, ready for refinement. 048-C and 048-D depend on 048-A. (2) **Stale task cleanup** — 10 tasks are stuck 🔄 in_progress from previous sessions (TASK-745, TASK-733, TASK-719, TASK-706, TASK-704, TASK-475, TASK-483, TASK-485, TASK-486, TASK-490), most from weeks ago. These should be triaged (completed, cancelled, or re-queued). (3) **Feature Closing** — several recently completed features (EPIC-047 features) may still need formal closing steps.
+
+### Rationale
+> The user is at a natural transition point after completing TASK-784. A direct answer listing prioritized options is the smallest useful intervention — it gives the user agency to choose without prescribing a single path. EPIC-048 refinement is the highest-value path since requirements and breakdown are already done.
+
+### Follow-up
+> None

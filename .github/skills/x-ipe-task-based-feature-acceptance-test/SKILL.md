@@ -75,6 +75,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
   <field name="feature_id" source="from previous task output or task board or human input" />
   <field name="target_url" source="IF feature-stage, resolve from feature's dev server config; IF standalone, from human input" />
   <field name="specification_link" source="auto-detect from x-ipe-docs/requirements/{feature_id}/specification.md" />

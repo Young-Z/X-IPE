@@ -83,6 +83,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
   <field name="extra_context_reference.requirement-doc" source="workflow context OR auto-detect">
     <steps>
       1. IF workflow-mode AND workflow.extra_context_reference.requirement-doc is a file path → use it
