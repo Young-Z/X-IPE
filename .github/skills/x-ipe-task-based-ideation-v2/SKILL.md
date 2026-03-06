@@ -113,7 +113,7 @@ input:
 | 6 | Generate Draft | Create idea draft, prefer enabled tools from step 1 | draft created |
 | 7 | Critique | Sub-agent provides constructive feedback | feedback received |
 | 8 | Improve Summary | Incorporate feedback, prefer enabled tools from step 1 | summary finalized |
-| 9 | Complete | Request human review | human approves |
+| 9 | Complete | Verify DoD, output summary | Task complete |
 
 BLOCKING: Step 4 - Continue brainstorming until idea is well-defined.
 
@@ -296,7 +296,7 @@ BLOCKING: Step 10 - Human MUST approve idea summary before proceeding.
          b. Log: "Workflow action status updated to done"
       2. Present final idea summary to human
       3. Ask human to choose next task
-      4. Wait for approval
+      4. Ask if any aspects of the idea are missing or unclear
     </action>
     <constraints>
       - BLOCKING: Human MUST approve before proceeding
@@ -399,7 +399,7 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
   </checkpoint>
   <checkpoint required="true">
     <name>Human Approved</name>
-    <verification>Human has reviewed and approved idea summary</verification>
+    <verification>Idea summary complete with all sections filled and key decisions documented</verification>
     <step_output>human_approval, next_task_choice</step_output>
   </checkpoint>
   <checkpoint required="recommended">

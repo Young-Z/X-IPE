@@ -143,11 +143,11 @@ input:
 | 3 | Reference Arch | Check existing architecture patterns | Patterns identified |
 | 4 | Research | Search for best practices and libraries | Research complete |
 | 5 | Create Design | Write two-part technical design document | Design written |
-| 6 | Complete | Verify DoD, output summary, request human review | Human review |
+| 6 | Complete | Verify DoD, output summary | Task complete |
 
 BLOCKING: Step 1 is BLOCKED if feature not on board or status not "Done Feature Refinement".
-BLOCKING (manual/stop_for_question): Step 6 requires human approval before proceeding to Code Implementation.
-BLOCKING (auto): Skip human review; proceed automatically after DoD verification.
+BLOCKING (manual/stop_for_question): Step 6 - present design, ask if architecture decisions are correct before Code Implementation.
+BLOCKING (auto): Proceed automatically after DoD verification.
 
 ---
 
@@ -269,13 +269,11 @@ BLOCKING (auto): Skip human review; proceed automatically after DoD verification
          b. Log: "Workflow action status updated to done"
       2. VERIFY all DoD checkpoints
       3. OUTPUT task completion summary
-      4. Review & Decision Gate:
-         IF process_preference.auto_proceed == "auto":
-           → Skip human review (auto-proceed mode)
-         ELSE (manual/stop_for_question):
-           → Present technical design to human for review
-           → Wait for human approval
-           → IF human rejects → revise
+      4. Verify all DoD checkpoints are met
+      5. IF manual/stop_for_question:
+            → Present technical design to human
+            → Ask if architecture decisions and component structure are correct
+            → IF human identifies issues → revise specific sections
     </action>
     <success_criteria>
       - All required DoD checkpoints pass

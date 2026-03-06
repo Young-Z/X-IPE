@@ -140,10 +140,10 @@ input:
 | 2 | Sync Docs & Tests | Invoke `x-ipe-tool-code-quality-sync` | All aligned, coverage ≥ 80% |
 | 3 | Generate Refactoring Plan | Design target structure, propose plan | Human approves plan |
 | 4 | Execute Refactoring | Apply changes incrementally with tests | All tests pass |
-| 5 | Validate & Complete | Verify improvement, update refs, apply tracing | Human approves |
+| 5 | Validate & Complete | Verify improvement, update refs, apply tracing | DoD verified |
 
-BLOCKING: Step 1 → 2 requires review of analysis results (manual/stop_for_question: human review; auto: DAO review).
-BLOCKING: Step 3 → 4 requires approval of refactoring plan (manual/stop_for_question: human approval; auto: DAO approval).
+BLOCKING: Step 1 → 2 requires verification that analysis identified all issues.
+BLOCKING: Step 3 → 4 requires confirmation that refactoring plan addresses identified issues (manual/stop_for_question: human confirms; auto: DAO confirms).
 BLOCKING: Step 4 halts if any test fails (must fix or revert).
 
 ---
@@ -172,7 +172,7 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
          IF process_preference.auto_proceed == "auto":
            Proceed automatically. If concerns found, use x-ipe-dao-end-user-representative.
          ELSE (manual/stop_for_question):
-           WAIT for human approval of analysis results.
+           PRESENT analysis findings to human. WAIT for confirmation that issues are correctly identified.
     </action>
     <constraints>
       - BLOCKING: Do not proceed to Step 2 without approved analysis
@@ -229,10 +229,10 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
             → IF disposition is "clarification" or "reframe" or "critique": revise plan
             → IF disposition is "pass_through": escalate to human
          ELSE (manual/stop_for_question):
-           → PRESENT plan to human, WAIT for approval
+           → PRESENT plan to human, WAIT for confirmation that plan addresses the right issues
     </action>
     <constraints>
-      - BLOCKING (manual/stop_for_question): Do not proceed to Step 4 without human approval of plan
+      - BLOCKING (manual/stop_for_question): Do not proceed to Step 4 without human confirming plan addresses issues
       - BLOCKING (auto): Do not proceed to Step 4 without DAO approval from x-ipe-dao-end-user-representative
     </constraints>
     <output>Approved refactoring_plan with phases and principle mappings</output>
@@ -281,11 +281,11 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
            - status: "done"
            - feature_id: {feature_id}
            - deliverables: {"refactor-report": "{path}"}
-      10. Mode-aware review gate:
+      10. Verify DoD checkpoints:
           IF process_preference.auto_proceed == "auto":
-            Skip human review. Resolve open questions via x-ipe-dao-end-user-representative.
+            Resolve any open questions via x-ipe-dao-end-user-representative.
           ELSE (manual/stop_for_question):
-            PRESENT summary to human, WAIT for approval.
+            PRESENT summary to human with any open questions. WAIT for answers.
       11. CREATE final commit
     </action>
     <success_criteria>
@@ -355,7 +355,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 <definition_of_done>
   <checkpoint required="true">
     <name>Analysis completed and approved</name>
-    <verification>x-ipe-tool-refactoring-analysis output received and reviewed</verification>
+    <verification>x-ipe-tool-refactoring-analysis output received and issues identified</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Documentation synced</name>

@@ -118,7 +118,7 @@ input:
 | 3 | Create Tests | Write human simulation tests in `playground/tests/` | Test files created |
 | 4 | Validate | Run playground command and verify exit code 0 | Command succeeds |
 | 5 | Run Tests | Execute human simulation tests | All tests pass |
-| 6 | Complete | Verify DoD, output summary, request human review | Human review |
+| 6 | Complete | Verify DoD, output summary, inform human playground is ready | Playground delivered |
 
 BLOCKING: Step 4 is blocked until playground command runs without error.
 BLOCKING: Step 5 is blocked until human simulation tests pass.
@@ -221,11 +221,11 @@ BLOCKING: Step 6 requires validation before Feature Closing (manual/stop_for_que
       3. Include sample data
       4. Add reset capability
       5. Log outputs for debugging
-      6. Review & Decision Gate:
+      6. Completion Gate:
          IF process_preference.auto_proceed == "auto":
-           → Skip human review (auto-proceed mode)
+           → Auto-proceed after DoD verification
          ELSE (manual/stop_for_question):
-           → Inform human that playground is ready for review
+           → Inform human that playground is ready for testing
            → Wait for human validation
     </action>
     <output>Playground ready for human validation</output>

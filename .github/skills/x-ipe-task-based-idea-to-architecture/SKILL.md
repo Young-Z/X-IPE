@@ -140,11 +140,11 @@ input:
 | 5. 笃行之 (Practice Earnestly) | 5.1 | Create Diagrams | Generate diagrams using enabled tools | Diagrams created |
 | | 5.2 | Save Artifacts | Store in `{current_idea_folder}/architecture/` | Artifacts saved |
 | | 5.3 | Update Summary | Create new idea-summary version with diagram links | Summary updated |
-| | 5.4 | Complete | Request human review and approval | Human approves |
+| | 5.4 | Complete | Verify DoD, output summary | Task complete |
 
 BLOCKING: Step 1.1 halts if current_idea_folder is null -- ask human for folder path.
 BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
-BLOCKING: Step 5.4 requires approval before proceeding (manual/stop_for_question: human approval; auto: skipped).
+BLOCKING (manual/stop_for_question): Step 5.4 - present diagrams, ask if architecture captures the right components.
 
 ---
 
@@ -295,14 +295,12 @@ BLOCKING: Step 5.4 requires approval before proceeding (manual/stop_for_question
     <step_5_4>
       <name>Complete</name>
       <action>
-        1. Review & Decision Gate:
-           IF process_preference.auto_proceed == "auto":
-             → Skip human review (auto-proceed mode)
-           ELSE (manual/stop_for_question):
-             → Present diagrams to human for review
-             → Wait for human approval
-             → IF human rejects → revise
-        2. Compile output result
+        1. Verify all DoD checkpoints are met
+        2. IF manual/stop_for_question:
+              → Present diagrams to human
+              → Ask if architecture captures the right components and relationships
+              → IF human identifies issues → revise specific components
+        3. Compile output result
       </action>
       <success_criteria>
         - All diagrams created and saved
@@ -382,8 +380,8 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <verification>New idea-summary-v{N+1}.md created with diagram links</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Approved (human or DAO)</name>
-    <verification>Architecture diagrams reviewed and approved (manual/stop_for_question: human; auto: DAO approval-like guidance or skipped)</verification>
+    <name>Architecture diagrams complete</name>
+    <verification>Architecture diagrams generated with all idea components represented</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -423,7 +421,7 @@ See [references/architecture-patterns.md](.github/skills/x-ipe-task-based-idea-t
 | Creating diagrams before reading idea | May miss requirements | Always analyze idea first |
 | Ignoring tools.json config | Inconsistent tool usage | Always check config |
 | Too much detail in initial diagrams | Overwhelms review | Start high-level, add detail if requested |
-| Skipping review | May create wrong architecture | Always get approval (human in manual/stop_for_question; auto: DAO or skip) |
+| Skipping DoD verification | May create wrong architecture | Always verify DoD checkpoints; ask specific questions in manual mode |
 | Using disabled tools | Violates config rules | Only use enabled tools |
 | Including implementation details | Architecture is high-level | Focus on components and relationships |
 | Creating only one diagram type | May miss important views | Consider multiple perspectives |

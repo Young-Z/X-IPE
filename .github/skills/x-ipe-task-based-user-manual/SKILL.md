@@ -227,7 +227,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ### Pattern: Human Communication on Completion
 
-**When:** Task is completed and requires human review (manual/stop_for_question mode)
+**When:** Task is completed (manual/stop_for_question mode)
 **Then:**
 ```
 1. IF process_preference.auto_proceed == "auto":

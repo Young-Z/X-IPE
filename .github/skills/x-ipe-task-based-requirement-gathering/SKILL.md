@@ -133,8 +133,8 @@ input:
 
 BLOCKING: Continue asking in Phase 2 until ALL ambiguities are resolved.
 BLOCKING: Each conflict in step 2.2 MUST be decided before proceeding (manual/stop_for_question: human decides; auto: x-ipe-dao-end-user-representative decides).
-BLOCKING (manual/stop_for_question): Human MUST approve requirements before proceeding to Feature Breakdown.
-BLOCKING (auto): Skip human review; proceed automatically after DoD verification.
+BLOCKING (manual/stop_for_question): Human MUST confirm requirements are complete before proceeding to Feature Breakdown.
+BLOCKING (auto): Proceed automatically after DoD verification.
 
 ---
 
@@ -338,12 +338,11 @@ BLOCKING (auto): Skip human review; proceed automatically after DoD verification
               - deliverables: {"requirement-doc": "{path}", "requirements-folder": "{path}"}
            b. Log: "Workflow action status updated to done"
         2. Verify all DoD checkpoints
-        3. Review & Decision Gate:
-           IF process_preference.auto_proceed == "auto":
-             → Skip human review (auto-proceed mode)
-           ELSE (manual/stop_for_question):
-             → Present requirements document to human for review
-             → Wait for human approval → IF rejected → revise
+        3. Verify all DoD checkpoints are met
+        4. IF manual/stop_for_question:
+              → Present requirements document to human
+              → Ask if any requirements are missing, incorrect, or unclear
+              → IF human identifies issues → revise specific sections
       </action>
       <output>Task completion output, workflow_action_updated</output>
     </step_5_2>

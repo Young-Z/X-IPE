@@ -136,8 +136,8 @@ MANDATORY: When `mockup_list` is provided, analyze mockups during Step 2 and ext
 
 BLOCKING: Phase 1 fails if feature not on board or status not "Planned".
 BLOCKING: Step 1.3 MUST scan for mockups if feature folder has no `mockups/` directory.
-BLOCKING (manual/stop_for_question): Human MUST approve specification before Technical Design.
-BLOCKING (auto): Skip human review; proceed automatically after DoD verification.
+BLOCKING (manual/stop_for_question): Human MUST confirm specification is complete before Technical Design.
+BLOCKING (auto): Proceed automatically after DoD verification.
 
 ---
 
@@ -286,8 +286,8 @@ BLOCKING (auto): Skip human review; proceed automatically after DoD verification
            - workflow_name, action, status: "done", feature_id
            - deliverables: {"specification": "{path}", "feature-docs-folder": "{path}"}
         2. Verify all DoD checkpoints
-        3. IF auto_proceed: skip human review
-        4. ELSE (manual/stop_for_question): present specification to human, wait for approval
+        3. Verify all DoD checkpoints are met
+        4. IF manual/stop_for_question: present specification, ask if anything is missing or incorrect
       </action>
       <output>Task completion output with specification path, workflow_action_updated</output>
     </step_5_2>

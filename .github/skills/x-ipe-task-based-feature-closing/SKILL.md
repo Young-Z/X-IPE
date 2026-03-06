@@ -320,9 +320,9 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
          - IF refactoring suggestions exist: list top suggestions with priority
          - IF overall_quality_score < 7: flag "Refactoring recommended" with summary of key improvements
          - IF overall_quality_score >= 7: note "Code quality is acceptable, optional improvements listed"
-      5. Review & Decision Gate:
+      5. Completion Gate:
          IF process_preference.auto_proceed == "auto":
-           → Skip human review (auto-proceed mode)
+           → Auto-proceed after DoD verification
            → Log refactoring recommendation to x-ipe-docs/dao/ semantic log via x-ipe-dao-end-user-representative if refactoring_score < 7
          ELSE (manual/stop_for_question):
            → Present summary to human with clear recommendation on whether refactoring is needed

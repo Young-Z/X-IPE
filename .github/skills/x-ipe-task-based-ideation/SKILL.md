@@ -115,12 +115,12 @@ input:
 | 3. 慎思之 (Think Carefully) | 3.1 | Critique | Sub-agent provides constructive feedback | feedback received |
 | 4. 明辨之 (Discern Clearly) | 4.1 | Improve Summary | Decide on feedback, incorporate improvements | summary finalized |
 | 5. 笃行之 (Practice Earnestly) | 5.1 | Generate Draft | Create idea draft, prefer enabled tools from step 1.1 | draft created |
-| | 5.2 | Complete | Request human review | human approves |
+| | 5.2 | Complete | Verify DoD, output summary | Task complete |
 
 BLOCKING: Step 2.2 - Continue brainstorming until idea is well-defined.
 
-BLOCKING (manual/stop_for_question): Step 5.2 - Human MUST approve idea summary before proceeding.
-BLOCKING (auto): Skip human review; auto-select next task from next_task_based_skill.
+BLOCKING (manual/stop_for_question): Step 5.2 - Human MUST confirm idea summary is accurate before proceeding.
+BLOCKING (auto): Proceed after DoD verification; auto-select next task from next_task_based_skill.
 
 ---
 
@@ -341,21 +341,19 @@ BLOCKING (auto): Skip human review; auto-select next task from next_task_based_s
               - status: "done"
               - deliverables: {"refined-idea": "{path to idea-summary file}", "refined-ideas-folder": "{path to refined-idea/ folder}"}
            b. Log: "Workflow action status updated to done"
-        2. Review & Decision Gate:
-           IF process_preference.auto_proceed == "auto":
-             → Skip human review (auto-proceed mode)
-             → Auto-select next task from next_task_based_skill
+        2. Verify all DoD checkpoints are met
+        3. IF process_preference.auto_proceed == "auto":
+              → Auto-select next task from next_task_based_skill
            ELSE (manual/stop_for_question):
-             → Present final idea summary to human
-             → Ask human to choose next task
-             → Wait for approval
-             → IF human rejects → revise
+              → Present final idea summary to human
+              → Ask if any aspects of the idea are missing or unclear
+              → IF human identifies gaps → revise specific sections
       </action>
       <constraints>
-        - BLOCKING (manual/stop_for_question): Human MUST approve before proceeding
-        - BLOCKING (auto): Skip human approval; auto-proceed to next task
+        - BLOCKING (manual/stop_for_question): Human MUST confirm idea is complete before proceeding
+        - BLOCKING (auto): Proceed after DoD verification; auto-select next task
       </constraints>
-      <output>human_approval, next_task_choice, workflow_action_updated</output>
+      <output>next_task_choice, workflow_action_updated</output>
     </step_5_2>
 
   </phase_5>
@@ -454,9 +452,9 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
     <step_output>idea_summary_path</step_output>
   </checkpoint>
   <checkpoint required="true">
-    <name>Approved (human or DAO)</name>
-    <verification>Idea summary reviewed and approved (manual/stop_for_question: human; auto: DAO approval-like guidance or skipped)</verification>
-    <step_output>human_approval, next_task_choice</step_output>
+    <name>Idea summary complete</name>
+    <verification>Idea summary complete with all sections filled and key decisions documented</verification>
+    <step_output>next_task_choice</step_output>
   </checkpoint>
   <checkpoint required="recommended">
     <name>Principles Researched</name>

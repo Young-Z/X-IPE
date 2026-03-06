@@ -146,8 +146,8 @@ BLOCKING: If parts exist, work with the CURRENT ACTIVE PART (highest part number
 BLOCKING: Features with more than 20 ACs MUST be split into sub-features.
 BLOCKING: First feature in each Epic MUST be "Minimum Runnable Feature" (MVP).
 BLOCKING: MUST use feature-board-management skill (not manual file editing).
-BLOCKING (manual/stop_for_question): Human MUST approve feature list before refinement.
-BLOCKING (auto): Skip human review; DAO approval via x-ipe-dao-end-user-representative if needed.
+BLOCKING (manual/stop_for_question): Human MUST confirm feature list is complete before refinement.
+BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ipe-dao-end-user-representative if needed.
 
 ---
 
@@ -313,8 +313,8 @@ BLOCKING (auto): Skip human review; DAO approval via x-ipe-dao-end-user-represen
       <action>
         1. IF workflow-mode: call update_workflow_action with status "done", features list
         2. Verify all DoD checkpoints
-        3. IF auto_proceed: skip human review
-        4. ELSE (manual/stop_for_question): present feature breakdown to human, wait for approval
+        3. Verify all DoD checkpoints are met
+        4. IF manual/stop_for_question: present feature breakdown, ask if any features are missing or miscategorized
       </action>
       <output>Task completion output, workflow_action_updated</output>
     </step_5_3>
