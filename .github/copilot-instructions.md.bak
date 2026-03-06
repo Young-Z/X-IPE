@@ -26,75 +26,26 @@
 
 ---
 
-## ⚠️ CRITICAL: DAO-First — Every Message Through Human Representative
-
-**EVERY user message MUST be processed through `x-ipe-dao-end-user-representative` before any other action.**
-
-This is the universal gateway. No matter what the user says — a command, a question, feedback, approval — the message flows through the human representative skill first. The DAO interprets the message, selects a disposition, and the agent acts on that structured output.
-
-### Message Processing Flow
-
-When you receive a user message (after session initialization):
-
-1. **Call `x-ipe-dao-end-user-representative`** internally with:
-   ```yaml
-   message_context:
-     source: "human"
-     calling_skill: "copilot-instructions"
-     task_id: "{active task ID or N/A}"
-     feature_id: "{active feature ID or N/A}"
-     workflow_name: "{active workflow or N/A}"
-     downstream_context: "{current agent state — active task, pending questions, skill phase}"
-     messages:
-       - content: "{exact user message}"
-   human_shadow: false
-   ```
-
-2. **Act on the DAO disposition:**
-
-   | Disposition | Meaning | Agent Action |
-   |-------------|---------|--------------|
-   | `instruction` | User is commanding action (e.g., "fix this bug", "implement feature X") | → Proceed to **Skill Classification** below |
-   | `approval` | User is approving pending work (e.g., "lgtm", "go ahead", "auto proceed") | → Proceed with next step in active skill/workflow |
-   | `answer` | User is providing requested information | → Feed into active task context, continue current skill |
-   | `clarification` | User is clarifying a previous question | → Update active task with clarified info, continue |
-   | `critique` | User is giving feedback on current work | → Adjust current approach per feedback, stay in skill |
-   | `reframe` | User is redirecting focus entirely | → Reassess — may need to switch tasks or skills |
-   | `pass_through` | Message doesn't need mediation | → Agent handles directly without skill routing |
-
-3. **Only AFTER DAO processing** → proceed with skill classification, task creation, or execution as appropriate.
-
-### Why DAO-First Matters
-
-- **Consistent interpretation** — Every message gets structured analysis, not ad-hoc pattern matching
-- **Context-aware routing** — DAO considers the current task, feature, and workflow state when interpreting
-- **Disposition-driven branching** — The agent's next action is determined by a clear, bounded signal, not raw text parsing
-- **Bounded scope** — DAO interprets intent only. It does NOT execute tasks, write code, or absorb skill responsibilities
-
----
-
 ## ⚠️ CRITICAL: Skill-First, Not Code-First
 
-**When DAO returns disposition `instruction` (user is commanding action), do NOT jump straight into coding or making changes.**
+**When a user asks you to do something, do NOT jump straight into coding or making changes.**
 
 ### 🚫 HARD GATE: No `edit` / `create` Tool Calls Without a Loaded Skill
 
 Before calling **any** file-editing tool (`edit`, `create`, or writing code via `bash`), you MUST have:
-1. ✅ Processed the message through `x-ipe-dao-end-user-representative` (disposition = `instruction`)
-2. ✅ Classified the request into a task-based skill
-3. ✅ Created a task on `task-board.md`
-4. ✅ Loaded the corresponding skill (via `skill` tool or by reading its `SKILL.md`)
-5. ✅ Reached the skill's implementation step that permits code changes
+1. ✅ Classified the request into a task-based skill
+2. ✅ Created a task on `task-board.md`
+3. ✅ Loaded the corresponding skill (via `skill` tool or by reading its `SKILL.md`)
+4. ✅ Reached the skill's implementation step that permits code changes
 
 If ANY of these are missing → **STOP. Do not touch code.**
 
-### Analyze the DAO Output
+### Analyze the Request First
 
-When DAO disposition is `instruction`:
-
-1. **Use DAO's interpretation** — the message has already been understood and classified
-2. **Match to an x-ipe skill** — scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions to find the right skill
-3. **Load and follow that skill** — the skill defines the proper procedure, prerequisites, and Definition of Done
+1. **Read and understand** the user's message carefully
+2. **Classify the intent** — is this a bug fix? A feature? A refactor? A config change?
+3. **Match to an x-ipe skill** — scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions to find the right skill
+4. **Load and follow that skill** — the skill defines the proper procedure, prerequisites, and Definition of Done
 
 ### Why This Matters
 
@@ -106,15 +57,14 @@ Even if a fix seems simple (e.g., "change the default port"), the correct approa
 
 **The skill ensures quality** — it enforces test coverage, proper documentation, and review steps that ad-hoc coding skips.
 
-### ⛔ Anti-Pattern: Direct Fix Without DAO + Skill
+### ⛔ Anti-Pattern: Direct Fix Without Skill
 
 ```
 ❌ User: "the default port is wrong, fix it"
    Agent: *immediately edits config.py and updates 3 files*
 
 ✅ User: "the default port is wrong, fix it"
-   Agent: *DAO interprets → disposition: instruction →
-           classifies as bug fix → loads x-ipe-task-based-bug-fix →
+   Agent: *identifies this as a bug fix → loads x-ipe-task-based-bug-fix →
            creates task on board → writes failing test → fixes code →
            verifies tests pass → updates board*
 ```
@@ -128,8 +78,7 @@ Even if a fix seems simple (e.g., "change the default port"), the correct approa
            wrote test AFTER the fix, no task board entry*
 
 ✅ What should have happened:
-   Agent: *DAO interprets → disposition: instruction →
-           classifies as bug fix → loads x-ipe-task-based-bug-fix →
+   Agent: *classifies as bug fix → loads x-ipe-task-based-bug-fix →
            creates TASK-681 on board → diagnoses root cause →
            runs conflict analysis → writes FAILING test first →
            implements fix → verifies test passes → updates board*
@@ -165,13 +114,12 @@ The skill caught things the direct fix missed: conflict analysis (checking all c
 
 **Before doing ANY work**, the agent MUST:
 
-1. **Process message through DAO** — call `x-ipe-dao-end-user-representative` to interpret user intent
-2. **Classify the work** into a task-based skill using auto-discovery (scan `.github/skills/x-ipe-task-based-*/`)
-3. **Create task on task-board.md** via `x-ipe+all+task-board-management` skill ← **BLOCKING**
-4. **Load the corresponding skill** from `.github/skills/` folder
-5. **Follow the skill's execution procedure** step-by-step
-6. **Complete the skill's Definition of Done (DoD)** before marking complete
-7. **Update task-board.md** with completion status ← **MANDATORY**
+1. **Classify the work** into a task-based skill using auto-discovery (scan `.github/skills/x-ipe-task-based-*/`)
+2. **Create task on task-board.md** via `x-ipe+all+task-board-management` skill ← **BLOCKING**
+3. **Load the corresponding skill** from `.github/skills/` folder
+4. **Follow the skill's execution procedure** step-by-step
+5. **Complete the skill's Definition of Done (DoD)** before marking complete
+6. **Update task-board.md** with completion status ← **MANDATORY**
 
 ### Task-Based Skill Identification
 
@@ -188,14 +136,22 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 > **Note:** When **Auto-Proceed is enabled** (global or task-level), `require_human_review` is **skipped** regardless of the skill's default. The `process_preference.auto_proceed` enum (`manual | auto | stop_for_question`) controls this behavior.
 
-> **Note:** DAO-First is universal — it applies in ALL modes (`auto`, `manual`, `stop_for_question`). The mode affects whether *within-skill* decision points also go through DAO (auto) or ask the human (manual/stop_for_question). But the initial message always goes through DAO.
+### Human Representative Interception (Auto Mode)
+
+When `process_preference.auto_proceed` is `auto` and a skill reaches a human-required decision point (e.g., a clarifying question, a conflict between requirements, or an ambiguous choice), the agent MUST call `x-ipe-dao-end-user-representative` to represent the human's intent instead of asking the human directly.
+
+**Behavior by mode:**
+- **`auto`**: Call `x-ipe-dao-end-user-representative` with `message_context` — the human representative skill provides guidance on behalf of the human. The response disposition (`answer`, `clarification`, `reframe`, `critique`, `instruction`, `approval`, `pass_through`) drives the skill's branching logic.
+- **`manual`**: Ask the human directly — DAO is NOT invoked.
+- **`stop_for_question`**: Ask the human directly — DAO is NOT invoked.
+
+**Bounded scope:** The human representative skill represents human intent at decision points only. It does NOT execute tasks, write code, make architectural decisions, or absorb the responsibilities of task-based skills. It mediates human-origin meaning and returns a bounded disposition.
 
 ### 🛑 STOP AND THINK: Pre-Flight Checklist
 
 **Before touching ANY code or making ANY changes, ask yourself:**
 
 ```
-0. Did I process this message through DAO? → If NO, STOP and call x-ipe-dao-end-user-representative
 1. What task-based skill is this? → Scan `.github/skills/x-ipe-task-based-*/` descriptions
 2. Did I create a task on task-board.md? → If NO, STOP and create it
 3. Did I load the corresponding skill? → If NO, STOP and load it
@@ -203,7 +159,7 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 5. Has the skill reached the step that permits code changes? → If NO, STOP
 ```
 
-**If you catch yourself about to call `edit`, `create`, or write code via `bash` without completing steps 0–5 above — STOP IMMEDIATELY. Go back and follow the process.**
+**If you catch yourself about to call `edit`, `create`, or write code via `bash` without completing steps 1–4 above — STOP IMMEDIATELY. Go back and follow the process.**
 
 **Common Mistakes to Avoid:**
 - User says "refactor this" → You must use `x-ipe-task-based-code-refactor` skill, NOT just start coding
@@ -213,7 +169,6 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 ### ⚠️ DO NOT Skip Skills
 
 **Forbidden Actions:**
-- ❌ Processing user messages without going through DAO first
 - ❌ Starting work without creating task on task-board.md first
 - ❌ Using `manage_todo_list` as a substitute for task-board.md
 - ❌ Completing work without updating task-board.md
@@ -224,7 +179,6 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 - ❌ Refactoring code without using `x-ipe-task-based-code-refactor` skill
 
 **Required Actions:**
-- ✅ Always process user messages through `x-ipe-dao-end-user-representative` FIRST
 - ✅ Always create task on task-board.md BEFORE starting work
 - ✅ Always identify task-based skill first
 - ✅ Always load and follow the corresponding skill
