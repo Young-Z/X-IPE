@@ -8,10 +8,10 @@
 # ─────────────────────────────────────────────────────────────
 skill_name: x-ipe-meta-skill-creator
 skill_type: x-ipe-meta
-version: "1.0.0"
+version: "1.1.0"
 status: candidate
 created: 2026-02-05
-updated: 2026-02-06
+updated: 2026-03-06
 implementation_path: .github/skills/x-ipe-meta-skill-creator/
 
 # ─────────────────────────────────────────────────────────────
@@ -27,6 +27,7 @@ target_skill_types:
   - x-ipe-workflow-orchestration
   - x-ipe-meta
   - x-ipe-task-category
+  - x-ipe-dao
 
 triggers:
   - "create a new skill"
@@ -45,7 +46,7 @@ upgraded_from: x-ipe-meta-skill-creator-v2
 improvements_over_v2:
   - area: Templates
     v2_issue: "4 mentioned, only 2 exist"
-    v3_fix: "All 5 templates exist and validated (added task-category)"
+    v3_fix: "All 6 templates exist and validated (added task-category and dao)"
   - area: Examples
     v2_issue: ">= 2 examples"
     v3_fix: ">= 3 concrete usage examples required"
@@ -68,7 +69,7 @@ inputs:
     - name: skill_type
       type: string
       description: Type of skill
-      validation: "x-ipe-task-based | x-ipe-tool | x-ipe-workflow-orchestration | x-ipe-meta | x-ipe-task-category"
+      validation: "x-ipe-task-based | x-ipe-tool | x-ipe-workflow-orchestration | x-ipe-meta | x-ipe-task-category | x-ipe-dao"
     - name: user_request
       type: string
       description: Description of what the skill should do
@@ -106,11 +107,12 @@ acceptance_criteria:
     # STRUCTURE - File organization
     - id: AC-M01
       category: structure
-      criterion: All 5 template files exist in templates/ folder
+      criterion: All 6 template files exist in templates/ folder
       test: file_exists
       expected: |
-        x-ipe-task-based.md, x-ipe-tool.md, x-ipe-workflow-orchestration.md, 
-        x-ipe-meta.md, skill-meta-x-ipe-task-based.md (and others)
+        x-ipe-task-based.md, x-ipe-tool.md, x-ipe-workflow-orchestration.md,
+        x-ipe-meta.md, x-ipe-dao.md, skill-meta-x-ipe-task-based.md,
+        skill-meta-x-ipe-dao.md (and peers)
     
     - id: AC-M02
       category: structure
@@ -251,6 +253,7 @@ dependencies:
       x-ipe-workflow-orchestration: x-ipe-workflow-orchestration.md
       x-ipe-meta: x-ipe-meta.md
       x-ipe-task-category: x-ipe-workflow-orchestration.md  # Same structure
+      x-ipe-dao: x-ipe-dao.md
 
   skill_meta_templates:
     description: "skill-meta.md templates - use to create acceptance criteria"
@@ -260,6 +263,7 @@ dependencies:
       x-ipe-task-category: skill-meta-x-ipe-task-category.md
       x-ipe-meta: skill-meta-x-ipe-meta.md
       x-ipe-workflow-orchestration: skill-meta-x-ipe-task-based.md  # Same structure
+      x-ipe-dao: skill-meta-x-ipe-dao.md
 
 # ─────────────────────────────────────────────────────────────
 # TEMPLATE USAGE PROCEDURE

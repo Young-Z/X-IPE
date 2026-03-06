@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-784 | Cleanup | Remove deprecated x-ipe-task-based-ideation-v2 skill folder (leftover from EPIC-046 TASK-761 rename) | Bolt ⚡ | ✅ done | 03-06-2026 16:31:00 | - | - |
 | TASK-781 | Feature Breakdown | EPIC-048: Break down tool-implementation alignment into 4 features — A: contract extension (MVP), B: consultation (tech-design + refactoring-analysis), C: bug-fix delegation, D: code-refactor delegation | Zephyr 🌬️ | ✅ done | 03-06-2026 13:10:00 | [requirement-details-part-20.md](x-ipe-docs/requirements/requirement-details-part-20.md), [features.md](x-ipe-docs/planning/features.md) | Feature Refinement |
 | TASK-780 | Change Request | CR: Align technical-design, bug-fix, code-refactor, refactoring-analysis skills with tool-implementation-* architecture from EPIC-045 — new EPIC-048 created with 5 HLRs covering consultation, delegation, and tool contract extension | Zephyr 🌬️ | ✅ done | 03-06-2026 12:55:00 | [requirement-details-part-20.md](x-ipe-docs/requirements/requirement-details-part-20.md) | Feature Breakdown |
 | TASK-783 | Change Request | Redesign instructions.md: universal DAO gateway — every user message → x-ipe-dao-end-user-representative → then skill/task routing. Backup at .bak | Spark ⚡ | ✅ done | 03-06-2026 13:45:00 | Backup at .bak, 297 lines (was 251) | - |

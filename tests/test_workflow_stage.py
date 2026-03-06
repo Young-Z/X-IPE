@@ -85,7 +85,7 @@ class TestActionMapping:
         content = js_path.read_text(encoding="utf-8")
         required_skills = [
             "x-ipe-tool-uiux-reference",
-            "x-ipe-task-based-ideation-v2",
+            "x-ipe-task-based-ideation",
             "x-ipe-task-based-idea-mockup",
             "x-ipe-task-based-requirement-gathering",
             "x-ipe-task-based-feature-breakdown",

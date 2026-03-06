@@ -1275,7 +1275,20 @@ class UIUXFeedbackManager {
             const clone = iframeDoc.documentElement.cloneNode(true);
             
             // Remove scripts and inspector artifacts
-            clone.querySelectorAll('script, [data-x-ipe-inspector]').forEach(el => el.remove());
+            clone.querySelectorAll('script, [data-x-ipe-inspector], [data-x-ipe-fetch-interceptor]').forEach(el => el.remove());
+            
+            // Sanitize attributes that may break XML serialization
+            // HTML5 tolerates unquoted/broken attributes, but SVG foreignObject requires valid XML
+            clone.querySelectorAll('*').forEach(el => {
+                const toRemove = [];
+                for (const attr of el.attributes) {
+                    // Remove attributes with names containing characters invalid in XML
+                    if (/["\]>]/.test(attr.name)) {
+                        toRemove.push(attr.name);
+                    }
+                }
+                toRemove.forEach(name => el.removeAttribute(name));
+            });
             
             // Inline stylesheet rules as a single <style> block
             // (replaces the expensive per-element getComputedStyle loop)
@@ -1287,6 +1300,11 @@ class UIUXFeedbackManager {
                     }
                 } catch (e) { /* skip cross-origin sheets */ }
             }
+            // SVG foreignObject does not run CSS animations, so elements
+            // with animation-fill-mode:both/forwards stay at the initial
+            // keyframe (often opacity:0). Disable all animations so
+            // elements render at their base CSS state instead.
+            cssText += '\n*, *::before, *::after { animation: none !important; }\n';
             clone.querySelectorAll('link[rel="stylesheet"], style').forEach(el => el.remove());
             if (cssText) {
                 const styleEl = iframeDoc.createElementNS('http://www.w3.org/1999/xhtml', 'style');

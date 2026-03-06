@@ -5,6 +5,7 @@ FEATURE-026: Homepage Infinity Loop
 Provides stage mapping configuration and template generation
 for the interactive homepage infinity loop visualization.
 """
+from html import escape as html_escape
 from x_ipe.services.tracing_service import x_ipe_tracing
 
 
@@ -147,7 +148,7 @@ class HomepageService:
             <button class="stage-btn {config['theme']}{tbd_class}"
                     data-stage="{stage_id}"
                     data-section="{config['section']}"
-                    data-selector="{config['selector'] or ''}"
+                    data-selector="{html_escape(config['selector'] or '', quote=True)}"
                     style="left: {config['position']['left']}; top: {config['position']['top']};"
                     {tbd_attr}>
                 <span class="stage-icon">{config['icon']}</span>

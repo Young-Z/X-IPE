@@ -1,229 +1,239 @@
+# Test Cases for x-ipe-task-based-feature-breakdown v3 candidate
+# Covers all acceptance criteria: AC-S01..AC-S03, AC-C01..AC-C13, AC-B01..AC-B02
+
 test_cases:
-  # ── Structure (AC-S01 through AC-S03) ──────────────────────
-  - id: TC-01
-    name: "SKILL.md exists"
-    acceptance_criteria: "AC-S01"
-    type: structure
-    test_method: file_exists
-    input: "candidate/SKILL.md"
-    expected: "file exists"
-    priority: must
+  # ═══════════════════════════════════════════════════════════
+  # Structure (AC-S01 .. AC-S03)
+  # ═══════════════════════════════════════════════════════════
 
-  - id: TC-02
-    name: "Frontmatter has name field"
-    acceptance_criteria: "AC-S01"
-    type: structure
-    test_method: content_check
-    input: "candidate/SKILL.md frontmatter"
-    expected: "name: x-ipe-task-based-feature-breakdown"
-    priority: must
+  - id: TC-001
+    name: "SKILL.md exists with valid frontmatter"
+    ac_ref: "AC-S01"
+    type: structural
+    input: "candidate/SKILL.md file on disk"
+    expected: "File exists; YAML frontmatter parses with 'name' and 'description' fields present"
+    verification_method: file_check
 
-  - id: TC-03
-    name: "Frontmatter has description field"
-    acceptance_criteria: "AC-S01"
-    type: structure
-    test_method: content_check
-    input: "candidate/SKILL.md frontmatter"
-    expected: "description field present and non-empty"
-    priority: must
-
-  - id: TC-04
-    name: "examples.md exists"
-    acceptance_criteria: "AC-S02"
-    type: structure
-    test_method: file_exists
+  - id: TC-002
+    name: "references/examples.md exists with at least 1 example"
+    ac_ref: "AC-S02"
+    type: structural
     input: "candidate/references/examples.md"
-    expected: "file exists"
-    priority: must
+    expected: "File exists and contains at least one example heading or numbered scenario"
+    verification_method: file_check
 
-  - id: TC-05
-    name: "examples.md has at least 1 example"
-    acceptance_criteria: "AC-S02"
-    type: structure
-    test_method: content_check
-    input: "candidate/references/examples.md"
-    expected: "contains at least one '## Example' heading"
-    priority: must
-
-  - id: TC-06
-    name: "SKILL.md under 500 lines"
-    acceptance_criteria: "AC-S03"
-    type: structure
-    test_method: line_count
+  - id: TC-003
+    name: "SKILL.md body under 500 lines"
+    ac_ref: "AC-S03"
+    type: structural
     input: "candidate/SKILL.md"
-    expected: "< 500 lines"
-    priority: must
+    expected: "Total line count < 500"
+    verification_method: file_check
 
-  # ── Content (AC-C01 through AC-C06) ────────────────────────
-  - id: TC-07
-    name: "Purpose section present"
-    acceptance_criteria: "AC-C01"
+  # ═══════════════════════════════════════════════════════════
+  # Content – Sections & Flow (AC-C01 .. AC-C02)
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC-004
+    name: "All required sections present in cognitive flow order"
+    ac_ref: "AC-C01"
     type: content
-    test_method: section_parse
-    input: "candidate/SKILL.md"
-    expected: "## Purpose heading exists"
-    priority: must
+    input: "candidate/SKILL.md section headings (## level)"
+    expected: >
+      Sections appear in order: Purpose, Important Notes, Input Parameters,
+      Input Initialization (###), Definition of Ready, Execution Flow,
+      Execution Procedure, Output Result, Definition of Done, Patterns, Examples
+    verification_method: content_grep
 
-  - id: TC-08
-    name: "Important Notes section present"
-    acceptance_criteria: "AC-C01"
+  - id: TC-005
+    name: "Execution Flow table has exactly 10 steps"
+    ac_ref: "AC-C02"
     type: content
-    test_method: section_parse
-    input: "candidate/SKILL.md"
-    expected: "## Important Notes heading exists"
-    priority: must
+    input: "Execution Flow markdown table in candidate/SKILL.md"
+    expected: >
+      10 data rows: Analyze, Assess Epic Granularity, Evaluate Complexity,
+      Identify Features, Process Mockups, Create Summary, Update Board,
+      Update Index, Dedup Check, Complete
+    verification_method: content_grep
 
-  - id: TC-09
-    name: "Input Parameters section present"
-    acceptance_criteria: "AC-C01"
+  # ═══════════════════════════════════════════════════════════
+  # Content – Epic Granularity Assessment (AC-C03 .. AC-C04)
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC-006
+    name: "Step 2 evaluates four scope signals"
+    ac_ref: "AC-C03"
     type: content
-    test_method: section_parse
-    input: "candidate/SKILL.md"
-    expected: "## Input Parameters heading exists"
-    priority: must
+    input: "step_2 (Assess Epic Granularity) in Execution Procedure"
+    expected: >
+      Step 2 text mentions all four signals: estimated feature count,
+      domain diversity, dependency clusters, team boundaries
+    verification_method: content_grep
 
-  - id: TC-10
-    name: "Definition of Ready section present"
-    acceptance_criteria: "AC-C01"
+  - id: TC-007
+    name: "Step 2 references decision matrix with thresholds"
+    ac_ref: "AC-C04"
     type: content
-    test_method: section_parse
-    input: "candidate/SKILL.md"
-    expected: "## Definition of Ready heading exists"
-    priority: must
+    input: "step_2 in Execution Procedure"
+    expected: >
+      Contains decision matrix rules including: ≤7 features threshold,
+      2-3 domains with 8-15 features, and 4+ domains OR >15 features
+    verification_method: content_grep
 
-  - id: TC-11
-    name: "Execution Flow section present"
-    acceptance_criteria: "AC-C01"
+  # ═══════════════════════════════════════════════════════════
+  # Content – Per-Epic Operation (AC-C05)
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC-008
+    name: "Step 3 operates per-Epic"
+    ac_ref: "AC-C05"
     type: content
-    test_method: section_parse
-    input: "candidate/SKILL.md"
-    expected: "## Execution Flow heading exists"
-    priority: must
+    input: "step_3 (Evaluate Complexity) in Execution Procedure"
+    expected: "Contains 'per Epic', 'For each Epic', or 'each Epic' language"
+    verification_method: content_grep
 
-  - id: TC-12
-    name: "Execution Procedure section present"
-    acceptance_criteria: "AC-C01"
+  - id: TC-009
+    name: "Step 4 operates per-Epic"
+    ac_ref: "AC-C05"
     type: content
-    test_method: section_parse
-    input: "candidate/SKILL.md"
-    expected: "## Execution Procedure heading exists"
-    priority: must
+    input: "step_4 (Identify Features) in Execution Procedure"
+    expected: "Contains 'per Epic', 'For each Epic', or 'each Epic' language"
+    verification_method: content_grep
 
-  - id: TC-13
-    name: "Output Result section present"
-    acceptance_criteria: "AC-C01"
+  # ═══════════════════════════════════════════════════════════
+  # Content – Output Result (AC-C06)
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC-010
+    name: "Output Result includes epic_ids and epic_count"
+    ac_ref: "AC-C06"
     type: content
-    test_method: section_parse
-    input: "candidate/SKILL.md"
-    expected: "## Output Result heading exists"
-    priority: must
+    input: "Output Result YAML block in candidate/SKILL.md"
+    expected: "task_completion_output contains 'epic_ids' (array) and 'epic_count' (integer) fields"
+    verification_method: content_grep
 
-  - id: TC-14
-    name: "Definition of Done section present"
-    acceptance_criteria: "AC-C01"
+  # ═══════════════════════════════════════════════════════════
+  # Content – DoD Epic Checkpoint (AC-C07)
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC-011
+    name: "DoD has Epic structure assessment checkpoint"
+    ac_ref: "AC-C07"
     type: content
-    test_method: section_parse
-    input: "candidate/SKILL.md"
-    expected: "## Definition of Done heading exists"
-    priority: must
+    input: "Definition of Done XML block in candidate/SKILL.md"
+    expected: "A <checkpoint> with name containing 'Epic structure' exists with required='true'"
+    verification_method: content_grep
 
-  - id: TC-15
-    name: "Patterns section present"
-    acceptance_criteria: "AC-C01"
+  # ═══════════════════════════════════════════════════════════
+  # Content – Dedup Coverage (AC-C08)
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC-012
+    name: "Step 9 compares parent FRs/ACs against sub-features"
+    ac_ref: "AC-C08"
     type: content
-    test_method: section_parse
-    input: "candidate/SKILL.md"
-    expected: "## Patterns heading exists"
-    priority: must
+    input: "step_9 (Parent Feature Deduplication Check) in Execution Procedure"
+    expected: >
+      Describes comparing parent FRs/ACs against union of sub-feature FRs/ACs;
+      100% coverage → remove parent; partial coverage → keep parent and flag gap
+    verification_method: content_grep
 
-  - id: TC-16
-    name: "Examples section present"
-    acceptance_criteria: "AC-C01"
+  # ═══════════════════════════════════════════════════════════
+  # Content – Anti-Patterns (AC-C09)
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC-013
+    name: "Anti-patterns include Epic-specific rows"
+    ac_ref: "AC-C09"
     type: content
-    test_method: section_parse
-    input: "candidate/SKILL.md"
-    expected: "## Examples heading exists"
-    priority: must
+    input: "Anti-Patterns table in candidate/SKILL.md"
+    expected: "Table contains rows for 'Skipping Epic assessment' AND 'All features in one Epic'"
+    verification_method: content_grep
 
-  - id: TC-17
-    name: "Execution Flow table has 9 steps"
-    acceptance_criteria: "AC-C02"
+  # ═══════════════════════════════════════════════════════════
+  # Content – Multi-Epic Example (AC-C10)
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC-014
+    name: "Examples include multi-Epic breakdown scenario"
+    ac_ref: "AC-C10"
     type: content
-    test_method: table_parse
-    input: "Execution Flow table rows (excluding header/separator)"
-    expected: "9 data rows: Analyze, Evaluate Complexity, Identify Features, Process Mockups, Create Summary, Update Board, Update Index, Dedup Check, Complete"
-    priority: must
+    input: "references/examples.md"
+    expected: "At least one example shows a multi-Epic breakdown (mentions multiple EPIC IDs or 'multi-Epic')"
+    verification_method: content_grep
 
-  - id: TC-18
-    name: "Step 8 compares parent FRs/ACs against sub-feature union"
-    acceptance_criteria: "AC-C03"
+  # ═══════════════════════════════════════════════════════════
+  # Content – Breakdown Guidelines Decision Matrix (AC-C11)
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC-015
+    name: "breakdown-guidelines.md has Epic grouping decision matrix"
+    ac_ref: "AC-C11"
     type: content
-    test_method: content_check
-    input: "step_8 in Execution Procedure"
-    expected: "contains FR/AC comparison logic between parent and sub-features"
-    priority: must
+    input: "references/breakdown-guidelines.md"
+    expected: "Contains a decision matrix table with domain count, feature count thresholds, and resulting Epic outcome"
+    verification_method: content_grep
 
-  - id: TC-19
-    name: "Step 8 removes parent via feature-board-management at 100% coverage"
-    acceptance_criteria: "AC-C04"
+  # ═══════════════════════════════════════════════════════════
+  # Content – Input Initialization Subsection (AC-C12)
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC-016
+    name: "Input Initialization subsection present"
+    ac_ref: "AC-C12"
     type: content
-    test_method: content_check
-    input: "step_8 in Execution Procedure"
-    expected: "contains instruction to remove/archive parent via feature-board-management when fully covered"
-    priority: must
+    input: "Input Parameters section in candidate/SKILL.md"
+    expected: "'### Input Initialization' heading exists under '## Input Parameters' and contains an <input_init> XML block"
+    verification_method: content_grep
 
-  - id: TC-20
-    name: "Step 8 keeps parent at partial coverage with gap flag"
-    acceptance_criteria: "AC-C05"
+  # ═══════════════════════════════════════════════════════════
+  # Content – patterns.md Epic Grouping Pattern (AC-C13)
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC-017
+    name: "patterns.md has Epic Grouping pattern"
+    ac_ref: "AC-C13"
     type: content
-    test_method: content_check
-    input: "step_8 in Execution Procedure"
-    expected: "contains conditional for partial coverage: keep parent, flag uncovered items"
-    priority: must
+    input: "references/patterns.md"
+    expected: "Contains a pattern for Epic Grouping describing single vs multi-Epic decision logic"
+    verification_method: content_grep
 
-  - id: TC-21
-    name: "DoD includes dedup checkpoint"
-    acceptance_criteria: "AC-C06"
-    type: content
-    test_method: table_parse
-    input: "Definition of Done checkpoints"
-    expected: "checkpoint named 'Parent feature deduplication verified' or similar exists"
-    priority: must
+  # ═══════════════════════════════════════════════════════════
+  # Behavior – Single Epic Scenario (AC-B01)
+  # ═══════════════════════════════════════════════════════════
 
-  # ── Behavior (AC-B01) ──────────────────────────────────────
-  - id: TC-22
-    name: "Step 8 skipped when no splitting occurred"
-    acceptance_criteria: "AC-B01"
-    type: behavior
-    test_method: content_check
-    input: "step_8 in Execution Procedure"
-    expected: "contains skip condition: 'IF no feature was split' or 'no parent-child relationship'"
-    priority: must
+  - id: TC-018
+    name: "Single-domain, few features → single Epic"
+    ac_ref: "AC-B01"
+    type: behavioral
+    input: "Simulated requirement: 1 domain (User Authentication), ~5 estimated features"
+    expected: "Step 2 decision matrix yields single Epic; epic_count == 1; one EPIC-{nnn}/ folder created"
+    verification_method: simulation
 
-  # ── Should (AC-C07 through AC-C09) ─────────────────────────
-  - id: TC-23
-    name: "Dedup step produces coverage comparison table"
-    acceptance_criteria: "AC-C07"
-    type: content
-    test_method: content_check
-    input: "step_8 in Execution Procedure"
-    expected: "contains structured coverage table with Parent FR/AC, Covered By, Status columns"
-    priority: should
+  - id: TC-019
+    name: "Borderline 2 domains but ≤7 features → single Epic"
+    ac_ref: "AC-B01"
+    type: behavioral
+    input: "Simulated requirement: 2 domains (Auth + Profile), 7 estimated features total"
+    expected: "Decision matrix selects single Epic (≤7 features rule takes precedence); epic_count == 1"
+    verification_method: simulation
 
-  - id: TC-24
-    name: "Anti-patterns include keeping duplicate parent"
-    acceptance_criteria: "AC-C08"
-    type: content
-    test_method: table_parse
-    input: "Anti-Patterns table"
-    expected: "row with 'Keeping duplicate parent' or similar anti-pattern"
-    priority: should
+  # ═══════════════════════════════════════════════════════════
+  # Behavior – Multi-Epic Scenario (AC-B02)
+  # ═══════════════════════════════════════════════════════════
 
-  - id: TC-25
-    name: "Examples include dedup scenario"
-    acceptance_criteria: "AC-C09"
-    type: content
-    test_method: content_check
-    input: "candidate/references/examples.md"
-    expected: "contains example with parent feature deduplication (split + coverage check)"
-    priority: should
+  - id: TC-020
+    name: "Multi-domain, many features → multiple Epics"
+    ac_ref: "AC-B02"
+    type: behavioral
+    input: "Simulated requirement: 3 domains (Product Mgmt, Order Processing, Reporting), ~12 features"
+    expected: "Step 2 produces 3 Epics (one per domain); epic_count == 3; Epic-level dependencies documented"
+    verification_method: simulation
+
+  - id: TC-021
+    name: "4+ domains or >15 features → multiple Epics with boundaries"
+    ac_ref: "AC-B02"
+    type: behavioral
+    input: "Simulated requirement: 5 domains, ~20 estimated features"
+    expected: "Multiple Epics created with clear domain boundaries; epic_count ≥ 4; each Epic has named domain ownership"
+    verification_method: simulation

@@ -122,6 +122,52 @@ class TestHomepageTemplate:
         assert 'tbd' in template.lower() or 'coming soon' in template.lower()
 
 
+class TestHomepageDataSelectorEscaping:
+    """TASK-739: data-selector attribute values must be properly HTML-escaped"""
+
+    def test_data_selector_quotes_escaped_in_template(self, homepage_service):
+        """data-selector values with quotes must use &quot; to prevent broken HTML attributes"""
+        template = homepage_service.get_template()
+        
+        # Selectors contain double quotes like [data-path="x-ipe-docs/ideas"]
+        # These MUST be escaped as &quot; inside data-selector="..." attribute
+        # Unescaped quotes break HTML parsing and SVG foreignObject screenshot capture
+        import re
+        # Find all data-selector attribute values
+        matches = re.findall(r'data-selector="([^"]*)"', template)
+        
+        for value in matches:
+            # Each matched value should NOT contain raw double quotes
+            # (if it did, the regex wouldn't have matched the full value)
+            assert '"' not in value, (
+                f"data-selector contains unescaped double quote: {value}"
+            )
+        
+        # Verify that selectors with quotes are present (escaped as &quot;)
+        assert '&quot;' in template or all(
+            m.get('selector') is None 
+            for m in homepage_service.get_stage_mapping().values()
+        ), "Selectors with quotes should be escaped as &quot;"
+
+    def test_data_selector_values_preserve_selector_content(self, homepage_service):
+        """Escaped data-selector values should be decodable to original selectors"""
+        from html import unescape
+        template = homepage_service.get_template()
+        
+        import re
+        matches = re.findall(r'data-selector="([^"]*)"', template)
+        
+        mapping = homepage_service.get_stage_mapping()
+        expected_selectors = [m['selector'] for m in mapping.values() if m['selector']]
+        
+        # Each escaped value, when unescaped, should match an expected selector
+        decoded_values = [unescape(v) for v in matches if v]
+        for expected in expected_selectors:
+            assert expected in decoded_values, (
+                f"Selector {expected} not found in template data-selector values"
+            )
+
+
 class TestHomepageAPI:
     """API endpoint tests for homepage (skipped - no Flask app in this project)"""
 

@@ -5,7 +5,7 @@ Use this template when creating a new task-based skill. Follow v2 guidelines for
 **Section Order (Cognitive Flow):**
 1. CONTEXT: Purpose → Important Notes
 2. DECISION: Input Parameters → Definition of Ready
-3. ACTION: Execution Flow Summary → Execution Procedure
+3. ACTION: Execution Flow Summary (with Phase column) → Phase Definitions → Execution Procedure (phase hierarchy)
 4. VERIFY: Output Result → Definition of Done
 5. REFERENCE: Patterns & Anti-Patterns → Examples
 
@@ -44,19 +44,52 @@ input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
   task_based_skill: "{task_based_skill}"
-  
+
+  # Execution context (passed by x-ipe-workflow-task-execution)
+  execution_mode: "free-mode | workflow-mode"  # default: free-mode
+  workflow:
+    name: "N/A"  # workflow name, default: N/A
+
   # Task type attributes
   category: "{standalone | feature-stage | requirement-stage | ideation-stage}"
   next_task_based_skill: "{Next Task-Based Skill | null}"
-  require_human_review: "{yes | no}"
-  
+
+  # Process preference (3-mode auto-proceed system)
+  process_preference:
+    auto_proceed: "manual | auto | stop_for_question"  # default: manual
+
   # Required inputs
-  auto_proceed: false
   {input_1}: "{default_value}"
   {input_2}: "{default_value}"
-  
+
   # Context (from previous task or project)
   {context_attr}: "{value_or_path}"
+```
+
+### Input Initialization
+
+Describes how to resolve each input field value before execution begins. Acts as the skill's constructor — all resolution logic is centralized here instead of in execution steps.
+
+BLOCKING: All input fields with non-trivial initialization MUST be documented here. Do NOT embed field initialization logic in execution procedure steps.
+
+```xml
+<input_init>
+  <!-- Standard fields (auto-populated by workflow) -->
+  <field name="task_id" source="task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="category" derive="Read from this skill's Output Result `category` field" />
+
+  <!-- Skill-specific fields (document resolution per field) -->
+  <field name="{input_1}">
+    <steps>
+      1. {If condition, use value from previous task output}
+      2. {Fallback action}
+    </steps>
+  </field>
+
+  <field name="{context_attr}" source="{previous task output or project config}" />
+</input_init>
 ```
 
 ---
@@ -84,14 +117,42 @@ input:
 
 ## Execution Flow
 
-| Step | Name | Action | Gate |
-|------|------|--------|------|
-| 1 | {Step Name} | {Brief action} | {gate condition} |
-| 2 | {Step Name} | {Brief action} | {gate condition} |
-| 3 | {Step Name} | {Brief action} | {gate condition} |
-| 4 | Complete | Verify DoD | DoD validated |
+| Phase | Step | Name | Action | Gate |
+|-------|------|------|--------|------|
+| 1. 博学之 (Study Broadly) | 1.1 | {Step Name} | {Gather context, read specs} | {gate condition} |
+| 2. 审问之 (Inquire Thoroughly) | — | SKIP | {skip reason} | — |
+| 3. 慎思之 (Think Carefully) | 3.1 | {Step Name} | {Analyze trade-offs} | {gate condition} |
+| 4. 明辨之 (Discern Clearly) | — | SKIP | {skip reason} | — |
+| 5. 笃行之 (Practice Earnestly) | 5.1 | {Step Name} | {Execute core work} | {gate condition} |
+| | 5.2 | Complete | Verify DoD | DoD validated |
 
-BLOCKING: {Rule that must not be skipped}
+BLOCKING: All 5 phases MUST appear in the table. Skipped phases use `—` for Step and Gate.
+BLOCKING: {Additional rule that must not be skipped}
+
+### Phase Definitions (5-Phase Learning Method — 博学之，审问之，慎思之，明辨之，笃行之)
+
+| Phase | Chinese | English | SE Purpose | Typical Activities |
+|-------|---------|---------|------------|-------------------|
+| 1 | 博学之 (Bóxué) | Study Broadly | Gather comprehensive context | Read specs, study domain, research patterns, load context |
+| 2 | 审问之 (Shěnwèn) | Inquire Thoroughly | Question assumptions, probe gaps | Ask clarifying questions, challenge inputs, validate constraints |
+| 3 | 慎思之 (Shènsī) | Think Carefully | Reflect on trade-offs and risks | Analyze alternatives, assess risk, evaluate impact |
+| 4 | 明辨之 (Míngbiàn) | Discern Clearly | Make informed decisions | Choose approach, document rationale, resolve conflicts |
+| 5 | 笃行之 (Dǔxíng) | Practice Earnestly | Execute with discipline | Implement, test, verify, deliver, commit |
+
+**Phase Rules:**
+- Phase 1 (博学之) and Phase 5 (笃行之) are NEVER skippable.
+- Phases 2, 3, 4 may use `<skip reason="..." />` when genuinely non-applicable.
+- Phase names MUST always be bilingual (Chinese + English).
+- Phase order is fixed: 1 → 2 → 3 → 4 → 5. No reordering.
+- auto_proceed in Phase 2: agent self-resolves via `x-ipe-tool-decision-making` (not skipped).
+
+**Common Skip Reasons:**
+
+| Phase | Skip Reason |
+|-------|-------------|
+| 2 (审问之) | "Input is fully specified by upstream skill; no ambiguity to resolve" |
+| 3 (慎思之) | "No design decisions or trade-offs; purely procedural execution" |
+| 4 (明辨之) | "Single valid approach; no alternatives to evaluate" |
 
 ---
 
@@ -103,46 +164,94 @@ BLOCKING: {Rule that must not be skipped}
   <execute_dor_checks_before_starting/>
   <schedule_dod_checks_with_sub_agent_before_starting/>
 
-  <step_1>
-    <name>{Step Name}</name>
-    <action>
-      1. {Sub-action 1}
-      2. {Sub-action 2}
-      3. {Sub-action 3}
-    </action>
-    <constraints>
-      - BLOCKING: {Must not violate}
-      - CRITICAL: {Important consideration}
-    </constraints>
-    <output>{What this step produces}</output>
-  </step_1>
+  <phase_1 name="博学之 — Study Broadly">
+    <step_1_1>
+      <name>{Step Name}</name>
+      <action>
+        1. {Sub-action 1: gather context, read specs, research domain}
+        2. {Sub-action 2}
+        3. {Sub-action 3}
+      </action>
+      <constraints>
+        - BLOCKING: {Must not violate}
+        - CRITICAL: {Important consideration}
+      </constraints>
+      <output>{What this step produces}</output>
+    </step_1_1>
+  </phase_1>
 
-  <step_2>
-    <name>{Step Name}</name>
-    <action>
-      1. {Sub-action 1}
-      2. {Sub-action 2}
-    </action>
-    <branch>
-      IF: {condition}
-      THEN: {action if true}
-      ELSE: {action if false}
-    </branch>
-    <output>{What this step produces}</output>
-  </step_2>
+  <phase_2 name="审问之 — Inquire Thoroughly">
+    <!-- Option A: Active inquiry -->
+    <step_2_1>
+      <name>{Step Name}</name>
+      <action>
+        1. {Question assumptions, probe gaps, challenge inputs}
+        2. IF process_preference.auto_proceed == "auto":
+             Invoke x-ipe-tool-decision-making to self-resolve
+           ELSE:
+             Ask human for clarification
+      </action>
+      <output>{Clarified requirements / resolved ambiguities}</output>
+    </step_2_1>
+    <!-- Option B: Skip (uncomment if phase not applicable) -->
+    <!-- <skip reason="Input is fully specified by upstream skill; no ambiguity to resolve" /> -->
+  </phase_2>
 
-  <step_3>
-    <name>{Step Name}</name>
-    <action>
-      1. {Sub-action 1}
-      2. {Sub-action 2}
-    </action>
-    <success_criteria>
-      - {Criterion 1}
-      - {Criterion 2}
-    </success_criteria>
-    <output>{What this step produces}</output>
-  </step_3>
+  <phase_3 name="慎思之 — Think Carefully">
+    <!-- Option A: Active reflection -->
+    <step_3_1>
+      <name>{Step Name}</name>
+      <action>
+        1. {Analyze trade-offs, evaluate risks, reflect on approaches}
+      </action>
+      <output>{Analysis results / risk assessment}</output>
+    </step_3_1>
+    <!-- Option B: Skip (uncomment if phase not applicable) -->
+    <!-- <skip reason="No design decisions or trade-offs; purely procedural execution" /> -->
+  </phase_3>
+
+  <phase_4 name="明辨之 — Discern Clearly">
+    <!-- Option A: Active discernment -->
+    <step_4_1>
+      <name>{Step Name}</name>
+      <action>
+        1. {Choose approach, document decision rationale}
+      </action>
+      <output>{Decision with rationale}</output>
+    </step_4_1>
+    <!-- Option B: Skip (uncomment if phase not applicable) -->
+    <!-- <skip reason="Single valid approach; no alternatives to evaluate" /> -->
+  </phase_4>
+
+  <phase_5 name="笃行之 — Practice Earnestly">
+    <step_5_1>
+      <name>{Step Name}</name>
+      <action>
+        1. {Execute the core work: create, implement, test}
+      </action>
+      <success_criteria>
+        - {Criterion 1}
+        - {Criterion 2}
+      </success_criteria>
+      <output>{Deliverable produced}</output>
+    </step_5_1>
+
+    <!-- MODE-AWARE COMPLETION (always last step in Phase 5): -->
+    <step_5_N_complete>
+      <name>Complete</name>
+      <action>
+        1. Verify all DoD checkpoints
+        2. Output task completion summary
+        3. Mode-aware review gate:
+           IF process_preference.auto_proceed == "auto":
+             Skip human review. If any open questions remain, invoke
+             x-ipe-tool-decision-making to resolve them autonomously.
+           ELIF process_preference.auto_proceed == "stop_for_question" OR "manual":
+             Present results to human and wait for approval.
+      </action>
+      <output>Task completion output</output>
+    </step_5_N_complete>
+  </phase_5>
 
 </procedure>
 ```
@@ -156,7 +265,11 @@ task_completion_output:
   category: "{standalone | feature-stage | requirement-stage | ideation-stage}"
   status: completed | blocked
   next_task_based_skill: "{Next Task-Based Skill}"
-  require_human_review: "{yes | no}"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
+  execution_mode: "{from input}"
+  workflow:
+    name: "{from input}"
   task_output_links:
     - "{output_file_path_1}"
     - "{output_file_path_2}"
@@ -228,8 +341,8 @@ CRITICAL: SKILL.md body MUST stay under 500 lines.
 
 **Keep in SKILL.md:**
 - Purpose, Input Parameters, DoR, DoD (core structure)
-- Execution Flow (overview table)
-- Execution Procedure (essential steps only)
+- Execution Flow (overview table with Phase column)
+- Execution Procedure (phase-based hierarchy, essential steps only)
 
 **Move to references/:**
 - `references/examples.md` - Detailed execution examples (MANDATORY)
@@ -247,10 +360,12 @@ task_based_skill_skills:
     2: Important Notes
     # DECISION
     3: Input Parameters
+    3a: "  └─ Input Initialization (### subsection)"
     4: Definition of Ready (DoR)
     # ACTION
-    5: Execution Flow Summary
-    6: Execution Procedure
+    5: Execution Flow Summary (with Phase column)
+    5a: "  └─ Phase Definitions (### subsection)"
+    6: Execution Procedure (phase_N → step_N_M hierarchy)
     # VERIFY
     7: Output Result
     8: Definition of Done (DoD)
@@ -265,7 +380,9 @@ task_based_skill_skills:
 |---------|--------|---------|
 | Importance signals | Keywords | `BLOCKING:`, `CRITICAL:`, `MANDATORY:` |
 | DoR/DoD | XML checkpoints | `<definition_of_ready>` |
-| Execution procedure | XML procedure | `<procedure name="...">` |
+| Execution procedure | XML procedure with phases | `<phase_1 name="博学之 — Study Broadly">` |
+| Steps within phases | XML step with phase prefix | `<step_1_1>`, `<step_2_1>`, `<step_5_N_complete>` |
+| Skipped phases | XML skip element | `<skip reason="..." />` |
 | Data models | YAML | `input:`, `output:` |
 | Variables | Braces | `{skill_name}`, `{task_id}` |
 

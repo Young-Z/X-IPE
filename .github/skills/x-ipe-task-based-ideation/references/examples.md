@@ -16,6 +16,7 @@
     "ideation": {
       "ideation": {
         "x-ipe-tool-infographic-syntax": true,
+        "x-ipe-tool-web-search": true,
         "mermaid": true
       },
       "mockup": {
@@ -34,9 +35,10 @@
 2. Load Toolbox Meta:
    - Read x-ipe-docs/config/tools.json
    - Enabled tools:
-     - stages.ideation.ideation.x-ipe-tool-infographic-syntax: true → will invoke x-ipe-tool-infographic-syntax
-     - stages.ideation.ideation.mermaid: true → will use mermaid diagrams
-     - stages.ideation.mockup.frontend-design: true → will invoke frontend-design skill
+      - stages.ideation.ideation.x-ipe-tool-infographic-syntax: true → will invoke x-ipe-tool-infographic-syntax
+      - stages.ideation.ideation.x-ipe-tool-web-search: true → will invoke x-ipe-tool-web-search for common-principles research
+      - stages.ideation.ideation.mermaid: true → will use mermaid diagrams
+      - stages.ideation.mockup.frontend-design: true → will invoke frontend-design skill
 
 3. Analyze Files:
    - Read business-plan.md
@@ -45,13 +47,14 @@
 
 4. Initialize Tools:
    - x-ipe-tool-infographic-syntax skill → Available
+   - x-ipe-tool-web-search skill → Available
    - mermaid capability → Available  
    - frontend-design skill → Available
    - Status: All enabled tools ready
 
 5. Generate Summary:
    "I understand you want to build a mobile app for..."
-   "Enabled tools: x-ipe-tool-infographic-syntax, mermaid (visualization), frontend-design (mockups)"
+   "Enabled tools: x-ipe-tool-infographic-syntax, x-ipe-tool-web-search, mermaid (visualization), frontend-design (mockups)"
    
 6. Brainstorming Questions (with Config-Driven Tool Usage):
    - "Your notes mention both iOS and Android - should v1 target both?"
@@ -67,9 +70,9 @@
    - Iterate based on feedback
 
 7. Research Common Principles (if applicable):
-   - Mobile app → Research: Mobile UX best practices, offline-first patterns
-   - User auth → Research: OAuth 2.0, biometric auth standards
-   - Document sources for references section
+   - Mobile app → Invoke x-ipe-tool-web-search for mobile UX best practices and offline-first patterns
+   - User auth → Invoke x-ipe-tool-web-search for OAuth 2.x and biometric auth standards
+   - Document cited sources for the references section
 
 8. Create x-ipe-docs/ideas/mobile-app-idea/idea-summary-v1.md with:
    - Overview and problem statement (text)
@@ -95,6 +98,7 @@
     "ideation": {
       "ideation": {
         "x-ipe-tool-infographic-syntax": false,
+        "x-ipe-tool-web-search": false,
         "mermaid": false
       },
       "mockup": {

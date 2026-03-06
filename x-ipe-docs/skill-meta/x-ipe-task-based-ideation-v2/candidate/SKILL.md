@@ -1,5 +1,5 @@
 ---
-name: x-ipe-task-based-ideation-v2
+name: x-ipe-task-based-ideation
 description: Learn and refine user ideas through brainstorming. Use when user uploads idea files to Workplace. Analyzes content, asks clarifying questions, and produces structured idea summary. Triggers on "ideate", "brainstorm", "refine idea", "analyze my idea".
 ---
 
@@ -24,6 +24,8 @@ CRITICAL: Only use tools that are explicitly enabled (`true`) in `x-ipe-docs/con
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
+**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the workflow state was updated before marking the task complete.
+
 ---
 
 ## Input Parameters
@@ -35,28 +37,45 @@ input:
   
   category: ideation-stage
   next_task_based_skill: "Idea Mockup | Idea to Architecture"
-  require_human_review: yes
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   
-  auto_proceed: false
-  execution_mode: "free-mode | workflow-mode"  # default: free-mode; set by x-ipe-workflow-task-execution
+  # Execution context (passed by x-ipe-workflow-task-execution)
+  execution_mode: "free-mode | workflow-mode"  # default: free-mode
+  workflow:
+    name: "N/A"  # workflow name, default: N/A
+    action: "refine_idea"  # hardcoded — this skill ALWAYS updates the refine_idea action
+    extra_context_reference:  # optional, default: N/A for all refs
+      raw-idea: "path | N/A | auto-detect"
+      uiux-reference: "path | N/A | auto-detect"
   idea_folder_path: "x-ipe-docs/ideas/{folder}"
   toolbox_meta_path: "x-ipe-docs/config/tools.json"
   extra_instructions: "{N/A | from config | from human}"
 ```
 
-### Extra Instructions Loading
+### Input Initialization
 
-```yaml
-loading_logic:
-  - step: 1
-    condition: "human provides explicit Extra Instructions"
-    action: "Use human-provided value"
-  - step: 2
-    condition: "x-ipe-docs/config/tools.json exists"
-    action: "Read stages.ideation.ideation._extra_instruction field"
-  - step: 3
-    condition: "field not found or empty"
-    action: "Set Extra Instructions = N/A"
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+
+  <field name="idea_folder_path">
+    <steps>
+      1. IF human specifies folder path → use provided path
+      2. ELSE scan x-ipe-docs/ideas/ for most recent folder
+    </steps>
+  </field>
+
+  <field name="extra_instructions">
+    <steps>
+      1. IF human provides explicit extra instructions → use human-provided value
+      2. ELSE IF x-ipe-docs/config/tools.json exists → read stages.ideation.ideation._extra_instruction field
+      3. ELSE → "N/A"
+    </steps>
+  </field>
+</input_init>
 ```
 
 ---
@@ -84,209 +103,237 @@ loading_logic:
 
 ## Execution Flow
 
-| Step | Name | Action | Gate |
-|------|------|--------|------|
-| 1 | Load Toolbox | Read tools.json config, output enabled tool list | config loaded |
-| 2 | Analyze Files | Read all files in idea folder | files analyzed |
-| 3 | Generate Summary | Create understanding summary | summary shared |
-| 4 | Brainstorm | Ask clarifying questions (3-5 at a time) | idea refined |
-| 5 | Research | Search for common principles | research complete |
-| 6 | Generate Draft | Create idea draft, prefer enabled tools from step 1 | draft created |
-| 7 | Critique | Sub-agent provides constructive feedback | feedback received |
-| 8 | Improve Summary | Incorporate feedback, prefer enabled tools from step 1 | summary finalized |
-| 9 | Rename Folder | Rename if "Draft Idea - xxx" | folder renamed |
-| 10 | Complete | Request human review | human approves |
+| Phase | Step | Name | Action | Gate |
+|-------|------|------|--------|------|
+| 1. 博学之 (Study Broadly) | 1.1 | Load Toolbox | Read tools.json config, output enabled tool list | config loaded |
+| | 1.2 | Analyze Files | Read all files in idea folder | files analyzed |
+| | 1.3 | Research | Search for common principles | research complete |
+| 2. 审问之 (Inquire Thoroughly) | 2.1 | Generate Summary | Create understanding summary | summary shared |
+| | 2.2 | Brainstorm | Ask clarifying questions (3-5 at a time) | idea refined |
+| 3. 慎思之 (Think Carefully) | 3.1 | Critique | Sub-agent provides constructive feedback | feedback received |
+| 4. 明辨之 (Discern Clearly) | 4.1 | Improve Summary | Decide on feedback, incorporate improvements | summary finalized |
+| 5. 笃行之 (Practice Earnestly) | 5.1 | Generate Draft | Create idea draft, prefer enabled tools from step 1.1 | draft created |
+| | 5.2 | Complete | Request human review | human approves |
 
-BLOCKING: Step 4 - Continue brainstorming until idea is well-defined.
+BLOCKING: Step 2.2 - Continue brainstorming until idea is well-defined.
 
-BLOCKING: Step 10 - Human MUST approve idea summary before proceeding.
+BLOCKING (manual/stop_for_question): Step 5.2 - Human MUST approve idea summary before proceeding. Skipped in auto mode.
 
 ---
 
 ## Execution Procedure
 
 ```xml
-<procedure name="ideation-v2">
+<procedure name="ideation">
+  <!-- CRITICAL: Both DoR/DoD check elements below are MANDATORY -->
+  <execute_dor_checks_before_starting/>
+  <schedule_dod_checks_with_sub_agent_before_starting/>
 
-  <step_1>
-    <name>Load Ideation Toolbox Meta</name>
-    <action>
-      1. Check if x-ipe-docs/config/tools.json exists
-      2. If exists: parse JSON, extract tools from stages.ideation
-      3. If NOT exists: create default config with all tools disabled
-      4. Load Extra Instructions (human → config → N/A)
-      5. Build and output the enabled tool list -- only tools with value `true` count as enabled; `false`, absent, or any other value means DISABLED
-      6. BLOCKING: For each enabled tool that has a corresponding skill at .github/skills/{tool-name}/SKILL.md, LOAD that skill now. This ensures correct syntax and grammar are available before any content generation.
-      7. Output format:
-         ```
-         Enabled tools: [list of enabled tool names]
-         Disabled tools: [list of disabled tool names]
-         Loaded tool skills: [list of skills loaded in step 6]
-         ```
-    </action>
-    <output>tool_config, enabled_tool_list, extra_instructions</output>
-  </step_1>
+  <phase_1 name="博学之 — Study Broadly">
 
-  <step_2>
-    <name>Analyze Idea Files</name>
-    <action>
-      1. Navigate to x-ipe-docs/ideas/{folder}/files/
-      2. Read each file (text, markdown, code, etc.)
-      3. Identify key themes, concepts, and goals
-      4. Note any gaps or ambiguities
-    </action>
-    <constraints>
-      - BLOCKING: All files must be analyzed before proceeding
-    </constraints>
-    <output>initial_analysis</output>
-  </step_2>
+    <step_1_1>
+      <name>Load Ideation Toolbox Meta</name>
+      <action>
+        1. Check if x-ipe-docs/config/tools.json exists
+        2. If exists: parse JSON, extract tools from stages.ideation
+        3. If NOT exists: create default config with all tools disabled
+        4. Resolve extra_instructions (see Input Initialization)
+        5. Build and output the enabled tool list -- only tools with value `true` count as enabled; `false`, absent, or any other value means DISABLED
+        6. BLOCKING: For each enabled tool that has a corresponding skill at .github/skills/{tool-name}/SKILL.md, LOAD that skill now. This ensures correct syntax and grammar are available before any content generation.
+        7. Output format:
+           ```
+           Enabled tools: [list of enabled tool names]
+           Disabled tools: [list of disabled tool names]
+           Loaded tool skills: [list of skills loaded in step 6]
+           ```
+      </action>
+      <output>tool_config, enabled_tool_list, extra_instructions</output>
+    </step_1_1>
 
-  <step_3>
-    <name>Generate Understanding Summary</name>
-    <action>
-      1. Create summary of what you understand
-      2. Include: Core Concept, Key Goals, Identified Components
-      3. List Questions and Ambiguities
-      4. List enabled tools from step 1
-      5. Share summary with user for validation
-    </action>
-    <output>understanding_summary</output>
-  </step_3>
+    <step_1_2>
+      <name>Analyze Idea Files</name>
+      <action>
+        0. Resolve extra_context_reference inputs:
+           - FOR EACH ref in [raw-idea, uiux-reference]:
+             IF workflow mode AND extra_context_reference.{ref} is a file path:
+               READ the file at that path
+             ELIF extra_context_reference.{ref} is "auto-detect":
+               Use existing discovery logic below
+             ELIF extra_context_reference.{ref} is "N/A":
+               Skip this context input
+             ELSE (free-mode / absent):
+               Use existing behavior
+        1. Navigate to x-ipe-docs/ideas/{folder}/files/
+        2. Read each file (text, markdown, code, etc.)
+        3. Identify key themes, concepts, and goals
+        4. Note any gaps or ambiguities
+      </action>
+      <constraints>
+        - BLOCKING: All files must be analyzed before proceeding
+      </constraints>
+      <output>initial_analysis</output>
+    </step_1_2>
 
-  <step_4>
-    <name>Brainstorming Session</name>
-    <action>
-      1. Ask questions in batches (3-5 at a time)
-      2. Wait for human response before proceeding
-      3. Build on previous answers
-      4. Challenge assumptions constructively
-      5. IF extra_instructions is provided and non-empty:
-         - Incorporate extra_instructions as additional context/guidance for the refinement
-         - Treat as user preference that supplements (not replaces) the idea content
-      6. When the user describes something visual (UI layouts, flows, system structure), proactively generate visual artifacts to enrich the brainstorming -- select the most appropriate enabled tool from step 1's tool list for the content type
-    </action>
-    <constraints>
-      - BLOCKING: Continue until idea is well-defined
-      - CRITICAL: Batch questions (3-5), do not overwhelm
-      - MANDATORY: Only use tools that appear in the enabled tool list from step 1
-    </constraints>
-    <output>brainstorming_notes, artifacts[]</output>
-  </step_4>
+    <step_1_3>
+      <name>Research Common Principles</name>
+      <action>
+        1. Identify if topic is common/established (auth, API, UI/UX, security)
+        2. IF topic is common: research industry best practices, design patterns, document findings as "Common Principles", note authoritative sources
+           ELSE: skip this step
+      </action>
+      <output>common_principles[], references[]</output>
+    </step_1_3>
 
-  <step_5>
-    <name>Research Common Principles</name>
-    <action>
-      1. Identify if topic is common/established (auth, API, UI/UX, security)
-      2. IF topic is common: research industry best practices, design patterns, document findings as "Common Principles", note authoritative sources
-         ELSE: skip this step
-    </action>
-    <output>common_principles[], references[]</output>
-  </step_5>
+  </phase_1>
 
-  <step_6>
-    <name>Generate Idea Draft</name>
-    <action>
-      1. Synthesize outputs from steps 3, 4, 5 (summary, brainstorming, research)
-      2. Determine version number (auto-increment)
-      3. Output path: {idea_folder}/refined-idea/idea-summary-vN.md
-         a. Create {idea_folder}/refined-idea/ folder if it does not exist
-         b. IF folder already exists and contains previous output: clear it (overwrite mode)
-         c. Write all refined output files to {idea_folder}/refined-idea/
-      4. Create draft using template from templates/idea-summary.md
-      5. RECOMMENDED: Use enabled tools from step 1's tool list to create rich visual content (diagrams, infographics, architecture views) -- select the most appropriate tool for each content type
-      6. If no tools are enabled: use standard markdown (bullet lists, tables)
-      7. Link to artifacts created during brainstorming
-    </action>
-    <constraints>
-      - CRITICAL: Only use tools that appear in the enabled tool list from step 1 -- if a tool is not in the enabled list, do NOT use it
-      - MANDATORY: Include all sections from template
-      - RECOMMENDED: Prefer enabled tools over plain markdown for richer idea presentation
-    </constraints>
-    <output>idea_draft</output>
-  </step_6>
+  <phase_2 name="审问之 — Inquire Thoroughly">
 
-  <step_7>
-    <name>Critique and Feedback</name>
-    <action>
-      1. Invoke sub-agent to review the idea draft
-      2. Sub-agent evaluates against quality criteria
-      3. Sub-agent provides constructive feedback
-    </action>
-    <sub_agent>
-      role: idea-critic
-      goal: Provide constructive feedback on idea draft
-      model_hint: sonnet
-      evaluation_criteria:
-        - Clarity: Is the problem statement clear?
-        - Completeness: Are all key sections filled?
-        - Consistency: Do sections align with each other?
-        - Feasibility: Are goals realistic?
-        - Visualization: Are enabled tools used effectively?
-      feedback_format:
-        - Strengths: What works well
-        - Improvements: Specific actionable suggestions
-        - Questions: Clarifications needed
-    </sub_agent>
-    <constraints>
-      - CRITICAL: Feedback must be constructive, not just critical
-      - MANDATORY: Include specific improvement suggestions
-    </constraints>
-    <output>critique_feedback</output>
-  </step_7>
+    <step_2_1>
+      <name>Generate Understanding Summary</name>
+      <action>
+        1. Create summary of what you understand from Phase 1 analysis
+        2. Include: Core Concept, Key Goals, Identified Components
+        3. List Questions and Ambiguities
+        4. List enabled tools from step 1.1
+        5. Share summary with user for validation
+      </action>
+      <output>understanding_summary</output>
+    </step_2_1>
 
-  <step_8>
-    <name>Improve and Deliver Summary</name>
-    <action>
-      1. Review critique feedback from step 7
-      2. Address each improvement suggestion
-      3. Resolve any questions raised
-      4. RECOMMENDED: Use enabled tools from step 1's tool list to enhance or add visual content where feedback suggests improvements -- select the most appropriate tool for each content type
-      5. IF feedback requires minor-to-moderate changes:
-         → Update the existing draft in-place
-         IF feedback requires extensive rewrite (majority of sections affected):
-         → Rewrite the file from scratch (same path)
-      6. Finalize at {idea_folder}/refined-idea/idea-summary-vN.md
-    </action>
-    <constraints>
-      - MANDATORY: Update the existing draft file in-place — do NOT create a new versioned file for critique improvements
-      - CRITICAL: All feedback items must be addressed
-      - CRITICAL: Only use tools that appear in the enabled tool list from step 1
-    </constraints>
-    <output>idea_summary_path</output>
-  </step_8>
+    <step_2_2>
+      <name>Brainstorming Session</name>
+      <action>
+        1. IF process_preference.auto_proceed == "auto":
+           → Analyze idea content and resolve ambiguities autonomously
+           → CALL x-ipe-tool-decision-making for any questions/conflicts:
+             { calling_skill: "ideation", task_id: "{task_id}", problems: [{description: "ambiguity", type: "question"}] }
+           → Build comprehensive brainstorming notes from source material + decisions
+           → Generate visual artifacts proactively using enabled tools from step 1.1
+        2. ELSE:
+           a. Ask questions in batches (3-5 at a time)
+           b. Wait for human response before proceeding
+           c. Build on previous answers
+           d. Challenge assumptions constructively
+        3. IF extra_instructions is provided and non-empty:
+           - Incorporate extra_instructions as additional context/guidance for the refinement
+           - Treat as user preference that supplements (not replaces) the idea content
+        4. When the user describes something visual (UI layouts, flows, system structure), proactively generate visual artifacts to enrich the brainstorming -- select the most appropriate enabled tool from step 1.1's tool list for the content type
+      </action>
+      <constraints>
+        - BLOCKING: Continue until idea is well-defined
+        - CRITICAL (manual/stop_for_question): Batch questions (3-5), do not overwhelm
+        - MANDATORY: Only use tools that appear in the enabled tool list from step 1.1
+      </constraints>
+      <output>brainstorming_notes, artifacts[]</output>
+    </step_2_2>
 
-  <step_9>
-    <name>Rename Folder</name>
-    <action>
-      1. Check if folder matches "Draft Idea - MMDDYYYY HHMMSS"
-      2. IF folder matches draft pattern AND idea has clear identity:
-         a. Generate new name based on idea content (2-5 words, Title Case)
-         b. Rename folder to "{Idea Name} - {timestamp}"
-         c. Update internal links
-         ELSE: skip rename
-    </action>
-    <output>folder_renamed, new_folder_name</output>
-  </step_9>
+  </phase_2>
 
-  <step_10>
-    <name>Complete and Request Review</name>
-    <action>
-      1. IF execution_mode == "workflow-mode":
-         a. Call update_workflow_action MCP with:
-            - workflow_name: {from context}
-            - action: "refine_idea"
-            - status: "done"
-            - deliverables: [list of output file paths]
-         b. Log: "Workflow action status updated to done"
-      2. Present final idea summary to human
-      3. Ask human to choose next task
-      4. Wait for approval
-    </action>
-    <constraints>
-      - BLOCKING: Human MUST approve before proceeding
-    </constraints>
-    <output>human_approval, next_task_choice, workflow_action_updated</output>
-  </step_10>
+  <phase_3 name="慎思之 — Think Carefully">
+
+    <step_3_1>
+      <name>Critique and Feedback</name>
+      <action>
+        1. Invoke sub-agent to review the brainstorming results and idea concept
+        2. Sub-agent evaluates against quality criteria
+        3. Sub-agent provides constructive feedback
+      </action>
+      <sub_agent>
+        role: idea-critic
+        goal: Provide constructive feedback on idea concept and brainstorming results
+        model_hint: sonnet
+        evaluation_criteria:
+          - Clarity: Is the problem statement clear?
+          - Completeness: Are all key aspects covered?
+          - Consistency: Do elements align with each other?
+          - Feasibility: Are goals realistic?
+          - Visualization: Are enabled tools used effectively?
+        feedback_format:
+          - Strengths: What works well
+          - Improvements: Specific actionable suggestions
+          - Questions: Clarifications needed
+      </sub_agent>
+      <constraints>
+        - CRITICAL: Feedback must be constructive, not just critical
+        - MANDATORY: Include specific improvement suggestions
+      </constraints>
+      <output>critique_feedback</output>
+    </step_3_1>
+
+  </phase_3>
+
+  <phase_4 name="明辨之 — Discern Clearly">
+
+    <step_4_1>
+      <name>Improve and Decide on Feedback</name>
+      <action>
+        1. Review critique feedback from step 3.1
+        2. Decide which improvement suggestions to incorporate
+        3. Resolve any questions raised
+        4. Document decisions: which feedback accepted, which deferred, and why
+        5. Finalize the approach and content direction for drafting
+      </action>
+      <constraints>
+        - CRITICAL: All feedback items must be addressed (accepted or explicitly deferred with rationale)
+      </constraints>
+      <output>improvement_decisions, finalized_approach</output>
+    </step_4_1>
+
+  </phase_4>
+
+  <phase_5 name="笃行之 — Practice Earnestly">
+
+    <step_5_1>
+      <name>Generate Idea Draft</name>
+      <action>
+        1. Synthesize outputs from all phases: study (1.1-1.3), inquiry (2.1-2.2), critique (3.1), decisions (4.1)
+        2. Determine version number (auto-increment)
+        3. Output path: {idea_folder}/refined-idea/idea-summary-vN.md
+           a. Create {idea_folder}/refined-idea/ folder if it does not exist
+           b. IF folder already exists and contains previous output: clear it (overwrite mode)
+           c. Write all refined output files to {idea_folder}/refined-idea/
+        4. Create draft using template from templates/idea-summary.md
+        5. RECOMMENDED: Use enabled tools from step 1.1's tool list to create rich visual content (diagrams, infographics, architecture views) -- select the most appropriate tool for each content type
+        6. If no tools are enabled: use standard markdown (bullet lists, tables)
+        7. Link to artifacts created during brainstorming
+        8. Apply improvement decisions from step 4.1
+      </action>
+      <constraints>
+        - CRITICAL: Only use tools that appear in the enabled tool list from step 1.1 -- if a tool is not in the enabled list, do NOT use it
+        - MANDATORY: Include all sections from template
+        - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
+        - RECOMMENDED: Prefer enabled tools over plain markdown for richer idea presentation
+      </constraints>
+      <output>idea_summary_path</output>
+    </step_5_1>
+
+    <step_5_2>
+      <name>Complete and Request Review</name>
+      <action>
+        1. IF execution_mode == "workflow-mode":
+           a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
+              - workflow_name: {from context}
+              - action: "refine_idea"  ← HARDCODED: always use "refine_idea", NEVER "compose_idea" or any other action
+              - status: "done"
+              - deliverables: {"refined-idea": "{path to idea-summary file}", "refined-ideas-folder": "{path to refined-idea/ folder}"}
+           b. Log: "Workflow action status updated to done"
+        2. Review & Decision Gate:
+           IF process_preference.auto_proceed == "auto":
+             → Skip human review (auto-proceed mode)
+             → Auto-select next task from next_task_based_skill
+           ELSE:
+             → Present final idea summary to human
+             → Ask human to choose next task
+             → Wait for approval
+             → IF human rejects → revise
+      </action>
+      <constraints>
+        - BLOCKING (manual/stop_for_question): Human MUST approve before proceeding
+      </constraints>
+      <output>human_approval, next_task_choice, workflow_action_updated</output>
+    </step_5_2>
+
+  </phase_5>
 
 </procedure>
 ```
@@ -300,20 +347,21 @@ task_completion_output:
   category: ideation-stage
   status: completed | blocked
   next_task_based_skill: "Idea Mockup | Idea to Architecture"
-  require_human_review: yes
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   task_output_links:
     - "x-ipe-docs/ideas/{folder}/refined-idea/idea-summary-vN.md"
-    - "x-ipe-docs/ideas/{folder}/mockups/mockup-vN.html"
+    - "x-ipe-docs/ideas/{folder}/refined-idea/"
   # Dynamic attributes
-  execution_mode: "free-mode | workflow-mode"  # propagated from input
-  workflow_action: "refine_idea"        # triggers workflow status update when execution_mode == workflow-mode
-  workflow_name: "{from context}"       # used to locate workflow JSON
+  execution_mode: "{from input}"
+  workflow:
+    name: "{from input}"
+  workflow_action: "{workflow.action}"   # triggers workflow status update when execution_mode == workflow-mode
   workflow_action_updated: true | false # true if update_workflow_action was called
   idea_id: "IDEA-XXX"
   idea_status: Refined
   idea_version: "vN"
-  idea_folder: "{renamed folder name or original}"
-  folder_renamed: true | false
+  idea_folder: "{original folder name}"
 ```
 
 ### Next Task Selection
@@ -362,8 +410,8 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
   </checkpoint>
   <checkpoint required="true">
     <name>Draft Created</name>
-    <verification>Idea draft generated, enabled tools from step 1 used where appropriate</verification>
-    <step_output>idea_draft</step_output>
+    <verification>Idea draft generated, enabled tools from step 1.1 used where appropriate</verification>
+    <step_output>idea_summary_path</step_output>
   </checkpoint>
   <checkpoint required="true">
     <name>Critique Received</name>
@@ -372,8 +420,8 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
   </checkpoint>
   <checkpoint required="true">
     <name>Feedback Addressed</name>
-    <verification>All critique items addressed in final summary</verification>
-    <step_output>N/A (validation step)</step_output>
+    <verification>All critique items addressed — accepted or explicitly deferred with rationale</verification>
+    <step_output>improvement_decisions, finalized_approach</step_output>
   </checkpoint>
   <checkpoint required="true">
     <name>Summary Created</name>
@@ -386,18 +434,13 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
     <step_output>human_approval, next_task_choice</step_output>
   </checkpoint>
   <checkpoint required="recommended">
-    <name>Folder Renamed</name>
-    <verification>Draft folder renamed if applicable</verification>
-    <step_output>folder_renamed, new_folder_name</step_output>
-  </checkpoint>
-  <checkpoint required="recommended">
     <name>Principles Researched</name>
     <verification>Common principles researched if topic is established</verification>
     <step_output>common_principles[], references[]</step_output>
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Workflow Action Status Updated</name>
-    <verification>If execution_mode == "workflow-mode", called update_workflow_action MCP with status "done" and deliverables list</verification>
+    <verification>If execution_mode == "workflow-mode", called the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with status "done" and deliverables keyed dict</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -408,56 +451,24 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Patterns & Anti-Patterns
 
-### Pattern: Raw Notes Upload
-
-**When:** User uploads unstructured notes or braindump
-**Then:**
-```
-1. Extract key themes from notes
-2. Organize into logical categories
-3. Ask clarifying questions about each category
-4. Help structure into coherent idea
-```
-
-### Pattern: Technical Specification Upload
-
-**When:** User uploads detailed technical spec
-**Then:**
-```
-1. Validate technical feasibility
-2. Ask about business goals (why this spec?)
-3. Identify missing user context
-4. Connect technical details to user value
-```
-
-### Pattern: Multiple Conflicting Ideas
-
-**When:** Uploaded files contain conflicting approaches
-**Then:**
-```
-1. Surface the conflicts clearly
-2. Ask user to prioritize or choose
-3. Help evaluate trade-offs
-4. Document decision rationale
-```
-
-### Anti-Patterns
+| Pattern | When | Then |
+|---------|------|------|
+| Raw Notes Upload | Unstructured notes/braindump | Extract themes → organize → ask per category → structure |
+| Technical Spec | Detailed tech spec uploaded | Validate feasibility → ask about goals → identify missing context |
+| Conflicting Ideas | Files contain conflicts | Surface conflicts → ask to prioritize → evaluate trade-offs |
 
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
 | Summarizing without questions | Misses refinement | Engage in brainstorming |
 | Too many questions at once | Overwhelms user | Batch 3-5 questions |
 | Accepting at face value | May miss issues | Challenge constructively |
-| Skipping to requirements | Idea not refined | Complete ideation first |
-| Ignoring tools.json | Uses wrong tools | Always check enabled tool list from step 1 |
-| Using disabled tools | Violates config | Only use tools in the enabled list |
+| Ignoring tools.json | Uses wrong tools | Always check enabled tool list from step 1.1 |
 
 ---
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for concrete execution examples:
+See [references/examples.md](.github/skills/x-ipe-task-based-ideation/references/examples.md) for concrete execution examples:
 - Business plan ideation with tools enabled
 - Ideation without tools (all disabled)
 - Missing config file handling
-- Draft folder rename scenario

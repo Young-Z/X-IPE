@@ -136,11 +136,12 @@ class HomepageInfinity {
             const tbdAttr = config.status === 'tbd' ? ' data-tbd="true"' : '';
             const tbdBadge = config.status === 'tbd' ? '<span class="tbd-badge">TBD</span>' : '';
             
+            const selectorEscaped = (config.selector || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
             buttons.push(`
             <button class="stage-btn ${config.theme}${tbdClass}"
                     data-stage="${stageId}"
                     data-section="${config.section}"
-                    data-selector="${config.selector || ''}"
+                    data-selector="${selectorEscaped}"
                     style="left: ${config.position.left}; top: ${config.position.top};"
                     ${tbdAttr}>
                 <span class="stage-icon">${config.icon}</span>

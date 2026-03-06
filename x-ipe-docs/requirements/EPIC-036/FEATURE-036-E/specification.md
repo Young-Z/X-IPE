@@ -2,15 +2,18 @@
 
 ## Version History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| v1.0 | 02-17-2026 | Spark | Initial specification |
+| Version | Date | Author | Changes | Change Request |
+|---------|------|--------|---------|----------------|
+| v1.1 | 03-05-2026 | Drift | Restructure deliverables layout from stage-grouped to feature-grouped | [CR-001](./CR-001.md) |
+| v1.0 | 02-17-2026 | Spark | Initial specification | - |
 
 ## Linked Mockups
 
 | Mockup | Path | Status |
 |--------|------|--------|
-| Workflow View v1 | `../mockups/workflow-view-v1.html` | Current — deliverables section (lines ~856–964, 1537–1605) |
+| Workflow View v1 | `x-ipe-docs/requirements/EPIC-036/mockups/workflow-view-v1.html` | Outdated — deliverables section layout changed by CR-001; use as directional reference only |
+
+> **Note:** Mockup workflow-view-v1.html is outdated for the deliverables section; use as directional reference only. Implementation should follow the updated requirements in this specification.
 
 ## Overview
 
@@ -60,7 +63,12 @@ Three capabilities:
 | AC-1.5 | Each deliverable card shows: category icon, filename, file path (monospace) |
 | AC-1.6 | Missing files show "⚠️ not found" indicator on the card |
 | AC-1.7 | Deliverable data comes from a backend API endpoint that resolves paths and checks file existence |
-| AC-1.8 | UI layout MUST match the approved mockup (workflow-view-v1.html) for deliverables section |
+| AC-1.8 | Shared deliverables (from ideation and requirement stages, without feature_id) are displayed in a "Shared Deliverables" section at the top |
+| AC-1.9 | Per-feature deliverables are grouped into a dedicated section per feature, titled with the feature name |
+| AC-1.10 | Within each feature section, deliverables from all stages (implement, validation, feedback) are shown together |
+| AC-1.11 | Feature sections appear in feature order after the shared deliverables section |
+| AC-1.12 | Shared deliverables section is not shown if there are no shared deliverables |
+| AC-1.13 | Feature sections are not shown if a feature has no deliverables |
 
 ### AC-2: Polling & Auto-Refresh
 
@@ -99,6 +107,8 @@ Three capabilities:
 | AC-5.1 | Deliverables section integrates below feature lanes or action area in panel body |
 | AC-5.2 | Polling works alongside feature lanes and stage ribbon without interference |
 | AC-5.3 | Manual override works on both global actions and per-feature actions |
+| AC-5.4 | DeliverableViewer (FEATURE-038-C) folder-type rendering works correctly within feature sections |
+| AC-5.5 | FolderBrowserModal click handlers work correctly on cards within feature sections |
 
 ## Functional Requirements
 
@@ -111,9 +121,12 @@ Three capabilities:
 
 ### FR-2: Deliverables UI Component
 - Collapsible section with header (title + count badge + toggle chevron)
-- Grid layout: `repeat(auto-fill, minmax(200px, 1fr))`
+- **Shared Deliverables subsection:** Groups deliverables from ideation and requirement stages (items without `feature_id`) in a card grid
+- **Feature subsections:** One per feature that has deliverables; titled with feature name; groups all deliverables for that feature across stages (implement, validation, feedback) in a card grid
 - Cards with category icon, filename, path, optional "New" badge
 - Missing files shown with ⚠️ indicator
+- Feature subsection layout: feature title label followed by card grid (`repeat(auto-fill, minmax(220px, 1fr))`)
+- Feature ordering: same order as features appear in the workflow state
 
 ### FR-3: Polling Mechanism
 - `setInterval` at 7-second intervals for each expanded panel
@@ -144,12 +157,19 @@ Three capabilities:
 
 ## UI/UX Requirements
 
-### Dark Theme Adaptation (from mockup)
+### Dark Theme Adaptation
 - Deliverables area: `var(--card-bg)` background
 - Cards: border `var(--border-color)`, hover accent
 - Category icon backgrounds adapted for dark theme
-- Grid responsive: auto-fill with 200px minimum
+- Grid responsive: auto-fill with 220px minimum
 - Toggle chevron: ▾ (expanded) / ▸ (collapsed)
+
+### Deliverables Layout (CR-001 update)
+- **Shared Deliverables section:** Title label "Shared Deliverables" in uppercase, followed by card grid
+- **Feature sections:** Each feature gets a distinct section with feature name as title label, followed by card grid of all that feature's deliverables
+- Feature section title: feature name (e.g., "FEATURE-039-A: Enhanced Modal Features"), styled with `.deliverables-feature-section-title` (11px, uppercase, slate-400)
+- Feature sections appear below the shared section
+- Sections with no deliverables are omitted entirely (no empty sections shown)
 
 ### Category Colors (dark theme adapted)
 - Ideas (💡): purple tones — bg: `rgba(168,85,247,0.15)`, text: `#a855f7`
@@ -181,6 +201,9 @@ Three capabilities:
 4. Archive threshold is 30 days of inactivity (configurable)
 5. Manual override does NOT trigger stage gating re-evaluation (it's a manual recovery tool)
 6. Polling only runs for expanded panels to minimize server load
+7. Shared deliverables (from ideation/requirement stages, or items without `feature_id`) are grouped into a "Shared Deliverables" section
+8. Per-feature deliverables (items with `feature_id`) are grouped by feature, not by stage
+9. Feature sections display all deliverables for that feature across all per-feature stages (implement, validation, feedback)
 
 ## Edge Cases
 
@@ -211,6 +234,8 @@ Three capabilities:
 - Polling uses `last_activity` timestamp comparison for efficiency
 - Auto-archive uses file system move (rename) for atomicity
 - Context menu positioning uses `event.clientX/clientY` with viewport boundary clamping
+- CR-001: Frontend grouping changes only — restructure `_renderDeliverables()` to group by feature instead of stage for per-feature items. Backend API returns `feature_id`/`feature_name` already; no backend changes needed
+- CR-001: Shared items (ideation/requirement stages, no `feature_id`) remain grouped separately from per-feature items
 
 ## Open Questions
 

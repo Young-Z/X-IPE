@@ -4,6 +4,7 @@
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| v1.1 | 03-05-2026 | Drift | CR-001: Restructure deliverables from stage-grouped to feature-grouped layout |
 | v1.0 | 02-17-2026 | Spark | Initial design |
 
 ## References
@@ -28,7 +29,8 @@
 ├──────────────────────────────────────────────────────────────────┤
 │ Frontend                                                         │
 │  workflow-stage.js (extended)                                    │
-│    ├── _renderDeliverables()            ★ NEW                    │
+│    ├── _renderDeliverables()            ★ NEW (v1.0)             │
+│    │     └── CR-001: grouping changed   MOD (v1.1)              │
 │    ├── _renderDeliverableCard()         ★ NEW                    │
 │    └── _renderContextMenu()            ★ NEW (manual override)   │
 │                                                                  │
@@ -298,3 +300,192 @@ User right-clicks action button
 | Navigate away from Workflow | Stop all polling intervals |
 | Right-click on locked action | Context menu still shows (override allowed) |
 | Archive directory doesn't exist | Create it on first archive |
+
+---
+
+## Part 1: Agent-Facing Summary (CR-001 Update)
+
+> **Purpose:** Quick reference for AI agents implementing CR-001 changes only.
+> **📌 AI Coders:** This section covers the v1.1 delta — feature-grouped deliverables layout.
+
+### Key Components Implemented
+
+| Component | Responsibility | Scope/Impact | Tags |
+|-----------|----------------|--------------|------|
+| `_renderDeliverables()` in workflow-stage.js | Restructure grouping from stage-first to feature-first for per-feature deliverables | Lines 973–1113 of workflow-stage.js | #deliverables #frontend #grouping #cr-001 |
+| CSS: `.deliverables-feature-section`, `.deliverables-feature-section-title` | New CSS classes for feature sections | workflow.css deliverables block | #css #deliverables #layout |
+
+### Dependencies
+
+| Dependency | Source | Design Link | Usage Description |
+|------------|--------|-------------|-------------------|
+| Backend API `/api/workflow/{name}/deliverables` | FEATURE-036-E v1.0 | This document §2.1 | Returns `feature_id`/`feature_name` per item — already exists, no changes needed |
+| `DeliverableViewer` | FEATURE-038-C | `x-ipe-docs/requirements/EPIC-038/FEATURE-038-C/technical-design.md` | Renders folder-type cards — called per-card, independent of grouping |
+| `FolderBrowserModal` | FEATURE-039-B | `x-ipe-docs/requirements/EPIC-039/FEATURE-039-B/specification.md` | Opens on folder card click — independent of grouping |
+
+### Major Flow (CR-001 Delta)
+
+1. Fetch deliverables from API (unchanged)
+2. Split items into `shared` (no `feature_id`) and `byFeature` (grouped by `feature_id`)
+3. Render "Shared Deliverables" section with shared items in a card grid
+4. For each feature that has deliverables, render a feature section with title and card grid
+5. Card rendering (icons, preview, folder modal) unchanged
+
+### Usage Example
+
+```javascript
+// CR-001: New grouping logic inside _renderDeliverables()
+const shared = [];
+const byFeature = {};
+
+items.forEach(item => {
+    if (!item.feature_id) {
+        shared.push(item);
+    } else {
+        if (!byFeature[item.feature_id]) {
+            byFeature[item.feature_id] = { name: item.feature_name || item.feature_id, items: [] };
+        }
+        byFeature[item.feature_id].items.push(item);
+    }
+});
+
+// Render shared section (if any)
+if (shared.length > 0) {
+    const section = createSection('Shared Deliverables');
+    shared.forEach(item => section.grid.appendChild(renderCard(item)));
+    grid.appendChild(section.el);
+}
+
+// Render per-feature sections
+for (const [fid, fdata] of Object.entries(byFeature)) {
+    const section = createSection(fdata.name);
+    fdata.items.forEach(item => section.grid.appendChild(renderCard(item)));
+    grid.appendChild(section.el);
+}
+```
+
+---
+
+## Part 2: Implementation Guide (CR-001 Update)
+
+### Workflow Diagram
+
+```mermaid
+flowchart TD
+    A[Fetch /api/workflow/name/deliverables] --> B{items.length > 0?}
+    B -->|No| C[Show 'No deliverables yet']
+    B -->|Yes| D[Split: shared vs byFeature]
+    D --> E{shared.length > 0?}
+    E -->|Yes| F[Render 'Shared Deliverables' section]
+    E -->|No| G[Skip shared section]
+    F --> H[For each feature in byFeature]
+    G --> H
+    H --> I[Render feature section with title + card grid]
+    I --> J[Done]
+```
+
+### Implementation Steps
+
+#### Step 1: Modify `_renderDeliverables()` in workflow-stage.js (lines 1017–1104)
+
+**Replace** the current grouping logic (lines 1023–1104) which uses `CATEGORY_STAGE`, `SHARED_STAGES`, `sharedByStage`, `featureByStage`, and the stage-ordered rendering loop.
+
+**New logic:**
+
+```javascript
+// 1. Split items into shared vs per-feature
+const shared = [];
+const byFeature = {};
+items.forEach(item => {
+    if (!item.feature_id) {
+        shared.push(item);
+    } else {
+        if (!byFeature[item.feature_id]) {
+            byFeature[item.feature_id] = { name: item.feature_name || item.feature_id, items: [] };
+        }
+        byFeature[item.feature_id].items.push(item);
+    }
+});
+
+// Helper: create a section with title + card grid
+const createSection = (title) => {
+    const section = document.createElement('div');
+    section.className = 'deliverables-feature-section';
+    const sTitle = document.createElement('div');
+    sTitle.className = 'deliverables-feature-section-title';
+    sTitle.textContent = title;
+    section.appendChild(sTitle);
+    const row = document.createElement('div');
+    row.className = 'deliverables-row';
+    section.appendChild(row);
+    return { el: section, grid: row };
+};
+
+// 2. Render shared deliverables section (if any)
+if (shared.length > 0) {
+    const s = createSection('Shared Deliverables');
+    shared.forEach(item => s.grid.appendChild(renderCard(item)));
+    grid.appendChild(s.el);
+}
+
+// 3. Render per-feature sections
+for (const [fid, fdata] of Object.entries(byFeature)) {
+    const s = createSection(fdata.name);
+    fdata.items.forEach(item => s.grid.appendChild(renderCard(item)));
+    grid.appendChild(s.el);
+}
+```
+
+**What gets removed:**
+- `CATEGORY_STAGE` constant
+- `SHARED_STAGES` constant
+- `sharedByStage` / `featureByStage` objects
+- The `for (const stage of allStages)` rendering loop with nested shared/feature sub-loops
+
+**What stays unchanged:**
+- `renderCard()` helper (lines 1047–1061) — renders both folder and file cards
+- `DeliverableViewer` and `FolderBrowserModal` instantiation (lines 1018–1021)
+- Error handling (lines 1106–1112)
+- Header, toggle, count badge (lines 978–1004)
+
+#### Step 2: Add CSS for feature sections in workflow.css
+
+**Append after** existing `.deliverables-feature-label` rule (line 581):
+
+```css
+.deliverables-feature-section { margin-bottom: 16px; }
+.deliverables-feature-section:last-child { margin-bottom: 0; }
+.deliverables-feature-section-title { font-size: 11px; font-weight: 600; color: var(--wf-slate-400); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+```
+
+**Existing classes that can be removed** (dead code after CR-001):
+- `.deliverables-stage-section` → replaced by `.deliverables-feature-section`
+- `.deliverables-stage-title` → replaced by `.deliverables-feature-section-title`
+- `.deliverables-feature-group` → no longer used (features are top-level sections now)
+- `.deliverables-feature-label` → replaced by `.deliverables-feature-section-title`
+
+### Edge Cases (CR-001 specific)
+
+| Case | Handling |
+|------|---------|
+| All deliverables are shared (no features yet) | Only "Shared Deliverables" section shown |
+| All deliverables are per-feature (no shared) | Only feature sections shown, no shared section |
+| Feature has deliverables across multiple stages | All combined in one feature section |
+| Feature with no deliverables | Not shown (empty features omitted) |
+| Backend returns items without `feature_id` from implement/validation | Treated as shared (grouped with shared section) |
+
+### Files Changed
+
+| File | Change Type | Lines Affected |
+|------|-------------|----------------|
+| `src/x_ipe/static/js/features/workflow-stage.js` | Modify | ~1023–1104 (replace grouping logic) |
+| `src/x_ipe/static/css/workflow.css` | Add + Remove | Add 3 rules, remove 4 dead rules (lines 577–581) |
+
+---
+
+## Design Change Log
+
+| Date | Phase | Change Summary |
+|------|-------|----------------|
+| 03-05-2026 | Technical Design (CR-001) | Restructure `_renderDeliverables()` from stage-grouped to feature-grouped layout. Replace `CATEGORY_STAGE`/`SHARED_STAGES`/`sharedByStage`/`featureByStage` with simple `shared`/`byFeature` split based on `feature_id` presence. Add new CSS `.deliverables-feature-section` classes, remove dead `.deliverables-stage-section` classes. No backend changes. |
+| 02-17-2026 | Initial Design | Initial technical design created. |

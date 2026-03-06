@@ -236,6 +236,10 @@ dependencies:
       relationship: integration
       description: Used for visual infographics when x-ipe-tool-infographic-syntax enabled
 
+    - name: x-ipe-tool-web-search
+      relationship: integration
+      description: Used in Study Broadly when external research is needed and the tool is enabled
+
   artifacts:
     - path: "x-ipe-docs/ideas/{folder}/files/"
       description: "Idea files must exist before skill can run"
@@ -249,9 +253,9 @@ dependencies:
 test_scenarios:
   happy_path:
     - name: "Full ideation with tools enabled"
-      given: "Idea files uploaded, tools.json has x-ipe-tool-infographic-syntax and mermaid enabled"
+      given: "Idea files uploaded, tools.json has x-ipe-tool-infographic-syntax, x-ipe-tool-web-search, and mermaid enabled"
       when: "Agent executes ideation skill"
-      then: "idea-summary-vN.md created with infographic/mermaid visualizations"
+      then: "idea-summary-vN.md created with infographic/mermaid visualizations and cited web research when applicable"
 
     - name: "Ideation without tools"
       given: "Idea files uploaded, all tools disabled in config"

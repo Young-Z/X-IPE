@@ -139,15 +139,6 @@
             "next_actions_suggested": [
               "acceptance_testing"
             ]
-          },
-          "test_generation": {
-            "status": "done",
-            "deliverables": {
-              "test-files": "tests/frontend-js/link-preview-manager.test.js"
-            },
-            "next_actions_suggested": [
-              "implementation"
-            ]
           }
         }
       },
@@ -232,15 +223,6 @@
             "next_actions_suggested": [
               "acceptance_testing"
             ]
-          },
-          "test_generation": {
-            "status": "done",
-            "deliverables": {
-              "test-files": "tests/frontend-js/link-preview-breadcrumb.test.js"
-            },
-            "next_actions_suggested": [
-              "implementation"
-            ]
           }
         }
       },
@@ -323,10 +305,6 @@
             "next_actions_suggested": [
               "acceptance_testing"
             ]
-          },
-          "test_generation": {
-            "status": "skipped",
-            "deliverables": []
           }
         }
       },
@@ -401,10 +379,6 @@
             "next_actions_suggested": [
               "acceptance_testing"
             ]
-          },
-          "test_generation": {
-            "status": "skipped",
-            "deliverables": []
           }
         }
       },

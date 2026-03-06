@@ -1,0 +1,251 @@
+execution_log:
+  timestamp: "2025-07-14"
+  candidate: "x-ipe-docs/skill-meta/x-ipe-task-based-feature-breakdown/candidate/"
+  total_tests: 21
+  passed: 21
+  failed: 0
+  skipped: 0
+  results:
+    # ═══════════════════════════════════════════════════
+    # Structure (AC-S01 .. AC-S03)
+    # ═══════════════════════════════════════════════════
+
+    - id: TC-001
+      name: "SKILL.md exists with valid frontmatter"
+      ac_ref: AC-S01
+      status: PASS
+      evidence: "File exists. YAML frontmatter contains 'name: x-ipe-task-based-feature-breakdown' and 'description: Break requirements into Epics and features...'"
+
+    - id: TC-002
+      name: "references/examples.md exists with at least 1 example"
+      ac_ref: AC-S02
+      status: PASS
+      evidence: "File exists with 20 headings (## and ###). Contains 6 examples: E-Commerce Platform, API Integration, Change Request, Granularity Guidelines, Parent Feature Dedup, Epic Grouping Borderline Case."
+
+    - id: TC-003
+      name: "SKILL.md body under 500 lines"
+      ac_ref: AC-S03
+      status: PASS
+      evidence: "Line count = 498 (< 500 threshold)"
+
+    # ═══════════════════════════════════════════════════
+    # Content – Sections & Flow (AC-C01 .. AC-C02)
+    # ═══════════════════════════════════════════════════
+
+    - id: TC-004
+      name: "All required sections present in cognitive flow order"
+      ac_ref: AC-C01
+      status: PASS
+      evidence: >
+        Sections found in order at lines: Purpose(8), Important Notes(19),
+        Input Parameters(48), Input Initialization(77 as ###),
+        Definition of Ready(120), Execution Flow(133),
+        Execution Procedure(157), Output Result(390),
+        Definition of Done(423), Patterns & Anti-Patterns(472), Examples(494)
+
+    - id: TC-005
+      name: "Execution Flow table has exactly 10 steps"
+      ac_ref: AC-C02
+      status: PASS
+      evidence: >
+        10 data rows found: 1-Analyze, 2-Assess Epic Granularity,
+        3-Evaluate Complexity, 4-Identify Features, 5-Process Mockups,
+        6-Create Summary, 7-Update Board, 8-Update Index,
+        9-Dedup Check, 10-Complete
+
+    # ═══════════════════════════════════════════════════
+    # Content – Epic Granularity Assessment (AC-C03..C04)
+    # ═══════════════════════════════════════════════════
+
+    - id: TC-006
+      name: "Step 2 evaluates four scope signals"
+      ac_ref: AC-C03
+      status: PASS
+      evidence: >
+        All four signals found in <step_2>:
+        'Estimated feature count', 'Domain diversity',
+        'Dependency clusters', 'Team boundaries'
+
+    - id: TC-007
+      name: "Step 2 references decision matrix with thresholds"
+      ac_ref: AC-C04
+      status: PASS
+      evidence: >
+        Thresholds found in <step_2>: '≤7 estimated features → Single Epic',
+        '2-3 domains, 8-15 estimated features → 2-3 Epics',
+        '4+ domains OR >15 estimated features → Multiple Epics'
+
+    # ═══════════════════════════════════════════════════
+    # Content – Per-Epic Operation (AC-C05)
+    # ═══════════════════════════════════════════════════
+
+    - id: TC-008
+      name: "Step 3 operates per-Epic"
+      ac_ref: AC-C05
+      status: PASS
+      evidence: >
+        <step_3> contains: 'For each Epic from Step 2',
+        'per Epic' (5 occurrences), 'within each Epic'
+
+    - id: TC-009
+      name: "Step 4 operates per-Epic"
+      ac_ref: AC-C05
+      status: PASS
+      evidence: >
+        <step_4> contains: 'For each Epic, apply feature identification criteria',
+        'first feature in each Epic', 'features per Epic maximum',
+        'dependencies per Epic'
+
+    # ═══════════════════════════════════════════════════
+    # Content – Output Result (AC-C06)
+    # ═══════════════════════════════════════════════════
+
+    - id: TC-010
+      name: "Output Result includes epic_ids and epic_count"
+      ac_ref: AC-C06
+      status: PASS
+      evidence: >
+        Found in Output Result YAML block:
+        'epic_ids: ["EPIC-001", "EPIC-002"]' (array) and
+        'epic_count: 2' (integer)
+
+    # ═══════════════════════════════════════════════════
+    # Content – DoD Epic Checkpoint (AC-C07)
+    # ═══════════════════════════════════════════════════
+
+    - id: TC-011
+      name: "DoD has Epic structure assessment checkpoint"
+      ac_ref: AC-C07
+      status: PASS
+      evidence: >
+        Found inside <definition_of_done>:
+        '<checkpoint required="true"><name>Epic structure assessed and documented</name>'
+
+    # ═══════════════════════════════════════════════════
+    # Content – Dedup Coverage (AC-C08)
+    # ═══════════════════════════════════════════════════
+
+    - id: TC-012
+      name: "Step 9 compares parent FRs/ACs against sub-features"
+      ac_ref: AC-C08
+      status: PASS
+      evidence: >
+        <step_9> describes: 'List the parent FRs/ACs',
+        'List the union of all sub-features FRs/ACs',
+        'Compare coverage and produce coverage table',
+        'IF 100% coverage: Remove parent',
+        'IF partial coverage: Keep parent, flag gap for human review'
+
+    # ═══════════════════════════════════════════════════
+    # Content – Anti-Patterns (AC-C09)
+    # ═══════════════════════════════════════════════════
+
+    - id: TC-013
+      name: "Anti-patterns include Epic-specific rows"
+      ac_ref: AC-C09
+      status: PASS
+      evidence: >
+        Anti-Patterns table contains both rows:
+        '| Skipping Epic assessment | Features lack cohesion...' and
+        '| All features in one Epic | Monolithic, hard to manage...'
+
+    # ═══════════════════════════════════════════════════
+    # Content – Multi-Epic Example (AC-C10)
+    # ═══════════════════════════════════════════════════
+
+    - id: TC-014
+      name: "Examples include multi-Epic breakdown scenario"
+      ac_ref: AC-C10
+      status: PASS
+      evidence: >
+        references/examples.md Example 1 titled 'E-Commerce Platform (Multi-Epic Breakdown)'
+        shows 3 Epics: EPIC-001, EPIC-002, EPIC-003 with cross-Epic dependencies
+
+    # ═══════════════════════════════════════════════════
+    # Content – Breakdown Guidelines Decision Matrix (AC-C11)
+    # ═══════════════════════════════════════════════════
+
+    - id: TC-015
+      name: "breakdown-guidelines.md has Epic grouping decision matrix"
+      ac_ref: AC-C11
+      status: PASS
+      evidence: >
+        Found '### Epic Grouping Decision Matrix' heading with table:
+        '| Domains | Est. Features | Decision | Rationale |'
+        Rows include domain counts (1, 2-3, 4+), feature thresholds (≤7, 8-15, >15),
+        and outcomes (Single Epic, 2-3 Epics, Multiple Epics)
+
+    # ═══════════════════════════════════════════════════
+    # Content – Input Initialization (AC-C12)
+    # ═══════════════════════════════════════════════════
+
+    - id: TC-016
+      name: "Input Initialization subsection present"
+      ac_ref: AC-C12
+      status: PASS
+      evidence: >
+        '### Input Initialization' heading found at line 77 under '## Input Parameters' (line 48).
+        Contains <input_init> XML block (2 occurrences of 'input_init' tag).
+
+    # ═══════════════════════════════════════════════════
+    # Content – patterns.md Epic Grouping Pattern (AC-C13)
+    # ═══════════════════════════════════════════════════
+
+    - id: TC-017
+      name: "patterns.md has Epic Grouping pattern"
+      ac_ref: AC-C13
+      status: PASS
+      evidence: >
+        Found '### Pattern: Epic Grouping' with description:
+        'When: Assessing whether to use single or multiple Epics'.
+        Contains rules: single Epic (1 domain ≤7 features),
+        2-3 Epics (2-3 domains 8-15 features), multiple Epics (4+ domains OR >15 features).
+
+    # ═══════════════════════════════════════════════════
+    # Behavior – Simulation (AC-B01 .. AC-B02)
+    # ═══════════════════════════════════════════════════
+
+    - id: TC-018
+      name: "Single-domain, few features → single Epic"
+      ac_ref: AC-B01
+      type: behavioral-simulation
+      status: PASS
+      evidence: >
+        Simulated: 1 domain (User Authentication), ~5 features.
+        Step 2 decision matrix rule '1 domain, ≤7 features → Single Epic' applies.
+        SKILL.md step_2 explicitly states this rule. epic_count would be 1.
+        Example 2 (API Integration) in examples.md confirms single-domain/5-feature → single Epic pattern.
+
+    - id: TC-019
+      name: "Borderline 2 domains but ≤7 features → single Epic"
+      ac_ref: AC-B01
+      type: behavioral-simulation
+      status: PASS
+      evidence: >
+        Simulated: 2 domains (Auth + Profile), 7 features total.
+        Decision matrix row '2-3 domains, ≤7 features → Single Epic' in
+        breakdown-guidelines.md applies. epic_count would be 1.
+        Rationale: 'Few features despite multiple domains'.
+
+    - id: TC-020
+      name: "Multi-domain, many features → multiple Epics"
+      ac_ref: AC-B02
+      type: behavioral-simulation
+      status: PASS
+      evidence: >
+        Simulated: 3 domains, ~12 features.
+        Decision matrix row '2-3 domains, 8-15 features → 2-3 Epics (one per domain)' applies.
+        Example 1 in examples.md confirms: 3 domains, ~13 features → 3 Epics with
+        domain-level dependencies (EPIC-001, EPIC-002, EPIC-003).
+
+    - id: TC-021
+      name: "4+ domains or >15 features → multiple Epics with boundaries"
+      ac_ref: AC-B02
+      type: behavioral-simulation
+      status: PASS
+      evidence: >
+        Simulated: 5 domains, ~20 features.
+        Decision matrix row '4+ domains, Any → Multiple Epics' in
+        breakdown-guidelines.md applies. Step 2 states:
+        '4+ domains OR >15 estimated features → Multiple Epics with clear boundaries'.
+        Each Epic gets named domain ownership per step_2 instruction 4.

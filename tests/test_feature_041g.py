@@ -23,7 +23,7 @@ SKILLS_DIR = Path(__file__).resolve().parent.parent / ".github" / "skills"
 
 # Mapping: skill_name -> (action_name, expected_context_refs)
 SKILL_ACTION_MAP = {
-    "x-ipe-task-based-ideation-v2": ("refine_idea", ["raw-idea", "uiux-reference"]),
+    "x-ipe-task-based-ideation": ("refine_idea", ["raw-idea", "uiux-reference"]),
     "x-ipe-task-based-idea-mockup": ("design_mockup", ["refined-idea", "uiux-reference"]),
     "x-ipe-task-based-requirement-gathering": ("requirement_gathering", ["refined-idea", "mockup-html"]),
     "x-ipe-task-based-feature-breakdown": ("feature_breakdown", ["requirement-doc"]),

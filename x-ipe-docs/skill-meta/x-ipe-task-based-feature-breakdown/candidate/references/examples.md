@@ -4,123 +4,100 @@
 
 ---
 
-## Example 1: E-Commerce Platform Feature Breakdown
+## Example 1: E-Commerce Platform (Multi-Epic Breakdown)
 
 **Input:** User story or high-level requirement for an e-commerce platform
 
-### Execution Flow
+### Step 2: Epic Assessment
 
 ```
-1. Execute Task Flow from x-ipe-workflow-task-execution skill
+Scope signals:
+  - Estimated features: ~13 features across 5 capability areas
+  - Domain diversity: 3 distinct domains (Product, Cart/Checkout, User)
+  - Dependency clusters: Product features tightly coupled; Cart/Checkout tightly coupled
 
-2. Identify Major Capabilities:
-   - Product Management
-   - Shopping Cart
-   - Checkout & Payment
-   - User Accounts
-   - Order Management
+Decision: 3 Epics (one per domain)
+  - EPIC-001: Product Management (catalog, search, details, inventory)
+  - EPIC-002: Shopping & Checkout (cart, checkout, payment, confirmation)
+  - EPIC-003: User Accounts (registration, profile, settings)
 
-3. Break Down Each Capability:
+Epic-level dependencies:
+  - EPIC-002 depends on EPIC-001 (cart needs product catalog)
+  - EPIC-003 is independent (can develop in parallel)
+```
 
-   Product Management:
-   - FEATURE-001: Product Catalog Display
-   - FEATURE-002: Product Search & Filter
-   - FEATURE-003: Product Details Page
-   - FEATURE-004: Inventory Management
+### Step 4: Feature Identification (per Epic)
 
-   Shopping Cart:
-   - FEATURE-005: Add to Cart
-   - FEATURE-006: Cart Management (update qty, remove)
-   - FEATURE-007: Cart Persistence
+```
+EPIC-001 — Product Management:
+  - FEATURE-001-A: Product Catalog Display (MVP)
+  - FEATURE-001-B: Product Search & Filter
+  - FEATURE-001-C: Product Details Page
+  - FEATURE-001-D: Inventory Management
 
-   Checkout & Payment:
-   - FEATURE-008: Checkout Flow
-   - FEATURE-009: Payment Integration
-   - FEATURE-010: Order Confirmation
+EPIC-002 — Shopping & Checkout:
+  - FEATURE-002-A: Add to Cart (MVP)
+  - FEATURE-002-B: Cart Management
+  - FEATURE-002-C: Checkout Flow
+  - FEATURE-002-D: Payment Integration
+  - FEATURE-002-E: Order Confirmation
 
-4. Define Dependencies:
+EPIC-003 — User Accounts:
+  - FEATURE-003-A: User Registration (MVP)
+  - FEATURE-003-B: User Profile
+  - FEATURE-003-C: User Settings
 
-   ```
-   FEATURE-001 (Catalog) 
-        ↓
-   FEATURE-005 (Add to Cart) → FEATURE-006 (Cart Management)
-        ↓                              ↓
-   FEATURE-007 (Persistence) ←─────────┘
-        ↓
-   FEATURE-008 (Checkout) → FEATURE-009 (Payment)
-        ↓
-   FEATURE-010 (Confirmation)
-   ```
-
-5. Update features.md:
-
-   | ID | Name | Status | Dependencies | Priority |
-   |----|------|--------|--------------|----------|
-   | FEATURE-001 | Product Catalog | Draft | None | P1 |
-   | FEATURE-002 | Product Search | Draft | FEATURE-001 | P2 |
-   | FEATURE-005 | Add to Cart | Draft | FEATURE-001 | P1 |
-   | FEATURE-008 | Checkout Flow | Draft | FEATURE-007 | P1 |
-
-6. Create Feature Folders:
-   - x-ipe-docs/requirements/FEATURE-001/
-   - x-ipe-docs/requirements/FEATURE-002/
-   - ... (one folder per feature)
-
-7. Resume Task Flow from x-ipe-workflow-task-execution skill
+Folder structure:
+  x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/
+  x-ipe-docs/requirements/EPIC-001/FEATURE-001-B/
+  x-ipe-docs/requirements/EPIC-002/FEATURE-002-A/
+  ...
 ```
 
 ### Output
 
 ```yaml
 category: requirement-stage
-next_task_based_skill: Feature Refinement
-require_human_review: Yes
-
-breakdown_summary: |
-  Identified 10 features across 5 capability areas:
-  - Product Management: 4 features
-  - Shopping Cart: 3 features
-  - Checkout & Payment: 3 features
-  
-dependencies_mapped: Yes
-priority_assigned: Yes
-
-task_output_links:
-  - x-ipe-docs/planning/features.md
-  - x-ipe-docs/requirements/FEATURE-001/
-  - x-ipe-docs/requirements/FEATURE-002/
-  - ... (10 feature folders)
+epic_ids: [EPIC-001, EPIC-002, EPIC-003]
+epic_count: 3
+feature_ids: [FEATURE-001-A, FEATURE-001-B, ..., FEATURE-003-C]
+feature_count: 12
 ```
 
 ---
 
-## Example 2: API Integration Feature Breakdown
+## Example 2: API Integration (Single Epic)
 
 **Input:** "Integrate with third-party shipping providers"
 
+### Step 2: Epic Assessment
+
 ```
-1. Analyze Scope:
-   - Single integration point, multiple providers
-   - Need abstraction layer
+Scope signals:
+  - Estimated features: 5 (interface + 3 providers + UI)
+  - Domain diversity: 1 domain (shipping integration)
+  - Dependency clusters: all depend on shared interface
 
-2. Break Down:
-   - FEATURE-020: Shipping Provider Interface
-   - FEATURE-021: FedEx Integration
-   - FEATURE-022: UPS Integration
-   - FEATURE-023: USPS Integration
-   - FEATURE-024: Rate Comparison UI
+Decision: Single Epic
+  - EPIC-020: Shipping Integration
+```
 
-3. Define Dependencies:
+### Feature Breakdown
 
-   FEATURE-020 (Interface) ──┬──→ FEATURE-021 (FedEx)
-                             ├──→ FEATURE-022 (UPS)
-                             └──→ FEATURE-023 (USPS)
-                                      ↓
-                             FEATURE-024 (Rate UI)
+```
+EPIC-020 — Shipping Integration:
+  - FEATURE-020-A: Shipping Provider Interface (MVP)
+  - FEATURE-020-B: FedEx Integration
+  - FEATURE-020-C: UPS Integration
+  - FEATURE-020-D: USPS Integration
+  - FEATURE-020-E: Rate Comparison UI
 
-4. Output:
-   features_created: 5
-   base_dependency: FEATURE-020
+Dependencies: All B/C/D depend on A; E depends on B/C/D
+
+Output:
+  epic_ids: [EPIC-020]
+  epic_count: 1
+  feature_count: 5
 ```
 
 ---
@@ -129,26 +106,32 @@ task_output_links:
 
 **Input:** CR classified as NEW_FEATURE for bulk import
 
+### Step 2: Epic Assessment
+
 ```
-1. Receive from Change Request task:
-   - CR: "Add bulk import to product management"
-   - Classification: NEW_FEATURE
+Scope signals:
+  - Estimated features: 4 (parser, validation, errors, UI)
+  - Domain diversity: 1 domain (import pipeline)
+  - Links to existing EPIC-001 (Product Management)
 
-2. Break Down:
-   - FEATURE-025: CSV Import Parser
-   - FEATURE-026: Import Validation Pipeline
-   - FEATURE-027: Import Error Handling
-   - FEATURE-028: Import Progress UI
+Decision: Single Epic (EPIC-025 — Bulk Import)
+```
 
-3. Link to Existing:
-   - All depend on FEATURE-004 (Product Management - existing)
+### Feature Breakdown
 
-4. Update features.md with new entries
+```
+EPIC-025 — Bulk Import:
+  - FEATURE-025-A: CSV Import Parser (MVP)
+  - FEATURE-025-B: Import Validation Pipeline
+  - FEATURE-025-C: Import Error Handling
+  - FEATURE-025-D: Import Progress UI
 
-5. Output:
-   source: Change Request
-   features_created: 4
-   linked_to_existing: FEATURE-004
+Cross-Epic dependency: All depend on FEATURE-001-D (Inventory — in EPIC-001)
+
+Output:
+  source: Change Request
+  epic_ids: [EPIC-025]
+  feature_count: 4
 ```
 
 ---
@@ -199,7 +182,7 @@ FEATURE-005: Add to Cart Functionality
 ### Execution Flow
 
 ```
-1. FEATURE-001 split into:
+1. FEATURE-001 split into (within EPIC-001):
    - FEATURE-001-A: Product Listing (covers FR-001.1, FR-001.2, FR-001.3)
    - FEATURE-001-B: Product Search (covers FR-001.4, FR-001.5)
    - FEATURE-001-C: Product Filtering (covers FR-001.6, FR-001.7, FR-001.8)
@@ -208,19 +191,17 @@ FEATURE-005: Add to Cart Functionality
 
    | Parent FR/AC | Covered By | Status |
    |-------------|------------|--------|
-   | FR-001.1 | FEATURE-001-A (FR-001-A.1) | ✅ Covered |
-   | FR-001.2 | FEATURE-001-A (FR-001-A.2) | ✅ Covered |
-   | FR-001.3 | FEATURE-001-A (FR-001-A.3) | ✅ Covered |
-   | FR-001.4 | FEATURE-001-B (FR-001-B.1) | ✅ Covered |
-   | FR-001.5 | FEATURE-001-B (FR-001-B.2) | ✅ Covered |
-   | FR-001.6 | FEATURE-001-C (FR-001-C.1) | ✅ Covered |
-   | FR-001.7 | FEATURE-001-C (FR-001-C.2) | ✅ Covered |
-   | FR-001.8 | FEATURE-001-C (FR-001-C.3) | ✅ Covered |
+   | FR-001.1 | FEATURE-001-A | Covered |
+   | FR-001.2 | FEATURE-001-A | Covered |
+   | FR-001.3 | FEATURE-001-A | Covered |
+   | FR-001.4 | FEATURE-001-B | Covered |
+   | FR-001.5 | FEATURE-001-B | Covered |
+   | FR-001.6 | FEATURE-001-C | Covered |
+   | FR-001.7 | FEATURE-001-C | Covered |
+   | FR-001.8 | FEATURE-001-C | Covered |
 
-3. Result: 100% coverage → Remove FEATURE-001 from:
-   - requirement-details.md (parent section removed)
-   - features.md (via feature-board-management: archive FEATURE-001)
-   - Log: "Parent FEATURE-001 fully covered by A/B/C, removed"
+3. Result: 100% coverage → Remove parent FEATURE-001 from board
+   Log: "Parent FEATURE-001 fully covered by A/B/C, removed"
 
 4. Output:
    parent_features_removed: [FEATURE-001]
@@ -232,12 +213,40 @@ FEATURE-005: Add to Cart Functionality
 ```
 If FR-001.9 (Inventory Display) was NOT covered by any sub-feature:
 
-   | FR-001.9 | — | ❌ Gap |
+   | FR-001.9 | — | Gap |
 
-   Result: Keep FEATURE-001 with note:
+   Result: Keep parent FEATURE-001 with note:
    "Partially split — uncovered: FR-001.9 (Inventory Display)"
    Flag for human review.
 
    parent_features_removed: []
    dedup_gaps: [{feature: FEATURE-001, uncovered: [FR-001.9]}]
+```
+
+---
+
+## Example 6: Epic Grouping Decision — Borderline Case
+
+**Input:** "Build a project management tool with task tracking, team chat, and file storage"
+
+### Step 2: Epic Assessment
+
+```
+Scope signals:
+  - Estimated features: ~12 (4 per domain)
+  - Domain diversity: 3 clearly distinct domains
+  - Dependency clusters:
+    - Task tracking: standalone core
+    - Team chat: references tasks for linking
+    - File storage: referenced by tasks and chat
+  - Team boundaries: chat needs real-time expertise; file storage needs infra
+
+Decision: 3 Epics
+  - EPIC-030: Task Management (foundation — no deps)
+  - EPIC-031: File Storage (depends on EPIC-030 for task attachments)
+  - EPIC-032: Team Chat (depends on EPIC-030 for task linking, EPIC-031 for file sharing)
+
+Rationale: 3 domains × ~4 features each = 12 features total.
+  Each domain is independently testable and could be developed by separate teams.
+  File Storage is a shared service used by both Tasks and Chat.
 ```

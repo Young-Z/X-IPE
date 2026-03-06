@@ -408,26 +408,30 @@ class TestDeliverablesCSSClasses:
 
 
 class TestDeliverablesStageSectionCSS:
-    """TASK-680: Verify workflow.css has deliverables stage section CSS classes."""
+    """TASK-680 + CR-001: Verify workflow.css has deliverables feature section CSS classes."""
 
     def _css_content(self):
         css_path = Path(__file__).parent.parent / "src" / "x_ipe" / "static" / "css" / "workflow.css"
         return css_path.read_text(encoding="utf-8")
 
-    def test_deliverables_stage_section(self):
-        assert ".deliverables-stage-section" in self._css_content()
+    def test_deliverables_feature_section(self):
+        assert ".deliverables-feature-section" in self._css_content()
 
-    def test_deliverables_stage_title(self):
-        assert ".deliverables-stage-title" in self._css_content()
+    def test_deliverables_feature_section_title(self):
+        assert ".deliverables-feature-section-title" in self._css_content()
 
     def test_deliverables_row(self):
         assert ".deliverables-row" in self._css_content()
 
-    def test_deliverables_feature_group(self):
-        assert ".deliverables-feature-group" in self._css_content()
+    def test_deliverables_feature_section_last_child(self):
+        assert ".deliverables-feature-section:last-child" in self._css_content()
 
-    def test_deliverables_feature_label(self):
-        assert ".deliverables-feature-label" in self._css_content()
+    def test_no_old_stage_classes(self):
+        css = self._css_content()
+        assert ".deliverables-stage-section" not in css
+        assert ".deliverables-stage-title" not in css
+        assert ".deliverables-feature-group" not in css
+        assert ".deliverables-feature-label" not in css
 
 
 # ─────────────────────────────────────────────

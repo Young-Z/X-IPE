@@ -9,7 +9,7 @@
 
 ### Project Overview
 
-A Change Request to replace the fragmented `auto_proceed` (boolean) and `require_human_review` (boolean) flags across all 22 task-based skills, the `x-ipe-workflow-task-execution` orchestrator, the `x-ipe-meta-skill-creator` template, and the workflow runtime (`workflow-{name}.json`) with a unified **3-mode `process_preference.auto_proceed`** enum. Introduces a new **`x-ipe-tool-decision-making`** tool skill for autonomous conflict/question resolution, and a shared **`x-ipe-docs/decision_made_by_ai.md`** audit log.
+A Change Request to replace the fragmented `auto_proceed` (boolean) and `require_human_review` (boolean) flags across all 22 task-based skills, the `x-ipe-workflow-task-execution` orchestrator, the `x-ipe-meta-skill-creator` template, and the workflow runtime (`workflow-{name}.json`) with a unified **3-mode `process_preference.auto_proceed`** enum. ~~Introduces a new **`x-ipe-tool-decision-making`** tool skill for autonomous conflict/question resolution, and a shared **`x-ipe-docs/decision_made_by_ai.md`** audit log.~~ *(Note: Decision-making tool and audit log superseded by EPIC-047 DAO.)*
 
 **Source:** [IDEA-031 Refined Summary](x-ipe-docs/ideas/031. CR-Adding Auto Proceed option to workflow mode/refined-idea/idea-summary-v1.md)
 
@@ -41,15 +41,15 @@ A Change Request to replace the fragmented `auto_proceed` (boolean) and `require
 2. **HLR-044.2: 3-Mode Behavior** — The system MUST support three execution modes with the following behavior:
    - `manual`: Agent stops between tasks and stops for within-skill questions (current behavior).
    - `stop_for_question`: Agent auto-proceeds between tasks but stops for within-skill questions/conflicts (human decides).
-   - `auto`: Agent auto-proceeds between tasks and calls `x-ipe-tool-decision-making` for within-skill questions/conflicts (fully autonomous).
+   - `auto`: Agent auto-proceeds between tasks and calls `x-ipe-dao-end-user` (formerly `x-ipe-tool-decision-making`) for within-skill questions/conflicts (fully autonomous).
 
-3. **HLR-044.3: Decision Making Tool Skill** — A new tool skill (`x-ipe-tool-decision-making`) MUST be created that AI agents invoke inline to resolve questions and conflicts autonomously when running in `auto` mode.
+3. **HLR-044.3: Decision Making Tool Skill** — ~~A new tool skill (`x-ipe-tool-decision-making`) MUST be created that AI agents invoke inline to resolve questions and conflicts autonomously when running in `auto` mode.~~ **[RETIRED by EPIC-047]** Superseded by `x-ipe-dao-end-user`. See HLR-047.2, HLR-047.3.
 
-4. **HLR-044.4: Decision Audit Log** — All AI-made decisions MUST be logged to `x-ipe-docs/decision_made_by_ai.md` with structured registry + detail sections. Unresolvable items MUST be logged as `UNRESOLVED` and execution continues.
+4. **HLR-044.4: Decision Audit Log** — ~~All AI-made decisions MUST be logged to `x-ipe-docs/decision_made_by_ai.md` with structured registry + detail sections. Unresolvable items MUST be logged as `UNRESOLVED` and execution continues.~~ **[RETIRED by EPIC-047]** Superseded by semantic DAO logs under `x-ipe-docs/dao/`. See HLR-047.6, HLR-047.7.
 
 5. **HLR-044.5: Workflow Template & Runtime** — `workflow-template.json` MUST include a `global.process_preference.auto_proceed` field (default: `manual`). Runtime `workflow-{name}.json` MUST support this field with runtime updates via UI toggle.
 
-6. **HLR-044.6: Workflow Orchestrator Update** — `x-ipe-workflow-task-execution` MUST route all flow-control decisions through `process_preference.auto_proceed`. All other stopping/gating logic MUST be consolidated. In `auto`/`stop_for_question` modes with multiple `next_actions_suggested`, the orchestrator MUST invoke `x-ipe-tool-decision-making` to choose.
+6. **HLR-044.6: Workflow Orchestrator Update** — `x-ipe-workflow-task-execution` MUST route all flow-control decisions through `process_preference.auto_proceed`. All other stopping/gating logic MUST be consolidated. In `auto`/`stop_for_question` modes with multiple `next_actions_suggested`, the orchestrator MUST invoke `x-ipe-dao-end-user` (formerly `x-ipe-tool-decision-making`) to choose.
 
 7. **HLR-044.7: Skill Creator Template Update** — The `x-ipe-meta-skill-creator` task-based template MUST include `process_preference.auto_proceed` as a standard input parameter for all future skills.
 
@@ -72,35 +72,41 @@ A Change Request to replace the fragmented `auto_proceed` (boolean) and `require
 
 - **FR-044.5:** In `manual` mode, skills MUST stop and ask human at every decision point and at skill completion review (current behavior).
 - **FR-044.6:** In `stop_for_question` mode, skills MUST stop and ask human at every within-skill decision point (same as manual for questions/conflicts).
-- **FR-044.7:** In `auto` mode, skills MUST invoke `x-ipe-tool-decision-making` instead of asking human at every within-skill decision point.
+- **FR-044.7:** In `auto` mode, skills MUST invoke `x-ipe-dao-end-user` (formerly `x-ipe-tool-decision-making`) instead of asking human at every within-skill decision point.
 - **FR-044.8:** In `manual` and `stop_for_question` modes, skills MUST present results to human and wait for approval at skill completion.
 - **FR-044.9:** In `auto` mode, skills MUST skip human review at skill completion.
 - **FR-044.10:** Each skill's human-review/approval step MUST be replaced with a mode-aware conditional block checking `process_preference.auto_proceed`.
 
-#### FR Group 3: Decision Making Tool Skill
+#### FR Group 3: Decision Making Tool Skill — **[RETIRED by EPIC-047]**
 
-- **FR-044.11:** A new tool skill `x-ipe-tool-decision-making` MUST be created at `.github/skills/x-ipe-tool-decision-making/SKILL.md`.
-- **FR-044.12:** The skill MUST accept `decision_context` input with: `calling_skill`, `task_id`, `feature_id` (optional), `workflow_name`, and `problems` array.
-- **FR-044.13:** Each problem in the `problems` array MUST have: `problem_id`, `description`, `type` (question | conflict | routing), `options` (optional list), `related_files` (optional list).
-- **FR-044.14:** The skill MUST execute a 6-step process: (1) Identify & classify problems, (2) Study project docs/tests/code, (3) Optional web search for general topics, (4) Sub-agent critique with constructive feedback, (5) Refine answers/solutions, (6) Record to decision_made_by_ai.md.
-- **FR-044.15:** When a problem cannot be resolved, the skill MUST log it as `UNRESOLVED` in `decision_made_by_ai.md` and return to the calling skill to continue execution.
-- **FR-044.16:** The skill MUST return a structured response with decision per problem: `{ problem_id, status: "resolved|unresolved", decision, rationale }`.
+> ⚠️ FR-044.11 through FR-044.16 are superseded by EPIC-047 FEATURE-047-A (`x-ipe-dao-end-user`).
+> See FR-047.5 to FR-047.15 in [requirement-details-part-19.md](x-ipe-docs/requirements/requirement-details-part-19.md).
 
-#### FR Group 4: Decision Audit Log
+- ~~**FR-044.11:** A new tool skill `x-ipe-tool-decision-making` MUST be created at `.github/skills/x-ipe-tool-decision-making/SKILL.md`.~~
+- ~~**FR-044.12:** The skill MUST accept `decision_context` input with: `calling_skill`, `task_id`, `feature_id` (optional), `workflow_name`, and `problems` array.~~
+- ~~**FR-044.13:** Each problem in the `problems` array MUST have: `problem_id`, `description`, `type` (question | conflict | routing), `options` (optional list), `related_files` (optional list).~~
+- ~~**FR-044.14:** The skill MUST execute a 6-step process: (1) Identify & classify problems, (2) Study project docs/tests/code, (3) Optional web search for general topics, (4) Sub-agent critique with constructive feedback, (5) Refine answers/solutions, (6) Record to decision_made_by_ai.md.~~
+- ~~**FR-044.15:** When a problem cannot be resolved, the skill MUST log it as `UNRESOLVED` in `decision_made_by_ai.md` and return to the calling skill to continue execution.~~
+- ~~**FR-044.16:** The skill MUST return a structured response with decision per problem: `{ problem_id, status: "resolved|unresolved", decision, rationale }`.~~
 
-- **FR-044.17:** A single shared decision log file MUST exist at `x-ipe-docs/decision_made_by_ai.md`.
-- **FR-044.18:** The log MUST have a Decision Registry table with columns: #, Date, Task ID, Feature ID, Skill, Workflow, Problem Type, Status, Section link.
-- **FR-044.19:** Each decision detail section MUST include: Task/Skill/Workflow metadata, Problem description, Type, Context, Analysis (project docs insight, web research, critique feedback), Decision, Rationale, Follow-up Required.
-- **FR-044.20:** Decision IDs (D-001, D-002, ...) MUST be globally unique per project (auto-increment from existing registry).
-- **FR-044.21:** In multi-agent scenarios, each agent MUST append atomically to avoid corruption.
-- **FR-044.22:** A template for `decision_made_by_ai.md` MUST be created in the decision-making skill's templates folder.
+#### FR Group 4: Decision Audit Log — **[RETIRED by EPIC-047]**
+
+> ⚠️ FR-044.17 through FR-044.22 are superseded by EPIC-047 FEATURE-047-B (Semantic DAO Logging).
+> See FR-047.16 to FR-047.20 in [requirement-details-part-19.md](x-ipe-docs/requirements/requirement-details-part-19.md).
+
+- ~~**FR-044.17:** A single shared decision log file MUST exist at `x-ipe-docs/decision_made_by_ai.md`.~~
+- ~~**FR-044.18:** The log MUST have a Decision Registry table with columns: #, Date, Task ID, Feature ID, Skill, Workflow, Problem Type, Status, Section link.~~
+- ~~**FR-044.19:** Each decision detail section MUST include: Task/Skill/Workflow metadata, Problem description, Type, Context, Analysis (project docs insight, web research, critique feedback), Decision, Rationale, Follow-up Required.~~
+- ~~**FR-044.20:** Decision IDs (D-001, D-002, ...) MUST be globally unique per project (auto-increment from existing registry).~~
+- ~~**FR-044.21:** In multi-agent scenarios, each agent MUST append atomically to avoid corruption.~~
+- ~~**FR-044.22:** A template for `decision_made_by_ai.md` MUST be created in the decision-making skill's templates folder.~~
 
 #### FR Group 5: Workflow Orchestrator Updates
 
 - **FR-044.23:** `x-ipe-workflow-task-execution` Step 6 (Task Routing) MUST use 3-mode logic instead of boolean `auto_proceed`:
   - `manual`: STOP, wait for human instruction.
-  - `stop_for_question`: auto-proceed to next task. If multiple `next_actions_suggested`, invoke `x-ipe-tool-decision-making` (type: routing).
-  - `auto`: auto-proceed to next task. If multiple `next_actions_suggested`, invoke `x-ipe-tool-decision-making` (type: routing).
+  - `stop_for_question`: auto-proceed to next task. If multiple `next_actions_suggested`, invoke `x-ipe-dao-end-user` (formerly `x-ipe-tool-decision-making`) (type: routing).
+  - `auto`: auto-proceed to next task. If multiple `next_actions_suggested`, invoke `x-ipe-dao-end-user` (formerly `x-ipe-tool-decision-making`) (type: routing).
 - **FR-044.24:** `x-ipe-workflow-task-execution` MUST remove/consolidate all other flow-control logic — `process_preference.auto_proceed` is the SOLE gate for task continuation.
 - **FR-044.25:** The orchestrator's Input Parameters MUST replace `auto_proceed: true | false` with `process_preference.auto_proceed: "manual | auto | stop_for_question"`.
 - **FR-044.26:** The orchestrator MUST resolve `process_preference.auto_proceed` from: (a) `workflow-{name}.json` global section in workflow-mode, (b) CLI flag in free-mode, (c) default `manual`.
@@ -141,15 +147,15 @@ A Change Request to replace the fragmented `auto_proceed` (boolean) and `require
 ### Constraints
 
 - All 22 task-based skills + orchestrator + template updated in one batch (no phased rollout).
-- `x-ipe-tool-decision-making` is a tool skill, NOT a task-based skill.
-- Web search in decision_making_skill is optional and context-dependent.
+- `x-ipe-tool-decision-making` is a tool skill, NOT a task-based skill. *(Note: Superseded by `x-ipe-dao-end-user` per EPIC-047.)*
+- Web search in decision_making_skill is optional and context-dependent. *(Note: Now applies to DAO.)*
 - Workflow `global.process_preference` is workflow-level, not per-feature.
 
 ### Acceptance Criteria
 
 - [ ] AC-044.1: All 22 task-based skills have `process_preference.auto_proceed` input parameter (enum, default: manual)
 - [ ] AC-044.2: No skill contains `auto_proceed: false` (boolean) or `require_human_review: yes` in input/output
-- [ ] AC-044.3: `x-ipe-tool-decision-making` SKILL.md exists with 6-step process, multi-problem input
+- [ ] AC-044.3: ~~`x-ipe-tool-decision-making` SKILL.md exists with 6-step process, multi-problem input~~ **[RETIRED by EPIC-047]** — replaced by `x-ipe-dao-end-user`
 - [ ] AC-044.4: `decision_made_by_ai.md` template exists with registry + detail format
 - [ ] AC-044.5: `workflow-template.json` has `global.process_preference.auto_proceed: "manual"` field
 - [ ] AC-044.6: New workflow instances inherit `global.process_preference` from template
@@ -160,10 +166,10 @@ A Change Request to replace the fragmented `auto_proceed` (boolean) and `require
 - [ ] AC-044.11: `x-ipe-meta-skill-creator` template includes `process_preference` standard input
 - [ ] AC-044.12: CLI flags `--proceed@auto` and `--proceed@stop-for-question` work in free-mode
 - [ ] AC-044.13: `manual` mode produces identical behavior to current system (backward compatible)
-- [ ] AC-044.14: In `auto` mode, within-skill questions invoke `x-ipe-tool-decision-making` instead of asking human
+- [ ] AC-044.14: In `auto` mode, within-skill questions invoke `x-ipe-dao-end-user` (formerly `x-ipe-tool-decision-making`) instead of asking human
 - [ ] AC-044.15: In `stop_for_question` mode, inter-task flow auto-proceeds, within-skill questions stop for human
 - [ ] AC-044.16: Unresolvable decisions logged as UNRESOLVED in decision_made_by_ai.md, execution continues
-- [ ] AC-044.17: Multiple `next_actions_suggested` handled by decision_making_skill in auto/stop_for_question modes
+- [ ] AC-044.17: Multiple `next_actions_suggested` handled by `x-ipe-dao-end-user` (formerly decision_making_skill) in auto/stop_for_question modes
 - [ ] AC-044.18: All 22 updated SKILL.md files pass skill-creator validation
 
 ### Related Features (Conflict Review)
@@ -193,10 +199,10 @@ No CR impact markers needed — all overlaps are extensions (new fields added al
 
 | Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
 |------------|---------|---------------|---------|-------------------|-------------------|
-| FEATURE-044-A | EPIC-044 | Decision Making Tool Skill | v1.0 | Create `x-ipe-tool-decision-making` SKILL.md with 6-step decision process, multi-problem input, decision log template, and UNRESOLVED handling | None |
+| FEATURE-044-A | EPIC-044 | ~~Decision Making Tool Skill~~ **[RETIRED by EPIC-047]** | v1.0 | ~~Create `x-ipe-tool-decision-making` SKILL.md with 6-step decision process, multi-problem input, decision log template, and UNRESOLVED handling~~ Superseded by `x-ipe-dao-end-user` | None |
 | FEATURE-044-B | EPIC-044 | Skill Creator Template Update | v1.0 | Update `x-ipe-meta-skill-creator` task-based template to replace boolean flags with `process_preference.auto_proceed` enum, add mode-aware conditional blocks, remove `require_human_review` output | FEATURE-044-A |
 | FEATURE-044-C | EPIC-044 | Batch Update All 22 Task-Based Skills | v1.0 | Update all 22 task-based skill SKILL.md files: replace `auto_proceed` boolean + `require_human_review` with `process_preference.auto_proceed` enum in input/output, add mode-aware conditional blocks | FEATURE-044-A, FEATURE-044-B |
-| FEATURE-044-D | EPIC-044 | Workflow Orchestrator Update | v1.0 | Update `x-ipe-workflow-task-execution` with 3-mode routing logic, consolidate all flow-control to single gate, resolve mode from workflow JSON/CLI flags, handle multi-next-step routing via decision skill | FEATURE-044-A |
+| FEATURE-044-D | EPIC-044 | Workflow Orchestrator Update | v1.0 | Update `x-ipe-workflow-task-execution` with 3-mode routing logic, consolidate all flow-control to single gate, resolve mode from workflow JSON/CLI flags, handle multi-next-step routing via `x-ipe-dao-end-user` (formerly decision skill) | FEATURE-044-A |
 | FEATURE-044-E | EPIC-044 | Workflow Template & Backend API | v1.0 | Add `global.process_preference.auto_proceed` to workflow-template.json and runtime workflow JSON, create backend PATCH endpoint for settings update, persist across restarts | FEATURE-044-D |
 | FEATURE-044-F | EPIC-044 | Workflow UI Toggle | v1.0 | Add execution mode dropdown to workflow panel header (manual/auto/stop_for_question), wire to backend PATCH API, reflect current state on load | FEATURE-044-E |
 
@@ -212,11 +218,15 @@ No CR impact markers needed — all overlaps are extensions (new fields added al
 
 ## Feature Details
 
-### FEATURE-044-A: Decision Making Tool Skill
+### FEATURE-044-A: Decision Making Tool Skill — **[RETIRED by EPIC-047]**
+
+> ⚠️ **RETIRED:** This feature is superseded by EPIC-047 FEATURE-047-A (`x-ipe-dao-end-user`).
+> The `x-ipe-tool-decision-making` skill and `decision_made_by_ai.md` log are replaced by DAO.
+> See: [FEATURE-047-A specification](x-ipe-docs/requirements/EPIC-047/FEATURE-047-A/specification.md)
 
 **Version:** v1.0
 **Priority:** P0 (MVP — Foundation)
-**Brief Description:** Create the `x-ipe-tool-decision-making` tool skill that AI agents invoke to autonomously resolve questions, conflicts, and routing decisions. Includes the decision log template (`decision_made_by_ai.md`).
+**Brief Description:** ~~Create the `x-ipe-tool-decision-making` tool skill that AI agents invoke to autonomously resolve questions, conflicts, and routing decisions. Includes the decision log template (`decision_made_by_ai.md`).~~ Superseded by `x-ipe-dao-end-user` human representative skill.
 
 **Acceptance Criteria:**
 - [ ] AC-044-A.1: `x-ipe-tool-decision-making` SKILL.md exists at `.github/skills/x-ipe-tool-decision-making/SKILL.md` with valid tool-skill structure
@@ -257,7 +267,7 @@ No CR impact markers needed — all overlaps are extensions (new fields added al
 - [ ] AC-044-B.3: Task-based template Output Result does NOT contain `require_human_review: yes`
 - [ ] AC-044-B.4: Task-based template Output Result includes `process_preference.auto_proceed: "{from input}"` pass-through
 - [ ] AC-044-B.5: Task-based template Execution Procedure includes a mode-aware conditional block pattern for human-review steps
-- [ ] AC-044-B.6: Mode-aware block pattern shows: `IF auto → skip review / call decision_making_skill`, `IF manual|stop_for_question → ask human`
+- [ ] AC-044-B.6: Mode-aware block pattern shows: `IF auto → skip review / call x-ipe-dao-end-user (formerly decision_making_skill)`, `IF manual|stop_for_question → ask human`
 - [ ] AC-044-B.7: Updated template passes `x-ipe-meta-skill-creator` self-validation
 
 **Dependencies:**
@@ -285,7 +295,7 @@ No CR impact markers needed — all overlaps are extensions (new fields added al
 - [ ] AC-044-C.3: No skill SKILL.md contains `require_human_review: yes` in Output Result YAML
 - [ ] AC-044-C.4: All skill Output Result YAML blocks include `process_preference.auto_proceed: "{from input}"` pass-through
 - [ ] AC-044-C.5: All skills with human-review steps in Execution Procedure include mode-aware conditional blocks
-- [ ] AC-044-C.6: Mode-aware blocks reference `x-ipe-tool-decision-making` for `auto` mode
+- [ ] AC-044-C.6: Mode-aware blocks reference `x-ipe-dao-end-user` (formerly `x-ipe-tool-decision-making`) for `auto` mode
 - [ ] AC-044-C.7: All 22 updated SKILL.md files pass `x-ipe-meta-skill-creator` structural validation
 - [ ] AC-044-C.8: `manual` mode behavior in each skill is identical to pre-update behavior (backward compatible)
 
@@ -313,7 +323,7 @@ No CR impact markers needed — all overlaps are extensions (new fields added al
 **Acceptance Criteria:**
 - [ ] AC-044-D.1: Orchestrator Input Parameters replace `auto_proceed: true | false` with `process_preference.auto_proceed: "manual | auto | stop_for_question"`
 - [ ] AC-044-D.2: Step 6 (Task Routing) uses 3-mode logic: manual=stop, stop_for_question=auto-proceed, auto=auto-proceed
-- [ ] AC-044-D.3: In `auto`/`stop_for_question` modes with multiple `next_actions_suggested`, orchestrator invokes `x-ipe-tool-decision-making` (type: routing)
+- [ ] AC-044-D.3: In `auto`/`stop_for_question` modes with multiple `next_actions_suggested`, orchestrator invokes `x-ipe-dao-end-user` (formerly `x-ipe-tool-decision-making`) (type: routing)
 - [ ] AC-044-D.4: All other flow-control logic (boolean auto_proceed, require_human_review checks) consolidated to single `process_preference.auto_proceed` gate
 - [ ] AC-044-D.5: Mode resolved from: (a) `workflow-{name}.json` global section in workflow-mode, (b) CLI flag in free-mode, (c) default `manual`
 - [ ] AC-044-D.6: CLI flags `--proceed@auto` and `--proceed@stop-for-question` recognized and mapped

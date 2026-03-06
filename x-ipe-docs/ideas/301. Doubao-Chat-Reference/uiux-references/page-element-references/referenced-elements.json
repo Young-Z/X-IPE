@@ -1,0 +1,222 @@
+{
+  "version": "2.0",
+  "source_url": "https://www.doubao.com/chat/",
+  "timestamp": "2026-03-05T14:09:28.065Z",
+  "idea_folder": "301. Doubao-Chat-Reference",
+  "areas": [
+    {
+      "id": "area-1",
+      "snap_selector": "body > div:nth-of-type(1) > div.w-full.h-full > div.flex-1.flex > main.flex-1.min-w-0",
+      "snap_tag": "main",
+      "bounding_box": {"x": -8, "y": 0, "width": 1731, "height": 859},
+      "screenshot": "screenshots/area-1.png",
+      "instruction": "",
+      "key_elements_identified_from_screenshot": [
+        {"element": "sidebar-panel", "purpose": "Navigation panel with brand logo, new chat, AI creation, more options", "examined_from_screenshot": "area-1.png"},
+        {"element": "sidebar-background", "purpose": "Light gray (#f3f4f6) background for the sidebar", "examined_from_screenshot": "full-page.png"},
+        {"element": "brand-logo-avatar", "purpose": "Circular avatar image with brand name", "examined_from_screenshot": "area-1.png"},
+        {"element": "new-chat-active-item", "purpose": "Blue highlighted active sidebar item for new conversation", "examined_from_screenshot": "area-1.png"},
+        {"element": "hero-heading", "purpose": "Large bold greeting text centered in main area", "examined_from_screenshot": "area-1.png"},
+        {"element": "suggestion-chips-grid", "purpose": "3x3 grid of rounded pill suggestion buttons", "examined_from_screenshot": "area-1.png"},
+        {"element": "chat-input-bar", "purpose": "Bottom chat input with rounded corners and subtle shadow", "examined_from_screenshot": "area-1.png"},
+        {"element": "action-toolbar", "purpose": "Row of feature buttons below input", "examined_from_screenshot": "area-1.png"},
+        {"element": "header-bar", "purpose": "Top bar with download and login buttons", "examined_from_screenshot": "area-1.png"},
+        {"element": "login-button", "purpose": "Dark filled button in top-right", "examined_from_screenshot": "area-1.png"},
+        {"element": "main-white-background", "purpose": "Pure white background for the main content area", "examined_from_screenshot": "full-page.png"},
+        {"element": "sidebar-footer", "purpose": "Info link at bottom of sidebar", "examined_from_screenshot": "area-1.png"}
+      ],
+      "discovered_elements": [
+        {
+          "element_name": "sidebar-nav",
+          "purpose_of_the_element": "Left navigation panel containing brand, new chat, AI creation and more menu items",
+          "relationships_to_other_elements": [
+            {"element": "main-content-area", "relationship": "sibling", "mimic_tips": "to_element_itself: width:280px, height:100vh, bg:rgb(243,244,246), padding:12px, position:relative, overflow:hidden, to_relevant_elements: left of main-content-area, full height sidebar"}
+          ],
+          "element_details": {"tag": "nav", "text_content": "", "classes": "left-side-U7A0kz", "styles": {"display": "flex", "position": "relative", "width": "280px", "height": "859px", "background-color": "rgb(243, 244, 246)", "padding": "12px"}, "resources": []}
+        },
+        {
+          "element_name": "brand-logo",
+          "purpose_of_the_element": "Brand identity with circular avatar image and text label",
+          "relationships_to_other_elements": [
+            {"element": "sidebar-nav", "relationship": "child", "mimic_tips": "to_element_itself: display:flex, align-items:center, gap:8px, margin-bottom:16px, font-size:16px, font-weight:600, color:rgba(0,0,0,0.85), to_relevant_elements: top of sidebar, above new-chat-button"}
+          ],
+          "element_details": {"tag": "div", "text_content": "豆包", "classes": "flex items-center gap-8", "styles": {"display": "flex", "align-items": "center", "gap": "8px", "font-size": "16px", "font-weight": "600", "color": "rgba(0, 0, 0, 0.85)"}, "resources": [{"type": "image", "src": "avatar", "usage": "brand avatar"}]}
+        },
+        {
+          "element_name": "brand-avatar-img",
+          "purpose_of_the_element": "36x36 circular avatar image for the brand",
+          "relationships_to_other_elements": [
+            {"element": "brand-logo", "relationship": "child", "mimic_tips": "to_element_itself: width:36px, height:36px, border-radius:50%, to_relevant_elements: left side of brand-logo, before brand name text"}
+          ],
+          "element_details": {"tag": "img", "text_content": "", "classes": "h-36 w-36", "styles": {"width": "36px", "height": "36px", "border-radius": "50%"}, "resources": []}
+        },
+        {
+          "element_name": "new-chat-button",
+          "purpose_of_the_element": "Active navigation item for starting a new conversation, highlighted in blue",
+          "relationships_to_other_elements": [
+            {"element": "sidebar-nav", "relationship": "child", "mimic_tips": "to_element_itself: display:flex, gap:6px, align-items:center, height:38px, padding:0 8px, border-radius:12px, background:rgba(0,87,255,0.06), color:rgb(0,87,255), font-size:14px, font-weight:600, to_relevant_elements: below brand-logo, above ai-creation-item"}
+          ],
+          "element_details": {"tag": "div", "text_content": "新对话", "classes": "flex flex-row gap-6 items-center", "styles": {"display": "flex", "gap": "6px", "align-items": "center", "height": "38px", "border-radius": "12px", "background-color": "rgba(0, 87, 255, 0.06)", "color": "rgb(0, 87, 255)", "font-size": "14px", "font-weight": "600"}, "resources": []}
+        },
+        {
+          "element_name": "ai-creation-item",
+          "purpose_of_the_element": "Navigation item for AI creation feature with Seedance 2.0 badge",
+          "relationships_to_other_elements": [
+            {"element": "new-chat-button", "relationship": "sibling-below", "mimic_tips": "to_element_itself: display:flex, align-items:center, height:38px, padding:0 8px, border-radius:10px, color:rgba(0,0,0,0.85), font-size:14px, font-weight:400, to_relevant_elements: below new-chat-button"}
+          ],
+          "element_details": {"tag": "a", "text_content": "AI 创作", "styles": {"display": "flex", "align-items": "center", "height": "38px", "border-radius": "10px", "color": "rgba(0, 0, 0, 0.85)", "font-size": "14px"}, "resources": []}
+        },
+        {
+          "element_name": "seedance-badge",
+          "purpose_of_the_element": "Blue badge label next to AI creation text",
+          "relationships_to_other_elements": [
+            {"element": "ai-creation-item", "relationship": "child", "mimic_tips": "to_element_itself: font-size:10px, color:rgb(0,101,253), border-radius:4px, margin-left:6px, to_relevant_elements: inline after AI creation text"}
+          ],
+          "element_details": {"tag": "div", "text_content": "Seedance 2.0", "styles": {"font-size": "10px", "color": "rgb(0, 101, 253)", "border-radius": "4px"}, "resources": []}
+        },
+        {
+          "element_name": "more-menu-item",
+          "purpose_of_the_element": "Navigation item for additional sidebar options with expand arrow",
+          "relationships_to_other_elements": [
+            {"element": "ai-creation-item", "relationship": "sibling-below", "mimic_tips": "to_element_itself: display:flex, align-items:center, height:38px, padding:0 8px, border-radius:10px, color:rgba(0,0,0,0.85), font-size:14px, to_relevant_elements: below ai-creation-item"}
+          ],
+          "element_details": {"tag": "div", "text_content": "更多", "styles": {"display": "flex", "align-items": "center", "height": "38px", "border-radius": "10px", "color": "rgba(0, 0, 0, 0.85)", "font-size": "14px"}, "resources": []}
+        },
+        {
+          "element_name": "history-label",
+          "purpose_of_the_element": "Section label for the chat history section",
+          "relationships_to_other_elements": [
+            {"element": "more-menu-item", "relationship": "sibling-below", "mimic_tips": "to_element_itself: font-size:12px, font-weight:600, color:rgba(0,0,0,0.3), position:sticky, top:0, to_relevant_elements: below more-menu-item, section divider"}
+          ],
+          "element_details": {"tag": "div", "text_content": "历史对话", "styles": {"font-size": "12px", "font-weight": "600", "color": "rgba(0, 0, 0, 0.3)"}, "resources": []}
+        },
+        {
+          "element_name": "sidebar-footer-about",
+          "purpose_of_the_element": "Info link at bottom of sidebar",
+          "relationships_to_other_elements": [
+            {"element": "sidebar-nav", "relationship": "child-bottom", "mimic_tips": "to_element_itself: font-size:14px, color:rgba(0,0,0,0.5), padding:4px, border-radius:12px, to_relevant_elements: pinned to bottom of sidebar"}
+          ],
+          "element_details": {"tag": "span", "text_content": "关于豆包", "styles": {"font-size": "14px", "color": "rgba(0, 0, 0, 0.5)"}, "resources": []}
+        },
+        {
+          "element_name": "main-content-area",
+          "purpose_of_the_element": "Primary content area with white background for chat interface",
+          "relationships_to_other_elements": [
+            {"element": "sidebar-nav", "relationship": "sibling-right", "mimic_tips": "to_element_itself: flex:1, min-width:0, background:rgb(255,255,255), display:flex, to_relevant_elements: right of sidebar-nav, takes remaining width"}
+          ],
+          "element_details": {"tag": "main", "text_content": "", "classes": "flex-1 min-w-0 flex", "styles": {"display": "flex", "flex": "1", "min-width": "0", "background-color": "rgb(255, 255, 255)"}, "resources": []}
+        },
+        {
+          "element_name": "header-bar",
+          "purpose_of_the_element": "Top navigation bar with dark mode toggle, download and login buttons",
+          "relationships_to_other_elements": [
+            {"element": "main-content-area", "relationship": "child-top", "mimic_tips": "to_element_itself: display:flex, height:56px, z-index:30, justify-content:space-between, to_relevant_elements: top of main area, full width"}
+          ],
+          "element_details": {"tag": "div", "text_content": "", "classes": "relative z-30 flex-row flex", "styles": {"display": "flex", "height": "56px", "z-index": "30"}, "resources": []}
+        },
+        {
+          "element_name": "download-button",
+          "purpose_of_the_element": "Button to download desktop version with Apple icon",
+          "relationships_to_other_elements": [
+            {"element": "login-button", "relationship": "sibling-left", "mimic_tips": "to_element_itself: width:115px, height:36px, border-radius:12px, background:rgb(255,255,255), color:rgba(0,0,0,0.85), font-size:14px, font-weight:500, to_relevant_elements: left of login-button with 8px gap"}
+          ],
+          "element_details": {"tag": "button", "text_content": "下载电脑版", "styles": {"width": "115px", "height": "36px", "border-radius": "12px", "background-color": "rgb(255, 255, 255)", "color": "rgba(0, 0, 0, 0.85)", "font-size": "14px", "font-weight": "500"}, "resources": []}
+        },
+        {
+          "element_name": "login-button",
+          "purpose_of_the_element": "Dark login button in the top-right corner",
+          "relationships_to_other_elements": [
+            {"element": "header-bar", "relationship": "child-right", "mimic_tips": "to_element_itself: width:73px, height:36px, border-radius:12px, background:rgb(35,38,41), color:rgb(255,255,255), font-size:14px, font-weight:500, to_relevant_elements: rightmost element in header-bar"}
+          ],
+          "element_details": {"tag": "button", "text_content": "登录", "styles": {"width": "73px", "height": "36px", "border-radius": "12px", "background-color": "rgb(35, 38, 41)", "color": "rgb(255, 255, 255)", "font-size": "14px", "font-weight": "500"}, "resources": []}
+        },
+        {
+          "element_name": "hero-heading",
+          "purpose_of_the_element": "Large bold greeting text as the main welcome message",
+          "relationships_to_other_elements": [
+            {"element": "suggestion-chips-grid", "relationship": "above", "mimic_tips": "to_element_itself: font-size:28px, font-weight:600, color:rgb(0,0,0), text-align:center, to_relevant_elements: centered horizontally, 28px above suggestion chips"}
+          ],
+          "element_details": {"tag": "div", "text_content": "你好，我是豆包", "classes": "relative text-dbx-text-primary text-center", "styles": {"font-size": "28px", "font-weight": "600", "color": "rgb(0, 0, 0)", "text-align": "center"}, "resources": []}
+        },
+        {
+          "element_name": "suggestion-chip",
+          "purpose_of_the_element": "Clickable prompt suggestion pill - 9 chips in 3x3 grid layout",
+          "relationships_to_other_elements": [
+            {"element": "hero-heading", "relationship": "below", "mimic_tips": "to_element_itself: height:42px, padding:0 16px, border-radius:12px, background:rgba(0,0,0,0.04), color:rgb(0,0,0), font-size:14px, display:flex, align-items:center, cursor:pointer, to_relevant_elements: 3 per row, 8px gap between chips, rows centered horizontally"}
+          ],
+          "element_details": {"tag": "div", "text_content": "[9 suggestion texts]", "classes": "flex h-[42px] flex-none", "styles": {"height": "42px", "border-radius": "12px", "background-color": "rgba(0, 0, 0, 0.04)", "font-size": "14px"}, "resources": []},
+          "chip_texts": ["写一份亮眼的季度工作总结", "鸡蛋黄颜色越深越有营养吗？", "分享一些冬季主题的小手工创意", "生成独一无二的新年贺图", "生成国风桌面壁纸", "为什么许多经典动画人物都戴着手套？", "为什么一首歌的高潮部分叫做副歌？", "深色和浅色蔬菜营养有区别吗？", "有哪些特别下饭的情景喜剧？"]
+        },
+        {
+          "element_name": "chat-input-wrapper",
+          "purpose_of_the_element": "Rounded container for chat input with subtle multi-layer shadow",
+          "relationships_to_other_elements": [
+            {"element": "main-content-area", "relationship": "child-bottom", "mimic_tips": "to_element_itself: width:800px, height:124px, border-radius:24px, background:rgb(255,255,255), box-shadow:rgba(0,0,0,0.02) 0px 2px 4px, rgba(0,0,0,0.04) 0px 4px 16px, rgba(0,0,0,0.08) 0px 8px 32px, to_relevant_elements: centered horizontally, near bottom of main area"}
+          ],
+          "element_details": {"tag": "div", "text_content": "", "classes": "relative z-0 rounded-dbx-4xl", "styles": {"width": "800px", "height": "124px", "border-radius": "24px", "background-color": "rgb(255, 255, 255)", "box-shadow": "rgba(0,0,0,0.02) 0px 2px 4px 0px, rgba(0,0,0,0.04) 0px 4px 16px 0px, rgba(0,0,0,0.08) 0px 8px 32px 0px"}, "resources": []}
+        },
+        {
+          "element_name": "chat-textarea",
+          "purpose_of_the_element": "Text input area for composing messages",
+          "relationships_to_other_elements": [
+            {"element": "chat-input-wrapper", "relationship": "child", "mimic_tips": "to_element_itself: width:760px, font-size:16px, color:rgba(0,0,0,0.85), background:transparent, border:none, to_relevant_elements: upper portion of chat-input-wrapper"}
+          ],
+          "element_details": {"tag": "textarea", "text_content": "", "placeholder": "发消息或输入\"/\"选择技能", "styles": {"font-size": "16px", "color": "rgba(0, 0, 0, 0.85)"}, "resources": []}
+        },
+        {
+          "element_name": "action-toolbar-row",
+          "purpose_of_the_element": "Row of feature action buttons below text input",
+          "relationships_to_other_elements": [
+            {"element": "chat-textarea", "relationship": "below", "mimic_tips": "to_element_itself: display:flex, gap:4px, height:36px, to_relevant_elements: below textarea inside chat-input-wrapper"}
+          ],
+          "element_details": {"tag": "div", "text_content": "", "styles": {"display": "flex", "height": "36px"}, "resources": []},
+          "toolbar_buttons": [
+            {"text": "快速", "width": 94, "badge": "新"},
+            {"text": "图像生成", "width": 92},
+            {"text": "帮我写作", "width": 92},
+            {"text": "翻译", "width": 65},
+            {"text": "编程", "width": 65},
+            {"text": "深入研究", "width": 92},
+            {"text": "AI 播客", "width": 82},
+            {"text": "更多", "width": 65}
+          ],
+          "button_styles": {"height": "32px", "border-radius": "12px", "font-size": "14px", "color": "rgb(0, 0, 0)", "background": "transparent"}
+        },
+        {
+          "element_name": "section-background",
+          "purpose_of_the_element": "White background inherited from main content area ancestors",
+          "relationships_to_other_elements": [
+            {"element": "main-content-area", "relationship": "ancestor-background", "mimic_tips": "to_element_itself: background-color:rgb(255,255,255), to_relevant_elements: all main area children render on this white bg"}
+          ],
+          "element_details": {"tag": "div", "classes": "w-full h-full flex", "styles": {"background-color": "rgb(255, 255, 255)"}, "resources": []}
+        }
+      ]
+    }
+  ],
+  "colors": [
+    {"id": "color-001", "hex": "#ffffff", "rgb": "255, 255, 255", "hsl": "0, 0%, 100%", "source_selector": "main", "role": "background"},
+    {"id": "color-002", "hex": "#f3f4f6", "rgb": "243, 244, 246", "hsl": "220, 14%, 96%", "source_selector": "nav", "role": "sidebar-background"},
+    {"id": "color-003", "hex": "#0057ff", "rgb": "0, 87, 255", "hsl": "220, 100%, 50%", "source_selector": "new-chat", "role": "primary"},
+    {"id": "color-004", "hex": "#232629", "rgb": "35, 38, 41", "hsl": "210, 8%, 15%", "source_selector": "button.login", "role": "accent"},
+    {"id": "color-005", "hex": "#000000", "rgb": "0, 0, 0", "hsl": "0, 0%, 0%", "source_selector": "heading", "role": "text-primary"},
+    {"id": "color-006", "hex": "#0000000a", "rgb": "0, 0, 0, 0.04", "hsl": "0, 0%, 0%", "source_selector": "chip", "role": "chip-background"},
+    {"id": "color-007", "hex": "#0065fd", "rgb": "0, 101, 253", "hsl": "216, 100%, 50%", "source_selector": "badge", "role": "secondary"}
+  ],
+  "design_tokens": {
+    "typography": {
+      "heading-xl": {"font-size": "28px", "font-weight": "600"},
+      "body": {"font-size": "14px", "font-weight": "400"},
+      "label-sm": {"font-size": "12px", "font-weight": "600"},
+      "label-xs": {"font-size": "10px", "font-weight": "600"}
+    },
+    "border-radius": {
+      "pill": "12px", "card": "24px", "button": "12px", "nav-item": "10px", "circle": "9999px"
+    },
+    "shadows": {
+      "input-wrapper": "rgba(0,0,0,0.02) 0px 2px 4px 0px, rgba(0,0,0,0.04) 0px 4px 16px 0px, rgba(0,0,0,0.08) 0px 8px 32px 0px"
+    },
+    "spacing": {
+      "sidebar-padding": "12px", "chip-gap": "8px", "section-gap": "16px"
+    }
+  }
+}

@@ -71,7 +71,7 @@ const workflowStage = {
             actions: {
                 compose_idea:   { label: 'Compose Idea',   icon: '📝', mandatory: true,  interaction: 'modal' },
                 reference_uiux: { label: 'Reference UIUX', icon: '🎨', mandatory: false, interaction: 'cli', skill: 'x-ipe-tool-uiux-reference' },
-                refine_idea:    { label: 'Refine Idea',    icon: '💡', mandatory: true,  interaction: 'cli', skill: 'x-ipe-task-based-ideation-v2' },
+                refine_idea:    { label: 'Refine Idea',    icon: '💡', mandatory: true,  interaction: 'cli', skill: 'x-ipe-task-based-ideation' },
                 design_mockup:  { label: 'Design Mockup',  icon: '🖼', mandatory: false, interaction: 'cli', skill: 'x-ipe-task-based-idea-mockup' },
             }
         },

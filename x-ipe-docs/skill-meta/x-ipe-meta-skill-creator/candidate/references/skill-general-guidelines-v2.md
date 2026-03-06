@@ -206,9 +206,49 @@ usage_in_skills:
   note: "Model is NOT specified here — each skill defines its own default model"
 ```
 
----
+## Principle 6: 5-Phase Learning Method (博学之，审问之，慎思之，明辨之，笃行之)
 
-# Part 2: Skill Specification
+```yaml
+principle:
+  name: 5-Phase Learning Method
+  origin: "《中庸》第二十章 (Doctrine of the Mean, Chapter 20)"
+  rationale: |
+    Systematic gap analysis revealed that while AI agent skills excel at
+    execution (笃行之, 10/10), they systematically underrepresent inquiry
+    (审问之, 3/10), reflection (慎思之, 3/10), and discernment (明辨之, 1/10).
+    The 5-phase method provides a mandatory structural backbone ensuring
+    every task-based skill considers the full learning cycle.
+
+phases:
+  1_study:    { chinese: "博学之", english: "Study Broadly", mandatory: true }
+  2_inquire:  { chinese: "审问之", english: "Inquire Thoroughly", mandatory: false }
+  3_think:    { chinese: "慎思之", english: "Think Carefully", mandatory: false }
+  4_discern:  { chinese: "明辨之", english: "Discern Clearly", mandatory: false }
+  5_practice: { chinese: "笃行之", english: "Practice Earnestly", mandatory: true }
+
+rules:
+  - "Phase 1 and Phase 5 are NEVER skippable"
+  - "Phases 2-4 may use <skip reason='...' /> when genuinely non-applicable"
+  - "Phase names always bilingual (Chinese + English)"
+  - "Phase order fixed: 1→2→3→4→5, no reordering"
+  - "auto_proceed in Phase 2: agent self-resolves via x-ipe-tool-decision-making (not skipped)"
+
+applies_to: x-ipe-task-based skills only (not tool, meta, or workflow-orchestration)
+
+mapping_guidance:
+  - challenge: "Where does my step fit?"
+    rule: "Match by cognitive activity, not step name"
+    examples:
+      - "Read specification → Phase 1 (Study)"
+      - "Ask user questions → Phase 2 (Inquire)"
+      - "Evaluate trade-offs → Phase 3 (Think)"
+      - "Choose approach → Phase 4 (Discern)"
+      - "Write code / create file → Phase 5 (Practice)"
+  - challenge: "My skill only has 2 steps"
+    rule: "Phase 1 gets context gathering, Phase 5 gets execution. Phases 2-4 skip."
+  - challenge: "auto_proceed mode and Phase 2?"
+    rule: "Agent self-resolves via x-ipe-tool-decision-making. Phase 2 is not skipped."
+```
 
 ## Skill Types
 
@@ -313,6 +353,12 @@ See [2. reference-section-order.md](2.%20reference-section-order.md) for full se
 
 CRITICAL: Only XML elements defined in the template below are allowed. Do NOT introduce custom XML tags or modify the structure.
 
+CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL actions. Do NOT split actions into separate blocks (e.g., `<branch>`). Conditional logic (IF/THEN/ELSE) belongs inline within the `<action>` numbered list.
+
+MANDATORY: For **x-ipe-task-based** skills, use the **phase-based variant** (Pattern 1b below). For other skill types, use the flat step variant (Pattern 1a).
+
+### Pattern 1a: Flat Steps (tool, meta, workflow-orchestration, task-category skills)
+
 ### Template
 
 ```xml
@@ -383,6 +429,12 @@ CRITICAL: Only XML elements defined in the template below are allowed. Do NOT in
 See examples in this folder:
 - [3. example-step-based-code-review.md](3.%20example-step-based-code-review.md) - Code review with multi-component steps
 - [4. example-step-based-feature-implementation.md](4.%20example-step-based-feature-implementation.md) - TDD-based feature implementation
+
+### Pattern 1b: Phase-Based Steps (x-ipe-task-based skills ONLY)
+
+MANDATORY: All x-ipe-task-based skills MUST use this phase-based structure. See Principle 6 for rationale.
+
+See the [x-ipe-task-based.md template](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-task-based.md) for the full phase-based procedure template with `<phase_N>` → `<step_N_M>` hierarchy.
 
 ---
 

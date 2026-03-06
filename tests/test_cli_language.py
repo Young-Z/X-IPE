@@ -206,7 +206,7 @@ class TestCopilotInstructionsExtraction:
         if target.exists():
             content = target.read_text()
             assert '优化创意' in content
-            assert 'x-ipe-task-based-ideation-v2' in content
+            assert 'x-ipe-task-based-ideation' in content
 
     def test_en_does_not_contain_zh_keywords(self, temp_project):
         """English instructions do not contain Chinese keyword mappings."""
