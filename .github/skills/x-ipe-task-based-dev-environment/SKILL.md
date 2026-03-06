@@ -113,10 +113,28 @@ BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
     <action>
       1. Check if user explicitly specified tech stack in request
       2. If not specified, analyze context clues (see references/tech-stack-details.md for detection hints)
-      3. If still unclear, present options:
-         "Which tech stack would you like to use?
-          1. Python Application (default) - Python with uv
-          2. Node.js Application - Node.js with npm/yarn"
+      3. If still unclear:
+         IF process_preference.auto_proceed == "auto":
+           → CALL x-ipe-dao-end-user-representative with:
+               message_context:
+                 source: "ai"
+                 calling_skill: "dev-environment"
+                 task_id: "{task_id}"
+                 feature_id: "N/A"
+                 workflow_name: "N/A"
+                 downstream_context: "Tech stack selection needed for new development environment setup"
+                 messages:
+                   - content: "Which tech stack to use? Options: Python with uv, Node.js with npm/yarn"
+                     preferred_dispositions: ["answer", "clarification"]
+               human_shadow: false
+           → IF disposition is "answer" or "approval" or "instruction": use returned decision (default: Python if unresolvable)
+           → IF disposition is "clarification" or "reframe" or "critique": refine question and re-ask
+           → IF disposition is "pass_through": escalate to human
+         ELSE:
+           → Present options:
+             "Which tech stack would you like to use?
+              1. Python Application (default) - Python with uv
+              2. Node.js Application - Node.js with npm/yarn"
       4. Default to Python if no preference given
     </action>
     <output>tech_stack: python | nodejs</output>
@@ -130,7 +148,10 @@ BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
          b. Run: uv venv
          c. Create src/__init__.py and tests/__init__.py
       2. ELSE (tech_stack = "nodejs"):
-         a. Ask user for npm or yarn preference (default: npm)
+         a. IF process_preference.auto_proceed == "auto":
+            → Default to npm (most common)
+         ELSE:
+            → Ask user for npm or yarn preference (default: npm)
          b. Run: npm init -y OR yarn init -y
          c. Create src/index.js and tests/index.test.js
       3. Verify standard folder structure exists (src/, tests/)

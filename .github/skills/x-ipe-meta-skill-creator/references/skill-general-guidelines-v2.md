@@ -206,9 +206,49 @@ usage_in_skills:
   note: "Model is NOT specified here — each skill defines its own default model"
 ```
 
----
+## Principle 6: 5-Phase Learning Method (博学之，审问之，慎思之，明辨之，笃行之)
 
-# Part 2: Skill Specification
+```yaml
+principle:
+  name: 5-Phase Learning Method
+  origin: "《中庸》第二十章 (Doctrine of the Mean, Chapter 20)"
+  rationale: |
+    Systematic gap analysis revealed that while AI agent skills excel at
+    execution (笃行之, 10/10), they systematically underrepresent inquiry
+    (审问之, 3/10), reflection (慎思之, 3/10), and discernment (明辨之, 1/10).
+    The 5-phase method provides a mandatory structural backbone ensuring
+    every task-based skill considers the full learning cycle.
+
+phases:
+  1_study:    { chinese: "博学之", english: "Study Broadly", mandatory: true }
+  2_inquire:  { chinese: "审问之", english: "Inquire Thoroughly", mandatory: false }
+  3_think:    { chinese: "慎思之", english: "Think Carefully", mandatory: false }
+  4_discern:  { chinese: "明辨之", english: "Discern Clearly", mandatory: false }
+  5_practice: { chinese: "笃行之", english: "Practice Earnestly", mandatory: true }
+
+rules:
+  - "Phase 1 and Phase 5 are NEVER skippable"
+  - "Phases 2-4 may use <skip reason='...' /> when genuinely non-applicable"
+  - "Phase names always bilingual (Chinese + English)"
+  - "Phase order fixed: 1→2→3→4→5, no reordering"
+  - "auto_proceed in Phase 2: agent self-resolves via x-ipe-dao-end-user-representative (not skipped)"
+
+applies_to: x-ipe-task-based skills only (not tool, meta, or workflow-orchestration)
+
+mapping_guidance:
+  - challenge: "Where does my step fit?"
+    rule: "Match by cognitive activity, not step name"
+    examples:
+      - "Read specification → Phase 1 (Study)"
+      - "Ask user questions → Phase 2 (Inquire)"
+      - "Evaluate trade-offs → Phase 3 (Think)"
+      - "Choose approach → Phase 4 (Discern)"
+      - "Write code / create file → Phase 5 (Practice)"
+  - challenge: "My skill only has 2 steps"
+    rule: "Phase 1 gets context gathering, Phase 5 gets execution. Phases 2-4 skip."
+  - challenge: "auto_proceed mode and Phase 2?"
+    rule: "Agent self-resolves via x-ipe-dao-end-user-representative. Phase 2 is not skipped."
+```
 
 ## Skill Types
 
@@ -292,7 +332,7 @@ directory_structure: |
 
 ## Section Order Reference
 
-See [2. reference-section-order.md](.github/skills/x-ipe-meta-skill-creator/references/2. reference-section-order.md) for full section order by skill type.
+See [2. reference-section-order.md](2.%20reference-section-order.md) for full section order by skill type.
 
 ---
 
@@ -313,7 +353,11 @@ See [2. reference-section-order.md](.github/skills/x-ipe-meta-skill-creator/refe
 
 CRITICAL: Only XML elements defined in the template below are allowed. Do NOT introduce custom XML tags or modify the structure.
 
-CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL actions for that step. Do NOT split actions into separate blocks (e.g., `<branch>`). Conditional logic (IF/THEN/ELSE) belongs inside the `<action>` block as inline conditions within the numbered action list.
+CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL actions. Do NOT split actions into separate blocks (e.g., `<branch>`). Conditional logic (IF/THEN/ELSE) belongs inline within the `<action>` numbered list.
+
+MANDATORY: For **x-ipe-task-based** skills, use the **phase-based variant** (Pattern 1b below). For other skill types, use the flat step variant (Pattern 1a).
+
+### Pattern 1a: Flat Steps (tool, meta, workflow-orchestration, task-category skills)
 
 ### Template
 
@@ -383,8 +427,14 @@ CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL action
 ### Examples
 
 See examples in this folder:
-- [3. example-step-based-code-review.md](.github/skills/x-ipe-meta-skill-creator/references/3. example-step-based-code-review.md) - Code review with multi-component steps
-- [4. example-step-based-feature-implementation.md](.github/skills/x-ipe-meta-skill-creator/references/4. example-step-based-feature-implementation.md) - TDD-based feature implementation
+- [3. example-step-based-code-review.md](3.%20example-step-based-code-review.md) - Code review with multi-component steps
+- [4. example-step-based-feature-implementation.md](4.%20example-step-based-feature-implementation.md) - TDD-based feature implementation
+
+### Pattern 1b: Phase-Based Steps (x-ipe-task-based skills ONLY)
+
+MANDATORY: All x-ipe-task-based skills MUST use this phase-based structure. See Principle 6 for rationale.
+
+See the [x-ipe-task-based.md template](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-task-based.md) for the full phase-based procedure template with `<phase_N>` → `<step_N_M>` hierarchy.
 
 ---
 
@@ -471,8 +521,8 @@ CRITICAL: Only XML elements defined in the template below are allowed. Do NOT in
 ### Examples
 
 See examples in this folder:
-- [5. example-function-based-validation.md](.github/skills/x-ipe-meta-skill-creator/references/5. example-function-based-validation.md) - Validation utilities library
-- [6. example-function-based-analysis.md](.github/skills/x-ipe-meta-skill-creator/references/6. example-function-based-analysis.md) - Code analysis toolkit
+- [5. example-function-based-validation.md](5.%20example-function-based-validation.md) - Validation utilities library
+- [6. example-function-based-analysis.md](6.%20example-function-based-analysis.md) - Code analysis toolkit
 
 ---
 
@@ -509,7 +559,7 @@ task_completion_output:
   "{attr_name}": "{value}"
 ```
 
-See [7. example-task-io-code-implementation.md](.github/skills/x-ipe-meta-skill-creator/references/7. example-task-io-code-implementation.md) for complete input/output example.
+See [7. example-task-io-code-implementation.md](7.%20example-task-io-code-implementation.md) for complete input/output example.
 
 ## Structured Summary
 
@@ -523,7 +573,7 @@ Use markdown table for skill outputs that summarize multiple items with consiste
 | {value}   | {value}   | {value}   | {value}   |
 ```
 
-See [8. example-structured-summary.md](.github/skills/x-ipe-meta-skill-creator/references/8. example-structured-summary.md) for examples (Feature, Dependency, Requirement, Test Coverage).
+See [8. example-structured-summary.md](8.%20example-structured-summary.md) for examples (Feature, Dependency, Requirement, Test Coverage).
 
 ## DoR/DoD Pattern
 
@@ -557,7 +607,7 @@ Use XML format for Definition of Ready (DoR) and Definition of Done (DoD) sectio
 </definition_of_done>
 ```
 
-See [9. example-dor-dod.md](.github/skills/x-ipe-meta-skill-creator/references/9. example-dor-dod.md) for examples (Code Implementation, Feature Refinement).
+See [9. example-dor-dod.md](9.%20example-dor-dod.md) for examples (Code Implementation, Feature Refinement).
 
 ## Gate Conditions
 
@@ -593,7 +643,7 @@ gate:
   on_fail: "{action_if_fail}"
 ```
 
-See [10. example-gate-conditions.md](.github/skills/x-ipe-meta-skill-creator/references/10. example-gate-conditions.md) for examples (Quality Gate, Approval Gate, Release Gate).
+See [10. example-gate-conditions.md](10.%20example-gate-conditions.md) for examples (Quality Gate, Approval Gate, Release Gate).
 
 ---
 
@@ -607,76 +657,7 @@ CRITICAL: Use keywords (BLOCKING, CRITICAL, MANDATORY) for importance signals in
 | `CRITICAL:` | High priority, affects correctness |
 | `MANDATORY:` | Required, continue with warning if missing |
 
-See [11. reference-quality-standards.md](.github/skills/x-ipe-meta-skill-creator/references/11. reference-quality-standards.md) for:
+See [11. reference-quality-standards.md](11.%20reference-quality-standards.md) for:
 - Full importance keywords reference
 - Common mistakes (anti-patterns)
 - What NOT to include in skills
-
----
-
-# Part 6: Chrome DevTools MCP Guidelines
-
-## Chrome User Data Directory
-
-MANDATORY: Any skill that uses Chrome DevTools MCP tools (navigate_page, evaluate_script, take_screenshot, take_snapshot, etc.) MUST instruct agents to launch Chrome with a dedicated `--user-data-dir` to avoid conflicts with the user's existing Chrome session.
-
-### Why --user-data-dir?
-
-- Prevents conflicts with user's existing Chrome sessions and profiles
-- Ensures clean, reproducible test/capture environment
-- Avoids browser lock issues when Chrome is already running
-- The `--isolated=true` flag is an alternative that creates temporary dirs with auto-cleanup
-
-### Launch Chrome with Dedicated Profile
-
-```bash
-# macOS
-/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
-  --remote-debugging-port=9222 \
-  --user-data-dir=/tmp/x-ipe-chrome-profile
-
-# Linux
-google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/x-ipe-chrome-profile
-```
-
-### MCP Server Configuration
-
-When configuring chrome-devtools-mcp as an MCP server, use `--user-data-dir` or `--isolated=true`:
-
-```json
-{
-  "mcpServers": {
-    "chrome-devtools": {
-      "command": "npx",
-      "args": [
-        "chrome-devtools-mcp@latest",
-        "--user-data-dir=/tmp/x-ipe-chrome-profile"
-      ]
-    }
-  }
-}
-```
-
-Or use `--isolated=true` for automatic temporary directory with cleanup:
-
-```json
-{
-  "mcpServers": {
-    "chrome-devtools": {
-      "command": "npx",
-      "args": [
-        "chrome-devtools-mcp@latest",
-        "--isolated=true"
-      ]
-    }
-  }
-}
-```
-
-### Skill Authoring Rule
-
-When creating or updating a skill that references Chrome DevTools MCP, include a note in the skill's **Important Notes** or **Definition of Ready** section:
-
-```
-MANDATORY: Chrome must be launched with `--user-data-dir` (dedicated profile) or the chrome-devtools-mcp server must be configured with `--user-data-dir` or `--isolated=true` to avoid conflicts with existing Chrome sessions.
-```

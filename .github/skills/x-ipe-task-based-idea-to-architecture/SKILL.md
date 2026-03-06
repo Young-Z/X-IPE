@@ -127,20 +127,22 @@ input:
 
 ## Execution Flow
 
-| Step | Name | Action | Gate |
-|------|------|--------|------|
-| 1 | Validate Folder | Verify current_idea_folder exists with idea summary | Folder validated |
-| 2 | Load Config | Read architecture section from tools config | Config loaded |
-| 3 | Read Idea Summary | Load latest idea-summary-vN.md | Summary parsed |
-| 4 | Identify Needs | Extract system components, select diagram types | Needs identified |
-| 5 | Create Diagrams | Generate diagrams using enabled tools | Diagrams created |
-| 6 | Save Artifacts | Store in `{current_idea_folder}/architecture/` | Artifacts saved |
-| 7 | Update Summary | Create new idea-summary version with diagram links | Summary updated |
-| 8 | Complete | Request human review and approval | Human approves |
+| Phase | Step | Name | Action | Gate |
+|-------|------|------|--------|------|
+| 1. 博学之 (Study Broadly) | 1.1 | Validate Folder | Verify current_idea_folder exists with idea summary | Folder validated |
+| | 1.2 | Load Config | Read architecture section from tools config | Config loaded |
+| | 1.3 | Read Idea Summary | Load latest idea-summary-vN.md | Summary parsed |
+| 2. 审问之 (Inquire Thoroughly) | 2.1 | Identify Architecture Needs | Extract system components, analyze diagram requirements | Needs identified |
+| 3. 慎思之 (Think Carefully) | — | SKIP | Architecture decisions are at idea level, not implementation | — |
+| 4. 明辨之 (Discern Clearly) | 4.1 | Select Diagram Types | Choose diagram types and prioritize | Types selected |
+| 5. 笃行之 (Practice Earnestly) | 5.1 | Create Diagrams | Generate diagrams using enabled tools | Diagrams created |
+| | 5.2 | Save Artifacts | Store in `{current_idea_folder}/architecture/` | Artifacts saved |
+| | 5.3 | Update Summary | Create new idea-summary version with diagram links | Summary updated |
+| | 5.4 | Complete | Request human review and approval | Human approves |
 
-BLOCKING: Step 1 halts if current_idea_folder is null -- ask human for folder path.
-BLOCKING: Step 5 halts if no tools available AND human declines manual mode.
-BLOCKING: Step 8 requires human approval before proceeding.
+BLOCKING: Step 1.1 halts if current_idea_folder is null -- ask human for folder path.
+BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
+BLOCKING: Step 5.4 requires human approval before proceeding.
 
 ---
 
@@ -148,115 +150,166 @@ BLOCKING: Step 8 requires human approval before proceeding.
 
 ```xml
 <procedure name="idea-to-architecture">
+  <!-- CRITICAL: Both DoR/DoD check elements below are MANDATORY -->
   <execute_dor_checks_before_starting/>
   <schedule_dod_checks_with_sub_agent_before_starting/>
 
-  <step_1>
-    <name>Validate Current Idea Folder</name>
-    <action>
-      1. IF current_idea_folder is null:
-         - List folders under x-ipe-docs/ideas/
-         - Ask human to select a folder
-         - Set current_idea_folder = selected folder
-      2. Verify folder exists on disk
-      3. Verify idea-summary-vN.md exists in folder
-    </action>
-    <constraints>
-      - BLOCKING: Stop if folder not found
-      - BLOCKING: Stop if no idea summary -- run Ideation first
-    </constraints>
-    <output>Validated current_idea_folder path</output>
-  </step_1>
+  <phase_1 name="博学之 — Study Broadly">
 
-  <step_2>
-    <name>Load Architecture Tool Configuration</name>
-    <action>
-      1. Read x-ipe-docs/config/tools.json
-      2. Extract stages.ideation.architecture section
-      3. Identify enabled tools (value = true)
-      4. Load extra_instructions (human value > config _extra_instruction > null)
-    </action>
+    <step_1_1>
+      <name>Validate Current Idea Folder</name>
+      <action>
+        1. IF current_idea_folder is null:
+           - List folders under x-ipe-docs/ideas/
+           - IF process_preference.auto_proceed == "auto":
+              → CALL x-ipe-dao-end-user-representative with:
+                  message_context:
+                    source: "ai"
+                    calling_skill: "idea-to-architecture"
+                    task_id: "{task_id}"
+                    feature_id: "N/A"
+                    workflow_name: "N/A"
+                    downstream_context: "Selecting which idea folder to generate architecture diagrams for"
+                    messages:
+                      - content: "Which idea folder for architecture? Options: {available folders}"
+                        preferred_dispositions: ["answer", "clarification"]
+                  human_shadow: false
+              → IF disposition is "answer" or "approval" or "instruction": use returned decision
+              → IF disposition is "clarification" or "reframe" or "critique": refine question and re-ask
+              → IF disposition is "pass_through": escalate to human
+           - ELSE:
+             → Ask human to select a folder
+           - Set current_idea_folder = selected folder
+        2. Verify folder exists on disk
+        3. Verify idea-summary-vN.md exists in folder
+      </action>
+      <constraints>
+        - BLOCKING: Stop if folder not found
+        - BLOCKING: Stop if no idea summary -- run Ideation first
+      </constraints>
+      <output>Validated current_idea_folder path</output>
+    </step_1_1>
 
-    <output>List of enabled architecture tools, extra_instructions value</output>
-  </step_2>
+    <step_1_2>
+      <name>Load Architecture Tool Configuration</name>
+      <action>
+        1. Read x-ipe-docs/config/tools.json
+        2. Extract stages.ideation.architecture section
+        3. Identify enabled tools (value = true)
+        4. Load extra_instructions (human value > config _extra_instruction > null)
+      </action>
+      <output>List of enabled architecture tools, extra_instructions value</output>
+    </step_1_2>
 
-  <step_3>
-    <name>Read Idea Summary</name>
-    <action>
-      1. Find latest idea-summary-vN.md (highest version number)
-      2. Parse summary content
-      3. Extract: overview, key features, technical mentions,
-         integration requirements, data flow
-    </action>
-    <output>Parsed idea summary with architecture-relevant sections</output>
-  </step_3>
+    <step_1_3>
+      <name>Read Idea Summary</name>
+      <action>
+        1. Find latest idea-summary-vN.md (highest version number)
+        2. Parse summary content
+        3. Extract: overview, key features, technical mentions,
+           integration requirements, data flow
+      </action>
+      <output>Parsed idea summary with architecture-relevant sections</output>
+    </step_1_3>
 
-  <step_4>
-    <name>Identify Architecture Needs</name>
-    <action>
-      1. Analyze: multiple system components? --> System Architecture (C4)
-      2. Analyze: data processing or flow? --> Data Flow Diagram
-      3. Analyze: user interactions with multiple systems? --> Sequence Diagram
-      4. Analyze: integrations or external services? --> Integration Architecture
-      5. Prioritize diagram list by relevance
-      6. Apply extra_instructions to component identification if set
-    </action>
-    <output>Prioritized list of diagrams to create</output>
-  </step_4>
+  </phase_1>
 
-  <step_5>
-    <name>Create Architecture Diagrams</name>
-    <action>
-      1. For each prioritized diagram type:
-         - IF mermaid enabled: generate C4/flowchart/sequence in markdown
-         - IF excalidraw enabled: create .excalidraw diagram
-         - IF no tools: create architecture-description.md
-      2. Use templates from references/architecture-patterns.md
-    </action>
-    <constraints>
-      - CRITICAL: Focus on system-level components, not implementation details
-      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
-      - BLOCKING: Stop if no tools AND human declines manual mode
-    </constraints>
-    <output>Generated diagram files</output>
-  </step_5>
+  <phase_2 name="审问之 — Inquire Thoroughly">
 
-  <step_6>
-    <name>Save Artifacts</name>
-    <action>
-      1. Create {current_idea_folder}/architecture/ directory if needed
-      2. Save diagrams as {diagram-type}-v{version}.{ext}
-         (e.g., system-architecture-v1.md)
-      3. Record list of saved artifact paths
-    </action>
-    <output>List of saved artifact paths</output>
-  </step_6>
+    <step_2_1>
+      <name>Identify Architecture Needs</name>
+      <action>
+        1. Analyze: multiple system components? --> System Architecture (C4)
+        2. Analyze: data processing or flow? --> Data Flow Diagram
+        3. Analyze: user interactions with multiple systems? --> Sequence Diagram
+        4. Analyze: integrations or external services? --> Integration Architecture
+        5. Apply extra_instructions to component identification if set
+      </action>
+      <output>List of architecture needs with analysis rationale</output>
+    </step_2_1>
 
-  <step_7>
-    <name>Update Idea Summary</name>
-    <action>
-      1. DO NOT modify existing idea-summary files
-      2. Create new version: idea-summary-v{N+1}.md
-      3. Add architecture diagram references table
-      4. Use template from references/architecture-patterns.md
-    </action>
-    <output>New idea summary version with diagram links</output>
-  </step_7>
+  </phase_2>
 
-  <step_8>
-    <name>Complete</name>
-    <action>
-      1. Present diagrams to human for review
-      2. Wait for human approval
-      3. Compile output result
-    </action>
-    <success_criteria>
-      - All diagrams created and saved
-      - New idea summary version references all diagrams
-      - Human has approved the architecture
-    </success_criteria>
-    <output>Completed task output</output>
-  </step_8>
+  <phase_3 name="慎思之 — Think Carefully">
+    <skip reason="Architecture decisions are at idea level, not implementation level. No trade-offs or risk assessment needed — diagram generation is straightforward given identified needs." />
+  </phase_3>
+
+  <phase_4 name="明辨之 — Discern Clearly">
+
+    <step_4_1>
+      <name>Select Diagram Types</name>
+      <action>
+        1. Based on architecture needs from step 2.1, select diagram types to create
+        2. Prioritize diagram list by relevance to the idea
+        3. Match diagram types to available tools (mermaid, excalidraw, manual)
+        4. Document selection rationale
+      </action>
+      <output>Prioritized list of diagrams to create with tool assignments</output>
+    </step_4_1>
+
+  </phase_4>
+
+  <phase_5 name="笃行之 — Practice Earnestly">
+
+    <step_5_1>
+      <name>Create Architecture Diagrams</name>
+      <action>
+        1. For each prioritized diagram type:
+           - IF mermaid enabled: generate C4/flowchart/sequence in markdown
+           - IF excalidraw enabled: create .excalidraw diagram
+           - IF no tools: create architecture-description.md
+        2. Use templates from references/architecture-patterns.md
+      </action>
+      <constraints>
+        - CRITICAL: Focus on system-level components, not implementation details
+        - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
+        - BLOCKING: Stop if no tools AND human declines manual mode
+      </constraints>
+      <output>Generated diagram files</output>
+    </step_5_1>
+
+    <step_5_2>
+      <name>Save Artifacts</name>
+      <action>
+        1. Create {current_idea_folder}/architecture/ directory if needed
+        2. Save diagrams as {diagram-type}-v{version}.{ext}
+           (e.g., system-architecture-v1.md)
+        3. Record list of saved artifact paths
+      </action>
+      <output>List of saved artifact paths</output>
+    </step_5_2>
+
+    <step_5_3>
+      <name>Update Idea Summary</name>
+      <action>
+        1. DO NOT modify existing idea-summary files
+        2. Create new version: idea-summary-v{N+1}.md
+        3. Add architecture diagram references table
+        4. Use template from references/architecture-patterns.md
+      </action>
+      <output>New idea summary version with diagram links</output>
+    </step_5_3>
+
+    <step_5_4>
+      <name>Complete</name>
+      <action>
+        1. Review & Decision Gate:
+           IF process_preference.auto_proceed == "auto":
+             → Skip human review (auto-proceed mode)
+           ELSE:
+             → Present diagrams to human for review
+             → Wait for human approval
+             → IF human rejects → revise
+        2. Compile output result
+      </action>
+      <success_criteria>
+        - All diagrams created and saved
+        - New idea summary version references all diagrams
+      </success_criteria>
+      <output>Completed task output</output>
+    </step_5_4>
+
+  </phase_5>
 
 </procedure>
 ```

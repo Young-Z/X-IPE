@@ -179,9 +179,27 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
       5. Flag any unmet criteria
     </action>
     <constraints>
-      - BLOCKING: If ANY criterion is not met, STOP and report to human
+      - BLOCKING: If ANY criterion is not met:
+        IF process_preference.auto_proceed == "auto":
+          → CALL x-ipe-dao-end-user-representative with:
+              message_context:
+                source: "ai"
+                calling_skill: "feature-closing"
+                task_id: "{task_id}"
+                feature_id: "{feature_id}"
+                workflow_name: "{workflow_name}"
+                downstream_context: "Acceptance criteria verification found unmet criterion during feature closing"
+                messages:
+                  - content: "Unmet criterion: {criterion}. Options: address gap, modify criterion, defer"
+                    preferred_dispositions: ["answer", "clarification"]
+              human_shadow: false
+          → IF disposition is "answer" or "approval" or "instruction": apply returned decision
+          → IF disposition is "clarification" or "reframe" or "critique": re-evaluate criterion
+          → IF disposition is "pass_through": escalate to human
+        ELSE:
+          → STOP and report to human
       - BLOCKING: Do NOT proceed to Step 2 until all criteria are verified
-      - CRITICAL: Present unmet criteria with options: (a) address gap, (b) modify criterion, (c) defer
+      - CRITICAL (manual/stop_for_question): Present unmet criteria with options: (a) address gap, (b) modify criterion, (c) defer
     </constraints>
     <output>Acceptance criteria verification table with status and evidence</output>
   </step_1>
@@ -299,7 +317,13 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
          - IF refactoring suggestions exist: list top suggestions with priority
          - IF overall_quality_score < 7: flag "Refactoring recommended" with summary of key improvements
          - IF overall_quality_score >= 7: note "Code quality is acceptable, optional improvements listed"
-      5. Present summary to human with clear recommendation on whether refactoring is needed
+      5. Review & Decision Gate:
+         IF process_preference.auto_proceed == "auto":
+           → Skip human review (auto-proceed mode)
+           → Log refactoring recommendation to x-ipe-docs/dao/ semantic log via x-ipe-dao-end-user-representative if refactoring_score < 7
+         ELSE:
+           → Present summary to human with clear recommendation on whether refactoring is needed
+           → Wait for human acknowledgment
     </action>
     <output>Feature completion summary with refactoring recommendation delivered to human</output>
   </step_6>

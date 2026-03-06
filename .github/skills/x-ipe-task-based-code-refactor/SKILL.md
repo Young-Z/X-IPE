@@ -168,7 +168,7 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
          - Suggested refactoring goals and principles
       4. Mode-aware gate:
          IF process_preference.auto_proceed == "auto":
-           Proceed automatically. If concerns found, use x-ipe-tool-decision-making.
+           Proceed automatically. If concerns found, use x-ipe-dao-end-user-representative.
          ELSE:
            WAIT for human approval of analysis results.
     </action>
@@ -209,10 +209,28 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
          - YAGNI: Remove unused code
       3. CREATE refactoring_plan with phases ordered by goal priority
       4. VALIDATE plan against constraints from refactoring_principle
-      5. PRESENT plan to human, WAIT for approval
+      5. Mode-aware gate:
+         IF process_preference.auto_proceed == "auto":
+            → CALL x-ipe-dao-end-user-representative with:
+                message_context:
+                  source: "ai"
+                  calling_skill: "code-refactor"
+                  task_id: "{task_id}"
+                  feature_id: "N/A"
+                  workflow_name: "N/A"
+                  downstream_context: "Evaluating whether the generated refactoring plan should be approved or revised"
+                  messages:
+                    - content: "Approve refactoring plan"
+                      preferred_dispositions: ["answer", "clarification"]
+                human_shadow: false
+            → IF disposition is "answer" or "approval" or "instruction": use approval decision
+            → IF disposition is "clarification" or "reframe" or "critique": revise plan
+            → IF disposition is "pass_through": escalate to human
+         ELSE:
+           → PRESENT plan to human, WAIT for approval
     </action>
     <constraints>
-      - BLOCKING: Do not proceed to Step 4 without human approval of plan
+      - BLOCKING (manual/stop_for_question): Do not proceed to Step 4 without human approval of plan
     </constraints>
     <output>Approved refactoring_plan with phases and principle mappings</output>
   </step_3>
@@ -262,7 +280,7 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
            - deliverables: {"refactor-report": "{path}"}
       10. Mode-aware review gate:
           IF process_preference.auto_proceed == "auto":
-            Skip human review. Resolve open questions via x-ipe-tool-decision-making.
+            Skip human review. Resolve open questions via x-ipe-dao-end-user-representative.
           ELSE:
             PRESENT summary to human, WAIT for approval.
       11. CREATE final commit

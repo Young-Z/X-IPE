@@ -6,7 +6,12 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-778 | Feature Closing | FEATURE-047-A: Close feature after CR-001 contract redesign — verify ACs, code-to-docs review, refactoring analysis, commit to main | Spark ⚡ | 🔄 in_progress | 03-06-2026 12:22:00 | - | User Manual |
+| TASK-781 | Feature Breakdown | EPIC-048: Break down tool-implementation alignment into 4 features — A: contract extension (MVP), B: consultation (tech-design + refactoring-analysis), C: bug-fix delegation, D: code-refactor delegation | Zephyr 🌬️ | ✅ done | 03-06-2026 13:10:00 | [requirement-details-part-20.md](x-ipe-docs/requirements/requirement-details-part-20.md), [features.md](x-ipe-docs/planning/features.md) | Feature Refinement |
+| TASK-780 | Change Request | CR: Align technical-design, bug-fix, code-refactor, refactoring-analysis skills with tool-implementation-* architecture from EPIC-045 — new EPIC-048 created with 5 HLRs covering consultation, delegation, and tool contract extension | Zephyr 🌬️ | ✅ done | 03-06-2026 12:55:00 | [requirement-details-part-20.md](x-ipe-docs/requirements/requirement-details-part-20.md) | Feature Breakdown |
+| TASK-781 | Code Implementation | FEATURE-047-B: Implement DAO logging steps, migrate 14 call sites, delete old decision-making skill | Spark ⚡ | 🔄 in_progress | 03-06-2026 13:07:00 | - | Feature Closing |
+| TASK-780 | Technical Design | FEATURE-047-B: Design semantic DAO logging structure + batch migration of 14 call sites from x-ipe-tool-decision-making to x-ipe-dao-end-user-representative | Spark ⚡ | ✅ done | 03-06-2026 13:07:00 | technical-design.md | Test Generation |
+| TASK-779 | Feature Refinement | FEATURE-047-B: Refine specification for Semantic DAO Logging & Workflow Migration — logging structure, migration plan, preserved auto_proceed behavior | Spark ⚡ | ✅ done | 03-06-2026 12:50:00 | specification.md (21 ACs, 5 USs, 14 FRs) | Technical Design |
+| TASK-778 | Feature Closing | FEATURE-047-A: Close feature after CR-001 contract redesign — verify ACs, code-to-docs review, refactoring analysis, commit to main | Spark ⚡ | ✅ done | 03-06-2026 12:22:00 | 03-06-2026 12:28:00 | User Manual |
 | TASK-777 | Code Implementation | FEATURE-047-A: Verify implementation matches spec v2.1 + tech design v2.0 after CR-001 contract redesign (message_context, human_shadow, represent_human_intent) | Spark ⚡ | ✅ done | 03-06-2026 12:12:00 | 23/23 ACs verified; Future Extensions section added to template + end-user skill | Feature Acceptance Test |
 | TASK-776 | Change Request | FEATURE-047-A CR-001 closure: Sync candidate folder with production (SKILL.md, examples.md, disposition-guidelines.md), close CR-001, final validation | Spark ⚡ | ✅ done | 03-06-2026 12:10:00 | CR-001.md (Closed) | - |
 | TASK-777 | Conflict Resolution | Apply requirement-gathering conflict resolution to EPIC-044 vs EPIC-047: mark superseded FEATURE-044-A docs as retired, update minor reference conflicts inline in requirement-details-part-16.md | Ember 🔥 | ✅ done | 03-06-2026 12:19:00 | requirement-details-part-16.md, FEATURE-044-A/specification.md, FEATURE-044-A/technical-design.md, features.md | - |
@@ -365,7 +370,7 @@
 
 ## Quick Stats
 
-- **Total Active:** 62
+- **Total Active:** 64
 - **In Progress:** 3
 - **Pending:** 1
 - **Deferred:** 0

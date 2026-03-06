@@ -211,9 +211,53 @@ input:
     - BLOCKING: The skill MUST choose exactly one supported disposition
     - CRITICAL: The skill MUST NOT claim human approval occurred; `approval` is approval-like guidance, not a real human authorization record
     - CRITICAL: `pass_through` should preserve the user's original intent while routing the answer to the downstream agent
-    - CRITICAL: The skill MUST NOT write semantic logs in this version
   </constraints>
   <output>operation_output with a single bounded disposition result</output>
+</operation>
+
+<operation name="record_semantic_log">
+  <name>Step 8: 录 (Record) — Write Semantic Log</name>
+  <description>After committing a disposition, record the interaction in a semantic log file under x-ipe-docs/dao/.</description>
+  <steps>
+    1. DETERMINE semantic_task_type from calling_skill:
+       - Extract the skill category (e.g., "bug-fix" → "bug_fix", "feature-refinement" → "feature_refinement")
+       - IF calling_skill is unclear, derive from downstream_context
+    2. CHECK if `x-ipe-docs/dao/` folder exists:
+       - IF NOT: create it
+    3. DETERMINE target log file:
+       - Scan existing files in `x-ipe-docs/dao/` matching `decisions_made_*.md`
+       - IF a file with matching semantic_task_type exists → append to it
+       - ELSE → create new file from dao-log-template.md as `decisions_made_{semantic_task_type}.md`
+    4. DETERMINE next Entry ID:
+       - Read registry table in target file
+       - Next ID = DAO-{N+1} where N is the count of existing entries (start at DAO-001)
+    5. APPEND to registry table:
+       | {Entry ID} | {timestamp} | {task_id} | {calling_skill} | {disposition} | {confidence} | {one-line summary} |
+    6. APPEND detail section after the registry table:
+       ## {Entry ID}
+       - **Timestamp:** {ISO 8601}
+       - **Task ID:** {task_id}
+       - **Feature ID:** {feature_id or N/A}
+       - **Workflow:** {workflow_name or N/A}
+       - **Calling Skill:** {calling_skill}
+       - **Source:** {source}
+       - **Disposition:** {disposition}
+       - **Confidence:** {confidence}
+       ### Message
+       > {original message content}
+       ### Guidance Returned
+       > {DAO response content}
+       ### Rationale
+       > {rationale_summary}
+       ### Follow-up
+       > {follow-up or "None"}
+  </steps>
+  <constraints>
+    - MANDATORY: Every DAO interaction MUST produce a log entry — no silent decisions
+    - Log entries are append-only — never edit or delete previous entries
+    - Semantic task type naming must be human-readable, lowercase with underscores
+  </constraints>
+  <output>Log entry written to x-ipe-docs/dao/decisions_made_{semantic_task_type}.md</output>
 </operation>
 ```
 

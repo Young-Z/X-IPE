@@ -121,20 +121,17 @@ input:
 
 ## Execution Flow
 
-| Step | Name | Action | Gate |
-|------|------|--------|------|
-| 1 | Understand | Parse what, who, why from user request (optional: web research) | Initial understanding |
-| 2 | Clarify | Ask clarifying questions (3-5 at a time) | All questions answered |
-| 3 | Conflict Review | Scan existing requirements for conflicts/overlaps, ask human to decide | Human decision on each conflict |
-| 4 | Update Impacted | Mark impacted features with CR notes in requirement-details files | Impacted features marked |
-| 5 | Check File | Check if requirement-details needs splitting (>500 lines) | File ready |
-| 6 | Document | Create/update `requirement-details.md` (or current part) | Document created |
-| 7 | Complete | Verify DoD, request human review | Human review |
+| Phase | Steps | Action | Gate |
+|-------|-------|--------|------|
+| 1. 博学之 — Study Broadly | 1.1 Understand User Request, 1.2 Domain & Context Research | Parse what/who/why, research domain standards and competitors | Domain context established |
+| 2. 审问之 — Inquire Thoroughly | 2.1 Ask Clarifying Questions, 2.2 Conflict and Overlap Review | Resolve ambiguities, scan existing requirements for conflicts | All questions answered, conflicts decided |
+| 3. 慎思之 — Think Carefully | 3.1 Feasibility & Risk Reflection | Assess technical feasibility, identify risks and constraints | Risks documented |
+| 4. 明辨之 — Discern Clearly | 4.1 Update Impacted Features, 4.2 Scope Decision | Mark impacted features, finalize in/out scope boundaries | Scope decided |
+| 5. 笃行之 — Practice Earnestly | 5.1 Create Requirement Document, 5.2 Complete & Verify | Create/update requirement-details, verify DoD | Document created |
 
-BLOCKING: Continue asking in Step 2 until ALL ambiguities are resolved.
-BLOCKING: MUST split file in Step 5 if current part exceeds 500 lines before adding new content.
-BLOCKING: Human MUST decide on each conflict in Step 3 before proceeding.
-BLOCKING: Human MUST approve requirements before proceeding to Feature Breakdown.
+BLOCKING: Continue asking in Phase 2 until ALL ambiguities are resolved.
+BLOCKING: Human MUST decide on each conflict in step 2.2 before proceeding.
+BLOCKING (manual/stop_for_question): Human MUST approve requirements before proceeding to Feature Breakdown. Skipped in auto mode.
 
 ---
 
@@ -146,163 +143,208 @@ BLOCKING: Human MUST approve requirements before proceeding to Feature Breakdown
   <execute_dor_checks_before_starting/>
   <schedule_dod_checks_with_sub_agent_before_starting/>
 
-  <step_1>
-    <name>Understand User Request</name>
-    <action>
-      0. Resolve extra_context_reference inputs:
-         - FOR EACH ref in [refined-idea, mockup-html]:
-           IF workflow mode AND extra_context_reference.{ref} is a file path:
-             READ the file at that path
-           ELIF extra_context_reference.{ref} is "auto-detect":
-             Use existing discovery logic
-           ELIF extra_context_reference.{ref} is "N/A":
-             Skip this context input
-           ELSE (free-mode / absent):
-             Use existing behavior
-      1. Identify WHAT is being requested
-      2. Identify WHO will use the feature
-      3. Identify WHY this is needed (business value)
-      4. Note any constraints mentioned
-      5. IF domain knowledge is insufficient: use web search to research industry standards, competitor features, domain terminology, and regulatory requirements
-    </action>
-    <constraints>
-      - CRITICAL: Do not skip scope identification
-    </constraints>
-    <output>Initial understanding summary</output>
-  </step_1>
+  <phase_1 name="博学之 — Study Broadly">
 
-  <step_2>
-    <name>Ask Clarifying Questions</name>
-    <action>
-      1. Identify ambiguities across: Scope, Users, Edge Cases, Priorities, Constraints
-      2. Ask questions in batches of 3-5
-      3. Wait for human response before next batch
-      4. Document answers immediately
-      5. Repeat until all ambiguities are resolved
-    </action>
-    <constraints>
-      - BLOCKING: Do not proceed until ALL ambiguities are resolved
-      - BLOCKING: Do not make assumptions - always ask
-      - CRITICAL: Unless Human enforces, do not skip any clarifications
-    </constraints>
-    <output>Complete set of clarified requirements</output>
-  </step_2>
+    <step_1_1>
+      <name>Understand User Request</name>
+      <action>
+        0. Resolve extra_context_reference inputs:
+           - FOR EACH ref in [refined-idea, mockup-html]:
+             IF workflow mode AND extra_context_reference.{ref} is a file path:
+               READ the file at that path
+             ELIF extra_context_reference.{ref} is "auto-detect":
+               Use existing discovery logic
+             ELIF extra_context_reference.{ref} is "N/A":
+               Skip this context input
+             ELSE (free-mode / absent):
+               Use existing behavior
+        1. Identify WHAT is being requested
+        2. Identify WHO will use the feature
+        3. Identify WHY this is needed (business value)
+        4. Note any constraints mentioned
+      </action>
+      <constraints>
+        - CRITICAL: Do not skip scope identification
+      </constraints>
+      <output>Initial understanding summary</output>
+    </step_1_1>
 
-  <step_3>
-    <name>Conflict and Overlap Review</name>
-    <action>
-      1. Read requirement-details-index.md to get list of all requirement-details parts
-      2. Scan each requirement-details file, extracting existing feature IDs and their scope (high-level requirements, FRs, constraints)
-      3. Compare new requirements (from Steps 1-2) against each existing feature:
-         - Functional overlap: new FRs that duplicate or contradict existing FRs
-         - Scope overlap: new feature covers same user scenarios as existing feature
-         - Dependency conflict: new feature changes behavior that existing feature depends on
-      4. IF no conflicts/overlaps found:
-         - Report "No conflicts found with existing requirements"
-         - Proceed to Step 5 (skip Step 4)
-      5. IF conflicts/overlaps found, for EACH conflict:
-         - Present a conflict summary table to human:
-           | Aspect | New Requirement | Existing Feature | Overlap Type |
-           |--------|----------------|-----------------|--------------|
-         - Provide recommendation based on these principles:
-           a. Single Responsibility: If the new requirement extends the SAME responsibility → recommend CR on existing feature
-           b. Cohesion: If the new requirement is functionally cohesive with existing feature (same domain, same users, same data) → recommend CR
-           c. Independence: If the new requirement can stand alone with its own lifecycle → recommend new feature
-           d. Minimal coupling: If merging would create tight coupling between unrelated concerns → recommend new feature
-         - Ask human: "Should this be handled as a Change Request (CR) on {FEATURE-XXX}, or as a new standalone feature?"
-      6. Record human decisions for each conflict
-    </action>
-    <constraints>
-      - BLOCKING: Do not proceed until human has decided on EVERY conflict
-      - CRITICAL: Always provide a recommendation with reasoning, do not just ask
-      - CRITICAL: Scan ALL requirement-details parts, not just the latest
-    </constraints>
-    <output>Conflict review result: list of conflicts with human decisions (CR | new feature)</output>
-  </step_3>
+    <step_1_2>
+      <name>Domain & Context Research</name>
+      <action>
+        1. IF domain knowledge is insufficient: use web search to research industry standards, competitor features, domain terminology, and regulatory requirements
+        2. Research best practices for similar features in the domain
+        3. Check for compliance requirements (GDPR, PCI-DSS, HIPAA if applicable)
+        4. Document key domain concepts and terminology discovered
+      </action>
+      <constraints>
+        - CRITICAL: Research before questioning — informed questions lead to better requirements
+      </constraints>
+      <output>Domain context summary with key standards and terminology</output>
+    </step_1_2>
 
-  <step_4>
-    <name>Update Impacted Features</name>
-    <requires>Conflict review result from Step 3</requires>
-    <action>
-      1. IF no conflicts were found in Step 3: skip this step entirely
-      2. For each conflict where human decided "CR on existing feature":
-         - Locate the feature in its requirement-details part file
-         - Add a CR impact marker at the end of that feature's section:
-           ```
-           > **⚠️ CR Impact Note** (added {date}, ref: {new_feature_id})
-           > - **Change:** {brief description of what changes}
-           > - **Affected FRs:** {list of FR IDs that need updating}
-           > - **Action Required:** Feature specification refactoring needed before implementation
-           > - **New Feature Ref:** EPIC-{nnn} — see {requirement-details-part-N.md}
-           ```
-         - Do NOT modify the existing FRs/ACs themselves — only add the marker
-      3. For each conflict where human decided "new standalone feature":
-         - Add a dependency note to the new requirement (in Step 6) referencing the related existing feature
-         - No changes to existing requirement-details files
-      4. Report summary of all updates made
-    </action>
-    <constraints>
-      - CRITICAL: Do NOT modify existing FRs, ACs, or NFRs — only append CR impact markers
-      - CRITICAL: Markers must include date, new feature reference, and action required
-    </constraints>
-    <output>List of impacted features and files updated</output>
-  </step_4>
+  </phase_1>
 
-  <step_5>
-    <name>Check File Size and Split if Needed</name>
-    <action>
-      1. Determine current active file (requirement-details.md or latest part)
-      2. Count lines in current active file
-      3. If > 500 lines, split per file-splitting procedure
-    </action>
-    <constraints>
-      - BLOCKING: MUST split before adding new content if over threshold
-    </constraints>
-    <output>Active file path determined</output>
-  </step_5>
+  <phase_2 name="审问之 — Inquire Thoroughly">
 
-  <step_6>
-    <name>Create Requirement Details Document</name>
-    <action>
-      1. Create Epic folder structure:
-         - Create x-ipe-docs/requirements/EPIC-{nnn}/ directory
-         - Create x-ipe-docs/requirements/EPIC-{nnn}/mockups/ sub-directory
-         - If mockup_list is provided, copy mockups to EPIC-{nnn}/mockups/
-      2. Use [references/requirement-details-template.md](references/requirement-details-template.md) as template for new files
-      3. Use ## EPIC-{nnn}: {Epic Title} as the section header in requirement-details (NOT ## FEATURE-{nnn})
-      4. Fill all sections based on gathered information
-      3. Include all clarifications and decisions from Step 2
-      4. IF conflicts were found in Step 3:
-         - Add a "Related Features" section listing all overlapping features and human decisions
-         - For "CR" decisions: note that existing feature has CR impact markers
-         - For "new feature" decisions: add cross-reference dependency
-      5. Add new content to the current active part file
-    </action>
-    <constraints>
-      - CRITICAL: Document the "why" behind requirements, not just the "what"
-      - CRITICAL: Be thorough - vague requirements lead to incorrect implementations
-      - CRITICAL: Include examples and edge cases discussed with the human
-      - CRITICAL: Capture constraints, assumptions, and dependencies
-      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
-    </constraints>
-    <output>requirement-details.md created or updated</output>
-  </step_6>
+    <step_2_1>
+      <name>Ask Clarifying Questions</name>
+      <action>
+        1. Identify ambiguities across: Scope, Users, Edge Cases, Priorities, Constraints
+        2. IF process_preference.auto_proceed == "auto":
+            → CALL x-ipe-dao-end-user-representative with:
+                message_context:
+                  source: "ai"
+                  calling_skill: "requirement-gathering"
+                  task_id: "{task_id}"
+                  feature_id: "N/A"
+                  workflow_name: "N/A"
+                  downstream_context: "Resolving requirement ambiguities during autonomous requirement gathering"
+                  messages:
+                    - content: "{ambiguity description}"
+                      preferred_dispositions: ["answer", "clarification"]
+                human_shadow: false
+            → IF disposition is "answer" or "approval" or "instruction": use returned decisions to resolve ambiguities
+            → IF disposition is "clarification" or "reframe" or "critique": refine questions and re-ask
+            → IF disposition is "pass_through": escalate to human
+            → Document resolved answers immediately
+        3. ELSE:
+           a. Ask questions in batches of 3-5
+           b. Wait for human response before next batch
+           c. Document answers immediately
+           d. Repeat until all ambiguities are resolved
+      </action>
+      <constraints>
+        - BLOCKING: Do not proceed until ALL ambiguities are resolved
+        - BLOCKING (manual/stop_for_question): Do not make assumptions - always ask
+      </constraints>
+      <output>Complete set of clarified requirements</output>
+    </step_2_1>
 
-  <step_7>
-    <name>Complete</name>
-    <action>
-      1. IF execution_mode == "workflow-mode":
-         a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
-            - workflow_name: {from context}
-            - action: {workflow.action}
-            - status: "done"
-            - deliverables: {"requirement-doc": "{path to requirement doc}", "requirements-folder": "{path to requirements/ folder}"}
-         b. Log: "Workflow action status updated to done"
-      2. Verify all DoD checkpoints
-      3. Request human review
-    </action>
-    <output>Task completion output, workflow_action_updated</output>
-  </step_7>
+    <step_2_2>
+      <name>Conflict and Overlap Review</name>
+      <action>
+        1. Read requirement-details-index.md to get list of all requirement-details parts
+        2. Scan each requirement-details file, extracting existing feature IDs and their scope
+        3. Compare new requirements against each existing feature:
+           - Functional overlap: new FRs that duplicate or contradict existing FRs
+           - Scope overlap: new feature covers same user scenarios
+           - Dependency conflict: new feature changes behavior existing feature depends on
+        4. IF no conflicts: report "No conflicts found" and proceed to Phase 3
+        5. IF conflicts found, for EACH conflict:
+           - Present conflict summary table
+           - Provide recommendation based on: Single Responsibility, Cohesion, Independence, Minimal Coupling
+           - IF auto_proceed: use decision-making tool
+           - ELSE: ask human "CR on existing or new standalone feature?"
+        6. Record decisions for each conflict
+      </action>
+      <constraints>
+        - BLOCKING: Do not proceed until human decided on EVERY conflict
+        - CRITICAL: Scan ALL requirement-details parts, not just the latest
+      </constraints>
+      <output>Conflict review result with human decisions</output>
+    </step_2_2>
+
+  </phase_2>
+
+  <phase_3 name="慎思之 — Think Carefully">
+
+    <step_3_1>
+      <name>Feasibility & Risk Reflection</name>
+      <action>
+        1. Assess technical feasibility of gathered requirements
+        2. Identify potential risks: technical complexity, dependencies, integration challenges
+        3. Consider resource constraints and timeline implications
+        4. Document assumptions that need validation during design
+        5. IF high-risk items found: flag for human attention with mitigation suggestions
+      </action>
+      <constraints>
+        - CRITICAL: Do not filter out requirements — document risks alongside them
+      </constraints>
+      <output>Feasibility assessment with documented risks and assumptions</output>
+    </step_3_1>
+
+  </phase_3>
+
+  <phase_4 name="明辨之 — Discern Clearly">
+
+    <step_4_1>
+      <name>Update Impacted Features</name>
+      <action>
+        1. IF no conflicts were found in Phase 2: skip this step
+        2. For each "CR" decision:
+           a. Add CR impact marker to feature (append only)
+           b. Resolve conflicting documents (applies regardless of human or auto_proceed resolution):
+              - IF minor conflict (wording overlap, small scope adjustment, additive change):
+                → Directly update the conflicting sections in the target requirement-details
+              - IF major conflict (contradicting FRs, structural scope overlap, fundamental redesign):
+                → Mark affected sections in target requirement-details with "[RETIRED by EPIC-{nnn}]" header
+                → Add retirement note: reason, date, and reference to new EPIC
+        3. For each "new feature" decision: add dependency note to new requirement
+        4. Report summary of updates including docs updated inline and docs marked retired
+      </action>
+      <constraints>
+        - CRITICAL: Do NOT modify existing FRs/ACs beyond CR impact markers and conflict resolution
+        - CRITICAL: Conflicting documents MUST be handled — minor conflicts updated inline, major conflicts marked retired
+      </constraints>
+      <output>List of impacted features, files updated, docs retired</output>
+    </step_4_1>
+
+    <step_4_2>
+      <name>Scope Decision</name>
+      <action>
+        1. Review all gathered requirements, conflicts, and feasibility assessment
+        2. Explicitly define what is IN scope and OUT of scope
+        3. IF auto_proceed: make scope decision via decision-making tool, log rationale
+        4. ELSE: present scope summary to human for confirmation
+        5. Document final scope boundaries
+      </action>
+      <output>Final scope boundaries (in-scope and out-of-scope items)</output>
+    </step_4_2>
+
+  </phase_4>
+
+  <phase_5 name="笃行之 — Practice Earnestly">
+
+    <step_5_1>
+      <name>Create Requirement Document</name>
+      <action>
+        1. Determine current active file, check if >500 lines → split per file-splitting procedure
+        2. Create Epic folder structure (EPIC-{nnn}/ and mockups/ sub-directory)
+        3. Copy mockups if provided
+        4. Use requirement-details-template.md, use ## EPIC-{nnn}: {Title} as header
+        5. Fill all sections based on gathered information including feasibility notes
+        6. IF conflicts found: add "Related Features" section
+        7. Add new content to current active part file
+      </action>
+      <constraints>
+        - BLOCKING: MUST split before adding new content if over 500-line threshold
+        - CRITICAL: Document the "why", not just the "what"
+        - MANDATORY: Use full project-root-relative paths for links
+      </constraints>
+      <output>requirement-details.md created or updated</output>
+    </step_5_1>
+
+    <step_5_2>
+      <name>Complete & Verify</name>
+      <action>
+        1. IF execution_mode == "workflow-mode":
+           a. Call update_workflow_action with:
+              - workflow_name, action, status: "done"
+              - deliverables: {"requirement-doc": "{path}", "requirements-folder": "{path}"}
+           b. Log: "Workflow action status updated to done"
+        2. Verify all DoD checkpoints
+        3. Review & Decision Gate:
+           IF process_preference.auto_proceed == "auto":
+             → Skip human review (auto-proceed mode)
+           ELSE:
+             → Present requirements document to human for review
+             → Wait for human approval → IF rejected → revise
+      </action>
+      <output>Task completion output, workflow_action_updated</output>
+    </step_5_2>
+
+  </phase_5>
 
 </procedure>
 ```
@@ -332,6 +374,8 @@ task_completion_output:
   conflict_review_completed: true | false
   conflicts_found: 0  # number of conflicts identified
   impacted_features: []  # list of FEATURE-XXX IDs marked with CR impact
+  conflicting_docs_updated: []          # Docs updated inline for minor conflicts
+  conflicting_docs_retired: []          # Doc sections marked retired for major conflicts
   epic_id: "EPIC-{nnn}"  # The Epic created by this requirement gathering
 ```
 
@@ -360,6 +404,10 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <verification>If conflicts found with CR decision, affected features have CR impact markers appended in their requirement-details files</verification>
   </checkpoint>
   <checkpoint required="conditional">
+    <name>Conflicting documents resolved</name>
+    <verification>If conflicts found: minor conflicts updated inline in target docs, major conflicts have sections marked "[RETIRED by EPIC-{nnn}]" with replacement content</verification>
+  </checkpoint>
+  <checkpoint required="conditional">
     <name>File split handled correctly</name>
     <verification>If split occurred, old file renamed and index updated per references/file-splitting.md</verification>
   </checkpoint>
@@ -376,78 +424,23 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Patterns & Anti-Patterns
 
-### Pattern: Vague Request
-
-**When:** User gives unclear request like "Build something for users to log in"
-**Then:**
-```
-1. Ask clarifying questions:
-   - "What authentication methods? (email/password, OAuth, SSO)"
-   - "Should there be password reset?"
-   - "Any specific security requirements?"
-2. Document answers
-3. Review conflicts, then create requirement summary
-```
-
-### Pattern: Detailed Request
-
-**When:** User gives detailed request with clear scope
-**Then:**
-```
-1. Confirm understanding with user
-2. Ask about edge cases only
-3. Review conflicts, then create requirement summary
-```
-
-### Pattern: Existing Project Addition
-
-**When:** Adding feature to existing project
-**Then:**
-```
-1. Read existing requirement-details.md
-2. Understand current scope
-3. Scan for conflicts/overlaps with new request
-4. Ask human to decide CR vs new feature for each overlap
-5. Mark impacted features, then create requirement summary
-```
-
-### Pattern: Overlap with Existing Feature
-
-**When:** New requirement overlaps an existing feature's scope
-**Then:**
-```
-1. Present overlap table showing new vs existing
-2. Recommend based on principles:
-   - Same responsibility/cohesion → CR on existing
-   - Independent lifecycle → new feature
-3. Wait for human decision
-4. Add CR impact marker or cross-reference dependency
-```
-
-### Pattern: Epic Folder Creation
-
-**When:** Creating any new requirement
-**Then:**
-```
-1. Determine next EPIC-{nnn} (scan x-ipe-docs/requirements/ for highest existing)
-2. Create EPIC-{nnn}/ folder
-3. Create EPIC-{nnn}/mockups/ sub-directory
-4. Store any mockups in EPIC-{nnn}/mockups/
-5. Write requirement-details section with ## EPIC-{nnn}: {Title} header
-6. Note: Feature sub-folders are created later during Feature Breakdown
-```
-
-### Anti-Patterns
+| Pattern | When | Then |
+|---------|------|------|
+| Vague Request | Unclear request like "build login" | Ask clarifying questions (auth methods, password reset, security) |
+| Detailed Request | Clear scope already provided | Confirm understanding, ask edge cases only |
+| Existing Project | Adding feature to existing project | Scan for conflicts/overlaps, ask human CR vs new feature |
+| Overlap Found | Requirement overlaps existing feature | Present overlap table, recommend CR or new based on responsibility/cohesion |
+| Epic Folder Creation | Any new requirement | Determine next EPIC-{nnn}, create folder + mockups/, write requirement-details |
 
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
 | Assuming requirements | Missing features | Ask clarifying questions |
 | Skipping documentation | Lost context | Always create requirement-details.md |
 | Too many questions at once | Overwhelms human | Batch 3-5 questions |
-| Skip to Feature Breakdown | Missing requirements | Complete this task first |
 | Skipping conflict review | Duplicate/conflicting features | Always scan existing requirements |
-| Modifying existing FRs during impact update | Breaks existing specs | Only append CR impact markers |
-| Deciding CR vs new feature without human | Wrong architectural decision | Always ask human with recommendation |
+| Modifying existing FRs | Breaks existing specs | Only append CR impact markers + resolve conflicts |
+| Deciding CR vs new without human | Wrong architectural decision | Always ask human with recommendation |
+| Leave conflicting docs unresolved | Stale docs mislead future work | Minor → update inline; major → mark retired |
 
 ---
 

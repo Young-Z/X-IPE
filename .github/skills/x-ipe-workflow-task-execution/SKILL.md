@@ -92,7 +92,7 @@ input:
 
   <!-- Execution fields (populated after Step 3) -->
   <field name="execution.next_task_based_skill" source="From task-based skill output" />
-  <field name="execution.process_preference.auto_proceed" source="Resolved from: (a) workflow-{name}.json global.process_preference in workflow-mode, (b) CLI flag --proceed@auto or --proceed@stop-for-question in free-mode, (c) Global Settings in task-board.md, (d) default: manual" />
+  <field name="execution.process_preference.auto_proceed" source="Resolved from: (a) workflow-{name}.json global.process_preference in workflow-mode, (b) CLI flag --proceed@auto or --proceed@stop-for-question in free-mode, (c) Semantic understanding from user message, (d) default: manual" />
   <field name="execution.task_output_links" source="From task-based skill output" />
 
   <!-- Git strategy (resolved during Step 2 DoR) -->
@@ -402,7 +402,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
       IF process_preference.auto_proceed == "auto" OR "stop_for_question":
         IF next_task_based_skill EXISTS:
           IF multiple next_actions_suggested (workflow-mode):
-            → Invoke x-ipe-tool-decision-making (type: routing) to choose
+            → Invoke x-ipe-dao-end-user-representative (type: routing) to choose
           → Find next task on board (already created in Step 1)
           → Start execution from Step 2
         ELSE:

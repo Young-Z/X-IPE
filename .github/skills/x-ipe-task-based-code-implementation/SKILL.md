@@ -255,7 +255,11 @@ BLOCKING: Step 5.1 special-case delegations run BEFORE semantic routing.
       3. FOR EACH tech_stack entry: semantically match to a discovered tool skill
          - Use LLM understanding to match (e.g., "Python/Flask" → x-ipe-tool-implementation-python)
          - IF no match: assign x-ipe-tool-implementation-general
-         - IF general insufficient: signal human "new tool skill needed"
+         - IF general insufficient:
+           IF process_preference.auto_proceed == "auto":
+             → Log gap via x-ipe-dao-end-user-representative and continue with general tool
+           ELSE:
+             → Signal human "new tool skill needed"
       4. FOR EACH matched tool skill (sequentially, backend first then frontend):
          a. FILTER AAA scenarios by matching layer tag
          b. INVOKE tool skill with: aaa_scenarios, source_code_path, feature_context
@@ -283,9 +287,17 @@ BLOCKING: Step 5.1 special-case delegations run BEFORE semantic routing.
       2. IF any tool skill has failing Asserts:
          a. Re-invoke ONLY the failed tool skill with original scenarios + error context
          b. IF retry succeeds: continue
-         c. IF retry fails: preserve passing results, escalate to human
+         c. IF retry fails: preserve passing results,
+            IF process_preference.auto_proceed == "auto":
+              → Log failure via x-ipe-dao-end-user-representative and continue with partial results
+            ELSE:
+              → Escalate to human
       3. RUN @integration scenarios: verify cross-layer behavior with mocking
-      4. IF integration fails: report contract mismatch to human with both tool skill outputs
+      4. IF integration fails:
+         IF process_preference.auto_proceed == "auto":
+           → Log contract mismatch via x-ipe-dao-end-user-representative and continue
+         ELSE:
+           → Report contract mismatch to human with both tool skill outputs
       5. PRODUCE aggregated report: per-skill pass/fail, integration results, overall status
     </action>
     <success_criteria>

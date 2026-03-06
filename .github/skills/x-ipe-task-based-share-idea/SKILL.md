@@ -103,17 +103,19 @@ input:
 
 ## Execution Flow
 
-| Step | Name | Action | Gate |
-|------|------|--------|------|
-| 1 | Load Config | Read toolbox meta sharing section; detect conversion tools | Config loaded |
-| 2 | Identify Source | Locate latest `idea-summary-vN.md` in idea folder | Source found |
-| 3 | Confirm Format | Ask human for target format(s) from enabled options | Format(s) confirmed |
-| 4 | Prepare Content | Restructure content for each target format | Content ready |
-| 5 | Convert | Generate output files via pandoc, MCP, or manual fallback | Files generated |
-| 6 | Verify & Complete | Confirm output files exist with size > 0; report to human | DoD validated |
+| Phase | Step | Name | Action | Gate |
+|-------|------|------|--------|------|
+| 1. 博学之 (Study Broadly) | 1.1 | Load Config | Read toolbox meta sharing section; detect conversion tools | Config loaded |
+| | 1.2 | Identify Source | Locate latest `idea-summary-vN.md` in idea folder | Source found |
+| 2. 审问之 (Inquire Thoroughly) | 2.1 | Confirm Format | Ask human for target format(s) from enabled options | Format(s) confirmed |
+| 3. 慎思之 (Think Carefully) | — | SKIP | No trade-offs; conversion is mechanical once format confirmed | — |
+| 4. 明辨之 (Discern Clearly) | — | SKIP | Format already confirmed in Phase 2; no alternatives to evaluate | — |
+| 5. 笃行之 (Practice Earnestly) | 5.1 | Prepare Content | Restructure content for each target format | Content ready |
+| | 5.2 | Convert | Generate output files via pandoc, MCP, or manual fallback | Files generated |
+| | 5.3 | Verify & Complete | Confirm output files exist with size > 0; report to human | DoD validated |
 
-BLOCKING: Step 3 requires human confirmation of target format(s).
-BLOCKING: Step 6 fails if any output file is empty or missing.
+BLOCKING: Step 2.1 requires human confirmation of target format(s).
+BLOCKING: Step 5.3 fails if any output file is empty or missing.
 
 ---
 
@@ -121,116 +123,158 @@ BLOCKING: Step 6 fails if any output file is empty or missing.
 
 ```xml
 <procedure name="share-idea">
+  <!-- CRITICAL: Both DoR/DoD check elements below are MANDATORY -->
   <execute_dor_checks_before_starting/>
   <schedule_dod_checks_with_sub_agent_before_starting/>
 
-  <step_1>
-    <name>Load Config and Detect Tools</name>
-    <action>
-      1. Check if x-ipe-docs/config/tools.json exists
-      2. If exists: parse JSON, extract stages.ideation.sharing section,
-         identify enabled formats (value = true)
-      3. If missing or sharing section empty: default to all formats available
-      4. Load extra_instructions:
-         a. IF human provided explicit value: use it
-         b. ELSE IF _extra_instruction field in sharing config: use config value
-         c. ELSE: set to null
-      5. Detect available conversion tools:
-         - pandoc (which pandoc)
-         - MCP document tools (check available MCP servers)
-         - python-pptx / python-docx (pip show)
-      6. Log active formats, extra_instructions, and available tools
-    </action>
-    <constraints>
-      - CRITICAL: Report available tools before proceeding
-    </constraints>
-    <output>Enabled formats list, available tools, extra_instructions</output>
-    <reference>
-      Supported formats and config key mapping:
-      | Config Key                         | Extension | Best For           |
-      |------------------------------------|----------|--------------------|
-      | stages.ideation.sharing.pptx       | .pptx    | Presentations      |
-      | stages.ideation.sharing.docx       | .docx    | Documents, reviews |
-      | stages.ideation.sharing.pdf        | .pdf     | Read-only sharing  |
-      | stages.ideation.sharing.html       | .html    | Web viewing        |
-    </reference>
-  </step_1>
+  <phase_1 name="博学之 — Study Broadly">
 
-  <step_2>
-    <name>Identify Source File</name>
-    <action>
-      1. Navigate to {idea_folder}
-      2. List available idea-summary-vN.md files
-      3. Select the latest version OR human-specified version
-      4. Read the source content
-    </action>
-    <output>Source file path and content</output>
-  </step_2>
+    <step_1_1>
+      <name>Load Config and Detect Tools</name>
+      <action>
+        1. Check if x-ipe-docs/config/tools.json exists
+        2. If exists: parse JSON, extract stages.ideation.sharing section,
+           identify enabled formats (value = true)
+        3. If missing or sharing section empty: default to all formats available
+        4. Load extra_instructions:
+           a. IF human provided explicit value: use it
+           b. ELSE IF _extra_instruction field in sharing config: use config value
+           c. ELSE: set to null
+        5. Detect available conversion tools:
+           - pandoc (which pandoc)
+           - MCP document tools (check available MCP servers)
+           - python-pptx / python-docx (pip show)
+        6. Log active formats, extra_instructions, and available tools
+      </action>
+      <constraints>
+        - CRITICAL: Report available tools before proceeding
+      </constraints>
+      <output>Enabled formats list, available tools, extra_instructions</output>
+      <reference>
+        Supported formats and config key mapping:
+        | Config Key                         | Extension | Best For           |
+        |------------------------------------|----------|--------------------|
+        | stages.ideation.sharing.pptx       | .pptx    | Presentations      |
+        | stages.ideation.sharing.docx       | .docx    | Documents, reviews |
+        | stages.ideation.sharing.pdf        | .pdf     | Read-only sharing  |
+        | stages.ideation.sharing.html       | .html    | Web viewing        |
+      </reference>
+    </step_1_1>
 
-  <step_3>
-    <name>Confirm Target Formats</name>
-    <action>
-      1. Present enabled formats to human (filter by config):
-         - PowerPoint (.pptx) - For presentations
-         - Word (.docx) - For document review
-         - PDF (.pdf) - For read-only sharing
-         - HTML (.html) - For web viewing
-      2. Allow multiple selections
-      3. Wait for human confirmation
-    </action>
-    <constraints>
-      - BLOCKING: Do not proceed until human confirms format(s)
-    </constraints>
-    <output>List of confirmed target formats</output>
-  </step_3>
+    <step_1_2>
+      <name>Identify Source File</name>
+      <action>
+        1. Navigate to {idea_folder}
+        2. List available idea-summary-vN.md files
+        3. Select the latest version OR human-specified version
+        4. Read the source content
+      </action>
+      <output>Source file path and content</output>
+    </step_1_2>
 
-  <step_4>
-    <name>Prepare Content Structure</name>
-    <action>
-      1. If extra_instructions set: apply them to content structuring
-      2. For PPTX: restructure into slide-sized chunks
-         - Title slide (idea name + subtitle)
-         - Overview, Problem, Solution as bullet points
-         - Key Features, Success Criteria, Next Steps
-         - Max 5-7 bullets per slide; add speaker notes
-      3. For DOCX/PDF: use markdown content directly,
-         preserve headers, tables, and formatting
-      4. For HTML: use markdown content with web-friendly structure
-    </action>
-    <output>Format-specific content ready for conversion</output>
-  </step_4>
+  </phase_1>
 
-  <step_5>
-    <name>Execute Conversion</name>
-    <action>
-      1. Select conversion method based on detected tools:
-         IF pandoc available:
-           pandoc -t {format} -o "formal-{source_name}.{ext}" "{source_file}"
-         ELSE IF MCP document tools available:
-           Use mcp-documents/convert, mcp-office/create-presentation, or mcp-office/create-document
-         ELSE (manual fallback):
-           Inform human that automatic conversion is unavailable, provide structured content for manual copy-paste, suggest alternatives (Google Docs, CloudConvert). Mark task as partially complete.
-      2. Generate each requested format sequentially
-      3. Output naming: formal-{source_filename}.{extension}
-         Example: idea-summary-v1.md -> formal-idea-summary-v1.pptx
-    </action>
-    <output>Generated document files in {idea_folder}</output>
-  </step_5>
+  <phase_2 name="审问之 — Inquire Thoroughly">
 
-  <step_6>
-    <name>Verify and Complete</name>
-    <action>
-      1. Check each output file exists in {idea_folder}
-      2. Verify file size > 0 for each
-      3. List generated files with paths and sizes to human
-      4. Wait for human to confirm receipt
-    </action>
-    <success_criteria>
-      - All requested files exist and are non-empty
-      - Human confirms receipt
-    </success_criteria>
-    <output>Verified file list with paths</output>
-  </step_6>
+    <step_2_1>
+      <name>Confirm Target Formats</name>
+      <action>
+        1. IF process_preference.auto_proceed == "auto":
+            → CALL x-ipe-dao-end-user-representative with:
+                message_context:
+                  source: "ai"
+                  calling_skill: "share-idea"
+                  task_id: "{task_id}"
+                  feature_id: "N/A"
+                  workflow_name: "N/A"
+                  downstream_context: "Selecting output format(s) for sharing the idea document"
+                  messages:
+                    - content: "Which output format(s) for sharing? Options: pptx, docx, pdf, html"
+                      preferred_dispositions: ["answer", "clarification"]
+                human_shadow: false
+            → IF disposition is "answer" or "approval" or "instruction": use returned decision (default: pptx if unresolvable)
+            → IF disposition is "clarification" or "reframe" or "critique": refine question and re-ask
+            → IF disposition is "pass_through": escalate to human
+        2. ELSE:
+           a. Present enabled formats to human (filter by config):
+              - PowerPoint (.pptx) - For presentations
+              - Word (.docx) - For document review
+              - PDF (.pdf) - For read-only sharing
+              - HTML (.html) - For web viewing
+           b. Allow multiple selections
+           c. Wait for human confirmation
+      </action>
+      <constraints>
+        - BLOCKING (manual/stop_for_question): Do not proceed until human confirms format(s)
+      </constraints>
+      <output>List of confirmed target formats</output>
+    </step_2_1>
+
+  </phase_2>
+
+  <phase_3 name="慎思之 — Think Carefully">
+    <skip reason="No trade-offs or risk assessment needed. Conversion is mechanical once the source file and target formats are confirmed." />
+  </phase_3>
+
+  <phase_4 name="明辨之 — Discern Clearly">
+    <skip reason="Format already confirmed in Phase 2. No alternative approaches to evaluate — conversion tool selection is automatic based on availability." />
+  </phase_4>
+
+  <phase_5 name="笃行之 — Practice Earnestly">
+
+    <step_5_1>
+      <name>Prepare Content Structure</name>
+      <action>
+        1. If extra_instructions set: apply them to content structuring
+        2. For PPTX: restructure into slide-sized chunks
+           - Title slide (idea name + subtitle)
+           - Overview, Problem, Solution as bullet points
+           - Key Features, Success Criteria, Next Steps
+           - Max 5-7 bullets per slide; add speaker notes
+        3. For DOCX/PDF: use markdown content directly,
+           preserve headers, tables, and formatting
+        4. For HTML: use markdown content with web-friendly structure
+      </action>
+      <output>Format-specific content ready for conversion</output>
+    </step_5_1>
+
+    <step_5_2>
+      <name>Execute Conversion</name>
+      <action>
+        1. Select conversion method based on detected tools:
+           IF pandoc available:
+             pandoc -t {format} -o "formal-{source_name}.{ext}" "{source_file}"
+           ELSE IF MCP document tools available:
+             Use mcp-documents/convert, mcp-office/create-presentation, or mcp-office/create-document
+           ELSE (manual fallback):
+             Inform human that automatic conversion is unavailable, provide structured content for manual copy-paste, suggest alternatives (Google Docs, CloudConvert). Mark task as partially complete.
+        2. Generate each requested format sequentially
+        3. Output naming: formal-{source_filename}.{extension}
+           Example: idea-summary-v1.md -> formal-idea-summary-v1.pptx
+      </action>
+      <output>Generated document files in {idea_folder}</output>
+    </step_5_2>
+
+    <step_5_3>
+      <name>Verify and Complete</name>
+      <action>
+        1. Check each output file exists in {idea_folder}
+        2. Verify file size > 0 for each
+        3. List generated files with paths and sizes
+        4. Review & Decision Gate:
+           IF process_preference.auto_proceed == "auto":
+             → Skip human confirmation (auto-proceed mode)
+           ELSE:
+             → Present file list to human
+             → Wait for human to confirm receipt
+      </action>
+      <success_criteria>
+        - All requested files exist and are non-empty
+      </success_criteria>
+      <output>Verified file list with paths</output>
+    </step_5_3>
+
+  </phase_5>
 
 </procedure>
 ```

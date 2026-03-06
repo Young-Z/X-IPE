@@ -130,5 +130,9 @@ This board tracks all features across the project lifecycle.
 | FEATURE-046-B | EPIC-046 | Restructure 4 Ideation-Stage Skills | v1.0 | Done | - | 03-05-2026 | 03-05-2026 17:30:00 |
 | FEATURE-046-C | EPIC-046 | Restructure 4 Requirement-Stage Skills | v1.0 | Done | FEATURE-046-A | 03-05-2026 | 03-05-2026 18:10:00 |
 | FEATURE-047-A | EPIC-047 | DAO Skill Foundation & End-User Core | v1.0 | Completed | [specification.md](x-ipe-docs/requirements/EPIC-047/FEATURE-047-A/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-047/FEATURE-047-A/technical-design.md), [.github/skills/x-ipe-dao-end-user-representative/SKILL.md](.github/skills/x-ipe-dao-end-user-representative/SKILL.md) | 03-06-2026 | 03-06-2026 16:53:12 |
-| FEATURE-047-B | EPIC-047 | Semantic DAO Logging & Workflow Migration | v1.0 | Planned | - | 03-06-2026 | 03-06-2026 06:53:51 |
+| FEATURE-047-B | EPIC-047 | Semantic DAO Logging & Workflow Migration | v1.0 | In Refinement | [specification.md](x-ipe-docs/requirements/EPIC-047/FEATURE-047-B/specification.md) | 03-06-2026 | 03-06-2026 12:50:00 |
 | FEATURE-047-C | EPIC-047 | Instruction Resource DAO Interception | v1.0 | Planned | - | 03-06-2026 | 03-06-2026 06:53:51 |
+| FEATURE-048-A | EPIC-048 | Tool Skill Contract Extension | v1.0 | Planned | - | 03-06-2026 | 03-06-2026 13:08:00 |
+| FEATURE-048-B | EPIC-048 | Consultation Integration (Technical Design + Refactoring Analysis) | v1.0 | Planned | - | 03-06-2026 | 03-06-2026 13:08:00 |
+| FEATURE-048-C | EPIC-048 | Bug Fix Delegation | v1.0 | Planned | FEATURE-048-A | 03-06-2026 | 03-06-2026 13:08:00 |
+| FEATURE-048-D | EPIC-048 | Code Refactor Delegation | v1.0 | Planned | FEATURE-048-A | 03-06-2026 | 03-06-2026 13:08:00 |
