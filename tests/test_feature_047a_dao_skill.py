@@ -88,9 +88,10 @@ class TestDaoEndUserSkillContent:
         assert "human_shadow" in dao_skill_content
         assert "fallback_required" in dao_skill_content
 
-    def test_documents_seven_step_backbone(self, dao_skill_content):
-        for step in ["静虑", "兼听", "审势", "权衡", "谋后而定", "试错", "断"]:
-            assert step in dao_skill_content
+    def test_documents_gewu_zhizhi_backbone(self, dao_skill_content):
+        """The skill documents the 格物致知 backbone phases."""
+        for phase in ["格物", "致知", "礼", "录", "示"]:
+            assert phase in dao_skill_content
 
     def test_line_count_under_600(self):
         line_count = len((DAO_SKILL_DIR / "SKILL.md").read_text().splitlines())
@@ -118,9 +119,10 @@ class TestDaoTemplateContent:
     def dao_template_content(self):
         return (META_CREATOR_DIR / "templates" / "x-ipe-dao.md").read_text()
 
-    def test_template_has_seven_step_backbone(self, dao_template_content):
-        for step in ["静虑", "兼听", "审势", "权衡", "谋后而定", "试错", "断"]:
-            assert step in dao_template_content
+    def test_template_has_gewu_zhizhi_backbone(self, dao_template_content):
+        """The template documents the 格物致知 backbone phases."""
+        for phase in ["格物", "致知", "礼", "录", "示"]:
+            assert phase in dao_template_content
 
     def test_template_has_bounded_output_language(self, dao_template_content):
         assert "bounded" in dao_template_content.lower()
