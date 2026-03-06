@@ -389,6 +389,10 @@ operation_output:
     <name>Semantic Log Written</name>
     <verification>Log entry appended to x-ipe-docs/dao/decisions_made_{semantic_task_type}.md</verification>
   </checkpoint>
+  <checkpoint required="true">
+    <name>CLI Output Presented</name>
+    <verification>Phase 4 (示) executed — structured CLI output printed with disposition, content, rationale, confidence, and fallback status</verification>
+  </checkpoint>
 </definition_of_done>
 ```
 
