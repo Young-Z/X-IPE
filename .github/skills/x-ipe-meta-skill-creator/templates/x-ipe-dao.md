@@ -127,13 +127,13 @@ input:
 
 | Phase | Step | Name (道) | Action | Gate |
 |-------|------|-----------|--------|------|
-| 1 | 1.1 | 静虑 — Pause & Restate | Pause and restate the real user need in one sentence | Need is clear in one sentence |
-| 2 | 2.1 | 兼听 — Listen Broadly | Consider user intent, workflow state, downstream constraints, caller preference hints | All context factors weighed |
-| 3 | 3.1 | 审势 — Assess the Situation | Assess whether direct guidance or pass-through best preserves the workflow | Guidance vs pass-through decided |
-| 4 | 4.1 | 权衡 — Weigh Trade-offs | Compare supported dispositions against user value, scope safety, and confidence | Candidate dispositions ranked |
-| 5 | 5.1 | 谋后而定 — Plan Then Decide | Choose the smallest useful intervention that unblocks the work | One disposition selected |
-| 6 | 6.1 | 试错 — Sanity Check | Sanity-check proposed response for tone, clarity, and unintended scope changes | Response validated |
-| 7 | 7.1 | 断 — Commit | Commit to one disposition and one bounded response | Final output ready |
+| 1 | 1.1 | 静虑 — Pause & Restate | Stop. Check readiness (info complete? context sufficient?). Restate the real user need in one sentence | Need is clear + readiness assessed |
+| 2 | 2.1 | 兼听 — Listen Broadly | Gather three perspectives: supporting voice, opposing voice, neutral expert | All three voices considered |
+| 3 | 3.1 | 审势 — Assess the Situation | Ask three questions: direction (顺势?), timing (时机?), environment (环境?) | Direct guidance vs pass-through decided |
+| 4 | 4.1 | 权衡 — Weigh Trade-offs | For each disposition, analyze 利 (gains) vs 害 (losses). Take greater gain, lesser harm | Dispositions ranked by net value |
+| 5 | 5.1 | 谋后而定 — Plan Then Decide | Envision best/medium/worst outcomes. Abandon if worst case is unacceptable | One disposition selected + worst-case gate passed |
+| 6 | 6.1 | 试错 — Small-Step Validation | Small step, don't go all-in (小步走不梭哈). Test stone first (投石问路). Check reversibility | Response is bounded and reversible |
+| 7 | 7.1 | 断 — Commit | Lock it. Counsel is collective, the call is singular (谋贵众断贵独). No flip-flopping | Final output ready |
 | 8 | 8.1 | 录 — Record | Write semantic log entry to x-ipe-docs/dao/ | Log entry written |
 
 BLOCKING: All 8 phases MUST be executed in order. No phase may be skipped.
@@ -141,16 +141,16 @@ BLOCKING: Phase 7 (断) MUST produce exactly one disposition — not multiple.
 
 ### Phase Definitions (道 Seven-Step Backbone + Record)
 
-| Phase | Chinese | English | Purpose | Typical Activities |
-|-------|---------|---------|---------|-------------------|
-| 1 | 静虑 (Jìnglǜ) | Pause & Restate | Ground the interaction | Strip noise, restate what the user actually needs |
-| 2 | 兼听 (Jiāntīng) | Listen Broadly | Gather all signal | Read intent, workflow state, constraints, caller hints |
-| 3 | 审势 (Shěnshì) | Assess the Situation | Evaluate the landscape | Direct guidance vs pass-through, risk assessment |
-| 4 | 权衡 (Quánhéng) | Weigh Trade-offs | Compare options | Score dispositions on value, safety, confidence |
-| 5 | 谋后而定 (Móuhòu'érdìng) | Plan Then Decide | Select intervention | Smallest useful action that unblocks work |
-| 6 | 试错 (Shìcuò) | Sanity Check | Validate before commit | Check tone, clarity, scope safety of draft response |
-| 7 | 断 (Duàn) | Commit | Finalize output | Lock disposition, content, rationale, confidence |
-| 8 | 录 (Lù) | Record | Persist the decision | Write semantic log entry |
+| Phase | Chinese | English | 心法 (Heart Method) | Typical Activities |
+|-------|---------|---------|---------------------|-------------------|
+| 1 | 静虑 (Jìnglǜ) | Pause & Restate | 静而后能安，安而后能虑，虑而后能得 | Check readiness (info? context? urgency?), strip noise, one-sentence restatement |
+| 2 | 兼听 (Jiāntīng) | Listen Broadly | 兼听则明，偏信则暗 | Three voices: supporting, opposing, neutral expert. One opinion = guaranteed misstep |
+| 3 | 审势 (Shěnshì) | Assess the Situation | 顺势者昌，逆势者亡 | Three questions: direction (顺势?), timing (时机?), environment (环境?) |
+| 4 | 权衡 (Quánhéng) | Weigh Trade-offs | 两利相权取其重，两害相权取其轻 | Two columns per disposition: 利 (gains) vs 害 (losses). Rank by net value |
+| 5 | 谋后而定 (Móuhòu'érdìng) | Plan Then Decide | 不能接受的最坏结果，直接放弃 | Three scenarios: best/medium/worst. Worst-case gate: abandon if intolerable |
+| 6 | 试错 (Shìcuò) | Small-Step Validation | 投石问路，观衅而动 | Small step, don't go all-in. Test stone first. Effective → proceed, ineffective → stop |
+| 7 | 断 (Duàn) | Commit | 谋贵众，断贵独 | Lock it. Deliberate before, don't second-guess after. No flip-flopping |
+| 8 | 录 (Lù) | Record | — | Write semantic log entry, append-only |
 
 **Phase Rules:**
 - All 7 reasoning phases (静虑 through 断) are NEVER skippable.
@@ -167,106 +167,153 @@ BLOCKING: Phase 7 (断) MUST produce exactly one disposition — not multiple.
   <execute_dor_checks_before_starting/>
 
   <phase_1 name="静虑 — Pause & Restate">
+    <!-- 心法：静而后能安，安而后能虑，虑而后能得 -->
+    <!-- 不急着定，先"停一停" -->
     <step_1_1>
-      <name>Restate the User Need</name>
+      <name>Pause and Check Readiness</name>
       <action>
-        1. Read message_context.messages content.
-        2. Strip noise, jargon, and indirection.
-        3. Produce a single clear sentence: "The user needs: {X}."
+        1. STOP before deciding anything. Check readiness:
+           - Is the message content clear enough to act on? (info completeness)
+           - Is there sufficient context (task_id, workflow state) to make a sound judgment?
+           - Are there signs of cascading urgency that might rush a poor decision?
+        2. IF context is insufficient → flag for `clarification` or `pass_through` in Phase 4
+        3. Read message_context.messages content.
+        4. Strip noise, jargon, and indirection.
+        5. Produce a single clear sentence: "The user needs: {X}."
       </action>
       <constraints>
         - MUST produce exactly one sentence
         - MUST NOT interpret beyond what the message says
+        - If info is incomplete, do NOT guess — carry the uncertainty forward
       </constraints>
-      <output>One-sentence user need statement</output>
+      <output>One-sentence user need statement + readiness assessment</output>
     </step_1_1>
   </phase_1>
 
   <phase_2 name="兼听 — Listen Broadly">
+    <!-- 心法：兼听则明，偏信则暗 -->
+    <!-- 至少找三种声音：支持、反对、中立旁观 -->
     <step_2_1>
-      <name>Gather All Context Signals</name>
+      <name>Gather Three Perspectives</name>
       <action>
         1. Read message_context: source, calling_skill, task_id, feature_id, workflow_name, downstream_context.
         2. Note any preferred_dispositions from the caller.
-        3. Consider what the downstream agent/skill is currently doing.
-        4. Identify any constraints (scope boundaries, blocked states, pending decisions).
+        3. Construct THREE internal perspectives on the message:
+           a. **Supporting voice:** What interpretation gives the user the most benefit of the doubt?
+           b. **Opposing voice:** What could go wrong if we take the message at face value? What's the risk?
+           c. **Neutral expert voice:** What would a detached, domain-aware observer say about the right response?
+        4. Only hearing one perspective guarantees a misstep. All three MUST be considered.
+        5. Identify any constraints (scope boundaries, blocked states, pending decisions).
       </action>
-      <output>Context signal summary (internal only)</output>
+      <constraints>
+        - MUST consider all three voices — do not shortcut to one perspective
+      </constraints>
+      <output>Three-perspective context summary (internal only)</output>
     </step_2_1>
   </phase_2>
 
   <phase_3 name="审势 — Assess the Situation">
+    <!-- 心法：顺势者昌，逆势者亡 -->
+    <!-- 问三句：顺大势？时机对？环境允许？ -->
     <step_3_1>
-      <name>Direct Guidance vs Pass-Through</name>
+      <name>Assess Direction, Timing, and Environment</name>
       <action>
-        1. Evaluate: can this skill answer directly and safely?
-        2. Evaluate: would the downstream agent provide a better answer?
-        3. Assess risk of direct guidance: scope creep, incorrect assumptions, missing context.
-        4. Decide the primary path: direct guidance or pass-through.
+        1. Ask three questions:
+           a. **Direction (顺势?):** Does the proposed action align with the current workflow direction?
+           b. **Timing (时机?):** Is now the right moment for this intervention?
+           c. **Environment (环境?):** Does the current project state allow for this type of response?
+        2. Based on these three assessments, decide the primary path:
+           - Direct guidance (this skill answers)
+           - Pass-through (downstream agent handles it)
+        3. If all three signals say "not now" → lean toward `pass_through` or `clarification`.
       </action>
-      <output>Primary path decision (internal only)</output>
+      <output>Direction/timing/environment assessment + primary path decision (internal only)</output>
     </step_3_1>
   </phase_3>
 
   <phase_4 name="权衡 — Weigh Trade-offs">
+    <!-- 心法：两利相权取其重，两害相权取其轻 -->
+    <!-- 只算两件事：利、害 -->
     <step_4_1>
-      <name>Score Candidate Dispositions</name>
+      <name>Analyze Gains and Losses for Each Disposition</name>
       <action>
         1. List applicable dispositions: answer, clarification, reframe, critique, instruction, approval, pass_through.
-        2. Score each against: user value, scope safety, confidence level.
-        3. IF preferred_dispositions provided → weight those higher (but do not blindly follow).
-        4. Rank dispositions by composite score.
+        2. For each candidate, analyze TWO columns:
+           a. **利 (Gains):** What does the user gain? What workflow progress is preserved?
+           b. **害 (Losses):** What could go wrong? What scope risk or wasted effort might result?
+        3. Apply the principle: between two gains, take the greater; between two harms, take the lesser.
+        4. IF preferred_dispositions provided → weight those higher (but do not blindly follow).
+        5. Rank dispositions by net value (gains minus harms).
       </action>
-      <output>Ranked disposition candidates (internal only)</output>
+      <output>Gains/losses analysis + ranked disposition candidates (internal only)</output>
     </step_4_1>
   </phase_4>
 
   <phase_5 name="谋后而定 — Plan Then Decide">
+    <!-- 想清楚三种结局：最好、中等、最坏 -->
+    <!-- 不能接受的最坏结果，直接放弃 -->
     <step_5_1>
-      <name>Select Smallest Useful Intervention</name>
+      <name>Three-Scenario Planning</name>
       <action>
-        1. From ranked candidates, select the top disposition.
-        2. Verify it is the SMALLEST useful intervention — prefer pass_through over answer when downstream can handle it.
-        3. Draft the bounded response content.
-        4. Draft the rationale_summary (one sentence).
+        1. For the top-ranked disposition, envision three outcomes:
+           a. **Best case:** The response perfectly unblocks the work.
+           b. **Medium case:** The response partially helps but requires follow-up.
+           c. **Worst case:** The response misleads or causes scope derailment.
+        2. WORST-CASE GATE: If the worst case is unacceptable
+           → abandon this disposition, fall back to the next-ranked candidate.
+        3. Select the disposition whose worst case is still tolerable.
+        4. Verify it is the SMALLEST useful intervention.
+        5. Draft the bounded response content and rationale_summary.
       </action>
       <constraints>
         - MUST select exactly one disposition
         - MUST prefer minimal intervention
+        - ABANDON if worst case is unacceptable — do not push through
       </constraints>
       <output>Selected disposition + draft content + draft rationale</output>
     </step_5_1>
   </phase_5>
 
-  <phase_6 name="试错 — Sanity Check">
+  <phase_6 name="试错 — Small-Step Validation">
+    <!-- 心法：投石问路，观衅而动 -->
+    <!-- 小步走，不梭哈 -->
     <step_6_1>
-      <name>Validate Response Before Commit</name>
+      <name>Validate with Small-Step Principle</name>
       <action>
-        1. Check tone: is the response respectful and clear?
-        2. Check clarity: would the caller understand what to do next?
-        3. Check scope: does the response introduce unintended scope changes?
-        4. Check boundaries: does the response stay within this skill's bounded role?
-        5. IF any check fails → return to Phase 5 and adjust.
+        1. Apply the small-step principle (小步走，不梭哈):
+           - Does the response commit to the MINIMUM necessary? No over-answering.
+           - Is the response reversible? If the caller needs to course-correct, can they?
+           - Is this a "test stone" (投石问路) — providing just enough to see the reaction?
+        2. Check tone, clarity, scope, and boundary safety.
+        3. IF any check fails → return to Phase 5 and adjust.
       </action>
       <constraints>
         - MUST NOT pass a response that expands downstream task scope
-        - MUST NOT claim human approval occurred (approval = approval-like guidance)
+        - MUST prefer bounded, reversible responses over sweeping ones
       </constraints>
       <output>Validated response (or loop back to Phase 5)</output>
     </step_6_1>
   </phase_6>
 
   <phase_7 name="断 — Commit">
+    <!-- 心法：谋贵众，断贵独 -->
+    <!-- 决策前多犹豫，决策后少纠结 -->
     <step_7_1>
-      <name>Finalize Output</name>
+      <name>Commit with Conviction</name>
       <action>
         1. Lock disposition, content, rationale_summary.
+           Deliberation is over — do NOT second-guess after this point.
         2. Estimate confidence between 0.0 and 1.0.
         3. Set fallback_required:
            - true ONLY if human_shadow == true AND confidence < internal threshold.
            - false otherwise.
         4. Assemble operation_output contract.
+        5. "谋贵众，断贵独" — counsel is collective, but the final call is singular.
       </action>
+      <constraints>
+        - MUST NOT revisit the disposition after committing
+        - The decision is final for this interaction — no flip-flopping
+      </constraints>
       <output>operation_output ready for return</output>
     </step_7_1>
   </phase_7>
