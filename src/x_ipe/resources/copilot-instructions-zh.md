@@ -127,14 +127,14 @@
 
 **发现规则：**
 1. 扫描 `.github/skills/x-ipe-task-based-*/SKILL.md`
-2. 每个技能的 Output Result YAML 声明：`category`、`next_task_based_skill`、`require_human_review`
+2. 每个技能的 Output Result YAML 声明：`category`、`next_task_based_skill`、`process_preference.auto_proceed`
 3. 每个技能 frontmatter 中的 `description` 包含用于请求匹配的触发关键词
 
 **中文请求匹配关键词：**
 
 | 中文关键词 | 对应技能 |
 |-----------|---------|
-| 优化创意、完善想法、头脑风暴、分析我的想法 | x-ipe-task-based-ideation-v2 |
+| 优化创意、完善想法、头脑风暴、分析我的想法 | x-ipe-task-based-ideation |
 | 收集需求、新功能、我想构建 | x-ipe-task-based-requirement-gathering |
 | 分解功能、拆分功能、创建功能列表 | x-ipe-task-based-feature-breakdown |
 | 细化功能、详细规格、明确需求 | x-ipe-task-based-feature-refinement |
@@ -155,7 +155,18 @@
 | 重构分析、评估重构范围 | x-ipe-tool-refactoring-analysis |
 | 提升代码质量、同步文档与代码 | x-ipe-tool-code-quality-sync |
 
-> **注意：** 当**自动继续已启用**（全局或任务级别）时，无论技能的默认设置如何，`require_human_review` 都会被**跳过**。
+> **注意：** 当**自动继续已启用**（全局或任务级别）时，无论技能的默认设置如何，`require_human_review` 都会被**跳过**。`process_preference.auto_proceed` 枚举值（`manual | auto | stop_for_question`）控制此行为。
+
+### 人类代表拦截（Auto 模式）
+
+当 `process_preference.auto_proceed` 为 `auto` 且技能到达需要人工决策的节点（如澄清问题、需求冲突或模糊选择）时，代理 **必须** 调用 `x-ipe-dao-end-user-representative` 代替人类做出决策，而非直接询问人类。
+
+**各模式行为：**
+- **`auto`**：调用 `x-ipe-dao-end-user-representative` 并传入 `message_context` — 人类代表技能代表人类提供指导。响应意向（`answer`、`clarification`、`reframe`、`critique`、`instruction`、`approval`、`pass_through`）驱动技能的分支逻辑。
+- **`manual`**：直接询问人类 — 不调用 DAO。
+- **`stop_for_question`**：直接询问人类 — 不调用 DAO。
+
+**边界范围：** 人类代表技能仅在决策节点代表人类意图。它 **不执行** 任务、不编写代码、不做架构决策、不承担任务技能的职责。它仅调解人类来源的意图并返回有界的处置结果。
 
 ### 🛑 停下来思考：预检清单
 

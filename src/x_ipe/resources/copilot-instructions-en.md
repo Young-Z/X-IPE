@@ -129,12 +129,23 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 **Discovery rule:**
 1. Scan `.github/skills/x-ipe-task-based-*/SKILL.md`
-2. Each skill's Output Result YAML declares: `category`, `next_task_based_skill`, `require_human_review`
+2. Each skill's Output Result YAML declares: `category`, `next_task_based_skill`, `process_preference.auto_proceed`
 3. Each skill's `description` in frontmatter contains trigger keywords for request matching
 
 **Request matching:** Match user request against trigger keywords in each skill's description (e.g., "fix bug" → `x-ipe-task-based-bug-fix`, "implement feature" → `x-ipe-task-based-code-implementation`).
 
-> **Note:** When **Auto-Proceed is enabled** (global or task-level), `require_human_review` is **skipped** regardless of the skill's default.
+> **Note:** When **Auto-Proceed is enabled** (global or task-level), `require_human_review` is **skipped** regardless of the skill's default. The `process_preference.auto_proceed` enum (`manual | auto | stop_for_question`) controls this behavior.
+
+### Human Representative Interception (Auto Mode)
+
+When `process_preference.auto_proceed` is `auto` and a skill reaches a human-required decision point (e.g., a clarifying question, a conflict between requirements, or an ambiguous choice), the agent MUST call `x-ipe-dao-end-user-representative` to represent the human's intent instead of asking the human directly.
+
+**Behavior by mode:**
+- **`auto`**: Call `x-ipe-dao-end-user-representative` with `message_context` — the human representative skill provides guidance on behalf of the human. The response disposition (`answer`, `clarification`, `reframe`, `critique`, `instruction`, `approval`, `pass_through`) drives the skill's branching logic.
+- **`manual`**: Ask the human directly — DAO is NOT invoked.
+- **`stop_for_question`**: Ask the human directly — DAO is NOT invoked.
+
+**Bounded scope:** The human representative skill represents human intent at decision points only. It does NOT execute tasks, write code, make architectural decisions, or absorb the responsibilities of task-based skills. It mediates human-origin meaning and returns a bounded disposition.
 
 ### 🛑 STOP AND THINK: Pre-Flight Checklist
 
