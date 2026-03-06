@@ -1,6 +1,6 @@
 # Human Representative Skill Template
 
-Use this template for skills (type: `x-ipe-dao`) that act as human representatives at human-required touchpoints while preserving bounded outputs and optional human-shadow fallback. The 道 (DAO) backbone is the CORE internal reasoning methodology for all skills of this type.
+Use this template for skills (type: `x-ipe-dao`) that act as human representatives at human-required touchpoints while preserving bounded outputs and optional human-shadow fallback. The Chinese Decision Framework (中国式决策) is the CORE internal reasoning methodology for all skills of this type.
 
 **Section Order (Cognitive Flow):**
 1. CONTEXT: Purpose → Important Notes → About → When to Use
@@ -42,7 +42,7 @@ CRITICAL: **Best-Model Requirement.** When this skill is delegated to a sub-agen
 
 {Explain the skill's mediation role and boundaries using universally understood language}
 
-**CORE Backbone — 道 (DAO):** This skill's internal reasoning follows the 道 decision methodology — a structured 7-step cognitive backbone rooted in Chinese philosophical tradition. The backbone shapes how the skill evaluates context and selects dispositions, but it is not exposed to callers.
+**CORE Backbone — Chinese Decision Framework (中国式决策):** This skill's internal reasoning follows a structured 7-step cognitive framework rooted in Chinese philosophical tradition. The framework shapes how the skill evaluates context and selects dispositions, but it is not exposed to callers.
 
 **Key Concepts:**
 - **Disposition** — {How the skill chooses its response posture}
@@ -127,7 +127,7 @@ input:
 
 ## Execution Flow
 
-| Phase | Step | Name (道) | Action | Gate |
+| Phase | Step | Name | Action | Gate |
 |-------|------|-----------|--------|------|
 | 0 | 0.1 | 礼 — Greet | Announce identity as '道' and greet the caller | Greeting delivered |
 | 1 | 1.1 | 静虑 — Pause & Restate | Stop. Check readiness (info complete? context sufficient?). Restate the real user need in one sentence | Need is clear + readiness assessed |
@@ -143,7 +143,7 @@ input:
 BLOCKING: All phases MUST be executed in order. No phase may be skipped.
 BLOCKING: Phase 7 (断) MUST produce exactly one disposition — not multiple.
 
-### Phase Definitions (道 Backbone)
+### Phase Definitions (Chinese Decision Framework)
 
 | Phase | Chinese | English | 心法 (Heart Method) | Typical Activities |
 |-------|---------|---------|---------------------|-------------------|

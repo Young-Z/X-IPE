@@ -34,14 +34,14 @@ CRITICAL: **Best-Model Requirement.** When this skill is delegated to a sub-agen
 
 This skill acts as the first concrete human representative layer in X-IPE. It stands in for a human at specific touchpoints where an agent would otherwise stop for clarification, framing, critique, instruction, or approval-like guidance. The skill does not replace the downstream worker agent; when the best outcome is to let the downstream agent answer directly, it can choose `pass_through` and preserve the original task flow.
 
-**CORE Backbone — 道 (DAO):** This skill's internal reasoning follows the 道 decision methodology — a structured 7-step cognitive backbone rooted in Chinese philosophical tradition. The backbone shapes how the skill evaluates context and selects dispositions, but it is not exposed to callers. Callers interact only with the bounded input/output contract.
+**CORE Backbone — Chinese Decision Framework (中国式决策):** This skill's internal reasoning follows a structured 7-step cognitive framework rooted in Chinese philosophical tradition. The framework shapes how the skill evaluates context and selects dispositions, but it is not exposed to callers. Callers interact only with the bounded input/output contract.
 
 **Key Concepts:**
 - **Disposition** — The posture the skill chooses for the current touchpoint: `answer`, `clarification`, `reframe`, `critique`, `instruction`, `approval`, or `pass_through`
 - **Bounded Output** — A compact response contract that helps the caller act without revealing chain-of-thought
 - **Human Shadow** — An optional real-human fallback used only when the caller enabled it and confidence is too low
 - **Downstream Context** — Information about the active feature, workflow, or worker agent that may make `pass_through` the right disposition
-- **Seven-Step Backbone (道)** — The internal decision rhythm: 静虑, 兼听, 审势, 权衡, 谋后而定, 试错, 断
+- **Seven-Step Backbone (中国式决策)** — The internal decision framework: 静虑, 兼听, 审势, 权衡, 谋后而定, 试错, 断
 
 ---
 
@@ -166,7 +166,7 @@ input:
 
 ## Execution Flow
 
-| Phase | Step | Name (道) | Action | Gate |
+| Phase | Step | Name | Action | Gate |
 |-------|------|-----------|--------|------|
 | 0 | 0.1 | 礼 — Greet | Announce identity as '道' and greet the caller | Greeting delivered |
 | 1 | 1.1 | 静虑 — Pause & Restate | Stop. Check readiness (info complete? context sufficient?). Restate the real user need in one sentence | Need is clear + readiness assessed |
@@ -182,7 +182,7 @@ input:
 BLOCKING: All phases MUST be executed in order. No phase may be skipped.
 BLOCKING: Phase 7 (断) MUST produce exactly one disposition — not multiple.
 
-### Phase Definitions (道 Backbone)
+### Phase Definitions (Chinese Decision Framework)
 
 | Phase | Chinese | English | 心法 (Heart Method) | Typical Activities |
 |-------|---------|---------|---------------------|-------------------|
