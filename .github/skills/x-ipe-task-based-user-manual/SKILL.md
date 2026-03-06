@@ -232,7 +232,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 ```
 1. IF process_preference.auto_proceed == "auto":
    → Skip human confirmation (auto-proceed mode)
-2. ELSE:
+2. ELSE (manual/stop_for_question):
    a. Inform the human with verified run and test commands
    b. Request confirmation that README is clear
    c. Example message:

@@ -132,7 +132,7 @@ BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
            → IF disposition is "answer" or "approval" or "instruction": use returned decision (default: Python if unresolvable)
            → IF disposition is "clarification" or "reframe" or "critique": refine question and re-ask
            → IF disposition is "pass_through": escalate to human
-         ELSE:
+         ELSE (manual/stop_for_question):
            → Present options:
              "Which tech stack would you like to use?
               1. Python Application (default) - Python with uv
@@ -152,7 +152,7 @@ BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
       2. ELSE (tech_stack = "nodejs"):
          a. IF process_preference.auto_proceed == "auto":
             → Default to npm (most common)
-         ELSE:
+         ELSE (manual/stop_for_question):
             → Ask user for npm or yarn preference (default: npm)
          b. Run: npm init -y OR yarn init -y
          c. Create src/index.js and tests/index.test.js

@@ -169,7 +169,7 @@ BLOCKING: Classification MUST be approved before Phase 5 execution (manual/stop_
            - Is the requested approach the best solution, or are there alternatives?
            - What is the impact if this CR is NOT implemented?
         2. IF auto_proceed: use x-ipe-dao-end-user-representative to resolve challenges
-        3. ELSE: present challenges to human, ask for confirmation
+        3. ELSE (manual/stop_for_question): present challenges to human, ask for confirmation
         4. Document challenge outcomes and confirmed scope
       </action>
       <output>Validated CR scope with challenge decisions</output>
@@ -233,13 +233,14 @@ BLOCKING: Classification MUST be approved before Phase 5 execution (manual/stop_
       <name>Route Workflow</name>
       <action>
         1. IF auto_proceed: log classification and conflicts via x-ipe-dao-end-user-representative, proceed
-        2. ELSE:
+        2. ELSE (manual/stop_for_question):
            a. Present to human: CR summary, classification, conflict results, affected features
            b. Wait for explicit human approval
            c. IF human requests changes: return to step 4.1 or Phase 3
       </action>
       <constraints>
         - BLOCKING (manual/stop_for_question): Do NOT proceed without human approval
+        - BLOCKING (auto): Do NOT proceed without DAO approval-like guidance from x-ipe-dao-end-user-representative
       </constraints>
       <output>Approved classification and conflict resolution</output>
     </step_4_2>
@@ -273,7 +274,7 @@ BLOCKING: Classification MUST be approved before Phase 5 execution (manual/stop_
         3. Create CR record at FEATURE-XXX/CR-XXX.md
         4. Verify all DoD checkpoints
         5. IF auto_proceed: skip human review
-        6. ELSE: present output, wait for approval
+        6. ELSE (manual/stop_for_question): present output, wait for approval
       </action>
       <constraints>
         - CRITICAL: Never override existing mockup files — create new versions

@@ -197,7 +197,7 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
             → IF disposition is "answer" or "approval" or "instruction": use returned decision (default: pptx if unresolvable)
             → IF disposition is "clarification" or "reframe" or "critique": refine question and re-ask
             → IF disposition is "pass_through": escalate to human
-        2. ELSE:
+        2. ELSE (manual/stop_for_question):
            a. Present enabled formats to human (filter by config):
               - PowerPoint (.pptx) - For presentations
               - Word (.docx) - For document review
@@ -208,6 +208,7 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
       </action>
       <constraints>
         - BLOCKING (manual/stop_for_question): Do not proceed until human confirms format(s)
+        - BLOCKING (auto): Format confirmed by x-ipe-dao-end-user-representative (default: pptx if unresolvable)
       </constraints>
       <output>List of confirmed target formats</output>
     </step_2_1>
@@ -266,7 +267,7 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
         4. Review & Decision Gate:
            IF process_preference.auto_proceed == "auto":
              → Skip human confirmation (auto-proceed mode)
-           ELSE:
+           ELSE (manual/stop_for_question):
              → Present file list to human
              → Wait for human to confirm receipt
       </action>

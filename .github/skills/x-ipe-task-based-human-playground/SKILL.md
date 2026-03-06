@@ -67,14 +67,14 @@ input:
     <steps>
       1. IF previous task output contains feature_id → use it
       2. ELIF task board has feature_id in task data → use it
-      3. ELSE → ask human for feature_id
+      3. ELSE → IF auto_proceed == "auto": derive from workflow context or x-ipe-dao-end-user-representative; ELSE: ask human for feature_id
     </steps>
   </field>
   <field name="feature_title" source="feature specification OR features.md">
     <steps>
       1. Query feature board for feature_id → extract title
       2. ELIF x-ipe-docs/features/{feature_id}/specification.md exists → extract title
-      3. ELSE → ask human
+      3. ELSE → IF auto_proceed == "auto": derive from feature_id context; ELSE: ask human
     </steps>
   </field>
   <field name="feature_version" source="features.md OR default '1.0.0'">
@@ -224,7 +224,7 @@ BLOCKING: Step 6 requires validation before Feature Closing (manual/stop_for_que
       6. Review & Decision Gate:
          IF process_preference.auto_proceed == "auto":
            → Skip human review (auto-proceed mode)
-         ELSE:
+         ELSE (manual/stop_for_question):
            → Inform human that playground is ready for review
            → Wait for human validation
     </action>

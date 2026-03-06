@@ -119,7 +119,8 @@ input:
 
 BLOCKING: Step 2.2 - Continue brainstorming until idea is well-defined.
 
-BLOCKING (manual/stop_for_question): Step 5.2 - Human MUST approve idea summary before proceeding. Skipped in auto mode.
+BLOCKING (manual/stop_for_question): Step 5.2 - Human MUST approve idea summary before proceeding.
+BLOCKING (auto): Skip human review; auto-select next task from next_task_based_skill.
 
 ---
 
@@ -231,7 +232,7 @@ BLOCKING (manual/stop_for_question): Step 5.2 - Human MUST approve idea summary 
             → IF disposition is "pass_through": escalate to human
            → Build comprehensive brainstorming notes from source material + decisions
            → Generate visual artifacts proactively using enabled tools from step 1.1
-        2. ELSE:
+        2. ELSE (manual/stop_for_question):
            a. Ask questions in batches (3-5 at a time)
            b. Wait for human response before proceeding
            c. Build on previous answers
@@ -244,6 +245,7 @@ BLOCKING (manual/stop_for_question): Step 5.2 - Human MUST approve idea summary 
       <constraints>
         - BLOCKING: Continue until idea is well-defined
         - CRITICAL (manual/stop_for_question): Batch questions (3-5), do not overwhelm
+        - CRITICAL (auto): Resolve all ambiguities via x-ipe-dao-end-user-representative, do not ask human
         - MANDATORY: Only use tools that appear in the enabled tool list from step 1.1
       </constraints>
       <output>brainstorming_notes, artifacts[]</output>
@@ -343,7 +345,7 @@ BLOCKING (manual/stop_for_question): Step 5.2 - Human MUST approve idea summary 
            IF process_preference.auto_proceed == "auto":
              → Skip human review (auto-proceed mode)
              → Auto-select next task from next_task_based_skill
-           ELSE:
+           ELSE (manual/stop_for_question):
              → Present final idea summary to human
              → Ask human to choose next task
              → Wait for approval
@@ -351,6 +353,7 @@ BLOCKING (manual/stop_for_question): Step 5.2 - Human MUST approve idea summary 
       </action>
       <constraints>
         - BLOCKING (manual/stop_for_question): Human MUST approve before proceeding
+        - BLOCKING (auto): Skip human approval; auto-proceed to next task
       </constraints>
       <output>human_approval, next_task_choice, workflow_action_updated</output>
     </step_5_2>

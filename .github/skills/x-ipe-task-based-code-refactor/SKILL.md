@@ -171,7 +171,7 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
       4. Mode-aware gate:
          IF process_preference.auto_proceed == "auto":
            Proceed automatically. If concerns found, use x-ipe-dao-end-user-representative.
-         ELSE:
+         ELSE (manual/stop_for_question):
            WAIT for human approval of analysis results.
     </action>
     <constraints>
@@ -228,11 +228,12 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
             → IF disposition is "answer" or "approval" or "instruction": use approval decision
             → IF disposition is "clarification" or "reframe" or "critique": revise plan
             → IF disposition is "pass_through": escalate to human
-         ELSE:
+         ELSE (manual/stop_for_question):
            → PRESENT plan to human, WAIT for approval
     </action>
     <constraints>
       - BLOCKING (manual/stop_for_question): Do not proceed to Step 4 without human approval of plan
+      - BLOCKING (auto): Do not proceed to Step 4 without DAO approval from x-ipe-dao-end-user-representative
     </constraints>
     <output>Approved refactoring_plan with phases and principle mappings</output>
   </step_3>
@@ -283,7 +284,7 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
       10. Mode-aware review gate:
           IF process_preference.auto_proceed == "auto":
             Skip human review. Resolve open questions via x-ipe-dao-end-user-representative.
-          ELSE:
+          ELSE (manual/stop_for_question):
             PRESENT summary to human, WAIT for approval.
       11. CREATE final commit
     </action>

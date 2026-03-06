@@ -146,7 +146,8 @@ input:
 | 6 | Complete | Verify DoD, output summary, request human review | Human review |
 
 BLOCKING: Step 1 is BLOCKED if feature not on board or status not "Done Feature Refinement".
-BLOCKING (manual/stop_for_question): Step 6 requires human approval before proceeding to Code Implementation. Skipped in auto mode.
+BLOCKING (manual/stop_for_question): Step 6 requires human approval before proceeding to Code Implementation.
+BLOCKING (auto): Skip human review; proceed automatically after DoD verification.
 
 ---
 
@@ -271,7 +272,7 @@ BLOCKING (manual/stop_for_question): Step 6 requires human approval before proce
       4. Review & Decision Gate:
          IF process_preference.auto_proceed == "auto":
            → Skip human review (auto-proceed mode)
-         ELSE:
+         ELSE (manual/stop_for_question):
            → Present technical design to human for review
            → Wait for human approval
            → IF human rejects → revise

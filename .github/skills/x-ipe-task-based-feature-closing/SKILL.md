@@ -78,14 +78,14 @@ input:
     <steps>
       1. IF previous task was "Feature Acceptance Test" → extract from task_output_links.feature_id
       2. ELIF task board has feature_id in task data → use it
-      3. ELSE → ask human for feature_id
+      3. ELSE → IF auto_proceed == "auto": derive from workflow context or x-ipe-dao-end-user-representative; ELSE: ask human for feature_id
     </steps>
   </field>
   <field name="feature_title" source="feature specification OR features.md">
     <steps>
       1. Query feature board for feature_id → extract title
       2. ELIF x-ipe-docs/features/{feature_id}/specification.md exists → extract title from header
-      3. ELSE → ask human
+      3. ELSE → IF auto_proceed == "auto": derive from feature_id context; ELSE: ask human
     </steps>
   </field>
   <field name="feature_version" source="features.md OR default '1.0.0'">
@@ -198,10 +198,11 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
           → IF disposition is "answer" or "approval" or "instruction": apply returned decision
           → IF disposition is "clarification" or "reframe" or "critique": re-evaluate criterion
           → IF disposition is "pass_through": escalate to human
-        ELSE:
+        ELSE (manual/stop_for_question):
           → STOP and report to human
       - BLOCKING: Do NOT proceed to Step 2 until all criteria are verified
       - CRITICAL (manual/stop_for_question): Present unmet criteria with options: (a) address gap, (b) modify criterion, (c) defer
+      - CRITICAL (auto): Resolve unmet criteria via x-ipe-dao-end-user-representative (same options: address, modify, defer)
     </constraints>
     <output>Acceptance criteria verification table with status and evidence</output>
   </step_1>
@@ -323,7 +324,7 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
          IF process_preference.auto_proceed == "auto":
            → Skip human review (auto-proceed mode)
            → Log refactoring recommendation to x-ipe-docs/dao/ semantic log via x-ipe-dao-end-user-representative if refactoring_score < 7
-         ELSE:
+         ELSE (manual/stop_for_question):
            → Present summary to human with clear recommendation on whether refactoring is needed
            → Wait for human acknowledgment
     </action>

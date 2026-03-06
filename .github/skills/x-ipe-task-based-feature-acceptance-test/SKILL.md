@@ -205,7 +205,7 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
     <name>Test Data Preparation</name>
     <action>
       1. IF process_preference.auto_proceed == "auto": skip this step, use placeholder/generated test data
-      2. ELSE:
+      2. ELSE (manual/stop_for_question):
          a. ANALYZE each test case for data requirements (Input, Selection, Expected, Compare)
          b. ASK user for test data per test case (see references/detailed-procedures.md)
          c. UPDATE Test Data table in each test case section
@@ -270,7 +270,7 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
          b. List outdated mockup files and recommend updating them
          c. IF process_preference.auto_proceed == "auto":
             → Log outdated mockup notice via x-ipe-dao-end-user-representative
-         d. ELSE:
+         d. ELSE (manual/stop_for_question):
             → INFORM human: "The following mockup(s) are outdated and were NOT used for UI/UX validation: {filenames}. Consider updating mockups to enable visual comparison in future acceptance tests."
       5. CALCULATE metrics: total, passed, failed, blocked, pass_rate = (passed/total)*100
       6. RETURN task completion output with results

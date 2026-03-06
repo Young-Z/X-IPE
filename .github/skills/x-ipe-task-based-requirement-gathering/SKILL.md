@@ -133,7 +133,8 @@ input:
 
 BLOCKING: Continue asking in Phase 2 until ALL ambiguities are resolved.
 BLOCKING: Each conflict in step 2.2 MUST be decided before proceeding (manual/stop_for_question: human decides; auto: x-ipe-dao-end-user-representative decides).
-BLOCKING (manual/stop_for_question): Human MUST approve requirements before proceeding to Feature Breakdown. Skipped in auto mode.
+BLOCKING (manual/stop_for_question): Human MUST approve requirements before proceeding to Feature Breakdown.
+BLOCKING (auto): Skip human review; proceed automatically after DoD verification.
 
 ---
 
@@ -210,7 +211,7 @@ BLOCKING (manual/stop_for_question): Human MUST approve requirements before proc
             → IF disposition is "clarification" or "reframe" or "critique": refine questions and re-ask
             → IF disposition is "pass_through": escalate to human
             → Document resolved answers immediately
-        3. ELSE:
+        3. ELSE (manual/stop_for_question):
            a. Ask questions in batches of 3-5
            b. Wait for human response before next batch
            c. Document answers immediately
@@ -219,6 +220,7 @@ BLOCKING (manual/stop_for_question): Human MUST approve requirements before proc
       <constraints>
         - BLOCKING: Do not proceed until ALL ambiguities are resolved
         - BLOCKING (manual/stop_for_question): Do not make assumptions - always ask
+        - BLOCKING (auto): Resolve ambiguities via x-ipe-dao-end-user-representative - never stop to ask human
       </constraints>
       <output>Complete set of clarified requirements</output>
     </step_2_1>
@@ -237,7 +239,7 @@ BLOCKING (manual/stop_for_question): Human MUST approve requirements before proc
            - Present conflict summary table
            - Provide recommendation based on: Single Responsibility, Cohesion, Independence, Minimal Coupling
            - IF auto_proceed: use x-ipe-dao-end-user-representative
-           - ELSE: ask human "CR on existing or new standalone feature?"
+           - ELSE (manual/stop_for_question): ask human "CR on existing or new standalone feature?"
         6. Record decisions for each conflict
       </action>
       <constraints>
@@ -298,7 +300,7 @@ BLOCKING (manual/stop_for_question): Human MUST approve requirements before proc
         1. Review all gathered requirements, conflicts, and feasibility assessment
         2. Explicitly define what is IN scope and OUT of scope
         3. IF auto_proceed: make scope decision via x-ipe-dao-end-user-representative, log rationale
-        4. ELSE: present scope summary to human for confirmation
+        4. ELSE (manual/stop_for_question): present scope summary to human for confirmation
         5. Document final scope boundaries
       </action>
       <output>Final scope boundaries (in-scope and out-of-scope items)</output>
@@ -339,7 +341,7 @@ BLOCKING (manual/stop_for_question): Human MUST approve requirements before proc
         3. Review & Decision Gate:
            IF process_preference.auto_proceed == "auto":
              → Skip human review (auto-proceed mode)
-           ELSE:
+           ELSE (manual/stop_for_question):
              → Present requirements document to human for review
              → Wait for human approval → IF rejected → revise
       </action>

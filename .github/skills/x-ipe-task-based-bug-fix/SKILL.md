@@ -232,7 +232,7 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
            → IF disposition is "answer" or "approval" or "instruction": proceed to Step 6
            → IF disposition is "clarification" or "reframe" or "critique": return to Step 4 with updated understanding
            → IF disposition is "pass_through": escalate to human
-         - ELSE:
+         - ELSE (manual/stop_for_question):
            → Present unexpected conflicts to user with clear explanation of what will change
            → Ask user to either: (a) confirm the change is acceptable, OR (b) clarify the original request
            → IF user confirms: proceed to Step 6

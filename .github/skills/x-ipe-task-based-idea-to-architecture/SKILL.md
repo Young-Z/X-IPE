@@ -179,7 +179,7 @@ BLOCKING: Step 5.4 requires approval before proceeding (manual/stop_for_question
               → IF disposition is "answer" or "approval" or "instruction": use returned decision
               → IF disposition is "clarification" or "reframe" or "critique": refine question and re-ask
               → IF disposition is "pass_through": escalate to human
-           - ELSE:
+           - ELSE (manual/stop_for_question):
              → Ask human to select a folder
            - Set current_idea_folder = selected folder
         2. Verify folder exists on disk
@@ -298,7 +298,7 @@ BLOCKING: Step 5.4 requires approval before proceeding (manual/stop_for_question
         1. Review & Decision Gate:
            IF process_preference.auto_proceed == "auto":
              → Skip human review (auto-proceed mode)
-           ELSE:
+           ELSE (manual/stop_for_question):
              → Present diagrams to human for review
              → Wait for human approval
              → IF human rejects → revise

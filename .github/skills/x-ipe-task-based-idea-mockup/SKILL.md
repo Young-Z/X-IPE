@@ -187,7 +187,7 @@ BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
               → IF disposition is "answer" or "approval" or "instruction": use returned decision
               → IF disposition is "clarification" or "reframe" or "critique": refine question and re-ask
               → IF disposition is "pass_through": escalate to human
-           - ELSE:
+           - ELSE (manual/stop_for_question):
              → Ask human: "Which idea folder should I create mockups for?"
              → Wait for selection
            - Set current_idea_folder = selected folder
