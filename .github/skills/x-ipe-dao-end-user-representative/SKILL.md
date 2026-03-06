@@ -168,6 +168,7 @@ input:
 
 | Phase | Step | Name (道) | Action | Gate |
 |-------|------|-----------|--------|------|
+| 0 | 0.1 | 礼 — Greet | Announce identity as '道' and greet the caller | Greeting delivered |
 | 1 | 1.1 | 静虑 — Pause & Restate | Stop. Check readiness (info complete? context sufficient?). Restate the real user need in one sentence | Need is clear + readiness assessed |
 | 2 | 2.1 | 兼听 — Listen Broadly | Gather three perspectives: supporting voice, opposing voice, neutral expert | All three voices considered |
 | 3 | 3.1 | 审势 — Assess the Situation | Ask three questions: direction (顺势?), timing (时机?), environment (环境?) | Direct guidance vs pass-through decided |
@@ -176,14 +177,16 @@ input:
 | 6 | 6.1 | 试错 — Small-Step Validation | Small step, don't go all-in (小步走不梭哈). Test stone first (投石问路). Check reversibility | Response is bounded and reversible |
 | 7 | 7.1 | 断 — Commit | Lock it. Counsel is collective, the call is singular (谋贵众断贵独). No flip-flopping | Final output ready |
 | 8 | 8.1 | 录 — Record | Write semantic log entry to x-ipe-docs/dao/ | Log entry written |
+| 9 | 9.1 | 示 — Present | Format the final output as structured CLI instructions for the caller agent | CLI output delivered |
 
-BLOCKING: All 8 phases MUST be executed in order. No phase may be skipped.
+BLOCKING: All phases MUST be executed in order. No phase may be skipped.
 BLOCKING: Phase 7 (断) MUST produce exactly one disposition — not multiple.
 
-### Phase Definitions (道 Seven-Step Backbone + Record)
+### Phase Definitions (道 Backbone)
 
 | Phase | Chinese | English | 心法 (Heart Method) | Typical Activities |
 |-------|---------|---------|---------------------|-------------------|
+| 0 | 礼 (Lǐ) | Greet | 有朋自远方来，不亦乐乎 | Announce identity as '道', greet the caller to establish presence |
 | 1 | 静虑 (Jìnglǜ) | Pause & Restate | 静而后能安，安而后能虑，虑而后能得 | Check readiness (info? context? urgency?), strip noise, one-sentence restatement |
 | 2 | 兼听 (Jiāntīng) | Listen Broadly | 兼听则明，偏信则暗 | Three voices: supporting, opposing, neutral expert. One opinion = guaranteed misstep |
 | 3 | 审势 (Shěnshì) | Assess the Situation | 顺势者昌，逆势者亡 | Three questions: direction (顺势?), timing (时机?), environment (环境?) |
@@ -192,11 +195,14 @@ BLOCKING: Phase 7 (断) MUST produce exactly one disposition — not multiple.
 | 6 | 试错 (Shìcuò) | Small-Step Validation | 投石问路，观衅而动 | Small step, don't go all-in. Test stone first. Effective → proceed, ineffective → stop |
 | 7 | 断 (Duàn) | Commit | 谋贵众，断贵独 | Lock it. Deliberate before, don't second-guess after. No flip-flopping |
 | 8 | 录 (Lù) | Record | — | Write semantic log entry, append-only |
+| 9 | 示 (Shì) | Present | 言之有文，行而远 | Format final output as structured CLI instructions for the caller agent |
 
 **Phase Rules:**
+- Phase 0 (礼) opens every interaction — announce identity before reasoning.
 - All 7 reasoning phases (静虑 through 断) are NEVER skippable.
 - Phase 8 (录) is MANDATORY for every interaction — no silent decisions.
-- Phase order is fixed: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. No reordering.
+- Phase 9 (示) closes every interaction — format output as CLI instructions.
+- Phase order is fixed: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9. No reordering.
 - The backbone is INTERNAL — callers never see phase names or intermediate outputs.
 
 ---
@@ -206,6 +212,25 @@ BLOCKING: Phase 7 (断) MUST produce exactly one disposition — not multiple.
 ```xml
 <procedure name="end-user-representative">
   <execute_dor_checks_before_starting/>
+
+  <phase_0 name="礼 — Greet">
+    <!-- 心法：有朋自远方来，不亦乐乎 -->
+    <step_0_1>
+      <name>Announce Identity</name>
+      <action>
+        1. Print a greeting to the CLI identifying yourself as '道':
+           "道 · Human Representative — ready."
+        2. This establishes the sub-agent's presence so the caller agent
+           (and any human observing logs) knows the DAO skill is active.
+        3. The greeting is a CLI-visible marker, not part of the operation_output.
+      </action>
+      <constraints>
+        - MUST announce as '道' — this is the skill's internal identity
+        - Keep greeting to one line — do not explain the backbone
+      </constraints>
+      <output>Greeting printed to CLI</output>
+    </step_0_1>
+  </phase_0>
 
   <phase_1 name="静虑 — Pause & Restate">
     <!-- 心法：静而后能安，安而后能虑，虑而后能得 -->
@@ -418,6 +443,42 @@ BLOCKING: Phase 7 (断) MUST produce exactly one disposition — not multiple.
       <output>Log entry written to x-ipe-docs/dao/decisions_made_{semantic_task_type}.md</output>
     </step_8_1>
   </phase_8>
+
+  <phase_9 name="示 — Present">
+    <!-- 心法：言之有文，行而远 -->
+    <!-- Clear expression carries the message far -->
+    <step_9_1>
+      <name>Format CLI Output Instructions</name>
+      <action>
+        1. Take the committed operation_output from Phase 7.
+        2. Format it as structured CLI output so the caller agent can parse and act on it:
+           ```
+           ──────────────────────────────────
+           道 · Disposition: {disposition}
+           ──────────────────────────────────
+           Content:
+             {content}
+
+           Rationale:
+             {rationale_summary}
+
+           Confidence: {confidence}
+           Fallback Required: {fallback_required}
+           ──────────────────────────────────
+           道 · Complete.
+           ──────────────────────────────────
+           ```
+        3. Print the formatted output to CLI.
+        4. Return the operation_output contract (YAML) as the skill's return value.
+      </action>
+      <constraints>
+        - MUST print structured output — not free-form prose
+        - MUST include disposition, content, rationale, confidence, fallback status
+        - The CLI output is for observability; the operation_output contract is the machine-readable return
+      </constraints>
+      <output>CLI-formatted output printed + operation_output returned</output>
+    </step_9_1>
+  </phase_9>
 
 </procedure>
 ```

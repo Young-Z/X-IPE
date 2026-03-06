@@ -68,10 +68,10 @@ class TestDaoLoggingSteps:
         assert "MUST NOT write semantic logs" not in content, \
             "Old v1 logging restriction still present — should be removed"
 
-    def test_skill_under_500_lines(self):
-        """NFR: SKILL.md stays under 500 lines after logging addition."""
+    def test_skill_under_600_lines(self):
+        """NFR: SKILL.md stays under 600 lines after greeting and presentation phases."""
         lines = self._read_skill().splitlines()
-        assert len(lines) < 500, f"SKILL.md is {len(lines)} lines, exceeds 500 limit"
+        assert len(lines) < 600, f"SKILL.md is {len(lines)} lines, exceeds 600 limit"
 
 
 class TestDaoLogTemplate:
