@@ -66,7 +66,7 @@ class TestDaoEndUserSkillContent:
     def test_documents_message_context_contract(self, dao_skill_content):
         assert "message_context:" in dao_skill_content
         assert 'source: "human | ai"' in dao_skill_content
-        assert '<operation name="represent_human_intent">' in dao_skill_content
+        assert '<procedure name="end-user-representative">' in dao_skill_content
 
     def test_documents_supported_dispositions(self, dao_skill_content):
         for disposition in [

@@ -5,9 +5,9 @@ Use this template for skills (type: `x-ipe-dao`) that act as human representativ
 **Section Order (Cognitive Flow):**
 1. CONTEXT: Purpose → Important Notes → About → When to Use
 2. DECISION: Input Parameters → Definition of Ready
-3. ACTION: Operations
+3. ACTION: Execution Flow → Execution Procedure
 4. VERIFY: Output Result → Definition of Done
-5. REFERENCE: Error Handling → References → Examples
+5. REFERENCE: Error Handling → Future Extensions → References → Examples
 
 ---
 
@@ -30,7 +30,7 @@ AI Agents follow this skill to represent human intent at human-required touchpoi
 
 ## Important Notes
 
-BLOCKING: {Critical mediation rule — use common language, avoid "DAO" terminology}
+BLOCKING: {Critical mediation rule — use common language, avoid "DAO" terminology in external surfaces}
 CRITICAL: {Bounded-output or safety rule}
 CRITICAL: {Fallback rule}
 
@@ -114,42 +114,182 @@ input:
     <name>Source identified</name>
     <verification>message_context.source is "human" or "ai"</verification>
   </checkpoint>
+  <checkpoint required="true">
+    <name>Human-shadow policy resolved</name>
+    <verification>human_shadow is initialized (defaults to false)</verification>
+  </checkpoint>
 </definition_of_ready>
 ```
 
 ---
 
-## Operations
+## Execution Flow
 
-### Operation: {Operation Name}
+| Phase | Step | Name (道) | Action | Gate |
+|-------|------|-----------|--------|------|
+| 1 | 1.1 | 静虑 — Pause & Restate | Pause and restate the real user need in one sentence | Need is clear in one sentence |
+| 2 | 2.1 | 兼听 — Listen Broadly | Consider user intent, workflow state, downstream constraints, caller preference hints | All context factors weighed |
+| 3 | 3.1 | 审势 — Assess the Situation | Assess whether direct guidance or pass-through best preserves the workflow | Guidance vs pass-through decided |
+| 4 | 4.1 | 权衡 — Weigh Trade-offs | Compare supported dispositions against user value, scope safety, and confidence | Candidate dispositions ranked |
+| 5 | 5.1 | 谋后而定 — Plan Then Decide | Choose the smallest useful intervention that unblocks the work | One disposition selected |
+| 6 | 6.1 | 试错 — Sanity Check | Sanity-check proposed response for tone, clarity, and unintended scope changes | Response validated |
+| 7 | 7.1 | 断 — Commit | Commit to one disposition and one bounded response | Final output ready |
+| 8 | 8.1 | 录 — Record | Write semantic log entry to x-ipe-docs/dao/ | Log entry written |
 
-**When:** {Condition for representing human intent at this touchpoint}
+BLOCKING: All 8 phases MUST be executed in order. No phase may be skipped.
+BLOCKING: Phase 7 (断) MUST produce exactly one disposition — not multiple.
+
+### Phase Definitions (道 Seven-Step Backbone + Record)
+
+| Phase | Chinese | English | Purpose | Typical Activities |
+|-------|---------|---------|---------|-------------------|
+| 1 | 静虑 (Jìnglǜ) | Pause & Restate | Ground the interaction | Strip noise, restate what the user actually needs |
+| 2 | 兼听 (Jiāntīng) | Listen Broadly | Gather all signal | Read intent, workflow state, constraints, caller hints |
+| 3 | 审势 (Shěnshì) | Assess the Situation | Evaluate the landscape | Direct guidance vs pass-through, risk assessment |
+| 4 | 权衡 (Quánhéng) | Weigh Trade-offs | Compare options | Score dispositions on value, safety, confidence |
+| 5 | 谋后而定 (Móuhòu'érdìng) | Plan Then Decide | Select intervention | Smallest useful action that unblocks work |
+| 6 | 试错 (Shìcuò) | Sanity Check | Validate before commit | Check tone, clarity, scope safety of draft response |
+| 7 | 断 (Duàn) | Commit | Finalize output | Lock disposition, content, rationale, confidence |
+| 8 | 录 (Lù) | Record | Persist the decision | Write semantic log entry |
+
+**Phase Rules:**
+- All 7 reasoning phases (静虑 through 断) are NEVER skippable.
+- Phase 8 (录) is MANDATORY for every interaction — no silent decisions.
+- Phase order is fixed: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. No reordering.
+- The backbone is INTERNAL — callers never see phase names or intermediate outputs.
+
+---
+
+## Execution Procedure
 
 ```xml
-<operation name="{operation_name}">
-  <action>
-    1. Frame the touchpoint:
-       - Read the message content, source, workflow context, and downstream context.
-       - Decide whether the touchpoint is best handled directly or by the downstream agent.
+<procedure name="{skill-name}">
+  <execute_dor_checks_before_starting/>
 
-    2. Run the CORE backbone (道 seven-step reasoning):
-       - 静虑: pause and restate the real user need in one sentence.
-       - 兼听: consider the user intent, workflow state, downstream constraints, and any caller preference hints.
-       - 审势: assess whether direct guidance or pass-through best preserves the workflow.
-       - 权衡: compare supported dispositions against user value, scope safety, and confidence.
-       - 谋后而定: choose the smallest useful intervention that unblocks the work.
-       - 试错: sanity-check the proposed response for tone, clarity, and unintended scope changes.
-       - 断: commit to one disposition and one bounded response.
+  <phase_1 name="静虑 — Pause & Restate">
+    <step_1_1>
+      <name>Restate the User Need</name>
+      <action>
+        1. Read message_context.messages content.
+        2. Strip noise, jargon, and indirection.
+        3. Produce a single clear sentence: "The user needs: {X}."
+      </action>
+      <constraints>
+        - MUST produce exactly one sentence
+        - MUST NOT interpret beyond what the message says
+      </constraints>
+      <output>One-sentence user need statement</output>
+    </step_1_1>
+  </phase_1>
 
-    3. Select a disposition and draft bounded response.
-    4. Score confidence and set fallback flag.
-    5. Return the bounded result.
-  </action>
-  <constraints>
-    - BLOCKING: {constraint}
-  </constraints>
-  <output>{what_is_returned}</output>
-</operation>
+  <phase_2 name="兼听 — Listen Broadly">
+    <step_2_1>
+      <name>Gather All Context Signals</name>
+      <action>
+        1. Read message_context: source, calling_skill, task_id, feature_id, workflow_name, downstream_context.
+        2. Note any preferred_dispositions from the caller.
+        3. Consider what the downstream agent/skill is currently doing.
+        4. Identify any constraints (scope boundaries, blocked states, pending decisions).
+      </action>
+      <output>Context signal summary (internal only)</output>
+    </step_2_1>
+  </phase_2>
+
+  <phase_3 name="审势 — Assess the Situation">
+    <step_3_1>
+      <name>Direct Guidance vs Pass-Through</name>
+      <action>
+        1. Evaluate: can this skill answer directly and safely?
+        2. Evaluate: would the downstream agent provide a better answer?
+        3. Assess risk of direct guidance: scope creep, incorrect assumptions, missing context.
+        4. Decide the primary path: direct guidance or pass-through.
+      </action>
+      <output>Primary path decision (internal only)</output>
+    </step_3_1>
+  </phase_3>
+
+  <phase_4 name="权衡 — Weigh Trade-offs">
+    <step_4_1>
+      <name>Score Candidate Dispositions</name>
+      <action>
+        1. List applicable dispositions: answer, clarification, reframe, critique, instruction, approval, pass_through.
+        2. Score each against: user value, scope safety, confidence level.
+        3. IF preferred_dispositions provided → weight those higher (but do not blindly follow).
+        4. Rank dispositions by composite score.
+      </action>
+      <output>Ranked disposition candidates (internal only)</output>
+    </step_4_1>
+  </phase_4>
+
+  <phase_5 name="谋后而定 — Plan Then Decide">
+    <step_5_1>
+      <name>Select Smallest Useful Intervention</name>
+      <action>
+        1. From ranked candidates, select the top disposition.
+        2. Verify it is the SMALLEST useful intervention — prefer pass_through over answer when downstream can handle it.
+        3. Draft the bounded response content.
+        4. Draft the rationale_summary (one sentence).
+      </action>
+      <constraints>
+        - MUST select exactly one disposition
+        - MUST prefer minimal intervention
+      </constraints>
+      <output>Selected disposition + draft content + draft rationale</output>
+    </step_5_1>
+  </phase_5>
+
+  <phase_6 name="试错 — Sanity Check">
+    <step_6_1>
+      <name>Validate Response Before Commit</name>
+      <action>
+        1. Check tone: is the response respectful and clear?
+        2. Check clarity: would the caller understand what to do next?
+        3. Check scope: does the response introduce unintended scope changes?
+        4. Check boundaries: does the response stay within this skill's bounded role?
+        5. IF any check fails → return to Phase 5 and adjust.
+      </action>
+      <constraints>
+        - MUST NOT pass a response that expands downstream task scope
+        - MUST NOT claim human approval occurred (approval = approval-like guidance)
+      </constraints>
+      <output>Validated response (or loop back to Phase 5)</output>
+    </step_6_1>
+  </phase_6>
+
+  <phase_7 name="断 — Commit">
+    <step_7_1>
+      <name>Finalize Output</name>
+      <action>
+        1. Lock disposition, content, rationale_summary.
+        2. Estimate confidence between 0.0 and 1.0.
+        3. Set fallback_required:
+           - true ONLY if human_shadow == true AND confidence < internal threshold.
+           - false otherwise.
+        4. Assemble operation_output contract.
+      </action>
+      <output>operation_output ready for return</output>
+    </step_7_1>
+  </phase_7>
+
+  <phase_8 name="录 — Record">
+    <step_8_1>
+      <name>Write Semantic Log</name>
+      <action>
+        1. DETERMINE semantic_task_type from calling_skill.
+        2. CHECK if x-ipe-docs/dao/ folder exists; create if not.
+        3. DETERMINE target log file: decisions_made_{semantic_task_type}.md.
+        4. DETERMINE next Entry ID (DAO-{N+1}).
+        5. APPEND registry table row and detail section.
+      </action>
+      <constraints>
+        - MANDATORY: Every interaction MUST produce a log entry — no silent decisions
+        - Log entries are append-only — never edit or delete previous entries
+      </constraints>
+      <output>Log entry written to x-ipe-docs/dao/decisions_made_{semantic_task_type}.md</output>
+    </step_8_1>
+  </phase_8>
+
+</procedure>
 ```
 
 ---
@@ -182,6 +322,10 @@ operation_output:
     <name>Bounded Output Returned</name>
     <verification>No full inner reasoning is exposed</verification>
   </checkpoint>
+  <checkpoint required="true">
+    <name>Semantic Log Written</name>
+    <verification>Log entry appended to x-ipe-docs/dao/decisions_made_{semantic_task_type}.md</verification>
+  </checkpoint>
 </definition_of_done>
 ```
 
@@ -199,9 +343,7 @@ operation_output:
 
 > Reserved for later versions. Do not implement persistence or recall in v1.
 
-- **Semantic Logging:** Deferred to FEATURE-047-B. This skill does not write semantic logs.
-- **Reusable Memory:** Deferred. A future version may add cross-task experience recall. The output contract already supports adding fields (backward-compatible).
-- **Instruction-Resource Interception:** Deferred to FEATURE-047-C.
+- **Reusable Memory:** A future version may add cross-task experience recall. The output contract already supports adding fields (backward-compatible).
 
 ---
 
