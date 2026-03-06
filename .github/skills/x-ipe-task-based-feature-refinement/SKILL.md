@@ -25,6 +25,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 MANDATORY: Every feature MUST have a feature ID in the format `FEATURE-{nnn}` (e.g., FEATURE-001, FEATURE-027). This applies regardless of the output language used.
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters
@@ -124,17 +126,17 @@ MANDATORY: When `mockup_list` is provided, analyze mockups during Step 2 and ext
 
 ## Execution Flow
 
-| Step | Name | Action | Gate |
-|------|------|--------|------|
-| 1 | Query Board | Get Feature Data Model from feature board | Feature data received |
-| 2 | Gather Context | Read requirement-details.md, check dependencies, analyze mockups | Context understood |
-| 3 | Process Mockups | Auto-detect mockups from idea folder if not in feature folder | Mockups processed |
-| 4 | Create Spec | Create/update `specification.md` with all sections | Specification written |
-| 5 | Complete | Verify DoD, output summary, request human review | Human review |
+| Phase | Steps | Action | Gate |
+|-------|-------|--------|------|
+| 1. 博学之 — Study Broadly | 1.1 Query Feature Board, 1.2 Gather Context, 1.3 Process Mockups | Load feature data, read requirements, analyze mockups | Full context gathered |
+| 2. 审问之 — Inquire Thoroughly | 2.1 Specification Review Questions | Challenge spec completeness, probe gaps and assumptions | Questions resolved |
+| 3. 慎思之 — Think Carefully | 3.1 AC Quality Reflection | Assess testability, measurability, completeness of ACs | AC quality validated |
+| 4. 明辨之 — Discern Clearly | 4.1 Specification Scope Decision | Finalize in/out scope, resolve edge cases | Scope decided |
+| 5. 笃行之 — Practice Earnestly | 5.1 Create/Update Specification, 5.2 Complete & Verify | Write specification document, verify DoD | Specification created |
 
-BLOCKING: Step 1 fails if feature not on board or status not "Planned".
-BLOCKING: Step 3 MUST scan for mockups if feature folder has no `mockups/` directory.
-BLOCKING: Human MUST approve specification before Technical Design proceeds.
+BLOCKING: Phase 1 fails if feature not on board or status not "Planned".
+BLOCKING: Step 1.3 MUST scan for mockups if feature folder has no `mockups/` directory.
+BLOCKING (manual/stop_for_question): Human MUST approve specification before Technical Design. Skipped in auto mode.
 
 ---
 
@@ -145,130 +147,151 @@ BLOCKING: Human MUST approve specification before Technical Design proceeds.
   <execute_dor_checks_before_starting/>
   <schedule_dod_checks_with_sub_agent_before_starting/>
 
-  <step_1>
-    <name>Query Feature Board</name>
-    <action>
-      1. CALL x-ipe+feature+feature-board-management skill:
-         operation: query_feature, feature_id: {feature_id from task_data}
-      2. RECEIVE Feature Data Model (feature_id, title, version, status, description, dependencies, timestamps)
-      3. Use data to understand context, check dependencies, get description, determine if specification exists
-    </action>
-    <constraints>
-      - BLOCKING: Feature must exist on board with status "Planned"
-    </constraints>
-    <output>Feature Data Model loaded</output>
-  </step_1>
+  <phase_1 name="博学之 — Study Broadly">
 
-  <step_2>
-    <name>Gather Context</name>
-    <action>
-      0. Resolve extra_context_reference inputs:
-         - FOR EACH ref in [requirement-doc, features-list]:
-           IF workflow mode AND extra_context_reference.{ref} is a file path:
-             READ the file at that path
-           ELIF extra_context_reference.{ref} is "auto-detect":
-             Use existing discovery logic below
-           ELIF extra_context_reference.{ref} is "N/A":
-             Skip this context input
-           ELSE (free-mode / absent):
-             Use existing behavior
-      1. IF x-ipe-docs/requirements/requirement-details.md exists:
-         READ for overall context, related features, business goals
-      2. IF feature has dependencies:
-         FOR EACH dependency -- check if specification exists, read integration points
-      3. IF feature has architecture implications:
-         CHECK x-ipe-docs/architecture/ for relevant designs
-      4. Web search (recommended): domain rules, compliance (GDPR, PCI-DSS, HIPAA),
-         UX best practices, common pitfalls, accessibility (WCAG)
-      5. IF mockup_list is provided:
-         Analyze mockup file(s), extract UI/UX requirements,
-         document in "UI/UX Requirements" section with acceptance criteria,
-         identify gaps (missing interactions, loading/empty/error states)
-    </action>
-    <output>Full context gathered including mockup analysis</output>
-  </step_2>
+    <step_1_1>
+      <name>Query Feature Board</name>
+      <action>
+        1. CALL x-ipe+feature+feature-board-management skill:
+           operation: query_feature, feature_id: {feature_id from task_data}
+        2. RECEIVE Feature Data Model (feature_id, title, version, status, description, dependencies, timestamps)
+        3. Use data to understand context, check dependencies, determine if specification exists
+      </action>
+      <constraints>
+        - BLOCKING: Feature must exist on board with status "Planned"
+      </constraints>
+      <output>Feature Data Model loaded</output>
+    </step_1_1>
 
-  <step_3>
-    <name>Process Mockups</name>
-    <action>
-      MANDATORY: Auto-detect and copy mockups if not in feature folder.
+    <step_1_2>
+      <name>Gather Context</name>
+      <action>
+        0. Resolve extra_context_reference inputs (requirement-doc, features-list)
+        1. IF requirement-details.md exists: read for context, related features, business goals
+        2. IF feature has dependencies: check if specs exist, read integration points
+        3. IF architecture implications: check x-ipe-docs/architecture/
+        4. Web search: domain rules, compliance, UX best practices, accessibility (WCAG)
+        5. IF mockup_list provided: analyze mockups, extract UI/UX requirements, identify gaps
+      </action>
+      <output>Full context gathered including mockup analysis</output>
+    </step_1_2>
 
-      1. CHECK x-ipe-docs/requirements/{FEATURE-ID}/mockups/
-         IF exists AND contains files -- skip to Step 4
-      2. IF mockups NOT in feature folder:
-         a. Check requirement-details.md for idea folder reference
-         b. IF idea folder exists -- scan x-ipe-docs/ideas/{idea-folder}/mockups/
-         c. IF mockups found:
-            - Create x-ipe-docs/requirements/{FEATURE-ID}/mockups/
-            - Copy ALL mockup files from idea folder
-            - Update mockup_list with copied paths
-      3. IF mockup_list provided AND not yet copied:
-         - Create mockups folder, copy each mockup, update paths
-      4. IF no mockups found -- log and proceed
-    </action>
-    <constraints>
-      - CRITICAL: Only copy if mockups NOT already in feature folder (avoid duplicates)
-      - Preserve original filenames when copying
-      - Create mockups folder only if mockups found
-    </constraints>
-    <output>Mockups in feature folder (or confirmed absent)</output>
-  </step_3>
+    <step_1_3>
+      <name>Process Mockups</name>
+      <action>
+        1. CHECK x-ipe-docs/requirements/{FEATURE-ID}/mockups/
+           IF exists AND contains files → skip
+        2. IF mockups NOT in feature folder:
+           a. Check requirement-details.md for idea folder reference
+           b. IF idea folder exists → scan x-ipe-docs/ideas/{idea-folder}/mockups/
+           c. IF mockups found: create folder, copy ALL mockup files, update paths
+        3. IF mockup_list provided AND not yet copied: create folder, copy, update paths
+        4. IF no mockups found → log and proceed
+      </action>
+      <constraints>
+        - CRITICAL: Only copy if NOT already in feature folder
+      </constraints>
+      <output>Mockups in feature folder (or confirmed absent)</output>
+    </step_1_3>
 
-  <step_4>
-    <name>Create/Update Feature Specification</name>
-    <action>
-      1. Create or update: x-ipe-docs/requirements/FEATURE-XXX/specification.md
-      2. Follow specification template structure from references/specification-template.md
-      3. Include all sections: Version History, Linked Mockups (if applicable),
-         Overview, User Stories, Acceptance Criteria, Functional Requirements,
-         Non-Functional Requirements, UI/UX Requirements, Dependencies,
-         Business Rules, Edge Cases, Out of Scope, Technical Considerations, Open Questions
-      4. IF mockups exist in FEATURE-XXX/mockups/:
-         a. Assess mockup freshness -- compare mockup content against current feature scope:
-            - IF mockup aligns with current feature scope: mark as "current" in Linked Mockups table
-            - IF mockup is outdated (feature scope changed significantly since mockup was created): mark as "outdated -- use as directional reference only"
-         b. For each current (non-outdated) mockup, add acceptance criteria that reference mockup comparison:
-            - AC: "UI layout MUST match the approved mockup ({mockup-filename}) for [component/screen]"
-            - AC: "Visual styling (colors, spacing, typography) MUST be consistent with mockup ({mockup-filename})"
-            - AC: "Interactive elements shown in mockup ({mockup-filename}) MUST be present and functional"
-         c. For outdated mockups, do NOT add mockup-comparison ACs -- instead note in UI/UX Requirements:
-            "Mockup {filename} is outdated; use as directional reference only. Implementation should follow the updated requirements in this specification."
-    </action>
-    <constraints>
-      - MANDATORY: Single file with version history (no versioned filenames)
-      - CRITICAL: Focus on WHAT not HOW in Technical Considerations
-      - CRITICAL: Only add mockup-comparison ACs for current mockups, never for outdated ones
-      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
-      - See references/specification-template.md for full structure
-      - See references/specification-writing-guide.md for detailed guidance
-    </constraints>
-    <success_criteria>
-      - All specification sections completed
-      - Acceptance criteria are testable and measurable
-      - Dependencies documented
-      - Edge cases identified
-      - If current mockups exist, ACs reference mockup comparison
-    </success_criteria>
-    <output>specification.md created/updated</output>
-  </step_4>
+  </phase_1>
 
-  <step_5>
-    <name>Complete</name>
-    <action>
-      1. IF execution_mode == "workflow-mode":
-         a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
-            - workflow_name: {from context}
-            - action: {workflow.action}
-            - status: "done"
-            - feature_id: {feature_id}
-            - deliverables: {"specification": "{path to specification.md}", "feature-docs-folder": "{path to FEATURE-XXX/ folder}"}
-         b. Log: "Workflow action status updated to done"
-      2. Verify all DoD checkpoints
-      3. Output task completion summary
-      4. Request human review
-    </action>
-    <output>Task completion output with specification path, workflow_action_updated</output>
-  </step_5>
+  <phase_2 name="审问之 — Inquire Thoroughly">
+
+    <step_2_1>
+      <name>Specification Review Questions</name>
+      <action>
+        1. Review gathered context and identify gaps:
+           - Are user stories comprehensive? Missing personas?
+           - Are acceptance criteria testable and measurable?
+           - Are edge cases documented?
+           - Are dependencies clearly identified?
+           - Are non-functional requirements addressed?
+        2. IF auto_proceed: use decision-making tool to self-resolve questions, log answers
+        3. ELSE: ask human about identified gaps (batch 3-5 questions)
+        4. Document all answers and clarifications
+      </action>
+      <constraints>
+        - CRITICAL: Do not skip — incomplete specs lead to incorrect implementations
+      </constraints>
+      <output>Clarified specification requirements with all gaps addressed</output>
+    </step_2_1>
+
+  </phase_2>
+
+  <phase_3 name="慎思之 — Think Carefully">
+
+    <step_3_1>
+      <name>AC Quality Reflection</name>
+      <action>
+        1. For each acceptance criterion, verify:
+           - Is it specific (not vague)?
+           - Is it measurable (can be tested programmatically)?
+           - Is it achievable (technically feasible)?
+           - Is it relevant (directly tied to a user story)?
+        2. Flag any ACs that fail SMART criteria
+        3. Identify missing ACs for: error states, loading states, empty states, edge cases
+        4. Consider testability: can each AC be verified with an automated test?
+      </action>
+      <output>AC quality assessment with improvement recommendations</output>
+    </step_3_1>
+
+  </phase_3>
+
+  <phase_4 name="明辨之 — Discern Clearly">
+
+    <step_4_1>
+      <name>Specification Scope Decision</name>
+      <action>
+        1. Review all gathered context, questions, and AC assessment
+        2. Decide final scope: what's IN scope vs OUT of scope
+        3. Resolve any remaining edge case decisions
+        4. IF mockups exist: decide freshness status (current vs outdated)
+        5. IF auto_proceed: log scope decisions via decision-making tool
+        6. ELSE: present scope summary to human for confirmation
+      </action>
+      <output>Final specification scope with all decisions documented</output>
+    </step_4_1>
+
+  </phase_4>
+
+  <phase_5 name="笃行之 — Practice Earnestly">
+
+    <step_5_1>
+      <name>Create/Update Feature Specification</name>
+      <action>
+        1. Create or update: x-ipe-docs/requirements/FEATURE-XXX/specification.md
+        2. Follow specification-template.md structure
+        3. Include all sections: Version History, Linked Mockups, Overview, User Stories,
+           Acceptance Criteria, Functional Requirements, NFRs, UI/UX Requirements,
+           Dependencies, Business Rules, Edge Cases, Out of Scope, Technical Considerations
+        4. IF mockups exist and marked "current":
+           a. Add mockup-comparison ACs (layout, styling, interactive elements)
+        5. IF mockups marked "outdated": note as directional reference only
+      </action>
+      <constraints>
+        - MANDATORY: Single file with version history
+        - CRITICAL: Focus on WHAT not HOW in Technical Considerations
+        - CRITICAL: Only add mockup-comparison ACs for current mockups
+        - MANDATORY: Use full project-root-relative paths for links
+      </constraints>
+      <output>specification.md created/updated</output>
+    </step_5_1>
+
+    <step_5_2>
+      <name>Complete & Verify</name>
+      <action>
+        1. IF workflow-mode: call update_workflow_action with:
+           - workflow_name, action, status: "done", feature_id
+           - deliverables: {"specification": "{path}", "feature-docs-folder": "{path}"}
+        2. Verify all DoD checkpoints
+        3. IF auto_proceed: skip human review
+        4. ELSE: present specification to human, wait for approval
+      </action>
+      <output>Task completion output with specification path, workflow_action_updated</output>
+    </step_5_2>
+
+  </phase_5>
 
 </procedure>
 ```
@@ -354,61 +377,12 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Patterns & Anti-Patterns
 
-### Pattern: Mockup-Driven Refinement
-
-**When:** Mockup List is provided from Idea Mockup task
-**Then:**
-```
-1. Open and thoroughly analyze mockup file(s)
-2. Assess mockup freshness against current feature scope:
-   - Current: scope unchanged since mockup creation → add mockup-comparison ACs
-   - Outdated: scope changed significantly → mark outdated, use as directional reference only
-3. Extract all visible UI elements and interactions
-4. Create UI/UX Requirements section with:
-   - Component inventory from mockup
-   - User interaction flows
-   - Form validation rules
-   - Error/empty/loading states
-5. Add "Linked Mockups" section at top of specification (with status column)
-6. For current mockups: add ACs like "UI layout MUST match mockup ({filename})"
-7. Cross-reference acceptance criteria to mockup elements
-8. Note any functionality implied by mockup not in requirements
-```
-
-### Pattern: Well-Defined Feature
-
-**When:** Feature has clear scope from breakdown
-**Then:**
-```
-1. Query feature board for context
-2. Read requirement-details.md
-3. Create specification with standard sections
-4. Request human review
-```
-
-### Pattern: Feature with Dependencies
-
-**When:** Feature depends on other features
-**Then:**
-```
-1. Read dependent feature specifications first
-2. Identify integration points
-3. Document assumptions about dependencies
-4. Note blocking vs non-blocking dependencies
-```
-
-### Pattern: Complex Domain
-
-**When:** Feature involves unfamiliar domain rules
-**Then:**
-```
-1. Research domain best practices (web search)
-2. Document compliance requirements
-3. Include domain glossary in specification
-4. Ask human for domain-specific clarifications
-```
-
-### Anti-Patterns
+| Pattern | When | Then |
+|---------|------|------|
+| Mockup-Driven | Mockup list provided | Assess freshness, extract UI elements, add mockup-comparison ACs for current mockups |
+| Well-Defined Feature | Clear scope from breakdown | Query board → read requirements → create specification |
+| Feature with Dependencies | Depends on other features | Read dependent specs, identify integration points, document assumptions |
+| Complex Domain | Unfamiliar domain rules | Web research, document compliance, include domain glossary |
 
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
@@ -416,11 +390,8 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Vague acceptance criteria | Untestable | Make criteria specific and measurable |
 | Technical implementation details | Wrong focus | Focus on WHAT, not HOW |
 | Ignore dependencies | Integration failures | Document all dependencies |
-| Multiple specification files | Version confusion | Single file with version history |
-| Skip web research | Reinvent wheel | Research domain best practices |
 | Ignore mockup when provided | Missing UI requirements | Always analyze mockup_list |
-| Skip mockup-to-spec mapping | Incomplete specification | Extract all UI elements from mockup |
-| Compare against outdated mockup | Wrong ACs, blocks progress | Check mockup freshness; only add comparison ACs for current mockups |
+| Compare against outdated mockup | Wrong ACs | Check freshness; only add ACs for current mockups |
 
 ---
 

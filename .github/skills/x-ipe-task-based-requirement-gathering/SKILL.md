@@ -31,6 +31,8 @@ MANDATORY: Every requirement MUST create an Epic with ID format `EPIC-{nnn}` (e.
 
 > **Transition Note:** During migration, both old (`FEATURE-{nnn}/`) and new (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`) folder structures may coexist. Skills must handle both formats when scanning existing files.
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters

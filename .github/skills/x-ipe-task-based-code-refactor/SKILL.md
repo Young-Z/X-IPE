@@ -28,6 +28,8 @@ This skill is the **single entry point** for all refactoring work. It orchestrat
 
 BLOCKING: If user requests "refactor", "analyze for refactoring", or "assess code quality" — this skill handles it. Do NOT redirect to separate analysis skills.
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters

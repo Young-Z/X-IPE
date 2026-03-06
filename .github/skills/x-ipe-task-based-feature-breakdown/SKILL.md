@@ -1,17 +1,18 @@
 ---
 name: x-ipe-task-based-feature-breakdown
-description: Break requirements into high-level features and create feature list in requirement-details.md (or current active part). Calls feature-board-management to initialize feature tracking. Use when requirements are gathered and need to be split into discrete features. Triggers on requests like "break down features", "split into features", "create feature list".
+description: Break requirements into Epics and features. Assesses scope to determine Epic grouping, then breaks each Epic into features with MVP-first criteria. Calls feature-board-management to initialize tracking. Use when requirements need to be split into discrete features. Triggers on requests like "break down features", "split into features", "create feature list", "organize epics".
 ---
 
 # Task-Based Skill: Feature Breakdown
 
 ## Purpose
 
-Break user requests into high-level features by:
+Break user requests into Epics and features by:
 1. Analyzing requirement documentation (or current active part)
-2. Identifying feature boundaries using MVP-first criteria
-3. Creating feature list in requirement-details.md (or current active part)
-4. Calling feature-board-management to create features on board
+2. Assessing scope to determine Epic-level grouping
+3. Identifying feature boundaries within each Epic using MVP-first criteria
+4. Creating feature list in requirement-details.md (or current active part)
+5. Calling feature-board-management to create features on board
 
 ---
 
@@ -30,17 +31,19 @@ MANDATORY: Every feature MUST have a feature ID in the format `FEATURE-{nnn}-{X}
 > **Transition Note:** During migration, both old (`FEATURE-{nnn}/`) and new (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`) folder structures may coexist. Skills must handle both formats when scanning existing files.
 
 See [references/breakdown-guidelines.md](.github/skills/x-ipe-task-based-feature-breakdown/references/breakdown-guidelines.md) for:
-- Feature dependency patterns (sequential, parallel, multiple) and rules (no cycles, foundation first)
+- Epic granularity heuristics and grouping decision matrix
+- Feature dependency patterns (sequential, parallel, multiple) and rules
 - Feature sizing guidelines, naming conventions, version numbering rules
 - Mockup processing procedures and examples
 - Feature board integration details and call format
-- Full file structure templates (single file and part files)
 
 Additional notes:
 - All features are consolidated in requirement-details.md (no individual feature.md files)
 - Feature board (features.md) is the status tracking system
 - Feature specifications are created later during Feature Refinement
-- Keep feature descriptions concise (50 words max) in the table; more details go in the feature details section
+- Keep feature descriptions concise (50 words max) in the table
+
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -131,25 +134,19 @@ mockup_list:
 
 ## Execution Flow
 
-| Step | Name | Action | Gate |
-|------|------|--------|------|
-| 1 | Analyze | Read requirement-details.md (or current active part) or user request | Requirements understood |
-| 2 | Evaluate Complexity | Count ACs, assess scope dimensions, apply sizing heuristics, identify split boundaries | Split decision made |
-| 3 | Identify Features | Extract features using MVP-first criteria (informed by complexity evaluation) | Features identified |
-| 4 | Process Mockups | Auto-detect mockups from idea folder, copy to feature folders | Mockups processed |
-| 5 | Create Summary | Create/update requirement-details file with feature list | Summary written |
-| 6 | Update Board | Call feature-board-management to create features | Board updated |
-| 7 | Update Index | If parts exist, update requirement-details-index.md | Index updated |
-| 8 | Dedup Check | Verify parent features fully covered by sub-features, remove duplicates | Dedup verified |
-| 9 | Complete | Verify DoD, output summary, request human review | Human review |
+| Phase | Steps | Action | Gate |
+|-------|-------|--------|------|
+| 1. 博学之 — Study Broadly | 1.1 Analyze Requirements, 1.2 Assess Epic Scope | Read requirements, evaluate scope and Epic grouping | Requirements and Epic structure understood |
+| 2. 审问之 — Inquire Thoroughly | 2.1 Scope Challenge | Challenge scope assumptions, question feature necessity | Scope validated |
+| 3. 慎思之 — Think Carefully | 3.1 Evaluate Complexity, 3.2 Identify Features | Count ACs, assess dimensions, identify feature boundaries | Features identified |
+| 4. 明辨之 — Discern Clearly | 4.1 MVP Prioritization Decision | Decide MVP order, validate dependency DAG | MVP and order decided |
+| 5. 笃行之 — Practice Earnestly | 5.1 Process Mockups, 5.2 Create Summary, 5.3 Update Board, 5.4 Complete | Execute all deliverables | All artifacts created |
 
 BLOCKING: If parts exist, work with the CURRENT ACTIVE PART (highest part number).
 BLOCKING: Features with more than 20 ACs MUST be split into sub-features.
-BLOCKING: First feature MUST be "Minimum Runnable Feature" (MVP).
-BLOCKING: MUST scan idea folder for mockups before skipping (auto-detection required).
-BLOCKING: Feature List goes into the PART FILE, not the index.
+BLOCKING: First feature in each Epic MUST be "Minimum Runnable Feature" (MVP).
 BLOCKING: MUST use feature-board-management skill (not manual file editing).
-BLOCKING: Human MUST approve feature list before refinement proceeds.
+BLOCKING (manual/stop_for_question): Human MUST approve feature list before refinement. Skipped in auto mode.
 
 ---
 
@@ -160,227 +157,168 @@ BLOCKING: Human MUST approve feature list before refinement proceeds.
   <execute_dor_checks_before_starting/>
   <schedule_dod_checks_with_sub_agent_before_starting/>
 
-  <step_1>
-    <name>Analyze Requirements</name>
-    <action>
-      0. Resolve extra_context_reference inputs:
-         - FOR ref requirement-doc:
-           IF workflow mode AND extra_context_reference.requirement-doc is a file path:
-             READ the file at that path (skip auto-detection in sub-step 1)
-           ELIF extra_context_reference.requirement-doc is "auto-detect":
-             Use existing discovery logic below
-           ELIF extra_context_reference.requirement-doc is "N/A":
-             Skip this context input
-           ELSE (free-mode / absent):
-             Use existing behavior
-      1. Determine which file to read:
-         a. Check if x-ipe-docs/requirements/requirement-details-part-X.md files exist
-         b. IF parts exist -- read the CURRENT ACTIVE PART (highest part number)
-         c. ELSE IF x-ipe-docs/requirements/requirement-details.md exists -- read it
-         d. ELSE -- analyze user request directly
-      2. Read the determined file:
-         - Understand existing requirement summary
-         - Identify features from requirements
-      3. Look for: verbs (actions), nouns (entities), boundaries (function edges), user goals
-    </action>
-    <constraints>
-      - BLOCKING: If parts exist, MUST use current active part (highest number)
-    </constraints>
-    <output>Requirements understood, feature candidates identified</output>
-  </step_1>
+  <phase_1 name="博学之 — Study Broadly">
 
-  <step_2>
-    <name>Evaluate Complexity</name>
-    <action>
-      Before identifying features, evaluate the proposed feature's complexity to determine
-      whether splitting is needed and where natural boundaries exist.
+    <step_1_1>
+      <name>Analyze Requirements</name>
+      <action>
+        0. Resolve extra_context_reference inputs:
+           - FOR ref requirement-doc:
+             IF workflow mode AND extra_context_reference.requirement-doc is a file path:
+               READ the file at that path
+             ELIF "auto-detect": Use existing discovery logic
+             ELIF "N/A": Skip
+             ELSE (free-mode): Use existing behavior
+        1. Determine file: check for requirement-details-part-X.md (use highest), else requirement-details.md, else user request
+        2. Read and understand requirement summary
+        3. Identify: verbs (actions), nouns (entities), boundaries, user goals, domain clusters
+      </action>
+      <constraints>
+        - BLOCKING: If parts exist, MUST use current active part (highest number)
+      </constraints>
+      <output>Requirements understood, capability areas and domain clusters identified</output>
+    </step_1_1>
 
-      1. Count acceptance criteria (ACs):
-         - Total AC count across all groups
-         - AC count per logical group (if grouped)
-      2. Assess scope dimensions:
-         - How many distinct technical layers? (service, API, CLI, UI, config)
-         - How many distinct user-facing capabilities?
-         - How many new files/modules estimated?
-      3. Apply sizing heuristics (see references/breakdown-guidelines.md):
-         - Under 10 ACs: likely single feature (no split needed)
-         - 10-20 ACs: evaluate — split if multiple distinct capabilities
-         - Over 20 ACs: MUST split into sub-features
-      4. Identify natural split boundaries:
-         - AC groups that map to independent deliverables
-         - Technical layers that can be developed/tested in isolation
-         - Dependency chains (foundation vs consumers)
-      5. Determine split strategy:
-         - IF no split needed: proceed with single feature to Step 3
-         - IF split needed: identify sub-feature candidates with clear boundaries
-    </action>
-    <constraints>
-      - BLOCKING: Features with more than 20 ACs MUST be split
-      - CRITICAL: Split boundaries must align with testable, deliverable units
-      - CRITICAL: Each sub-feature must be independently valuable when completed
-    </constraints>
-    <output>Complexity assessment with split decision and boundary candidates</output>
-  </step_2>
+    <step_1_2>
+      <name>Assess Epic Scope</name>
+      <action>
+        1. Evaluate scope signals: estimated feature count, domain diversity, dependency clusters
+        2. Apply Epic grouping matrix (see references/breakdown-guidelines.md):
+           - 1 domain, ≤7 features → Single Epic
+           - 2-3 domains, 8-15 features → 2-3 Epics
+           - 4+ domains OR >15 features → Multiple Epics
+        3. IF single Epic: assign EPIC-{nnn}, create folder
+        4. IF multiple Epics: define boundaries, name each, assign sequential IDs, create folders
+        5. Document Epic assessment decision with rationale
+      </action>
+      <constraints>
+        - BLOCKING: Epic structure must be decided BEFORE feature identification
+      </constraints>
+      <output>Epic structure with IDs, names, domains, dependencies</output>
+    </step_1_2>
 
-  <step_3>
-    <name>Identify Features</name>
-    <action>
-      Apply feature identification criteria:
-      1. Assign Feature IDs as FEATURE-{nnn}-{A|B|C...} where {nnn} matches parent Epic number.
-         First feature gets suffix A, second gets B, etc.
-      2. Prioritize MVP: first feature MUST be the "Minimum Runnable Feature"
-         - Small but sufficient to demonstrate the core value loop
-      2. Iterative Expansion: subsequent features build upon the first
-      3. Single Responsibility: each feature does one thing well
-      4. Independent: can be developed/tested in isolation (mostly)
-      5. Deliverable Value: provides value when completed
-      6. Reasonable Size: fits within a development sprint
-    </action>
-    <constraints>
-      - BLOCKING: First feature MUST be MVP (runnable core loop)
-      - CRITICAL: Minimize cross-feature dependencies
-      - Limit to 5-7 features maximum
-    </constraints>
-    <output>Feature list with IDs, titles, descriptions, dependencies</output>
-  </step_3>
+  </phase_1>
 
-  <step_4>
-    <name>Process Mockups</name>
-    <action>
-      MANDATORY: Auto-detect mockups if not provided.
+  <phase_2 name="审问之 — Inquire Thoroughly">
 
-      1. IF mockup_list empty -- scan EPIC-{nnn}/mockups/ (shared Epic-level mockups)
-      2. IF still empty -- scan x-ipe-docs/ideas/{idea-folder}/mockups/
-      3. IF still empty -- skip to Step 5
-      4. Mockups remain at EPIC-{nnn}/mockups/ (shared) — do NOT create per-feature mockup folders
-      5. Features reference mockups via ../mockups/ relative path
-      6. Link in requirement-details.md
+    <step_2_1>
+      <name>Scope Challenge</name>
+      <action>
+        1. For each identified domain/capability area, challenge assumptions:
+           - Is this capability truly needed for the MVP?
+           - Can this be deferred to a later version?
+           - Does this overlap with existing features in the system?
+        2. IF auto_proceed: use decision-making tool to self-resolve scope questions
+        3. ELSE: present scope challenges to human, ask for confirmation
+        4. Document scope decisions and rationale
+      </action>
+      <constraints>
+        - CRITICAL: Challenge scope BEFORE breaking down into features
+      </constraints>
+      <output>Validated scope with challenge decisions documented</output>
+    </step_2_1>
 
-      See: references/breakdown-guidelines.md for detailed procedures.
-    </action>
-    <constraints>
-      - CRITICAL: Only copy if mockups NOT already in feature folder (avoid duplicates)
-      - Preserve original filenames when copying
-    </constraints>
-    <output>Mockups in feature folders (or confirmed absent)</output>
-  </step_4>
+  </phase_2>
 
-  <step_5>
-    <name>Create/Update Requirement Summary</name>
-    <action>
-      1. Determine target file:
-         - IF parts exist -- update CURRENT ACTIVE PART (highest part number)
-         - ELSE -- update x-ipe-docs/requirements/requirement-details.md
-      2. Add Feature List table:
+  <phase_3 name="慎思之 — Think Carefully">
 
-         | Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
-         |------------|---------|---------------|---------|-------------------|-------------------|
-         | FEATURE-001-A | EPIC-001 | ... | v1.0 | ... | None |
-         | FEATURE-001-B | EPIC-001 | ... | v1.0 | ... | FEATURE-001-A |
+    <step_3_1>
+      <name>Evaluate Complexity</name>
+      <action>
+        1. Count ACs per Epic (total and per logical group)
+        2. Assess scope dimensions: technical layers, user-facing capabilities, new files
+        3. Apply sizing heuristics (see references/breakdown-guidelines.md):
+           - <10 ACs: likely single feature
+           - 10-20 ACs: evaluate split if multiple capabilities
+           - >20 ACs: MUST split
+        4. Identify natural split boundaries within each Epic
+      </action>
+      <constraints>
+        - BLOCKING: Features with more than 20 ACs MUST be split
+      </constraints>
+      <output>Per-Epic complexity assessment with split decisions</output>
+    </step_3_1>
 
-         ⛔ **Feature ID column MUST only contain `FEATURE-{nnn}-{X}` values — NEVER `EPIC-{nnn}`.** Epic IDs go in the Epic ID column only.
+    <step_3_2>
+      <name>Identify Features</name>
+      <action>
+        1. Assign Feature IDs: FEATURE-{nnn}-{A|B|C...} where {nnn} matches Epic number
+        2. Apply feature criteria: Single Responsibility, Independent, Deliverable Value, Reasonable Size
+        3. First feature = MVP (Minimum Runnable Feature)
+        4. Subsequent features build upon first
+      </action>
+      <constraints>
+        - BLOCKING: First feature per Epic MUST be MVP
+        - Limit to 5-7 features per Epic maximum
+      </constraints>
+      <output>Feature list with IDs, titles, descriptions, dependencies per Epic</output>
+    </step_3_2>
 
-      3. Add detailed sections for each feature
+  </phase_3>
 
-      See: references/breakdown-guidelines.md for file structure templates.
-    </action>
-    <constraints>
-      - BLOCKING: Feature List goes into the PART FILE, NOT the index
-      - Each part file has its OWN Feature List section
-      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
-    </constraints>
-    <output>Requirement-details file updated with feature list and details</output>
-  </step_5>
+  <phase_4 name="明辨之 — Discern Clearly">
 
-  <step_6>
-    <name>Update Feature Board</name>
-    <action>
-      CALL x-ipe+feature+feature-board-management skill:
-        operation: create_or_update_features
-        features:
-          - feature_id: FEATURE-001-A
-            epic_id: EPIC-001
-            title: "{title}"
-            version: v1.0
-            description: "{description}"
-            dependencies: []
-          [... for all features]
-    </action>
-    <constraints>
-      - BLOCKING: MUST use feature-board-management skill (not manual file editing)
-    </constraints>
-    <output>Features created on x-ipe-docs/planning/features.md with status "Planned"</output>
-  </step_6>
+    <step_4_1>
+      <name>MVP Prioritization Decision</name>
+      <action>
+        1. Review feature list across all Epics
+        2. Validate MVP selection: does first feature provide minimum runnable value?
+        3. Validate dependency DAG: no circular dependencies, clear implementation order
+        4. IF auto_proceed: confirm via decision-making tool
+        5. ELSE: present prioritized list to human for confirmation
+        6. Finalize feature order and dependency graph
+      </action>
+      <output>Confirmed feature prioritization with validated dependency DAG</output>
+    </step_4_1>
 
-  <step_7>
-    <name>Update Index</name>
-    <action>
-      Only execute if requirement-details-part-X.md files exist:
-      1. Open x-ipe-docs/requirements/requirement-details-index.md
-      2. Update "Parts Overview" table with new feature range
-      3. Update "Lines" column with approximate line count
+  </phase_4>
 
-      See: references/breakdown-guidelines.md for index file structure.
-    </action>
+  <phase_5 name="笃行之 — Practice Earnestly">
 
-    <output>Index updated (or skipped if no parts)</output>
-  </step_7>
+    <step_5_1>
+      <name>Process Mockups</name>
+      <action>
+        1. IF mockup_list empty: scan EPIC-{nnn}/mockups/ then x-ipe-docs/ideas/{idea-folder}/mockups/
+        2. IF still empty: skip
+        3. Mockups stay at EPIC-{nnn}/mockups/ (shared), features reference via ../mockups/
+      </action>
+      <constraints>
+        - CRITICAL: Only copy if NOT already in feature folder
+      </constraints>
+      <output>Mockups in Epic folders (or confirmed absent)</output>
+    </step_5_1>
 
-  <step_8>
-    <name>Parent Feature Deduplication Check</name>
-    <action>
-      1. IF no feature was split into sub-features (no parent-child relationship created):
-         - Skip this step entirely
-      2. For each parent feature that was split (e.g., FEATURE-001 → FEATURE-001-A, B, C):
-         a. List the parent's FRs/ACs from requirement-details
-         b. List the union of all sub-features' FRs/ACs
-         c. Compare coverage:
-            - For each parent FR/AC, check if it is covered by at least one sub-feature
-         d. Produce a coverage table:
-            | Parent FR/AC | Covered By | Status |
-            |-------------|------------|--------|
-            | FR-001.1 | FEATURE-001-A (FR-001-A.1) | ✅ Covered |
-            | FR-001.2 | FEATURE-001-B (FR-001-B.3) | ✅ Covered |
-            | FR-001.5 | — | ❌ Gap |
-      3. IF 100% coverage (all parent FRs/ACs covered by sub-features):
-         - Remove parent feature from requirement-details file (keep sub-features only)
-         - CALL feature-board-management to archive/remove parent feature from board
-         - Log: "Parent {FEATURE-XXX} fully covered by sub-features, removed to avoid duplication"
-      4. IF partial coverage (some parent FRs/ACs not covered):
-         - Keep parent feature in requirement-details
-         - Add note to parent: "Partially split — uncovered items: {list}"
-         - Flag gap for human review in Step 9
-    </action>
-    <constraints>
-      - BLOCKING: MUST use feature-board-management skill to remove parent (not manual editing)
-      - CRITICAL: Only remove parent when 100% coverage confirmed
-      - CRITICAL: Coverage comparison must be FR/AC level, not just title matching
-    </constraints>
-    <output>Dedup result: parents removed or gaps flagged</output>
-  </step_8>
+    <step_5_2>
+      <name>Create Summary & Update Board</name>
+      <action>
+        1. Determine target file (current active part or requirement-details.md)
+        2. Add Feature List table:
+           | Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+        3. Add detailed sections for each feature
+        4. CALL x-ipe+feature+feature-board-management skill to create all features
+        5. IF parts exist: update requirement-details-index.md
+        6. IF features were split: run parent dedup check (100% coverage → remove parent)
+      </action>
+      <constraints>
+        - BLOCKING: Feature List goes into PART FILE, NOT index
+        - BLOCKING: MUST use feature-board-management skill
+        - MANDATORY: Use full project-root-relative paths
+      </constraints>
+      <output>Requirement-details updated, features on board with status "Planned"</output>
+    </step_5_2>
 
-  <step_9>
-    <name>Complete</name>
-    <action>
-      1. IF execution_mode == "workflow-mode":
-         a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
-            - workflow_name: {from context}
-            - action: {workflow.action}
-            - status: "done"
-            - deliverables: {"features-list": "{path to features list file}", "breakdown-folder": "{path to breakdown/ folder}"}
-            - features: [list of feature objects from Step 6, each with id, name, depends_on]
-              Example: [{"id": "FEATURE-001-A", "name": "Login Page", "depends_on": []},
-                        {"id": "FEATURE-001-B", "name": "Dashboard", "depends_on": ["FEATURE-001-A"]}]
-         b. Log: "Workflow action status updated to done with features"
-         NOTE: The tool automatically populates per-feature workflow structures and
-               sets next_actions_suggested to features with no dependencies.
-               No separate add_features API call is needed.
-      2. Verify all DoD checkpoints
-      3. Output task completion summary
-      4. Request human review
-    </action>
-    <output>Task completion output, workflow_action_updated</output>
-  </step_9>
+    <step_5_3>
+      <name>Complete & Verify</name>
+      <action>
+        1. IF workflow-mode: call update_workflow_action with status "done", features list
+        2. Verify all DoD checkpoints
+        3. IF auto_proceed: skip human review
+        4. ELSE: present feature breakdown to human, wait for approval
+      </action>
+      <output>Task completion output, workflow_action_updated</output>
+    </step_5_3>
+
+  </phase_5>
 
 </procedure>
 ```
@@ -394,24 +332,26 @@ task_completion_output:
   category: "requirement-stage"
   status: completed | blocked
   next_task_based_skill: "x-ipe-task-based-feature-refinement"
+  require_human_review: yes
   process_preference:
     auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
-  workflow_action: "{workflow.action}"      # triggers workflow status update when execution_mode == workflow-mode
-  workflow_action_updated: true | false # true if update_workflow_action was called
+  workflow_action: "{workflow.action}"
+  workflow_action_updated: true | false
   task_output_links:
-    - "x-ipe-docs/requirements/requirement-details.md"  # or requirement-details-part-X.md
+    - "x-ipe-docs/requirements/requirement-details.md"
   mockup_list: "{inherited from input or N/A}"
   # Dynamic attributes
   requirement_id: "REQ-XXX"
-  feature_ids: ["FEATURE-001-A", "FEATURE-001-B", "FEATURE-001-C"]
+  epic_ids: ["EPIC-001", "EPIC-002"]
+  epic_count: 2
+  feature_ids: ["FEATURE-001-A", "FEATURE-001-B", "FEATURE-002-A"]
   feature_count: 3
-  epic_id: "EPIC-{nnn}"  # Parent Epic
-  requirement_details_part: null | 1 | 2  # current active part number (null if no parts)
-  parent_features_removed: []  # list of parent FEATURE-XXX IDs removed due to full sub-feature coverage
-  dedup_gaps: []  # list of partially covered parents with uncovered FRs
+  requirement_details_part: null | 1 | 2
+  parent_features_removed: []
+  dedup_gaps: []
   linked_mockups:
     - mockup_name: "Description of mockup function"
       mockup_path: "x-ipe-docs/requirements/EPIC-XXX/mockups/mockup-name.html"
@@ -425,6 +365,10 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 
 ```xml
 <definition_of_done>
+  <checkpoint required="true">
+    <name>Epic structure assessed and documented</name>
+    <verification>Epic grouping decision made with rationale; EPIC-{nnn}/ folders created</verification>
+  </checkpoint>
   <checkpoint required="true">
     <name>Requirement-details file updated with Feature List</name>
     <verification>Feature List table exists in requirement-details.md (or current part)</verification>
@@ -446,20 +390,16 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <verification>requirement-details-index.md updated with new feature range</verification>
   </checkpoint>
   <checkpoint required="if-applicable">
-    <name>Mockups copied to feature folders</name>
-    <verification>Mockup files exist in x-ipe-docs/requirements/EPIC-{nnn}/mockups/ (shared at Epic level)</verification>
-  </checkpoint>
-  <checkpoint required="if-applicable">
-    <name>Linked Mockups section updated</name>
-    <verification>Linked Mockups table populated in requirement-details</verification>
+    <name>Mockups copied to Epic folders</name>
+    <verification>Mockup files exist in x-ipe-docs/requirements/EPIC-{nnn}/mockups/</verification>
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Parent feature deduplication verified</name>
-    <verification>If features were split, parent coverage checked — fully covered parents removed, partial coverage gaps flagged</verification>
+    <verification>If features were split, parent coverage checked — fully covered parents removed</verification>
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Workflow Action Status Updated</name>
-    <verification>If execution_mode == "workflow-mode", called the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with status "done" and deliverables keyed dict</verification>
+    <verification>If execution_mode == "workflow-mode", called update_workflow_action with status "done"</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -470,68 +410,28 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Patterns & Anti-Patterns
 
-### Pattern: Clear Requirements
-
-**When:** Well-documented requirements exist
-**Then:**
-```
-1. Read requirement-details.md thoroughly
-2. Identify natural feature boundaries
-3. Apply MVP-first principle
-4. Document dependencies between features
-```
-
-### Pattern: Vague Requirements
-
-**When:** Requirements are ambiguous or incomplete
-**Then:**
-```
-1. Ask clarifying questions to human
-2. Document assumptions made
-3. Start with minimal feature set
-4. Flag areas needing more detail
-```
-
-### Pattern: Large Scope
-
-**When:** Requirement covers many features
-**Then:**
-```
-1. Group by domain/functionality
-2. Identify MVP core (first feature)
-3. Create feature hierarchy
-4. Limit initial breakdown to 5-7 features
-```
-
-### Pattern: Feature Split with Parent Dedup
-
-**When:** A parent feature is split into sub-features (e.g., FEATURE-001 → A, B, C)
-**Then:**
-```
-1. After splitting, compare parent FRs against union of sub-feature FRs
-2. If 100% covered → remove parent from board and requirement-details
-3. If partial → keep parent, flag uncovered FRs for human review
-4. Use feature-board-management for all board changes
-```
+See [references/patterns.md](.github/skills/x-ipe-task-based-feature-breakdown/references/patterns.md) for detailed patterns including:
+- Clear Requirements, Vague Requirements, Large Scope patterns
+- Epic Grouping pattern (single vs multi-Epic decision)
+- Feature Split with Parent Dedup pattern
 
 ### Anti-Patterns
 
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
-| Too many features | Overwhelming, hard to track | Limit to 5-7 features max |
+| Skipping Epic assessment | Features lack cohesion, poor organization | Always assess Epic granularity first |
+| All features in one Epic | Monolithic, hard to manage large scope | Split by domain when >7 features |
+| Too many features per Epic | Overwhelming, hard to track | Limit to 5-7 features per Epic |
 | Features too granular | Micromanagement | Combine related functions |
-| MVP not first | Critical path unclear | Always start with runnable MVP |
+| MVP not first | Critical path unclear | First feature per Epic = MVP |
 | Circular dependencies | Impossible to implement | Ensure DAG structure |
 | Manual board updates | Inconsistent state | Use feature-board-management skill |
-| Vague feature titles | Unclear scope | Use specific, action-oriented names |
-| Keeping duplicate parent | Redundant tracking, confusing | Remove parent if fully covered by sub-features |
+| Keeping duplicate parent | Redundant tracking | Remove parent if fully covered |
 
 ---
 
 ## Examples
 
-See [references/examples.md](.github/skills/x-ipe-task-based-feature-breakdown/references/examples.md) for detailed execution examples including:
-- E-commerce platform feature breakdown
-- API integration feature breakdown
-- Change request (NEW_FEATURE) breakdown
-- Granularity and sizing guidelines
+See [references/examples.md](.github/skills/x-ipe-task-based-feature-breakdown/references/examples.md) for detailed examples including:
+- Multi-Epic and single-Epic breakdown scenarios
+- Epic grouping decisions, change requests, and parent feature deduplication

@@ -42,6 +42,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 See [references/implementation-guidelines.md](.github/skills/x-ipe-task-based-code-implementation/references/implementation-guidelines.md) for detailed principles, coding standards, AAA format specification, and error handling patterns.
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters

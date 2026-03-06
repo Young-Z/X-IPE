@@ -45,6 +45,8 @@ When `mockup_list` input is needed, resolve in this order:
 
 MANDATORY: When mockup_list is provided AND scope includes [Frontend] or [Full Stack], the agent MUST open, analyze, extract UI requirements, and reference mockups in Part 2.
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters
@@ -144,7 +146,7 @@ input:
 | 6 | Complete | Verify DoD, output summary, request human review | Human review |
 
 BLOCKING: Step 1 is BLOCKED if feature not on board or status not "Done Feature Refinement".
-BLOCKING: Step 6 requires human approval before proceeding to Code Implementation.
+BLOCKING (manual/stop_for_question): Step 6 requires human approval before proceeding to Code Implementation. Skipped in auto mode.
 
 ---
 
@@ -266,7 +268,13 @@ BLOCKING: Step 6 requires human approval before proceeding to Code Implementatio
          b. Log: "Workflow action status updated to done"
       2. VERIFY all DoD checkpoints
       3. OUTPUT task completion summary
-      4. REQUEST human review
+      4. Review & Decision Gate:
+         IF process_preference.auto_proceed == "auto":
+           → Skip human review (auto-proceed mode)
+         ELSE:
+           → Present technical design to human for review
+           → Wait for human approval
+           → IF human rejects → revise
     </action>
     <success_criteria>
       - All required DoD checkpoints pass

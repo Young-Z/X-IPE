@@ -33,6 +33,8 @@ MANDATORY: This skill requires Chrome DevTools MCP for test execution. If MCP is
 
 MANDATORY: Chrome must be launched with `--user-data-dir` (dedicated profile) or the chrome-devtools-mcp server must be configured with `--user-data-dir` or `--isolated=true` to avoid conflicts with existing Chrome sessions. Example: `chrome --remote-debugging-port=9222 --user-data-dir=/tmp/x-ipe-chrome-profile` or configure MCP with `--user-data-dir=/tmp/x-ipe-chrome-profile`.
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters
@@ -266,7 +268,8 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
       4. IF outdated mockups were flagged in Step 2:
          a. Add prominent notice: "⚠ Outdated Mockup(s) Detected"
          b. List outdated mockup files and recommend updating them
-         c. INFORM human: "The following mockup(s) are outdated and were NOT used for UI/UX validation: {filenames}. Consider updating mockups to enable visual comparison in future acceptance tests."
+         c. IF process_preference.auto_proceed != "auto":
+            → INFORM human: "The following mockup(s) are outdated and were NOT used for UI/UX validation: {filenames}. Consider updating mockups to enable visual comparison in future acceptance tests."
       5. CALCULATE metrics: total, passed, failed, blocked, pass_rate = (passed/total)*100
       6. RETURN task completion output with results
     </action>

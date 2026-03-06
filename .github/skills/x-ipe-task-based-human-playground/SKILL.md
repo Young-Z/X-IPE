@@ -21,6 +21,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters
@@ -120,7 +122,7 @@ input:
 
 BLOCKING: Step 4 is blocked until playground command runs without error.
 BLOCKING: Step 5 is blocked until human simulation tests pass.
-BLOCKING: Step 6 requires human validation before Feature Closing.
+BLOCKING: Step 6 requires human validation before Feature Closing (skipped in auto mode).
 
 ---
 
@@ -219,7 +221,12 @@ BLOCKING: Step 6 requires human validation before Feature Closing.
       3. Include sample data
       4. Add reset capability
       5. Log outputs for debugging
-      6. Inform human that playground is ready for review
+      6. Review & Decision Gate:
+         IF process_preference.auto_proceed == "auto":
+           → Skip human review (auto-proceed mode)
+         ELSE:
+           → Inform human that playground is ready for review
+           → Wait for human validation
     </action>
     <output>Playground ready for human validation</output>
   </step_6>

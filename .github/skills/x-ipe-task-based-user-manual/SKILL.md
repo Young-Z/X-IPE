@@ -20,6 +20,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters
@@ -225,16 +227,19 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ### Pattern: Human Communication on Completion
 
-**When:** Task is completed and requires human review
+**When:** Task is completed and requires human review (manual/stop_for_question mode)
 **Then:**
 ```
-1. Inform the human with verified run and test commands
-2. Request confirmation that README is clear
-3. Example message:
-   "User Manual updated in README.md.
-    Verified Run Command: `{command}`
-    Verified Test Command: `{test_command}`
-    Please check the README and confirm it is clear."
+1. IF process_preference.auto_proceed == "auto":
+   → Skip human confirmation (auto-proceed mode)
+2. ELSE:
+   a. Inform the human with verified run and test commands
+   b. Request confirmation that README is clear
+   c. Example message:
+      "User Manual updated in README.md.
+       Verified Run Command: `{command}`
+       Verified Test Command: `{test_command}`
+       Please check the README and confirm it is clear."
 ```
 
 ### Anti-Patterns
