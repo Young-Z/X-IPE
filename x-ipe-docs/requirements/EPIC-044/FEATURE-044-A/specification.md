@@ -1,16 +1,23 @@
-# Feature Specification: Decision Making Tool Skill
+# [RETIRED by EPIC-047] Feature Specification: Decision Making Tool Skill
 
 > Feature ID: FEATURE-044-A
 > Epic ID: EPIC-044
 > Version: v1.0
-> Status: Refined
-> Last Updated: 03-04-2026
+> Status: **RETIRED** — Superseded by EPIC-047 (`x-ipe-dao-end-user-representative` replaces `x-ipe-tool-decision-making`)
+> Last Updated: 03-06-2026
+
+> ⚠️ **RETIRED:** This specification is superseded by EPIC-047 (DAO End-User Human Proxy Layer).
+> The `x-ipe-tool-decision-making` skill is replaced by `x-ipe-dao-end-user-representative`.
+> The `decision_made_by_ai.md` audit log is replaced by semantic DAO logs under `x-ipe-docs/dao/`.
+> See: [EPIC-047 requirements](x-ipe-docs/requirements/requirement-details-part-19.md),
+> [FEATURE-047-A specification](x-ipe-docs/requirements/EPIC-047/FEATURE-047-A/specification.md)
 
 ## Version History
 
 | Version | Date | Description |
 |---------|------|-------------|
 | v1.0 | 03-04-2026 | Initial specification |
+| RETIRED | 03-06-2026 | Superseded by EPIC-047 — `x-ipe-dao-end-user-representative` replaces decision-making tool |
 
 ## Linked Mockups
 

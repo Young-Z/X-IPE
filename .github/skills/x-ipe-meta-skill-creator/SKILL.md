@@ -48,6 +48,7 @@ Skills are modular, self-contained packages that extend AI Agent capabilities by
 | x-ipe-tool | Utility functions and tool integrations | `x-ipe-tool-{name}` | [x-ipe-tool.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-tool.md) | [skill-meta-x-ipe-tool.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-tool.md) |
 | x-ipe-workflow-orchestration | Multi-skill coordination | `x-ipe-workflow-{name}` | [x-ipe-workflow-orchestration.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-workflow-orchestration.md) | [skill-meta-x-ipe-task-based.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-task-based.md) |
 | x-ipe-meta | Creates/manages skills | `x-ipe-meta-{name}` | [x-ipe-meta.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-meta.md) | [skill-meta-x-ipe-meta.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-meta.md) |
+| x-ipe-dao | Human representative skills (道 backbone as CORE) | `x-ipe-dao-{name}` | [x-ipe-dao.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-dao.md) | [skill-meta-x-ipe-dao.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-dao.md) |
 
 ---
 
@@ -57,7 +58,7 @@ BLOCKING: Read [skill-general-guidelines-v2.md](.github/skills/x-ipe-meta-skill-
 
 CRITICAL: SKILL.md body must stay under 500 lines. Move examples to references/.
 
-MANDATORY: All 4 skill types have complete templates in the templates/ folder.
+MANDATORY: All 6 skill types have complete templates in the templates/ folder.
 
 CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL actions. Do NOT split actions into separate blocks (e.g., `<branch>`). Conditional logic (IF/THEN/ELSE) belongs inline within the `<action>` numbered list.
 
@@ -68,7 +69,7 @@ CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL action
 ```yaml
 input:
   skill_name: "{skill-name}"  # lowercase, hyphens, 1-64 chars
-  skill_type: x-ipe-task-based | x-ipe-task-category | x-ipe-tool | x-ipe-workflow-orchestration | x-ipe-meta
+  skill_type: x-ipe-task-based | x-ipe-task-category | x-ipe-tool | x-ipe-workflow-orchestration | x-ipe-meta | x-ipe-dao
   user_request: "{description of what skill should do}"
   examples: []  # Concrete usage examples (optional)
 ```
@@ -81,7 +82,7 @@ input:
 <definition_of_ready>
   <checkpoint required="true">
     <name>Skill Type Identified</name>
-    <verification>One of: x-ipe-task-based, x-ipe-task-category, x-ipe-tool, x-ipe-workflow-orchestration, x-ipe-meta</verification>
+    <verification>One of: x-ipe-task-based, x-ipe-task-category, x-ipe-tool, x-ipe-workflow-orchestration, x-ipe-meta, x-ipe-dao</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Skill Name Compliant</name>
@@ -146,7 +147,10 @@ input:
       7. IF Creates/manages skills → x-ipe-meta:
          - SKILL.md: templates/x-ipe-meta.md
          - skill-meta.md: templates/skill-meta-x-ipe-meta.md
-      8. IF Category orchestration → x-ipe-task-category:
+      8. IF Human representative skill (道 backbone as CORE) → x-ipe-dao:
+         - SKILL.md: templates/x-ipe-dao.md
+         - skill-meta.md: templates/skill-meta-x-ipe-dao.md
+      9. IF Category orchestration → x-ipe-task-category:
          - SKILL.md: templates/x-ipe-workflow-orchestration.md
          - skill-meta.md: templates/skill-meta-x-ipe-task-category.md
     </action>
@@ -470,10 +474,12 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 | [x-ipe-tool.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-tool.md) | SKILL.md for tool skills |
 | [x-ipe-workflow-orchestration.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-workflow-orchestration.md) | SKILL.md for workflow/task-category skills |
 | [x-ipe-meta.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-meta.md) | SKILL.md for meta skills |
+| [x-ipe-dao.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-dao.md) | SKILL.md for human representative skills (x-ipe-dao type) |
 | [skill-meta-x-ipe-task-based.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-task-based.md) | skill-meta for task-based/workflow skills |
 | [skill-meta-x-ipe-tool.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-tool.md) | skill-meta for tool skills |
 | [skill-meta-x-ipe-task-category.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-task-category.md) | skill-meta for task-category skills |
 | [skill-meta-x-ipe-meta.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-meta.md) | skill-meta for meta skills |
+| [skill-meta-x-ipe-dao.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-dao.md) | skill-meta for human representative skills (x-ipe-dao type) |
 
 BLOCKING: Always use the appropriate template. Never create SKILL.md or skill-meta.md from scratch.
 

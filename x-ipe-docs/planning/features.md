@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 03-05-2026 15:45:00
+> Last Updated: 03-06-2026 07:54:28
 
 ## Overview
 
@@ -114,7 +114,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-043-B | EPIC-043 | Breadcrumb Navigation & Visual Distinction | v1.0 | Closed | [specification.md](x-ipe-docs/requirements/EPIC-043/FEATURE-043-B/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-043/FEATURE-043-B/technical-design.md), [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-043/FEATURE-043-B/acceptance-test-cases.md) | 03-03-2026 | 03-04-2026 03:15:00 |
 | FEATURE-043-C | EPIC-043 | Skill Path Convention Updates | v1.0 | Closed | [specification.md](x-ipe-docs/requirements/EPIC-043/FEATURE-043-C/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-043/FEATURE-043-C/technical-design.md) | 03-03-2026 | 03-04-2026 05:45:00 |
 | FEATURE-043-D | EPIC-043 | Existing File Migration | v1.0 | Closed | [specification.md](x-ipe-docs/requirements/EPIC-043/FEATURE-043-D/specification.md) | 03-03-2026 | 03-04-2026 05:50:00 |
-| FEATURE-044-A | EPIC-044 | Decision Making Tool Skill | v1.0 | Completed | [specification.md](x-ipe-docs/requirements/EPIC-044/FEATURE-044-A/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-044/FEATURE-044-A/technical-design.md) | 03-04-2026 | 03-04-2026 11:35:00 |
+| FEATURE-044-A | EPIC-044 | ~~Decision Making Tool Skill~~ [RETIRED by EPIC-047] | v1.0 | Retired | [specification.md](x-ipe-docs/requirements/EPIC-044/FEATURE-044-A/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-044/FEATURE-044-A/technical-design.md) | 03-04-2026 | 03-06-2026 12:19:00 |
 | FEATURE-044-B | EPIC-044 | Skill Creator Template Update | v1.0 | Completed | [specification.md](x-ipe-docs/requirements/EPIC-044/FEATURE-044-B/specification.md) | 03-04-2026 | 03-04-2026 13:42:00 |
 | FEATURE-044-C | EPIC-044 | Batch Update All 22 Task-Based Skills | v1.0 | Completed | — | 03-04-2026 | 03-04-2026 14:15:00 |
 | FEATURE-044-D | EPIC-044 | Workflow Orchestrator Update | v1.0 | Completed | — | 03-04-2026 | 03-04-2026 14:00:00 |
@@ -126,3 +126,9 @@ This board tracks all features across the project lifecycle.
 | FEATURE-045-D | EPIC-045 | TypeScript Implementation Tool Skill | v1.0 | Completed | [specification.md](x-ipe-docs/requirements/EPIC-045/FEATURE-045-D/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-045/FEATURE-045-D/technical-design.md) | 03-05-2026 | 03-05-2026 16:30:00 |
 | FEATURE-045-E | EPIC-045 | Java & MCP Implementation Tool Skills | v1.0 | Completed | [specification.md](x-ipe-docs/requirements/EPIC-045/FEATURE-045-E/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-045/FEATURE-045-E/technical-design.md) | 03-05-2026 | 03-05-2026 16:35:00 |
 | FEATURE-045-F | EPIC-045 | Test Generation Deprecation Migration | v1.0 | Completed | [specification.md](x-ipe-docs/requirements/EPIC-045/FEATURE-045-F/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-045/FEATURE-045-F/technical-design.md) | 03-05-2026 | 03-05-2026 16:40:00 |
+| FEATURE-046-A | EPIC-046 | Skill-Creator Template + Guidelines Update | v1.0 | Done Code Implementation | - | 03-05-2026 | 03-05-2026 17:05:00 |
+| FEATURE-046-B | EPIC-046 | Restructure 4 Ideation-Stage Skills | v1.0 | Done | - | 03-05-2026 | 03-05-2026 17:30:00 |
+| FEATURE-046-C | EPIC-046 | Restructure 4 Requirement-Stage Skills | v1.0 | Done | FEATURE-046-A | 03-05-2026 | 03-05-2026 18:10:00 |
+| FEATURE-047-A | EPIC-047 | DAO Skill Foundation & End-User Core | v1.0 | Completed | [specification.md](x-ipe-docs/requirements/EPIC-047/FEATURE-047-A/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-047/FEATURE-047-A/technical-design.md), [.github/skills/x-ipe-dao-end-user-representative/SKILL.md](.github/skills/x-ipe-dao-end-user-representative/SKILL.md) | 03-06-2026 | 03-06-2026 16:53:12 |
+| FEATURE-047-B | EPIC-047 | Semantic DAO Logging & Workflow Migration | v1.0 | Planned | - | 03-06-2026 | 03-06-2026 06:53:51 |
+| FEATURE-047-C | EPIC-047 | Instruction Resource DAO Interception | v1.0 | Planned | - | 03-06-2026 | 03-06-2026 06:53:51 |
