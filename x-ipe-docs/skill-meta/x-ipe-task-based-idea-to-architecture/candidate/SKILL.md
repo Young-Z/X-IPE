@@ -35,6 +35,8 @@ CRITICAL: Architecture diagrams must focus on system-level design, not implement
 | Scalability considerations | Specific library choices |
 | Security boundaries | Deployment scripts |
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters
@@ -138,11 +140,11 @@ input:
 | 5. 笃行之 (Practice Earnestly) | 5.1 | Create Diagrams | Generate diagrams using enabled tools | Diagrams created |
 | | 5.2 | Save Artifacts | Store in `{current_idea_folder}/architecture/` | Artifacts saved |
 | | 5.3 | Update Summary | Create new idea-summary version with diagram links | Summary updated |
-| | 5.4 | Complete | Request human review and approval | Human approves |
+| | 5.4 | Complete | Verify DoD, output summary | Task complete |
 
 BLOCKING: Step 1.1 halts if current_idea_folder is null -- ask human for folder path.
 BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
-BLOCKING: Step 5.4 requires human approval before proceeding.
+BLOCKING (manual/stop_for_question): Step 5.4 - present diagrams, ask if architecture captures the right components.
 
 ---
 
@@ -162,10 +164,22 @@ BLOCKING: Step 5.4 requires human approval before proceeding.
         1. IF current_idea_folder is null:
            - List folders under x-ipe-docs/ideas/
            - IF process_preference.auto_proceed == "auto":
-             → CALL x-ipe-tool-decision-making with decision_context:
-               { calling_skill: "idea-to-architecture", task_id: "{task_id}", problems: [{description: "Which idea folder for architecture?", type: "question", options: ["{available folders}"]}] }
-             → Use returned decision
-           - ELSE:
+              → CALL x-ipe-dao-end-user-representative with:
+                  message_context:
+                    source: "ai"
+                    calling_skill: "idea-to-architecture"
+                    task_id: "{task_id}"
+                    feature_id: "N/A"
+                    workflow_name: "N/A"
+                    downstream_context: "Selecting which idea folder to generate architecture diagrams for"
+                    messages:
+                      - content: "Which idea folder for architecture? Options: {available folders}"
+                        preferred_dispositions: ["answer", "clarification"]
+                  human_shadow: false
+              → IF disposition is "answer" or "approval" or "instruction": use returned decision
+              → IF disposition is "clarification" or "reframe" or "critique": refine question and re-ask
+              → IF disposition is "pass_through": escalate to human
+           - ELSE (manual/stop_for_question):
              → Ask human to select a folder
            - Set current_idea_folder = selected folder
         2. Verify folder exists on disk
@@ -251,7 +265,7 @@ BLOCKING: Step 5.4 requires human approval before proceeding.
       <constraints>
         - CRITICAL: Focus on system-level components, not implementation details
         - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
-        - BLOCKING: Stop if no tools AND human declines manual mode
+        - BLOCKING: Stop if no tools AND human declines manual mode (auto: DAO decides whether to proceed with manual mode)
       </constraints>
       <output>Generated diagram files</output>
     </step_5_1>
@@ -281,14 +295,12 @@ BLOCKING: Step 5.4 requires human approval before proceeding.
     <step_5_4>
       <name>Complete</name>
       <action>
-        1. Review & Decision Gate:
-           IF process_preference.auto_proceed == "auto":
-             → Skip human review (auto-proceed mode)
-           ELSE:
-             → Present diagrams to human for review
-             → Wait for human approval
-             → IF human rejects → revise
-        2. Compile output result
+        1. Verify all DoD checkpoints are met
+        2. IF manual/stop_for_question:
+              → Present diagrams to human
+              → Ask if architecture captures the right components and relationships
+              → IF human identifies issues → revise specific components
+        3. Compile output result
       </action>
       <success_criteria>
         - All diagrams created and saved
@@ -368,8 +380,8 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <verification>New idea-summary-v{N+1}.md created with diagram links</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Human approved</name>
-    <verification>Human has reviewed and approved the architecture diagrams</verification>
+    <name>Architecture diagrams complete</name>
+    <verification>Architecture diagrams generated with all idea components represented</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -409,7 +421,7 @@ See [references/architecture-patterns.md](.github/skills/x-ipe-task-based-idea-t
 | Creating diagrams before reading idea | May miss requirements | Always analyze idea first |
 | Ignoring tools.json config | Inconsistent tool usage | Always check config |
 | Too much detail in initial diagrams | Overwhelms review | Start high-level, add detail if requested |
-| Skipping human review | May create wrong architecture | Always get approval |
+| Skipping DoD verification | May create wrong architecture | Always verify DoD checkpoints; ask specific questions in manual mode |
 | Using disabled tools | Violates config rules | Only use enabled tools |
 | Including implementation details | Architecture is high-level | Focus on components and relationships |
 | Creating only one diagram type | May miss important views | Consider multiple perspectives |

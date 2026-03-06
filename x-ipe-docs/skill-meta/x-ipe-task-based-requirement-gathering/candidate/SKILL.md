@@ -31,6 +31,8 @@ MANDATORY: Every requirement MUST create an Epic with ID format `EPIC-{nnn}` (e.
 
 > **Transition Note:** During migration, both old (`FEATURE-{nnn}/`) and new (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`) folder structures may coexist. Skills must handle both formats when scanning existing files.
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters
@@ -130,8 +132,9 @@ input:
 | 5. 笃行之 — Practice Earnestly | 5.1 Create Requirement Document, 5.2 Complete & Verify | Create/update requirement-details, verify DoD | Document created |
 
 BLOCKING: Continue asking in Phase 2 until ALL ambiguities are resolved.
-BLOCKING: Human MUST decide on each conflict in step 2.2 before proceeding.
-BLOCKING (manual/stop_for_question): Human MUST approve requirements before proceeding to Feature Breakdown. Skipped in auto mode.
+BLOCKING: Each conflict in step 2.2 MUST be decided before proceeding (manual/stop_for_question: human decides; auto: x-ipe-dao-end-user-representative decides).
+BLOCKING (manual/stop_for_question): Human MUST confirm requirements are complete before proceeding to Feature Breakdown.
+BLOCKING (auto): Proceed automatically after DoD verification.
 
 ---
 
@@ -192,11 +195,23 @@ BLOCKING (manual/stop_for_question): Human MUST approve requirements before proc
       <action>
         1. Identify ambiguities across: Scope, Users, Edge Cases, Priorities, Constraints
         2. IF process_preference.auto_proceed == "auto":
-           → CALL x-ipe-tool-decision-making with decision_context:
-             { calling_skill: "requirement-gathering", task_id: "{task_id}", problems: [{description: "ambiguity", type: "question", options: []}] }
-           → Use returned decisions to resolve ambiguities
-           → Document resolved answers immediately
-        3. ELSE:
+            → CALL x-ipe-dao-end-user-representative with:
+                message_context:
+                  source: "ai"
+                  calling_skill: "requirement-gathering"
+                  task_id: "{task_id}"
+                  feature_id: "N/A"
+                  workflow_name: "N/A"
+                  downstream_context: "Resolving requirement ambiguities during autonomous requirement gathering"
+                  messages:
+                    - content: "{ambiguity description}"
+                      preferred_dispositions: ["answer", "clarification"]
+                human_shadow: false
+            → IF disposition is "answer" or "approval" or "instruction": use returned decisions to resolve ambiguities
+            → IF disposition is "clarification" or "reframe" or "critique": refine questions and re-ask
+            → IF disposition is "pass_through": escalate to human
+            → Document resolved answers immediately
+        3. ELSE (manual/stop_for_question):
            a. Ask questions in batches of 3-5
            b. Wait for human response before next batch
            c. Document answers immediately
@@ -205,6 +220,7 @@ BLOCKING (manual/stop_for_question): Human MUST approve requirements before proc
       <constraints>
         - BLOCKING: Do not proceed until ALL ambiguities are resolved
         - BLOCKING (manual/stop_for_question): Do not make assumptions - always ask
+        - BLOCKING (auto): Resolve ambiguities via x-ipe-dao-end-user-representative - never stop to ask human
       </constraints>
       <output>Complete set of clarified requirements</output>
     </step_2_1>
@@ -222,12 +238,12 @@ BLOCKING (manual/stop_for_question): Human MUST approve requirements before proc
         5. IF conflicts found, for EACH conflict:
            - Present conflict summary table
            - Provide recommendation based on: Single Responsibility, Cohesion, Independence, Minimal Coupling
-           - IF auto_proceed: use decision-making tool
-           - ELSE: ask human "CR on existing or new standalone feature?"
+           - IF auto_proceed: use x-ipe-dao-end-user-representative
+           - ELSE (manual/stop_for_question): ask human "CR on existing or new standalone feature?"
         6. Record decisions for each conflict
       </action>
       <constraints>
-        - BLOCKING: Do not proceed until human decided on EVERY conflict
+        - BLOCKING: Do not proceed until EVERY conflict is decided (manual/stop_for_question: human decides; auto: x-ipe-dao-end-user-representative decides)
         - CRITICAL: Scan ALL requirement-details parts, not just the latest
       </constraints>
       <output>Conflict review result with human decisions</output>
@@ -283,8 +299,8 @@ BLOCKING (manual/stop_for_question): Human MUST approve requirements before proc
       <action>
         1. Review all gathered requirements, conflicts, and feasibility assessment
         2. Explicitly define what is IN scope and OUT of scope
-        3. IF auto_proceed: make scope decision via decision-making tool, log rationale
-        4. ELSE: present scope summary to human for confirmation
+        3. IF auto_proceed: make scope decision via x-ipe-dao-end-user-representative, log rationale
+        4. ELSE (manual/stop_for_question): present scope summary to human for confirmation
         5. Document final scope boundaries
       </action>
       <output>Final scope boundaries (in-scope and out-of-scope items)</output>
@@ -322,12 +338,11 @@ BLOCKING (manual/stop_for_question): Human MUST approve requirements before proc
               - deliverables: {"requirement-doc": "{path}", "requirements-folder": "{path}"}
            b. Log: "Workflow action status updated to done"
         2. Verify all DoD checkpoints
-        3. Review & Decision Gate:
-           IF process_preference.auto_proceed == "auto":
-             → Skip human review (auto-proceed mode)
-           ELSE:
-             → Present requirements document to human for review
-             → Wait for human approval → IF rejected → revise
+        3. Verify all DoD checkpoints are met
+        4. IF manual/stop_for_question:
+              → Present requirements document to human
+              → Ask if any requirements are missing, incorrect, or unclear
+              → IF human identifies issues → revise specific sections
       </action>
       <output>Task completion output, workflow_action_updated</output>
     </step_5_2>
@@ -385,7 +400,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>Conflict review completed</name>
-    <verification>All existing requirement-details files scanned for overlaps; conflicts (if any) presented to human with decisions recorded</verification>
+    <verification>All existing requirement-details files scanned for overlaps; conflicts (if any) decided and recorded (manual/stop_for_question: human decides; auto: DAO decides)</verification>
   </checkpoint>
   <checkpoint required="conditional">
     <name>Impacted features marked</name>
@@ -427,7 +442,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Too many questions at once | Overwhelms human | Batch 3-5 questions |
 | Skipping conflict review | Duplicate/conflicting features | Always scan existing requirements |
 | Modifying existing FRs | Breaks existing specs | Only append CR impact markers + resolve conflicts |
-| Deciding CR vs new without human | Wrong architectural decision | Always ask human with recommendation |
+| Deciding CR vs new without human | Wrong architectural decision | Always ask human with recommendation (manual/stop_for_question); use DAO in auto mode |
 | Leave conflicting docs unresolved | Stale docs mislead future work | Minor → update inline; major → mark retired |
 
 ---

@@ -25,6 +25,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 MANDATORY: Every feature MUST have a feature ID in the format `FEATURE-{nnn}` (e.g., FEATURE-001, FEATURE-027). This applies regardless of the output language used.
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters
@@ -68,7 +70,7 @@ input:
     <steps>
       1. IF previous task was "Feature Breakdown" → extract from task_output_links.feature_ids
       2. ELIF task board has feature_id in task data → use it
-      3. ELSE → ask human for feature_id
+      3. ELSE → IF auto_proceed == "auto": derive from workflow context or x-ipe-dao-end-user-representative; ELSE: ask human for feature_id
     </steps>
   </field>
   <field name="extra_context_reference" source="workflow context OR auto-detect">
@@ -134,7 +136,8 @@ MANDATORY: When `mockup_list` is provided, analyze mockups during Step 2 and ext
 
 BLOCKING: Phase 1 fails if feature not on board or status not "Planned".
 BLOCKING: Step 1.3 MUST scan for mockups if feature folder has no `mockups/` directory.
-BLOCKING (manual/stop_for_question): Human MUST approve specification before Technical Design. Skipped in auto mode.
+BLOCKING (manual/stop_for_question): Human MUST confirm specification is complete before Technical Design.
+BLOCKING (auto): Proceed automatically after DoD verification.
 
 ---
 
@@ -205,8 +208,8 @@ BLOCKING (manual/stop_for_question): Human MUST approve specification before Tec
            - Are edge cases documented?
            - Are dependencies clearly identified?
            - Are non-functional requirements addressed?
-        2. IF auto_proceed: use decision-making tool to self-resolve questions, log answers
-        3. ELSE: ask human about identified gaps (batch 3-5 questions)
+        2. IF auto_proceed: use x-ipe-dao-end-user-representative to resolve questions, log answers
+        3. ELSE (manual/stop_for_question): ask human about identified gaps (batch 3-5 questions)
         4. Document all answers and clarifications
       </action>
       <constraints>
@@ -245,8 +248,8 @@ BLOCKING (manual/stop_for_question): Human MUST approve specification before Tec
         2. Decide final scope: what's IN scope vs OUT of scope
         3. Resolve any remaining edge case decisions
         4. IF mockups exist: decide freshness status (current vs outdated)
-        5. IF auto_proceed: log scope decisions via decision-making tool
-        6. ELSE: present scope summary to human for confirmation
+        5. IF auto_proceed: log scope decisions via x-ipe-dao-end-user-representative
+        6. ELSE (manual/stop_for_question): present scope summary to human for confirmation
       </action>
       <output>Final specification scope with all decisions documented</output>
     </step_4_1>
@@ -283,8 +286,8 @@ BLOCKING (manual/stop_for_question): Human MUST approve specification before Tec
            - workflow_name, action, status: "done", feature_id
            - deliverables: {"specification": "{path}", "feature-docs-folder": "{path}"}
         2. Verify all DoD checkpoints
-        3. IF auto_proceed: skip human review
-        4. ELSE: present specification to human, wait for approval
+        3. Verify all DoD checkpoints are met
+        4. IF manual/stop_for_question: present specification, ask if anything is missing or incorrect
       </action>
       <output>Task completion output with specification path, workflow_action_updated</output>
     </step_5_2>

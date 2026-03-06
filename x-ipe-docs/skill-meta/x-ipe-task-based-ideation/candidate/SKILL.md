@@ -26,6 +26,8 @@ CRITICAL: Only use tools that are explicitly enabled (`true`) in `x-ipe-docs/con
 
 **Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the workflow state was updated before marking the task complete.
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters
@@ -113,11 +115,12 @@ input:
 | 3. 慎思之 (Think Carefully) | 3.1 | Critique | Sub-agent provides constructive feedback | feedback received |
 | 4. 明辨之 (Discern Clearly) | 4.1 | Improve Summary | Decide on feedback, incorporate improvements | summary finalized |
 | 5. 笃行之 (Practice Earnestly) | 5.1 | Generate Draft | Create idea draft, prefer enabled tools from step 1.1 | draft created |
-| | 5.2 | Complete | Request human review | human approves |
+| | 5.2 | Complete | Verify DoD, output summary | Task complete |
 
 BLOCKING: Step 2.2 - Continue brainstorming until idea is well-defined.
 
-BLOCKING (manual/stop_for_question): Step 5.2 - Human MUST approve idea summary before proceeding. Skipped in auto mode.
+BLOCKING (manual/stop_for_question): Step 5.2 - Human MUST confirm idea summary is accurate before proceeding.
+BLOCKING (auto): Proceed after DoD verification; auto-select next task from next_task_based_skill.
 
 ---
 
@@ -212,11 +215,24 @@ BLOCKING (manual/stop_for_question): Step 5.2 - Human MUST approve idea summary 
       <action>
         1. IF process_preference.auto_proceed == "auto":
            → Analyze idea content and resolve ambiguities autonomously
-           → CALL x-ipe-tool-decision-making for any questions/conflicts:
-             { calling_skill: "ideation", task_id: "{task_id}", problems: [{description: "ambiguity", type: "question"}] }
+            → CALL x-ipe-dao-end-user-representative with:
+                message_context:
+                  source: "ai"
+                  calling_skill: "ideation"
+                  task_id: "{task_id}"
+                  feature_id: "N/A"
+                  workflow_name: "N/A"
+                  downstream_context: "Resolving ambiguities and questions during autonomous idea brainstorming"
+                  messages:
+                    - content: "{ambiguity description}"
+                      preferred_dispositions: ["answer", "clarification"]
+                human_shadow: false
+            → IF disposition is "answer" or "approval" or "instruction": use decision to resolve ambiguity
+            → IF disposition is "clarification" or "reframe" or "critique": refine understanding and re-ask
+            → IF disposition is "pass_through": escalate to human
            → Build comprehensive brainstorming notes from source material + decisions
            → Generate visual artifacts proactively using enabled tools from step 1.1
-        2. ELSE:
+        2. ELSE (manual/stop_for_question):
            a. Ask questions in batches (3-5 at a time)
            b. Wait for human response before proceeding
            c. Build on previous answers
@@ -229,6 +245,7 @@ BLOCKING (manual/stop_for_question): Step 5.2 - Human MUST approve idea summary 
       <constraints>
         - BLOCKING: Continue until idea is well-defined
         - CRITICAL (manual/stop_for_question): Batch questions (3-5), do not overwhelm
+        - CRITICAL (auto): Resolve all ambiguities via x-ipe-dao-end-user-representative, do not ask human
         - MANDATORY: Only use tools that appear in the enabled tool list from step 1.1
       </constraints>
       <output>brainstorming_notes, artifacts[]</output>
@@ -324,20 +341,19 @@ BLOCKING (manual/stop_for_question): Step 5.2 - Human MUST approve idea summary 
               - status: "done"
               - deliverables: {"refined-idea": "{path to idea-summary file}", "refined-ideas-folder": "{path to refined-idea/ folder}"}
            b. Log: "Workflow action status updated to done"
-        2. Review & Decision Gate:
-           IF process_preference.auto_proceed == "auto":
-             → Skip human review (auto-proceed mode)
-             → Auto-select next task from next_task_based_skill
-           ELSE:
-             → Present final idea summary to human
-             → Ask human to choose next task
-             → Wait for approval
-             → IF human rejects → revise
+        2. Verify all DoD checkpoints are met
+        3. IF process_preference.auto_proceed == "auto":
+              → Auto-select next task from next_task_based_skill
+           ELSE (manual/stop_for_question):
+              → Present final idea summary to human
+              → Ask if any aspects of the idea are missing or unclear
+              → IF human identifies gaps → revise specific sections
       </action>
       <constraints>
-        - BLOCKING (manual/stop_for_question): Human MUST approve before proceeding
+        - BLOCKING (manual/stop_for_question): Human MUST confirm idea is complete before proceeding
+        - BLOCKING (auto): Proceed after DoD verification; auto-select next task
       </constraints>
-      <output>human_approval, next_task_choice, workflow_action_updated</output>
+      <output>next_task_choice, workflow_action_updated</output>
     </step_5_2>
 
   </phase_5>
@@ -373,7 +389,7 @@ task_completion_output:
 
 ### Next Task Selection
 
-After ideation completes, ask human to choose:
+After ideation completes, ask human to choose (auto mode: auto-select from next_task_based_skill):
 
 ```yaml
 next_task_options:
@@ -436,9 +452,9 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
     <step_output>idea_summary_path</step_output>
   </checkpoint>
   <checkpoint required="true">
-    <name>Human Approved</name>
-    <verification>Human has reviewed and approved idea summary</verification>
-    <step_output>human_approval, next_task_choice</step_output>
+    <name>Idea summary complete</name>
+    <verification>Idea summary complete with all sections filled and key decisions documented</verification>
+    <step_output>next_task_choice</step_output>
   </checkpoint>
   <checkpoint required="recommended">
     <name>Principles Researched</name>

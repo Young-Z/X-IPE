@@ -22,6 +22,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` and `x-ipe+all+task-board-manage
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters
@@ -114,7 +116,7 @@ input:
 | | 5.2 | Convert | Generate output files via pandoc, MCP, or manual fallback | Files generated |
 | | 5.3 | Verify & Complete | Confirm output files exist with size > 0; report to human | DoD validated |
 
-BLOCKING: Step 2.1 requires human confirmation of target format(s).
+BLOCKING: Step 2.1 requires confirmation of target format(s) (manual/stop_for_question: human confirms; auto: DAO confirms via x-ipe-dao-end-user-representative).
 BLOCKING: Step 5.3 fails if any output file is empty or missing.
 
 ---
@@ -180,10 +182,22 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
       <name>Confirm Target Formats</name>
       <action>
         1. IF process_preference.auto_proceed == "auto":
-           → CALL x-ipe-tool-decision-making with decision_context:
-             { calling_skill: "share-idea", task_id: "{task_id}", problems: [{description: "Which output format(s) for sharing?", type: "question", options: ["pptx", "docx", "pdf", "html"]}] }
-           → Use returned decision (default: pptx if unresolvable)
-        2. ELSE:
+            → CALL x-ipe-dao-end-user-representative with:
+                message_context:
+                  source: "ai"
+                  calling_skill: "share-idea"
+                  task_id: "{task_id}"
+                  feature_id: "N/A"
+                  workflow_name: "N/A"
+                  downstream_context: "Selecting output format(s) for sharing the idea document"
+                  messages:
+                    - content: "Which output format(s) for sharing? Options: pptx, docx, pdf, html"
+                      preferred_dispositions: ["answer", "clarification"]
+                human_shadow: false
+            → IF disposition is "answer" or "approval" or "instruction": use returned decision (default: pptx if unresolvable)
+            → IF disposition is "clarification" or "reframe" or "critique": refine question and re-ask
+            → IF disposition is "pass_through": escalate to human
+        2. ELSE (manual/stop_for_question):
            a. Present enabled formats to human (filter by config):
               - PowerPoint (.pptx) - For presentations
               - Word (.docx) - For document review
@@ -194,6 +208,7 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
       </action>
       <constraints>
         - BLOCKING (manual/stop_for_question): Do not proceed until human confirms format(s)
+        - BLOCKING (auto): Format confirmed by x-ipe-dao-end-user-representative (default: pptx if unresolvable)
       </constraints>
       <output>List of confirmed target formats</output>
     </step_2_1>
@@ -252,7 +267,7 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
         4. Review & Decision Gate:
            IF process_preference.auto_proceed == "auto":
              → Skip human confirmation (auto-proceed mode)
-           ELSE:
+           ELSE (manual/stop_for_question):
              → Present file list to human
              → Wait for human to confirm receipt
       </action>
@@ -321,8 +336,8 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <verification>Files exist in {idea_folder} directory</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Human confirmed receipt</name>
-    <verification>Human acknowledged generated files</verification>
+    <name>Receipt confirmed (human or auto)</name>
+    <verification>Generated files acknowledged (manual/stop_for_question: human confirms; auto: auto-acknowledged)</verification>
   </checkpoint>
 </definition_of_done>
 ```

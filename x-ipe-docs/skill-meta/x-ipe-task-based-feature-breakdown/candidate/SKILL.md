@@ -43,6 +43,8 @@ Additional notes:
 - Feature specifications are created later during Feature Refinement
 - Keep feature descriptions concise (50 words max) in the table
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters
@@ -144,7 +146,8 @@ BLOCKING: If parts exist, work with the CURRENT ACTIVE PART (highest part number
 BLOCKING: Features with more than 20 ACs MUST be split into sub-features.
 BLOCKING: First feature in each Epic MUST be "Minimum Runnable Feature" (MVP).
 BLOCKING: MUST use feature-board-management skill (not manual file editing).
-BLOCKING (manual/stop_for_question): Human MUST approve feature list before refinement. Skipped in auto mode.
+BLOCKING (manual/stop_for_question): Human MUST confirm feature list is complete before refinement.
+BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ipe-dao-end-user-representative if needed.
 
 ---
 
@@ -206,8 +209,8 @@ BLOCKING (manual/stop_for_question): Human MUST approve feature list before refi
            - Is this capability truly needed for the MVP?
            - Can this be deferred to a later version?
            - Does this overlap with existing features in the system?
-        2. IF auto_proceed: use decision-making tool to self-resolve scope questions
-        3. ELSE: present scope challenges to human, ask for confirmation
+        2. IF auto_proceed: use x-ipe-dao-end-user-representative to resolve scope questions
+        3. ELSE (manual/stop_for_question): present scope challenges to human, ask for confirmation
         4. Document scope decisions and rationale
       </action>
       <constraints>
@@ -262,8 +265,8 @@ BLOCKING (manual/stop_for_question): Human MUST approve feature list before refi
         1. Review feature list across all Epics
         2. Validate MVP selection: does first feature provide minimum runnable value?
         3. Validate dependency DAG: no circular dependencies, clear implementation order
-        4. IF auto_proceed: confirm via decision-making tool
-        5. ELSE: present prioritized list to human for confirmation
+        4. IF auto_proceed: confirm via x-ipe-dao-end-user-representative
+        5. ELSE (manual/stop_for_question): present prioritized list to human for confirmation
         6. Finalize feature order and dependency graph
       </action>
       <output>Confirmed feature prioritization with validated dependency DAG</output>
@@ -310,8 +313,8 @@ BLOCKING (manual/stop_for_question): Human MUST approve feature list before refi
       <action>
         1. IF workflow-mode: call update_workflow_action with status "done", features list
         2. Verify all DoD checkpoints
-        3. IF auto_proceed: skip human review
-        4. ELSE: present feature breakdown to human, wait for approval
+        3. Verify all DoD checkpoints are met
+        4. IF manual/stop_for_question: present feature breakdown, ask if any features are missing or miscategorized
       </action>
       <output>Task completion output, workflow_action_updated</output>
     </step_5_3>
@@ -330,7 +333,6 @@ task_completion_output:
   category: "requirement-stage"
   status: completed | blocked
   next_task_based_skill: "x-ipe-task-based-feature-refinement"
-  require_human_review: yes
   process_preference:
     auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"

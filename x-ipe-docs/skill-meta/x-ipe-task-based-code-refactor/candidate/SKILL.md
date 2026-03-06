@@ -28,6 +28,8 @@ This skill is the **single entry point** for all refactoring work. It orchestrat
 
 BLOCKING: If user requests "refactor", "analyze for refactoring", or "assess code quality" — this skill handles it. Do NOT redirect to separate analysis skills.
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters
@@ -79,7 +81,7 @@ input:
       1. IF caller provides scope_level → use provided value
       2. IF feature_id is provided → default to "feature"
       3. IF files[] is provided → default to "custom"
-      4. ELSE → ASK human for scope
+      4. ELSE → IF auto_proceed == "auto": ASK x-ipe-dao-end-user-representative for scope; ELSE: ASK human for scope
     </steps>
   </field>
 
@@ -87,7 +89,7 @@ input:
     <steps>
       1. IF caller provides → use provided value
       2. IF human describes intent → derive from description
-      3. ELSE → ASK human: "What is the purpose of this refactoring?"
+      3. ELSE → IF auto_proceed == "auto": ASK x-ipe-dao-end-user-representative; ELSE: ASK human: "What is the purpose of this refactoring?"
     </steps>
   </field>
 
@@ -138,10 +140,10 @@ input:
 | 2 | Sync Docs & Tests | Invoke `x-ipe-tool-code-quality-sync` | All aligned, coverage ≥ 80% |
 | 3 | Generate Refactoring Plan | Design target structure, propose plan | Human approves plan |
 | 4 | Execute Refactoring | Apply changes incrementally with tests | All tests pass |
-| 5 | Validate & Complete | Verify improvement, update refs, apply tracing | Human approves |
+| 5 | Validate & Complete | Verify improvement, update refs, apply tracing | DoD verified |
 
-BLOCKING: Step 1 → 2 requires human review of analysis results.
-BLOCKING: Step 3 → 4 requires human approval of refactoring plan.
+BLOCKING: Step 1 → 2 requires verification that analysis identified all issues.
+BLOCKING: Step 3 → 4 requires confirmation that refactoring plan addresses identified issues (manual/stop_for_question: human confirms; auto: DAO confirms).
 BLOCKING: Step 4 halts if any test fails (must fix or revert).
 
 ---
@@ -168,9 +170,9 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
          - Suggested refactoring goals and principles
       4. Mode-aware gate:
          IF process_preference.auto_proceed == "auto":
-           Proceed automatically. If concerns found, use x-ipe-tool-decision-making.
-         ELSE:
-           WAIT for human approval of analysis results.
+           Proceed automatically. If concerns found, use x-ipe-dao-end-user-representative.
+         ELSE (manual/stop_for_question):
+           PRESENT analysis findings to human. WAIT for confirmation that issues are correctly identified.
     </action>
     <constraints>
       - BLOCKING: Do not proceed to Step 2 without approved analysis
@@ -209,10 +211,29 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
          - YAGNI: Remove unused code
       3. CREATE refactoring_plan with phases ordered by goal priority
       4. VALIDATE plan against constraints from refactoring_principle
-      5. PRESENT plan to human, WAIT for approval
+      5. Mode-aware gate:
+         IF process_preference.auto_proceed == "auto":
+            → CALL x-ipe-dao-end-user-representative with:
+                message_context:
+                  source: "ai"
+                  calling_skill: "code-refactor"
+                  task_id: "{task_id}"
+                  feature_id: "N/A"
+                  workflow_name: "N/A"
+                  downstream_context: "Evaluating whether the generated refactoring plan should be approved or revised"
+                  messages:
+                    - content: "Approve refactoring plan"
+                      preferred_dispositions: ["answer", "clarification"]
+                human_shadow: false
+            → IF disposition is "answer" or "approval" or "instruction": use approval decision
+            → IF disposition is "clarification" or "reframe" or "critique": revise plan
+            → IF disposition is "pass_through": escalate to human
+         ELSE (manual/stop_for_question):
+           → PRESENT plan to human, WAIT for confirmation that plan addresses the right issues
     </action>
     <constraints>
-      - BLOCKING: Do not proceed to Step 4 without human approval of plan
+      - BLOCKING (manual/stop_for_question): Do not proceed to Step 4 without human confirming plan addresses issues
+      - BLOCKING (auto): Do not proceed to Step 4 without DAO approval from x-ipe-dao-end-user-representative
     </constraints>
     <output>Approved refactoring_plan with phases and principle mappings</output>
   </step_3>
@@ -260,11 +281,11 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
            - status: "done"
            - feature_id: {feature_id}
            - deliverables: {"refactor-report": "{path}"}
-      10. Mode-aware review gate:
+      10. Verify DoD checkpoints:
           IF process_preference.auto_proceed == "auto":
-            Skip human review. Resolve open questions via x-ipe-tool-decision-making.
-          ELSE:
-            PRESENT summary to human, WAIT for approval.
+            Resolve any open questions via x-ipe-dao-end-user-representative.
+          ELSE (manual/stop_for_question):
+            PRESENT summary to human with any open questions. WAIT for answers.
       11. CREATE final commit
     </action>
     <success_criteria>
@@ -334,7 +355,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 <definition_of_done>
   <checkpoint required="true">
     <name>Analysis completed and approved</name>
-    <verification>x-ipe-tool-refactoring-analysis output received and reviewed</verification>
+    <verification>x-ipe-tool-refactoring-analysis output received and issues identified</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Documentation synced</name>
@@ -384,7 +405,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 ```
 1. Step 1: Invoke analysis tool → get scope, quality, suggestions
 2. Step 2: Invoke sync tool → align docs, reach 80% coverage
-3. Step 3: Generate plan from suggestions → human approval
+3. Step 3: Generate plan from suggestions → approval (human or DAO per mode)
 4. Step 4: Execute incrementally with tests
 5. Step 5: Validate, update refs, commit
 ```

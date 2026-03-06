@@ -22,6 +22,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters
@@ -112,11 +114,11 @@ input:
 | 1. 博学之 — Study Broadly | 1.1 Understand Change Request, 1.2 CR Context Study | Parse CR context, research similar features and standards | CR context established |
 | 2. 审问之 — Inquire Thoroughly | 2.1 CR Challenge, 2.2 Analyze Impact | Challenge CR assumptions, review existing requirements and features | Impact analyzed |
 | 3. 慎思之 — Think Carefully | 3.1 Detect Conflicts | Analyze spec/design/dependency conflicts with existing features | Conflicts classified |
-| 4. 明辨之 — Discern Clearly | 4.1 Classify CR Type, 4.2 Route Workflow | Classify modification vs new feature, get human approval | Classification approved |
+| 4. 明辨之 — Discern Clearly | 4.1 Classify CR Type, 4.2 Route Workflow | Classify modification vs new feature, confirm classification | Classification confirmed |
 | 5. 笃行之 — Practice Earnestly | 5.1 Execute & Document | Update documents, create CR record | CR documented |
 
 BLOCKING: Phase 3 must complete before Phase 4 — do NOT classify without conflict analysis.
-BLOCKING: Human MUST approve classification before Phase 5 execution (skipped in auto mode).
+BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop_for_question: human confirms; auto: DAO confirms via x-ipe-dao-end-user-representative).
 
 ---
 
@@ -166,8 +168,8 @@ BLOCKING: Human MUST approve classification before Phase 5 execution (skipped in
            - Could the existing feature already handle this with configuration?
            - Is the requested approach the best solution, or are there alternatives?
            - What is the impact if this CR is NOT implemented?
-        2. IF auto_proceed: use decision-making tool to self-resolve challenges
-        3. ELSE: present challenges to human, ask for confirmation
+        2. IF auto_proceed: use x-ipe-dao-end-user-representative to resolve challenges
+        3. ELSE (manual/stop_for_question): present challenges to human, ask for confirmation
         4. Document challenge outcomes and confirmed scope
       </action>
       <output>Validated CR scope with challenge decisions</output>
@@ -230,16 +232,17 @@ BLOCKING: Human MUST approve classification before Phase 5 execution (skipped in
     <step_4_2>
       <name>Route Workflow</name>
       <action>
-        1. IF auto_proceed: log classification and conflicts via decision-making tool, proceed
-        2. ELSE:
+        1. IF auto_proceed: log classification and conflicts via x-ipe-dao-end-user-representative, proceed
+        2. ELSE (manual/stop_for_question):
            a. Present to human: CR summary, classification, conflict results, affected features
-           b. Wait for explicit human approval
+           b. Wait for human to confirm classification and conflict decisions
            c. IF human requests changes: return to step 4.1 or Phase 3
       </action>
       <constraints>
-        - BLOCKING (manual/stop_for_question): Do NOT proceed without human approval
+        - BLOCKING (manual/stop_for_question): Do NOT proceed without human confirming classification
+        - BLOCKING (auto): Do NOT proceed without DAO confirming classification via x-ipe-dao-end-user-representative
       </constraints>
-      <output>Approved classification and conflict resolution</output>
+      <output>Confirmed classification and conflict decisions</output>
     </step_4_2>
 
   </phase_4>
@@ -250,7 +253,7 @@ BLOCKING: Human MUST approve classification before Phase 5 execution (skipped in
       <name>Execute & Document</name>
       <action>
         0. Resolve conflicting documents (from Phase 3 conflict analysis):
-           - Applies regardless of resolution method (human approval or auto_proceed)
+           - Applies regardless of resolution method (human confirmation or auto_proceed)
            - FOR EACH conflict with an existing document (spec, design, requirement):
              a. IF minor conflict (wording update, small AC adjustment, additive change):
                 → Directly update the target document inline with CR changes
@@ -270,8 +273,8 @@ BLOCKING: Human MUST approve classification before Phase 5 execution (skipped in
            c. NOTE: CR-XXX.md created after feature breakdown creates folder
         3. Create CR record at FEATURE-XXX/CR-XXX.md
         4. Verify all DoD checkpoints
-        5. IF auto_proceed: skip human review
-        6. ELSE: present output, wait for approval
+        5. Verify all DoD checkpoints are met
+        6. IF manual/stop_for_question: present CR summary to human
       </action>
       <constraints>
         - CRITICAL: Never override existing mockup files — create new versions
@@ -381,11 +384,11 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>Conflict analysis completed</name>
-    <verification>Conflicts checked against specs, designs, and dependencies; all unexpected conflicts resolved with human</verification>
+    <verification>Conflicts checked against specs, designs, and dependencies; all unexpected conflicts resolved (manual/stop_for_question: with human; auto: via DAO)</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Human approved classification and conflicts</name>
-    <verification>Explicit human approval recorded before execution, including conflict resolution</verification>
+    <name>Classification and conflicts confirmed</name>
+    <verification>Classification confirmed before execution (manual/stop_for_question: human confirmed; auto: DAO confirmed), including conflict decisions</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Version history updated</name>
@@ -418,7 +421,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 | Pattern | When | Then |
 |---------|------|------|
-| Classification Decision | Classification unclear | Score against criteria, if score diff ≤2 ask human |
+| Classification Decision | Classification unclear | Score against criteria, if score diff ≤2 ask human (manual/stop_for_question) or DAO (auto) |
 | Conflict Resolution | Unexpected conflicts found | Present with impact, suggest mitigations, split CR if severe |
 | Enhancement CR | See [references/patterns.md] | Match existing feature, classify modification |
 | Multi-Feature CR | CR touches many features | One CR = one classification; split if needed |
@@ -427,7 +430,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 |--------------|---------|------------|
 | Skip classification | Wrong workflow chosen | Always classify explicitly |
 | Classify before conflicts | May miss scope issues | Phase 3 (conflicts) before Phase 4 (classify) |
-| No human approval | Risk wrong direction | Always get approval at Phase 4.2 |
+| No classification confirmation | Risk wrong direction | Always confirm classification at Phase 4.2 (human in manual/stop_for_question; DAO in auto) |
 | Skip conflict analysis | Break existing features | Always detect conflicts in Phase 3 |
 | Override existing mockup | Lost design history | Create new version (v{N+1}), keep original |
 | Leave conflicting docs unresolved | Stale docs mislead future work | Minor → update inline; major → mark retired |

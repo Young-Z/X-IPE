@@ -33,6 +33,8 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 | Resource Leak | Slowdown/crash | Missing cleanup |
 | Integration | External fail | API changes |
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
 ---
 
 ## Input Parameters
@@ -51,10 +53,10 @@ input:
   # Task type attributes
   category: "standalone"
   next_task_based_skill: null
-  require_human_review: yes
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
 
   # Required inputs
-  auto_proceed: false
   bug_description: "{description of the bug}"
   expected_behavior: "{what should happen}"
   actual_behavior: "{what actually happens}"
@@ -66,6 +68,22 @@ input:
   # Tech context (optional — auto-detected from affected files if not provided)
   program_type: "frontend | backend | fullstack | cli | library | skills | mcp | ..."  # non-exhaustive
   tech_stack: []  # e.g. ["Python/Flask", "JavaScript/Vanilla"]
+```
+
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="bug_description" source="from human input" />
+  <field name="expected_behavior" source="from human input" />
+  <field name="actual_behavior" source="from human input" />
+  <field name="reproduction_steps" source="from human input or 'N/A'" />
+  <field name="program_type" source="auto-detect from affected files if not provided (check file extensions: .py→backend, .js/.ts/.css/.html→frontend)" />
+  <field name="tech_stack" source="auto-detect from project config files (pyproject.toml, package.json) if not provided" />
+</input_init>
 ```
 
 ---
@@ -198,10 +216,27 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
          - Output: classified conflict list
       4. IF all conflicts are "expected": proceed to Step 6
       5. IF any conflicts are "unexpected":
-         - Present unexpected conflicts to user with clear explanation of what will change
-         - Ask user to either: (a) confirm the change is acceptable, OR (b) clarify the original request
-         - IF user confirms: proceed to Step 6
-         - IF user clarifies: return to Step 4 (Design Fix) with updated understanding
+         - IF process_preference.auto_proceed == "auto":
+           → CALL x-ipe-dao-end-user-representative with:
+               message_context:
+                 source: "ai"
+                 calling_skill: "bug-fix"
+                 task_id: "{task_id}"
+                 feature_id: "N/A"
+                 workflow_name: "N/A"
+                 downstream_context: "Conflict analysis found unexpected behavioral changes from the proposed bug fix"
+                 messages:
+                   - content: "Unexpected conflict: {conflict}"
+                     preferred_dispositions: ["answer", "clarification"]
+               human_shadow: false
+           → IF disposition is "answer" or "approval" or "instruction": proceed to Step 6
+           → IF disposition is "clarification" or "reframe" or "critique": return to Step 4 with updated understanding
+           → IF disposition is "pass_through": escalate to human
+         - ELSE (manual/stop_for_question):
+           → Present unexpected conflicts to user with clear explanation of what will change
+           → Ask user to either: (a) confirm the change is acceptable, OR (b) clarify the original request
+           → IF user confirms: proceed to Step 6
+           → IF user clarifies: return to Step 4 (Design Fix) with updated understanding
     </action>
     <constraints>
       - BLOCKING: Do NOT proceed to Step 6 if unexpected conflicts are unresolved
@@ -275,8 +310,8 @@ task_completion_output:
   category: "standalone"
   status: completed | blocked
   next_task_based_skill: null
-  require_human_review: yes
-  auto_proceed: "{from input auto_proceed}"
+  process_preference:
+    auto_proceed: "{from input process_preference.auto_proceed}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
@@ -391,4 +426,4 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for concrete execution examples.
+See [references/examples.md](.github/skills/x-ipe-task-based-bug-fix/references/examples.md) for concrete execution examples.
