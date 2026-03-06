@@ -34,6 +34,8 @@ BLOCKING: {Critical mediation rule — use common language, avoid "DAO" terminol
 CRITICAL: {Bounded-output or safety rule}
 CRITICAL: {Fallback rule}
 
+CRITICAL: **Best-Model Requirement.** When this skill is delegated to a sub-agent (e.g., via the `task` tool), it MUST use the most capable (premium) LLM model available. The 7-step backbone requires nuanced reasoning — weighing three perspectives, analyzing gains/losses, scenario planning — that benefits from the strongest model. Use the `model` parameter to select a premium model. Do NOT run this skill on fast/cheap models.
+
 ---
 
 ## About

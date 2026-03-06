@@ -64,6 +64,10 @@ When you receive a user message (after session initialization):
 
 3. **Only AFTER DAO processing** → proceed with skill classification, task creation, or execution as appropriate.
 
+### Model Requirement
+
+When `x-ipe-dao-end-user-representative` is delegated to a sub-agent (e.g., via the `task` tool), **use the most capable (premium) LLM model available** (e.g., `model: "claude-opus-4.6"`). The 7-step backbone requires nuanced reasoning — weighing three perspectives, analyzing gains/losses, scenario planning — that fast/cheap models cannot reliably handle. If running inline (not as a sub-agent), the main agent's model is used automatically.
+
 ### Why DAO-First Matters
 
 - **Consistent interpretation** — Every message gets structured analysis, not ad-hoc pattern matching

@@ -26,6 +26,8 @@ CRITICAL: `fallback_required` is true ONLY when `human_shadow` is true AND the s
 
 CRITICAL: Semantic decision logging, legacy decision-log migration, and persistent memory are out of scope for this v1 skill.
 
+CRITICAL: **Best-Model Requirement.** When this skill is delegated to a sub-agent (e.g., via the `task` tool), it MUST use the most capable (premium) LLM model available. The 7-step backbone requires nuanced reasoning — weighing three perspectives, analyzing gains/losses, scenario planning — that benefits from the strongest model. Use the `model` parameter to select a premium model (e.g., `claude-opus-4.6`). Do NOT run this skill on fast/cheap models.
+
 ---
 
 ## About
