@@ -128,7 +128,7 @@ const workflow = {
             <button class="btn btn-sm btn-outline-secondary dropdown-toggle auto-proceed-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi ${modeIcons[currentMode]}"></i> <span class="badge ${modeBadges[currentMode]}">${modeLabels[currentMode]}</span>
             </button>
-            <ul class="dropdown-menu dropdown-menu-dark">
+            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
                 <li><button class="dropdown-item${currentMode === 'manual' ? ' active' : ''}" data-mode="manual"><i class="bi bi-hand-index"></i> Manual</button></li>
                 <li><button class="dropdown-item${currentMode === 'auto' ? ' active' : ''}" data-mode="auto"><i class="bi bi-lightning-charge-fill"></i> Auto</button></li>
                 <li><button class="dropdown-item${currentMode === 'stop_for_question' ? ' active' : ''}" data-mode="stop_for_question"><i class="bi bi-pause-circle"></i> Stop for Question</button></li>
