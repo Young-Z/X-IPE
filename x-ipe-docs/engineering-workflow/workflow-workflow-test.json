@@ -1,0 +1,53 @@
+{
+  "schema_version": "2.0",
+  "name": "workflow-test",
+  "created": "2026-03-07T01:48:52.259932+00:00",
+  "last_activity": "2026-03-07T01:48:52.259932+00:00",
+  "idea_folder": null,
+  "current_stage": "ideation",
+  "global": {
+    "process_preference": {
+      "auto_proceed": "manual"
+    }
+  },
+  "shared": {
+    "ideation": {
+      "status": "in_progress",
+      "actions": {
+        "compose_idea": {
+          "status": "pending",
+          "deliverables": []
+        },
+        "refine_idea": {
+          "status": "pending",
+          "deliverables": []
+        },
+        "reference_uiux": {
+          "status": "pending",
+          "deliverables": [],
+          "optional": true
+        },
+        "design_mockup": {
+          "status": "pending",
+          "deliverables": [],
+          "optional": true
+        }
+      }
+    },
+    "requirement": {
+      "status": "locked",
+      "actions": {
+        "requirement_gathering": {
+          "status": "pending",
+          "deliverables": []
+        },
+        "feature_breakdown": {
+          "status": "pending",
+          "deliverables": [],
+          "features_created": []
+        }
+      }
+    }
+  },
+  "features": []
+}

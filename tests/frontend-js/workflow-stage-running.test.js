@@ -82,6 +82,40 @@ describe('CR-001: _renderActionButton applies .running from Set', () => {
   });
 });
 
+describe('TASK-786: Clear running state when action completes', () => {
+  it('should NOT have .running class when action status is done even if key is in _runningActions', () => {
+    workflowStage._runningActions.add('compose_idea');
+    const btn = workflowStage._renderActionButton(
+      'compose_idea',
+      { icon: '📝', label: 'Compose Idea', interaction: 'modal', mandatory: true },
+      'done', false, false, 'test-wf', false
+    );
+    expect(btn.classList.contains('running')).toBe(false);
+  });
+
+  it('should remove actionKey from _runningActions when rendered with done status', () => {
+    workflowStage._runningActions.add('compose_idea');
+    workflowStage._renderActionButton(
+      'compose_idea',
+      { icon: '📝', label: 'Compose Idea', interaction: 'modal', mandatory: true },
+      'done', false, false, 'test-wf', false
+    );
+    expect(workflowStage._runningActions.has('compose_idea')).toBe(false);
+  });
+
+  it('should not affect other running actions when one completes', () => {
+    workflowStage._runningActions.add('compose_idea');
+    workflowStage._runningActions.add('refine_idea');
+    workflowStage._renderActionButton(
+      'compose_idea',
+      { icon: '📝', label: 'Compose Idea', interaction: 'modal', mandatory: true },
+      'done', false, false, 'test-wf', false
+    );
+    expect(workflowStage._runningActions.has('compose_idea')).toBe(false);
+    expect(workflowStage._runningActions.has('refine_idea')).toBe(true);
+  });
+});
+
 describe('CR-001: CSS .action-btn.running in workflow.css', () => {
   it('should have .action-btn.running rule', () => {
     const css = readFileSync(CSS_WORKFLOW, 'utf-8');

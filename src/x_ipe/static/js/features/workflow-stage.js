@@ -344,7 +344,10 @@ const workflowStage = {
 
         let stateClass;
         if (locked) stateClass = 'locked';
-        else if (status === 'done') stateClass = 'done';
+        else if (status === 'done') {
+            stateClass = 'done';
+            this._runningActions.delete(actionKey);
+        }
         else if (isOptional) stateClass = 'optional';
         else stateClass = 'normal';
 

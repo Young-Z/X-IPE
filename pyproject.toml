@@ -1,6 +1,6 @@
 [project]
 name = "x-ipe"
-version = "1.0.89"
+version = "1.0.91"
 description = "An AI native integrated project environment for end to end business value delivery"
 requires-python = ">=3.12"
 dependencies = [
@@ -35,6 +35,7 @@ packages = ["src/x_ipe"]
 [tool.hatch.build.targets.wheel.force-include]
 ".github/skills" = "x_ipe/resources/skills"
 ".github/copilot-instructions.md" = "x_ipe/resources/copilot-instructions.md"
+"x-ipe-docs/config/tools.json" = "x_ipe/resources/config/tools.json"
 
 [dependency-groups]
 dev = [

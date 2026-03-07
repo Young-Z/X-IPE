@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-786 | Bug Fix | In-progress pulse animation persists on action buttons after action completes (turns green/done). _runningActions Set never cleared. Feedback-20260307-094938 | Drift 🌊 | ✅ done | 03-07-2026 09:56:00 | workflow-stage.js, workflow-stage-running.test.js | - |
 | TASK-785 | Change Request | Move auto-proceed dropdown from feature toolbar to workflow panel header bar beside 3-dots menu — now applies to all actions, not just feature-level. Feedback-20260307-090240 | Pixel 🎨 | ✅ done | 03-07-2026 09:15:00 | workflow.js, workflow-stage.js, workflow.css, workflow_manager_service.py | - |
 | TASK-784 | Cleanup | Remove deprecated x-ipe-task-based-ideation-v2 skill folder (leftover from EPIC-046 TASK-761 rename) | Bolt ⚡ | ✅ done | 03-06-2026 16:31:00 | - | - |
 | TASK-781 | Feature Breakdown | EPIC-048: Break down tool-implementation alignment into 4 features — A: contract extension (MVP), B: consultation (tech-design + refactoring-analysis), C: bug-fix delegation, D: code-refactor delegation | Zephyr 🌬️ | ✅ done | 03-06-2026 13:10:00 | [requirement-details-part-20.md](x-ipe-docs/requirements/requirement-details-part-20.md), [features.md](x-ipe-docs/planning/features.md) | Feature Refinement |
