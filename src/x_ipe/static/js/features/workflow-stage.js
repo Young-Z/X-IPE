@@ -666,46 +666,10 @@ const workflowStage = {
         return feats;
     },
 
-    /** Render toolbar with Auto-Proceed dropdown and Dependencies toggle. */
+    /** Render toolbar with Dependencies toggle. */
     _renderToolbar(stages, nextAction, wfName, workflowState) {
         const wrap = document.createElement('div');
         wrap.className = 'feature-selector-wrap';
-
-        // Auto-Proceed dropdown (Bootstrap styled)
-        const currentMode = workflowState?.global?.process_preference?.auto_proceed || 'manual';
-        const modeLabels = { manual: 'Manual', auto: 'Auto', stop_for_question: 'Stop for Question' };
-        const modeIcons = { manual: 'bi-hand-index', auto: 'bi-lightning-charge-fill', stop_for_question: 'bi-pause-circle' };
-        const modeBadges = { manual: 'text-bg-secondary', auto: 'text-bg-success', stop_for_question: 'text-bg-warning' };
-
-        const apWrap = document.createElement('div');
-        apWrap.className = 'dropdown d-inline-block';
-        apWrap.innerHTML = `
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi ${modeIcons[currentMode]}"></i> Auto-Proceed: <span class="badge ${modeBadges[currentMode]}">${modeLabels[currentMode]}</span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-dark">
-                <li><button class="dropdown-item${currentMode === 'manual' ? ' active' : ''}" data-mode="manual"><i class="bi bi-hand-index"></i> Manual</button></li>
-                <li><button class="dropdown-item${currentMode === 'auto' ? ' active' : ''}" data-mode="auto"><i class="bi bi-lightning-charge-fill"></i> Auto</button></li>
-                <li><button class="dropdown-item${currentMode === 'stop_for_question' ? ' active' : ''}" data-mode="stop_for_question"><i class="bi bi-pause-circle"></i> Stop for Question</button></li>
-            </ul>`;
-        const btnLabel = apWrap.querySelector('.dropdown-toggle');
-        apWrap.querySelectorAll('.dropdown-item').forEach(item => {
-            item.onclick = async () => {
-                const mode = item.dataset.mode;
-                try {
-                    const resp = await fetch(`/api/workflow/${encodeURIComponent(wfName)}/settings`, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ process_preference: { auto_proceed: mode } })
-                    });
-                    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                    apWrap.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
-                    item.classList.add('active');
-                    btnLabel.innerHTML = `<i class="bi ${modeIcons[mode]}"></i> Auto-Proceed: <span class="badge ${modeBadges[mode]}">${modeLabels[mode]}</span>`;
-                } catch (e) { /* revert silently */ }
-            };
-        });
-        wrap.appendChild(apWrap);
 
         // Dependencies toggle
         const depToggle = document.createElement('span');

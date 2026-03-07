@@ -2,6 +2,7 @@
  * TASK-676: Bug fix — workflow panel ⋮ button not aligned to right side.
  * CSS: .workflow-panel-info needs flex:1, .workflow-panel-actions needs position:relative.
  * Also verifies action menu toggle and delete button wiring.
+ * TASK-785: Auto-proceed dropdown moved from feature toolbar to panel header.
  */
 import { describe, it, expect, beforeAll, beforeEach, vi, afterEach } from 'vitest';
 import { loadFeatureScript, mockFetch } from './helpers.js';
@@ -53,6 +54,7 @@ describe('workflow panel action menu behavior', () => {
       feature_count: 0,
       created: '2026-01-01',
       last_activity: null,
+      auto_proceed: 'manual',
     });
     document.getElementById('workflow-panels').appendChild(panel);
   });
@@ -87,5 +89,86 @@ describe('workflow panel action menu behavior', () => {
     delBtn.click();
     expect(spy).toHaveBeenCalledWith('test-wf');
     spy.mockRestore();
+  });
+});
+
+describe('TASK-785: auto-proceed dropdown in panel header', () => {
+  let panel;
+
+  beforeEach(() => {
+    panel = workflow._renderPanel({
+      name: 'test-wf',
+      current_stage: 'Ideation',
+      feature_count: 2,
+      created: '2026-01-01',
+      last_activity: null,
+      auto_proceed: 'manual',
+    });
+    document.getElementById('workflow-panels').appendChild(panel);
+  });
+
+  it('renders auto-proceed dropdown inside panel header actions', () => {
+    const apDropdown = panel.querySelector('.auto-proceed-header');
+    expect(apDropdown).not.toBeNull();
+    expect(apDropdown.closest('.workflow-panel-actions')).not.toBeNull();
+  });
+
+  it('renders three mode options (Manual, Auto, Stop for Question)', () => {
+    const items = panel.querySelectorAll('.auto-proceed-header .dropdown-item');
+    expect(items.length).toBe(3);
+    expect(items[0].dataset.mode).toBe('manual');
+    expect(items[1].dataset.mode).toBe('auto');
+    expect(items[2].dataset.mode).toBe('stop_for_question');
+  });
+
+  it('marks current mode as active', () => {
+    const active = panel.querySelector('.auto-proceed-header .dropdown-item.active');
+    expect(active).not.toBeNull();
+    expect(active.dataset.mode).toBe('manual');
+  });
+
+  it('shows correct badge for auto mode', () => {
+    const autoPanel = workflow._renderPanel({
+      name: 'auto-wf', current_stage: 'Implement', feature_count: 1,
+      created: '2026-01-01', last_activity: null, auto_proceed: 'auto',
+    });
+    const badge = autoPanel.querySelector('.auto-proceed-btn .badge');
+    expect(badge.textContent).toBe('Auto');
+    expect(badge.classList.contains('text-bg-success')).toBe(true);
+  });
+
+  it('defaults to manual when auto_proceed is missing', () => {
+    const noModePanel = workflow._renderPanel({
+      name: 'no-mode', current_stage: 'Ideation', feature_count: 0,
+      created: '2026-01-01', last_activity: null,
+    });
+    const badge = noModePanel.querySelector('.auto-proceed-btn .badge');
+    expect(badge.textContent).toBe('Manual');
+  });
+
+  it('dropdown click does not propagate to panel header (no toggle)', () => {
+    const apDropdown = panel.querySelector('.auto-proceed-header');
+    const expandedBefore = panel.classList.contains('expanded');
+    const evt = new MouseEvent('click', { bubbles: true });
+    apDropdown.dispatchEvent(evt);
+    expect(panel.classList.contains('expanded')).toBe(expandedBefore);
+  });
+
+  it('CSS: .workflow-panel-actions has display:flex and gap', () => {
+    const css = readFileSync(CSS_PATH, 'utf-8');
+    const actionsRule = css.match(/\.workflow-panel-actions\s*\{[^}]*\}/);
+    expect(actionsRule).not.toBeNull();
+    expect(actionsRule[0]).toMatch(/display\s*:\s*flex/);
+    expect(actionsRule[0]).toMatch(/gap/);
+  });
+
+  it('mode selection calls PATCH settings API', async () => {
+    const restore = mockFetch();
+    const autoItem = panel.querySelector('.auto-proceed-header .dropdown-item[data-mode="auto"]');
+    await autoItem.click();
+    const patchCall = globalThis.fetch.mock.calls.find(c => c[0].includes('/settings') && c[1]?.method === 'PATCH');
+    expect(patchCall).toBeDefined();
+    expect(patchCall[0]).toContain('/api/workflow/test-wf/settings');
+    restore();
   });
 });

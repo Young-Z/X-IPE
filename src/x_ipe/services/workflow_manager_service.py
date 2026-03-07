@@ -249,12 +249,16 @@ class WorkflowManagerService:
                         if feats:
                             feature_count = len(feats)
                             break
+                auto_proceed = (state.get("global", {})
+                                .get("process_preference", {})
+                                .get("auto_proceed", "manual"))
                 results.append({
                     "name": state.get("name", f.stem),
                     "created": state.get("created"),
                     "last_activity": state.get("last_activity"),
                     "current_stage": state.get("current_stage"),
                     "feature_count": feature_count,
+                    "auto_proceed": auto_proceed,
                 })
             except (json.JSONDecodeError, KeyError):
                 continue

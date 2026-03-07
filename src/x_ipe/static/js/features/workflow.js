@@ -113,9 +113,47 @@ const workflow = {
         info.appendChild(meta);
         header.appendChild(info);
 
-        // Action button (⋮)
+        // Auto-Proceed dropdown + Action button (⋮)
         const actionsWrap = document.createElement('div');
         actionsWrap.className = 'workflow-panel-actions';
+
+        // Auto-Proceed dropdown
+        const currentMode = wf.auto_proceed || 'manual';
+        const modeLabels = { manual: 'Manual', auto: 'Auto', stop_for_question: 'Stop for Q' };
+        const modeIcons = { manual: 'bi-hand-index', auto: 'bi-lightning-charge-fill', stop_for_question: 'bi-pause-circle' };
+        const modeBadges = { manual: 'text-bg-secondary', auto: 'text-bg-success', stop_for_question: 'text-bg-warning' };
+        const apWrap = document.createElement('div');
+        apWrap.className = 'dropdown d-inline-block auto-proceed-header';
+        apWrap.innerHTML = `
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle auto-proceed-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi ${modeIcons[currentMode]}"></i> <span class="badge ${modeBadges[currentMode]}">${modeLabels[currentMode]}</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark">
+                <li><button class="dropdown-item${currentMode === 'manual' ? ' active' : ''}" data-mode="manual"><i class="bi bi-hand-index"></i> Manual</button></li>
+                <li><button class="dropdown-item${currentMode === 'auto' ? ' active' : ''}" data-mode="auto"><i class="bi bi-lightning-charge-fill"></i> Auto</button></li>
+                <li><button class="dropdown-item${currentMode === 'stop_for_question' ? ' active' : ''}" data-mode="stop_for_question"><i class="bi bi-pause-circle"></i> Stop for Question</button></li>
+            </ul>`;
+        const btnLabel = apWrap.querySelector('.dropdown-toggle');
+        apWrap.querySelectorAll('.dropdown-item').forEach(item => {
+            item.onclick = async (e) => {
+                e.stopPropagation();
+                const mode = item.dataset.mode;
+                try {
+                    const resp = await fetch(`/api/workflow/${encodeURIComponent(wf.name)}/settings`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ process_preference: { auto_proceed: mode } })
+                    });
+                    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                    apWrap.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    btnLabel.innerHTML = `<i class="bi ${modeIcons[mode]}"></i> <span class="badge ${modeBadges[mode]}">${modeLabels[mode]}</span>`;
+                } catch (e) { /* revert silently */ }
+            };
+        });
+        apWrap.onclick = (e) => e.stopPropagation();
+        actionsWrap.appendChild(apWrap);
+
         const actBtn = document.createElement('button');
         actBtn.className = 'workflow-action-btn';
         actBtn.innerHTML = '⋮';

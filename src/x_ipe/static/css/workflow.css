@@ -206,7 +206,19 @@
 .workflow-panel-actions {
     position: relative;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
+
+.auto-proceed-header .auto-proceed-btn {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-color: var(--wf-slate-200);
+    color: var(--wf-slate-600);
+}
+.auto-proceed-header .auto-proceed-btn:hover { border-color: var(--wf-accent); }
+.auto-proceed-header .badge { font-size: 0.68rem; }
 
 .workflow-action-btn {
     background: none;
