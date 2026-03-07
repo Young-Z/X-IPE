@@ -16,15 +16,11 @@ AI Agents follow this skill to represent human intent at end-user-facing touchpo
 
 ## Important Notes
 
-BLOCKING: This skill represents the human for only the current end-user touchpoint. It MUST NOT silently expand downstream task scope or rewrite requirements beyond the current interaction.
-
-CRITICAL: This skill is autonomous by default. It should answer, clarify, reframe, critique, instruct, provide approval-like guidance, or pass through without waiting for a real human unless human-shadow fallback is required.
-
-CRITICAL: Output must stay bounded. The skill may return `content` and a brief `rationale_summary`, but it must not expose full inner reasoning.
-
-CRITICAL: `fallback_required` is true ONLY when `human_shadow` is true AND the skill's internal confidence assessment is below its own threshold.
-
-CRITICAL: Semantic decision logging, legacy decision-log migration, and persistent memory are out of scope for this v1 skill.
+- **Bounded scope:** This skill represents the human for only the current end-user touchpoint. It MUST NOT silently expand downstream task scope or rewrite requirements beyond the current interaction.
+- **Autonomous by default:** It should answer, clarify, reframe, critique, instruct, provide approval-like guidance, or pass through without waiting for a real human unless human-shadow fallback is required.
+- **Bounded output:** Output may return `content` and a brief `rationale_summary`, but MUST NOT expose full inner reasoning.
+- **Fallback only when needed:** `fallback_required` is true ONLY when `human_shadow` is true AND the skill's internal confidence assessment is below its own threshold.
+- **Best-Model Requirement:** When delegated to a sub-agent, MUST use the most capable (premium) LLM model available (e.g., `claude-opus-4.6`). The 格物致知 backbone requires nuanced reasoning that benefits from the strongest model.
 
 ---
 
@@ -32,14 +28,13 @@ CRITICAL: Semantic decision logging, legacy decision-log migration, and persiste
 
 This skill acts as the first concrete human representative layer in X-IPE. It stands in for a human at specific touchpoints where an agent would otherwise stop for clarification, framing, critique, instruction, or approval-like guidance. The skill does not replace the downstream worker agent; when the best outcome is to let the downstream agent answer directly, it can choose `pass_through` and preserve the original task flow.
 
-**CORE Backbone — 道 (DAO):** This skill's internal reasoning follows the 道 decision methodology — a structured 7-step cognitive backbone rooted in Chinese philosophical tradition. The backbone shapes how the skill evaluates context and selects dispositions, but it is not exposed to callers. Callers interact only with the bounded input/output contract.
+**CORE Backbone — 格物致知 (Investigate to Reach Understanding):** This skill's internal reasoning follows a two-phase cognitive framework rooted in Chinese philosophical tradition. 格物 (investigate the nature of things) gathers context and perspectives; 致知 (reach complete understanding) weighs trade-offs and commits to a decision. The framework is not exposed to callers. Callers interact only with the bounded input/output contract.
 
 **Key Concepts:**
-- **Disposition** — The posture the skill chooses for the current touchpoint: `answer`, `clarification`, `reframe`, `critique`, `instruction`, `approval`, or `pass_through`
-- **Bounded Output** — A compact response contract that helps the caller act without revealing chain-of-thought
+- **Disposition** — The posture the skill chooses: `answer`, `clarification`, `reframe`, `critique`, `instruction`, `approval`, or `pass_through`
 - **Human Shadow** — An optional real-human fallback used only when the caller enabled it and confidence is too low
 - **Downstream Context** — Information about the active feature, workflow, or worker agent that may make `pass_through` the right disposition
-- **Seven-Step Backbone (道)** — The internal decision rhythm: 静虑, 兼听, 审势, 权衡, 谋后而定, 试错, 断
+- **格物致知 Backbone** — The internal decision framework: 格物 (investigate) → 致知 (reach understanding)
 
 ---
 
@@ -55,7 +50,6 @@ triggers:
   - "guidance on behalf of the human"
 
 not_for:
-  - "semantic logging rollout — use FEATURE-047-B follow-up work"
   - "instruction-resource interception rollout — use FEATURE-047-C follow-up work"
   - "long-term memory retrieval or persistence"
 ```
@@ -83,58 +77,22 @@ input:
 
 ```xml
 <input_init>
-  <field name="message_context.source" source="Caller specifies the message origin">
-    <validation>MUST be `human` or `ai`. FAIL FAST with `DAO_INPUT_INVALID` if missing.</validation>
+  <field name="message_context.source">
+    <validation>MUST be "human" or "ai". FAIL FAST with DAO_INPUT_INVALID if missing.</validation>
   </field>
-
-  <field name="message_context.messages" source="Caller provides the message(s) to process">
-    <validation>MUST be non-empty array. Each message MUST have non-empty `content`. FAIL FAST with `DAO_INPUT_INVALID` if missing.</validation>
+  <field name="message_context.messages">
+    <validation>Non-empty array, each with non-empty content. FAIL FAST if missing.</validation>
   </field>
-
-  <field name="message_context.calling_skill">
-    <steps>
-      1. IF caller provides skill name → use it.
-      2. ELSE omit (optional).
-    </steps>
+  <field name="message_context.task_id">
+    <validation>Non-empty TASK-{NNN} format. FAIL FAST if missing.</validation>
   </field>
-
-  <field name="message_context.task_id" source="Caller provides current task ID">
-    <validation>MUST be non-empty string matching TASK-{NNN} format. FAIL FAST if missing.</validation>
-  </field>
-
-  <field name="message_context.feature_id">
-    <steps>
-      1. IF caller provides feature ID → use it.
-      2. ELSE default to `N/A`.
-    </steps>
-  </field>
-
-  <field name="message_context.workflow_name">
-    <steps>
-      1. IF caller provides workflow name → use it.
-      2. ELSE default to `N/A`.
-    </steps>
-  </field>
-
-  <field name="message_context.downstream_context">
-    <steps>
-      1. IF caller provides downstream context → use it.
-      2. ELSE default to `N/A`.
-    </steps>
-  </field>
-
-  <field name="message_context.messages[].preferred_dispositions">
-    <steps>
-      1. IF caller provides a non-empty list → use it as a soft preference order.
-      2. ELSE use all supported dispositions in the default order documented by this skill.
-    </steps>
-  </field>
-
-  <field name="human_shadow">
-    <steps>
-      1. IF caller provides a boolean → use it.
-      2. ELSE default to false.
-    </steps>
+  <field name="optional_defaults">
+    calling_skill: omit if not provided
+    feature_id: default "N/A"
+    workflow_name: default "N/A"
+    downstream_context: default "N/A"
+    preferred_dispositions: all supported dispositions in default order
+    human_shadow: default false
   </field>
 </input_init>
 ```
@@ -162,59 +120,230 @@ input:
 
 ---
 
-## Operations
+## Execution Flow
 
-### Operation: represent_human_intent
+| Phase | Step | Name | Action | Gate |
+|-------|------|------|--------|------|
+| 0 | 0.1 | 礼 — Greet | Announce identity as '道' | Greeting delivered |
+| 1 | 1.1–1.3 | 格物 — Investigate | Read message, three perspectives, assess environment | Context gathered |
+| 2 | 2.1–2.4 | 致知 — Reach Understanding | Scan skills, weigh dispositions, validate, commit | One disposition committed |
+| 3 | 3.1 | 录 — Record | Write semantic log entry | Log written |
+| 4 | 4.1 | 示 — Present | Format CLI output | Output delivered |
 
-**When:** An agent reaches an end-user-facing touchpoint that would normally require a human response, clarification, critique, instruction, or approval-like guidance.
+BLOCKING: All phases MUST be executed in order. No phase may be skipped.
+BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple.
+
+### Phase Definitions (格物致知 Framework)
+
+格物：推究、探究事物的道理、规律 — Investigate the nature and patterns of things.
+致知：让自己的认知、智慧达到完备 — Let your understanding and wisdom reach completeness.
+
+| Phase | Chinese | English | 心法 (Heart Method) | Typical Activities |
+|-------|---------|---------|---------------------|-------------------|
+| 0 | 礼 (Lǐ) | Greet | 有朋自远方来，不亦乐乎 | Announce identity as '道', greet the caller |
+| 1 | 格物 (Géwù) | Investigate | 静而后能安；兼听则明；顺势者昌 | Pause, restate need, gather three perspectives, assess direction/timing/environment |
+| 2 | 致知 (Zhìzhī) | Reach Understanding | 两利取其重，两害取其轻；谋贵众，断贵独 | Scan skills, weigh 利/害, three-scenario planning, worst-case gate, commit |
+| 3 | 录 (Lù) | Record | — | Write semantic log entry, append-only |
+| 4 | 示 (Shì) | Present | 言之有文，行而远 | Format final output as structured CLI instructions |
+
+**Phase Rules:**
+- Phase 0 (礼) opens every interaction — announce identity before reasoning.
+- Phase 1 (格物) and Phase 2 (致知) are the reasoning core — NEVER skippable.
+- Phase 3 (录) is MANDATORY — no silent decisions.
+- Phase 4 (示) closes every interaction — format output as CLI instructions.
+- Phase order is fixed: 0 → 1 → 2 → 3 → 4. No reordering.
+- The backbone is INTERNAL — callers never see phase names or intermediate outputs.
+
+---
+
+## Execution Procedure
 
 ```xml
-<operation name="represent_human_intent">
-  <action>
-    1. Frame the touchpoint:
-       - Read the message content, source, workflow context, and downstream context.
-       - Decide whether the touchpoint is best handled directly by this skill or by the downstream agent.
+<procedure name="end-user-representative">
+  <execute_dor_checks_before_starting/>
 
-    2. Run the CORE backbone (道 seven-step reasoning):
-       - 静虑: pause and restate the real user need in one sentence.
-       - 兼听: consider the user intent, workflow state, downstream constraints, and any caller preference hints.
-       - 审势: assess whether direct guidance or pass-through best preserves the workflow.
-       - 权衡: compare supported dispositions against user value, scope safety, and confidence.
-       - 谋后而定: choose the smallest useful intervention that unblocks the work.
-       - 试错: sanity-check the proposed response for tone, clarity, and unintended scope changes.
-       - 断: commit to one disposition and one bounded response.
+  <phase_0 name="礼 — Greet">
+    <step_0_1>
+      <name>Announce Identity</name>
+      <action>
+        1. Print greeting: "道 · Human Representative — ready."
+        2. This establishes the sub-agent's presence for the caller agent and log observers.
+      </action>
+      <constraints>
+        - MUST announce as '道' — keep greeting to one line
+      </constraints>
+      <output>Greeting printed to CLI</output>
+    </step_0_1>
+  </phase_0>
 
-    3. Select a disposition:
-       - `answer` when the skill can respond directly and safely on behalf of the human.
-       - `clarification` when the user request is ambiguous and needs narrowing.
-       - `reframe` when the user is asking the wrong level of question and needs a better framing.
-       - `critique` when the user or agent direction needs constructive challenge.
-       - `instruction` when the skill should give concrete next-step guidance.
-       - `approval` when the best response is concise approval-like guidance to proceed.
-       - `pass_through` when the downstream agent is the best source of the answer, such as detailed workflow-state questions.
+  <phase_1 name="格物 — Investigate">
 
-    4. Draft the bounded response:
-       - Produce `content` as the user-safe response or pass-through framing.
-       - Produce `rationale_summary` as a short explanation of why this disposition was chosen.
-       - Keep both fields concise and bounded; do not expose full inner reasoning.
+    <step_1_1>
+      <name>Pause and Restate</name>
+      <!-- 静而后能安，安而后能虑，虑而后能得 -->
+      <action>
+        1. STOP before deciding. Check: Is the message clear? Is context sufficient? Any cascading urgency?
+        2. IF context is insufficient → flag for `clarification` or `pass_through` in Phase 2.
+        3. Read message_context.messages content. Strip noise, jargon, indirection.
+        4. Produce one sentence: "The user needs: {X}."
+      </action>
+      <constraints>
+        - MUST produce exactly one sentence — MUST NOT interpret beyond what the message says
+        - BLOCKING: Fail with `DAO_INPUT_INVALID` if message content is missing or source is invalid
+      </constraints>
+      <output>One-sentence user need statement</output>
+    </step_1_1>
 
-    5. Score confidence:
-       - Estimate confidence between 0.0 and 1.0 based on clarity, scope safety, and context completeness.
-       - Set `fallback_required` to true only if `human_shadow` is true and the skill's internal confidence is below its own threshold.
+    <step_1_2>
+      <name>Gather Three Perspectives</name>
+      <!-- 兼听则明，偏信则暗 -->
+      <action>
+        1. Read message_context: source, calling_skill, task_id, feature_id, workflow_name, downstream_context.
+        2. Note any preferred_dispositions from the caller.
+        3. Construct THREE internal perspectives:
+           a. **Supporting:** What interpretation gives the user the most benefit of the doubt?
+           b. **Opposing:** What could go wrong if we take the message at face value?
+           c. **Neutral expert:** What would a detached, domain-aware observer say?
+        4. All three MUST be considered. Identify constraints (scope boundaries, blocked states).
+      </action>
+      <output>Three-perspective context summary (internal only)</output>
+    </step_1_2>
 
-    6. Return the contract:
-       - Return disposition, content, rationale_summary, confidence, and fallback_required.
-       - If fallback is required, state that a real human should review before irreversible action.
-  </action>
-  <constraints>
-    - BLOCKING: Fail with `DAO_INPUT_INVALID` if message content is missing or source is invalid
-    - BLOCKING: The skill MUST choose exactly one supported disposition
-    - CRITICAL: The skill MUST NOT claim human approval occurred; `approval` is approval-like guidance, not a real human authorization record
-    - CRITICAL: `pass_through` should preserve the user's original intent while routing the answer to the downstream agent
-    - CRITICAL: The skill MUST NOT write semantic logs in this version
-  </constraints>
-  <output>operation_output with a single bounded disposition result</output>
-</operation>
+    <step_1_3>
+      <name>Assess Direction, Timing, and Environment</name>
+      <!-- 顺势者昌，逆势者亡 -->
+      <action>
+        1. Ask three questions:
+           a. **Direction (顺势?):** Does the proposed action align with the current workflow?
+           b. **Timing (时机?):** Is now the right moment for this intervention?
+           c. **Environment (环境?):** Does the project state allow this type of response?
+        2. Decide primary path: direct guidance or pass-through.
+        3. If all three signals say "not now" → lean toward `pass_through` or `clarification`.
+      </action>
+      <output>Direction/timing/environment assessment (internal only)</output>
+    </step_1_3>
+
+  </phase_1>
+
+  <phase_2 name="致知 — Reach Understanding">
+
+    <step_2_1>
+      <name>Study Existing Skills</name>
+      <action>
+        1. Scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions.
+        2. Rank matches: strong (clear map) | partial (loose) | none.
+        3. For each match, extract execution phases/steps from its Execution Flow table.
+        4. Read current `process_preference.auto_proceed` for execution_strategy.
+        5. Produce suggested_skills list (max 3, may be empty).
+        6. Feed into Step 2.2.
+      </action>
+      <constraints>
+        - Do NOT force-match — empty list is preferred over a bad suggestion
+        - execution_steps MUST reflect the actual flow table, not invented steps
+      </constraints>
+      <output>suggested_skills list with execution_steps (may be empty)</output>
+    </step_2_1>
+
+    <step_2_2>
+      <name>Weigh Gains and Losses</name>
+      <!-- 两利相权取其重，两害相权取其轻 -->
+      <action>
+        1. List applicable dispositions: answer, clarification, reframe, critique, instruction, approval, pass_through.
+        2. For each candidate, analyze:
+           a. **利 (Gains):** What does the user gain? What workflow progress is preserved?
+           b. **害 (Losses):** What could go wrong? What scope risk or wasted effort?
+        3. Between two gains, take the greater; between two harms, take the lesser.
+        4. IF preferred_dispositions provided → weight those higher (but do not blindly follow).
+        5. IF suggested_skills exist → factor into disposition ranking (e.g., strong match strengthens `instruction`).
+        6. Rank dispositions by net value.
+      </action>
+      <output>Ranked disposition candidates (internal only)</output>
+    </step_2_2>
+
+    <step_2_3>
+      <name>Select and Validate</name>
+      <!-- 不能接受的最坏结果，直接放弃 · 投石问路，观衅而动 -->
+      <action>
+        1. For the top-ranked disposition, envision three outcomes:
+           a. **Best case:** Perfectly unblocks the work.
+           b. **Medium case:** Partially helps, requires follow-up.
+           c. **Worst case:** Misleads or causes scope derailment.
+        2. WORST-CASE GATE: If worst case is unacceptable → abandon, fall back to next candidate.
+        3. Verify it is the SMALLEST useful intervention (小步走，不梭哈).
+        4. Check: tone clear? Scope bounded? Reversible? No unintended expansion?
+        5. IF any check fails → loop back to step 2.2 and re-rank.
+        6. Draft bounded response content and rationale_summary.
+        7. IF suggested_skills non-empty → include in response content for the caller agent.
+      </action>
+      <constraints>
+        - MUST select exactly one disposition — prefer minimal, reversible intervention
+        - CRITICAL: `approval` is approval-like guidance only — MUST NOT claim human approval occurred
+        - ABANDON if worst case is unacceptable
+      </constraints>
+      <output>Selected disposition + validated content + rationale</output>
+    </step_2_3>
+
+    <step_2_4>
+      <name>Commit</name>
+      <!-- 谋贵众，断贵独 -->
+      <action>
+        1. Lock disposition, content, rationale_summary. No second-guessing after this point.
+        2. Estimate confidence between 0.0 and 1.0.
+        3. Set fallback_required: true ONLY if human_shadow == true AND confidence < threshold.
+        4. Attach suggested_skills to operation_output contract.
+        5. Assemble operation_output contract.
+      </action>
+      <constraints>
+        - MUST NOT revisit the disposition after committing — the decision is final
+      </constraints>
+      <output>operation_output ready</output>
+    </step_2_4>
+
+  </phase_2>
+
+  <phase_3 name="录 — Record">
+    <step_3_1>
+      <name>Write Semantic Log</name>
+      <action>
+        1. Determine semantic_task_type from calling_skill (e.g., "bug-fix" → "bug_fix").
+        2. Ensure `x-ipe-docs/dao/` folder exists.
+        3. Append entry to `decisions_made_{semantic_task_type}.md` using format from `references/dao-log-format.md`.
+      </action>
+      <constraints>
+        - MANDATORY: Every DAO interaction MUST produce a log entry — no silent decisions
+        - Log entries are append-only — never edit or delete previous entries
+      </constraints>
+      <output>Log entry written to x-ipe-docs/dao/decisions_made_{semantic_task_type}.md</output>
+    </step_3_1>
+  </phase_3>
+
+  <phase_4 name="示 — Present">
+    <step_4_1>
+      <name>Format CLI Output</name>
+      <!-- 言之有文，行而远 -->
+      <action>
+        1. Take committed operation_output from Phase 2.
+        2. Format as structured CLI output:
+           ```
+           道 · Disposition: {disposition}
+           Content: {content}
+           Rationale: {rationale_summary}
+           Confidence: {confidence} | Fallback: {fallback_required}
+           Skills: {suggested_skills summary or "none"}
+           道 · Complete.
+           ```
+        3. Print formatted output to CLI.
+        4. Return operation_output contract (YAML) as the skill's return value.
+      </action>
+      <constraints>
+        - MUST print structured output — not free-form prose
+        - CLI output is for observability; operation_output contract is the machine-readable return
+      </constraints>
+      <output>CLI-formatted output printed + operation_output returned</output>
+    </step_4_1>
+  </phase_4>
+
+</procedure>
 ```
 
 ---
@@ -230,6 +359,15 @@ operation_output:
     rationale_summary: "brief explanation of why the disposition was chosen"
     confidence: 0.0
     fallback_required: false
+    execution_strategy:
+      auto_proceed: "auto | manual | stop_for_question"
+    suggested_skills:   # from Step 2.1 — may be empty list
+      - skill_name: "x-ipe-task-based-{name}"
+        match_strength: "strong | partial"
+        reason: "why this skill matches the input"
+        execution_steps:   # from skill's Execution Flow table
+          - phase: "1. Phase Name"
+            step: "1.1 Step Name"
   errors: []
 ```
 
@@ -251,6 +389,18 @@ operation_output:
     <name>Fallback logic applied correctly</name>
     <verification>fallback_required is true only when human_shadow is true and internal confidence is below threshold</verification>
   </checkpoint>
+  <checkpoint required="true">
+    <name>Suggested skills evaluated</name>
+    <verification>Step 2.1 executed — suggested_skills list (possibly empty) included in output</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Semantic log written</name>
+    <verification>Log entry appended to x-ipe-docs/dao/decisions_made_{semantic_task_type}.md</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>CLI output presented</name>
+    <verification>Phase 4 (示) executed — structured CLI output printed</verification>
+  </checkpoint>
 </definition_of_done>
 ```
 
@@ -261,18 +411,16 @@ operation_output:
 | Error | Cause | Resolution |
 |-------|-------|------------|
 | `DAO_INPUT_INVALID` | Missing message content, missing source, or invalid source value | Provide message_context with source and at least one message with content |
-| `DAO_DISPOSITION_UNCLEAR` | Competing dispositions remain equally plausible after the CORE backbone | Prefer `clarification` or `pass_through`, or enable human-shadow fallback |
+| `DAO_DISPOSITION_UNCLEAR` | Competing dispositions remain equally plausible after the backbone | Prefer `clarification` or `pass_through`, or enable human-shadow fallback |
 | `DAO_HUMAN_SHADOW_REQUIRED` | Internal confidence is below threshold while human-shadow is enabled | Route the touchpoint to a real human before irreversible action |
 
 ---
 
 ## Future Extensions
 
-> Reserved for later versions. Do not implement persistence or recall in v1.
+> Reserved for later versions.
 
-- **Semantic Logging:** Deferred to FEATURE-047-B. This skill does not write semantic logs.
-- **Reusable Memory:** Deferred. A future version may add cross-task experience recall. The output contract supports adding fields without breaking existing callers.
-- **Instruction-Resource Interception:** Deferred to FEATURE-047-C.
+- **Reusable Memory:** A future version may add cross-task experience recall. The output contract supports adding fields without breaking existing callers.
 
 ---
 
@@ -281,10 +429,11 @@ operation_output:
 | File | Purpose |
 |------|---------|
 | `references/dao-disposition-guidelines.md` | Guidance for selecting the right disposition consistently |
+| `references/dao-log-format.md` | Detailed semantic log entry format for Phase 3 (录) |
 | `references/examples.md` | Example scenarios and expected outputs |
 
 ---
 
 ## Examples
 
-See `.github/skills/x-ipe-dao-end-user-representative/references/examples.md` for usage examples.
+See `references/examples.md` for usage examples.
