@@ -300,13 +300,12 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
            - Read the flow summary table to get the ordered list of phases and steps
            - Capture phase names and step names
            - This gives the caller a preview of what executing this skill involves
-        5. For each matched skill, check its `process_preference.auto_proceed` value from the skill's output YAML:
-           - Read the `task_completion_output` section to find `process_preference.auto_proceed`
-           - This tells the caller whether the skill will auto-proceed or require human interaction
+        5. Check the current `process_preference.auto_proceed` value for the execution strategy:
+           - Read from workflow JSON (workflow-mode) or CLI flag/user message (free-mode)
+           - This determines overall execution_strategy for the caller
         6. Produce `suggested_skills` list (may be empty):
-           - Each entry: { skill_name, match_strength, reason, execution_steps, auto_proceed }
+           - Each entry: { skill_name, match_strength, reason, execution_steps }
            - `execution_steps`: ordered list of { phase, step } from the skill's flow table
-           - `auto_proceed`: the skill's process_preference.auto_proceed value
            - Maximum 3 suggestions, ordered by relevance
            - If no skill matches, set suggested_skills to empty list — do NOT force a match
         7. Feed suggested_skills into subsequent disposition ranking (Step 2.2).
@@ -481,8 +480,8 @@ operation_output:
     rationale_summary: "brief explanation of why the disposition was chosen"
     confidence: 0.0
     fallback_required: false
-    exeuction_strategy:
-      - auto_pro
+    execution_strategy:
+      - auto_proceed: "auto | manual | stop_for_question"
     suggested_skills:   # from Step 2.1 — may be empty list
       - skill_name: "x-ipe-task-based-{name}"
         match_strength: "strong | partial"
