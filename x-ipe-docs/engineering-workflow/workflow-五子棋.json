@@ -161,10 +161,13 @@
             "status": "pending",
             "deliverables": []
           },
-          "quality_evaluation": {
-            "status": "skipped",
-            "deliverables": [],
-            "optional": true
+          "code_refactor": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "feature_closing": {
+            "status": "pending",
+            "deliverables": []
           }
         }
       },
@@ -172,6 +175,11 @@
         "status": "locked",
         "actions": {
           "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "human_playground": {
             "status": "skipped",
             "deliverables": [],
             "optional": true
@@ -209,10 +217,13 @@
             "status": "pending",
             "deliverables": []
           },
-          "quality_evaluation": {
-            "status": "skipped",
-            "deliverables": [],
-            "optional": true
+          "code_refactor": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "feature_closing": {
+            "status": "pending",
+            "deliverables": []
           }
         }
       },
@@ -220,6 +231,11 @@
         "status": "locked",
         "actions": {
           "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "human_playground": {
             "status": "skipped",
             "deliverables": [],
             "optional": true
@@ -257,10 +273,13 @@
             "status": "pending",
             "deliverables": []
           },
-          "quality_evaluation": {
-            "status": "skipped",
-            "deliverables": [],
-            "optional": true
+          "code_refactor": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "feature_closing": {
+            "status": "pending",
+            "deliverables": []
           }
         }
       },
@@ -268,6 +287,11 @@
         "status": "locked",
         "actions": {
           "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "human_playground": {
             "status": "skipped",
             "deliverables": [],
             "optional": true
@@ -305,10 +329,13 @@
             "status": "pending",
             "deliverables": []
           },
-          "quality_evaluation": {
-            "status": "skipped",
-            "deliverables": [],
-            "optional": true
+          "code_refactor": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "feature_closing": {
+            "status": "pending",
+            "deliverables": []
           }
         }
       },
@@ -316,6 +343,11 @@
         "status": "locked",
         "actions": {
           "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "human_playground": {
             "status": "skipped",
             "deliverables": [],
             "optional": true
@@ -353,10 +385,13 @@
             "status": "pending",
             "deliverables": []
           },
-          "quality_evaluation": {
-            "status": "skipped",
-            "deliverables": [],
-            "optional": true
+          "code_refactor": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "feature_closing": {
+            "status": "pending",
+            "deliverables": []
           }
         }
       },
@@ -364,6 +399,11 @@
         "status": "locked",
         "actions": {
           "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "human_playground": {
             "status": "skipped",
             "deliverables": [],
             "optional": true

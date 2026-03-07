@@ -918,8 +918,15 @@ def upgrade(ctx: click.Context, force: bool, dry_run: bool,
                     continue
                 click.echo(f"  → {pkg_skill.name}")
     
-    # Copy/update MCP config from package, then merge using active CLI's path
+    # Sync config files to x-ipe-docs/config/ (--force overwrites all)
     scaffold = ScaffoldManager(project_root, dry_run=dry_run, force=force)
+    scaffold.copy_config_files()
+    if scaffold.created:
+        click.echo(f"\n✓ Updated {len(scaffold.created)} config file(s):")
+        for f in scaffold.created:
+            click.echo(f"  ✓ {Path(f).name}")
+    
+    # Copy/update MCP config from package, then merge using active CLI's path
     scaffold.copy_mcp_config()
     
     # MCP config merge using active CLI's target path

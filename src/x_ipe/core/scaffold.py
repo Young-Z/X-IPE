@@ -338,7 +338,7 @@ class ScaffoldManager:
         target_dir = self.project_root / "x-ipe-docs" / "config"
         
         # Copy each config file individually (don't overwrite existing)
-        config_files = ["copilot-prompt.json", "tools.json", ".env.example"]
+        config_files = ["copilot-prompt.json", "tools.json", "workflow-template.json", "cli-adapters.yaml", ".env.example"]
         for filename in config_files:
             source_file = config_source / filename
             target_file = target_dir / filename
