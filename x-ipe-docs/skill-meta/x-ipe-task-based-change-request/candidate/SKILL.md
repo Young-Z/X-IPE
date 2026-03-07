@@ -68,6 +68,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
   <field name="change_request_description" source="from human input" />
   <field name="business_justification" source="from human input" />
   <field name="extra_context_reference" source="from workflow context or N/A" />
@@ -116,6 +117,8 @@ input:
 | 3. 慎思之 — Think Carefully | 3.1 Detect Conflicts | Analyze spec/design/dependency conflicts with existing features | Conflicts classified |
 | 4. 明辨之 — Discern Clearly | 4.1 Classify CR Type, 4.2 Route Workflow | Classify modification vs new feature, confirm classification | Classification confirmed |
 | 5. 笃行之 — Practice Earnestly | 5.1 Execute & Document | Update documents, create CR record | CR documented |
+| 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
+| 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Phase 3 must complete before Phase 4 — do NOT classify without conflict analysis.
 BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop_for_question: human confirms; auto: DAO confirms via x-ipe-dao-end-user-representative).
@@ -168,9 +171,14 @@ BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop
            - Could the existing feature already handle this with configuration?
            - Is the requested approach the best solution, or are there alternatives?
            - What is the impact if this CR is NOT implemented?
-        2. IF auto_proceed: use x-ipe-dao-end-user-representative to resolve challenges
-        3. ELSE (manual/stop_for_question): present challenges to human, ask for confirmation
-        4. Document challenge outcomes and confirmed scope
+        2. Present challenges and ask for confirmation
+        3. Document challenge outcomes and confirmed scope
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Resolve via x-ipe-dao-end-user-representative
+        ELSE (manual/stop_for_question):
+          → Ask human for confirmation
       </action>
       <output>Validated CR scope with challenge decisions</output>
     </step_2_1>
@@ -232,11 +240,15 @@ BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop
     <step_4_2>
       <name>Route Workflow</name>
       <action>
-        1. IF auto_proceed: log classification and conflicts via x-ipe-dao-end-user-representative, proceed
-        2. ELSE (manual/stop_for_question):
-           a. Present to human: CR summary, classification, conflict results, affected features
-           b. Wait for human to confirm classification and conflict decisions
-           c. IF human requests changes: return to step 4.1 or Phase 3
+        1. Present CR summary: classification, conflict results, affected features
+        2. Wait for confirmation of classification and conflict decisions
+        3. IF changes requested: return to step 4.1 or Phase 3
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Confirm via x-ipe-dao-end-user-representative
+        ELSE (manual/stop_for_question):
+          → Ask human to confirm
       </action>
       <constraints>
         - BLOCKING (manual/stop_for_question): Do NOT proceed without human confirming classification
@@ -285,6 +297,44 @@ BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop
     </step_5_1>
 
   </phase_5>
+
+  <phase_6 name="继续执行（Continue Execute）">
+    <step_6_1>
+      <name>Decide Next Action</name>
+      <action>
+        Collect the full context and task_completion_output from this skill execution.
+
+        IF process_preference.auto_proceed == "auto":
+          → Invoke x-ipe-dao-end-user-representative with:
+            type: "routing"
+            completed_skill_output: {full task_completion_output YAML from this skill}
+            next_task_based_skill: "{from output}"
+            context: "Skill completed. Study the context and full output to decide best next action."
+          → DAO studies the complete context and decides the best next action
+        ELSE (manual):
+          → Present next task suggestion to human and wait for instruction
+      </action>
+      <constraints>
+        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
+        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
+      </constraints>
+      <output>Next action decided with execution context</output>
+    </step_6_1>
+    <step_6_2>
+      <name>Execute Next Action</name>
+      <action>
+        Based on the decision from Step 6.1:
+        1. Load the target task-based skill's SKILL.md
+        2. Generate an execution plan from the skill's Execution Flow table
+        3. Start execution from the skill's first phase/step
+      </action>
+      <constraints>
+        - MUST load the skill before executing — do not skip skill loading
+        - Execution follows the target skill's procedure, not this skill's
+      </constraints>
+      <output>Next task execution started</output>
+    </step_6_2>
+  </phase_6>
 
 </procedure>
 ```

@@ -73,6 +73,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
   <field name="epic_id" source="auto-assigned">
     <steps>
       1. Scan x-ipe-docs/requirements/ for existing EPIC-{nnn} folders
@@ -130,6 +131,8 @@ input:
 | 3. 慎思之 — Think Carefully | 3.1 Feasibility & Risk Reflection | Assess technical feasibility, identify risks and constraints | Risks documented |
 | 4. 明辨之 — Discern Clearly | 4.1 Update Impacted Features, 4.2 Scope Decision | Mark impacted features, finalize in/out scope boundaries | Scope decided |
 | 5. 笃行之 — Practice Earnestly | 5.1 Create Requirement Document, 5.2 Complete & Verify | Create/update requirement-details, verify DoD | Document created |
+| 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
+| 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Continue asking in Phase 2 until ALL ambiguities are resolved.
 BLOCKING: Each conflict in step 2.2 MUST be decided before proceeding (manual/stop_for_question: human decides; auto: x-ipe-dao-end-user-representative decides).
@@ -194,28 +197,16 @@ BLOCKING (auto): Proceed automatically after DoD verification.
       <name>Ask Clarifying Questions</name>
       <action>
         1. Identify ambiguities across: Scope, Users, Edge Cases, Priorities, Constraints
-        2. IF process_preference.auto_proceed == "auto":
-            → CALL x-ipe-dao-end-user-representative with:
-                message_context:
-                  source: "ai"
-                  calling_skill: "requirement-gathering"
-                  task_id: "{task_id}"
-                  feature_id: "N/A"
-                  workflow_name: "N/A"
-                  downstream_context: "Resolving requirement ambiguities during autonomous requirement gathering"
-                  messages:
-                    - content: "{ambiguity description}"
-                      preferred_dispositions: ["answer", "clarification"]
-                human_shadow: false
-            → IF disposition is "answer" or "approval" or "instruction": use returned decisions to resolve ambiguities
-            → IF disposition is "clarification" or "reframe" or "critique": refine questions and re-ask
-            → IF disposition is "pass_through": escalate to human
-            → Document resolved answers immediately
-        3. ELSE (manual/stop_for_question):
-           a. Ask questions in batches of 3-5
-           b. Wait for human response before next batch
-           c. Document answers immediately
-           d. Repeat until all ambiguities are resolved
+        2. Ask questions in batches of 3-5 to avoid overwhelming
+        3. Wait for response before next batch
+        4. Document answers immediately
+        5. Repeat until all ambiguities are resolved
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Resolve ambiguities via x-ipe-dao-end-user-representative
+        ELSE (manual/stop_for_question):
+          → Ask human for responses
       </action>
       <constraints>
         - BLOCKING: Do not proceed until ALL ambiguities are resolved
@@ -238,8 +229,13 @@ BLOCKING (auto): Proceed automatically after DoD verification.
         5. IF conflicts found, for EACH conflict:
            - Present conflict summary table
            - Provide recommendation based on: Single Responsibility, Cohesion, Independence, Minimal Coupling
-           - IF auto_proceed: use x-ipe-dao-end-user-representative
-           - ELSE (manual/stop_for_question): ask human "CR on existing or new standalone feature?"
+           - Ask "CR on existing or new standalone feature?"
+
+             Response source (based on auto_proceed):
+             IF process_preference.auto_proceed == "auto":
+               → Resolve via x-ipe-dao-end-user-representative
+             ELSE (manual/stop_for_question):
+               → Ask human for decision
         6. Record decisions for each conflict
       </action>
       <constraints>
@@ -299,8 +295,13 @@ BLOCKING (auto): Proceed automatically after DoD verification.
       <action>
         1. Review all gathered requirements, conflicts, and feasibility assessment
         2. Explicitly define what is IN scope and OUT of scope
-        3. IF auto_proceed: make scope decision via x-ipe-dao-end-user-representative, log rationale
-        4. ELSE (manual/stop_for_question): present scope summary to human for confirmation
+        3. Present scope summary for confirmation
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Resolve via x-ipe-dao-end-user-representative, log rationale
+        ELSE (manual/stop_for_question):
+          → Ask human for confirmation
         5. Document final scope boundaries
       </action>
       <output>Final scope boundaries (in-scope and out-of-scope items)</output>
@@ -348,6 +349,44 @@ BLOCKING (auto): Proceed automatically after DoD verification.
     </step_5_2>
 
   </phase_5>
+
+  <phase_6 name="继续执行（Continue Execute）">
+    <step_6_1>
+      <name>Decide Next Action</name>
+      <action>
+        Collect the full context and task_completion_output from this skill execution.
+
+        IF process_preference.auto_proceed == "auto":
+          → Invoke x-ipe-dao-end-user-representative with:
+            type: "routing"
+            completed_skill_output: {full task_completion_output YAML from this skill}
+            next_task_based_skill: "{from output}"
+            context: "Skill completed. Study the context and full output to decide best next action."
+          → DAO studies the complete context and decides the best next action
+        ELSE (manual):
+          → Present next task suggestion to human and wait for instruction
+      </action>
+      <constraints>
+        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
+        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
+      </constraints>
+      <output>Next action decided with execution context</output>
+    </step_6_1>
+    <step_6_2>
+      <name>Execute Next Action</name>
+      <action>
+        Based on the decision from Step 6.1:
+        1. Load the target task-based skill's SKILL.md
+        2. Generate an execution plan from the skill's Execution Flow table
+        3. Start execution from the skill's first phase/step
+      </action>
+      <constraints>
+        - MUST load the skill before executing — do not skip skill loading
+        - Execution follows the target skill's procedure, not this skill's
+      </constraints>
+      <output>Next task execution started</output>
+    </step_6_2>
+  </phase_6>
 
 </procedure>
 ```

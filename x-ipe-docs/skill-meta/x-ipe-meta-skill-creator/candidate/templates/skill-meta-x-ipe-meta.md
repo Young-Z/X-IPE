@@ -86,6 +86,10 @@ acceptance_criteria:
       description: Cross-references validated
       test_method: custom
       expected: "grep -r {skill-name} shows correct registrations"
+    - id: AC-S04
+      description: Input Initialization subsection present under Input Parameters
+      test_method: section_parse
+      expected: "### Input Initialization with <input_init> XML block"
   could:
     - id: AC-C01
       description: Sub-agent workflow used for complex skills

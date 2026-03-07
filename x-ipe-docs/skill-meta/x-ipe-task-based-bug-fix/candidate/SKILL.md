@@ -77,6 +77,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
   <field name="bug_description" source="from human input" />
   <field name="expected_behavior" source="from human input" />
   <field name="actual_behavior" source="from human input" />
@@ -125,6 +126,8 @@ input:
 | 6 | Write Test | Create failing test that reproduces bug | Test fails |
 | 7 | Implement | Write minimum code to fix bug | Test passes |
 | 8 | Verify | Confirm bug fixed, all tests pass | DoD validated |
+| 9.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
+| 9.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Step 5 must complete before Step 6 — do NOT write tests with unresolved conflicts.
 BLOCKING: Step 6 to 7 is blocked until test is written and FAILS.
@@ -216,27 +219,16 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
          - Output: classified conflict list
       4. IF all conflicts are "expected": proceed to Step 6
       5. IF any conflicts are "unexpected":
-         - IF process_preference.auto_proceed == "auto":
-           → CALL x-ipe-dao-end-user-representative with:
-               message_context:
-                 source: "ai"
-                 calling_skill: "bug-fix"
-                 task_id: "{task_id}"
-                 feature_id: "N/A"
-                 workflow_name: "N/A"
-                 downstream_context: "Conflict analysis found unexpected behavioral changes from the proposed bug fix"
-                 messages:
-                   - content: "Unexpected conflict: {conflict}"
-                     preferred_dispositions: ["answer", "clarification"]
-               human_shadow: false
-           → IF disposition is "answer" or "approval" or "instruction": proceed to Step 6
-           → IF disposition is "clarification" or "reframe" or "critique": return to Step 4 with updated understanding
-           → IF disposition is "pass_through": escalate to human
-         - ELSE (manual/stop_for_question):
-           → Present unexpected conflicts to user with clear explanation of what will change
-           → Ask user to either: (a) confirm the change is acceptable, OR (b) clarify the original request
-           → IF user confirms: proceed to Step 6
-           → IF user clarifies: return to Step 4 (Design Fix) with updated understanding
+         - Present unexpected conflicts with clear explanation of what will change
+         - Ask: (a) confirm the change is acceptable, OR (b) clarify the original request
+         - IF confirmed: proceed to Step 6
+         - IF clarified: return to Step 4 (Design Fix) with updated understanding
+
+         Response source (based on auto_proceed):
+         IF process_preference.auto_proceed == "auto":
+           → Resolve via x-ipe-dao-end-user-representative
+         ELSE (manual/stop_for_question):
+           → Ask human for decision
     </action>
     <constraints>
       - BLOCKING: Do NOT proceed to Step 6 if unexpected conflicts are unresolved
@@ -297,6 +289,44 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
     </success_criteria>
     <output>Verified fix with documentation</output>
   </step_8>
+
+  <phase_9 name="继续执行（Continue Execute）">
+    <step_9_1>
+      <name>Decide Next Action</name>
+      <action>
+        Collect the full context and task_completion_output from this skill execution.
+
+        IF process_preference.auto_proceed == "auto":
+          → Invoke x-ipe-dao-end-user-representative with:
+            type: "routing"
+            completed_skill_output: {full task_completion_output YAML from this skill}
+            next_task_based_skill: "{from output}"
+            context: "Skill completed. Study the context and full output to decide best next action."
+          → DAO studies the complete context and decides the best next action
+        ELSE (manual):
+          → Present next task suggestion to human and wait for instruction
+      </action>
+      <constraints>
+        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
+        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
+      </constraints>
+      <output>Next action decided with execution context</output>
+    </step_9_1>
+    <step_9_2>
+      <name>Execute Next Action</name>
+      <action>
+        Based on the decision from Step 9.1:
+        1. Load the target task-based skill's SKILL.md
+        2. Generate an execution plan from the skill's Execution Flow table
+        3. Start execution from the skill's first phase/step
+      </action>
+      <constraints>
+        - MUST load the skill before executing — do not skip skill loading
+        - Execution follows the target skill's procedure, not this skill's
+      </constraints>
+      <output>Next task execution started</output>
+    </step_9_2>
+  </phase_9>
 
 </procedure>
 ```

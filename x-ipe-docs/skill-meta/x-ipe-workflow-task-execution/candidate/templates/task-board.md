@@ -12,25 +12,25 @@ auto_proceed: false  # Set to true for automatic task chaining
 
 ## Active Tasks
 
-| Task ID | Task | Description | Category | Role | Status | Next Task |
-|---------|-----------|-------------|----------|------|--------|-----------|
-| | | | | | | |
+| Task ID | Task | Description | Category | Role | Status | Next Task | Workflow |
+|---------|-----------|-------------|----------|------|--------|-----------|----------|
+| | | | | | | | |
 
 ---
 
 ## Completed Tasks
 
-| Task ID | Task | Description | Category | Completed | Category Changes |
-|---------|-----------|-------------|----------|-----------|------------------|
-| | | | | | |
+| Task ID | Task | Description | Category | Completed | Category Changes | Workflow |
+|---------|-----------|-------------|----------|-----------|------------------|----------|
+| | | | | | | |
 
 ---
 
 ## Cancelled Tasks
 
-| Task ID | Task | Description | Reason | Cancelled |
-|---------|-----------|-------------|--------|-----------|
-| | | | |
+| Task ID | Task | Description | Reason | Cancelled | Workflow |
+|---------|-----------|-------------|--------|-----------|----------|
+| | | | | | |
 
 ---
 

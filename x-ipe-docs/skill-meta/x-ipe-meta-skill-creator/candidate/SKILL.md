@@ -16,6 +16,18 @@ Guide for creating effective X-IPE skills by:
 
 ---
 
+## Important Notes
+
+⛔ **NEVER directly edit files in `.github/skills/{skill-name}/`.**
+All skill modifications — updates, bug fixes, enhancements — MUST go through the candidate workflow:
+1. Edit in `x-ipe-docs/skill-meta/{skill-name}/candidate/`
+2. Validate via reflection + tests (Rounds 2–3)
+3. Merge candidate → `.github/skills/{skill-name}/` only after validation
+
+This ensures traceability, rollback capability, and quality control. Direct edits to live skills bypass validation and risk breaking production behavior.
+
+---
+
 ## About X-IPE Skills
 
 Skills are modular, self-contained packages that extend AI Agent capabilities by providing specialized knowledge, workflows, and tools.
@@ -31,22 +43,24 @@ Skills are modular, self-contained packages that extend AI Agent capabilities by
 
 | Type | Purpose | Naming Convention | SKILL.md Template | skill-meta.md Template |
 |------|---------|-------------------|-------------------|------------------------|
-| x-ipe-task-based | Belong to end-to-end project lifecycle workflows | `x-ipe-task-based-{name}` | [x-ipe-task-based.md](templates/x-ipe-task-based.md) | [skill-meta-x-ipe-task-based.md](templates/skill-meta-x-ipe-task-based.md) |
-| x-ipe-task-category | Category orchestration when related tasks complete | `x-ipe-{category}-{operation}` | [x-ipe-workflow-orchestration.md](templates/x-ipe-workflow-orchestration.md) | [skill-meta-x-ipe-task-category.md](templates/skill-meta-x-ipe-task-category.md) |
-| x-ipe-tool | Utility functions and tool integrations | `x-ipe-tool-{name}` | [x-ipe-tool.md](templates/x-ipe-tool.md) | [skill-meta-x-ipe-tool.md](templates/skill-meta-x-ipe-tool.md) |
-| x-ipe-workflow-orchestration | Multi-skill coordination | `x-ipe-workflow-{name}` | [x-ipe-workflow-orchestration.md](templates/x-ipe-workflow-orchestration.md) | [skill-meta-x-ipe-task-based.md](templates/skill-meta-x-ipe-task-based.md) |
-| x-ipe-meta | Creates/manages skills | `x-ipe-meta-{name}` | [x-ipe-meta.md](templates/x-ipe-meta.md) | [skill-meta-x-ipe-meta.md](templates/skill-meta-x-ipe-meta.md) |
-| x-ipe-dao | Human-proxy mediation skills | `x-ipe-dao-{name}` | [x-ipe-dao.md](templates/x-ipe-dao.md) | [skill-meta-x-ipe-dao.md](templates/skill-meta-x-ipe-dao.md) |
+| x-ipe-task-based | Belong to end-to-end project lifecycle workflows | `x-ipe-task-based-{name}` | [x-ipe-task-based.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-task-based.md) | [skill-meta-x-ipe-task-based.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-task-based.md) |
+| x-ipe-task-category | Category orchestration when related tasks complete | `x-ipe+{category}+{name}` (`all` for cross-category) | [x-ipe-workflow-orchestration.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-workflow-orchestration.md) | [skill-meta-x-ipe-task-category.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-task-category.md) |
+| x-ipe-tool | Utility functions and tool integrations | `x-ipe-tool-{name}` | [x-ipe-tool.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-tool.md) | [skill-meta-x-ipe-tool.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-tool.md) |
+| x-ipe-workflow-orchestration | Multi-skill coordination | `x-ipe-workflow-{name}` | [x-ipe-workflow-orchestration.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-workflow-orchestration.md) | [skill-meta-x-ipe-task-based.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-task-based.md) |
+| x-ipe-meta | Creates/manages skills | `x-ipe-meta-{name}` | [x-ipe-meta.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-meta.md) | [skill-meta-x-ipe-meta.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-meta.md) |
+| x-ipe-dao | Human representative skills (道 backbone as CORE) | `x-ipe-dao-{name}` | [x-ipe-dao.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-dao.md) | [skill-meta-x-ipe-dao.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-dao.md) |
 
 ---
 
 ## Important Notes
 
-BLOCKING: Read [skill-general-guidelines-v2.md](references/skill-general-guidelines-v2.md) for core principles and patterns before creating skills.
+BLOCKING: Read [skill-general-guidelines-v2.md](.github/skills/x-ipe-meta-skill-creator/references/skill-general-guidelines-v2.md) for core principles and patterns before creating skills.
 
 CRITICAL: SKILL.md body must stay under 500 lines. Move examples to references/.
 
 MANDATORY: All 6 skill types have complete templates in the templates/ folder.
+
+CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL actions. Do NOT split actions into separate blocks (e.g., `<branch>`). Conditional logic (IF/THEN/ELSE) belongs inline within the `<action>` numbered list.
 
 ---
 
@@ -98,10 +112,10 @@ input:
 | 1 | Identify Skill Type | Determine type, select template | type selected |
 | 2 | Gather Examples | Collect usage scenarios | >= 2 examples |
 | 3 | Plan Resources | Identify scripts/references/templates | resources planned |
-| 4 | Round 1: Meta + Draft | Create skill-meta.md + candidate/ (parallel sub-agents 1,2) | both complete |
-| 5 | Round 2: Reflect + Tests | Reflect on candidate + generate tests (parallel sub-agents 3,4) | both complete |
-| 6 | Round 3: Run Tests | Execute tests in sandbox (sub-agent 5) | tests executed |
-| 7 | Round 4: Evaluate | Evaluate results (sub-agent 6) | evaluation complete |
+| 4 | Round 1: Meta + Draft | Create skill-meta.md + candidate/ (sub-agent 1) | both complete |
+| 5 | Round 2: Reflect + Tests | Reflect on candidate + generate tests (sub-agent 2) | both complete |
+| 6 | Round 3: Run Tests | Execute tests in sandbox (sub-agent 3) | tests executed |
+| 7 | Round 4: Evaluate | Evaluate results (sub-agent 4) | evaluation complete |
 | 8 | Merge/Iterate | Merge if pass, iterate if fail | decision made |
 | 9 | Cross-References | Validate external references | all valid |
 
@@ -133,7 +147,7 @@ input:
       7. IF Creates/manages skills → x-ipe-meta:
          - SKILL.md: templates/x-ipe-meta.md
          - skill-meta.md: templates/skill-meta-x-ipe-meta.md
-      8. IF Human-proxy mediation skill → x-ipe-dao:
+      8. IF Human representative skill (道 backbone as CORE) → x-ipe-dao:
          - SKILL.md: templates/x-ipe-dao.md
          - skill-meta.md: templates/skill-meta-x-ipe-dao.md
       9. IF Category orchestration → x-ipe-task-category:
@@ -192,15 +206,22 @@ input:
       2. Create skill-meta.md under x-ipe-docs/skill-meta/{skill-name}/ by filling template
       3. Load SKILL.md template from {skill_template_path}
       4. Create candidate/ under x-ipe-docs/skill-meta/{skill-name}/ with full skill structure
+      5. Create ALL bundled resources from resources_plan[] inside candidate/:
+         - candidate/references/ — all reference files
+         - candidate/scripts/ — all script files
+         - candidate/templates/ — all template files
     </action>
     <constraints>
       - BLOCKING: Both outputs must complete before Round 2
       - BLOCKING: skill-meta.md MUST be created from template, not from scratch
       - BLOCKING: SKILL.md MUST be created from template, not from scratch
+      - BLOCKING: ALL bundled resources (references/, scripts/, templates/) MUST be created inside candidate/ — never directly in .github/skills/{skill-name}/
+      - MANDATORY: All internal markdown links in generated skill files MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
     </constraints>
     <success_criteria>
       - skill-meta.md exists (created from {skill_meta_template_path})
       - candidate/ folder with SKILL.md exists (created from {skill_template_path})
+      - All planned resources from resources_plan[] exist inside candidate/
     </success_criteria>
     <output>skill-meta.md, candidate/</output>
   </step_4>
@@ -254,6 +275,8 @@ input:
     <action>
       1. Check evaluation results
       2. IF must_pass_rate == 100% AND should_pass_rate >= 80%:
+         - Validate candidate/ completeness: verify all files referenced by candidate/SKILL.md exist inside candidate/ (references/, scripts/, templates/)
+         - IF missing files found: add them to candidate/ before merging
          - cp -r candidate/* .github/skills/{skill-name}/
          - Update skill-version-history.md
          - Proceed to Step 9
@@ -262,6 +285,9 @@ input:
       4. IF tests failed AND iteration_count >= 3:
          - Escalate to human
     </action>
+    <constraints>
+      - BLOCKING: Pre-merge validation must confirm candidate/ contains ALL files that will exist in production — no direct writes to .github/skills/{skill-name}/ after merge
+    </constraints>
     <success_criteria>
       - Skill merged OR iteration documented
     </success_criteria>
@@ -272,12 +298,13 @@ input:
     <name>Validate Cross-References</name>
     <requires>merge_status == merged</requires>
     <action>
-      1. Check copilot-instructions.md registration (x-ipe-task-based only)
-      2. Check x-ipe-workflow-task-execution registration (x-ipe-task-based only)
+      1. Verify skill's Output Result YAML declares: category, next_task_based_skill, require_human_review (x-ipe-task-based only)
+      2. Verify skill description contains trigger keywords for auto-discovery (x-ipe-task-based only)
       3. Verify bidirectional references
+      4. Verify Input Initialization subsection exists under Input Parameters with <input_init> XML block
     </action>
     <constraints>
-      - MANDATORY: Task type skills must be registered in copilot-instructions.md
+      - MANDATORY: Task-based skills must declare category, next_task_based_skill, require_human_review in Output Result for auto-discovery
     </constraints>
     <success_criteria>
       - Cross-references validated
@@ -286,60 +313,44 @@ input:
   </step_9>
 
   <sub-agent-planning>
+    <!-- Constraint: One step = one sub-agent; one sub-agent = many steps -->
     <sub_agent_1>
       <sub_agent_definition>
-        <role>Meta Creator</role>
-        <prompt>Load skill-meta template from {skill_meta_template_path}, fill with skill-specific content (purpose, acceptance criteria, test scenarios). Output: x-ipe-docs/skill-meta/{skill-name}/skill-meta.md</prompt>
+        <role>Meta & Draft Creator</role>
+        <prompt>Load skill-meta template from {skill_meta_template_path} and SKILL.md template from {skill_template_path}. Fill both with skill-specific content. Output: x-ipe-docs/skill-meta/{skill-name}/skill-meta.md and x-ipe-docs/skill-meta/{skill-name}/candidate/</prompt>
       </sub_agent_definition>
       <workflow_step_reference>step_4</workflow_step_reference>
     </sub_agent_1>
     <sub_agent_2>
       <sub_agent_definition>
-        <role>Draft Creator</role>
-        <prompt>Load SKILL.md template from {skill_template_path}, fill with skill-specific content following guidelines. Output: x-ipe-docs/skill-meta/{skill-name}/candidate/</prompt>
+        <role>Reflector & Test Generator</role>
+        <prompt>Review candidate against skill-meta, identify gaps, suggest improvements. Then generate test-cases.yaml from acceptance criteria in skill-meta.md</prompt>
       </sub_agent_definition>
-      <workflow_step_reference>step_4</workflow_step_reference>
+      <workflow_step_reference>step_5</workflow_step_reference>
+      <starting_condition>
+        - "START after sub_agent_1 completes"
+      </starting_condition>
     </sub_agent_2>
     <sub_agent_3>
-      <sub_agent_definition>
-        <role>Reflector</role>
-        <prompt>Review candidate against skill-meta, identify gaps, suggest improvements</prompt>
-      </sub_agent_definition>
-      <workflow_step_reference>step_5</workflow_step_reference>
-      <starting_condition>
-        - "START after sub_agent_1 and sub_agent_2 complete"
-      </starting_condition>
-    </sub_agent_3>
-    <sub_agent_4>
-      <sub_agent_definition>
-        <role>Test Generator</role>
-        <prompt>Generate test-cases.yaml from acceptance criteria in skill-meta.md</prompt>
-      </sub_agent_definition>
-      <workflow_step_reference>step_5</workflow_step_reference>
-      <starting_condition>
-        - "START after sub_agent_1 and sub_agent_2 complete"
-      </starting_condition>
-    </sub_agent_4>
-    <sub_agent_5>
       <sub_agent_definition>
         <role>Test Runner</role>
         <prompt>Execute test cases in sandbox, record outputs and execution log</prompt>
       </sub_agent_definition>
       <workflow_step_reference>step_6</workflow_step_reference>
       <starting_condition>
-        - "START after sub_agent_3 and sub_agent_4 complete"
+        - "START after sub_agent_2 completes"
       </starting_condition>
-    </sub_agent_5>
-    <sub_agent_6>
+    </sub_agent_3>
+    <sub_agent_4>
       <sub_agent_definition>
         <role>Evaluator</role>
         <prompt>Evaluate sandbox outputs against expectations, generate evaluation-report.yaml</prompt>
       </sub_agent_definition>
       <workflow_step_reference>step_7</workflow_step_reference>
       <starting_condition>
-        - "START after sub_agent_5 completes"
+        - "START after sub_agent_3 completes"
       </starting_condition>
-    </sub_agent_6>
+    </sub_agent_4>
   </sub-agent-planning>
 
 </procedure>
@@ -380,7 +391,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>Step 4 Outputs Complete</name>
-    <verification>skill-meta.md and candidate/ folder created</verification>
+    <verification>skill-meta.md and candidate/ folder created with ALL bundled resources (references/, scripts/, templates/) inside candidate/</verification>
     <step_output>skill-meta.md, candidate/</step_output>
   </checkpoint>
   <checkpoint required="true">
@@ -404,8 +415,12 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <step_output>merge_status</step_output>
   </checkpoint>
   <checkpoint required="true">
+    <name>Candidate-Production Parity</name>
+    <verification>Every file in .github/skills/{skill-name}/ has a corresponding file in candidate/ — no files were created directly in production</verification>
+  </checkpoint>
+  <checkpoint required="true">
     <name>Step 9 Output Complete</name>
-    <verification>Cross-references validated (copilot-instructions.md if x-ipe-task-based)</verification>
+    <verification>Cross-references validated (auto-discovery fields declared if x-ipe-task-based)</verification>
     <step_output>cross_references_valid</step_output>
   </checkpoint>
   
@@ -440,7 +455,11 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>Cross-References Valid</name>
-    <verification>Registered in copilot-instructions.md (if x-ipe-task-based)</verification>
+    <verification>Auto-discovery fields present in Output Result (if x-ipe-task-based)</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Input Initialization Present</name>
+    <verification>Skills with non-trivial input resolution have ### Input Initialization subsection under Input Parameters</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -451,18 +470,16 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 
 | Template | Purpose |
 |----------|---------|
-| [x-ipe-task-based.md](templates/x-ipe-task-based.md) | SKILL.md for task-based skills |
-| [x-ipe-tool.md](templates/x-ipe-tool.md) | SKILL.md for tool skills |
-| [x-ipe-workflow-orchestration.md](templates/x-ipe-workflow-orchestration.md) | SKILL.md for workflow/task-category skills |
-| [x-ipe-meta.md](templates/x-ipe-meta.md) | SKILL.md for meta skills |
-| [x-ipe-dao.md](templates/x-ipe-dao.md) | SKILL.md for DAO skills |
-| [x-ipe-dao.md](templates/x-ipe-dao.md) | SKILL.md for DAO skills |
-| [skill-meta-x-ipe-task-based.md](templates/skill-meta-x-ipe-task-based.md) | skill-meta for task-based/workflow skills |
-| [skill-meta-x-ipe-tool.md](templates/skill-meta-x-ipe-tool.md) | skill-meta for tool skills |
-| [skill-meta-x-ipe-task-category.md](templates/skill-meta-x-ipe-task-category.md) | skill-meta for task-category skills |
-| [skill-meta-x-ipe-meta.md](templates/skill-meta-x-ipe-meta.md) | skill-meta for meta skills |
-| [skill-meta-x-ipe-dao.md](templates/skill-meta-x-ipe-dao.md) | skill-meta for DAO skills |
-| [skill-meta-x-ipe-dao.md](templates/skill-meta-x-ipe-dao.md) | skill-meta for DAO skills |
+| [x-ipe-task-based.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-task-based.md) | SKILL.md for task-based skills |
+| [x-ipe-tool.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-tool.md) | SKILL.md for tool skills |
+| [x-ipe-workflow-orchestration.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-workflow-orchestration.md) | SKILL.md for workflow/task-category skills |
+| [x-ipe-meta.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-meta.md) | SKILL.md for meta skills |
+| [x-ipe-dao.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-dao.md) | SKILL.md for human representative skills (x-ipe-dao type) |
+| [skill-meta-x-ipe-task-based.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-task-based.md) | skill-meta for task-based/workflow skills |
+| [skill-meta-x-ipe-tool.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-tool.md) | skill-meta for tool skills |
+| [skill-meta-x-ipe-task-category.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-task-category.md) | skill-meta for task-category skills |
+| [skill-meta-x-ipe-meta.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-meta.md) | skill-meta for meta skills |
+| [skill-meta-x-ipe-dao.md](.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-dao.md) | skill-meta for human representative skills (x-ipe-dao type) |
 
 BLOCKING: Always use the appropriate template. Never create SKILL.md or skill-meta.md from scratch.
 
@@ -472,18 +489,18 @@ BLOCKING: Always use the appropriate template. Never create SKILL.md or skill-me
 
 | File | Purpose |
 |------|---------|
-| [skill-general-guidelines-v2.md](references/skill-general-guidelines-v2.md) | Core principles, patterns, standards |
-| [2. reference-section-order.md](references/2.%20reference-section-order.md) | Section ordering guide |
-| [3-6. example-*.md](references/) | Workflow pattern examples (step-based, function-based) |
-| [7-10. example-*.md](references/) | Task IO, structured summary, DoR/DoD, gate conditions |
-| [11. reference-quality-standards.md](references/11.%20reference-quality-standards.md) | Quality standards |
-| [examples.md](references/examples.md) | Concrete execution examples |
+| [skill-general-guidelines-v2.md](.github/skills/x-ipe-meta-skill-creator/references/skill-general-guidelines-v2.md) | Core principles, patterns, standards |
+| [2. reference-section-order.md](.github/skills/x-ipe-meta-skill-creator/references/2. reference-section-order.md) | Section ordering guide |
+| [3-6. example-*.md](.github/skills/x-ipe-meta-skill-creator/references) | Workflow pattern examples (step-based, function-based) |
+| [7-10. example-*.md](.github/skills/x-ipe-meta-skill-creator/references) | Task IO, structured summary, DoR/DoD, gate conditions |
+| [11. reference-quality-standards.md](.github/skills/x-ipe-meta-skill-creator/references/11. reference-quality-standards.md) | Quality standards |
+| [examples.md](.github/skills/x-ipe-meta-skill-creator/references/examples.md) | Concrete execution examples |
 
 ---
 
 ## Example
 
-See [references/examples.md](references/examples.md) for concrete execution examples.
+See [references/examples.md](.github/skills/x-ipe-meta-skill-creator/references/examples.md) for concrete execution examples.
 
 ---
 

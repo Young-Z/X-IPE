@@ -27,23 +27,10 @@
 **When:** Requirement covers many features
 **Then:**
 ```
-1. Group by domain/functionality into Epics
-2. Identify MVP core (first feature per Epic)
-3. Create feature hierarchy within each Epic
-4. Limit initial breakdown to 5-7 features per Epic
-```
-
-### Pattern: Epic Grouping
-
-**When:** Assessing whether to use single or multiple Epics
-**Then:**
-```
-1. Count estimated features and distinct domains
-2. IF 1 domain AND ≤7 features → single Epic
-3. IF 2-3 domains AND 8-15 features → 2-3 Epics (one per domain)
-4. IF 4+ domains OR >15 features → multiple Epics
-5. Each Epic should be independently deliverable where possible
-6. Name Epics by domain: "Product Management", "Order Processing"
+1. Group by domain/functionality
+2. Identify MVP core (first feature)
+3. Create feature hierarchy
+4. Limit initial breakdown to 5-7 features
 ```
 
 ### Pattern: Feature Split with Parent Dedup
@@ -61,9 +48,7 @@
 
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
-| Skipping Epic assessment | Features lack cohesion, poor organization | Always assess Epic granularity first |
-| All features in one Epic | Monolithic, hard to manage large scope | Split by domain when >7 features |
-| Too many features per Epic | Overwhelming, hard to track | Limit to 5-7 features per Epic |
+| Too many features | Overwhelming, hard to track | Limit to 5-7 features max |
 | Features too granular | Micromanagement | Combine related functions |
 | MVP not first | Critical path unclear | Always start with runnable MVP |
 | Circular dependencies | Impossible to implement | Ensure DAG structure |

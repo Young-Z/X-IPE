@@ -45,7 +45,7 @@ input:
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
   workflow:
-    name: "N/A"  # workflow name, default: N/A
+    name: "N/A"  # workflow name from workflow-{name}.json (NOT the idea folder name), default: N/A
     action: "refine_idea"  # hardcoded — this skill ALWAYS updates the refine_idea action
     extra_context_reference:  # optional, default: N/A for all refs
       raw-idea: "path | N/A | auto-detect"
@@ -61,7 +61,11 @@ input:
 <input_init>
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})">
+    NOTE: workflow.name is the {name} part from workflow-{name}.json filename — it is NOT the idea folder name.
+    The idea folder name is auto-generated as wf-{NNN}-{sanitized-idea-name} under x-ipe-docs/ideas/.
+  </field>
+  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
 
   <field name="idea_folder_path">
     <steps>
@@ -116,6 +120,8 @@ input:
 | 4. 明辨之 (Discern Clearly) | 4.1 | Improve Summary | Decide on feedback, incorporate improvements | summary finalized |
 | 5. 笃行之 (Practice Earnestly) | 5.1 | Generate Draft | Create idea draft, prefer enabled tools from step 1.1 | draft created |
 | | 5.2 | Complete | Verify DoD, output summary | Task complete |
+| 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
+| 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Step 2.2 - Continue brainstorming until idea is well-defined.
 
@@ -213,38 +219,26 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
     <step_2_2>
       <name>Brainstorming Session</name>
       <action>
-        1. IF process_preference.auto_proceed == "auto":
-           → Analyze idea content and resolve ambiguities autonomously
-            → CALL x-ipe-dao-end-user-representative with:
-                message_context:
-                  source: "ai"
-                  calling_skill: "ideation"
-                  task_id: "{task_id}"
-                  feature_id: "N/A"
-                  workflow_name: "N/A"
-                  downstream_context: "Resolving ambiguities and questions during autonomous idea brainstorming"
-                  messages:
-                    - content: "{ambiguity description}"
-                      preferred_dispositions: ["answer", "clarification"]
-                human_shadow: false
-            → IF disposition is "answer" or "approval" or "instruction": use decision to resolve ambiguity
-            → IF disposition is "clarification" or "reframe" or "critique": refine understanding and re-ask
-            → IF disposition is "pass_through": escalate to human
-           → Build comprehensive brainstorming notes from source material + decisions
-           → Generate visual artifacts proactively using enabled tools from step 1.1
-        2. ELSE (manual/stop_for_question):
-           a. Ask questions in batches (3-5 at a time)
-           b. Wait for human response before proceeding
-           c. Build on previous answers
-           d. Challenge assumptions constructively
-        3. IF extra_instructions is provided and non-empty:
+        1. Ask yourself two questions, 'which mode auto_proceed is in?'
+        2. Ask questions in batches (3-5 at a time) to avoid overwhelming, iterate based on user responses
+        3. Wait for response based on auto_proceed condition before proceeding
+        4. Build on previous answers
+        5. Challenge assumptions constructively
+        6. IF extra_instructions is provided and non-empty:
            - Incorporate extra_instructions as additional context/guidance for the refinement
            - Treat as user preference that supplements (not replaces) the idea content
-        4. When the user describes something visual (UI layouts, flows, system structure), proactively generate visual artifacts to enrich the brainstorming -- select the most appropriate enabled tool from step 1.1's tool list for the content type
+        7. When the user describes something visual (UI layouts, flows, system structure), proactively generate visual artifacts to enrich the brainstorming -- select the most appropriate enabled tool from step 1.1's tool list for the content type
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Resolve ambiguities via x-ipe-dao-end-user-representative
+          → Build comprehensive brainstorming notes from source material + decisions
+        ELSE (manual/stop_for_question):
+          → Ask human for response
       </action>
       <constraints>
         - BLOCKING: Continue until idea is well-defined
-        - CRITICAL (manual/stop_for_question): Batch questions (3-5), do not overwhelm
+        - CRITICAL (manual/stop_for_question): Ask human for response
         - CRITICAL (auto): Resolve all ambiguities via x-ipe-dao-end-user-representative, do not ask human
         - MANDATORY: Only use tools that appear in the enabled tool list from step 1.1
       </constraints>
@@ -342,12 +336,15 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
               - deliverables: {"refined-idea": "{path to idea-summary file}", "refined-ideas-folder": "{path to refined-idea/ folder}"}
            b. Log: "Workflow action status updated to done"
         2. Verify all DoD checkpoints are met
-        3. IF process_preference.auto_proceed == "auto":
-              → Auto-select next task from next_task_based_skill
-           ELSE (manual/stop_for_question):
-              → Present final idea summary to human
-              → Ask if any aspects of the idea are missing or unclear
-              → IF human identifies gaps → revise specific sections
+        3. Present final idea summary
+        4. Ask if any aspects of the idea are missing or unclear
+        5. IF human/DAO identifies gaps → revise specific sections
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Auto-select next task from next_task_based_skill after DoD verification
+        ELSE (manual/stop_for_question):
+          → Ask human if idea is complete before proceeding
       </action>
       <constraints>
         - BLOCKING (manual/stop_for_question): Human MUST confirm idea is complete before proceeding
@@ -357,6 +354,44 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
     </step_5_2>
 
   </phase_5>
+
+  <phase_6 name="继续执行（Continue Execute）">
+    <step_6_1>
+      <name>Decide Next Action</name>
+      <action>
+        Collect the full context and task_completion_output from this skill execution.
+
+        IF process_preference.auto_proceed == "auto":
+          → Invoke x-ipe-dao-end-user-representative with:
+            type: "routing"
+            completed_skill_output: {full task_completion_output YAML from this skill}
+            next_task_based_skill: "{from output}"
+            context: "Skill completed. Study the context and full output to decide best next action."
+          → DAO studies the complete context and decides the best next action
+        ELSE (manual):
+          → Present next task suggestion to human and wait for instruction
+      </action>
+      <constraints>
+        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
+        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
+      </constraints>
+      <output>Next action decided with execution context</output>
+    </step_6_1>
+    <step_6_2>
+      <name>Execute Next Action</name>
+      <action>
+        Based on the decision from Step 6.1:
+        1. Load the target task-based skill's SKILL.md
+        2. Generate an execution plan from the skill's Execution Flow table
+        3. Start execution from the skill's first phase/step
+      </action>
+      <constraints>
+        - MUST load the skill before executing — do not skip skill loading
+        - Execution follows the target skill's procedure, not this skill's
+      </constraints>
+      <output>Next task execution started</output>
+    </step_6_2>
+  </phase_6>
 
 </procedure>
 ```

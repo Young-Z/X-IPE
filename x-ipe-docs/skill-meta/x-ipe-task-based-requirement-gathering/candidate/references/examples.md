@@ -1,5 +1,7 @@
 # Requirement Gathering - Examples
 
+> **Note:** Examples below use legacy FEATURE-{nnn} IDs (pre-Epic convention). New requirements use EPIC-{nnn} headers with FEATURE-{nnn}-{X} IDs. See SKILL.md for current format.
+
 ## Example 1: New Feature — No Conflicts
 
 **Request:** "Add user authentication"
@@ -25,7 +27,9 @@
 
 5. (Skipped — no conflicts)
 
-6. Create x-ipe-docs/requirements/requirement-details.md:
+6. Create EPIC-{nnn}/ folder with mockups/ sub-directory
+   Create/update x-ipe-docs/requirements/requirement-details.md:
+   Use ## EPIC-{nnn}: User Authentication as section header
    # Requirement Summary
    ... (fill all sections) ...
 

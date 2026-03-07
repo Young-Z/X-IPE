@@ -85,3 +85,32 @@ auto_proceed = true, next_task_based_skill = Feature Closing
 | "refactor", "restructure", "split file", "clean up code", "improve code quality" | Code Refactor |
 | "change request", "CR", "modify feature", "update requirement" | Change Request |
 | "set up project", "initialize" | Project Initialization |
+
+---
+
+## Git Strategy Detailed Rules
+
+### `main-branch-only`
+
+- Do NOT create any branches
+- All commits go directly to the main branch
+- No PRs needed — code lands on main immediately
+- `git push` pushes to main
+
+### `dev-session-based`
+
+- BLOCKING: Validate git identity before resolving branch name:
+  → Run: `git config user.name` and `git config user.email`
+  → Reject placeholder values: `"Your Name"`, `"you@example.com"`, empty, or any value matching common defaults
+  → IF placeholder detected: STOP and ask user to provide their actual git name/email
+  → Do NOT proceed with branch creation until valid identity confirmed
+- Resolve dev branch name from git identity (NOT agent nickname):
+  → Run: `git config user.name` (or `git config user.email` if user.name is empty)
+  → Sanitize: lowercase, replace spaces with hyphens, remove special chars
+  → Branch name: `dev/{sanitized_git_user_name}`
+- On first task execution, check if `dev/{git_user_name}` branch exists
+  - If not → create it from main: `git checkout -b dev/{git_user_name}`
+  - If exists → switch to it: `git checkout dev/{git_user_name}`
+- All work happens on this branch
+- On feature close → push branch, create PR targeting main
+- Branch persists across features (not deleted after PR)

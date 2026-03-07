@@ -83,6 +83,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
   <field name="extra_context_reference.requirement-doc" source="workflow context OR auto-detect">
     <steps>
       1. IF workflow-mode AND workflow.extra_context_reference.requirement-doc is a file path → use it
@@ -141,6 +142,8 @@ mockup_list:
 | 3. 慎思之 — Think Carefully | 3.1 Evaluate Complexity, 3.2 Identify Features | Count ACs, assess dimensions, identify feature boundaries | Features identified |
 | 4. 明辨之 — Discern Clearly | 4.1 MVP Prioritization Decision | Decide MVP order, validate dependency DAG | MVP and order decided |
 | 5. 笃行之 — Practice Earnestly | 5.1 Process Mockups, 5.2 Create Summary, 5.3 Update Board, 5.4 Complete | Execute all deliverables | All artifacts created |
+| 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
+| 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: If parts exist, work with the CURRENT ACTIVE PART (highest part number).
 BLOCKING: Features with more than 20 ACs MUST be split into sub-features.
@@ -209,9 +212,14 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
            - Is this capability truly needed for the MVP?
            - Can this be deferred to a later version?
            - Does this overlap with existing features in the system?
-        2. IF auto_proceed: use x-ipe-dao-end-user-representative to resolve scope questions
-        3. ELSE (manual/stop_for_question): present scope challenges to human, ask for confirmation
-        4. Document scope decisions and rationale
+        2. Present scope challenges and ask for confirmation
+        3. Document scope decisions and rationale
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Resolve via x-ipe-dao-end-user-representative
+        ELSE (manual/stop_for_question):
+          → Ask human for confirmation
       </action>
       <constraints>
         - CRITICAL: Challenge scope BEFORE breaking down into features
@@ -265,9 +273,14 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
         1. Review feature list across all Epics
         2. Validate MVP selection: does first feature provide minimum runnable value?
         3. Validate dependency DAG: no circular dependencies, clear implementation order
-        4. IF auto_proceed: confirm via x-ipe-dao-end-user-representative
-        5. ELSE (manual/stop_for_question): present prioritized list to human for confirmation
-        6. Finalize feature order and dependency graph
+        4. Present prioritized list for confirmation
+        5. Finalize feature order and dependency graph
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Confirm via x-ipe-dao-end-user-representative
+        ELSE (manual/stop_for_question):
+          → Ask human for confirmation
       </action>
       <output>Confirmed feature prioritization with validated dependency DAG</output>
     </step_4_1>
@@ -320,6 +333,44 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
     </step_5_3>
 
   </phase_5>
+
+  <phase_6 name="继续执行（Continue Execute）">
+    <step_6_1>
+      <name>Decide Next Action</name>
+      <action>
+        Collect the full context and task_completion_output from this skill execution.
+
+        IF process_preference.auto_proceed == "auto":
+          → Invoke x-ipe-dao-end-user-representative with:
+            type: "routing"
+            completed_skill_output: {full task_completion_output YAML from this skill}
+            next_task_based_skill: "{from output}"
+            context: "Skill completed. Study the context and full output to decide best next action."
+          → DAO studies the complete context and decides the best next action
+        ELSE (manual):
+          → Present next task suggestion to human and wait for instruction
+      </action>
+      <constraints>
+        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
+        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
+      </constraints>
+      <output>Next action decided with execution context</output>
+    </step_6_1>
+    <step_6_2>
+      <name>Execute Next Action</name>
+      <action>
+        Based on the decision from Step 6.1:
+        1. Load the target task-based skill's SKILL.md
+        2. Generate an execution plan from the skill's Execution Flow table
+        3. Start execution from the skill's first phase/step
+      </action>
+      <constraints>
+        - MUST load the skill before executing — do not skip skill loading
+        - Execution follows the target skill's procedure, not this skill's
+      </constraints>
+      <output>Next task execution started</output>
+    </step_6_2>
+  </phase_6>
 
 </procedure>
 ```

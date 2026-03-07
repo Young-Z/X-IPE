@@ -70,6 +70,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
   <field name="current_idea_folder" source="previous Ideation task output OR task board OR human input">
     <steps>
       1. IF previous task was "Ideation" → extract from task_output_links.current_idea_folder
@@ -149,6 +150,8 @@ MANDATORY: See [references/mockup-guidelines.md](.github/skills/x-ipe-task-based
 | | 5.2 | Save Artifacts | Store mockups in `{current_idea_folder}/mockups/` | Artifacts saved |
 | | 5.3 | Update Summary | Add mockup links to idea summary | Summary updated |
 | | 5.4 | Complete | Verify DoD, update workflow status | DoD verified |
+| 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
+| 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Step 1.1 halts if current_idea_folder is N/A -- ask human for folder path.
 BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
@@ -171,26 +174,14 @@ BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
       <action>
         1. IF current_idea_folder == N/A:
            - List available folders under x-ipe-docs/ideas/
-           - IF process_preference.auto_proceed == "auto":
-              → CALL x-ipe-dao-end-user-representative with:
-                  message_context:
-                    source: "ai"
-                    calling_skill: "idea-mockup"
-                    task_id: "{task_id}"
-                    feature_id: "N/A"
-                    workflow_name: "N/A"
-                    downstream_context: "Selecting which idea folder to generate mockups for"
-                    messages:
-                      - content: "Which idea folder for mockups? Options: {available folders}"
-                        preferred_dispositions: ["answer", "clarification"]
-                  human_shadow: false
-              → IF disposition is "answer" or "approval" or "instruction": use returned decision
-              → IF disposition is "clarification" or "reframe" or "critique": refine question and re-ask
-              → IF disposition is "pass_through": escalate to human
-           - ELSE (manual/stop_for_question):
-             → Ask human: "Which idea folder should I create mockups for?"
-             → Wait for selection
+           - Ask "Which idea folder should I create mockups for?" with available options
            - Set current_idea_folder = selected folder
+
+           Response source (based on auto_proceed):
+           IF process_preference.auto_proceed == "auto":
+             → Resolve via x-ipe-dao-end-user-representative
+           ELSE (manual/stop_for_question):
+             → Ask human for selection
         2. Validate folder exists on disk
         3. Verify idea-summary-vN.md exists in folder
         4. Log: "Working with idea folder: {current_idea_folder}"
@@ -358,6 +349,44 @@ BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
     </step_5_4>
 
   </phase_5>
+
+  <phase_6 name="继续执行（Continue Execute）">
+    <step_6_1>
+      <name>Decide Next Action</name>
+      <action>
+        Collect the full context and task_completion_output from this skill execution.
+
+        IF process_preference.auto_proceed == "auto":
+          → Invoke x-ipe-dao-end-user-representative with:
+            type: "routing"
+            completed_skill_output: {full task_completion_output YAML from this skill}
+            next_task_based_skill: "{from output}"
+            context: "Skill completed. Study the context and full output to decide best next action."
+          → DAO studies the complete context and decides the best next action
+        ELSE (manual):
+          → Present next task suggestion to human and wait for instruction
+      </action>
+      <constraints>
+        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
+        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
+      </constraints>
+      <output>Next action decided with execution context</output>
+    </step_6_1>
+    <step_6_2>
+      <name>Execute Next Action</name>
+      <action>
+        Based on the decision from Step 6.1:
+        1. Load the target task-based skill's SKILL.md
+        2. Generate an execution plan from the skill's Execution Flow table
+        3. Start execution from the skill's first phase/step
+      </action>
+      <constraints>
+        - MUST load the skill before executing — do not skip skill loading
+        - Execution follows the target skill's procedure, not this skill's
+      </constraints>
+      <output>Next task execution started</output>
+    </step_6_2>
+  </phase_6>
 
 </procedure>
 ```

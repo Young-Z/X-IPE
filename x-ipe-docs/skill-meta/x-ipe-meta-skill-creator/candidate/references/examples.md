@@ -112,7 +112,7 @@ cp -r candidate/* .github/skills/x-ipe-task-based-bug-fix/
 ```yaml
 cross_reference_checks:
   auto_discovery_fields: declared
-  task_execution_guideline: added
+  task_execution_guideline: verified
   status: valid
 ```
 

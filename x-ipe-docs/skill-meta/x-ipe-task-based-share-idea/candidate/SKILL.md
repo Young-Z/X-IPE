@@ -62,6 +62,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
   <field name="idea_folder" source="human input | auto-detect">
     <steps>
       1. If human provides explicit folder path, use it
@@ -115,6 +116,8 @@ input:
 | 5. 笃行之 (Practice Earnestly) | 5.1 | Prepare Content | Restructure content for each target format | Content ready |
 | | 5.2 | Convert | Generate output files via pandoc, MCP, or manual fallback | Files generated |
 | | 5.3 | Verify & Complete | Confirm output files exist with size > 0; report to human | DoD validated |
+| 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
+| 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Step 2.1 requires confirmation of target format(s) (manual/stop_for_question: human confirms; auto: DAO confirms via x-ipe-dao-end-user-representative).
 BLOCKING: Step 5.3 fails if any output file is empty or missing.
@@ -181,30 +184,19 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
     <step_2_1>
       <name>Confirm Target Formats</name>
       <action>
-        1. IF process_preference.auto_proceed == "auto":
-            → CALL x-ipe-dao-end-user-representative with:
-                message_context:
-                  source: "ai"
-                  calling_skill: "share-idea"
-                  task_id: "{task_id}"
-                  feature_id: "N/A"
-                  workflow_name: "N/A"
-                  downstream_context: "Selecting output format(s) for sharing the idea document"
-                  messages:
-                    - content: "Which output format(s) for sharing? Options: pptx, docx, pdf, html"
-                      preferred_dispositions: ["answer", "clarification"]
-                human_shadow: false
-            → IF disposition is "answer" or "approval" or "instruction": use returned decision (default: pptx if unresolvable)
-            → IF disposition is "clarification" or "reframe" or "critique": refine question and re-ask
-            → IF disposition is "pass_through": escalate to human
-        2. ELSE (manual/stop_for_question):
-           a. Present enabled formats to human (filter by config):
-              - PowerPoint (.pptx) - For presentations
-              - Word (.docx) - For document review
-              - PDF (.pdf) - For read-only sharing
-              - HTML (.html) - For web viewing
-           b. Allow multiple selections
-           c. Wait for human confirmation
+        1. Present enabled formats (filter by config):
+           - PowerPoint (.pptx) - For presentations
+           - Word (.docx) - For document review
+           - PDF (.pdf) - For read-only sharing
+           - HTML (.html) - For web viewing
+        2. Allow multiple selections
+        3. Wait for format confirmation
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Resolve via x-ipe-dao-end-user-representative (default: pptx if unresolvable)
+        ELSE (manual/stop_for_question):
+          → Ask human to confirm format(s)
       </action>
       <constraints>
         - BLOCKING (manual/stop_for_question): Do not proceed until human confirms format(s)
@@ -264,12 +256,13 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
         1. Check each output file exists in {idea_folder}
         2. Verify file size > 0 for each
         3. List generated files with paths and sizes
-        4. Review & Decision Gate:
-           IF process_preference.auto_proceed == "auto":
-             → Skip human confirmation (auto-proceed mode)
-           ELSE (manual/stop_for_question):
-             → Present file list to human
-             → Wait for human to confirm receipt
+        4. Present file list with paths and sizes
+
+        Completion gate (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Auto-proceed after verification
+        ELSE (manual/stop_for_question):
+          → Ask human to confirm receipt
       </action>
       <success_criteria>
         - All requested files exist and are non-empty
@@ -278,6 +271,44 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
     </step_5_3>
 
   </phase_5>
+
+  <phase_6 name="继续执行（Continue Execute）">
+    <step_6_1>
+      <name>Decide Next Action</name>
+      <action>
+        Collect the full context and task_completion_output from this skill execution.
+
+        IF process_preference.auto_proceed == "auto":
+          → Invoke x-ipe-dao-end-user-representative with:
+            type: "routing"
+            completed_skill_output: {full task_completion_output YAML from this skill}
+            next_task_based_skill: "{from output}"
+            context: "Skill completed. Study the context and full output to decide best next action."
+          → DAO studies the complete context and decides the best next action
+        ELSE (manual):
+          → Present next task suggestion to human and wait for instruction
+      </action>
+      <constraints>
+        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
+        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
+      </constraints>
+      <output>Next action decided with execution context</output>
+    </step_6_1>
+    <step_6_2>
+      <name>Execute Next Action</name>
+      <action>
+        Based on the decision from Step 6.1:
+        1. Load the target task-based skill's SKILL.md
+        2. Generate an execution plan from the skill's Execution Flow table
+        3. Start execution from the skill's first phase/step
+      </action>
+      <constraints>
+        - MUST load the skill before executing — do not skip skill loading
+        - Execution follows the target skill's procedure, not this skill's
+      </constraints>
+      <output>Next task execution started</output>
+    </step_6_2>
+  </phase_6>
 
 </procedure>
 ```

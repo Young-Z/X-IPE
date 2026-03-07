@@ -147,7 +147,7 @@ BLOCKING: {Additional rule that must not be skipped}
 - Phases 2, 3, 4 may use `<skip reason="..." />` when genuinely non-applicable.
 - Phase names MUST always be bilingual (Chinese + English).
 - Phase order is fixed: 1 → 2 → 3 → 4 → 5. No reordering.
-- auto_proceed in Phase 2: agent self-resolves via `x-ipe-tool-decision-making` (not skipped).
+- auto_proceed in Phase 2: agent self-resolves via `x-ipe-dao-end-user-representative` (not skipped).
 
 **Common Skip Reasons:**
 
@@ -190,7 +190,7 @@ BLOCKING: {Additional rule that must not be skipped}
       <action>
         1. {Question assumptions, probe gaps, challenge inputs}
         2. IF process_preference.auto_proceed == "auto":
-             Invoke x-ipe-tool-decision-making to self-resolve
+             Invoke x-ipe-dao-end-user-representative to self-resolve
            ELSE:
              Ask human for clarification
       </action>
@@ -248,7 +248,7 @@ BLOCKING: {Additional rule that must not be skipped}
         3. Mode-aware review gate:
            IF process_preference.auto_proceed == "auto":
              Skip human review. If any open questions remain, invoke
-             x-ipe-tool-decision-making to resolve them autonomously.
+             x-ipe-dao-end-user-representative to resolve them autonomously.
            ELIF process_preference.auto_proceed == "stop_for_question" OR "manual":
              Present results to human and wait for approval.
       </action>

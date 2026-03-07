@@ -70,6 +70,25 @@ input:
     max_retries: {number}
 ```
 
+### Input Initialization
+
+Describes how to resolve each input field value before execution begins. Acts as the skill's constructor — all resolution logic is centralized here instead of in execution steps.
+
+BLOCKING: All input fields with non-trivial initialization MUST be documented here. Do NOT embed field initialization logic in execution procedure steps.
+
+```xml
+<input_init>
+  <field name="workflow_trigger" source="{where the trigger comes from}" />
+
+  <field name="shared_context.{context_field_1}">
+    <steps>
+      1. {If condition, resolve value}
+      2. {Fallback action}
+    </steps>
+  </field>
+</input_init>
+```
+
 ---
 
 ## Definition of Ready
@@ -294,6 +313,7 @@ workflow_orchestration_skills:
     2: Important Notes
     # DECISION
     3: Input Parameters
+    3a: "  └─ Input Initialization (### subsection)"
     4: Definition of Ready (DoR)
     # ACTION
     5: Execution Flow Summary (DAG/Sub-agent)
@@ -321,7 +341,7 @@ workflow_orchestration_skills:
 
 ### Key Differences from Task-Based Skills
 
-| Aspect | Task | Workflow Orchestration |
+| Aspect | Task-Based | Workflow Orchestration |
 |--------|-----------|------------------------|
 | Implements logic | Yes | No - coordinates other skills |
 | Produces artifacts | Directly | Aggregates from coordinated skills |

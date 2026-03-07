@@ -17,7 +17,7 @@ AI Agents follow this skill to generate AntV Infographic DSL syntax to:
 
 ## Important Notes
 
-BLOCKING: Read [references/prompt.md](references/prompt.md) before generating syntax. It contains the complete DSL specification, template list, and data field rules.
+BLOCKING: Read [references/prompt.md](.github/skills/x-ipe-tool-infographic-syntax/references/prompt.md) before generating syntax. It contains the complete DSL specification, template list, and data field rules.
 
 CRITICAL: Output MUST be a `plain` code block containing only infographic DSL. No JSON, no Markdown, no explanatory text.
 
@@ -325,4 +325,4 @@ data
         - label Slow release
 ```
 
-See [references/prompt.md](references/prompt.md) for the complete template list and additional examples.
+See [references/prompt.md](.github/skills/x-ipe-tool-infographic-syntax/references/prompt.md) for the complete template list and additional examples.

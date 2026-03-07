@@ -4,53 +4,6 @@ This document contains detailed guidelines, examples, and rules for feature brea
 
 ---
 
-## Epic Granularity Assessment
-
-### When to Create Multiple Epics
-
-Before breaking requirements into features, assess whether the scope warrants multiple Epics. Epics group related features into cohesive, domain-aligned containers.
-
-### Scope Signal Evaluation
-
-| Signal | Question | Measurement |
-|--------|----------|-------------|
-| Feature count | How many features will likely emerge? | Count distinct deliverables from requirements |
-| Domain diversity | How many distinct functional domains? | Count capability areas that could be owned independently |
-| Dependency clusters | Do features group with tight internal deps? | Identify clusters where features reference each other more than external features |
-| Team boundaries | Would different expertise areas own different parts? | Count distinct skill sets needed (frontend, backend, data, infra) |
-
-### Epic Grouping Decision Matrix
-
-| Domains | Est. Features | Decision | Rationale |
-|---------|---------------|----------|-----------|
-| 1 | ≤7 | Single Epic | Small enough to manage as one unit |
-| 1 | 8-15 | Single Epic, consider split | Split only if clear sub-domains emerge |
-| 2-3 | ≤7 | Single Epic | Few features despite multiple domains |
-| 2-3 | 8-15 | 2-3 Epics (one per domain) | Each domain has enough features to justify separate tracking |
-| 2-3 | >15 | 2-3 Epics (one per domain) | Must split — too many features for one container |
-| 4+ | Any | Multiple Epics | Each domain = one Epic; merge small domains if <3 features |
-
-### Epic Naming Conventions
-
-- **Domain-based:** "{Domain} {Capability}" — e.g., "Product Management", "Order Processing"
-- **Clear scope:** Name should convey what the Epic contains
-- **Avoid generic:** Do not use "Miscellaneous" or "Other" — assign features to real domains
-
-### Epic-Level Dependencies
-
-| Pattern | Description | Example |
-|---------|-------------|---------|
-| Foundation Epic | Core infrastructure that other Epics build on | "Data Layer" → "Product Management" → "Order Processing" |
-| Parallel Epics | Independent domains that can be developed concurrently | "User Management" ∥ "Product Catalog" |
-| Sequential Epics | One domain must complete before another starts | "Auth" → "User Profiles" → "Social Features" |
-
-Rules:
-1. **No circular Epic dependencies** — if Epic A depends on Epic B, B cannot depend on A
-2. **Foundation Epics first** — Epics with no dependencies should be prioritized
-3. **Minimize cross-Epic feature dependencies** — features within an Epic should primarily depend on other features in the same Epic
-
----
-
 ## Feature Sizing Guidelines
 
 ### Complexity Evaluation Heuristics
@@ -125,14 +78,17 @@ Rules:
 1. Feature {NNN} ALWAYS matches parent Epic {NNN}
 2. Suffix assigned alphabetically: first feature = A, second = B
 3. Scan x-ipe-docs/requirements/ for highest existing EPIC-{NNN} to determine next number
-4. NEVER use `EPIC-{NNN}` as a Feature ID — they are separate concepts
+4. ⛔ NEVER use `EPIC-{NNN}` as a Feature ID — they are separate concepts. Epic IDs identify grouping containers; Feature IDs identify deliverable units of work.
 
 ### Assignment Rules
 
 1. **Sequential Assignment** - IDs assigned in order of creation
 2. **No Gaps** - Do not skip numbers
 3. **No Reuse** - Deleted features keep their IDs
-4. **Part-Specific Ranges** - When using parts, each part covers a range
+4. **Part-Specific Ranges** - When using parts, each part covers a range:
+   - Part 1: EPIC-001 to EPIC-011
+   - Part 2: EPIC-012 to EPIC-017
+   - etc.
 
 ### Continuation Numbering
 
@@ -156,6 +112,13 @@ When adding features to an existing set:
 | P2 (Medium) | Nice to have | Convenience features, polish |
 | P3 (Low) | Future consideration | Advanced features, optimizations |
 
+### Priority Assignment Criteria
+
+1. **User Impact** - How many users affected? How severely?
+2. **Business Value** - Revenue, retention, or growth impact
+3. **Technical Risk** - Complex features may need early start
+4. **Dependencies** - Features blocking others get higher priority
+
 ---
 
 ## Feature Naming Conventions
@@ -176,6 +139,18 @@ When adding features to an existing set:
 
 ---
 
+## Version Numbering
+
+| Version | When to Use |
+|---------|-------------|
+| v1.0 | Initial feature implementation |
+| v1.1, v1.2 | Minor enhancements, bug fixes |
+| v2.0 | Major redesign or rewrite |
+
+**Note:** Most breakdown features will be v1.0.
+
+---
+
 ## Feature Dependency Patterns
 
 ### Sequential Dependencies
@@ -192,6 +167,14 @@ FEATURE-001: User Authentication (no deps)
                     ┌── FEATURE-002: User Service (depends on FEATURE-001)
 FEATURE-001: Database Layer ──┤
                     └── FEATURE-003: Product Service (depends on FEATURE-001)
+```
+
+### Multiple Dependencies
+
+```
+FEATURE-001: Authentication (no deps) ──┐
+                                        ├── FEATURE-003: Admin Panel
+FEATURE-002: Authorization (no deps) ───┘
 ```
 
 ### Dependency Rules
@@ -214,10 +197,43 @@ FEATURE-001: Database Layer ──┤
    b. IF idea folder exists:
       - Scan: x-ipe-docs/ideas/{idea-folder}/mockups/
       - IF mockups found → Auto-populate mockup_list from found files
-
+      - Notify: "Found {N} mockups in idea folder, processing..."
+   
 2. IF mockup_list is STILL empty after auto-detection:
    - Log: "No mockups found - skipping mockup processing"
-   - Proceed to next step
+   - Proceed to Step 3
+```
+
+### File Operations Example
+
+```yaml
+# Input mockup_list
+mockup_list:
+  - mockup_name: "main-dashboard"
+    mockup_list: "x-ipe-docs/ideas/Draft Idea - 01232026/mockup.html"
+  - mockup_name: "settings-panel"
+    mockup_list: "x-ipe-docs/ideas/Draft Idea - 01232026/mockups/settings.html"
+
+# Result: Files created
+x-ipe-docs/requirements/EPIC-001/mockups/main-dashboard.html
+(Shared at Epic level — Features reference via ../mockups/)
+x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/mockups/ → NOT used (mockups are at Epic level)
+```
+
+### Linking Mockups in Documents
+
+**Location 1:** `x-ipe-docs/requirements/requirement-details.md`
+
+**Location 2:** `x-ipe-docs/requirements/{FEATURE-ID}/specification.md`
+
+**Format:**
+```markdown
+## Linked Mockups
+
+| Mockup Function Name | Mockup List |
+|---------------------|-------------|
+| main-dashboard | [main-dashboard.html](EPIC-001/mockups/main-dashboard.html) |
+| settings-panel | [settings-panel.html](EPIC-001/mockups/settings-panel.html) |
 ```
 
 ### Mockup Rules
@@ -239,11 +255,99 @@ FEATURE-001: Database Layer ──┤
 | Write Feature List | Current active part |
 | Update Index | requirement-details-index.md |
 
+### Part File Structure
+
+```markdown
+# Requirement Details - Part {X}
+
+> Continued from: [requirement-details-part-{X-1}.md](requirement-details-part-{X-1}.md)  
+> Created: MM-DD-YYYY
+
+---
+
+## Feature List
+
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-012-A | EPIC-012 | Design Themes | v1.0 | Theme folder structure | FEATURE-011-A |
+
+---
+
+## Linked Mockups
+
+| Mockup Function Name | Feature | Mockup List |
+|---------------------|---------|-------------|
+| themes-toolbox | FEATURE-012-A | [themes-toolbox.html](EPIC-012/mockups/themes-toolbox.html) |
+
+---
+
+## Feature Details (Continued)
+
+### FEATURE-012-A: Design Themes
+[Feature details...]
+```
+
+### Index File Structure
+
+```markdown
+# Requirement Details Index
+
+> Last Updated: MM-DD-YYYY
+
+## Parts Overview
+
+| Part | File | Features Covered | Lines |
+|------|------|------------------|-------|
+| 1 | [Part 1](requirement-details-part-1.md) | EPIC-001 to EPIC-011 | ~420 |
+| 2 | [Part 2](requirement-details-part-2.md) | EPIC-012 to EPIC-017 | ~415 |
+```
+
+**⚠️ IMPORTANT:** Index file contains ONLY Parts Overview table. NO Feature List in index - each part has its own.
+
+---
+
+## Feature Details Template
+
+```markdown
+### {FEATURE-NNN-X}: {Feature Title}
+
+**Version:** v{X.Y}  
+**Brief Description:** [1-2 sentence description]
+
+**Acceptance Criteria:**
+- [ ] Criterion 1
+- [ ] Criterion 2
+- [ ] Criterion 3
+
+**Dependencies:**
+- {FEATURE-ID}: [Why needed]
+- None (if no dependencies)
+
+**Technical Considerations:**
+- [Key technical decisions or constraints]
+- [Performance requirements]
+- [Security considerations]
+```
+
+### Template Rules
+
+- Keep brief description under 50 words
+- List 3-7 acceptance criteria per feature
+- Note dependencies using Feature IDs
+- Technical considerations are hints for design
+
 ---
 
 ## Integration with Feature Board Management
 
 This skill **MUST** call the feature-board-management skill to create features on the board.
+
+### Why Integration Matters
+
+1. **Creates centralized tracking** - Single source of truth at x-ipe-docs/requirements/features.md
+2. **Initializes status** - All features start with status "Planned"
+3. **Enables queries** - Other skills can query feature board for Feature Data Model
+4. **Supports lifecycle** - Board tracks features through all phases
 
 ### Call Format
 
@@ -259,8 +363,10 @@ CALL x-ipe+feature+feature-board-management skill:
       dependencies: []
     - feature_id: FEATURE-001-B
       epic_id: EPIC-001
-      title: User Profile
+      title: User Profile  
       version: v1.0
       description: User profile management
       dependencies: [FEATURE-001-A]
 ```
+
+**See:** `skills/x-ipe+feature+feature-board-management/SKILL.md` for full operation details

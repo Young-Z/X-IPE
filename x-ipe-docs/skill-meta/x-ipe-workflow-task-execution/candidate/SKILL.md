@@ -28,6 +28,8 @@ MANDATORY: NEVER use `manage_todo_list` (VS Code internal) as substitute for tas
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point for each skill.
 
+IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue. When `manual` or `stop_for_question`, always wait for human feedback before proceeding to the next task.
+
 ---
 
 ## Input Parameters
@@ -49,8 +51,8 @@ input:
 
   execution:
     next_task_based_skill: "{task_based_skill} | null"
-    require_human_review: true | false
-    auto_proceed: true | false
+    process_preference:
+      auto_proceed: "manual | auto | stop_for_question"  # default: manual
     task_output_links: ["{links}"] | null
     dynamic_attributes: {}
 
@@ -62,6 +64,59 @@ input:
     category_level_change_summary: "{summary, max 100 words} | null"
 ```
 
+### Input Initialization
+
+```xml
+<input_init>
+  <!-- Task fields (resolved during Step 1 Planning) -->
+  <field name="task.task_id" source="x-ipe+all+task-board-management (auto-generated on create)" />
+  <field name="task.task_based_skill" source="Auto-discovery: match request against .github/skills/x-ipe-task-based-*/SKILL.md descriptions" />
+  <field name="task.task_description" source="Summarize from human request (max 50 words)" />
+  <field name="task.category" source="Read from matched skill's Output Result `category` field" />
+  <field name="task.role_assigned" source="Current agent nickname" />
+  <field name="task.status" source="Set to 'pending' on creation" />
+  <field name="task.last_updated" source="Current timestamp on each status change" />
+
+  <!-- Execution mode (resolved at start of Step 1) -->
+  <field name="execution_mode">
+    <steps>
+      1. IF instruction starts with `--workflow-mode@{name}` → "workflow-mode"
+      2. IF instruction starts with `--workflow-mode` (no @) → "workflow-mode"
+      3. ELSE → "free-mode"
+    </steps>
+  </field>
+  <field name="workflow.name">
+    <steps>
+      1. IF instruction has `--workflow-mode@{name}` → extract {name}
+      2. ELSE → "N/A"
+    </steps>
+  </field>
+
+  <!-- Execution fields (populated after Step 3) -->
+  <field name="execution.next_task_based_skill" source="From task-based skill output" />
+  <field name="execution.process_preference.auto_proceed" source="Resolved from: (a) workflow-{name}.json global.process_preference in workflow-mode, (b) CLI flag --proceed@auto or --proceed@stop-for-question in free-mode, (c) Semantic understanding from user message, (d) default: manual" />
+  <field name="execution.task_output_links" source="From task-based skill output" />
+
+  <!-- Git strategy (resolved during Step 2 DoR) -->
+  <field name="git.strategy">
+    <steps>
+      1. Read .x-ipe.yaml from project root
+      2. IF file exists AND git.strategy specified → use value
+      3. ELSE → "main-branch-only"
+    </steps>
+  </field>
+  <field name="git.main_branch">
+    <steps>
+      1. IF .x-ipe.yaml specifies git.main-branch → use value
+      2. ELSE → auto-detect from `git remote show origin` or fallback to main/master
+    </steps>
+  </field>
+
+  <!-- Closing fields (populated after Step 4) -->
+  <field name="closing.category_level_change_summary" source="From category skill output (or null if skipped)" />
+</input_init>
+```
+
 ### Git Strategy
 
 BLOCKING: At the start of every workflow execution, read `.x-ipe.yaml` from project root to determine `git.strategy` and `git.main-branch`. If `.x-ipe.yaml` does not exist or `git.strategy` is not specified, default to `main-branch-only`. If `git.main-branch` is not specified, auto-detect the main branch from git (see Step 2 procedure). Pass these values to all task-based skills that interact with git.
@@ -71,30 +126,7 @@ BLOCKING: At the start of every workflow execution, read `.x-ipe.yaml` from proj
 | `main-branch-only` | Work directly on main branch | No | All commits go to main. No feature branches created. |
 | `dev-session-based` | `dev/{git_user_name}` branch per developer | Yes, on feature close | Each developer works on their own persistent branch. PR to main when a feature is closed. |
 
-**Rules by strategy:**
-
-**`main-branch-only`:**
-- Do NOT create any branches
-- All commits go directly to the main branch
-- No PRs needed — code lands on main immediately
-- `git push` pushes to main
-
-**`dev-session-based`:**
-- BLOCKING: Validate git identity before resolving branch name:
-  → Run: `git config user.name` and `git config user.email`
-  → Reject placeholder values: `"Your Name"`, `"you@example.com"`, empty, or any value matching common defaults
-  → IF placeholder detected: STOP and ask user to provide their actual git name/email
-  → Do NOT proceed with branch creation until valid identity confirmed
-- Resolve dev branch name from git identity (NOT agent nickname):
-  → Run: `git config user.name` (or `git config user.email` if user.name is empty)
-  → Sanitize: lowercase, replace spaces with hyphens, remove special chars
-  → Branch name: `dev/{sanitized_git_user_name}`
-- On first task execution, check if `dev/{git_user_name}` branch exists
-  - If not → create it from main: `git checkout -b dev/{git_user_name}`
-  - If exists → switch to it: `git checkout dev/{git_user_name}`
-- All work happens on this branch
-- On feature close → push branch, create PR targeting main
-- Branch persists across features (not deleted after PR)
+See [references/examples.md](.github/skills/x-ipe-workflow-task-execution/references/examples.md) for detailed strategy rules and git identity validation.
 
 ### Category Derivation
 
@@ -174,8 +206,8 @@ deferred → in_progress
 | 2 | Global DoR | Verify prerequisites | All checks pass | → Step 3 (pass) or STOP (fail) |
 | 3 | Execute | Load task-based skill, do work | Skill output collected | → Step 4 |
 | 4 | Closing | Load category skills, update boards | Boards updated | → Step 5 |
-| 5 | Global DoD | Validate, output summary | Summary displayed | → Step 6 (pass) or STOP (review) |
-| 6 | 继续执行（Continue Execute） | Check auto_proceed, next task or STOP | Next action decided | → Step 2 (next) or END |
+| 5 | Global DoD | Validate, output summary | Summary displayed | → Step 6 (pass) or STOP (manual) |
+| 6 | 继续执行（Continue Execute） | Resolve process_preference mode, route next | Next action decided | → Step 1 (auto) or WAIT for human (manual/stop_for_question) |
 
 BLOCKING: Step 1 → Step 2: task must be created on task-board.md.
 BLOCKING: Step 3 → Step 4: x-ipe+all+task-board-management skill must be loaded.
@@ -194,9 +226,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
     <name>Task Planning</name>
     <trigger>Receive work request from human or system</trigger>
     <actions>
-      1. Detect execution mode from instruction prefix:
-         - IF instruction starts with `--workflow-mode` → set execution_mode = "workflow-mode", strip prefix from instruction
-         - ELSE → set execution_mode = "free-mode"
+      1. Resolve execution_mode and workflow.name from instruction prefix (see Input Initialization)
       2. Match request to task-based skill using auto-discovery (scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions)
          See references/examples.md for request matching patterns.
       3. Derive category from skill's Output Result `category` field
@@ -233,14 +263,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
            CALL x-ipe-tool-git-version-control skill: operation=init
            CALL x-ipe-tool-git-version-control skill: operation=create_gitignore
 
-      6. Read git strategy from .x-ipe.yaml:
-         → Read .x-ipe.yaml from project root (if file exists)
-         → Set git.strategy = git.strategy (default: "main-branch-only" if not specified or file missing)
-         → Set git.main_branch:
-           IF .x-ipe.yaml specifies git.main-branch → use that value
-           ELSE → auto-detect: run `git remote show origin` to find HEAD branch,
-                  or fallback to `git symbolic-ref refs/remotes/origin/HEAD` → parse branch name,
-                  or fallback to checking if `main` or `master` branch exists locally
+      6. Resolve git.strategy and git.main_branch (see Input Initialization)
 
       7. Apply git strategy:
          IF git.strategy == "main-branch-only":
@@ -272,7 +295,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
     <name>Task Work Execution</name>
     <actions>
       1. Load task-based skill: x-ipe-task-based-{task_based_skill}
-      2. Pass Task Data Model to skill, including execution_mode
+      2. Pass Task Data Model to skill, including execution_mode and workflow.name
       3. Check task-based skill DoR (defined in skill)
       4. Execute core work (defined in skill)
       5. Check task-based skill DoD (defined in skill)
@@ -282,7 +305,8 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
       Each task-based skill MUST return:
         status: {new_status}
         next_task_based_skill: {task_based_skill} | null
-        require_human_review: true | false
+        process_preference:
+          auto_proceed: "{from input process_preference.auto_proceed}"
         task_output_links: [{links}] | null
         {dynamic_attributes}: per skill definition
     </skill_output_contract>
@@ -333,18 +357,25 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
       3. Workflow Status Verification:
          IF execution_mode == "workflow-mode" AND completed skill's task_completion_output contains workflow_action field:
            a. Extract workflow_name and workflow_action from output
-           b. READ instance/workflows/workflow-{workflow_name}.json
+           b. READ instance/workflows/wf-{nnn}-{workflow_name}.json
            c. CHECK that actions.{workflow_action}.status is NOT "pending"
-           d. IF status is "pending" → FLAG task as incomplete: "Workflow action '{workflow_action}' status not updated. Call update_workflow_action MCP tool before completing."
-           e. IF workflow JSON file not found → WARN and skip (non-blocking)
+           d. IF status is "pending" → FLAG task as incomplete: "Workflow action '{workflow_action}' status not updated. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server before completing."
+           e. CHECK that actions.{workflow_action}.deliverables is a keyed dict (not a list). Keys must match extract tags from workflow-template.json for this action.
+           f. IF workflow JSON file not found → WARN and skip (non-blocking)
          ELSE IF execution_mode == "free-mode":
            → Skip workflow status verification
 
-      4. Human Review Check:
-         IF require_human_review = true AND auto_proceed = false AND global_auto_proceed = false:
+      4. Auto-Proceed Freshness Check:
+         Re-read the current process_preference.auto_proceed value from its source:
+           - workflow-mode: from workflow-{name}.json global.process_preference
+           - free-mode: from CLI flag or user message
+         IF the value has changed since Step 2 → update process_preference.auto_proceed for Step 6 routing.
+
+      5. Human Review Check (mode-aware):
+         IF process_preference.auto_proceed == "auto":
+           → Skip human review, proceed directly
+         ELIF process_preference.auto_proceed == "stop_for_question" OR "manual":
            → Output summary and STOP for human review
-         ELSE:
-           → Skip human review (auto-proceed overrides)
     </actions>
     <output_template>
       > Task ID: {task_id}
@@ -353,10 +384,11 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
       > Category: {category}
       > Assignee: {role_assigned}
       > Status: {status}
+      > Execution Mode: {execution_mode}
+      > Workflow: {workflow.name}
       > Category Changes: {category_level_change_summary}
-      > Require Human Review: {require_human_review}
+      > Process Preference: {process_preference.auto_proceed}
       > Task Output Links: {task_output_links}
-      > Auto Proceed: {auto_proceed}
       > --- Dynamic Attributes ---
       > {attr_1}: {value}
     </output_template>
@@ -364,19 +396,44 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
   </step_5>
 
   <step_6>
-    <name>Task Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
-      1. Read Global Auto-Proceed setting from task-board.md (Global Settings section)
-         → Default to false if not found
-      2. Set effective_auto_proceed = auto_proceed OR global_auto_proceed
+      NOTE: Each task-based skill now includes its own &lt;routing&gt; phase at the end.
+      The task-based skill's routing phase passes the full task_completion_output to
+      x-ipe-dao-end-user-representative for context-rich routing decisions.
 
-      IF effective_auto_proceed = true AND next_task_based_skill EXISTS:
-        → Find next task on board (already created in Step 1)
-        → Start execution from Step 2
-      ELSE:
-        → STOP (wait for human)
+      This step acts as a fallback/coordinator:
+
+      IF task-based skill already executed its &lt;routing&gt; phase:
+        → Routing decision was already made with full skill output context
+        → Follow the routing decision (next task or stop)
+        → If routing to next task → Start from Step 1 (Planning)
+
+      ELSE IF routing was not handled by the task-based skill:
+        IF next_task_based_skill EXISTS:
+          IF process_preference.auto_proceed == "auto":
+            → Invoke x-ipe-dao-end-user-representative with:
+              type: "routing"
+              completed_skill_output: {full task_completion_output YAML}
+              next_task_based_skill: "{from output}"
+              context: "Skill completed. Study the full output to decide best next action."
+            → IF multiple next_actions_suggested (workflow-mode):
+                invoke x-ipe-dao-end-user-representative (type: routing) to choose
+            → Start execution from Step 1 (Planning — to create/verify task on board)
+          ELIF process_preference.auto_proceed == "stop_for_question":
+            → Invoke x-ipe-dao-end-user-representative with same context
+            → Present DAO's recommendation to human and wait for confirmation
+          ELSE (manual):
+            → Present next task suggestion to human and wait for instruction
+        ELSE:
+          → STOP (no next task defined)
     </actions>
-    <gate>Routing decision made</gate>
+    <constraints>
+      - BLOCKING (manual/stop_for_question): Human MUST confirm or redirect before routing to next task
+      - BLOCKING (auto): Proceed automatically; resolve routing ambiguity via x-ipe-dao-end-user-representative
+      - DAO receives full task_completion_output for context-aware routing decisions
+    </constraints>
+    <gate>Continue Execute decision made</gate>
   </step_6>
 </procedure>
 ```
@@ -393,10 +450,13 @@ output:
   category: "{category}"
   role_assigned: "{role_assigned}"
   status: "completed | blocked | deferred"
+  execution_mode: "{execution_mode}"
+  workflow:
+    name: "{workflow.name}"
   category_level_change_summary: "{summary} | null"
-  require_human_review: true | false
+  process_preference:
+    auto_proceed: "manual | auto | stop_for_question"
   task_output_links: ["{links}"] | null
-  auto_proceed: true | false
   next_task_based_skill: "{task_based_skill} | null"
   dynamic_attributes: {}  # Per task-based skill
 ```
@@ -434,15 +494,15 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 **Discovery rule:**
 1. Scan `.github/skills/x-ipe-task-based-*/SKILL.md`
-2. Each skill's Output Result YAML declares: `category`, `next_task_based_skill`, `require_human_review`
+2. Each skill's Output Result YAML declares: `category`, `next_task_based_skill`, `process_preference.auto_proceed`
 3. Each skill's `description` in frontmatter contains trigger keywords for request matching
 
 **Request matching:**
 1. Read the `description` field from each `x-ipe-task-based-*/SKILL.md` frontmatter
 2. Match user request against trigger keywords (e.g., "fix bug" matches `x-ipe-task-based-bug-fix`)
-3. See [references/examples.md](references/examples.md) for common request-to-skill patterns
+3. See [references/examples.md](.github/skills/x-ipe-workflow-task-execution/references/examples.md) for common request-to-skill patterns
 
-> **Note:** When Auto-Proceed is enabled (global or task-level), `require_human_review` is skipped regardless of the skill's default.
+> **Note:** When `process_preference.auto_proceed` is `auto` or `stop_for_question`, human review at skill completion is handled by the mode-aware gate in Step 5. In `auto` mode, review is skipped entirely. In `stop_for_question` mode, review still stops for human approval.
 
 ---
 
@@ -458,13 +518,8 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 ---
 
-## Templates
+## Templates & Examples
 
 - `templates/task-record.yaml` - Task data template
 - `templates/task-board.md` - Task tracking board
-
----
-
-## Examples
-
-See [references/examples.md](references/examples.md) for full workflow examples and request matching patterns.
+- [references/examples.md](.github/skills/x-ipe-workflow-task-execution/references/examples.md) - Full workflow examples, request matching patterns, and git strategy rules

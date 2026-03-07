@@ -16,6 +16,14 @@ status: pending                      # Task status: pending | in_progress | bloc
 last_updated: ""                     # Timestamp: MM-DD-YYYY HH:MM:SS
 
 # =============================================================================
+# EXECUTION CONTEXT
+# =============================================================================
+
+execution_mode: "free-mode"          # Execution mode: free-mode | workflow-mode (default: free-mode)
+workflow:
+  name: "N/A"                        # Workflow name from --workflow-mode@{name}, default: N/A
+
+# =============================================================================
 # EXECUTION FIELDS (set by task-based skill)
 # =============================================================================
 

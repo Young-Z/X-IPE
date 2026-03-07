@@ -88,6 +88,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
   <field name="feature_id" source="from previous task (Technical Design) output or task board" />
   <field name="extra_context_reference" source="from workflow context or auto-detect from feature artifacts (x-ipe-docs/requirements/FEATURE-XXX/)" />
   <field name="git_strategy" source="from .x-ipe.yaml" />
@@ -135,6 +136,8 @@ input:
 | 5 | Route & Invoke | Semantic-match tool skills and invoke sequentially | All tool skills complete |
 | 6 | Validate Results | Verify Assert clauses, run integration scenarios | All checks pass |
 | 7 | Tracing | Add tracing decorators to implemented code | Tests still pass |
+| 9.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
+| 9.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Step 4 → 5 is BLOCKED until AAA scenarios are generated with coverage validated.
 BLOCKING: Step 5: If design needs changes → UPDATE technical design BEFORE implementing.
@@ -257,11 +260,13 @@ BLOCKING: Step 5.1 special-case delegations run BEFORE semantic routing.
       3. FOR EACH tech_stack entry: semantically match to a discovered tool skill
          - Use LLM understanding to match (e.g., "Python/Flask" → x-ipe-tool-implementation-python)
          - IF no match: assign x-ipe-tool-implementation-general
-         - IF general insufficient:
+         - IF general insufficient: signal "new tool skill needed"
+
+           Response source (based on auto_proceed):
            IF process_preference.auto_proceed == "auto":
-             → Log gap via x-ipe-dao-end-user-representative and continue with general tool
+             → Log gap via x-ipe-dao-end-user-representative, continue with general tool
            ELSE (manual/stop_for_question):
-             → Signal human "new tool skill needed"
+             → Ask human for guidance
       4. FOR EACH matched tool skill (sequentially, backend first then frontend):
          a. FILTER AAA scenarios by matching layer tag
          b. INVOKE tool skill with: aaa_scenarios, source_code_path, feature_context
@@ -289,17 +294,21 @@ BLOCKING: Step 5.1 special-case delegations run BEFORE semantic routing.
       2. IF any tool skill has failing Asserts:
          a. Re-invoke ONLY the failed tool skill with original scenarios + error context
          b. IF retry succeeds: continue
-         c. IF retry fails: preserve passing results,
+         c. IF retry fails: preserve passing results, escalate failure
+
+            Response source (based on auto_proceed):
             IF process_preference.auto_proceed == "auto":
-              → Log failure via x-ipe-dao-end-user-representative and continue with partial results
+              → Log failure via x-ipe-dao-end-user-representative, continue with partial results
             ELSE (manual/stop_for_question):
               → Escalate to human
       3. RUN @integration scenarios: verify cross-layer behavior with mocking
-      4. IF integration fails:
+      4. IF integration fails: report contract mismatch with both tool skill outputs
+
+         Response source (based on auto_proceed):
          IF process_preference.auto_proceed == "auto":
-           → Log contract mismatch via x-ipe-dao-end-user-representative and continue
+           → Log via x-ipe-dao-end-user-representative, continue
          ELSE (manual/stop_for_question):
-           → Report contract mismatch to human with both tool skill outputs
+           → Report to human
       5. PRODUCE aggregated report: per-skill pass/fail, integration results, overall status
     </action>
     <success_criteria>
@@ -340,6 +349,44 @@ BLOCKING: Step 5.1 special-case delegations run BEFORE semantic routing.
     </action>
     <output>Task completion output, workflow_action_updated</output>
   </step_8>
+
+  <phase_9 name="继续执行（Continue Execute）">
+    <step_9_1>
+      <name>Decide Next Action</name>
+      <action>
+        Collect the full context and task_completion_output from this skill execution.
+
+        IF process_preference.auto_proceed == "auto":
+          → Invoke x-ipe-dao-end-user-representative with:
+            type: "routing"
+            completed_skill_output: {full task_completion_output YAML from this skill}
+            next_task_based_skill: "{from output}"
+            context: "Skill completed. Study the context and full output to decide best next action."
+          → DAO studies the complete context and decides the best next action
+        ELSE (manual):
+          → Present next task suggestion to human and wait for instruction
+      </action>
+      <constraints>
+        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
+        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
+      </constraints>
+      <output>Next action decided with execution context</output>
+    </step_9_1>
+    <step_9_2>
+      <name>Execute Next Action</name>
+      <action>
+        Based on the decision from Step 9.1:
+        1. Load the target task-based skill's SKILL.md
+        2. Generate an execution plan from the skill's Execution Flow table
+        3. Start execution from the skill's first phase/step
+      </action>
+      <constraints>
+        - MUST load the skill before executing — do not skip skill loading
+        - Execution follows the target skill's procedure, not this skill's
+      </constraints>
+      <output>Next task execution started</output>
+    </step_9_2>
+  </phase_9>
 
 </procedure>
 ```
