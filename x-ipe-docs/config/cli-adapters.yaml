@@ -17,9 +17,9 @@ adapters:
     run_args: ""
     inline_prompt_flag: "--prompt"
     prompt_format: '{command} {inline_prompt_flag} "{escaped_prompt}"'
-    instructions_file: ".opencode/instructions.md"
+    instructions_file: "Agents.md"
     skills_folder: ".opencode/skills/"
-    mcp_config_path: ".opencode.json"
+    mcp_config_path: "opencode.json"
     mcp_config_format: "nested"
     detection_command: "opencode"
 
