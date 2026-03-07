@@ -483,9 +483,7 @@ operation_output:
         reason: "why this skill matches the input"
         execution_steps:   # from skill's Execution Flow table
           - phase: "1. Phase Name"
-            step: "1.1"
-            name: "Step Name"
-            gate: "gate condition"
+            step: "1.1 Step Name"
   errors: []
 ```
 
