@@ -35,6 +35,15 @@
 ### Rationale
 > {rationale_summary}
 
+### Suggested Skills
+> suggested_skills:   # from Step 2.1 — may be empty list
+>   - skill_name: "x-ipe-task-based-{name}"
+>     match_strength: "strong | partial"
+>     reason: "why this skill matches the input"
+>     execution_steps:
+>       - phase: "1. Phase Name"
+>         step: "1.1 Step Name"
+
 ### Follow-up
 > {follow-up or "None"}
 ```
