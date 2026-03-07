@@ -1,7 +1,22 @@
 # Copilot 使用指南
 
 ## 开始之前
-**时机：** 开始新对话时
+
+## ⚠️ 关键：DAO优先 — 每条消息都经过人类代表
+
+**时机：** 收到任何用户消息时（命令、问题、反馈、批准）
+**操作：**
+1. **每条用户消息必须先经过 `x-ipe-dao-end-user-representative` 处理，然后再执行任何其他操作。**
+   - 这是通用网关。无论用户说什么 — 命令、问题、反馈、批准 — 消息都先经过人类代表技能。DAO 解读消息、选择处置方式，Agent 根据结构化输出采取行动。
+2. 模型要求
+   - 当 `x-ipe-dao-end-user-representative` 被委托给子Agent执行时（如通过 `task` 工具），**必须使用最强大的（premium）LLM 模型**（如 `model: "claude-opus-4.6"`）。七步骨架需要精细推理 — 权衡三方视角、分析得失、场景推演 — 快速/廉价模型无法可靠处理。如果在主Agent内联执行，则自动使用主Agent的模型。
+3. 为什么 DAO优先 很重要
+   - **一致的解读** — 每条消息都获得结构化分析，而非临时模式匹配
+   - **上下文感知路由** — DAO 在解读时考虑当前任务、功能和工作流状态
+   - **处置驱动分支** — Agent的下一步行动由清晰、有界的信号决定，而非原始文本解析
+   - **有界范围** — DAO 仅解读意图。它不执行任务、不编写代码、不承担技能职责
+
+**时机：** 在新会话中开始第一个 x-ipe 工作流任务时
 **操作：**
 1. **从以下名称池中随机选择一个昵称：**
    - Nova, Echo, Flux, Bolt, Sage, Pixel, Cipher, Spark, Drift, Pulse, Vex, Atom, Onyx, Rune, Zephyr, Quill, Ember, Frost, Haze, Ink
@@ -14,66 +29,6 @@
 4. 此昵称是你的任务分配标识
 5. 检查分配给你的待办任务
 6. 只处理分配给你或未分配的任务
-
-**时机：** 开始任何工作之前
-**操作：**
-
-1. 检查 Agent 模型是否支持 Anthropic skills protocol。
-2. 如果支持，加载技能：`x-ipe-workflow-task-execution`。
-2. 如果不支持，执行以下操作：
-   - 阅读 `.github/skills/x-ipe-workflow-task-execution/` 文件夹下的文件以理解任务执行指南。
-   - **重要：** 指南中提到的每种任务类型都必须有对应的技能文件在 `.github/skills/` 文件夹下。SKILL.md 是理解每个技能的入口。
-
----
-
-## ⚠️ 关键：DAO优先 — 每条消息都经过人类代表
-
-**每条用户消息必须先经过 `x-ipe-dao-end-user-representative` 处理，然后再执行任何其他操作。**
-
-这是通用网关。无论用户说什么 — 命令、问题、反馈、批准 — 消息都先经过人类代表技能。DAO 解读消息、选择处置方式，Agent 根据结构化输出采取行动。
-
-### 消息处理流程
-
-当你收到用户消息时（会话初始化之后）：
-
-1. **内部调用 `x-ipe-dao-end-user-representative`**，传入：
-   ```yaml
-   message_context:
-     source: "human"
-     calling_skill: "copilot-instructions"
-     task_id: "{当前任务ID 或 N/A}"
-     feature_id: "{当前功能ID 或 N/A}"
-     workflow_name: "{当前工作流 或 N/A}"
-     downstream_context: "{当前Agent状态 — 活跃任务、待回答问题、技能阶段}"
-     messages:
-       - content: "{用户原始消息}"
-   human_shadow: false
-   ```
-
-2. **根据 DAO 处置结果行动：**
-
-   | 处置方式 | 含义 | Agent行动 |
-   |---------|------|----------|
-   | `instruction` | 用户在下达指令（如"修复这个bug"、"实现功能X"） | → 进入下方**技能分类**流程 |
-   | `approval` | 用户在批准待处理工作（如"lgtm"、"继续"、"自动继续"） | → 继续当前技能/工作流的下一步 |
-   | `answer` | 用户在提供请求的信息 | → 输入到当前任务上下文，继续当前技能 |
-   | `clarification` | 用户在澄清之前的问题 | → 用澄清信息更新当前任务，继续 |
-   | `critique` | 用户在给出当前工作的反馈 | → 根据反馈调整当前方案，留在当前技能 |
-   | `reframe` | 用户在完全重定向焦点 | → 重新评估 — 可能需要切换任务或技能 |
-   | `pass_through` | 消息不需要调解 | → Agent直接处理，不经过技能路由 |
-
-3. **只有在 DAO 处理之后** → 才能进行技能分类、任务创建或执行。
-
-### 模型要求
-
-当 `x-ipe-dao-end-user-representative` 被委托给子Agent执行时（如通过 `task` 工具），**必须使用最强大的（premium）LLM 模型**（如 `model: "claude-opus-4.6"`）。七步骨架需要精细推理 — 权衡三方视角、分析得失、场景推演 — 快速/廉价模型无法可靠处理。如果在主Agent内联执行，则自动使用主Agent的模型。
-
-### 为什么 DAO优先 很重要
-
-- **一致的解读** — 每条消息都获得结构化分析，而非临时模式匹配
-- **上下文感知路由** — DAO 在解读时考虑当前任务、功能和工作流状态
-- **处置驱动分支** — Agent的下一步行动由清晰、有界的信号决定，而非原始文本解析
-- **有界范围** — DAO 仅解读意图。它不执行任务、不编写代码、不承担技能职责
 
 ---
 
@@ -92,38 +47,8 @@
 
 如果以上任何一项缺失 → **停下来，不要修改代码。**
 
-### 分析 DAO 输出
 
-当 DAO 处置为 `instruction` 时：
-
-1. **使用 DAO 的解读** — 消息已被理解和分类
-2. **匹配对应技能** — 扫描 `.github/skills/x-ipe-task-based-*/SKILL.md` 描述找到正确的技能
-3. **加载并遵循该技能** — 技能定义了正确的流程、前置条件和完成定义
-
-### 为什么这很重要
-
-即使修复看起来很简单（例如"修改默认端口"），正确的做法是：
-- 用户说"修复这个 bug" → 使用 `x-ipe-task-based-bug-fix`（先写失败测试，再修复）
-- 用户说"这个配置不对" → 仍然是 bug 修复 → 使用 `x-ipe-task-based-bug-fix`
-- 用户说"添加一个新接口" → 使用 `x-ipe-task-based-code-implementation`
-- 用户说"重构这个模块" → 使用 `x-ipe-task-based-code-refactor`
-
-**技能确保质量** — 它强制执行测试覆盖、文档更新和审查步骤，这些都是直接编码会跳过的。
-
-### ⛔ 反模式：未经 DAO + 技能 直接修复
-
-```
-❌ 用户："默认端口不对，修复一下"
-   Agent：*直接编辑 config.py 并更新 3 个文件*
-
-✅ 用户："默认端口不对，修复一下"
-   Agent：*DAO 解读 → 处置: instruction →
-           分类为 bug 修复 → 加载 x-ipe-task-based-bug-fix →
-           在看板创建任务 → 写失败测试 → 修复代码 →
-           验证测试通过 → 更新看板*
-```
-
-### ⛔ 真实案例教训：TASK-681
+### ⛔ 真实案例教训：
 
 ```
 ❌ 实际发生的：
@@ -133,13 +58,11 @@
 
 ✅ 应该这样做：
    Agent：*DAO 解读 → 处置: instruction →
-           分类为 bug 修复 → 加载 x-ipe-task-based-bug-fix →
+           分类为 bug 修复 → 加载 x-ipe-workflow-task-execution → 加载 x-ipe-task-based-bug-fix →
            在看板创建 TASK-681 → 诊断根因 →
            执行冲突分析 → 先写失败测试 →
            实现修复 → 验证测试通过 → 更新看板*
 ```
-
-技能发现了直接修复遗漏的内容：冲突分析（检查所有调用方）、TDD 验证（证明测试在修复前失败）、任务追踪。
 
 ---
 
@@ -177,7 +100,9 @@
 6. **完成技能的完成定义 (DoD)** 才能标记完成
 7. **更新 task-board.md** 的完成状态 ← **必须操作**
 
-### 技能自动发现
+### 任务技能识别
+
+## 技能自动发现
 
 阻断：不要维护硬编码的注册表。技能通过自动发现获取。
 
@@ -233,26 +158,6 @@
 - ✅ 必须检查前置条件 (DoR)
 - ✅ 必须完成完成定义 (DoD)
 - ✅ 完成工作后必须更新 task-board.md
-
----
-
-## 下一步建议 (OpenCode & Claude CLI)
-
-> **CLI 代理的注意事项：** 完成 X-IPE 任务流程中的任务时，响应结尾的"下一步"建议**必须**基于已完成技能的 Output Result YAML 中的 `next_task_based_skill` 字段 — 而非通用建议。阅读技能的 `task_completion_output` 部分确定推荐的下一步操作并呈现给用户。
->
-> 例如，如果已完成技能声明 `next_task_based_skill: "Feature Acceptance Test"`，建议：*"下一步：运行功能验收测试 (x-ipe-task-based-feature-acceptance-test)"*，而非通用的"您接下来想做什么？"。
->
-> 如果 `next_task_based_skill` 为空或任务是独立的，可以建议一般性的下一步操作。
-
----
-
-## 人机交互
-
-### 审批识别
-
-- 除非人类明确说出以下词语，否则不要假设已获批准：`approve`、`confirmed`、`lgtm`、`looks good`、`go ahead`、`proceed`
-- 如果人类给出反馈但没有批准 → 保持任务在当前状态
-- 如有疑问，询问："是否批准继续？"
 
 ---
 

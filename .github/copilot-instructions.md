@@ -1,7 +1,22 @@
 # Copilot Instructions
 
 ## Before You Start
-**When:** Starting a new conversation
+
+## ⚠️ CRITICAL: DAO-First — Every Message Through Human Representative
+
+**When:** Receiving ANY user message (command, question, feedback, approval)
+**Then:**
+1. **EVERY user message MUST be processed through `x-ipe-dao-end-user-representative` before any other action.**
+   - This is the universal gateway. No matter what the user says — a command, a question, feedback, approval — the message flows through the human representative skill first. The DAO interprets the message, selects a disposition, and the agent acts on that structured output.
+2. Model Requirement
+   - When `x-ipe-dao-end-user-representative` is delegated to a sub-agent (e.g., via the `task` tool), **use the most capable (premium) LLM model available** (e.g., `model: "claude-opus-4.6"`). The 7-step backbone requires nuanced reasoning — weighing three perspectives, analyzing gains/losses, scenario planning — that fast/cheap models cannot reliably handle. If running inline (not as a sub-agent), the main agent's model is used automatically.
+3. Why DAO-First Matters
+   - **Consistent interpretation** — Every message gets structured analysis, not ad-hoc pattern matching
+   - **Context-aware routing** — DAO considers the current task, feature, and workflow state when interpreting
+   - **Disposition-driven branching** — The agent's next action is determined by a clear, bounded signal, not raw text parsing
+   - **Bounded scope** — DAO interprets intent only. It does NOT execute tasks, write code, or absorb skill responsibilities
+
+**When:** Starting first x-ipe workflow task in a new session
 **Then:**
 1. **Generate a random nickname** from this pool:
    - Nova, Echo, Flux, Bolt, Sage, Pixel, Cipher, Spark, Drift, Pulse, Vex, Atom, Onyx, Rune, Zephyr, Quill, Ember, Frost, Haze, Ink
@@ -14,66 +29,6 @@
 4. This nickname is your assignee identifier
 5. Check for open tasks assigned to you
 6. Only work on tasks assigned to you or unassigned
-
-**When:** Before starting any thinking
-**Then:**
-
-1. Check if Agent Model have capability to use Anthropic skills protocol.
-2. If yes, load skill: `x-ipe-workflow-task-execution`.
-2. If no, do following things:
-   - read files under `.github/skills/x-ipe-workflow-task-execution/` folder to understand task execution guideline.
-   - **Important:** each type of task mentioned in the guideline must have a corresponding skill file under `.github/skills/` folder. And SKILL.md file is the entry point to understand each skill.
-
----
-
-## ⚠️ CRITICAL: DAO-First — Every Message Through Human Representative
-
-**EVERY user message MUST be processed through `x-ipe-dao-end-user-representative` before any other action.**
-
-This is the universal gateway. No matter what the user says — a command, a question, feedback, approval — the message flows through the human representative skill first. The DAO interprets the message, selects a disposition, and the agent acts on that structured output.
-
-### Message Processing Flow
-
-When you receive a user message (after session initialization):
-
-1. **Call `x-ipe-dao-end-user-representative`** internally with:
-   ```yaml
-   message_context:
-     source: "human"
-     calling_skill: "copilot-instructions"
-     task_id: "{active task ID or N/A}"
-     feature_id: "{active feature ID or N/A}"
-     workflow_name: "{active workflow or N/A}"
-     downstream_context: "{current agent state — active task, pending questions, skill phase}"
-     messages:
-       - content: "{exact user message}"
-   human_shadow: false
-   ```
-
-2. **Act on the DAO disposition:**
-
-   | Disposition | Meaning | Agent Action |
-   |-------------|---------|--------------|
-   | `instruction` | User is commanding action (e.g., "fix this bug", "implement feature X") | → Proceed to **Skill Classification** below |
-   | `approval` | User is approving pending work (e.g., "lgtm", "go ahead", "auto proceed") | → Proceed with next step in active skill/workflow |
-   | `answer` | User is providing requested information | → Feed into active task context, continue current skill |
-   | `clarification` | User is clarifying a previous question | → Update active task with clarified info, continue |
-   | `critique` | User is giving feedback on current work | → Adjust current approach per feedback, stay in skill |
-   | `reframe` | User is redirecting focus entirely | → Reassess — may need to switch tasks or skills |
-   | `pass_through` | Message doesn't need mediation | → Agent handles directly without skill routing |
-
-3. **Only AFTER DAO processing** → proceed with skill classification, task creation, or execution as appropriate.
-
-### Model Requirement
-
-When `x-ipe-dao-end-user-representative` is delegated to a sub-agent (e.g., via the `task` tool), **use the most capable (premium) LLM model available** (e.g., `model: "claude-opus-4.6"`). The 7-step backbone requires nuanced reasoning — weighing three perspectives, analyzing gains/losses, scenario planning — that fast/cheap models cannot reliably handle. If running inline (not as a sub-agent), the main agent's model is used automatically.
-
-### Why DAO-First Matters
-
-- **Consistent interpretation** — Every message gets structured analysis, not ad-hoc pattern matching
-- **Context-aware routing** — DAO considers the current task, feature, and workflow state when interpreting
-- **Disposition-driven branching** — The agent's next action is determined by a clear, bounded signal, not raw text parsing
-- **Bounded scope** — DAO interprets intent only. It does NOT execute tasks, write code, or absorb skill responsibilities
 
 ---
 
@@ -92,38 +47,8 @@ Before calling **any** file-editing tool (`edit`, `create`, or writing code via 
 
 If ANY of these are missing → **STOP. Do not touch code.**
 
-### Analyze the DAO Output
 
-When DAO disposition is `instruction`:
-
-1. **Use DAO's interpretation** — the message has already been understood and classified
-2. **Match to an x-ipe skill** — scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions to find the right skill
-3. **Load and follow that skill** — the skill defines the proper procedure, prerequisites, and Definition of Done
-
-### Why This Matters
-
-Even if a fix seems simple (e.g., "change the default port"), the correct approach is:
-- User says "fix this bug" → use `x-ipe-task-based-bug-fix` (write failing test first, then fix)
-- User says "this config is wrong" → still a bug fix → use `x-ipe-task-based-bug-fix`
-- User says "add a new endpoint" → use `x-ipe-task-based-code-implementation`
-- User says "refactor this module" → use `x-ipe-task-based-code-refactor`
-
-**The skill ensures quality** — it enforces test coverage, proper documentation, and review steps that ad-hoc coding skips.
-
-### ⛔ Anti-Pattern: Direct Fix Without DAO + Skill
-
-```
-❌ User: "the default port is wrong, fix it"
-   Agent: *immediately edits config.py and updates 3 files*
-
-✅ User: "the default port is wrong, fix it"
-   Agent: *DAO interprets → disposition: instruction →
-           classifies as bug fix → loads x-ipe-task-based-bug-fix →
-           creates task on board → writes failing test → fixes code →
-           verifies tests pass → updates board*
-```
-
-### ⛔ Real-World Lesson: TASK-681
+### ⛔ Real-World Lesson:
 
 ```
 ❌ What happened:
@@ -133,13 +58,11 @@ Even if a fix seems simple (e.g., "change the default port"), the correct approa
 
 ✅ What should have happened:
    Agent: *DAO interprets → disposition: instruction →
-           classifies as bug fix → loads x-ipe-task-based-bug-fix →
+           classifies as bug fix → loads x-ipe-workflow-task-execution → loads x-ipe-task-based-bug-fix →
            creates TASK-681 on board → diagnoses root cause →
            runs conflict analysis → writes FAILING test first →
            implements fix → verifies test passes → updates board*
 ```
-
-The skill caught things the direct fix missed: conflict analysis (checking all callers), TDD verification (proving the test fails without the fix), and task tracking.
 
 ---
 
@@ -235,26 +158,6 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 - ✅ Always check prerequisites (DoR) before starting
 - ✅ Always complete Definition of Done (DoD) before finishing
 - ✅ Always update task-board.md AFTER completing work
-
----
-
-## Next Step Suggestions (OpenCode & Claude CLI)
-
-> **Note for CLI-based agents (OpenCode, Claude CLI):** When completing a task that is part of the X-IPE task workflow, your "next step" suggestion at the end of your response **MUST** be based on the `next_task_based_skill` field from the completed skill's Output Result YAML — not a generic suggestion. Read the skill's `task_completion_output` section to determine the recommended next action and present it to the user.
->
-> For example, if the completed skill declares `next_task_based_skill: "Feature Acceptance Test"`, suggest: *"Next step: Run feature acceptance tests (x-ipe-task-based-feature-acceptance-test)"* rather than a generic "What would you like to do next?".
->
-> If `next_task_based_skill` is empty or the task is standalone, you may suggest general next actions.
-
----
-
-## Human Interaction
-
-### Approval Recognition
-
-- Do NOT assume approval unless human explicitly says: `approve`, `confirmed`, `lgtm`, `looks good`, `go ahead`, `proceed`
-- If human gives feedback without approval → keep task in current state
-- When in doubt, ask: "Do you approve this to proceed?"
 
 ---
 
