@@ -45,7 +45,7 @@ input:
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
   workflow:
-    name: "N/A"  # workflow name, default: N/A
+    name: "N/A"  # workflow name from workflow-{name}.json (NOT the idea folder name), default: N/A
     action: "refine_idea"  # hardcoded — this skill ALWAYS updates the refine_idea action
     extra_context_reference:  # optional, default: N/A for all refs
       raw-idea: "path | N/A | auto-detect"
@@ -61,7 +61,10 @@ input:
 <input_init>
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})">
+    NOTE: workflow.name is the {name} part from workflow-{name}.json filename — it is NOT the idea folder name.
+    The idea folder name is auto-generated as wf-{NNN}-{sanitized-idea-name} under x-ipe-docs/ideas/.
+  </field>
   <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
 
   <field name="idea_folder_path">

@@ -262,6 +262,10 @@ class ComposeIdeaModal {
             if (this.folderPreview) {
                 this.folderPreview.textContent = `📁 x-ipe-docs/ideas/${this.folderName}`;
             }
+        } else if (this.workflowName) {
+            // Auto-fill with workflow name (from workflow-{name}.json)
+            this.nameInput.value = this.workflowName;
+            this.nameInput.dispatchEvent(new Event('input'));
         }
     }
 
