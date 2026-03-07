@@ -398,21 +398,40 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
   <step_6>
     <name>Task Routing</name>
     <actions>
-      IF next_task_based_skill EXISTS:
-        Response source (based on auto_proceed):
-        IF process_preference.auto_proceed == "auto":
-          → Auto-route to next task via x-ipe-dao-end-user-representative to learn context and define best next task
-          → IF multiple next_actions_suggested (workflow-mode):
-              invoke x-ipe-dao-end-user-representative (type: routing) to choose
-          → Start execution from Step 1 (Planning — to create/verify task on board)
-        ELSE (manual/stop_for_question):
-          → Present next task suggestion to human and wait for instruction
-      ELSE:
-        → STOP (no next task defined)
+      NOTE: Each task-based skill now includes its own &lt;routing&gt; phase at the end.
+      The task-based skill's routing phase passes the full task_completion_output to
+      x-ipe-dao-end-user-representative for context-rich routing decisions.
+
+      This step acts as a fallback/coordinator:
+
+      IF task-based skill already executed its &lt;routing&gt; phase:
+        → Routing decision was already made with full skill output context
+        → Follow the routing decision (next task or stop)
+        → If routing to next task → Start from Step 1 (Planning)
+
+      ELSE IF routing was not handled by the task-based skill:
+        IF next_task_based_skill EXISTS:
+          IF process_preference.auto_proceed == "auto":
+            → Invoke x-ipe-dao-end-user-representative with:
+              type: "routing"
+              completed_skill_output: {full task_completion_output YAML}
+              next_task_based_skill: "{from output}"
+              context: "Skill completed. Study the full output to decide best next action."
+            → IF multiple next_actions_suggested (workflow-mode):
+                invoke x-ipe-dao-end-user-representative (type: routing) to choose
+            → Start execution from Step 1 (Planning — to create/verify task on board)
+          ELIF process_preference.auto_proceed == "stop_for_question":
+            → Invoke x-ipe-dao-end-user-representative with same context
+            → Present DAO's recommendation to human and wait for confirmation
+          ELSE (manual):
+            → Present next task suggestion to human and wait for instruction
+        ELSE:
+          → STOP (no next task defined)
     </actions>
     <constraints>
       - BLOCKING (manual/stop_for_question): Human MUST confirm or redirect before routing to next task
       - BLOCKING (auto): Proceed automatically; resolve routing ambiguity via x-ipe-dao-end-user-representative
+      - DAO receives full task_completion_output for context-aware routing decisions
     </constraints>
     <gate>Routing decision made</gate>
   </step_6>

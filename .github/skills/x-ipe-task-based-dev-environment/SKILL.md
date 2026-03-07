@@ -202,6 +202,36 @@ BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
     <output>Initial commit created with structured message</output>
   </step_5>
 
+  <routing>
+    <name>Routing</name>
+    <actions>
+      Collect the full task_completion_output from this skill execution.
+
+      IF next_task_based_skill EXISTS (not null):
+        IF process_preference.auto_proceed == "auto":
+          → Invoke x-ipe-dao-end-user-representative with:
+            type: "routing"
+            completed_skill_output: {full task_completion_output YAML from this skill}
+            next_task_based_skill: "{from output}"
+            context: "Skill completed. Study the full output to decide best next action."
+          → DAO studies the complete output context and decides the best next action
+          → Return to x-ipe-workflow-task-execution Step 1
+        ELIF process_preference.auto_proceed == "stop_for_question":
+          → Invoke x-ipe-dao-end-user-representative with:
+            type: "routing"
+            completed_skill_output: {full task_completion_output YAML from this skill}
+            next_task_based_skill: "{from output}"
+            context: "Skill completed. Study the full output and recommend next action."
+          → Present DAO's recommendation to human and wait for confirmation
+          → Return to x-ipe-workflow-task-execution Step 1
+        ELSE (manual):
+          → Present next task suggestion to human and wait for instruction
+      ELSE (next_task_based_skill is null):
+        → STOP — return to x-ipe-workflow-task-execution
+    </actions>
+    <gate>Routing decision made — return to x-ipe-workflow-task-execution</gate>
+  </routing>
+
 </procedure>
 ```
 
