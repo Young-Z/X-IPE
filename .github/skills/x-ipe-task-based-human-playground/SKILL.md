@@ -120,7 +120,8 @@ input:
 | 4 | Validate | Run playground command and verify exit code 0 | Command succeeds |
 | 5 | Run Tests | Execute human simulation tests | All tests pass |
 | 6 | Complete | Verify DoD, output summary, inform human playground is ready | Playground delivered |
-| 7 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
+| 7.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
+| 7.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Step 4 is blocked until playground command runs without error.
 BLOCKING: Step 5 is blocked until human simulation tests pass.
@@ -234,29 +235,43 @@ BLOCKING: Step 6 requires validation before Feature Closing (manual/stop_for_que
     <output>Playground ready for human validation</output>
   </step_6>
 
-  <step_7>
-    <name>继续执行（Continue Execute）</name>
-    <actions>
-      Collect the full context and task_completion_output from this skill execution.
+  <phase_7 name="继续执行（Continue Execute）">
+    <step_7_1>
+      <name>Decide Next Action</name>
+      <action>
+        Collect the full context and task_completion_output from this skill execution.
 
-      IF process_preference.auto_proceed == "auto":
-        → Invoke x-ipe-dao-end-user-representative with:
-          type: "routing"
-          completed_skill_output: {full task_completion_output YAML from this skill}
-          next_task_based_skill: "{from output}"
-          context: "Skill completed. Study the context and full output to decide best next action."
-        → DAO studies the complete context and decides the best next action
-      ELSE (manual):
-        → Present next task suggestion to human and wait for instruction
-    </actions>
-    <constraints>
-      - BLOCKING (manual): Human MUST confirm or redirect before routing to next task
-      - BLOCKING (auto/stop_for_question): Proceed after DoD verification; auto-select next task via DAO
-    </constraints>
-    <routing>
-      **Execute next task based on the decision from above with related task based skill**
-    </routing>
-  </step_7>
+        IF process_preference.auto_proceed == "auto":
+          → Invoke x-ipe-dao-end-user-representative with:
+            type: "routing"
+            completed_skill_output: {full task_completion_output YAML from this skill}
+            next_task_based_skill: "{from output}"
+            context: "Skill completed. Study the context and full output to decide best next action."
+          → DAO studies the complete context and decides the best next action
+        ELSE (manual):
+          → Present next task suggestion to human and wait for instruction
+      </action>
+      <constraints>
+        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
+        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
+      </constraints>
+      <output>Next action decided with execution context</output>
+    </step_7_1>
+    <step_7_2>
+      <name>Execute Next Action</name>
+      <action>
+        Based on the decision from Step 7.1:
+        1. Load the target task-based skill's SKILL.md
+        2. Generate an execution plan from the skill's Execution Flow table
+        3. Start execution from the skill's first phase/step
+      </action>
+      <constraints>
+        - MUST load the skill before executing — do not skip skill loading
+        - Execution follows the target skill's procedure, not this skill's
+      </constraints>
+      <output>Next task execution started</output>
+    </step_7_2>
+  </phase_7>
 
 </procedure>
 ```

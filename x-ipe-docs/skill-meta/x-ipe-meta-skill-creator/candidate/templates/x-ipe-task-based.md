@@ -125,7 +125,8 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 | 4. 明辨之 (Discern Clearly) | — | SKIP | {skip reason} | — |
 | 5. 笃行之 (Practice Earnestly) | 5.1 | {Step Name} | {Execute core work} | {gate condition} |
 | | 5.2 | Complete | Verify DoD | DoD validated |
-| 6. 继续执行 | 6 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
+| 6. 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
+| 6. 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: All 5 phases MUST appear in the table. Skipped phases use `—` for Step and Gate.
 BLOCKING: {Additional rule that must not be skipped}
@@ -139,7 +140,7 @@ BLOCKING: {Additional rule that must not be skipped}
 | 3 | 慎思之 (Shènsī) | Think Carefully | Reflect on trade-offs and risks | Analyze alternatives, assess risk, evaluate impact |
 | 4 | 明辨之 (Míngbiàn) | Discern Clearly | Make informed decisions | Choose approach, document rationale, resolve conflicts |
 | 5 | 笃行之 (Dǔxíng) | Practice Earnestly | Execute with discipline | Implement, test, verify, deliver, commit |
-| 6 | 继续执行（Continue Execute） | Route to Next | Transition to next task | DAO-assisted routing based on full skill output |
+| 6 | 继续执行（Continue Execute） | Route and Execute | Decide next task, then load and execute | DAO-assisted decision + execution plan generation |
 
 **Phase Rules:**
 - Phase 1 (博学之) and Phase 5 (笃行之) are NEVER skippable.
@@ -255,29 +256,43 @@ BLOCKING: {Additional rule that must not be skipped}
     </step_5_N_complete>
   </phase_5>
 
-  <!-- ROUTING (always last phase — handles next task transition): -->
-  <phase_6>
-    <name>继续执行（Continue Execute）</name>
-    <actions>
-      Collect the full context and task_completion_output from this skill execution.
+  <!-- CONTINUE EXECUTE (always last phase — handles next task transition): -->
+  <phase_6 name="继续执行（Continue Execute）">
+    <step_6_1>
+      <name>Decide Next Action</name>
+      <action>
+        Collect the full context and task_completion_output from this skill execution.
 
-      IF process_preference.auto_proceed == "auto":
-        → Invoke x-ipe-dao-end-user-representative with:
-          type: "routing"
-          completed_skill_output: {full task_completion_output YAML from this skill}
-          next_task_based_skill: "{from output}"
-          context: "Skill completed. Study the context and full output to decide best next action."
-        → DAO studies the complete context and decides the best next action
-      ELSE (manual):
-        → Present next task suggestion to human and wait for instruction
-    </actions>
-    <constraints>
-      - BLOCKING (manual): Human MUST confirm or redirect before routing to next task
-      - BLOCKING (auto/stop_for_question): Proceed after DoD verification; auto-select next task via DAO
-    </constraints>
-    <routing>
-      **Execute next task based on the decision from above with related task based skill**
-    </routing>
+        IF process_preference.auto_proceed == "auto":
+          → Invoke x-ipe-dao-end-user-representative with:
+            type: "routing"
+            completed_skill_output: {full task_completion_output YAML from this skill}
+            next_task_based_skill: "{from output}"
+            context: "Skill completed. Study the context and full output to decide best next action."
+          → DAO studies the complete context and decides the best next action
+        ELSE (manual):
+          → Present next task suggestion to human and wait for instruction
+      </action>
+      <constraints>
+        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
+        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
+      </constraints>
+      <output>Next action decided with execution context</output>
+    </step_6_1>
+    <step_6_2>
+      <name>Execute Next Action</name>
+      <action>
+        Based on the decision from Step 6.1:
+        1. Load the target task-based skill's SKILL.md
+        2. Generate an execution plan from the skill's Execution Flow table
+        3. Start execution from the skill's first phase/step
+      </action>
+      <constraints>
+        - MUST load the skill before executing — do not skip skill loading
+        - Execution follows the target skill's procedure, not this skill's
+      </constraints>
+      <output>Next task execution started</output>
+    </step_6_2>
   </phase_6>
 
 </procedure>
