@@ -217,27 +217,16 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
          - Output: classified conflict list
       4. IF all conflicts are "expected": proceed to Step 6
       5. IF any conflicts are "unexpected":
-         - IF process_preference.auto_proceed == "auto":
-           → CALL x-ipe-dao-end-user-representative with:
-               message_context:
-                 source: "ai"
-                 calling_skill: "bug-fix"
-                 task_id: "{task_id}"
-                 feature_id: "N/A"
-                 workflow_name: "N/A"
-                 downstream_context: "Conflict analysis found unexpected behavioral changes from the proposed bug fix"
-                 messages:
-                   - content: "Unexpected conflict: {conflict}"
-                     preferred_dispositions: ["answer", "clarification"]
-               human_shadow: false
-           → IF disposition is "answer" or "approval" or "instruction": proceed to Step 6
-           → IF disposition is "clarification" or "reframe" or "critique": return to Step 4 with updated understanding
-           → IF disposition is "pass_through": escalate to human
-         - ELSE (manual/stop_for_question):
-           → Present unexpected conflicts to user with clear explanation of what will change
-           → Ask user to either: (a) confirm the change is acceptable, OR (b) clarify the original request
-           → IF user confirms: proceed to Step 6
-           → IF user clarifies: return to Step 4 (Design Fix) with updated understanding
+         - Present unexpected conflicts with clear explanation of what will change
+         - Ask: (a) confirm the change is acceptable, OR (b) clarify the original request
+         - IF confirmed: proceed to Step 6
+         - IF clarified: return to Step 4 (Design Fix) with updated understanding
+
+         Response source (based on auto_proceed):
+         IF process_preference.auto_proceed == "auto":
+           → Resolve via x-ipe-dao-end-user-representative
+         ELSE (manual/stop_for_question):
+           → Ask human for decision
     </action>
     <constraints>
       - BLOCKING: Do NOT proceed to Step 6 if unexpected conflicts are unresolved

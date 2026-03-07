@@ -222,12 +222,13 @@ BLOCKING: Step 6 requires validation before Feature Closing (manual/stop_for_que
       3. Include sample data
       4. Add reset capability
       5. Log outputs for debugging
-      6. Completion Gate:
-         IF process_preference.auto_proceed == "auto":
-           → Auto-proceed after DoD verification
-         ELSE (manual/stop_for_question):
-           → Inform human that playground is ready for testing
-           → Wait for human validation
+      6. Inform that playground is ready for testing
+
+        Completion gate (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Auto-proceed after DoD verification
+        ELSE (manual/stop_for_question):
+          → Ask human to validate playground
     </action>
     <output>Playground ready for human validation</output>
   </step_6>

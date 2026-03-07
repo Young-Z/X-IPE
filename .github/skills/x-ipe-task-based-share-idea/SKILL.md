@@ -182,30 +182,19 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
     <step_2_1>
       <name>Confirm Target Formats</name>
       <action>
-        1. IF process_preference.auto_proceed == "auto":
-            → CALL x-ipe-dao-end-user-representative with:
-                message_context:
-                  source: "ai"
-                  calling_skill: "share-idea"
-                  task_id: "{task_id}"
-                  feature_id: "N/A"
-                  workflow_name: "N/A"
-                  downstream_context: "Selecting output format(s) for sharing the idea document"
-                  messages:
-                    - content: "Which output format(s) for sharing? Options: pptx, docx, pdf, html"
-                      preferred_dispositions: ["answer", "clarification"]
-                human_shadow: false
-            → IF disposition is "answer" or "approval" or "instruction": use returned decision (default: pptx if unresolvable)
-            → IF disposition is "clarification" or "reframe" or "critique": refine question and re-ask
-            → IF disposition is "pass_through": escalate to human
-        2. ELSE (manual/stop_for_question):
-           a. Present enabled formats to human (filter by config):
-              - PowerPoint (.pptx) - For presentations
-              - Word (.docx) - For document review
-              - PDF (.pdf) - For read-only sharing
-              - HTML (.html) - For web viewing
-           b. Allow multiple selections
-           c. Wait for human confirmation
+        1. Present enabled formats (filter by config):
+           - PowerPoint (.pptx) - For presentations
+           - Word (.docx) - For document review
+           - PDF (.pdf) - For read-only sharing
+           - HTML (.html) - For web viewing
+        2. Allow multiple selections
+        3. Wait for format confirmation
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Resolve via x-ipe-dao-end-user-representative (default: pptx if unresolvable)
+        ELSE (manual/stop_for_question):
+          → Ask human to confirm format(s)
       </action>
       <constraints>
         - BLOCKING (manual/stop_for_question): Do not proceed until human confirms format(s)
@@ -265,12 +254,13 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
         1. Check each output file exists in {idea_folder}
         2. Verify file size > 0 for each
         3. List generated files with paths and sizes
-        4. Review & Decision Gate:
-           IF process_preference.auto_proceed == "auto":
-             → Skip human confirmation (auto-proceed mode)
-           ELSE (manual/stop_for_question):
-             → Present file list to human
-             → Wait for human to confirm receipt
+        4. Present file list with paths and sizes
+
+        Completion gate (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Auto-proceed after verification
+        ELSE (manual/stop_for_question):
+          → Ask human to confirm receipt
       </action>
       <success_criteria>
         - All requested files exist and are non-empty

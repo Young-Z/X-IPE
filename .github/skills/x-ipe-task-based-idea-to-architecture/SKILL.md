@@ -164,25 +164,14 @@ BLOCKING (manual/stop_for_question): Step 5.4 - present diagrams, ask if archite
       <action>
         1. IF current_idea_folder is null:
            - List folders under x-ipe-docs/ideas/
-           - IF process_preference.auto_proceed == "auto":
-              → CALL x-ipe-dao-end-user-representative with:
-                  message_context:
-                    source: "ai"
-                    calling_skill: "idea-to-architecture"
-                    task_id: "{task_id}"
-                    feature_id: "N/A"
-                    workflow_name: "N/A"
-                    downstream_context: "Selecting which idea folder to generate architecture diagrams for"
-                    messages:
-                      - content: "Which idea folder for architecture? Options: {available folders}"
-                        preferred_dispositions: ["answer", "clarification"]
-                  human_shadow: false
-              → IF disposition is "answer" or "approval" or "instruction": use returned decision
-              → IF disposition is "clarification" or "reframe" or "critique": refine question and re-ask
-              → IF disposition is "pass_through": escalate to human
-           - ELSE (manual/stop_for_question):
-             → Ask human to select a folder
+           - Ask "Which idea folder for architecture?" with available options
            - Set current_idea_folder = selected folder
+
+           Response source (based on auto_proceed):
+           IF process_preference.auto_proceed == "auto":
+             → Resolve via x-ipe-dao-end-user-representative
+           ELSE (manual/stop_for_question):
+             → Ask human for selection
         2. Verify folder exists on disk
         3. Verify idea-summary-vN.md exists in folder
       </action>

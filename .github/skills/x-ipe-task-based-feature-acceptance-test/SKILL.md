@@ -205,11 +205,15 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
   <step_4>
     <name>Test Data Preparation</name>
     <action>
-      1. IF process_preference.auto_proceed == "auto": skip this step, use placeholder/generated test data
-      2. ELSE (manual/stop_for_question):
-         a. ANALYZE each test case for data requirements (Input, Selection, Expected, Compare)
-         b. ASK user for test data per test case (see references/detailed-procedures.md)
-         c. UPDATE Test Data table in each test case section
+      1. ANALYZE each test case for data requirements (Input, Selection, Expected, Compare)
+      2. Collect test data per test case (see references/detailed-procedures.md)
+      3. UPDATE Test Data table in each test case section
+
+      Response source (based on auto_proceed):
+      IF process_preference.auto_proceed == "auto":
+        → Use placeholder/generated test data (auto-populate)
+      ELSE (manual/stop_for_question):
+        → Ask human for test data per test case
     </action>
     <output>Test Data tables populated in each test case</output>
   </step_4>
@@ -269,10 +273,13 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
       4. IF outdated mockups were flagged in Step 2:
          a. Add prominent notice: "⚠ Outdated Mockup(s) Detected"
          b. List outdated mockup files and recommend updating them
-         c. IF process_preference.auto_proceed == "auto":
-            → Log outdated mockup notice via x-ipe-dao-end-user-representative
-         d. ELSE (manual/stop_for_question):
-            → INFORM human: "The following mockup(s) are outdated and were NOT used for UI/UX validation: {filenames}. Consider updating mockups to enable visual comparison in future acceptance tests."
+         c. Inform: "The following mockup(s) are outdated and were NOT used for UI/UX validation: {filenames}. Consider updating mockups to enable visual comparison in future acceptance tests."
+
+            Response source (based on auto_proceed):
+            IF process_preference.auto_proceed == "auto":
+              → Log notice via x-ipe-dao-end-user-representative
+            ELSE (manual/stop_for_question):
+              → Inform human directly
       5. CALCULATE metrics: total, passed, failed, blocked, pass_rate = (passed/total)*100
       6. RETURN task completion output with results
     </action>

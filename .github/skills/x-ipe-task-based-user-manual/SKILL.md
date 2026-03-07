@@ -228,19 +228,22 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ### Pattern: Human Communication on Completion
 
-**When:** Task is completed (manual/stop_for_question mode)
+**When:** Task is completed
 **Then:**
 ```
-1. IF process_preference.auto_proceed == "auto":
-   → Skip human confirmation (auto-proceed mode)
-2. ELSE (manual/stop_for_question):
-   a. Inform the human with verified run and test commands
-   b. Request confirmation that README is clear
-   c. Example message:
-      "User Manual updated in README.md.
-       Verified Run Command: `{command}`
-       Verified Test Command: `{test_command}`
-       Please check the README and confirm it is clear."
+1. Inform with verified run and test commands
+2. Request confirmation that README is clear
+3. Example message:
+   "User Manual updated in README.md.
+    Verified Run Command: `{command}`
+    Verified Test Command: `{test_command}`
+    Please check the README and confirm it is clear."
+
+Completion gate (based on auto_proceed):
+IF process_preference.auto_proceed == "auto":
+  → Auto-proceed after DoD verification
+ELSE (manual/stop_for_question):
+  → Ask human to confirm README is clear
 ```
 
 ### Anti-Patterns

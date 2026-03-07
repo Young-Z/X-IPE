@@ -172,26 +172,14 @@ BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
       <action>
         1. IF current_idea_folder == N/A:
            - List available folders under x-ipe-docs/ideas/
-           - IF process_preference.auto_proceed == "auto":
-              → CALL x-ipe-dao-end-user-representative with:
-                  message_context:
-                    source: "ai"
-                    calling_skill: "idea-mockup"
-                    task_id: "{task_id}"
-                    feature_id: "N/A"
-                    workflow_name: "N/A"
-                    downstream_context: "Selecting which idea folder to generate mockups for"
-                    messages:
-                      - content: "Which idea folder for mockups? Options: {available folders}"
-                        preferred_dispositions: ["answer", "clarification"]
-                  human_shadow: false
-              → IF disposition is "answer" or "approval" or "instruction": use returned decision
-              → IF disposition is "clarification" or "reframe" or "critique": refine question and re-ask
-              → IF disposition is "pass_through": escalate to human
-           - ELSE (manual/stop_for_question):
-             → Ask human: "Which idea folder should I create mockups for?"
-             → Wait for selection
+           - Ask "Which idea folder should I create mockups for?" with available options
            - Set current_idea_folder = selected folder
+
+           Response source (based on auto_proceed):
+           IF process_preference.auto_proceed == "auto":
+             → Resolve via x-ipe-dao-end-user-representative
+           ELSE (manual/stop_for_question):
+             → Ask human for selection
         2. Validate folder exists on disk
         3. Verify idea-summary-vN.md exists in folder
         4. Log: "Working with idea folder: {current_idea_folder}"

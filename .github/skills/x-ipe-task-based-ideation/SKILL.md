@@ -214,38 +214,25 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
     <step_2_2>
       <name>Brainstorming Session</name>
       <action>
-        1. IF process_preference.auto_proceed == "auto":
-           → Analyze idea content and resolve ambiguities autonomously
-            → CALL x-ipe-dao-end-user-representative with:
-                message_context:
-                  source: "ai"
-                  calling_skill: "ideation"
-                  task_id: "{task_id}"
-                  feature_id: "N/A"
-                  workflow_name: "N/A"
-                  downstream_context: "Resolving ambiguities and questions during autonomous idea brainstorming"
-                  messages:
-                    - content: "{ambiguity description}"
-                      preferred_dispositions: ["answer", "clarification"]
-                human_shadow: false
-            → IF disposition is "answer" or "approval" or "instruction": use decision to resolve ambiguity
-            → IF disposition is "clarification" or "reframe" or "critique": refine understanding and re-ask
-            → IF disposition is "pass_through": escalate to human
-           → Build comprehensive brainstorming notes from source material + decisions
-           → Generate visual artifacts proactively using enabled tools from step 1.1
-        2. ELSE (manual/stop_for_question):
-           a. Ask questions in batches (3-5 at a time)
-           b. Wait for human response before proceeding
-           c. Build on previous answers
-           d. Challenge assumptions constructively
-        3. IF extra_instructions is provided and non-empty:
+        1. Ask questions in batches (3-5 at a time) to avoid overwhelming
+        2. Wait for response based on auto_proceed condition before proceeding
+        3. Build on previous answers
+        4. Challenge assumptions constructively
+        5. IF extra_instructions is provided and non-empty:
            - Incorporate extra_instructions as additional context/guidance for the refinement
            - Treat as user preference that supplements (not replaces) the idea content
-        4. When the user describes something visual (UI layouts, flows, system structure), proactively generate visual artifacts to enrich the brainstorming -- select the most appropriate enabled tool from step 1.1's tool list for the content type
+        6. When the user describes something visual (UI layouts, flows, system structure), proactively generate visual artifacts to enrich the brainstorming -- select the most appropriate enabled tool from step 1.1's tool list for the content type
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Resolve ambiguities via x-ipe-dao-end-user-representative
+          → Build comprehensive brainstorming notes from source material + decisions
+        ELSE (manual/stop_for_question):
+          → Ask human for response
       </action>
       <constraints>
         - BLOCKING: Continue until idea is well-defined
-        - CRITICAL (manual/stop_for_question): Batch questions (3-5), do not overwhelm
+        - CRITICAL (manual/stop_for_question): Ask human for response
         - CRITICAL (auto): Resolve all ambiguities via x-ipe-dao-end-user-representative, do not ask human
         - MANDATORY: Only use tools that appear in the enabled tool list from step 1.1
       </constraints>
@@ -343,12 +330,15 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
               - deliverables: {"refined-idea": "{path to idea-summary file}", "refined-ideas-folder": "{path to refined-idea/ folder}"}
            b. Log: "Workflow action status updated to done"
         2. Verify all DoD checkpoints are met
-        3. IF process_preference.auto_proceed == "auto":
-              → Auto-select next task from next_task_based_skill
-           ELSE (manual/stop_for_question):
-              → Present final idea summary to human
-              → Ask if any aspects of the idea are missing or unclear
-              → IF human identifies gaps → revise specific sections
+        3. Present final idea summary
+        4. Ask if any aspects of the idea are missing or unclear
+        5. IF human/DAO identifies gaps → revise specific sections
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Auto-select next task from next_task_based_skill after DoD verification
+        ELSE (manual/stop_for_question):
+          → Ask human if idea is complete before proceeding
       </action>
       <constraints>
         - BLOCKING (manual/stop_for_question): Human MUST confirm idea is complete before proceeding

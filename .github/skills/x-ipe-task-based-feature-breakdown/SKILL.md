@@ -210,9 +210,14 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
            - Is this capability truly needed for the MVP?
            - Can this be deferred to a later version?
            - Does this overlap with existing features in the system?
-        2. IF auto_proceed: use x-ipe-dao-end-user-representative to resolve scope questions
-        3. ELSE (manual/stop_for_question): present scope challenges to human, ask for confirmation
-        4. Document scope decisions and rationale
+        2. Present scope challenges and ask for confirmation
+        3. Document scope decisions and rationale
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Resolve via x-ipe-dao-end-user-representative
+        ELSE (manual/stop_for_question):
+          → Ask human for confirmation
       </action>
       <constraints>
         - CRITICAL: Challenge scope BEFORE breaking down into features
@@ -266,9 +271,14 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
         1. Review feature list across all Epics
         2. Validate MVP selection: does first feature provide minimum runnable value?
         3. Validate dependency DAG: no circular dependencies, clear implementation order
-        4. IF auto_proceed: confirm via x-ipe-dao-end-user-representative
-        5. ELSE (manual/stop_for_question): present prioritized list to human for confirmation
-        6. Finalize feature order and dependency graph
+        4. Present prioritized list for confirmation
+        5. Finalize feature order and dependency graph
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Confirm via x-ipe-dao-end-user-representative
+        ELSE (manual/stop_for_question):
+          → Ask human for confirmation
       </action>
       <output>Confirmed feature prioritization with validated dependency DAG</output>
     </step_4_1>

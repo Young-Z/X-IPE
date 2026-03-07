@@ -169,9 +169,14 @@ BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop
            - Could the existing feature already handle this with configuration?
            - Is the requested approach the best solution, or are there alternatives?
            - What is the impact if this CR is NOT implemented?
-        2. IF auto_proceed: use x-ipe-dao-end-user-representative to resolve challenges
-        3. ELSE (manual/stop_for_question): present challenges to human, ask for confirmation
-        4. Document challenge outcomes and confirmed scope
+        2. Present challenges and ask for confirmation
+        3. Document challenge outcomes and confirmed scope
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Resolve via x-ipe-dao-end-user-representative
+        ELSE (manual/stop_for_question):
+          → Ask human for confirmation
       </action>
       <output>Validated CR scope with challenge decisions</output>
     </step_2_1>
@@ -233,11 +238,15 @@ BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop
     <step_4_2>
       <name>Route Workflow</name>
       <action>
-        1. IF auto_proceed: log classification and conflicts via x-ipe-dao-end-user-representative, proceed
-        2. ELSE (manual/stop_for_question):
-           a. Present to human: CR summary, classification, conflict results, affected features
-           b. Wait for human to confirm classification and conflict decisions
-           c. IF human requests changes: return to step 4.1 or Phase 3
+        1. Present CR summary: classification, conflict results, affected features
+        2. Wait for confirmation of classification and conflict decisions
+        3. IF changes requested: return to step 4.1 or Phase 3
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Confirm via x-ipe-dao-end-user-representative
+        ELSE (manual/stop_for_question):
+          → Ask human to confirm
       </action>
       <constraints>
         - BLOCKING (manual/stop_for_question): Do NOT proceed without human confirming classification

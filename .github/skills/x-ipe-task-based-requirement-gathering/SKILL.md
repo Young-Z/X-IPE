@@ -195,28 +195,16 @@ BLOCKING (auto): Proceed automatically after DoD verification.
       <name>Ask Clarifying Questions</name>
       <action>
         1. Identify ambiguities across: Scope, Users, Edge Cases, Priorities, Constraints
-        2. IF process_preference.auto_proceed == "auto":
-            → CALL x-ipe-dao-end-user-representative with:
-                message_context:
-                  source: "ai"
-                  calling_skill: "requirement-gathering"
-                  task_id: "{task_id}"
-                  feature_id: "N/A"
-                  workflow_name: "N/A"
-                  downstream_context: "Resolving requirement ambiguities during autonomous requirement gathering"
-                  messages:
-                    - content: "{ambiguity description}"
-                      preferred_dispositions: ["answer", "clarification"]
-                human_shadow: false
-            → IF disposition is "answer" or "approval" or "instruction": use returned decisions to resolve ambiguities
-            → IF disposition is "clarification" or "reframe" or "critique": refine questions and re-ask
-            → IF disposition is "pass_through": escalate to human
-            → Document resolved answers immediately
-        3. ELSE (manual/stop_for_question):
-           a. Ask questions in batches of 3-5
-           b. Wait for human response before next batch
-           c. Document answers immediately
-           d. Repeat until all ambiguities are resolved
+        2. Ask questions in batches of 3-5 to avoid overwhelming
+        3. Wait for response before next batch
+        4. Document answers immediately
+        5. Repeat until all ambiguities are resolved
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Resolve ambiguities via x-ipe-dao-end-user-representative
+        ELSE (manual/stop_for_question):
+          → Ask human for responses
       </action>
       <constraints>
         - BLOCKING: Do not proceed until ALL ambiguities are resolved
@@ -239,8 +227,13 @@ BLOCKING (auto): Proceed automatically after DoD verification.
         5. IF conflicts found, for EACH conflict:
            - Present conflict summary table
            - Provide recommendation based on: Single Responsibility, Cohesion, Independence, Minimal Coupling
-           - IF auto_proceed: use x-ipe-dao-end-user-representative
-           - ELSE (manual/stop_for_question): ask human "CR on existing or new standalone feature?"
+           - Ask "CR on existing or new standalone feature?"
+
+             Response source (based on auto_proceed):
+             IF process_preference.auto_proceed == "auto":
+               → Resolve via x-ipe-dao-end-user-representative
+             ELSE (manual/stop_for_question):
+               → Ask human for decision
         6. Record decisions for each conflict
       </action>
       <constraints>
@@ -300,8 +293,13 @@ BLOCKING (auto): Proceed automatically after DoD verification.
       <action>
         1. Review all gathered requirements, conflicts, and feasibility assessment
         2. Explicitly define what is IN scope and OUT of scope
-        3. IF auto_proceed: make scope decision via x-ipe-dao-end-user-representative, log rationale
-        4. ELSE (manual/stop_for_question): present scope summary to human for confirmation
+        3. Present scope summary for confirmation
+
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Resolve via x-ipe-dao-end-user-representative, log rationale
+        ELSE (manual/stop_for_question):
+          → Ask human for confirmation
         5. Document final scope boundaries
       </action>
       <output>Final scope boundaries (in-scope and out-of-scope items)</output>

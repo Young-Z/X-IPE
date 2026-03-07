@@ -182,28 +182,15 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
       5. Flag any unmet criteria
     </action>
     <constraints>
-      - BLOCKING: If ANY criterion is not met:
+      - BLOCKING: If ANY criterion is not met, present options: (a) address gap, (b) modify criterion, (c) defer
+        Response source (based on auto_proceed):
         IF process_preference.auto_proceed == "auto":
-          → CALL x-ipe-dao-end-user-representative with:
-              message_context:
-                source: "ai"
-                calling_skill: "feature-closing"
-                task_id: "{task_id}"
-                feature_id: "{feature_id}"
-                workflow_name: "{workflow_name}"
-                downstream_context: "Acceptance criteria verification found unmet criterion during feature closing"
-                messages:
-                  - content: "Unmet criterion: {criterion}. Options: address gap, modify criterion, defer"
-                    preferred_dispositions: ["answer", "clarification"]
-              human_shadow: false
-          → IF disposition is "answer" or "approval" or "instruction": apply returned decision
-          → IF disposition is "clarification" or "reframe" or "critique": re-evaluate criterion
-          → IF disposition is "pass_through": escalate to human
+          → Resolve via x-ipe-dao-end-user-representative
         ELSE (manual/stop_for_question):
-          → STOP and report to human
+          → Ask human for decision
       - BLOCKING: Do NOT proceed to Step 2 until all criteria are verified
-      - CRITICAL (manual/stop_for_question): Present unmet criteria with options: (a) address gap, (b) modify criterion, (c) defer
-      - CRITICAL (auto): Resolve unmet criteria via x-ipe-dao-end-user-representative (same options: address, modify, defer)
+      - CRITICAL (manual/stop_for_question): Present unmet criteria to human with options
+      - CRITICAL (auto): Resolve unmet criteria via x-ipe-dao-end-user-representative
     </constraints>
     <output>Acceptance criteria verification table with status and evidence</output>
   </step_1>
@@ -321,13 +308,14 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
          - IF refactoring suggestions exist: list top suggestions with priority
          - IF overall_quality_score < 7: flag "Refactoring recommended" with summary of key improvements
          - IF overall_quality_score >= 7: note "Code quality is acceptable, optional improvements listed"
-      5. Completion Gate:
-         IF process_preference.auto_proceed == "auto":
-           → Auto-proceed after DoD verification
-           → Log refactoring recommendation to x-ipe-docs/dao/ semantic log via x-ipe-dao-end-user-representative if refactoring_score < 7
-         ELSE (manual/stop_for_question):
-           → Present summary to human with clear recommendation on whether refactoring is needed
-           → Wait for human acknowledgment
+      5. Present summary with clear recommendation on whether refactoring is needed
+      6. IF refactoring_score < 7: flag "Refactoring recommended"
+
+        Completion gate (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Auto-proceed after DoD verification, log refactoring recommendation via x-ipe-dao-end-user-representative
+        ELSE (manual/stop_for_question):
+          → Ask human to acknowledge summary
     </action>
     <output>Feature completion summary with refactoring recommendation delivered to human</output>
   </step_6>

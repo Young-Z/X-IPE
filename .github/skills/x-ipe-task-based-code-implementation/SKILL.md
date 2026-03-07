@@ -258,11 +258,13 @@ BLOCKING: Step 5.1 special-case delegations run BEFORE semantic routing.
       3. FOR EACH tech_stack entry: semantically match to a discovered tool skill
          - Use LLM understanding to match (e.g., "Python/Flask" → x-ipe-tool-implementation-python)
          - IF no match: assign x-ipe-tool-implementation-general
-         - IF general insufficient:
+         - IF general insufficient: signal "new tool skill needed"
+
+           Response source (based on auto_proceed):
            IF process_preference.auto_proceed == "auto":
-             → Log gap via x-ipe-dao-end-user-representative and continue with general tool
+             → Log gap via x-ipe-dao-end-user-representative, continue with general tool
            ELSE (manual/stop_for_question):
-             → Signal human "new tool skill needed"
+             → Ask human for guidance
       4. FOR EACH matched tool skill (sequentially, backend first then frontend):
          a. FILTER AAA scenarios by matching layer tag
          b. INVOKE tool skill with: aaa_scenarios, source_code_path, feature_context
@@ -290,17 +292,21 @@ BLOCKING: Step 5.1 special-case delegations run BEFORE semantic routing.
       2. IF any tool skill has failing Asserts:
          a. Re-invoke ONLY the failed tool skill with original scenarios + error context
          b. IF retry succeeds: continue
-         c. IF retry fails: preserve passing results,
+         c. IF retry fails: preserve passing results, escalate failure
+
+            Response source (based on auto_proceed):
             IF process_preference.auto_proceed == "auto":
-              → Log failure via x-ipe-dao-end-user-representative and continue with partial results
+              → Log failure via x-ipe-dao-end-user-representative, continue with partial results
             ELSE (manual/stop_for_question):
               → Escalate to human
       3. RUN @integration scenarios: verify cross-layer behavior with mocking
-      4. IF integration fails:
+      4. IF integration fails: report contract mismatch with both tool skill outputs
+
+         Response source (based on auto_proceed):
          IF process_preference.auto_proceed == "auto":
-           → Log contract mismatch via x-ipe-dao-end-user-representative and continue
+           → Log via x-ipe-dao-end-user-representative, continue
          ELSE (manual/stop_for_question):
-           → Report contract mismatch to human with both tool skill outputs
+           → Report to human
       5. PRODUCE aggregated report: per-skill pass/fail, integration results, overall status
     </action>
     <success_criteria>
