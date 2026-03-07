@@ -157,8 +157,8 @@ class ActionExecutionModal {
     }
 
     _buildExecutionFlag() {
-        if (this._autoProceed === 'auto') return ' --execution@{keep running}';
-        if (this._autoProceed === 'stop_for_question') return ' --execution@{keep running stop only on question}';
+        if (this._autoProceed === 'auto') return ' --execute@keep-running-forever';
+        if (this._autoProceed === 'stop_for_question') return ' --execute@keep-running-forever-stop-only-on-question';
         return '';
     }
 
@@ -394,7 +394,13 @@ class ActionExecutionModal {
         this._loadedInstructions.command = resolved;
         const contentEl = this.overlay.querySelector('.instructions-content');
         if (contentEl) {
-            const formatted = this._formatUnresolvedWarnings(this._escapeHtml(resolved));
+            // Build full preview including CLI flags
+            let preview = resolved;
+            if (this.featureId) preview += ` --feature-id ${this.featureId}`;
+            const wfSuffix = this.workflowName ? `@${this.workflowName}` : '';
+            preview += ` --workflow-mode${wfSuffix}`;
+            preview += this._buildExecutionFlag();
+            const formatted = this._formatUnresolvedWarnings(this._escapeHtml(preview));
             contentEl.innerHTML = formatted;
         }
     }
@@ -706,7 +712,7 @@ class ActionExecutionModal {
                         <div class="instructions-section">
                             <div class="instructions-label">Instructions</div>
                             <div class="instructions-content">${hasInstructions
-                                ? this._escapeHtml(this._loadedInstructions.command)
+                                ? this._escapeHtml(this._buildPreviewText())
                                 : '<em>No instructions available for this action.</em>'}</div>
                         </div>
                         <div class="extra-instructions-section">
@@ -800,8 +806,8 @@ class ActionExecutionModal {
         if (extraInstructions && extraInstructions.trim()) {
             cmd += ` --extra-instructions ${extraInstructions.trim()}`;
         }
-        cmd += this._buildExecutionFlag();
         cmd += ` --workflow-mode${wfSuffix}`;
+        cmd += this._buildExecutionFlag();
         return cmd;
     }
 
@@ -820,8 +826,8 @@ class ActionExecutionModal {
             if (this.featureId) {
                 cmd += ` --feature-id ${this.featureId}`;
             }
-            cmd += this._buildExecutionFlag();
             cmd += ` --workflow-mode${wfSuffix}`;
+            cmd += this._buildExecutionFlag();
         } else {
             cmd = this._buildCommand(extraText);
         }
@@ -863,6 +869,16 @@ class ActionExecutionModal {
     }
 
     /* --- Helpers ---------------------------------------------------------- */
+
+    _buildPreviewText() {
+        if (!this._loadedInstructions) return '';
+        let preview = this._loadedInstructions.command;
+        if (this.featureId) preview += ` --feature-id ${this.featureId}`;
+        const wfSuffix = this.workflowName ? `@${this.workflowName}` : '';
+        preview += ` --workflow-mode${wfSuffix}`;
+        preview += this._buildExecutionFlag();
+        return preview;
+    }
 
     _formatActionKey(key) {
         return (key || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());

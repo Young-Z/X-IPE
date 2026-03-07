@@ -623,7 +623,8 @@ describe('FEATURE-042-C: command composition', () => {
 
     // _composeCommand returns pure prompt content (no flags)
     expect(composed).not.toContain('--workflow-mode');
-    expect(composed).toContain(resolved);
+    // Preview includes CLI flags; composed includes only the template-resolved prompt
+    expect(resolved).toContain(composed);
     expect(composed).not.toContain('--extra-instructions');
     // No trailing newlines
     expect(composed).not.toMatch(/\n+$/);
@@ -744,7 +745,8 @@ describe('FEATURE-042-C: edge cases', () => {
 
     // _composeCommand returns pure prompt content (no flags)
     expect(composed).not.toContain('--workflow-mode');
-    expect(composed).toContain(resolved);
+    // Preview includes CLI flags; composed includes only the template-resolved prompt
+    expect(resolved).toContain(composed);
     expect(composed).not.toContain('--extra-instructions');
   });
 
