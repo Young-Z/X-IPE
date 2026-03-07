@@ -296,19 +296,25 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
            a. **Strong match:** Message clearly maps to a skill (e.g., "fix this bug" → x-ipe-task-based-bug-fix)
            b. **Partial match:** Message loosely relates (e.g., "clean up the code" could be refactor or bug-fix)
            c. **No match:** No existing skill covers this request — this is a valid outcome
-        4. Produce `suggested_skills` list (may be empty):
-           - Each entry: { skill_name, match_strength: "strong" | "partial", reason }
+        4. For each matched skill, extract execution phases/steps from its `## Execution Flow` table:
+           - Read the flow summary table to get the ordered list of phases and steps
+           - Capture phase names, step names, and gate conditions
+           - This gives the caller a preview of what executing this skill involves
+        5. Produce `suggested_skills` list (may be empty):
+           - Each entry: { skill_name, match_strength, reason, execution_steps }
+           - `execution_steps`: ordered list of { phase, step, name, gate } from the skill's flow table
            - Maximum 3 suggestions, ordered by relevance
            - If no skill matches, set suggested_skills to empty list — do NOT force a match
-        5. Feed suggested_skills into subsequent disposition ranking (Step 2.2).
+        6. Feed suggested_skills into subsequent disposition ranking (Step 2.2).
            - IF disposition is `instruction` AND suggested_skills is non-empty → include in output content
            - IF disposition is NOT `instruction` → suggested_skills is informational only (still included in output)
       </action>
       <constraints>
         - Do NOT force-match a skill when none fits — empty list is preferred over a bad suggestion
         - Skill discovery is advisory, not binding — the caller decides whether to follow the suggestion
+        - execution_steps MUST reflect the actual flow table from the skill file, not invented steps
       </constraints>
-      <output>suggested_skills list (may be empty)</output>
+      <output>suggested_skills list with execution_steps (may be empty)</output>
     </step_2_1>
 
     <step_2_2>
@@ -435,7 +441,10 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
 
            Confidence: {confidence}
            Fallback Required: {fallback_required}
-           Suggested Skills: {suggested_skills or "None"}
+           Suggested Skills:
+             {for each suggested skill:}
+             → {skill_name} ({match_strength}): {reason}
+               Steps: {step1.name} → {step2.name} → ... → Routing
            ──────────────────────────────────
            道 · Complete.
            ──────────────────────────────────
@@ -472,6 +481,11 @@ operation_output:
       - skill_name: "x-ipe-task-based-{name}"
         match_strength: "strong | partial"
         reason: "why this skill matches the input"
+        execution_steps:   # from skill's Execution Flow table
+          - phase: "1. Phase Name"
+            step: "1.1"
+            name: "Step Name"
+            gate: "gate condition"
   errors: []
 ```
 
