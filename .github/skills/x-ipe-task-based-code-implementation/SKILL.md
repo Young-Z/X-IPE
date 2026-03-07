@@ -137,7 +137,7 @@ input:
 | 6 | Validate Results | Verify Assert clauses, run integration scenarios | All checks pass |
 | 7 | Tracing | Add tracing decorators to implemented code | Tests still pass |
 | 9.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 9.2 | Execute Next Action | Delegate to x-ipe-workflow-task-execution sub-agent | Sub-agent started |
+| 9.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Step 4 → 5 is BLOCKED until AAA scenarios are generated with coverage validated.
 BLOCKING: Step 5: If design needs changes → UPDATE technical design BEFORE implementing.
@@ -375,17 +375,16 @@ BLOCKING: Step 5.1 special-case delegations run BEFORE semantic routing.
     <step_9_2>
       <name>Execute Next Action</name>
       <action>
-        Based on the decision from Step 9.1, delegate execution to a sub-agent:
-        1. Invoke x-ipe-workflow-task-execution as a sub-agent (use premium model)
-        2. Pass the decided next task and full context from Step 9.1
-        3. The workflow skill handles: skill loading, execution plan generation, and execution
+        Based on the decision from Step 9.1:
+        1. Load the target task-based skill's SKILL.md
+        2. Generate an execution plan from the skill's Execution Flow table
+        3. Start execution from the skill's first phase/step
       </action>
       <constraints>
-        - MUST delegate to x-ipe-workflow-task-execution — do not execute the next skill directly
-        - Sub-agent MUST use premium model (Best-Model Requirement)
-        - Execution follows the workflow skill's 6-step orchestration
+        - MUST load the skill before executing — do not skip skill loading
+        - Execution follows the target skill's procedure, not this skill's
       </constraints>
-      <output>Sub-agent started with x-ipe-workflow-task-execution</output>
+      <output>Next task execution started</output>
     </step_9_2>
   </phase_9>
 

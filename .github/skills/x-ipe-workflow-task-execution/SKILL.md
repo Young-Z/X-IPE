@@ -30,8 +30,6 @@ MANDATORY: NEVER use `manage_todo_list` (VS Code internal) as substitute for tas
 
 IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue. When `manual` or `stop_for_question`, always wait for human feedback before proceeding to the next task.
 
-CRITICAL: **Best-Model Requirement.** When this skill is delegated to a sub-agent (e.g., via the `task` tool), it MUST use the most capable (premium) LLM model available. The 6-step orchestration requires nuanced reasoning — skill matching, prerequisite checking, routing decisions — that benefits from the strongest model. Use the `model` parameter to select a premium model. Do NOT run this skill on fast/cheap models.
-
 ---
 
 ## Input Parameters

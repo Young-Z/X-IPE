@@ -127,7 +127,7 @@ input:
 | 6 | Execute Tests | Run tests via Chrome DevTools MCP | Tests complete |
 | 7 | Report Results | Document test results and metrics | Results documented |
 | 9.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 9.2 | Execute Next Action | Delegate to x-ipe-workflow-task-execution sub-agent | Sub-agent started |
+| 9.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Step 1 - If no web UI, output status=skipped and proceed to next_task_based_skill.
 BLOCKING: Step 4 - If process_preference.auto_proceed=="auto", skip this step and use placeholder/generated data.
@@ -334,17 +334,16 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
     <step_9_2>
       <name>Execute Next Action</name>
       <action>
-        Based on the decision from Step 9.1, delegate execution to a sub-agent:
-        1. Invoke x-ipe-workflow-task-execution as a sub-agent (use premium model)
-        2. Pass the decided next task and full context from Step 9.1
-        3. The workflow skill handles: skill loading, execution plan generation, and execution
+        Based on the decision from Step 9.1:
+        1. Load the target task-based skill's SKILL.md
+        2. Generate an execution plan from the skill's Execution Flow table
+        3. Start execution from the skill's first phase/step
       </action>
       <constraints>
-        - MUST delegate to x-ipe-workflow-task-execution — do not execute the next skill directly
-        - Sub-agent MUST use premium model (Best-Model Requirement)
-        - Execution follows the workflow skill's 6-step orchestration
+        - MUST load the skill before executing — do not skip skill loading
+        - Execution follows the target skill's procedure, not this skill's
       </constraints>
-      <output>Sub-agent started with x-ipe-workflow-task-execution</output>
+      <output>Next task execution started</output>
     </step_9_2>
   </phase_9>
 

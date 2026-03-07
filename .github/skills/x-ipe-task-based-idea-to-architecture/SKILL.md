@@ -143,7 +143,7 @@ input:
 | | 5.3 | Update Summary | Create new idea-summary version with diagram links | Summary updated |
 | | 5.4 | Complete | Verify DoD, output summary | Task complete |
 | 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 继续执行 | 6.2 | Execute Next Action | Delegate to x-ipe-workflow-task-execution sub-agent | Sub-agent started |
+| 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Step 1.1 halts if current_idea_folder is null -- ask human for folder path.
 BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
@@ -328,17 +328,16 @@ BLOCKING (manual/stop_for_question): Step 5.4 - present diagrams, ask if archite
     <step_6_2>
       <name>Execute Next Action</name>
       <action>
-        Based on the decision from Step 6.1, delegate execution to a sub-agent:
-        1. Invoke x-ipe-workflow-task-execution as a sub-agent (use premium model)
-        2. Pass the decided next task and full context from Step 6.1
-        3. The workflow skill handles: skill loading, execution plan generation, and execution
+        Based on the decision from Step 6.1:
+        1. Load the target task-based skill's SKILL.md
+        2. Generate an execution plan from the skill's Execution Flow table
+        3. Start execution from the skill's first phase/step
       </action>
       <constraints>
-        - MUST delegate to x-ipe-workflow-task-execution — do not execute the next skill directly
-        - Sub-agent MUST use premium model (Best-Model Requirement)
-        - Execution follows the workflow skill's 6-step orchestration
+        - MUST load the skill before executing — do not skip skill loading
+        - Execution follows the target skill's procedure, not this skill's
       </constraints>
-      <output>Sub-agent started with x-ipe-workflow-task-execution</output>
+      <output>Next task execution started</output>
     </step_6_2>
   </phase_6>
 
