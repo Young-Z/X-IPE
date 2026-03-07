@@ -125,6 +125,7 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 | 4. 明辨之 (Discern Clearly) | — | SKIP | {skip reason} | — |
 | 5. 笃行之 (Practice Earnestly) | 5.1 | {Step Name} | {Execute core work} | {gate condition} |
 | | 5.2 | Complete | Verify DoD | DoD validated |
+| 6. Routing | 6 | Routing | DAO-assisted next task routing | Routing decision made |
 
 BLOCKING: All 5 phases MUST appear in the table. Skipped phases use `—` for Step and Gate.
 BLOCKING: {Additional rule that must not be skipped}
@@ -138,6 +139,7 @@ BLOCKING: {Additional rule that must not be skipped}
 | 3 | 慎思之 (Shènsī) | Think Carefully | Reflect on trade-offs and risks | Analyze alternatives, assess risk, evaluate impact |
 | 4 | 明辨之 (Míngbiàn) | Discern Clearly | Make informed decisions | Choose approach, document rationale, resolve conflicts |
 | 5 | 笃行之 (Dǔxíng) | Practice Earnestly | Execute with discipline | Implement, test, verify, deliver, commit |
+| 6 | Routing | Route to Next | Transition to next task | DAO-assisted routing based on full skill output |
 
 **Phase Rules:**
 - Phase 1 (博学之) and Phase 5 (笃行之) are NEVER skippable.
@@ -252,6 +254,31 @@ BLOCKING: {Additional rule that must not be skipped}
       <output>Task completion output</output>
     </step_5_N_complete>
   </phase_5>
+
+  <!-- ROUTING (always last phase — handles next task transition): -->
+  <phase_6>
+    <name>Routing</name>
+    <actions>
+      Collect the full context and task_completion_output from this skill execution.
+
+      IF process_preference.auto_proceed == "auto":
+        → Invoke x-ipe-dao-end-user-representative with:
+          type: "routing"
+          completed_skill_output: {full task_completion_output YAML from this skill}
+          next_task_based_skill: "{from output}"
+          context: "Skill completed. Study the context and full output to decide best next action."
+        → DAO studies the complete context and decides the best next action
+      ELSE (manual):
+        → Present next task suggestion to human and wait for instruction
+    </actions>
+    <constraints>
+      - BLOCKING (manual): Human MUST confirm or redirect before routing to next task
+      - BLOCKING (auto/stop_for_question): Proceed after DoD verification; auto-select next task via DAO
+    </constraints>
+    <routing>
+      **Execute next task based on the decision from above with related task based skill**
+    </routing>
+  </phase_6>
 
 </procedure>
 ```

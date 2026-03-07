@@ -81,6 +81,7 @@ input:
 | 2 | Create Structure | Create `x-ipe-docs/` directories and root files | Folders created |
 | 3 | Init Task Board | Call x-ipe+all+task-board-management skill | Task board created |
 | 4 | Init Docs | Create `lessons_learned.md` | Docs initialized |
+| 5 | Routing | DAO-assisted next task routing | Routing decision made |
 
 BLOCKING: Step 3 MUST use x-ipe+all+task-board-management skill (not manual file creation).
 BLOCKING: Existing projects - only ADD missing files, do NOT restructure.
@@ -145,35 +146,29 @@ BLOCKING: Existing projects - only ADD missing files, do NOT restructure.
     <output>Baseline documentation files created</output>
   </step_4>
 
-  <routing>
+  <step_5>
     <name>Routing</name>
     <actions>
-      Collect the full task_completion_output from this skill execution.
+      Collect the full context and task_completion_output from this skill execution.
 
-      IF next_task_based_skill EXISTS (not null):
-        IF process_preference.auto_proceed == "auto":
-          → Invoke x-ipe-dao-end-user-representative with:
-            type: "routing"
-            completed_skill_output: {full task_completion_output YAML from this skill}
-            next_task_based_skill: "{from output}"
-            context: "Skill completed. Study the full output to decide best next action."
-          → DAO studies the complete output context and decides the best next action
-          → Return to x-ipe-workflow-task-execution Step 1
-        ELIF process_preference.auto_proceed == "stop_for_question":
-          → Invoke x-ipe-dao-end-user-representative with:
-            type: "routing"
-            completed_skill_output: {full task_completion_output YAML from this skill}
-            next_task_based_skill: "{from output}"
-            context: "Skill completed. Study the full output and recommend next action."
-          → Present DAO's recommendation to human and wait for confirmation
-          → Return to x-ipe-workflow-task-execution Step 1
-        ELSE (manual):
-          → Present next task suggestion to human and wait for instruction
-      ELSE (next_task_based_skill is null):
-        → STOP — return to x-ipe-workflow-task-execution
+      IF process_preference.auto_proceed == "auto":
+        → Invoke x-ipe-dao-end-user-representative with:
+          type: "routing"
+          completed_skill_output: {full task_completion_output YAML from this skill}
+          next_task_based_skill: "{from output}"
+          context: "Skill completed. Study the context and full output to decide best next action."
+        → DAO studies the complete context and decides the best next action
+      ELSE (manual):
+        → Present next task suggestion to human and wait for instruction
     </actions>
-    <gate>Routing decision made — return to x-ipe-workflow-task-execution</gate>
-  </routing>
+    <constraints>
+      - BLOCKING (manual): Human MUST confirm or redirect before routing to next task
+      - BLOCKING (auto/stop_for_question): Proceed after DoD verification; auto-select next task via DAO
+    </constraints>
+    <routing>
+      **Execute next task based on the decision from above with related task based skill**
+    </routing>
+  </step_5>
 
 </procedure>
 ```
