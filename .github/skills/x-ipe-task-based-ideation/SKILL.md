@@ -214,14 +214,15 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
     <step_2_2>
       <name>Brainstorming Session</name>
       <action>
-        1. Ask questions in batches (3-5 at a time) to avoid overwhelming
-        2. Wait for response based on auto_proceed condition before proceeding
-        3. Build on previous answers
-        4. Challenge assumptions constructively
-        5. IF extra_instructions is provided and non-empty:
+        1. Ask yourself two questions, 'which mode auto_proceed is in?' and 'How to base on it deal following steps?'
+        2. Ask questions in batches (3-5 at a time) to avoid overwhelming
+        3. Wait for response based on auto_proceed condition before proceeding
+        4. Build on previous answers
+        5. Challenge assumptions constructively
+        6. IF extra_instructions is provided and non-empty:
            - Incorporate extra_instructions as additional context/guidance for the refinement
            - Treat as user preference that supplements (not replaces) the idea content
-        6. When the user describes something visual (UI layouts, flows, system structure), proactively generate visual artifacts to enrich the brainstorming -- select the most appropriate enabled tool from step 1.1's tool list for the content type
+        7. When the user describes something visual (UI layouts, flows, system structure), proactively generate visual artifacts to enrich the brainstorming -- select the most appropriate enabled tool from step 1.1's tool list for the content type
 
         Response source (based on auto_proceed):
         IF process_preference.auto_proceed == "auto":
