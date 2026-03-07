@@ -207,7 +207,7 @@ deferred → in_progress
 | 3 | Execute | Load task-based skill, do work | Skill output collected | → Step 4 |
 | 4 | Closing | Load category skills, update boards | Boards updated | → Step 5 |
 | 5 | Global DoD | Validate, output summary | Summary displayed | → Step 6 (pass) or STOP (manual) |
-| 6 | Routing | Resolve process_preference mode, route next | Next action decided | → Step 2 (auto) or WAIT for human (manual/stop_for_question) or END (no next task) |
+| 6 | Routing | Resolve process_preference mode, route next | Next action decided | → Step 1 (auto) or WAIT for human (manual/stop_for_question) |
 
 BLOCKING: Step 1 → Step 2: task must be created on task-board.md.
 BLOCKING: Step 3 → Step 4: x-ipe+all+task-board-management skill must be loaded.
@@ -365,7 +365,13 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
          ELSE IF execution_mode == "free-mode":
            → Skip workflow status verification
 
-      4. Human Review Check (mode-aware):
+      4. Auto-Proceed Freshness Check:
+         Re-read the current process_preference.auto_proceed value from its source:
+           - workflow-mode: from workflow-{name}.json global.process_preference
+           - free-mode: from CLI flag or user message
+         IF the value has changed since Step 2 → update process_preference.auto_proceed for Step 6 routing.
+
+      5. Human Review Check (mode-aware):
          IF process_preference.auto_proceed == "auto":
            → Skip human review, proceed directly
          ELIF process_preference.auto_proceed == "stop_for_question" OR "manual":
@@ -392,14 +398,17 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
   <step_6>
     <name>Task Routing</name>
     <actions>
-      1. Check with task to execute next task, can reference next_task_based_skill from Step 3 output.
-      2. Wait for response based on auto_proceed condition before proceeding.
-      3. Route to next task (Another iteration of task execution)
-
-      IF process_preference.auto_proceed == "auto":
-        → invoke x-ipe-dao-end-user-representative learn the context to define best next task
-      ELSE (manual/stop_for_question):
-        → Present next task suggestion to human and wait for instruction
+      IF next_task_based_skill EXISTS:
+        Response source (based on auto_proceed):
+        IF process_preference.auto_proceed == "auto":
+          → Auto-route to next task via x-ipe-dao-end-user-representative to learn context and define best next task
+          → IF multiple next_actions_suggested (workflow-mode):
+              invoke x-ipe-dao-end-user-representative (type: routing) to choose
+          → Start execution from Step 1 (Planning — to create/verify task on board)
+        ELSE (manual/stop_for_question):
+          → Present next task suggestion to human and wait for instruction
+      ELSE:
+        → STOP (no next task defined)
     </actions>
     <constraints>
       - BLOCKING (manual/stop_for_question): Human MUST confirm or redirect before routing to next task

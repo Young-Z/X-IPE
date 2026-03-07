@@ -287,6 +287,31 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
     <!-- Let your understanding and wisdom reach completeness -->
 
     <step_2_1>
+      <name>Study Existing Skills</name>
+      <!-- AI agents rely heavily on skills — match input to available capabilities -->
+      <action>
+        1. Scan `.github/skills/x-ipe-task-based-*/SKILL.md` — read each skill's `description` field from frontmatter.
+        2. Compare the input message intent against each skill's trigger keywords and description.
+        3. Rank matches by relevance:
+           a. **Strong match:** Message clearly maps to a skill (e.g., "fix this bug" → x-ipe-task-based-bug-fix)
+           b. **Partial match:** Message loosely relates (e.g., "clean up the code" could be refactor or bug-fix)
+           c. **No match:** No existing skill covers this request — this is a valid outcome
+        4. Produce `suggested_skills` list (may be empty):
+           - Each entry: { skill_name, match_strength: "strong" | "partial", reason }
+           - Maximum 3 suggestions, ordered by relevance
+           - If no skill matches, set suggested_skills to empty list — do NOT force a match
+        5. Feed suggested_skills into subsequent disposition ranking (Step 2.2).
+           - IF disposition is `instruction` AND suggested_skills is non-empty → include in output content
+           - IF disposition is NOT `instruction` → suggested_skills is informational only (still included in output)
+      </action>
+      <constraints>
+        - Do NOT force-match a skill when none fits — empty list is preferred over a bad suggestion
+        - Skill discovery is advisory, not binding — the caller decides whether to follow the suggestion
+      </constraints>
+      <output>suggested_skills list (may be empty)</output>
+    </step_2_1>
+
+    <step_2_2>
       <name>Weigh Gains and Losses</name>
       <!-- 两利相权取其重，两害相权取其轻 -->
       <action>
@@ -296,12 +321,14 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
            b. **害 (Losses):** What could go wrong? What scope risk or wasted effort?
         3. Between two gains, take the greater; between two harms, take the lesser.
         4. IF preferred_dispositions provided → weight those higher (but do not blindly follow).
-        5. Rank dispositions by net value.
+        5. IF suggested_skills from Step 2.1 exist → factor skill availability into disposition ranking
+           (e.g., a strong skill match strengthens the `instruction` disposition).
+        6. Rank dispositions by net value.
       </action>
       <output>Ranked disposition candidates (internal only)</output>
-    </step_2_1>
+    </step_2_2>
 
-    <step_2_2>
+    <step_2_3>
       <name>Select and Validate</name>
       <!-- 不能接受的最坏结果，直接放弃 · 投石问路，观衅而动 -->
       <action>
@@ -312,8 +339,9 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
         2. WORST-CASE GATE: If worst case is unacceptable → abandon, fall back to next candidate.
         3. Verify it is the SMALLEST useful intervention (小步走，不梭哈).
         4. Check: tone clear? Scope bounded? Reversible? No unintended expansion?
-        5. IF any check fails → loop back to step 2.1 and re-rank.
+        5. IF any check fails → loop back to step 2.2 and re-rank.
         6. Draft bounded response content and rationale_summary.
+        7. IF suggested_skills is non-empty → include in response content for the caller agent.
       </action>
       <constraints>
         - MUST select exactly one disposition
@@ -322,22 +350,23 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
         - ABANDON if worst case is unacceptable
       </constraints>
       <output>Selected disposition + validated content + rationale</output>
-    </step_2_2>
+    </step_2_3>
 
-    <step_2_3>
+    <step_2_4>
       <name>Commit</name>
       <!-- 谋贵众，断贵独 -->
       <action>
         1. Lock disposition, content, rationale_summary. No second-guessing after this point.
         2. Estimate confidence between 0.0 and 1.0.
         3. Set fallback_required: true ONLY if human_shadow == true AND confidence < threshold.
-        4. Assemble operation_output contract.
+        4. Attach suggested_skills to operation_output contract.
+        5. Assemble operation_output contract.
       </action>
       <constraints>
         - MUST NOT revisit the disposition after committing — the decision is final
       </constraints>
       <output>operation_output ready</output>
-    </step_2_3>
+    </step_2_4>
 
   </phase_2>
 
@@ -406,6 +435,7 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
 
            Confidence: {confidence}
            Fallback Required: {fallback_required}
+           Suggested Skills: {suggested_skills or "None"}
            ──────────────────────────────────
            道 · Complete.
            ──────────────────────────────────
@@ -438,6 +468,10 @@ operation_output:
     rationale_summary: "brief explanation of why the disposition was chosen"
     confidence: 0.0
     fallback_required: false
+    suggested_skills:   # from Step 2.1 — may be empty list
+      - skill_name: "x-ipe-task-based-{name}"
+        match_strength: "strong | partial"
+        reason: "why this skill matches the input"
   errors: []
 ```
 
