@@ -298,14 +298,18 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
            c. **No match:** No existing skill covers this request — this is a valid outcome
         4. For each matched skill, extract execution phases/steps from its `## Execution Flow` table:
            - Read the flow summary table to get the ordered list of phases and steps
-           - Capture phase names, step names, and gate conditions
+           - Capture phase names and step names
            - This gives the caller a preview of what executing this skill involves
-        5. Produce `suggested_skills` list (may be empty):
-           - Each entry: { skill_name, match_strength, reason, execution_steps }
-           - `execution_steps`: ordered list of { phase, step, name, gate } from the skill's flow table
+        5. For each matched skill, check its `process_preference.auto_proceed` value from the skill's output YAML:
+           - Read the `task_completion_output` section to find `process_preference.auto_proceed`
+           - This tells the caller whether the skill will auto-proceed or require human interaction
+        6. Produce `suggested_skills` list (may be empty):
+           - Each entry: { skill_name, match_strength, reason, execution_steps, auto_proceed }
+           - `execution_steps`: ordered list of { phase, step } from the skill's flow table
+           - `auto_proceed`: the skill's process_preference.auto_proceed value
            - Maximum 3 suggestions, ordered by relevance
            - If no skill matches, set suggested_skills to empty list — do NOT force a match
-        6. Feed suggested_skills into subsequent disposition ranking (Step 2.2).
+        7. Feed suggested_skills into subsequent disposition ranking (Step 2.2).
            - IF disposition is `instruction` AND suggested_skills is non-empty → include in output content
            - IF disposition is NOT `instruction` → suggested_skills is informational only (still included in output)
       </action>
@@ -477,6 +481,8 @@ operation_output:
     rationale_summary: "brief explanation of why the disposition was chosen"
     confidence: 0.0
     fallback_required: false
+    exeuction_strategy:
+      - auto_pro
     suggested_skills:   # from Step 2.1 — may be empty list
       - skill_name: "x-ipe-task-based-{name}"
         match_strength: "strong | partial"
