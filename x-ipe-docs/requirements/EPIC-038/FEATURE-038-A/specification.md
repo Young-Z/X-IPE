@@ -10,6 +10,7 @@
 | Version | Date | Description |
 |---------|------|-------------|
 | v1.0 | 02-20-2026 | Initial specification — reusable modal for CLI Agent workflow actions |
+| v1.1 | 03-07-2026 | CR-001: Append --execution@{mode} flag to CLI command based on auto-proceed dropdown |
 
 ## Linked Mockups
 
@@ -59,7 +60,7 @@ This is a **CR on FEATURE-036-C** (Stage Ribbon & Action Execution), extending t
 
 - [ ] AC-038-A.9: Clicking the "Copilot" button triggers the console session flow: find idle session → rename session → construct CLI command → type into session
 - [ ] AC-038-A.10: Agent CLI tool is detected from `cli-adapters.yaml` configuration (supports copilot, opencode, claude-code)
-- [ ] AC-038-A.11: CLI command is constructed using the adapter's `prompt_format` template with the prompt from `copilot-prompt.json` and extra instructions appended
+- [ ] AC-038-A.11: CLI command is constructed using the adapter's `prompt_format` template with the prompt from `copilot-prompt.json`, extra instructions, and `--execution@{mode}` flag (based on auto-proceed setting) appended
 - [ ] AC-038-A.12: The command is sent to the terminal via `window.terminalManager.sendCopilotPromptCommandNoEnter()` — user must press Enter to confirm
 - [ ] AC-038-A.13: After command is typed, modal closes and action button transitions to "in progress" state
 

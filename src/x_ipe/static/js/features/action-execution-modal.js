@@ -19,12 +19,14 @@ class ActionExecutionModal {
         this._keyHandler = null;
         this._templateCache = null;
         this._actionContextDef = null;
+        this._autoProceed = 'manual';
     }
 
     /* --- Lifecycle -------------------------------------------------------- */
 
     async open() {
         await this._loadInstructions();
+        await this._loadAutoProceed();
         this._createDOM();
         this._bindEvents();
         document.body.appendChild(this.overlay);
@@ -139,6 +141,25 @@ class ActionExecutionModal {
         }
 
         this._loadedInstructions = { label: detail.label, command };
+    }
+
+    /* --- CR-001: Auto-Proceed Loading ------------------------------------- */
+
+    async _loadAutoProceed() {
+        if (!this.workflowName) return;
+        try {
+            const instance = this._cachedInstance || await this._fetchInstance();
+            this._cachedInstance = instance;
+            if (instance) {
+                this._autoProceed = (instance.global || {}).process_preference?.auto_proceed || 'manual';
+            }
+        } catch { /* keep default 'manual' */ }
+    }
+
+    _buildExecutionFlag() {
+        if (this._autoProceed === 'auto') return ' --execution@{keep running}';
+        if (this._autoProceed === 'stop_for_question') return ' --execution@{keep running stop only on question}';
+        return '';
     }
 
     async _resolveIdeaFiles() {
@@ -779,6 +800,7 @@ class ActionExecutionModal {
         if (extraInstructions && extraInstructions.trim()) {
             cmd += ` --extra-instructions ${extraInstructions.trim()}`;
         }
+        cmd += this._buildExecutionFlag();
         cmd += ` --workflow-mode${wfSuffix}`;
         return cmd;
     }
@@ -798,6 +820,7 @@ class ActionExecutionModal {
             if (this.featureId) {
                 cmd += ` --feature-id ${this.featureId}`;
             }
+            cmd += this._buildExecutionFlag();
             cmd += ` --workflow-mode${wfSuffix}`;
         } else {
             cmd = this._buildCommand(extraText);
