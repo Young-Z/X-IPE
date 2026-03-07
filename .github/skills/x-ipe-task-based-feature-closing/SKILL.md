@@ -158,7 +158,7 @@ input:
 | 5 | Ship | Push to main (main-branch-only) or push dev branch & create PR (dev-session-based) | Shipped |
 | 6 | Output Summary | Provide completion summary with refactoring recommendations | Summary delivered |
 | 7.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 7.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
+| 7.2 | Execute Next Action | Delegate to x-ipe-workflow-task-execution sub-agent | Sub-agent started |
 
 BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP and report to human.
 
@@ -347,16 +347,17 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
     <step_7_2>
       <name>Execute Next Action</name>
       <action>
-        Based on the decision from Step 7.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
+        Based on the decision from Step 7.1, delegate execution to a sub-agent:
+        1. Invoke x-ipe-workflow-task-execution as a sub-agent (use premium model)
+        2. Pass the decided next task and full context from Step 7.1
+        3. The workflow skill handles: skill loading, execution plan generation, and execution
       </action>
       <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
+        - MUST delegate to x-ipe-workflow-task-execution — do not execute the next skill directly
+        - Sub-agent MUST use premium model (Best-Model Requirement)
+        - Execution follows the workflow skill's 6-step orchestration
       </constraints>
-      <output>Next task execution started</output>
+      <output>Sub-agent started with x-ipe-workflow-task-execution</output>
     </step_7_2>
   </phase_7>
 

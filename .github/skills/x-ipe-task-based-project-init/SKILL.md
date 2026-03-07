@@ -82,7 +82,7 @@ input:
 | 3 | Init Task Board | Call x-ipe+all+task-board-management skill | Task board created |
 | 4 | Init Docs | Create `lessons_learned.md` | Docs initialized |
 | 5.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 5.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
+| 5.2 | Execute Next Action | Delegate to x-ipe-workflow-task-execution sub-agent | Sub-agent started |
 
 BLOCKING: Step 3 MUST use x-ipe+all+task-board-management skill (not manual file creation).
 BLOCKING: Existing projects - only ADD missing files, do NOT restructure.
@@ -172,16 +172,17 @@ BLOCKING: Existing projects - only ADD missing files, do NOT restructure.
     <step_5_2>
       <name>Execute Next Action</name>
       <action>
-        Based on the decision from Step 5.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
+        Based on the decision from Step 5.1, delegate execution to a sub-agent:
+        1. Invoke x-ipe-workflow-task-execution as a sub-agent (use premium model)
+        2. Pass the decided next task and full context from Step 5.1
+        3. The workflow skill handles: skill loading, execution plan generation, and execution
       </action>
       <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
+        - MUST delegate to x-ipe-workflow-task-execution — do not execute the next skill directly
+        - Sub-agent MUST use premium model (Best-Model Requirement)
+        - Execution follows the workflow skill's 6-step orchestration
       </constraints>
-      <output>Next task execution started</output>
+      <output>Sub-agent started with x-ipe-workflow-task-execution</output>
     </step_5_2>
   </phase_5>
 

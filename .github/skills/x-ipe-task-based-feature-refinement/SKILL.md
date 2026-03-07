@@ -135,7 +135,7 @@ MANDATORY: When `mockup_list` is provided, analyze mockups during Step 2 and ext
 | 4. 明辨之 — Discern Clearly | 4.1 Specification Scope Decision | Finalize in/out scope, resolve edge cases | Scope decided |
 | 5. 笃行之 — Practice Earnestly | 5.1 Create/Update Specification, 5.2 Complete & Verify | Write specification document, verify DoD | Specification created |
 | 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
+| 继续执行 | 6.2 | Execute Next Action | Delegate to x-ipe-workflow-task-execution sub-agent | Sub-agent started |
 
 BLOCKING: Phase 1 fails if feature not on board or status not "Planned".
 BLOCKING: Step 1.3 MUST scan for mockups if feature folder has no `mockups/` directory.
@@ -332,16 +332,17 @@ BLOCKING (auto): Proceed automatically after DoD verification.
     <step_6_2>
       <name>Execute Next Action</name>
       <action>
-        Based on the decision from Step 6.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
+        Based on the decision from Step 6.1, delegate execution to a sub-agent:
+        1. Invoke x-ipe-workflow-task-execution as a sub-agent (use premium model)
+        2. Pass the decided next task and full context from Step 6.1
+        3. The workflow skill handles: skill loading, execution plan generation, and execution
       </action>
       <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
+        - MUST delegate to x-ipe-workflow-task-execution — do not execute the next skill directly
+        - Sub-agent MUST use premium model (Best-Model Requirement)
+        - Execution follows the workflow skill's 6-step orchestration
       </constraints>
-      <output>Next task execution started</output>
+      <output>Sub-agent started with x-ipe-workflow-task-execution</output>
     </step_6_2>
   </phase_6>
 

@@ -143,7 +143,7 @@ input:
 | 4 | Execute Refactoring | Apply changes incrementally with tests | All tests pass |
 | 5 | Validate & Complete | Verify improvement, update refs, apply tracing | DoD verified |
 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
+| 6.2 | Execute Next Action | Delegate to x-ipe-workflow-task-execution sub-agent | Sub-agent started |
 
 BLOCKING: Step 1 → 2 requires verification that analysis identified all issues.
 BLOCKING: Step 3 → 4 requires confirmation that refactoring plan addresses identified issues (manual/stop_for_question: human confirms; auto: DAO confirms).
@@ -317,16 +317,17 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
     <step_6_2>
       <name>Execute Next Action</name>
       <action>
-        Based on the decision from Step 6.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
+        Based on the decision from Step 6.1, delegate execution to a sub-agent:
+        1. Invoke x-ipe-workflow-task-execution as a sub-agent (use premium model)
+        2. Pass the decided next task and full context from Step 6.1
+        3. The workflow skill handles: skill loading, execution plan generation, and execution
       </action>
       <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
+        - MUST delegate to x-ipe-workflow-task-execution — do not execute the next skill directly
+        - Sub-agent MUST use premium model (Best-Model Requirement)
+        - Execution follows the workflow skill's 6-step orchestration
       </constraints>
-      <output>Next task execution started</output>
+      <output>Sub-agent started with x-ipe-workflow-task-execution</output>
     </step_6_2>
   </phase_6>
 
