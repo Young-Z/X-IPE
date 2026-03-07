@@ -150,7 +150,7 @@ MANDATORY: See [references/mockup-guidelines.md](.github/skills/x-ipe-task-based
 | | 5.2 | Save Artifacts | Store mockups in `{current_idea_folder}/mockups/` | Artifacts saved |
 | | 5.3 | Update Summary | Add mockup links to idea summary | Summary updated |
 | | 5.4 | Complete | Verify DoD, update workflow status | DoD verified |
-| Routing | 6 | Routing | DAO-assisted next task routing | Routing decision made |
+| 继续执行 | 6 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Step 1.1 halts if current_idea_folder is N/A -- ask human for folder path.
 BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
@@ -350,7 +350,7 @@ BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
   </phase_5>
 
   <phase_6>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

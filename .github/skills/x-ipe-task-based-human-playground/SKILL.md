@@ -120,7 +120,7 @@ input:
 | 4 | Validate | Run playground command and verify exit code 0 | Command succeeds |
 | 5 | Run Tests | Execute human simulation tests | All tests pass |
 | 6 | Complete | Verify DoD, output summary, inform human playground is ready | Playground delivered |
-| 7 | Routing | DAO-assisted next task routing | Routing decision made |
+| 7 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Step 4 is blocked until playground command runs without error.
 BLOCKING: Step 5 is blocked until human simulation tests pass.
@@ -235,7 +235,7 @@ BLOCKING: Step 6 requires validation before Feature Closing (manual/stop_for_que
   </step_6>
 
   <step_7>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

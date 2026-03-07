@@ -125,7 +125,7 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 | 4. 明辨之 (Discern Clearly) | — | SKIP | {skip reason} | — |
 | 5. 笃行之 (Practice Earnestly) | 5.1 | {Step Name} | {Execute core work} | {gate condition} |
 | | 5.2 | Complete | Verify DoD | DoD validated |
-| 6. Routing | 6 | Routing | DAO-assisted next task routing | Routing decision made |
+| 6. 继续执行 | 6 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: All 5 phases MUST appear in the table. Skipped phases use `—` for Step and Gate.
 BLOCKING: {Additional rule that must not be skipped}
@@ -139,7 +139,7 @@ BLOCKING: {Additional rule that must not be skipped}
 | 3 | 慎思之 (Shènsī) | Think Carefully | Reflect on trade-offs and risks | Analyze alternatives, assess risk, evaluate impact |
 | 4 | 明辨之 (Míngbiàn) | Discern Clearly | Make informed decisions | Choose approach, document rationale, resolve conflicts |
 | 5 | 笃行之 (Dǔxíng) | Practice Earnestly | Execute with discipline | Implement, test, verify, deliver, commit |
-| 6 | Routing | Route to Next | Transition to next task | DAO-assisted routing based on full skill output |
+| 6 | 继续执行（Continue Execute） | Route to Next | Transition to next task | DAO-assisted routing based on full skill output |
 
 **Phase Rules:**
 - Phase 1 (博学之) and Phase 5 (笃行之) are NEVER skippable.
@@ -257,7 +257,7 @@ BLOCKING: {Additional rule that must not be skipped}
 
   <!-- ROUTING (always last phase — handles next task transition): -->
   <phase_6>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

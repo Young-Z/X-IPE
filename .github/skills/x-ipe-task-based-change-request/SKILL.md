@@ -117,7 +117,7 @@ input:
 | 3. 慎思之 — Think Carefully | 3.1 Detect Conflicts | Analyze spec/design/dependency conflicts with existing features | Conflicts classified |
 | 4. 明辨之 — Discern Clearly | 4.1 Classify CR Type, 4.2 Route Workflow | Classify modification vs new feature, confirm classification | Classification confirmed |
 | 5. 笃行之 — Practice Earnestly | 5.1 Execute & Document | Update documents, create CR record | CR documented |
-| Routing | 6 | Routing | DAO-assisted next task routing | Routing decision made |
+| 继续执行 | 6 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Phase 3 must complete before Phase 4 — do NOT classify without conflict analysis.
 BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop_for_question: human confirms; auto: DAO confirms via x-ipe-dao-end-user-representative).
@@ -298,7 +298,7 @@ BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop
   </phase_5>
 
   <phase_6>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

@@ -98,7 +98,7 @@ input:
 | 3 | Init Git | Call x-ipe-tool-git-version-control skill for repo and .gitignore | Git initialized |
 | 4 | Document Setup | Create `x-ipe-docs/environment/setup.md` | Documentation created |
 | 5 | Commit | Stage and commit all setup files | Initial commit done |
-| 6 | Routing | DAO-assisted next task routing | Routing decision made |
+| 6 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Step 2 cannot start until tech stack is confirmed.
 BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
@@ -204,7 +204,7 @@ BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
   </step_5>
 
   <step_6>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

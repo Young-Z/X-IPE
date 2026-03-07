@@ -142,7 +142,7 @@ mockup_list:
 | 3. 慎思之 — Think Carefully | 3.1 Evaluate Complexity, 3.2 Identify Features | Count ACs, assess dimensions, identify feature boundaries | Features identified |
 | 4. 明辨之 — Discern Clearly | 4.1 MVP Prioritization Decision | Decide MVP order, validate dependency DAG | MVP and order decided |
 | 5. 笃行之 — Practice Earnestly | 5.1 Process Mockups, 5.2 Create Summary, 5.3 Update Board, 5.4 Complete | Execute all deliverables | All artifacts created |
-| Routing | 6 | Routing | DAO-assisted next task routing | Routing decision made |
+| 继续执行 | 6 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: If parts exist, work with the CURRENT ACTIVE PART (highest part number).
 BLOCKING: Features with more than 20 ACs MUST be split into sub-features.
@@ -334,7 +334,7 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
   </phase_5>
 
   <phase_6>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

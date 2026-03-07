@@ -82,7 +82,7 @@ input:
 | 3 | Create Viewer | Build `index.html` with marked.js and mermaid.js | HTML file created |
 | 4 | Create README | Write usage instructions | README created |
 | 5 | Test | Run server and verify docs display | Server works |
-| 6 | Routing | DAO-assisted next task routing | Routing decision made |
+| 6 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Step 5 blocked until server runs and displays documentation correctly.
 
@@ -170,7 +170,7 @@ BLOCKING: Step 5 blocked until server runs and displays documentation correctly.
   </step_5>
 
   <step_6>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

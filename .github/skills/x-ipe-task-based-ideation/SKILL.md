@@ -117,7 +117,7 @@ input:
 | 4. 明辨之 (Discern Clearly) | 4.1 | Improve Summary | Decide on feedback, incorporate improvements | summary finalized |
 | 5. 笃行之 (Practice Earnestly) | 5.1 | Generate Draft | Create idea draft, prefer enabled tools from step 1.1 | draft created |
 | | 5.2 | Complete | Verify DoD, output summary | Task complete |
-| Routing | 6 | Routing | DAO-assisted next task routing | Routing decision made |
+| 继续执行 | 6 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Step 2.2 - Continue brainstorming until idea is well-defined.
 
@@ -352,7 +352,7 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
   </phase_5>
 
   <phase_6>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

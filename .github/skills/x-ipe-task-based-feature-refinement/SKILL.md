@@ -134,7 +134,7 @@ MANDATORY: When `mockup_list` is provided, analyze mockups during Step 2 and ext
 | 3. 慎思之 — Think Carefully | 3.1 AC Quality Reflection | Assess testability, measurability, completeness of ACs | AC quality validated |
 | 4. 明辨之 — Discern Clearly | 4.1 Specification Scope Decision | Finalize in/out scope, resolve edge cases | Scope decided |
 | 5. 笃行之 — Practice Earnestly | 5.1 Create/Update Specification, 5.2 Complete & Verify | Write specification document, verify DoD | Specification created |
-| Routing | 6 | Routing | DAO-assisted next task routing | Routing decision made |
+| 继续执行 | 6 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Phase 1 fails if feature not on board or status not "Planned".
 BLOCKING: Step 1.3 MUST scan for mockups if feature folder has no `mockups/` directory.
@@ -307,7 +307,7 @@ BLOCKING (auto): Proceed automatically after DoD verification.
   </phase_5>
 
   <phase_6>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

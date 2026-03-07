@@ -131,7 +131,7 @@ input:
 | 3. 慎思之 — Think Carefully | 3.1 Feasibility & Risk Reflection | Assess technical feasibility, identify risks and constraints | Risks documented |
 | 4. 明辨之 — Discern Clearly | 4.1 Update Impacted Features, 4.2 Scope Decision | Mark impacted features, finalize in/out scope boundaries | Scope decided |
 | 5. 笃行之 — Practice Earnestly | 5.1 Create Requirement Document, 5.2 Complete & Verify | Create/update requirement-details, verify DoD | Document created |
-| Routing | 6 | Routing | DAO-assisted next task routing | Routing decision made |
+| 继续执行 | 6 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Continue asking in Phase 2 until ALL ambiguities are resolved.
 BLOCKING: Each conflict in step 2.2 MUST be decided before proceeding (manual/stop_for_question: human decides; auto: x-ipe-dao-end-user-representative decides).
@@ -350,7 +350,7 @@ BLOCKING (auto): Proceed automatically after DoD verification.
   </phase_5>
 
   <phase_6>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

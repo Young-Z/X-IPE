@@ -207,7 +207,7 @@ deferred → in_progress
 | 3 | Execute | Load task-based skill, do work | Skill output collected | → Step 4 |
 | 4 | Closing | Load category skills, update boards | Boards updated | → Step 5 |
 | 5 | Global DoD | Validate, output summary | Summary displayed | → Step 6 (pass) or STOP (manual) |
-| 6 | Routing | Resolve process_preference mode, route next | Next action decided | → Step 1 (auto) or WAIT for human (manual/stop_for_question) |
+| 6 | 继续执行（Continue Execute） | Resolve process_preference mode, route next | Next action decided | → Step 1 (auto) or WAIT for human (manual/stop_for_question) |
 
 BLOCKING: Step 1 → Step 2: task must be created on task-board.md.
 BLOCKING: Step 3 → Step 4: x-ipe+all+task-board-management skill must be loaded.
@@ -396,7 +396,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
   </step_5>
 
   <step_6>
-    <name>Task Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       NOTE: Each task-based skill now includes its own &lt;routing&gt; phase at the end.
       The task-based skill's routing phase passes the full task_completion_output to
@@ -433,7 +433,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
       - BLOCKING (auto): Proceed automatically; resolve routing ambiguity via x-ipe-dao-end-user-representative
       - DAO receives full task_completion_output for context-aware routing decisions
     </constraints>
-    <gate>Routing decision made</gate>
+    <gate>Continue Execute decision made</gate>
   </step_6>
 </procedure>
 ```

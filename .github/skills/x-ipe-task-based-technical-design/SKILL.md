@@ -145,7 +145,7 @@ input:
 | 4 | Research | Search for best practices and libraries | Research complete |
 | 5 | Create Design | Write two-part technical design document | Design written |
 | 6 | Complete | Verify DoD, output summary | Task complete |
-| 7 | Routing | DAO-assisted next task routing | Routing decision made |
+| 7 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Step 1 is BLOCKED if feature not on board or status not "Done Feature Refinement".
 BLOCKING (manual/stop_for_question): Step 6 - present design, ask if architecture decisions are correct before Code Implementation.
@@ -286,7 +286,7 @@ BLOCKING (auto): Proceed automatically after DoD verification.
   </step_6>
 
   <step_7>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

@@ -116,7 +116,7 @@ input:
 | 5. 笃行之 (Practice Earnestly) | 5.1 | Prepare Content | Restructure content for each target format | Content ready |
 | | 5.2 | Convert | Generate output files via pandoc, MCP, or manual fallback | Files generated |
 | | 5.3 | Verify & Complete | Confirm output files exist with size > 0; report to human | DoD validated |
-| Routing | 6 | Routing | DAO-assisted next task routing | Routing decision made |
+| 继续执行 | 6 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Step 2.1 requires confirmation of target format(s) (manual/stop_for_question: human confirms; auto: DAO confirms via x-ipe-dao-end-user-representative).
 BLOCKING: Step 5.3 fails if any output file is empty or missing.
@@ -272,7 +272,7 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
   </phase_5>
 
   <phase_6>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

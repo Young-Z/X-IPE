@@ -175,7 +175,7 @@ deferred → in_progress
 | 3 | Execute | Load task-based skill, do work | Skill output collected | → Step 4 |
 | 4 | Closing | Load category skills, update boards | Boards updated | → Step 5 |
 | 5 | Global DoD | Validate, output summary | Summary displayed | → Step 6 (pass) or STOP (review) |
-| 6 | Routing | Check auto_proceed, next task or STOP | Next action decided | → Step 2 (next) or END |
+| 6 | 继续执行（Continue Execute） | Check auto_proceed, next task or STOP | Next action decided | → Step 2 (next) or END |
 
 BLOCKING: Step 1 → Step 2: task must be created on task-board.md.
 BLOCKING: Step 3 → Step 4: x-ipe+all+task-board-management skill must be loaded.

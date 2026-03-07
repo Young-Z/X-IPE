@@ -126,7 +126,7 @@ input:
 | 6 | Write Test | Create failing test that reproduces bug | Test fails |
 | 7 | Implement | Write minimum code to fix bug | Test passes |
 | 8 | Verify | Confirm bug fixed, all tests pass | DoD validated |
-| 9 | Routing | DAO-assisted next task routing | Routing decision made |
+| 9 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Step 5 must complete before Step 6 — do NOT write tests with unresolved conflicts.
 BLOCKING: Step 6 to 7 is blocked until test is written and FAILS.
@@ -290,7 +290,7 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
   </step_8>
 
   <step_9>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

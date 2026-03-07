@@ -157,7 +157,7 @@ input:
 | 4 | Refactoring Analysis | Subagent runs refactoring analysis scoped to feature | Analysis complete |
 | 5 | Ship | Push to main (main-branch-only) or push dev branch & create PR (dev-session-based) | Shipped |
 | 6 | Output Summary | Provide completion summary with refactoring recommendations | Summary delivered |
-| 7 | Routing | DAO-assisted next task routing | Routing decision made |
+| 7 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP and report to human.
 
@@ -322,7 +322,7 @@ BLOCKING: Step 1 to 2 is BLOCKED if any acceptance criterion is not met. STOP an
   </step_6>
 
   <step_7>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

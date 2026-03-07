@@ -81,7 +81,7 @@ input:
 | 2 | Create Structure | Create `x-ipe-docs/` directories and root files | Folders created |
 | 3 | Init Task Board | Call x-ipe+all+task-board-management skill | Task board created |
 | 4 | Init Docs | Create `lessons_learned.md` | Docs initialized |
-| 5 | Routing | DAO-assisted next task routing | Routing decision made |
+| 5 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Step 3 MUST use x-ipe+all+task-board-management skill (not manual file creation).
 BLOCKING: Existing projects - only ADD missing files, do NOT restructure.
@@ -147,7 +147,7 @@ BLOCKING: Existing projects - only ADD missing files, do NOT restructure.
   </step_4>
 
   <step_5>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

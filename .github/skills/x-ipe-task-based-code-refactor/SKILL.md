@@ -142,7 +142,7 @@ input:
 | 3 | Generate Refactoring Plan | Design target structure, propose plan | Human approves plan |
 | 4 | Execute Refactoring | Apply changes incrementally with tests | All tests pass |
 | 5 | Validate & Complete | Verify improvement, update refs, apply tracing | DoD verified |
-| 6 | Routing | DAO-assisted next task routing | Routing decision made |
+| 6 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Step 1 → 2 requires verification that analysis identified all issues.
 BLOCKING: Step 3 → 4 requires confirmation that refactoring plan addresses identified issues (manual/stop_for_question: human confirms; auto: DAO confirms).
@@ -292,7 +292,7 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
   </step_5>
 
   <step_6>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

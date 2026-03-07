@@ -84,7 +84,7 @@ input:
 | 2 | Verify Commands | Execute commands to confirm they work | Commands verified |
 | 3 | Update README | Add/update "How to Run" section in README.md | README updated |
 | 4 | Complete | Verify DoD | DoD validated |
-| 4 | Routing | DAO-assisted next task routing | Routing decision made |
+| 4 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Step 2 to 3 is blocked until run command executes successfully.
 
@@ -143,7 +143,7 @@ BLOCKING: Step 2 to 3 is blocked until run command executes successfully.
   </step_3>
 
   <step_4>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

@@ -136,7 +136,7 @@ input:
 | 5 | Route & Invoke | Semantic-match tool skills and invoke sequentially | All tool skills complete |
 | 6 | Validate Results | Verify Assert clauses, run integration scenarios | All checks pass |
 | 7 | Tracing | Add tracing decorators to implemented code | Tests still pass |
-| 9 | Routing | DAO-assisted next task routing | Routing decision made |
+| 9 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Step 4 → 5 is BLOCKED until AAA scenarios are generated with coverage validated.
 BLOCKING: Step 5: If design needs changes → UPDATE technical design BEFORE implementing.
@@ -350,7 +350,7 @@ BLOCKING: Step 5.1 special-case delegations run BEFORE semantic routing.
   </step_8>
 
   <step_9>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 

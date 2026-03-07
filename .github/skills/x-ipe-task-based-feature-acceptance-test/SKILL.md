@@ -126,7 +126,7 @@ input:
 | 5 | Reflect & Refine | Review and update test cases | Cases validated |
 | 6 | Execute Tests | Run tests via Chrome DevTools MCP | Tests complete |
 | 7 | Report Results | Document test results and metrics | Results documented |
-| 9 | Routing | DAO-assisted next task routing | Routing decision made |
+| 9 | 继续执行（Continue Execute） | DAO-assisted next task routing | Continue Execute decision made |
 
 BLOCKING: Step 1 - If no web UI, output status=skipped and proceed to next_task_based_skill.
 BLOCKING: Step 4 - If process_preference.auto_proceed=="auto", skip this step and use placeholder/generated data.
@@ -309,7 +309,7 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
   </step_8>
 
   <step_9>
-    <name>Routing</name>
+    <name>继续执行（Continue Execute）</name>
     <actions>
       Collect the full context and task_completion_output from this skill execution.
 
