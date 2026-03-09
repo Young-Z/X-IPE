@@ -1,7 +1,7 @@
 {
   "global": {
     "process_preference": {
-      "auto_proceed": "manual"
+      "interaction_mode": "interact-with-human"
     }
   },
   "stage_order": [

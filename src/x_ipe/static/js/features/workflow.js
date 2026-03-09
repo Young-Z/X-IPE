@@ -113,25 +113,44 @@ const workflow = {
         info.appendChild(meta);
         header.appendChild(info);
 
-        // Auto-Proceed dropdown + Action button (⋮)
+        // Interaction Mode dropdown + Action button (⋮)
         const actionsWrap = document.createElement('div');
         actionsWrap.className = 'workflow-panel-actions';
 
-        // Auto-Proceed dropdown
-        const currentMode = wf.auto_proceed || 'manual';
-        const modeLabels = { manual: 'Manual', auto: 'Auto', stop_for_question: 'Stop for Q' };
-        const modeIcons = { manual: 'bi-hand-index', auto: 'bi-lightning-charge-fill', stop_for_question: 'bi-pause-circle' };
-        const modeBadges = { manual: 'text-bg-secondary', auto: 'text-bg-success', stop_for_question: 'text-bg-warning' };
+        // Interaction Mode dropdown
+        const currentMode = wf.interaction_mode || wf.auto_proceed || 'interact-with-human';
+        const modeLabels = {
+            'interact-with-human': '👤 Human Direct',
+            'dao-represent-human-to-interact': '🤖 DAO Represents Human',
+            'dao-represent-human-to-interact-for-questions-in-skill': '🤖⚡ DAO Inner-Skill Only'
+        };
+        const modeIcons = {
+            'interact-with-human': 'bi-hand-index',
+            'dao-represent-human-to-interact': 'bi-lightning-charge-fill',
+            'dao-represent-human-to-interact-for-questions-in-skill': 'bi-pause-circle'
+        };
+        const modeBadges = {
+            'interact-with-human': 'text-bg-secondary',
+            'dao-represent-human-to-interact': 'text-bg-success',
+            'dao-represent-human-to-interact-for-questions-in-skill': 'text-bg-warning'
+        };
+        const legacyModeMap = {
+            'manual': 'interact-with-human',
+            'auto': 'dao-represent-human-to-interact',
+            'stop_for_question': 'dao-represent-human-to-interact-for-questions-in-skill'
+        };
+        const resolvedMode = legacyModeMap[currentMode] || currentMode;
         const apWrap = document.createElement('div');
         apWrap.className = 'dropdown d-inline-block auto-proceed-header';
         apWrap.innerHTML = `
+            <span class="interaction-mode-label">Interaction Mode</span>
             <button class="btn btn-sm btn-outline-secondary dropdown-toggle auto-proceed-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi ${modeIcons[currentMode]}"></i> <span class="badge ${modeBadges[currentMode]}">${modeLabels[currentMode]}</span>
+                <i class="bi ${modeIcons[resolvedMode] || 'bi-hand-index'}"></i> <span class="badge ${modeBadges[resolvedMode] || 'text-bg-secondary'}">${modeLabels[resolvedMode] || resolvedMode}</span>
             </button>
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-                <li><button class="dropdown-item${currentMode === 'manual' ? ' active' : ''}" data-mode="manual"><i class="bi bi-hand-index"></i> Manual</button></li>
-                <li><button class="dropdown-item${currentMode === 'auto' ? ' active' : ''}" data-mode="auto"><i class="bi bi-lightning-charge-fill"></i> Auto</button></li>
-                <li><button class="dropdown-item${currentMode === 'stop_for_question' ? ' active' : ''}" data-mode="stop_for_question"><i class="bi bi-pause-circle"></i> Stop for Question</button></li>
+                <li><button class="dropdown-item${resolvedMode === 'interact-with-human' ? ' active' : ''}" data-mode="interact-with-human"><i class="bi bi-hand-index"></i> 👤 Human Direct</button></li>
+                <li><button class="dropdown-item${resolvedMode === 'dao-represent-human-to-interact' ? ' active' : ''}" data-mode="dao-represent-human-to-interact"><i class="bi bi-lightning-charge-fill"></i> 🤖 DAO Represents Human</button></li>
+                <li><button class="dropdown-item${resolvedMode === 'dao-represent-human-to-interact-for-questions-in-skill' ? ' active' : ''}" data-mode="dao-represent-human-to-interact-for-questions-in-skill"><i class="bi bi-pause-circle"></i> 🤖⚡ DAO Inner-Skill Only</button></li>
             </ul>`;
         const btnLabel = apWrap.querySelector('.dropdown-toggle');
         apWrap.querySelectorAll('.dropdown-item').forEach(item => {
@@ -142,7 +161,7 @@ const workflow = {
                     const resp = await fetch(`/api/workflow/${encodeURIComponent(wf.name)}/settings`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ process_preference: { auto_proceed: mode } })
+                        body: JSON.stringify({ process_preference: { interaction_mode: mode } })
                     });
                     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                     apWrap.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));

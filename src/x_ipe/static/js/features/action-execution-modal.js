@@ -19,14 +19,14 @@ class ActionExecutionModal {
         this._keyHandler = null;
         this._templateCache = null;
         this._actionContextDef = null;
-        this._autoProceed = 'manual';
+        this._interactionMode = 'interact-with-human';
     }
 
     /* --- Lifecycle -------------------------------------------------------- */
 
     async open() {
         await this._loadInstructions();
-        await this._loadAutoProceed();
+        await this._loadInteractionMode();
         this._createDOM();
         this._bindEvents();
         document.body.appendChild(this.overlay);
@@ -143,23 +143,31 @@ class ActionExecutionModal {
         this._loadedInstructions = { label: detail.label, command };
     }
 
-    /* --- CR-001: Auto-Proceed Loading ------------------------------------- */
+    /* --- CR-001/CR-002: Interaction Mode Loading ----------------------------- */
 
-    async _loadAutoProceed() {
+    async _loadInteractionMode() {
         if (!this.workflowName) return;
         try {
             const instance = this._cachedInstance || await this._fetchInstance();
             this._cachedInstance = instance;
             if (instance) {
-                this._autoProceed = (instance.global || {}).process_preference?.auto_proceed || 'manual';
+                const pref = (instance.global || {}).process_preference || {};
+                this._interactionMode = pref.interaction_mode || pref.auto_proceed || 'interact-with-human';
+                const legacyMap = {
+                    'manual': 'interact-with-human',
+                    'auto': 'dao-represent-human-to-interact',
+                    'stop_for_question': 'dao-represent-human-to-interact-for-questions-in-skill'
+                };
+                if (legacyMap[this._interactionMode]) {
+                    this._interactionMode = legacyMap[this._interactionMode];
+                }
             }
-        } catch { /* keep default 'manual' */ }
+        } catch { /* keep default 'interact-with-human' */ }
     }
 
     _buildExecutionFlag() {
-        if (this._autoProceed === 'auto') return ' --execute@keep-running-forever';
-        if (this._autoProceed === 'stop_for_question') return ' --execute@keep-running-forever-stop-only-on-question';
-        return '';
+        if (this._interactionMode === 'interact-with-human') return '';
+        return ` --interaction@${this._interactionMode}`;
     }
 
     async _resolveIdeaFiles() {

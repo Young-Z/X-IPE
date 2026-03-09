@@ -28,7 +28,7 @@ This skill is the **single entry point** for all refactoring work. It orchestrat
 
 BLOCKING: If user requests "refactor", "analyze for refactoring", or "assess code quality" — this skill handles it. Do NOT redirect to separate analysis skills.
 
-IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -52,7 +52,7 @@ input:
   category: "standalone"
   next_task_based_skill: null
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
 
   # Required inputs
   refactoring_scope:
@@ -75,14 +75,14 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
+  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
 
   <field name="refactoring_scope.scope_level">
     <steps>
       1. IF caller provides scope_level → use provided value
       2. IF feature_id is provided → default to "feature"
       3. IF files[] is provided → default to "custom"
-      4. ELSE → IF auto_proceed == "auto": ASK x-ipe-dao-end-user-representative for scope; ELSE: ASK human for scope
+      4. ELSE → IF interaction_mode == "dao-represent-human-to-interact": ASK x-ipe-dao-end-user-representative for scope; ELSE: ASK human for scope
     </steps>
   </field>
 
@@ -90,7 +90,7 @@ input:
     <steps>
       1. IF caller provides → use provided value
       2. IF human describes intent → derive from description
-      3. ELSE → IF auto_proceed == "auto": ASK x-ipe-dao-end-user-representative; ELSE: ASK human: "What is the purpose of this refactoring?"
+      3. ELSE → IF interaction_mode == "dao-represent-human-to-interact": ASK x-ipe-dao-end-user-representative; ELSE: ASK human: "What is the purpose of this refactoring?"
     </steps>
   </field>
 
@@ -173,10 +173,10 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
          - Suggested refactoring goals and principles
       4. Present analysis findings and wait for confirmation that issues are correctly identified
 
-        Response source (based on auto_proceed):
-        IF process_preference.auto_proceed == "auto":
+        Response source (based on interaction_mode):
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Resolve concerns via x-ipe-dao-end-user-representative, proceed automatically
-        ELSE (manual/stop_for_question):
+        ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human to confirm analysis findings
     </action>
     <constraints>
@@ -218,10 +218,10 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
       4. VALIDATE plan against constraints from refactoring_principle
       5. Present refactoring plan and wait for confirmation that plan addresses the right issues
 
-        Response source (based on auto_proceed):
-        IF process_preference.auto_proceed == "auto":
+        Response source (based on interaction_mode):
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Resolve via x-ipe-dao-end-user-representative
-        ELSE (manual/stop_for_question):
+        ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human to confirm plan
     </action>
     <constraints>
@@ -276,10 +276,10 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
            - deliverables: {"refactor-report": "{path}"}
       10. Verify DoD checkpoints and resolve any open questions
 
-          Response source (based on auto_proceed):
-          IF process_preference.auto_proceed == "auto":
+          Response source (based on interaction_mode):
+          IF process_preference.interaction_mode == "dao-represent-human-to-interact":
             → Resolve open questions via x-ipe-dao-end-user-representative
-          ELSE (manual/stop_for_question):
+          ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
             → Ask human for answers
       11. CREATE final commit
     </action>
@@ -298,14 +298,14 @@ BLOCKING: Step 4 halts if any test fails (must fix or revert).
       <action>
         Collect the full context and task_completion_output from this skill execution.
 
-        IF process_preference.auto_proceed == "auto":
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Invoke x-ipe-dao-end-user-representative with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"
             context: "Skill completed. Study the context and full output to decide best next action."
           → DAO studies the complete context and decides the best next action
-        ELSE (manual):
+        ELSE (interact-with-human):
           → Present next task suggestion to human and wait for instruction
       </action>
       <constraints>
@@ -343,7 +343,7 @@ task_completion_output:
   status: completed | blocked
   next_task_based_skill: null
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"

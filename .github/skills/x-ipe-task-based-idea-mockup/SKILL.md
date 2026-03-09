@@ -26,7 +26,7 @@ CRITICAL: Focus ONLY on UI/UX presentation -- ignore all tech stack mentions. Se
 
 **Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the workflow state was updated before marking the task complete.
 
-IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -51,7 +51,7 @@ input:
   category: "ideation-stage"
   next_task_based_skill: "Requirement Gathering"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
 
   # Required inputs
   ideation_toolbox_meta: "{project_root}/x-ipe-docs/config/tools.json"
@@ -70,7 +70,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
+  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
   <field name="current_idea_folder" source="previous Ideation task output OR task board OR human input">
     <steps>
       1. IF previous task was "Ideation" → extract from task_output_links.current_idea_folder
@@ -177,10 +177,10 @@ BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
            - Ask "Which idea folder should I create mockups for?" with available options
            - Set current_idea_folder = selected folder
 
-           Response source (based on auto_proceed):
-           IF process_preference.auto_proceed == "auto":
+           Response source (based on interaction_mode):
+           IF process_preference.interaction_mode == "dao-represent-human-to-interact":
              → Resolve via x-ipe-dao-end-user-representative
-           ELSE (manual/stop_for_question):
+           ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
              → Ask human for selection
         2. Validate folder exists on disk
         3. Verify idea-summary-vN.md exists in folder
@@ -356,14 +356,14 @@ BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
       <action>
         Collect the full context and task_completion_output from this skill execution.
 
-        IF process_preference.auto_proceed == "auto":
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Invoke x-ipe-dao-end-user-representative with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"
             context: "Skill completed. Study the context and full output to decide best next action."
           → DAO studies the complete context and decides the best next action
-        ELSE (manual):
+        ELSE (interact-with-human):
           → Present next task suggestion to human and wait for instruction
       </action>
       <constraints>
@@ -403,7 +403,7 @@ task_completion_output:
   status: completed | blocked
   next_task_based_skill: "Requirement Gathering"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"

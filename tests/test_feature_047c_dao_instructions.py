@@ -51,9 +51,9 @@ class TestRepoLocalInstructions:
         assert "审势" not in content
 
     def test_uses_process_preference(self):
-        """Instructions use process_preference.auto_proceed, not require_human_review."""
+        """Instructions use process_preference.interaction_mode, not require_human_review."""
         content = self._read()
-        assert "process_preference.auto_proceed" in content
+        assert "process_preference.interaction_mode" in content
 
 
 class TestPackagedEnglishInstructions:
@@ -69,9 +69,9 @@ class TestPackagedEnglishInstructions:
         assert "x-ipe-dao-end-user-representative" in self._read()
 
     def test_uses_process_preference(self):
-        """AC-047-C.7: Uses process_preference.auto_proceed, not require_human_review."""
+        """AC-047-C.7: Uses process_preference.interaction_mode, not require_human_review."""
         content = self._read()
-        assert "process_preference.auto_proceed" in content
+        assert "process_preference.interaction_mode" in content
 
     def test_synced_with_repo_local(self):
         """AC-047-C.5: Packaged EN matches repo-local for DAO section."""

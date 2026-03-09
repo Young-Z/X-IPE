@@ -20,7 +20,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -41,7 +41,7 @@ input:
   category: "standalone"
   next_task_based_skill: null
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
 
   # Required inputs
 ```
@@ -53,7 +53,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
+  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
 </input_init>
 ```
 
@@ -149,14 +149,14 @@ BLOCKING: Step 2 to 3 is blocked until run command executes successfully.
       <action>
         Collect the full context and task_completion_output from this skill execution.
 
-        IF process_preference.auto_proceed == "auto":
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Invoke x-ipe-dao-end-user-representative with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"
             context: "Skill completed. Study the context and full output to decide best next action."
           → DAO studies the complete context and decides the best next action
-        ELSE (manual):
+        ELSE (interact-with-human):
           → Present next task suggestion to human and wait for instruction
       </action>
       <constraints>
@@ -194,7 +194,7 @@ task_completion_output:
   status: completed | blocked
   next_task_based_skill: null
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
@@ -279,10 +279,10 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
     Verified Test Command: `{test_command}`
     Please check the README and confirm it is clear."
 
-Completion gate (based on auto_proceed):
-IF process_preference.auto_proceed == "auto":
+Completion gate (based on interaction_mode):
+IF process_preference.interaction_mode == "dao-represent-human-to-interact":
   → Auto-proceed after DoD verification
-ELSE (manual/stop_for_question):
+ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
   → Ask human to confirm README is clear
 ```
 

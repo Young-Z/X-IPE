@@ -108,12 +108,12 @@
 
 **发现规则：**
 1. 扫描 `.github/skills/x-ipe-task-based-*/SKILL.md`
-2. 每个技能的 Output Result YAML 声明：`category`、`next_task_based_skill`、`process_preference.auto_proceed`
+2. 每个技能的 Output Result YAML 声明：`category`、`next_task_based_skill`、`process_preference.interaction_mode`
 3. 每个技能 frontmatter 中的 `description` 包含用于请求匹配的触发关键词
 
 **请求匹配：** 将用户请求与每个技能描述中的触发关键词进行匹配（如"修复bug" → `x-ipe-task-based-bug-fix`，"实现功能" → `x-ipe-task-based-code-implementation`）。
 
-> **注意：** 当**自动继续已启用**（全局或任务级别）时，无论技能的默认设置如何，`require_human_review` 都会被**跳过**。`process_preference.auto_proceed` 枚举值（`manual | auto | stop_for_question`）控制此行为。
+> **注意：** 当**交互模式为 DAO 模式**（全局或任务级别）时，无论技能的默认设置如何，`require_human_review` 都会被**跳过**。`process_preference.interaction_mode` 枚举值（`interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill`）控制此行为。
 
 > **注意：** DAO优先 是通用的 — 它适用于所有模式（`auto`、`manual`、`stop_for_question`）。模式影响的是技能*内部*决策点是否也经过 DAO（auto）或直接询问人类（manual/stop_for_question）。但初始消息始终经过 DAO。
 

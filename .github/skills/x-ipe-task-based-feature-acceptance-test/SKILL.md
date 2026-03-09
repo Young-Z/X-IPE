@@ -33,7 +33,7 @@ MANDATORY: This skill requires Chrome DevTools MCP for test execution. If MCP is
 
 MANDATORY: Chrome must be launched with `--user-data-dir` (dedicated profile) or the chrome-devtools-mcp server must be configured with `--user-data-dir` or `--isolated=true` to avoid conflicts with existing Chrome sessions. Example: `chrome --remote-debugging-port=9222 --user-data-dir=/tmp/x-ipe-chrome-profile` or configure MCP with `--user-data-dir=/tmp/x-ipe-chrome-profile`.
 
-IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -57,7 +57,7 @@ input:
   category: "standalone | feature-stage"
   next_task_based_skill: "Feature Closing | null"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
 
   # Required inputs
   feature_id: "{FEATURE-XXX}"       # Required (feature-stage) OR Optional (standalone)
@@ -75,7 +75,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
+  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
   <field name="feature_id" source="from previous task output or task board or human input" />
   <field name="target_url" source="IF feature-stage, resolve from feature's dev server config; IF standalone, from human input" />
   <field name="specification_link" source="auto-detect from x-ipe-docs/requirements/{feature_id}/specification.md" />
@@ -122,7 +122,7 @@ input:
 | 1 | Check UI Scope | Determine if feature has web UI | Has web UI OR skip |
 | 2 | Generate Plan | Create test cases from acceptance criteria | Test cases defined |
 | 3 | Analyze HTML | Extract element selectors from UI code | Selectors identified |
-| 4 | Test Data Prep | Ask user for test data (if process_preference.auto_proceed=="manual") | Data collected OR skipped |
+| 4 | Test Data Prep | Ask user for test data (if process_preference.interaction_mode=="manual") | Data collected OR skipped |
 | 5 | Reflect & Refine | Review and update test cases | Cases validated |
 | 6 | Execute Tests | Run tests via Chrome DevTools MCP | Tests complete |
 | 7 | Report Results | Document test results and metrics | Results documented |
@@ -130,7 +130,7 @@ input:
 | 9.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Step 1 - If no web UI, output status=skipped and proceed to next_task_based_skill.
-BLOCKING: Step 4 - If process_preference.auto_proceed=="auto", skip this step and use placeholder/generated data.
+BLOCKING: Step 4 - If process_preference.interaction_mode=="auto", skip this step and use placeholder/generated data.
 BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready for manual execution.
 
 ---
@@ -211,10 +211,10 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
       2. Collect test data per test case (see references/detailed-procedures.md)
       3. UPDATE Test Data table in each test case section
 
-      Response source (based on auto_proceed):
-      IF process_preference.auto_proceed == "auto":
+      Response source (based on interaction_mode):
+      IF process_preference.interaction_mode == "dao-represent-human-to-interact":
         → Use placeholder/generated test data (auto-populate)
-      ELSE (manual/stop_for_question):
+      ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
         → Ask human for test data per test case
     </action>
     <output>Test Data tables populated in each test case</output>
@@ -277,10 +277,10 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
          b. List outdated mockup files and recommend updating them
          c. Inform: "The following mockup(s) are outdated and were NOT used for UI/UX validation: {filenames}. Consider updating mockups to enable visual comparison in future acceptance tests."
 
-            Response source (based on auto_proceed):
-            IF process_preference.auto_proceed == "auto":
+            Response source (based on interaction_mode):
+            IF process_preference.interaction_mode == "dao-represent-human-to-interact":
               → Log notice via x-ipe-dao-end-user-representative
-            ELSE (manual/stop_for_question):
+            ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
               → Inform human directly
       5. CALCULATE metrics: total, passed, failed, blocked, pass_rate = (passed/total)*100
       6. RETURN task completion output with results
@@ -315,14 +315,14 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
       <action>
         Collect the full context and task_completion_output from this skill execution.
 
-        IF process_preference.auto_proceed == "auto":
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Invoke x-ipe-dao-end-user-representative with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"
             context: "Skill completed. Study the context and full output to decide best next action."
           → DAO studies the complete context and decides the best next action
-        ELSE (manual):
+        ELSE (interact-with-human):
           → Present next task suggestion to human and wait for instruction
       </action>
       <constraints>
@@ -360,7 +360,7 @@ task_completion_output:
   status: completed | blocked | skipped
   next_task_based_skill: "Feature Closing | null"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
@@ -405,7 +405,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="conditional">
     <name>Test data collected from user</name>
-    <verification>Test Data tables populated (if process_preference.auto_proceed=="manual" and has UI)</verification>
+    <verification>Test Data tables populated (if process_preference.interaction_mode=="manual" and has UI)</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Test cases reflected and refined</name>

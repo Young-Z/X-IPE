@@ -66,7 +66,7 @@ not_for:
 
 ```yaml
 input:
-  operation: "init_board | locate_board | create_task | update_status | query_tasks | update_auto_proceed | validate_integrity"
+  operation: "init_board | locate_board | create_task | update_status | query_tasks | update_interaction_mode | validate_integrity"
   task:
     task_id: "TASK-XXX"
     task_based_skill: "{task_based_skill}"
@@ -78,7 +78,7 @@ input:
     next_task_based_skill: "{task_based_skill} | null"
     require_human_review: "true | false"
     task_output_links: "[{links}] | null"
-    auto_proceed: "true | false"
+    interaction_mode: "true | false"
     workflow_name: "N/A"  # workflow name from execution context, default: N/A
 ```
 
@@ -116,7 +116,7 @@ input:
   <action>
     1. Use template from `templates/task-board.md`
     2. Create at `x-ipe-docs/planning/task-board.md`
-    3. Initialize with default settings: auto_proceed: false, empty task lists
+    3. Initialize with default settings: interaction_mode: false, empty task lists
   </action>
   <output>Board file path</output>
 </operation>
@@ -206,13 +206,13 @@ input:
 **When:** Changing task chaining behavior
 
 ```xml
-<operation name="update_auto_proceed">
+<operation name="update_interaction_mode">
   <action>
     1. Locate task board
-    2. Update auto_proceed value in Global Settings section
+    2. Update interaction_mode value in Global Settings section
     3. Confirm change
   </action>
-  <output>Updated auto_proceed value</output>
+  <output>Updated interaction_mode value</output>
 </operation>
 ```
 

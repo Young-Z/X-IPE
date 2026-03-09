@@ -108,12 +108,12 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 **Discovery rule:**
 1. Scan `.github/skills/x-ipe-task-based-*/SKILL.md`
-2. Each skill's Output Result YAML declares: `category`, `next_task_based_skill`, `process_preference.auto_proceed`
+2. Each skill's Output Result YAML declares: `category`, `next_task_based_skill`, `process_preference.interaction_mode`
 3. Each skill's `description` in frontmatter contains trigger keywords for request matching
 
 **Request matching:** Match user request against trigger keywords in each skill's description (e.g., "fix bug" → `x-ipe-task-based-bug-fix`, "implement feature" → `x-ipe-task-based-code-implementation`).
 
-> **Note:** When **Auto-Proceed is enabled** (global or task-level), `require_human_review` is **skipped** regardless of the skill's default. The `process_preference.auto_proceed` enum (`manual | auto | stop_for_question`) controls this behavior.
+> **Note:** When **Interaction Mode is DAO-based** (global or task-level), `require_human_review` is **skipped** regardless of the skill's default. The `process_preference.interaction_mode` enum (`interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill`) controls this behavior.
 
 > **Note:** DAO-First is universal — it applies in ALL modes (`auto`, `manual`, `stop_for_question`). The mode affects whether *within-skill* decision points also go through DAO (auto) or ask the human (manual/stop_for_question). But the initial message always goes through DAO.
 

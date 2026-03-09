@@ -43,7 +43,7 @@ Additional notes:
 - Feature specifications are created later during Feature Refinement
 - Keep feature descriptions concise (50 words max) in the table
 
-IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -67,7 +67,7 @@ input:
   category: "requirement-stage"
   next_task_based_skill: "Feature Refinement"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
 
   # Required inputs
   mockup_list: "N/A"  # List of mockups from previous task or context
@@ -83,7 +83,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
+  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
   <field name="extra_context_reference.requirement-doc" source="workflow context OR auto-detect">
     <steps>
       1. IF workflow-mode AND workflow.extra_context_reference.requirement-doc is a file path → use it
@@ -215,10 +215,10 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
         2. Present scope challenges and ask for confirmation
         3. Document scope decisions and rationale
 
-        Response source (based on auto_proceed):
-        IF process_preference.auto_proceed == "auto":
+        Response source (based on interaction_mode):
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Resolve via x-ipe-dao-end-user-representative
-        ELSE (manual/stop_for_question):
+        ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human for confirmation
       </action>
       <constraints>
@@ -276,10 +276,10 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
         4. Present prioritized list for confirmation
         5. Finalize feature order and dependency graph
 
-        Response source (based on auto_proceed):
-        IF process_preference.auto_proceed == "auto":
+        Response source (based on interaction_mode):
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Confirm via x-ipe-dao-end-user-representative
-        ELSE (manual/stop_for_question):
+        ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human for confirmation
       </action>
       <output>Confirmed feature prioritization with validated dependency DAG</output>
@@ -340,14 +340,14 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
       <action>
         Collect the full context and task_completion_output from this skill execution.
 
-        IF process_preference.auto_proceed == "auto":
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Invoke x-ipe-dao-end-user-representative with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"
             context: "Skill completed. Study the context and full output to decide best next action."
           → DAO studies the complete context and decides the best next action
-        ELSE (manual):
+        ELSE (interact-with-human):
           → Present next task suggestion to human and wait for instruction
       </action>
       <constraints>
@@ -385,7 +385,7 @@ task_completion_output:
   status: completed | blocked
   next_task_based_skill: "x-ipe-task-based-feature-refinement"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"

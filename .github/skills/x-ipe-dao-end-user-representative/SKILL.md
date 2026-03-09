@@ -233,7 +233,7 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
         1. Scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions.
         2. Rank matches: strong (clear map) | partial (loose) | none.
         3. For each match, extract execution phases/steps from its Execution Flow table.
-        4. Read current `process_preference.auto_proceed` for execution_strategy.
+        4. Read current `process_preference.interaction_mode` for execution_strategy.
         5. Produce suggested_skills list (max 3, may be empty).
         6. Feed into Step 2.2.
       </action>
@@ -360,7 +360,7 @@ operation_output:
     confidence: 0.0
     fallback_required: false
     execution_strategy:
-      auto_proceed: "auto | manual | stop_for_question"
+      interaction_mode: "dao-represent-human-to-interact | interact-with-human | dao-represent-human-to-interact-for-questions-in-skill"
     suggested_skills:   # from Step 2.1 — may be empty list
       - skill_name: "x-ipe-task-based-{name}"
         match_strength: "strong | partial"

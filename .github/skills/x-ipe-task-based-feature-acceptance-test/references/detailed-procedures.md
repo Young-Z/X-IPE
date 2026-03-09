@@ -109,7 +109,7 @@ await page.click('{selector}', { button: 'right', position: { x: 200, y: 200 } }
 
 ## Test Data Collection Process
 
-When `auto_proceed = false`, collect test data from the user:
+When `interaction_mode == "interact-with-human"`, collect test data from the user:
 
 ### Data Types Per Test Case
 

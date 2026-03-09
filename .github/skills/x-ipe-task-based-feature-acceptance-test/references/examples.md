@@ -86,7 +86,7 @@ Updated selectors:
 
 ### Step 4: Test Data Preparation
 
-**Context:** auto_proceed = false, so user is asked for test data.
+**Context:** interaction_mode == "interact-with-human", so user is asked for test data.
 
 Agent asks:
 ```markdown

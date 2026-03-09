@@ -42,7 +42,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 See [references/implementation-guidelines.md](.github/skills/x-ipe-task-based-code-implementation/references/implementation-guidelines.md) for detailed principles, coding standards, AAA format specification, and error handling patterns.
 
-IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -66,7 +66,7 @@ input:
   category: "feature-stage"
   next_task_based_skill: "Feature Acceptance Test"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   feature_phase: "Code Implementation"
 
   # Required inputs
@@ -88,7 +88,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
+  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
   <field name="feature_id" source="from previous task (Technical Design) output or task board" />
   <field name="extra_context_reference" source="from workflow context or auto-detect from feature artifacts (x-ipe-docs/requirements/FEATURE-XXX/)" />
   <field name="git_strategy" source="from .x-ipe.yaml" />
@@ -262,10 +262,10 @@ BLOCKING: Step 5.1 special-case delegations run BEFORE semantic routing.
          - IF no match: assign x-ipe-tool-implementation-general
          - IF general insufficient: signal "new tool skill needed"
 
-           Response source (based on auto_proceed):
-           IF process_preference.auto_proceed == "auto":
+           Response source (based on interaction_mode):
+           IF process_preference.interaction_mode == "dao-represent-human-to-interact":
              → Log gap via x-ipe-dao-end-user-representative, continue with general tool
-           ELSE (manual/stop_for_question):
+           ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
              → Ask human for guidance
       4. FOR EACH matched tool skill (sequentially, backend first then frontend):
          a. FILTER AAA scenarios by matching layer tag
@@ -296,18 +296,18 @@ BLOCKING: Step 5.1 special-case delegations run BEFORE semantic routing.
          b. IF retry succeeds: continue
          c. IF retry fails: preserve passing results, escalate failure
 
-            Response source (based on auto_proceed):
-            IF process_preference.auto_proceed == "auto":
+            Response source (based on interaction_mode):
+            IF process_preference.interaction_mode == "dao-represent-human-to-interact":
               → Log failure via x-ipe-dao-end-user-representative, continue with partial results
-            ELSE (manual/stop_for_question):
+            ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
               → Escalate to human
       3. RUN @integration scenarios: verify cross-layer behavior with mocking
       4. IF integration fails: report contract mismatch with both tool skill outputs
 
-         Response source (based on auto_proceed):
-         IF process_preference.auto_proceed == "auto":
+         Response source (based on interaction_mode):
+         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
            → Log via x-ipe-dao-end-user-representative, continue
-         ELSE (manual/stop_for_question):
+         ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
            → Report to human
       5. PRODUCE aggregated report: per-skill pass/fail, integration results, overall status
     </action>
@@ -356,14 +356,14 @@ BLOCKING: Step 5.1 special-case delegations run BEFORE semantic routing.
       <action>
         Collect the full context and task_completion_output from this skill execution.
 
-        IF process_preference.auto_proceed == "auto":
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Invoke x-ipe-dao-end-user-representative with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"
             context: "Skill completed. Study the context and full output to decide best next action."
           → DAO studies the complete context and decides the best next action
-        ELSE (manual):
+        ELSE (interact-with-human):
           → Present next task suggestion to human and wait for instruction
       </action>
       <constraints>
@@ -403,7 +403,7 @@ task_completion_output:
   status: completed | blocked
   next_task_based_skill: "Feature Acceptance Test"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"

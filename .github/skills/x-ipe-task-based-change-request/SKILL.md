@@ -22,7 +22,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -46,7 +46,7 @@ input:
   category: "standalone"
   next_task_based_skill: "x-ipe-task-based-feature-refinement | x-ipe-task-based-feature-breakdown"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
 
   # Required inputs
   change_request_description: "{description of the requested change}"
@@ -68,7 +68,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
+  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
   <field name="change_request_description" source="from human input" />
   <field name="business_justification" source="from human input" />
   <field name="extra_context_reference" source="from workflow context or N/A" />
@@ -174,10 +174,10 @@ BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop
         2. Present challenges and ask for confirmation
         3. Document challenge outcomes and confirmed scope
 
-        Response source (based on auto_proceed):
-        IF process_preference.auto_proceed == "auto":
+        Response source (based on interaction_mode):
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Resolve via x-ipe-dao-end-user-representative
-        ELSE (manual/stop_for_question):
+        ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human for confirmation
       </action>
       <output>Validated CR scope with challenge decisions</output>
@@ -244,10 +244,10 @@ BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop
         2. Wait for confirmation of classification and conflict decisions
         3. IF changes requested: return to step 4.1 or Phase 3
 
-        Response source (based on auto_proceed):
-        IF process_preference.auto_proceed == "auto":
+        Response source (based on interaction_mode):
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Confirm via x-ipe-dao-end-user-representative
-        ELSE (manual/stop_for_question):
+        ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human to confirm
       </action>
       <constraints>
@@ -265,7 +265,7 @@ BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop
       <name>Execute & Document</name>
       <action>
         0. Resolve conflicting documents (from Phase 3 conflict analysis):
-           - Applies regardless of resolution method (human confirmation or auto_proceed)
+           - Applies regardless of resolution method (human confirmation or interaction_mode)
            - FOR EACH conflict with an existing document (spec, design, requirement):
              a. IF minor conflict (wording update, small AC adjustment, additive change):
                 → Directly update the target document inline with CR changes
@@ -304,14 +304,14 @@ BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop
       <action>
         Collect the full context and task_completion_output from this skill execution.
 
-        IF process_preference.auto_proceed == "auto":
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Invoke x-ipe-dao-end-user-representative with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"
             context: "Skill completed. Study the context and full output to decide best next action."
           → DAO studies the complete context and decides the best next action
-        ELSE (manual):
+        ELSE (interact-with-human):
           → Present next task suggestion to human and wait for instruction
       </action>
       <constraints>
@@ -395,7 +395,7 @@ task_completion_output:
   status: completed | blocked
   next_task_based_skill: x-ipe-task-based-feature-refinement | x-ipe-task-based-feature-breakdown
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"

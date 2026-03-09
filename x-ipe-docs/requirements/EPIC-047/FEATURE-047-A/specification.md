@@ -14,6 +14,7 @@
 | v1.1 | 03-06-2026 | [CR-001](./CR-001.md): Avoid "DAO" in external descriptions; position 道 as internal CORE backbone; fix AC-047-A.6 template backbone |
 | v2.0 | 03-06-2026 | Specification refinement per CR-001: renamed "human-proxy" to "human representative" throughout; added AC-047-A.21 for naming convention; aligned terminology with implemented skill artifacts |
 | v2.1 | 03-06-2026 | Input contract redesigned: removed operation field; mediation_request→message_context with source/messages; human_shadow standalone; confidence_threshold internal; "mediate" prose→"represent human intent" |
+| v2.2 | 03-09-2026 | CR-002: Rename `auto_proceed` → `interaction_mode` in DAO skill execution_strategy output; new semantic enum keys align DAO naming with config layer |
 
 ## Linked Mockups
 

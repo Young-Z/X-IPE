@@ -1,9 +1,9 @@
 /**
- * Tests for CR-001: Append --execute@mode flag to CLI command
- * based on workflow auto-proceed dropdown value.
+ * Tests for CR-001/CR-002: Append --interaction@mode flag to CLI command
+ * based on workflow interaction mode dropdown value.
  *
  * Feedback: Feedback-20260307-190453
- * Task: TASK-788
+ * Task: TASK-788, TASK-796 (CR-002 rename)
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { loadFeatureScript } from './helpers.js';
@@ -19,7 +19,7 @@ function ensureImpl() {
   return typeof globalThis.ActionExecutionModal !== 'undefined';
 }
 
-describe('CR-001: --execute@ flag based on auto-proceed', () => {
+describe('CR-001/CR-002: --interaction@ flag based on interaction mode', () => {
   let mockTerminalManager;
 
   beforeEach(() => {
@@ -54,7 +54,29 @@ describe('CR-001: --execute@ flag based on auto-proceed', () => {
     document.body.innerHTML = '';
   });
 
-  function mockFetchWithAutoProceed(mode) {
+  function mockFetchWithInteractionMode(mode) {
+    globalThis.fetch = vi.fn((url) => {
+      if (url.includes('/api/workflow/')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            data: {
+              global: { process_preference: { interaction_mode: mode } },
+              stages: { ideation: { actions: { compose_idea: {
+                deliverables: ['x-ipe-docs/ideas/wf-hello/idea.md']
+              }}}}
+            }
+          })
+        });
+      }
+      if (url.includes('/api/config/copilot-prompt')) {
+        return Promise.resolve({ ok: false });
+      }
+      return Promise.resolve({ ok: false });
+    });
+  }
+
+  function mockFetchWithLegacyAutoProceed(mode) {
     globalThis.fetch = vi.fn((url) => {
       if (url.includes('/api/workflow/')) {
         return Promise.resolve({
@@ -76,141 +98,165 @@ describe('CR-001: --execute@ flag based on auto-proceed', () => {
     });
   }
 
-  describe('_loadAutoProceed', () => {
-    it('should load auto_proceed from workflow API', async () => {
-      mockFetchWithAutoProceed('auto');
+  describe('_loadInteractionMode', () => {
+    it('should load interaction_mode from workflow API', async () => {
+      mockFetchWithInteractionMode('dao-represent-human-to-interact');
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      await modal._loadAutoProceed();
-      expect(modal._autoProceed).toBe('auto');
+      await modal._loadInteractionMode();
+      expect(modal._interactionMode).toBe('dao-represent-human-to-interact');
     });
 
-    it('should default to manual when no workflow name', async () => {
+    it('should default to interact-with-human when no workflow name', async () => {
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea' });
-      await modal._loadAutoProceed();
-      expect(modal._autoProceed).toBe('manual');
+      await modal._loadInteractionMode();
+      expect(modal._interactionMode).toBe('interact-with-human');
     });
 
-    it('should default to manual when API fails', async () => {
+    it('should default to interact-with-human when API fails', async () => {
       globalThis.fetch = vi.fn().mockResolvedValue({ ok: false });
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      await modal._loadAutoProceed();
-      expect(modal._autoProceed).toBe('manual');
+      await modal._loadInteractionMode();
+      expect(modal._interactionMode).toBe('interact-with-human');
     });
 
-    it('should handle stop_for_question mode', async () => {
-      mockFetchWithAutoProceed('stop_for_question');
+    it('should handle dao-represent-human-to-interact-for-questions-in-skill mode', async () => {
+      mockFetchWithInteractionMode('dao-represent-human-to-interact-for-questions-in-skill');
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      await modal._loadAutoProceed();
-      expect(modal._autoProceed).toBe('stop_for_question');
+      await modal._loadInteractionMode();
+      expect(modal._interactionMode).toBe('dao-represent-human-to-interact-for-questions-in-skill');
+    });
+
+    it('should migrate legacy auto_proceed "auto" to dao-represent-human-to-interact', async () => {
+      mockFetchWithLegacyAutoProceed('auto');
+      const Modal = globalThis.ActionExecutionModal;
+      const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
+      await modal._loadInteractionMode();
+      expect(modal._interactionMode).toBe('dao-represent-human-to-interact');
+    });
+
+    it('should migrate legacy auto_proceed "manual" to interact-with-human', async () => {
+      mockFetchWithLegacyAutoProceed('manual');
+      const Modal = globalThis.ActionExecutionModal;
+      const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
+      await modal._loadInteractionMode();
+      expect(modal._interactionMode).toBe('interact-with-human');
+    });
+
+    it('should migrate legacy auto_proceed "stop_for_question" to dao-represent-human-to-interact-for-questions-in-skill', async () => {
+      mockFetchWithLegacyAutoProceed('stop_for_question');
+      const Modal = globalThis.ActionExecutionModal;
+      const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
+      await modal._loadInteractionMode();
+      expect(modal._interactionMode).toBe('dao-represent-human-to-interact-for-questions-in-skill');
     });
   });
 
   describe('_buildExecutionFlag', () => {
-    it('should return --execute@keep-running-forever for auto mode', () => {
+    it('should return --interaction@dao-represent-human-to-interact for DAO mode', () => {
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      modal._autoProceed = 'auto';
-      expect(modal._buildExecutionFlag()).toBe(' --execute@keep-running-forever');
+      modal._interactionMode = 'dao-represent-human-to-interact';
+      expect(modal._buildExecutionFlag()).toBe(' --interaction@dao-represent-human-to-interact');
     });
 
-    it('should return --execute@keep-running-forever-stop-only-on-question for stop_for_question', () => {
+    it('should return --interaction@dao-represent-human-to-interact-for-questions-in-skill for DAO inner-skill only', () => {
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      modal._autoProceed = 'stop_for_question';
-      expect(modal._buildExecutionFlag()).toBe(' --execute@keep-running-forever-stop-only-on-question');
+      modal._interactionMode = 'dao-represent-human-to-interact-for-questions-in-skill';
+      expect(modal._buildExecutionFlag()).toBe(' --interaction@dao-represent-human-to-interact-for-questions-in-skill');
     });
 
-    it('should return empty string for manual mode', () => {
+    it('should return empty string for interact-with-human mode', () => {
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      modal._autoProceed = 'manual';
+      modal._interactionMode = 'interact-with-human';
       expect(modal._buildExecutionFlag()).toBe('');
     });
   });
 
-  describe('_buildCommand with execution flag', () => {
-    it('should include --execute@ flag when auto mode', async () => {
-      mockFetchWithAutoProceed('auto');
+  describe('_buildCommand with interaction flag', () => {
+    it('should include --interaction@ flag when DAO mode', async () => {
+      mockFetchWithInteractionMode('dao-represent-human-to-interact');
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
       await modal._loadInstructions();
-      modal._autoProceed = 'auto';
+      modal._interactionMode = 'dao-represent-human-to-interact';
       const cmd = modal._buildCommand('');
-      expect(cmd).toContain('--execute@keep-running-forever');
+      expect(cmd).toContain('--interaction@dao-represent-human-to-interact');
     });
 
-    it('should include --execute@ flag when stop_for_question mode', async () => {
-      mockFetchWithAutoProceed('stop_for_question');
+    it('should include --interaction@ flag when DAO inner-skill only mode', async () => {
+      mockFetchWithInteractionMode('dao-represent-human-to-interact-for-questions-in-skill');
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
       await modal._loadInstructions();
-      modal._autoProceed = 'stop_for_question';
+      modal._interactionMode = 'dao-represent-human-to-interact-for-questions-in-skill';
       const cmd = modal._buildCommand('');
-      expect(cmd).toContain('--execute@keep-running-forever-stop-only-on-question');
+      expect(cmd).toContain('--interaction@dao-represent-human-to-interact-for-questions-in-skill');
     });
 
-    it('should NOT include --execute@ flag when manual mode', async () => {
-      mockFetchWithAutoProceed('manual');
+    it('should NOT include --interaction@ flag when interact-with-human mode', async () => {
+      mockFetchWithInteractionMode('interact-with-human');
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
       await modal._loadInstructions();
-      modal._autoProceed = 'manual';
+      modal._interactionMode = 'interact-with-human';
       const cmd = modal._buildCommand('');
-      expect(cmd).not.toContain('--execute@');
+      expect(cmd).not.toContain('--interaction@');
     });
 
-    it('should place --execute@ after --workflow-mode', async () => {
-      mockFetchWithAutoProceed('auto');
+    it('should place --interaction@ after --workflow-mode', async () => {
+      mockFetchWithInteractionMode('dao-represent-human-to-interact');
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
       await modal._loadInstructions();
-      modal._autoProceed = 'auto';
+      modal._interactionMode = 'dao-represent-human-to-interact';
       const cmd = modal._buildCommand('');
-      const execIdx = cmd.indexOf('--execute@');
+      const execIdx = cmd.indexOf('--interaction@');
       const wfIdx = cmd.indexOf('--workflow-mode');
       expect(execIdx).toBeGreaterThan(-1);
       expect(execIdx).toBeGreaterThan(wfIdx);
     });
   });
 
-  describe('_handleExecute with execution flag', () => {
-    it('should send command with --execute@ flag to terminal', async () => {
-      mockFetchWithAutoProceed('auto');
+  describe('_handleExecute with interaction flag', () => {
+    it('should send command with --interaction@ flag to terminal', async () => {
+      mockFetchWithInteractionMode('dao-represent-human-to-interact');
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
       await modal.open();
       await modal._handleExecute();
       const sentCmd = mockTerminalManager.sendCopilotPromptCommandNoEnter.mock.calls[0][0];
-      expect(sentCmd).toContain('--execute@keep-running-forever');
+      expect(sentCmd).toContain('--interaction@dao-represent-human-to-interact');
     });
 
-    it('should NOT include --execution@ in manual mode', async () => {
-      mockFetchWithAutoProceed('manual');
+    it('should NOT include --interaction@ in interact-with-human mode', async () => {
+      mockFetchWithInteractionMode('interact-with-human');
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
       await modal.open();
       await modal._handleExecute();
       const sentCmd = mockTerminalManager.sendCopilotPromptCommandNoEnter.mock.calls[0][0];
-      expect(sentCmd).not.toContain('--execute@');
+      expect(sentCmd).not.toContain('--interaction@');
     });
   });
 
   describe('Instruction preview shows CLI flags', () => {
-    it('should show --execute@ flag in preview when auto mode', async () => {
-      mockFetchWithAutoProceed('auto');
+    it('should show --interaction@ flag in preview when DAO mode', async () => {
+      mockFetchWithInteractionMode('dao-represent-human-to-interact');
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
       await modal.open();
       const preview = document.querySelector('.instructions-content');
-      expect(preview.textContent).toContain('--execute@keep-running-forever');
+      expect(preview.textContent).toContain('--interaction@dao-represent-human-to-interact');
     });
 
     it('should show --workflow-mode in preview', async () => {
-      mockFetchWithAutoProceed('auto');
+      mockFetchWithInteractionMode('dao-represent-human-to-interact');
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
       await modal.open();
@@ -218,13 +264,13 @@ describe('CR-001: --execute@ flag based on auto-proceed', () => {
       expect(preview.textContent).toContain('--workflow-mode@hello');
     });
 
-    it('should NOT show --execution@ in preview when manual mode', async () => {
-      mockFetchWithAutoProceed('manual');
+    it('should NOT show --interaction@ in preview when interact-with-human mode', async () => {
+      mockFetchWithInteractionMode('interact-with-human');
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
       await modal.open();
       const preview = document.querySelector('.instructions-content');
-      expect(preview.textContent).not.toContain('--execute@');
+      expect(preview.textContent).not.toContain('--interaction@');
     });
   });
 });

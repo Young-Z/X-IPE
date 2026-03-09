@@ -6,7 +6,11 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-792 | Ideation | Refine idea 034 CR-'道' for x-ipe — rename auto_proceed to End-User Representative Mode, update interaction_mode enum, UI dropdown label, and verify logic. Feedback-20260309-111628 | Ember 🔥 | 🔄 in_progress | 03-09-2026 03:59:00 | - | - |
+| TASK-796 | Code Implementation | Implement FEATURE-044-E CR-002: Rename auto_proceed to interaction_mode across backend (migration map, validation), frontend (dropdown, CLI flags), templates, tests, and 19+ skill files. | Ember 🔥 | 🔄 in_progress | 03-09-2026 08:15:00 | - | - |
+| TASK-795 | Technical Design | Technical design for FEATURE-044-E CR-002: Interaction mode rename. Backend migration map, API validation changes, CLI flag format, and frontend dropdown updates. | Ember 🔥 | ✅ done | 03-09-2026 08:00:00 | x-ipe-docs/requirements/EPIC-044/FEATURE-044-E/technical-design.md | Code Implementation |
+| TASK-794 | Feature Refinement | Refine FEATURE-044-E specification for CR-002: Rename auto_proceed to interaction_mode with semantic enum keys. Create/update specification with acceptance criteria for backend validation, migration map, new enum values, and CLI flag changes. | Ember 🔥 | ✅ done | 03-09-2026 07:45:00 | x-ipe-docs/requirements/EPIC-044/FEATURE-044-E/specification.md | Technical Design |
+| TASK-793 | Change Request | CR-034: Rename auto_proceed to interaction_mode with semantic keys (dao-represent-human-to-interact, dao-represent-human-to-interact-for-questions-in-skill, interact-with-human). Update UI dropdown label, backend, 19 skills, CLI flags, copilot-instructions. IDEA-034 | Ember 🔥 | ✅ done | 03-09-2026 07:10:00 | 03-09-2026 | x-ipe-docs/requirements/EPIC-044/FEATURE-044-E/CR-002.md |
+| TASK-792 | Ideation | Refine idea 034 CR-'道' for x-ipe — rename auto_proceed to End-User Representative Mode, update interaction_mode enum, UI dropdown label, and verify logic. Feedback-20260309-111628 | Ember 🔥 | ✅ done | 03-09-2026 06:22:00 | idea-summary-v1.md | Change Request |
 | TASK-791 | Bug Fix | Refactoring dropdown items show no text — quality-evaluation.js reads opt.label/opt.command directly but config now uses prompt-details format. Evaluate button command also broken. Feedback-20260308-162624 | Sage 🧠 | ✅ done | 03-08-2026 08:43:00 | quality-evaluation.js, quality-evaluation.test.js | - |
 | TASK-790 | Bug Fix | Submit Idea button stays disabled when idea name is auto-filled — form validation not triggered by programmatic value. Feedback-20260308-094212 | Nova ✨ | ✅ done | 03-08-2026 01:48:00 | compose-idea-modal.js, compose-idea-modal.test.js | - |
 | TASK-789 | Change Request | Remove sidebar hover auto-expand behavior — sections should only expand/collapse on click, not on hover. Feedback-20260307-232835 | Frost ❄️ | 🔄 in_progress | 03-07-2026 15:29:00 | - | - |
@@ -381,8 +385,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 65
-- **In Progress:** 4
+- **Total Active:** 67
+- **In Progress:** 5
 - **Pending:** 1
 - **Deferred:** 0
 - **Completed (archived):** 465

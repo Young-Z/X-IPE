@@ -11,6 +11,7 @@
 | Version | Date | Description |
 |---------|------|-------------|
 | v1.0 | 03-04-2026 | Initial specification |
+| v1.1 | 03-09-2026 | CR-002: Rename `auto_proceed` → `interaction_mode` with semantic enum keys (`dao-represent-human-to-interact`, `dao-represent-human-to-interact-for-questions-in-skill`, `interact-with-human`) |
 
 ## Linked Mockups
 

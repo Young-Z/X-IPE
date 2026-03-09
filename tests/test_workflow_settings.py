@@ -1,10 +1,11 @@
 """
-Acceptance tests for EPIC-044: Auto-Proceed Process Preference
+Acceptance tests for EPIC-044: Interaction Mode Process Preference (CR-002)
 
 Covers:
 - FEATURE-044-E: global.process_preference in workflow state & PATCH settings API
-- FEATURE-044-F: Settings validation (manual|auto|stop_for_question)
+- FEATURE-044-F: Settings validation (interaction_mode enum)
 - Integration: initial state includes global section, update persists
+- Migration: legacy auto_proceed key/values auto-migrated to interaction_mode
 """
 
 import json
@@ -65,11 +66,11 @@ class TestInitialStateProcessPreference:
     def test_initial_state_has_process_preference(self, workflow_service, sample_workflow):
         state = workflow_service.get_workflow(sample_workflow)
         pp = state["global"]["process_preference"]
-        assert pp["auto_proceed"] == "manual"
+        assert pp["interaction_mode"] == "interact-with-human"
 
-    def test_initial_state_default_is_manual(self, workflow_service, sample_workflow):
+    def test_initial_state_default_is_interact_with_human(self, workflow_service, sample_workflow):
         state = workflow_service.get_workflow(sample_workflow)
-        assert state["global"]["process_preference"]["auto_proceed"] == "manual"
+        assert state["global"]["process_preference"]["interaction_mode"] == "interact-with-human"
 
 
 # ==============================================================================
@@ -79,51 +80,105 @@ class TestInitialStateProcessPreference:
 class TestUpdateSettings:
     """FEATURE-044-E: update_settings service method."""
 
-    def test_update_to_auto(self, workflow_service, sample_workflow):
+    def test_update_to_dao_represent(self, workflow_service, sample_workflow):
         result = workflow_service.update_settings(
-            sample_workflow, {"process_preference": {"auto_proceed": "auto"}})
+            sample_workflow, {"process_preference": {"interaction_mode": "dao-represent-human-to-interact"}})
         assert result["success"]
-        assert result["data"]["process_preference"]["auto_proceed"] == "auto"
+        assert result["data"]["process_preference"]["interaction_mode"] == "dao-represent-human-to-interact"
 
-    def test_update_to_stop_for_question(self, workflow_service, sample_workflow):
+    def test_update_to_dao_inner_skill_only(self, workflow_service, sample_workflow):
         result = workflow_service.update_settings(
-            sample_workflow, {"process_preference": {"auto_proceed": "stop_for_question"}})
+            sample_workflow, {"process_preference": {"interaction_mode": "dao-represent-human-to-interact-for-questions-in-skill"}})
         assert result["success"]
-        assert result["data"]["process_preference"]["auto_proceed"] == "stop_for_question"
+        assert result["data"]["process_preference"]["interaction_mode"] == "dao-represent-human-to-interact-for-questions-in-skill"
 
-    def test_update_to_manual(self, workflow_service, sample_workflow):
-        # First set to auto, then back to manual
+    def test_update_to_interact_with_human(self, workflow_service, sample_workflow):
         workflow_service.update_settings(
-            sample_workflow, {"process_preference": {"auto_proceed": "auto"}})
+            sample_workflow, {"process_preference": {"interaction_mode": "dao-represent-human-to-interact"}})
         result = workflow_service.update_settings(
-            sample_workflow, {"process_preference": {"auto_proceed": "manual"}})
+            sample_workflow, {"process_preference": {"interaction_mode": "interact-with-human"}})
         assert result["success"]
-        assert result["data"]["process_preference"]["auto_proceed"] == "manual"
+        assert result["data"]["process_preference"]["interaction_mode"] == "interact-with-human"
 
     def test_update_persists_to_disk(self, workflow_service, sample_workflow):
         workflow_service.update_settings(
-            sample_workflow, {"process_preference": {"auto_proceed": "auto"}})
+            sample_workflow, {"process_preference": {"interaction_mode": "dao-represent-human-to-interact"}})
         state = workflow_service.get_workflow(sample_workflow)
-        assert state["global"]["process_preference"]["auto_proceed"] == "auto"
+        assert state["global"]["process_preference"]["interaction_mode"] == "dao-represent-human-to-interact"
 
     def test_invalid_mode_rejected(self, workflow_service, sample_workflow):
         result = workflow_service.update_settings(
-            sample_workflow, {"process_preference": {"auto_proceed": "turbo"}})
+            sample_workflow, {"process_preference": {"interaction_mode": "turbo"}})
         assert not result["success"]
         assert result["error"] == "INVALID_VALUE"
 
     def test_update_nonexistent_workflow(self, workflow_service):
         result = workflow_service.update_settings(
-            "nonexistent", {"process_preference": {"auto_proceed": "auto"}})
+            "nonexistent", {"process_preference": {"interaction_mode": "dao-represent-human-to-interact"}})
         assert not result["success"]
         assert result["error"] == "NOT_FOUND"
 
     def test_update_updates_last_activity(self, workflow_service, sample_workflow):
         state_before = workflow_service.get_workflow(sample_workflow)
         workflow_service.update_settings(
-            sample_workflow, {"process_preference": {"auto_proceed": "auto"}})
+            sample_workflow, {"process_preference": {"interaction_mode": "dao-represent-human-to-interact"}})
         state_after = workflow_service.get_workflow(sample_workflow)
         assert state_after["last_activity"] >= state_before["last_activity"]
+
+
+# ==============================================================================
+# Migration tests: legacy auto_proceed → interaction_mode
+# ==============================================================================
+
+class TestLegacyMigration:
+    """CR-002: Legacy auto_proceed key/values auto-migrate to interaction_mode."""
+
+    def test_legacy_key_auto_migrates_on_api(self, workflow_service, sample_workflow):
+        """Sending auto_proceed key should be treated as interaction_mode."""
+        result = workflow_service.update_settings(
+            sample_workflow, {"process_preference": {"auto_proceed": "auto"}})
+        assert result["success"]
+        assert result["data"]["process_preference"]["interaction_mode"] == "dao-represent-human-to-interact"
+        assert "auto_proceed" not in result["data"]["process_preference"]
+
+    def test_legacy_value_manual_migrates(self, workflow_service, sample_workflow):
+        result = workflow_service.update_settings(
+            sample_workflow, {"process_preference": {"auto_proceed": "manual"}})
+        assert result["success"]
+        assert result["data"]["process_preference"]["interaction_mode"] == "interact-with-human"
+
+    def test_legacy_value_stop_for_question_migrates(self, workflow_service, sample_workflow):
+        result = workflow_service.update_settings(
+            sample_workflow, {"process_preference": {"auto_proceed": "stop_for_question"}})
+        assert result["success"]
+        assert result["data"]["process_preference"]["interaction_mode"] == "dao-represent-human-to-interact-for-questions-in-skill"
+
+    def test_interaction_mode_takes_precedence_over_auto_proceed(self, workflow_service, sample_workflow):
+        """When both keys provided, interaction_mode wins."""
+        result = workflow_service.update_settings(
+            sample_workflow, {"process_preference": {
+                "auto_proceed": "auto",
+                "interaction_mode": "interact-with-human"
+            }})
+        assert result["success"]
+        assert result["data"]["process_preference"]["interaction_mode"] == "interact-with-human"
+
+    def test_legacy_invalid_value_still_rejected(self, workflow_service, sample_workflow):
+        result = workflow_service.update_settings(
+            sample_workflow, {"process_preference": {"auto_proceed": "turbo"}})
+        assert not result["success"]
+        assert result["error"] == "INVALID_VALUE"
+
+    def test_migration_on_read_legacy_persisted_file(self, workflow_service, sample_workflow):
+        """Simulate a legacy file with auto_proceed key — should be migrated on read."""
+        path = workflow_service._get_workflow_path(sample_workflow)
+        state = json.loads(path.read_text())
+        state["global"]["process_preference"] = {"auto_proceed": "stop_for_question"}
+        path.write_text(json.dumps(state))
+
+        loaded = workflow_service.get_workflow(sample_workflow)
+        assert loaded["global"]["process_preference"]["interaction_mode"] == "dao-represent-human-to-interact-for-questions-in-skill"
+        assert "auto_proceed" not in loaded["global"]["process_preference"]
 
 
 # ==============================================================================
@@ -136,34 +191,33 @@ class TestSettingsEndpoint:
     def test_patch_settings_200(self, client):
         client.post("/api/workflow/create", json={"name": "api-test-044"})
         resp = client.patch("/api/workflow/api-test-044/settings",
-                            json={"process_preference": {"auto_proceed": "auto"}})
+                            json={"process_preference": {"interaction_mode": "dao-represent-human-to-interact"}})
         assert resp.status_code == 200
         data = resp.get_json()
         assert data["success"]
-        assert data["data"]["process_preference"]["auto_proceed"] == "auto"
+        assert data["data"]["process_preference"]["interaction_mode"] == "dao-represent-human-to-interact"
 
     def test_patch_settings_not_found_404(self, client):
         resp = client.patch("/api/workflow/nonexistent/settings",
-                            json={"process_preference": {"auto_proceed": "auto"}})
+                            json={"process_preference": {"interaction_mode": "dao-represent-human-to-interact"}})
         assert resp.status_code == 404
 
     def test_patch_settings_invalid_mode_400(self, client):
         client.post("/api/workflow/create", json={"name": "api-test-044b"})
         resp = client.patch("/api/workflow/api-test-044b/settings",
-                            json={"process_preference": {"auto_proceed": "invalid"}})
+                            json={"process_preference": {"interaction_mode": "invalid"}})
         assert resp.status_code == 400
 
     def test_get_workflow_includes_global(self, client):
         client.post("/api/workflow/create", json={"name": "api-test-044c"})
         resp = client.get("/api/workflow/api-test-044c")
         data = resp.get_json()
-        # GET wraps state in {"success": true, "data": {...}} or returns state directly
         state = data.get("data", data) if isinstance(data, dict) and "data" in data else data
         assert "global" in state
-        assert state["global"]["process_preference"]["auto_proceed"] == "manual"
+        assert state["global"]["process_preference"]["interaction_mode"] == "interact-with-human"
 
     def test_roundtrip_toggle(self, client):
-        """Simulate UI toggle: create → read default → change to auto → read back."""
+        """Simulate UI toggle: create → read default → change mode → read back."""
         client.post("/api/workflow/create", json={"name": "toggle-test"})
 
         # Read default
@@ -171,11 +225,11 @@ class TestSettingsEndpoint:
         state = resp.get_json()
         if "data" in state:
             state = state["data"]
-        assert state["global"]["process_preference"]["auto_proceed"] == "manual"
+        assert state["global"]["process_preference"]["interaction_mode"] == "interact-with-human"
 
-        # Toggle to auto
+        # Toggle to dao-represent-human-to-interact
         resp = client.patch("/api/workflow/toggle-test/settings",
-                            json={"process_preference": {"auto_proceed": "auto"}})
+                            json={"process_preference": {"interaction_mode": "dao-represent-human-to-interact"}})
         assert resp.status_code == 200
 
         # Read back
@@ -183,11 +237,11 @@ class TestSettingsEndpoint:
         state = resp.get_json()
         if "data" in state:
             state = state["data"]
-        assert state["global"]["process_preference"]["auto_proceed"] == "auto"
+        assert state["global"]["process_preference"]["interaction_mode"] == "dao-represent-human-to-interact"
 
-        # Toggle to stop_for_question
+        # Toggle to dao-represent-human-to-interact-for-questions-in-skill
         resp = client.patch("/api/workflow/toggle-test/settings",
-                            json={"process_preference": {"auto_proceed": "stop_for_question"}})
+                            json={"process_preference": {"interaction_mode": "dao-represent-human-to-interact-for-questions-in-skill"}})
         assert resp.status_code == 200
 
         # Read back
@@ -195,7 +249,7 @@ class TestSettingsEndpoint:
         state = resp.get_json()
         if "data" in state:
             state = state["data"]
-        assert state["global"]["process_preference"]["auto_proceed"] == "stop_for_question"
+        assert state["global"]["process_preference"]["interaction_mode"] == "dao-represent-human-to-interact-for-questions-in-skill"
 
 
 # ==============================================================================
@@ -211,7 +265,7 @@ class TestWorkflowTemplate:
         with open(path) as f:
             tpl = json.load(f)
         assert "global" in tpl
-        assert tpl["global"]["process_preference"]["auto_proceed"] == "manual"
+        assert tpl["global"]["process_preference"]["interaction_mode"] == "interact-with-human"
 
     def test_src_template_has_global(self):
         path = os.path.join(os.path.dirname(__file__), "..",
@@ -219,7 +273,7 @@ class TestWorkflowTemplate:
         with open(path) as f:
             tpl = json.load(f)
         assert "global" in tpl
-        assert tpl["global"]["process_preference"]["auto_proceed"] == "manual"
+        assert tpl["global"]["process_preference"]["interaction_mode"] == "interact-with-human"
 
 
 # ==============================================================================

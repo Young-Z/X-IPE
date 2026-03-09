@@ -12,7 +12,7 @@ Output:
   status: completed | blocked
   next_task_based_skill: Improve Code Quality Before Refactoring
   require_human_review: Yes
-  auto_proceed: {from input Auto Proceed}
+  interaction_mode: {from input Auto Proceed}
   task_output_links: [<path to analysis report>]
   
   # Dynamic attributes - MUST be passed to next task

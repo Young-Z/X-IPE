@@ -231,7 +231,7 @@ rules:
   - "Phases 2-4 may use <skip reason='...' /> when genuinely non-applicable"
   - "Phase names always bilingual (Chinese + English)"
   - "Phase order fixed: 1→2→3→4→5, no reordering"
-  - "auto_proceed in Phase 2: agent self-resolves via x-ipe-dao-end-user-representative (not skipped)"
+  - "interaction_mode in Phase 2: agent self-resolves via x-ipe-dao-end-user-representative (not skipped)"
 
 applies_to: x-ipe-task-based skills only (not tool, meta, or workflow-orchestration)
 
@@ -246,7 +246,7 @@ mapping_guidance:
       - "Write code / create file → Phase 5 (Practice)"
   - challenge: "My skill only has 2 steps"
     rule: "Phase 1 gets context gathering, Phase 5 gets execution. Phases 2-4 skip."
-  - challenge: "auto_proceed mode and Phase 2?"
+  - challenge: "interaction_mode mode and Phase 2?"
     rule: "Agent self-resolves via x-ipe-dao-end-user-representative. Phase 2 is not skipped."
 ```
 

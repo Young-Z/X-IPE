@@ -24,6 +24,22 @@ from x_ipe.tracing import x_ipe_tracing
 # Valid action statuses
 VALID_STATUSES = {"pending", "in_progress", "done", "skipped", "failed"}
 
+# Interaction mode: valid values and legacy migration maps (CR-002)
+INTERACTION_MODES = (
+    "interact-with-human",
+    "dao-represent-human-to-interact",
+    "dao-represent-human-to-interact-for-questions-in-skill",
+)
+
+LEGACY_VALUE_MAP = {
+    "manual": "interact-with-human",
+    "auto": "dao-represent-human-to-interact",
+    "stop_for_question": "dao-represent-human-to-interact-for-questions-in-skill",
+}
+
+LEGACY_KEY = "auto_proceed"
+NEW_KEY = "interaction_mode"
+
 
 def _load_workflow_template(project_root: str = None) -> dict:
     """Load workflow template from x-ipe-docs/config/workflow-template.json."""
@@ -287,13 +303,25 @@ class WorkflowManagerService:
         # Merge process_preference if provided
         pp = settings.get("process_preference")
         if pp:
-            valid_modes = ("manual", "auto", "stop_for_question")
-            ap = pp.get("auto_proceed")
-            if ap and ap not in valid_modes:
-                return {"success": False, "error": "INVALID_VALUE",
-                        "message": f"auto_proceed must be one of: {valid_modes}"}
+            # Key migration: auto_proceed → interaction_mode
+            if LEGACY_KEY in pp and NEW_KEY not in pp:
+                pp[NEW_KEY] = pp.pop(LEGACY_KEY)
+            elif LEGACY_KEY in pp and NEW_KEY in pp:
+                pp.pop(LEGACY_KEY)  # interaction_mode takes precedence
+
+            if NEW_KEY in pp:
+                mode = pp[NEW_KEY]
+                mode = LEGACY_VALUE_MAP.get(mode, mode)
+                if mode not in INTERACTION_MODES:
+                    return {"success": False, "error": "INVALID_VALUE",
+                            "message": f"interaction_mode must be one of: {INTERACTION_MODES}"}
+                pp[NEW_KEY] = mode
+                pp.pop(LEGACY_KEY, None)
+
             state["global"].setdefault("process_preference", {})
             state["global"]["process_preference"].update(pp)
+            # Remove legacy key from persisted data
+            state["global"]["process_preference"].pop(LEGACY_KEY, None)
 
         state["last_activity"] = _now_iso()
         self._write_state(name, state)
@@ -759,6 +787,8 @@ class WorkflowManagerService:
             self._write_state(name, state)
         if self._migrate_sync_feature_actions(state):
             self._write_state(name, state)
+        if self._migrate_interaction_mode(state):
+            self._write_state(name, state)
         return state
 
     def _write_state(self, name: str, state: dict):
@@ -1076,4 +1106,22 @@ class WorkflowManagerService:
                 for a in obsolete:
                     del current_actions[a]
                     changed = True
+        return changed
+
+    def _migrate_interaction_mode(self, state: dict) -> bool:
+        """Migrate legacy auto_proceed key/values to interaction_mode on read.
+
+        Returns True if state was modified (caller should persist).
+        """
+        pref = state.get("global", {}).get("process_preference", {})
+        if not pref:
+            return False
+        changed = False
+        if LEGACY_KEY in pref:
+            value = pref.pop(LEGACY_KEY)
+            pref[NEW_KEY] = LEGACY_VALUE_MAP.get(value, value)
+            changed = True
+        elif NEW_KEY in pref and pref[NEW_KEY] in LEGACY_VALUE_MAP:
+            pref[NEW_KEY] = LEGACY_VALUE_MAP[pref[NEW_KEY]]
+            changed = True
         return changed
