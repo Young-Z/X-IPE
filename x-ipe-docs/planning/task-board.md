@@ -6,6 +6,10 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-792 | Ideation | Refine idea 034 CR-'道' for x-ipe — rename auto_proceed to End-User Representative Mode, update interaction_mode enum, UI dropdown label, and verify logic. Feedback-20260309-111628 | Ember 🔥 | 🔄 in_progress | 03-09-2026 03:59:00 | - | - |
+| TASK-791 | Bug Fix | Refactoring dropdown items show no text — quality-evaluation.js reads opt.label/opt.command directly but config now uses prompt-details format. Evaluate button command also broken. Feedback-20260308-162624 | Sage 🧠 | ✅ done | 03-08-2026 08:43:00 | quality-evaluation.js, quality-evaluation.test.js | - |
+| TASK-790 | Bug Fix | Submit Idea button stays disabled when idea name is auto-filled — form validation not triggered by programmatic value. Feedback-20260308-094212 | Nova ✨ | ✅ done | 03-08-2026 01:48:00 | compose-idea-modal.js, compose-idea-modal.test.js | - |
+| TASK-789 | Change Request | Remove sidebar hover auto-expand behavior — sections should only expand/collapse on click, not on hover. Feedback-20260307-232835 | Frost ❄️ | 🔄 in_progress | 03-07-2026 15:29:00 | - | - |
 | TASK-788 | Change Request | Append --execution@{mode} to instruction CLI command based on workflow auto-proceed dropdown value (auto → keep running, stop_for_question → keep running stop only on question). Feedback-20260307-190453 | Ember 🔥 | ✅ done | 03-07-2026 11:10:00 | action-execution-modal.js, action-execution-modal-cr001.test.js, CR-001.md | - |
 | TASK-787 | Bug Fix | Refine Idea modal ACTION CONTEXT dropdowns not loading candidates — raw-idea candidates changed from ideas-folder to refined-ideas-folder per user preference. Feedback-20260307-103705 | Pulse 🔮 | ✅ done | 03-07-2026 10:48:00 | workflow-template.json | - |
 | TASK-786 | Bug Fix | In-progress pulse animation persists on action buttons after action completes (turns green/done). _runningActions Set never cleared. Feedback-20260307-094938 | Drift 🌊 | ✅ done | 03-07-2026 09:56:00 | workflow-stage.js, workflow-stage-running.test.js | - |
@@ -377,8 +381,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 64
-- **In Progress:** 3
+- **Total Active:** 65
+- **In Progress:** 4
 - **Pending:** 1
 - **Deferred:** 0
 - **Completed (archived):** 465

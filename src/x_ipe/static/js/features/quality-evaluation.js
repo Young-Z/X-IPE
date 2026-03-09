@@ -135,6 +135,7 @@ class QualityEvaluationView {
 
     renderEmptyState() {
         const evaluateConfig = this.config?.evaluation?.evaluate || this.getDefaultConfig().evaluation.evaluate;
+        const resolved = this._resolvePromptDetails(evaluateConfig) || { label: evaluateConfig.label };
         
         this.container.innerHTML = `
             <div class="quality-eval-view">
@@ -149,7 +150,7 @@ class QualityEvaluationView {
                     </p>
                     <button class="btn btn-evaluate" id="quality-empty-cta">
                         <i class="bi ${evaluateConfig.icon}"></i>
-                        ${evaluateConfig.label}
+                        ${resolved.label}
                     </button>
                 </div>
             </div>
@@ -190,12 +191,15 @@ class QualityEvaluationView {
     }
 
     renderRefactoringDropdown(options) {
-        const items = options.map(opt => `
-            <div class="dropdown-item" data-command="${this.escapeHtml(opt.command)}">
+        const items = options.map(opt => {
+            const resolved = this._resolvePromptDetails(opt) || { label: '', command: '' };
+            return `
+            <div class="dropdown-item" data-command="${this.escapeHtml(resolved.command)}">
                 <i class="bi ${opt.icon}"></i>
-                <span>${this.escapeHtml(opt.label)}</span>
+                <span>${this.escapeHtml(resolved.label)}</span>
             </div>
-        `).join('');
+        `;
+        }).join('');
         
         return `
             <div class="dropdown-refactoring">
@@ -306,7 +310,8 @@ class QualityEvaluationView {
 
     handleEvaluateClick() {
         const evaluateConfig = this.config?.evaluation?.evaluate || this.getDefaultConfig().evaluation.evaluate;
-        const command = this.replacePlaceholders(evaluateConfig.command);
+        const resolved = this._resolvePromptDetails(evaluateConfig) || { command: evaluateConfig.command };
+        const command = this.replacePlaceholders(resolved.command);
         this.sendToConsole(command);
     }
 
@@ -374,6 +379,24 @@ class QualityEvaluationView {
                 alert(`Copy this command to console:\n${command}`);
             });
         }
+    }
+
+    /**
+     * Resolve label/command from prompt-details (v3.0) or top-level (v2.0).
+     * Fallback chain: prompt-details[lang] → prompt-details["en"] → top-level label/command.
+     */
+    _resolvePromptDetails(prompt, language = 'en') {
+        if (prompt['prompt-details'] && Array.isArray(prompt['prompt-details'])) {
+            const match = prompt['prompt-details'].find(d => d.language === language);
+            if (match) return { label: match.label, command: match.command };
+
+            const en = prompt['prompt-details'].find(d => d.language === 'en');
+            if (en) return { label: en.label, command: en.command };
+        }
+        if (prompt.label && prompt.command) {
+            return { label: prompt.label, command: prompt.command };
+        }
+        return null;
     }
 
     escapeHtml(text) {
