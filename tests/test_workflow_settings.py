@@ -306,8 +306,8 @@ class TestSkillTemplateUpdate:
             assert "process_preference" in content, \
                 f"{os.path.basename(os.path.dirname(path))} missing process_preference"
 
-    def test_skill_count_is_22(self):
-        assert len(self._get_skill_files()) == 22
+    def test_skill_count_is_19(self):
+        assert len(self._get_skill_files()) == 19
 
 
 # ==============================================================================
@@ -336,6 +336,6 @@ class TestOrchestratorUpdate:
         assert "auto" in content
         assert "stop_for_question" in content
 
-    def test_references_decision_making_skill(self):
+    def test_references_dao_representative_skill(self):
         content = self._read_orchestrator()
-        assert "x-ipe-tool-decision-making" in content
+        assert "x-ipe-dao-end-user-representative" in content
