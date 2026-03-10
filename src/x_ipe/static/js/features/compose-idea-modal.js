@@ -502,6 +502,10 @@ class ComposeIdeaModal {
                 const content = this.easyMDE.value();
                 const blob = new Blob([content], { type: 'text/markdown' });
                 formData.append('files', blob, 'new idea.md');
+                // Also include any files added via upload tab
+                for (const file of this.pendingFiles) {
+                    formData.append('files', file);
+                }
             } else {
                 for (const file of this.pendingFiles) {
                     formData.append('files', file);

@@ -216,8 +216,31 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
       const DV = globalThis.DeliverableViewer;
       expect(DV).toBeDefined();
       const viewer = new DV({ workflowName: 'hello' });
-      await viewer.showPreview('image.png');
+      // Use a non-image binary file (e.g. .docx) to test the 415 fallback
+      await viewer.showPreview('document.docx');
       expect(document.querySelector('.deliverable-preview').textContent).toContain('Binary');
+    });
+
+    it('should render image files with an img tag instead of fetching as text', async () => {
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      await viewer.showPreview('photo.png');
+      const img = document.querySelector('.deliverable-preview img');
+      expect(img).not.toBeNull();
+      expect(img.src).toContain('api/ideas/file');
+      expect(img.src).toContain('photo.png');
+    });
+
+    it('should render PDF files with an iframe', async () => {
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      await viewer.showPreview('report.pdf');
+      const iframe = document.querySelector('.deliverable-preview iframe');
+      expect(iframe).not.toBeNull();
+      expect(iframe.src).toContain('api/ideas/file');
+      expect(iframe.src).toContain('report.pdf');
     });
   });
 

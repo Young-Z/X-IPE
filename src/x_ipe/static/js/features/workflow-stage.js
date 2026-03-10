@@ -494,21 +494,30 @@ const workflowStage = {
         if (actionKey === 'compose_idea' && typeof ComposeIdeaModal !== 'undefined') {
             const stages = this._buildStagesView(wfData);
             const action = (stages.ideation && stages.ideation.actions && stages.ideation.actions.compose_idea) || {};
-            const rawDeliverables = action.deliverables || [];
-            const deliverables = Array.isArray(rawDeliverables) ? rawDeliverables : Object.values(rawDeliverables);
+            const rawDeliverables = action.deliverables || {};
 
-            // Auto-detect folder path and file from deliverables
+            // Extract file and folder from keyed deliverables (dict) or legacy array
             let folderPath = '';
             let folderName = '';
             let filePath = '';
-            for (const d of deliverables) {
-                if (d.endsWith('.md')) {
-                    filePath = d;
-                    const parts = d.split('/');
-                    parts.pop(); // remove filename
-                    folderPath = parts.join('/');
-                    folderName = parts[parts.length - 1] || '';
+            if (!Array.isArray(rawDeliverables) && rawDeliverables['raw-idea']) {
+                filePath = rawDeliverables['raw-idea'];
+                folderPath = rawDeliverables['ideas-folder'] || '';
+            } else {
+                const deliverables = Array.isArray(rawDeliverables) ? rawDeliverables : Object.values(rawDeliverables);
+                for (const d of deliverables) {
+                    if (typeof d === 'string' && d.includes('.')) {
+                        filePath = filePath || d;
+                    }
                 }
+                if (filePath) {
+                    const parts = filePath.split('/');
+                    parts.pop();
+                    folderPath = parts.join('/');
+                }
+            }
+            if (folderPath) {
+                folderName = folderPath.split('/').pop() || '';
             }
 
             const modal = new ComposeIdeaModal({

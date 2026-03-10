@@ -13,7 +13,7 @@ Provides:
 """
 import os
 from pathlib import Path
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request, current_app, send_file
 
 from x_ipe.services import IdeasService, SkillsService
 from x_ipe.tracing import x_ipe_tracing
@@ -565,16 +565,17 @@ def get_idea_file():
     GET /api/ideas/file?path=<relative-path>
 
     Return raw file content. Path must be within project root.
+    Serves text files as plain text and known binary types (images, PDFs) natively.
 
     Query params:
         - path: string (required) - Relative path from project root
 
     Response:
-        - 200: plain text file content
+        - 200: file content (text or binary with appropriate Content-Type)
         - 400: missing path parameter
         - 403: path outside project root
         - 404: file not found
-        - 415: binary file (cannot read as text)
+        - 415: unsupported binary file
     """
     rel_path = request.args.get('path', '')
     if not rel_path:
@@ -589,6 +590,13 @@ def get_idea_file():
 
     if not target.is_file():
         return jsonify({'error': 'File not found'}), 404
+
+    # Serve known binary types with correct Content-Type
+    import mimetypes
+    mime_type, _ = mimetypes.guess_type(str(target))
+    binary_prefixes = ('image/', 'application/pdf')
+    if mime_type and any(mime_type.startswith(p) for p in binary_prefixes):
+        return send_file(target, mimetype=mime_type)
 
     try:
         content = target.read_text(encoding='utf-8')

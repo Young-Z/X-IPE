@@ -169,6 +169,32 @@ class DeliverableViewer {
         requestAnimationFrame(() => backdrop.classList.add('active'));
         this._previewContainer = preview;
 
+        const ext = filePath.split('.').pop().toLowerCase();
+
+        // Handle image files directly (no text API needed)
+        if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'bmp', 'ico'].includes(ext)) {
+            const img = document.createElement('img');
+            img.src = `/api/ideas/file?path=${encodeURIComponent(filePath)}`;
+            img.alt = filePath.split('/').pop();
+            img.style.maxWidth = '100%';
+            img.style.maxHeight = '100%';
+            img.style.objectFit = 'contain';
+            img.onerror = () => { content.textContent = 'Cannot preview this image'; };
+            content.appendChild(img);
+            return;
+        }
+
+        // Handle PDF files directly
+        if (ext === 'pdf') {
+            const iframe = document.createElement('iframe');
+            iframe.src = `/api/ideas/file?path=${encodeURIComponent(filePath)}`;
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            content.appendChild(iframe);
+            return;
+        }
+
         try {
             const resp = await fetch(`/api/ideas/file?path=${encodeURIComponent(filePath)}`);
             if (!resp.ok) {

@@ -281,3 +281,84 @@ describe('IdeaNameValidator — sanitize with Unicode', () => {
     expect(result).not.toMatch(/^-|-$/);
   });
 });
+
+describe('ComposeIdeaModal — upload files included in compose submit', () => {
+  let modal;
+  let capturedFormData;
+
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    capturedFormData = null;
+    globalThis.EasyMDE = class {
+      constructor() { this.codemirror = { on: () => {} }; }
+      value() { return 'My idea content'; }
+      toTextArea() {}
+    };
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      if (url === '/api/ideas/upload' && opts?.body instanceof FormData) {
+        capturedFormData = opts.body;
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ folder_path: 'x-ipe-docs/ideas/wf-001-test', files_uploaded: ['new idea.md', 'extra.txt'] })
+        };
+      }
+      return { ok: true, json: async () => ({ tree: [], success: true }), text: async () => '' };
+    });
+    globalThis.marked = { parse: (s) => s };
+
+    modal = new ComposeIdeaModal({ workflowName: 'test' });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.initEasyMDE();
+    document.body.appendChild(modal.overlay);
+  });
+
+  it('includes pendingFiles when submitting from compose tab', async () => {
+    // Simulate adding an uploaded file
+    const fakeFile = new File(['hello'], 'extra.txt', { type: 'text/plain' });
+    modal.pendingFiles = [fakeFile];
+    modal.activeTab = 'compose';
+    modal.namer.generate = vi.fn(async () => 'wf-001-test');
+
+    // Set valid name and enable submit
+    modal.nameInput.value = 'test-idea';
+    modal.nameValid = true;
+    modal.submitBtn.disabled = false;
+    modal.validator.validate = vi.fn(() => ({ valid: true, sanitized: 'test-idea' }));
+
+    await modal.handleSubmit();
+
+    expect(capturedFormData).not.toBeNull();
+    const allFiles = capturedFormData.getAll('files');
+    // Should have both: compose blob (new idea.md) AND the uploaded file
+    expect(allFiles.length).toBe(2);
+    expect(allFiles[0].name).toBe('new idea.md');
+    expect(allFiles[1].name).toBe('extra.txt');
+  });
+});
+
+describe('ComposeIdeaModal — edit mode stores non-.md file paths', () => {
+  it('stores .pdf file path for edit mode', () => {
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/My Idea/design.pdf',
+      folderPath: 'x-ipe-docs/ideas/My Idea',
+      folderName: 'My Idea',
+    });
+    expect(modal.filePath).toBe('x-ipe-docs/ideas/My Idea/design.pdf');
+    expect(modal.editMode).toBe(true);
+  });
+
+  it('stores .txt file path for edit mode', () => {
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/My Idea/notes.txt',
+      folderPath: 'x-ipe-docs/ideas/My Idea',
+      folderName: 'My Idea',
+    });
+    expect(modal.filePath).toBe('x-ipe-docs/ideas/My Idea/notes.txt');
+  });
+});
