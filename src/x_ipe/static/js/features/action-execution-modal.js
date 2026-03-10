@@ -889,7 +889,10 @@ class ActionExecutionModal {
     }
 
     _formatActionKey(key) {
-        return (key || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        const ACRONYMS = new Set(['uiux', 'api', 'ui', 'ux', 'cr', 'dao', 'cli', 'mcp']);
+        return (key || '').split('_').map(w =>
+            ACRONYMS.has(w) ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1)
+        ).join(' ');
     }
 
     _escapeHtml(text) {

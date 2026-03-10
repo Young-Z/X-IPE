@@ -297,4 +297,38 @@ describe('FEATURE-038-A: Action Execution Modal', () => {
       expect(btn.classList.contains('in-progress')).toBe(true);
     });
   });
+
+  describe('BUG-002: _formatActionKey acronym handling', () => {
+    it('should preserve UIUX as uppercase acronym in "reference_uiux"', () => {
+      const Modal = globalThis.ActionExecutionModal;
+      if (!Modal) return;
+      const modal = new Modal({ actionKey: 'reference_uiux' });
+      const result = modal._formatActionKey('reference_uiux');
+      expect(result).toBe('Reference UIUX');
+    });
+
+    it('should title-case normal words without acronyms', () => {
+      const Modal = globalThis.ActionExecutionModal;
+      if (!Modal) return;
+      const modal = new Modal({ actionKey: 'compose_idea' });
+      const result = modal._formatActionKey('compose_idea');
+      expect(result).toBe('Compose Idea');
+    });
+
+    it('should handle single-word keys', () => {
+      const Modal = globalThis.ActionExecutionModal;
+      if (!Modal) return;
+      const modal = new Modal({ actionKey: 'implementation' });
+      const result = modal._formatActionKey('implementation');
+      expect(result).toBe('Implementation');
+    });
+
+    it('should handle empty or null keys', () => {
+      const Modal = globalThis.ActionExecutionModal;
+      if (!Modal) return;
+      const modal = new Modal({ actionKey: '' });
+      expect(modal._formatActionKey('')).toBe('');
+      expect(modal._formatActionKey(null)).toBe('');
+    });
+  });
 });
