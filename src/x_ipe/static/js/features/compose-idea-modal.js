@@ -326,6 +326,12 @@ class ComposeIdeaModal {
 
         // Name validation
         this.validator.bindLiveValidation();
+
+        // Re-trigger validation if name was pre-filled before listener was bound
+        // Skip in edit mode — folder preview is already set correctly
+        if (!this.editMode && this.nameInput.value.trim()) {
+            this.nameInput.dispatchEvent(new Event('input'));
+        }
     }
 
     /* --- Mode & Tab Switching --------------------------------------------- */

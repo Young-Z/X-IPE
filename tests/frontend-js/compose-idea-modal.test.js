@@ -158,6 +158,49 @@ describe('ComposeIdeaModal — _linkedPath tracking', () => {
   });
 });
 
+describe('ComposeIdeaModal — workflow name auto-fill validation (TASK-790)', () => {
+  let modal;
+
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    globalThis.EasyMDE = class { constructor() {} value() { return 'some content'; } toTextArea() {} };
+    globalThis.fetch = vi.fn(async () => ({ ok: true, json: async () => ({ tree: [] }), text: async () => '' }));
+    globalThis.marked = { parse: (s) => s };
+  });
+
+  it('sets nameValid=true when workflowName auto-fills the name input', () => {
+    modal = new ComposeIdeaModal({ workflowName: 'workflow-test' });
+    modal.createDOM();
+    modal.bindEvents();
+    document.body.appendChild(modal.overlay);
+
+    expect(modal.nameInput.value).toBe('workflow-test');
+    expect(modal.nameValid).toBe(true);
+  });
+
+  it('enables Submit button when workflowName is auto-filled and content exists', () => {
+    modal = new ComposeIdeaModal({ workflowName: 'workflow-test' });
+    modal.createDOM();
+    modal.bindEvents();
+    document.body.appendChild(modal.overlay);
+
+    // Simulate EasyMDE having content
+    modal.easyMDE = { value: () => 'some content' };
+    modal.updateSubmitState();
+
+    expect(modal.submitBtn.disabled).toBe(false);
+  });
+
+  it('updates word counter when workflowName is auto-filled', () => {
+    modal = new ComposeIdeaModal({ workflowName: 'workflow-test' });
+    modal.createDOM();
+    modal.bindEvents();
+    document.body.appendChild(modal.overlay);
+
+    expect(modal.wordCounter.textContent).toContain('1');
+  });
+});
+
 describe('AutoFolderNamer — incremental wf-NNN naming', () => {
   it('extracts tree array from API response and increments highest wf number', async () => {
     const namer = new AutoFolderNamer();

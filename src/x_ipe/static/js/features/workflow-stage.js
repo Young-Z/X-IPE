@@ -492,9 +492,10 @@ const workflowStage = {
      */
     _dispatchEditModalAction(wfName, actionKey, wfData) {
         if (actionKey === 'compose_idea' && typeof ComposeIdeaModal !== 'undefined') {
-            const stages = wfData.stages || {};
+            const stages = this._buildStagesView(wfData);
             const action = (stages.ideation && stages.ideation.actions && stages.ideation.actions.compose_idea) || {};
-            const deliverables = action.deliverables || [];
+            const rawDeliverables = action.deliverables || [];
+            const deliverables = Array.isArray(rawDeliverables) ? rawDeliverables : Object.values(rawDeliverables);
 
             // Auto-detect folder path and file from deliverables
             let folderPath = '';
