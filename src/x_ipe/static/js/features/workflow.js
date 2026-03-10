@@ -378,8 +378,13 @@ const workflow = {
             const modal = document.createElement('div');
             modal.className = 'workflow-modal';
             modal.innerHTML = `
-                <h3>${title}</h3>
-                <p style="color:#94a3b8;margin:8px 0 16px">${message}</p>
+                <div class="workflow-modal-header">
+                    <span class="workflow-modal-title">${title}</span>
+                    <button class="workflow-modal-close" id="wf-confirm-close">×</button>
+                </div>
+                <div class="workflow-modal-body">
+                    <p style="color:#94a3b8;margin:0">${message}</p>
+                </div>
                 <div class="workflow-modal-actions">
                     <button id="wf-confirm-cancel">Cancel</button>
                     <button id="wf-confirm-ok" class="btn-primary btn-danger">Delete</button>
@@ -389,6 +394,7 @@ const workflow = {
 
             const cleanup = (result) => { overlay.remove(); resolve(result); };
             document.getElementById('wf-confirm-cancel').onclick = () => cleanup(false);
+            document.getElementById('wf-confirm-close').onclick = () => cleanup(false);
             document.getElementById('wf-confirm-ok').onclick = () => cleanup(true);
             overlay.onclick = (e) => { if (e.target === overlay) cleanup(false); };
         });

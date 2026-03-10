@@ -92,6 +92,41 @@ describe('workflow panel action menu behavior', () => {
   });
 });
 
+describe('delete confirm modal structure', () => {
+  afterEach(() => {
+    document.body.innerHTML = '<div id="workflow-panels"></div>';
+  });
+
+  it('has workflow-modal-header with title and close button', async () => {
+    const promise = workflow._showConfirmModal('Delete?', 'Cannot undo.');
+    const modal = document.querySelector('.workflow-modal');
+    expect(modal).not.toBeNull();
+    const header = modal.querySelector('.workflow-modal-header');
+    expect(header).not.toBeNull();
+    expect(header.querySelector('.workflow-modal-title').textContent).toBe('Delete?');
+    expect(header.querySelector('.workflow-modal-close')).not.toBeNull();
+    document.getElementById('wf-confirm-cancel').click();
+    await promise;
+  });
+
+  it('has workflow-modal-body with message', async () => {
+    const promise = workflow._showConfirmModal('Delete?', 'Cannot undo.');
+    const body = document.querySelector('.workflow-modal .workflow-modal-body');
+    expect(body).not.toBeNull();
+    expect(body.textContent).toContain('Cannot undo.');
+    document.getElementById('wf-confirm-cancel').click();
+    await promise;
+  });
+
+  it('close button dismisses the modal (resolves false)', async () => {
+    const promise = workflow._showConfirmModal('Delete?', 'Nope');
+    document.getElementById('wf-confirm-close').click();
+    const result = await promise;
+    expect(result).toBe(false);
+    expect(document.querySelector('.workflow-modal-overlay')).toBeNull();
+  });
+});
+
 describe('TASK-785: interaction mode dropdown in panel header', () => {
   let panel;
 
