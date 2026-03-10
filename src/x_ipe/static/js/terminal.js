@@ -129,7 +129,7 @@
             this._cliAdapter = null;
 
             this._loadAutoExecuteConfig();
-            this._loadCliAdapterConfig();
+            this._cliAdapterReady = this._loadCliAdapterConfig();
             this._setupEventListeners();
             this._setupResizeObserver();
         }
@@ -787,7 +787,7 @@
                     .replace('{escaped_prompt}', escaped)
                     .replace(/\s+/g, ' ').trim();
             }
-            return `copilot --allow-all-tools -i "${escaped}"`;
+            return `copilot --allow-all-tools --allow-all-paths -i "${escaped}"`;
         }
 
         _waitForCopilotReady(sessionKey, callback, maxAttempts = 30) {
@@ -1194,6 +1194,7 @@
             this.explorerWidth = EXPLORER_DEFAULT_WIDTH;
             this.panelHeight = 300;
             this._bindEvents();
+            this._updateCopilotBtn();
         }
 
         _bindEvents() {
@@ -1366,6 +1367,18 @@
 
         // -- Copilot command --------------------------------------------------
 
+        _updateCopilotBtn() {
+            if (!this.copilotCmdBtn) return;
+            const ready = this.terminalManager._cliAdapterReady;
+            if (!ready) return;
+            ready.then(() => {
+                const adapter = this.terminalManager._cliAdapter;
+                if (adapter && adapter.display_name) {
+                    this.copilotCmdBtn.title = `Insert ${adapter.display_name} command`;
+                }
+            });
+        }
+
         _insertCopilotCommand() {
             if (this.terminalManager.sessions.size === 0) this.terminalManager.addSession();
             const s = this.terminalManager._getActiveSession();
@@ -1373,7 +1386,7 @@
             const adapter = this.terminalManager._cliAdapter;
             const cmd = adapter
                 ? `${adapter.command}${adapter.run_args ? ' ' + adapter.run_args : ''}`.trim()
-                : 'copilot --allow-all-tools';
+                : 'copilot --allow-all-tools --allow-all-paths';
             this.terminalManager._sendWithTypingEffect(s.key, cmd, null);
         }
     }

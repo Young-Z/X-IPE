@@ -92,3 +92,59 @@
 - **Confidence:** 0.92
 - **Fallback:** false
 - **Skills:** x-ipe-task-based-bug-fix (strong)
+
+### DAO-ENTRY-20260310-071630
+- **Task:** TASK-818 (pending creation)
+- **Feature:** N/A
+- **Input:** "Get uiux feedback — test the functions within the whole workflow mode, if any bug please fix it. Feedback-20260310-151522"
+- **Disposition:** instruction
+- **Content:** Functional test of Engineering Workflows page (workflow mode) — systematically test workflow panel functions (stage navigation, feature lanes, action cards, interaction mode dropdown, dependencies, etc.) and fix any bugs found. Route to x-ipe-task-based-bug-fix.
+- **Rationale:** User provides UIUX feedback with screenshot of workflow mode page and requests comprehensive functional testing + bug fixing. Single instruction unit — test and fix are tightly coupled. Strong match to bug-fix skill.
+- **Confidence:** 0.82
+- **Fallback:** false
+- **Skills:** x-ipe-task-based-bug-fix (strong)
+
+## DAO-019
+- **Timestamp:** 2026-03-10T07:45:48Z
+- **Task ID:** TASK-819
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A (initial user message)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.85
+
+### Message
+> Get uiux feedback, please visit feedback folder x-ipe-docs/uiux-feedback/Feedback-20260310-154318 to get details. Feedback: The copilot button (#copilot-cmd-btn) should also be based on the CLI chosen (copilot, opencode, claude-code), and for copilot CLI it's not only all resources, but also all paths '--allow-all-paths'.
+
+### Guidance Returned
+> This is a bug in the #copilot-cmd-btn button: it does not adapt its generated command to the selected CLI tool, and for Copilot CLI it is missing the --allow-all-paths flag. The agent should use the bug-fix skill to diagnose and fix the button's command generation logic so it varies per CLI choice and includes the correct flags for each.
+
+### Rationale
+> The feedback clearly identifies a specific UI element (#copilot-cmd-btn) that produces incorrect CLI commands. This is a concrete, reproducible bug — the button should generate different commands based on the CLI selection. The bug-fix skill is the right match: understand → reproduce → diagnose → test → fix → verify.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "strong"
+>     reason: "Button generates incorrect CLI command — does not adapt to selected CLI tool and is missing --allow-all-paths for Copilot CLI"
+>     execution_steps:
+>       - phase: "1. Understand"
+>         step: "1. Read bug description, categorize severity"
+>       - phase: "2. Reproduce"
+>         step: "2. Follow steps to confirm bug occurs"
+>       - phase: "3. Diagnose"
+>         step: "3. Trace root cause, check technical design"
+>       - phase: "4. Design Fix"
+>         step: "4. Identify fix options, choose minimal fix"
+>       - phase: "5. Conflict Analysis"
+>         step: "5. Detect conflicts with existing logic"
+>       - phase: "6. Write Test"
+>         step: "6. Create failing test that reproduces bug"
+>       - phase: "7. Implement"
+>         step: "7. Write minimum code to fix bug"
+>       - phase: "8. Verify"
+>         step: "8. Confirm bug fixed, all tests pass"
+
+### Follow-up
+> None

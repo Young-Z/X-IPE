@@ -1,8 +1,8 @@
 /**
- * TASK-673: Terminal CLI Adapter — _buildCopilotCmd uses active CLI adapter
+ * TASK-673 / TASK-819: Terminal CLI Adapter
  *
- * Tests that _buildCopilotCmd and _insertCopilotCommand use the CLI adapter
- * config instead of hardcoding 'copilot'.
+ * Tests that _buildCopilotCmd, _insertCopilotCommand, and the copilot-cmd-btn
+ * button title all use the active CLI adapter config instead of hardcoding 'copilot'.
  */
 import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest';
 import { readFileSync } from 'fs';
@@ -12,11 +12,18 @@ import vm from 'vm';
 const JS_PATH = resolve(import.meta.dirname, '../../src/x_ipe/static/js/terminal.js');
 
 beforeAll(() => {
-  // Provide minimal DOM stubs required by TerminalManager constructor
+  // Provide minimal DOM stubs required by TerminalManager + TerminalPanel constructors
   document.body.innerHTML = `
     <div id="terminal-content"></div>
     <div id="terminal-status-indicator"></div>
     <div id="terminal-status-text"></div>
+    <div id="terminal-panel">
+      <div id="terminal-header">
+        <button id="terminal-toggle"></button>
+        <button id="copilot-cmd-btn" title="Insert Copilot command"><i class="bi bi-robot"></i></button>
+      </div>
+      <div id="terminal-resize-handle"></div>
+    </div>
   `;
 
   // Stub ResizeObserver
@@ -117,7 +124,7 @@ describe('TerminalManager — _buildCopilotCmd uses CLI adapter', () => {
           json: async () => ({
             success: true,
             command: 'copilot',
-            run_args: '--allow-all-tools',
+            run_args: '--allow-all-tools --allow-all-paths',
             inline_prompt_flag: '-i',
             prompt_format: '{command} {run_args} {inline_prompt_flag} "{escaped_prompt}"',
           }),
@@ -137,5 +144,90 @@ describe('TerminalManager — _buildCopilotCmd uses CLI adapter', () => {
     expect(cmd).toContain('--allow-all-tools');
     expect(cmd).toContain('-i');
     expect(cmd).toContain('hello world');
+  });
+
+  it('exposes _cliAdapterReady promise', () => {
+    expect(tm._cliAdapterReady).toBeInstanceOf(Promise);
+  });
+});
+
+describe('TerminalPanel — copilot-cmd-btn adapts to active CLI', () => {
+  function stubFetchFor(adapterName, displayName, command, runArgs = '') {
+    globalThis.fetch = vi.fn(async (url) => {
+      if (url === '/api/config/cli-adapter') {
+        return {
+          ok: true,
+          json: async () => ({
+            success: true,
+            adapter_name: adapterName,
+            display_name: displayName,
+            command,
+            run_args: runArgs,
+            inline_prompt_flag: '-i',
+            prompt_format: '{command} {run_args} {inline_prompt_flag} "{escaped_prompt}"',
+          }),
+        };
+      }
+      if (url === '/api/config') {
+        return { ok: true, json: async () => ({}) };
+      }
+      return { ok: false };
+    });
+  }
+
+  it('updates button title to reflect opencode adapter', async () => {
+    stubFetchFor('opencode', 'OpenCode CLI', 'opencode');
+    const tm = new window.TerminalManager('terminal-content');
+    const panel = new window.TerminalPanel(tm);
+    await tm._cliAdapterReady;
+    // Allow microtask to settle
+    await new Promise(r => setTimeout(r, 50));
+    expect(panel.copilotCmdBtn.title).toContain('OpenCode');
+  });
+
+  it('updates button title to reflect copilot adapter', async () => {
+    stubFetchFor('copilot', 'GitHub Copilot CLI', 'copilot', '--allow-all-tools --allow-all-paths');
+    const tm = new window.TerminalManager('terminal-content');
+    const panel = new window.TerminalPanel(tm);
+    await tm._cliAdapterReady;
+    await new Promise(r => setTimeout(r, 50));
+    expect(panel.copilotCmdBtn.title).toContain('Copilot');
+  });
+
+  it('updates button title to reflect claude-code adapter', async () => {
+    stubFetchFor('claude-code', 'Claude Code CLI', 'claude');
+    const tm = new window.TerminalManager('terminal-content');
+    const panel = new window.TerminalPanel(tm);
+    await tm._cliAdapterReady;
+    await new Promise(r => setTimeout(r, 50));
+    expect(panel.copilotCmdBtn.title).toContain('Claude');
+  });
+
+  it('keeps default title if adapter fails to load', async () => {
+    globalThis.fetch = vi.fn(async () => ({ ok: false }));
+    const btn = document.getElementById('copilot-cmd-btn');
+    btn.title = 'Insert Copilot command';
+    const tm = new window.TerminalManager('terminal-content');
+    const panel = new window.TerminalPanel(tm);
+    await tm._cliAdapterReady;
+    await new Promise(r => setTimeout(r, 50));
+    expect(panel.copilotCmdBtn.title).toBe('Insert Copilot command');
+  });
+
+  it('_insertCopilotCommand uses adapter command + run_args', async () => {
+    stubFetchFor('copilot', 'GitHub Copilot CLI', 'copilot', '--allow-all-tools --allow-all-paths');
+    const tm = new window.TerminalManager('terminal-content');
+    const panel = new window.TerminalPanel(tm);
+    await tm._cliAdapterReady;
+    await new Promise(r => setTimeout(r, 50));
+    // Mock _sendWithTypingEffect to capture the command
+    let captured = null;
+    tm._sendWithTypingEffect = (_key, cmd) => { captured = cmd; };
+    // Need an active session
+    tm.sessions = new Map([['s1', { key: 's1', socket: { connected: true } }]]);
+    tm.activeSessionKey = 's1';
+    tm._getActiveSession = () => tm.sessions.get('s1');
+    panel._insertCopilotCommand();
+    expect(captured).toBe('copilot --allow-all-tools --allow-all-paths');
   });
 });
