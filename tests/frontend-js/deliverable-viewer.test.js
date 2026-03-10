@@ -57,6 +57,17 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
       expect(DV).toBeDefined();
       expect(DV.isFolderType('x-ipe-docs/ideas/025/idea-summary.md')).toBe(false);
     });
+
+    it('should identify numbered folder names with dots as folder-type', () => {
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      // Folder names like "001. Feature Name" contain dots but are not file extensions
+      expect(DV.isFolderType('ideas/001. Feature-Console Voice Input - 01242026 000728')).toBe(true);
+      expect(DV.isFolderType('x-ipe-docs/ideas/002. Feature-Brand Themes')).toBe(true);
+      // Files should still be detected correctly
+      expect(DV.isFolderType('ideas/001. Feature-Console Voice Input/new idea.md')).toBe(false);
+      expect(DV.isFolderType('ideas/002. Feature-Brand Themes/mockup.html')).toBe(false);
+    });
   });
 
   describe('File-Tree Rendering', () => {

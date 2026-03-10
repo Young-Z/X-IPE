@@ -20,12 +20,16 @@ class DeliverableViewer {
 
     /**
      * Check if a deliverable path represents a folder.
+     * Uses file-extension detection: a dot followed by 1-10 non-space chars at end
+     * indicates a file. Folder names may contain dots (e.g. "001. Feature Name").
      */
     static isFolderType(path) {
         if (typeof path !== 'string') return false;
         if (path.endsWith('/')) return true;
         const basename = path.split('/').pop();
-        return basename && !basename.includes('.');
+        if (!basename) return false;
+        const hasExtension = /\.[^\s.]{1,10}$/.test(basename);
+        return !hasExtension;
     }
 
     /**
