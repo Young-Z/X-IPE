@@ -4,6 +4,7 @@
 |----------|-----------|---------|---------------|-------------|------------|---------|
 | DAO-039 | 2026-03-11T11:14:10Z | TASK-839 | N/A (human direct) | instruction | 0.90 | Update acceptance test skill: (1) run ALL tests from spec not just web UI, choosing best tool per test type; (2) add chrome-devtools-mcp to tools.json quality stage; (3) skill reads tools.json config like ideation does |
 | DAO-041 | 2026-03-11T11:53:33Z | TASK-840 | N/A (human direct) | instruction | 0.92 | Change next_task_based_skill in x-ipe-task-based-feature-acceptance-test to only include code-refactor |
+| DAO-044 | 2026-03-11T13:58:34Z | N/A | N/A (human direct) | pass_through | 0.92 | Investigate feature refinement skill for scope+mockup → specification flow |
 
 ## DAO-039
 - **Timestamp:** 2026-03-11T11:14:10Z
@@ -224,6 +225,31 @@
 >   - skill_name: "x-ipe-meta-skill-creator"
 >     match_strength: "strong"
 >     reason: "Updating an existing skill"
+
+### Follow-up
+> None
+
+## DAO-044
+- **Timestamp:** 2026-03-11T13:58:34Z
+- **Task ID:** N/A
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A (human direct)
+- **Source:** human
+- **Disposition:** pass_through
+- **Confidence:** 0.92
+
+### Message
+> check the feature refinement skill, did it follow feature scope and it's referenced mockup to genereate the specification doc?
+
+### Guidance Returned
+> Investigate the feature refinement skill (x-ipe-task-based-feature-refinement) procedure to verify it properly ensures: (1) feature scope from the feature board query and requirement context flows into specification generation, and (2) referenced mockups are analyzed and their UI/UX requirements are extracted into the specification document. Report findings to the user.
+
+### Rationale
+> Analytical question requiring procedure trace — user wants to understand whether the skill's execution steps properly incorporate feature scope and mockup references when generating the specification document. This requires reading and analyzing the skill, not making changes.
+
+### Suggested Skills
+> suggested_skills: none (investigation/analysis task)
 
 ### Follow-up
 > None
