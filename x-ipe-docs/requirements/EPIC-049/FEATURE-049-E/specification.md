@@ -1,20 +1,22 @@
 # Feature Specification: KB File Upload
 
 > Feature ID: FEATURE-049-E  
-> Version: v1.0  
+> Version: v2.0  
 > Status: Refined  
-> Last Updated: 07-13-2025
+> Last Updated: 03-11-2026
 
 ## Version History
 
 | Version | Date       | Description                                              |
 |---------|------------|----------------------------------------------------------|
 | v1.0    | 07-13-2025 | Retroactive specification from implemented code & tests  |
+| v2.0    | 03-11-2026 | Template alignment — GWT format for ACs, Test Type Legend |
 
 ## Linked Mockups
 
-- **KB Interface Mockup (Scene 4 — Upload View):** `x-ipe-docs/ideas/wf-007-knowledge-base-implementation/mockups/kb-interface-v1.html`  
-  ⚠️ *Outdated — directional reference only.* The implementation evolved beyond the original mockup (e.g., folder dropdown replaced breadcrumb picker, inline new-folder creation added). Use as visual context, not as source of truth.
+| Mockup | Type | Path | Description | Status | Linked Date |
+|--------|------|------|-------------|--------|-------------|
+| KB Interface v1 (Scene 4 — Upload View) | HTML | [../../mockups/kb-interface-v1.html](../../mockups/kb-interface-v1.html) | Upload modal layout and interaction flow | current | 03-11-2026 |
 
 ## Overview
 
@@ -36,33 +38,81 @@ The component is implemented as the `KBFileUpload` class (298 lines, vanilla JS)
 
 ## Acceptance Criteria
 
-| AC ID | Criterion | Test Type |
+### AC-049-E-01: Modal Lifecycle
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-----------|-----------|
-| AC-049-E-01a | Modal overlay appears with fade-in animation (`active` class), body scroll is locked, and modal contains header ("📤 Upload Files"), folder selector, drop zone, and close button when `open()` is called | UI |
-| AC-049-E-01b | Modal fades out, is removed from DOM, and body scroll is restored when user clicks close button or overlay background | UI |
-| AC-049-E-02a | Drop zone highlights with blue border and background tint (`dragover` class) when files are dragged over it | UI |
-| AC-049-E-02b | `dragover` visual state is removed and upload flow begins for all dropped files on drop | UI |
-| AC-049-E-02c | `dragover` visual state is removed when drag leaves the drop zone without a drop | UI |
-| AC-049-E-03a | System file picker opens with `multiple` selection enabled when user clicks drop zone or "browse" link | UI |
-| AC-049-E-03b | Upload flow begins for all files selected via the file picker | UI |
-| AC-049-E-04a | `<select>` dropdown displays all KB folders in hierarchical indented list with `/ (root)` as first option, populated from `GET /api/kb/tree` | Integration |
-| AC-049-E-04b | `folder` property updates to selected path and subsequent uploads target that folder when user selects a folder | UI |
-| AC-049-E-04c | Dropdown pre-selects matching folder when `folder` option is passed to constructor | Unit |
-| AC-049-E-05a | Inline input row with text field, "Create" button, and "Cancel" button appears when user clicks "+ Folder" button | UI |
-| AC-049-E-05b | `POST /api/kb/folders` request sent with path, dropdown refreshes with new folder selected, and `kb:changed` event dispatched when user creates a folder with valid name | Integration |
-| AC-049-E-05c | No API call made and no folder created when user clicks "Create" with empty or whitespace-only name | Unit |
-| AC-049-E-05d | New-folder input row is hidden when user clicks "Cancel" | UI |
-| AC-049-E-06a | Progress area shows each file name with "⏳ Uploading..." status indicator when upload begins | UI |
-| AC-049-E-06b | Each successfully uploaded file shows "✅ Uploaded" and each server-rejected file shows "❌ {error message}" when API responds | Integration |
-| AC-049-E-06c | `kb:changed` event dispatched and `onComplete` callback invoked when all uploads complete with at least one success | Integration |
-| AC-049-E-07a | `.zip` archive extracted preserving internal folder structure within destination folder; all extracted files appear in response `uploaded` array | API |
-| AC-049-E-08a | `.7z` archive extracted preserving internal folder structure within destination folder; all extracted files appear in response `uploaded` array | API |
-| AC-049-E-09a | Nested archives within extracted content are stored as-is without recursive extraction | API |
-| AC-049-E-10a | Oversized file (>10 MB) immediately rejected client-side with "❌ Too large (>10MB)" status and excluded from FormData | Unit |
-| AC-049-E-10b | Only valid files sent to server when mixed with oversized files; oversized files show rejection status alongside upload results | Unit |
-| AC-049-E-11a | Backend returns error entry with file name and descriptive message for unsupported file types, displayed in upload progress list | API |
-| AC-049-E-12a | File names containing HTML/script characters (e.g., `<script>alert(1)</script>.md`) are escaped and rendered as plain text, preventing XSS | Unit |
-| AC-049-E-13a | All in-progress files marked "❌ Upload failed" and no `kb:changed` event dispatched on network request failure | Integration |
+| AC-049-E-01a | GIVEN KBFileUpload is instantiated WHEN `open()` is called THEN modal overlay appears with fade-in animation (`active` class), body scroll is locked, AND modal contains header ("📤 Upload Files"), folder selector, drop zone, and close button | UI |
+| AC-049-E-01b | GIVEN upload modal is open WHEN user clicks close button or overlay background THEN modal fades out, is removed from DOM, AND body scroll is restored | UI |
+
+### AC-049-E-02: Drag-and-Drop Upload
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-----------|-----------|
+| AC-049-E-02a | GIVEN upload modal is open WHEN files are dragged over the drop zone THEN drop zone highlights with blue border and background tint (`dragover` class) | UI |
+| AC-049-E-02b | GIVEN files are dragged over the drop zone WHEN user drops the files THEN `dragover` visual state is removed AND upload flow begins for all dropped files | UI |
+| AC-049-E-02c | GIVEN files are dragged over the drop zone WHEN drag leaves the drop zone without a drop THEN `dragover` visual state is removed | UI |
+
+### AC-049-E-03: File Picker Browse
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-----------|-----------|
+| AC-049-E-03a | GIVEN upload modal is open WHEN user clicks drop zone or "browse" link THEN system file picker opens with `multiple` selection enabled | UI |
+| AC-049-E-03b | GIVEN system file picker is open WHEN user selects files and confirms THEN upload flow begins for all selected files | UI |
+
+### AC-049-E-04: Folder Selection
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-----------|-----------|
+| AC-049-E-04a | GIVEN upload modal is open AND `GET /api/kb/tree` returns folder data WHEN folder selector renders THEN `<select>` dropdown displays all KB folders in hierarchical indented list with `/ (root)` as first option | Integration |
+| AC-049-E-04b | GIVEN upload modal is open WHEN user selects a folder from the dropdown THEN `folder` property updates to selected path AND subsequent uploads target that folder | UI |
+| AC-049-E-04c | GIVEN `folder` option is passed to KBFileUpload constructor WHEN upload modal opens THEN dropdown pre-selects the matching folder | Unit |
+
+### AC-049-E-05: Inline Folder Creation
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-----------|-----------|
+| AC-049-E-05a | GIVEN upload modal is open WHEN user clicks "+ Folder" button THEN inline input row with text field, "Create" button, and "Cancel" button appears | UI |
+| AC-049-E-05b | GIVEN inline folder creation input is visible AND user enters a valid folder name WHEN user clicks "Create" button THEN `POST /api/kb/folders` request is sent with path, dropdown refreshes with new folder selected, AND `kb:changed` event is dispatched | Integration |
+| AC-049-E-05c | GIVEN inline folder creation input is visible AND name field is empty or whitespace-only WHEN user clicks "Create" THEN no API call is made AND no folder is created | Unit |
+| AC-049-E-05d | GIVEN inline folder creation input is visible WHEN user clicks "Cancel" THEN new-folder input row is hidden | UI |
+
+### AC-049-E-06: Upload Progress & Feedback
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-----------|-----------|
+| AC-049-E-06a | GIVEN user has selected files for upload WHEN upload begins THEN progress area shows each file name with "⏳ Uploading..." status indicator | UI |
+| AC-049-E-06b | GIVEN files are uploading WHEN API responds THEN each successfully uploaded file shows "✅ Uploaded" AND each server-rejected file shows "❌ {error message}" | Integration |
+| AC-049-E-06c | GIVEN files are uploading WHEN all uploads complete with at least one success THEN `kb:changed` event is dispatched AND `onComplete` callback is invoked | Integration |
+
+### AC-049-E-07: Archive Extraction
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-----------|-----------|
+| AC-049-E-07a | GIVEN user uploads a `.zip` archive file WHEN upload completes THEN archive is extracted preserving internal folder structure within destination folder AND all extracted files appear in response `uploaded` array | API |
+| AC-049-E-08a | GIVEN user uploads a `.7z` archive file WHEN upload completes THEN archive is extracted preserving internal folder structure within destination folder AND all extracted files appear in response `uploaded` array | API |
+| AC-049-E-09a | GIVEN an archive contains nested archive files WHEN the outer archive is extracted THEN nested archives are stored as-is without recursive extraction | API |
+
+### AC-049-E-08: File Validation
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-----------|-----------|
+| AC-049-E-10a | GIVEN user selects a file exceeding 10 MB WHEN file validation runs THEN file is immediately rejected client-side with "❌ Too large (>10MB)" status AND excluded from FormData | Unit |
+| AC-049-E-10b | GIVEN user selects a mix of valid and oversized files WHEN upload begins THEN only valid files are sent to server AND oversized files show rejection status alongside upload results | Unit |
+| AC-049-E-11a | GIVEN user uploads a file with unsupported file type WHEN backend processes the upload THEN backend returns error entry with file name and descriptive message AND error is displayed in upload progress list | API |
+
+### AC-049-E-09: Security & Error Handling
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-----------|-----------|
+| AC-049-E-12a | GIVEN a file has HTML/script characters in its name (e.g., `<script>alert(1)</script>.md`) WHEN file name is rendered in the UI THEN name is escaped and rendered as plain text, preventing XSS | Unit |
+| AC-049-E-13a | GIVEN files are uploading WHEN network request fails THEN all in-progress files are marked "❌ Upload failed" AND no `kb:changed` event is dispatched | Integration |
+
+> **Test Type Legend:**
+> - **UI** — Browser/DOM interaction test (clicks, renders, layout)
+> - **API** — HTTP request/response test (status codes, response body)
+> - **Unit** — Isolated function/module test (parsing, calculations)
+> - **Integration** — Multi-component interaction test (service + DB)
 
 ## Functional Requirements
 
@@ -164,3 +214,7 @@ The component is implemented as the `KBFileUpload` class (298 lines, vanilla JS)
 - The component integrates with the KB interface via the `kb:changed` custom event pattern — the same event bus used by file CRUD and sidebar operations.
 - Folder tree data is fetched once on modal open; new folder creation triggers a re-fetch to keep the dropdown current.
 - The `KBFileUpload` class is instantiated per-use (not a singleton) — each `open()` creates a fresh modal DOM tree.
+
+## Open Questions
+
+_No open questions at this time._

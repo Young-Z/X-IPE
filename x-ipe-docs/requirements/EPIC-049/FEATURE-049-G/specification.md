@@ -1,17 +1,21 @@
 # Feature Specification: KB Reference Picker
 
 > Feature ID: FEATURE-049-G  
-> Version: v1.0  
+> Version: v2.0  
 > Status: Refined  
-> Last Updated: 07-19-2025
+> Last Updated: 03-11-2026
 
 ## Version History
 | Version | Date | Description |
 |---------|------|-------------|
 | v1.0 | 07-19-2025 | Initial specification (retroactive from implementation) |
+| v2.0 | 03-11-2026 | Template alignment — GWT format for ACs, Test Type Legend |
 
 ## Linked Mockups
-- `x-ipe-docs/ideas/wf-007-knowledge-base-implementation/mockups/kb-interface-v1.html` — Scene 3 (Reference Picker). **Outdated**: directional reference only; the implementation evolved beyond the original mockup in layout details and interaction patterns.
+
+| Mockup | Type | Path | Description | Status | Linked Date |
+|--------|------|------|-------------|--------|-------------|
+| KB Interface v1 (Scene 3 — Reference Picker) | HTML | [../../mockups/kb-interface-v1.html](../../mockups/kb-interface-v1.html) | Reference picker modal layout and interaction flow | current | 03-11-2026 |
 
 ## Overview
 
@@ -43,27 +47,65 @@ As a user working within a workflow, I want to insert selected references direct
 
 ## Acceptance Criteria
 
-| AC ID | Criterion | Test Type |
+### AC-049-G-01: Modal Lifecycle
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-----------|-----------|
-| AC-049-G-01a | Modal overlay (`.kb-ref-overlay`) appended to body with left folder-tree panel (`.kb-ref-tree-panel`) and right file-list panel (`.kb-ref-list-panel`) when `open()` is called | UI |
-| AC-049-G-02a | Modal plays 300ms fade-out animation, overlay removed from DOM, and body scroll restored when user clicks ✕ close button or overlay backdrop | UI |
-| AC-049-G-03a | Fetch request to `/api/kb/search?q={query}` fires after 300ms debounce when user types in search input | Unit |
-| AC-049-G-03b | File list panel re-renders with search results after API response | UI |
-| AC-049-G-04a | Lifecycle tags render as amber-styled chips (`kb-ref-chip-lifecycle`) and domain tags as blue-styled chips (`kb-ref-chip-domain`) from KB config | UI |
-| AC-049-G-04b | Clicking a chip toggles its `active` class and filters file list to show only files matching any active tag | UI |
-| AC-049-G-05a | Checking a file or folder checkbox adds its path to the selected set | Unit |
-| AC-049-G-05b | Unchecking a file or folder checkbox removes its path from the selected set | Unit |
-| AC-049-G-06a | Footer count label updates to reflect current number of selected items (e.g., "3 selected") when checkboxes change | UI |
-| AC-049-G-07a | Selected paths joined with newlines and written to clipboard via `navigator.clipboard.writeText` when "📋 Copy" button clicked | Unit |
-| AC-049-G-07b | Fallback to `document.execCommand('copy')` when Clipboard API is unavailable | Unit |
-| AC-049-G-08a | Copy button text changes to "✅ Copied!" for 1500ms then reverts to "📋 Copy" after successful clipboard write | UI |
-| AC-049-G-09a | `onInsert` callback called with array of selected paths when "Insert" button clicked | Unit |
-| AC-049-G-09b | `kb:references-inserted` CustomEvent dispatched on `document` with paths in `detail` when "Insert" button clicked | Unit |
-| AC-049-G-09c | Modal closes after Insert button action completes | UI |
-| AC-049-G-10a | Three API requests (`/api/kb/tree`, `/api/kb/config`, `/api/kb/files`) fire in parallel via `Promise.all` on `open()` | Integration |
-| AC-049-G-11a | File names and tag text containing HTML special characters escaped via DOM-based text content assignment, preventing script injection | Unit |
-| AC-049-G-12a | Modal opens without crashing when API endpoints fail, showing "No folders" and/or "No files found" placeholders | Integration |
-| AC-049-G-13a | `document.body.style.overflow` set to `'hidden'` on modal open and restored to `''` on close | UI |
+| AC-049-G-01a | GIVEN KBReferencePicker is instantiated WHEN `open()` is called THEN modal overlay (`.kb-ref-overlay`) is appended to body with left folder-tree panel (`.kb-ref-tree-panel`) AND right file-list panel (`.kb-ref-list-panel`) | UI |
+| AC-049-G-02a | GIVEN reference picker modal is open WHEN user clicks ✕ close button or overlay backdrop THEN modal plays 300ms fade-out animation, overlay is removed from DOM, AND body scroll is restored | UI |
+| AC-049-G-13a | GIVEN reference picker is used WHEN modal opens THEN `document.body.style.overflow` is set to `'hidden'` AND WHEN modal closes THEN overflow is restored to `''` | UI |
+
+### AC-049-G-02: Search
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-----------|-----------|
+| AC-049-G-03a | GIVEN reference picker modal is open WHEN user types in search input AND 300ms debounce elapses THEN fetch request to `/api/kb/search?q={query}` fires | Unit |
+| AC-049-G-03b | GIVEN a search request has been sent WHEN API response is received THEN file list panel re-renders with search results | UI |
+
+### AC-049-G-03: Tag Filtering
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-----------|-----------|
+| AC-049-G-04a | GIVEN `/api/kb/config` returns tag data WHEN filter chips render THEN lifecycle tags render as amber-styled chips (`kb-ref-chip-lifecycle`) AND domain tags render as blue-styled chips (`kb-ref-chip-domain`) | UI |
+| AC-049-G-04b | GIVEN filter chips are rendered WHEN user clicks a chip THEN chip's `active` class is toggled AND file list filters to show only files matching any active tag | UI |
+
+### AC-049-G-04: Selection Management
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-----------|-----------|
+| AC-049-G-05a | GIVEN a file or folder checkbox is unchecked WHEN user checks the checkbox THEN its path is added to the selected set | Unit |
+| AC-049-G-05b | GIVEN a file or folder checkbox is checked WHEN user unchecks the checkbox THEN its path is removed from the selected set | Unit |
+| AC-049-G-06a | GIVEN reference picker modal is open WHEN checkboxes change THEN footer count label updates to reflect current number of selected items (e.g., "3 selected") | UI |
+
+### AC-049-G-05: Copy Action
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-----------|-----------|
+| AC-049-G-07a | GIVEN one or more items are selected WHEN user clicks "📋 Copy" button THEN selected paths are joined with newlines AND written to clipboard via `navigator.clipboard.writeText` | Unit |
+| AC-049-G-07b | GIVEN Clipboard API is unavailable WHEN user clicks "📋 Copy" button THEN fallback to `document.execCommand('copy')` is used | Unit |
+| AC-049-G-08a | GIVEN user clicks "📋 Copy" button WHEN clipboard write succeeds THEN button text changes to "✅ Copied!" for 1500ms AND then reverts to "📋 Copy" | UI |
+
+### AC-049-G-06: Insert Action
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-----------|-----------|
+| AC-049-G-09a | GIVEN one or more items are selected AND `onInsert` callback is configured WHEN user clicks "Insert" button THEN `onInsert` callback is called with array of selected paths | Unit |
+| AC-049-G-09b | GIVEN one or more items are selected WHEN user clicks "Insert" button THEN `kb:references-inserted` CustomEvent is dispatched on `document` with paths in `detail` | Unit |
+| AC-049-G-09c | GIVEN user clicks "Insert" button WHEN insert action completes THEN modal closes | UI |
+
+### AC-049-G-07: Data Loading, Security & Error Handling
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-----------|-----------|
+| AC-049-G-10a | GIVEN KBReferencePicker is instantiated WHEN `open()` is called THEN three API requests (`/api/kb/tree`, `/api/kb/config`, `/api/kb/files`) fire in parallel via `Promise.all` | Integration |
+| AC-049-G-11a | GIVEN file names or tag text contain HTML special characters WHEN content is rendered in the modal THEN characters are escaped via DOM-based text content assignment, preventing script injection | Unit |
+| AC-049-G-12a | GIVEN one or more API endpoints fail WHEN `open()` is called THEN modal opens without crashing AND shows "No folders" and/or "No files found" placeholders | Integration |
+
+> **Test Type Legend:**
+> - **UI** — Browser/DOM interaction test (clicks, renders, layout)
+> - **API** — HTTP request/response test (status codes, response body)
+> - **Unit** — Isolated function/module test (parsing, calculations)
+> - **Integration** — Multi-component interaction test (service + DB)
 
 ## Functional Requirements
 
@@ -203,3 +245,7 @@ If `open()` is called while a modal is already displayed, a second overlay will 
 - The `kb:references-inserted` CustomEvent on `document` enables loose coupling — any listener can react to insertions without direct reference to the picker instance
 - Animation timing constants (debounce, animation, copy feedback) are exposed as static class properties for testability and tuning
 - Tag filtering operates client-side on the already-loaded file set; server-side tag filtering is delegated to the search endpoint
+
+## Open Questions
+
+_No open questions at this time._

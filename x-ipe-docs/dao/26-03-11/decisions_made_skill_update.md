@@ -253,3 +253,73 @@
 
 ### Follow-up
 > None
+
+
+| DAO-045 | 2026-03-11T14:08:49Z | TASK-843 | x-ipe-meta-skill-creator | instruction | 0.93 | 4 mockup-handling improvements to feature refinement skill: enforce mockup-to-spec ACs, epic-folder mockup discovery, scope-aware linking, temporal conflict resolution via Linked Date |
+
+## DAO-045
+
+### Meta
+| Field | Value |
+|-------|-------|
+| Timestamp | 2026-03-11T14:08:49Z |
+| Task ID | TASK-843 (continuation) |
+| Feature ID | N/A |
+| Workflow | N/A |
+| Calling Skill | x-ipe-meta-skill-creator |
+| Source | human |
+| Disposition | instruction |
+| Confidence | 0.93 |
+
+### Message
+> 1. if the mockup provided, make enforce the specification content design reference the mockup, especially ac test cases. 2. add a way to find linked mockup, by searching mockups/ folder in its related epic folder. 3. check the existing logic only if the feature scope related with linked mockup, then link it. 4. in the link mockup table add linked datetime, so if later on there is a conflict between specification and linked mockup we can base on the datetime to know which one we should follow. usually if mockup is not stale, we should follow the mockup.
+
+### Guidance
+> Apply 4 tightly coupled changes to the feature refinement skill mockup handling:
+> 1. **Enforce mockup-to-spec references** - When mockups are linked, specification content (especially acceptance criteria test cases) MUST reference the mockup. Not optional - the skill should gate spec completion on mockup alignment.
+> 2. **Add epic-folder mockup discovery** - New discovery path: search mockups/ folder in the features related EPIC folder (e.g., x-ipe-docs/requirements/EPIC-XXX/mockups/). This supplements any explicitly provided mockup paths.
+> 3. **Scope-aware linking** - Only link discovered mockups that are relevant to the features scope. Do not blindly link all epic-level mockups - check if the mockup content relates to the feature being refined.
+> 4. **Add Linked Date column** - Add a Linked Date column to the Linked Mockups table. When spec-vs-mockup conflicts arise, temporal precedence determines which to follow. If mockup is newer and not stale, mockup wins.
+
+### Rationale
+> Strengthens mockup-to-spec flow by making it mandatory rather than optional. Adds epic-level discovery so mockups are not missed when they exist at the epic level. Scope-aware linking prevents noise from unrelated mockups. Temporal conflict resolution (Linked Date) provides a clear, deterministic rule for resolving spec-vs-mockup divergence - newer non-stale mockup wins. All 4 changes are tightly coupled to the same mockup handling pipeline.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: x-ipe-meta-skill-creator
+>     match_strength: strong
+>     reason: Continuation of TASK-843 skill update already in progress
+
+### Follow-up
+> None
+
+---
+
+## DAO-046
+
+- **Timestamp:** 2026-03-11T14:19:36Z
+- **Task:** TASK-843
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.95
+
+### Input
+> in feature refinement ac template, you can use given when then, so let's make it as a explict standard for ac
+
+### Instruction Units
+1. **Unit 1** — Make Given/When/Then (GWT) format the explicit standard for writing acceptance criteria in the feature refinement skill
+   - Update AC table template: Criterion column must use GWT format
+   - Update AC Quality Reflection: verify GWT structure
+   - Update constraints and DoD checkpoints
+
+### Guidance
+> Standardize acceptance criteria in the feature refinement skill to use Given/When/Then (Gherkin) format. The AC table Criterion column should explicitly require GWT syntax (e.g., "GIVEN [precondition] WHEN [action] THEN [expected result]"). Update the AC quality reflection step to verify GWT structure. This is a continuation of TASK-843.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: x-ipe-meta-skill-creator
+>     match_strength: strong
+>     reason: Continuation of TASK-843 skill update already in progress
+
+### Follow-up
+> None
