@@ -17,8 +17,8 @@
 
 | Mockup | Type | Path | Description | Status | Linked Date |
 |--------|------|------|-------------|--------|-------------|
-| KB Browse Articles | HTML | [../../mockups/kb-interface-v1.html](../../mockups/kb-interface-v1.html) | Scene 1 — grid/list browse with tags, search, sort | current | 03-11-2026 |
-| KB Article Detail | HTML | [../../mockups/kb-interface-v1.html](../../mockups/kb-interface-v1.html) | Scene 2 — article detail with frontmatter display | current | 03-11-2026 |
+| KB Browse Articles | HTML | [x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html](x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html) | Scene 1 — grid/list browse with tags, search, sort | current | 03-11-2026 |
+| KB Article Detail | HTML | [x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html](x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html) | Scene 2 — article detail with frontmatter display | current | 03-11-2026 |
 
 > **Note:** UI/UX requirements and acceptance criteria below are derived from mockups marked as "current".
 > Mockups marked as "outdated" are directional references only — do not use for AC comparison.

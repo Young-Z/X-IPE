@@ -15,7 +15,7 @@
 
 | Mockup | Type | Path | Description | Status | Linked Date |
 |--------|------|------|-------------|--------|-------------|
-| KB Interface v1 (Scene 3 — Reference Picker) | HTML | [../../mockups/kb-interface-v1.html](../../mockups/kb-interface-v1.html) | Reference picker modal layout and interaction flow | current | 03-11-2026 |
+| KB Interface v1 (Scene 3 — Reference Picker) | HTML | [x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html](x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html) | Reference picker modal layout and interaction flow | current | 03-11-2026 |
 
 ## Overview
 

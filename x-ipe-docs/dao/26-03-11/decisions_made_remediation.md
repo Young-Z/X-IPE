@@ -112,3 +112,28 @@ User is instructing that the **specification.md** files (not acceptance-test-cas
 
 ### Follow-up
 > After all 6 specs updated, commit and push. Then address remaining 5 missing tests from audit.
+
+## DAO-048
+- **Timestamp:** 2026-03-11T14:41:06Z
+- **Task ID:** TASK-845
+- **Feature ID:** FEATURE-049-A through G
+- **Workflow:** Knowledge-Base-Implementation
+- **Calling Skill:** N/A (direct human message)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.9
+
+### Message
+> since we have link preview feature, do you think the mockup link in these specification we should also use the preview syntax? update the specification file and also the skill to let it use preview syntax. btw the file path for the mockup looks wrong
+
+### Guidance Returned
+> Two issues: (1) Mockup paths use `../../mockups/` which is wrong — from FEATURE-049-X/specification.md, `../../` goes past EPIC-049/ to requirements/. (2) Per IDEA-033 link preview convention, all internal links should use project-root-relative paths. Fix: change all mockup links to `x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html` and update the specification-template.md and specification-writing-guide.md to use project-root-relative paths.
+
+### Rationale
+> User correctly identified broken relative paths and wants preview-compatible syntax. IDEA-033 establishes the convention: all internal links use full project-root-relative paths for the DeliverableViewer modal preview feature.
+
+### Suggested Skills
+> suggested_skills: []
+
+### Follow-up
+> None

@@ -99,14 +99,11 @@ input:
 
 ### Mockup List Resolution
 
-The `mockup_list` value is resolved in this priority order:
+The `mockup_list` is resolved: (1) previous Idea Mockup task output, (2) human-provided path, (3) idea-summary-vN.md "Mockups & Prototypes" section, (4) N/A.
 
-1. IF previous task was "Idea Mockup" -- extract from previous task's `task_output_links`
-2. ELSE IF human provides explicit path -- use human-provided value
-3. ELSE IF `idea-summary-vN.md` exists -- extract from "Mockups & Prototypes" section
-4. ELSE -- set to N/A
+Step 1.3 performs additional discovery: idea folder → EPIC-level `mockups/` folder → scope-aware filtering.
 
-MANDATORY: When `mockup_list` is provided, analyze mockups during Step 2 and extract UI/UX requirements into the specification.
+MANDATORY: When mockups are linked, spec content — especially ACs and UI/UX Requirements — MUST reference the mockup.
 
 ---
 
@@ -140,7 +137,8 @@ MANDATORY: When `mockup_list` is provided, analyze mockups during Step 2 and ext
 | 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Phase 1 fails if feature not on board or status not "Planned".
-BLOCKING: Step 1.3 MUST scan for mockups if feature folder has no `mockups/` directory.
+BLOCKING: Step 1.3 MUST scan for mockups (feature folder → idea folder → EPIC folder) if feature folder has no `mockups/` directory.
+BLOCKING: Step 1.3 MUST apply scope-aware filtering — only link mockups relevant to this feature.
 BLOCKING (manual/stop_for_question): Human MUST confirm specification is complete before Technical Design.
 BLOCKING (auto): Proceed automatically after DoD verification.
 
@@ -186,18 +184,33 @@ BLOCKING (auto): Proceed automatically after DoD verification.
       <name>Process Mockups</name>
       <action>
         1. CHECK x-ipe-docs/requirements/{FEATURE-ID}/mockups/
-           IF exists AND contains files → skip
-        2. IF mockups NOT in feature folder:
+           IF exists AND contains files → skip to step 5
+        2. IF mockups NOT in feature folder, discover from these sources (in order):
            a. Check requirement-details.md for idea folder reference
-           b. IF idea folder exists → scan x-ipe-docs/ideas/{idea-folder}/mockups/
-           c. IF mockups found: create folder, copy ALL mockup files, update paths
-        3. IF mockup_list provided AND not yet copied: create folder, copy, update paths
-        4. IF no mockups found → log and proceed
+              IF idea folder exists → scan x-ipe-docs/ideas/{idea-folder}/mockups/
+           b. Scan EPIC-level mockups folder: x-ipe-docs/requirements/{EPIC-ID}/mockups/
+              (derive EPIC-ID from feature_id, e.g., FEATURE-049-A → EPIC-049)
+           c. IF mockup_list provided → use those paths
+        3. SCOPE-AWARE FILTERING: For each discovered mockup:
+           a. Read mockup content/filename to understand what it covers
+           b. Compare against feature scope (from Step 1.1 Feature Data Model description)
+           c. ONLY link mockups whose content overlaps with this feature's scope
+           d. Skip mockups that cover unrelated features in the same epic
+        4. IF scope-relevant mockups found:
+           a. Create x-ipe-docs/requirements/{FEATURE-ID}/mockups/ folder
+           b. Copy ONLY scope-relevant mockup files
+           c. Update paths in mockup_list
+        5. IF linked mockups exist (pre-existing or just copied):
+           a. Analyze each mockup: extract UI/UX elements, layouts, interactions
+           b. Record findings for use in Steps 3.1 and 5.1
+        6. IF no relevant mockups found → log and proceed
       </action>
       <constraints>
         - CRITICAL: Only copy if NOT already in feature folder
+        - CRITICAL: Only link mockups relevant to this feature's scope — do NOT blindly link all epic mockups
+        - MANDATORY: If mockups are discovered in this step, perform analysis (step 5) before proceeding
       </constraints>
-      <output>Mockups in feature folder (or confirmed absent)</output>
+      <output>Scope-relevant mockups in feature folder with analysis (or confirmed absent)</output>
     </step_1_3>
 
   </phase_1>
@@ -236,15 +249,28 @@ BLOCKING (auto): Proceed automatically after DoD verification.
       <name>AC Quality Reflection</name>
       <action>
         1. For each acceptance criterion, verify:
+           - Is it in Given/When/Then format? (MANDATORY — reject any AC not in GWT syntax)
            - Is it specific (not vague)?
            - Is it measurable (can be tested programmatically)?
            - Is it achievable (technically feasible)?
            - Is it relevant (directly tied to a user story)?
-        2. Flag any ACs that fail SMART criteria
+        2. Flag any ACs that fail SMART criteria or do not follow GWT format
         3. Identify missing ACs for: error states, loading states, empty states, edge cases
         4. Consider testability: can each AC be verified with an automated test?
+        5. Classify each AC with a Test Type indicating the best validation method:
+           - **UI** — validated via browser/DOM interaction (e.g., click, render, layout checks)
+           - **API** — validated via HTTP request/response (e.g., endpoint returns correct status/body)
+           - **Unit** — validated via isolated function/module test (e.g., parsing logic, calculations)
+           - **Integration** — validated via multi-component interaction (e.g., service + DB)
+           Assign the MOST SPECIFIC type. If an AC could be tested multiple ways, pick the primary method.
+           All ACs MUST be automatable — do not use "Manual" as a test type.
+        6. MOCKUP CROSS-CHECK (if linked mockups exist and marked "current"):
+           a. For each UI element/interaction in the mockup, verify a corresponding AC exists
+           b. Flag mockup elements that have NO matching AC — these are gaps
+           c. Ensure ACs reference specific mockup elements (e.g., "grid layout per mockup Scene 1")
+           d. BLOCKING: Do not proceed if current mockups have UI elements with no corresponding AC
       </action>
-      <output>AC quality assessment with improvement recommendations</output>
+      <output>AC quality assessment with test type classification, mockup cross-check, and improvement recommendations</output>
     </step_3_1>
 
   </phase_3>
@@ -281,17 +307,31 @@ BLOCKING (auto): Proceed automatically after DoD verification.
         3. Include all sections: Version History, Linked Mockups, Overview, User Stories,
            Acceptance Criteria, Functional Requirements, NFRs, UI/UX Requirements,
            Dependencies, Business Rules, Edge Cases, Out of Scope, Technical Considerations
-        4. IF mockups exist and marked "current":
-           a. Add mockup-comparison ACs (layout, styling, interactive elements)
-        5. IF mockups marked "outdated": note as directional reference only
+        4. MANDATORY: Write Acceptance Criteria as a table with Test Type column per AC group:
+           | AC ID | Criterion (Given/When/Then) | Test Type |
+           Each row: AC ID (e.g., AC-XXX-01), criterion in **Given/When/Then** format, and one of: UI, API, Unit, Integration
+           MANDATORY: Every criterion MUST use GWT (Gherkin) syntax:
+             `GIVEN [precondition/context] WHEN [action/event] THEN [expected outcome]`
+           Example: "GIVEN user is on login page WHEN user submits valid credentials THEN dashboard is displayed"
+           Multi-clause: use AND to chain conditions (GIVEN ... AND ... WHEN ... THEN ... AND ...)
+        5. IF linked mockups exist and marked "current":
+           a. MANDATORY: Spec content MUST reference the mockup — ACs, UI/UX Requirements,
+              and User Stories must trace back to mockup elements
+           b. Add mockup-comparison ACs (layout, styling, interactive elements) with Test Type = UI
+           c. In the Linked Mockups table, record Linked Date as the current date (MM-DD-YYYY)
+           d. UI/UX Requirements section MUST derive from mockup analysis, not invented independently
+        6. IF linked mockups marked "outdated": note as directional reference only, do NOT derive ACs
       </action>
       <constraints>
         - MANDATORY: Single file with version history
+        - MANDATORY: AC table MUST include Test Type column (UI | API | Unit | Integration)
+        - MANDATORY: Every AC Criterion MUST use Given/When/Then (GWT) format
+        - BLOCKING: If current mockups are linked, spec MUST reference them in ACs and UI/UX sections
         - CRITICAL: Focus on WHAT not HOW in Technical Considerations
         - CRITICAL: Only add mockup-comparison ACs for current mockups
-        - MANDATORY: Use full project-root-relative paths for links
+        - MANDATORY: Use full project-root-relative paths for ALL links (e.g., `x-ipe-docs/requirements/EPIC-XXX/mockups/file.html`). Do NOT use relative paths (`../`, `../../`). This enables link preview (IDEA-033).
       </constraints>
-      <output>specification.md created/updated</output>
+      <output>specification.md created/updated with mockup-referenced, test-type-classified ACs</output>
     </step_5_1>
 
     <step_5_2>
@@ -397,8 +437,8 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <verification>Check all template sections are present and filled</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Acceptance criteria are testable</name>
-    <verification>Each criterion is specific and measurable</verification>
+    <name>Acceptance criteria are testable and in GWT format</name>
+    <verification>Each criterion uses Given/When/Then format and is specific and measurable</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Dependencies documented</name>
@@ -443,7 +483,8 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
 | Skip board query | Missing context | Always query feature board first |
-| Vague acceptance criteria | Untestable | Make criteria specific and measurable |
+| Vague acceptance criteria | Untestable | Make criteria specific and measurable using Given/When/Then format |
+| AC without GWT format | Not standardized, harder to automate | Every AC criterion MUST use GIVEN/WHEN/THEN syntax |
 | Technical implementation details | Wrong focus | Focus on WHAT, not HOW |
 | Ignore dependencies | Integration failures | Document all dependencies |
 | Ignore mockup when provided | Missing UI requirements | Always analyze mockup_list |
@@ -453,9 +494,4 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Examples
 
-See [references/examples.md](.github/skills/x-ipe-task-based-feature-refinement/references/examples.md) for detailed execution examples including:
-- User authentication specification
-- Enhancement refinement from change request
-- Missing feature entry (blocked)
-- Complex feature requiring split
-- Specification with thorough edge case coverage
+See [references/examples.md](.github/skills/x-ipe-task-based-feature-refinement/references/examples.md) for detailed examples.

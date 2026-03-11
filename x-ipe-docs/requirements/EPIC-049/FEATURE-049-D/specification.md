@@ -16,7 +16,7 @@
 
 | Mockup | Type | Path | Description | Status | Linked Date |
 |--------|------|------|-------------|--------|-------------|
-| KB Interface v1 — Article Detail (Scene 2) | Interactive HTML | [../../mockups/kb-interface-v1.html](../../mockups/kb-interface-v1.html) | Article detail view showing content rendering and metadata layout | Current | 03-11-2026 |
+| KB Interface v1 — Article Detail (Scene 2) | Interactive HTML | [x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html](x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html) | Article detail view showing content rendering and metadata layout | Current | 03-11-2026 |
 
 ## Overview
 

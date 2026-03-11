@@ -15,10 +15,10 @@
 
 | Mockup | Type | Path | Description | Status | Linked Date |
 |--------|------|------|-------------|--------|-------------|
-| KB Browse Articles | HTML | [../../mockups/kb-interface-v1.html](../../mockups/kb-interface-v1.html) | Scene 1 — Browse Articles grid view with sidebar tree | current | 03-11-2026 |
-| KB Article Detail | HTML | [../../mockups/kb-interface-v1.html](../../mockups/kb-interface-v1.html) | Scene 2 — Article Detail view with sidebar navigation | current | 03-11-2026 |
-| Reference Picker Modal | HTML | [../../mockups/kb-interface-v1.html](../../mockups/kb-interface-v1.html) | Scene 3 — Reference Picker Modal | current | 03-11-2026 |
-| AI Librarian Intake | HTML | [../../mockups/kb-interface-v1.html](../../mockups/kb-interface-v1.html) | Scene 4 — AI Librarian Intake | current | 03-11-2026 |
+| KB Browse Articles | HTML | [x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html](x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html) | Scene 1 — Browse Articles grid view with sidebar tree | current | 03-11-2026 |
+| KB Article Detail | HTML | [x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html](x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html) | Scene 2 — Article Detail view with sidebar navigation | current | 03-11-2026 |
+| Reference Picker Modal | HTML | [x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html](x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html) | Scene 3 — Reference Picker Modal | current | 03-11-2026 |
+| AI Librarian Intake | HTML | [x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html](x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html) | Scene 4 — AI Librarian Intake | current | 03-11-2026 |
 
 > **Note:** UI/UX requirements and acceptance criteria below are derived from mockups marked as "current".
 > Mockups marked as "outdated" are directional references only — do not use for AC comparison.

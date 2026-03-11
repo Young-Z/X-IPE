@@ -16,7 +16,7 @@
 
 | Mockup | Type | Path | Description | Status | Linked Date |
 |--------|------|------|-------------|--------|-------------|
-| KB Interface v1 — Browse Articles (Scene 1) | Interactive HTML | [../../mockups/kb-interface-v1.html](../../mockups/kb-interface-v1.html) | Grid card layout for browsing KB articles with search, sort, and tag filtering | Current | 03-11-2026 |
+| KB Interface v1 — Browse Articles (Scene 1) | Interactive HTML | [x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html](x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html) | Grid card layout for browsing KB articles with search, sort, and tag filtering | Current | 03-11-2026 |
 
 ## Overview
 
