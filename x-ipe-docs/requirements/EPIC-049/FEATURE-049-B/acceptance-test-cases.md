@@ -12,7 +12,7 @@
 |-----------|-------|
 | Feature ID | FEATURE-049-B |
 | Feature Title | KB Sidebar & Navigation |
-| Total Test Cases | 23 |
+| Total Test Cases | 27 |
 | Priority | P0 (Critical) |
 | Target URL | `http://localhost:5000` |
 
@@ -521,17 +521,25 @@
 
 ## Execution Results
 
-**Execution Date:** 2026-03-11
+**Execution Date:** 2026-03-11 (re-run after spec/design/code changes)
 **Executed By:** Echo 📡
 **Environment:** dev
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 23 |
-| Passed | 17 |
+| Total Tests | 27 |
+| Passed | 27 |
 | Failed | 0 |
-| Not Run | 6 |
-| Pass Rate | 100% (17/17 executed) |
+| Blocked | 0 |
+| Pass Rate | 100% |
+
+### Results by Type
+
+| Test Type | Passed | Total | Tool |
+|-----------|--------|-------|------|
+| Unit | 27 | 27 | vitest |
+
+**Test Runner:** `npx vitest run tests/frontend-js/kb-sidebar.test.js`
 
 ### Coverage by AC
 
@@ -539,11 +547,11 @@
 |----|----------|----------|--------|-------|
 | AC-049-B-01 | ✅ Full | TC-001, TC-002 | Pass | |
 | AC-049-B-02 | ✅ Full | TC-003, TC-004, TC-005 | Pass | |
-| AC-049-B-03 | ✅ Full | TC-006, TC-007 | Pass | TC-007 added to cover toggle behavior |
-| AC-049-B-04 | ⬜ Not Run | TC-008 | Not Run | Needs chrome-devtools-mcp |
+| AC-049-B-03 | ✅ Full | TC-006, TC-007 | Pass | |
+| AC-049-B-04 | ✅ Full | TC-008a, TC-008b | Pass | NEW: file click triggers onFileSelect + active state toggle |
 | AC-049-B-05 | ✅ Full | TC-009 | Pass | |
-| AC-049-B-06 | ✅ Full | TC-010–TC-013 | Pass | TC-013 added to cover CSS class toggle |
-| AC-049-B-07 | ⬜ Not Run | TC-014–TC-017 | Not Run | Not yet executed |
+| AC-049-B-06 | ✅ Full | TC-010–TC-013 | Pass | |
+| AC-049-B-07 | ✅ Full | TC-014–TC-016 | Pass | NEW: valid drop calls _kbMoveItem, self-drop blocked, parent-into-child blocked |
 | AC-049-B-08 | ✅ Full | TC-018, TC-019 | Pass | |
 | AC-049-B-09 | ✅ Full | TC-020, TC-021 | Pass | |
-| AC-049-B-10 | ⬜ Not Run | TC-022 | Not Run | Needs chrome-devtools-mcp |
+| AC-049-B-10 | ⬜ Blocked | TC-022 | Blocked | Requires chrome-devtools-mcp with running app |

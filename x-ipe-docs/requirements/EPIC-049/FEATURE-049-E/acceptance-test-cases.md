@@ -12,7 +12,7 @@
 |-----------|-------|
 | Feature ID | FEATURE-049-E |
 | Feature Title | KB File Upload |
-| Total Test Cases | 36 |
+| Total Test Cases | 41 |
 | Priority | P0 (Critical) |
 | Target URL | N/A (unit tests via vitest) |
 
@@ -1417,16 +1417,27 @@
 
 ## Execution Results
 
-**Execution Date:** 2025-07-13
+**Execution Date:** 2026-03-11 (re-run after spec/design/code changes)
 **Executed By:** Echo 📡
-**Environment:** dev (vitest + jsdom)
+**Environment:** dev (vitest + jsdom + pytest)
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 36 |
-| Passed | 33 |
+| Total Tests | 41 |
+| Passed | 41 |
 | Failed | 0 |
-| Blocked | 3 |
-| Pass Rate | 91.7% |
+| Blocked | 0 |
+| Pass Rate | 100% |
 
-> **Note:** 3 test cases (TC-028, TC-029, TC-030) cover backend archive extraction logic (AC-049-E-07, AC-049-E-08, AC-049-E-09) and require Python/pytest integration tests — no frontend coverage exists for server-side extraction behavior.
+### Results by Type
+
+| Test Type | Passed | Total | Tool |
+|-----------|--------|-------|------|
+| Unit (frontend) | 33 | 33 | vitest |
+| Unit (backend) | 8 | 8 | pytest |
+
+**Test Runners:**
+- `npx vitest run tests/frontend-js/kb-file-upload.test.js`
+- `uv run python -m pytest tests/test_kb_service.py -k "Zip or SevenZip or Nested or upload" -v`
+
+> **Previously blocked TCs now passing:** TC-028 (.zip extraction), TC-029 (.7z extraction), TC-030 (nested archive handling) — covered by Python pytest tests added in TASK-847. Additionally, 4 route-level upload tests added (single file, subfolder, zip auto-extract, no-files error).

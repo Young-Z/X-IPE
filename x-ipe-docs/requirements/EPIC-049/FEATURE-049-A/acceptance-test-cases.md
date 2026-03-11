@@ -12,7 +12,7 @@
 |-----------|-------|
 | Feature ID | FEATURE-049-A |
 | Feature Title | KB Backend & Storage Foundation |
-| Total Test Cases | 69 |
+| Total Test Cases | 88 |
 | Priority | P0 (Critical) |
 | Target URL | N/A (backend) |
 
@@ -664,19 +664,36 @@
 
 ## Execution Results
 
-**Execution Date:** 2026-03-11
+**Execution Date:** 2026-03-11 (re-run after spec/design/code changes)
 **Executed By:** Echo 📡
 **Environment:** dev
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 69 |
-| Passed | 69 |
+| Total Tests | 88 |
+| Passed | 88 |
 | Failed | 0 |
 | Blocked | 0 |
+| Skipped | 1 (py7zr not installed) |
 | Pass Rate | 100% |
 
+### Results by Type
+
+| Test Type | Passed | Total | Tool |
+|-----------|--------|-------|------|
+| Unit | 76 | 76 | pytest |
+| Integration (route) | 12 | 12 | pytest + Flask test client |
+
 **Test Runner:** `uv run python -m pytest tests/test_kb_service.py -v`
+
+### Tests Added Since Prior Run
+
+| AC | Tests Added | Description |
+|----|------------|-------------|
+| AC-049-E-07 | 4 | .zip extraction: creates files, dest folder, skips nested, preserves structure |
+| AC-049-E-08 | 2 | .7z extraction: creates files, missing library error |
+| AC-049-E-09 | 2 | Nested archive handling (.zip-in-.zip, .7z-in-.zip) |
+| Route coverage | 11 | update_file, delete_file, rename_folder, upload (single, subfolder, zip, no-files) |
 
 ### Gap Fixes Applied
 

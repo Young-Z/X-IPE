@@ -1376,8 +1376,8 @@
 
 ## Execution Results
 
-**Execution Date:** 2025-07-18
-**Executed By:** Agent 📡
+**Execution Date:** 2026-03-11 (re-run after spec/design/code changes)
+**Executed By:** Echo 📡
 **Environment:** dev
 
 | Metric | Value |
@@ -1387,3 +1387,11 @@
 | Failed | 0 |
 | Blocked | 0 |
 | Pass Rate | 100% |
+
+### Results by Type
+
+| Test Type | Passed | Total | Tool |
+|-----------|--------|-------|------|
+| Unit | 34 | 34 | vitest |
+
+**Test Runner:** `npx vitest run tests/frontend-js/kb-article-editor.test.js`
