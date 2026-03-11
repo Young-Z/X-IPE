@@ -71,3 +71,30 @@
 
 ### Follow-up
 > None
+
+| DAO-034 | 2026-03-11T02:41:11Z | TASK-000 | N/A | instruction | 0.90 | User requested archiving all tasks from task board |
+
+## DAO-034
+- **Timestamp:** 2026-03-11T02:41:11Z
+- **Task ID:** TASK-000
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.90
+
+### Message
+> put all the tasks into archive
+
+### Guidance Returned
+> Proceed with archiving all tasks from Active Tasks and Completed Tasks sections into task-board-archive-2.md. Clean the board. Update Quick Stats.
+
+### Rationale
+> Clear user intent to archive all tasks for a clean board. All but 4 tasks are already done. User explicitly said "all" — no ambiguity.
+
+### Suggested Skills
+> None — this is a direct task board management operation.
+
+### Follow-up
+> None

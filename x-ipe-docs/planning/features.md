@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 03-06-2026 07:54:28
+> Last Updated: 03-11-2026 05:18:00
 
 ## Overview
 
@@ -138,3 +138,10 @@ This board tracks all features across the project lifecycle.
 | FEATURE-048-D | EPIC-048 | Code Refactor Delegation | v1.0 | Implemented | FEATURE-048-A | 03-06-2026 | 03-10-2026 05:25:00 |
 | FEATURE-048-E | EPIC-048 | Acceptance Test Tool Selection | v1.0 | Implemented | - | 03-10-2026 | 03-10-2026 05:10:00 |
 | FEATURE-048-F | EPIC-048 | Human Playground Tool Selection | v1.0 | Implemented | - | 03-10-2026 | 03-10-2026 05:15:00 |
+| FEATURE-049-A | EPIC-049 | KB Backend & Storage Foundation | v1.0 | Implemented | [specification.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-A/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-A/technical-design.md) | 03-11-2026 | 03-11-2026 10:30:00 |
+| FEATURE-049-B | EPIC-049 | KB Sidebar & Navigation | v1.0 | Implemented | [specification.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/technical-design.md) | 03-11-2026 | 03-11-2026 10:50:00 |
+| FEATURE-049-C | EPIC-049 | KB Browse & Search | v1.0 | Implemented | [specification.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-C/specification.md) | 03-11-2026 | 03-11-2026 11:10:00 |
+| FEATURE-049-D | EPIC-049 | KB Article Editor | v1.0 | Implemented | [specification.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-D/specification.md) | 03-11-2026 | 03-11-2026 10:55:00 |
+| FEATURE-049-E | EPIC-049 | KB File Upload | v1.0 | Implemented | [specification.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-E/specification.md) | 03-11-2026 | 03-11-2026 11:30:00 |
+| FEATURE-049-F | EPIC-049 | KB AI Librarian & Intake | v1.0 | Planned | FEATURE-049-A, FEATURE-049-E | 03-11-2026 | 03-11-2026 05:18:00 |
+| FEATURE-049-G | EPIC-049 | KB Reference Picker | v1.0 | Implemented | [specification.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/specification.md) | 03-11-2026 | 03-11-2026 11:45:00 |

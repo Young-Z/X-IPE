@@ -3,6 +3,7 @@
 | Entry ID | Timestamp | Task ID | Calling Skill | Disposition | Confidence | Summary |
 |----------|-----------|---------|---------------|-------------|------------|---------|
 | DAO-039 | 2026-03-11T11:14:10Z | TASK-839 | N/A (human direct) | instruction | 0.90 | Update acceptance test skill: (1) run ALL tests from spec not just web UI, choosing best tool per test type; (2) add chrome-devtools-mcp to tools.json quality stage; (3) skill reads tools.json config like ideation does |
+| DAO-041 | 2026-03-11T11:53:33Z | TASK-840 | N/A (human direct) | instruction | 0.92 | Change next_task_based_skill in x-ipe-task-based-feature-acceptance-test to only include code-refactor |
 
 ## DAO-039
 - **Timestamp:** 2026-03-11T11:14:10Z
@@ -61,6 +62,39 @@
 >   - skill_name: "x-ipe-meta-skill-creator"
 >     match_strength: "strong"
 >     reason: "Adding reference file and updating SKILL.md procedure"
+
+### Follow-up
+> None
+
+## DAO-041
+- **Timestamp:** 2026-03-11T11:53:33Z
+- **Task ID:** TASK-840
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A (human direct)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.92
+
+### Message
+> for x-ipe-task-based-feature-acceptance-test skill the next step should only be refactoring
+
+### Guidance Returned
+> Update `next_task_based_skill` in x-ipe-task-based-feature-acceptance-test to only include `x-ipe-task-based-code-refactor`. Remove `x-ipe-task-based-feature-closing` and `x-ipe-task-based-human-playground` entries from both the input parameters and output result sections. Also update `references/engineering-workflow.md` in the DAO skill to reflect this routing change.
+
+### Rationale
+> User explicitly wants to enforce a quality-first workflow: after acceptance testing, always go through refactoring before any closing. This simplifies the decision tree and ensures code quality review happens consistently. The change is a clear, scoped user override of the current multi-option routing. Three perspectives considered — supporting (enforces quality gate), opposing (reduces flexibility to skip refactoring), neutral (user owns the workflow, reversible).
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-meta-skill-creator"
+>     match_strength: "strong"
+>     reason: "Modifying an existing task-based skill's YAML configuration requires skill creator process"
+>     execution_steps:
+>       - phase: "1. Validate"
+>         step: "1.1 Load existing skill"
+>       - phase: "2. Update"
+>         step: "2.1 Apply changes following template"
 
 ### Follow-up
 > None

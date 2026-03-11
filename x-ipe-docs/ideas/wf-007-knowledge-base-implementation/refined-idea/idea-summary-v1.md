@@ -158,9 +158,12 @@ mindmap
 
 - [ ] KB sidebar section renders with tree navigation showing categories and articles
 - [ ] Users can create, edit, and delete KB articles via inline editor
-- [ ] Users can upload files (markdown, PDF, images) and paste URLs
+- [ ] Users can upload files (markdown, PDF, images), paste URLs, and upload archives (.zip/.7z) with auto-extraction
 - [ ] Keyword search returns relevant results across all article content
 - [ ] Tag-based filtering narrows results by metadata
+- [ ] Untagged files are visually flagged with "Needs Tags" badge and filterable via "Untagged" quick-filter
+- [ ] Browse view supports dual-mode: Grid (editorial cards) and List (sortable table) with auto-switch at scale
+- [ ] Sorting options: Last Modified (default), Name A→Z, Date Created, Untagged First
 - [ ] AI agents can read KB articles when linked to workflow actions via `kb-articles` context key
 - [ ] Permitted agents auto-capture research findings with `[auto-generated]` tag
 - [ ] Cross-workflow "📚 Reference KB" shortcut available in editors/modals to browse and insert KB references
@@ -255,9 +258,24 @@ linked_workflows: []                     # Workflows referencing this article
   "agent_write_allowlist": [
     "x-ipe-task-based-ideation",
     "x-ipe-task-based-technical-design",
-    "x-ipe-task-based-idea-mockup"
+    "x-ipe-task-based-idea-mockup",
+    "x-ipe-tool-kb-librarian"
   ],
-  "supported_extensions": [".md", ".pdf", ".png", ".jpg", ".jpeg", ".gif", ".svg"],
+  "intake_folder": ".intake",
+  "ai_librarian": {
+    "enabled": true,
+    "skill": "x-ipe-tool-kb-librarian",
+    "auto_tag": true,
+    "auto_extract_archives": true,
+    "comment": "📥 Intake staging folder for AI-assisted organization. Files uploaded in AI Librarian mode land here. Running the librarian analyzes content, suggests folder placement, and auto-tags lifecycle & domain dimensions."
+  },
+  "supported_extensions": [".md", ".pdf", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".zip", ".7z"],
+  "archive_behavior": {
+    "auto_extract": true,
+    "preserve_folder_structure": true,
+    "skip_nested_archives": true,
+    "comment": "Archives (.zip/.7z) are auto-extracted on upload. Folder structure inside archives is preserved. Nested archives within uploaded folders or sub-folders are skipped (not recursively extracted)."
+  },
   "url_bookmark_format": ".url.md"
 }
 ```
@@ -375,12 +393,19 @@ The KB feature will reuse these established X-IPE patterns:
 
 ### Scene Breakdown
 
-1. **Browse Articles** — Main KB dashboard with article card grid (hero + standard), search bar, tag filter chips, category stats, drag-and-drop upload zone. Uses "Knowledge Atelier" editorial aesthetic with Instrument Serif display font.
+1. **Browse Articles** — Main KB dashboard with dual-mode view: **Grid** (editorial card layout with hero + standard cards for small collections ≤30) and **List** (sortable table with columns: icon, name, folder, lifecycle tags, domain tags, date modified — practical for 50+ files, auto-switches as default). Features: search bar, 2D tag filter chips (lifecycle × domain), "⚠ Untagged" quick-filter for post-upload triage, sort dropdown (Last Modified / Name A→Z / Date Created / Untagged First), stats bar (articles, folders, tags, untagged count). **Dual-mode upload section** at the bottom: **Normal Upload** (drag-and-drop directly to selected folder, supports .zip/.7z auto-extraction) and **📚 AI Librarian** mode (files land in 📥 Intake staging area for AI-assisted organization). Untagged files highlighted with amber "Needs Tags" badge.
 2. **Article Detail** — Article reading view with rich markdown rendering, breadcrumb navigation, metadata sidebar (tags, author, linked workflows, file path), and edit/download actions.
-3. **📚 Reference Picker Modal** — Cross-workflow KB reference shortcut. Shows folder-tree category browser (left), selectable article list with checkboxes (right), selected count, and "Insert References" button. Demonstrates the UX for referencing KB articles from any X-IPE editor.
+3. **📚 Reference Picker Modal** — Cross-workflow KB reference shortcut. Shows folder-tree category browser (left), selectable article list with checkboxes (right), selected count, "Copy to Clipboard" button, and "Insert References" button. Demonstrates the UX for referencing KB articles from any X-IPE editor.
 
 ### Design Decisions
 
+- **Dual-mode upload** — **Normal Upload** sends files directly to the selected folder (fast, user-controlled). **📚 AI Librarian** mode routes files to a temporary **📥 Intake** staging area, where clicking "✨ Run AI Librarian" opens a Copilot CLI session that analyzes content, suggests folder placement, and auto-tags lifecycle & domain dimensions. Purple accent (`#8b5cf6`) visually differentiates AI Librarian from the standard emerald KB accent.
+- **Intake concept** — The 📥 Intake is a temporary staging folder (shown in sidebar with purple accent and pending count badge). Files sit as "Pending" until the AI Librarian processes them. After processing, files move to proper folders with tags applied, and status shows "Filed ✓". This separates the upload action from the organization action.
+- **x-ipe-tool-kb-librarian** — Future tool-type skill (not task-based) that the AI Librarian button invokes via CLI session. Responsibilities: content analysis, folder suggestion, tag inference (lifecycle + domain), archive extraction, and batch file organization.
+- **Dual-mode browse** — Grid view for editorial aesthetic (≤30 files), List view for practical scale (50+ files). Grid is default for small KBs; list auto-becomes default when article count grows. Toggle always available.
+- **Sorting logic** — Default: Last Modified (newest first). Options: Name A→Z, Date Created, Untagged First (triage sort). List view columns are clickable for sort.
+- **Untagged triage** — "Needs Tags" amber badge on untagged files + "⚠ Untagged (N)" quick-filter in toolbar. Answers "what needs attention after bulk upload?"
+- **Archive upload** — .zip/.7z auto-extracted preserving internal folder structure. Nested archives inside uploaded folders/sub-folders are skipped (no recursive extraction).
 - **Category color coding** — Each category gets a unique color strip on cards and sidebar dots (Requirements=blue, Design=amber, Technical=emerald, Market=purple, Brand=pink, General=slate)
 - **Hero card pattern** — First article spans 2 columns for visual hierarchy and editorial feel
 - **Auto-generated badge** — Robot icon + "Auto" label clearly marks AI-generated articles

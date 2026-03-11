@@ -1,0 +1,226 @@
+/* FEATURE-049-E: KB File Upload Styles */
+
+.kb-upload-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1051;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.kb-upload-overlay.active {
+    opacity: 1;
+}
+
+.kb-upload-modal {
+    background: var(--bg-primary, #121220);
+    border: 1px solid var(--border-color, #333);
+    border-radius: 12px;
+    width: 90vw;
+    max-width: 600px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: transform 0.3s;
+}
+
+.kb-upload-overlay.active .kb-upload-modal {
+    transform: scale(1);
+}
+
+.kb-upload-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color, #333);
+}
+
+.kb-upload-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary, #e0e0e0);
+}
+
+.kb-upload-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary, #888);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.kb-upload-close:hover {
+    color: var(--text-primary, #e0e0e0);
+}
+
+.kb-upload-body {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Folder selector */
+.kb-upload-folder-select {
+    margin-bottom: 16px;
+}
+
+.kb-upload-folder-select label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary, #888);
+    margin-bottom: 6px;
+}
+
+.kb-upload-folder-row {
+    display: flex;
+    gap: 8px;
+}
+
+.kb-upload-folder-dropdown {
+    flex: 1;
+    padding: 8px 12px;
+    background: var(--bg-secondary, #1e1e2e);
+    border: 1px solid var(--border-color, #333);
+    border-radius: 6px;
+    color: var(--text-primary, #e0e0e0);
+    font-size: 0.85rem;
+}
+
+.kb-upload-newfolder-btn {
+    padding: 8px 12px;
+    background: var(--bg-secondary, #1e1e2e);
+    border: 1px solid var(--border-color, #333);
+    border-radius: 6px;
+    color: var(--text-primary, #e0e0e0);
+    font-size: 0.8rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.kb-upload-newfolder-btn:hover {
+    border-color: var(--accent-primary, #3b82f6);
+}
+
+.kb-upload-newfolder-input {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.kb-newfolder-name {
+    flex: 1;
+    padding: 6px 10px;
+    background: var(--bg-secondary, #1e1e2e);
+    border: 1px solid var(--border-color, #333);
+    border-radius: 4px;
+    color: var(--text-primary, #e0e0e0);
+    font-size: 0.85rem;
+}
+
+.kb-newfolder-create-btn,
+.kb-newfolder-cancel-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--border-color, #333);
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.kb-newfolder-create-btn {
+    background: var(--accent-primary, #3b82f6);
+    color: white;
+    border-color: var(--accent-primary, #3b82f6);
+}
+
+.kb-newfolder-cancel-btn {
+    background: var(--bg-secondary, #1e1e2e);
+    color: var(--text-secondary, #888);
+}
+
+/* Dropzone */
+.kb-upload-dropzone {
+    border: 2px dashed var(--border-color, #444);
+    border-radius: 10px;
+    padding: 40px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.kb-upload-dropzone:hover,
+.kb-upload-dropzone.dragover {
+    border-color: var(--accent-primary, #3b82f6);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.kb-upload-dropzone-content i {
+    font-size: 2rem;
+    color: var(--text-secondary, #888);
+    display: block;
+    margin-bottom: 8px;
+}
+
+.kb-upload-dropzone-content p {
+    color: var(--text-secondary, #888);
+    margin: 0 0 4px;
+    font-size: 0.9rem;
+}
+
+.kb-upload-browse-link {
+    color: var(--accent-primary, #3b82f6);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.kb-upload-dropzone-content small {
+    color: var(--text-muted, #666);
+    font-size: 0.75rem;
+}
+
+/* Progress */
+.kb-upload-progress {
+    margin-top: 16px;
+    border-top: 1px solid var(--border-color, #333);
+    padding-top: 12px;
+}
+
+.kb-upload-progress-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.kb-upload-fname {
+    color: var(--text-primary, #e0e0e0);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 60%;
+}
+
+.kb-upload-status {
+    font-size: 0.8rem;
+}
+
+.kb-upload-pending {
+    color: var(--text-secondary, #888);
+}
+
+.kb-upload-success {
+    color: #10b981;
+}
+
+.kb-upload-error {
+    color: #ef4444;
+}

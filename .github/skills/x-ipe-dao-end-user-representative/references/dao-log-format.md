@@ -1,8 +1,10 @@
 # DAO Semantic Log Format
 
 ## File Naming
-- Target: `x-ipe-docs/dao/decisions_made_{semantic_task_type}.md`
+- Target: `x-ipe-docs/dao/{yy-mm-dd}/decisions_made_{semantic_task_type}.md`
+- `{yy-mm-dd}` is the current date (e.g., `26-03-11` for 2026-03-11)
 - semantic_task_type derived from calling_skill (e.g., "bug-fix" → "bug_fix")
+- Ensure the date subfolder exists before writing
 
 ## Entry ID
 - Format: DAO-{NNN} (zero-padded 3 digits, starting at DAO-001)

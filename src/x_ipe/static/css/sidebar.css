@@ -336,3 +336,27 @@
 .sidebar-parent.active-parent {
     background-color: var(--sidebar-active, #3a3a4a);
 }
+
+/* FEATURE-049-B: Knowledge Base sidebar styles */
+.kb-folder.kb-drag-over {
+    border: 2px dashed #10b981 !important;
+    background: rgba(16, 185, 129, 0.1) !important;
+    border-radius: 6px;
+}
+
+.kb-dragging {
+    opacity: 0.5;
+}
+
+.kb-empty-state {
+    font-style: italic;
+    opacity: 0.7;
+    padding: 0.5rem 1rem;
+}
+
+.kb-intake-placeholder {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    margin-top: 0.25rem;
+    padding-top: 0.5rem;
+    cursor: default;
+}

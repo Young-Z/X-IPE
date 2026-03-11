@@ -152,6 +152,12 @@ def _init_services(app):
         except Exception:
             pass  # Non-critical — adapter service is optional at startup
     
+    # Initialize KB service (FEATURE-049-A)
+    project_root = app.config.get('PROJECT_ROOT', '.')
+    from x_ipe.services.kb_service import KBService
+    kb_service = KBService(project_root)
+    app.config['KB_SERVICE'] = kb_service
+
     # Cleanup old UIUX feedback on startup (TASK-237)
     if not app.config.get('TESTING'):
         project_root = app.config.get('PROJECT_ROOT', '.')
@@ -183,6 +189,7 @@ def _register_blueprints(app):
     from x_ipe.routes.quality_evaluation_routes import quality_evaluation_bp
     from x_ipe.routes.uiux_reference_routes import uiux_reference_bp
     from x_ipe.routes.workflow_routes import workflow_bp
+    from x_ipe.routes.kb_routes import kb_bp
     
     # Initialize tracing middleware (FEATURE-023)
     from x_ipe.tracing.middleware import init_tracing_middleware
@@ -200,6 +207,7 @@ def _register_blueprints(app):
     app.register_blueprint(config_bp)
     app.register_blueprint(uiux_reference_bp)
     app.register_blueprint(workflow_bp)
+    app.register_blueprint(kb_bp)
 
 
 def _register_handlers():

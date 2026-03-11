@@ -1,0 +1,234 @@
+/* FEATURE-049-D: KB Article Editor Modal */
+
+.kb-editor-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1051;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.kb-editor-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.kb-editor-modal {
+    background: #fff;
+    border-radius: 12px;
+    width: 90vw;
+    height: 90vh;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    transform: scale(0.95) translateY(10px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+}
+
+.kb-editor-overlay.active .kb-editor-modal {
+    transform: scale(1) translateY(0);
+}
+
+/* Header */
+.kb-editor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.kb-editor-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.kb-editor-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+}
+
+.kb-editor-close:hover {
+    color: #1e293b;
+}
+
+/* Body */
+.kb-editor-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Form */
+.kb-editor-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.kb-editor-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 4px;
+}
+
+.kb-required {
+    color: #ef4444;
+}
+
+.kb-editor-title {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.kb-editor-title:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Tag Chips */
+.kb-tag-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.kb-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 12px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s;
+}
+
+.kb-chip-lifecycle {
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    color: #b45309;
+}
+
+.kb-chip-lifecycle.active {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border-color: transparent;
+    color: #fff;
+}
+
+.kb-chip-domain {
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    color: #1d4ed8;
+}
+
+.kb-chip-domain.active {
+    background: #3b82f6;
+    border-color: transparent;
+    color: #fff;
+}
+
+/* Editor Content */
+.kb-editor-content {
+    flex: 1;
+    min-height: 300px;
+}
+
+.kb-editor-content .EasyMDEContainer {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.kb-editor-content .EasyMDEContainer .CodeMirror {
+    min-height: 250px;
+    border: none;
+    font-size: 14px;
+}
+
+.kb-editor-content .editor-toolbar {
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+/* Footer */
+.kb-editor-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 16px 24px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.kb-editor-toast {
+    flex: 1;
+    font-size: 13px;
+}
+
+.kb-toast-error {
+    color: #ef4444;
+}
+
+.kb-toast-info {
+    color: #64748b;
+}
+
+.kb-editor-btn {
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+}
+
+.kb-editor-btn-cancel {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.kb-editor-btn-cancel:hover {
+    background: #e2e8f0;
+}
+
+.kb-editor-btn-save {
+    background: #10b981;
+    color: #fff;
+}
+
+.kb-editor-btn-save:hover:not(:disabled) {
+    background: #059669;
+}
+
+.kb-editor-btn-save:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

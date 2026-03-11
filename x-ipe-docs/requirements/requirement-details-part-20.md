@@ -285,3 +285,395 @@ All conflicts are classified as **expected** — they are natural consequences o
 - ~~Feature Acceptance Test skill (tests via Chrome DevTools, doesn't write production code)~~ **[Moved to in-scope by CR-001]**
 - Creating new tool-implementation skills for new languages
 - Changing the AAA scenario format itself
+
+---
+
+## EPIC-049: Knowledge Base — Integrated Project Knowledge Management
+
+> **Supersedes:** EPIC-025 (Knowledge Base Infrastructure). EPIC-025 is retired — all KB requirements are consolidated here with enhanced scope.
+
+### Project Overview
+
+A project-scoped Knowledge Base (KB) integrated into X-IPE that serves as persistent organizational memory — storing requirement documents, user manuals, design references, market research, and technical patterns. Both humans and AI agents can read from and write to the KB across all workflow phases. Supports legacy application maintenance and knowledge-intensive development alongside X-IPE's existing greenfield workflow.
+
+**Source:** Idea IDEA-036, workflow `wf-007-knowledge-base-implementation`, refined through 13+ rounds of mockup iteration.
+
+### User Request
+
+> "We need a knowledge base in X-IPE to support legacy applications (existing docs, manuals, architecture diagrams) and capture reusable knowledge (market research, design references, technical patterns). It should work like OneDrive/Google Drive with user-defined folders, have predefined 2D tags (lifecycle × domain), support AI-assisted upload via an AI Librarian, and integrate into all workflow phases via a Reference Picker."
+
+### Clarifications
+
+| Question | Answer |
+|----------|--------|
+| KB scope per project vs per workflow? | **Shared** — one KB per project under `x-ipe-docs/knowledge-base/`, all workflows access the same KB |
+| Folder structure predefined or user-defined? | **User-defined** — free-form like OneDrive/Google Drive. No predefined categories. Users create/manage folders freely |
+| Tags predefined or user-defined? | **Predefined** — 2D taxonomy in `kb-config.json`: lifecycle tags (SDLC phases) × domain tags (project topics) |
+| Markdown editor type? | **Simple code-editor** with markdown preview panel (reuse EPIC-037 Compose Idea Modal pattern with EasyMDE) |
+| Agent auto-write behavior? | Agents wire to **AI Librarian skill** (`x-ipe-tool-kb-librarian`) which auto-handles placement and tagging. No direct KB writes |
+| Search implementation? | **Simple first** — filename + frontmatter/tags. Full-text content search deferred to V2 |
+| URL bookmarks auto-fetch? | **No** — store URL + optional user notes in `.url.md` file only. No webpage snapshots |
+| Relationship to EPIC-025? | **EPIC-049 replaces EPIC-025** — consolidated with enhanced scope (2D tags, AI Librarian, reference picker, markdown editor) |
+| Reuse existing modal patterns? | **Yes** — reuse EPIC-037 (Compose Idea Modal) for KB editor + EPIC-039 (Folder Browser Modal) for reference picker |
+| Archive uploads (.zip/.7z)? | **Supported** — auto-extract preserving folder structure, skip nested archives within uploaded folders |
+| Browse view scalability? | **Dual-mode** — Grid view (cards, editorial, ≤30 files) ↔ List view (sortable table, practical at 50+ files) |
+| Lifecycle vs domain tag display? | **Visually differentiated** — lifecycle: amber gradient pill with `▸` prefix; domain: blue outlined pill with `#` prefix |
+
+### High-Level Requirements
+
+#### HR-049.1: KB Storage & Folder Structure
+1. KB files stored under `x-ipe-docs/knowledge-base/` within the project repository
+2. Folder structure is entirely user-defined (create, rename, move, delete folders)
+3. `kb-config.json` at KB root stores configuration: predefined tags, AI Librarian settings, agent write allowlist
+4. Supported file types: Markdown (`.md`, first-class with in-app editing), PDF, images (`.png`, `.jpg`, `.svg`), URL bookmarks (`.url.md`)
+5. Maximum file size: 10MB per file
+6. YAML frontmatter on all `.md` articles: title, tags (lifecycle + domain), author, created date, auto-generated flag
+
+#### HR-049.2: KB Sidebar & Navigation
+1. New "Knowledge Base" section in sidebar (between Ideas and Workflows)
+2. Collapsible folder tree mirroring file system structure
+3. Folder expand/collapse with click; file click opens article in content area
+4. "📥 Intake" entry in sidebar for AI Librarian staging area
+5. Drag-and-drop files onto sidebar folders for quick move/upload
+6. Visual folder highlight (emerald dashed border) on drag-over
+
+#### HR-049.3: KB Browsing & Search
+1. **Grid view**: Card-based layout with title, snippet, tags, date — suitable for ≤30 files
+2. **List view**: Sortable table with columns: Name, Tags, Modified, Size — suitable for 50+ files
+3. View toggle (grid ↔ list) persisted per session
+4. **Sort options**: Last Modified (default), Name A→Z, Date Created, Untagged First
+5. **Search**: Keyword search matching filename + frontmatter fields (title, tags, author)
+6. **Tag filter chips**: 2D taxonomy — lifecycle tags (amber, `▸` prefix) + domain tags (blue, `#` prefix)
+7. "⚠ Untagged" quick-filter chip to surface files needing tags
+8. "Needs Tags" amber badge on untagged files in both views
+
+#### HR-049.4: KB Article Editor
+1. Create new article via "New Article" button → modal editor
+2. Reuse EPIC-037 Compose Idea Modal pattern (EasyMDE markdown editor with toolbar)
+3. Split-pane or toggle between edit and preview modes
+4. YAML frontmatter auto-populated with defaults (author, date); user edits tags and title
+5. Save writes `.md` file to selected folder with frontmatter
+6. Edit existing articles in-place (same modal, pre-populated)
+
+#### HR-049.5: KB Upload — Normal Mode
+1. Drag-and-drop or click-to-browse file upload zone
+2. **Folder path selector**: Breadcrumb-style picker above drop zone showing destination path (e.g., `/ research / competitors`)
+3. Dropdown folder tree for selecting destination folder
+4. "Create new folder" button beside breadcrumb
+5. Archive support: `.zip` and `.7z` files auto-extracted preserving internal folder structure
+6. Nested archives within uploaded folders are skipped (not recursively extracted)
+7. Drag-drop directly onto sidebar folder entries for immediate upload to that folder
+
+#### HR-049.6: KB Upload — AI Librarian Mode
+1. Upload mode toggle: "Normal" (direct to folder) ↔ "AI Librarian" (via Intake staging)
+2. AI Librarian mode uploads files to `x-ipe-docs/knowledge-base/.intake/` staging folder
+3. "📥 Intake" section shows staged files with status: Pending, Processing, Filed
+4. Status filter pills: All / Pending / Processing / Filed
+5. Per-file actions: Preview, Assign folder manually, Remove
+6. "✨ Run AI Librarian" button triggers agent CLI session via `x-ipe-tool-kb-librarian` skill
+7. AI Librarian auto-handles: move files to appropriate folders, assign tags, generate frontmatter
+8. After processing, files move from Intake to their destination folders with status "Filed"
+9. Intake file table columns: Name, Size, Upload Date, Status, Destination, Actions
+
+#### HR-049.7: Reference Picker Modal
+1. Cross-workflow modal invoked from any workflow phase (e.g., during ideation, technical design)
+2. Reuse EPIC-039 Folder Browser Modal pattern (two-panel: tree left, preview right)
+3. Browse KB folder tree on left panel, file preview on right panel
+4. Select files AND/OR folders for referencing
+5. Search within modal matching filename + tags
+6. Tag filter chips within modal (same 2D taxonomy)
+7. **"📋 Copy" button**: Copy selected references to clipboard (for manual pasting)
+8. **"Insert" button**: Insert references into current workflow context
+9. Multi-select support for batch referencing
+
+#### HR-049.8: 2D Tag Taxonomy
+1. Tags defined in `kb-config.json` under `tags.lifecycle` and `tags.domain`
+2. **Lifecycle tags** (vertical — SDLC phases): Ideation, Requirement, Design, Implementation, Testing, Deployment, Maintenance
+3. **Domain tags** (horizontal — project topics): API, Authentication, UI/UX, Database, Infrastructure, Security, Performance, Integration, Documentation, Analytics
+4. Visual differentiation: lifecycle = amber gradient pill with `▸` prefix + left border accent; domain = blue outlined pill with `#` prefix + border-only style
+5. Tags are filterable in browse view and reference picker
+6. Articles can have multiple lifecycle + domain tags
+
+#### HR-049.9: Agent Integration
+1. Agents access KB via `x-ipe-tool-kb-librarian` skill (tool-type, agent-invoked)
+2. Agent write access controlled by `agent_write_allowlist` in `kb-config.json`
+3. Agent-generated articles tagged with `[auto-generated]` flag in frontmatter
+4. Workflow integration: `kb-articles` key in action context for referencing KB articles during workflow execution
+5. AI Librarian skill handles: file organization, tag assignment, frontmatter generation, folder placement
+
+#### HR-049.10: URL Bookmarks
+1. URL bookmarks stored as `.url.md` files with standard frontmatter
+2. Frontmatter includes: `url` field, title, tags, optional notes
+3. URL bookmarks displayed with link icon (🔗) and "Open URL" action
+4. No auto-fetching or webpage snapshot — URL + user notes only
+
+### Non-Functional Requirements
+
+- NFR-049.1: KB operations must be file-system based (git-compatible, no database dependency)
+- NFR-049.2: Sidebar folder tree must load within 500ms for up to 500 files
+- NFR-049.3: Search results must return within 300ms for filename + frontmatter matching
+- NFR-049.4: All KB UI must follow existing X-IPE design system (base.css variables, modal patterns, sidebar styles)
+- NFR-049.5: Archive extraction must handle up to 100MB compressed files
+- NFR-049.6: Intake staging area must be excluded from regular KB browsing (`.intake/` folder convention)
+
+### Constraints
+
+- File-based storage only — no database, no external search index
+- Project-scoped — no cross-project KB sharing in V1
+- 10MB max per individual file
+- Tags are predefined in `kb-config.json` — no ad-hoc tag creation from UI in V1
+- Full-text content search deferred to V2
+- Agent writes MUST go through AI Librarian skill — no direct file writes
+
+### Out of Scope
+
+- Cross-project KB federation or shared libraries
+- Full-text content search (V2)
+- WYSIWYG markdown editor (using simple code-editor with preview)
+- Auto-fetch webpage snapshots for URL bookmarks
+- Real-time collaborative editing
+- KB versioning / article history (git provides this implicitly)
+- KB permissions / role-based access (all project members have full access)
+
+### Open Questions
+
+- None — all questions resolved during ideation (13+ rounds) and requirement clarification
+
+### Dependencies
+
+| EPIC | Dependency Type | Description |
+|------|----------------|-------------|
+| EPIC-037 | Reuse | Compose Idea Modal pattern for KB Article Editor |
+| EPIC-039 | Reuse | Folder Browser Modal pattern for Reference Picker |
+| EPIC-043 | Integrate | File Link Preview for internal KB article links |
+
+### Supersedes
+
+| EPIC | Reason |
+|------|--------|
+| EPIC-025 | KB Infrastructure — fully replaced by EPIC-049 with enhanced scope (2D tags, AI Librarian, reference picker, markdown editor, dual-mode upload) |
+
+### Linked Mockups
+
+| Mockup Function Name | Mockup Link |
+|---------------------|-------------|
+| KB Browse Articles (Grid/List) | [kb-interface-v1.html — Scene 1](EPIC-049/mockups/kb-interface-v1.html) |
+| KB Article Detail | [kb-interface-v1.html — Scene 2](EPIC-049/mockups/kb-interface-v1.html) |
+| KB Reference Picker Modal | [kb-interface-v1.html — Scene 3](EPIC-049/mockups/kb-interface-v1.html) |
+| KB Intake — AI Librarian | [kb-interface-v1.html — Scene 4](EPIC-049/mockups/kb-interface-v1.html) |
+
+---
+
+## Feature List — EPIC-049
+
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-049-A | EPIC-049 | KB Backend & Storage Foundation | v1.0 | Backend APIs for file/folder CRUD, kb-config.json, YAML frontmatter parsing, 2D tag taxonomy model, URL bookmark format | None |
+| FEATURE-049-B | EPIC-049 | KB Sidebar & Navigation | v1.0 | New sidebar section with collapsible folder tree, expand/collapse, drag-drop folder highlight | FEATURE-049-A |
+| FEATURE-049-C | EPIC-049 | KB Browse & Search | v1.0 | Grid view with cards, sort dropdown, keyword search (filename+tags), 2D tag filter chips, untagged badge | FEATURE-049-A, FEATURE-049-B |
+| FEATURE-049-D | EPIC-049 | KB Article Editor | v1.0 | Create/edit markdown articles via modal (reuse EPIC-037 pattern), EasyMDE editor, frontmatter editing | FEATURE-049-A |
+| FEATURE-049-E | EPIC-049 | KB File Upload | v1.0 | Normal mode upload zone, folder path selector breadcrumb, .zip/.7z archive extraction, sidebar drag-drop upload | FEATURE-049-A, FEATURE-049-B |
+| FEATURE-049-F | EPIC-049 | KB AI Librarian & Intake | v1.0 | Upload mode toggle, intake staging area, AI Librarian skill integration, agent write access, workflow kb-articles key | FEATURE-049-A, FEATURE-049-E |
+| FEATURE-049-G | EPIC-049 | KB Reference Picker | v1.0 | Cross-workflow modal (reuse EPIC-039 pattern), file+folder selection, copy to clipboard, insert reference, multi-select | FEATURE-049-A, FEATURE-049-C |
+
+> **MVP Scope:** Features A, B, C, D, E, G — **Post-MVP:** Feature F (AI Librarian & Intake)
+> **Note:** Feature C ships with grid view only for MVP; list view added as enhancement post-MVP.
+
+---
+
+## Feature Details — EPIC-049
+
+### FEATURE-049-A: KB Backend & Storage Foundation
+
+**Version:** v1.0
+**Brief Description:** Core backend service providing file-based KB storage, folder management, configuration, and metadata handling.
+
+**Acceptance Criteria:**
+- [ ] KB root folder `x-ipe-docs/knowledge-base/` created on project init (or first KB access)
+- [ ] `kb-config.json` schema supports: `tags.lifecycle[]`, `tags.domain[]`, `agent_write_allowlist[]`, `ai_librarian` settings
+- [ ] Backend API: list folders, create folder, rename folder, delete folder (with contents confirmation)
+- [ ] Backend API: list files in folder (with frontmatter metadata), get file content, create file, update file, delete file
+- [ ] Backend API: move file/folder to new parent folder
+- [ ] YAML frontmatter parsing for `.md` files: title, tags (lifecycle + domain), author, created, auto_generated
+- [ ] URL bookmark format: `.url.md` files with `url`, `title`, `tags`, `notes` frontmatter fields
+- [ ] File type validation: `.md`, `.pdf`, `.png`, `.jpg`, `.svg`, `.url.md` accepted; 10MB max per file
+- [ ] 2D tag taxonomy model: lifecycle tags (7 SDLC phases) × domain tags (10 topics) from kb-config.json
+- [ ] API endpoint to read/update kb-config.json tag definitions
+
+**Dependencies:**
+- None (foundation feature)
+
+**Technical Considerations:**
+- File-based storage only — no database, git-compatible
+- Reuse existing X-IPE file service patterns (see `src/x_ipe/services/`)
+- Frontmatter parsing via Python `yaml` module (already a project dependency)
+- All paths relative to project root
+
+---
+
+### FEATURE-049-B: KB Sidebar & Navigation
+
+**Version:** v1.0
+**Brief Description:** New "Knowledge Base" sidebar section with interactive folder tree and drag-drop support.
+
+**Acceptance Criteria:**
+- [ ] New "Knowledge Base" section appears in sidebar between Ideas and Workflows
+- [ ] Folder tree mirrors `x-ipe-docs/knowledge-base/` file system structure
+- [ ] Folders expand/collapse on click; files open in content area on click
+- [ ] Folder tree auto-refreshes after file/folder operations (create, move, delete, upload)
+- [ ] Drag-over on sidebar folders shows emerald dashed border + "DROP HERE" visual
+- [ ] Drop event on sidebar folder triggers file move/upload to that folder
+- [ ] "📥 Intake" entry visible in sidebar (navigates to Intake view when Feature F is implemented; placeholder until then)
+
+**Dependencies:**
+- FEATURE-049-A: Needs folder/file listing APIs
+
+**Technical Considerations:**
+- Follow existing sidebar patterns (`sidebar.css`, `.nav-section-header` style)
+- HTML5 drag events: dragover, dragleave, drop
+- Sidebar tree should load within 500ms for up to 500 files (NFR-049.2)
+
+---
+
+### FEATURE-049-C: KB Browse & Search
+
+**Version:** v1.0
+**Brief Description:** Main content area for browsing KB articles with grid view, search, sort, and tag filtering.
+
+**Acceptance Criteria:**
+- [ ] Grid view: card-based layout showing title, snippet (first 100 chars), tags, last modified date
+- [ ] Tag display: lifecycle tags as amber gradient pill with `▸` prefix; domain tags as blue outlined pill with `#` prefix
+- [ ] Sort dropdown with options: Last Modified (default), Name A→Z, Date Created, Untagged First
+- [ ] Keyword search bar matching filename + frontmatter fields (title, tags, author)
+- [ ] Search results update as user types (debounced 300ms)
+- [ ] 2D tag filter chips below search bar — click to toggle filter; active chip highlighted
+- [ ] "⚠ Untagged" quick-filter chip surfaces files missing tags
+- [ ] "Needs Tags" amber badge displayed on untagged file cards
+- [ ] Click on article card navigates to article detail view (Scene 2 from mockup)
+- [ ] URL bookmark cards display 🔗 icon and "Open URL" action
+
+**Dependencies:**
+- FEATURE-049-A: Needs file listing + frontmatter APIs
+- FEATURE-049-B: Needs sidebar for folder-scoped browsing
+
+**Technical Considerations:**
+- Search within 300ms for filename+frontmatter matching (NFR-049.3)
+- Grid view only for MVP; list view (sortable table) deferred to post-MVP enhancement
+- Follow X-IPE design system (base.css variables, card patterns)
+
+---
+
+### FEATURE-049-D: KB Article Editor
+
+**Version:** v1.0
+**Brief Description:** Modal-based markdown editor for creating and editing KB articles, reusing EPIC-037 Compose Idea Modal pattern.
+
+**Acceptance Criteria:**
+- [ ] "New Article" button in browse view opens editor modal
+- [ ] Editor modal reuses EPIC-037 Compose Idea Modal shell (90vw×90vh, backdrop blur, spring animation)
+- [ ] EasyMDE markdown editor with toolbar (Bold, Italic, Heading, Lists, Link, Image, Code)
+- [ ] Split-pane or toggle between edit and preview modes
+- [ ] Frontmatter form fields above editor: Title (text), Lifecycle tags (multi-select from kb-config), Domain tags (multi-select from kb-config)
+- [ ] Author and created date auto-populated; auto_generated defaults to false for human-created articles
+- [ ] Save button writes `.md` file with YAML frontmatter to selected folder
+- [ ] Edit existing article: same modal pre-populated with current content and frontmatter
+- [ ] Cancel/close discards unsaved changes (with confirmation if content modified)
+
+**Dependencies:**
+- FEATURE-049-A: Needs file create/update APIs and tag definitions
+
+**Technical Considerations:**
+- EasyMDE already used in EPIC-037 — reuse same library instance
+- Modal pattern from `compose-idea-modal.css` (border-radius 12px, z-index 1051, overlay blur)
+- Frontmatter serialized via JS before save; parsed via Python on backend
+
+---
+
+### FEATURE-049-E: KB File Upload
+
+**Version:** v1.0
+**Brief Description:** Normal mode file upload with folder destination picker, archive extraction, and sidebar drag-drop.
+
+**Acceptance Criteria:**
+- [ ] Upload zone: drag-and-drop area + click-to-browse file picker
+- [ ] Folder path selector: breadcrumb-style picker above drop zone (e.g., `/ research / competitors`)
+- [ ] Dropdown folder tree for selecting destination folder with indented sub-folders
+- [ ] "Create new folder" button beside breadcrumb — inline folder name input
+- [ ] Multi-file upload support with progress indicators
+- [ ] Archive support: `.zip` files auto-extracted preserving internal folder structure
+- [ ] Archive support: `.7z` files auto-extracted preserving internal folder structure
+- [ ] Nested archives within uploaded folder contents are skipped (not recursively extracted)
+- [ ] File type validation: reject unsupported types with error message
+- [ ] File size validation: reject files >10MB with error message
+- [ ] Sidebar drag-drop: drop files onto any sidebar folder to upload directly to that folder
+- [ ] Upload zone hint text dynamically shows selected destination path
+
+**Dependencies:**
+- FEATURE-049-A: Needs file create API and folder structure
+- FEATURE-049-B: Needs sidebar folder tree for drag-drop target
+
+**Technical Considerations:**
+- Archive extraction: Python `zipfile` (stdlib) for .zip; `py7zr` library for .7z
+- Handle up to 100MB compressed files (NFR-049.5)
+- Preserve folder structure within archives when extracting
+- HTML5 File API + FormData for upload
+
+---
+
+### FEATURE-049-F: KB AI Librarian & Intake
+
+**Version:** v1.0 (Post-MVP)
+**Brief Description:** AI-assisted upload mode with intake staging area, file processing status tracking, and AI Librarian skill integration.
+
+**Acceptance Criteria:**
+- [ ] Upload mode toggle bar: "Normal" (direct) ↔ "AI Librarian" (via Intake)
+- [ ] AI Librarian mode uploads to `x-ipe-docs/knowledge-base/.intake/` staging folder
+- [ ] Intake view: file table with columns — Name, Size, Upload Date, Status, Destination, Actions
+- [ ] Status badges: Pending (default), Processing (during AI run), Filed (after placement)
+- [ ] Status filter pills: All / Pending / Processing / Filed
+- [ ] Per-file actions: Preview, Assign folder manually, Remove
+- [ ] "✨ Run AI Librarian" button triggers CLI agent session via `x-ipe-tool-kb-librarian` skill
+- [ ] AI Librarian auto-handles: move files to folders, assign lifecycle+domain tags, generate frontmatter
+- [ ] Filed files disappear from Intake and appear in destination folders
+- [ ] Agent write access controlled by `agent_write_allowlist` in kb-config.json
+- [ ] Agent-generated articles tagged with `auto_generated: true` in frontmatter
+- [ ] Workflow context integration: `kb-articles` key in action context for referencing KB articles
+- [ ] `x-ipe-tool-kb-librarian` skill created (tool-type, agent-invoked)
+
+**Dependencies:**
+- FEATURE-049-A: Needs storage APIs and config
+- FEATURE-049-E: Needs upload infrastructure
+
+**Technical Considerations:**
+- `.intake/` folder excluded from regular KB browsing (NFR-049.6)
+- AI Librarian skill is tool-type (not task-based) — invoked by agent during CLI session
+- Requires new skill file: `.github/skills/x-ipe-tool-kb-librarian/SKILL.md`
+
+---
+
+### FEATURE-049-G: KB Reference Picker
+
+**Version:** v1.0
+**Brief Description:** Cross-workflow modal for selecting and referencing KB articles/folders, reusing EPIC-039 Folder Browser Modal pattern.
+
+**Acceptance Criteria:**
+- [ ] Reference Picker modal invocable from any workflow phase (ideation, design, implementation, etc.)
+- [ ] Modal reuses EPIC-039 Folder Browser Modal shell (80vw, two-panel layout)
+- [ ] Left panel: KB folder tree browser with expand/collapse
+- [ ] Right panel: file preview (markdown rendered, images displayed, PDF placeholder)
+- [ ] Select individual files AND/OR entire folders for referencing
+- [ ] Search bar within modal matching filename + tags
+- [ ] 2D tag filter chips within modal (lifecycle amber + domain blue)
+- [ ] "📋 Copy" button: copies selected reference paths to clipboard
+- [ ] "Insert" button: inserts references into current workflow action context
+- [ ] Multi-select support: checkbox per file/folder, batch copy/insert
+- [ ] "✅ Copied!" animation feedback on clipboard copy
+
+**Dependencies:**
+- FEATURE-049-A: Needs file/folder listing APIs
+- FEATURE-049-C: Needs search and tag filter logic
+
+**Technical Considerations:**
+- Reuse EPIC-039 Folder Browser Modal component with KB-specific configuration
+- Clipboard API (`navigator.clipboard.writeText`) for copy function
+- Reference format: project-root-relative paths (e.g., `x-ipe-docs/knowledge-base/research/competitor-analysis.md`)

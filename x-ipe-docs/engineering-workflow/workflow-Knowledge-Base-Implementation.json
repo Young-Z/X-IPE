@@ -2,17 +2,17 @@
   "schema_version": "3.0",
   "name": "Knowledge-Base-Implementation",
   "created": "2026-03-10T11:29:06.244938+00:00",
-  "last_activity": "2026-03-10T12:30:13.458577+00:00",
+  "last_activity": "2026-03-11T12:42:33.325842+00:00",
   "idea_folder": null,
-  "current_stage": "ideation",
+  "current_stage": "validation",
   "global": {
     "process_preference": {
-      "interaction_mode": "interact-with-human"
+      "interaction_mode": "dao-represent-human-to-interact"
     }
   },
   "shared": {
     "ideation": {
-      "status": "in_progress",
+      "status": "completed",
       "actions": {
         "compose_idea": {
           "status": "done",
@@ -44,8 +44,7 @@
         "design_mockup": {
           "status": "done",
           "deliverables": {
-            "mockup-html": "x-ipe-docs/ideas/wf-007-knowledge-base-implementation/mockups/kb-interface-v1.html",
-            "mockups-folder": "x-ipe-docs/ideas/wf-007-knowledge-base-implementation/mockups/"
+            "kb-mockup": "x-ipe-docs/ideas/wf-007-knowledge-base-implementation/mockups/kb-interface-v1.html"
           },
           "optional": true,
           "next_actions_suggested": [
@@ -55,19 +54,636 @@
       }
     },
     "requirement": {
-      "status": "locked",
+      "status": "completed",
       "actions": {
         "requirement_gathering": {
-          "status": "pending",
-          "deliverables": []
+          "status": "done",
+          "deliverables": {
+            "requirement-doc": "x-ipe-docs/requirements/requirement-details-part-20.md",
+            "requirements-folder": "x-ipe-docs/requirements/EPIC-049/"
+          },
+          "next_actions_suggested": [
+            "feature_breakdown"
+          ]
         },
         "feature_breakdown": {
-          "status": "pending",
-          "deliverables": [],
-          "features_created": []
+          "status": "done",
+          "deliverables": {
+            "requirement-doc": "x-ipe-docs/requirements/requirement-details-part-20.md",
+            "features-board": "x-ipe-docs/planning/features.md"
+          },
+          "features_created": [
+            {
+              "id": "FEATURE-049-A",
+              "name": "KB Backend & Storage Foundation",
+              "depends_on": []
+            },
+            {
+              "id": "FEATURE-049-B",
+              "name": "KB Sidebar & Navigation",
+              "depends_on": [
+                "FEATURE-049-A"
+              ]
+            },
+            {
+              "id": "FEATURE-049-C",
+              "name": "KB Browse & Search",
+              "depends_on": [
+                "FEATURE-049-A",
+                "FEATURE-049-B"
+              ]
+            },
+            {
+              "id": "FEATURE-049-D",
+              "name": "KB Article Editor",
+              "depends_on": [
+                "FEATURE-049-A"
+              ]
+            },
+            {
+              "id": "FEATURE-049-E",
+              "name": "KB File Upload",
+              "depends_on": [
+                "FEATURE-049-A",
+                "FEATURE-049-B"
+              ]
+            },
+            {
+              "id": "FEATURE-049-F",
+              "name": "KB AI Librarian & Intake",
+              "depends_on": [
+                "FEATURE-049-A",
+                "FEATURE-049-E"
+              ]
+            },
+            {
+              "id": "FEATURE-049-G",
+              "name": "KB Reference Picker",
+              "depends_on": [
+                "FEATURE-049-A",
+                "FEATURE-049-C"
+              ]
+            }
+          ],
+          "next_actions_suggested": [
+            "FEATURE-049-A"
+          ]
         }
       }
     }
   },
-  "features": []
+  "features": [
+    {
+      "feature_id": "FEATURE-049-A",
+      "name": "KB Backend & Storage Foundation",
+      "depends_on": [],
+      "implement": {
+        "status": "done",
+        "actions": {
+          "feature_refinement": {
+            "status": "done",
+            "deliverables": {
+              "specification": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-A/specification.md",
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-A/"
+            },
+            "next_actions_suggested": [
+              "technical_design"
+            ]
+          },
+          "technical_design": {
+            "status": "done",
+            "deliverables": {
+              "tech-design": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-A/technical-design.md",
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-A/"
+            },
+            "next_actions_suggested": [
+              "implementation"
+            ]
+          },
+          "implementation": {
+            "status": "done",
+            "deliverables": {
+              "impl-files": "src/x_ipe/services/kb_service.py, src/x_ipe/routes/kb_routes.py",
+              "impl-folder": "src/x_ipe/"
+            },
+            "next_actions_suggested": [
+              "acceptance_testing"
+            ]
+          }
+        }
+      },
+      "validation": {
+        "status": "in_progress",
+        "actions": {
+          "acceptance_testing": {
+            "status": "done",
+            "deliverables": {
+              "test-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-A/acceptance-test-cases.md",
+              "test-folder": "tests/test_kb_service.py"
+            },
+            "next_actions_suggested": [
+              "code_refactor"
+            ]
+          },
+          "code_refactor": {
+            "status": "done",
+            "deliverables": {
+              "refactor-report": "refactoring: route helper, archive merge, node builder — quality 6.3→7.5"
+            },
+            "next_actions_suggested": [
+              "feature_closing"
+            ]
+          },
+          "feature_closing": {
+            "status": "done",
+            "deliverables": {
+              "closing-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-A/acceptance-test-cases.md"
+            },
+            "next_actions_suggested": [
+              "human_playground",
+              "change_request"
+            ]
+          }
+        }
+      },
+      "feedback": {
+        "status": "locked",
+        "actions": {
+          "human_playground": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          }
+        }
+      }
+    },
+    {
+      "feature_id": "FEATURE-049-B",
+      "name": "KB Sidebar & Navigation",
+      "depends_on": [
+        "FEATURE-049-A"
+      ],
+      "implement": {
+        "status": "done",
+        "actions": {
+          "feature_refinement": {
+            "status": "done",
+            "deliverables": {
+              "specification": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/specification.md"
+            },
+            "next_actions_suggested": [
+              "technical_design"
+            ]
+          },
+          "technical_design": {
+            "status": "done",
+            "deliverables": {
+              "technical-design": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/technical-design.md"
+            },
+            "next_actions_suggested": [
+              "implementation"
+            ]
+          },
+          "implementation": {
+            "status": "done",
+            "deliverables": {
+              "impl-sidebar-js": "src/x_ipe/static/js/features/sidebar.js",
+              "impl-sidebar-css": "src/x_ipe/static/css/sidebar.css",
+              "impl-file-service": "src/x_ipe/services/file_service.py",
+              "tests": "tests/frontend-js/kb-sidebar.test.js"
+            },
+            "next_actions_suggested": [
+              "acceptance_testing"
+            ]
+          }
+        }
+      },
+      "validation": {
+        "status": "in_progress",
+        "actions": {
+          "acceptance_testing": {
+            "status": "done",
+            "deliverables": {
+              "test-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/acceptance-test-cases.md",
+              "test-folder": "tests/frontend-js/kb-sidebar.test.js"
+            },
+            "next_actions_suggested": [
+              "code_refactor"
+            ]
+          },
+          "code_refactor": {
+            "status": "done",
+            "deliverables": {
+              "refactor-report": "refactoring: split drag handlers, unify patterns — quality 5.3→7.2"
+            },
+            "next_actions_suggested": [
+              "feature_closing"
+            ]
+          },
+          "feature_closing": {
+            "status": "pending",
+            "deliverables": {
+              "closing-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/acceptance-test-cases.md"
+            }
+          }
+        }
+      },
+      "feedback": {
+        "status": "locked",
+        "actions": {
+          "human_playground": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          }
+        }
+      }
+    },
+    {
+      "feature_id": "FEATURE-049-C",
+      "name": "KB Browse & Search",
+      "depends_on": [
+        "FEATURE-049-A",
+        "FEATURE-049-B"
+      ],
+      "implement": {
+        "status": "done",
+        "actions": {
+          "feature_refinement": {
+            "status": "done",
+            "deliverables": {
+              "specification": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-C/specification.md"
+            },
+            "next_actions_suggested": [
+              "technical_design"
+            ]
+          },
+          "technical_design": {
+            "status": "done",
+            "deliverables": {
+              "tech-design": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-C/technical-design.md"
+            },
+            "next_actions_suggested": [
+              "implementation"
+            ]
+          },
+          "implementation": {
+            "status": "done",
+            "deliverables": {
+              "impl-js": "src/x_ipe/static/js/features/kb-browse.js",
+              "impl-css": "src/x_ipe/static/css/kb-browse.css",
+              "tests": "tests/frontend-js/kb-browse.test.js"
+            },
+            "next_actions_suggested": [
+              "acceptance_testing"
+            ]
+          }
+        }
+      },
+      "validation": {
+        "status": "in_progress",
+        "actions": {
+          "acceptance_testing": {
+            "status": "in_progress",
+            "deliverables": []
+          },
+          "code_refactor": {
+            "status": "done",
+            "deliverables": {
+              "refactor-report": "memory leak fix, constants extraction — quality 6→8"
+            },
+            "next_actions_suggested": [
+              "feature_closing"
+            ]
+          },
+          "feature_closing": {
+            "status": "done",
+            "deliverables": {
+              "closing-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-C/acceptance-test-cases.md"
+            },
+            "next_actions_suggested": [
+              "human_playground",
+              "change_request"
+            ]
+          }
+        }
+      },
+      "feedback": {
+        "status": "locked",
+        "actions": {
+          "human_playground": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          }
+        }
+      }
+    },
+    {
+      "feature_id": "FEATURE-049-D",
+      "name": "KB Article Editor",
+      "depends_on": [
+        "FEATURE-049-A"
+      ],
+      "implement": {
+        "status": "done",
+        "actions": {
+          "feature_refinement": {
+            "status": "done",
+            "deliverables": {
+              "specification": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-D/specification.md"
+            },
+            "next_actions_suggested": [
+              "technical_design"
+            ]
+          },
+          "technical_design": {
+            "status": "done",
+            "deliverables": {
+              "tech-design": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-D/technical-design.md"
+            },
+            "next_actions_suggested": [
+              "implementation"
+            ]
+          },
+          "implementation": {
+            "status": "done",
+            "deliverables": {
+              "impl-editor": "src/x_ipe/static/js/features/kb-article-editor.js",
+              "impl-css": "src/x_ipe/static/css/kb-article-editor.css",
+              "tests": "tests/frontend-js/kb-article-editor.test.js"
+            },
+            "next_actions_suggested": [
+              "acceptance_testing"
+            ]
+          }
+        }
+      },
+      "validation": {
+        "status": "in_progress",
+        "actions": {
+          "acceptance_testing": {
+            "status": "in_progress",
+            "deliverables": []
+          },
+          "code_refactor": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "feature_closing": {
+            "status": "done",
+            "deliverables": {
+              "closing-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-D/acceptance-test-cases.md"
+            },
+            "next_actions_suggested": [
+              "human_playground",
+              "change_request"
+            ]
+          }
+        }
+      },
+      "feedback": {
+        "status": "locked",
+        "actions": {
+          "human_playground": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          }
+        }
+      }
+    },
+    {
+      "feature_id": "FEATURE-049-E",
+      "name": "KB File Upload",
+      "depends_on": [
+        "FEATURE-049-A",
+        "FEATURE-049-B"
+      ],
+      "implement": {
+        "status": "done",
+        "actions": {
+          "feature_refinement": {
+            "status": "done",
+            "deliverables": {
+              "specification": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-E/specification.md"
+            },
+            "next_actions_suggested": [
+              "technical_design"
+            ]
+          },
+          "technical_design": {
+            "status": "done",
+            "deliverables": [],
+            "next_actions_suggested": [
+              "implementation"
+            ]
+          },
+          "implementation": {
+            "status": "done",
+            "deliverables": {
+              "impl-js": "src/x_ipe/static/js/features/kb-file-upload.js",
+              "impl-css": "src/x_ipe/static/css/kb-file-upload.css",
+              "backend": "src/x_ipe/routes/kb_routes.py",
+              "tests": "tests/frontend-js/kb-file-upload.test.js"
+            },
+            "next_actions_suggested": [
+              "acceptance_testing"
+            ]
+          }
+        }
+      },
+      "validation": {
+        "status": "in_progress",
+        "actions": {
+          "acceptance_testing": {
+            "status": "in_progress",
+            "deliverables": []
+          },
+          "code_refactor": {
+            "status": "done",
+            "deliverables": {
+              "refactor-report": "decomposed modal/events/upload, constants — quality 6.3→7.5"
+            },
+            "next_actions_suggested": [
+              "feature_closing"
+            ]
+          },
+          "feature_closing": {
+            "status": "pending",
+            "deliverables": []
+          }
+        }
+      },
+      "feedback": {
+        "status": "locked",
+        "actions": {
+          "human_playground": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          }
+        }
+      }
+    },
+    {
+      "feature_id": "FEATURE-049-F",
+      "name": "KB AI Librarian & Intake",
+      "depends_on": [
+        "FEATURE-049-A",
+        "FEATURE-049-E"
+      ],
+      "implement": {
+        "status": "locked",
+        "actions": {
+          "feature_refinement": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "technical_design": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "implementation": {
+            "status": "pending",
+            "deliverables": []
+          }
+        }
+      },
+      "validation": {
+        "status": "locked",
+        "actions": {
+          "acceptance_testing": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "code_refactor": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "feature_closing": {
+            "status": "pending",
+            "deliverables": []
+          }
+        }
+      },
+      "feedback": {
+        "status": "locked",
+        "actions": {
+          "human_playground": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          }
+        }
+      }
+    },
+    {
+      "feature_id": "FEATURE-049-G",
+      "name": "KB Reference Picker",
+      "depends_on": [
+        "FEATURE-049-A",
+        "FEATURE-049-C"
+      ],
+      "implement": {
+        "status": "done",
+        "actions": {
+          "feature_refinement": {
+            "status": "done",
+            "deliverables": {
+              "specification": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/specification.md"
+            },
+            "next_actions_suggested": [
+              "technical_design"
+            ]
+          },
+          "technical_design": {
+            "status": "done",
+            "deliverables": [],
+            "next_actions_suggested": [
+              "implementation"
+            ]
+          },
+          "implementation": {
+            "status": "done",
+            "deliverables": {
+              "impl-css": "src/x_ipe/static/css/kb-reference-picker.css",
+              "impl-js": "src/x_ipe/static/js/features/kb-reference-picker.js",
+              "tests": "tests/frontend-js/kb-reference-picker.test.js"
+            },
+            "next_actions_suggested": [
+              "acceptance_testing"
+            ]
+          }
+        }
+      },
+      "validation": {
+        "status": "in_progress",
+        "actions": {
+          "acceptance_testing": {
+            "status": "in_progress",
+            "deliverables": []
+          },
+          "code_refactor": {
+            "status": "done",
+            "deliverables": {
+              "refactor-report": "XSS fix, constants, debounce cleanup — quality 6→8"
+            },
+            "next_actions_suggested": [
+              "feature_closing"
+            ]
+          },
+          "feature_closing": {
+            "status": "pending",
+            "deliverables": []
+          }
+        }
+      },
+      "feedback": {
+        "status": "locked",
+        "actions": {
+          "human_playground": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          }
+        }
+      }
+    }
+  ]
 }
