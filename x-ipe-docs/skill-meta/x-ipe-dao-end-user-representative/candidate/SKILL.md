@@ -16,7 +16,7 @@ AI Agents follow this skill to represent human intent at end-user-facing touchpo
 
 **CORE Backbone — 格物致知:** Internal two-phase cognitive framework. 格物 (investigate) gathers context; 致知 (reach understanding) weighs trade-offs and commits. Not exposed to callers.
 
-**Key Concepts:** Disposition (`answer|clarification|reframe|critique|instruction|approval|pass_through`) · Human Shadow (real-human fallback when confidence low) · Instruction Units (1–3 independent units per message)
+**Key Concepts:** Disposition (`answer|clarification|reframe|critique|instruction|approval|pass_through`) · Human Shadow (real-human fallback when confidence low) · Instruction Units (1–3 units per message) · Execution Plan (parallel/sequential strategy for multi-unit output)
 
 ---
 
@@ -113,8 +113,8 @@ input:
 | Phase | Step | Name | Action | Gate |
 |-------|------|------|--------|------|
 | 0 | 0.1 | 礼 — Greet | Announce identity as '道' | Greeting delivered |
-| 1 | 1.1–1.3 | 格物 — Investigate | Restate need, decompose compound, three perspectives, assess environment | Context gathered + units identified |
-| 2 | 2.1–2.4 | 致知 — Reach Understanding | Per unit: scan skills, weigh dispositions, validate, commit | One disposition per unit committed |
+| 1 | 1.1–1.3 | 格物 — Investigate | Restate need, decompose compound, analyze unit dependencies, three perspectives, assess environment | Context gathered + units identified + dependencies mapped |
+| 2 | 2.1–2.4 | 致知 — Reach Understanding | Per unit: scan skills, weigh dispositions, validate, commit + assemble execution_plan | One disposition per unit committed + execution_plan produced |
 | 3 | 3.1 | 录 — Record | Write semantic log entry (all units) | Log written |
 | 4 | 4.1 | 示 — Present | Format CLI output (all units) | Output delivered |
 
@@ -155,15 +155,21 @@ See `references/dao-phases-and-output-format.md` for phase definitions, 心法, 
     </step_1_1>
 
     <step_1_1b>
-      <name>Decompose Compound Message</name>
+      <name>Decompose Compound Message and Analyze Dependencies</name>
       <!-- See references/dao-phases-and-output-format.md for decomposition criteria -->
       <action>
         1. Does the message contain multiple weakly-related instructions for DIFFERENT skills/paths?
         2. IF compound → produce N units (max 3), each with `unit_content` + `unit_context`.
         3. IF NOT compound → produce 1 unit with full message.
+        4. IF multiple units produced → analyze inter-unit dependencies:
+           a. For each pair of units, check: does one unit's output feed another's input?
+              Does one require a file/feature/state that another creates?
+              Do they target the same file or resource (write conflict)?
+           b. Mark each unit with `depends_on: []` (list of unit indices it depends on).
+           c. Units with no dependencies on each other are INDEPENDENT → eligible for parallel execution.
       </action>
-      <constraints>Default 1 unit. Max 3. First mentioned = first unit.</constraints>
-      <output>List of instruction units (1–3)</output>
+      <constraints>Default 1 unit. Max 3. First mentioned = first unit. Single unit → no dependency analysis needed.</constraints>
+      <output>List of instruction units (1–3) with dependency annotations</output>
     </step_1_1b>
 
     <step_1_2>
@@ -236,16 +242,28 @@ See `references/dao-phases-and-output-format.md` for phase definitions, 心法, 
     </step_2_3>
 
     <step_2_4>
-      <name>Commit (per unit, then assemble)</name>
+      <name>Commit (per unit, then assemble with execution plan)</name>
       <!-- 谋贵众，断贵独 -->
       <action>
         1. Lock disposition, content, rationale for THIS unit. No second-guessing.
         2. Confidence: 0.0–1.0. fallback_required: true ONLY if human_shadow AND confidence < threshold.
         3. AFTER all units committed: assemble `instruction_units[]` (order from 1.1b).
-        4. Overall confidence = MINIMUM across units. Assemble operation_output.
+        4. Overall confidence = MINIMUM across units.
+        5. IF multiple units → build `execution_plan` from dependency annotations (step 1.1b):
+           a. Group independent units into parallel batches. Units with no mutual
+              dependencies go into the SAME group (can run concurrently).
+           b. Units that depend on earlier units go into LATER groups (sequential after dependencies).
+           c. Set `execution_plan.strategy`:
+              - `"parallel"` — all units are independent, run concurrently
+              - `"sequential"` — all units have chain dependencies, run in order
+              - `"mixed"` — some groups parallel, some sequential
+           d. Set `execution_plan.groups[]` — ordered list of groups, each containing unit indices.
+              Groups execute sequentially; units WITHIN a group execute in parallel.
+        6. IF single unit → `execution_plan.strategy: "sequential"`, one group with that unit.
+        7. Assemble operation_output.
       </action>
-      <constraints>Final — MUST NOT revisit. Preserve unit order.</constraints>
-      <output>operation_output ready</output>
+      <constraints>Final — MUST NOT revisit. Preserve unit order. execution_plan MUST reflect dependency analysis from 1.1b.</constraints>
+      <output>operation_output ready (with execution_plan)</output>
     </step_2_4>
 
   </phase_2>
@@ -292,6 +310,7 @@ operation_output:
       - disposition: "answer | clarification | reframe | critique | instruction | approval | pass_through"
         content: "bounded response for this instruction unit"
         rationale_summary: "brief explanation of why this disposition was chosen"
+        depends_on: []        # unit indices this unit depends on (from Step 1.1b)
         suggested_skills:     # from Step 2.1 — may be empty list
           - skill_name: "x-ipe-task-based-{name}"
             match_strength: "strong | partial"
@@ -299,6 +318,13 @@ operation_output:
             execution_steps:  # from skill's Execution Flow table
               - phase: "1. Phase Name"
                 step: "1.1 Step Name"
+    # Execution plan for multi-unit output (from Step 2.4)
+    execution_plan:
+      strategy: "parallel | sequential | mixed"  # how units relate
+      groups:                 # ordered list — groups run sequentially, units within a group run in parallel
+        - [0]                 # group 1: unit indices that can run concurrently
+        - [1, 2]             # group 2: these units run after group 1, concurrently with each other
+      rationale: "brief explanation of why this execution order was chosen"
     # Shared fields (apply across all units)
     confidence: 0.0           # minimum confidence across all units
     fallback_required: false
@@ -311,10 +337,18 @@ operation_output:
 
 ```
 # The consuming agent MUST use this pattern:
-for each unit in instruction_units:
-    create task on task-board.md
-    load suggested skill (or general work if suggested_skills is empty)
-    execute following skill steps exactly
+for each group in execution_plan.groups (sequentially):
+    for each unit_index in group (in PARALLEL if group has multiple units):
+        unit = instruction_units[unit_index]
+        create task on task-board.md
+        load suggested skill (or general work if suggested_skills is empty)
+        execute following skill steps exactly
+    wait for all units in this group to complete before starting next group
+
+# Example: execution_plan.groups = [[0, 1], [2]]
+#   → Run unit 0 and unit 1 in parallel
+#   → Wait for both to complete
+#   → Then run unit 2
 ```
 
 ---
@@ -338,6 +372,10 @@ for each unit in instruction_units:
   <checkpoint required="true">
     <name>Skills evaluated per unit</name>
     <verification>Step 2.1 executed per unit — each has its own suggested_skills list (possibly empty)</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Execution plan produced</name>
+    <verification>execution_plan contains strategy + groups[] reflecting dependency analysis from step 1.1b</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Semantic log written</name>

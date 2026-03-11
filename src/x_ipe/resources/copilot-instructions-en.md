@@ -43,17 +43,19 @@
 
 ### 🚫 HARD GATE: No `edit` / `create` Tool Calls Without a Loaded Skill
 
-DAO now returns `instruction_units[]` — an array of 1–3 instruction units. The agent MUST iterate over each unit:
+DAO now returns `instruction_units[]` — an array of 1–3 instruction units with an `execution_plan`. The agent MUST respect the execution plan:
 
 ```
-for each unit in instruction_units:
-    1. ✅ Check unit disposition (if `instruction` → continue below; if `answer`/other → handle accordingly)
-    2. ✅ Classified the unit into a task-based skill (from unit's suggested_skills)
-    3. ✅ Created a task on `task-board.md` for this unit
-    4. ✅ Loaded the corresponding skill (via `skill` tool or by reading its `SKILL.md`)
-    5. ✅ Reached the skill's implementation step that permits code changes
-    6. Execute the unit
-    then proceed to next unit
+for each group in execution_plan.groups (sequentially):
+    for each unit_index in group (in PARALLEL if group has multiple units):
+        unit = instruction_units[unit_index]
+        1. ✅ Check unit disposition (if `instruction` → continue below; if `answer`/other → handle accordingly)
+        2. ✅ Classified the unit into a task-based skill (from unit's suggested_skills)
+        3. ✅ Created a task on `task-board.md` for this unit
+        4. ✅ Loaded the corresponding skill (via `skill` tool or by reading its `SKILL.md`)
+        5. ✅ Reached the skill's implementation step that permits code changes
+        6. Execute the unit
+    wait for all units in this group to complete before starting next group
 ```
 
 If ANY of steps 1–5 are missing for the CURRENT unit → **STOP. Do not touch code.**

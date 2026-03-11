@@ -43,17 +43,19 @@
 
 ### 🚫 硬性门禁：未加载技能禁止调用 `edit` / `create`
 
-DAO 现在返回 `instruction_units[]` — 一个包含 1–3 个指令单元的数组。Agent 必须遍历每个单元：
+DAO 现在返回 `instruction_units[]` — 包含 1–3 个指令单元和 `execution_plan`。Agent 必须遵守执行计划：
 
 ```
-for each unit in instruction_units:
-    1. ✅ 检查单元处置（如果 `instruction` → 继续下面步骤；如果 `answer`/其他 → 相应处理）
-    2. ✅ 已将该单元分类到对应的任务技能（来自单元的 suggested_skills）
-    3. ✅ 已在 `task-board.md` 上为该单元创建任务
-    4. ✅ 已加载对应技能（通过 `skill` 工具或阅读其 `SKILL.md`）
-    5. ✅ 已到达技能流程中允许修改代码的步骤
-    6. 执行该单元
-    然后处理下一个单元
+for each group in execution_plan.groups (顺序执行):
+    for each unit_index in group (如果组内有多个单元则并行执行):
+        unit = instruction_units[unit_index]
+        1. ✅ 检查单元处置（如果 `instruction` → 继续下面步骤；如果 `answer`/其他 → 相应处理）
+        2. ✅ 已将该单元分类到对应的任务技能（来自单元的 suggested_skills）
+        3. ✅ 已在 `task-board.md` 上为该单元创建任务
+        4. ✅ 已加载对应技能（通过 `skill` 工具或阅读其 `SKILL.md`）
+        5. ✅ 已到达技能流程中允许修改代码的步骤
+        6. 执行该单元
+    等待该组内所有单元完成后再开始下一组
 ```
 
 如果当前单元的步骤 1–5 中任何一项缺失 → **停下来，不要修改代码。**
