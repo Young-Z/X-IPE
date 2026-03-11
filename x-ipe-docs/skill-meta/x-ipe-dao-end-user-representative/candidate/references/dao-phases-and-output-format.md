@@ -8,8 +8,8 @@
 | Phase | Chinese | English | 心法 | Activities |
 |-------|---------|---------|------|------------|
 | 0 | 礼 (Lǐ) | Greet | 有朋自远方来 | Print "道 · Human Representative — ready." |
-| 1 | 格物 (Géwù) | Investigate | 静→安→虑→得; 兼听则明; 顺势者昌 | Restate need, decompose compound, analyze unit dependencies, three perspectives, assess direction/timing/environment |
-| 2 | 致知 (Zhìzhī) | Reach Understanding | 两利取重，两害取轻; 谋贵众，断贵独 | Per unit: scan skills, weigh 利/害, three-scenario, worst-case gate, commit. Then: assemble execution_plan from dependencies |
+| 1 | 格物 (Géwù) | Investigate | 静→安→虑→得; 兼听则明 | Restate need, decompose compound + analyze unit dependencies, three perspectives |
+| 2 | 致知 (Zhìzhī) | Reach Understanding | 两利取重，两害取轻; 谋贵众，断贵独 | Per unit: scan skills, weigh 利/害 + select + draft, commit. Then: assemble execution_plan from dependencies |
 | 3 | 录 (Lù) | Record | — | Write semantic log entry (append-only) |
 | 4 | 示 (Shì) | Present | 言之有文，行而远 | Format structured CLI output |
 

@@ -113,8 +113,8 @@ input:
 | Phase | Step | Name | Action | Gate |
 |-------|------|------|--------|------|
 | 0 | 0.1 | 礼 — Greet | Announce identity as '道' | Greeting delivered |
-| 1 | 1.1–1.3 | 格物 — Investigate | Restate need, decompose compound, analyze unit dependencies, three perspectives, assess environment | Context gathered + units identified + dependencies mapped |
-| 2 | 2.1–2.4 | 致知 — Reach Understanding | Per unit: scan skills, weigh dispositions, validate, commit + assemble execution_plan | One disposition per unit committed + execution_plan produced |
+| 1 | 1.1–1.2 | 格物 — Investigate | Restate need, decompose compound + analyze dependencies, three perspectives | Context gathered + units identified + dependencies mapped |
+| 2 | 2.1–2.3 | 致知 — Reach Understanding | Per unit: scan skills, weigh dispositions + select, commit + assemble execution_plan | One disposition per unit committed + execution_plan produced |
 | 3 | 3.1 | 录 — Record | Write semantic log entry (all units) | Log written |
 | 4 | 4.1 | 示 — Present | Format CLI output (all units) | Output delivered |
 
@@ -184,20 +184,10 @@ See `references/dao-phases-and-output-format.md` for phase definitions, 心法, 
       <output>Three-perspective summary (internal)</output>
     </step_1_2>
 
-    <step_1_3>
-      <name>Direction, Timing, Environment</name>
-      <!-- 顺势者昌，逆势者亡 -->
-      <action>
-        1. **Direction (顺势?):** Aligns with workflow? **Timing (时机?):** Right moment? **Environment (环境?):** State allows it?
-        2. All three "not now" → lean `pass_through` or `clarification`.
-      </action>
-      <output>Assessment (internal)</output>
-    </step_1_3>
-
   </phase_1>
 
   <phase_2 name="致知 — Reach Understanding">
-    <!-- Runs ONCE PER instruction unit. Steps 2.1→2.2→2.3→2.4 per unit. -->
+    <!-- Runs ONCE PER instruction unit. Steps 2.1→2.2→2.3 per unit. -->
 
     <step_2_1>
       <name>Scan Skills (per unit)</name>
@@ -215,33 +205,21 @@ See `references/dao-phases-and-output-format.md` for phase definitions, 心法, 
     </step_2_1>
 
     <step_2_2>
-      <name>Weigh Gains/Losses (per unit)</name>
+      <name>Weigh, Select, and Draft (per unit)</name>
       <!-- 两利相权取其重，两害相权取其轻 -->
       <action>
         1. For each disposition (answer, clarification, reframe, critique, instruction, approval, pass_through):
            - **利:** User gain? Workflow progress? **害:** Risk? Wasted effort?
         2. Two gains → take greater. Two harms → take lesser.
         3. preferred_dispositions → weight higher. suggested_skills → factor in.
-        4. Rank by net value.
-      </action>
-      <output>Ranked dispositions (internal)</output>
-    </step_2_2>
-
-    <step_2_3>
-      <name>Validate (per unit)</name>
-      <!-- 不能接受的最坏结果，直接放弃 -->
-      <action>
-        1. Top candidate → envision: best case / medium case / worst case.
-        2. WORST-CASE GATE: unacceptable → abandon, next candidate.
-        3. Verify: smallest useful intervention (小步走). Tone clear? Scope bounded? Reversible?
-        4. IF check fails → re-rank from 2.2.
+        4. Select top-ranked disposition. Verify: smallest useful intervention, scope bounded, reversible.
         5. Draft content + rationale_summary. Include suggested_skills if non-empty.
       </action>
       <constraints>Exactly one disposition. `approval` is guidance only — NOT human approval.</constraints>
       <output>Selected disposition + content + rationale</output>
-    </step_2_3>
+    </step_2_2>
 
-    <step_2_4>
+    <step_2_3>
       <name>Commit (per unit, then assemble with execution plan)</name>
       <!-- 谋贵众，断贵独 -->
       <action>
@@ -264,7 +242,7 @@ See `references/dao-phases-and-output-format.md` for phase definitions, 心法, 
       </action>
       <constraints>Final — MUST NOT revisit. Preserve unit order. execution_plan MUST reflect dependency analysis from 1.1b.</constraints>
       <output>operation_output ready (with execution_plan)</output>
-    </step_2_4>
+    </step_2_3>
 
   </phase_2>
 

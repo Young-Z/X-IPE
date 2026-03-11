@@ -168,3 +168,62 @@
 
 ### Follow-up
 > None
+
+---
+
+## DAO-043
+
+### Meta
+| Field | Value |
+|-------|-------|
+| Timestamp | 2026-03-11T13:26:00Z |
+| Task ID | TASK-842 |
+| Feature ID | N/A |
+| Workflow | N/A |
+| Calling Skill | x-ipe-meta-skill-creator |
+| Source | human |
+| Disposition | instruction |
+| Confidence | 0.95 |
+
+### Message
+> "btw no manual testing this option"
+
+### Guidance
+> Remove "Manual" from Test Type options across all candidate files. Valid Test Type values should be: UI, API, Unit, Integration (4 types only). Update all references in candidate files: SKILL.md Step 3.1, Step 5.1, specification-template.md, and specification-writing-guide.md.
+
+### Rationale
+> User explicitly excludes manual testing; all ACs should be verifiable by automated tests. This aligns with the project's test automation philosophy — every acceptance criterion must be machine-checkable.
+
+### Suggested Skills
+> none (continuation of current TASK-842 work)
+
+### Follow-up
+> None
+
+## DAO-005
+- **Timestamp:** 2026-03-11T13:53:29Z
+- **Task ID:** TASK-843
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** (direct human message)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.90
+
+### Message
+> let's make 'DAO' simpler, we no longer need step 1.3 and step 2.3
+
+### Guidance Returned
+> Remove step 1.3 (Direction, Timing, Environment) and step 2.3 (Validate) from the DAO skill. Update Execution Flow table, procedure, references, and re-number affected steps accordingly.
+
+### Rationale
+> User explicitly requests simplification. Step 1.2 (Three Perspectives) already covers directional assessment. Step 2.2 (Weigh Gains/Losses) can absorb the validation/worst-case gate logic. Removing redundant steps reduces DAO token cost and execution time.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-meta-skill-creator"
+>     match_strength: "strong"
+>     reason: "Updating an existing skill"
+
+### Follow-up
+> None
