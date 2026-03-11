@@ -137,3 +137,98 @@ User is instructing that the **specification.md** files (not acceptance-test-cas
 
 ### Follow-up
 > None
+
+## DAO-049
+- **Timestamp:** 2026-03-11T14:46:04Z
+- **Task ID:** TASK-846
+- **Feature ID:** FEATURE-049-A through G
+- **Workflow:** Knowledge-Base-Implementation
+- **Calling Skill:** N/A (direct human message)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.9
+
+### Message
+> now specification.md looks good, but with big fix, so for the next step in the roll is technical design, I assume you also missed a lot of design info since you don't have right info inputs
+
+### Guidance Returned
+> Re-align all 6 technical-design.md files using the updated specification.md files as input. The original designs were created before specs had GWT acceptance criteria, proper sections, and complete template structure. The designs likely have gaps in: dependency tables (missing Design Links, project-root-relative paths), version history, coverage of all ACs in Part 2, mockup references, and edge cases. Follow x-ipe-task-based-technical-design skill template for re-alignment.
+
+### Rationale
+> User correctly identifies that since specs were significantly updated (GWT, new sections, missing features added), the technical designs downstream are now misaligned. The designs were written against incomplete specs and need re-validation. This follows the engineering workflow: spec changes cascade to design changes.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-technical-design"
+>     match_strength: "strong"
+>     reason: "Re-align technical designs against updated specifications"
+>     execution_steps:
+>       - phase: "1. 博学之 — Study Broadly"
+>         step: "1.2 Read Specification"
+>       - phase: "3. 慎思之 — Think Carefully"
+>         step: "3.1 Create Technical Design Document"
+
+### Follow-up
+> After all 6 designs updated, commit and push.
+
+---
+
+## Decision: Code Implementation Validation Assessment
+
+| Field | Value |
+|-------|-------|
+| **DAO ID** | DAO-050 |
+| **Date** | 26-03-11 15:06 |
+| **Source** | human |
+| **Task** | TASK-846 (follow-up) |
+| **Feature** | EPIC-049 (all features) |
+| **Workflow** | Knowledge-Base-Implementation |
+
+### Unit 0 — Assessment of code/test gaps vs code-implementation DoD
+
+| Field | Value |
+|-------|-------|
+| **Disposition** | `answer` |
+| **Confidence** | 0.85 |
+
+**Content:** User asks whether existing code needs rewriting or augmentation based on re-aligned specs/designs. Assessment: (1) Code logic does NOT need rewriting — spec updates were FORMAT changes (GWT wording, template sections), not functional changes. Features remain the same. (2) 5 KNOWN test gaps need writing: B-04, B-07, E-07, E-08, E-09. (3) Tracing decorators (DoD checkpoint) need verification. (4) Test coverage ≥80% needs verification. Recommend: write the 5 missing tests, verify tracing + coverage, then proceed to acceptance testing.
+
+**Rationale:** `answer` chosen because user asked a diagnostic question ("do you need to?"), not a command. Providing assessment before committing effort avoids unnecessary code churn on working features.
+
+### Execution Plan
+
+| Field | Value |
+|-------|-------|
+| **Strategy** | `sequential` |
+| **Groups** | `[[0]]` |
+
+---
+
+## Decision: Approval to Execute Code-Implementation DoD Validation
+
+| Field | Value |
+|-------|-------|
+| **DAO ID** | DAO-051 |
+| **Date** | 26-03-11 15:10 |
+| **Source** | human |
+| **Task** | TASK-847 |
+| **Feature** | EPIC-049 (all features) |
+| **Workflow** | Knowledge-Base-Implementation |
+
+### Unit 0 — Approve all 3 proposed validation actions
+
+| Field | Value |
+|-------|-------|
+| **Disposition** | `approval` |
+| **Confidence** | 0.95 |
+
+**Content:** User approves all 3 proposed actions: (1) Write 5 missing tests for B-04, B-07, E-07, E-08, E-09, (2) Verify @x_ipe_tracing decorators on kb_service.py and kb_routes.py public functions, (3) Verify test coverage ≥80% for new KB code. Proceed with x-ipe-task-based-code-implementation Phase 4 validation.
+
+**Rationale:** `approval` — user gave explicit unambiguous go-ahead ("go for all") for a pre-defined plan. No reinterpretation needed.
+
+### Execution Plan
+
+| Field | Value |
+|-------|-------|
+| **Strategy** | `sequential` |
+| **Groups** | `[[0]]` |

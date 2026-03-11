@@ -278,6 +278,126 @@ describe('FEATURE-049-B: KB Sidebar & Navigation', () => {
     });
   });
 
+  describe('AC-049-B-04: File Click Navigation', () => {
+    it('should call onFileSelect when a KB file is clicked', () => {
+      if (!sidebar) return;
+      sidebar.onFileSelect = vi.fn();
+      sidebar.sections = [KB_SECTION_WITH_FILES];
+      sidebar.render();
+
+      const fileItem = sidebar.container.querySelector('.nav-file[data-path="x-ipe-docs/knowledge-base/guide.md"]');
+      expect(fileItem).toBeTruthy();
+      fileItem.click();
+      expect(sidebar.onFileSelect).toHaveBeenCalledWith('x-ipe-docs/knowledge-base/guide.md');
+    });
+
+    it('should mark clicked KB file as active and remove active from others', () => {
+      if (!sidebar) return;
+      sidebar.onFileSelect = vi.fn();
+      sidebar.sections = [KB_SECTION_WITH_FILES];
+      sidebar.render();
+
+      const guideFile = sidebar.container.querySelector('.nav-file[data-path="x-ipe-docs/knowledge-base/guide.md"]');
+      const introFile = sidebar.container.querySelector('.nav-file[data-path="x-ipe-docs/knowledge-base/tutorials/intro.md"]');
+
+      guideFile.click();
+      expect(guideFile.classList.contains('active')).toBe(true);
+
+      introFile.click();
+      expect(introFile.classList.contains('active')).toBe(true);
+      expect(guideFile.classList.contains('active')).toBe(false);
+    });
+  });
+
+  describe('AC-049-B-07: Drop to Move', () => {
+    it('should call _kbMoveItem on valid drop and prevent self-drop', async () => {
+      if (!sidebar) return;
+      sidebar.sections = [KB_SECTION_WITH_FILES];
+      sidebar.render();
+
+      const moveSpy = vi.spyOn(sidebar, '_kbMoveItem').mockResolvedValue(undefined);
+
+      const folder = sidebar.container.querySelector('[data-kb-folder="true"]');
+      expect(folder).toBeTruthy();
+
+      // Simulate drop with different source path
+      const dropEvent = new Event('drop', { bubbles: true });
+      dropEvent.preventDefault = vi.fn();
+      dropEvent.stopPropagation = vi.fn();
+      dropEvent.dataTransfer = {
+        getData: (key) => {
+          if (key === 'text/plain') return 'x-ipe-docs/knowledge-base/guide.md';
+          if (key === 'application/x-kb-type') return 'file';
+          return '';
+        }
+      };
+      folder.dispatchEvent(dropEvent);
+
+      expect(moveSpy).toHaveBeenCalledWith(
+        'x-ipe-docs/knowledge-base/guide.md',
+        'x-ipe-docs/knowledge-base/tutorials',
+        'file'
+      );
+    });
+
+    it('should block self-drop (source === target)', () => {
+      if (!sidebar) return;
+      sidebar.sections = [KB_SECTION_WITH_FILES];
+      sidebar.render();
+
+      const moveSpy = vi.spyOn(sidebar, '_kbMoveItem').mockResolvedValue(undefined);
+
+      const folder = sidebar.container.querySelector('[data-kb-folder="true"]');
+
+      const dropEvent = new Event('drop', { bubbles: true });
+      dropEvent.preventDefault = vi.fn();
+      dropEvent.stopPropagation = vi.fn();
+      dropEvent.dataTransfer = {
+        getData: (key) => {
+          if (key === 'text/plain') return folder.dataset.path;
+          if (key === 'application/x-kb-type') return 'folder';
+          return '';
+        }
+      };
+      folder.dispatchEvent(dropEvent);
+      expect(moveSpy).not.toHaveBeenCalled();
+    });
+
+    it('should block parent-into-child drop', () => {
+      if (!sidebar) return;
+      const nestedSection = {
+        ...KB_SECTION_WITH_FILES,
+        children: [{
+          name: 'parent', type: 'folder', path: 'x-ipe-docs/knowledge-base/parent',
+          children: [{
+            name: 'child', type: 'folder', path: 'x-ipe-docs/knowledge-base/parent/child',
+            children: []
+          }]
+        }]
+      };
+      sidebar.sections = [nestedSection];
+      sidebar.render();
+
+      const moveSpy = vi.spyOn(sidebar, '_kbMoveItem').mockResolvedValue(undefined);
+
+      const childFolder = sidebar.container.querySelector('[data-kb-path="x-ipe-docs/knowledge-base/parent/child"]');
+      if (!childFolder) return;
+
+      const dropEvent = new Event('drop', { bubbles: true });
+      dropEvent.preventDefault = vi.fn();
+      dropEvent.stopPropagation = vi.fn();
+      dropEvent.dataTransfer = {
+        getData: (key) => {
+          if (key === 'text/plain') return 'x-ipe-docs/knowledge-base/parent';
+          if (key === 'application/x-kb-type') return 'folder';
+          return '';
+        }
+      };
+      childFolder.dispatchEvent(dropEvent);
+      expect(moveSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('KB Move API Integration', () => {
     it('should have _kbMoveItem method', () => {
       if (!sidebar) return;

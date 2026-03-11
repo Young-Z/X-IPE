@@ -687,3 +687,254 @@ class TestRouteErrors:
             'content': 'x' * (11 * 1024 * 1024),
         })
         assert resp.status_code == 413
+
+
+# ===========================================================================
+# AC-049-E-07/08/09: Archive Extraction (.zip / .7z / nested)
+# ===========================================================================
+
+class TestZipExtraction:
+    """AC-049-E-07: .zip archive auto-extraction into KB."""
+
+    def test_extract_zip_creates_files(self, kb_service):
+        import zipfile
+        import io
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, 'w') as zf:
+            zf.writestr('readme.md', '# Hello')
+            zf.writestr('docs/guide.md', '# Guide')
+        results = kb_service.extract_zip(buf.getvalue())
+        assert len(results) == 2
+        paths = {r['path'] for r in results}
+        assert 'readme.md' in paths
+        assert 'docs/guide.md' in paths
+        assert (kb_service.kb_root / 'readme.md').is_file()
+        assert (kb_service.kb_root / 'docs' / 'guide.md').is_file()
+
+    def test_extract_zip_into_dest_folder(self, kb_service):
+        import zipfile
+        import io
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, 'w') as zf:
+            zf.writestr('notes.md', 'Notes')
+        results = kb_service.extract_zip(buf.getvalue(), dest_folder='archive')
+        assert results[0]['path'] == 'archive/notes.md'
+        assert (kb_service.kb_root / 'archive' / 'notes.md').is_file()
+
+    def test_extract_zip_skips_nested_archives(self, kb_service):
+        import zipfile
+        import io
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, 'w') as zf:
+            zf.writestr('ok.md', 'good file')
+            zf.writestr('nested.zip', b'fake zip data')
+            zf.writestr('nested.7z', b'fake 7z data')
+        results = kb_service.extract_zip(buf.getvalue())
+        paths = {r['path'] for r in results}
+        assert 'ok.md' in paths
+        assert 'nested.zip' not in paths
+        assert 'nested.7z' not in paths
+
+    def test_extract_zip_preserves_folder_structure(self, kb_service):
+        import zipfile
+        import io
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, 'w') as zf:
+            zf.writestr('a/b/c/deep.md', 'Deep file')
+        results = kb_service.extract_zip(buf.getvalue())
+        assert results[0]['path'] == 'a/b/c/deep.md'
+        assert (kb_service.kb_root / 'a' / 'b' / 'c' / 'deep.md').is_file()
+
+
+class TestSevenZipExtraction:
+    """AC-049-E-08: .7z archive auto-extraction into KB."""
+
+    def test_extract_7z_creates_files(self, kb_service):
+        py7zr = pytest.importorskip('py7zr')
+        import io
+        buf = io.BytesIO()
+        with py7zr.SevenZipFile(buf, 'w') as z:
+            z.writestr(b'# Seven-Zip Doc', 'readme.md')
+        results = kb_service.extract_7z(buf.getvalue())
+        assert len(results) >= 1
+        assert (kb_service.kb_root / 'readme.md').is_file()
+
+    def test_extract_7z_missing_library_raises(self, kb_service, monkeypatch):
+        import builtins
+        real_import = builtins.__import__
+        def mock_import(name, *args, **kwargs):
+            if name == 'py7zr':
+                raise ImportError('No module named py7zr')
+            return real_import(name, *args, **kwargs)
+        monkeypatch.setattr(builtins, '__import__', mock_import)
+        with pytest.raises(ValueError, match=r'py7zr'):
+            kb_service.extract_7z(b'fake data')
+
+
+class TestNestedArchiveHandling:
+    """AC-049-E-09: Nested .zip/.7z inside archives are skipped."""
+
+    def test_nested_zip_inside_zip_skipped(self, kb_service):
+        import zipfile
+        import io
+        # Create inner zip
+        inner = io.BytesIO()
+        with zipfile.ZipFile(inner, 'w') as zf:
+            zf.writestr('inner.md', 'inner content')
+        # Create outer zip containing inner.zip + a normal file
+        outer = io.BytesIO()
+        with zipfile.ZipFile(outer, 'w') as zf:
+            zf.writestr('normal.md', 'normal content')
+            zf.writestr('inner.zip', inner.getvalue())
+        results = kb_service.extract_zip(outer.getvalue())
+        paths = {r['path'] for r in results}
+        assert 'normal.md' in paths
+        assert 'inner.zip' not in paths
+
+    def test_nested_7z_inside_zip_skipped(self, kb_service):
+        import zipfile
+        import io
+        outer = io.BytesIO()
+        with zipfile.ZipFile(outer, 'w') as zf:
+            zf.writestr('doc.md', 'content')
+            zf.writestr('archive.7z', b'fake 7z bytes')
+        results = kb_service.extract_zip(outer.getvalue())
+        paths = {r['path'] for r in results}
+        assert 'doc.md' in paths
+        assert 'archive.7z' not in paths
+
+
+# ===========================================================================
+# Route Integration Tests — Coverage Gap Remediation
+# ===========================================================================
+
+class TestRouteUpdateFile:
+    """Route-level tests for PUT /api/kb/files/{path}."""
+
+    def test_update_file_content(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        svc.create_file('doc.md', 'Original')
+        resp = client.put('/api/kb/files/doc.md', json={'content': 'Updated'})
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data['path'] == 'doc.md'
+
+    def test_update_file_not_found(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        resp = client.put('/api/kb/files/missing.md', json={'content': 'x'})
+        assert resp.status_code == 404
+
+    def test_update_file_no_json(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        svc.create_file('doc.md', 'Original')
+        resp = client.put('/api/kb/files/doc.md', data='not json')
+        assert resp.status_code == 400
+
+
+class TestRouteDeleteFile:
+    """Route-level tests for DELETE /api/kb/files/{path}."""
+
+    def test_delete_file_success(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        svc.create_file('to-delete.md', 'Bye')
+        resp = client.delete('/api/kb/files/to-delete.md')
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data['success'] is True
+        assert data['deleted'] == 'to-delete.md'
+
+    def test_delete_file_not_found(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        resp = client.delete('/api/kb/files/ghost.md')
+        assert resp.status_code == 404
+
+
+class TestRouteRenameFolder:
+    """Route-level tests for PATCH /api/kb/folders."""
+
+    def test_rename_folder_success(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        svc.create_folder('old-name')
+        resp = client.patch('/api/kb/folders', json={
+            'path': 'old-name', 'new_name': 'new-name'
+        })
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data['path'] == 'new-name'
+
+    def test_rename_folder_missing_params(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        resp = client.patch('/api/kb/folders', json={'path': ''})
+        assert resp.status_code == 400
+
+    def test_rename_folder_not_found(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        resp = client.patch('/api/kb/folders', json={
+            'path': 'nonexistent', 'new_name': 'whatever'
+        })
+        assert resp.status_code == 404
+
+
+class TestRouteUpload:
+    """Route-level tests for POST /api/kb/upload."""
+
+    def test_upload_single_file(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        import io
+        data = {
+            'files': (io.BytesIO(b'# My Doc'), 'readme.md'),
+        }
+        resp = client.post('/api/kb/upload', data=data,
+                           content_type='multipart/form-data')
+        assert resp.status_code == 201
+        result = resp.get_json()
+        assert result['total'] == 1
+        assert result['failed'] == 0
+
+    def test_upload_into_subfolder(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        import io
+        data = {
+            'files': (io.BytesIO(b'content'), 'notes.md'),
+            'folder': 'guides',
+        }
+        resp = client.post('/api/kb/upload', data=data,
+                           content_type='multipart/form-data')
+        assert resp.status_code == 201
+        result = resp.get_json()
+        assert result['total'] == 1
+
+    def test_upload_zip_auto_extracts(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        import io, zipfile
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, 'w') as zf:
+            zf.writestr('a.md', '# A')
+            zf.writestr('b.md', '# B')
+        buf.seek(0)
+        data = {
+            'files': (buf, 'archive.zip'),
+        }
+        resp = client.post('/api/kb/upload', data=data,
+                           content_type='multipart/form-data')
+        assert resp.status_code == 201
+        result = resp.get_json()
+        assert result['total'] == 2
+
+    def test_upload_no_files_400(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        resp = client.post('/api/kb/upload', data={},
+                           content_type='multipart/form-data')
+        assert resp.status_code == 400
