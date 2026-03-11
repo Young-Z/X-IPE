@@ -98,3 +98,73 @@
 
 ### Follow-up
 > None
+
+## DAO-004
+- **Timestamp:** 2026-03-11T13:41:06Z
+- **Task ID:** TASK-842
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** (direct human message)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.85
+
+### Message
+> let's update DAO skill a bit, it should encourage parallelization with evaluation, if it identifies multi tasks which have no dependency, then it should suggest the execution plan with parallelism
+
+### Guidance Returned
+> Update the DAO skill (x-ipe-dao-end-user-representative) to add parallelism-awareness: when Step 1.1b decomposes a message into multiple instruction units, analyze dependencies between units. If units are independent, add an execution_plan field suggesting parallel execution. Update the output format, phases, and examples accordingly. Use x-ipe-meta-skill-creator process.
+
+### Rationale
+> User explicitly requests a skill enhancement. The DAO already produces instruction_units[] (1–3). Adding dependency analysis and a parallel execution plan is a natural extension. Aligns with workflow efficiency goals. Bounded change — only affects DAO output format and Phase 2 logic.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-meta-skill-creator"
+>     match_strength: "strong"
+>     reason: "Updating an existing skill requires the skill creator process"
+>     execution_steps:
+>       - phase: "1. Validate"
+>         step: "1.1 Load existing skill"
+>       - phase: "2. Update"
+>         step: "2.1 Apply changes following template"
+
+### Follow-up
+> None
+
+| DAO-042 | 2026-03-11T13:24:05Z | TASK-842 | N/A (human direct) | instruction | 0.90 | Update x-ipe-task-based-feature-refinement: add "Test Type" column (UI/API/other) to acceptance testing table in skill template |
+
+## DAO-042
+- **Timestamp:** 2026-03-11T13:24:05Z
+- **Task ID:** TASK-842
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A (human direct)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.90
+
+### Message
+> let's update the existing feature refinement skill, for acceptance testing section, it's table we need have an extra column listing for these acceptance testing it's ui testing or api testing or some other way suggested to validate the ac
+
+### Guidance Returned
+> Update the feature refinement skill (x-ipe-task-based-feature-refinement) acceptance testing table to add a "Test Type" column. Each acceptance criterion row should specify how to validate it: UI Testing, API Testing, Unit Testing, Manual, or other suggested method. Use x-ipe-meta-skill-creator to make the update following proper skill modification process.
+
+### Rationale
+> Clear, bounded skill update request. User wants the acceptance testing table in the feature refinement skill to include a column indicating the validation method for each AC. This aids downstream acceptance testing skill by pre-classifying test types during refinement. Low risk — additive change to table format.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-meta-skill-creator"
+>     match_strength: "strong"
+>     reason: "Updating an existing skill requires the skill creator process"
+>     execution_steps:
+>       - phase: "1. Preparation"
+>         step: "1.1 Load existing skill"
+>       - phase: "2. Modification"
+>         step: "2.1 Apply changes to candidate"
+>       - phase: "3. Validation"
+>         step: "3.1 Validate against checklist"
+
+### Follow-up
+> None

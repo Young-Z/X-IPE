@@ -2,7 +2,7 @@
   "schema_version": "3.0",
   "name": "Knowledge-Base-Implementation",
   "created": "2026-03-10T11:29:06.244938+00:00",
-  "last_activity": "2026-03-11T13:03:54.002485+00:00",
+  "last_activity": "2026-03-11T13:42:54.191312+00:00",
   "idea_folder": null,
   "current_stage": "validation",
   "global": {
@@ -335,7 +335,8 @@
           "technical_design": {
             "status": "done",
             "deliverables": {
-              "tech-design": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-C/technical-design.md"
+              "tech-design": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-C/technical-design.md",
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-C/"
             },
             "next_actions_suggested": [
               "implementation"
@@ -425,7 +426,8 @@
           "technical_design": {
             "status": "done",
             "deliverables": {
-              "tech-design": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-D/technical-design.md"
+              "tech-design": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-D/technical-design.md",
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-D/"
             },
             "next_actions_suggested": [
               "implementation"
@@ -507,7 +509,8 @@
           "feature_refinement": {
             "status": "done",
             "deliverables": {
-              "specification": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-E/specification.md"
+              "specification": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-E/specification.md",
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-E/"
             },
             "next_actions_suggested": [
               "technical_design"
@@ -515,7 +518,10 @@
           },
           "technical_design": {
             "status": "done",
-            "deliverables": [],
+            "deliverables": {
+              "tech-design": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-E/technical-design.md",
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-E/"
+            },
             "next_actions_suggested": [
               "implementation"
             ]
@@ -654,7 +660,8 @@
           "feature_refinement": {
             "status": "done",
             "deliverables": {
-              "specification": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/specification.md"
+              "specification": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/specification.md",
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/"
             },
             "next_actions_suggested": [
               "technical_design"
@@ -662,7 +669,10 @@
           },
           "technical_design": {
             "status": "done",
-            "deliverables": [],
+            "deliverables": {
+              "tech-design": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/technical-design.md",
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/"
+            },
             "next_actions_suggested": [
               "implementation"
             ]
