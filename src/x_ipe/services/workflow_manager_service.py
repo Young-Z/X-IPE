@@ -11,6 +11,7 @@ Manages the full lifecycle of engineering workflows:
 - Auto-archive of stale workflows (FEATURE-036-E)
 """
 
+import fcntl
 import json
 import os
 import re
@@ -342,6 +343,24 @@ class WorkflowManagerService:
         if deliverables is not None and isinstance(deliverables, list):
             deliverables = self._convert_list_to_keyed(action, deliverables)
 
+        # File-level lock to prevent lost-update race condition.
+        # Concurrent read-modify-write cycles on the same JSON file would
+        # silently discard all but the last writer's changes without this.
+        lock_path = self._get_workflow_path(workflow_name).with_suffix(".lock")
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+        lock_fd = os.open(str(lock_path), os.O_CREAT | os.O_RDWR)
+        try:
+            fcntl.flock(lock_fd, fcntl.LOCK_EX)
+            return self._do_update_action(
+                workflow_name, action, status, feature_id,
+                deliverables, context, features)
+        finally:
+            fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            os.close(lock_fd)
+
+    def _do_update_action(self, workflow_name, action, status, feature_id,
+                          deliverables, context, features):
+        """Inner update logic, called under file lock."""
         state = self._read_state(workflow_name)
         if "error" in state and state.get("success") is False:
             return state

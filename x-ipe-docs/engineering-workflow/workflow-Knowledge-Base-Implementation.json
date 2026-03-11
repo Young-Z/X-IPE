@@ -2,7 +2,7 @@
   "schema_version": "3.0",
   "name": "Knowledge-Base-Implementation",
   "created": "2026-03-10T11:29:06.244938+00:00",
-  "last_activity": "2026-03-11T12:42:33.325842+00:00",
+  "last_activity": "2026-03-11T13:03:54.002485+00:00",
   "idea_folder": null,
   "current_stage": "validation",
   "global": {
@@ -286,10 +286,14 @@
             ]
           },
           "feature_closing": {
-            "status": "pending",
+            "status": "done",
             "deliverables": {
               "closing-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/acceptance-test-cases.md"
-            }
+            },
+            "next_actions_suggested": [
+              "human_playground",
+              "change_request"
+            ]
           }
         }
       },
@@ -354,8 +358,14 @@
         "status": "in_progress",
         "actions": {
           "acceptance_testing": {
-            "status": "in_progress",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "test-folder": "tests/frontend-js/kb-browse.test.js",
+              "test-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-C/acceptance-test-cases.md"
+            },
+            "next_actions_suggested": [
+              "code_refactor"
+            ]
           },
           "code_refactor": {
             "status": "done",
@@ -438,12 +448,23 @@
         "status": "in_progress",
         "actions": {
           "acceptance_testing": {
-            "status": "in_progress",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "test-folder": "tests/frontend-js/kb-article-editor.test.js",
+              "test-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-D/acceptance-test-cases.md"
+            },
+            "next_actions_suggested": [
+              "code_refactor"
+            ]
           },
           "code_refactor": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "refactor-report": "constants + save decomposition — quality 6.5→7.5"
+            },
+            "next_actions_suggested": [
+              "feature_closing"
+            ]
           },
           "feature_closing": {
             "status": "done",
@@ -517,8 +538,14 @@
         "status": "in_progress",
         "actions": {
           "acceptance_testing": {
-            "status": "in_progress",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "test-folder": "tests/frontend-js/kb-file-upload.test.js",
+              "test-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-E/acceptance-test-cases.md"
+            },
+            "next_actions_suggested": [
+              "code_refactor"
+            ]
           },
           "code_refactor": {
             "status": "done",
@@ -530,8 +557,14 @@
             ]
           },
           "feature_closing": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "closing-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-E/acceptance-test-cases.md"
+            },
+            "next_actions_suggested": [
+              "human_playground",
+              "change_request"
+            ]
           }
         }
       },
@@ -651,8 +684,14 @@
         "status": "in_progress",
         "actions": {
           "acceptance_testing": {
-            "status": "in_progress",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "test-folder": "tests/frontend-js/kb-reference-picker.test.js",
+              "test-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/acceptance-test-cases.md"
+            },
+            "next_actions_suggested": [
+              "code_refactor"
+            ]
           },
           "code_refactor": {
             "status": "done",
@@ -664,8 +703,14 @@
             ]
           },
           "feature_closing": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "closing-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/acceptance-test-cases.md"
+            },
+            "next_actions_suggested": [
+              "human_playground",
+              "change_request"
+            ]
           }
         }
       },
