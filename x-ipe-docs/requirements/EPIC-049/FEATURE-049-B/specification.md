@@ -17,54 +17,76 @@ As a developer using X-IPE, I want a Knowledge Base section in the sidebar with 
 ## Acceptance Criteria
 
 ### AC-049-B-01: Sidebar Section Presence
-**Given** the application loads  
-**When** the sidebar renders  
-**Then** a "Knowledge Base" section appears with a `bi-book` icon in the sidebar, positioned after "Project Plan" and before "Requirements"
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-B-01a | "Knowledge Base" section appears in sidebar with `bi-book` icon | UI |
+| AC-049-B-01b | KB section positioned after "Project Plan" and before "Requirements" | UI |
 
 ### AC-049-B-02: Folder Tree Rendering
-**Given** the KB root has folders and files  
-**When** the Knowledge Base section expands  
-**Then** the folder tree mirrors the `x-ipe-docs/knowledge-base/` file system, showing folders with `bi-folder` icons and files with `bi-file-earmark-text` icons
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-B-02a | Folder tree mirrors `x-ipe-docs/knowledge-base/` file system structure | Integration |
+| AC-049-B-02b | Folders display with `bi-folder` icons | UI |
+| AC-049-B-02c | Files display with `bi-file-earmark-text` icons | UI |
 
 ### AC-049-B-03: Expand/Collapse Folders
-**Given** a folder node in the KB tree  
-**When** the user clicks the folder  
-**Then** the folder expands to show children (sub-folders and files) with chevron rotation animation; clicking again collapses it
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-B-03a | Clicking a folder node expands it to show children (sub-folders and files) | UI |
+| AC-049-B-03b | Clicking an expanded folder collapses it | UI |
+| AC-049-B-03c | Chevron rotation animation plays on expand/collapse | UI |
 
 ### AC-049-B-04: File Click Navigation
-**Given** a file in the KB tree  
-**When** the user clicks it  
-**Then** the file content opens in the main content area using the existing content rendering pipeline; the file item shows active (highlighted) state
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-B-04a | Clicking a file opens its content in the main content area via existing rendering pipeline | UI |
+| AC-049-B-04b | Clicked file item shows active (highlighted) state in the tree | UI |
 
 ### AC-049-B-05: Tree Auto-Refresh
-**Given** a file or folder operation occurs (create, move, delete, upload via other features)  
-**When** the operation completes  
-**Then** the sidebar KB tree refreshes automatically to reflect the new state within 2 seconds
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-B-05a | Sidebar KB tree refreshes automatically after create/move/delete/upload operations | Integration |
+| AC-049-B-05b | Tree refresh completes within 2 seconds of operation completion | UI |
 
 ### AC-049-B-06: Drag-Over Visual Feedback
-**Given** a user drags a file or folder over a sidebar KB folder  
-**When** the drag enters the folder element  
-**Then** an emerald dashed border appears around the folder with a subtle background highlight; the visual clears on drag-leave
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-B-06a | Emerald dashed border appears around folder on drag-over | UI |
+| AC-049-B-06b | Subtle background highlight shown on drag-over | UI |
+| AC-049-B-06c | Visual feedback clears on drag-leave | UI |
 
 ### AC-049-B-07: Drop to Move
-**Given** a user drops a dragged item onto a KB sidebar folder  
-**When** the drop event fires  
-**Then** the file/folder is moved to the target folder via the KB move API; the tree refreshes to show the new location
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-B-07a | Dropping item onto a folder calls KB move API (`PUT /api/kb/files/move` or `/api/kb/folders/move`) | Integration |
+| AC-049-B-07b | Tree refreshes to show new location after successful move | UI |
 
 ### AC-049-B-08: Intake Placeholder
-**Given** the sidebar KB section is expanded  
-**When** the tree renders  
-**Then** a "📥 Intake" entry appears at the bottom of the KB section (non-functional placeholder for FEATURE-049-F)
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-B-08a | "📥 Intake" entry appears at the bottom of the KB section | UI |
+| AC-049-B-08b | Intake entry is non-functional (placeholder for FEATURE-049-F) | UI |
 
 ### AC-049-B-09: Empty State
-**Given** the KB root folder is empty or doesn't exist  
-**When** the sidebar KB section expands  
-**Then** a subtle "No articles yet" message is shown instead of an empty tree
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-B-09a | "No articles yet" message shown when KB root is empty | UI |
+| AC-049-B-09b | "No articles yet" message shown when KB root does not exist | UI |
 
 ### AC-049-B-10: Tree Performance
-**Given** the KB contains up to 500 files across nested folders  
-**When** the tree is loaded  
-**Then** the sidebar renders within 500ms (NFR-049.2)
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-B-10a | Sidebar tree renders within 500ms for up to 500 files (NFR-049.2) | UI |
 
 ## Functional Requirements
 

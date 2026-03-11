@@ -16,55 +16,26 @@ As a developer using X-IPE, I want to browse KB articles in a grid view with sea
 
 ## Acceptance Criteria
 
-### AC-049-C-01: Grid View
-**Given** the KB content area is displayed  
-**When** articles exist in the current folder  
-**Then** articles show as card-based grid: title, snippet (first 100 chars), tags, last modified date
-
-### AC-049-C-02: Tag Display
-**Given** an article card with tags  
-**When** the card renders  
-**Then** lifecycle tags show as amber gradient pill with `▸` prefix; domain tags show as blue outlined pill with `#` prefix
-
-### AC-049-C-03: Sort Dropdown
-**Given** the KB browse view  
-**When** the user opens the sort dropdown  
-**Then** options include: Last Modified (default), Name A→Z, Date Created, Untagged First
-
-### AC-049-C-04: Keyword Search
-**Given** the search bar  
-**When** the user types a query  
-**Then** results filter by filename + frontmatter fields (title, tags, author), debounced 300ms
-
-### AC-049-C-05: Tag Filter Chips
-**Given** the browse view  
-**When** rendered  
-**Then** 2D tag filter chips appear below search bar; clicking toggles filter; active chip highlighted
-
-### AC-049-C-06: Untagged Filter
-**Given** the tag filter area  
-**When** "⚠ Untagged" chip clicked  
-**Then** only files without tags are shown; untagged cards show "Needs Tags" amber badge
-
-### AC-049-C-07: Card Click Navigation
-**Given** an article card  
-**When** the user clicks it  
-**Then** the file opens in the content area via the existing content rendering pipeline
-
-### AC-049-C-08: New Article Button
-**Given** the browse view  
-**When** rendered  
-**Then** a "New Article" button is available that opens the KB Article Editor modal (FEATURE-049-D)
-
-### AC-049-C-09: Empty State
-**Given** no articles in current folder  
-**When** the browse view renders  
-**Then** shows "No articles yet — create one!" with a button to open the editor
-
-### AC-049-C-10: kb:changed Refresh
-**Given** the browse view is displayed  
-**When** a `kb:changed` event fires  
-**Then** the browse view refreshes automatically
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-C-01a | Articles render as card-based grid layout in the KB content area | UI |
+| AC-049-C-01b | Each card displays title, snippet (first 100 chars), tags, and last modified date | UI |
+| AC-049-C-02a | Lifecycle tags render as amber gradient pill with `▸` prefix | UI |
+| AC-049-C-02b | Domain tags render as blue outlined pill with `#` prefix | UI |
+| AC-049-C-03a | Sort dropdown is available in the KB browse view | UI |
+| AC-049-C-03b | Sort options include: Last Modified (default), Name A→Z, Date Created, Untagged First | UI |
+| AC-049-C-04a | Search bar filters results by filename and frontmatter fields (title, tags, author) | UI |
+| AC-049-C-04b | Search input is debounced at 300ms | Unit |
+| AC-049-C-05a | 2D tag filter chips appear below the search bar | UI |
+| AC-049-C-05b | Clicking a chip toggles the filter; active chip is highlighted | UI |
+| AC-049-C-06a | Clicking "⚠ Untagged" chip shows only files without tags | UI |
+| AC-049-C-06b | Untagged cards display a "Needs Tags" amber badge | UI |
+| AC-049-C-07a | Clicking an article card opens the file in the content area via existing rendering pipeline | UI |
+| AC-049-C-08a | "New Article" button is visible in the browse view | UI |
+| AC-049-C-08b | Clicking the button opens the KB Article Editor modal (FEATURE-049-D) | UI |
+| AC-049-C-09a | When no articles exist in current folder, shows "No articles yet — create one!" message | UI |
+| AC-049-C-09b | Empty state includes a button to open the editor | UI |
+| AC-049-C-10a | Browse view refreshes automatically when a `kb:changed` event fires | Unit |
 
 ## Functional Requirements
 

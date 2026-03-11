@@ -16,50 +16,25 @@ As a developer using X-IPE, I want a modal-based markdown editor for creating an
 
 ## Acceptance Criteria
 
-### AC-049-D-01: New Article Button
-**Given** the KB sidebar is visible  
-**When** the user right-clicks a folder or clicks a "New Article" action  
-**Then** the article editor modal opens with the target folder pre-selected
-
-### AC-049-D-02: Modal Shell
-**Given** the editor modal opens  
-**When** the modal renders  
-**Then** it uses the compose-idea-modal pattern: 90vw×90vh, backdrop blur, spring scale animation, z-index 1051
-
-### AC-049-D-03: EasyMDE Editor
-**Given** the editor modal is open  
-**When** the editor initializes  
-**Then** EasyMDE renders with toolbar: Bold, Italic, Heading, Lists, Link, Code, Preview toggle
-
-### AC-049-D-04: Frontmatter Form
-**Given** the editor modal is open  
-**When** the form renders above the editor  
-**Then** it shows: Title (text input), Lifecycle tags (multi-select chips from /api/kb/config), Domain tags (multi-select chips from /api/kb/config)
-
-### AC-049-D-05: Auto-Populated Fields
-**Given** a new article is being created  
-**When** the frontmatter form renders  
-**Then** author is auto-populated with "user", created date with today, auto_generated defaults to false
-
-### AC-049-D-06: Save Creates File
-**Given** the user fills in title and content  
-**When** the user clicks "Save Article"  
-**Then** a `.md` file is created via `POST /api/kb/files` with YAML frontmatter (title, tags, author, created, auto_generated) and body content
-
-### AC-049-D-07: Edit Existing Article
-**Given** an existing KB article is opened for editing  
-**When** the modal opens  
-**Then** it pre-populates the title, tags, and content from the existing file's frontmatter and body
-
-### AC-049-D-08: Cancel with Confirmation
-**Given** the user has modified content in the editor  
-**When** the user clicks Cancel or presses Escape  
-**Then** a confirmation dialog appears ("Discard changes?"); confirming closes the modal, declining returns to editing
-
-### AC-049-D-09: kb:changed Event
-**Given** the user saves an article  
-**When** the save succeeds  
-**Then** a `kb:changed` custom event is dispatched to refresh the sidebar tree
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-D-01a | Right-clicking a folder or clicking "New Article" opens the editor modal | UI |
+| AC-049-D-01b | Target folder is pre-selected in the modal | UI |
+| AC-049-D-02a | Modal uses compose-idea-modal pattern: 90vw×90vh, backdrop blur, spring scale animation, z-index 1051 | UI |
+| AC-049-D-03a | EasyMDE renders with toolbar: Bold, Italic, Heading, Lists, Link, Code, Preview toggle | UI |
+| AC-049-D-04a | Title text input renders above the editor | UI |
+| AC-049-D-04b | Lifecycle tags render as multi-select chips sourced from `/api/kb/config` | UI |
+| AC-049-D-04c | Domain tags render as multi-select chips sourced from `/api/kb/config` | UI |
+| AC-049-D-05a | Author field auto-populated with "user" | Unit |
+| AC-049-D-05b | Created date auto-populated with today's date | Unit |
+| AC-049-D-05c | `auto_generated` defaults to false | Unit |
+| AC-049-D-06a | Clicking "Save Article" creates a `.md` file via `POST /api/kb/files` | API |
+| AC-049-D-06b | File contains YAML frontmatter (title, tags, author, created, auto_generated) and body content | Unit |
+| AC-049-D-07a | Opening an existing article pre-populates title, tags, and content from frontmatter and body | UI |
+| AC-049-D-08a | Clicking Cancel or pressing Escape shows confirmation dialog ("Discard changes?") when content is modified | UI |
+| AC-049-D-08b | Confirming discards changes and closes the modal; declining returns to editing | UI |
+| AC-049-D-09a | Successful save dispatches a `kb:changed` custom event | Unit |
+| AC-049-D-09b | Event triggers sidebar tree refresh | Integration |
 
 ## Functional Requirements
 

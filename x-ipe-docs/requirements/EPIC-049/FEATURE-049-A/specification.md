@@ -43,76 +43,109 @@ This is the MVP foundation: no UI components are included (those are in FEATURE-
 ## Acceptance Criteria
 
 ### AC-049-A-01: KB Root Initialization
-- [ ] When the KB root (`x-ipe-docs/knowledge-base/`) does not exist on first API call, it is auto-created
-- [ ] `kb-config.json` is auto-generated with default lifecycle tags: Ideation, Requirement, Design, Implementation, Testing, Deployment, Maintenance
-- [ ] `kb-config.json` is auto-generated with default domain tags: API, Authentication, UI-UX, Database, Infrastructure, Security, Performance, Integration, Documentation, Analytics
-- [ ] `kb-config.json` includes empty `agent_write_allowlist` array and `ai_librarian` settings object
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-A-01a | KB root (`x-ipe-docs/knowledge-base/`) auto-created on first API call when it does not exist | API |
+| AC-049-A-01b | `kb-config.json` auto-generated with default lifecycle tags: Ideation, Requirement, Design, Implementation, Testing, Deployment, Maintenance | Unit |
+| AC-049-A-01c | `kb-config.json` auto-generated with default domain tags: API, Authentication, UI-UX, Database, Infrastructure, Security, Performance, Integration, Documentation, Analytics | Unit |
+| AC-049-A-01d | `kb-config.json` includes empty `agent_write_allowlist` array and `ai_librarian` settings object | Unit |
 
 ### AC-049-A-02: Folder Listing API
-- [ ] `GET /api/kb/tree` returns full folder/file tree structure as nested JSON
-- [ ] Each node includes: name, path (relative to KB root), type ("folder" | "file"), children (for folders)
-- [ ] File nodes include metadata: size_bytes, modified_date, file_type extension
-- [ ] `.intake/` folder is excluded from tree response
-- [ ] Response returns within 500ms for up to 500 files (NFR-049.2)
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-A-02a | `GET /api/kb/tree` returns full folder/file tree structure as nested JSON | API |
+| AC-049-A-02b | Each tree node includes: name, path (relative to KB root), type (`folder` or `file`), children (for folders) | API |
+| AC-049-A-02c | File nodes include metadata: size_bytes, modified_date, file_type extension | API |
+| AC-049-A-02d | `.intake/` folder excluded from tree response | API |
+| AC-049-A-02e | Response returns within 500ms for up to 500 files (NFR-049.2) | API |
 
 ### AC-049-A-03: Folder CRUD Operations
-- [ ] `POST /api/kb/folders` creates a new folder at specified path; returns 201 with folder info
-- [ ] `PATCH /api/kb/folders` renames a folder; returns 200 with updated info
-- [ ] `PUT /api/kb/folders/move` moves a folder to a new parent; returns 200
-- [ ] `DELETE /api/kb/folders` deletes a folder and its contents; returns 200 with deleted count
-- [ ] Creating a folder with an existing name at the same level returns 409 Conflict
-- [ ] Moving a folder into itself or a descendant returns 400 Bad Request
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-A-03a | `POST /api/kb/folders` creates folder at specified path; returns 201 with folder info | API |
+| AC-049-A-03b | `PATCH /api/kb/folders` renames a folder; returns 200 with updated info | API |
+| AC-049-A-03c | `PUT /api/kb/folders/move` moves folder to new parent; returns 200 | API |
+| AC-049-A-03d | `DELETE /api/kb/folders` deletes folder and contents; returns 200 with deleted count | API |
+| AC-049-A-03e | Creating folder with existing name at same level returns 409 Conflict | API |
+| AC-049-A-03f | Moving folder into itself or a descendant returns 400 Bad Request | API |
 
 ### AC-049-A-04: File Listing with Metadata
-- [ ] `GET /api/kb/files?folder={path}` returns files in specified folder with frontmatter metadata
-- [ ] Each file includes: name, path, size_bytes, modified_date, frontmatter (title, tags, author, created, auto_generated)
-- [ ] Files without YAML frontmatter return null for frontmatter fields (no error)
-- [ ] Non-markdown files (PDF, images) return file metadata without frontmatter parsing
-- [ ] Results sortable via `sort` query parameter: `modified` (default), `name`, `created`, `untagged`
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-A-04a | `GET /api/kb/files?folder={path}` returns files in specified folder with frontmatter metadata | API |
+| AC-049-A-04b | Each file includes: name, path, size_bytes, modified_date, frontmatter (title, tags, author, created, auto_generated) | API |
+| AC-049-A-04c | Files without YAML frontmatter return null for frontmatter fields (no error) | API |
+| AC-049-A-04d | Non-markdown files (PDF, images) return file metadata without frontmatter parsing | API |
+| AC-049-A-04e | Results sortable via `sort` query param: `modified` (default), `name`, `created`, `untagged` | API |
 
 ### AC-049-A-05: File CRUD Operations
-- [ ] `GET /api/kb/files/{path}` returns file content (markdown body) and parsed frontmatter
-- [ ] `POST /api/kb/files` creates a new file at specified path with content and optional frontmatter; returns 201
-- [ ] `PUT /api/kb/files/{path}` updates file content and/or frontmatter; returns 200
-- [ ] `DELETE /api/kb/files/{path}` deletes a file; returns 200
-- [ ] Creating a file with missing frontmatter auto-populates: title (from filename), tags (empty), author ("unknown"), created (current date), auto_generated (false)
-- [ ] File size validated: files >10MB rejected with 413 Payload Too Large
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-A-05a | `GET /api/kb/files/{path}` returns file content (markdown body) and parsed frontmatter | API |
+| AC-049-A-05b | `POST /api/kb/files` creates new file with content and optional frontmatter; returns 201 | API |
+| AC-049-A-05c | `PUT /api/kb/files/{path}` updates file content and/or frontmatter; returns 200 | API |
+| AC-049-A-05d | `DELETE /api/kb/files/{path}` deletes a file; returns 200 | API |
+| AC-049-A-05e | Missing frontmatter auto-populates: title (from filename), tags (empty), author ("unknown"), created (current date), auto_generated (false) | Unit |
+| AC-049-A-05f | Files >10MB rejected with 413 Payload Too Large | API |
 
 ### AC-049-A-06: File Move Operation
-- [ ] `PUT /api/kb/files/move` moves a file to a new folder; returns 200 with new path
-- [ ] Moving to a non-existent folder returns 404 Not Found
-- [ ] Moving creates the destination file and removes the source file atomically
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-A-06a | `PUT /api/kb/files/move` moves file to new folder; returns 200 with new path | API |
+| AC-049-A-06b | Moving to non-existent folder returns 404 Not Found | API |
+| AC-049-A-06c | Move operation creates destination file and removes source file atomically | Integration |
 
 ### AC-049-A-07: YAML Frontmatter Parsing
-- [ ] Frontmatter extracted from `---` delimited YAML block at top of .md files
-- [ ] Supported fields: title (string), tags (object with lifecycle[] and domain[]), author (string), created (date string), auto_generated (boolean)
-- [ ] Invalid YAML in frontmatter block returns file with frontmatter as null (graceful degradation)
-- [ ] Frontmatter update preserves markdown body content below the `---` block
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-A-07a | Frontmatter extracted from `---` delimited YAML block at top of .md files | Unit |
+| AC-049-A-07b | Supported fields: title (string), tags (object with lifecycle[] and domain[]), author (string), created (date string), auto_generated (boolean) | Unit |
+| AC-049-A-07c | Invalid YAML in frontmatter returns file with frontmatter as null (graceful degradation) | Unit |
+| AC-049-A-07d | Frontmatter update preserves markdown body content below the `---` block | Unit |
 
 ### AC-049-A-08: Tag Taxonomy API
-- [ ] `GET /api/kb/config` returns parsed kb-config.json including tags.lifecycle and tags.domain arrays
-- [ ] Tag arrays contain string values matching predefined taxonomy
-- [ ] Response includes agent_write_allowlist and ai_librarian configuration sections
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-A-08a | `GET /api/kb/config` returns parsed kb-config.json including tags.lifecycle and tags.domain arrays | API |
+| AC-049-A-08b | Tag arrays contain string values matching predefined taxonomy | Unit |
+| AC-049-A-08c | Response includes agent_write_allowlist and ai_librarian configuration sections | API |
 
 ### AC-049-A-09: Search API
-- [ ] `GET /api/kb/search?q={query}` returns files matching query against filename and frontmatter fields
-- [ ] Search matches against: filename, frontmatter.title, frontmatter.tags (lifecycle + domain), frontmatter.author
-- [ ] Search is case-insensitive
-- [ ] Results include full file metadata (same as file listing response)
-- [ ] `GET /api/kb/search?tag={tag}&tag_type={lifecycle|domain}` filters by specific tag
-- [ ] Combined query + tag filter supported: `?q={query}&tag={tag}&tag_type={type}`
-- [ ] Search returns within 300ms for filename+frontmatter matching (NFR-049.3)
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-A-09a | `GET /api/kb/search?q={query}` returns files matching query against filename and frontmatter fields | API |
+| AC-049-A-09b | Search matches against: filename, frontmatter.title, frontmatter.tags (lifecycle + domain), frontmatter.author | Unit |
+| AC-049-A-09c | Search is case-insensitive | Unit |
+| AC-049-A-09d | Results include full file metadata (same as file listing response) | API |
+| AC-049-A-09e | `GET /api/kb/search?tag={tag}&tag_type={lifecycle\|domain}` filters by specific tag | API |
+| AC-049-A-09f | Combined query + tag filter supported: `?q={query}&tag={tag}&tag_type={type}` | API |
+| AC-049-A-09g | Search returns within 300ms for filename+frontmatter matching (NFR-049.3) | API |
 
 ### AC-049-A-10: URL Bookmark Format
-- [ ] `.url.md` files parsed with additional frontmatter field: `url` (string, required)
-- [ ] `GET /api/kb/files/{path}` for `.url.md` files returns url field in frontmatter
-- [ ] Creating a `.url.md` file requires `url` field in frontmatter; missing url returns 400
-- [ ] URL bookmarks are included in file listing and search results with `file_type: "url_bookmark"` indicator
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-A-10a | `.url.md` files parsed with additional frontmatter field: `url` (string, required) | Unit |
+| AC-049-A-10b | `GET /api/kb/files/{path}` for `.url.md` files returns url field in frontmatter | API |
+| AC-049-A-10c | Creating `.url.md` file requires `url` field in frontmatter; missing url returns 400 | API |
+| AC-049-A-10d | URL bookmarks included in file listing and search results with `file_type: "url_bookmark"` indicator | API |
 
 ### AC-049-A-11: File Type Validation
-- [ ] Accepted file types: `.md`, `.url.md`, `.pdf`, `.png`, `.jpg`, `.jpeg`, `.svg`
-- [ ] Upload of unsupported file types returns 415 Unsupported Media Type
-- [ ] File type determined by extension, not content sniffing
+
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-A-11a | Accepted file types: `.md`, `.url.md`, `.pdf`, `.png`, `.jpg`, `.jpeg`, `.svg` | Unit |
+| AC-049-A-11b | Upload of unsupported file types returns 415 Unsupported Media Type | API |
+| AC-049-A-11c | File type determined by extension, not content sniffing | Unit |
 
 ## Functional Requirements
 

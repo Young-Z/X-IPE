@@ -43,70 +43,27 @@ As a user working within a workflow, I want to insert selected references direct
 
 ## Acceptance Criteria
 
-### AC-049-G-01: Modal opens with two-panel layout
-- **Given** a KBReferencePicker instance is created
-- **When** the `open()` method is called
-- **Then** a modal overlay (`.kb-ref-overlay`) is appended to the document body with a left folder-tree panel (`.kb-ref-tree-panel`) and a right file-list panel (`.kb-ref-list-panel`)
-
-### AC-049-G-02: Modal closes via close button and backdrop
-- **Given** the Reference Picker modal is open
-- **When** the user clicks the ✕ close button OR clicks the overlay backdrop (outside the modal)
-- **Then** the modal plays a 300ms fade-out animation, the overlay is removed from the DOM, and body scroll is restored
-
-### AC-049-G-03: Debounced search triggers API call
-- **Given** the Reference Picker modal is open with a search input
-- **When** the user types into the search input and 300ms elapses without further input
-- **Then** a fetch request is made to `/api/kb/search?q={query}` and the file list panel re-renders with the results
-
-### AC-049-G-04: Tag filter chips render and toggle
-- **Given** the KB config returns lifecycle and domain tag arrays
-- **When** the modal renders
-- **Then** lifecycle tags appear as amber-styled chips (`kb-ref-chip-lifecycle`) and domain tags appear as blue-styled chips (`kb-ref-chip-domain`), and clicking a chip toggles its `active` class and filters the file list to show only files matching any active tag
-
-### AC-049-G-05: Multi-select via checkboxes for files and folders
-- **Given** the Reference Picker modal displays files and folders with checkboxes
-- **When** the user checks a file or folder checkbox
-- **Then** the item's path is added to the selected set, and unchecking removes it from the set
-
-### AC-049-G-06: Selected count display updates
-- **Given** the Reference Picker modal is open with a footer showing "0 selected"
-- **When** the user checks or unchecks file/folder checkboxes
-- **Then** the count label updates to reflect the current number of selected items (e.g., "3 selected")
-
-### AC-049-G-07: Copy button copies paths to clipboard
-- **Given** one or more files/folders are selected
-- **When** the user clicks the "📋 Copy" button
-- **Then** the selected paths are joined with newlines and written to the clipboard via `navigator.clipboard.writeText`, with a fallback to `document.execCommand('copy')` if the Clipboard API is unavailable
-
-### AC-049-G-08: Copy feedback animation
-- **Given** the user clicks the Copy button and clipboard write succeeds
-- **When** the copy operation completes
-- **Then** the button text changes to "✅ Copied!" for 1500ms before reverting to "📋 Copy"
-
-### AC-049-G-09: Insert button invokes callback and dispatches event
-- **Given** one or more files/folders are selected and an `onInsert` callback is provided
-- **When** the user clicks the "Insert" button
-- **Then** the `onInsert` callback is called with an array of selected paths, a `kb:references-inserted` CustomEvent is dispatched on `document` with the paths in `detail`, and the modal closes
-
-### AC-049-G-10: Parallel API loading on open
-- **Given** a KBReferencePicker instance
-- **When** `open()` is called
-- **Then** three API requests (`/api/kb/tree`, `/api/kb/config`, `/api/kb/files`) are fired in parallel via `Promise.all` before the modal renders
-
-### AC-049-G-11: HTML escaping prevents XSS
-- **Given** a file name or tag text contains HTML special characters (e.g., `<script>`)
-- **When** the file list or filter chips are rendered
-- **Then** the content is escaped via DOM-based text content assignment, preventing script injection
-
-### AC-049-G-12: Graceful degradation on API failure
-- **Given** one or more of the KB API endpoints fail or are unavailable
-- **When** `open()` is called
-- **Then** the modal still opens without crashing, showing empty tree ("No folders") and/or empty file list ("No files found") placeholders as appropriate
-
-### AC-049-G-13: Body scroll locked during modal
-- **Given** the page has scrollable content
-- **When** the Reference Picker modal opens
-- **Then** `document.body.style.overflow` is set to `'hidden'`, and when the modal closes it is restored to `''`
+| AC ID | Criterion | Test Type |
+|-------|-----------|-----------|
+| AC-049-G-01a | Modal overlay (`.kb-ref-overlay`) appended to body with left folder-tree panel (`.kb-ref-tree-panel`) and right file-list panel (`.kb-ref-list-panel`) when `open()` is called | UI |
+| AC-049-G-02a | Modal plays 300ms fade-out animation, overlay removed from DOM, and body scroll restored when user clicks ✕ close button or overlay backdrop | UI |
+| AC-049-G-03a | Fetch request to `/api/kb/search?q={query}` fires after 300ms debounce when user types in search input | Unit |
+| AC-049-G-03b | File list panel re-renders with search results after API response | UI |
+| AC-049-G-04a | Lifecycle tags render as amber-styled chips (`kb-ref-chip-lifecycle`) and domain tags as blue-styled chips (`kb-ref-chip-domain`) from KB config | UI |
+| AC-049-G-04b | Clicking a chip toggles its `active` class and filters file list to show only files matching any active tag | UI |
+| AC-049-G-05a | Checking a file or folder checkbox adds its path to the selected set | Unit |
+| AC-049-G-05b | Unchecking a file or folder checkbox removes its path from the selected set | Unit |
+| AC-049-G-06a | Footer count label updates to reflect current number of selected items (e.g., "3 selected") when checkboxes change | UI |
+| AC-049-G-07a | Selected paths joined with newlines and written to clipboard via `navigator.clipboard.writeText` when "📋 Copy" button clicked | Unit |
+| AC-049-G-07b | Fallback to `document.execCommand('copy')` when Clipboard API is unavailable | Unit |
+| AC-049-G-08a | Copy button text changes to "✅ Copied!" for 1500ms then reverts to "📋 Copy" after successful clipboard write | UI |
+| AC-049-G-09a | `onInsert` callback called with array of selected paths when "Insert" button clicked | Unit |
+| AC-049-G-09b | `kb:references-inserted` CustomEvent dispatched on `document` with paths in `detail` when "Insert" button clicked | Unit |
+| AC-049-G-09c | Modal closes after Insert button action completes | UI |
+| AC-049-G-10a | Three API requests (`/api/kb/tree`, `/api/kb/config`, `/api/kb/files`) fire in parallel via `Promise.all` on `open()` | Integration |
+| AC-049-G-11a | File names and tag text containing HTML special characters escaped via DOM-based text content assignment, preventing script injection | Unit |
+| AC-049-G-12a | Modal opens without crashing when API endpoints fail, showing "No folders" and/or "No files found" placeholders | Integration |
+| AC-049-G-13a | `document.body.style.overflow` set to `'hidden'` on modal open and restored to `''` on close | UI |
 
 ## Functional Requirements
 
