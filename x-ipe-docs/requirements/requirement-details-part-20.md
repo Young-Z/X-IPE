@@ -9,11 +9,11 @@
 
 ### Project Overview
 
-A Change Request to align all code-touching skills (technical-design, bug-fix, code-refactor) and the refactoring-analysis tool with the `x-ipe-tool-implementation-*` architecture established in EPIC-045. Currently, only `x-ipe-task-based-code-implementation` leverages tool-implementation skills for language-specific best practices. Three other code-touching skills (technical-design, bug-fix, code-refactor) and one analysis tool (refactoring-analysis) operate independently, potentially producing inconsistent code quality, test patterns, and coding standards.
+A Change Request to align all code-touching skills (technical-design, bug-fix, code-refactor, acceptance-test, human-playground) and the refactoring-analysis tool with the `x-ipe-tool-implementation-*` architecture established in EPIC-045. Currently, only `x-ipe-task-based-code-implementation` leverages tool-implementation skills for language-specific best practices. Other code-touching skills operate independently, potentially producing inconsistent code quality, test patterns, and coding standards.
 
-**Motivation:** EPIC-045 established a powerful architecture where language-specific implementation skills (`x-ipe-tool-implementation-python`, `x-ipe-tool-implementation-html5`, etc.) embed best practices for their stack. However, only the code-implementation orchestrator uses them. When bugs are fixed or code is refactored, these skills are bypassed — meaning a Python bug fix may not follow the same PEP 8/type hints/pytest patterns that a new Python feature implementation does.
+**Motivation:** EPIC-045 established a powerful architecture where language-specific implementation skills (`x-ipe-tool-implementation-python`, `x-ipe-tool-implementation-html5`, etc.) embed best practices for their stack. However, only the code-implementation orchestrator uses them. When bugs are fixed, code is refactored, acceptance tests are generated, or playground demos are created, these skills are bypassed — meaning a Python bug fix may not follow the same PEP 8/type hints/pytest patterns that a new Python feature implementation does.
 
-**Source:** Analysis of EPIC-045 impact on downstream skills.
+**Source:** Analysis of EPIC-045 impact on downstream skills + CR-001 (config filtering & scope extension, 03-10-2026).
 
 ### User Request
 
@@ -39,6 +39,9 @@ A Change Request to align all code-touching skills (technical-design, bug-fix, c
 | HLR-048.3 | Code-refactor Step 4 (Execute Refactoring) delegates each refactoring phase to matched tool-implementation skill via per-phase AAA scenarios | P1 |
 | HLR-048.4 | Refactoring-analysis consults tool-implementation skills to understand target coding standards during quality evaluation | P2 |
 | HLR-048.5 | Tool-implementation skills extend input contract to support `operation: "fix"` and `operation: "refactor"` alongside existing `"implement"` | P1 |
+| HLR-048.6 | All code-touching skills use tools.json config-based filtering before semantic routing — same 3-layer pattern as code-implementation (config → discover → filter → route) | P1 |
+| HLR-048.7 | Acceptance-test test code generation delegates to matched tool-implementation skill based on project tech_stack | P1 |
+| HLR-048.8 | Human-playground replaces Python-only hardcoding with dynamic tool-implementation routing based on project tech_stack | P1 |
 
 ### Functional Requirements
 
@@ -87,6 +90,43 @@ A Change Request to align all code-touching skills (technical-design, bug-fix, c
 - FR-048.5.5: All 6 tool skills (python, html5, typescript, java, mcp, general) MUST be updated with new operations
 - FR-048.5.6: Standard output contract (implementation_files, test_files, test_results, lint_status) applies to all operations
 
+#### FR-048.6: Config-Based Tool Filtering (CR-001)
+
+- FR-048.6.1: All code-touching skills MUST read `x-ipe-docs/config/tools.json` to determine which tool-implementation skills are enabled before semantic routing
+- FR-048.6.2: Each consuming stage MUST have its own config section in tools.json:
+  - `stages.feature.bug_fix` — for bug-fix tool selection
+  - `stages.refactoring.execution` — for code-refactor tool selection
+  - `stages.feature.consultation` — for technical-design and refactoring-analysis tool scanning
+  - `stages.quality.testing` — for acceptance-test tool selection
+  - `stages.feature.playground` — for human-playground tool selection
+- FR-048.6.3: Config filtering follows the same 3-layer pattern as code-implementation Step 3.1:
+  1. DISCOVER: Scan `.github/skills/x-ipe-tool-implementation-*/`
+  2. READ CONFIG: Extract the stage-specific section from tools.json
+  3. FILTER: Only ENABLED tools participate in semantic matching (opt-in model)
+  4. FORCE-ENABLE: `x-ipe-tool-implementation-general` always enabled (safety net)
+- FR-048.6.4: IF config section missing or empty → `config_active = false` → all discovered tools treated as ENABLED (backwards compatibility)
+- FR-048.6.5: IF config section exists → opt-in model: only explicitly enabled tools participate
+- FR-048.6.6: `_extra_instruction` field supported per stage for supplementary semantic routing context
+
+#### FR-048.7: Acceptance Test — Tool Skill Delegation (CR-001)
+
+- FR-048.7.1: Acceptance-test Step 1.2 (Generate Test Plan) MUST determine `tech_stack` from specification and implementation files
+- FR-048.7.2: Acceptance-test Step 3 (test code generation) MUST route to matched `x-ipe-tool-implementation-*` skill with `operation: "implement"` for language-specific test file creation
+- FR-048.7.3: Tool skill generates test scaffolding following language-specific test conventions (pytest for Python, Vitest/Jest for JS/TS, JUnit for Java)
+- FR-048.7.4: Chrome DevTools MCP integration for web UI testing remains unchanged — tool delegation handles test CODE generation, not browser interaction
+- FR-048.7.5: `feature_context` is available from acceptance-test workflow (specification, implementation files)
+- FR-048.7.6: IF no matching tool skill enabled → fall back to current inline test generation (graceful degradation)
+
+#### FR-048.8: Human Playground — Tool Skill Delegation (CR-001)
+
+- FR-048.8.1: Human-playground Step 1 (Create Examples) MUST determine `tech_stack` from feature's implementation files and project config
+- FR-048.8.2: Human-playground MUST route playground file creation to matched `x-ipe-tool-implementation-*` skill with `operation: "implement"`
+- FR-048.8.3: Playground file naming MUST be dynamic based on tool skill language: `playground_{feature_name}.{ext}` where `{ext}` is determined by the matched tool skill (`.py`, `.ts`, `.js`, `.java`, etc.)
+- FR-048.8.4: Playground execution command MUST be dynamic: tool skill returns the appropriate run command (e.g., `uv run python`, `npx tsx`, `node`, `java`)
+- FR-048.8.5: Playground test file naming follows the same dynamic pattern: `test_playground_{feature_name}.{ext}`
+- FR-048.8.6: `feature_context` is available from playground workflow (specification, implementation files)
+- FR-048.8.7: IF no matching tool skill enabled → fall back to current Python behavior (backwards compatibility)
+
 ### Conflict Analysis Summary
 
 | # | Type | Affected Skill | Severity | Resolution |
@@ -98,6 +138,9 @@ A Change Request to align all code-touching skills (technical-design, bug-fix, c
 | 5 | Specification | Bug fix — no spec for AAA generation | HIGH | Local mini AAA from bug context (FR-048.2.2) |
 | 6 | Dependency | Technical design — Part 2 format coupling | MEDIUM | Informational-only scanning (FR-048.1.5) |
 | 7 | Design | Tool skills — feature-only architecture | HIGH | Optional feature_context for fix/refactor operations (FR-048.5.4) |
+| 8 | Specification | EPIC-048 Out of Scope — acceptance-test, human-playground | LOW | Moved to in-scope by CR-001 (FR-048.7, FR-048.8) |
+| 9 | Design | Human-playground — Python-only hardcoding | MEDIUM | Dynamic tool routing replaces hardcoded paths (FR-048.8.3, FR-048.8.4) |
+| 10 | Specification | All delegation features — no config filtering | MEDIUM | 3-layer config pattern added to all consuming skills (FR-048.6) |
 
 All conflicts are classified as **expected** — they are natural consequences of extending the tool-implementation architecture to maintenance workflows. All have documented mitigations in the functional requirements above.
 
@@ -106,9 +149,11 @@ All conflicts are classified as **expected** — they are natural consequences o
 | Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
 |------------|---------|---------------|---------|-------------------|--------------------|
 | FEATURE-048-A | EPIC-048 | Tool Skill Contract Extension | v1.0 | Extend all 6 tool-implementation skills with `operation: "fix"` and `"refactor"`, optional feature_context for maintenance ops | - |
-| FEATURE-048-B | EPIC-048 | Consultation Integration (Technical Design + Refactoring Analysis) | v1.0 | Add tool skill capability awareness to technical-design Step 4 (Research) and refactoring-analysis quality evaluation | - |
-| FEATURE-048-C | EPIC-048 | Bug Fix Delegation | v1.0 | Delegate bug-fix Steps 6-7 (Write Test, Implement Fix) to matched tool-implementation skill with mini AAA scenarios | FEATURE-048-A |
-| FEATURE-048-D | EPIC-048 | Code Refactor Delegation | v1.0 | Delegate code-refactor Step 4 (Execute Refactoring) to matched tool-implementation skill with per-phase AAA scenarios | FEATURE-048-A |
+| FEATURE-048-B | EPIC-048 | Consultation Integration (Technical Design + Refactoring Analysis) | v1.0 | Add tool skill capability awareness with config-based filtering to technical-design Step 4 and refactoring-analysis quality evaluation | - |
+| FEATURE-048-C | EPIC-048 | Bug Fix Delegation | v1.0 | Delegate bug-fix Steps 6-7 to matched tool-implementation skill with config filtering and mini AAA scenarios | FEATURE-048-A |
+| FEATURE-048-D | EPIC-048 | Code Refactor Delegation | v1.0 | Delegate code-refactor Step 4 to matched tool-implementation skill with config filtering and per-phase AAA scenarios | FEATURE-048-A |
+| FEATURE-048-E | EPIC-048 | Acceptance Test Tool Selection (CR-001) | v1.0 | Acceptance-test delegates test code generation to tool-implementation skill based on tech_stack with config filtering | - |
+| FEATURE-048-F | EPIC-048 | Human Playground Tool Selection (CR-001) | v1.0 | Human-playground replaces Python-only with dynamic tool-implementation routing based on tech_stack with config filtering | - |
 
 ### Feature Details
 
@@ -188,6 +233,46 @@ All conflicts are classified as **expected** — they are natural consequences o
 
 **Requirement Coverage:** FR-048.3.1 through FR-048.3.6
 
+#### FEATURE-048-E: Acceptance Test Tool Selection (CR-001)
+
+**Version:** v1.0
+**Priority:** P1
+**Dependency:** None (uses existing `operation: "implement"` — no contract extension needed)
+
+**Scope:**
+- Update `x-ipe-task-based-feature-acceptance-test` to route test code generation to matched `x-ipe-tool-implementation-*` skill
+- Determine `tech_stack` from specification and implementation files in Step 1.2
+- Read config from `tools.json` → `stages.quality.testing` section for enabled tools
+- Route test scaffolding to matched tool skill with `operation: "implement"` — tool skill generates language-specific test files (pytest, Vitest/Jest, JUnit)
+- Chrome DevTools MCP integration for web UI testing remains unchanged (tool delegation handles test CODE, not browser interaction)
+- Graceful fallback to current inline test generation if no matching tool skill enabled
+
+**Key Deliverables:**
+- Updated x-ipe-task-based-feature-acceptance-test/SKILL.md
+- tools.json `stages.quality.testing` section (added during implementation)
+
+**Requirement Coverage:** FR-048.6.1 through FR-048.6.6, FR-048.7.1 through FR-048.7.6
+
+#### FEATURE-048-F: Human Playground Tool Selection (CR-001)
+
+**Version:** v1.0
+**Priority:** P1
+**Dependency:** None (uses existing `operation: "implement"` — no contract extension needed)
+
+**Scope:**
+- Update `x-ipe-task-based-human-playground` to route playground file creation to matched `x-ipe-tool-implementation-*` skill
+- Determine `tech_stack` from feature's implementation files and project config in Step 1
+- Read config from `tools.json` → `stages.feature.playground` section for enabled tools
+- Replace hardcoded Python paths: file naming (`playground_{feature}.{ext}`), execution commands, test file naming — all dynamic based on matched tool skill
+- Tool skill returns: file extension, run command, test framework
+- Graceful fallback to current Python behavior if no matching tool skill enabled
+
+**Key Deliverables:**
+- Updated x-ipe-task-based-human-playground/SKILL.md
+- tools.json `stages.feature.playground` section (added during implementation)
+
+**Requirement Coverage:** FR-048.6.1 through FR-048.6.6, FR-048.8.1 through FR-048.8.7
+
 ### Non-Functional Requirements
 
 - NFR-048.1: Tool skill consultation/delegation MUST NOT add more than 1 additional step to existing skill execution flows
@@ -196,7 +281,7 @@ All conflicts are classified as **expected** — they are natural consequences o
 
 ### Out of Scope
 
-- Human Playground skill (creates demo code, not production code)
-- Feature Acceptance Test skill (tests via Chrome DevTools, doesn't write production code)
+- ~~Human Playground skill (creates demo code, not production code)~~ **[Moved to in-scope by CR-001]**
+- ~~Feature Acceptance Test skill (tests via Chrome DevTools, doesn't write production code)~~ **[Moved to in-scope by CR-001]**
 - Creating new tool-implementation skills for new languages
 - Changing the AAA scenario format itself

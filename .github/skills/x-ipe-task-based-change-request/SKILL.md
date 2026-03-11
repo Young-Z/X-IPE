@@ -32,7 +32,7 @@ IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "change-request"
+  task_based_skill: "x-ipe-task-based-change-request"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
@@ -44,7 +44,11 @@ input:
 
   # Task type attributes
   category: "standalone"
-  next_task_based_skill: "x-ipe-task-based-feature-refinement | x-ipe-task-based-feature-breakdown"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-feature-refinement"
+      condition: "When CR modifies an existing feature"
+    - skill: "x-ipe-task-based-feature-breakdown"
+      condition: "When CR requires a new feature"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
 
@@ -393,7 +397,11 @@ classification_logic:
 task_completion_output:
   category: standalone
   status: completed | blocked
-  next_task_based_skill: x-ipe-task-based-feature-refinement | x-ipe-task-based-feature-breakdown
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-feature-refinement"
+      condition: "When CR modifies an existing feature"
+    - skill: "x-ipe-task-based-feature-breakdown"
+      condition: "When CR requires a new feature"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"

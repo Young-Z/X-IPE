@@ -579,6 +579,9 @@ See [8. example-structured-summary.md](8.%20example-structured-summary.md) for e
 
 Use XML format for Definition of Ready (DoR) and Definition of Done (DoD) sections.
 
+CRITICAL: DoR MUST have at most 5 checkpoints. DoD MUST have at most 10 checkpoints.
+If a skill naturally generates more, keep only the most critical ones — those that prevent broken execution (DoR) or ensure delivery quality (DoD). Merge related checks into single checkpoints where possible.
+
 ### Template
 
 ```xml

@@ -42,7 +42,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 See [references/implementation-guidelines.md](.github/skills/x-ipe-task-based-code-implementation/references/implementation-guidelines.md) for detailed principles, coding standards, AAA format specification, and error handling patterns.
 
-IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -66,7 +66,7 @@ input:
   category: "feature-stage"
   next_task_based_skill: "Feature Acceptance Test"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   feature_phase: "Code Implementation"
 
   # Required inputs
@@ -88,7 +88,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
+  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
   <field name="feature_id" source="from previous task (Technical Design) output or task board" />
   <field name="extra_context_reference" source="from workflow context or auto-detect from feature artifacts (x-ipe-docs/requirements/FEATURE-XXX/)" />
   <field name="git_strategy" source="from .x-ipe.yaml" />
@@ -127,21 +127,19 @@ input:
 
 ## Execution Flow
 
-| Step | Name | Action | Gate |
-|------|------|--------|------|
-| 1 | Query Board | Get Feature Data Model from feature board | Feature data received |
-| 2 | Learn Design | Read technical design document thoroughly | Design understood |
-| 3 | Read Architecture | Read referenced architecture designs (if any) | Architecture understood |
-| 4 | Generate AAA Scenarios | Create tagged test scenarios from spec + design | Scenarios generated with coverage |
-| 5 | Route & Invoke | Semantic-match tool skills and invoke sequentially | All tool skills complete |
-| 6 | Validate Results | Verify Assert clauses, run integration scenarios | All checks pass |
-| 7 | Tracing | Add tracing decorators to implemented code | Tests still pass |
-| 9.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 9.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
+| Phase | Steps | Action | Gate |
+|-------|-------|--------|------|
+| 1. 博学之 — Study Broadly | 1.1 Query Board, 1.2 Learn Design, 1.3 Read Architecture | Load feature data, study technical design, read architecture | Design fully understood |
+| 2. 审问之 — Inquire Thoroughly | 2.1 Generate AAA Scenarios | Create tagged test scenarios from spec + design | Scenarios with coverage |
+| 3. 慎思之 — Think Carefully | 3.1 Route & Invoke Tool Skills | Semantic-match and invoke tool skills sequentially | All tool skills complete |
+| 4. 明辨之 — Discern Clearly | 4.1 Validate Results, 4.2 Apply Tracing | Verify Assert clauses, run integration, add tracing | All checks pass |
+| 5. 笃行之 — Practice Earnestly | 5.1 Update Workflow Status | Update workflow, verify DoD, output summary | Task complete |
+| 继续执行 | 6.1 Decide Next Action | DAO-assisted next task decision | Next action decided |
+| 继续执行 | 6.2 Execute Next Action | Load skill, generate plan, execute | Execution started |
 
-BLOCKING: Step 4 → 5 is BLOCKED until AAA scenarios are generated with coverage validated.
-BLOCKING: Step 5: If design needs changes → UPDATE technical design BEFORE implementing.
-BLOCKING: Step 5.1 special-case delegations run BEFORE semantic routing.
+BLOCKING: Phase 2 → 3 is BLOCKED until AAA scenarios are generated with coverage validated.
+BLOCKING: Phase 3: If design needs changes → UPDATE technical design BEFORE implementing.
+BLOCKING: Step 3.1 special-case delegations run BEFORE semantic routing.
 
 ---
 
@@ -153,217 +151,171 @@ BLOCKING: Step 5.1 special-case delegations run BEFORE semantic routing.
   <execute_dor_checks_before_starting/>
   <schedule_dod_checks_with_sub_agent_before_starting/>
 
-  <step_1>
-    <name>Query Feature Board</name>
-    <action>
-      1. CALL x-ipe+feature+feature-board-management skill with operation=query_feature
-      2. RECEIVE Feature Data Model (feature_id, title, version, status, specification_link, technical_design_link)
-    </action>
-    <constraints>
-      - BLOCKING: Feature must exist on board with status "Designed"
-    </constraints>
-    <output>Feature Data Model with all links and context</output>
-  </step_1>
+  <phase_1 name="博学之 — Study Broadly">
 
-  <step_2>
-    <name>Learn Technical Design</name>
-    <action>
-      0. Resolve extra_context_reference inputs:
-         - FOR EACH ref in [tech-design, specification]:
-           IF workflow mode AND extra_context_reference.{ref} is a file path:
-             READ the file at that path (use instead of corresponding *_link)
-           ELIF extra_context_reference.{ref} is "auto-detect":
-             Use existing discovery logic below
-           ELIF extra_context_reference.{ref} is "N/A":
-             Skip this context input
-           ELSE (free-mode / absent):
-             Use existing behavior
-      1. READ technical_design_link from Feature Data Model
-      2. UNDERSTAND Part 1 (Agent-Facing Summary) and Part 2 (Implementation Guide)
-      3. NOTE references to architecture designs
-      4. CHECK Design Change Log for updates
-      5. CHECK specification.md for Linked Mockups section:
-         a. IF mockups exist with status "current":
-            - READ each current mockup file from x-ipe-docs/requirements/FEATURE-XXX/mockups/
-            - Extract: layout structure, component placement, visual states, interactions, styling details
-            - These mockup details MUST guide frontend implementation in Step 5
-         b. IF mockups are marked "outdated" or absent: note and proceed
-      6. CHECK if technical design includes skill files (`.github/skills/*/SKILL.md`):
-         a. SCAN technical design for references to `.github/skills/` paths
-         b. IF skill file(s) found: FLAG for delegation to `x-ipe-meta-skill-creator` in Step 5
-         c. NOTE: Skill files MUST NOT be created directly — they require the skill creator process
-      7. CHECK if specification or technical design requires an MCP server:
-         a. SCAN for keywords: "MCP server", "MCP tool", "Model Context Protocol", "MCP endpoint"
-         b. IF MCP server is required: FLAG for delegation to `mcp-builder` skill in Step 5
-         c. NOTE: MCP servers MUST be built via `mcp-builder` skill to ensure protocol compliance
-    </action>
-    <constraints>
-      - BLOCKING: Do NOT code until design is understood
-      - If design is unclear -> STOP and clarify before proceeding
-      - CRITICAL: If implementation reveals design issues during later steps, STOP, UPDATE technical-design.md, add to Design Change Log, then RESUME
-    </constraints>
-    <output>Complete understanding of implementation requirements, mockup references loaded (if applicable)</output>
-  </step_2>
+    <step_1_1>
+      <name>Query Feature Board</name>
+      <action>
+        1. CALL x-ipe+feature+feature-board-management skill with operation=query_feature
+        2. RECEIVE Feature Data Model (feature_id, title, version, status, specification_link, technical_design_link)
+      </action>
+      <constraints>
+        - BLOCKING: Feature must exist on board with status "Designed"
+      </constraints>
+      <output>Feature Data Model with all links and context</output>
+    </step_1_1>
 
-  <step_3>
-    <name>Read Architecture Designs</name>
-    <action>
-      1. CHECK if technical design references architecture patterns
-      2. IF no architecture references: skip this step
-         ELSE: READ x-ipe-docs/architecture/technical-designs/{component}.md and UNDERSTAND common patterns, interfaces, integration requirements
-    </action>
-    <output>Architecture patterns understood (or skipped)</output>
-  </step_3>
+    <step_1_2>
+      <name>Learn Technical Design</name>
+      <action>
+        0. Resolve extra_context_reference inputs (tech-design, specification):
+           workflow mode + file path → READ directly; "auto-detect" → discover; "N/A" → skip
+        1. READ technical_design_link; UNDERSTAND Part 1 (Summary) and Part 2 (Guide)
+        2. NOTE architecture references; CHECK Design Change Log for updates
+        3. CHECK specification.md Linked Mockups:
+           - "current" → READ mockup files, extract layout/components/styling for Phase 3
+           - "outdated"/absent → note and proceed
+        4. CHECK for skill files (.github/skills/) → FLAG for x-ipe-meta-skill-creator in Phase 3
+        5. CHECK for MCP server keywords → FLAG for mcp-builder in Phase 3
+      </action>
+      <constraints>
+        - BLOCKING: Do NOT code until design is understood; STOP and clarify if unclear
+        - CRITICAL: If later steps reveal design issues → UPDATE technical-design.md + Design Change Log, then RESUME
+      </constraints>
+      <output>Implementation requirements understood, mockup references loaded (if applicable)</output>
+    </step_1_2>
 
-  <step_4>
-    <name>Generate AAA Scenarios</name>
-    <action>
-      1. PARSE specification.md:
-         a. Extract each acceptance criterion → create one @integration scenario per AC
-            (Arrange = preconditions, Act = user action, Assert = expected outcome)
-      2. PARSE technical-design.md Part 2:
-         a. FOR EACH API endpoint/service method → create @backend happy-path + error-path scenarios
-         b. FOR EACH UI component/event handler → create @frontend happy-path + error-path scenarios
-         c. FOR EACH validation rule → create @backend validation scenario
-         d. FOR EACH documented error/edge case → create scenario in matching layer
-      3. TAG each scenario: @backend, @frontend, or @integration
-      4. VALIDATE coverage: every AC has ≥1 scenario, every endpoint/component has happy + sad path
-      5. IF context is large (>20 components): generate per-layer batches
-         (see references/implementation-guidelines.md for batching procedure)
-      6. IF AAA generation fails (ambiguous spec, insufficient detail):
-         FALLBACK to x-ipe-tool-test-generation (Phase 1 coexistence)
-    </action>
-    <constraints>
-      - MANDATORY: AAA format: @{tag} / Test Scenario: {name} / Arrange: / Act: / Assert:
-      - BLOCKING: Do NOT proceed to Step 5 until scenarios generated and coverage validated
-      - See references/implementation-guidelines.md for full AAA format specification
-    </constraints>
-    <output>List of tagged AAA scenarios with coverage summary</output>
-  </step_4>
+    <step_1_3>
+      <name>Read Architecture Designs</name>
+      <action>
+        1. CHECK if technical design references architecture patterns
+        2. IF no references: skip this step
+           ELSE: READ x-ipe-docs/architecture/technical-designs/{component}.md; UNDERSTAND common patterns, interfaces, integration requirements
+      </action>
+      <output>Architecture patterns understood (or skipped)</output>
+    </step_1_3>
 
-  <step_5>
-    <name>Route and Invoke Tool Skills</name>
-    <action>
-      1. CHECK special-case delegations FIRST:
-         a. IF program_type == "skills":
-            BLOCKING: DELEGATE entire implementation to x-ipe-meta-skill-creator
-            - Skip AAA generation output; skill-creator has its own testing
-            - INVOKE x-ipe-meta-skill-creator with skill_name, skill_type, user_request from technical design
-            - WAIT for completion; VERIFY skill-creator DoD passes
-            - JUMP to Step 7 (skip Step 6)
-         b. IF MCP server detected in spec/design:
-            BLOCKING: DELEGATE to mcp-builder skill
-            - INVOKE mcp-builder with context from technical design
-            - WAIT for completion; VERIFY mcp-builder quality checks pass
-            - JUMP to Step 7 (skip Step 6)
-      2. SCAN .github/skills/x-ipe-tool-implementation-*/ for available tool skills
-      3. FOR EACH tech_stack entry: semantically match to a discovered tool skill
-         - Use LLM understanding to match (e.g., "Python/Flask" → x-ipe-tool-implementation-python)
-         - IF no match: assign x-ipe-tool-implementation-general
-         - IF general insufficient: signal "new tool skill needed"
+  </phase_1>
 
-           Response source (based on auto_proceed):
-           IF process_preference.auto_proceed == "auto":
-             → Log gap via x-ipe-dao-end-user-representative, continue with general tool
-           ELSE (manual/stop_for_question):
-             → Ask human for guidance
-      4. FOR EACH matched tool skill (sequentially, backend first then frontend):
-         a. FILTER AAA scenarios by matching layer tag
-         b. INVOKE tool skill with: aaa_scenarios, source_code_path, feature_context
-         c. RECEIVE: implementation_files, test_files, test_results, lint_status
-      5. IF current mockups loaded in Step 2 AND feature has frontend/UI components:
-         a. Pass mockup constraints to frontend tool skill invocation
-         b. Tool skill MUST match implementation to mockup layout, components, styling
-      6. COLLECT all tool skill outputs for validation in Step 6
-    </action>
-    <constraints>
-      - BLOCKING: Special-case check (5.1) runs BEFORE semantic routing
-      - CRITICAL: Tool skills invoked sequentially, NOT in parallel
-      - MANDATORY: Use standard tool skill I/O contract (see references/implementation-guidelines.md)
-      - MANDATORY: All internal markdown links MUST use full project-root-relative paths
-    </constraints>
-    <output>All tool skill outputs collected</output>
-  </step_5>
+  <phase_2 name="审问之 — Inquire Thoroughly">
 
-  <step_6>
-    <name>Validate Tool Skill Results</name>
-    <action>
-      1. FOR EACH tool skill output:
-         a. Verify all Assert clauses in test_results: count pass/fail
-         b. Verify lint_status == "pass"
-      2. IF any tool skill has failing Asserts:
-         a. Re-invoke ONLY the failed tool skill with original scenarios + error context
-         b. IF retry succeeds: continue
-         c. IF retry fails: preserve passing results, escalate failure
+    <step_2_1>
+      <name>Generate AAA Scenarios</name>
+      <action>
+        1. PARSE specification.md: each AC → one @integration scenario (Arrange/Act/Assert)
+        2. PARSE technical-design.md Part 2:
+           - API endpoints → @backend happy + error scenarios
+           - UI components → @frontend happy + error scenarios
+           - Validation rules → @backend scenarios; edge cases → matching layer
+        3. TAG scenarios: @backend, @frontend, @integration
+        4. VALIDATE coverage: every AC ≥1 scenario, every endpoint/component has happy + sad path
+        5. Large context (>20 components) → per-layer batches (see references/)
+        6. IF generation fails → FALLBACK to x-ipe-tool-test-generation (Phase 1 coexistence)
+      </action>
+      <constraints>
+        - MANDATORY: AAA format: @{tag} / Test Scenario: {name} / Arrange: / Act: / Assert:
+        - BLOCKING: Do NOT proceed to Phase 3 until scenarios generated and coverage validated
+      </constraints>
+      <output>Tagged AAA scenarios with coverage summary</output>
+    </step_2_1>
 
-            Response source (based on auto_proceed):
-            IF process_preference.auto_proceed == "auto":
-              → Log failure via x-ipe-dao-end-user-representative, continue with partial results
-            ELSE (manual/stop_for_question):
-              → Escalate to human
-      3. RUN @integration scenarios: verify cross-layer behavior with mocking
-      4. IF integration fails: report contract mismatch with both tool skill outputs
+  </phase_2>
 
-         Response source (based on auto_proceed):
-         IF process_preference.auto_proceed == "auto":
-           → Log via x-ipe-dao-end-user-representative, continue
-         ELSE (manual/stop_for_question):
-           → Report to human
-      5. PRODUCE aggregated report: per-skill pass/fail, integration results, overall status
-    </action>
-    <success_criteria>
-      - All @backend Assert clauses pass
-      - All @frontend Assert clauses pass
-      - All @integration scenarios pass
-      - All lint checks pass
-    </success_criteria>
-    <output>Aggregated validation report (PASS/FAIL)</output>
-  </step_6>
+  <phase_3 name="慎思之 — Think Carefully">
 
-  <step_7>
-    <name>Apply Tracing Instrumentation</name>
-    <action>
-      1. IF no tracing infrastructure (no x_ipe.tracing module) or only skill/config files modified: skip this step
-      2. ELSE:
-         a. INVOKE x-ipe-tool-tracing-instrumentation skill for all modified files
-         b. REVIEW proposed decorators (INFO for public, DEBUG for helpers)
-         c. APPLY decorators with sensitive param redaction
-         d. RE-RUN tests to verify functionality
-    </action>
-    <output>Tracing decorators applied; tests still pass</output>
-  </step_7>
+    <step_3_1>
+      <name>Route and Invoke Tool Skills</name>
+      <action>
+        1. CHECK special-case delegations FIRST:
+           a. IF program_type == "skills": DELEGATE to x-ipe-meta-skill-creator (skip AAA; skill-creator has own testing); VERIFY DoD; JUMP to step_4_2
+           b. IF MCP server detected: DELEGATE to mcp-builder; VERIFY quality checks; JUMP to step_4_2
+        2. SCAN .github/skills/x-ipe-tool-implementation-*/ for available tool skills
+        3. FOR EACH tech_stack entry: semantically match to discovered tool skill
+           - No match → assign x-ipe-tool-implementation-general
+           - General insufficient → signal "new tool skill needed"
+           dao-represent-human → log gap via DAO, continue; else → ask human
+        4. FOR EACH matched tool skill (sequentially, backend first):
+           a. FILTER AAA scenarios by layer tag
+           b. INVOKE with: aaa_scenarios, source_code_path, feature_context
+           c. RECEIVE: implementation_files, test_files, test_results, lint_status
+        5. IF current mockups AND frontend components: pass mockup constraints to frontend tool skill
+        6. COLLECT all tool skill outputs for validation
+      </action>
+      <constraints>
+        - BLOCKING: Special-case check runs BEFORE semantic routing
+        - CRITICAL: Tool skills invoked sequentially, NOT in parallel
+        - MANDATORY: Use standard tool skill I/O contract (see references/implementation-guidelines.md)
+        - MANDATORY: All internal markdown links MUST use full project-root-relative paths
+      </constraints>
+      <output>All tool skill outputs collected</output>
+    </step_3_1>
 
-  <step_8>
-    <name>Update Workflow Status</name>
-    <action>
-      1. IF execution_mode == "workflow-mode":
-         a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
-            - workflow_name: {from context}
-            - action: {workflow.action}
-            - status: "done"
-            - feature_id: {feature_id}
-            - deliverables: {"impl-files": "{path to main implementation file(s)}", "impl-folder": "{path to implementation folder}"}
-         b. Log: "Workflow action status updated to done"
-      2. Verify all DoD checkpoints
-      3. Output task completion summary
-    </action>
-    <output>Task completion output, workflow_action_updated</output>
-  </step_8>
+  </phase_3>
 
-  <phase_9 name="继续执行（Continue Execute）">
-    <step_9_1>
+  <phase_4 name="明辨之 — Discern Clearly">
+
+    <step_4_1>
+      <name>Validate Tool Skill Results</name>
+      <action>
+        1. FOR EACH tool skill output: verify all Assert clauses (count pass/fail); verify lint_status == "pass"
+        2. IF failing Asserts: re-invoke failed tool skill with original scenarios + error context
+           - Retry succeeds → continue; retry fails → preserve passing results, escalate
+           dao-represent-human → log failure via DAO; else → escalate to human
+        3. RUN @integration scenarios: verify cross-layer behavior with mocking
+        4. IF integration fails: report contract mismatch
+           dao-represent-human → log via DAO; else → report to human
+        5. PRODUCE aggregated report: per-skill pass/fail, integration results, overall status
+      </action>
+      <success_criteria>
+        - All @backend, @frontend, @integration Assert clauses pass; all lint checks pass
+      </success_criteria>
+      <output>Aggregated validation report (PASS/FAIL)</output>
+    </step_4_1>
+
+    <step_4_2>
+      <name>Apply Tracing Instrumentation</name>
+      <action>
+        1. IF no tracing infrastructure (no x_ipe.tracing module) or only skill/config files modified: skip
+        2. ELSE: INVOKE x-ipe-tool-tracing-instrumentation for all modified files
+           - REVIEW decorators (INFO for public, DEBUG for helpers)
+           - APPLY with sensitive param redaction; RE-RUN tests to verify
+      </action>
+      <output>Tracing decorators applied; tests still pass</output>
+    </step_4_2>
+
+  </phase_4>
+
+  <phase_5 name="笃行之 — Practice Earnestly">
+
+    <step_5_1>
+      <name>Update Workflow Status</name>
+      <action>
+        1. IF execution_mode == "workflow-mode":
+           a. Call update_workflow_action with: workflow_name, action, status: "done", feature_id,
+              deliverables: {"impl-files": "{path}", "impl-folder": "{path}"}
+           b. Log: "Workflow action status updated to done"
+        2. Verify all DoD checkpoints
+        3. Output task completion summary
+      </action>
+      <output>Task completion output, workflow_action_updated</output>
+    </step_5_1>
+
+  </phase_5>
+
+  <phase_6 name="继续执行（Continue Execute）">
+    <step_6_1>
       <name>Decide Next Action</name>
       <action>
         Collect the full context and task_completion_output from this skill execution.
 
-        IF process_preference.auto_proceed == "auto":
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Invoke x-ipe-dao-end-user-representative with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"
             context: "Skill completed. Study the context and full output to decide best next action."
           → DAO studies the complete context and decides the best next action
-        ELSE (manual):
+        ELSE (interact-with-human):
           → Present next task suggestion to human and wait for instruction
       </action>
       <constraints>
@@ -371,11 +323,11 @@ BLOCKING: Step 5.1 special-case delegations run BEFORE semantic routing.
         - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
       </constraints>
       <output>Next action decided with execution context</output>
-    </step_9_1>
-    <step_9_2>
+    </step_6_1>
+    <step_6_2>
       <name>Execute Next Action</name>
       <action>
-        Based on the decision from Step 9.1:
+        Based on the decision from Step 6.1:
         1. Load the target task-based skill's SKILL.md
         2. Generate an execution plan from the skill's Execution Flow table
         3. Start execution from the skill's first phase/step
@@ -385,8 +337,8 @@ BLOCKING: Step 5.1 special-case delegations run BEFORE semantic routing.
         - Execution follows the target skill's procedure, not this skill's
       </constraints>
       <output>Next task execution started</output>
-    </step_9_2>
-  </phase_9>
+    </step_6_2>
+  </phase_6>
 
 </procedure>
 ```
@@ -403,7 +355,7 @@ task_completion_output:
   status: completed | blocked
   next_task_based_skill: "Feature Acceptance Test"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
@@ -496,57 +448,25 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution` to continue the task execution flow.
 
 ---
+
 ## Patterns & Anti-Patterns
 
-### Pattern: Orchestrator Flow (Standard)
-
-**When:** Starting implementation for a feature with code (backend/frontend/fullstack)
-**Then:**
-```
-1. Generate AAA scenarios from spec + design
-2. Route tech_stack entries to tool skills
-3. Invoke tool skills sequentially (backend → frontend)
-4. Validate all Assert clauses pass
-5. Run @integration scenarios
-6. Apply tracing
-```
-
-### Pattern: Special-Case Delegation
-
-**When:** program_type is "skills" or MCP server detected
-**Then:**
-```
-1. Bypass AAA generation entirely
-2. Delegate to x-ipe-meta-skill-creator (skills) or mcp-builder (MCP)
-3. Wait for delegation to complete
-4. Verify delegated skill's DoD passes
-5. Skip validation gate (Step 6)
-```
-
-### Pattern: Design Reference
-
-**When:** Technical design references architecture patterns
-**Then:**
-```
-1. Read referenced architecture docs
-2. Follow existing patterns exactly
-3. Reuse shared utilities
-4. Ask if patterns unclear
-```
-
-### Anti-Patterns
+| Pattern | When | Then |
+|---------|------|------|
+| Orchestrator Flow | Code feature (backend/frontend/fullstack) | Generate AAA → route tool skills → validate → trace |
+| Special-Case Delegation | program_type "skills" or MCP server | Bypass AAA, delegate to skill-creator/mcp-builder, verify DoD |
+| Design Reference | Technical design references architecture | Read architecture docs, follow existing patterns, reuse utilities |
 
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
 | Skip reading design | Wrong implementation | Learn technical design first |
 | Ignore architecture docs | Inconsistent patterns | Read referenced architecture |
 | Skip AAA generation | No validation contract | Always generate scenarios first |
-| Invoke tool skills in parallel | Context conflicts, unpredictable | Sequential invocation only |
-| Add "nice to have" features | YAGNI violation | Only implement what is in design |
-| Complex code for coverage | Maintenance nightmare | Keep simple, accept 80% coverage |
-| Ignore mockups for frontend | UI drifts from approved design | Use current mockups as visual spec |
-| Create skill files directly | Skill won't follow standards | Delegate to x-ipe-meta-skill-creator |
-| Build MCP server directly | Won't follow MCP protocol standards | Delegate to mcp-builder skill |
+| Parallel tool skills | Context conflicts | Sequential invocation only |
+| Add "nice to have" features | YAGNI violation | Only implement what's in design |
+| Complex code for coverage | Maintenance nightmare | Keep simple, accept 80% |
+| Ignore mockups | UI drifts from design | Use current mockups as visual spec |
+| Create skills/MCP directly | Won't follow standards | Delegate to skill-creator/mcp-builder |
 | Copy-paste code | DRY violation | Extract reusable functions |
 
 ---

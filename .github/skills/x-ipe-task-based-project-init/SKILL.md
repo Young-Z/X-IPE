@@ -31,7 +31,7 @@ IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "Project Initialization"
+  task_based_skill: "x-ipe-task-based-project-init"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
@@ -40,7 +40,11 @@ input:
 
   # Task type attributes
   category: "standalone"
-  next_task_based_skill: "Development Environment Setup"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-dev-environment"
+      condition: "Set up development environment"
+    - skill: "x-ipe-task-based-ideation"
+      condition: "Start ideating on project features"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
 
@@ -198,7 +202,11 @@ See [references/examples.md](.github/skills/x-ipe-task-based-project-init/refere
 task_completion_output:
   category: "standalone"
   status: completed | blocked
-  next_task_based_skill: "Development Environment Setup"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-dev-environment"
+      condition: "Set up development environment"
+    - skill: "x-ipe-task-based-ideation"
+      condition: "Start ideating on project features"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"

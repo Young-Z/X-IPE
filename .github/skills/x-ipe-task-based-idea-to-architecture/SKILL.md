@@ -45,7 +45,7 @@ IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "Idea to Architecture"
+  task_based_skill: "x-ipe-task-based-idea-to-architecture"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
@@ -54,7 +54,13 @@ input:
 
   # Task type attributes
   category: "ideation-stage"
-  next_task_based_skill: "Requirement Gathering"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-requirement-gathering"
+      condition: "Proceed to requirements after architecture"
+    - skill: "x-ipe-task-based-idea-mockup"
+      condition: "Create visual mockup if not done"
+    - skill: "x-ipe-task-based-share-idea"
+      condition: "Share the architecture with stakeholders"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
 
@@ -351,7 +357,7 @@ BLOCKING (manual/stop_for_question): Step 5.4 - present diagrams, ask if archite
 ```yaml
 task_completion_output:
   category: "ideation-stage"
-  task_based_skill: "Idea to Architecture"
+  task_based_skill: "x-ipe-task-based-idea-to-architecture"
   status: "completed"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
@@ -368,7 +374,13 @@ task_completion_output:
     - type: "data-flow"
       path: "{current_idea_folder}/architecture/data-flow-v1.md"
   idea_summary_version: "v{N+1}"
-  next_task_based_skill: "Requirement Gathering"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-requirement-gathering"
+      condition: "Proceed to requirements after architecture"
+    - skill: "x-ipe-task-based-idea-mockup"
+      condition: "Create visual mockup if not done"
+    - skill: "x-ipe-task-based-share-idea"
+      condition: "Share the architecture with stakeholders"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   task_output_links:

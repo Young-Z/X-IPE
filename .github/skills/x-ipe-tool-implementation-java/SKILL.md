@@ -47,12 +47,12 @@ not_for:
 
 ```yaml
 input:
-  operation: "implement"
+  operation: "implement"  # Supported: "implement" | "fix" | "refactor"
   aaa_scenarios:
     - scenario_text: "{tagged AAA scenario text}"
   source_code_path: "{path to source directory}"
   test_code_path: "{path to test directory}"
-  feature_context:
+  feature_context:  # OPTIONAL for "fix"/"refactor"; REQUIRED for "implement"
     feature_id: "{FEATURE-XXX-X}"
     feature_title: "{title}"
     technical_design_link: "{path to technical-design.md}"
@@ -163,6 +163,61 @@ input:
     - CRITICAL: Follow existing code conventions found in Step 1
     - MANDATORY: Every AAA Assert clause must map to exactly one test assertion
     - MANDATORY: Use constructor injection (not field injection) for Spring Boot
+  </constraints>
+  <output>Standard tool skill output (implementation_files, test_files, test_results, lint_status)</output>
+</operation>
+
+<operation name="fix">
+  <action>
+    1. LEARN existing code: scan source_code_path for conventions, build system (Maven/Gradle), patterns
+    2. IF feature_context is absent: generate synthetic context (feature_id: "BUG-{task_id}", technical_design_link: "N/A")
+    3. WRITE failing test from AAA scenario:
+       a. FOR EACH AAA scenario:
+          - Create test: @Test void testFix_{scenarioName}() { ... }
+          - Arrange → reproduce bug preconditions
+          - Act → trigger the buggy action
+          - Assert → expected CORRECT behavior (JUnit assertions)
+    4. RUN test → MUST FAIL (TDD gate)
+       - IF test passes → STOP, report: "TDD gate violation — test already passes, review scenario"
+    5. IMPLEMENT minimal fix following Java best practices:
+       - Code style, proper exception handling, existing conventions
+       - Only change what is necessary to make the test pass
+    6. RUN test → MUST PASS
+    7. RUN all existing tests → no regressions
+    8. RUN linting: checkstyle or spotless (if configured)
+    9. RETURN standard output
+  </action>
+  <constraints>
+    - BLOCKING: Test MUST fail before fix (Step 4) — TDD gate
+    - CRITICAL: Minimal fix only — do not refactor during a fix
+    - MANDATORY: Feature_context is OPTIONAL — use synthetic fallback if absent
+    - MANDATORY: Detect Maven vs Gradle for test runner
+  </constraints>
+  <output>Standard tool skill output (implementation_files, test_files, test_results, lint_status)</output>
+</operation>
+
+<operation name="refactor">
+  <action>
+    1. LEARN existing code: scan source_code_path for conventions, build system, patterns
+    2. IF feature_context is absent: generate synthetic context (feature_id: "REFACTOR-{task_id}", technical_design_link: "N/A")
+    3. RUN existing tests → establish baseline (all must pass)
+       - IF any test fails → STOP, report: "Cannot refactor — baseline tests failing"
+    4. RESTRUCTURE code per AAA scenario target state:
+       a. FOR EACH AAA scenario:
+          - Read target state from Assert clauses
+          - Apply structural changes following Java best practices
+          - Preserve external behavior
+    5. UPDATE imports and references across affected files
+    6. RUN all tests → MUST pass (behavior preserved)
+       - IF tests fail → report failed scenarios with details; do NOT auto-revert
+    7. RUN linting: checkstyle or spotless (if configured)
+    8. RETURN standard output
+  </action>
+  <constraints>
+    - BLOCKING: Baseline tests must pass before refactoring (Step 3)
+    - CRITICAL: Preserve behavior — no functional changes
+    - CRITICAL: Do NOT manage git commits — orchestrator handles checkpointing
+    - MANDATORY: Feature_context is OPTIONAL — use synthetic fallback if absent
   </constraints>
   <output>Standard tool skill output (implementation_files, test_files, test_results, lint_status)</output>
 </operation>

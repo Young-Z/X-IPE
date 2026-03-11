@@ -43,7 +43,7 @@ IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "Feature Acceptance Test"
+  task_based_skill: "x-ipe-task-based-feature-acceptance-test"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
@@ -55,7 +55,13 @@ input:
 
   # Task type attributes
   category: "standalone | feature-stage"
-  next_task_based_skill: "Feature Closing | null"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-code-refactor"
+      condition: "Refactor code for quality improvements"
+    - skill: "x-ipe-task-based-feature-closing"
+      condition: "Close feature if acceptance tests pass"
+    - skill: "x-ipe-task-based-human-playground"
+      condition: "Manual validation before closing"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
 
@@ -117,21 +123,19 @@ input:
 
 ## Execution Flow
 
-| Step | Name | Action | Gate |
-|------|------|--------|------|
-| 1 | Check UI Scope | Determine if feature has web UI | Has web UI OR skip |
-| 2 | Generate Plan | Create test cases from acceptance criteria | Test cases defined |
-| 3 | Analyze HTML | Extract element selectors from UI code | Selectors identified |
-| 4 | Test Data Prep | Ask user for test data (if process_preference.interaction_mode=="manual") | Data collected OR skipped |
-| 5 | Reflect & Refine | Review and update test cases | Cases validated |
-| 6 | Execute Tests | Run tests via Chrome DevTools MCP | Tests complete |
-| 7 | Report Results | Document test results and metrics | Results documented |
-| 9.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 9.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
+| Phase | Steps | Action | Gate |
+|-------|-------|--------|------|
+| 1. 博学之 — Study Broadly | 1.1 Check UI Scope, 1.2 Generate Plan | Determine UI scope, create test cases from ACs | Has web UI, test cases defined |
+| 2. 审问之 — Inquire Thoroughly | 2.1 Analyze HTML, 2.2 Test Data Prep | Extract selectors, collect test data | Selectors identified, data collected |
+| 3. 慎思之 — Think Carefully | 3.1 Reflect & Refine | Review and validate test cases | Cases validated |
+| 4. 明辨之 — Discern Clearly | 4.1 Execute Tests, 4.2 Report Results | Run tests via MCP, document results | Tests complete, results documented |
+| 5. 笃行之 — Practice Earnestly | 5.1 Update Workflow Status | Update workflow and complete | Status updated |
+| 继续执行 | 6.1 | Decide Next Action | Next action decided |
+| 继续执行 | 6.2 | Execute Next Action | Execution started |
 
-BLOCKING: Step 1 - If no web UI, output status=skipped and proceed to next_task_based_skill.
-BLOCKING: Step 4 - If process_preference.interaction_mode=="auto", skip this step and use placeholder/generated data.
-BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready for manual execution.
+BLOCKING: Step 1.1 - If no web UI, output status=skipped and proceed to next_task_based_skill.
+BLOCKING: Step 2.2 - If process_preference.interaction_mode=="auto", skip and use placeholder/generated data.
+BLOCKING: Step 4.1 - If MCP unavailable, output status=blocked; test cases ready for manual execution.
 
 ---
 
@@ -143,174 +147,195 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
   <execute_dor_checks_before_starting/>
   <schedule_dod_checks_with_sub_agent_before_starting/>
 
-  <step_1>
-    <name>Check UI Scope</name>
-    <action>
-      1. QUERY feature board for feature_id, specification_link, technical_design_link
-      2. READ technical design, check "Technical Scope" section
-      3. VERIFY feature is accessible (playground/demo URL exists)
-      4. IF scope does NOT include [Frontend] or [Full Stack]:
-         SET status="skipped", skip_reason="No web UI", RETURN next_task_based_skill=Feature Closing
-    </action>
-    <output>Decision to proceed or skip</output>
-  </step_1>
+  <phase_1 name="博学之 — Study Broadly">
 
-  <step_2>
-    <name>Generate Acceptance Test Plan</name>
-    <action>
-      0. Resolve extra_context_reference inputs:
-         - FOR EACH ref in [specification, impl-files]:
-           IF workflow mode AND extra_context_reference.{ref} is a file path:
-             READ the file at that path
-           ELIF extra_context_reference.{ref} is "auto-detect":
-             Use existing discovery logic below
-           ELIF extra_context_reference.{ref} is "N/A":
-             Skip this context input
-           ELSE (free-mode / absent):
-             Use existing behavior
-      1. READ specification.md at x-ipe-docs/requirements/FEATURE-XXX/specification.md
-      2. EXTRACT all acceptance criteria (AC-X) with testable conditions
-      3. CHECK specification.md for Linked Mockups section:
-         a. IF mockups exist with status "current":
-            - READ each current mockup file from x-ipe-docs/requirements/FEATURE-XXX/mockups/
-            - Note mockup details for UI/UX validation test cases in Step 5
-         b. IF mockups exist with status "outdated":
-            - FLAG for human notification: "Mockup {filename} is outdated -- UI/UX visual validation will be skipped for this mockup. Consider updating the mockup if visual comparison is needed."
-            - Do NOT generate mockup-comparison test cases for outdated mockups
-         c. IF no mockups: proceed without mockup validation
-      4. CREATE acceptance-test-cases.md using templates/acceptance-test-cases.md
-      5. FOR EACH acceptance criterion: create test case (TC-XXX), map to AC, set priority (P0/P1/P2), write high-level steps, define expected outcomes
-      6. PRIORITIZE: P0=Critical (must pass), P1=High (should pass), P2=Medium (edge cases)
-    </action>
-    <constraints>
-      - MANDATORY: Each AC must have at least one test case
-      - CRITICAL: Test cases must be independent and self-contained
-    </constraints>
-    <output>Initial acceptance-test-cases.md with test case outlines, mockup status noted</output>
-  </step_2>
+    <step_1_1>
+      <name>Check UI Scope</name>
+      <action>
+        1. QUERY feature board for feature_id, specification_link, technical_design_link
+        2. READ technical design, check "Technical Scope" section
+        3. VERIFY feature is accessible (playground/demo URL exists)
+        4. IF scope does NOT include [Frontend] or [Full Stack]:
+           SET status="skipped", skip_reason="No web UI", RETURN next_task_based_skill=x-ipe-task-based-code-refactor
+      </action>
+      <output>Decision to proceed or skip</output>
+    </step_1_1>
 
-  <step_3>
-    <name>Analyze HTML for Selectors</name>
-    <action>
-      1. LOCATE UI implementation files (templates, static JS, components)
-      2. FOR EACH test case, identify UI elements using selector priority (see references/detailed-procedures.md)
-      3. UPDATE test steps with precise selectors in step table format
-      4. VERIFY selectors are unique, stable, and descriptive
-    </action>
-    <constraints>
-      - CRITICAL: Use selector priority order: data-testid > id > aria-label > class > CSS path
-      - BLOCKING: Never use auto-generated IDs or fragile class chains
-    </constraints>
-    <output>Test cases updated with element selectors</output>
-  </step_3>
+    <step_1_2>
+      <name>Generate Acceptance Test Plan</name>
+      <action>
+        0. Resolve extra_context_reference inputs:
+           - FOR EACH ref in [specification, impl-files]:
+             IF workflow mode AND extra_context_reference.{ref} is a file path → READ the file
+             ELIF "auto-detect" → use existing discovery logic below
+             ELIF "N/A" → skip; ELSE (free-mode/absent) → use existing behavior
+        1. DETECT tech_stack from specification and implementation files
+        2. TOOL SKILL ROUTING (config-filtered):
+           a. DISCOVER: Scan .github/skills/x-ipe-tool-implementation-*/
+           b. READ CONFIG: Read x-ipe-docs/config/tools.json → stages.quality.testing
+              - IF section missing/empty → config_active = false (all tools enabled)
+              - ELSE → config_active = true (opt-in); force-enable general
+           c. FILTER: IF config_active → only ENABLED tools participate
+           d. SEMANTIC MATCH: Match tech_stack to enabled tool skill
+           e. STORE matched_tool_skill for use in Step 3.1
+        3. READ specification.md at x-ipe-docs/requirements/FEATURE-XXX/specification.md
+        4. EXTRACT all acceptance criteria (AC-X) with testable conditions
+        5. CHECK Linked Mockups section:
+           a. IF current mockups: READ from mockups/, note for Step 3.1
+           b. IF outdated: FLAG for human, do NOT generate mockup test cases
+           c. IF no mockups: proceed without mockup validation
+        6. CREATE acceptance-test-cases.md using templates/acceptance-test-cases.md
+        7. FOR EACH AC: create TC-XXX, map to AC, set priority (P0/P1/P2), write steps, define expected outcomes
+        8. PRIORITIZE: P0=Critical, P1=High, P2=Medium (edge cases)
+      </action>
+      <constraints>
+        - MANDATORY: Each AC must have at least one test case
+        - CRITICAL: Test cases must be independent and self-contained
+      </constraints>
+      <output>Initial acceptance-test-cases.md with test case outlines, matched_tool_skill identified</output>
+    </step_1_2>
 
-  <step_4>
-    <name>Test Data Preparation</name>
-    <action>
-      1. ANALYZE each test case for data requirements (Input, Selection, Expected, Compare)
-      2. Collect test data per test case (see references/detailed-procedures.md)
-      3. UPDATE Test Data table in each test case section
+  </phase_1>
 
-      Response source (based on interaction_mode):
-      IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-        → Use placeholder/generated test data (auto-populate)
-      ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
-        → Ask human for test data per test case
-    </action>
-    <output>Test Data tables populated in each test case</output>
-  </step_4>
+  <phase_2 name="审问之 — Inquire Thoroughly">
 
-  <step_5>
-    <name>Reflect and Refine Test Cases</name>
-    <action>
-      1. FOR EACH test case, validate: AC coverage, preconditions, actionable steps, selector existence, measurable expected results, edge cases
-      2. REFLECT: false negative risks, missing steps, vague expectations, split candidates
-      3. REFINE: add missing steps, clarify results, add wait conditions, handle dynamic content
-      4. IF current mockups were identified in Step 2:
-         a. ADD UI/UX visual validation test cases (priority P1):
-            - TC: "Layout matches mockup" -- compare page layout, component placement, element hierarchy against mockup
-            - TC: "Visual styling matches mockup" -- verify colors, spacing, typography, borders are consistent with mockup
-            - TC: "Interactive states match mockup" -- verify hover, active, disabled states shown in mockup
-            - TC: "Responsive behavior matches mockup" -- if mockup shows responsive layouts, verify breakpoints
-         b. For each visual validation TC: reference the specific mockup file in the test case description
-         c. Use screenshot comparison during execution (Step 6) to validate visual match
-      5. UPDATE acceptance-test-cases.md with refinements
-    </action>
-    <constraints>
-      - MANDATORY: Every test case must pass reflection checklist (see references/detailed-procedures.md)
-      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
-    </constraints>
-    <output>Refined and validated test cases, including mockup UI/UX validation (if applicable)</output>
-  </step_5>
+    <step_2_1>
+      <name>Analyze HTML for Selectors</name>
+      <action>
+        1. LOCATE UI implementation files (templates, static JS, components)
+        2. FOR EACH test case, identify UI elements using selector priority (see references/detailed-procedures.md)
+        3. UPDATE test steps with precise selectors in step table format
+        4. VERIFY selectors are unique, stable, and descriptive
+      </action>
+      <constraints>
+        - CRITICAL: Use selector priority order: data-testid > id > aria-label > class > CSS path
+        - BLOCKING: Never use auto-generated IDs or fragile class chains
+      </constraints>
+      <output>Test cases updated with element selectors</output>
+    </step_2_1>
 
-  <step_6>
-    <name>Execute Tests via Chrome DevTools MCP</name>
-    <action>
-      1. CHECK Chrome DevTools MCP availability
-      2. IF MCP not available: SET status="blocked", document "Test cases ready for manual execution"
-      3. ELSE: FOR EACH test case (ordered by priority):
-         a. SETUP: Navigate to test URL, verify page loaded (see references/detailed-procedures.md for command patterns)
-         b. EXECUTE: Perform each action via MCP, capture results, screenshot on failure
-         c. VERIFY: Check element states, validate text content, confirm UI changes
-         d. RECORD: Status (Pass/Fail/Blocked), execution time, failure reason, screenshot link
-      4. FOR mockup UI/UX validation test cases (if applicable):
-         a. Take screenshot of the implemented UI
-         b. Open the referenced mockup file side-by-side (or load in separate tab)
-         c. Visually compare: layout structure, component placement, colors, spacing, typography
-         d. Document any deviations: element, mockup expectation, actual implementation, severity (major/minor)
-         e. Mark as Pass (matches mockup), Partial (minor deviations), or Fail (major deviations)
-      5. CONTINUE with remaining tests even if some fail
-    </action>
-    <output>Test execution results per test case, including mockup comparison findings</output>
-  </step_6>
+    <step_2_2>
+      <name>Test Data Preparation</name>
+      <action>
+        1. ANALYZE each test case for data requirements (Input, Selection, Expected, Compare)
+        2. Collect test data per test case (see references/detailed-procedures.md)
+        3. UPDATE Test Data table in each test case section
 
-  <step_7>
-    <name>Report Test Results</name>
-    <action>
-      1. UPDATE acceptance-test-cases.md: set status per test case (Pass/Fail/Not Run), add execution notes, fill Execution Results section
-      2. DOCUMENT failures with reason and recommended action
-      3. IF mockup UI/UX validation was performed:
-         a. Add "Mockup Validation Summary" section with deviation table
-         b. Note which mockup(s) were compared and their status
-      4. IF outdated mockups were flagged in Step 2:
-         a. Add prominent notice: "⚠ Outdated Mockup(s) Detected"
-         b. List outdated mockup files and recommend updating them
-         c. Inform: "The following mockup(s) are outdated and were NOT used for UI/UX validation: {filenames}. Consider updating mockups to enable visual comparison in future acceptance tests."
+        Response source (based on interaction_mode):
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
+          → Use placeholder/generated test data (auto-populate)
+        ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
+          → Ask human for test data per test case
+      </action>
+      <output>Test Data tables populated in each test case</output>
+    </step_2_2>
 
-            Response source (based on interaction_mode):
-            IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-              → Log notice via x-ipe-dao-end-user-representative
-            ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
-              → Inform human directly
-      5. CALCULATE metrics: total, passed, failed, blocked, pass_rate = (passed/total)*100
-      6. RETURN task completion output with results
-    </action>
-    <success_criteria>
-      - All test cases have a status recorded
-      - Metrics calculated and documented
-      - acceptance-test-cases.md saved to feature folder
-      - Outdated mockups flagged to human (if any)
-    </success_criteria>
-    <output>Completed acceptance-test-cases.md with execution results and mockup validation</output>
-  </step_7>
+  </phase_2>
 
-  <step_8>
-    <name>Update Workflow Status</name>
-    <action>
-      1. IF execution_mode == "workflow-mode":
-         a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
-            - workflow_name: {from context}
-            - action: {workflow.action}
-            - status: "done"
-            - feature_id: {feature_id}
-            - deliverables: {"test-report": "{path to acceptance-test-cases.md}", "test-folder": "{path to test folder}"}
-         b. Log: "Workflow action status updated to done"
-    </action>
-    <output>workflow_action_updated</output>
-  </step_8>
+  <phase_3 name="慎思之 — Think Carefully">
 
-  <phase_9 name="继续执行（Continue Execute）">
-    <step_9_1>
+    <step_3_1>
+      <name>Reflect and Refine Test Cases</name>
+      <action>
+        1. FOR EACH test case, validate: AC coverage, preconditions, actionable steps, selector existence, measurable expected results, edge cases
+        2. REFLECT: false negative risks, missing steps, vague expectations, split candidates
+        3. REFINE: add missing steps, clarify results, add wait conditions, handle dynamic content
+        4. IF current mockups identified in Step 1.2:
+           a. ADD UI/UX visual validation TCs (P1): layout, styling, interactive states, responsive behavior
+           b. Reference specific mockup file in each TC description
+           c. Use screenshot comparison during execution (Step 4.1) to validate
+        5. ROUTE TEST CODE GENERATION (if matched_tool_skill from Step 1.2):
+           a. CONVERT refined test cases to AAA scenarios
+           b. INVOKE matched_tool_skill with operation: "implement", aaa_scenarios, feature_context
+           c. Tool skill generates test scaffolding using language-specific conventions
+           d. IF no matched tool skill → fall back to current inline test generation
+           e. Chrome DevTools MCP for browser interaction remains unchanged
+        6. UPDATE acceptance-test-cases.md with refinements
+      </action>
+      <constraints>
+        - MANDATORY: Every test case must pass reflection checklist (see references/detailed-procedures.md)
+        - MANDATORY: All internal markdown links MUST use full project-root-relative paths
+      </constraints>
+      <output>Refined test cases with language-specific test code (if tool routed)</output>
+    </step_3_1>
+
+  </phase_3>
+
+  <phase_4 name="明辨之 — Discern Clearly">
+
+    <step_4_1>
+      <name>Execute Tests via Chrome DevTools MCP</name>
+      <action>
+        1. CHECK Chrome DevTools MCP availability
+        2. IF MCP not available: SET status="blocked", document "Test cases ready for manual execution"
+        3. ELSE: FOR EACH test case (ordered by priority):
+           a. SETUP: Navigate to test URL, verify page loaded (see references/detailed-procedures.md for command patterns)
+           b. EXECUTE: Perform each action via MCP, capture results, screenshot on failure
+           c. VERIFY: Check element states, validate text content, confirm UI changes
+           d. RECORD: Status (Pass/Fail/Blocked), execution time, failure reason, screenshot link
+        4. FOR mockup UI/UX validation test cases (if applicable):
+           a. Take screenshot of the implemented UI
+           b. Open the referenced mockup file side-by-side (or load in separate tab)
+           c. Visually compare: layout structure, component placement, colors, spacing, typography
+           d. Document deviations: element, mockup expectation, actual implementation, severity (major/minor)
+           e. Mark as Pass (matches mockup), Partial (minor deviations), or Fail (major deviations)
+        5. CONTINUE with remaining tests even if some fail
+      </action>
+      <output>Test execution results per test case, including mockup comparison findings</output>
+    </step_4_1>
+
+    <step_4_2>
+      <name>Report Test Results</name>
+      <action>
+        1. UPDATE acceptance-test-cases.md: set status per test case (Pass/Fail/Not Run), add execution notes, fill Execution Results section
+        2. DOCUMENT failures with reason and recommended action
+        3. IF mockup UI/UX validation was performed:
+           a. Add "Mockup Validation Summary" section with deviation table
+           b. Note which mockup(s) were compared and their status
+        4. IF outdated mockups were flagged in Step 1.2:
+           a. Add prominent notice: "⚠ Outdated Mockup(s) Detected"
+           b. List outdated mockup files and recommend updating them
+           c. Inform: "The following mockup(s) are outdated and were NOT used for UI/UX validation: {filenames}. Consider updating mockups to enable visual comparison in future acceptance tests."
+              Response source (based on interaction_mode):
+              IF process_preference.interaction_mode == "dao-represent-human-to-interact":
+                → Log notice via x-ipe-dao-end-user-representative
+              ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
+                → Inform human directly
+        5. CALCULATE metrics: total, passed, failed, blocked, pass_rate = (passed/total)*100
+        6. RETURN task completion output with results
+      </action>
+      <success_criteria>
+        - All test cases have a status recorded
+        - Metrics calculated and documented
+        - acceptance-test-cases.md saved to feature folder
+        - Outdated mockups flagged to human (if any)
+      </success_criteria>
+      <output>Completed acceptance-test-cases.md with execution results and mockup validation</output>
+    </step_4_2>
+
+  </phase_4>
+
+  <phase_5 name="笃行之 — Practice Earnestly">
+
+    <step_5_1>
+      <name>Update Workflow Status</name>
+      <action>
+        1. IF execution_mode == "workflow-mode":
+           a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
+              - workflow_name: {from context}
+              - action: {workflow.action}
+              - status: "done"
+              - feature_id: {feature_id}
+              - deliverables: {"test-report": "{path to acceptance-test-cases.md}", "test-folder": "{path to test folder}"}
+           b. Log: "Workflow action status updated to done"
+      </action>
+      <output>workflow_action_updated</output>
+    </step_5_1>
+
+  </phase_5>
+
+  <phase_6 name="继续执行（Continue Execute）">
+    <step_6_1>
       <name>Decide Next Action</name>
       <action>
         Collect the full context and task_completion_output from this skill execution.
@@ -330,11 +355,11 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
         - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
       </constraints>
       <output>Next action decided with execution context</output>
-    </step_9_1>
-    <step_9_2>
+    </step_6_1>
+    <step_6_2>
       <name>Execute Next Action</name>
       <action>
-        Based on the decision from Step 9.1:
+        Based on the decision from Step 6.1:
         1. Load the target task-based skill's SKILL.md
         2. Generate an execution plan from the skill's Execution Flow table
         3. Start execution from the skill's first phase/step
@@ -344,8 +369,8 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
         - Execution follows the target skill's procedure, not this skill's
       </constraints>
       <output>Next task execution started</output>
-    </step_9_2>
-  </phase_9>
+    </step_6_2>
+  </phase_6>
 
 </procedure>
 ```
@@ -358,7 +383,13 @@ BLOCKING: Step 6 - If MCP unavailable, output status=blocked; test cases ready f
 task_completion_output:
   category: "{standalone | feature-stage}"
   status: completed | blocked | skipped
-  next_task_based_skill: "Feature Closing | null"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-code-refactor"
+      condition: "Refactor code for quality improvements"
+    - skill: "x-ipe-task-based-feature-closing"
+      condition: "Close feature if acceptance tests pass"
+    - skill: "x-ipe-task-based-human-playground"
+      condition: "Manual validation before closing"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
@@ -393,7 +424,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 <definition_of_done>
   <checkpoint required="true">
     <name>Feature checked for web UI scope</name>
-    <verification>Step 1 completed with proceed or skip decision</verification>
+    <verification>Step 1.1 completed with proceed or skip decision</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Acceptance test cases created from ACs</name>
@@ -440,65 +471,26 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Patterns & Anti-Patterns
 
-### Pattern: Form Submission Test
-
-**When:** Feature includes form input and submission
-**Then:**
-```
-1. Test empty form submission (validation)
-2. Test invalid input formats
-3. Test valid submission, verify success state
-4. Verify success message/redirect
-```
-
-### Pattern: CRUD Operations Test
-
-**When:** Feature includes Create/Read/Update/Delete
-**Then:**
-```
-1. Test Create, verify appears in list
-2. Test Read, verify data displayed correctly
-3. Test Update, verify changes persisted
-4. Test Delete, verify removed from list
-```
-
-### Pattern: Navigation/Routing Test
-
-**When:** Feature includes page navigation
-**Then:**
-```
-1. Test direct URL access
-2. Test navigation via links/buttons
-3. Verify correct page renders
-4. Test back/forward browser navigation
-```
-
-### Anti-Patterns
+| Pattern | When | Then |
+|---------|------|------|
+| Form Submission | Form input/submission | Test empty (validation), invalid formats, valid submission, success state |
+| CRUD Operations | Create/Read/Update/Delete | Test Create→list, Read→display, Update→persist, Delete→remove |
+| Navigation/Routing | Page navigation | Test direct URL, link/button nav, correct render, back/forward |
 
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
-| Test without selectors | Tests will fail to find elements | Analyze HTML first |
-| Skip reflection step | Miss edge cases and errors | Always reflect on each TC |
+| Test without selectors | Fail to find elements | Analyze HTML first |
+| Skip reflection step | Miss edge cases | Always reflect on each TC |
 | Test implementation details | Brittle tests | Test user-visible behavior |
-| One massive test | Hard to debug failures | Split into focused tests |
+| One massive test | Hard to debug | Split into focused tests |
 | Ignore async loading | Flaky tests | Add explicit wait steps |
 | Hard-coded test data | Hard to maintain | Use variables/fixtures |
-| Skip mockup comparison | UI drifts from approved design | Validate against current mockups |
-| Use outdated mockup for validation | False failures, wasted effort | Flag outdated mockups to human |
+| Skip mockup comparison | UI drifts from design | Validate against current mockups |
+| Use outdated mockup | False failures | Flag outdated mockups to human |
 
 ---
 
 ## Examples
 
-See [references/examples.md](.github/skills/x-ipe-task-based-feature-acceptance-test/references/examples.md) for concrete execution examples including:
-- Standard feature acceptance test flow
-- Skipped execution (no web UI)
-- Blocked execution (no MCP available)
-- Partial test failure handling
-
-See [references/detailed-procedures.md](.github/skills/x-ipe-task-based-feature-acceptance-test/references/detailed-procedures.md) for:
-- Selector best practices and priority order
-- MCP command patterns
-- Test data collection process
-- Reflection checklist
-- Result reporting format
+See [references/examples.md](.github/skills/x-ipe-task-based-feature-acceptance-test/references/examples.md) for execution examples.
+See [references/detailed-procedures.md](.github/skills/x-ipe-task-based-feature-acceptance-test/references/detailed-procedures.md) for selector practices, MCP patterns, and reflection checklist.

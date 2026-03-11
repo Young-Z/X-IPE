@@ -55,7 +55,7 @@ IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "Technical Design"
+  task_based_skill: "x-ipe-task-based-technical-design"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
@@ -66,7 +66,9 @@ input:
 
   # Task type attributes
   category: "feature-stage"
-  next_task_based_skill: "Code Implementation"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-code-implementation"
+      condition: "Implement the designed feature"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   feature_phase: "Technical Design"
@@ -137,19 +139,18 @@ input:
 
 ## Execution Flow
 
-| Step | Name | Action | Gate |
-|------|------|--------|------|
-| 1 | Query Board | Get Feature Data Model from feature board | Feature data received |
-| 2 | Read Spec | Thoroughly read feature specification | Spec understood |
-| 3 | Reference Arch | Check existing architecture patterns | Patterns identified |
-| 4 | Research | Search for best practices and libraries | Research complete |
-| 5 | Create Design | Write two-part technical design document | Design written |
-| 6 | Complete | Verify DoD, output summary | Task complete |
-| 7.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 7.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
+| Phase | Steps | Action | Gate |
+|-------|-------|--------|------|
+| 1. 博学之 — Study Broadly | 1.1 Query Feature Board, 1.2 Read Specification | Load feature data, read specification | Full context gathered |
+| 2. 审问之 — Inquire Thoroughly | 2.1 Reference Architecture, 2.2 Research Best Practices | Check existing patterns, research libraries and best practices | Research complete |
+| 3. 慎思之 — Think Carefully | 3.1 Create Technical Design Document | Write two-part technical design document | Design written |
+| 4. 明辨之 — Discern Clearly | 4.1 Self-Critique Design | AI validates design against spec; escalates ONLY specific unresolvable conflicts | Design validated |
+| 5. 笃行之 — Practice Earnestly | 5.1 Complete | Verify DoD, update workflow, output summary | Task complete |
+| 继续执行 | 6.1 | Decide Next Action | Next action decided |
+| 继续执行 | 6.2 | Execute Next Action | Execution started |
 
-BLOCKING: Step 1 is BLOCKED if feature not on board or status not "Done Feature Refinement".
-BLOCKING (manual/stop_for_question): Step 6 - present design, ask if architecture decisions are correct before Code Implementation.
+BLOCKING: Phase 1 fails if feature not on board or status not "Done Feature Refinement".
+BLOCKING (manual/stop_for_question): Phase 4 - present design, ask if architecture decisions are correct before Code Implementation.
 BLOCKING (auto): Proceed automatically after DoD verification.
 
 ---
@@ -162,132 +163,182 @@ BLOCKING (auto): Proceed automatically after DoD verification.
   <execute_dor_checks_before_starting/>
   <schedule_dod_checks_with_sub_agent_before_starting/>
 
-  <step_1>
-    <name>Query Feature Board</name>
-    <action>
-      1. CALL x-ipe+feature+feature-board-management skill:
-         operation: query_feature
-         feature_id: {feature_id from task_data}
-      2. RECEIVE Feature Data Model:
-         feature_id, title, version, status, specification_link
-    </action>
-    <constraints>
-      - BLOCKING: Feature must exist on board with status "Done Feature Refinement"
-    </constraints>
-    <output>Feature Data Model with specification_link</output>
-  </step_1>
+  <phase_1 name="博学之 — Study Broadly">
+    <step_1_1>
+      <name>Query Feature Board</name>
+      <action>
+        1. CALL x-ipe+feature+feature-board-management skill:
+           operation: query_feature
+           feature_id: {feature_id from task_data}
+        2. RECEIVE Feature Data Model:
+           feature_id, title, version, status, specification_link
+      </action>
+      <constraints>
+        - BLOCKING: Feature must exist on board with status "Done Feature Refinement"
+      </constraints>
+      <output>Feature Data Model with specification_link</output>
+    </step_1_1>
 
-  <step_2>
-    <name>Read Specification</name>
-    <action>
-      0. Resolve extra_context_reference inputs:
-         - FOR ref specification:
-           IF workflow mode AND extra_context_reference.specification is a file path:
-             READ the file at that path (use instead of specification_link)
-           ELIF extra_context_reference.specification is "auto-detect":
-             Use existing discovery logic below
-           ELIF extra_context_reference.specification is "N/A":
-             Skip this context input
-           ELSE (free-mode / absent):
-             Use existing behavior
-      1. READ {specification_link} from Feature Data Model
-      2. UNDERSTAND:
-         - User stories and acceptance criteria
-         - Business rules and constraints
-         - Edge cases documented
-         - Dependencies on other features
-    </action>
-    <constraints>
-      - CRITICAL: Do NOT proceed to design until spec is fully understood
-    </constraints>
-    <output>Comprehensive understanding of feature requirements</output>
-  </step_2>
+    <step_1_2>
+      <name>Read Specification</name>
+      <action>
+        0. Resolve extra_context_reference inputs:
+           - FOR ref specification:
+             IF workflow mode AND extra_context_reference.specification is a file path:
+               READ the file at that path (use instead of specification_link)
+             ELIF extra_context_reference.specification is "auto-detect":
+               Use existing discovery logic below
+             ELIF extra_context_reference.specification is "N/A":
+               Skip this context input
+             ELSE (free-mode / absent):
+               Use existing behavior
+        1. READ {specification_link} from Feature Data Model
+        2. UNDERSTAND:
+           - User stories and acceptance criteria
+           - Business rules and constraints
+           - Edge cases documented
+           - Dependencies on other features
+      </action>
+      <constraints>
+        - CRITICAL: Do NOT proceed to design until spec is fully understood
+      </constraints>
+      <output>Comprehensive understanding of feature requirements</output>
+    </step_1_2>
 
-  <step_3>
-    <name>Reference Architecture</name>
-    <action>
-      1. READ x-ipe-docs/architecture/ for existing patterns
-      2. IDENTIFY reusable components, established conventions, integration requirements
-      3. AVOID reinventing existing solutions
-    </action>
-    <output>List of applicable patterns and reusable components</output>
-  </step_3>
+  </phase_1>
 
-  <step_4>
-    <name>Research Best Practices</name>
-    <action>
-      1. SEARCH for official documentation
-      2. LOOK for existing libraries (don't reinvent the wheel)
-      3. CHECK reference implementations
-      4. REVIEW API documentation for planned libraries
-      5. IF mockup_list provided AND scope includes [Frontend] or [Full Stack]:
-         OPEN and thoroughly analyze all mockup files. EXTRACT exact layout structure, component hierarchy, spacing, colors, and interaction patterns. DOCUMENT these as binding constraints for implementation. CRITICAL: The mockup is the source of truth for visual design — the technical design MUST faithfully translate mockup visuals into component specifications so that Code Implementation follows the mockup precisely.
-      6. DOCUMENT findings for design decisions
-    </action>
-    <output>Research findings informing design decisions (including mockup-derived UI constraints if applicable)</output>
-  </step_4>
+  <phase_2 name="审问之 — Inquire Thoroughly">
+    <step_2_1>
+      <name>Reference Architecture</name>
+      <action>
+        1. READ x-ipe-docs/architecture/ for existing patterns
+        2. IDENTIFY reusable components, established conventions, integration requirements
+        3. AVOID reinventing existing solutions
+      </action>
+      <output>List of applicable patterns and reusable components</output>
+    </step_2_1>
 
-  <step_5>
-    <name>Create Technical Design Document</name>
-    <action>
-      1. WRITE two-part technical design at x-ipe-docs/requirements/FEATURE-XXX/technical-design.md
-      2. ADAPT structure based on implementation type (API, CLI, frontend, backend)
-      3. USE templates from references/design-templates.md
-      4. IF mockup_list provided AND scope includes [Frontend] or [Full Stack]:
-         Open mockup files, extract UI component requirements, design frontend components based on mockup layout, reference mockup in Part 2
-         ELSE: Focus on service architecture, data models, APIs
-      5. INCLUDE Design Change Log section at end of document
-      6. IDENTIFY and record program_type and tech_stack:
-         - program_type: classify using known types (non-exhaustive, extend as needed):
-           - "frontend": Browser-only (HTML/CSS/JS, no server logic)
-           - "backend": Server-only (API, services, data processing)
-           - "fullstack": Both server routes AND browser UI (JS/CSS)
-           - "cli": Command-line tool
-           - "library": Reusable package/module
-           - "skills": Agent skill definitions (SKILL.md, prompt engineering)
-           - "mcp": MCP server tools/endpoints
-           - Other types may emerge as tech evolves — use descriptive lowercase names
-         - tech_stack: list all technologies used (e.g. ["Python/Flask", "JavaScript/Vanilla", "HTML/CSS", "pytest"])
-         - These are passed to downstream skills (Test Generation, Code Implementation) to determine test types
-    </action>
-    <constraints>
-      - MANDATORY: Part 1 must have component table with Tags for semantic search
-      - MANDATORY: Part 1 must have usage example
-      - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
-      - CRITICAL: Follow KISS/YAGNI/DRY principles
-    </constraints>
-    <output>Complete two-part technical design document</output>
-  </step_5>
+    <step_2_2>
+      <name>Research Best Practices</name>
+      <action>
+        1. CONSULT TOOL SKILLS (config-filtered):
+           a. DISCOVER: Scan .github/skills/x-ipe-tool-implementation-*/ for available tools
+           b. READ CONFIG: Read x-ipe-docs/config/tools.json → stages.feature.consultation
+              - IF section missing/empty → config_active = false (all discovered tools enabled)
+              - ELSE → config_active = true (opt-in filtering); force-enable general
+           c. FILTER: IF config_active → only ENABLED tools participate
+           d. FOR EACH enabled tool: read "Built-In Practices" and "Operations" sections
+           e. DOCUMENT as "Tool Capability Summary" (informational only — not binding)
+        2. SEARCH official documentation, libraries, reference implementations, API docs
+        3. IF mockup_list provided AND scope includes [Frontend] or [Full Stack]:
+           OPEN and analyze all mockup files. EXTRACT layout, components, spacing, colors, interactions. The mockup is source of truth for visual design.
+        4. DOCUMENT findings for design decisions (include tool capability summary)
+      </action>
+      <constraints>
+        - Tool consultation is INFORMATIONAL ONLY — do not invoke tools for code execution
+        - Part 2 format MUST remain independent of tool availability (FR-048.1.5)
+      </constraints>
+      <output>Research findings including tool capability summary and mockup constraints if applicable</output>
+    </step_2_2>
 
-  <step_6>
-    <name>Complete</name>
-    <action>
-      1. IF execution_mode == "workflow-mode":
-         a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
-            - workflow_name: {from context}
-            - action: {workflow.action}
-            - status: "done"
-            - feature_id: {feature_id}
-            - deliverables: {"tech-design": "{path to technical-design.md}", "feature-docs-folder": "{path to FEATURE-XXX/ folder}"}
-         b. Log: "Workflow action status updated to done"
-      2. VERIFY all DoD checkpoints
-      3. OUTPUT task completion summary
-      4. Verify all DoD checkpoints are met
-      5. IF manual/stop_for_question:
-            → Present technical design to human
-            → Ask if architecture decisions and component structure are correct
-            → IF human identifies issues → revise specific sections
-    </action>
-    <success_criteria>
-      - All required DoD checkpoints pass
-      - Design document created at correct location
-      - feature_phase set to "Technical Design"
-    </success_criteria>
-    <output>Task completion output with design document link, workflow_action_updated</output>
-  </step_6>
+  </phase_2>
 
-  <phase_7 name="继续执行（Continue Execute）">
-    <step_7_1>
+  <phase_3 name="慎思之 — Think Carefully">
+    <step_3_1>
+      <name>Create Technical Design Document</name>
+      <action>
+        1. WRITE two-part technical design at x-ipe-docs/requirements/FEATURE-XXX/technical-design.md
+        2. ADAPT structure based on implementation type (API, CLI, frontend, backend)
+        3. USE templates from references/design-templates.md
+        4. IF mockup_list provided AND scope includes [Frontend] or [Full Stack]:
+           Open mockup files, extract UI component requirements, design frontend components based on mockup layout, reference mockup in Part 2
+           ELSE: Focus on service architecture, data models, APIs
+        5. INCLUDE Design Change Log section at end of document
+        6. IDENTIFY and record program_type and tech_stack:
+           - program_type: classify using known types (non-exhaustive, extend as needed):
+             - "frontend": Browser-only (HTML/CSS/JS, no server logic)
+             - "backend": Server-only (API, services, data processing)
+             - "fullstack": Both server routes AND browser UI (JS/CSS)
+             - "cli": Command-line tool
+             - "library": Reusable package/module
+             - "skills": Agent skill definitions (SKILL.md, prompt engineering)
+             - "mcp": MCP server tools/endpoints
+             - Other types may emerge as tech evolves — use descriptive lowercase names
+           - tech_stack: list all technologies used (e.g. ["Python/Flask", "JavaScript/Vanilla", "HTML/CSS", "pytest"])
+           - These are passed to downstream skills (Test Generation, Code Implementation) to determine test types
+        7. LEVERAGE tool capability summary from Step 2.2:
+           - Reference tool built-in practices instead of duplicating (e.g., "Python tool enforces PEP 8")
+           - Focus Part 2 on what tools NEED: module boundaries, API contracts, data models
+           - Note: Part 2 format remains independent of tool availability
+      </action>
+      <constraints>
+        - MANDATORY: Part 1 must have component table with Tags for semantic search
+        - MANDATORY: Part 1 must have usage example
+        - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
+        - CRITICAL: Follow KISS/YAGNI/DRY principles
+      </constraints>
+      <output>Complete two-part technical design document</output>
+    </step_3_1>
+
+  </phase_3>
+
+  <phase_4 name="明辨之 — Discern Clearly">
+    <step_4_1>
+      <name>Self-Critique Design</name>
+      <action>
+        1. AI self-critique — validate the design against objective criteria:
+           a. Every specification acceptance criterion maps to a component or flow
+           b. No contradictions between chosen patterns (e.g., stateless API + server-side sessions)
+           c. Technology choices are compatible (versions, licenses, runtime)
+           d. No over-engineering: each component has a clear reason from the spec
+        2. Collect unresolved_questions[] — ONLY items AI genuinely cannot decide:
+           - Trade-offs needing user preference (e.g., "Redis vs Memcached?")
+           - Business-domain constraints AI lacks context for
+           - Conflicting requirements needing human prioritization
+        3. IF unresolved_questions is EMPTY → design is validated, proceed
+        4. IF unresolved_questions is NON-EMPTY:
+           IF process_preference.interaction_mode == "dao-represent-human-to-interact":
+             → Invoke x-ipe-dao-end-user-representative with specific questions list
+           ELSE:
+             → Present ONLY the specific questions to human (not "review the whole design")
+           → Incorporate answers, revise affected sections
+      </action>
+      <constraints>
+        - MUST NOT ask broad "is this correct?" — only ask specific, bounded questions
+        - IF self-critique passes with zero questions → skip human/DAO entirely
+      </constraints>
+      <output>Design validated (self-critique passed or specific questions resolved)</output>
+    </step_4_1>
+
+  </phase_4>
+
+  <phase_5 name="笃行之 — Practice Earnestly">
+    <step_5_1>
+      <name>Complete</name>
+      <action>
+        1. VERIFY all DoD checkpoints are met
+        2. IF execution_mode == "workflow-mode":
+           a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
+              - workflow_name: {from context}
+              - action: {workflow.action}
+              - status: "done"
+              - feature_id: {feature_id}
+              - deliverables: {"tech-design": "{path to technical-design.md}", "feature-docs-folder": "{path to FEATURE-XXX/ folder}"}
+           b. Log: "Workflow action status updated to done"
+        3. OUTPUT task completion summary
+      </action>
+      <success_criteria>
+        - All required DoD checkpoints pass
+        - Design document created at correct location
+        - feature_phase set to "Technical Design"
+      </success_criteria>
+      <output>Task completion output with design document link, workflow_action_updated</output>
+    </step_5_1>
+
+  </phase_5>
+
+  <phase_6 name="继续执行（Continue Execute）">
+    <step_6_1>
       <name>Decide Next Action</name>
       <action>
         Collect the full context and task_completion_output from this skill execution.
@@ -307,11 +358,11 @@ BLOCKING (auto): Proceed automatically after DoD verification.
         - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
       </constraints>
       <output>Next action decided with execution context</output>
-    </step_7_1>
-    <step_7_2>
+    </step_6_1>
+    <step_6_2>
       <name>Execute Next Action</name>
       <action>
-        Based on the decision from Step 7.1:
+        Based on the decision from Step 6.1:
         1. Load the target task-based skill's SKILL.md
         2. Generate an execution plan from the skill's Execution Flow table
         3. Start execution from the skill's first phase/step
@@ -321,8 +372,8 @@ BLOCKING (auto): Proceed automatically after DoD verification.
         - Execution follows the target skill's procedure, not this skill's
       </constraints>
       <output>Next task execution started</output>
-    </step_7_2>
-  </phase_7>
+    </step_6_2>
+  </phase_6>
 
 </procedure>
 ```
@@ -335,10 +386,11 @@ BLOCKING (auto): Proceed automatically after DoD verification.
 task_completion_output:
   category: "feature-stage"
   status: completed | blocked
-  next_task_based_skill: "Code Implementation"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-code-implementation"
+      condition: "Implement the designed feature"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
-  interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
@@ -414,41 +466,11 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Patterns & Anti-Patterns
 
-### Pattern: API-Based Feature
-
-**When:** Feature exposes REST/GraphQL endpoints
-**Then:**
-```
-1. Focus Part 2 on API specification
-2. Include request/response schemas
-3. Document authentication requirements
-4. Add sequence diagrams for complex flows
-```
-
-### Pattern: Background Service
-
-**When:** Feature runs as background process
-**Then:**
-```
-1. Design for fault tolerance
-2. Include retry/backoff strategies
-3. Document monitoring points
-4. Add state diagrams for lifecycle
-```
-
-### Pattern: UI-Heavy Feature
-
-**When:** Feature is primarily frontend
-**Then:**
-```
-1. Focus on component architecture
-2. Document state management
-3. Include wireframes or mockup references
-4. Describe user interaction flows
-5. CRITICAL: Mockup is the source of truth for visual design - technical design must specify components, layout, and styling that faithfully reproduce the mockup so Code Implementation follows it precisely
-```
-
-### Anti-Patterns
+| Pattern | When | Key Actions |
+|---------|------|-------------|
+| API-Based | REST/GraphQL endpoints | Focus Part 2 on API spec, request/response schemas, auth, sequence diagrams |
+| Background Service | Background process | Fault tolerance, retry/backoff, monitoring points, state diagrams |
+| UI-Heavy | Primarily frontend | Component architecture, state management, mockup references (mockup = source of truth) |
 
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
@@ -458,13 +480,8 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Monolithic design | Hard to change | Design modular components |
 | Missing workflows | Hard to understand | Always include Mermaid diagrams |
 | No tags | Hard for AI to find | Always add searchable tags |
-
 ---
 
 ## Examples
 
-See [references/examples.md](.github/skills/x-ipe-task-based-technical-design/references/examples.md) for detailed execution examples including:
-- User authentication technical design
-- Complex feature with multiple modules
-- Missing specification (blocked)
-- Design update from change request
+See [references/examples.md](.github/skills/x-ipe-task-based-technical-design/references/examples.md) for detailed execution examples.

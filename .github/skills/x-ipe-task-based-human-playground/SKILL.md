@@ -31,7 +31,7 @@ IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "Human Playground"
+  task_based_skill: "x-ipe-task-based-human-playground"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
@@ -43,7 +43,11 @@ input:
 
   # Task type attributes
   category: "standalone"
-  next_task_based_skill: null
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-feature-closing"
+      condition: "Close feature after successful validation"
+    - skill: "x-ipe-task-based-bug-fix"
+      condition: "Fix bugs discovered during playground testing"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   feature_phase: "Human Playground"
@@ -140,18 +144,32 @@ BLOCKING: Step 6 requires validation before Feature Closing (manual/stop_for_que
   <step_1>
     <name>Create Runnable Examples</name>
     <action>
-      1. Create `playground/` directory if it does not exist
-      2. Place playground files directly in `playground/` (no subfolders per feature)
-      3. Name files as `playground_{feature_name}.py`
-      4. Identify key functionality to demonstrate
-      5. Create minimal, self-contained runnable examples
-      6. Include both happy path and edge cases
+      1. DETECT tech_stack from feature implementation files and project config
+      2. TOOL SKILL ROUTING (config-filtered):
+         a. DISCOVER: Scan .github/skills/x-ipe-tool-implementation-*/
+         b. READ CONFIG: Read x-ipe-docs/config/tools.json → stages.feature.playground
+            - IF section missing/empty → config_active = false (all tools enabled)
+            - ELSE → config_active = true (opt-in); force-enable general
+         c. FILTER: IF config_active → only ENABLED tools participate
+         d. SEMANTIC MATCH: Match tech_stack to enabled tool skill
+         e. IF no match → fall back to Python defaults (.py, uv run python)
+      3. DETERMINE file extension and run command from matched tool:
+         - Python: ext=.py, cmd="uv run python"
+         - TypeScript: ext=.ts, cmd="npx tsx"
+         - JavaScript: ext=.js, cmd="node"
+         - Java: ext=.java, cmd="java"
+         - General: ext determined by context, cmd determined by context
+      4. Create `playground/` directory if it does not exist
+      5. Place playground files directly in `playground/` (no subfolders per feature)
+      6. Name files as `playground_{feature_name}.{ext}` (dynamic extension)
+      7. Identify key functionality to demonstrate
+      8. Create minimal, self-contained runnable examples (happy path + edge cases)
     </action>
     <constraints>
-      - BLOCKING: File naming must follow `playground_{feature_name}.py` convention
+      - BLOCKING: File naming must follow `playground_{feature_name}.{ext}` convention
       - CRITICAL: Examples must be self-contained and runnable without manual setup
     </constraints>
-    <output>Playground file(s) in `playground/`</output>
+    <output>Playground file(s) in `playground/`, matched tool skill and run command</output>
   </step_1>
 
   <step_2>
@@ -171,13 +189,13 @@ BLOCKING: Step 6 requires validation before Feature Closing (manual/stop_for_que
     <name>Create and Validate Tests</name>
     <action>
       1. Create `playground/tests/` directory for test scripts
-      2. Name test files as `test_playground_{feature_name}.py`
+      2. Name test files as `test_playground_{feature_name}.{ext}` (same ext as Step 1)
       3. Write tests that simulate human interaction scenarios (NOT unit tests)
       4. Tests must validate expected behavior from a human perspective
     </action>
     <constraints>
       - CRITICAL: These are human simulation tests, not unit tests
-      - BLOCKING: Test file naming must follow `test_playground_{feature_name}.py`
+      - BLOCKING: Test file naming must follow `test_playground_{feature_name}.{ext}`
     </constraints>
     <output>Test files in `playground/tests/`</output>
   </step_3>
@@ -185,7 +203,7 @@ BLOCKING: Step 6 requires validation before Feature Closing (manual/stop_for_que
   <step_4>
     <name>Validate Playground</name>
     <action>
-      1. Execute playground command (e.g., `uv run python playground/playground_{feature}.py`)
+      1. Execute playground using the run command determined in Step 1 (e.g., `uv run python`, `npx tsx`, `node`)
       2. Verify it runs without error (exit code 0)
       3. If it fails, fix the playground script or surrounding code
     </action>
@@ -284,15 +302,19 @@ BLOCKING: Step 6 requires validation before Feature Closing (manual/stop_for_que
 task_completion_output:
   category: "standalone"
   status: completed | blocked
-  next_task_based_skill: null
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-feature-closing"
+      condition: "Close feature after successful validation"
+    - skill: "x-ipe-task-based-bug-fix"
+      condition: "Fix bugs discovered during playground testing"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
   task_output_links:
-    - "playground/playground_{feature_name}.py"
-    - "playground/tests/test_playground_{feature_name}.py"
+    - "playground/playground_{feature_name}.{ext}"
+    - "playground/tests/test_playground_{feature_name}.{ext}"
     - "playground/README.md"
   feature_id: "{FEATURE-XXX}"
   feature_title: "{title}"
@@ -310,7 +332,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 <definition_of_done>
   <checkpoint required="true">
     <name>Runnable examples created</name>
-    <verification>Verify playground/playground_{feature_name}.py exists</verification>
+    <verification>Verify playground/playground_{feature_name}.{ext} exists (ext from Step 1)</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>README entry added</name>
@@ -318,7 +340,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>Human simulation tests created</name>
-    <verification>Verify playground/tests/test_playground_{feature_name}.py exists</verification>
+    <verification>Verify playground/tests/test_playground_{feature_name}.{ext} exists</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Playground command verified</name>
@@ -347,38 +369,18 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 **Then:**
 ```
 playground/
-  README.md                            # How to run all playgrounds
-  playground_{feature1}.py             # Interactive playground for feature 1
-  playground_{feature2}.py             # Interactive playground for feature 2
+  README.md                               # How to run all playgrounds
+  playground_{feature1}.{ext}             # Interactive playground (ext from tool skill)
+  playground_{feature2}.{ext}             # Interactive playground
   tests/
-    test_playground_{feature1}.py      # Human simulation tests
-    test_playground_{feature2}.py      # Human simulation tests
+    test_playground_{feature1}.{ext}      # Human simulation tests
+    test_playground_{feature2}.{ext}      # Human simulation tests
 ```
 
-### Pattern: API Playground
+### Pattern: API/CLI Playground
 
-**When:** Feature exposes an API
-**Then:**
-```
-playground/
-  README.md                  # How to run all playgrounds
-  playground_api.py          # Interactive API testing script
-  sample-data.json           # Test data (optional)
-  tests/
-    test_playground_api.py   # Human simulation tests
-```
-
-### Pattern: CLI Playground
-
-**When:** Feature is command-line based
-**Then:**
-```
-playground/
-  README.md                    # How to run all playgrounds
-  playground_cli.py            # Interactive CLI playground
-  tests/
-    test_playground_cli.py     # Human simulation tests
-```
+**When:** Feature exposes an API or CLI
+**Then:** Same structure, include sample-data.json if needed for test data.
 
 ### Anti-Patterns
 

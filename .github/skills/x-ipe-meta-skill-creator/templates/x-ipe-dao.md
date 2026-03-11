@@ -106,6 +106,7 @@ input:
 
 ## Definition of Ready
 
+CRITICAL: DoR at most 5 checkpoints. DoD at most 10 checkpoints. Keep only the most critical checks.
 ```xml
 <definition_of_ready>
   <checkpoint required="true">

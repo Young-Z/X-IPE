@@ -1,5 +1,10 @@
 # Copilot 使用指南
 
+> **⚠️ AI Agent 执行建议技能时的关键规则：**
+> 严格按照技能中的步骤执行！不得跳过、重排或自行发挥。
+> 严格按照技能中的步骤执行！不得跳过、重排或自行发挥。
+> 严格按照技能中的步骤执行！不得跳过、重排或自行发挥。
+
 ## 开始之前
 
 ## ⚠️ 关键：DAO优先 — 每条消息都经过人类代表
@@ -34,18 +39,24 @@
 
 ## ⚠️ 关键：技能优先，而非直接编码
 
-**当 DAO 返回处置 `instruction`（用户在下达指令）时，不要直接跳到编码或修改文件。**
+**当 DAO 返回任何指令单元的处置为 `instruction`（用户在下达指令）时，不要直接跳到编码或修改文件。**
 
 ### 🚫 硬性门禁：未加载技能禁止调用 `edit` / `create`
 
-在调用 **任何** 文件编辑工具（`edit`、`create` 或通过 `bash` 写代码）之前，你必须：
-1. ✅ 已通过 `x-ipe-dao-end-user-representative` 处理消息（处置 = `instruction`）
-2. ✅ 已将请求分类到对应的任务技能
-3. ✅ 已在 `task-board.md` 上创建任务
-4. ✅ 已加载对应技能（通过 `skill` 工具或阅读其 `SKILL.md`）
-5. ✅ 已到达技能流程中允许修改代码的步骤
+DAO 现在返回 `instruction_units[]` — 一个包含 1–3 个指令单元的数组。Agent 必须遍历每个单元：
 
-如果以上任何一项缺失 → **停下来，不要修改代码。**
+```
+for each unit in instruction_units:
+    1. ✅ 检查单元处置（如果 `instruction` → 继续下面步骤；如果 `answer`/其他 → 相应处理）
+    2. ✅ 已将该单元分类到对应的任务技能（来自单元的 suggested_skills）
+    3. ✅ 已在 `task-board.md` 上为该单元创建任务
+    4. ✅ 已加载对应技能（通过 `skill` 工具或阅读其 `SKILL.md`）
+    5. ✅ 已到达技能流程中允许修改代码的步骤
+    6. 执行该单元
+    然后处理下一个单元
+```
+
+如果当前单元的步骤 1–5 中任何一项缺失 → **停下来，不要修改代码。**
 
 
 ### ⛔ 真实案例教训：
@@ -57,7 +68,7 @@
            修复之后才写测试，没有任务看板记录*
 
 ✅ 应该这样做：
-   Agent：*DAO 解读 → 处置: instruction →
+   Agent：*DAO 解读 → instruction_units[0].disposition: instruction →
            分类为 bug 修复 → 加载 x-ipe-workflow-task-execution → 加载 x-ipe-task-based-bug-fix →
            在看板创建 TASK-681 → 诊断根因 →
            执行冲突分析 → 先写失败测试 →

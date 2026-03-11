@@ -1,6 +1,6 @@
 # Technical Design: Orchestrator Core + AAA Generator + General Fallback
 
-> Feature ID: FEATURE-045-A | Version: v1.0 | Last Updated: 03-05-2026
+> Feature ID: FEATURE-045-A | Version: v1.1 | Last Updated: 03-10-2026
 
 > Specification: [specification.md](x-ipe-docs/requirements/EPIC-045/FEATURE-045-A/specification.md)
 
@@ -17,7 +17,8 @@
 |-----------|----------------|--------------|------|
 | Orchestrator SKILL.md (refactored) | Coordinate implementation workflow: generate AAA scenarios, route to tool skills, validate results | `.github/skills/x-ipe-task-based-code-implementation/SKILL.md` — Steps 4-6 replaced | #orchestrator #implementation #workflow #skills |
 | AAA Scenario Generator | Generate language-agnostic test scenarios from spec + technical design | New Step 4 in orchestrator — embedded procedure, not a separate file | #aaa #test-scenarios #generation #tdd |
-| Semantic Tool Router | Discover and match `tech_stack` entries to `x-ipe-tool-implementation-*` skills | New Step 5 sub-procedure in orchestrator | #routing #semantic #discovery #tool-skills |
+| Semantic Tool Router | Discover, filter by config, and match `tech_stack` entries to `x-ipe-tool-implementation-*` skills | New Step 5 sub-procedure in orchestrator | #routing #semantic #discovery #tool-skills #config-filtering |
+| Config Filter | Read `tools.json` `stages.feature.implementation` section, determine enabled/disabled tools | Embedded in Step 5 routing procedure | #config #tools-json #filtering #enable-disable |
 | Validation Gate | Verify all tool skill Assert clauses pass, run integration scenarios | New Step 6 in orchestrator | #validation #integration #verification |
 | General Fallback Tool Skill | Handle any unmapped tech stack with research-driven implementation | `.github/skills/x-ipe-tool-implementation-general/SKILL.md` — new file | #fallback #general #tool-skill |
 | Implementation Guidelines (updated) | Updated references for new step structure | `.github/skills/x-ipe-task-based-code-implementation/references/implementation-guidelines.md` | #guidelines #reference |
@@ -27,6 +28,7 @@
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
 | Current code-implementation SKILL.md | Existing | [SKILL.md](.github/skills/x-ipe-task-based-code-implementation/SKILL.md) | Base file being refactored — Steps 1-3, 7-8 preserved |
+| tools.json config | Existing | [tools.json](x-ipe-docs/config/tools.json) | `stages.feature.implementation` section controls tool enable/disable |
 | x-ipe-tool-test-generation | Existing | [SKILL.md](.github/skills/x-ipe-tool-test-generation/SKILL.md) | Phase 1 fallback when AAA generation fails |
 | x-ipe+feature+feature-board-management | Existing | [SKILL.md](.github/skills/x-ipe+feature+feature-board-management/SKILL.md) | Queried in Step 1 for Feature Data Model (unchanged) |
 | x-ipe-meta-skill-creator | Existing | [SKILL.md](.github/skills/x-ipe-meta-skill-creator/SKILL.md) | Special-case delegation for `program_type: skills` |
@@ -36,7 +38,7 @@
 
 1. Steps 1-3 **unchanged**: Query Feature Board → Learn Technical Design → Read Architecture
 2. **Step 4 (NEW):** Generate AAA scenarios from specification + technical design using mapping algorithm
-3. **Step 5 (NEW):** Scan `.github/skills/x-ipe-tool-implementation-*/` → semantic match `tech_stack` → invoke matched tool skills sequentially with AAA scenarios + source paths
+3. **Step 5 (NEW):** Scan `.github/skills/x-ipe-tool-implementation-*/` → read `tools.json` config → filter enabled tools → semantic match `tech_stack` → invoke matched tool skills sequentially with AAA scenarios + source paths
 4. **Step 6 (NEW):** Validate all Assert clauses pass → run `@integration` scenarios with mocking → aggregate results
 5. Steps 7-8 **unchanged**: Apply Tracing → Update Workflow Status
 
@@ -78,10 +80,16 @@ Test Scenario: End-to-end project creation
     - Project appears in the list
     - Mock backend received correct POST request
 
-# Step 5 — Routing:
+# Step 5 — Config + Routing:
+# Read tools.json stages.feature.implementation → empty config (only _order: 2)
+# → All discovered tools enabled (backwards compatibility)
 # "Python/Flask" → x-ipe-tool-implementation-python (passes @backend scenarios)
 # "HTML/CSS/JavaScript" → x-ipe-tool-implementation-html5 (passes @frontend scenarios)
 # @integration scenarios → handled by orchestrator after unit skills complete
+#
+# Alternative (if config has entries):
+# tools.json: { "x-ipe-tool-implementation-python": true, "x-ipe-tool-implementation-java": false }
+# → python enabled, java disabled (skipped with diagnostic log), general always on
 
 # Step 6 — Validation:
 # Verify: all @backend Asserts pass, all @frontend Asserts pass
@@ -133,6 +141,7 @@ flowchart TD
 | `.github/skills/x-ipe-task-based-code-implementation/SKILL.md` | **Modify** | Replace Steps 4-6, update Execution Flow table, update DoR/DoD, update Output Result |
 | `.github/skills/x-ipe-task-based-code-implementation/references/implementation-guidelines.md` | **Modify** | Update step references from old Steps 4-6 to new Steps 4-6 |
 | `.github/skills/x-ipe-tool-implementation-general/SKILL.md` | **Create** | New tool skill file (~200-250 lines) |
+| `x-ipe-docs/config/tools.json` | **Modify** | Add tool entries under `stages.feature.implementation` for all 6 discovered tool-implementation skills |
 
 ### Component Relationship Diagram
 
@@ -158,8 +167,11 @@ classDiagram
 
     class SemanticRouter {
         +discoverToolSkills()
+        +readToolConfig()
+        +filterEnabledTools()
         +matchTechStack()
         +routeToSkill()
+        +logSkippedTools()
     }
 
     class ValidationGate {
@@ -299,10 +311,10 @@ flowchart TD
 
 ### Step 5: Semantic Routing & Tool Skill Invocation — Detailed Design
 
-#### Discovery Procedure
+#### Discovery & Config Filtering Procedure
 
 ```
-PROCEDURE: Discover and Route Tool Skills
+PROCEDURE: Discover, Filter, and Route Tool Skills
 
 INPUT: tech_stack array from technical design
 OUTPUT: Mapping of tech_stack_entry → tool_skill_name
@@ -311,17 +323,42 @@ OUTPUT: Mapping of tech_stack_entry → tool_skill_name
 2. FOR EACH discovered skill:
    - Read SKILL.md frontmatter (name, description)
    - Note what languages/frameworks it covers
-3. FOR EACH entry in tech_stack:
-   - Use LLM semantic understanding to match entry to a discovered skill
+
+3. READ x-ipe-docs/config/tools.json → extract stages.feature.implementation section
+   - IF section missing OR empty (only _order key) → config_active = false
+   - ELSE (has tool entries) → config_active = true
+
+4. FILTER enabled tools:
+   IF config_active == false:
+     → All discovered tools treated as ENABLED (backwards compatibility)
+   ELSE (config_active == true):
+     → FOR EACH discovered skill:
+       a. Look up key "x-ipe-tool-implementation-{name}" in config
+       b. IF key exists AND value is true → ENABLED
+       c. IF key exists AND value is false → DISABLED, log: "skipped x-ipe-tool-implementation-{name} (disabled)"
+       d. IF key does NOT exist (undeclared) → DISABLED (opt-in required), log: "skipped x-ipe-tool-implementation-{name} (undeclared, default disabled)"
+
+5. FORCE-ENABLE x-ipe-tool-implementation-general:
+   - IF general was disabled or undeclared → override to ENABLED
+   - Log warning: "x-ipe-tool-implementation-general cannot be disabled — safety net fallback"
+
+6. LOAD _extra_instruction (if present):
+   - IF stages.feature.implementation._extra_instruction exists → read as supplementary routing context
+   - Pass to semantic matching step for additional context
+
+7. FOR EACH entry in tech_stack:
+   - Use LLM semantic understanding to match entry to an ENABLED skill ONLY
    - Example mappings:
-     "Python/Flask" → x-ipe-tool-implementation-python
-     "HTML/CSS/JavaScript" → x-ipe-tool-implementation-html5
-     "TypeScript/React" → x-ipe-tool-implementation-typescript
-     "Java/Spring Boot" → x-ipe-tool-implementation-java
-     "MCP Server" → x-ipe-tool-implementation-mcp
-   - IF no match: assign x-ipe-tool-implementation-general
+     "Python/Flask" → x-ipe-tool-implementation-python (if enabled)
+     "HTML/CSS/JavaScript" → x-ipe-tool-implementation-html5 (if enabled)
+     "TypeScript/React" → x-ipe-tool-implementation-typescript (if enabled)
+     "Java/Spring Boot" → x-ipe-tool-implementation-java (if enabled)
+     "MCP Server" → x-ipe-tool-implementation-mcp (if enabled)
+   - IF best match is DISABLED: fall through to general
+   - IF no match at all: assign x-ipe-tool-implementation-general
    - IF general insufficient: signal human
-4. OUTPUT: routing map
+
+8. OUTPUT: routing map (tech_stack_entry → enabled_tool_skill)
 ```
 
 #### Tool Skill Invocation Contract
@@ -367,15 +404,20 @@ tool_skill_output:
 ```mermaid
 sequenceDiagram
     participant O as Orchestrator
+    participant C as tools.json Config
     participant R as Semantic Router
     participant TS1 as Backend Tool Skill
     participant TS2 as Frontend Tool Skill
     participant VG as Validation Gate
 
-    O->>R: Route tech_stack entries
-    R-->>O: Routing map
+    O->>R: Discover tool skills (scan directories)
+    R->>C: Read stages.feature.implementation
+    C-->>R: Config entries (or empty)
+    R->>R: Filter enabled tools + force-enable general
+    R->>R: Load _extra_instruction (if present)
+    R-->>O: Enabled tools + routing map
 
-    Note over O: Sequential execution
+    Note over O: Sequential execution (enabled tools only)
     O->>TS1: @backend scenarios + source_path
     TS1->>TS1: Implement code + tests
     TS1-->>O: Results (files, test_results, lint)
@@ -451,8 +493,18 @@ flowchart TD
     H -->|"Yes"| I["Route to Tool Skills"]
     H -->|"No"| J["Fallback: x-ipe-tool-test-generation<br/>(Phase 1 Coexistence)"]
 
-    K["Semantic Routing"] --> L{Match Found?}
-    L -->|"Specific Skill"| M["Invoke Matched Skill"]
+    K["Semantic Routing"] --> K1{Config Active?}
+    K1 -->|"No (empty config)"| K2["All Tools Enabled<br/>(backwards compat)"]
+    K1 -->|"Yes"| K3{Tool Enabled<br/>in Config?}
+    K3 -->|"true"| K4["Include in<br/>Enabled Pool"]
+    K3 -->|"false / absent"| K5["Skip Tool<br/>(log 'disabled')"]
+    K2 --> L{Match Found?}
+    K4 --> L
+    K5 --> K6{Is General?}
+    K6 -->|"Yes"| K7["Force-Enable<br/>(safety net)"]
+    K6 -->|"No"| L
+    K7 --> L
+    L -->|"Enabled Skill"| M["Invoke Matched Skill"]
     L -->|"No Match"| N["Invoke General Fallback"]
     N --> O{General Sufficient?}
     O -->|"Yes"| M
@@ -495,7 +547,7 @@ description: General-purpose fallback implementation tool skill. Handles any tec
 | Definition of Ready | **No change** | "Tracing utility exists" check retained (preserves backward compatibility) |
 | Execution Flow table | **Modify** | Replace Steps 4-6 descriptions |
 | Step 4 procedure | **Replace** | Remove test-generation invocation → Add AAA generation procedure |
-| Step 5 procedure | **Replace** | Remove inline implementation → Add semantic routing + tool skill invocation |
+| Step 5 procedure | **Replace** | Remove inline implementation → Add config-aware semantic routing (read config → filter enabled → semantic match → invoke) + tool skill invocation |
 | Step 6 procedure | **Replace** | Remove pytest/npm test → Add validation gate procedure |
 | Steps 7-8 | **No change** | Tracing and workflow status preserved |
 | Output Result | **No change** | Same `task_completion_output` structure |
@@ -510,7 +562,10 @@ description: General-purpose fallback implementation tool skill. Handles any tec
    c. Add Phase 1 coexistence note to Important Notes
    d. Update Execution Flow table (Steps 4-6)
    e. Replace Step 4: embed AAA generation procedure with algorithm
-   f. Replace Step 5: embed semantic routing + invocation procedure with special-case delegations
+   f. Replace Step 5: embed config-aware semantic routing + invocation procedure with special-case delegations
+      - Add sub-steps: read tools.json → filter enabled → force-enable general → semantic match enabled only
+      - Add diagnostic logging for skipped (disabled) tools
+      - Add `_extra_instruction` loading
    g. Replace Step 6: embed validation gate procedure
    h. Update Definition of Done checkpoints
    i. Update Patterns section
@@ -519,10 +574,28 @@ description: General-purpose fallback implementation tool skill. Handles any tec
    a. Update step references (old Steps 4-6 → new Steps 4-6)
    b. Add AAA scenario format reference
    c. Add tool skill contract reference
+   d. Add tools.json config filtering reference
 
 3. **Create general fallback skill:**
    a. Create `.github/skills/x-ipe-tool-implementation-general/SKILL.md`
    b. Follow standard tool skill structure with research-first approach
+
+4. **Update tools.json config:**
+   a. Add tool entries under `stages.feature.implementation`:
+      ```json
+      "implementation": {
+        "_order": 2,
+        "_extra_instruction": "",
+        "x-ipe-tool-implementation-python": true,
+        "x-ipe-tool-implementation-html5": true,
+        "x-ipe-tool-implementation-typescript": true,
+        "x-ipe-tool-implementation-java": true,
+        "x-ipe-tool-implementation-mcp": true,
+        "x-ipe-tool-implementation-general": true
+      }
+      ```
+   b. All tools initially set to `true` (no disruption to existing behavior)
+   c. Users can later set individual tools to `false` to disable them
 
 ### Edge Cases & Error Handling
 
@@ -530,12 +603,19 @@ description: General-purpose fallback implementation tool skill. Handles any tec
 |----------|-------------------|
 | Single tech_stack entry (e.g., `["Python/Flask"]`) | Orchestrator invokes one tool skill; may skip @integration if no cross-layer interaction |
 | `tech_stack: ["Rust/Actix"]` (no matching skill) | Falls back to general; if insufficient, signals human |
+| Matching skill exists but disabled in config | Skip disabled skill (log diagnostic), fall through to general fallback |
+| All tools disabled except general | All tech_stack entries route to general; system functional but with generic implementation |
+| User disables `x-ipe-tool-implementation-general` | Override to enabled; log warning "general cannot be disabled — safety net fallback" |
+| Empty config (only `_order`, no tool entries) | All discovered tools enabled — backwards compatibility preserved |
+| New undeclared tool-implementation skill added | If config is active (has entries), new skill defaults to disabled; if config empty, enabled |
+| `_extra_instruction` present in config | Loaded as supplementary routing context for semantic matching |
 | Spec has no explicit acceptance criteria | Derives scenarios from FRs and user stories; logs warning |
 | >20 components in technical design | Per-layer generation: @backend batch → invoke → @frontend batch → invoke |
 | Tool skill fails on retry | Preserves passing results; escalates to human with both attempt details |
 | `program_type: skills` | Bypasses AAA entirely; delegates to `x-ipe-meta-skill-creator` |
 | Existing test suite from old test-generation | Tool skills follow existing naming; create subfolder if conflicts |
 | AAA generation fails (ambiguous spec) | Falls back to `x-ipe-tool-test-generation` (Phase 1) |
+| tools.json file missing or malformed | Treat as empty config — all tools enabled (graceful degradation) |
 
 ---
 
@@ -544,3 +624,4 @@ description: General-purpose fallback implementation tool skill. Handles any tec
 | Date | Phase | Change Summary |
 |------|-------|----------------|
 | 03-05-2026 | Initial Design | Initial technical design for FEATURE-045-A: orchestrator refactoring with AAA scenario generation, semantic routing, validation gate, and general fallback tool skill. |
+| 03-10-2026 | CR-001 Update (v1.1) | Added tools.json config-based filtering to Step 5 routing: read config → filter enabled tools → force-enable general → semantic match enabled only. Added ConfigFilter component, updated sequence diagram, expanded discovery procedure (4→8 steps), added 7 config-related edge cases, added tools.json to file changes and dependencies. |

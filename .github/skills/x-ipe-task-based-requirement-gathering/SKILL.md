@@ -41,7 +41,7 @@ IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "Requirement Gathering"
+  task_based_skill: "x-ipe-task-based-requirement-gathering"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
@@ -54,7 +54,9 @@ input:
 
   # Task type attributes
   category: "requirement-stage"
-  next_task_based_skill: "Feature Breakdown"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-feature-breakdown"
+      condition: "Break requirements into features"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
 
@@ -399,7 +401,9 @@ BLOCKING (auto): Proceed automatically after DoD verification.
 task_completion_output:
   category: "requirement-stage"
   status: completed | blocked
-  next_task_based_skill: "Feature Breakdown"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-feature-breakdown"
+      condition: "Break requirements into features"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"

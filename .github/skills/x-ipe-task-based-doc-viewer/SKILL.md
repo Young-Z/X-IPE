@@ -31,7 +31,7 @@ IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "Documentation Viewer"
+  task_based_skill: "x-ipe-task-based-doc-viewer"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
@@ -40,7 +40,7 @@ input:
 
   # Task type attributes
   category: "standalone"
-  next_task_based_skill: null
+  next_task_based_skill: null  # terminal skill
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
 
@@ -219,7 +219,7 @@ BLOCKING: Step 5 blocked until server runs and displays documentation correctly.
 task_completion_output:
   category: "standalone"
   status: completed | blocked
-  next_task_based_skill: null
+  next_task_based_skill: null  # terminal skill
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"

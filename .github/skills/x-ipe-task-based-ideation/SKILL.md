@@ -35,10 +35,18 @@ IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-
 ```yaml
 input:
   task_id: "{TASK-XXX}"
-  task_based_skill: "Ideation"
+  task_based_skill: "x-ipe-task-based-ideation"
   
   category: ideation-stage
-  next_task_based_skill: "Idea Mockup | Idea to Architecture"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-idea-mockup"
+      condition: "Create visual mockup of the idea"
+    - skill: "x-ipe-task-based-idea-to-architecture"
+      condition: "Create architecture diagram for the idea"
+    - skill: "x-ipe-task-based-share-idea"
+      condition: "Share the refined idea with stakeholders"
+    - skill: "x-ipe-task-based-requirement-gathering"
+      condition: "Skip to requirements if idea is already clear"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   
@@ -404,7 +412,15 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
 task_completion_output:
   category: ideation-stage
   status: completed | blocked
-  next_task_based_skill: "Idea Mockup | Idea to Architecture"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-idea-mockup"
+      condition: "Create visual mockup of the idea"
+    - skill: "x-ipe-task-based-idea-to-architecture"
+      condition: "Create architecture diagram for the idea"
+    - skill: "x-ipe-task-based-share-idea"
+      condition: "Share the refined idea with stakeholders"
+    - skill: "x-ipe-task-based-requirement-gathering"
+      condition: "Skip to requirements if idea is already clear"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   task_output_links:
@@ -482,14 +498,9 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
     <step_output>improvement_decisions, finalized_approach</step_output>
   </checkpoint>
   <checkpoint required="true">
-    <name>Summary Created</name>
-    <verification>x-ipe-docs/ideas/{folder}/refined-idea/idea-summary-vN.md exists</verification>
-    <step_output>idea_summary_path</step_output>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Idea summary complete</name>
-    <verification>Idea summary complete with all sections filled and key decisions documented</verification>
-    <step_output>next_task_choice</step_output>
+    <name>Summary Created and Complete</name>
+    <verification>x-ipe-docs/ideas/{folder}/refined-idea/idea-summary-vN.md exists with all sections filled and key decisions documented</verification>
+    <step_output>idea_summary_path, next_task_choice</step_output>
   </checkpoint>
   <checkpoint required="recommended">
     <name>Principles Researched</name>

@@ -3,38 +3,44 @@ name: x-ipe-dao-end-user-representative
 description: Represent human intent at end-user-facing touchpoints as an autonomous human representative. Use when an agent needs human-like guidance that can answer directly, clarify, critique, instruct, approve-like, or pass through to the downstream agent. Triggers on requests like "represent human intent", "human representative guidance", "human representative", "approval-like guidance".
 ---
 
+> **⚠️ CRITICAL RULE FOR AI AGENTS EXECUTING SUGGESTED SKILLS:**
+> Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
+> Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
+> Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
+
 # End-User Human Representative Skill
 
 ## Purpose
 
 AI Agents follow this skill to represent human intent at end-user-facing touchpoints by:
 1. Interpreting the user message in workflow and downstream context
-2. Choosing the best disposition for the interaction on behalf of the human
-3. Returning a bounded, user-safe response with optional human-shadow fallback guidance
+2. Decomposing compound messages into independent instruction units when needed
+3. Choosing the best disposition for each instruction unit on behalf of the human
+4. Returning a bounded, user-safe response as `instruction_units[]` with optional human-shadow fallback guidance
 
 ---
 
 ## Important Notes
 
-- **Bounded scope:** This skill represents the human for only the current end-user touchpoint. It MUST NOT silently expand downstream task scope or rewrite requirements beyond the current interaction.
-- **Autonomous by default:** It should answer, clarify, reframe, critique, instruct, provide approval-like guidance, or pass through without waiting for a real human unless human-shadow fallback is required.
-- **Bounded output:** Output may return `content` and a brief `rationale_summary`, but MUST NOT expose full inner reasoning.
-- **Fallback only when needed:** `fallback_required` is true ONLY when `human_shadow` is true AND the skill's internal confidence assessment is below its own threshold.
-- **Best-Model Requirement:** When delegated to a sub-agent, MUST use the most capable (premium) LLM model available (e.g., `claude-opus-4.6`). The 格物致知 backbone requires nuanced reasoning that benefits from the strongest model.
+- **Bounded scope:** Represents the human for only the current touchpoint. MUST NOT expand downstream task scope.
+- **Autonomous by default:** Answer, clarify, reframe, critique, instruct, approve-like, or pass through without waiting for a real human.
+- **Bounded output:** Returns `content` + `rationale_summary` only — MUST NOT expose full inner reasoning.
+- **Fallback only when needed:** `fallback_required` true ONLY when `human_shadow` true AND confidence below threshold.
+- **Best-Model Requirement:** Sub-agent delegation MUST use premium LLM (e.g., `claude-opus-4.6`).
 
 ---
 
 ## About
 
-This skill acts as the first concrete human representative layer in X-IPE. It stands in for a human at specific touchpoints where an agent would otherwise stop for clarification, framing, critique, instruction, or approval-like guidance. The skill does not replace the downstream worker agent; when the best outcome is to let the downstream agent answer directly, it can choose `pass_through` and preserve the original task flow.
+This skill acts as the first concrete human representative layer in X-IPE. It stands in for a human at touchpoints where an agent would otherwise stop for clarification, critique, instruction, or approval-like guidance. It can choose `pass_through` to preserve the original task flow.
 
-**CORE Backbone — 格物致知 (Investigate to Reach Understanding):** This skill's internal reasoning follows a two-phase cognitive framework rooted in Chinese philosophical tradition. 格物 (investigate the nature of things) gathers context and perspectives; 致知 (reach complete understanding) weighs trade-offs and commits to a decision. The framework is not exposed to callers. Callers interact only with the bounded input/output contract.
+**CORE Backbone — 格物致知 (Investigate to Reach Understanding):** Internal two-phase cognitive framework. 格物 (investigate) gathers context and perspectives; 致知 (reach understanding) weighs trade-offs and commits. Not exposed to callers.
 
 **Key Concepts:**
-- **Disposition** — The posture the skill chooses: `answer`, `clarification`, `reframe`, `critique`, `instruction`, `approval`, or `pass_through`
-- **Human Shadow** — An optional real-human fallback used only when the caller enabled it and confidence is too low
-- **Downstream Context** — Information about the active feature, workflow, or worker agent that may make `pass_through` the right disposition
-- **格物致知 Backbone** — The internal decision framework: 格物 (investigate) → 致知 (reach understanding)
+- **Disposition** — `answer`, `clarification`, `reframe`, `critique`, `instruction`, `approval`, or `pass_through`
+- **Human Shadow** — Optional real-human fallback when confidence is too low
+- **Instruction Units** — Compound messages are decomposed into 1–3 independent units, each with its own disposition and skill suggestion
+- **格物致知 Backbone** — 格物 (investigate) → 致知 (reach understanding)
 
 ---
 
@@ -44,13 +50,9 @@ This skill acts as the first concrete human representative layer in X-IPE. It st
 triggers:
   - "represent human intent"
   - "human representative guidance"
-  - "human representative"
   - "approval-like guidance"
-  - "should the downstream agent answer this"
   - "guidance on behalf of the human"
-
 not_for:
-  - "instruction-resource interception rollout — use FEATURE-047-C follow-up work"
   - "long-term memory retrieval or persistence"
 ```
 
@@ -125,33 +127,33 @@ input:
 | Phase | Step | Name | Action | Gate |
 |-------|------|------|--------|------|
 | 0 | 0.1 | 礼 — Greet | Announce identity as '道' | Greeting delivered |
-| 1 | 1.1–1.3 | 格物 — Investigate | Read message, three perspectives, assess environment | Context gathered |
-| 2 | 2.1–2.4 | 致知 — Reach Understanding | Scan skills, weigh dispositions, validate, commit | One disposition committed |
-| 3 | 3.1 | 录 — Record | Write semantic log entry | Log written |
-| 4 | 4.1 | 示 — Present | Format CLI output | Output delivered |
+| 1 | 1.1–1.4 | 格物 — Investigate | Read message, decompose compound, three perspectives, assess environment | Context gathered + instruction units identified |
+| 2 | 2.1–2.4 | 致知 — Reach Understanding | For EACH instruction unit: scan skills, weigh dispositions, validate, commit | One disposition per instruction unit committed |
+| 3 | 3.1 | 录 — Record | Write semantic log entry (all units) | Log written |
+| 4 | 4.1 | 示 — Present | Format CLI output (all units) | Output delivered |
 
 BLOCKING: All phases MUST be executed in order. No phase may be skipped.
-BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple.
+BLOCKING: Phase 2 (致知) MUST produce exactly one disposition PER instruction unit.
+BLOCKING: Output MUST always be `instruction_units[]` — even for single instructions (array of 1).
 
 ### Phase Definitions (格物致知 Framework)
 
 格物：推究、探究事物的道理、规律 — Investigate the nature and patterns of things.
 致知：让自己的认知、智慧达到完备 — Let your understanding and wisdom reach completeness.
 
-| Phase | Chinese | English | 心法 (Heart Method) | Typical Activities |
-|-------|---------|---------|---------------------|-------------------|
-| 0 | 礼 (Lǐ) | Greet | 有朋自远方来，不亦乐乎 | Announce identity as '道', greet the caller |
-| 1 | 格物 (Géwù) | Investigate | 静而后能安；兼听则明；顺势者昌 | Pause, restate need, gather three perspectives, assess direction/timing/environment |
-| 2 | 致知 (Zhìzhī) | Reach Understanding | 两利取其重，两害取其轻；谋贵众，断贵独 | Scan skills, weigh 利/害, three-scenario planning, worst-case gate, commit |
-| 3 | 录 (Lù) | Record | — | Write semantic log entry, append-only |
-| 4 | 示 (Shì) | Present | 言之有文，行而远 | Format final output as structured CLI instructions |
+| Phase | Chinese | English | Typical Activities |
+|-------|---------|---------|-------------------|
+| 0 | 礼 (Lǐ) | Greet | Announce identity as '道' |
+| 1 | 格物 (Géwù) | Investigate | Restate need, decompose compound, three perspectives, assess environment |
+| 2 | 致知 (Zhìzhī) | Reach Understanding | Per unit: scan skills, weigh 利/害, three-scenario, worst-case gate, commit |
+| 3 | 录 (Lù) | Record | Write semantic log entry, append-only |
+| 4 | 示 (Shì) | Present | Format output as structured CLI instructions |
 
 **Phase Rules:**
 - Phase 0 (礼) opens every interaction — announce identity before reasoning.
-- Phase 1 (格物) and Phase 2 (致知) are the reasoning core — NEVER skippable.
+- Phases 1 (格物) and 2 (致知) are the reasoning core — NEVER skippable.
 - Phase 3 (录) is MANDATORY — no silent decisions.
-- Phase 4 (示) closes every interaction — format output as CLI instructions.
-- Phase order is fixed: 0 → 1 → 2 → 3 → 4. No reordering.
+- Phase 4 (示) closes every interaction. Order fixed: 0→1→2→3→4.
 - The backbone is INTERNAL — callers never see phase names or intermediate outputs.
 
 ---
@@ -185,14 +187,41 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
         1. STOP before deciding. Check: Is the message clear? Is context sufficient? Any cascading urgency?
         2. IF context is insufficient → flag for `clarification` or `pass_through` in Phase 2.
         3. Read message_context.messages content. Strip noise, jargon, indirection.
-        4. Produce one sentence: "The user needs: {X}."
+        4. Produce one sentence summarizing the overall user need: "The user needs: {X}."
       </action>
       <constraints>
-        - MUST produce exactly one sentence — MUST NOT interpret beyond what the message says
+        - MUST produce exactly one overall need sentence
         - BLOCKING: Fail with `DAO_INPUT_INVALID` if message content is missing or source is invalid
       </constraints>
       <output>One-sentence user need statement</output>
     </step_1_1>
+
+    <step_1_1b>
+      <name>Decompose Compound Message</name>
+      <!-- 分而治之 — Divide and conquer -->
+      <action>
+        1. Analyze the restated need: does the message contain multiple weakly-related instructions
+           that should be handled by DIFFERENT skills or different execution paths?
+        2. Decomposition criteria — split ONLY when:
+           a. The sub-instructions target different domains (e.g., skill update vs code fix)
+           b. They could reasonably be separate user messages
+           c. They require different task-based skills or one needs a skill and the other doesn't
+        3. Do NOT split when:
+           a. The parts are tightly coupled steps of ONE task (e.g., "write test then implement" = one task)
+           b. The second part is a natural consequence of the first (e.g., "refactor and update imports")
+           c. Splitting would lose important context that links them
+        4. IF compound → produce N instruction units, each with:
+           - `unit_content`: what this unit asks the agent to do
+           - `unit_context`: any relevant context from the original message
+        5. IF NOT compound → produce 1 instruction unit with the full message.
+      </action>
+      <constraints>
+        - Default is 1 unit (no split) — split ONLY when criteria in action.2 are clearly met
+        - Maximum 3 instruction units per message — if more, ask for clarification
+        - Preserve the user's intended execution order (first mentioned = first unit)
+      </constraints>
+      <output>List of instruction units (1 to 3)</output>
+    </step_1_1b>
 
     <step_1_2>
       <name>Gather Three Perspectives</name>
@@ -226,26 +255,30 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
   </phase_1>
 
   <phase_2 name="致知 — Reach Understanding">
+    <!-- Phase 2 runs ONCE PER instruction unit from Step 1.1b -->
+    <!-- For each instruction unit, execute Steps 2.1 → 2.2 → 2.3 → 2.4 independently -->
 
     <step_2_1>
-      <name>Study Existing Skills</name>
+      <name>Study Existing Skills (per unit)</name>
       <action>
-        1. Scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions.
-        2. Rank matches: strong (clear map) | partial (loose) | none.
-        3. For each match, extract execution phases/steps from its Execution Flow table.
-        4. Read current `process_preference.interaction_mode` for execution_strategy.
-        5. Produce suggested_skills list (max 3, may be empty).
-        6. Feed into Step 2.2.
+        1. For the CURRENT instruction unit's content:
+        2. Scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions.
+        3. Rank matches: strong (clear map) | partial (loose) | none.
+        4. For each match, extract execution phases/steps from its Execution Flow table.
+        5. Read current `process_preference.interaction_mode` for execution_strategy.
+        6. Produce suggested_skills list for THIS unit (max 3, may be empty).
+        7. Feed into Step 2.2.
       </action>
       <constraints>
         - Do NOT force-match — empty list is preferred over a bad suggestion
         - execution_steps MUST reflect the actual flow table, not invented steps
+        - Each unit gets its OWN skill matching — do not reuse results across units
       </constraints>
-      <output>suggested_skills list with execution_steps (may be empty)</output>
+      <output>suggested_skills list with execution_steps for this unit (may be empty)</output>
     </step_2_1>
 
     <step_2_2>
-      <name>Weigh Gains and Losses</name>
+      <name>Weigh Gains and Losses (per unit)</name>
       <!-- 两利相权取其重，两害相权取其轻 -->
       <action>
         1. List applicable dispositions: answer, clarification, reframe, critique, instruction, approval, pass_through.
@@ -261,7 +294,7 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
     </step_2_2>
 
     <step_2_3>
-      <name>Select and Validate</name>
+      <name>Select and Validate (per unit)</name>
       <!-- 不能接受的最坏结果，直接放弃 · 投石问路，观衅而动 -->
       <action>
         1. For the top-ranked disposition, envision three outcomes:
@@ -284,19 +317,22 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
     </step_2_3>
 
     <step_2_4>
-      <name>Commit</name>
+      <name>Commit (per unit, then assemble)</name>
       <!-- 谋贵众，断贵独 -->
       <action>
-        1. Lock disposition, content, rationale_summary. No second-guessing after this point.
-        2. Estimate confidence between 0.0 and 1.0.
+        1. Lock disposition, content, rationale_summary for THIS unit. No second-guessing after this point.
+        2. Estimate confidence between 0.0 and 1.0 for this unit.
         3. Set fallback_required: true ONLY if human_shadow == true AND confidence < threshold.
-        4. Attach suggested_skills to operation_output contract.
-        5. Assemble operation_output contract.
+        4. Attach suggested_skills to this unit.
+        5. AFTER all units are committed: assemble `instruction_units[]` array in the order from Step 1.1b.
+        6. Compute overall confidence as the MINIMUM across all units.
+        7. Assemble final operation_output contract with instruction_units[].
       </action>
       <constraints>
-        - MUST NOT revisit the disposition after committing — the decision is final
+        - MUST NOT revisit any unit's disposition after committing — the decision is final
+        - instruction_units[] MUST preserve the order from Step 1.1b
       </constraints>
-      <output>operation_output ready</output>
+      <output>operation_output with instruction_units[] ready</output>
     </step_2_4>
 
   </phase_2>
@@ -307,11 +343,14 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
       <action>
         1. Determine semantic_task_type from calling_skill (e.g., "bug-fix" → "bug_fix").
         2. Ensure `x-ipe-docs/dao/` folder exists.
-        3. Append entry to `decisions_made_{semantic_task_type}.md` using format from `references/dao-log-format.md`.
+        3. Append ONE log entry covering ALL instruction units to `decisions_made_{semantic_task_type}.md`
+           using format from `references/dao-log-format.md`.
+        4. Each unit's disposition, content, and suggested_skills MUST appear in the log entry.
       </action>
       <constraints>
         - MANDATORY: Every DAO interaction MUST produce a log entry — no silent decisions
         - Log entries are append-only — never edit or delete previous entries
+        - One log entry per DAO invocation, not per instruction unit
       </constraints>
       <output>Log entry written to x-ipe-docs/dao/decisions_made_{semantic_task_type}.md</output>
     </step_3_1>
@@ -322,22 +361,34 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
       <name>Format CLI Output</name>
       <!-- 言之有文，行而远 -->
       <action>
-        1. Take committed operation_output from Phase 2.
-        2. Format as structured CLI output:
+        1. Take committed operation_output with instruction_units[] from Phase 2.
+        2. Format as structured CLI output, one block PER instruction unit:
            ```
-           道 · Disposition: {disposition}
+           道 · Instruction Unit {N}/{total}
+           Disposition: {disposition}
            Content: {content}
            Rationale: {rationale_summary}
-           Confidence: {confidence} | Fallback: {fallback_required}
            Skills: {suggested_skills summary or "none"}
+           ```
+        3. After all units, print summary:
+           ```
+           道 · Total: {N} instruction unit(s) | Confidence: {confidence} | Fallback: {fallback_required}
            道 · Complete.
            ```
-        3. Print formatted output to CLI.
-        4. Return operation_output contract (YAML) as the skill's return value.
+        4. IF ANY unit has suggested_skills non-empty, APPEND to the CLI output:
+           ```
+           ⚠️ Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
+           ⚠️ Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
+           ⚠️ Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
+           ```
+        5. Print formatted output to CLI.
+        6. Return operation_output contract (YAML) as the skill's return value.
       </action>
       <constraints>
         - MUST print structured output — not free-form prose
         - CLI output is for observability; operation_output contract is the machine-readable return
+        - WHEN any unit has suggested_skills non-empty: the 3x "Follow the steps EXACTLY" reminder is MANDATORY
+        - Agent consuming this output MUST iterate over instruction_units[] — one task per unit
       </constraints>
       <output>CLI-formatted output printed + operation_output returned</output>
     </step_4_1>
@@ -354,21 +405,33 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
 operation_output:
   success: true | false
   result:
-    disposition: "answer | clarification | reframe | critique | instruction | approval | pass_through"
-    content: "bounded response for the user or downstream handoff"
-    rationale_summary: "brief explanation of why the disposition was chosen"
-    confidence: 0.0
+    instruction_units:        # ALWAYS an array — even for single instructions (array of 1)
+      - disposition: "answer | clarification | reframe | critique | instruction | approval | pass_through"
+        content: "bounded response for this instruction unit"
+        rationale_summary: "brief explanation of why this disposition was chosen"
+        suggested_skills:     # from Step 2.1 — may be empty list
+          - skill_name: "x-ipe-task-based-{name}"
+            match_strength: "strong | partial"
+            reason: "why this skill matches this unit"
+            execution_steps:  # from skill's Execution Flow table
+              - phase: "1. Phase Name"
+                step: "1.1 Step Name"
+    # Shared fields (apply across all units)
+    confidence: 0.0           # minimum confidence across all units
     fallback_required: false
     execution_strategy:
       interaction_mode: "dao-represent-human-to-interact | interact-with-human | dao-represent-human-to-interact-for-questions-in-skill"
-    suggested_skills:   # from Step 2.1 — may be empty list
-      - skill_name: "x-ipe-task-based-{name}"
-        match_strength: "strong | partial"
-        reason: "why this skill matches the input"
-        execution_steps:   # from skill's Execution Flow table
-          - phase: "1. Phase Name"
-            step: "1.1 Step Name"
   errors: []
+```
+
+### Agent Consumption Pattern
+
+```
+# The consuming agent MUST use this pattern:
+for each unit in instruction_units:
+    create task on task-board.md
+    load suggested skill (or general work if suggested_skills is empty)
+    execute following skill steps exactly
 ```
 
 ---
@@ -378,28 +441,28 @@ operation_output:
 ```xml
 <definition_of_done>
   <checkpoint required="true">
-    <name>Single disposition selected</name>
-    <verification>Result contains exactly one supported disposition</verification>
+    <name>Instruction units produced</name>
+    <verification>Result contains instruction_units[] with 1–3 entries, each with exactly one supported disposition</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Bounded response returned</name>
-    <verification>content and rationale_summary are concise and do not expose full inner reasoning</verification>
+    <name>Bounded responses returned</name>
+    <verification>Each unit's content and rationale_summary are concise and do not expose full inner reasoning</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Fallback logic applied correctly</name>
     <verification>fallback_required is true only when human_shadow is true and internal confidence is below threshold</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Suggested skills evaluated</name>
-    <verification>Step 2.1 executed — suggested_skills list (possibly empty) included in output</verification>
+    <name>Suggested skills evaluated per unit</name>
+    <verification>Step 2.1 executed per unit — each unit has its own suggested_skills list (possibly empty)</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Semantic log written</name>
-    <verification>Log entry appended to x-ipe-docs/dao/decisions_made_{semantic_task_type}.md</verification>
+    <verification>Log entry appended to x-ipe-docs/dao/decisions_made_{semantic_task_type}.md covering all units</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>CLI output presented</name>
-    <verification>Phase 4 (示) executed — structured CLI output printed</verification>
+    <verification>Phase 4 (示) executed — structured CLI output printed for all units</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -418,9 +481,7 @@ operation_output:
 
 ## Future Extensions
 
-> Reserved for later versions.
-
-- **Reusable Memory:** A future version may add cross-task experience recall. The output contract supports adding fields without breaking existing callers.
+- **Reusable Memory:** A future version may add cross-task experience recall.
 
 ---
 
@@ -428,8 +489,8 @@ operation_output:
 
 | File | Purpose |
 |------|---------|
-| `references/dao-disposition-guidelines.md` | Guidance for selecting the right disposition consistently |
-| `references/dao-log-format.md` | Detailed semantic log entry format for Phase 3 (录) |
+| `references/dao-disposition-guidelines.md` | Disposition selection guidance |
+| `references/dao-log-format.md` | Semantic log entry format for Phase 3 (录) |
 | `references/examples.md` | Example scenarios and expected outputs |
 
 ---

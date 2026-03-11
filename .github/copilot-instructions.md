@@ -1,5 +1,10 @@
 # Copilot Instructions
 
+> **⚠️ CRITICAL RULE FOR AI AGENTS EXECUTING SUGGESTED SKILLS:**
+> Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
+> Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
+> Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
+
 ## Before You Start
 
 ## ⚠️ CRITICAL: DAO-First — Every Message Through Human Representative
@@ -34,18 +39,24 @@
 
 ## ⚠️ CRITICAL: Skill-First, Not Code-First
 
-**When DAO returns disposition `instruction` (user is commanding action), do NOT jump straight into coding or making changes.**
+**When DAO returns any instruction unit with disposition `instruction` (user is commanding action), do NOT jump straight into coding or making changes.**
 
 ### 🚫 HARD GATE: No `edit` / `create` Tool Calls Without a Loaded Skill
 
-Before calling **any** file-editing tool (`edit`, `create`, or writing code via `bash`), you MUST have:
-1. ✅ Processed the message through `x-ipe-dao-end-user-representative` (disposition = `instruction`)
-2. ✅ Classified the request into a task-based skill
-3. ✅ Created a task on `task-board.md`
-4. ✅ Loaded the corresponding skill (via `skill` tool or by reading its `SKILL.md`)
-5. ✅ Reached the skill's implementation step that permits code changes
+DAO now returns `instruction_units[]` — an array of 1–3 instruction units. The agent MUST iterate over each unit:
 
-If ANY of these are missing → **STOP. Do not touch code.**
+```
+for each unit in instruction_units:
+    1. ✅ Check unit disposition (if `instruction` → continue below; if `answer`/other → handle accordingly)
+    2. ✅ Classified the unit into a task-based skill (from unit's suggested_skills)
+    3. ✅ Created a task on `task-board.md` for this unit
+    4. ✅ Loaded the corresponding skill (via `skill` tool or by reading its `SKILL.md`)
+    5. ✅ Reached the skill's implementation step that permits code changes
+    6. Execute the unit
+    then proceed to next unit
+```
+
+If ANY of steps 1–5 are missing for the CURRENT unit → **STOP. Do not touch code.**
 
 
 ### ⛔ Real-World Lesson:
@@ -57,7 +68,7 @@ If ANY of these are missing → **STOP. Do not touch code.**
            wrote test AFTER the fix, no task board entry*
 
 ✅ What should have happened:
-   Agent: *DAO interprets → disposition: instruction →
+   Agent: *DAO interprets → instruction_units[0].disposition: instruction →
            classifies as bug fix → loads x-ipe-workflow-task-execution → loads x-ipe-task-based-bug-fix →
            creates TASK-681 on board → diagnoses root cause →
            runs conflict analysis → writes FAILING test first →

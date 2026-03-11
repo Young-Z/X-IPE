@@ -156,11 +156,21 @@ input:
       CRITICAL: Evaluate ALL 5 perspectives even if docs missing (set status: not_found)
 
     Phase 4 — Generate Suggestions:
-      1. ANALYZE quality gaps → derive suggestion categories
-      2. SCAN code for principle violations (SRP, DRY, KISS, YAGNI, SoC)
-      3. PRIORITIZE into primary (MUST) and secondary (nice-to-have) principles
-      4. FORMULATE specific, measurable goals with priority and rationale
-      5. DEFINE target structure and constraints (backward compat, API stability)
+      1. CONSULT TOOL SKILLS (config-filtered):
+         a. DISCOVER: Scan .github/skills/x-ipe-tool-implementation-*/ for available tools
+         b. READ CONFIG: Read x-ipe-docs/config/tools.json → stages.feature.consultation
+            - IF section missing/empty → config_active = false (all tools enabled)
+            - ELSE → config_active = true (opt-in filtering); force-enable general
+         c. FILTER: IF config_active → only ENABLED tools participate
+         d. FOR detected tech_stack: read matched tool's "Built-In Practices"
+      2. ANALYZE quality gaps → derive suggestion categories
+      3. SCAN code for principle violations (SRP, DRY, KISS, YAGNI, SoC)
+      4. CROSS-REFERENCE gaps against tool built-in practices:
+         - IF tool already enforces a practice → mark gap as "auto-enforced by tool"
+         - IF tool provides conventions → reference them in suggestion
+      5. PRIORITIZE into primary (MUST) and secondary (nice-to-have) principles
+      6. FORMULATE specific, measurable goals with priority and rationale
+      7. DEFINE target structure and constraints (backward compat, API stability)
       BLOCKING: Every suggestion must trace back to a documented gap
 
     Phase 5 — Compile Output:

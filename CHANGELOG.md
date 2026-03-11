@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **EPIC-048: Dynamic Tool Selection for Code-Touching Skills**
+  - FEATURE-048-A: Extended 6 tool-implementation skills with `fix`/`refactor` operations and optional `feature_context`
+  - FEATURE-048-B: Config-filtered tool consultation for technical-design (Step 2.2) and refactoring-analysis (Phase 4)
+  - FEATURE-048-C: Bug fix delegation — tool routing in Steps 6-7 with AAA scenarios and TDD gate
+  - FEATURE-048-D: Code refactor delegation — tool routing in Phase 4 with per-phase AAA and rollback
+  - FEATURE-048-E: Acceptance test tool selection — test code generation routed to matched tool skill
+  - FEATURE-048-F: Human playground tool selection — dynamic file naming/execution (.py→.{ext})
+  - Added 5 new `tools.json` config sections: consultation, playground, bug_fix, testing, execution
+  - Updated `implementation-guidelines.md` with operation semantics table
+
+### Added
 - **FEATURE-025-E: KB Search & Preview** (EPIC-025)
   - Global search modal (`Cmd+K` / `Ctrl+K`) with debounced API calls (300ms)
   - Search results grouped by section (Files, Topics, Summaries) with highlighted matches

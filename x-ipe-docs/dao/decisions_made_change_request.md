@@ -8,6 +8,7 @@
 | DAO-005 | 2026-03-07T15:29:52Z | TASK-789 | N/A (initial) | instruction | 0.90 | UIUX feedback: remove sidebar hover auto-expand behavior — user expects click-only expand |
 | DAO-006 | 2026-03-08T07:57:32Z | N/A | N/A (initial) | clarification | 0.92 | UIUX feedback contradicts TASK-789 — user now wants hover-to-expand, but TASK-789 (in_progress) removes hover-to-expand |
 | DAO-013 | 2026-03-09T07:45:00Z | TASK-793 | x-ipe-task-based-change-request | approval | 0.95 | User approves proceeding to feature refinement for FEATURE-044-E after CR-002 completion |
+| DAO-015 | 2026-03-09T17:30:00Z | (pending) | N/A (initial) | instruction | 0.92 | DoR/DoD overrun fix: update skill-creator with max checkpoint limits, then audit all existing skills |
 
 ---
 
@@ -171,3 +172,44 @@
 
 ### Follow-up
 > None — proceeding to feature refinement
+
+---
+
+## DAO-015
+- **Timestamp:** 2026-03-09T17:30:00Z
+- **Task ID:** (pending — to be created by Rune)
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A (initial user message)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.92
+
+### Message
+> "I find one overrun fact, DoD and DoR in some skill getting longer and longer, why not let's update the skill creator skill to limit the dor and dod with maximum checks, and leave it's check for most critical check points if it's over maximum capacity. then reflect all existing skills with DoR and DoD"
+
+### Guidance Returned
+> Two-part instruction: (1) Update x-ipe-meta-skill-creator to enforce maximum checkpoint limits in DoR/DoD sections — when over capacity, retain only the most critical checkpoints. Update templates and validation rules accordingly. (2) Audit all existing skills with DoR/DoD sections and trim to comply with the new limits. Route via x-ipe-meta-skill-creator skill (update itself first, then audit).
+
+### Rationale
+> User is the framework architect who just completed TASK-797 (skill validation audit). Observation of DoR/DoD overrun is evidence-based. The request is clear, two-part, and well-scoped. instruction disposition chosen because intent is unambiguous and aligns with current workflow momentum. Confidence 0.92 — slight deduction only because exact max number is left to implementation judgment.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-meta-skill-creator"
+>     match_strength: "strong"
+>     reason: "The skill being modified IS the skill-creator. Use it to update itself (templates + validation), then audit all skills."
+>     execution_steps:
+>       - phase: "1. Identify Skill Type"
+>         step: "1 — Identify as meta skill update"
+>       - phase: "4. Round 1: Meta + Draft"
+>         step: "4 — Draft updated template with max checkpoint rules"
+>       - phase: "5. Round 2: Reflect + Tests"
+>         step: "5 — Validate updated templates against existing skills"
+>       - phase: "8. Merge/Iterate"
+>         step: "8 — Merge if pass, iterate if fail"
+>       - phase: "9. Cross-References"
+>         step: "9 — Audit all existing skills for compliance"
+
+### Follow-up
+> None — proceed to task creation and skill-creator execution

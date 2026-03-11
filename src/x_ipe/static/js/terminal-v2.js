@@ -599,13 +599,13 @@
                             .replace('{escaped_prompt}', escapedCommand)
                             .replace(/\s+/g, ' ').trim();
                     } else {
-                        cliCommand = `copilot --allow-all-tools -i "${escapedCommand}"`;
+                        cliCommand = `copilot --allow-all-tools --allow-all-paths -i "${escapedCommand}"`;
                     }
                     this._typeWithEffect(instance.socket, cliCommand, null, false);
                 })
                 .catch(() => {
                     // Fallback to copilot if API unavailable
-                    const cliCommand = `copilot --allow-all-tools -i "${escapedCommand}"`;
+                    const cliCommand = `copilot --allow-all-tools --allow-all-paths -i "${escapedCommand}"`;
                     this._typeWithEffect(instance.socket, cliCommand, null, false);
                 });
         }

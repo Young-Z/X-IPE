@@ -10,7 +10,44 @@
         "_order": 1
       },
       "implementation": {
-        "_order": 2
+        "_order": 2,
+        "_extra_instruction": "",
+        "x-ipe-tool-implementation-python": true,
+        "x-ipe-tool-implementation-html5": true,
+        "x-ipe-tool-implementation-typescript": true,
+        "x-ipe-tool-implementation-java": true,
+        "x-ipe-tool-implementation-mcp": true,
+        "x-ipe-tool-implementation-general": true
+      },
+      "consultation": {
+        "_order": 3,
+        "_extra_instruction": "Consultation mode: read tool capabilities for informational use only. Do not invoke tools for code execution.",
+        "x-ipe-tool-implementation-python": true,
+        "x-ipe-tool-implementation-html5": true,
+        "x-ipe-tool-implementation-typescript": true,
+        "x-ipe-tool-implementation-java": true,
+        "x-ipe-tool-implementation-mcp": true,
+        "x-ipe-tool-implementation-general": true
+      },
+      "playground": {
+        "_order": 4,
+        "_extra_instruction": "Playground mode: create self-contained runnable examples for human validation. File extension and run command determined by matched tool.",
+        "x-ipe-tool-implementation-python": true,
+        "x-ipe-tool-implementation-typescript": true,
+        "x-ipe-tool-implementation-html5": true,
+        "x-ipe-tool-implementation-java": true,
+        "x-ipe-tool-implementation-mcp": true,
+        "x-ipe-tool-implementation-general": true
+      },
+      "bug_fix": {
+        "_order": 5,
+        "_extra_instruction": "Bug fix mode: TDD gate required — test must fail before fix. Tool skill receives operation 'fix' with mini AAA scenarios from bug context.",
+        "x-ipe-tool-implementation-python": true,
+        "x-ipe-tool-implementation-typescript": true,
+        "x-ipe-tool-implementation-html5": true,
+        "x-ipe-tool-implementation-java": true,
+        "x-ipe-tool-implementation-mcp": true,
+        "x-ipe-tool-implementation-general": true
       }
     },
     "ideation": {
@@ -43,7 +80,14 @@
         "_order": 2
       },
       "testing": {
-        "_order": 1
+        "_order": 1,
+        "_extra_instruction": "Testing mode: route test code generation to tool skills. Chrome DevTools MCP for browser interaction remains separate.",
+        "x-ipe-tool-implementation-python": true,
+        "x-ipe-tool-implementation-typescript": true,
+        "x-ipe-tool-implementation-html5": true,
+        "x-ipe-tool-implementation-java": true,
+        "x-ipe-tool-implementation-mcp": true,
+        "x-ipe-tool-implementation-general": true
       }
     },
     "refactoring": {
@@ -51,7 +95,14 @@
         "_order": 1
       },
       "execution": {
-        "_order": 2
+        "_order": 2,
+        "_extra_instruction": "Refactor mode: preserve behavior, structure changes only. Tool skill receives operation 'refactor' with per-phase AAA scenarios. Orchestrator manages git checkpoints.",
+        "x-ipe-tool-implementation-python": true,
+        "x-ipe-tool-implementation-typescript": true,
+        "x-ipe-tool-implementation-html5": true,
+        "x-ipe-tool-implementation-java": true,
+        "x-ipe-tool-implementation-mcp": true,
+        "x-ipe-tool-implementation-general": true
       }
     },
     "requirement": {

@@ -31,7 +31,7 @@ IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "dev-environment"
+  task_based_skill: "x-ipe-task-based-dev-environment"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
@@ -40,7 +40,11 @@ input:
 
   # Task type attributes
   category: "standalone"
-  next_task_based_skill: null
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-ideation"
+      condition: "Start ideating on a new project"
+    - skill: "x-ipe-task-based-requirement-gathering"
+      condition: "Begin gathering requirements if they already exist"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
 
@@ -253,7 +257,11 @@ BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
 task_completion_output:
   category: "standalone"
   status: completed | blocked
-  next_task_based_skill: null
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-ideation"
+      condition: "Start ideating on a new project"
+    - skill: "x-ipe-task-based-requirement-gathering"
+      condition: "Begin gathering requirements if they already exist"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"

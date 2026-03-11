@@ -59,12 +59,12 @@ not_for:
 
 ```yaml
 input:
-  operation: "implement"
+  operation: "implement"  # Supported: "implement" | "fix" | "refactor"
   aaa_scenarios:
     - scenario_text: "{tagged AAA scenario text}"
   source_code_path: "{path to source directory}"
   test_code_path: "{path to test directory}"
-  feature_context:
+  feature_context:  # OPTIONAL for "fix"/"refactor"; REQUIRED for "implement"
     feature_id: "{FEATURE-XXX-X}"
     feature_title: "{title}"
     technical_design_link: "{path to technical-design.md}"
@@ -75,11 +75,11 @@ input:
 
 ```xml
 <input_init>
-  <field name="operation" source="Always 'implement' when called by orchestrator" />
+  <field name="operation" source="'implement' | 'fix' | 'refactor' — set by calling orchestrator" />
   <field name="aaa_scenarios" source="Filtered scenarios from orchestrator Step 5" />
   <field name="source_code_path" source="From technical design Part 2" />
   <field name="test_code_path" source="From technical design Part 2 or project convention" />
-  <field name="feature_context" source="From orchestrator's Feature Data Model" />
+  <field name="feature_context" source="From orchestrator's Feature Data Model. OPTIONAL for fix/refactor — use synthetic fallback if absent" />
 </input_init>
 ```
 
@@ -155,6 +155,66 @@ input:
     - BLOCKING: Steps 1-2 (identify + research) MUST complete before Step 4 (implement)
     - CRITICAL: Follow existing code conventions in source_code_path
     - MANDATORY: Every AAA Assert clause must map to a test assertion
+  </constraints>
+  <output>Standard tool skill output (implementation_files, test_files, test_results, lint_status)</output>
+</operation>
+
+<operation name="fix">
+  <action>
+    1. IDENTIFY language and framework from file extensions, package files in source_code_path
+    2. RESEARCH best practices: documentation, testing frameworks, linting tools for detected language
+    3. LEARN existing code structure in source_code_path
+    4. IF feature_context is absent: generate synthetic context (feature_id: "BUG-{task_id}", technical_design_link: "N/A")
+    5. WRITE failing test from AAA scenario:
+       a. FOR EACH AAA scenario:
+          - Create test function named: test_fix_{scenario_name}
+          - Arrange → reproduce bug preconditions
+          - Act → trigger the buggy action
+          - Assert → expected CORRECT behavior (one assert per Assert clause)
+    6. RUN test → MUST FAIL (TDD gate)
+       - IF test passes → STOP, report: "TDD gate violation — test already passes, review scenario"
+    7. IMPLEMENT minimal fix following detected language best practices
+       - Only change what is necessary to make the test pass
+       - Follow existing code conventions from Step 3
+    8. RUN test → MUST PASS
+    9. RUN all existing tests → no regressions
+    10. RUN linting with discovered linting tool
+    11. RETURN standard output
+  </action>
+  <constraints>
+    - BLOCKING: Steps 1-2 (identify + research) MUST complete before Step 7 (implement)
+    - BLOCKING: Test MUST fail before fix (Step 6) — TDD gate
+    - CRITICAL: Minimal fix only — do not refactor during a fix
+    - MANDATORY: Feature_context is OPTIONAL — use synthetic fallback if absent
+  </constraints>
+  <output>Standard tool skill output (implementation_files, test_files, test_results, lint_status)</output>
+</operation>
+
+<operation name="refactor">
+  <action>
+    1. IDENTIFY language and framework from file extensions, package files in source_code_path
+    2. RESEARCH best practices: documentation, testing frameworks, linting tools for detected language
+    3. LEARN existing code structure in source_code_path
+    4. IF feature_context is absent: generate synthetic context (feature_id: "REFACTOR-{task_id}", technical_design_link: "N/A")
+    5. RUN existing tests → establish baseline (all must pass)
+       - IF any test fails → STOP, report: "Cannot refactor — baseline tests failing"
+    6. RESTRUCTURE code per AAA scenario target state:
+       a. FOR EACH AAA scenario:
+          - Read target state from Assert clauses
+          - Apply structural changes following detected language best practices
+          - Preserve external behavior
+    7. UPDATE imports and references across affected files
+    8. RUN all tests → MUST pass (behavior preserved)
+       - IF tests fail → report failed scenarios with details; do NOT auto-revert (orchestrator decides)
+    9. RUN linting with discovered linting tool
+    10. RETURN standard output
+  </action>
+  <constraints>
+    - BLOCKING: Steps 1-2 (identify + research) MUST complete before Step 6 (restructure)
+    - BLOCKING: Baseline tests must pass before refactoring (Step 5)
+    - CRITICAL: Preserve behavior — no functional changes
+    - CRITICAL: Do NOT manage git commits — orchestrator handles checkpointing
+    - MANDATORY: Feature_context is OPTIONAL — use synthetic fallback if absent
   </constraints>
   <output>Standard tool skill output (implementation_files, test_files, test_results, lint_status)</output>
 </operation>

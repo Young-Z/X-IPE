@@ -58,6 +58,8 @@ BLOCKING: Read [skill-general-guidelines-v2.md](.github/skills/x-ipe-meta-skill-
 
 CRITICAL: SKILL.md body must stay under 500 lines. Move examples to references/.
 
+CRITICAL: DoR ≤ 5 checkpoints, DoD ≤ 10 checkpoints. If over limit, keep only the most critical checks and merge related ones.
+
 MANDATORY: All 6 skill types have complete templates in the templates/ folder.
 
 CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL actions. Do NOT split actions into separate blocks (e.g., `<branch>`). Conditional logic (IF/THEN/ELSE) belongs inline within the `<action>` numbered list.
@@ -112,12 +114,13 @@ input:
 | 1 | Identify Skill Type | Determine type, select template | type selected |
 | 2 | Gather Examples | Collect usage scenarios | >= 2 examples |
 | 3 | Plan Resources | Identify scripts/references/templates | resources planned |
-| 4 | Round 1: Meta + Draft | Create skill-meta.md + candidate/ (sub-agent 1) | both complete |
-| 5 | Round 2: Reflect + Tests | Reflect on candidate + generate tests (sub-agent 2) | both complete |
-| 6 | Round 3: Run Tests | Execute tests in sandbox (sub-agent 3) | tests executed |
-| 7 | Round 4: Evaluate | Evaluate results (sub-agent 4) | evaluation complete |
-| 8 | Merge/Iterate | Merge if pass, iterate if fail | decision made |
-| 9 | Cross-References | Validate external references | all valid |
+| 4 | Self-Critique Scope | AI validates scope; escalates only specific ambiguities | scope validated |
+| 5 | Round 1: Meta + Draft | Create skill-meta.md + candidate/ (sub-agent 1) | both complete |
+| 6 | Round 2: Reflect + Tests | Reflect on candidate + generate tests (sub-agent 2) | both complete |
+| 7 | Round 3: Run Tests | Execute tests in sandbox (sub-agent 3) | tests executed |
+| 8 | Round 4: Evaluate | Evaluate results (sub-agent 4) | evaluation complete |
+| 9 | Merge/Iterate | Merge if pass, iterate if fail | decision made |
+| 10 | Cross-References | Validate external references | all valid |
 
 ---
 
@@ -199,6 +202,34 @@ input:
   </step_3>
 
   <step_4>
+    <name>Self-Critique Scope</name>
+    <requires>skill_type, skill_template_path, examples[], resources_plan[]</requires>
+    <action>
+      1. AI self-critique — validate scope against objective criteria:
+         a. Skill type matches the description (e.g., not a tool skill disguised as task-based)
+         b. Template path exists and is correct for the chosen type
+         c. Examples cover at least 2 distinct trigger patterns
+         d. Resources plan references only files that will be created (no dangling refs)
+         e. No naming conflicts with existing skills in .github/skills/
+      2. Collect unresolved_questions[] — ONLY genuine ambiguities:
+         - "This skill could be task-based OR tool type — which fits better?"
+         - "Example 2 overlaps with existing skill X — should we merge or keep separate?"
+      3. IF unresolved_questions is EMPTY → scope validated, proceed
+      4. IF unresolved_questions is NON-EMPTY:
+         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
+           → Invoke x-ipe-dao-end-user-representative with specific questions
+         ELSE:
+           → Present ONLY the specific questions to human
+         → Incorporate answers, revise scope
+    </action>
+    <constraints>
+      - MUST NOT ask broad "is this scope correct?" — only ask specific, bounded questions
+      - IF self-critique passes with zero questions → skip human/DAO entirely
+    </constraints>
+    <output>scope_validated</output>
+  </step_4>
+
+  <step_5>
     <name>Round 1: Create Meta + Draft</name>
     <requires>skill_type, skill_template_path, skill_meta_template_path, examples[], resources_plan[]</requires>
     <action>
@@ -224,9 +255,9 @@ input:
       - All planned resources from resources_plan[] exist inside candidate/
     </success_criteria>
     <output>skill-meta.md, candidate/</output>
-  </step_4>
+  </step_5>
 
-  <step_5>
+  <step_6>
     <name>Round 2: Reflect + Test Cases</name>
     <requires>skill-meta.md, candidate/</requires>
     <action>
@@ -238,9 +269,9 @@ input:
       - test-cases.yaml created
     </success_criteria>
     <output>candidate/, test-cases.yaml</output>
-  </step_5>
+  </step_6>
 
-  <step_6>
+  <step_7>
     <name>Round 3: Run Tests</name>
     <requires>test-cases.yaml</requires>
     <action>
@@ -252,9 +283,9 @@ input:
       - Execution log recorded
     </success_criteria>
     <output>sandbox/{outputs}, execution-log.yaml</output>
-  </step_6>
+  </step_7>
 
-  <step_7>
+  <step_8>
     <name>Round 4: Evaluate Results</name>
     <requires>sandbox/{outputs}, execution-log.yaml</requires>
     <action>
@@ -267,9 +298,9 @@ input:
       - Pass/fail determination made
     </success_criteria>
     <output>evaluation-report.yaml</output>
-  </step_7>
+  </step_8>
 
-  <step_8>
+  <step_9>
     <name>Merge or Iterate</name>
     <requires>evaluation-report.yaml</requires>
     <action>
@@ -279,7 +310,7 @@ input:
          - IF missing files found: add them to candidate/ before merging
          - cp -r candidate/* .github/skills/{skill-name}/
          - Update skill-version-history.md
-         - Proceed to Step 9
+         - Proceed to Step 10
       3. IF tests failed AND iteration_count < 3:
          - Update candidate, re-run from Round 2
       4. IF tests failed AND iteration_count >= 3:
@@ -292,25 +323,27 @@ input:
       - Skill merged OR iteration documented
     </success_criteria>
     <output>merge_status</output>
-  </step_8>
+  </step_9>
 
-  <step_9>
+  <step_10>
     <name>Validate Cross-References</name>
     <requires>merge_status == merged</requires>
     <action>
-      1. Verify skill's Output Result YAML declares: category, next_task_based_skill, require_human_review (x-ipe-task-based only)
+      1. Verify skill's Output Result YAML declares: category, next_task_based_skill, interaction_mode (x-ipe-task-based only)
       2. Verify skill description contains trigger keywords for auto-discovery (x-ipe-task-based only)
       3. Verify bidirectional references
       4. Verify Input Initialization subsection exists under Input Parameters with <input_init> XML block
+      5. Verify DoR ≤ 5 checkpoints AND DoD ≤ 10 checkpoints. If over, trim to most critical checks.
     </action>
     <constraints>
-      - MANDATORY: Task-based skills must declare category, next_task_based_skill, require_human_review in Output Result for auto-discovery
+      - MANDATORY: Task-based skills must declare category, next_task_based_skill, interaction_mode in Output Result for auto-discovery
+      - CRITICAL: DoR ≤ 5 checkpoints, DoD ≤ 10 checkpoints
     </constraints>
     <success_criteria>
       - Cross-references validated
     </success_criteria>
     <output>cross_references_valid</output>
-  </step_9>
+  </step_10>
 
   <sub-agent-planning>
     <!-- Constraint: One step = one sub-agent; one sub-agent = many steps -->
@@ -319,14 +352,14 @@ input:
         <role>Meta & Draft Creator</role>
         <prompt>Load skill-meta template from {skill_meta_template_path} and SKILL.md template from {skill_template_path}. Fill both with skill-specific content. Output: x-ipe-docs/skill-meta/{skill-name}/skill-meta.md and x-ipe-docs/skill-meta/{skill-name}/candidate/</prompt>
       </sub_agent_definition>
-      <workflow_step_reference>step_4</workflow_step_reference>
+      <workflow_step_reference>step_5</workflow_step_reference>
     </sub_agent_1>
     <sub_agent_2>
       <sub_agent_definition>
         <role>Reflector & Test Generator</role>
         <prompt>Review candidate against skill-meta, identify gaps, suggest improvements. Then generate test-cases.yaml from acceptance criteria in skill-meta.md</prompt>
       </sub_agent_definition>
-      <workflow_step_reference>step_5</workflow_step_reference>
+      <workflow_step_reference>step_6</workflow_step_reference>
       <starting_condition>
         - "START after sub_agent_1 completes"
       </starting_condition>
@@ -336,7 +369,7 @@ input:
         <role>Test Runner</role>
         <prompt>Execute test cases in sandbox, record outputs and execution log</prompt>
       </sub_agent_definition>
-      <workflow_step_reference>step_6</workflow_step_reference>
+      <workflow_step_reference>step_7</workflow_step_reference>
       <starting_condition>
         - "START after sub_agent_2 completes"
       </starting_condition>
@@ -346,7 +379,7 @@ input:
         <role>Evaluator</role>
         <prompt>Evaluate sandbox outputs against expectations, generate evaluation-report.yaml</prompt>
       </sub_agent_definition>
-      <workflow_step_reference>step_7</workflow_step_reference>
+      <workflow_step_reference>step_8</workflow_step_reference>
       <starting_condition>
         - "START after sub_agent_3 completes"
       </starting_condition>
@@ -383,83 +416,45 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 
 ```xml
 <definition_of_done>
-  <!-- Step Output Verification -->
   <checkpoint required="true">
-    <name>Step 1-3 Outputs Complete</name>
-    <verification>skill_type, template_path, examples[], resources_plan[] defined</verification>
-    <step_output>skill_type, template_path, examples[], trigger_patterns[], resources_plan[]</step_output>
+    <name>Planning Complete</name>
+    <verification>skill_type, template_path, examples[], resources_plan[] defined; skill-meta.md created from template</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Step 4 Outputs Complete</name>
-    <verification>skill-meta.md and candidate/ folder created with ALL bundled resources (references/, scripts/, templates/) inside candidate/</verification>
-    <step_output>skill-meta.md, candidate/</step_output>
+    <name>Candidate Created</name>
+    <verification>candidate/SKILL.md + all bundled resources (references/, scripts/, templates/) exist in candidate/</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Step 5 Outputs Complete</name>
-    <verification>test-cases.yaml exists in x-ipe-docs/skill-meta/{skill-name}/</verification>
-    <step_output>candidate/, test-cases.yaml</step_output>
+    <name>Validation Passed</name>
+    <verification>test-cases.yaml created, sandbox executed, evaluation passed (must_pass=100%, should_pass>=80%)</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Step 6 Outputs Complete</name>
-    <verification>sandbox/ folder with test outputs and execution-log.yaml exist</verification>
-    <step_output>sandbox/{outputs}, execution-log.yaml</step_output>
+    <name>Merged with Parity</name>
+    <verification>Skill merged to .github/skills/{skill-name}/ AND every production file has corresponding candidate/ file</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Step 7 Outputs Complete</name>
-    <verification>evaluation-report.yaml exists with pass/fail results</verification>
-    <step_output>evaluation-report.yaml</step_output>
+    <name>SKILL.md Structure Valid</name>
+    <verification>Frontmatter valid (name + triggers), section order correct, keywords used, line count under 500</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Step 8 Output Complete</name>
-    <verification>Skill merged to .github/skills/{skill-name}/ or iteration documented</verification>
-    <step_output>merge_status</step_output>
+    <name>DoR/DoD Within Limits</name>
+    <verification>Created skill has DoR at most 5 and DoD at most 10 checkpoints</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Candidate-Production Parity</name>
-    <verification>Every file in .github/skills/{skill-name}/ has a corresponding file in candidate/ — no files were created directly in production</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Step 9 Output Complete</name>
-    <verification>Cross-references validated (auto-discovery fields declared if x-ipe-task-based)</verification>
-    <step_output>cross_references_valid</step_output>
-  </checkpoint>
-  
-  <!-- Quality Verification -->
-  <checkpoint required="true">
-    <name>Candidate SKILL.md Created</name>
-    <verification>File exists at x-ipe-docs/skill-meta/{skill-name}/candidate/SKILL.md</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>SKILL.md Created</name>
-    <verification>File exists at .github/skills/{skill-name}/SKILL.md</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Frontmatter Valid</name>
-    <verification>name (1-64 chars) and description (includes triggers)</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Section Order Correct</name>
-    <verification>Follows cognitive flow per skill type</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Line Count Under Limit</name>
-    <verification>SKILL.md < 500 lines</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Keywords Used</name>
-    <verification>Uses BLOCKING/CRITICAL/MANDATORY (not emoji)</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Step Outputs Covered in Created Skill</name>
-    <verification>Every step output in created skill has corresponding DoD checkpoint</verification>
+    <name>Step Outputs Covered</name>
+    <verification>Every step output in created skill has a corresponding DoD checkpoint</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Cross-References Valid</name>
-    <verification>Auto-discovery fields present in Output Result (if x-ipe-task-based)</verification>
+    <verification>Auto-discovery fields in Output Result (if task-based), Input Initialization present, bidirectional refs verified</verification>
   </checkpoint>
-  <checkpoint required="true">
+  <checkpoint required="recommended">
     <name>Input Initialization Present</name>
-    <verification>Skills with non-trivial input resolution have ### Input Initialization subsection under Input Parameters</verification>
+    <verification>Skills with non-trivial input resolution have Input Initialization subsection with input_init block</verification>
+  </checkpoint>
+  <checkpoint required="recommended">
+    <name>Examples Documented</name>
+    <verification>references/examples.md exists with concrete usage scenarios</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -495,12 +490,6 @@ BLOCKING: Always use the appropriate template. Never create SKILL.md or skill-me
 | [7-10. example-*.md](.github/skills/x-ipe-meta-skill-creator/references) | Task IO, structured summary, DoR/DoD, gate conditions |
 | [11. reference-quality-standards.md](.github/skills/x-ipe-meta-skill-creator/references/11. reference-quality-standards.md) | Quality standards |
 | [examples.md](.github/skills/x-ipe-meta-skill-creator/references/examples.md) | Concrete execution examples |
-
----
-
-## Example
-
-See [references/examples.md](.github/skills/x-ipe-meta-skill-creator/references/examples.md) for concrete execution examples.
 
 ---
 

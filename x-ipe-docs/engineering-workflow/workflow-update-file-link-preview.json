@@ -2,7 +2,7 @@
   "schema_version": "3.0",
   "name": "update-file-link-preview",
   "created": "2026-03-03T13:33:34.127819+00:00",
-  "last_activity": "2026-03-05T06:53:23.225417+00:00",
+  "last_activity": "2026-03-10T07:35:47.117350+00:00",
   "idea_folder": null,
   "current_stage": "validation",
   "shared": {
@@ -422,7 +422,7 @@
   ],
   "global": {
     "process_preference": {
-      "auto_proceed": "manual"
+      "interaction_mode": "interact-with-human"
     }
   }
 }

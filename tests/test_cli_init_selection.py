@@ -42,7 +42,7 @@ def temp_adapters_yaml():
   copilot:
     display_name: "GitHub Copilot CLI"
     command: "copilot"
-    run_args: "--allow-all-tools"
+    run_args: "--allow-all-tools --allow-all-paths"
     inline_prompt_flag: "-i"
     prompt_format: '{command} {run_args} {inline_prompt_flag} "{escaped_prompt}"'
     instructions_file: ".github/copilot-instructions.md"

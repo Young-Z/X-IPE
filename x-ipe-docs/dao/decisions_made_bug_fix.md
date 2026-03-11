@@ -148,3 +148,79 @@
 
 ### Follow-up
 > None
+
+## DAO-020
+- **Timestamp:** 2026-03-10T08:00:13Z
+- **Task ID:** TASK-819
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** x-ipe-task-based-bug-fix
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.90
+
+### Message
+> when I click on it, still only see copilot --allow-all-tools, but no --allow-all-paths
+
+### Guidance Returned
+> Previous fix (title update) was correct but incomplete. The actual CLI command typed into the terminal when clicking the button is still missing --allow-all-paths. Continue TASK-819 bug-fix: reproduce by checking the running API response, trace the code path, and fix the command generation.
+
+### Rationale
+> The user confirms the button command is still wrong. This is a continuation of the same bug — not a new task. The fix for the button title was one part; the command itself also needs fixing. Re-enter bug-fix flow at Step 2 (Reproduce).
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "strong"
+>     reason: "Continuation of TASK-819 — command still incorrect"
+
+### Follow-up
+> None
+
+---
+
+### DAO Decision — 2026-03-10T08:48
+
+**Task:** TASK-820 (compose_idea validation continuation)
+**Source:** human
+**Message:** "I found you didn't test link idea function, which if I link an idea file, it's folder preview cannot properly display in the modal window, it says failed to load file"
+
+**Instruction Units:**
+
+| # | Disposition | Content | Skills |
+|---|-----------|---------|--------|
+| 1 | instruction | Bug: Link Existing mode folder preview shows "failed to load file" when linking an idea file. Reproduce, diagnose, fix. | x-ipe-task-based-bug-fix (strong) |
+
+**Confidence:** 0.85 | **Fallback:** false
+
+---
+
+### DAO Entry — 2026-03-10T09:16Z
+
+| Field | Value |
+|-------|-------|
+| Task ID | TASK-820 |
+| Source | human |
+| Workflow | test-compose-idea |
+| Message | 3 Upload-tab bugs: (1) uploaded file not saved, (2) uploaded file not previewable, (3) re-edit after upload-only shows create mode |
+
+**Instruction Unit 1/1**
+- Disposition: `instruction`
+- Content: Fix 3 Upload-tab bugs in compose-idea-modal — all share the Upload code path
+- Suggested Skills: `x-ipe-task-based-bug-fix` (strong)
+- Confidence: 0.85
+
+---
+
+### DAO Entry — 2026-03-10T11:11:51Z
+
+**Task:** TASK-821
+**Source:** human
+**Message:** "the delete icon from 3 dots will bring up the delete modal window, the ui looks like has some problem"
+
+**Instruction Unit 1/1**
+- **Disposition:** `instruction`
+- **Content:** Fix the delete confirmation modal UI — it lacks proper structure (header/body wrappers, close button, padding) compared to other modals in the app
+- **Rationale:** User reports visual bug; investigation confirms the delete modal HTML doesn't use the same `.workflow-modal-header`/`.workflow-modal-body` wrapper pattern that provides proper padding and structure
+- **Suggested Skills:** `x-ipe-task-based-bug-fix` (strong)
+- **Confidence:** 0.85

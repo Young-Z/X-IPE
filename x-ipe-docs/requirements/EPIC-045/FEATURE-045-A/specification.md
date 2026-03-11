@@ -2,15 +2,16 @@
 
 > Feature ID: FEATURE-045-A  
 > Epic ID: EPIC-045  
-> Version: v1.0  
+> Version: v1.1  
 > Status: Refined  
-> Last Updated: 03-05-2026
+> Last Updated: 03-10-2026
 
 ## Version History
 
 | Version | Date | Description |
 |---------|------|-------------|
 | v1.0 | 03-05-2026 | Initial specification |
+| v1.1 | 03-10-2026 | [CR-001](x-ipe-docs/requirements/EPIC-045/FEATURE-045-A/CR-001.md): Add tools.json config-based filtering to tool routing (AC-3, FR-3 affected) |
 
 ## Linked Mockups
 
@@ -66,10 +67,16 @@ The primary users are **AI agents** executing the X-IPE engineering workflow. Hu
 ### AC-3: AI Semantic Tool Routing
 
 - [ ] AC-3.1: The orchestrator scans `.github/skills/x-ipe-tool-implementation-*/` to discover available tool skills
-- [ ] AC-3.2: The orchestrator uses LLM semantic understanding (not string matching) to map each `tech_stack` entry to a tool skill
-- [ ] AC-3.3: If no specific tool skill matches a `tech_stack` entry, the orchestrator falls back to `x-ipe-tool-implementation-general`
-- [ ] AC-3.4: If the general fallback is also insufficient (tech stack too exotic), the orchestrator signals to the human: "This feature requires a new tool skill"
-- [ ] AC-3.5: Adding a new `x-ipe-tool-implementation-*` folder does NOT require any changes to the orchestrator SKILL.md
+- [ ] AC-3.2: After discovery, the orchestrator reads `x-ipe-docs/config/tools.json` section `stages.feature.implementation` to determine which tool skills are enabled (`true`) or disabled
+- [ ] AC-3.3: If `stages.feature.implementation` has no tool entries (empty or only `_order`), all discovered tool skills are treated as enabled (backwards compatibility)
+- [ ] AC-3.4: If `stages.feature.implementation` has tool entries, only tools with value `true` are included in the routing pool; `false`, absent, or any other value means disabled
+- [ ] AC-3.5: `x-ipe-tool-implementation-general` is always treated as enabled regardless of config — if set to `false`, the orchestrator overrides to `true` and logs a warning
+- [ ] AC-3.6: The orchestrator uses LLM semantic understanding (not string matching) to map each `tech_stack` entry to an **enabled** tool skill
+- [ ] AC-3.7: If no enabled tool skill matches a `tech_stack` entry, the orchestrator falls back to `x-ipe-tool-implementation-general`
+- [ ] AC-3.8: If the general fallback is also insufficient (tech stack too exotic), the orchestrator signals to the human: "This feature requires a new tool skill"
+- [ ] AC-3.9: Adding a new `x-ipe-tool-implementation-*` folder is auto-discovered but defaults to disabled if not declared in tools.json — explicit opt-in via config required
+- [ ] AC-3.10: The orchestrator logs which tool skills were skipped as disabled: "skipped x-ipe-tool-implementation-{name} (disabled)" for traceability
+- [ ] AC-3.11: If `_extra_instruction` is present under `stages.feature.implementation`, the orchestrator uses it as supplementary context during semantic matching
 
 ### AC-4: Tool Skill Invocation Interface
 
@@ -144,17 +151,22 @@ The primary users are **AI agents** executing the X-IPE engineering workflow. Hu
 
 ### FR-3: Semantic Tool Skill Discovery and Routing
 
-**Description:** Define the procedure for discovering and selecting tool skills at runtime.
+**Description:** Define the procedure for discovering, filtering, and selecting tool skills at runtime.
 
 **Details:**
-- Input: `tech_stack` array from technical design (e.g., `["Python/Flask", "HTML/CSS/JavaScript"]`)
+- Input: `tech_stack` array from technical design (e.g., `["Python/Flask", "HTML/CSS/JavaScript"]`), `x-ipe-docs/config/tools.json`
 - Process:
   1. Scan `.github/skills/x-ipe-tool-implementation-*/` for available tool skills
-  2. Read each tool skill's description/frontmatter to understand its coverage
-  3. Use LLM semantic matching to map each `tech_stack` entry to a tool skill
-  4. If no match → assign to `x-ipe-tool-implementation-general`
-  5. If general is insufficient → signal "new tool skill needed"
-- Output: Mapping of `tech_stack` entry → tool skill name
+  2. Read `x-ipe-docs/config/tools.json` section `stages.feature.implementation`
+  3. IF config has tool entries → filter: keep only tools with value `true`; ensure `general` is always in the enabled set
+  4. IF config has no tool entries (empty or `_order` only) → treat all discovered tools as enabled (backwards compatibility)
+  5. IF `_extra_instruction` present → load as supplementary matching context
+  6. Read each **enabled** tool skill's description/frontmatter to understand its coverage
+  7. Use LLM semantic matching (with `_extra_instruction` context if available) to map each `tech_stack` entry to an enabled tool skill
+  8. Log skipped (disabled) tools for traceability
+  9. If no enabled match → assign to `x-ipe-tool-implementation-general`
+  10. If general is insufficient → signal "new tool skill needed"
+- Output: Mapping of `tech_stack` entry → enabled tool skill name, skipped tools log
 
 ### FR-4: Tool Skill Input/Output Contract
 
@@ -224,7 +236,7 @@ The primary users are **AI agents** executing the X-IPE engineering workflow. Hu
 
 ### NFR-1: Extensibility
 
-Adding a new implementation tool skill (e.g., `x-ipe-tool-implementation-rust`) MUST NOT require any changes to the orchestrator SKILL.md. The new skill is auto-discovered by folder scanning + semantic matching.
+Adding a new implementation tool skill (e.g., `x-ipe-tool-implementation-rust`) MUST NOT require any changes to the orchestrator SKILL.md. The new skill is auto-discovered by folder scanning + semantic matching. New skills default to disabled if tools.json config entries exist — users must explicitly enable them via `tools.json`. If no config entries exist (empty implementation block), all tools are enabled by default for backwards compatibility.
 
 ### NFR-2: Performance Overhead
 
@@ -274,6 +286,26 @@ None — This feature modifies skill definition files only. No external librarie
 **Scenario:** `tech_stack` contains an entry like `"Rust/Actix"` and no `x-ipe-tool-implementation-rust` exists.
 **Expected Behavior:** Falls back to `x-ipe-tool-implementation-general`. If general cannot handle it, signals human: "This feature requires a new tool skill: x-ipe-tool-implementation-rust."
 
+### Edge Case 2b: Matching Tool Skill Exists But Is Disabled
+**Scenario:** `tech_stack` contains `"Java/Spring"` and `x-ipe-tool-implementation-java` exists but is set to `false` in tools.json.
+**Expected Behavior:** The orchestrator skips java skill (logs "skipped x-ipe-tool-implementation-java (disabled)"), falls back to `x-ipe-tool-implementation-general` for the Java stack entry.
+
+### Edge Case 2c: All Tool Skills Disabled Except General
+**Scenario:** User sets all tool-implementation skills to `false` except `general` (or `general` is force-enabled).
+**Expected Behavior:** All tech_stack entries route to `x-ipe-tool-implementation-general`. System remains functional but with generic (non-specialized) implementation.
+
+### Edge Case 2d: User Tries to Disable General
+**Scenario:** User sets `x-ipe-tool-implementation-general: false` in tools.json.
+**Expected Behavior:** Orchestrator overrides to `true`, logs warning: "x-ipe-tool-implementation-general cannot be disabled — it serves as the safety net fallback."
+
+### Edge Case 2e: No Config Entries (Empty Implementation Block)
+**Scenario:** `stages.feature.implementation` exists but contains only `_order: 2` with no tool entries.
+**Expected Behavior:** All discovered tool-implementation skills are treated as enabled (backwards compatibility). No filtering applied.
+
+### Edge Case 2f: Undeclared New Tool Skill
+**Scenario:** A new `x-ipe-tool-implementation-go` folder is added but no entry exists in tools.json.
+**Expected Behavior:** If tools.json has other tool entries (config is active), the Go skill defaults to disabled. If tools.json has no tool entries (config is empty), the Go skill is enabled by default.
+
 ### Edge Case 3: Specification with No Acceptance Criteria
 **Scenario:** Specification exists but has no explicit acceptance criteria section.
 **Expected Behavior:** Orchestrator derives scenarios from functional requirements and user stories instead. Logs a warning that explicit ACs should be added.
@@ -307,6 +339,9 @@ None — This feature modifies skill definition files only. No external librarie
 - **Real browser-based acceptance testing** — Remains in `x-ipe-task-based-feature-acceptance-test`
 - **Parallel tool skill execution** — Out of scope; sequential only
 - **Automatic test suite migration** — Existing tests from `x-ipe-tool-test-generation` are not automatically converted
+- **Per-run config override** — Config is static per project via tools.json, not overridable per-execution-run
+- **Auto-adding tools.json entries on skill creation** — Adding config entries for new tool-implementation skills is manual (future: auto-add via `x-ipe-meta-skill-creator`)
+- **Config filtering for other stages** — Only `stages.feature.implementation` is in scope; design stage and other stages are future extensions
 
 ## Technical Considerations
 
@@ -316,6 +351,9 @@ None — This feature modifies skill definition files only. No external librarie
 - The general fallback skill is a separate SKILL.md file created alongside the orchestrator refactoring.
 - References to `x-ipe-tool-test-generation` in the orchestrator should be preserved for Phase 1 coexistence but clearly marked as fallback.
 - The `references/implementation-guidelines.md` file may need minor updates to reflect the new step structure.
+- The tools.json config filtering adds a step between discovery and routing: scan → read config → filter → match. This follows the established pattern from the ideation stage (`x-ipe-task-based-ideation` Step 1.1).
+- The `_extra_instruction` field under `stages.feature.implementation` provides lightweight routing hints without modifying any skill files.
+- EPIC-048 features (bug-fix, code-refactor delegation) should adopt the same config filtering pattern when they implement tool-implementation routing.
 
 ## Open Questions
 

@@ -36,7 +36,7 @@ IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "Idea Mockup"
+  task_based_skill: "x-ipe-task-based-idea-mockup"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
@@ -49,7 +49,9 @@ input:
 
   # Task type attributes
   category: "ideation-stage"
-  next_task_based_skill: "Requirement Gathering"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-requirement-gathering"
+      condition: "Proceed to requirements after mockup"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
 
@@ -401,7 +403,9 @@ MANDATORY: See [references/mockup-guidelines.md](.github/skills/x-ipe-task-based
 task_completion_output:
   category: "ideation-stage"
   status: completed | blocked
-  next_task_based_skill: "Requirement Gathering"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-requirement-gathering"
+      condition: "Proceed to requirements after mockup"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
