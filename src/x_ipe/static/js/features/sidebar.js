@@ -23,6 +23,11 @@ class ProjectSidebar {
         this.expandedFolders = new Set();  // Set of folder paths
         
         this._startPolling();
+        
+        // FEATURE-049-B: Listen for KB changes to auto-refresh sidebar tree
+        document.addEventListener('kb:changed', () => {
+            this.load();
+        });
     }
     
     /**
@@ -373,6 +378,11 @@ class ProjectSidebar {
             `;
         }
         
+        // FEATURE-049-B: Knowledge Base section with folder tree, drag-drop, and Intake placeholder
+        if (section.id === 'knowledge-base') {
+            return this._renderKBSection(section, icon, hasChildren);
+        }
+        
         let html = `
             <div class="nav-section" data-section-id="${section.id}">
                 <div class="nav-section-header collapsed" data-bs-target="#section-${section.id}">
@@ -502,6 +512,212 @@ class ProjectSidebar {
             'ico': 'bi-file-image'
         };
         return icons[ext] || 'bi-file-earmark';
+    }
+    
+    // FEATURE-049-B: Render Knowledge Base sidebar section
+    _renderKBSection(section, icon, hasChildren) {
+        let html = `
+            <div class="nav-section" data-section-id="${section.id}">
+                <div class="nav-section-header collapsed" data-bs-target="#section-${section.id}">
+                    <i class="bi ${icon}"></i>
+                    <span>${section.label}</span>
+                    <i class="bi bi-chevron-down chevron"></i>
+                </div>
+                <div class="collapse nav-section-content" id="section-${section.id}">
+        `;
+        
+        if (!section.exists || !hasChildren) {
+            html += '<div class="nav-empty kb-empty-state">📖 No articles yet</div>';
+        } else {
+            html += this._renderKBChildren(section.children);
+        }
+        
+        // Intake placeholder (FEATURE-049-F future)
+        html += `
+            <div class="nav-item kb-intake-placeholder" data-section-id="kb-intake" style="padding-left: 2rem; opacity: 0.6;">
+                <i class="bi bi-inbox"></i>
+                <span>📥 Intake</span>
+            </div>
+        `;
+        
+        html += '</div></div>';
+        return html;
+    }
+    
+    // FEATURE-049-B: Render KB children with drag-drop attributes on folders
+    _renderKBChildren(children, depth = 0) {
+        if (!children || children.length === 0) return '';
+        
+        let html = '';
+        const files = children.filter(item => item.type !== 'folder');
+        const folders = children.filter(item => item.type === 'folder');
+        
+        for (const item of files) {
+            html += this.renderFile(item, depth);
+        }
+        for (const item of folders) {
+            html += this._renderKBFolder(item, depth);
+        }
+        return html;
+    }
+    
+    // FEATURE-049-B: Render KB folder with drag-drop support
+    _renderKBFolder(folder, depth) {
+        const folderId = folder.path.replace(/[\/\.]/g, '-');
+        const hasChildren = folder.children && folder.children.length > 0;
+        const paddingLeft = 2 + (depth * 0.75);
+        const isChanged = this.changedPaths.has(folder.path);
+        
+        let html = `
+            <div class="nav-item nav-folder kb-folder${isChanged ? ' has-changes' : ''}" 
+                 style="padding-left: ${paddingLeft}rem"
+                 data-bs-target="#folder-${folderId}"
+                 data-path="${folder.path}"
+                 data-kb-folder="true"
+                 draggable="true">
+                ${isChanged ? '<span class="change-indicator"></span>' : ''}
+                <i class="bi bi-folder"></i>
+                <span>${folder.name}</span>
+                ${hasChildren ? '<i class="bi bi-chevron-down chevron ms-auto" style="font-size: 0.7rem;"></i>' : ''}
+            </div>
+        `;
+        
+        if (hasChildren) {
+            html += `
+                <div class="collapse nav-folder-content" id="folder-${folderId}">
+                    ${this._renderKBChildren(folder.children, depth + 1)}
+                </div>
+            `;
+        }
+        
+        return html;
+    }
+    
+    // FEATURE-049-B: Bind KB drag-drop events on sidebar KB folders
+    _bindKBDragDrop() {
+        const kbFolders = this.container.querySelectorAll('[data-kb-folder="true"]');
+        const kbFiles = this.container.querySelectorAll('.nav-section[data-section-id="knowledge-base"] .nav-file');
+        
+        this._bindKBDragSources(kbFiles, kbFolders, 'file');
+        this._bindKBDragSources(kbFolders, kbFolders, 'folder');
+        this._bindKBDropTargets(kbFolders);
+    }
+    
+    // FEATURE-049-B: Make elements draggable with KB drag data
+    _bindKBDragSources(elements, allFolders, itemType) {
+        const isFolder = itemType === 'folder';
+        elements.forEach(el => {
+            if (!isFolder) el.setAttribute('draggable', 'true');
+            el.addEventListener('dragstart', (e) => {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', el.dataset.path);
+                e.dataTransfer.setData('application/x-kb-type', itemType);
+                el.classList.add('kb-dragging');
+                if (isFolder) e.stopPropagation();
+            });
+            el.addEventListener('dragend', () => {
+                el.classList.remove('kb-dragging');
+                allFolders.forEach(f => f.classList.remove('kb-drag-over'));
+            });
+        });
+    }
+    
+    // FEATURE-049-B: Set up KB folders as drop targets
+    _bindKBDropTargets(kbFolders) {
+        kbFolders.forEach(folder => {
+            folder.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                if (!e.dataTransfer.types.includes('text/plain')) return;
+                e.dataTransfer.dropEffect = 'move';
+                folder.classList.add('kb-drag-over');
+            });
+            
+            folder.addEventListener('dragleave', (e) => {
+                if (!folder.contains(e.relatedTarget)) {
+                    folder.classList.remove('kb-drag-over');
+                }
+            });
+            
+            folder.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                folder.classList.remove('kb-drag-over');
+                
+                const sourcePath = e.dataTransfer.getData('text/plain');
+                const sourceType = e.dataTransfer.getData('application/x-kb-type');
+                const targetPath = folder.dataset.path;
+                
+                if (!sourcePath || !targetPath || sourcePath === targetPath) return;
+                if (sourceType === 'folder' && targetPath.startsWith(sourcePath + '/')) return;
+                
+                await this._kbMoveItem(sourcePath, targetPath, sourceType);
+            });
+        });
+    }
+    
+    // FEATURE-049-B: Move KB item via API
+    async _kbMoveItem(sourcePath, targetFolderPath, sourceType) {
+        try {
+            // Strip KB root prefix to get relative paths for the KB API
+            const kbRoot = 'x-ipe-docs/knowledge-base/';
+            const relSource = sourcePath.startsWith(kbRoot) ? sourcePath.slice(kbRoot.length) : sourcePath;
+            const relTarget = targetFolderPath.startsWith(kbRoot) ? targetFolderPath.slice(kbRoot.length) : targetFolderPath;
+            
+            const endpoint = sourceType === 'folder' ? '/api/kb/folders/move' : '/api/kb/files/move';
+            const body = sourceType === 'folder'
+                ? { path: relSource, new_parent: relTarget }
+                : { path: relSource, destination: relTarget };
+            
+            const response = await fetch(endpoint, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            
+            if (response.ok) {
+                document.dispatchEvent(new CustomEvent('kb:changed'));
+            } else {
+                let message = 'Unknown error';
+                try { message = (await response.json()).error || message; } catch { /* non-JSON body */ }
+                console.error('KB move failed:', message);
+            }
+        } catch (error) {
+            console.error('KB move failed:', error);
+        }
+    }
+    
+    // FEATURE-049-C: KB folder/section clicks open browse view in content area
+    _bindKBFolderClicks() {
+        // KB section header click → show browse view for root
+        const kbSection = this.container.querySelector('[data-section-id="knowledge-base"]');
+        if (kbSection) {
+            const header = kbSection.querySelector('.nav-section-header');
+            if (header) {
+                header.addEventListener('dblclick', () => {
+                    this._openKBBrowse('');
+                });
+            }
+        }
+        
+        // KB folder clicks → show browse view for that folder
+        this.container.querySelectorAll('.kb-folder .nav-folder-header').forEach(fh => {
+            fh.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                const folderPath = fh.closest('.kb-folder')?.dataset?.kbPath || '';
+                this._openKBBrowse(folderPath);
+            });
+        });
+    }
+    
+    _openKBBrowse(folder) {
+        if (typeof KBBrowseView === 'undefined') return;
+        const contentArea = document.getElementById('content-area') || document.querySelector('.content-area');
+        if (!contentArea) return;
+        
+        if (!this._kbBrowseView) {
+            this._kbBrowseView = new KBBrowseView(contentArea);
+        }
+        this._kbBrowseView.render(folder);
     }
     
     /**
@@ -720,6 +936,12 @@ class ProjectSidebar {
         
         // Hover expand/collapse for sections and folders
         this._bindHoverExpand();
+        
+        // FEATURE-049-B: KB sidebar drag-drop
+        this._bindKBDragDrop();
+        
+        // FEATURE-049-C: KB folder click opens browse view
+        this._bindKBFolderClicks();
     }
     
     /**
