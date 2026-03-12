@@ -107,6 +107,17 @@ class KBBrowseModal {
 
     _getFolderNames() {
         const names = new Set();
+        // Extract from tree API data (complete folder list)
+        const walk = (nodes) => {
+            for (const n of nodes) {
+                if (n.type === 'folder') {
+                    names.add(n.name);
+                    if (n.children) walk(n.children);
+                }
+            }
+        };
+        walk(this.tree);
+        // Fallback: also extract from file paths
         this.files.forEach(f => {
             const parts = f.path.split('/');
             if (parts.length > 1) names.add(parts[0]);
@@ -810,6 +821,9 @@ class KBBrowseModal {
                 this._renderBrowseContent();
             }
         });
+
+        // Drag & drop on upload zones
+        this._bindDragDrop();
     }
 
     _handleAction(action, el) {
@@ -872,6 +886,9 @@ class KBBrowseModal {
                     window.kbFileUpload.open();
                 }
                 break;
+            case 'toggle-folder-dropdown':
+                this._toggleFolderDropdown(el);
+                break;
         }
     }
 
@@ -918,6 +935,134 @@ class KBBrowseModal {
         this.uploadMode = mode;
         this.overlay?.querySelectorAll('.kb-upload-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.uploadMode === mode));
         this.overlay?.querySelectorAll('.kb-upload-panel').forEach(p => p.classList.toggle('active', p.dataset.uploadPanel === mode));
+    }
+
+    // ─── Folder Dropdown ──────────────────────────────
+    _toggleFolderDropdown(el) {
+        const picker = el.closest('.kb-upload-folder-picker');
+        if (!picker) return;
+        let dropdown = picker.querySelector('.kb-upload-folder-dropdown');
+        if (dropdown) {
+            dropdown.remove();
+            return;
+        }
+        const folders = this._getFolderNames();
+        dropdown = document.createElement('div');
+        dropdown.className = 'kb-upload-folder-dropdown';
+        const rootItem = document.createElement('div');
+        rootItem.className = `kb-upload-folder-dropdown-item${this.uploadFolder === '/' ? ' active' : ''}`;
+        rootItem.innerHTML = '<i class="bi bi-folder2" style="font-size:12px;"></i> / (root)';
+        rootItem.addEventListener('click', () => this._selectUploadFolder('/', picker));
+        dropdown.appendChild(rootItem);
+        folders.forEach(name => {
+            const item = document.createElement('div');
+            item.className = `kb-upload-folder-dropdown-item${this.uploadFolder === name ? ' active' : ''}`;
+            item.innerHTML = `<i class="bi bi-folder2" style="font-size:12px;"></i> ${this._escapeHtml(name)}`;
+            item.addEventListener('click', () => this._selectUploadFolder(name, picker));
+            dropdown.appendChild(item);
+        });
+        picker.appendChild(dropdown);
+        // Close on outside click
+        const closeHandler = (e) => {
+            if (!picker.contains(e.target)) {
+                dropdown.remove();
+                document.removeEventListener('click', closeHandler, true);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', closeHandler, true), 0);
+    }
+
+    _selectUploadFolder(folder, picker) {
+        this.uploadFolder = folder;
+        const pathEl = picker.querySelector('[data-role="upload-folder-path"]');
+        if (pathEl) pathEl.textContent = folder;
+        const dropdown = picker.querySelector('.kb-upload-folder-dropdown');
+        if (dropdown) dropdown.remove();
+    }
+
+    // ─── Drag & Drop ──────────────────────────────────
+    _bindDragDrop() {
+        if (!this.overlay) return;
+        // Normal upload zone
+        const uploadZone = this.overlay.querySelector('.kb-upload-zone');
+        if (uploadZone) this._attachDropHandlers(uploadZone, 'normal');
+        // Intake dropzone
+        const intakeZone = this.overlay.querySelector('.kb-intake-dropzone');
+        if (intakeZone) this._attachDropHandlers(intakeZone, 'intake');
+    }
+
+    _attachDropHandlers(zone, mode) {
+        let dragCounter = 0;
+        zone.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            dragCounter++;
+            zone.classList.add('drag-over');
+        });
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        });
+        zone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dragCounter--;
+            if (dragCounter <= 0) { dragCounter = 0; zone.classList.remove('drag-over'); }
+        });
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dragCounter = 0;
+            zone.classList.remove('drag-over');
+            const files = e.dataTransfer?.files;
+            if (!files || files.length === 0) return;
+            if (mode === 'intake') {
+                this._handleIntakeDrop(files);
+            } else {
+                this._handleNormalDrop(files);
+            }
+        });
+    }
+
+    _handleNormalDrop(files) {
+        if (typeof window.kbFileUpload !== 'undefined' && window.kbFileUpload.uploadFiles) {
+            // Use kbFileUpload's upload with current folder
+            const folder = this.uploadFolder === '/' ? '' : this.uploadFolder;
+            window.kbFileUpload.uploadFiles(files, folder);
+        } else {
+            // Fallback: POST directly to API
+            this._uploadFiles(files, this.uploadFolder === '/' ? '' : this.uploadFolder);
+        }
+    }
+
+    _handleIntakeDrop(files) {
+        const filesEl = this.overlay?.querySelector('[data-role="intake-files"]');
+        if (!filesEl) return;
+        for (const file of files) {
+            const item = document.createElement('div');
+            item.className = 'kb-intake-file';
+            item.innerHTML = `
+                <i class="bi bi-file-earmark file-icon"></i>
+                <span class="file-name">${this._escapeHtml(file.name)}</span>
+                <span class="file-size">${this._formatFileSize(file.size)}</span>`;
+            filesEl.appendChild(item);
+        }
+        // Update badge count
+        const badges = this.overlay?.querySelectorAll('.intake-badge');
+        const count = filesEl.children.length;
+        badges?.forEach(b => b.textContent = count);
+        // Store files for AI Librarian processing
+        this._intakeFiles = this._intakeFiles || [];
+        this._intakeFiles.push(...Array.from(files));
+    }
+
+    async _uploadFiles(files, folder) {
+        const formData = new FormData();
+        for (const file of files) formData.append('files', file);
+        if (folder) formData.append('folder', folder);
+        try {
+            const res = await fetch('/api/kb/upload', { method: 'POST', body: formData });
+            if (res.ok) {
+                document.dispatchEvent(new CustomEvent('kb:changed'));
+            }
+        } catch { /* ignore */ }
     }
 
     // ─── Utilities ─────────────────────────────────
