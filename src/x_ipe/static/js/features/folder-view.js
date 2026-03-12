@@ -596,7 +596,7 @@ class FolderViewManager {
             const msg = type === 'folder' && itemCount > 0
                 ? `Delete "${itemName}" and all ${itemCount} items inside?`
                 : `Delete "${itemName}"?`;
-            confirmed = confirm(msg);
+            confirmed = await showConfirmModal('Delete', msg, { danger: true, confirmLabel: 'Delete' });
         }
 
         if (confirmed && this.onAction) {

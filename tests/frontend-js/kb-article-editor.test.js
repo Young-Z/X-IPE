@@ -40,6 +40,10 @@ describe('FEATURE-049-D: KB Article Editor', () => {
       value(v) { if (v !== undefined) this._value = v; return this._value; }
       toTextArea() {}
     };
+    // CR-001: Mock Bootstrap 5 dialog utility
+    globalThis.showConfirmModal = vi.fn().mockResolvedValue(false);
+    globalThis.showPromptModal = vi.fn().mockResolvedValue(null);
+    globalThis.showAlertModal = vi.fn().mockResolvedValue(undefined);
     ensureImpl();
   });
 
@@ -383,13 +387,13 @@ describe('FEATURE-049-D: KB Article Editor', () => {
       titleInput.dispatchEvent(new Event('input'));
       expect(editor.dirty).toBe(true);
 
-      globalThis.confirm = vi.fn().mockReturnValue(false);
-      editor.close();
+      globalThis.showConfirmModal = vi.fn().mockResolvedValue(false);
+      await editor.close();
       // Should NOT close because user declined
-      expect(globalThis.confirm).toHaveBeenCalled();
+      expect(globalThis.showConfirmModal).toHaveBeenCalled();
       expect(document.querySelector('.kb-editor-overlay')).not.toBeNull();
       // Force-close to clean up escape handler for subsequent tests
-      editor.close(true);
+      await editor.close(true);
     });
 
     it('should close when user confirms discard', async () => {
@@ -401,9 +405,9 @@ describe('FEATURE-049-D: KB Article Editor', () => {
       titleInput.value = 'Unsaved';
       titleInput.dispatchEvent(new Event('input'));
 
-      globalThis.confirm = vi.fn().mockReturnValue(true);
-      editor.close();
-      expect(globalThis.confirm).toHaveBeenCalled();
+      globalThis.showConfirmModal = vi.fn().mockResolvedValue(true);
+      await editor.close();
+      expect(globalThis.showConfirmModal).toHaveBeenCalled();
       await new Promise(r => setTimeout(r, 350));
       expect(document.querySelector('.kb-editor-overlay')).toBeNull();
     });
@@ -414,9 +418,9 @@ describe('FEATURE-049-D: KB Article Editor', () => {
       await editor.open();
       expect(editor.dirty).toBe(false);
 
-      globalThis.confirm = vi.fn();
-      editor.close();
-      expect(globalThis.confirm).not.toHaveBeenCalled();
+      globalThis.showConfirmModal = vi.fn();
+      await editor.close();
+      expect(globalThis.showConfirmModal).not.toHaveBeenCalled();
     });
   });
 

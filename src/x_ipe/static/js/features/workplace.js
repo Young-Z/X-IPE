@@ -235,7 +235,7 @@ class WorkplaceManager {
                     
                 case 'add-folder':
                     // Prompt for folder name and create via API
-                    const folderName = prompt('Enter folder name:');
+                    const folderName = await showPromptModal('New Folder', 'Enter folder name:', { placeholder: 'folder-name' });
                     if (folderName && folderName.trim()) {
                         const response = await fetch('/api/ideas/create-folder', {
                             method: 'POST',
@@ -259,7 +259,7 @@ class WorkplaceManager {
                     return false;
                     
                 case 'rename':
-                    const newName = prompt(`Rename "${data.name || path.split('/').pop()}" to:`, data.name || path.split('/').pop());
+                    const newName = await showPromptModal('Rename', `Rename "${data.name || path.split('/').pop()}" to:`, { defaultValue: data.name || path.split('/').pop() });
                     if (newName && newName !== data.name) {
                         if (data.type === 'folder') {
                             const result = await this._renameFolder(path, newName);
@@ -985,7 +985,8 @@ class WorkplaceManager {
     async openFile(path) {
         // Check for unsaved changes
         if (this.hasUnsavedChanges) {
-            if (!window.confirm('You have unsaved changes. Do you want to discard them?')) {
+            const discard = await showConfirmModal('Unsaved Changes', 'You have unsaved changes. Do you want to discard them?', { danger: true, confirmLabel: 'Discard' });
+            if (!discard) {
                 return;
             }
         }
@@ -1611,9 +1612,10 @@ class WorkplaceManager {
     /**
      * Exit edit mode (cancel changes)
      */
-    exitEditMode() {
+    async exitEditMode() {
         if (this.hasUnsavedChanges) {
-            if (!window.confirm('You have unsaved changes. Do you want to discard them?')) {
+            const discard = await showConfirmModal('Unsaved Changes', 'You have unsaved changes. Do you want to discard them?', { danger: true, confirmLabel: 'Discard' });
+            if (!discard) {
                 return;
             }
         }
@@ -1830,10 +1832,11 @@ class WorkplaceManager {
      * Show upload/compose view
      * @param {string|null} targetFolder - Optional folder path to save files to (null = create new folder)
      */
-    showUploadView(targetFolder = null) {
+    async showUploadView(targetFolder = null) {
         // Check for unsaved changes
         if (this.hasUnsavedChanges) {
-            if (!window.confirm('You have unsaved changes. Do you want to discard them?')) {
+            const discard = await showConfirmModal('Unsaved Changes', 'You have unsaved changes. Do you want to discard them?', { danger: true, confirmLabel: 'Discard' });
+            if (!discard) {
                 return;
             }
         }
@@ -2654,8 +2657,7 @@ class WorkplaceManager {
      * @param {string|null} parentFolder - Optional parent folder path
      */
     async _createFolder(parentFolder = null) {
-        const folderName = prompt('Enter folder name:');
-        if (!folderName || !folderName.trim()) {
+        const folderName = await showPromptModal('New Folder', 'Enter folder name:', { placeholder: 'folder-name' });        if (!folderName || !folderName.trim()) {
             return;
         }
         

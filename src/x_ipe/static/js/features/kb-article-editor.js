@@ -37,9 +37,10 @@ class KBArticleEditor {
         });
     }
 
-    close(force = false) {
+    async close(force = false) {
         if (!force && this.dirty) {
-            if (!confirm('Discard unsaved changes?')) return;
+            const discard = await showConfirmModal('Discard Changes', 'Discard unsaved changes?', { danger: true, confirmLabel: 'Discard' });
+            if (!discard) return;
         }
         this._cleanup();
         this.overlay.classList.remove('active');

@@ -11,6 +11,7 @@
 |---------|------|---------|
 | v1.0 | 03-11-2026 | Initial specification |
 | v2.0 | 03-11-2026 | Template alignment — added GWT acceptance criteria, overview, UI/UX requirements, dependencies, business rules, out of scope, technical considerations |
+| v2.1 | 03-12-2026 | [CR-001](CR-001.md) — Replace native browser dialogs with Bootstrap 5 modals (cross-cutting: 14 call sites across 6 JS files) |
 
 ## Linked Mockups
 
@@ -86,8 +87,17 @@ This feature targets developers and knowledge workers who need to create or upda
 
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-----------|-----------|
-| AC-049-D-08a | GIVEN the editor has unsaved changes WHEN user clicks Cancel OR presses Escape THEN a confirmation dialog ("Discard changes?") is shown | UI |
-| AC-049-D-08b | GIVEN the discard confirmation dialog is shown WHEN user confirms THEN changes are discarded AND the modal closes; WHEN user declines THEN the modal returns to editing | UI |
+| AC-049-D-08a | GIVEN the editor has unsaved changes WHEN user clicks Cancel OR presses Escape THEN a Bootstrap 5 confirmation modal ("Discard changes?") is shown (not a native browser dialog) | UI |
+| AC-049-D-08b | GIVEN the discard confirmation modal is shown WHEN user confirms THEN changes are discarded AND the modal closes; WHEN user declines THEN the modal returns to editing | UI |
+
+### AC-049-D-10: Bootstrap 5 Dialog Utility (CR-001)
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-----------|-----------|
+| AC-049-D-10a | GIVEN the application loads WHEN any feature calls `showConfirmModal(title, body)` THEN a Bootstrap 5 modal renders with the given title/body AND returns a Promise resolving to boolean | Unit |
+| AC-049-D-10b | GIVEN the application loads WHEN any feature calls `showPromptModal(title, message, placeholder)` THEN a Bootstrap 5 modal renders with an input field AND returns a Promise resolving to string or null | Unit |
+| AC-049-D-10c | GIVEN the application loads WHEN any feature calls `showAlertModal(title, body)` THEN a Bootstrap 5 modal renders with the given title/body AND an OK button AND returns a Promise resolving when dismissed | Unit |
+| AC-049-D-10d | GIVEN the shared utility is loaded WHEN all 14 former native dialog call sites are exercised THEN none produce a native browser dialog; all use Bootstrap 5 modals | Integration |
 
 ### AC-049-D-09: Event Dispatch
 

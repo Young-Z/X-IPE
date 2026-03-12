@@ -616,7 +616,8 @@ class TracingDashboard {
     }
     
     async clearAllTraces() {
-        if (!confirm('Are you sure you want to delete all trace logs? This cannot be undone.')) {
+        const confirmed = await showConfirmModal('Delete All Traces', 'Are you sure you want to delete all trace logs? This cannot be undone.', { danger: true, confirmLabel: 'Delete All' });
+        if (!confirmed) {
             return;
         }
         

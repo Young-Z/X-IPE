@@ -91,12 +91,12 @@ class ContentEditor {
     /**
      * Set current path when a file is selected
      */
-    setCurrentPath(path) {
+    async setCurrentPath(path) {
         // If editing and path changes, warn about unsaved changes
         if (this.isEditing && this.currentPath !== path) {
             if (this.hasUnsavedChanges) {
-                const confirm = window.confirm('You have unsaved changes. Do you want to discard them?');
-                if (!confirm) {
+                const discard = await showConfirmModal('Unsaved Changes', 'You have unsaved changes. Do you want to discard them?', { danger: true, confirmLabel: 'Discard' });
+                if (!discard) {
                     return false;  // Block navigation
                 }
             }
@@ -117,9 +117,9 @@ class ContentEditor {
     /**
      * Check if navigation is allowed
      */
-    canNavigate() {
+    async canNavigate() {
         if (this.hasUnsavedChanges) {
-            return window.confirm('You have unsaved changes. Do you want to discard them?');
+            return showConfirmModal('Unsaved Changes', 'You have unsaved changes. Do you want to discard them?', { danger: true, confirmLabel: 'Discard' });
         }
         return true;
     }
@@ -282,13 +282,13 @@ class ContentEditor {
     /**
      * Cancel editing
      */
-    cancel() {
+    async cancel() {
         if (!this.isEditing) return;
         
         // Check for unsaved changes
         if (this.hasUnsavedChanges) {
-            const confirm = window.confirm('You have unsaved changes. Do you want to discard them?');
-            if (!confirm) return;
+            const discard = await showConfirmModal('Unsaved Changes', 'You have unsaved changes. Do you want to discard them?', { danger: true, confirmLabel: 'Discard' });
+            if (!discard) return;
         }
         
         this._exitEditMode(true);

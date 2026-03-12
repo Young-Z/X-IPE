@@ -373,10 +373,10 @@ class QualityEvaluationView {
             // Fallback: copy to clipboard and show alert
             navigator.clipboard.writeText(command).then(() => {
                 console.log('[QualityEval] Command copied to clipboard:', command);
-                alert(`Command copied to clipboard:\n${command}`);
+                showAlertModal('Copied', `Command copied to clipboard:<br><code>${command}</code>`);
             }).catch(() => {
                 console.log('[QualityEval] Command:', command);
-                alert(`Copy this command to console:\n${command}`);
+                showAlertModal('Copy Command', `Copy this command to console:<br><code>${command}</code>`);
             });
         }
     }
