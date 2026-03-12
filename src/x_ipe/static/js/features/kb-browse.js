@@ -174,9 +174,12 @@ class KBBrowseView {
     _renderCard(file) {
         const title = file.frontmatter?.title || file.name;
         const snippet = (file.content_preview || '').substring(0, SNIPPET_MAX_CHARS);
-        const mtime = file.mtime ? new Date(file.mtime * 1000).toLocaleDateString() : '';
-        const lifecycleTags = file.frontmatter?.tags?.lifecycle || [];
-        const domainTags = file.frontmatter?.tags?.domain || [];
+        const mtime = file.mtime ? new Date(file.mtime * 1000).toLocaleDateString() : 
+                      file.modified_date ? new Date(file.modified_date).toLocaleDateString() : '';
+        let lifecycleTags = file.frontmatter?.tags?.lifecycle || [];
+        if (typeof lifecycleTags === 'string') lifecycleTags = [lifecycleTags];
+        let domainTags = file.frontmatter?.tags?.domain || [];
+        if (typeof domainTags === 'string') domainTags = [domainTags];
         const hasNoTags = lifecycleTags.length === 0 && domainTags.length === 0;
         
         return `

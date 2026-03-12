@@ -288,10 +288,14 @@ class KBService:
         if not isinstance(raw, dict):
             return None
         tags_raw = raw.get('tags', {})
-        tags = TagSet(
-            lifecycle=tags_raw.get('lifecycle', []) if isinstance(tags_raw, dict) else [],
-            domain=tags_raw.get('domain', []) if isinstance(tags_raw, dict) else [],
-        )
+        if isinstance(tags_raw, dict):
+            lc = tags_raw.get('lifecycle', [])
+            dm = tags_raw.get('domain', [])
+            lc = [lc] if isinstance(lc, str) else (lc or [])
+            dm = [dm] if isinstance(dm, str) else (dm or [])
+        else:
+            lc, dm = [], []
+        tags = TagSet(lifecycle=lc, domain=dm)
         return FrontmatterData(
             title=raw.get('title'),
             tags=tags,
@@ -333,10 +337,11 @@ class KBService:
         title = fm.get('title') or stem.replace('-', ' ').replace('_', ' ').title()
         tags_raw = fm.get('tags', {})
         if isinstance(tags_raw, dict):
-            tags = TagSet(
-                lifecycle=tags_raw.get('lifecycle', []),
-                domain=tags_raw.get('domain', []),
-            )
+            lc = tags_raw.get('lifecycle', [])
+            dm = tags_raw.get('domain', [])
+            lc = [lc] if isinstance(lc, str) else (lc or [])
+            dm = [dm] if isinstance(dm, str) else (dm or [])
+            tags = TagSet(lifecycle=lc, domain=dm)
         else:
             tags = TagSet()
         author = fm.get('author') or 'unknown'

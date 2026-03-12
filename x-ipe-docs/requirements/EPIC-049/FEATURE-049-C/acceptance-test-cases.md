@@ -1238,3 +1238,24 @@
 | Unit | 31 | 31 | vitest |
 
 **Test Runner:** `npx vitest run tests/frontend-js/kb-browse.test.js`
+
+---
+
+## Browser UI Test Results (chrome-devtools-mcp)
+
+**Execution tool:** chrome-devtools-mcp (browser-based UI testing)
+**Date:** 2026-03-12
+**Task:** TASK-849
+
+| AC ID | Description | Status | Evidence |
+|-------|-------------|--------|----------|
+| AC-049-C-01 | Grid card layout with title/tags/date | ✅ Pass | Cards show title, lifecycle/domain tag pills, date |
+| AC-049-C-02 | Tag rendering (lifecycle amber + domain blue) | ✅ Pass | Amber lifecycle pills, blue domain pills from config |
+| AC-049-C-03 | Sort dropdown with options | ✅ Pass | "Last Modified" default, Name A→Z, Date Created, Untagged First |
+| AC-049-C-04 | Search bar filters by filename & frontmatter | ✅ Pass | Debounced API call on text input |
+| AC-049-C-05 | Tag filter chips below search | ✅ Pass | Lifecycle + domain tag chips below search bar |
+| AC-049-C-07 | Article card click opens content | ✅ Pass | Card click dispatches fileSelected event |
+| AC-049-C-08 | New Article button visible | ✅ Pass | "+ New Article" button in top right of browse view |
+| AC-049-C-09 | Empty state message | ✅ Pass | "📖 No articles yet — create one!" + Create Article button |
+
+**Summary:** 8/8 UI acceptance criteria passed.

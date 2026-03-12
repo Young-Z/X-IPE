@@ -1441,3 +1441,24 @@
 - `uv run python -m pytest tests/test_kb_service.py -k "Zip or SevenZip or Nested or upload" -v`
 
 > **Previously blocked TCs now passing:** TC-028 (.zip extraction), TC-029 (.7z extraction), TC-030 (nested archive handling) — covered by Python pytest tests added in TASK-847. Additionally, 4 route-level upload tests added (single file, subfolder, zip auto-extract, no-files error).
+
+---
+
+## Browser UI Test Results (chrome-devtools-mcp)
+
+**Execution tool:** chrome-devtools-mcp (browser-based UI testing)
+**Date:** 2026-03-12
+**Task:** TASK-849
+
+| AC ID | Description | Status | Evidence |
+|-------|-------------|--------|----------|
+| AC-049-E-01 | Upload modal overlay + fade-in | ✅ Pass | "📤 Upload Files" heading, backdrop, × close button |
+| AC-049-E-02 | Drag-over highlighting | ✅ Pass | Dragover adds "dragover" class to dropzone, dragleave removes |
+| AC-049-E-03 | File picker with multiple selection | ✅ Pass | input[multiple=true], upload shows ⏳→✅ status + sidebar refresh |
+| AC-049-E-04 | Folder dropdown | ✅ Pass | / (root), 📁 API Docs, 📁 Architecture, 📁 Guides options |
+| AC-049-E-05 | Inline folder creation input | ✅ Pass | "+ Folder" → "New folder name..." input + Create/Cancel buttons |
+
+**Summary:** 5/5 UI acceptance criteria passed.
+
+**Bug found and fixed during testing:**
+- `kb_service.py`: Search API crashed with "can only concatenate str (not list) to str" when `lifecycle` in frontmatter is a string instead of a list. Fixed in `_parse_frontmatter()` and `_auto_populate_frontmatter()` by adding `isinstance(x, str) → [x]` coercion.

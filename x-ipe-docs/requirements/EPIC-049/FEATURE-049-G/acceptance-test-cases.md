@@ -1244,3 +1244,22 @@
 **Test Runner:** `npx vitest run tests/frontend-js/kb-reference-picker.test.js`
 
 > **Note:** TC-022 (Copy Feedback Animation timing) and TC-026 (Parallel API Loading) are now implicitly covered — copy functionality verified by TC-020/TC-021, and parallel loading tested by every `picker.open()` call. Prior "blocked" TCs resolved by consolidating into existing test coverage.
+
+---
+
+## Browser UI Test Results (chrome-devtools-mcp)
+
+**Execution tool:** chrome-devtools-mcp (browser-based UI testing)
+**Date:** 2026-03-12
+**Task:** TASK-849
+
+| AC ID | Description | Status | Evidence |
+|-------|-------------|--------|----------|
+| AC-049-G-01 | Reference picker modal opens | ✅ Pass | "📎 Reference Picker" heading, search, tags, checkboxes, Copy/Insert |
+| AC-049-G-03 | Search input re-renders file list | ✅ Pass | "system" → only "System Overview" shown, others hidden |
+| AC-049-G-04 | Tag filter chips + toggle | ✅ Pass | # testing → "No files found", # backend → backend-tagged files only |
+| AC-049-G-06 | Selected count label updates | ✅ Pass | "0 selected" → "1 selected" after checking System Overview |
+| AC-049-G-07 | Copy button + clipboard | ✅ Pass | "📋 Copy" → "✅ Copied!" with clipboard write |
+| AC-049-G-08 | Insert button inserts reference | ✅ Pass | onInsert received ["Architecture/system-overview.md"]. Modal closed. |
+
+**Summary:** 6/6 UI acceptance criteria passed.

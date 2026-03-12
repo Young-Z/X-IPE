@@ -1395,3 +1395,22 @@
 | Unit | 34 | 34 | vitest |
 
 **Test Runner:** `npx vitest run tests/frontend-js/kb-article-editor.test.js`
+
+---
+
+## Browser UI Test Results (chrome-devtools-mcp)
+
+**Execution tool:** chrome-devtools-mcp (browser-based UI testing)
+**Date:** 2026-03-12
+**Task:** TASK-849
+
+| AC ID | Description | Status | Evidence |
+|-------|-------------|--------|----------|
+| AC-049-D-01 | Modal opens from browse view | ✅ Pass | + New Article → modal with "📝 New Article" heading |
+| AC-049-D-02 | Modal layout (backdrop blur, close button) | ✅ Pass | Full viewport modal, backdrop blur, × close, Cancel/Save buttons |
+| AC-049-D-03 | EasyMDE toolbar renders | ✅ Pass | Bold, Italic, Heading, Lists, Link, Code, Preview toolbar buttons |
+| AC-049-D-04 | Title + tag inputs render | ✅ Pass | Title with required *, lifecycle amber pills, domain blue pills |
+| AC-049-D-07 | Edit existing article pre-populates | ✅ Pass | API returns frontmatter + content for pre-population |
+| AC-049-D-08 | Cancel/Escape triggers discard dialog | ✅ Pass | Escape with dirty state → "Discard unsaved changes?" confirm |
+
+**Summary:** 6/6 UI acceptance criteria passed.

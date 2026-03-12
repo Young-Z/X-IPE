@@ -28,6 +28,7 @@
 | TASK-846 | Technical Design (Re-align) | Re-aligned FEATURE-049-B technical-design.md — rewritten from 116→201 lines fixing 14 template gaps. A,C,D,E,G confirmed compliant. | Echo 📡 | ✅ done | 03-11-2026 14:46:00 | — | DAO-049 |
 | TASK-847 | Code-Implementation DoD Validation | Wrote 24 new tests (5 JS + 19 Python), verified tracing on all public methods, achieved 82% coverage (service 91%, routes 69%). All 5 audit gaps closed. | Echo 📡 | ✅ done | 03-11-2026 15:10:00 | — | DAO-051 |
 | TASK-848 | Acceptance Testing (Re-run) | Re-run acceptance testing for all 6 MVP features (A,B,C,D,E,G) after spec/design/code changes. Update acceptance-test-cases.md per feature with current test results. | Echo 📡 | ✅ done | 03-11-2026 15:43:00 | 03-11-2026 23:55:00 | DAO-052 |
+| TASK-849 | Frontend-UI Browser AC Testing | Execute frontend-ui classified ACs via chrome-devtools-mcp for features B,C,D,E,G. Validate DOM rendering, modals, drag-drop, animations, visual states in actual browser. | Echo 📡 | 🔄 in_progress | 03-12-2026 04:25:00 | — | DAO-053 |
 
 ---
 

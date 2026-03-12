@@ -1,0 +1,6 @@
+{
+  "tags": {
+    "lifecycle": ["draft", "active", "deprecated", "archived"],
+    "domain": ["backend", "frontend", "devops", "testing", "design"]
+  }
+}
