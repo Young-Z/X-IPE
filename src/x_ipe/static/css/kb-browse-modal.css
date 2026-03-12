@@ -950,6 +950,7 @@
     top: 0;
     align-self: flex-start;
     max-height: 100%;
+    margin-left: auto;
 }
 .kb-meta-section { margin-bottom: 24px; }
 .kb-meta-section-title {
