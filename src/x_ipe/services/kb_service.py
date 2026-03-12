@@ -375,20 +375,23 @@ class KBService:
         return self._tree_cache
 
     @x_ipe_tracing()
-    def list_files(self, folder: str = '', sort: str = 'modified') -> List[KBNode]:
-        """List files in *folder* with optional sorting."""
+    def list_files(self, folder: str = '', sort: str = 'modified',
+                   recursive: bool = False) -> List[KBNode]:
+        """List files in *folder* with optional sorting.
+        When *recursive* is True, walk all subdirectories."""
         self._ensure_file_index()
         target = self._resolve_safe_path(folder)
         if not target.is_dir():
             raise FileNotFoundError(f"Folder not found: {folder}")
 
         files: List[KBNode] = []
-        for entry in target.iterdir():
+        entries = target.rglob('*') if recursive else target.iterdir()
+        for entry in entries:
             if not entry.is_file():
                 continue
-            if entry.name == KB_CONFIG_FILE and folder == '':
-                continue
             rel = str(entry.relative_to(self.kb_root)).replace('\\', '/')
+            if entry.name == KB_CONFIG_FILE:
+                continue
             stat = entry.stat()
             fm = self._frontmatter_index.get(rel) or self._parse_frontmatter_safe(entry)
             files.append(self._build_file_node(rel, entry.name, stat, fm))

@@ -57,7 +57,7 @@ def get_tree():
 @x_ipe_tracing()
 def list_files():
     """
-    GET /api/kb/files?folder={path}&sort={field}
+    GET /api/kb/files?folder={path}&sort={field}&recursive={true|false}
 
     FEATURE-049-A: List files in folder with frontmatter metadata.
     """
@@ -65,9 +65,10 @@ def list_files():
 
     folder = request.args.get('folder', '')
     sort = request.args.get('sort', 'modified')
+    recursive = request.args.get('recursive', 'false').lower() == 'true'
 
     try:
-        files = svc.list_files(folder=folder, sort=sort)
+        files = svc.list_files(folder=folder, sort=sort, recursive=recursive)
         return jsonify({
             'files': [f.to_dict() for f in files],
             'folder': folder,

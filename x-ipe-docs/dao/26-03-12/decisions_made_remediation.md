@@ -265,3 +265,100 @@ Confirm MODIFICATION classification. The change-request skill should proceed to 
 
 ### Follow-up
 > After lightweight refinement updates the spec ACs, proceed directly to `x-ipe-task-based-code-implementation` (skip `x-ipe-task-based-technical-design`). Then run `x-ipe-task-based-feature-acceptance-test` against the updated ACs.
+
+---
+
+## DAO-058
+- **Timestamp:** 2026-03-12T22:30:00Z
+- **Task ID:** TASK-850
+- **Feature ID:** N/A
+- **Workflow:** Knowledge-Base-Implementation
+- **Calling Skill:** N/A
+- **Source:** human
+- **Disposition:** instruction (×2 units)
+- **Confidence:** 0.85
+
+### Message
+> but me, I still cannot click intake menu, and I don't know how to get into the general knowledge base home page
+
+### Instruction Unit 1 — Intake Placeholder UX Bug
+> **Disposition:** instruction
+> **Content:** The "📥 Intake" sidebar item is a static placeholder for post-MVP FEATURE-049-F. It currently appears interactive but does nothing on click, creating a misleading UX pattern. Fix: make the placeholder visually indicate it's a future/disabled feature — add a "Coming Soon" tooltip, apply a disabled/dimmed visual style, and suppress click events so it doesn't appear broken. Do NOT implement Intake functionality — only fix the misleading affordance.
+> **Depends on:** none
+
+### Instruction Unit 2 — KB Browse Page Navigation Discoverability Bug
+> **Disposition:** instruction
+> **Content:** The KB browse/home view currently requires DOUBLE-CLICKING the KB section header or a folder header in sidebar.js (_bindKBFolderClicks, lines 690-725). Single-click only expands/collapses the tree. This is an undiscoverable interaction pattern — users cannot find how to navigate to the main KB page. Fix: add a discoverable single-click entry point to the KB browse view. Options include: (a) add a visible "📚 Browse" or "🏠 Home" sub-item under the KB section, (b) make single-click on the KB section header navigate to browse view (move expand/collapse to a chevron), or (c) add a right-click context menu option. Choose the approach that best fits the existing sidebar patterns.
+> **Depends on:** none (but sequential execution due to same-file write conflict with Unit 1)
+
+### Rationale
+> Both issues are UX/usability bugs discovered during human playground testing (FEEDBACK stage → discovery loop → bug-fix). The Intake placeholder creates a false interactive affordance; the KB navigation requires an undiscoverable double-click. Both are low-risk sidebar fixes. Sequential execution recommended because both modify sidebar.js. Engineering workflow: FEEDBACK → bug-fix → acceptance_testing.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "strong"
+>     reason: "Unit 1 — Intake placeholder appears clickable but is non-functional; UX bug in sidebar"
+>     execution_steps:
+>       - phase: "1. Diagnose"
+>         step: "1.1 Reproduce the bug — click Intake in sidebar, confirm no response"
+>       - phase: "2. Fix"
+>         step: "2.1 Add disabled visual state and Coming Soon tooltip to Intake placeholder"
+>   - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "strong"
+>     reason: "Unit 2 — KB browse page requires undiscoverable double-click; navigation UX bug"
+>     execution_steps:
+>       - phase: "1. Diagnose"
+>         step: "1.1 Confirm double-click is only path to KB browse view"
+>       - phase: "2. Fix"
+>         step: "2.1 Add discoverable single-click entry point for KB browse navigation"
+
+### Execution Plan
+
+| Field | Value |
+|-------|-------|
+| **Strategy** | `sequential` |
+| **Groups** | `[[0], [1]]` |
+| **Rationale** | Both units modify sidebar.js — sequential execution avoids write conflicts. Unit 1 (Intake placeholder) first, then Unit 2 (KB navigation discoverability). |
+
+### Follow-up
+> Execute both bug-fixes via `x-ipe-task-based-bug-fix` skill, sequentially. After each fix, run `x-ipe-task-based-feature-acceptance-test` to validate. Both are UX-only changes — no backend or data model impact.
+
+---
+
+## DAO-059
+- **Timestamp:** 2026-03-12T13:30:00+08:00
+- **Task ID:** TASK-851
+- **Feature ID:** FEATURE-049-B, FEATURE-049-D
+- **Workflow:** Knowledge-Base-Implementation
+- **Calling Skill:** x-ipe-task-based-bug-fix
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.85
+
+### Message
+> don't change sidebar logic, can we do this, for knowledge base entry can we put it on top bar, on the rightside of the workflow mode. when click on the knowledge base text or icon, open a modal window, the left side should the knowledge base folder tree as is, the right side show the content
+
+### Guidance Returned
+> Revert TASK-851 sidebar changes (📚 Browse All item + Intake placeholder styling). Instead, add a KB icon/button to the top bar (right of workflow mode toggle). On click, open a Bootstrap 5 modal with split-pane layout: left panel = KB folder tree (reuse existing tree rendering from sidebar.js), right panel = article content viewer (reuse kb-browse/kb-article-editor rendering). This stays within TASK-851 scope as a course-correction for KB browse discoverability. Classify as change request within existing task — use x-ipe-task-based-change-request to process impact, then x-ipe-task-based-code-implementation for the modal.
+
+### Rationale
+> User explicitly rejected the sidebar "Browse All" approach and specified a concrete alternative (top-bar modal with tree+content). This is a clear instruction with well-defined UI requirements. The modal pattern improves discoverability — KB becomes globally accessible from any page, not buried in sidebar navigation. Classifying as CR within TASK-851 to keep workflow clean.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-change-request"
+>     match_strength: "strong"
+>     reason: "User is changing the KB navigation approach from sidebar-based to top-bar modal — modifies FEATURE-049-D integration"
+>     execution_steps:
+>       - phase: "1. Impact Analysis"
+>         step: "1.1 Analyze scope of change"
+>   - skill_name: "x-ipe-task-based-code-implementation"
+>     match_strength: "partial"
+>     reason: "After CR processed, implementation of the KB modal component"
+>     execution_steps:
+>       - phase: "3. Implementation"
+>         step: "3.1 Code implementation"
+
+### Follow-up
+> 1. Revert uncommitted sidebar.js and sidebar.css TASK-851 changes. 2. Process as CR-002 under FEATURE-049-D. 3. Implement KB top-bar modal with tree+content split layout.

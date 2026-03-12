@@ -10,6 +10,7 @@
 | Version | Date | Description |
 |---------|------|-------------|
 | v1.0 | 03-11-2026 | Initial specification — template conformance with GWT criteria, test type legend, linked mockups |
+| v1.1 | 03-12-2026 | CR-002: Add top-bar KB button + browse modal (tree+content split pane). Sidebar KB unchanged. |
 
 ## Linked Mockups
 

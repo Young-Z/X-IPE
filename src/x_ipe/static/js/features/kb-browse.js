@@ -58,7 +58,11 @@ class KBBrowseView {
     async _loadFiles() {
         try {
             let url = `/api/kb/files?sort=${this.sort}`;
-            if (this.folder) url += `&folder=${encodeURIComponent(this.folder)}`;
+            if (this.folder) {
+                url += `&folder=${encodeURIComponent(this.folder)}`;
+            } else {
+                url += '&recursive=true';
+            }
             
             if (this.searchQuery) {
                 url = `/api/kb/search?q=${encodeURIComponent(this.searchQuery)}`;

@@ -139,6 +139,17 @@ function initializeApp() {
             });
         }
     }
+
+    // FEATURE-049-B / CR-002: KB Browse Modal
+    if (typeof KBBrowseModal !== 'undefined') {
+        window.kbBrowseModal = new KBBrowseModal();
+        const kbBtn = document.getElementById('btn-kb-browse');
+        if (kbBtn) {
+            kbBtn.addEventListener('click', () => {
+                window.kbBrowseModal.open();
+            });
+        }
+    }
     
     // FEATURE-036-B: Engineering Workflow / Free mode toggle handler
     const modeToggleBtn = document.getElementById('mode-toggle-btn');
