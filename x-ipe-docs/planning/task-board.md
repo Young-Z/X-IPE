@@ -31,8 +31,10 @@
 | TASK-849 | Frontend-UI Browser AC Testing | Execute frontend-ui classified ACs via chrome-devtools-mcp for features B,C,D,E,G. 34/34 UI ACs pass. Fixed 2 bugs: kb-browse.js string-to-array coercion, kb_service.py search API string concatenation. | Echo 📡 | ✅ done | 03-12-2026 07:05:00 | [B-ac](x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/acceptance-test-cases.md), [C-ac](x-ipe-docs/requirements/EPIC-049/FEATURE-049-C/acceptance-test-cases.md), [D-ac](x-ipe-docs/requirements/EPIC-049/FEATURE-049-D/acceptance-test-cases.md), [E-ac](x-ipe-docs/requirements/EPIC-049/FEATURE-049-E/acceptance-test-cases.md), [G-ac](x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/acceptance-test-cases.md) | DAO-053 |
 | TASK-850 | Change Request | CR-001: Replace all native browser dialogs (alert/confirm/prompt) with Bootstrap 5 modals. Created shared utility + replaced 14 call sites across 6 JS files. All 621 tests pass. | Echo 📡 | ✅ done | 03-12-2026 07:30:00 | [bootstrap-dialogs.js](src/x_ipe/static/js/utils/bootstrap-dialogs.js), [CR-001.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-D/CR-001.md) | DAO-055 |
 | TASK-851 | Bug Fix + CR-002 | KB browse discoverability: added top-bar KB button → modal with folder tree + article viewer (CR-002). Sidebar unchanged. Recursive API added. | Echo 📡 | ✅ done | 03-12-2026 07:35:00 | 03-12-2026 13:45:00 | DAO-058, DAO-059 |
-| TASK-852 | Skill Creation | Create `x-ipe-ui-testing-via-chrome-mcp` tool skill — define UI testing capabilities using Chrome DevTools MCP based on best practices (navigation, snapshot, screenshot, form interaction, assertions) | Sage 🌿 | 🔄 in_progress | 03-12-2026 05:39:00 | — | DAO-060 |
-| TASK-853 | Skill Update | Update `x-ipe-task-based-feature-acceptance-test` + tools.json: (1) store ACs by test type after scope definition, (2) add x-ipe-ui-testing-via-chrome-mcp to tools.json, (3) route UI test sets through the new tool | Sage 🌿 | ⏳ pending | 03-12-2026 05:39:00 | — | DAO-060 |
+| TASK-852 | Skill Creation | Create `x-ipe-ui-testing-via-chrome-mcp` tool skill — define UI testing capabilities using Chrome DevTools MCP based on best practices (navigation, snapshot, screenshot, form interaction, assertions) | Sage 🌿 | ✅ done | 03-12-2026 05:48:00 | [SKILL.md](.github/skills/x-ipe-ui-testing-via-chrome-mcp/SKILL.md), [skill-meta](x-ipe-docs/skill-meta/x-ipe-ui-testing-via-chrome-mcp/skill-meta.md) | DAO-060 |
+| TASK-853 | Skill Update | Update `x-ipe-task-based-feature-acceptance-test` + tools.json: (1) store ACs by test type after scope definition, (2) add x-ipe-ui-testing-via-chrome-mcp to tools.json, (3) route UI test sets through the new tool | Sage 🌿 | ✅ done | 03-12-2026 05:50:00 | [SKILL.md](.github/skills/x-ipe-task-based-feature-acceptance-test/SKILL.md), [tools.json](x-ipe-docs/config/tools.json) | DAO-060 |
+| TASK-855 | Skill Update | Add mockup support: (1) AC skill gets mockup_path input with auto-detect + freshness check, (2) UI testing tool gets mockup_path input + compare_with_mockup operation for visual gap analysis | Sage 🌿 | ✅ done | 03-12-2026 10:58:00 | [AC-SKILL](.github/skills/x-ipe-task-based-feature-acceptance-test/SKILL.md), [UI-TOOL](.github/skills/x-ipe-ui-testing-via-chrome-mcp/SKILL.md) | DAO-061 |
+| TASK-854 | Skill Update | Simplify DAO 格物 (Phase 1) and 致知 (Phase 2) — merged 6 substeps into 3: Step 1.1 (Parse+Decompose), Step 1.2 (Quick Perspectives), Step 2.1 (Match+Decide+Commit). 401→356 lines. | Zephyr 🌬️ | ✅ done | 03-12-2026 10:55:00 | [SKILL.md](.github/skills/x-ipe-dao-end-user-representative/SKILL.md), [phases-ref](.github/skills/x-ipe-dao-end-user-representative/references/dao-phases-and-output-format.md) | DAO-060 |
 
 ---
 
@@ -93,7 +95,7 @@
 - **In Progress:** 3
 - **Pending:** 1
 - **Deferred:** 0
-- **Completed (archived):** 848
+- **Completed (archived):** 850
 - **Reverted:** 8
 - **Pending Review:** 0
 - **Blocked:** 0

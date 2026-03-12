@@ -362,3 +362,69 @@ Confirm MODIFICATION classification. The change-request skill should proceed to 
 
 ### Follow-up
 > 1. Revert uncommitted sidebar.js and sidebar.css TASK-851 changes. 2. Process as CR-002 under FEATURE-049-D. 3. Implement KB top-bar modal with tree+content split layout.
+
+| DAO-060 | 2026-03-12T05:35:29Z | TASK-852 | N/A | instruction | 0.90 | Simplify DAO 格物+致知 phases for efficiency |
+
+## DAO-060
+- **Timestamp:** 2026-03-12T05:35:29Z
+- **Task ID:** TASK-852
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.90
+
+### Message
+> for 'DAO' let's base on the 格物，致知，录，示，backbone, but for 格物 and 致知 part, can we make it more simple and efficient, so it won't spent too much time on these two part
+
+### Guidance Returned
+> User directs simplification of DAO phases 1 (格物) and 2 (致知). Keep 5-phase backbone. Merge/compress internal substeps to reduce token/time cost. Use x-ipe-meta-skill-creator to update the skill.
+
+### Rationale
+> Project owner giving clear design direction. Current 6 substeps across phases 1-2 are verbose for routine messages. Merging and compressing preserves cognitive rigor while reducing overhead.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-meta-skill-creator"
+>     match_strength: "strong"
+>     reason: "Updating an existing skill (DAO) requires the skill creator process"
+>     execution_steps:
+>       - phase: "Candidate creation"
+>         step: "Update SKILL.md in candidate folder"
+
+### Follow-up
+> None
+
+---
+
+## DAO-060
+- **Timestamp:** 2026-03-12T13:50:00+08:00
+- **Task ID:** TASK-851
+- **Feature ID:** FEATURE-049-B, FEATURE-049-C, FEATURE-049-D, FEATURE-049-E
+- **Workflow:** Knowledge-Base-Implementation
+- **Calling Skill:** x-ipe-task-based-change-request
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.90
+
+### Message
+> the modal window for it should be following standard size in x-ipe, 2. intake menu is missing 3. all the views in mockup should be implemented, and the ui and ux should be exactly the same!
+
+### Guidance Returned
+> Three issues with the KB browse modal: (1) Modal size must match X-IPE standard — 90vw × 90vh per kb-article-editor pattern. (2) Intake (📥) entry must appear in the modal navigation. (3) The modal must implement ALL 4 mockup scenes: Browse Articles (grid/list with search, filters, sort, upload), Article Detail (with metadata sidebar), Reference Picker (already exists separately), and Intake (AI Librarian — FEATURE-049-F placeholder). The UI must exactly match the mockup's visual design including card layout, filter chips, tag taxonomy, stats bar, upload section, article layout with sidebar metadata, and intake table view.
+
+### Rationale
+> User is explicitly demanding mockup-faithful implementation. The current KB browse modal is too basic — it shows only a folder tree + content viewer. The mockup defines a much richer 4-scene experience with specific visual patterns. This is a continuation of CR-002, expanding scope to match the full mockup specification.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-code-implementation"
+>     match_strength: "strong"
+>     reason: "Full UI implementation matching mockup scenes — major coding task"
+>     execution_steps:
+>       - phase: "3. Implementation"
+>         step: "3.1 Code implementation"
+
+### Follow-up
+> Rewrite kb-browse-modal.js and kb-browse-modal.css to faithfully implement all 4 mockup scenes. Use the frontend-design skill for pixel-perfect UI matching.

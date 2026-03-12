@@ -8,8 +8,8 @@
 | Phase | Chinese | English | 心法 | Activities |
 |-------|---------|---------|------|------------|
 | 0 | 礼 (Lǐ) | Greet | 有朋自远方来 | Print "道 · Human Representative — ready." |
-| 1 | 格物 (Géwù) | Investigate | 静→安→虑→得; 兼听则明 | Restate need, decompose compound + analyze unit dependencies, three perspectives |
-| 2 | 致知 (Zhìzhī) | Reach Understanding | 两利取重，两害取轻; 谋贵众，断贵独 | Per unit: scan skills, weigh 利/害 + select + draft, commit. Then: assemble execution_plan from dependencies |
+| 1 | 格物 (Géwù) | Investigate | 静→安→虑→得; 兼听则明 | Step 1.1: Parse + decompose + dependencies. Step 1.2: Quick three-perspective check |
+| 2 | 致知 (Zhìzhī) | Reach Understanding | 两利取重，两害取轻; 谋贵众，断贵独 | Step 2.1: Per unit — match skill → select disposition → commit. Then assemble execution_plan |
 | 3 | 录 (Lù) | Record | — | Write semantic log entry (append-only) |
 | 4 | 示 (Shì) | Present | 言之有文，行而远 | Format structured CLI output |
 
@@ -47,7 +47,7 @@ IF any unit has suggested_skills non-empty, APPEND:
 ⚠️ Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
 ```
 
-## Decomposition Criteria (Step 1.1b)
+## Decomposition Criteria (Step 1.1)
 
 Split ONLY when:
 - Sub-instructions target different domains (e.g., skill update vs code fix)
@@ -61,7 +61,7 @@ Do NOT split when:
 
 Default: 1 unit. Maximum: 3 units. Order: first mentioned = first unit.
 
-## Dependency Analysis Criteria (Step 1.1b)
+## Dependency Analysis Criteria (Step 1.1)
 
 After decomposition, analyze dependencies between units:
 

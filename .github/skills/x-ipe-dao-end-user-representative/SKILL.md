@@ -113,8 +113,8 @@ input:
 | Phase | Step | Name | Action | Gate |
 |-------|------|------|--------|------|
 | 0 | 0.1 | 礼 — Greet | Announce identity as '道' | Greeting delivered |
-| 1 | 1.1–1.2 | 格物 — Investigate | Restate need, decompose compound + analyze dependencies, three perspectives | Context gathered + units identified + dependencies mapped |
-| 2 | 2.1–2.3 | 致知 — Reach Understanding | Per unit: scan skills, weigh dispositions + select, commit + assemble execution_plan | One disposition per unit committed + execution_plan produced |
+| 1 | 1.1–1.2 | 格物 — Investigate | Parse + decompose + quick perspectives | Units identified with dependencies |
+| 2 | 2.1 | 致知 — Reach Understanding | Per unit: match skill → select disposition → commit; then assemble execution_plan | instruction_units[] + execution_plan ready |
 | 3 | 3.1 | 录 — Record | Write semantic log entry (all units) | Log written |
 | 4 | 4.1 | 示 — Present | Format CLI output (all units) | Output delivered |
 
@@ -139,110 +139,65 @@ See `references/dao-phases-and-output-format.md` for phase definitions, 心法, 
   </phase_0>
 
   <phase_1 name="格物 — Investigate">
+    <!-- 格物：推究事物的道理 — kept lean for efficiency -->
 
     <step_1_1>
-      <name>Pause and Restate</name>
-      <!-- 静而后能安，安而后能虑，虑而后能得 -->
+      <name>Parse and Decompose</name>
+      <!-- 静→安→虑→得 -->
       <action>
-        1. STOP. Check: message clear? Context sufficient? Cascading urgency?
-        2. IF insufficient → flag for `clarification` or `pass_through` in Phase 2.
-        3. Read messages, strip noise/jargon. Produce: "The user needs: {X}."
+        1. Read messages, strip noise. Produce: "The user needs: {X}."
+        2. IF message unclear or context missing → flag for `clarification` in Phase 2.
+        3. Compound check (see references/dao-phases-and-output-format.md decomposition criteria):
+           - Multiple unrelated instructions for DIFFERENT skills? → split into N units (max 3).
+           - Otherwise → 1 unit.
+        4. IF multiple units → mark `depends_on: []` per unit (output feeds input? same file? → dependent).
       </action>
-      <constraints>
-        - Exactly one need sentence. BLOCKING: Fail `DAO_INPUT_INVALID` if message/source missing.
-      </constraints>
-      <output>One-sentence user need</output>
+      <constraints>BLOCKING: Fail `DAO_INPUT_INVALID` if message/source missing. Default 1 unit.</constraints>
+      <output>Need sentence + instruction units (1–3) with dependency annotations</output>
     </step_1_1>
 
-    <step_1_1b>
-      <name>Decompose Compound Message and Analyze Dependencies</name>
-      <!-- See references/dao-phases-and-output-format.md for decomposition criteria -->
-      <action>
-        1. Does the message contain multiple weakly-related instructions for DIFFERENT skills/paths?
-        2. IF compound → produce N units (max 3), each with `unit_content` + `unit_context`.
-        3. IF NOT compound → produce 1 unit with full message.
-        4. IF multiple units produced → analyze inter-unit dependencies:
-           a. For each pair of units, check: does one unit's output feed another's input?
-              Does one require a file/feature/state that another creates?
-              Do they target the same file or resource (write conflict)?
-           b. Mark each unit with `depends_on: []` (list of unit indices it depends on).
-           c. Units with no dependencies on each other are INDEPENDENT → eligible for parallel execution.
-      </action>
-      <constraints>Default 1 unit. Max 3. First mentioned = first unit. Single unit → no dependency analysis needed.</constraints>
-      <output>List of instruction units (1–3) with dependency annotations</output>
-    </step_1_1b>
-
     <step_1_2>
-      <name>Three Perspectives</name>
-      <!-- 兼听则明，偏信则暗 -->
+      <name>Quick Perspectives</name>
+      <!-- 兼听则明 -->
       <action>
-        1. Read message_context (source, calling_skill, task_id, feature_id, workflow_name, downstream_context).
-        2. Note preferred_dispositions.
-        3. Construct: **Supporting** (benefit of doubt) · **Opposing** (what could go wrong) · **Neutral expert** (detached observer).
-        4. All three MUST be considered. Identify constraints.
+        1. Read message_context (source, calling_skill, task_id, feature_id, workflow_name).
+        2. Three-voice check: **Supporting** (benefit of doubt) · **Opposing** (risk?) · **Neutral** (detached).
+        3. Note preferred_dispositions + constraints. Done — move to Phase 2.
       </action>
-      <output>Three-perspective summary (internal)</output>
+      <output>Three-perspective summary (internal, brief)</output>
     </step_1_2>
 
   </phase_1>
 
   <phase_2 name="致知 — Reach Understanding">
-    <!-- Runs ONCE PER instruction unit. Steps 2.1→2.2→2.3 per unit. -->
+    <!-- 致知：认知达到完备 — one dense step per unit, then assemble -->
 
     <step_2_1>
-      <name>Scan Skills (per unit)</name>
+      <name>Match, Decide, and Commit (per unit → then assemble)</name>
+      <!-- 两利取重，两害取轻；谋贵众，断贵独 -->
       <action>
-        1. Scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions for THIS unit.
-        2. Rank: strong | partial | none. Extract execution phases/steps from matches.
-        3. Consult `references/engineering-workflow.md`: identify current stage/action position,
-           check what the workflow DAG says comes next. If keyword match and engineering-next
-           agree → high confidence. If they conflict → prefer engineering-next unless user overrides.
-        4. Read `process_preference.interaction_mode` for execution_strategy.
-        5. Produce suggested_skills (max 3, may be empty).
+        FOR EACH unit:
+        1. **Match skill:** Scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions.
+           Rank: strong | partial | none. Consult `references/engineering-workflow.md` for
+           stage position. Keyword + engineering-next agree → high confidence. Produce suggested_skills (max 3).
+        2. **Select disposition:** Weigh 利/害 for each candidate (answer|clarification|reframe|critique|instruction|approval|pass_through).
+           Two gains → take greater. Two harms → take lesser. Verify: smallest useful intervention, bounded, reversible.
+           IF worst case unacceptable → fall to next candidate.
+        3. **Draft:** content + rationale_summary for this unit. Lock — no second-guessing.
+
+        AFTER ALL units:
+        4. **Assemble:** instruction_units[] in order. Confidence = min across units.
+           fallback_required = true ONLY if human_shadow AND confidence < threshold.
+        5. **Execution plan:** Group independent units into parallel batches;
+           dependent units into later sequential groups. Strategy: parallel | sequential | mixed.
+           Single unit → strategy: "sequential", groups: [[0]].
       </action>
-      <constraints>No force-matching. Each unit gets own matching. Engineering process context informs but does not override explicit user intent.</constraints>
-      <output>suggested_skills list for this unit</output>
+      <constraints>
+        - Exactly one disposition per unit. `approval` is guidance, NOT human approval.
+        - Final — MUST NOT revisit after commit. execution_plan MUST reflect step 1.1 dependencies.
+      </constraints>
+      <output>operation_output ready (instruction_units[] + execution_plan)</output>
     </step_2_1>
-
-    <step_2_2>
-      <name>Weigh, Select, and Draft (per unit)</name>
-      <!-- 两利相权取其重，两害相权取其轻 -->
-      <action>
-        1. For each disposition (answer, clarification, reframe, critique, instruction, approval, pass_through):
-           - **利:** User gain? Workflow progress? **害:** Risk? Wasted effort?
-        2. Two gains → take greater. Two harms → take lesser.
-        3. preferred_dispositions → weight higher. suggested_skills → factor in.
-        4. Select top-ranked disposition. Verify: smallest useful intervention, scope bounded, reversible.
-        5. Draft content + rationale_summary. Include suggested_skills if non-empty.
-      </action>
-      <constraints>Exactly one disposition. `approval` is guidance only — NOT human approval.</constraints>
-      <output>Selected disposition + content + rationale</output>
-    </step_2_2>
-
-    <step_2_3>
-      <name>Commit (per unit, then assemble with execution plan)</name>
-      <!-- 谋贵众，断贵独 -->
-      <action>
-        1. Lock disposition, content, rationale for THIS unit. No second-guessing.
-        2. Confidence: 0.0–1.0. fallback_required: true ONLY if human_shadow AND confidence < threshold.
-        3. AFTER all units committed: assemble `instruction_units[]` (order from 1.1b).
-        4. Overall confidence = MINIMUM across units.
-        5. IF multiple units → build `execution_plan` from dependency annotations (step 1.1b):
-           a. Group independent units into parallel batches. Units with no mutual
-              dependencies go into the SAME group (can run concurrently).
-           b. Units that depend on earlier units go into LATER groups (sequential after dependencies).
-           c. Set `execution_plan.strategy`:
-              - `"parallel"` — all units are independent, run concurrently
-              - `"sequential"` — all units have chain dependencies, run in order
-              - `"mixed"` — some groups parallel, some sequential
-           d. Set `execution_plan.groups[]` — ordered list of groups, each containing unit indices.
-              Groups execute sequentially; units WITHIN a group execute in parallel.
-        6. IF single unit → `execution_plan.strategy: "sequential"`, one group with that unit.
-        7. Assemble operation_output.
-      </action>
-      <constraints>Final — MUST NOT revisit. Preserve unit order. execution_plan MUST reflect dependency analysis from 1.1b.</constraints>
-      <output>operation_output ready (with execution_plan)</output>
-    </step_2_3>
 
   </phase_2>
 
@@ -288,7 +243,7 @@ operation_output:
       - disposition: "answer | clarification | reframe | critique | instruction | approval | pass_through"
         content: "bounded response for this instruction unit"
         rationale_summary: "brief explanation of why this disposition was chosen"
-        depends_on: []        # unit indices this unit depends on (from Step 1.1b)
+        depends_on: []        # unit indices this unit depends on (from Step 1.1)
         suggested_skills:     # from Step 2.1 — may be empty list
           - skill_name: "x-ipe-task-based-{name}"
             match_strength: "strong | partial"
@@ -296,7 +251,7 @@ operation_output:
             execution_steps:  # from skill's Execution Flow table
               - phase: "1. Phase Name"
                 step: "1.1 Step Name"
-    # Execution plan for multi-unit output (from Step 2.4)
+    # Execution plan for multi-unit output (from Step 2.1)
     execution_plan:
       strategy: "parallel | sequential | mixed"  # how units relate
       groups:                 # ordered list — groups run sequentially, units within a group run in parallel
@@ -353,7 +308,7 @@ for each group in execution_plan.groups (sequentially):
   </checkpoint>
   <checkpoint required="true">
     <name>Execution plan produced</name>
-    <verification>execution_plan contains strategy + groups[] reflecting dependency analysis from step 1.1b</verification>
+    <verification>execution_plan contains strategy + groups[] reflecting dependency analysis from step 1.1</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Semantic log written</name>
