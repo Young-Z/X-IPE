@@ -95,12 +95,6 @@ class ProjectService:
             'icon': 'bi-kanban'
         },
         {
-            'id': 'knowledge-base',
-            'label': 'Knowledge Base',
-            'path': 'x-ipe-docs/knowledge-base',
-            'icon': 'bi-book'
-        },
-        {
             'id': 'requirements',
             'label': 'Requirements',
             'path': 'x-ipe-docs/requirements',
