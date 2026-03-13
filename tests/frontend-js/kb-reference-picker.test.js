@@ -440,4 +440,36 @@ describe('FEATURE-049-G: KB Reference Picker', () => {
       expect(document.querySelector('.kb-ref-list-panel script')).toBeNull();
     });
   });
+
+  describe('Global instantiation (init.js integration)', () => {
+    it('should open reference picker when triggered via window.kbReferencePicker', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      // Simulate what init.js should do: create global instance
+      globalThis.window = globalThis.window || globalThis;
+      globalThis.window.kbReferencePicker = new globalThis.KBReferencePicker();
+
+      expect(typeof globalThis.window.kbReferencePicker).not.toBe('undefined');
+      expect(typeof globalThis.window.kbReferencePicker.open).toBe('function');
+
+      await globalThis.window.kbReferencePicker.open();
+      const overlay = document.querySelector('.kb-ref-overlay');
+      expect(overlay).not.toBeNull();
+
+      globalThis.window.kbReferencePicker.close();
+      delete globalThis.window.kbReferencePicker;
+    });
+
+    it('should be instantiated by init.js alongside KBBrowseModal and KBArticleEditor', () => {
+      if (!globalThis.KBReferencePicker) return;
+      // This test documents the expected init.js behavior:
+      // init.js should create window.kbReferencePicker just like it creates
+      // window.kbBrowseModal and window.kbArticleEditor
+      const initContent = require('fs').readFileSync(
+        require('path').resolve(__dirname, '../../src/x_ipe/static/js/init.js'),
+        'utf8'
+      );
+      expect(initContent).toContain('KBReferencePicker');
+      expect(initContent).toContain('kbReferencePicker');
+    });
+  });
 });

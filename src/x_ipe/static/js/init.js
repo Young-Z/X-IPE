@@ -155,6 +155,11 @@ function initializeApp() {
     if (typeof KBArticleEditor !== 'undefined') {
         window.kbArticleEditor = new KBArticleEditor();
     }
+
+    // FEATURE-049-G: KB Reference Picker (global instance for cross-workflow reference)
+    if (typeof KBReferencePicker !== 'undefined') {
+        window.kbReferencePicker = new KBReferencePicker();
+    }
     
     // FEATURE-036-B: Engineering Workflow / Free mode toggle handler
     const modeToggleBtn = document.getElementById('mode-toggle-btn');
