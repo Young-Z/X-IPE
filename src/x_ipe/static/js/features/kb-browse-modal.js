@@ -1098,15 +1098,21 @@ class KBBrowseModal {
 
     _runAILibrarian() {
         const command = 'organize knowledge base intake files with AI Librarian --workflow-mode@Knowledge-Base-Implementation';
-        if (window.terminalManager?.sendCopilotPromptCommand) {
-            this.close();
-            window.terminalManager.sendCopilotPromptCommand(command);
-        } else {
+        if (!window.terminalManager?.sendCopilotPromptCommand) {
             navigator.clipboard?.writeText(command);
-            if (typeof showToast === 'function') {
-                showToast('Command copied — paste into Copilot CLI', 'info');
-            }
+            if (typeof showToast === 'function') showToast('Command copied — paste into Copilot CLI', 'info');
+            return;
         }
+        this.close();
+        // Ensure terminal panel is expanded (collapsed = ~36px status bar only)
+        const termPanel = document.getElementById('terminal-panel');
+        if (termPanel && termPanel.offsetHeight < 100) {
+            const toggle = document.querySelector('[title="Toggle terminal"]');
+            if (toggle) toggle.click();
+        }
+        setTimeout(() => {
+            window.terminalManager.sendCopilotPromptCommand(command);
+        }, 300);
     }
 
     _toggleUploadView() {
