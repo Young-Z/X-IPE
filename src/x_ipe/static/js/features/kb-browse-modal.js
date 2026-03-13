@@ -621,14 +621,18 @@ class KBBrowseModal {
                 <div class="kb-stat-item"><span class="kb-stat-num">0</span> processing</div>
                 <div class="kb-stat-item"><span class="kb-stat-num">0</span> filed</div>
             </div>
+            <div style="padding:12px 24px 0;display:flex;gap:10px;align-items:center;">
+                <button class="kb-btn-ai-librarian" data-action="run-librarian" ${intakeFiles.length === 0 ? 'disabled' : ''}>
+                    <span>\u2728</span> Run AI Librarian
+                    <span style="font-size:11px;font-weight:400;opacity:0.8;">\u2014 Organize ${intakeFiles.length} file${intakeFiles.length !== 1 ? 's' : ''}</span>
+                </button>
+                <div class="kb-intake-dropzone" data-action="trigger-intake-upload" style="padding:10px 18px;text-align:center;border:2px dashed #c4b5fd;border-radius:10px;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;">
+                    <i class="bi bi-plus-circle" style="font-size:16px;color:#8b5cf6;"></i>
+                    <span style="font-size:12px;color:#475569;">Add files</span>
+                </div>
+            </div>
             <div style="flex:1;overflow-y:auto;padding:16px 24px;">
                 ${fileListHtml}
-            </div>
-            <div style="padding:16px 24px;border-top:1px solid #e2e8f0;">
-                <div class="kb-intake-dropzone" data-action="trigger-intake-upload" style="padding:20px;text-align:center;border:2px dashed #c4b5fd;border-radius:10px;cursor:pointer;transition:all 0.2s;">
-                    <i class="bi bi-inbox" style="font-size:24px;color:#8b5cf6;"></i>
-                    <div style="font-size:13px;color:#475569;margin-top:6px;">Drop files here or <strong>click to browse</strong></div>
-                </div>
             </div>
         `;
         // Attach drag & drop to the intake scene dropzone
@@ -924,6 +928,9 @@ class KBBrowseModal {
             case 'trigger-intake-upload':
                 this._triggerIntakeFileInput();
                 break;
+            case 'run-librarian':
+                this._runAILibrarian();
+                break;
             case 'toggle-folder-dropdown':
                 this._toggleFolderDropdown(el);
                 break;
@@ -1072,6 +1079,19 @@ class KBBrowseModal {
 
     _handleIntakeDrop(files) {
         this._uploadIntakeFiles(files);
+    }
+
+    _runAILibrarian() {
+        const command = 'organize knowledge base intake files with AI Librarian --workflow-mode@Knowledge-Base-Implementation';
+        if (window.terminalManager?.sendCopilotPromptCommand) {
+            this.close();
+            window.terminalManager.sendCopilotPromptCommand(command);
+        } else {
+            navigator.clipboard?.writeText(command);
+            if (typeof showToast === 'function') {
+                showToast('Command copied — paste into Copilot CLI', 'info');
+            }
+        }
     }
 
     _triggerIntakeFileInput() {
