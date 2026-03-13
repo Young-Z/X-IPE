@@ -36,6 +36,15 @@
     transform: scale(1) translateY(0);
 }
 
+/* Embedded mode (inside KB browse modal) */
+.kb-editor-embedded {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #fff;
+}
+.kb-editor-embedded .kb-editor-body { flex: 1; overflow-y: auto; }
+
 /* Header */
 .kb-editor-header {
     display: flex;

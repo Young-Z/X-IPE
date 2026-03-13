@@ -13,8 +13,11 @@ class KBArticleEditor {
         this.editPath = options.editPath || null;
         this.editMode = !!this.editPath;
         this.onComplete = options.onComplete || (() => {});
+        this.onClose = options.onClose || null;
         
         this.overlay = null;
+        this.container = null;
+        this.embedded = false;
         this.easyMDE = null;
         this.dirty = false;
         this.config = { lifecycle: [], domain: [] };
@@ -37,19 +40,38 @@ class KBArticleEditor {
         });
     }
 
+    async openInContainer(container) {
+        this.embedded = true;
+        this.container = container;
+        await this._loadConfig();
+        this._createEmbeddedDOM(container);
+        this._bindEvents();
+        requestAnimationFrame(() => {
+            this._initEasyMDE();
+            if (this.editMode) {
+                this._loadExisting();
+            }
+        });
+    }
+
     async close(force = false) {
         if (!force && this.dirty) {
             const discard = await showConfirmModal('Discard Changes', 'Discard unsaved changes?', { danger: true, confirmLabel: 'Discard' });
             if (!discard) return;
         }
         this._cleanup();
-        this.overlay.classList.remove('active');
-        document.body.style.overflow = '';
-        setTimeout(() => {
-            if (this.overlay && this.overlay.parentNode) {
-                this.overlay.remove();
-            }
-        }, KBArticleEditor.CLOSE_ANIMATION_MS);
+        if (this.embedded) {
+            if (this.container) this.container.innerHTML = '';
+            if (this.onClose) this.onClose();
+        } else {
+            this.overlay.classList.remove('active');
+            document.body.style.overflow = '';
+            setTimeout(() => {
+                if (this.overlay && this.overlay.parentNode) {
+                    this.overlay.remove();
+                }
+            }, KBArticleEditor.CLOSE_ANIMATION_MS);
+        }
     }
 
     async _loadConfig() {
@@ -70,6 +92,18 @@ class KBArticleEditor {
         this.overlay.className = 'kb-editor-overlay';
         this.overlay.innerHTML = `
             <div class="kb-editor-modal">
+                ${this._editorInnerHTML()}
+            </div>
+        `;
+    }
+
+    _createEmbeddedDOM(container) {
+        container.innerHTML = `<div class="kb-editor-embedded">${this._editorInnerHTML()}</div>`;
+        this.overlay = container.querySelector('.kb-editor-embedded');
+    }
+
+    _editorInnerHTML() {
+        return `
                 <div class="kb-editor-header">
                     <h3>${this.editMode ? '✏️ Edit Article' : '📝 New Article'}</h3>
                     <button class="kb-editor-close" title="Close">&times;</button>
@@ -107,9 +141,7 @@ class KBArticleEditor {
                     <button class="kb-editor-btn kb-editor-btn-save" disabled>
                         ${this.editMode ? 'Update Article' : 'Save Article'}
                     </button>
-                </div>
-            </div>
-        `;
+                </div>`;
     }
 
     _bindEvents() {

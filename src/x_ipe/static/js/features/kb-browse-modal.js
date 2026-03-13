@@ -162,6 +162,7 @@ class KBBrowseModal {
                     <div class="kb-modal-content">
                         <div class="kb-scene active" data-scene="browse"></div>
                         <div class="kb-scene" data-scene="article"></div>
+                        <div class="kb-scene" data-scene="edit"></div>
                         <div class="kb-scene" data-scene="intake"></div>
                     </div>
                 </div>
@@ -844,8 +845,18 @@ class KBBrowseModal {
             case 'new-article': {
                 const folder = this.activeSidebarFolder !== 'all' ? this.activeSidebarFolder : '';
                 if (typeof KBArticleEditor !== 'undefined') {
-                    const editor = new KBArticleEditor({ folder });
-                    editor.open();
+                    const editScene = this.overlay?.querySelector('[data-scene="edit"]');
+                    if (editScene) {
+                        this._showScene('edit');
+                        const editor = new KBArticleEditor({
+                            folder,
+                            onClose: () => {
+                                this._showScene('browse');
+                                this._refreshData();
+                            }
+                        });
+                        editor.openInContainer(editScene);
+                    }
                 }
                 break;
             }
@@ -857,8 +868,17 @@ class KBBrowseModal {
                 break;
             case 'edit-article': {
                 if (this.currentArticle && typeof KBArticleEditor !== 'undefined') {
-                    const editor = new KBArticleEditor({ editPath: this.currentArticle.path });
-                    editor.open();
+                    const editScene = this.overlay?.querySelector('[data-scene="edit"]');
+                    if (editScene) {
+                        this._showScene('edit');
+                        const editor = new KBArticleEditor({
+                            editPath: this.currentArticle.path,
+                            onClose: () => {
+                                this._showArticle(this.currentArticle.path);
+                            }
+                        });
+                        editor.openInContainer(editScene);
+                    }
                 }
                 break;
             }
