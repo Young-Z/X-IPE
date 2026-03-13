@@ -290,7 +290,6 @@ class KBBrowseModal {
                     <span class="kb-tag-lifecycle sm">lifecycle</span> \u00D7 <span class="kb-tag-domain sm">domain</span>
                 </div>
             </div>
-            ${this._renderUploadSection()}
             <div class="kb-cards-scroll" data-role="cards-container">
                 <div class="kb-cards-grid" data-role="cards-grid"></div>
             </div>
@@ -305,6 +304,7 @@ class KBBrowseModal {
                 </div>
                 <div class="kb-list-rows" data-role="list-rows"></div>
             </div>
+            ${this._renderUploadSection()}
         `;
 
         this._renderBrowseContent();
