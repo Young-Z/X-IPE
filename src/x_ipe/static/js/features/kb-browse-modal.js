@@ -119,10 +119,10 @@ class KBBrowseModal {
             }
         };
         walk(this.tree);
-        // Fallback: also extract from file paths
+        // Fallback: also extract from file paths (exclude .intake)
         this.files.forEach(f => {
             const parts = f.path.split('/');
-            if (parts.length > 1) names.add(parts[0]);
+            if (parts.length > 1 && parts[0] !== '.intake') names.add(parts[0]);
         });
         return [...names].sort();
     }
@@ -181,7 +181,8 @@ class KBBrowseModal {
         const el = this.overlay?.querySelector('[data-role="sidebar-folders"]');
         if (!el) return;
         const folders = this._getFolderNames();
-        const totalFiles = this.files.length;
+        const browseFiles = this.files.filter(f => !f.path.startsWith('.intake/') && !f.path.startsWith('.intake\\'));
+        const totalFiles = browseFiles.length;
 
         let html = `
             <div class="kb-sidebar-section">
@@ -198,7 +199,7 @@ class KBBrowseModal {
                     </div>`;
 
         folders.forEach(name => {
-            const count = this.files.filter(f => f.path.startsWith(name + '/')).length;
+            const count = browseFiles.filter(f => f.path.startsWith(name + '/')).length;
             const color = this._getFolderColor(name);
             const isActive = this.activeSidebarFolder === name;
             html += `
@@ -210,7 +211,7 @@ class KBBrowseModal {
 
             // Show files in expanded folder
             if (isActive && isActive !== 'all') {
-                this.files.filter(f => f.path.startsWith(name + '/')).forEach(f => {
+                browseFiles.filter(f => f.path.startsWith(name + '/')).forEach(f => {
                     const fName = f.path.split('/').pop();
                     html += `
                     <div class="kb-sidebar-file" data-path="${this._escapeAttr(f.path)}">
@@ -342,10 +343,11 @@ class KBBrowseModal {
         const bar = this.overlay?.querySelector('[data-role="stats-bar"]');
         if (!bar) return;
         const folders = this._getFolderNames();
+        const browseFiles = this.files.filter(f => !f.path.startsWith('.intake/') && !f.path.startsWith('.intake\\'));
         const lcCount = new Set();
         const dmCount = new Set();
         let autoGen = 0, untagged = 0;
-        this.files.forEach(f => {
+        browseFiles.forEach(f => {
             const tags = f.frontmatter?.tags || {};
             (Array.isArray(tags.lifecycle) ? tags.lifecycle : tags.lifecycle ? [tags.lifecycle] : []).forEach(t => lcCount.add(t));
             (Array.isArray(tags.domain) ? tags.domain : tags.domain ? [tags.domain] : []).forEach(t => dmCount.add(t));
@@ -353,7 +355,7 @@ class KBBrowseModal {
             if (this._isUntagged(f)) untagged++;
         });
         bar.innerHTML = `
-            <div class="kb-stat-item"><span class="kb-stat-num">${this.files.length}</span> articles</div>
+            <div class="kb-stat-item"><span class="kb-stat-num">${browseFiles.length}</span> articles</div>
             <div class="kb-stat-item"><span class="kb-stat-num">${folders.length}</span> folders</div>
             <div class="kb-stat-item"><span class="kb-stat-num">${lcCount.size}</span> lifecycle tags</div>
             <div class="kb-stat-item"><span class="kb-stat-num">${dmCount.size}</span> domain tags</div>
@@ -658,6 +660,9 @@ class KBBrowseModal {
     // ─── Filtering & Sorting ───────────────────────
     _getFilteredFiles() {
         let files = [...this.files];
+
+        // Exclude .intake files from browse view
+        files = files.filter(f => !f.path.startsWith('.intake/') && !f.path.startsWith('.intake\\'));
 
         // Sidebar folder filter
         if (this.activeSidebarFolder !== 'all') {
