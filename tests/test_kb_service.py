@@ -619,12 +619,11 @@ class TestFileTypeValidation:
     def test_unsupported_type_415(self, client, app):
         svc = app.config['KB_SERVICE']
         svc.ensure_kb_root()
-        # Files without an extension are rejected
         resp = client.post('/api/kb/files', json={
-            'path': 'no-extension',
+            'path': 'hack.exe',
             'content': 'bad',
         })
-        assert resp.status_code == 400
+        assert resp.status_code == 415
 
     def test_url_md_accepted(self, kb_service):
         result = kb_service.create_file('link.url.md', '', {

@@ -113,6 +113,18 @@ class KBConfig:
         ],
     })
     agent_write_allowlist: List[str] = field(default_factory=list)
+    allowed_extensions: List[str] = field(default_factory=lambda: [
+        '.md', '.txt', '.json', '.yaml', '.yml', '.csv', '.tsv',
+        '.html', '.htm', '.css', '.js', '.ts', '.jsx', '.tsx', '.vue', '.svelte',
+        '.xml', '.toml', '.ini', '.cfg', '.env', '.sh', '.bat', '.ps1',
+        '.py', '.rb', '.java', '.go', '.rs', '.c', '.cpp', '.h', '.hpp', '.cs',
+        '.swift', '.kt', '.scala', '.r', '.m', '.sql', '.graphql',
+        '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.odt', '.ods', '.odp',
+        '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico', '.bmp', '.tiff',
+        '.mp3', '.mp4', '.wav', '.ogg', '.webm',
+        '.zip', '.7z', '.tar', '.gz',
+        '.woff', '.woff2', '.ttf', '.otf', '.eot',
+    ])
     ai_librarian: Dict[str, Any] = field(default_factory=lambda: {
         'enabled': False,
         'intake_folder': '.intake',
@@ -122,6 +134,7 @@ class KBConfig:
         return {
             'tags': self.tags,
             'agent_write_allowlist': self.agent_write_allowlist,
+            'allowed_extensions': self.allowed_extensions,
             'ai_librarian': self.ai_librarian,
         }
 
@@ -226,6 +239,8 @@ class KBService:
         self._cache_valid = False
         self._tree_cache = None
         self._frontmatter_index.clear()
+        if hasattr(self, '_allowed_ext_cache'):
+            del self._allowed_ext_cache
 
     def _ensure_file_index(self) -> None:
         """Rebuild the in-memory tree cache and frontmatter index if stale."""
@@ -730,11 +745,25 @@ class KBService:
         from datetime import datetime
         return datetime.fromtimestamp(stat.st_mtime).isoformat(timespec='seconds')
 
-    @staticmethod
-    def _validate_file_type(filename: str) -> None:
+    def _validate_file_type(self, filename: str) -> None:
         """Raise ValueError for unsupported file types."""
-        if not Path(filename).suffix:
+        ext = Path(filename).suffix.lower()
+        if not ext:
             raise ValueError("File must have an extension")
+        allowed = self._get_allowed_extensions()
+        if ext not in allowed:
+            raise ValueError(f"Unsupported file type: {ext}")
+
+    def _get_allowed_extensions(self) -> set:
+        """Return allowed extensions from config (cached)."""
+        if not hasattr(self, '_allowed_ext_cache'):
+            try:
+                raw = self.get_config()
+                exts = raw.get('allowed_extensions', [])
+                self._allowed_ext_cache = {e.lower() for e in exts} if exts else None
+            except Exception:
+                self._allowed_ext_cache = None
+        return self._allowed_ext_cache or {e for e in KBConfig().allowed_extensions}
 
     @staticmethod
     def _check_size(content: str) -> None:
