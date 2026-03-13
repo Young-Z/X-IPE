@@ -247,9 +247,6 @@ class KBBrowseModal {
                     <div class="kb-content-title"><i class="bi bi-book"></i> Knowledge Base</div>
                 </div>
                 <div class="kb-content-header-right">
-                    <button class="kb-content-btn" data-action="reference-kb">
-                        <i class="bi bi-link-45deg"></i> \u{1F4DA} Reference KB
-                    </button>
                     <button class="kb-content-btn" data-action="toggle-upload-view">
                         <i class="bi bi-cloud-arrow-up"></i> Upload
                     </button>
