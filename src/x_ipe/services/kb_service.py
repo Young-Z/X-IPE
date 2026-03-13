@@ -24,7 +24,8 @@ from x_ipe.tracing import x_ipe_tracing
 # ---------------------------------------------------------------------------
 
 KB_ROOT_DIR = 'x-ipe-docs/knowledge-base'
-KB_CONFIG_FILE = 'kb-config.json'
+KB_CONFIG_FILE = 'knowledgebase-config.json'
+KB_CONFIG_DIR = 'x-ipe-docs/config'
 INTAKE_FOLDER = '.intake'
 
 MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024  # 10 MB
@@ -124,6 +125,7 @@ class KBConfig:
         '.mp3', '.mp4', '.wav', '.ogg', '.webm',
         '.zip', '.7z', '.tar', '.gz',
         '.woff', '.woff2', '.ttf', '.otf', '.eot',
+        '.msg',
     ])
     ai_librarian: Dict[str, Any] = field(default_factory=lambda: {
         'enabled': False,
@@ -150,6 +152,7 @@ class KBService:
     def __init__(self, project_root: str):
         self.project_root = Path(project_root).resolve()
         self.kb_root = self.project_root / KB_ROOT_DIR
+        self.config_path = self.project_root / KB_CONFIG_DIR / KB_CONFIG_FILE
         self._tree_cache: Optional[List[KBNode]] = None
         self._frontmatter_index: Dict[str, Optional[FrontmatterData]] = {}
         self._cache_valid = False
@@ -160,12 +163,12 @@ class KBService:
 
     @x_ipe_tracing()
     def ensure_kb_root(self) -> None:
-        """Create KB root directory and default kb-config.json if missing."""
+        """Create KB root directory and default knowledgebase-config.json if missing."""
         self.kb_root.mkdir(parents=True, exist_ok=True)
-        config_path = self.kb_root / KB_CONFIG_FILE
-        if not config_path.exists():
+        if not self.config_path.exists():
+            self.config_path.parent.mkdir(parents=True, exist_ok=True)
             default_config = KBConfig()
-            self._write_json(config_path, default_config.to_dict())
+            self._write_json(self.config_path, default_config.to_dict())
 
     # ------------------------------------------------------------------
     # Path safety
@@ -266,8 +269,6 @@ class KBService:
             name = entry.name
             if name == INTAKE_FOLDER:
                 continue
-            if name == KB_CONFIG_FILE and rel_base == '':
-                continue  # skip config from tree
 
             rel_path = f"{rel_base}/{name}".lstrip('/')
 
@@ -417,8 +418,6 @@ class KBService:
             if not entry.is_file():
                 continue
             rel = str(entry.relative_to(self.kb_root)).replace('\\', '/')
-            if entry.name == KB_CONFIG_FILE:
-                continue
             stat = entry.stat()
             fm = self._frontmatter_index.get(rel) or self._parse_frontmatter_safe(entry)
             files.append(self._build_file_node(rel, entry.name, stat, fm))
@@ -634,13 +633,12 @@ class KBService:
 
     @x_ipe_tracing()
     def get_config(self) -> Dict[str, Any]:
-        """Read and return kb-config.json."""
+        """Read and return knowledgebase-config.json."""
         self.ensure_kb_root()
-        config_path = self.kb_root / KB_CONFIG_FILE
         try:
-            raw = json.loads(config_path.read_text(encoding='utf-8'))
+            raw = json.loads(self.config_path.read_text(encoding='utf-8'))
         except (json.JSONDecodeError, IOError) as exc:
-            raise RuntimeError(f"Invalid kb-config.json: {exc}") from exc
+            raise RuntimeError(f"Invalid {KB_CONFIG_FILE}: {exc}") from exc
         return raw
 
     # ------------------------------------------------------------------

@@ -13,6 +13,7 @@
     ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".ico", ".bmp", ".tiff",
     ".mp3", ".mp4", ".wav", ".ogg", ".webm",
     ".zip", ".7z", ".tar", ".gz",
-    ".woff", ".woff2", ".ttf", ".otf", ".eot"
+    ".woff", ".woff2", ".ttf", ".otf", ".eot",
+    ".msg"
   ]
 }

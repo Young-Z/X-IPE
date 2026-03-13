@@ -286,7 +286,7 @@ class KBBrowseModal {
                 </div>
                 <div class="kb-filter-hint">
                     <i class="bi bi-info-circle"></i>
-                    2D taxonomy from <code>kb-config.json</code> \u2014
+                    2D taxonomy from <code>knowledgebase-config.json</code> \u2014
                     <span class="kb-tag-lifecycle sm">lifecycle</span> \u00D7 <span class="kb-tag-domain sm">domain</span>
                 </div>
             </div>

@@ -76,7 +76,7 @@ def _create_md_file(kb_root: Path, rel_path: str, body: str = 'Hello',
 # ===========================================================================
 
 class TestKBRootInitialization:
-    """AC-01: Auto-create KB root + kb-config.json with default tags."""
+    """AC-01: Auto-create KB root + knowledgebase-config.json with default tags."""
 
     def test_ensure_kb_root_creates_directory(self, temp_project):
         from x_ipe.services.kb_service import KBService
@@ -85,7 +85,7 @@ class TestKBRootInitialization:
         assert svc.kb_root.is_dir()
 
     def test_ensure_kb_root_creates_config(self, kb_service):
-        config_path = kb_service.kb_root / 'kb-config.json'
+        config_path = kb_service.config_path
         assert config_path.exists()
         config = json.loads(config_path.read_text())
         assert 'tags' in config
@@ -93,29 +93,29 @@ class TestKBRootInitialization:
         assert 'domain' in config['tags']
 
     def test_default_lifecycle_tags(self, kb_service):
-        config = json.loads((kb_service.kb_root / 'kb-config.json').read_text())
+        config = json.loads((kb_service.config_path).read_text())
         expected = ['Ideation', 'Requirement', 'Design', 'Implementation',
                     'Testing', 'Deployment', 'Maintenance']
         assert config['tags']['lifecycle'] == expected
 
     def test_default_domain_tags(self, kb_service):
-        config = json.loads((kb_service.kb_root / 'kb-config.json').read_text())
+        config = json.loads((kb_service.config_path).read_text())
         expected = ['API', 'Authentication', 'UI-UX', 'Database',
                     'Infrastructure', 'Security', 'Performance',
                     'Integration', 'Documentation', 'Analytics']
         assert config['tags']['domain'] == expected
 
     def test_default_agent_write_allowlist(self, kb_service):
-        config = json.loads((kb_service.kb_root / 'kb-config.json').read_text())
+        config = json.loads((kb_service.config_path).read_text())
         assert config['agent_write_allowlist'] == []
 
     def test_default_ai_librarian_settings(self, kb_service):
-        config = json.loads((kb_service.kb_root / 'kb-config.json').read_text())
+        config = json.loads((kb_service.config_path).read_text())
         assert config['ai_librarian'] == {'enabled': False, 'intake_folder': '.intake'}
 
     def test_ensure_kb_root_idempotent(self, kb_service):
         """Calling ensure_kb_root again doesn't overwrite existing config."""
-        config_path = kb_service.kb_root / 'kb-config.json'
+        config_path = kb_service.config_path
         original = config_path.read_text()
         kb_service.ensure_kb_root()
         assert config_path.read_text() == original
@@ -162,10 +162,10 @@ class TestTreeAPI:
         assert 'visible.md' in names
 
     def test_get_tree_excludes_config(self, kb_service):
-        """kb-config.json should not appear in tree."""
+        """knowledgebase-config.json lives in config/ dir, not in KB tree."""
         tree = kb_service.get_tree()
         names = [n.name for n in tree]
-        assert 'kb-config.json' not in names
+        assert 'knowledgebase-config.json' not in names
 
     def test_get_tree_file_has_metadata(self, kb_service):
         _create_md_file(kb_service.kb_root, 'test.md',
@@ -481,9 +481,9 @@ class TestTagTaxonomy:
         assert data['tags']['lifecycle'][0] == 'Ideation'
 
     def test_corrupt_config_500(self, kb_service):
-        config_path = kb_service.kb_root / 'kb-config.json'
+        config_path = kb_service.config_path
         config_path.write_text('not valid json!!!')
-        with pytest.raises(RuntimeError, match='Invalid kb-config.json'):
+        with pytest.raises(RuntimeError, match='Invalid knowledgebase-config.json'):
             kb_service.get_config()
 
 

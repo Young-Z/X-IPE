@@ -376,7 +376,7 @@ def get_config():
     """
     GET /api/kb/config
 
-    FEATURE-049-A: Return kb-config.json (tag taxonomy + AI Librarian config).
+    FEATURE-049-A: Return knowledgebase-config.json (tag taxonomy + AI Librarian config).
     """
     svc = _get_kb_service_or_abort()
     try:
