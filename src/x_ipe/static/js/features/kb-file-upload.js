@@ -97,7 +97,7 @@ class KBFileUpload {
                         <div class="kb-upload-dropzone-content">
                             <i class="bi bi-cloud-upload"></i>
                             <p>Drag & drop files here, or <span class="kb-upload-browse-link">browse</span></p>
-                            <small>Supports .md, .txt, .json, .yaml, .csv, .zip — Max 10MB per file</small>
+                            <small>Supports all file types — Max 10MB per file</small>
                         </div>
                     </div>
                     <div class="kb-upload-progress" style="display:none;">

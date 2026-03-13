@@ -5,6 +5,7 @@ Flask Blueprint exposing REST API endpoints under /api/kb/ for Knowledge Base
 file/folder CRUD, config, tree, and search operations.
 """
 from flask import Blueprint, jsonify, request, current_app
+from pathlib import Path
 
 from x_ipe.tracing import x_ipe_tracing
 
@@ -453,7 +454,16 @@ def upload_files():
                 results.extend(extracted)
             else:
                 dest_path = f'{folder}/{f.filename}' if folder else f.filename
-                result = svc.create_file(dest_path, content.decode('utf-8', errors='replace'))
+                # Text files get frontmatter support; binary files stored as-is
+                TEXT_EXTS = {'.md', '.txt', '.json', '.yaml', '.yml', '.csv',
+                             '.html', '.htm', '.css', '.js', '.ts', '.xml',
+                             '.toml', '.ini', '.cfg', '.sh', '.bat', '.py',
+                             '.rb', '.java', '.go', '.rs', '.c', '.cpp', '.h'}
+                ext = Path(f.filename).suffix.lower()
+                if ext in TEXT_EXTS:
+                    result = svc.create_file(dest_path, content.decode('utf-8', errors='replace'))
+                else:
+                    result = svc.create_binary_file(dest_path, content)
                 results.append(result)
         except (FileExistsError, ValueError) as exc:
             errors.append({'file': f.filename, 'error': str(exc)})

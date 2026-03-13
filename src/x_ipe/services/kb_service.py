@@ -27,8 +27,6 @@ KB_ROOT_DIR = 'x-ipe-docs/knowledge-base'
 KB_CONFIG_FILE = 'kb-config.json'
 INTAKE_FOLDER = '.intake'
 
-ACCEPTED_EXTENSIONS = {'.md', '.pdf', '.png', '.jpg', '.jpeg', '.svg'}
-
 MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024  # 10 MB
 
 # ---------------------------------------------------------------------------
@@ -200,6 +198,20 @@ class KBService:
             with os.fdopen(fd, 'w', encoding='utf-8') as fh:
                 json.dump(data, fh, indent=2, ensure_ascii=False)
                 fh.write('\n')
+            os.replace(tmp_path, str(target))
+        except Exception:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+            raise
+
+    @staticmethod
+    def _write_binary_atomic(target: Path, data: bytes) -> None:
+        """Write binary *data* to *target* atomically (temp → rename)."""
+        target.parent.mkdir(parents=True, exist_ok=True)
+        fd, tmp_path = tempfile.mkstemp(dir=target.parent, suffix='.tmp')
+        try:
+            with os.fdopen(fd, 'wb') as fh:
+                fh.write(data)
             os.replace(tmp_path, str(target))
         except Exception:
             if os.path.exists(tmp_path):
@@ -407,11 +419,28 @@ class KBService:
         target = self._resolve_safe_path(rel_path)
         if not target.is_file():
             raise FileNotFoundError(f"File not found: {rel_path}")
+        stat = target.stat()
+        file_type = self._determine_file_type(target.name)
+        # Binary files: return metadata only (no content/frontmatter)
+        TEXT_EXTS = {'.md', '.txt', '.json', '.yaml', '.yml', '.csv',
+                     '.html', '.htm', '.css', '.js', '.ts', '.xml',
+                     '.toml', '.ini', '.cfg', '.sh', '.bat', '.py',
+                     '.rb', '.java', '.go', '.rs', '.c', '.cpp', '.h'}
+        ext = target.suffix.lower()
+        if ext not in TEXT_EXTS:
+            return {
+                'name': target.name,
+                'path': rel_path,
+                'content': None,
+                'frontmatter': None,
+                'size_bytes': stat.st_size,
+                'modified_date': self._iso_mtime(stat),
+                'file_type': file_type,
+                'binary': True,
+            }
         content = target.read_text(encoding='utf-8')
         fm = self._parse_frontmatter_safe(target)
         body = self._extract_body(content)
-        stat = target.stat()
-        file_type = self._determine_file_type(target.name)
         return {
             'name': target.name,
             'path': rel_path,
@@ -446,6 +475,26 @@ class KBService:
         self._write_file_atomic(target, file_content)
         self._invalidate_cache()
         return self.get_file(rel_path)
+
+    @x_ipe_tracing()
+    def create_binary_file(self, rel_path: str, data: bytes) -> Dict[str, Any]:
+        """Create a new binary KB file (images, PDFs, etc.)."""
+        target = self._resolve_safe_path(rel_path)
+        self._validate_file_type(target.name)
+        if target.exists():
+            raise FileExistsError(f"File already exists: {rel_path}")
+        if len(data) > MAX_FILE_SIZE_BYTES:
+            raise ValueError("File exceeds maximum size of 10MB")
+        self._write_binary_atomic(target, data)
+        self._invalidate_cache()
+        stat = target.stat()
+        return {
+            'name': target.name,
+            'path': rel_path,
+            'size_bytes': stat.st_size,
+            'modified_date': self._iso_mtime(stat),
+            'file_type': self._determine_file_type(target.name),
+        }
 
     @x_ipe_tracing()
     def update_file(self, rel_path: str, content: Optional[str] = None,
@@ -684,11 +733,8 @@ class KBService:
     @staticmethod
     def _validate_file_type(filename: str) -> None:
         """Raise ValueError for unsupported file types."""
-        if filename.endswith('.url.md'):
-            return
-        ext = Path(filename).suffix.lower()
-        if ext not in ACCEPTED_EXTENSIONS:
-            raise ValueError(f"Unsupported file type: {ext}")
+        if not Path(filename).suffix:
+            raise ValueError("File must have an extension")
 
     @staticmethod
     def _check_size(content: str) -> None:
@@ -707,6 +753,10 @@ class KBService:
         """
         results = []
         skip_exts = {'.zip', '.7z'}
+        TEXT_EXTS = {'.md', '.txt', '.json', '.yaml', '.yml', '.csv',
+                     '.html', '.htm', '.css', '.js', '.ts', '.xml',
+                     '.toml', '.ini', '.cfg', '.sh', '.bat', '.py',
+                     '.rb', '.java', '.go', '.rs', '.c', '.cpp', '.h'}
         for entry in entries:
             if is_dir and is_dir(entry):
                 continue
@@ -715,7 +765,7 @@ class KBService:
             if ext in skip_exts:
                 continue
             try:
-                content = get_data(entry).decode('utf-8', errors='replace')
+                raw_data = get_data(entry)
                 rel_path = f'{dest_folder}/{name}' if dest_folder else name
                 parent = os.path.dirname(rel_path)
                 if parent:
@@ -723,7 +773,10 @@ class KBService:
                         self.create_folder(parent)
                     except FileExistsError:
                         pass
-                result = self.create_file(rel_path, content)
+                if ext in TEXT_EXTS:
+                    result = self.create_file(rel_path, raw_data.decode('utf-8', errors='replace'))
+                else:
+                    result = self.create_binary_file(rel_path, raw_data)
                 results.append(result)
             except (FileExistsError, ValueError):
                 pass

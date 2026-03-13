@@ -448,7 +448,7 @@ class KBBrowseModal {
                         <div class="kb-upload-zone" data-action="trigger-upload">
                             <i class="bi bi-cloud-arrow-up"></i>
                             <div class="kb-upload-zone-text">Drag & drop files here, or <strong>browse</strong></div>
-                            <div class="kb-upload-zone-hint">Supports .md, .pdf, .png, .jpg, .svg, .zip \u00B7 Max 10MB</div>
+                            <div class="kb-upload-zone-hint">Supports all file types \u00B7 Max 10MB</div>
                         </div>
                     </div>
                     <div class="kb-upload-panel${this.uploadMode === 'librarian' ? ' active' : ''}" data-upload-panel="librarian">
@@ -1078,7 +1078,7 @@ class KBBrowseModal {
         const input = document.createElement('input');
         input.type = 'file';
         input.multiple = true;
-        input.accept = '.md,.pdf,.png,.jpg,.jpeg,.svg,.zip,.7z,.txt,.html,.css,.js,.json,.yaml,.yml';
+        input.accept = '';
         input.addEventListener('change', () => {
             if (input.files?.length) this._uploadIntakeFiles(input.files);
         });
