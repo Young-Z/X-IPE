@@ -303,7 +303,7 @@
 }
 
 /* Scene switching */
-.kb-scene { display: none; flex-direction: column; height: 100%; }
+.kb-scene { display: none; flex-direction: column; height: 100%; overflow-y: auto; }
 .kb-scene.active { display: flex; }
 
 /* Content header */
