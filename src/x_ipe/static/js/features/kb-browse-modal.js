@@ -290,6 +290,7 @@ class KBBrowseModal {
                     <span class="kb-tag-lifecycle sm">lifecycle</span> \u00D7 <span class="kb-tag-domain sm">domain</span>
                 </div>
             </div>
+            ${this._renderUploadSection()}
             <div class="kb-cards-scroll" data-role="cards-container">
                 <div class="kb-cards-grid" data-role="cards-grid"></div>
             </div>
@@ -304,7 +305,6 @@ class KBBrowseModal {
                 </div>
                 <div class="kb-list-rows" data-role="list-rows"></div>
             </div>
-            ${this._renderUploadSection()}
         `;
 
         this._renderBrowseContent();
@@ -458,17 +458,17 @@ class KBBrowseModal {
                                 <span class="intake-badge" style="background:#8b5cf6;color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;">0</span>
                             </div>
                         </div>
+                        <button class="kb-btn-ai-librarian" data-action="run-librarian">
+                            <span>\u2728</span> Run AI Librarian
+                            <span style="font-size:11px;font-weight:400;opacity:0.8;">\u2014 Organize files</span>
+                        </button>
+                        <div class="kb-btn-ai-librarian-hint">Opens a Copilot CLI session to classify, move & tag your files</div>
                         <div class="kb-intake-subtitle">Drop files here for AI-assisted organization. The AI Librarian will analyze content, suggest folder placement, and auto-tag lifecycle & domain dimensions.</div>
                         <div class="kb-intake-dropzone" data-action="trigger-intake-upload">
                             <i class="bi bi-inbox"></i>
                             <div class="kb-intake-dropzone-text">Drop files into <strong>Intake</strong> for AI processing</div>
                         </div>
                         <div class="kb-intake-files" data-role="intake-files"></div>
-                        <button class="kb-btn-ai-librarian" data-action="run-librarian">
-                            <span>\u2728</span> Run AI Librarian
-                            <span style="font-size:11px;font-weight:400;opacity:0.8;">\u2014 Organize files</span>
-                        </button>
-                        <div class="kb-btn-ai-librarian-hint">Opens a Copilot CLI session to classify, move & tag your files</div>
                     </div>
                 </div>
             </div>`;
