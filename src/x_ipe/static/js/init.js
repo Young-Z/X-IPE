@@ -150,6 +150,11 @@ function initializeApp() {
             });
         }
     }
+
+    // FEATURE-049-D: KB Article Editor (global instance for modal reuse)
+    if (typeof KBArticleEditor !== 'undefined') {
+        window.kbArticleEditor = new KBArticleEditor();
+    }
     
     // FEATURE-036-B: Engineering Workflow / Free mode toggle handler
     const modeToggleBtn = document.getElementById('mode-toggle-btn');

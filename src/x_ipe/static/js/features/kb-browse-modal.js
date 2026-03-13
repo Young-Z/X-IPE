@@ -841,26 +841,27 @@ class KBBrowseModal {
                 el.classList.toggle('active', this.showUntaggedOnly);
                 this._renderBrowseContent();
                 break;
-            case 'new-article':
-                this.close();
-                if (typeof window.kbArticleEditor !== 'undefined') {
-                    window.kbArticleEditor.open();
+            case 'new-article': {
+                const folder = this.activeSidebarFolder !== 'all' ? this.activeSidebarFolder : '';
+                if (typeof KBArticleEditor !== 'undefined') {
+                    const editor = new KBArticleEditor({ folder });
+                    editor.open();
                 }
                 break;
+            }
             case 'reference-kb':
                 this.close();
                 if (typeof window.kbReferencePicker !== 'undefined') {
                     window.kbReferencePicker.open();
                 }
                 break;
-            case 'edit-article':
-                if (this.currentArticle) {
-                    this.close();
-                    if (typeof window.kbArticleEditor !== 'undefined') {
-                        window.kbArticleEditor.open(this.currentArticle.path);
-                    }
+            case 'edit-article': {
+                if (this.currentArticle && typeof KBArticleEditor !== 'undefined') {
+                    const editor = new KBArticleEditor({ editPath: this.currentArticle.path });
+                    editor.open();
                 }
                 break;
+            }
             case 'delete-article':
                 if (this.currentArticle && typeof showConfirmModal === 'function') {
                     showConfirmModal(
