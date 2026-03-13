@@ -512,9 +512,13 @@ class KBReferencePicker {
             }
         });
 
-        this.overlay.querySelector('.kb-ref-insert-btn').addEventListener('click', () => {
+        this.overlay.querySelector('.kb-ref-insert-btn').addEventListener('click', async () => {
             const paths = Array.from(this.selected);
-            if (this.onInsert) this.onInsert(paths);
+            if (this.onInsert) {
+                this.onInsert(paths);
+            } else {
+                await this._persistReferences(paths);
+            }
             document.dispatchEvent(new CustomEvent('kb:references-inserted', { detail: { paths } }));
             this.close();
         });
@@ -549,5 +553,33 @@ class KBReferencePicker {
 
     _escapeAttr(str) {
         return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    _detectIdeationFolder() {
+        const current = document.querySelector('.breadcrumb-item.current[data-path]');
+        if (current) {
+            const path = current.dataset.path;
+            if (path && path.startsWith('x-ipe-docs/ideas/')) return path;
+        }
+        return null;
+    }
+
+    async _persistReferences(paths) {
+        if (!paths || paths.length === 0) return;
+        const folderPath = this._detectIdeationFolder();
+        if (!folderPath) return;
+        try {
+            const response = await fetch('/api/ideas/kb-references', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ folder_path: folderPath, kb_references: paths })
+            });
+            const result = await response.json();
+            if (!result.success) {
+                console.error('Failed to save KB references:', result.error);
+            }
+        } catch (err) {
+            console.error('Failed to save KB references:', err);
+        }
     }
 }

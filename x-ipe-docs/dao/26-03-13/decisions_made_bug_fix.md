@@ -36,3 +36,51 @@
 
 ### Follow-up
 > None
+
+---
+
+## DAO-067 — Modal Size Consistency
+
+| Field | Value |
+|-------|-------|
+| Timestamp | 2026-03-13T05:56:43Z |
+| Source | human |
+| Task ID | TASK-861 |
+| Feature ID | FEATURE-049-G |
+| Disposition | instruction |
+| Confidence | 0.95 |
+
+**Message:** "the modal window size should be the same as the others"
+
+**Need:** Match KB Reference Picker modal dimensions to the standard 90vw × 90vh used by all other modals (KB Browse, Compose Idea, Action Execution, Folder Browser, Stage Toolbox).
+
+**Rationale:** All 5 other full-size modals use `width: 90vw; height: 90vh`. The KB Reference Picker currently uses `max-width: 800px; max-height: 600px` which is inconsistent. User explicitly requests consistency.
+
+**Suggested Skill:** x-ipe-task-based-bug-fix (partial match — CSS fix)
+
+**Execution Plan:** sequential, groups: [[0]]
+
+---
+
+## DAO-069 — KB Reference Persistence
+
+| Field | Value |
+|-------|-------|
+| Timestamp | 2026-03-13T22:00:00Z |
+| Source | human |
+| Task ID | TASK-862 |
+| Feature ID | FEATURE-049-G |
+| Disposition | instruction |
+| Confidence | 0.92 |
+
+**Message:** "I inserted a KB reference into 002. Feature-Brand Themes, but I didn't see the .knowledge-reference.yaml within its folder"
+
+**Need:** Insert button in KB Reference Picker does not persist `.knowledge-reference.yaml` when opened via KB Browse Modal → "Reference KB" path (global `window.kbReferencePicker` with no `onInsert` callback).
+
+**Root Cause:** Two code paths: (1) Workplace compose pane creates new picker WITH `onInsert` → saves; (2) KB Browse Modal uses global picker WITHOUT `onInsert` → Insert did nothing.
+
+**Fix:** Added `_persistReferences()` fallback that auto-detects current ideation folder from DOM breadcrumb and POSTs directly to `/api/ideas/kb-references`.
+
+**Suggested Skill:** x-ipe-task-based-bug-fix (strong match)
+
+**Execution Plan:** sequential, groups: [[0]]

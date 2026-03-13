@@ -747,4 +747,117 @@ describe('FEATURE-049-G: KB Reference Picker', () => {
       expect(tip.textContent).toContain('Double-click');
     });
   });
+
+  describe('TASK-862: Auto-persist references when no onInsert callback', () => {
+    it('should detect ideation folder from breadcrumb', () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      // No breadcrumb → null
+      expect(picker._detectIdeationFolder()).toBeNull();
+
+      // Add a breadcrumb with current folder
+      const crumb = document.createElement('span');
+      crumb.className = 'breadcrumb-item current';
+      crumb.dataset.path = 'x-ipe-docs/ideas/002. Feature-Brand Themes';
+      document.body.appendChild(crumb);
+      expect(picker._detectIdeationFolder()).toBe('x-ipe-docs/ideas/002. Feature-Brand Themes');
+      crumb.remove();
+    });
+
+    it('should return null for non-ideas paths', () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      const crumb = document.createElement('span');
+      crumb.className = 'breadcrumb-item current';
+      crumb.dataset.path = 'x-ipe-docs/requirements/EPIC-001';
+      document.body.appendChild(crumb);
+      expect(picker._detectIdeationFolder()).toBeNull();
+      crumb.remove();
+    });
+
+    it('should call _persistReferences when onInsert is not set', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const persistSpy = vi.spyOn(picker, '_persistReferences').mockResolvedValue();
+
+      // Select a file
+      const fileCheck = picker.overlay.querySelector('.kb-ref-check[data-type="file"]');
+      if (fileCheck) {
+        fileCheck.checked = true;
+        picker.selected.add(fileCheck.dataset.path);
+      }
+
+      // Click insert
+      picker.overlay.querySelector('.kb-ref-insert-btn').click();
+      await vi.waitFor(() => expect(persistSpy).toHaveBeenCalledTimes(1));
+      persistSpy.mockRestore();
+    });
+
+    it('should NOT call _persistReferences when onInsert IS set', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      const onInsert = vi.fn();
+      picker = new globalThis.KBReferencePicker({ onInsert });
+      await picker.open();
+      const persistSpy = vi.spyOn(picker, '_persistReferences').mockResolvedValue();
+
+      // Select a file
+      const fileCheck = picker.overlay.querySelector('.kb-ref-check[data-type="file"]');
+      if (fileCheck) {
+        fileCheck.checked = true;
+        picker.selected.add(fileCheck.dataset.path);
+      }
+
+      // Click insert
+      picker.overlay.querySelector('.kb-ref-insert-btn').click();
+      expect(onInsert).toHaveBeenCalledTimes(1);
+      expect(persistSpy).not.toHaveBeenCalled();
+      persistSpy.mockRestore();
+    });
+
+    it('should POST to /api/ideas/kb-references with detected folder', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+
+      // Mock fetch
+      const origFetch = globalThis.fetch;
+      const fetchMock = vi.fn().mockResolvedValue({
+        json: () => Promise.resolve({ success: true, path: 'test' })
+      });
+      globalThis.fetch = fetchMock;
+
+      // Set up breadcrumb
+      const crumb = document.createElement('span');
+      crumb.className = 'breadcrumb-item current';
+      crumb.dataset.path = 'x-ipe-docs/ideas/002. Feature-Brand Themes';
+      document.body.appendChild(crumb);
+
+      await picker._persistReferences(['knowledge-base/guides/setup.md']);
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [url, opts] = fetchMock.mock.calls[0];
+      expect(url).toBe('/api/ideas/kb-references');
+      expect(opts.method).toBe('POST');
+      const body = JSON.parse(opts.body);
+      expect(body.folder_path).toBe('x-ipe-docs/ideas/002. Feature-Brand Themes');
+      expect(body.kb_references).toEqual(['knowledge-base/guides/setup.md']);
+
+      crumb.remove();
+      globalThis.fetch = origFetch;
+    });
+
+    it('should not POST when no ideation folder is detected', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+
+      const origFetch = globalThis.fetch;
+      const fetchMock = vi.fn();
+      globalThis.fetch = fetchMock;
+
+      await picker._persistReferences(['knowledge-base/guides/setup.md']);
+      expect(fetchMock).not.toHaveBeenCalled();
+
+      globalThis.fetch = origFetch;
+    });
+  });
 });
