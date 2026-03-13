@@ -49,6 +49,8 @@ class KBBrowseModal {
         requestAnimationFrame(() => {
             if (this.overlay) this.overlay.classList.add('active');
         });
+        // Load intake file count for badges
+        this._refreshIntakeFiles();
     }
 
     close() {
@@ -588,9 +590,22 @@ class KBBrowseModal {
     }
 
     // ─── Intake Scene ──────────────────────────────
-    _renderIntakeScene() {
+    async _renderIntakeScene() {
         const scene = this.overlay?.querySelector('[data-scene="intake"]');
         if (!scene) return;
+        const intakeFiles = await this._loadIntakeFiles();
+        this._updateIntakeBadges(intakeFiles.length);
+        const pending = intakeFiles.length;
+        const fileListHtml = intakeFiles.length > 0
+            ? intakeFiles.map(f => `
+                <div class="kb-intake-file-row" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f8fafc;border-radius:8px;margin-bottom:6px;">
+                    <i class="bi bi-file-earmark-text" style="font-size:16px;color:#8b5cf6;"></i>
+                    <span style="flex:1;font-size:13px;color:#1e293b;font-weight:500;">${this._escapeHtml(f.name)}</span>
+                    <span style="font-size:11px;color:#94a3b8;">${this._formatFileSize(f.size_bytes || 0)}</span>
+                    <span style="font-size:10px;color:#8b5cf6;background:#ede9fe;padding:2px 8px;border-radius:6px;">pending</span>
+                </div>`).join('')
+            : `<div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;">No files in intake. Drop or upload files to get started.</div>`;
+
         scene.innerHTML = `
             <div class="kb-content-header">
                 <div class="kb-content-header-left">
@@ -601,19 +616,24 @@ class KBBrowseModal {
                 </div>
             </div>
             <div class="kb-stats-bar">
-                <div class="kb-stat-item"><span class="kb-stat-num">0</span> files</div>
-                <div class="kb-stat-item"><span class="kb-stat-num">0</span> pending</div>
+                <div class="kb-stat-item"><span class="kb-stat-num">${intakeFiles.length}</span> files</div>
+                <div class="kb-stat-item"><span class="kb-stat-num">${pending}</span> pending</div>
                 <div class="kb-stat-item"><span class="kb-stat-num">0</span> processing</div>
                 <div class="kb-stat-item"><span class="kb-stat-num">0</span> filed</div>
             </div>
-            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;">
-                <i class="bi bi-inbox" style="font-size:48px;color:#c4b5fd;opacity:0.5;margin-bottom:16px;"></i>
-                <p style="font-size:15px;color:#475569;margin-bottom:6px;font-weight:500;">AI Librarian Intake</p>
-                <p style="font-size:12.5px;color:#94a3b8;max-width:400px;line-height:1.6;">
-                    Drop files into Intake using the upload section below, then click <strong style="color:#8b5cf6;">Run AI Librarian</strong> to automatically organize, classify, and tag your documents.
-                </p>
+            <div style="flex:1;overflow-y:auto;padding:16px 24px;">
+                ${fileListHtml}
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid #e2e8f0;">
+                <div class="kb-intake-dropzone" data-action="trigger-intake-upload" style="padding:20px;text-align:center;border:2px dashed #c4b5fd;border-radius:10px;cursor:pointer;transition:all 0.2s;">
+                    <i class="bi bi-inbox" style="font-size:24px;color:#8b5cf6;"></i>
+                    <div style="font-size:13px;color:#475569;margin-top:6px;">Drop files here or <strong>click to browse</strong></div>
+                </div>
             </div>
         `;
+        // Attach drag & drop to the intake scene dropzone
+        const intakeZone = scene.querySelector('.kb-intake-dropzone');
+        if (intakeZone) this._attachDropHandlers(intakeZone, 'intake');
     }
 
     // ─── Scene Navigation ──────────────────────────
@@ -902,10 +922,7 @@ class KBBrowseModal {
                 }
                 break;
             case 'trigger-intake-upload':
-                if (typeof window.kbFileUpload !== 'undefined') {
-                    this.close();
-                    window.kbFileUpload.open();
-                }
+                this._triggerIntakeFileInput();
                 break;
             case 'toggle-folder-dropdown':
                 this._toggleFolderDropdown(el);
@@ -1054,24 +1071,64 @@ class KBBrowseModal {
     }
 
     _handleIntakeDrop(files) {
+        this._uploadIntakeFiles(files);
+    }
+
+    _triggerIntakeFileInput() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.multiple = true;
+        input.accept = '.md,.pdf,.png,.jpg,.jpeg,.svg,.zip,.7z,.txt,.html,.css,.js,.json,.yaml,.yml';
+        input.addEventListener('change', () => {
+            if (input.files?.length) this._uploadIntakeFiles(input.files);
+        });
+        input.click();
+    }
+
+    async _uploadIntakeFiles(files) {
+        const formData = new FormData();
+        for (const file of files) formData.append('files', file);
+        formData.append('folder', '.intake');
+        try {
+            const res = await fetch('/api/kb/upload', { method: 'POST', body: formData });
+            if (res.ok) {
+                document.dispatchEvent(new CustomEvent('kb:changed'));
+                await this._refreshIntakeFiles();
+            }
+        } catch { /* ignore */ }
+    }
+
+    async _refreshIntakeFiles() {
+        const intakeFiles = await this._loadIntakeFiles();
+        this._updateIntakeBadges(intakeFiles.length);
+        // Update intake files list in browse upload panel
         const filesEl = this.overlay?.querySelector('[data-role="intake-files"]');
-        if (!filesEl) return;
-        for (const file of files) {
-            const item = document.createElement('div');
-            item.className = 'kb-intake-file';
-            item.innerHTML = `
-                <i class="bi bi-file-earmark file-icon"></i>
-                <span class="file-name">${this._escapeHtml(file.name)}</span>
-                <span class="file-size">${this._formatFileSize(file.size)}</span>`;
-            filesEl.appendChild(item);
+        if (filesEl) {
+            filesEl.innerHTML = intakeFiles.map(f => `
+                <div class="kb-intake-file">
+                    <i class="bi bi-file-earmark file-icon"></i>
+                    <span class="file-name">${this._escapeHtml(f.name)}</span>
+                    <span class="file-size">${this._formatFileSize(f.size_bytes || 0)}</span>
+                </div>`).join('');
         }
-        // Update badge count
+        // If intake scene is active, re-render it
+        if (this.currentScene === 'intake') {
+            this._renderIntakeScene();
+        }
+    }
+
+    async _loadIntakeFiles() {
+        try {
+            const res = await fetch('/api/kb/files?folder=.intake&recursive=true');
+            if (!res.ok) return [];
+            const data = await res.json();
+            return data.files || [];
+        } catch { return []; }
+    }
+
+    _updateIntakeBadges(count) {
         const badges = this.overlay?.querySelectorAll('.intake-badge');
-        const count = filesEl.children.length;
         badges?.forEach(b => b.textContent = count);
-        // Store files for AI Librarian processing
-        this._intakeFiles = this._intakeFiles || [];
-        this._intakeFiles.push(...Array.from(files));
     }
 
     async _uploadFiles(files, folder) {
