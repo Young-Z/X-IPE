@@ -119,13 +119,15 @@ describe('FEATURE-049-G: KB Reference Picker', () => {
       expect(document.querySelector('.kb-ref-list-panel')).not.toBeNull();
     });
 
-    it('should show folders in tree with checkboxes', async () => {
+    it('should show clickable folder tree items without checkboxes', async () => {
       if (!globalThis.KBReferencePicker) return;
       picker = new globalThis.KBReferencePicker();
       await picker.open();
-      
-      const folderChecks = document.querySelectorAll('.kb-ref-tree-panel .kb-ref-check[data-type="folder"]');
-      expect(folderChecks.length).toBe(2); // guides + setup
+
+      const treeItems = document.querySelectorAll('.kb-ref-tree-panel .kb-ref-tree-item');
+      expect(treeItems.length).toBe(3); // KB Root + guides + setup
+      const treeChecks = document.querySelectorAll('.kb-ref-tree-panel .kb-ref-check');
+      expect(treeChecks.length).toBe(0);
     });
 
     it('should show files in list panel', async () => {
@@ -218,11 +220,11 @@ describe('FEATURE-049-G: KB Reference Picker', () => {
       picker = new globalThis.KBReferencePicker();
       await picker.open();
       
-      picker.selected.add('knowledge-base/test.md');
+      picker.selected.add('x-ipe-docs/knowledge-base/test.md');
       document.querySelector('.kb-ref-copy-btn').click();
       
       await new Promise(r => setTimeout(r, 50));
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('knowledge-base/test.md');
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('x-ipe-docs/knowledge-base/test.md');
     });
 
     it('should copy multiple paths newline-separated', async () => {
@@ -230,14 +232,14 @@ describe('FEATURE-049-G: KB Reference Picker', () => {
       picker = new globalThis.KBReferencePicker();
       await picker.open();
 
-      picker.selected.add('knowledge-base/a.md');
-      picker.selected.add('knowledge-base/b.md');
+      picker.selected.add('x-ipe-docs/knowledge-base/a.md');
+      picker.selected.add('x-ipe-docs/knowledge-base/b.md');
       document.querySelector('.kb-ref-copy-btn').click();
 
       await new Promise(r => setTimeout(r, 50));
       const arg = navigator.clipboard.writeText.mock.calls[0][0];
-      expect(arg).toContain('knowledge-base/a.md');
-      expect(arg).toContain('knowledge-base/b.md');
+      expect(arg).toContain('x-ipe-docs/knowledge-base/a.md');
+      expect(arg).toContain('x-ipe-docs/knowledge-base/b.md');
       expect(arg).toContain('\n');
     });
   });
@@ -256,11 +258,11 @@ describe('FEATURE-049-G: KB Reference Picker', () => {
       picker = new globalThis.KBReferencePicker({ onInsert });
       await picker.open();
       
-      picker.selected.add('knowledge-base/test.md');
+      picker.selected.add('x-ipe-docs/knowledge-base/test.md');
       document.querySelector('.kb-ref-insert-btn').click();
       
       await new Promise(r => setTimeout(r, 350));
-      expect(onInsert).toHaveBeenCalledWith(['knowledge-base/test.md']);
+      expect(onInsert).toHaveBeenCalledWith(['x-ipe-docs/knowledge-base/test.md']);
     });
 
     it('should dispatch kb:references-inserted event', async () => {
@@ -271,11 +273,11 @@ describe('FEATURE-049-G: KB Reference Picker', () => {
       let eventPaths = null;
       document.addEventListener('kb:references-inserted', (e) => { eventPaths = e.detail.paths; }, { once: true });
       
-      picker.selected.add('knowledge-base/api.md');
+      picker.selected.add('x-ipe-docs/knowledge-base/api.md');
       document.querySelector('.kb-ref-insert-btn').click();
       
       await new Promise(r => setTimeout(r, 50));
-      expect(eventPaths).toEqual(['knowledge-base/api.md']);
+      expect(eventPaths).toEqual(['x-ipe-docs/knowledge-base/api.md']);
     });
   });
 
@@ -441,6 +443,120 @@ describe('FEATURE-049-G: KB Reference Picker', () => {
     });
   });
 
+  describe('Breadcrumb Navigation', () => {
+    it('should render breadcrumb bar', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      expect(document.querySelector('.kb-ref-breadcrumb')).not.toBeNull();
+    });
+
+    it('should show KB Root at root level', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const trail = document.querySelector('.kb-ref-crumb-trail');
+      expect(trail.textContent).toContain('KB Root');
+    });
+
+    it('should have folder checkbox in breadcrumb', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const check = document.querySelector('.kb-ref-folder-check');
+      expect(check).not.toBeNull();
+      expect(check.dataset.type).toBe('folder');
+      expect(check.dataset.path).toBe('x-ipe-docs/knowledge-base');
+    });
+  });
+
+  describe('Folder Navigation', () => {
+    it('should show sub-folders in right panel', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const subfolders = document.querySelectorAll('.kb-ref-subfolder');
+      expect(subfolders.length).toBe(1); // guides
+    });
+
+    it('should navigate when tree folder clicked', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const guidesItem = Array.from(document.querySelectorAll('.kb-ref-tree-item'))
+        .find(el => el.dataset.folderPath === 'guides');
+      guidesItem.click();
+      expect(picker.currentFolder).toBe('guides');
+    });
+
+    it('should toggle check when subfolder in right panel clicked', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const subfolder = document.querySelector('.kb-ref-subfolder');
+      const checkbox = subfolder.querySelector('.kb-ref-check');
+      expect(checkbox.checked).toBe(false);
+      subfolder.click();
+      expect(checkbox.checked).toBe(true);
+      expect(picker.selected.size).toBe(1);
+    });
+
+    it('should navigate when subfolder in right panel double-clicked', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const subfolder = document.querySelector('.kb-ref-subfolder');
+      subfolder.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+      expect(picker.currentFolder).toBe('guides');
+    });
+
+    it('should update breadcrumb on navigation', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      picker._navigateToFolder('guides');
+      const trail = document.querySelector('.kb-ref-crumb-trail');
+      expect(trail.textContent).toContain('guides');
+    });
+  });
+
+  describe('Full Paths', () => {
+    it('should prefix file paths with x-ipe-docs/', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const check = document.querySelector('.kb-ref-check[data-type="file"]');
+      expect(check.dataset.path).toMatch(/^x-ipe-docs\//);
+    });
+
+    it('should prefix folder path with x-ipe-docs/', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const check = document.querySelector('.kb-ref-folder-check');
+      expect(check.dataset.path).toMatch(/^x-ipe-docs\//);
+    });
+  });
+
+  describe('Tag Filter Layout', () => {
+    it('should render tag chips in separate rows', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const rows = document.querySelectorAll('.kb-ref-chip-row');
+      expect(rows.length).toBe(2);
+    });
+
+    it('should have lifecycle chips in first row and domain in second', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const rows = document.querySelectorAll('.kb-ref-chip-row');
+      expect(rows[0].querySelectorAll('.kb-ref-chip-lifecycle').length).toBe(2);
+      expect(rows[1].querySelectorAll('.kb-ref-chip-domain').length).toBe(2);
+    });
+  });
+
   describe('Global instantiation (init.js integration)', () => {
     it('should open reference picker when triggered via window.kbReferencePicker', async () => {
       if (!globalThis.KBReferencePicker) return;
@@ -470,6 +586,165 @@ describe('FEATURE-049-G: KB Reference Picker', () => {
       );
       expect(initContent).toContain('KBReferencePicker');
       expect(initContent).toContain('kbReferencePicker');
+    });
+  });
+
+  describe('CR-002: View Toggle (list/icon)', () => {
+    it('should default to list view', () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      expect(picker.viewMode).toBe('list');
+    });
+
+    it('should render view toggle buttons in breadcrumb bar', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const btns = document.querySelectorAll('.kb-ref-view-btn');
+      expect(btns.length).toBe(2);
+      expect(btns[0].dataset.view).toBe('list');
+      expect(btns[1].dataset.view).toBe('icon');
+    });
+
+    it('should mark list button as active by default', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const listBtn = document.querySelector('[data-view="list"]');
+      expect(listBtn.classList.contains('active')).toBe(true);
+      const iconBtn = document.querySelector('[data-view="icon"]');
+      expect(iconBtn.classList.contains('active')).toBe(false);
+    });
+
+    it('should switch to icon view on icon button click', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const iconBtn = document.querySelector('[data-view="icon"]');
+      iconBtn.click();
+      expect(picker.viewMode).toBe('icon');
+      const grid = document.querySelector('.kb-ref-icon-grid');
+      expect(grid).not.toBeNull();
+    });
+
+    it('should render icon cards in icon view', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      picker.viewMode = 'icon';
+      picker._refreshRightPanel();
+      const cards = document.querySelectorAll('.kb-ref-icon-card');
+      expect(cards.length).toBeGreaterThan(0);
+    });
+
+    it('should place checkbox at bottom-right in icon view cards', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      picker.viewMode = 'icon';
+      picker._refreshRightPanel();
+      const iconCheck = document.querySelector('.kb-ref-icon-check');
+      expect(iconCheck).not.toBeNull();
+      expect(iconCheck.classList.contains('kb-ref-icon-check')).toBe(true);
+    });
+  });
+
+  describe('CR-002: Sub-folder Checkboxes', () => {
+    it('should render checkboxes on sub-folders in list view', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const subfolder = document.querySelector('.kb-ref-subfolder');
+      expect(subfolder).not.toBeNull();
+      const checkbox = subfolder.querySelector('.kb-ref-check');
+      expect(checkbox).not.toBeNull();
+      expect(checkbox.dataset.type).toBe('folder');
+    });
+
+    it('should render checkboxes on sub-folders in icon view', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      picker.viewMode = 'icon';
+      picker._refreshRightPanel();
+      const folderCard = document.querySelector('.kb-ref-icon-folder');
+      expect(folderCard).not.toBeNull();
+      const checkbox = folderCard.querySelector('.kb-ref-check');
+      expect(checkbox).not.toBeNull();
+      expect(checkbox.dataset.type).toBe('folder');
+    });
+
+    it('should use full path for sub-folder checkbox data-path', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const subfolder = document.querySelector('.kb-ref-subfolder');
+      const checkbox = subfolder.querySelector('.kb-ref-check');
+      expect(checkbox.dataset.path).toContain('x-ipe-docs/knowledge-base');
+    });
+  });
+
+  describe('CR-002: Click-to-check / Double-click Navigation', () => {
+    it('should toggle file checkbox on single click', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const fileItem = document.querySelector('.kb-ref-file-item');
+      if (!fileItem) return;
+      const checkbox = fileItem.querySelector('.kb-ref-check');
+      expect(checkbox.checked).toBe(false);
+      fileItem.click();
+      expect(checkbox.checked).toBe(true);
+      expect(picker.selected.size).toBe(1);
+    });
+
+    it('should uncheck on second click', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const fileItem = document.querySelector('.kb-ref-file-item');
+      if (!fileItem) return;
+      fileItem.click();
+      expect(picker.selected.size).toBe(1);
+      fileItem.click();
+      expect(picker.selected.size).toBe(0);
+    });
+
+    it('should toggle icon card checkbox on single click', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      picker.viewMode = 'icon';
+      picker._refreshRightPanel();
+      const card = document.querySelector('.kb-ref-icon-card');
+      if (!card) return;
+      const checkbox = card.querySelector('.kb-ref-check');
+      expect(checkbox.checked).toBe(false);
+      card.click();
+      expect(checkbox.checked).toBe(true);
+    });
+
+    it('should navigate into folder on double-click in icon view', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      picker.viewMode = 'icon';
+      picker._refreshRightPanel();
+      const folderCard = document.querySelector('.kb-ref-icon-folder');
+      if (!folderCard) return;
+      folderCard.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+      expect(picker.currentFolder).toBe('guides');
+    });
+  });
+
+  describe('CR-002: Footer Tip', () => {
+    it('should show double-click tip in footer', async () => {
+      if (!globalThis.KBReferencePicker) return;
+      picker = new globalThis.KBReferencePicker();
+      await picker.open();
+      const tip = document.querySelector('.kb-ref-tip');
+      expect(tip).not.toBeNull();
+      expect(tip.textContent).toContain('Double-click');
     });
   });
 });

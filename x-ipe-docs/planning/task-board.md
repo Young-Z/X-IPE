@@ -6,7 +6,11 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-861 | Bug Fix | FEATURE-049-G modal size — change from max-width:800px/max-height:600px to 90vw×90vh to match all other modals | Drift 🌊 | ✅ done | 03-13-2026 05:59:00 | [CSS](src/x_ipe/static/css/kb-reference-picker.css) | — |
+| TASK-860 | Acceptance Testing | FEATURE-049-G acceptance tests: verify all 29 ACs (UI + Unit + Integration) against CR-003 implementation via Chrome DevTools MCP for UI tests | Drift 🌊 | ✅ done | 03-13-2026 05:40:00 | [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/acceptance-test-cases.md) | — |
 | TASK-858 | Bug Fix | FEATURE-049-G (KB Reference Picker) reported non-functional — diagnose root cause, write failing test, fix, verify | Ember 🔥 | ✅ done | 03-13-2026 02:25:00 | [init.js](src/x_ipe/static/js/init.js), [tests](tests/frontend-js/kb-reference-picker.test.js) | — |
+| TASK-859 | Change Request | CR-002 on FEATURE-049-G: (1) sub-folder checkboxes in file list, (2) list/icon view toggle, (3) icon-view checkbox at bottom-right, (4) click to check, dblclick to navigate folders, footer tip | Ember 🔥 | 🔄 in_progress | 03-13-2026 08:40:00 | — | — |
+| TASK-859 | Change Request + Implementation | CR-003: 8-point UIUX redesign of FEATURE-049-G (KB Reference Picker) — folder navigation, light theme, standard modal, breadcrumb nav, tag separation, full paths. Includes refinement, design, and implementation. | Drift 🌊 | ✅ done | 03-13-2026 02:35:00 | [CR-003.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/CR-003.md), [spec](x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/specification.md), [JS](src/x_ipe/static/js/features/kb-reference-picker.js), [CSS](src/x_ipe/static/css/kb-reference-picker.css), [tests](tests/frontend-js/kb-reference-picker.test.js) | — |
 | TASK-843 | Skill Update | Update x-ipe-task-based-feature-refinement: (1) Test Type column, (2) epic-folder mockup discovery, (3) scope-aware linking, (4) Linked Date, (5) enforce mockup→spec AC refs | Spark ✨ | ✅ done | 03-11-2026 14:10:00 | [SKILL.md](.github/skills/x-ipe-task-based-feature-refinement/SKILL.md), [spec-template](.github/skills/x-ipe-task-based-feature-refinement/references/specification-template.md) | - |
 | TASK-827 | Requirement Gathering | Gather requirements for Knowledge Base (EPIC-049) — storage, sidebar, browse, upload, tags, search, agent integration, reference picker, AI Librarian | Echo 📡 | ✅ done | 03-11-2026 03:50:00 | [requirement-details-part-20.md](x-ipe-docs/requirements/requirement-details-part-20.md) | x-ipe-task-based-feature-breakdown |
 | TASK-828 | Feature Breakdown | Break EPIC-049 (Knowledge Base) into features with MVP-first ordering, create feature board entries, update requirement-details-part-20.md | Echo 📡 | ✅ done | 03-11-2026 05:18:00 | [features.md](x-ipe-docs/planning/features.md), [requirement-details-part-20.md](x-ipe-docs/requirements/requirement-details-part-20.md) | x-ipe-task-based-feature-refinement |
@@ -94,11 +98,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 3
-- **In Progress:** 3
-- **Pending:** 1
+- **Total Active:** 1
+- **In Progress:** 1
+- **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 850
+- **Completed (archived):** 858
 - **Reverted:** 8
 - **Pending Review:** 0
 - **Blocked:** 0
