@@ -249,15 +249,19 @@ class KBBrowseModal {
                     <button class="kb-content-btn" data-action="reference-kb">
                         <i class="bi bi-link-45deg"></i> \u{1F4DA} Reference KB
                     </button>
+                    <button class="kb-content-btn" data-action="toggle-upload-view">
+                        <i class="bi bi-cloud-arrow-up"></i> Upload
+                    </button>
                 </div>
             </div>
-            <div class="kb-stats-bar" data-role="stats-bar"></div>
-            <div class="kb-toolbar">
-                <div class="kb-search-row">
-                    <div class="kb-search-box">
-                        <i class="bi bi-search"></i>
-                        <input type="text" placeholder="Search articles by keyword, title, or content\u2026" data-role="content-search" />
-                    </div>
+            <div data-role="browse-preview">
+                <div class="kb-stats-bar" data-role="stats-bar"></div>
+                <div class="kb-toolbar">
+                    <div class="kb-search-row">
+                        <div class="kb-search-box">
+                            <i class="bi bi-search"></i>
+                            <input type="text" placeholder="Search articles by keyword, title, or content\u2026" data-role="content-search" />
+                        </div>
                     <div class="kb-view-toggle">
                         <button class="kb-view-btn${this.viewMode === 'grid' ? ' active' : ''}" data-view="grid" title="Grid view"><i class="bi bi-grid-3x3-gap"></i></button>
                         <button class="kb-view-btn${this.viewMode === 'list' ? ' active' : ''}" data-view="list" title="List view"><i class="bi bi-list-ul"></i></button>
@@ -304,7 +308,10 @@ class KBBrowseModal {
                 </div>
                 <div class="kb-list-rows" data-role="list-rows"></div>
             </div>
-            ${this._renderUploadSection()}
+            </div>
+            <div data-role="browse-upload" style="display:none;flex:1;overflow-y:auto;">
+                ${this._renderUploadSection()}
+            </div>
         `;
 
         this._renderBrowseContent();
@@ -931,6 +938,9 @@ class KBBrowseModal {
             case 'run-librarian':
                 this._runAILibrarian();
                 break;
+            case 'toggle-upload-view':
+                this._toggleUploadView();
+                break;
             case 'toggle-folder-dropdown':
                 this._toggleFolderDropdown(el);
                 break;
@@ -1091,6 +1101,23 @@ class KBBrowseModal {
             if (typeof showToast === 'function') {
                 showToast('Command copied — paste into Copilot CLI', 'info');
             }
+        }
+    }
+
+    _toggleUploadView() {
+        const scene = this.overlay?.querySelector('[data-scene="browse"]');
+        if (!scene) return;
+        const preview = scene.querySelector('[data-role="browse-preview"]');
+        const upload = scene.querySelector('[data-role="browse-upload"]');
+        const btn = scene.querySelector('[data-action="toggle-upload-view"]');
+        if (!preview || !upload) return;
+        const showingUpload = upload.style.display !== 'none';
+        preview.style.display = showingUpload ? '' : 'none';
+        upload.style.display = showingUpload ? 'none' : '';
+        if (btn) {
+            btn.innerHTML = showingUpload
+                ? '<i class="bi bi-cloud-arrow-up"></i> Upload'
+                : '<i class="bi bi-journal-text"></i> Browse Articles';
         }
     }
 
