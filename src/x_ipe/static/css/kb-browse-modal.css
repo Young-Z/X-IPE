@@ -946,11 +946,8 @@
     background: #fafbfc;
     overflow-y: auto;
     padding: 24px 20px;
-    position: sticky;
-    top: 0;
-    align-self: flex-start;
-    max-height: 100%;
     margin-left: auto;
+    align-self: stretch;
 }
 .kb-meta-section { margin-bottom: 24px; }
 .kb-meta-section-title {
