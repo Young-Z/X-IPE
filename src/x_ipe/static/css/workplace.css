@@ -585,6 +585,7 @@
 .workplace-tabs .nav-link:hover {
     border: none;
     color: #007bff;
+    background: none;
 }
 
 .workplace-tabs .nav-link.active {
@@ -715,7 +716,7 @@
 }
 
 .workplace-kb-ref-btn:hover {
-    background: #f1f5f9;
+    background: none;
     color: #334155;
 }
 
