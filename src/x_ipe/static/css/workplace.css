@@ -571,6 +571,9 @@
 .workplace-tabs {
     border-bottom: 1px solid #dee2e6;
     margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
 }
 
 .workplace-tabs .nav-link {
@@ -687,6 +690,107 @@
     justify-content: flex-end;
     gap: 0.5rem;
     flex-shrink: 0;
+}
+
+/* CR-004: KB Reference button and count label (in tab bar) */
+.workplace-kb-ref-area {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.25rem 0;
+}
+
+.workplace-kb-ref-btn {
+    border: none;
+    background: none;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.workplace-kb-ref-btn:hover {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.workplace-kb-ref-count {
+    background: #10b981;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    border-radius: 10px;
+    padding: 0 6px;
+    cursor: pointer;
+}
+
+.workplace-kb-ref-popup {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: 100;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 8px;
+    min-width: 220px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.workplace-kb-ref-popup-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 4px 6px;
+    font-size: 0.8rem;
+    color: #212529;
+    border-radius: 4px;
+}
+
+.workplace-kb-ref-popup-item:hover {
+    background: #f8fafc;
+}
+
+.workplace-kb-ref-popup-item button {
+    border: none;
+    background: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 2px;
+    line-height: 1;
+}
+
+.workplace-kb-ref-popup-item button:hover {
+    color: #ef4444;
+}
+
+.workplace-kb-ref-clear {
+    border-top: 1px solid #e2e8f0;
+    margin-top: 2px;
+    padding-top: 2px;
+    text-align: right;
+}
+
+.workplace-kb-ref-clear-btn {
+    border: none;
+    background: none;
+    color: #ef4444;
+    font-size: 10px;
+    cursor: pointer;
+    padding: 2px 4px;
 }
 
 /* =================================================================

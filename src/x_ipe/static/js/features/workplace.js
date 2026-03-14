@@ -2095,9 +2095,18 @@ class WorkplaceManager {
         }
         
         if (kbRefCountEl) {
-            kbRefCountEl.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this._toggleKbRefPopup(kbRefCountEl);
+            const kbArea = kbRefCountEl.closest('.workplace-kb-ref-area');
+            let hoverTimeout;
+            kbArea.addEventListener('mouseenter', () => {
+                clearTimeout(hoverTimeout);
+                if (this.kbReferences.length > 0 && !kbArea.querySelector('.workplace-kb-ref-popup')) {
+                    this._showKbRefPopup(kbRefCountEl);
+                }
+            });
+            kbArea.addEventListener('mouseleave', () => {
+                hoverTimeout = setTimeout(() => {
+                    this._closeKbRefPopup();
+                }, 200);
             });
         }
     }
@@ -2838,21 +2847,11 @@ class WorkplaceManager {
         if (!countEl) return;
         if (!this.kbReferences || this.kbReferences.length === 0) {
             countEl.style.display = 'none';
-            countEl.innerHTML = '';
+            countEl.textContent = '';
             return;
         }
-        const n = this.kbReferences.length;
-        countEl.innerHTML = `📚 ${n} reference${n > 1 ? 's' : ''}<span class="workplace-kb-ref-delete" title="Remove KB references">✕</span>`;
+        countEl.textContent = this.kbReferences.length;
         countEl.style.display = '';
-        
-        // Attach delete handler
-        const deleteBtn = countEl.querySelector('.workplace-kb-ref-delete');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                await this._deleteKbReferences();
-            });
-        }
     }
     
     async _saveKbReferences() {
@@ -2956,42 +2955,55 @@ class WorkplaceManager {
         uploader.prepend(banner);
     }
     
-    _toggleKbRefPopup(anchorEl) {
-        if (this._kbRefPopupEl) {
-            this._closeKbRefPopup();
-            return;
-        }
+    _showKbRefPopup(anchor) {
+        this._closeKbRefPopup();
         if (!this.kbReferences || this.kbReferences.length === 0) return;
         
         const popup = document.createElement('div');
         popup.className = 'workplace-kb-ref-popup';
-        popup.innerHTML = this.kbReferences.map(ref => {
-            const isFolder = !ref.includes('.') || ref.endsWith('/');
-            const icon = isFolder ? '📁' : '📄';
+        const list = this.kbReferences.map((ref, i) => {
             const name = ref.split('/').pop() || ref;
-            return `<div class="workplace-kb-ref-popup-item">${icon} ${this._escapeHtml(name)}</div>`;
+            return `<div class="workplace-kb-ref-popup-item">
+                <span>${this._escapeHtml(name)}</span>
+                <button data-idx="${i}" title="Remove">&times;</button>
+            </div>`;
         }).join('');
+        popup.innerHTML = `${list}<div class="workplace-kb-ref-clear">
+            <button class="workplace-kb-ref-clear-btn">Clear All</button></div>`;
         
-        anchorEl.style.position = 'relative';
-        anchorEl.appendChild(popup);
-        this._kbRefPopupEl = popup;
-        
-        this._kbRefPopupClose = (ev) => {
-            if (!popup.contains(ev.target) && ev.target !== anchorEl) {
-                this._closeKbRefPopup();
+        popup.addEventListener('click', async (e) => {
+            const removeBtn = e.target.closest('[data-idx]');
+            if (removeBtn) {
+                this.kbReferences.splice(Number(removeBtn.dataset.idx), 1);
+                this._updateKbCountLabel(document.getElementById('workplace-kb-ref-count'));
+                await this._saveKbReferences();
+                if (this.kbReferences.length) {
+                    this._showKbRefPopup(anchor);
+                } else {
+                    this._closeKbRefPopup();
+                }
             }
-        };
-        setTimeout(() => document.addEventListener('click', this._kbRefPopupClose), 0);
+            if (e.target.closest('.workplace-kb-ref-clear-btn')) {
+                await this._deleteKbReferences();
+            }
+        });
+        
+        // Keep popup open when hovering over it
+        popup.addEventListener('mouseenter', () => {
+            clearTimeout(this._kbPopupHideTimeout);
+        });
+        popup.addEventListener('mouseleave', () => {
+            this._kbPopupHideTimeout = setTimeout(() => this._closeKbRefPopup(), 200);
+        });
+        
+        anchor.parentElement.appendChild(popup);
+        this._kbRefPopupEl = popup;
     }
     
     _closeKbRefPopup() {
         if (this._kbRefPopupEl) {
             this._kbRefPopupEl.remove();
             this._kbRefPopupEl = null;
-        }
-        if (this._kbRefPopupClose) {
-            document.removeEventListener('click', this._kbRefPopupClose);
-            this._kbRefPopupClose = null;
         }
     }
     

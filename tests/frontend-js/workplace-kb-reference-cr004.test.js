@@ -118,47 +118,43 @@ describe('CR-004: KB Reference in Tab Bar', () => {
         });
     });
 
-    describe('Count Label with Delete Icon', () => {
-        it('should show count label with delete icon after references inserted', () => {
+    describe('Count Label (Green Badge)', () => {
+        it('should show count badge with number after references inserted', () => {
             const countEl = document.getElementById('workplace-kb-ref-count');
-            const n = 2;
-            countEl.innerHTML = `📚 ${n} references<span class="workplace-kb-ref-delete" title="Remove KB references">✕</span>`;
+            countEl.textContent = '2';
             countEl.style.display = '';
             
             expect(countEl.style.display).toBe('');
-            expect(countEl.textContent).toContain('2');
-            const deleteIcon = countEl.querySelector('.workplace-kb-ref-delete');
-            expect(deleteIcon).toBeTruthy();
-            expect(deleteIcon.textContent).toBe('✕');
+            expect(countEl.textContent).toBe('2');
         });
 
-        it('should hide delete icon by default (shown on hover via CSS)', () => {
+        it('should hide count badge when no references', () => {
             const countEl = document.getElementById('workplace-kb-ref-count');
-            countEl.innerHTML = `📚 1 reference<span class="workplace-kb-ref-delete">✕</span>`;
-            const deleteIcon = countEl.querySelector('.workplace-kb-ref-delete');
-            // CSS rule: .workplace-kb-ref-delete { display: none; }
-            // .workplace-kb-ref-count:hover .workplace-kb-ref-delete { display: inline; }
-            // In jsdom we can't test CSS hover, but verify the element exists
-            expect(deleteIcon).toBeTruthy();
+            countEl.textContent = '';
+            countEl.style.display = 'none';
+            
+            expect(countEl.style.display).toBe('none');
         });
     });
 
-    describe('Popup', () => {
-        it('should show popup with reference items when count label clicked', () => {
-            const countEl = document.getElementById('workplace-kb-ref-count');
-            countEl.style.display = '';
-            countEl.style.position = 'relative';
-            
+    describe('Hover Popup with Delete', () => {
+        it('should show popup with reference items and delete buttons on hover', () => {
+            const area = document.querySelector('.workplace-kb-ref-area');
             const popup = document.createElement('div');
             popup.className = 'workplace-kb-ref-popup';
             popup.innerHTML = [
-                '<div class="workplace-kb-ref-popup-item">📄 setup.md</div>',
-                '<div class="workplace-kb-ref-popup-item">📁 guides</div>'
+                '<div class="workplace-kb-ref-popup-item"><span>setup.md</span><button data-idx="0" title="Remove">&times;</button></div>',
+                '<div class="workplace-kb-ref-popup-item"><span>guides</span><button data-idx="1" title="Remove">&times;</button></div>',
+                '<div class="workplace-kb-ref-clear"><button class="workplace-kb-ref-clear-btn">Clear All</button></div>'
             ].join('');
-            countEl.appendChild(popup);
+            area.appendChild(popup);
             
             const items = popup.querySelectorAll('.workplace-kb-ref-popup-item');
             expect(items.length).toBe(2);
+            const removeBtn = popup.querySelector('[data-idx="0"]');
+            expect(removeBtn).toBeTruthy();
+            const clearBtn = popup.querySelector('.workplace-kb-ref-clear-btn');
+            expect(clearBtn).toBeTruthy();
         });
     });
 
