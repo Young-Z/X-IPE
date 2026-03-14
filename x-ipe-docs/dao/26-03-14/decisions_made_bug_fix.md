@@ -125,3 +125,35 @@ Disposition: instruction — route to x-ipe-task-based-bug-fix. This is a UI dis
 
 ### Follow-up
 > None
+
+---
+
+| DAO-077 | 2026-03-14T09:56:34Z | TASK-877 | N/A (direct human message) | instruction | 0.90 | Make deliverable file cards smaller to match action button height |
+
+## DAO-077
+- **Timestamp:** 2026-03-14T09:56:34Z
+- **Task ID:** TASK-877
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A (direct human message)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.90
+
+### Message
+> make the deliverable file box also smaller the same height as action button?
+
+### Guidance Returned
+> Implement the UI fix: reduce deliverable file card height to match the action button height in the workflow UI. Adjust padding, icon size, and font size in CSS.
+
+### Rationale
+> Direct continuation of TASK-876 UIUX feedback. User wants consistent sizing between deliverable cards and action buttons. Bounded CSS fix.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "strong"
+>     reason: "CSS height adjustment for existing UI component"
+
+### Follow-up
+> None

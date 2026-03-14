@@ -594,11 +594,11 @@
 .deliverable-folder-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; color: var(--wf-slate-600); background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 6px; padding: 1px 8px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
 .deliverable-folder-chip:hover { border-color: var(--wf-accent); background: #e0e7ff; }
 .deliverables-empty { color: var(--wf-slate-400); font-size: 12px; padding: 12px 0; }
-.deliverable-card { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--wf-slate-50); border: 1px solid var(--wf-slate-200); border-radius: 10px; transition: all 0.2s; cursor: default; }
+.deliverable-card { display: flex; align-items: center; gap: 6px; padding: 5px 10px; background: var(--wf-slate-50); border: 1px solid var(--wf-slate-200); border-radius: 8px; transition: all 0.2s; cursor: default; }
 .deliverable-card.clickable { cursor: pointer; }
 .deliverable-card:hover { border-color: var(--wf-accent); box-shadow: 0 2px 6px rgba(16,185,129,0.06); }
 .deliverable-card.missing { opacity: 0.6; }
-.deliverable-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 16px; flex-shrink: 0; }
+.deliverable-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-size: 12px; flex-shrink: 0; }
 .deliverable-icon.ideas { background: #f3e8ff; }
 .deliverable-icon.mockups { background: #fce7f3; }
 .deliverable-icon.requirements { background: #dbeafe; }
@@ -606,8 +606,8 @@
 .deliverable-icon.quality { background: var(--wf-accent-light); }
 .deliverable-icon.folders { background: var(--wf-slate-100); }
 .deliverable-info { flex: 1; min-width: 0; }
-.deliverable-name { font-size: 12px; font-weight: 600; color: var(--wf-slate-800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.deliverable-path { font-size: 10px; font-family: monospace; color: var(--wf-slate-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.deliverable-name { font-size: 11px; font-weight: 600; color: var(--wf-slate-800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.deliverable-path { font-size: 9px; font-family: monospace; color: var(--wf-slate-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
 .deliverable-missing-badge { font-size: 10px; color: #ef4444; white-space: nowrap; }
 .deliverable-preview-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 1051; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; font-family: 'DM Sans', sans-serif; }
 .deliverable-preview-backdrop.active { opacity: 1; visibility: visible; }
