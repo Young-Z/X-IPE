@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-867 | Bug Fix | FEATURE-049-G: +Create New Idea → KB Reference should auto-create draft folder before opening picker (reuse create-folder API) | Ember 🔥 | ✅ done | 03-14-2026 06:45:00 | [JS](src/x_ipe/static/js/features/workplace.js), [tests](tests/frontend-js/workplace-kb-reference-cr004.test.js) | — |
 | TASK-866 | Bug Fix | FEATURE-049-G: KB Reference Insert button does not persist .knowledge-reference.yaml when opened via KB Browse Modal → Reference KB (no onInsert callback). Added _persistReferences() fallback. | Ember 🔥 | ✅ done | 03-13-2026 22:15:00 | [JS](src/x_ipe/static/js/features/kb-reference-picker.js), [tests](tests/frontend-js/kb-reference-picker.test.js) | — |
 | TASK-865 | Code Implementation | Implement FEATURE-049-G CR-004: KB Reference button in compose pane, YAML persistence, count label/popup — workplace.js + ideas_routes.py + ideas_service.py | Pulse 💓 | ✅ done | 03-13-2026 13:35:00 | 03-13-2026 13:42:00 | x-ipe-task-based-feature-acceptance-test |
 | TASK-864 | Technical Design | Design FEATURE-049-G CR-004: KB Reference in compose — button placement, picker integration, YAML persistence, count label/popup, API changes | Pulse 💓 | ✅ done | 03-13-2026 13:22:00 | 03-13-2026 13:34:00 | x-ipe-task-based-code-implementation |

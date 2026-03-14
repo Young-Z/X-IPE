@@ -1889,6 +1889,12 @@ class WorkplaceManager {
                             <span class="uiux-ref-new-badge">NEW</span>
                         </button>
                     </li>
+                    <li class="nav-item workplace-kb-ref-area ms-auto" role="presentation">
+                        <span class="workplace-kb-ref-count" id="workplace-kb-ref-count" style="display:none;"></span>
+                        <button class="workplace-kb-ref-btn" id="workplace-kb-ref-btn" title="Add KB References">
+                            📚 KB Reference
+                        </button>
+                    </li>
                 </ul>
                 
                 <!-- Tab Content -->
@@ -2066,6 +2072,34 @@ class WorkplaceManager {
         submitBtn.addEventListener('click', () => {
             this.submitComposedIdea();
         });
+        
+        // CR-004: KB Reference button integration (button is in tab bar, not compose pane)
+        this.kbReferences = [];
+        const kbRefBtn = document.getElementById('workplace-kb-ref-btn');
+        const kbRefCountEl = document.getElementById('workplace-kb-ref-count');
+        
+        if (kbRefBtn && typeof KBReferencePicker !== 'undefined') {
+            kbRefBtn.addEventListener('click', async () => {
+                // TASK-867: Auto-create draft folder if in "+Create New Idea" mode
+                await this._ensureDraftFolder();
+                const picker = new KBReferencePicker({
+                    onInsert: async (paths) => {
+                        this.kbReferences.push(...paths);
+                        this._updateKbCountLabel(kbRefCountEl);
+                        // Immediately write .knowledge-reference.yaml
+                        await this._saveKbReferences();
+                    }
+                });
+                picker.open();
+            });
+        }
+        
+        if (kbRefCountEl) {
+            kbRefCountEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this._toggleKbRefPopup(kbRefCountEl);
+            });
+        }
     }
     
     /**
@@ -2117,6 +2151,11 @@ class WorkplaceManager {
                 
                 // Reset target folder after successful submit
                 this.targetFolderPath = null;
+                
+                // CR-004: Reset KB reference state
+                this.kbReferences = [];
+                this._updateKbCountLabel(document.getElementById('workplace-kb-ref-count'));
+                this._closeKbRefPopup();
                 
                 // Show success message
                 const contentArea = document.getElementById('workplace-content');
@@ -2791,6 +2830,169 @@ class WorkplaceManager {
         const div = document.createElement('div');
         div.textContent = text || '';
         return div.innerHTML;
+    }
+    
+    // CR-004: KB Reference count label and popup helpers
+    
+    _updateKbCountLabel(countEl) {
+        if (!countEl) return;
+        if (!this.kbReferences || this.kbReferences.length === 0) {
+            countEl.style.display = 'none';
+            countEl.innerHTML = '';
+            return;
+        }
+        const n = this.kbReferences.length;
+        countEl.innerHTML = `📚 ${n} reference${n > 1 ? 's' : ''}<span class="workplace-kb-ref-delete" title="Remove KB references">✕</span>`;
+        countEl.style.display = '';
+        
+        // Attach delete handler
+        const deleteBtn = countEl.querySelector('.workplace-kb-ref-delete');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                await this._deleteKbReferences();
+            });
+        }
+    }
+    
+    async _saveKbReferences() {
+        if (!this.kbReferences || this.kbReferences.length === 0) return;
+        const folderPath = this._getKbTargetFolder();
+        if (!folderPath) return;
+        try {
+            const response = await fetch('/api/ideas/kb-references', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ folder_path: folderPath, kb_references: this.kbReferences })
+            });
+            const result = await response.json();
+            if (!result.success) {
+                console.error('Failed to save KB references:', result.error);
+            }
+        } catch (err) {
+            console.error('Failed to save KB references:', err);
+        }
+    }
+    
+    async _deleteKbReferences() {
+        const folderPath = this._getKbTargetFolder();
+        if (folderPath) {
+            try {
+                await fetch('/api/ideas/kb-references', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ folder_path: folderPath })
+                });
+            } catch (err) {
+                console.error('Failed to delete KB references:', err);
+            }
+        }
+        this.kbReferences = [];
+        this._updateKbCountLabel(document.getElementById('workplace-kb-ref-count'));
+        this._closeKbRefPopup();
+    }
+    
+    _getKbTargetFolder() {
+        // Use the target folder if set (user selected a folder in tree)
+        if (this.targetFolderPath) return this.targetFolderPath;
+        // Fallback: check the "Saving to" banner for the active folder
+        const savingBanner = document.querySelector('.workplace-target-folder-name');
+        if (savingBanner) {
+            const path = savingBanner.closest('[data-folder-path]')?.dataset.folderPath;
+            if (path) return path;
+        }
+        return null;
+    }
+    
+    /**
+     * TASK-867: Auto-create draft folder when in "+Create New Idea" mode.
+     * Reuses the /api/ideas/create-folder endpoint to create a timestamped
+     * draft folder, then sets targetFolderPath and shows "Saving to" banner.
+     */
+    async _ensureDraftFolder() {
+        if (this.targetFolderPath) return this.targetFolderPath;
+        
+        const now = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        const timestamp = `${pad(now.getMonth() + 1)}${pad(now.getDate())}${now.getFullYear()} ` +
+            `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+        const folderName = `Draft Idea - ${timestamp}`;
+        
+        try {
+            const response = await fetch('/api/ideas/create-folder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ folder_name: folderName })
+            });
+            const result = await response.json();
+            if (result.success) {
+                this.targetFolderPath = result.folder_path;
+                this._showDraftFolderBanner(result.folder_name, result.folder_path);
+                await this.loadTree();
+                return result.folder_path;
+            } else {
+                console.error('Failed to create draft folder:', result.error);
+            }
+        } catch (err) {
+            console.error('Failed to create draft folder:', err);
+        }
+        return null;
+    }
+    
+    _showDraftFolderBanner(folderName, folderPath) {
+        const uploader = document.querySelector('.workplace-uploader');
+        if (!uploader) return;
+        // Remove any existing banner
+        const existing = uploader.querySelector('.workplace-target-folder');
+        if (existing) existing.remove();
+        
+        const banner = document.createElement('div');
+        banner.className = 'workplace-target-folder';
+        banner.setAttribute('data-folder-path', folderPath);
+        banner.innerHTML = `
+            <i class="bi bi-folder-fill"></i>
+            <span>Saving to: <strong class="workplace-target-folder-name">${this._escapeHtml(folderName)}</strong></span>
+        `;
+        uploader.prepend(banner);
+    }
+    
+    _toggleKbRefPopup(anchorEl) {
+        if (this._kbRefPopupEl) {
+            this._closeKbRefPopup();
+            return;
+        }
+        if (!this.kbReferences || this.kbReferences.length === 0) return;
+        
+        const popup = document.createElement('div');
+        popup.className = 'workplace-kb-ref-popup';
+        popup.innerHTML = this.kbReferences.map(ref => {
+            const isFolder = !ref.includes('.') || ref.endsWith('/');
+            const icon = isFolder ? '📁' : '📄';
+            const name = ref.split('/').pop() || ref;
+            return `<div class="workplace-kb-ref-popup-item">${icon} ${this._escapeHtml(name)}</div>`;
+        }).join('');
+        
+        anchorEl.style.position = 'relative';
+        anchorEl.appendChild(popup);
+        this._kbRefPopupEl = popup;
+        
+        this._kbRefPopupClose = (ev) => {
+            if (!popup.contains(ev.target) && ev.target !== anchorEl) {
+                this._closeKbRefPopup();
+            }
+        };
+        setTimeout(() => document.addEventListener('click', this._kbRefPopupClose), 0);
+    }
+    
+    _closeKbRefPopup() {
+        if (this._kbRefPopupEl) {
+            this._kbRefPopupEl.remove();
+            this._kbRefPopupEl = null;
+        }
+        if (this._kbRefPopupClose) {
+            document.removeEventListener('click', this._kbRefPopupClose);
+            this._kbRefPopupClose = null;
+        }
     }
     
     // =========================================================================
