@@ -299,8 +299,8 @@ class ComposeIdeaModal {
             btn.addEventListener('click', () => this.switchMode(btn.dataset.mode));
         });
 
-        // Tab switching
-        this.overlay.querySelectorAll('.compose-modal-tabs button').forEach(btn => {
+        // Tab switching — only buttons with data-tab, NOT the KB ref button
+        this.overlay.querySelectorAll('.compose-modal-tabs button[data-tab]').forEach(btn => {
             btn.addEventListener('click', () => this.switchTab(btn.dataset.tab));
         });
 
@@ -344,12 +344,22 @@ class ComposeIdeaModal {
             });
         }
 
-        // KB Reference count click — show popup to view/delete
+        // KB Reference count hover — show popup to view/delete
         const kbCountEl = this.overlay.querySelector('.compose-modal-kb-ref-count');
         if (kbCountEl) {
-            kbCountEl.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this._toggleKbRefPopup(kbCountEl);
+            const kbArea = kbCountEl.closest('.compose-modal-kb-ref-area');
+            let hoverTimeout;
+            kbArea.addEventListener('mouseenter', () => {
+                clearTimeout(hoverTimeout);
+                if (this.kbReferences.length > 0 && !this.overlay.querySelector('.compose-modal-kb-ref-popup')) {
+                    this._showKbRefPopup(kbCountEl);
+                }
+            });
+            kbArea.addEventListener('mouseleave', () => {
+                hoverTimeout = setTimeout(() => {
+                    const popup = this.overlay?.querySelector('.compose-modal-kb-ref-popup');
+                    if (popup) popup.remove();
+                }, 200);
             });
         }
 
@@ -394,7 +404,7 @@ class ComposeIdeaModal {
 
     switchTab(tab) {
         this.activeTab = tab;
-        this.overlay.querySelectorAll('.compose-modal-tabs button').forEach(btn => {
+        this.overlay.querySelectorAll('.compose-modal-tabs button[data-tab]').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.tab === tab);
         });
         const editor = this.overlay.querySelector('[data-content="compose"]');
@@ -709,9 +719,9 @@ class ComposeIdeaModal {
         }
     }
 
-    _toggleKbRefPopup(anchor) {
+    _showKbRefPopup(anchor) {
         const existing = this.overlay?.querySelector('.compose-modal-kb-ref-popup');
-        if (existing) { existing.remove(); return; }
+        if (existing) existing.remove();
         if (!this.kbReferences.length) return;
 
         const popup = document.createElement('div');
@@ -730,14 +740,25 @@ class ComposeIdeaModal {
             if (removeBtn) {
                 this.kbReferences.splice(Number(removeBtn.dataset.idx), 1);
                 this._updateKbRefCount();
-                popup.remove();
-                if (this.kbReferences.length) this._toggleKbRefPopup(anchor);
+                if (this.kbReferences.length) {
+                    this._showKbRefPopup(anchor);
+                } else {
+                    popup.remove();
+                }
             }
             if (e.target.closest('.compose-modal-kb-ref-clear-btn')) {
                 this.kbReferences = [];
                 this._updateKbRefCount();
                 popup.remove();
             }
+        });
+
+        // Keep popup open when hovering over it
+        popup.addEventListener('mouseenter', () => {
+            clearTimeout(this._kbPopupHideTimeout);
+        });
+        popup.addEventListener('mouseleave', () => {
+            this._kbPopupHideTimeout = setTimeout(() => popup.remove(), 200);
         });
 
         anchor.parentElement.appendChild(popup);

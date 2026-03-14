@@ -417,22 +417,22 @@ describe('ComposeIdeaModal — KB Reference Integration', () => {
     expect(count.style.display).toBe('none');
   });
 
-  it('_toggleKbRefPopup creates and removes popup', () => {
+  it('_showKbRefPopup creates popup with references', () => {
     const modal = new ComposeIdeaModal({ workflowName: 'test' });
     modal.createDOM();
     modal.kbReferences = ['kb/guides/setup.md'];
     const anchor = modal.overlay.querySelector('.compose-modal-kb-ref-count');
     
-    // Open popup
-    modal._toggleKbRefPopup(anchor);
+    // Show popup
+    modal._showKbRefPopup(anchor);
     let popup = modal.overlay.querySelector('.compose-modal-kb-ref-popup');
     expect(popup).toBeTruthy();
     expect(popup.textContent).toContain('setup.md');
 
-    // Toggle close
-    modal._toggleKbRefPopup(anchor);
-    popup = modal.overlay.querySelector('.compose-modal-kb-ref-popup');
-    expect(popup).toBeNull();
+    // Calling again replaces popup (not toggle)
+    modal._showKbRefPopup(anchor);
+    const popups = modal.overlay.querySelectorAll('.compose-modal-kb-ref-popup');
+    expect(popups.length).toBe(1);
   });
 
   it('popup Clear All removes all references', () => {
@@ -440,7 +440,7 @@ describe('ComposeIdeaModal — KB Reference Integration', () => {
     modal.createDOM();
     modal.kbReferences = ['kb/a.md', 'kb/b.md'];
     const anchor = modal.overlay.querySelector('.compose-modal-kb-ref-count');
-    modal._toggleKbRefPopup(anchor);
+    modal._showKbRefPopup(anchor);
 
     const clearBtn = modal.overlay.querySelector('.compose-modal-kb-ref-clear-btn');
     clearBtn.click();
@@ -454,11 +454,50 @@ describe('ComposeIdeaModal — KB Reference Integration', () => {
     modal.createDOM();
     modal.kbReferences = ['kb/a.md', 'kb/b.md', 'kb/c.md'];
     const anchor = modal.overlay.querySelector('.compose-modal-kb-ref-count');
-    modal._toggleKbRefPopup(anchor);
+    modal._showKbRefPopup(anchor);
 
     const removeBtn = modal.overlay.querySelector('[data-idx="1"]');
     removeBtn.click();
 
     expect(modal.kbReferences).toEqual(['kb/a.md', 'kb/c.md']);
+  });
+
+  it('KB Reference button click should NOT switch tabs', () => {
+    const modal = new ComposeIdeaModal({ workflowName: 'test' });
+    modal.createDOM();
+    modal.bindEvents();
+    
+    // Start on compose tab
+    expect(modal.activeTab).toBe('compose');
+    
+    // Click KB Reference button
+    const kbBtn = modal.overlay.querySelector('.compose-modal-kb-ref-btn');
+    kbBtn.click();
+    
+    // Should still be on compose tab
+    expect(modal.activeTab).toBe('compose');
+    
+    // Compose tab button should still be active
+    const composeTabBtn = modal.overlay.querySelector('.compose-modal-tabs button[data-tab="compose"]');
+    expect(composeTabBtn.classList.contains('active')).toBe(true);
+  });
+
+  it('switching to upload tab then clicking KB Ref should stay on upload', () => {
+    const modal = new ComposeIdeaModal({ workflowName: 'test' });
+    modal.createDOM();
+    modal.bindEvents();
+    
+    // Switch to upload tab
+    modal.switchTab('upload');
+    expect(modal.activeTab).toBe('upload');
+    
+    // Click KB Reference button
+    const kbBtn = modal.overlay.querySelector('.compose-modal-kb-ref-btn');
+    kbBtn.click();
+    
+    // Should still be on upload tab
+    expect(modal.activeTab).toBe('upload');
+    const uploadBtn = modal.overlay.querySelector('.compose-modal-tabs button[data-tab="upload"]');
+    expect(uploadBtn.classList.contains('active')).toBe(true);
   });
 });

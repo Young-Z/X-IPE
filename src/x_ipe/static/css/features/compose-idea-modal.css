@@ -222,6 +222,7 @@
 
 /* KB Reference Area in Tab Bar */
 .compose-modal-kb-ref-area {
+    position: relative;
     margin-left: auto;
     display: flex;
     align-items: center;
@@ -301,18 +302,18 @@
 
 .compose-modal-kb-ref-clear {
     border-top: 1px solid #e2e8f0;
-    margin-top: 4px;
-    padding-top: 4px;
-    text-align: center;
+    margin-top: 2px;
+    padding-top: 2px;
+    text-align: right;
 }
 
 .compose-modal-kb-ref-clear-btn {
     border: none;
     background: none;
     color: #ef4444;
-    font-size: 11px;
+    font-size: 10px;
     cursor: pointer;
-    padding: 4px 8px;
+    padding: 2px 4px;
 }
 
 /* --------------------------------------------------------------------------
