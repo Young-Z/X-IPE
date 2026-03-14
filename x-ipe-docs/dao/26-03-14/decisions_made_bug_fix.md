@@ -5,6 +5,7 @@
 | DAO-070 | 2026-03-14T06:36:43Z | TASK-867 | N/A (direct human message) | instruction | 0.90 | Reference KB from +Create New Idea should auto-create draft idea folder before opening picker |
 | DAO-071 | 2026-03-14T06:51:15Z | TASK-868 | N/A (direct human message) | instruction | 0.95 | Add KB Reference button to Compose Idea modal in workflow mode |
 | DAO-075 | 2026-03-14T09:10:56Z | TASK-873 | x-ipe-task-based-code-implementation | instruction | 0.85 | Compose Idea file upload shows only one of multiple uploaded files |
+| DAO-077 | 2026-03-14T10:45:00Z | TASK-875 | N/A (direct human message) | instruction | 0.92 | Compose idea reopen/edit mode regression — stuck (1 file) or "No file path" (2+ files) after TASK-874 format change |
 
 ---
 
@@ -154,6 +155,97 @@ Disposition: instruction — route to x-ipe-task-based-bug-fix. This is a UI dis
 >   - skill_name: "x-ipe-task-based-bug-fix"
 >     match_strength: "strong"
 >     reason: "CSS height adjustment for existing UI component"
+
+### Follow-up
+> None
+
+---
+
+## DAO-077 — Compose Idea Reopen/Edit Mode Regression (TASK-874 Format Change)
+
+**Timestamp:** 2026-03-14T10:45:00Z
+**Task ID:** TASK-875 (follow-up)
+**Calling Skill:** N/A (direct human message)
+**Agent:** Bolt ⚡
+
+### Phase 1: 聞 — Listen & Interpret
+
+**Raw message:** "I found two bug, when i reopen a composed idea with uploaded one file, it will stuck. if with two uploaded file or more, it will show No file path — opening in create mode in the compose idea modal window."
+
+**Interpretation:** User reports two regression bugs in compose idea reopen/edit mode, both triggered after TASK-874 changed the deliverable format from legacy list `[filePath, folder_path]` to keyed dict `{"raw-ideas": ..., "ideas-folder": ...}`. The reopen code path reads deliverables from workflow state and likely still expects the old list format.
+
+- **Bug 1:** Single uploaded file → modal gets stuck (likely undefined access on keyed dict treated as array)
+- **Bug 2:** Two+ uploaded files → modal shows "No file path — opening in create mode" (format mismatch causes path extraction failure)
+
+**Three Perspectives:**
+1. **Literal:** Two bugs — stuck modal (1 file) and wrong message (2+ files) when reopening composed idea
+2. **Intended:** Fix the reopen/edit code path to handle the new keyed dict deliverable format from TASK-874
+3. **Beneficial:** Ensure compose idea edit mode is fully compatible with the new deliverable format, preventing future regressions
+
+### Phase 2: 量 — Weigh & Decide
+
+**Disposition:** `instruction`
+**Confidence:** 0.92
+
+**Gain/Loss Analysis:**
+- ✅ Fix: Restores compose idea edit functionality, completes TASK-874 integration
+- ⚠️ Risk: Minimal — targeted fix to format handling in reopen code path
+- ❌ Skip: Users cannot reopen any composed idea — critical UX blocker
+
+**Scenario fork:**
+- Both bugs share the same root cause (deliverable format mismatch) → single fix unit
+
+### Phase 3: 伝 — Formulate Response
+
+**Instruction Units:** 1
+
+> **Unit 0:** Fix two regression bugs in compose idea reopen/edit mode caused by TASK-874's deliverable format change. Bug 1: single file → modal stuck. Bug 2: 2+ files → "No file path" message. Root cause: reopen code expects old list format `[filePath, folder_path]` but receives keyed dict `{"raw-ideas": ..., "ideas-folder": ...}`. Investigate `compose-idea-modal.js` and `workflow-stage.js` edit mode code paths.
+
+**Execution Plan:** Sequential — single group `[0]`
+
+### Phase 4: 省 — Reflect
+
+**Why this disposition?** Clear regression from a known recent change (TASK-874). Both bugs are deterministic, share one root cause, and map directly to `x-ipe-task-based-bug-fix`. High confidence because the format change is documented and the symptom matches a format mismatch pattern.
+
+**Suggested Skills:**
+> - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "strong"
+>     reason: "Regression bugs from recent TASK-874 deliverable format change"
+
+### Follow-up
+> None
+
+| DAO-078 | 2026-03-14T16:04:14Z | TASK-878 | N/A | instruction | 0.85 | UIUX feedback: Compose Idea dialog doesn't restore saved content/KB references when reopening an existing idea |
+
+## DAO-078
+- **Timestamp:** 2026-03-14T16:04:14Z
+- **Task ID:** TASK-878
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.85
+
+### Message
+> Get uiux feedback, please visit feedback folder x-ipe-docs/uiux-feedback/Feedback-20260314-234833 to get details. Feedback: when reopening a composed idea with KB references, nothing is changed — expected the deliverable file to show composed idea and referenced knowledge.
+
+### Guidance Returned
+> Proceed with bug fix. The Compose Idea dialog fails to restore saved content (idea name, editor text, KB references) when reopening an existing idea. Investigate the compose idea component's initialization/loading logic and the deliverable file persistence layer.
+
+### Rationale
+> Clear UIUX feedback with screenshot evidence showing empty editor on reopen. This is a functional bug — data was saved but not restored on reopen. Maps directly to bug-fix skill.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "strong"
+>     reason: "User reports broken behavior: saved compose idea content not shown on reopen. This is a functional bug."
+>     execution_steps:
+>       - phase: "1. Diagnosis"
+>         step: "1.1 Reproduce and locate root cause"
+>       - phase: "2. Fix"
+>         step: "2.1 Write failing test, implement fix, verify"
 
 ### Follow-up
 > None

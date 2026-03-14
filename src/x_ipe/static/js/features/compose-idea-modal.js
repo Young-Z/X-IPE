@@ -572,8 +572,10 @@ class ComposeIdeaModal {
 
             const uploadData = await uploadRes.json();
             const folder_path = uploadData.folder_path || `x-ipe-docs/ideas/${folderName}`;
-            const fileName = uploadData.files_uploaded?.[0] || 'new idea.md';
-            const filePath = `${folder_path}/${fileName}`;
+            const filesUploaded = uploadData.files_uploaded || [];
+            const filePaths = filesUploaded.map(f => `${folder_path}/${f}`);
+            const primaryFile = filePaths[0] || `${folder_path}/new idea.md`;
+            const rawIdeas = filePaths.length === 1 ? filePaths[0] : filePaths;
 
             // Auto-complete compose_idea action
             await fetch(`/api/workflow/${this.workflowName}/action`, {
@@ -582,12 +584,12 @@ class ComposeIdeaModal {
                 body: JSON.stringify({
                     action: 'compose_idea',
                     status: 'done',
-                    deliverables: [filePath, folder_path]
+                    deliverables: { 'raw-ideas': rawIdeas, 'ideas-folder': folder_path }
                 }),
                 signal: this.abortController.signal
             });
 
-            this.onComplete({ file: filePath, folder: folder_path });
+            this.onComplete({ file: primaryFile, files: filePaths, folder: folder_path });
             this.close();
 
         } catch (err) {
@@ -642,10 +644,22 @@ class ComposeIdeaModal {
             this.showToast('No file path — opening in create mode', 'error');
             return;
         }
+
+        // Start KB reference loading in parallel
+        const kbPromise = this.folderPath ? this._loadKbReferences() : Promise.resolve();
+
+        // Skip binary files — they can't be edited in the text editor
+        const ext = (this.filePath.split('.').pop() || '').toLowerCase();
+        const textEditable = ['md', 'txt', 'py', 'js', 'ts', 'css', 'html', 'json', 'yaml', 'yml', 'toml', 'cfg', 'ini', 'sh', 'bat'];
+        if (!textEditable.includes(ext)) {
+            await kbPromise;
+            return;
+        }
         try {
             const resp = await fetch(`/api/ideas/file?path=${encodeURIComponent(this.filePath)}`);
             if (!resp.ok) {
                 this.showToast('Could not load file content', 'error');
+                await kbPromise;
                 return;
             }
             const content = await resp.text();
@@ -655,6 +669,21 @@ class ComposeIdeaModal {
             this.updateSubmitState();
         } catch (err) {
             this.showToast('Failed to load file for editing', 'error');
+        }
+        await kbPromise;
+    }
+
+    async _loadKbReferences() {
+        try {
+            const resp = await fetch(`/api/ideas/kb-references?folder_path=${encodeURIComponent(this.folderPath)}`);
+            if (!resp.ok) return;
+            const data = await resp.json();
+            if (data.success && Array.isArray(data.kb_references) && data.kb_references.length > 0) {
+                this.kbReferences = data.kb_references;
+                this._updateKbRefCount();
+            }
+        } catch (_) {
+            // Non-critical — silently ignore KB reference load failures
         }
     }
 
@@ -670,6 +699,10 @@ class ComposeIdeaModal {
             formData.append('target_folder', this.folderName);
             formData.append('files', blob, this.filePath.split('/').pop() || 'new idea.md');
 
+            if (this.kbReferences.length > 0) {
+                formData.append('kb_references', JSON.stringify(this.kbReferences));
+            }
+
             const uploadRes = await fetch('/api/ideas/upload', {
                 method: 'POST',
                 body: formData,
@@ -683,8 +716,10 @@ class ComposeIdeaModal {
 
             const uploadData = await uploadRes.json();
             const folder_path = uploadData.folder_path || this.folderPath;
-            const fileName = uploadData.files_uploaded?.[0] || this.filePath.split('/').pop();
-            const filePath = `${folder_path}/${fileName}`;
+            const filesUploaded = uploadData.files_uploaded || [];
+            const filePaths = filesUploaded.map(f => `${folder_path}/${f}`);
+            const primaryFile = filePaths[0] || this.filePath;
+            const rawIdeas = filePaths.length === 1 ? filePaths[0] : filePaths;
 
             await fetch(`/api/workflow/${this.workflowName}/action`, {
                 method: 'POST',
@@ -692,12 +727,12 @@ class ComposeIdeaModal {
                 body: JSON.stringify({
                     action: 'compose_idea',
                     status: 'done',
-                    deliverables: [filePath, folder_path]
+                    deliverables: { 'raw-ideas': rawIdeas, 'ideas-folder': folder_path }
                 }),
                 signal: this.abortController.signal
             });
 
-            this.onComplete({ file: filePath, folder: folder_path });
+            this.onComplete({ file: primaryFile, files: filePaths, folder: folder_path });
             this.close();
         } catch (err) {
             if (err.name === 'AbortError') return;

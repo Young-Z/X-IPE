@@ -6,8 +6,10 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-878 | Bug Fix | UIUX Feedback-20260314-234833: Reopen composed idea doesn't restore saved content, idea name, or KB references — editor shows empty, deliverable file not loaded | Drift 🌊 | ✅ done | 03-14-2026 16:15:00 | [compose-idea-modal.js](src/x_ipe/static/js/features/compose-idea-modal.js), [ideas_service.py](src/x_ipe/services/ideas_service.py), [ideas_routes.py](src/x_ipe/routes/ideas_routes.py), [tests](tests/frontend-js/compose-idea-modal.test.js) | — |
 | TASK-877 | Bug Fix | UIUX feedback: Make deliverable file cards smaller to match action button height — reduce padding, icon size, gap | Flux ⚡ | ✅ done | 03-14-2026 09:58:00 | [workflow.css](src/x_ipe/static/css/workflow.css) | — |
 | TASK-876 | Bug Fix | UIUX Feedback-20260314-174241: In deliverables cards, move folder paths beside subtitle (inline) and reduce font size to distinguish folders from generated files | Flux ⚡ | ✅ done | 03-14-2026 09:51:00 | [deliverable-viewer.js](src/x_ipe/static/js/features/deliverable-viewer.js), [workflow-stage.js](src/x_ipe/static/js/features/workflow-stage.js), [workflow.css](src/x_ipe/static/css/workflow.css), [tests](tests/frontend-js/deliverable-viewer.test.js) | — |
+| TASK-876 | Bug Fix | Reopen composed idea broken (TASK-874 regression): (1) single file stuck, (2) 2+ files shows 'No file path'. Fix raw-idea→raw-ideas + handle array values in workflow-stage.js and action-execution-modal.js | Bolt ⚡ | ✅ done | 03-14-2026 14:46:00 | [workflow-stage.js](src/x_ipe/static/js/features/workflow-stage.js), [action-execution-modal.js](src/x_ipe/static/js/features/action-execution-modal.js), [tests](tests/frontend-js/workflow-stage-running.test.js) | — |
 | TASK-875 | Bug Fix | Deliverable card labels show tag name (e.g. "raw-ideas") instead of file/folder name — change to show basename from path | Bolt ⚡ | ✅ done | 03-14-2026 09:32:00 | [workflow-stage.js](src/x_ipe/static/js/features/workflow-stage.js), [deliverable-viewer.js](src/x_ipe/static/js/features/deliverable-viewer.js), [tests](tests/frontend-js/deliverable-viewer.test.js) | — |
 | TASK-874 | Bug Fix | Compose idea file upload shows only 1 file when 2 are uploaded — diagnose root cause, write failing test, fix, verify | Bolt ⚡ | ✅ done | 03-14-2026 09:18:00 | [compose-idea-modal.js](src/x_ipe/static/js/features/compose-idea-modal.js), [tests](tests/frontend-js/compose-idea-modal.test.js) | — |
 | TASK-873 | Acceptance Test | Execute acceptance tests for FEATURE-041-E CR-003: Verify array-valued deliverable tags — backend storage, schema bump, validation, expansion, template resolution, backward compat | Bolt ⚡ | ✅ done | 03-14-2026 08:50:00 | [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/acceptance-test-cases.md) | — |
@@ -118,7 +120,7 @@
 - **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 864
+- **Completed (archived):** 865
 - **Reverted:** 8
 - **Pending Review:** 0
 - **Blocked:** 0

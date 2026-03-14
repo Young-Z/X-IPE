@@ -338,6 +338,148 @@ describe('ComposeIdeaModal — upload files included in compose submit', () => {
   });
 });
 
+/* --------------------------------------------------------------------------
+   TASK-874: Multi-file deliverables bug fix
+   Bug: uploading 2 files in compose idea only shows 1 in deliverables
+   -------------------------------------------------------------------------- */
+describe('ComposeIdeaModal — multi-file deliverables (TASK-874)', () => {
+  let modal;
+  let capturedWorkflowBody;
+
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    capturedWorkflowBody = null;
+    globalThis.EasyMDE = class {
+      constructor() { this.codemirror = { on: () => {} }; }
+      value() { return 'My idea content'; }
+      toTextArea() {}
+    };
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      if (url === '/api/ideas/upload' && opts?.body instanceof FormData) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            folder_path: 'x-ipe-docs/ideas/wf-001-test',
+            files_uploaded: ['new idea.md', 'sketch1.png', 'sketch2.png']
+          })
+        };
+      }
+      if (url.includes('/api/workflow/') && url.includes('/action')) {
+        capturedWorkflowBody = JSON.parse(opts.body);
+        return { ok: true, json: async () => ({ success: true }), text: async () => '' };
+      }
+      return { ok: true, json: async () => ({ tree: [], success: true }), text: async () => '' };
+    });
+    globalThis.marked = { parse: (s) => s };
+
+    modal = new ComposeIdeaModal({ workflowName: 'test' });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.initEasyMDE();
+    document.body.appendChild(modal.overlay);
+  });
+
+  it('sends all uploaded files as array deliverables to workflow API', async () => {
+    const fakeFile1 = new File(['img1'], 'sketch1.png', { type: 'image/png' });
+    const fakeFile2 = new File(['img2'], 'sketch2.png', { type: 'image/png' });
+    modal.pendingFiles = [fakeFile1, fakeFile2];
+    modal.activeTab = 'compose';
+    modal.namer.generate = vi.fn(async () => 'wf-001-test');
+    modal.nameInput.value = 'test-idea';
+    modal.nameValid = true;
+    modal.submitBtn.disabled = false;
+    modal.validator.validate = vi.fn(() => ({ valid: true, sanitized: 'test-idea' }));
+
+    await modal.handleSubmit();
+
+    expect(capturedWorkflowBody).not.toBeNull();
+    expect(capturedWorkflowBody.action).toBe('compose_idea');
+    expect(capturedWorkflowBody.status).toBe('done');
+    // Deliverables should include ALL files as keyed dict with array
+    const deliverables = capturedWorkflowBody.deliverables;
+    expect(deliverables['raw-ideas']).toEqual([
+      'x-ipe-docs/ideas/wf-001-test/new idea.md',
+      'x-ipe-docs/ideas/wf-001-test/sketch1.png',
+      'x-ipe-docs/ideas/wf-001-test/sketch2.png'
+    ]);
+    expect(deliverables['ideas-folder']).toBe('x-ipe-docs/ideas/wf-001-test');
+  });
+
+  it('sends single file as string deliverable (backward compat)', async () => {
+    modal.pendingFiles = [];
+    modal.activeTab = 'compose';
+    modal.namer.generate = vi.fn(async () => 'wf-001-test');
+    modal.nameInput.value = 'test-idea';
+    modal.nameValid = true;
+    modal.submitBtn.disabled = false;
+    modal.validator.validate = vi.fn(() => ({ valid: true, sanitized: 'test-idea' }));
+
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      if (url === '/api/ideas/upload') {
+        return {
+          ok: true, status: 200,
+          json: async () => ({
+            folder_path: 'x-ipe-docs/ideas/wf-001-test',
+            files_uploaded: ['new idea.md']
+          })
+        };
+      }
+      if (url.includes('/api/workflow/') && url.includes('/action')) {
+        capturedWorkflowBody = JSON.parse(opts.body);
+        return { ok: true, json: async () => ({ success: true }), text: async () => '' };
+      }
+      return { ok: true, json: async () => ({ tree: [], success: true }), text: async () => '' };
+    });
+
+    await modal.handleSubmit();
+
+    expect(capturedWorkflowBody).not.toBeNull();
+    const deliverables = capturedWorkflowBody.deliverables;
+    expect(deliverables['raw-ideas']).toBe('x-ipe-docs/ideas/wf-001-test/new idea.md');
+    expect(deliverables['ideas-folder']).toBe('x-ipe-docs/ideas/wf-001-test');
+  });
+
+  it('passes all file paths in onComplete callback', async () => {
+    let completedData = null;
+    modal.onComplete = (data) => { completedData = data; };
+    const fakeFile = new File(['img'], 'sketch.png', { type: 'image/png' });
+    modal.pendingFiles = [fakeFile];
+    modal.activeTab = 'compose';
+    modal.namer.generate = vi.fn(async () => 'wf-001-test');
+    modal.nameInput.value = 'test-idea';
+    modal.nameValid = true;
+    modal.submitBtn.disabled = false;
+    modal.validator.validate = vi.fn(() => ({ valid: true, sanitized: 'test-idea' }));
+
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      if (url === '/api/ideas/upload') {
+        return {
+          ok: true, status: 200,
+          json: async () => ({
+            folder_path: 'x-ipe-docs/ideas/wf-001-test',
+            files_uploaded: ['new idea.md', 'sketch.png']
+          })
+        };
+      }
+      if (url.includes('/api/workflow/') && url.includes('/action')) {
+        return { ok: true, json: async () => ({ success: true }), text: async () => '' };
+      }
+      return { ok: true, json: async () => ({ tree: [], success: true }), text: async () => '' };
+    });
+
+    await modal.handleSubmit();
+
+    expect(completedData).not.toBeNull();
+    expect(completedData.file).toBe('x-ipe-docs/ideas/wf-001-test/new idea.md');
+    expect(completedData.files).toEqual([
+      'x-ipe-docs/ideas/wf-001-test/new idea.md',
+      'x-ipe-docs/ideas/wf-001-test/sketch.png'
+    ]);
+    expect(completedData.folder).toBe('x-ipe-docs/ideas/wf-001-test');
+  });
+});
+
 describe('ComposeIdeaModal — edit mode stores non-.md file paths', () => {
   it('stores .pdf file path for edit mode', () => {
     const modal = new ComposeIdeaModal({
@@ -499,5 +641,281 @@ describe('ComposeIdeaModal — KB Reference Integration', () => {
     expect(modal.activeTab).toBe('upload');
     const uploadBtn = modal.overlay.querySelector('.compose-modal-tabs button[data-tab="upload"]');
     expect(uploadBtn.classList.contains('active')).toBe(true);
+  });
+});
+
+/* --------------------------------------------------------------------------
+   TASK-876: loadEditContent skips non-text (binary) files
+   -------------------------------------------------------------------------- */
+describe('TASK-876: loadEditContent skips binary files', () => {
+  it('should NOT fetch/load a .png file into the editor', async () => {
+    const fetchSpy = vi.fn(async () => ({ ok: true, json: async () => ({ success: true, kb_references: [] }) }));
+    globalThis.fetch = fetchSpy;
+
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/test/sketch.png',
+      folderPath: 'x-ipe-docs/ideas/test',
+      folderName: 'test'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    // Mock easyMDE
+    modal.easyMDE = { value: vi.fn() };
+
+    await modal.loadEditContent();
+
+    // Should NOT have fetched the binary file content
+    const fileCall = fetchSpy.mock.calls.find(c => c[0].includes('/api/ideas/file'));
+    expect(fileCall).toBeUndefined();
+    // Should NOT have set editor value
+    expect(modal.easyMDE.value).not.toHaveBeenCalled();
+  });
+
+  it('should NOT fetch/load a .jpg file into the editor', async () => {
+    const fetchSpy = vi.fn(async () => ({ ok: true, json: async () => ({ success: true, kb_references: [] }) }));
+    globalThis.fetch = fetchSpy;
+
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/test/photo.jpg',
+      folderPath: 'x-ipe-docs/ideas/test',
+      folderName: 'test'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.easyMDE = { value: vi.fn() };
+
+    await modal.loadEditContent();
+    const fileCall = fetchSpy.mock.calls.find(c => c[0].includes('/api/ideas/file'));
+    expect(fileCall).toBeUndefined();
+  });
+
+  it('should NOT fetch/load a .pdf file into the editor', async () => {
+    const fetchSpy = vi.fn(async () => ({ ok: true, json: async () => ({ success: true, kb_references: [] }) }));
+    globalThis.fetch = fetchSpy;
+
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/test/doc.pdf',
+      folderPath: 'x-ipe-docs/ideas/test',
+      folderName: 'test'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.easyMDE = { value: vi.fn() };
+
+    await modal.loadEditContent();
+    const fileCall = fetchSpy.mock.calls.find(c => c[0].includes('/api/ideas/file'));
+    expect(fileCall).toBeUndefined();
+  });
+
+  it('SHOULD still load a .md file normally', async () => {
+    globalThis.fetch = vi.fn(async () => ({
+      ok: true,
+      text: async () => '# My Idea'
+    }));
+
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/test/new idea.md',
+      folderPath: 'x-ipe-docs/ideas/test',
+      folderName: 'test'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.easyMDE = { value: vi.fn() };
+
+    await modal.loadEditContent();
+    expect(globalThis.fetch).toHaveBeenCalled();
+    expect(modal.easyMDE.value).toHaveBeenCalledWith('# My Idea');
+  });
+
+  it('SHOULD still load a .txt file normally', async () => {
+    globalThis.fetch = vi.fn(async () => ({
+      ok: true,
+      text: async () => 'plain text idea'
+    }));
+
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/test/notes.txt',
+      folderPath: 'x-ipe-docs/ideas/test',
+      folderName: 'test'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.easyMDE = { value: vi.fn() };
+
+    await modal.loadEditContent();
+    expect(globalThis.fetch).toHaveBeenCalled();
+    expect(modal.easyMDE.value).toHaveBeenCalledWith('plain text idea');
+  });
+});
+
+/* --------------------------------------------------------------------------
+   TASK-878: loadEditContent should also load KB references on reopen
+   -------------------------------------------------------------------------- */
+describe('TASK-878: loadEditContent loads KB references on reopen', () => {
+  it('should fetch KB references and populate kbReferences array', async () => {
+    const kbRefs = ['kb/articles/guide.md', 'kb/articles/setup.md'];
+    let callCount = 0;
+    globalThis.fetch = vi.fn(async (url) => {
+      callCount++;
+      if (url.includes('/api/ideas/kb-references')) {
+        return {
+          ok: true,
+          json: async () => ({ success: true, kb_references: kbRefs })
+        };
+      }
+      // File content fetch
+      return { ok: true, text: async () => '# My Idea Content' };
+    });
+
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/wf-001-test/new idea.md',
+      folderPath: 'x-ipe-docs/ideas/wf-001-test',
+      folderName: 'wf-001-test'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.easyMDE = { value: vi.fn() };
+
+    await modal.loadEditContent();
+
+    // Should have fetched both file content AND KB references
+    const kbCall = globalThis.fetch.mock.calls.find(c => c[0].includes('/api/ideas/kb-references'));
+    expect(kbCall).toBeTruthy();
+    expect(kbCall[0]).toContain('folder_path=');
+    expect(modal.kbReferences).toEqual(kbRefs);
+  });
+
+  it('should update KB reference count badge after loading', async () => {
+    globalThis.fetch = vi.fn(async (url) => {
+      if (url.includes('/api/ideas/kb-references')) {
+        return {
+          ok: true,
+          json: async () => ({ success: true, kb_references: ['kb/a.md'] })
+        };
+      }
+      return { ok: true, text: async () => '# Content' };
+    });
+
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/wf-001-test/new idea.md',
+      folderPath: 'x-ipe-docs/ideas/wf-001-test',
+      folderName: 'wf-001-test'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.easyMDE = { value: vi.fn() };
+
+    await modal.loadEditContent();
+
+    const countEl = modal.overlay.querySelector('.compose-modal-kb-ref-count');
+    expect(countEl.textContent).toBe('1');
+    expect(countEl.style.display).not.toBe('none');
+  });
+
+  it('should gracefully handle missing KB references (404 or empty)', async () => {
+    globalThis.fetch = vi.fn(async (url) => {
+      if (url.includes('/api/ideas/kb-references')) {
+        return {
+          ok: true,
+          json: async () => ({ success: true, kb_references: [] })
+        };
+      }
+      return { ok: true, text: async () => '# Content' };
+    });
+
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/wf-001-test/new idea.md',
+      folderPath: 'x-ipe-docs/ideas/wf-001-test',
+      folderName: 'wf-001-test'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.easyMDE = { value: vi.fn() };
+
+    await modal.loadEditContent();
+
+    expect(modal.kbReferences).toEqual([]);
+    const countEl = modal.overlay.querySelector('.compose-modal-kb-ref-count');
+    expect(countEl.style.display).toBe('none');
+  });
+});
+
+/* --------------------------------------------------------------------------
+   TASK-878: handleUpdate should include KB references in formData
+   -------------------------------------------------------------------------- */
+describe('TASK-878: handleUpdate sends KB references', () => {
+  it('should include kb_references in formData when kbReferences is non-empty', async () => {
+    let capturedFormData = null;
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      if (url === '/api/ideas/upload' && opts?.body instanceof FormData) {
+        capturedFormData = opts.body;
+      }
+      return { ok: true, json: async () => ({ folder_path: 'x-ipe-docs/ideas/wf-001-test', files_uploaded: ['new idea.md'] }), status: 200 };
+    });
+
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/wf-001-test/new idea.md',
+      folderPath: 'x-ipe-docs/ideas/wf-001-test',
+      folderName: 'wf-001-test'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.easyMDE = { value: () => '# Updated idea', toTextArea: () => {} };
+    modal.kbReferences = ['kb/guide.md', 'kb/setup.md'];
+    modal.submitBtn = { disabled: false, set textContent(v) {} };
+
+    await modal.handleUpdate();
+
+    expect(capturedFormData).toBeTruthy();
+    const kbRefsValue = capturedFormData.get('kb_references');
+    expect(kbRefsValue).toBeTruthy();
+    expect(JSON.parse(kbRefsValue)).toEqual(['kb/guide.md', 'kb/setup.md']);
+  });
+
+  it('should NOT include kb_references in formData when kbReferences is empty', async () => {
+    let capturedFormData = null;
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      if (url === '/api/ideas/upload' && opts?.body instanceof FormData) {
+        capturedFormData = opts.body;
+      }
+      return { ok: true, json: async () => ({ folder_path: 'x-ipe-docs/ideas/wf-001-test', files_uploaded: ['new idea.md'] }), status: 200 };
+    });
+
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/wf-001-test/new idea.md',
+      folderPath: 'x-ipe-docs/ideas/wf-001-test',
+      folderName: 'wf-001-test'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.easyMDE = { value: () => '# Updated', toTextArea: () => {} };
+    modal.kbReferences = [];
+    modal.submitBtn = { disabled: false, set textContent(v) {} };
+
+    await modal.handleUpdate();
+
+    expect(capturedFormData).toBeTruthy();
+    const kbRefsValue = capturedFormData.get('kb_references');
+    expect(kbRefsValue).toBeNull();
   });
 });

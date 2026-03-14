@@ -11,6 +11,7 @@ Provides:
 - Toolbox config
 - Skills list
 """
+import json
 import os
 from pathlib import Path
 from flask import Blueprint, jsonify, request, current_app, send_file
@@ -85,10 +86,65 @@ def upload_ideas():
     # CR-002: Get optional target_folder from form data
     target_folder = request.form.get('target_folder', None)
     
+    # CR-004: Get optional kb_references from form data
+    kb_references_raw = request.form.get('kb_references')
+    kb_references = []
+    if kb_references_raw:
+        try:
+            kb_references = json.loads(kb_references_raw)
+            if not isinstance(kb_references, list):
+                kb_references = []
+        except (json.JSONDecodeError, TypeError):
+            kb_references = []
+    
     # Convert to (filename, content) tuples
     files = [(f.filename, f.read()) for f in uploaded_files if f.filename]
     
-    result = service.upload(files, target_folder=target_folder)
+    result = service.upload(files, target_folder=target_folder, kb_references=kb_references)
+    
+    if result['success']:
+        return jsonify(result)
+    return jsonify(result), 400
+
+
+@ideas_bp.route('/api/ideas/kb-references', methods=['GET', 'POST', 'DELETE'])
+@x_ipe_tracing()
+def manage_kb_references():
+    """
+    GET /api/ideas/kb-references?folder_path=... — Read .knowledge-reference.yaml
+    POST /api/ideas/kb-references — Write .knowledge-reference.yaml immediately
+    DELETE /api/ideas/kb-references — Remove .knowledge-reference.yaml
+    
+    CR-004: Immediate YAML persistence on insert/delete.
+    """
+    project_root = current_app.config.get('PROJECT_ROOT', os.getcwd())
+    service = IdeasService(project_root)
+    
+    if request.method == 'GET':
+        folder_path = request.args.get('folder_path')
+        if not folder_path:
+            return jsonify({'success': False, 'error': 'folder_path query parameter is required'}), 400
+        result = service.get_kb_references(folder_path)
+        if result['success']:
+            return jsonify(result)
+        return jsonify(result), 400
+    
+    if not request.is_json:
+        return jsonify({'success': False, 'error': 'JSON required'}), 400
+    
+    data = request.get_json()
+    folder_path = data.get('folder_path')
+    
+    if not folder_path:
+        return jsonify({'success': False, 'error': 'folder_path is required'}), 400
+    
+    if request.method == 'POST':
+        kb_references = data.get('kb_references', [])
+        if not isinstance(kb_references, list) or not kb_references:
+            return jsonify({'success': False, 'error': 'kb_references must be a non-empty list'}), 400
+        result = service.save_kb_references(folder_path, kb_references)
+    else:  # DELETE
+        result = service.delete_kb_references(folder_path)
     
     if result['success']:
         return jsonify(result)

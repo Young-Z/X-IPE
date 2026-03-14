@@ -11,6 +11,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any
 
+import yaml
+
 from x_ipe.tracing import x_ipe_tracing
 
 
@@ -97,7 +99,7 @@ class IdeasService:
         return items
     
     @x_ipe_tracing()
-    def upload(self, files: List[tuple], date: str = None, target_folder: str = None) -> Dict[str, Any]:
+    def upload(self, files: List[tuple], date: str = None, target_folder: str = None, kb_references: list = None) -> Dict[str, Any]:
         """
         Upload files to a new or existing idea folder.
         
@@ -107,6 +109,7 @@ class IdeasService:
             target_folder: Optional existing folder path to upload into (CR-002)
                           Can be relative to project root (e.g., 'x-ipe-docs/ideas/MyFolder/SubFolder')
                           or relative to ideas root (e.g., 'MyFolder/SubFolder')
+            kb_references: Optional list of KB reference paths (CR-004)
         
         Returns:
             Dict with success, folder_name, folder_path, files_uploaded
@@ -150,12 +153,67 @@ class IdeasService:
             file_path.write_bytes(content if isinstance(content, bytes) else content.encode('utf-8'))
             uploaded_files.append(filename)
         
+        # CR-004: Write .knowledge-reference.yaml if KB references provided
+        if kb_references:
+            self._write_kb_references(folder_path, kb_references)
+        
         return {
             'success': True,
             'folder_name': folder_name,
             'folder_path': f'{self.IDEAS_PATH}/{folder_name}',
             'files_uploaded': uploaded_files
         }
+    
+    def _write_kb_references(self, folder_path: Path, kb_references: list):
+        """CR-004: Write .knowledge-reference.yaml to idea folder."""
+        yaml_path = folder_path / '.knowledge-reference.yaml'
+        data = {'knowledge-reference': kb_references}
+        with open(yaml_path, 'w') as f:
+            yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+    
+    def _resolve_folder_path(self, folder_path: str) -> Path:
+        """Resolve a folder path (relative to project root or ideas root) to absolute Path."""
+        if folder_path.startswith(self.IDEAS_PATH + '/'):
+            folder_path = folder_path[len(self.IDEAS_PATH) + 1:]
+        elif folder_path.startswith(self.IDEAS_PATH):
+            folder_path = folder_path[len(self.IDEAS_PATH):]
+        return self.ideas_root / folder_path
+    
+    @x_ipe_tracing()
+    def get_kb_references(self, folder_path: str) -> Dict[str, Any]:
+        """CR-004: Read .knowledge-reference.yaml from a folder."""
+        resolved = self._resolve_folder_path(folder_path)
+        yaml_path = resolved / '.knowledge-reference.yaml'
+        if not yaml_path.exists():
+            return {'success': True, 'kb_references': []}
+        try:
+            with open(yaml_path, 'r') as f:
+                data = yaml.safe_load(f) or {}
+            refs = data.get('knowledge-reference', [])
+            if not isinstance(refs, list):
+                refs = []
+            return {'success': True, 'kb_references': refs}
+        except Exception as e:
+            return {'success': False, 'error': str(e), 'kb_references': []}
+
+    @x_ipe_tracing()
+    def save_kb_references(self, folder_path: str, kb_references: list) -> Dict[str, Any]:
+        """CR-004: Immediately save .knowledge-reference.yaml to a folder."""
+        resolved = self._resolve_folder_path(folder_path)
+        if not resolved.exists():
+            resolved.mkdir(parents=True, exist_ok=True)
+        self._write_kb_references(resolved, kb_references)
+        return {'success': True, 'path': str(resolved / '.knowledge-reference.yaml')}
+    
+    @x_ipe_tracing()
+    def delete_kb_references(self, folder_path: str) -> Dict[str, Any]:
+        """CR-004: Delete .knowledge-reference.yaml from a folder."""
+        resolved = self._resolve_folder_path(folder_path)
+        yaml_path = resolved / '.knowledge-reference.yaml'
+        if yaml_path.exists():
+            yaml_path.unlink()
+            return {'success': True, 'deleted': True}
+        return {'success': True, 'deleted': False}
     
     @x_ipe_tracing()
     def create_folder(self, folder_name: str, parent_folder: str = None) -> Dict[str, Any]:
