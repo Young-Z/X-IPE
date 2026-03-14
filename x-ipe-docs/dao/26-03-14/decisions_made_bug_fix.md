@@ -3,6 +3,7 @@
 | Entry ID | Timestamp | Task ID | Calling Skill | Disposition | Confidence | Summary |
 |----------|-----------|---------|---------------|-------------|------------|---------|
 | DAO-070 | 2026-03-14T06:36:43Z | TASK-867 | N/A (direct human message) | instruction | 0.90 | Reference KB from +Create New Idea should auto-create draft idea folder before opening picker |
+| DAO-071 | 2026-03-14T06:51:15Z | TASK-868 | N/A (direct human message) | instruction | 0.95 | Add KB Reference button to Compose Idea modal in workflow mode |
 
 ---
 

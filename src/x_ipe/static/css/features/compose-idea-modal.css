@@ -220,6 +220,101 @@
     color: #334155;
 }
 
+/* KB Reference Area in Tab Bar */
+.compose-modal-kb-ref-area {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-bottom: 2px;
+}
+
+.compose-modal-kb-ref-btn {
+    border: none;
+    background: none;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.compose-modal-kb-ref-btn:hover {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.compose-modal-kb-ref-count {
+    background: #10b981;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    border-radius: 10px;
+    padding: 0 6px;
+    cursor: pointer;
+}
+
+.compose-modal-kb-ref-popup {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: 10;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 8px;
+    min-width: 220px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.compose-modal-kb-ref-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: #334155;
+    border-radius: 4px;
+}
+
+.compose-modal-kb-ref-item:hover { background: #f8fafc; }
+
+.compose-modal-kb-ref-item button {
+    border: none;
+    background: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 4px;
+}
+
+.compose-modal-kb-ref-item button:hover { color: #ef4444; }
+
+.compose-modal-kb-ref-clear {
+    border-top: 1px solid #e2e8f0;
+    margin-top: 4px;
+    padding-top: 4px;
+    text-align: center;
+}
+
+.compose-modal-kb-ref-clear-btn {
+    border: none;
+    background: none;
+    color: #ef4444;
+    font-size: 11px;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
 /* --------------------------------------------------------------------------
    Compose Tab — Editor Area
    -------------------------------------------------------------------------- */

@@ -116,6 +116,7 @@ class ComposeIdeaModal {
         this.folderPath = folderPath || '';
         this.folderName = folderName || '';
         this.linkPanel = null;
+        this.kbReferences = [];
     }
 
     /* --- Lifecycle -------------------------------------------------------- */
@@ -196,6 +197,10 @@ class ComposeIdeaModal {
                         <div class="compose-modal-tabs">
                             <button class="active" data-tab="compose">Compose</button>
                             <button data-tab="upload">Upload</button>
+                            <span class="compose-modal-kb-ref-area">
+                                <span class="compose-modal-kb-ref-count" style="display:none;"></span>
+                                <button class="compose-modal-kb-ref-btn" title="Add KB References">📚 KB Reference</button>
+                            </span>
                         </div>
 
                         <!-- Compose Editor -->
@@ -323,6 +328,30 @@ class ComposeIdeaModal {
 
         // Submit
         this.submitBtn.addEventListener('click', () => this.handleSubmit());
+
+        // KB Reference button
+        const kbRefBtn = this.overlay.querySelector('.compose-modal-kb-ref-btn');
+        if (kbRefBtn && typeof KBReferencePicker !== 'undefined') {
+            kbRefBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const picker = new KBReferencePicker({
+                    onInsert: (paths) => {
+                        this.kbReferences.push(...paths);
+                        this._updateKbRefCount();
+                    }
+                });
+                picker.open();
+            });
+        }
+
+        // KB Reference count click — show popup to view/delete
+        const kbCountEl = this.overlay.querySelector('.compose-modal-kb-ref-count');
+        if (kbCountEl) {
+            kbCountEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this._toggleKbRefPopup(kbCountEl);
+            });
+        }
 
         // Name validation
         this.validator.bindLiveValidation();
@@ -512,6 +541,11 @@ class ComposeIdeaModal {
                 }
             }
 
+            // Include KB references if any were selected
+            if (this.kbReferences.length > 0) {
+                formData.append('kb_references', JSON.stringify(this.kbReferences));
+            }
+
             const uploadRes = await fetch('/api/ideas/upload', {
                 method: 'POST',
                 body: formData,
@@ -660,6 +694,53 @@ class ComposeIdeaModal {
             this.showToast('Failed to update idea', 'error');
             this.setSubmitting(false);
         }
+    }
+
+    /* --- KB Reference Helpers ---------------------------------------------- */
+
+    _updateKbRefCount() {
+        const countEl = this.overlay?.querySelector('.compose-modal-kb-ref-count');
+        if (!countEl) return;
+        if (this.kbReferences.length > 0) {
+            countEl.textContent = this.kbReferences.length;
+            countEl.style.display = '';
+        } else {
+            countEl.style.display = 'none';
+        }
+    }
+
+    _toggleKbRefPopup(anchor) {
+        const existing = this.overlay?.querySelector('.compose-modal-kb-ref-popup');
+        if (existing) { existing.remove(); return; }
+        if (!this.kbReferences.length) return;
+
+        const popup = document.createElement('div');
+        popup.className = 'compose-modal-kb-ref-popup';
+        const list = this.kbReferences.map((r, i) =>
+            `<div class="compose-modal-kb-ref-item">
+                <span>${r.split('/').pop()}</span>
+                <button data-idx="${i}" title="Remove">&times;</button>
+            </div>`
+        ).join('');
+        popup.innerHTML = `${list}<div class="compose-modal-kb-ref-clear">
+            <button class="compose-modal-kb-ref-clear-btn">Clear All</button></div>`;
+
+        popup.addEventListener('click', (e) => {
+            const removeBtn = e.target.closest('[data-idx]');
+            if (removeBtn) {
+                this.kbReferences.splice(Number(removeBtn.dataset.idx), 1);
+                this._updateKbRefCount();
+                popup.remove();
+                if (this.kbReferences.length) this._toggleKbRefPopup(anchor);
+            }
+            if (e.target.closest('.compose-modal-kb-ref-clear-btn')) {
+                this.kbReferences = [];
+                this._updateKbRefCount();
+                popup.remove();
+            }
+        });
+
+        anchor.parentElement.appendChild(popup);
     }
 }
 

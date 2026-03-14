@@ -362,3 +362,103 @@ describe('ComposeIdeaModal — edit mode stores non-.md file paths', () => {
     expect(modal.filePath).toBe('x-ipe-docs/ideas/My Idea/notes.txt');
   });
 });
+
+/* --------------------------------------------------------------------------
+   TASK-868: KB Reference Integration in Workflow Compose
+   -------------------------------------------------------------------------- */
+describe('ComposeIdeaModal — KB Reference Integration', () => {
+  it('initializes kbReferences as empty array', () => {
+    const modal = new ComposeIdeaModal({ workflowName: 'test' });
+    expect(modal.kbReferences).toEqual([]);
+  });
+
+  it('renders KB Reference button in tab bar', () => {
+    const modal = new ComposeIdeaModal({ workflowName: 'test' });
+    modal.createDOM();
+    const btn = modal.overlay.querySelector('.compose-modal-kb-ref-btn');
+    expect(btn).toBeTruthy();
+    expect(btn.textContent).toContain('KB Reference');
+  });
+
+  it('renders KB Reference count label (hidden by default)', () => {
+    const modal = new ComposeIdeaModal({ workflowName: 'test' });
+    modal.createDOM();
+    const count = modal.overlay.querySelector('.compose-modal-kb-ref-count');
+    expect(count).toBeTruthy();
+    expect(count.style.display).toBe('none');
+  });
+
+  it('places KB Reference area after tab buttons with ms-auto', () => {
+    const modal = new ComposeIdeaModal({ workflowName: 'test' });
+    modal.createDOM();
+    const tabs = modal.overlay.querySelector('.compose-modal-tabs');
+    const kbArea = tabs.querySelector('.compose-modal-kb-ref-area');
+    expect(kbArea).toBeTruthy();
+    // Should be last child in tabs
+    expect(tabs.lastElementChild).toBe(kbArea);
+  });
+
+  it('_updateKbRefCount shows count when references exist', () => {
+    const modal = new ComposeIdeaModal({ workflowName: 'test' });
+    modal.createDOM();
+    modal.kbReferences = ['kb/article1.md', 'kb/article2.md'];
+    modal._updateKbRefCount();
+    const count = modal.overlay.querySelector('.compose-modal-kb-ref-count');
+    expect(count.style.display).toBe('');
+    expect(count.textContent).toBe('2');
+  });
+
+  it('_updateKbRefCount hides count when no references', () => {
+    const modal = new ComposeIdeaModal({ workflowName: 'test' });
+    modal.createDOM();
+    modal.kbReferences = [];
+    modal._updateKbRefCount();
+    const count = modal.overlay.querySelector('.compose-modal-kb-ref-count');
+    expect(count.style.display).toBe('none');
+  });
+
+  it('_toggleKbRefPopup creates and removes popup', () => {
+    const modal = new ComposeIdeaModal({ workflowName: 'test' });
+    modal.createDOM();
+    modal.kbReferences = ['kb/guides/setup.md'];
+    const anchor = modal.overlay.querySelector('.compose-modal-kb-ref-count');
+    
+    // Open popup
+    modal._toggleKbRefPopup(anchor);
+    let popup = modal.overlay.querySelector('.compose-modal-kb-ref-popup');
+    expect(popup).toBeTruthy();
+    expect(popup.textContent).toContain('setup.md');
+
+    // Toggle close
+    modal._toggleKbRefPopup(anchor);
+    popup = modal.overlay.querySelector('.compose-modal-kb-ref-popup');
+    expect(popup).toBeNull();
+  });
+
+  it('popup Clear All removes all references', () => {
+    const modal = new ComposeIdeaModal({ workflowName: 'test' });
+    modal.createDOM();
+    modal.kbReferences = ['kb/a.md', 'kb/b.md'];
+    const anchor = modal.overlay.querySelector('.compose-modal-kb-ref-count');
+    modal._toggleKbRefPopup(anchor);
+
+    const clearBtn = modal.overlay.querySelector('.compose-modal-kb-ref-clear-btn');
+    clearBtn.click();
+
+    expect(modal.kbReferences).toEqual([]);
+    expect(modal.overlay.querySelector('.compose-modal-kb-ref-popup')).toBeNull();
+  });
+
+  it('popup individual remove deletes one reference', () => {
+    const modal = new ComposeIdeaModal({ workflowName: 'test' });
+    modal.createDOM();
+    modal.kbReferences = ['kb/a.md', 'kb/b.md', 'kb/c.md'];
+    const anchor = modal.overlay.querySelector('.compose-modal-kb-ref-count');
+    modal._toggleKbRefPopup(anchor);
+
+    const removeBtn = modal.overlay.querySelector('[data-idx="1"]');
+    removeBtn.click();
+
+    expect(modal.kbReferences).toEqual(['kb/a.md', 'kb/c.md']);
+  });
+});
