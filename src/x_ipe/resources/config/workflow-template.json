@@ -19,8 +19,9 @@
         "compose_idea": {
           "optional": false,
           "deliverables": [
-            "$output:raw-idea",
-            "$output-folder:ideas-folder"
+            "$output:raw-ideas",
+            "$output-folder:ideas-folder",
+            "$output:kb-references"
           ],
           "next_actions_suggested": [
             "refine_idea",
@@ -40,7 +41,7 @@
         "refine_idea": {
           "optional": false,
           "action_context": {
-            "raw-idea": {
+            "raw-ideas": {
               "required": true,
               "candidates": "ideas-folder"
             },

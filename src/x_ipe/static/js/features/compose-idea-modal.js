@@ -578,13 +578,17 @@ class ComposeIdeaModal {
             const rawIdeas = filePaths.length === 1 ? filePaths[0] : filePaths;
 
             // Auto-complete compose_idea action
+            const deliverables = { 'raw-ideas': rawIdeas, 'ideas-folder': folder_path };
+            if (this.kbReferences.length > 0) {
+                deliverables['kb-references'] = `${folder_path}/.knowledge-reference.yaml`;
+            }
             await fetch(`/api/workflow/${this.workflowName}/action`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'compose_idea',
                     status: 'done',
-                    deliverables: { 'raw-ideas': rawIdeas, 'ideas-folder': folder_path }
+                    deliverables
                 }),
                 signal: this.abortController.signal
             });
@@ -699,6 +703,10 @@ class ComposeIdeaModal {
             formData.append('target_folder', this.folderName);
             formData.append('files', blob, this.filePath.split('/').pop() || 'new idea.md');
 
+            for (const file of this.pendingFiles) {
+                formData.append('files', file);
+            }
+
             if (this.kbReferences.length > 0) {
                 formData.append('kb_references', JSON.stringify(this.kbReferences));
             }
@@ -721,13 +729,17 @@ class ComposeIdeaModal {
             const primaryFile = filePaths[0] || this.filePath;
             const rawIdeas = filePaths.length === 1 ? filePaths[0] : filePaths;
 
+            const deliverables = { 'raw-ideas': rawIdeas, 'ideas-folder': folder_path };
+            if (this.kbReferences.length > 0) {
+                deliverables['kb-references'] = `${folder_path}/.knowledge-reference.yaml`;
+            }
             await fetch(`/api/workflow/${this.workflowName}/action`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'compose_idea',
                     status: 'done',
-                    deliverables: { 'raw-ideas': rawIdeas, 'ideas-folder': folder_path }
+                    deliverables
                 }),
                 signal: this.abortController.signal
             });

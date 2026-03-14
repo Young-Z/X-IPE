@@ -919,3 +919,207 @@ describe('TASK-878: handleUpdate sends KB references', () => {
     expect(kbRefsValue).toBeNull();
   });
 });
+
+/* --------------------------------------------------------------------------
+   TASK-879: KB reference file should appear as deliverable
+   -------------------------------------------------------------------------- */
+describe('TASK-879: KB references included in workflow deliverables', () => {
+  it('handleCreate includes kb-references path in deliverables when KB refs present', async () => {
+    let capturedWorkflowBody = null;
+    document.body.innerHTML = '';
+    globalThis.EasyMDE = class {
+      constructor() { this.codemirror = { on: () => {} }; }
+      value() { return '# My idea'; }
+      toTextArea() {}
+    };
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      if (url === '/api/ideas/upload') {
+        return {
+          ok: true, status: 200,
+          json: async () => ({
+            folder_path: 'x-ipe-docs/ideas/wf-001-test',
+            files_uploaded: ['new idea.md']
+          })
+        };
+      }
+      if (url.includes('/api/workflow/') && url.includes('/action')) {
+        capturedWorkflowBody = JSON.parse(opts.body);
+        return { ok: true, json: async () => ({ success: true }), text: async () => '' };
+      }
+      return { ok: true, json: async () => ({ tree: [], success: true }), text: async () => '' };
+    });
+    globalThis.marked = { parse: (s) => s };
+
+    const modal = new ComposeIdeaModal({ workflowName: 'test' });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.initEasyMDE();
+    document.body.appendChild(modal.overlay);
+    modal.activeTab = 'compose';
+    modal.kbReferences = ['kb/guide.md', 'kb/setup.md'];
+    modal.namer.generate = vi.fn(async () => 'wf-001-test');
+    modal.nameInput.value = 'test-idea';
+    modal.nameValid = true;
+    modal.submitBtn.disabled = false;
+    modal.validator.validate = vi.fn(() => ({ valid: true, sanitized: 'test-idea' }));
+
+    await modal.handleSubmit();
+
+    expect(capturedWorkflowBody).not.toBeNull();
+    const deliverables = capturedWorkflowBody.deliverables;
+    expect(deliverables['kb-references']).toBe('x-ipe-docs/ideas/wf-001-test/.knowledge-reference.yaml');
+  });
+
+  it('handleUpdate includes kb-references path in deliverables when KB refs present', async () => {
+    let capturedWorkflowBody = null;
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      if (url === '/api/ideas/upload') {
+        return {
+          ok: true, status: 200,
+          json: async () => ({
+            folder_path: 'x-ipe-docs/ideas/wf-001-test',
+            files_uploaded: ['new idea.md']
+          })
+        };
+      }
+      if (url.includes('/api/workflow/') && url.includes('/action')) {
+        capturedWorkflowBody = JSON.parse(opts.body);
+        return { ok: true, json: async () => ({ success: true }), text: async () => '' };
+      }
+      return { ok: true, json: async () => ({ success: true }), text: async () => '' };
+    });
+
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/wf-001-test/new idea.md',
+      folderPath: 'x-ipe-docs/ideas/wf-001-test',
+      folderName: 'wf-001-test'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.easyMDE = { value: () => '# Updated', toTextArea: () => {} };
+    modal.kbReferences = ['kb/guide.md'];
+    modal.submitBtn = { disabled: false, set textContent(v) {} };
+
+    await modal.handleUpdate();
+
+    expect(capturedWorkflowBody).not.toBeNull();
+    const deliverables = capturedWorkflowBody.deliverables;
+    expect(deliverables['kb-references']).toBe('x-ipe-docs/ideas/wf-001-test/.knowledge-reference.yaml');
+  });
+
+  it('handleCreate does NOT include kb-references when no KB refs', async () => {
+    let capturedWorkflowBody = null;
+    document.body.innerHTML = '';
+    globalThis.EasyMDE = class {
+      constructor() { this.codemirror = { on: () => {} }; }
+      value() { return '# My idea'; }
+      toTextArea() {}
+    };
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      if (url === '/api/ideas/upload') {
+        return {
+          ok: true, status: 200,
+          json: async () => ({
+            folder_path: 'x-ipe-docs/ideas/wf-001-test',
+            files_uploaded: ['new idea.md']
+          })
+        };
+      }
+      if (url.includes('/api/workflow/') && url.includes('/action')) {
+        capturedWorkflowBody = JSON.parse(opts.body);
+        return { ok: true, json: async () => ({ success: true }), text: async () => '' };
+      }
+      return { ok: true, json: async () => ({ tree: [], success: true }), text: async () => '' };
+    });
+    globalThis.marked = { parse: (s) => s };
+
+    const modal = new ComposeIdeaModal({ workflowName: 'test' });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.initEasyMDE();
+    document.body.appendChild(modal.overlay);
+    modal.activeTab = 'compose';
+    modal.kbReferences = [];
+    modal.namer.generate = vi.fn(async () => 'wf-001-test');
+    modal.nameInput.value = 'test-idea';
+    modal.nameValid = true;
+    modal.submitBtn.disabled = false;
+    modal.validator.validate = vi.fn(() => ({ valid: true, sanitized: 'test-idea' }));
+
+    await modal.handleSubmit();
+
+    expect(capturedWorkflowBody).not.toBeNull();
+    const deliverables = capturedWorkflowBody.deliverables;
+    expect(deliverables['kb-references']).toBeUndefined();
+  });
+});
+
+/* --------------------------------------------------------------------------
+   TASK-880: handleUpdate should include pendingFiles in formData
+   -------------------------------------------------------------------------- */
+describe('TASK-880: handleUpdate includes pendingFiles', () => {
+  it('should include pendingFiles in formData when updating', async () => {
+    let capturedFormData = null;
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      if (url === '/api/ideas/upload' && opts?.body instanceof FormData) {
+        capturedFormData = opts.body;
+      }
+      return { ok: true, json: async () => ({ folder_path: 'x-ipe-docs/ideas/wf-001-test', files_uploaded: ['new idea.md', 'attachment.pdf'] }), status: 200 };
+    });
+
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/wf-001-test/new idea.md',
+      folderPath: 'x-ipe-docs/ideas/wf-001-test',
+      folderName: 'wf-001-test'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.easyMDE = { value: () => '# Updated idea', toTextArea: () => {} };
+    const fakeFile = new File(['pdf-data'], 'attachment.pdf', { type: 'application/pdf' });
+    modal.pendingFiles = [fakeFile];
+    modal.kbReferences = [];
+    modal.submitBtn = { disabled: false, set textContent(v) {} };
+
+    await modal.handleUpdate();
+
+    expect(capturedFormData).toBeTruthy();
+    const allFiles = capturedFormData.getAll('files');
+    // Should have 2 files: the markdown blob + the pending file
+    expect(allFiles.length).toBe(2);
+    expect(allFiles[1].name).toBe('attachment.pdf');
+  });
+
+  it('should only include markdown blob when no pendingFiles', async () => {
+    let capturedFormData = null;
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      if (url === '/api/ideas/upload' && opts?.body instanceof FormData) {
+        capturedFormData = opts.body;
+      }
+      return { ok: true, json: async () => ({ folder_path: 'x-ipe-docs/ideas/wf-001-test', files_uploaded: ['new idea.md'] }), status: 200 };
+    });
+
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/wf-001-test/new idea.md',
+      folderPath: 'x-ipe-docs/ideas/wf-001-test',
+      folderName: 'wf-001-test'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.easyMDE = { value: () => '# Updated', toTextArea: () => {} };
+    modal.pendingFiles = [];
+    modal.kbReferences = [];
+    modal.submitBtn = { disabled: false, set textContent(v) {} };
+
+    await modal.handleUpdate();
+
+    expect(capturedFormData).toBeTruthy();
+    const allFiles = capturedFormData.getAll('files');
+    expect(allFiles.length).toBe(1);
+  });
+});

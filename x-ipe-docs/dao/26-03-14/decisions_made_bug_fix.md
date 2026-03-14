@@ -249,3 +249,38 @@ Disposition: instruction — route to x-ipe-task-based-bug-fix. This is a UI dis
 
 ### Follow-up
 > None
+| DAO-079 | 2026-03-14T16:25:17Z | TBD (new) | N/A (direct human message) | instruction (x2) | 0.80 | Two compose-idea bugs: (1) KB reference file not shown as deliverable, (2) upload files broken on reopen after TASK-878 |
+
+## DAO-079
+- **Timestamp:** 2026-03-14T16:25:17Z
+- **Task ID:** TBD (new bugs — tasks to be created)
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A (direct human message)
+- **Source:** human
+- **Disposition:** instruction (2 units)
+- **Confidence:** 0.80
+
+### Message
+> first of all, the reference file didn't show as file deliverable, 2. I found that if I try to reopen and upload files, it's no longer working
+
+### Guidance Returned
+> Unit 0: Diagnose and fix why KB reference files don't appear as deliverables in the workflow stage UI. Use x-ipe-task-based-bug-fix skill.
+> Unit 1: Diagnose and fix the upload regression introduced by TASK-878 — reopening an idea and uploading files no longer works. Use x-ipe-task-based-bug-fix skill.
+
+### Rationale
+> Two independent bugs in compose-idea flow. Unit 0 is a display/deliverable issue. Unit 1 is a likely regression from TASK-878 (KB reference loading changes may have broken upload flow). Sequential execution since both may touch compose-idea-modal.js.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "strong"
+>     reason: "Both units are bugs — missing deliverable display and broken upload"
+>     execution_steps:
+>       - phase: "1. Understand"
+>         step: "1.1 Read bug, categorize severity"
+>       - phase: "2. Fix"
+>         step: "2.1 Write failing test, implement fix, verify"
+
+### Follow-up
+> None
