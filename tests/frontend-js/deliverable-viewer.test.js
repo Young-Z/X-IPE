@@ -4,7 +4,7 @@
  *
  * TDD: All tests MUST fail until deliverable-viewer.js is implemented.
  */
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest';
 import { loadFeatureScript } from './helpers.js';
 
 /**
@@ -417,5 +417,133 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
       const viewer = new DV({ workflowName: 'hello' });
       await expect(viewer.showPreview('../../etc/passwd')).rejects.toThrow();
     });
+  });
+
+  /* --------------------------------------------------------------------------
+     TASK-875: Deliverable labels show file/folder names instead of tag names
+     -------------------------------------------------------------------------- */
+  /* --------------------------------------------------------------------------
+     TASK-876: Folder chips rendered inline beside section subtitle
+     -------------------------------------------------------------------------- */
+  describe('TASK-876: renderFolderChip creates small inline chip', () => {
+    it('should have renderFolderChip method', () => {
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      expect(typeof viewer.renderFolderChip).toBe('function');
+    });
+
+    it('should render a chip with deliverable-folder-chip class', () => {
+      const DV = globalThis.DeliverableViewer;
+      const viewer = new DV({ workflowName: 'hello' });
+      const chip = viewer.renderFolderChip({ path: 'x-ipe-docs/ideas/wf-001-test', name: 'ideas-folder', category: 'ideas' });
+      expect(chip.classList.contains('deliverable-folder-chip')).toBe(true);
+    });
+
+    it('should show folder name from path basename', () => {
+      const DV = globalThis.DeliverableViewer;
+      const viewer = new DV({ workflowName: 'hello' });
+      const chip = viewer.renderFolderChip({ path: 'x-ipe-docs/ideas/wf-001-test', name: 'ideas-folder', category: 'ideas' });
+      expect(chip.textContent).toContain('wf-001-test');
+    });
+
+    it('should include a folder icon', () => {
+      const DV = globalThis.DeliverableViewer;
+      const viewer = new DV({ workflowName: 'hello' });
+      const chip = viewer.renderFolderChip({ path: 'ideas/my-folder/', name: 'my-folder', category: 'ideas' });
+      expect(chip.textContent).toContain('📁');
+    });
+
+    it('should be clickable', () => {
+      const DV = globalThis.DeliverableViewer;
+      const viewer = new DV({ workflowName: 'hello' });
+      const chip = viewer.renderFolderChip({ path: 'ideas/my-folder', name: 'my-folder', category: 'ideas' });
+      expect(chip.classList.contains('clickable')).toBe(true);
+      expect(chip.style.cursor).toBe('pointer');
+    });
+
+    it('should fall back to name when path is empty', () => {
+      const DV = globalThis.DeliverableViewer;
+      const viewer = new DV({ workflowName: 'hello' });
+      const chip = viewer.renderFolderChip({ path: '', name: 'fallback-name', category: 'ideas' });
+      expect(chip.textContent).toContain('fallback-name');
+    });
+
+    it('should set title attribute to full path', () => {
+      const DV = globalThis.DeliverableViewer;
+      const viewer = new DV({ workflowName: 'hello' });
+      const chip = viewer.renderFolderChip({ path: 'x-ipe-docs/ideas/wf-001-test', name: 'ideas', category: 'ideas' });
+      expect(chip.title).toBe('x-ipe-docs/ideas/wf-001-test');
+    });
+  });
+
+  describe('TASK-875: Deliverable card labels use file/folder names', () => {
+    it('renderFolderDeliverable shows folder name, not tag name', () => {
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      const card = viewer.renderFolderDeliverable({
+        path: 'x-ipe-docs/ideas/my-cool-idea',
+        name: 'ideas-folder',
+        category: 'folders'
+      });
+      const name = card.querySelector('.deliverable-name');
+      expect(name.textContent).toBe('my-cool-idea');
+    });
+
+    it('renderFolderDeliverable falls back to tag name when path is empty', () => {
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      const card = viewer.renderFolderDeliverable({
+        path: '',
+        name: 'ideas-folder',
+        category: 'folders'
+      });
+      const name = card.querySelector('.deliverable-name');
+      expect(name.textContent).toBe('ideas-folder');
+    });
+  });
+});
+
+/* --------------------------------------------------------------------------
+   TASK-875: File deliverable card labels (workflow-stage._renderDeliverableCard)
+   -------------------------------------------------------------------------- */
+describe('TASK-875: _renderDeliverableCard labels use file names', () => {
+  beforeAll(() => {
+    loadFeatureScript('workflow-stage.js');
+  });
+
+  it('shows file basename instead of tag name', () => {
+    const card = workflowStage._renderDeliverableCard({
+      name: 'raw-ideas',
+      path: 'x-ipe-docs/ideas/my-idea/sketch1.png',
+      category: 'ideas',
+      exists: true
+    });
+    const name = card.querySelector('.deliverable-name');
+    expect(name.textContent).toBe('sketch1.png');
+  });
+
+  it('shows file basename for nested paths', () => {
+    const card = workflowStage._renderDeliverableCard({
+      name: 'specification',
+      path: 'x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/specification.md',
+      category: 'requirements',
+      exists: true
+    });
+    const name = card.querySelector('.deliverable-name');
+    expect(name.textContent).toBe('specification.md');
+  });
+
+  it('falls back to tag name when path is empty', () => {
+    const card = workflowStage._renderDeliverableCard({
+      name: 'raw-ideas',
+      path: '',
+      category: 'ideas',
+      exists: false
+    });
+    const name = card.querySelector('.deliverable-name');
+    expect(name.textContent).toBe('raw-ideas');
   });
 });

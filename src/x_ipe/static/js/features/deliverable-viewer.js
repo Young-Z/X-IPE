@@ -33,6 +33,19 @@ class DeliverableViewer {
     }
 
     /**
+     * Render a small inline folder chip (beside section subtitle).
+     */
+    renderFolderChip(item) {
+        const chip = document.createElement('span');
+        chip.className = 'deliverable-folder-chip clickable';
+        chip.style.cursor = 'pointer';
+        const label = item.path ? item.path.split('/').pop() || item.name : item.name;
+        chip.textContent = `📁 ${label}`;
+        chip.title = item.path || '';
+        return chip;
+    }
+
+    /**
      * Render a folder deliverable card (click opens FolderBrowserModal externally).
      */
     renderFolderDeliverable(item) {
@@ -49,7 +62,7 @@ class DeliverableViewer {
 
         const nameEl = document.createElement('div');
         nameEl.className = 'deliverable-name';
-        nameEl.textContent = item.name;
+        nameEl.textContent = item.path ? item.path.split('/').pop() || item.name : item.name;
         nameEl.title = item.path;
         info.appendChild(nameEl);
 

@@ -1028,14 +1028,42 @@ const workflowStage = {
                 const createSection = (titleText, sectionItems) => {
                     const section = document.createElement('div');
                     section.className = 'deliverables-feature-section';
+
+                    // Separate folders from files
+                    const folders = [];
+                    const files = [];
+                    sectionItems.forEach(item => {
+                        if (viewer && DeliverableViewer.isFolderType(item.path)) {
+                            folders.push(item);
+                        } else {
+                            files.push(item);
+                        }
+                    });
+
+                    // Title row: subtitle + inline folder chips
+                    const titleRow = document.createElement('div');
+                    titleRow.className = 'deliverables-section-title-row';
                     const sTitle = document.createElement('div');
                     sTitle.className = 'deliverables-feature-section-title';
                     sTitle.textContent = titleText;
-                    section.appendChild(sTitle);
-                    const row = document.createElement('div');
-                    row.className = 'deliverables-row';
-                    sectionItems.forEach(item => row.appendChild(renderCard(item)));
-                    section.appendChild(row);
+                    titleRow.appendChild(sTitle);
+
+                    folders.forEach(item => {
+                        const chip = viewer.renderFolderChip(item);
+                        if (folderModal) {
+                            chip.addEventListener('click', () => folderModal.open(item.path));
+                        }
+                        titleRow.appendChild(chip);
+                    });
+                    section.appendChild(titleRow);
+
+                    // File cards grid (only non-folder items)
+                    if (files.length > 0) {
+                        const row = document.createElement('div');
+                        row.className = 'deliverables-row';
+                        files.forEach(item => row.appendChild(renderCard(item)));
+                        section.appendChild(row);
+                    }
                     return section;
                 };
 
@@ -1071,7 +1099,7 @@ const workflowStage = {
         info.className = 'deliverable-info';
         const nameEl = document.createElement('div');
         nameEl.className = 'deliverable-name';
-        nameEl.textContent = item.name;
+        nameEl.textContent = item.path ? item.path.split('/').pop() || item.name : item.name;
         info.appendChild(nameEl);
         const pathEl = document.createElement('div');
         pathEl.className = 'deliverable-path';

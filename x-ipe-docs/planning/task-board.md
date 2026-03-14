@@ -6,6 +6,14 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-876 | Bug Fix | UIUX Feedback-20260314-174241: In deliverables cards, move folder paths beside subtitle (inline) and reduce font size to distinguish folders from generated files | Flux ⚡ | ✅ done | 03-14-2026 09:51:00 | [deliverable-viewer.js](src/x_ipe/static/js/features/deliverable-viewer.js), [workflow-stage.js](src/x_ipe/static/js/features/workflow-stage.js), [workflow.css](src/x_ipe/static/css/workflow.css), [tests](tests/frontend-js/deliverable-viewer.test.js) | — |
+| TASK-875 | Bug Fix | Deliverable card labels show tag name (e.g. "raw-ideas") instead of file/folder name — change to show basename from path | Bolt ⚡ | ✅ done | 03-14-2026 09:32:00 | [workflow-stage.js](src/x_ipe/static/js/features/workflow-stage.js), [deliverable-viewer.js](src/x_ipe/static/js/features/deliverable-viewer.js), [tests](tests/frontend-js/deliverable-viewer.test.js) | — |
+| TASK-874 | Bug Fix | Compose idea file upload shows only 1 file when 2 are uploaded — diagnose root cause, write failing test, fix, verify | Bolt ⚡ | ✅ done | 03-14-2026 09:18:00 | [compose-idea-modal.js](src/x_ipe/static/js/features/compose-idea-modal.js), [tests](tests/frontend-js/compose-idea-modal.test.js) | — |
+| TASK-873 | Acceptance Test | Execute acceptance tests for FEATURE-041-E CR-003: Verify array-valued deliverable tags — backend storage, schema bump, validation, expansion, template resolution, backward compat | Bolt ⚡ | ✅ done | 03-14-2026 08:50:00 | [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/acceptance-test-cases.md) | — |
+| TASK-872 | Code Implementation | Implement FEATURE-041-E CR-003: Array-valued deliverable tags — 11 implementation steps across config, backend, MCP tool, frontend. Rename raw-idea→raw-ideas, array storage/validation/expansion, schema 4.0, template resolution, candidate algorithm, static validation | Bolt ⚡ | ✅ done | 03-14-2026 08:50:00 | [workflow_manager_service.py](src/x_ipe/services/workflow_manager_service.py), [action-execution-modal.js](src/x_ipe/static/js/features/action-execution-modal.js), [tests](tests/test_workflow_deliverables.py) | x-ipe-task-based-feature-acceptance-test |
+| TASK-871 | Technical Design | Design FEATURE-041-E CR-003: Array-valued deliverable tags — data model changes, resolve_deliverables expansion, template token resolution, validation updates, schema version bump, frontend rendering | Bolt ⚡ | ✅ done | 03-14-2026 08:25:00 | [technical-design.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/technical-design.md) | x-ipe-task-based-code-implementation |
+| TASK-870 | Feature Refinement | Refine FEATURE-041-E specification for CR-003: Add ACs for array-valued deliverable tags, update data model, backward compat, template resolution, frontend rendering | Bolt ⚡ | ✅ done | 03-14-2026 08:10:00 | [specification.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/specification.md) | x-ipe-task-based-technical-design |
+| TASK-869 | Change Request | UIUX Feedback-20260314-152441: Update deliverable tags to support multiple outputs — change `$output:raw-idea` to `$output:raw-ideas` so compose_idea lists all produced files (idea .md + uploaded PNGs) | Bolt ⚡ | ✅ done | 03-14-2026 07:35:00 | [CR-003.md](x-ipe-docs/requirements/EPIC-041/FEATURE-041-E/CR-003.md) | x-ipe-task-based-feature-refinement |
 | TASK-868 | Enhancement | FEATURE-049-G: Add KB Reference button to Compose Idea modal in workflow mode — button, picker integration, count label, popup, FormData kb_references | Ember 🔥 | ✅ done | 03-14-2026 06:55:00 | [JS](src/x_ipe/static/js/features/compose-idea-modal.js), [CSS](src/x_ipe/static/css/features/compose-idea-modal.css), [tests](tests/frontend-js/compose-idea-modal.test.js) | — |
 | TASK-867 | Bug Fix | FEATURE-049-G: +Create New Idea → KB Reference should auto-create draft folder before opening picker (reuse create-folder API) | Ember 🔥 | ✅ done | 03-14-2026 06:45:00 | [JS](src/x_ipe/static/js/features/workplace.js), [tests](tests/frontend-js/workplace-kb-reference-cr004.test.js) | — |
 | TASK-866 | Bug Fix | FEATURE-049-G: KB Reference Insert button does not persist .knowledge-reference.yaml when opened via KB Browse Modal → Reference KB (no onInsert callback). Added _persistReferences() fallback. | Ember 🔥 | ✅ done | 03-13-2026 22:15:00 | [JS](src/x_ipe/static/js/features/kb-reference-picker.js), [tests](tests/frontend-js/kb-reference-picker.test.js) | — |
@@ -105,11 +113,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 1
-- **In Progress:** 1
+- **Total Active:** 0
+- **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 858
+- **Completed (archived):** 864
 - **Reverted:** 8
 - **Pending Review:** 0
 - **Blocked:** 0
