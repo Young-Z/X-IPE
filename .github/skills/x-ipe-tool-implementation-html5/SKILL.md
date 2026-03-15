@@ -65,6 +65,7 @@ input:
     feature_title: "{title}"
     technical_design_link: "{path to technical-design.md}"
     specification_link: "{path to specification.md}"
+    mockup_link: "{path | N/A}"  # From orchestrator; visual reference for frontend fidelity
 ```
 
 ### Input Initialization
@@ -76,6 +77,7 @@ input:
   <field name="source_code_path" source="From technical design Part 2" />
   <field name="test_code_path" source="From technical design Part 2 or project convention" />
   <field name="feature_context" source="From orchestrator's Feature Data Model. OPTIONAL for fix/refactor — use synthetic fallback if absent" />
+  <field name="feature_context.mockup_link" source="From orchestrator (code-implementation Step 3.1). N/A if no current mockup." />
 </input_init>
 ```
 
@@ -125,8 +127,15 @@ input:
           - Default: plain CSS3 with custom properties
        d. Follow existing conventions (naming, file structure, class naming)
 
-    2. IMPLEMENT with built-in HTML5/CSS3/JS best practices:
-       a. Follow technical design Part 2 exactly
+    2. REFERENCE MOCKUP (if available):
+       a. IF feature_context.mockup_link != "N/A":
+          - READ mockup file at mockup_link
+          - EXTRACT visual spec: layout structure, component hierarchy, spacing, colors, states
+          - USE as visual fidelity guide for steps below (layout, styling, responsive breakpoints)
+       b. ELSE: proceed with technical design only
+
+    3. IMPLEMENT with built-in HTML5/CSS3/JS best practices:
+       a. Follow technical design Part 2 exactly; IF mockup available, match its layout/styling
        b. Semantic HTML5: header, nav, main, section, article, aside, footer
        c. Required meta: &lt;meta charset="UTF-8"&gt;, viewport meta, lang attribute on &lt;html&gt;
        d. Accessibility (MANDATORY on all output):
@@ -147,7 +156,7 @@ input:
        g. Progressive enhancement: core content readable without JavaScript
        h. Follow KISS/YAGNI — implement only what design specifies
 
-    3. WRITE tests mapped to AAA scenarios:
+    4. WRITE tests mapped to AAA scenarios:
        a. FOR EACH AAA scenario:
           - Create: test('{scenario_name_kebab_or_description}', () => {})
           - Arrange → DOM setup (document.createElement, innerHTML, or JSDOM fixture)
@@ -161,21 +170,22 @@ input:
           - Mock viewport width → verify CSS class or layout behavior
        d. Use describe() blocks to group related scenarios
 
-    4. RUN tests:
+    5. RUN tests:
        a. Execute: npx vitest run --reporter=verbose (or npx jest --verbose)
        b. Record pass/fail for each Assert clause
 
-    5. RUN linting:
+    6. RUN linting:
        a. Execute: npx eslint {source_code_path} --fix
        b. Execute: npx prettier {source_code_path} --write
        c. If ESLint/Prettier unavailable: log warning, return lint_status: "skipped"
        d. Re-run tests after any lint-induced changes
 
-    6. RETURN standard output
+    7. RETURN standard output
   </action>
   <constraints>
-    - CRITICAL: No research step — HTML5/CSS3/JS best practices are built into Step 2
+    - CRITICAL: No research step — HTML5/CSS3/JS best practices are built into Step 3
     - CRITICAL: Follow existing code conventions found in Step 1
+    - CRITICAL: IF mockup_link provided, implementation MUST match mockup layout/styling
     - MANDATORY: Every AAA Assert clause must map to exactly one test assertion
     - MANDATORY: All interactive elements must have ARIA labels and keyboard support
   </constraints>

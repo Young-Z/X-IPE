@@ -131,9 +131,9 @@ describe('FEATURE-042-D: tag correctness', () => {
     return entry['prompt-details'].find((p) => p.language === 'en').command;
   }
 
-  it('refine_idea uses $output:raw-idea$ and <...$output:uiux-reference$...>', () => {
+  it('refine_idea uses $output:raw-ideas$ and <...$output:uiux-reference$...>', () => {
     const cmd = getEnCommand('refine_idea');
-    expect(cmd).toContain('$output:raw-idea$');
+    expect(cmd).toContain('$output:raw-ideas$');
     expect(cmd).toMatch(/<[^>]*\$output:uiux-reference\$[^>]*>/);
   });
 

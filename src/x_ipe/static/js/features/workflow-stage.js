@@ -500,8 +500,9 @@ const workflowStage = {
             let folderPath = '';
             let folderName = '';
             let filePath = '';
-            if (!Array.isArray(rawDeliverables) && rawDeliverables['raw-idea']) {
-                filePath = rawDeliverables['raw-idea'];
+            if (!Array.isArray(rawDeliverables) && (rawDeliverables['raw-ideas'] || rawDeliverables['raw-idea'])) {
+                const rawIdeas = rawDeliverables['raw-ideas'] || rawDeliverables['raw-idea'];
+                filePath = Array.isArray(rawIdeas) ? rawIdeas[0] : rawIdeas;
                 folderPath = rawDeliverables['ideas-folder'] || '';
             } else {
                 const deliverables = Array.isArray(rawDeliverables) ? rawDeliverables : Object.values(rawDeliverables);
@@ -1099,7 +1100,13 @@ const workflowStage = {
         info.className = 'deliverable-info';
         const nameEl = document.createElement('div');
         nameEl.className = 'deliverable-name';
-        nameEl.textContent = item.path ? item.path.split('/').pop() || item.name : item.name;
+        nameEl.textContent = (() => {
+            if (!item.path) return item.name;
+            const basename = item.path.split('/').pop();
+            // Hidden/metadata files — show tag name instead
+            if (basename && basename.startsWith('.')) return item.name;
+            return basename || item.name;
+        })();
         info.appendChild(nameEl);
         const pathEl = document.createElement('div');
         pathEl.className = 'deliverable-path';

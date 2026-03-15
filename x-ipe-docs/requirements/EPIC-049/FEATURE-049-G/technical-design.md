@@ -1,9 +1,16 @@
 # Technical Design: KB Reference Picker
 
-> Feature ID: FEATURE-049-G | Version: v1.0 | Last Updated: 07-19-2025
+> Feature ID: FEATURE-049-G | Version: v2.0 | Last Updated: 03-13-2026
 
-> program_type: frontend
-> tech_stack: ["JavaScript (ES6+)", "CSS3", "Clipboard API", "Vitest"]
+> program_type: fullstack
+> tech_stack: ["JavaScript (ES6+)", "CSS3", "Clipboard API", "Python/Flask", "PyYAML", "Vitest"]
+
+## Version History
+
+| Version | Date | Description |
+|---------|------|-------------|
+| v1.0 | 07-19-2025 | Initial technical design (retroactive from implementation) |
+| v2.0 | 03-13-2026 | CR-004: KB Reference integration in Workplace compose — button, YAML persistence, count label/popup |
 
 ---
 
@@ -22,6 +29,11 @@
 | `_refreshFileList()` / `_updateCount()` | Incremental DOM updates — re-renders file list or count label without full modal rebuild | Targeted panel innerHTML swap | `rendering`, `incremental-update` |
 | `_escapeHtml()` / `_escapeAttr()` | Security utilities — prevent XSS in rendered content and attribute values | Used by all render methods | `security`, `xss`, `escaping` |
 | CSS stylesheet (`kb-reference-picker.css`) | Visual layer — dark theme, two-panel layout, chip styles, transitions, responsive constraints | Scoped via `.kb-ref-*` class namespace; CSS custom property theming | `css`, `theming`, `layout`, `animation` |
+| **CR-004 Components** | | | |
+| Compose pane KB integration (in `workplace.js`) | Renders KB Reference button, manages reference state, integrates with picker's onInsert callback, renders count label + popup | Modifies `.workplace-compose-actions`; adds `kbReferences[]` state | `compose`, `kb-integration`, `workplace`, `button` |
+| Reference count label + popup (in `workplace.js`) | Displays reference count badge, renders click-to-expand popup with file/folder type icons | Inline popup near KB button; updates on each insert | `badge`, `popup`, `reference-count`, `ui` |
+| Backend YAML writer (in `ideas_service.py`) | Writes `.knowledge-reference.yaml` to idea folder from `kb_references` form field | Additive — no change to existing upload flow when field absent | `yaml`, `persistence`, `backend`, `ideas` |
+| Route handler extension (in `ideas_routes.py`) | Extracts `kb_references` JSON field from upload FormData, passes to service | Backward compatible — field is optional | `route`, `api`, `form-data` |
 
 ### Scope & Boundaries
 
@@ -56,6 +68,10 @@
 | `/api/kb/search` | FEATURE-049-C (KB Search & Tags) | `x-ipe-docs/requirements/EPIC-049/FEATURE-049-C/technical-design.md` | Returns search results filtered by query string |
 | EPIC-039 Folder Browser Modal | Pattern reference | — | Reuses the 80vw two-panel modal shell pattern (design pattern, not code import) |
 | Clipboard API | Browser | — | Primary method for `writeText`; fallback to `document.execCommand('copy')` |
+| Workplace compose pane (`workplace.js`) | FEATURE-008 / In-project | `src/x_ipe/static/js/features/workplace.js` | CR-004: Host for KB Reference button, `.workplace-compose-actions` bar |
+| Ideas upload API (`ideas_routes.py`) | In-project | `src/x_ipe/routes/ideas_routes.py` | CR-004: Endpoint receives `kb_references` form field |
+| Ideas service (`ideas_service.py`) | In-project | `src/x_ipe/services/ideas_service.py` | CR-004: Writes `.knowledge-reference.yaml` to idea folder |
+| PyYAML | Python library | — | CR-004: YAML serialization for `.knowledge-reference.yaml` |
 
 ### Major Flow
 
@@ -69,25 +85,61 @@
 8. **Insert** — "Insert" button calls `onInsert(paths)`, dispatches `kb:references-inserted` CustomEvent on `document`, closes modal
 9. **Close** — `close()` removes `active` class, waits 300ms animation, removes overlay from DOM, restores body scroll
 
+#### CR-004: Compose Pane Integration Flow
+
+10. **Button Render** — `setupComposer()` adds KB Reference button (left side) to `.workplace-compose-actions` using flex layout
+11. **Open Picker** — KB Reference button click creates/reuses `KBReferencePicker({ onInsert })`, calls `open()`
+12. **Store References** — `onInsert` callback appends selected paths to `this.kbReferences[]` array
+13. **Update Label** — After insert, renders/updates reference count label (e.g., "📚 3 references") near the button
+14. **Show Popup** — Clicking count label toggles inline popup listing items with 📁/📄 type icons
+15. **Submit with Refs** — `submitComposedIdea()` appends `kbReferences` as JSON to FormData → POST `/api/ideas/upload`
+16. **Backend Persist** — Route extracts `kb_references` field → service writes `.knowledge-reference.yaml` to the new idea folder
+
 ### Usage Example
 
 ```javascript
-// Instantiate with an insert callback
+// === Original: Standalone picker usage ===
 const picker = new KBReferencePicker({
     onInsert: (paths) => {
         console.log('Selected KB references:', paths);
-        // e.g., ["knowledge-base/guides/setup.md", "knowledge-base/api-docs.md"]
     }
 });
-
-// Open the modal (fetches data, renders, animates in)
 await picker.open();
 
-// Or listen for the CustomEvent instead of using callback
-document.addEventListener('kb:references-inserted', (e) => {
-    const { paths } = e.detail;
-    // Handle inserted references
+// === CR-004: Compose pane integration ===
+// In setupComposer(), the KB button wires into the existing picker:
+const kbBtn = container.querySelector('#workplace-kb-ref-btn');
+const kbReferences = [];  // accumulates across picker opens
+
+kbBtn.addEventListener('click', () => {
+    const picker = new KBReferencePicker({
+        onInsert: (paths) => {
+            kbReferences.push(...paths);
+            updateKbCountLabel(kbReferences.length);
+        }
+    });
+    picker.open();
 });
+
+// In submitComposedIdea(), attach references to form data:
+if (kbReferences.length > 0) {
+    formData.append('kb_references', JSON.stringify(kbReferences));
+}
+```
+
+```python
+# === CR-004: Backend YAML persistence ===
+# In ideas_service.py, after creating idea folder:
+import yaml
+
+def write_kb_references(idea_folder_path, kb_references):
+    """Write .knowledge-reference.yaml if references exist."""
+    if not kb_references:
+        return
+    yaml_path = os.path.join(idea_folder_path, '.knowledge-reference.yaml')
+    data = {'knowledge-reference': kb_references}
+    with open(yaml_path, 'w') as f:
+        yaml.dump(data, f, default_flow_style=False, sort_keys=False)
 ```
 
 ---
@@ -309,8 +361,289 @@ KBReferencePicker (class)
 
 ---
 
+## CR-004: Compose Pane KB Reference Integration (Part 2 Extension)
+
+### Workflow Diagram
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant WP as workplace.js (Compose)
+    participant PKR as KBReferencePicker
+    participant API as /api/ideas/upload
+    participant SVC as ideas_service.py
+    participant FS as File System
+
+    U->>WP: Click "📚 KB Reference" button
+    WP->>PKR: new KBReferencePicker({ onInsert }) → open()
+    PKR-->>U: Modal opens (browse/select)
+    U->>PKR: Select references → click Insert
+    PKR->>WP: onInsert(paths)
+    WP->>WP: kbReferences.push(...paths)
+    WP->>WP: updateKbCountLabel(count)
+    WP-->>U: "📚 3 references" label shown
+
+    opt User clicks count label
+        U->>WP: Click count label
+        WP-->>U: Popup with reference list (📁/📄 icons)
+    end
+
+    U->>WP: Click "Submit Idea"
+    WP->>WP: Build FormData (title, content, files)
+    WP->>WP: Append kb_references JSON to FormData
+    WP->>API: POST /api/ideas/upload (multipart)
+    API->>SVC: create_idea(form_data)
+    SVC->>FS: Create idea folder (wf-NNN-name/)
+    SVC->>FS: Write .knowledge-reference.yaml
+    SVC-->>API: { success: true }
+    API-->>WP: 200 OK
+    WP->>WP: Clear kbReferences[], hide label
+```
+
+### Frontend Changes (workplace.js)
+
+#### 1. HTML — KB Reference Button
+
+Add to the `.workplace-compose-actions` div (currently at line ~1902):
+
+```html
+<!-- Before: Single submit button -->
+<div class="workplace-compose-actions">
+    <button id="workplace-kb-ref-btn" class="workplace-kb-ref-btn" title="Add KB References">
+        📚 KB Reference
+    </button>
+    <span id="workplace-kb-ref-count" class="workplace-kb-ref-count" style="display:none;"></span>
+    <button id="workplace-submit-idea" class="workplace-submit-btn">Submit Idea</button>
+</div>
+```
+
+#### 2. CSS — Flex Layout for Actions Bar
+
+```css
+.workplace-compose-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+}
+
+.workplace-kb-ref-btn {
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.workplace-kb-ref-btn:hover {
+    background: #e9ecef;
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.workplace-kb-ref-count {
+    font-size: 0.8rem;
+    color: #007bff;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+
+.workplace-kb-ref-count:hover {
+    background: #e9ecef;
+}
+
+.workplace-submit-btn {
+    margin-left: auto;  /* Push submit to right */
+}
+
+/* Popup */
+.workplace-kb-ref-popup {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    margin-bottom: 4px;
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    min-width: 260px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 100;
+}
+
+.workplace-kb-ref-popup-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    font-size: 0.8rem;
+    color: #212529;
+    border-radius: 4px;
+}
+
+.workplace-kb-ref-popup-item:hover {
+    background: #f8f9fa;
+}
+```
+
+#### 3. State Management (in setupComposer)
+
+```javascript
+// Add to setupComposer() - after existing setup code
+const kbRefBtn = container.querySelector('#workplace-kb-ref-btn');
+const kbRefCountEl = container.querySelector('#workplace-kb-ref-count');
+let kbReferences = [];       // accumulates paths across picker invocations
+let kbRefPopupEl = null;     // popup DOM node (created on demand)
+
+kbRefBtn.addEventListener('click', () => {
+    const picker = new KBReferencePicker({
+        onInsert: (paths) => {
+            kbReferences.push(...paths);
+            updateKbCountLabel();
+        }
+    });
+    picker.open();
+});
+
+function updateKbCountLabel() {
+    if (kbReferences.length === 0) {
+        kbRefCountEl.style.display = 'none';
+        return;
+    }
+    kbRefCountEl.textContent = `📚 ${kbReferences.length} reference${kbReferences.length > 1 ? 's' : ''}`;
+    kbRefCountEl.style.display = '';
+}
+
+kbRefCountEl.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleKbRefPopup();
+});
+
+function toggleKbRefPopup() {
+    if (kbRefPopupEl) {
+        kbRefPopupEl.remove();
+        kbRefPopupEl = null;
+        return;
+    }
+    kbRefPopupEl = document.createElement('div');
+    kbRefPopupEl.className = 'workplace-kb-ref-popup';
+    kbRefPopupEl.innerHTML = kbReferences.map(ref => {
+        const isFolder = !ref.includes('.') || ref.endsWith('/');
+        const icon = isFolder ? '📁' : '📄';
+        const name = ref.split('/').pop() || ref;
+        return `<div class="workplace-kb-ref-popup-item">${icon} ${escapeHtml(name)}</div>`;
+    }).join('');
+    // Position relative to count label
+    kbRefCountEl.style.position = 'relative';
+    kbRefCountEl.appendChild(kbRefPopupEl);
+    // Close on outside click
+    const closePopup = (ev) => {
+        if (!kbRefPopupEl?.contains(ev.target) && ev.target !== kbRefCountEl) {
+            kbRefPopupEl?.remove();
+            kbRefPopupEl = null;
+            document.removeEventListener('click', closePopup);
+        }
+    };
+    document.addEventListener('click', closePopup);
+}
+```
+
+#### 4. Submit Integration (in submitComposedIdea)
+
+```javascript
+// In submitComposedIdea(), before the fetch call:
+if (kbReferences.length > 0) {
+    formData.append('kb_references', JSON.stringify(kbReferences));
+}
+
+// After successful submission, reset state:
+kbReferences = [];
+updateKbCountLabel();
+if (kbRefPopupEl) {
+    kbRefPopupEl.remove();
+    kbRefPopupEl = null;
+}
+```
+
+### Backend Changes
+
+#### Route: `ideas_routes.py`
+
+```python
+# In the upload endpoint handler, extract kb_references:
+kb_references_raw = request.form.get('kb_references')
+kb_references = []
+if kb_references_raw:
+    try:
+        kb_references = json.loads(kb_references_raw)
+        if not isinstance(kb_references, list):
+            kb_references = []
+    except (json.JSONDecodeError, TypeError):
+        kb_references = []
+
+# Pass to service:
+result = ideas_service.create_idea(
+    ...,  # existing params
+    kb_references=kb_references
+)
+```
+
+#### Service: `ideas_service.py`
+
+```python
+import yaml
+
+def create_idea(self, ..., kb_references=None):
+    # ... existing idea creation logic (create folder, write files) ...
+    
+    # After folder is created, write YAML if references exist:
+    if kb_references:
+        self._write_kb_references(idea_folder_path, kb_references)
+    
+    return result
+
+def _write_kb_references(self, idea_folder_path, kb_references):
+    """Write .knowledge-reference.yaml to idea folder."""
+    yaml_path = os.path.join(idea_folder_path, '.knowledge-reference.yaml')
+    data = {'knowledge-reference': kb_references}
+    with open(yaml_path, 'w') as f:
+        yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+```
+
+#### YAML Output Format
+
+```yaml
+# .knowledge-reference.yaml
+knowledge-reference:
+  - knowledge-base/guides/setup.md
+  - knowledge-base/architecture/overview.md
+  - knowledge-base/api-docs/
+```
+
+### Edge Cases & Error Handling (CR-004)
+
+| Edge Case | Handling | Reference |
+|-----------|----------|-----------|
+| No references selected → Submit | `kb_references` not appended to FormData; backend receives no field; no YAML written | EC-049-G-08 |
+| Multiple picker opens → accumulate | `onInsert` pushes to same array; count label updates cumulatively | AC-049-G-12-05 |
+| `kb_references` field invalid JSON | Route catches `JSONDecodeError`, defaults to empty list; idea created normally | EC-049-G-09 |
+| Popup with 50+ references | Popup has `max-height: 200px; overflow-y: auto` for scrollable list | EC-049-G-10 |
+| KBReferencePicker not available | Button click wrapped in guard: `if (typeof KBReferencePicker === 'undefined') return` | Defensive coding |
+| Submit clears state | After successful POST, `kbReferences = []`, label hidden, popup removed | AC-049-G-12-06 |
+| Duplicate paths from multiple inserts | Allowed — accumulate as-is (spec says append, not deduplicate) | BR-049-G-06 |
+
+---
+
 ## Design Change Log
 
 | Version | Date | Author | Description |
 |---------|------|--------|-------------|
 | v1.0 | 07-19-2025 | Echo 📡 | Initial technical design (retroactive from implemented code) |
+| v2.0 | 03-13-2026 | Pulse 💓 | CR-004: Added compose pane KB Reference button, count label/popup, backend YAML persistence, route extension. Scope expanded from frontend to fullstack. |

@@ -147,9 +147,12 @@ def update_workflow_action(workflow_name: str, action: str, status: str,
         feature_id: Required for per-feature actions (implement/validation/feedback stages).
         deliverables: Optional deliverable paths — either a keyed dict (new format:
             {"tag-name": "path/to/file"}) or a list of paths (legacy format, auto-converted
-            to keyed dict using template tag order).
+            to keyed dict using template tag order). CR-003: Tag values may be arrays
+            for multi-file outputs, e.g. {"raw-ideas": ["idea.md", "sketch.png"]}.
+            Array values trigger schema_version "4.0". $output-folder tags do NOT
+            support arrays.
         context: Optional dict of action context selections (e.g.
-            {"raw-idea": "path/to/idea.md", "uiux-reference": "N/A"}).
+            {"raw-ideas": "path/to/idea.md", "uiux-reference": "N/A"}).
         features: Optional list of feature objects for feature_breakdown action.
             Each feature: {"id": "FEATURE-XXX", "name": "...", "depends_on": [...]}.
             When provided with action=feature_breakdown and status=done, automatically

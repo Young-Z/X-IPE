@@ -31,7 +31,7 @@ function taggedTemplate() {
           refine_idea: {
             optional: false,
             action_context: {
-              'raw-idea': { required: true, candidates: 'ideas-folder' },
+              'raw-ideas': { required: true, candidates: 'ideas-folder' },
               'uiux-reference': { required: false },
               'architecture': { required: false },
             },
@@ -55,7 +55,7 @@ function workflowInstance() {
           refine_idea: {
             status: 'done',
             context: {
-              'raw-idea': 'x-ipe-docs/ideas/test/raw-idea.md',
+              'raw-ideas': 'x-ipe-docs/ideas/test/raw-ideas.md',
               'uiux-reference': 'N/A',
               'architecture': 'x-ipe-docs/ideas/test/arch.md',
             },
@@ -125,7 +125,7 @@ describe('FEATURE-042-B: conditional block parsing', () => {
   it('skips <> block when any $var$ inside is N/A', () => {
     if (!ensureImpl()) return;
     const modal = createWorkflowModal();
-    const resolvedValues = { 'uiux-reference': 'N/A', 'raw-idea': 'path/idea.md' };
+    const resolvedValues = { 'uiux-reference': 'N/A', 'raw-ideas': 'path/idea.md' };
     const text = 'Review <and uiux reference: $output:uiux-reference$> now';
     const result = modal._resolveConditionalBlocks(text, resolvedValues);
     expect(result).not.toContain('uiux reference');
@@ -136,32 +136,32 @@ describe('FEATURE-042-B: conditional block parsing', () => {
   it('includes <> content when all $vars$ resolve to values', () => {
     if (!ensureImpl()) return;
     const modal = createWorkflowModal();
-    const resolvedValues = { 'raw-idea': 'path/idea.md' };
-    const text = 'Review <context: $output:raw-idea$> now';
+    const resolvedValues = { 'raw-ideas': 'path/idea.md' };
+    const text = 'Review <context: $output:raw-ideas$> now';
     const result = modal._resolveConditionalBlocks(text, resolvedValues);
-    expect(result).toContain('context: $output:raw-idea$');
+    expect(result).toContain('context: $output:raw-ideas$');
   });
 
   it('strips <> delimiters from included content', () => {
     if (!ensureImpl()) return;
     const modal = createWorkflowModal();
-    const resolvedValues = { 'raw-idea': 'path/idea.md' };
-    const text = '<context: $output:raw-idea$>';
+    const resolvedValues = { 'raw-ideas': 'path/idea.md' };
+    const text = '<context: $output:raw-ideas$>';
     const result = modal._resolveConditionalBlocks(text, resolvedValues);
     expect(result).not.toContain('<');
     expect(result).not.toContain('>');
-    expect(result).toBe('context: $output:raw-idea$');
+    expect(result).toBe('context: $output:raw-ideas$');
   });
 
   it('handles multiple <> blocks in one template', () => {
     if (!ensureImpl()) return;
     const modal = createWorkflowModal();
     const resolvedValues = {
-      'raw-idea': 'path/idea.md',
+      'raw-ideas': 'path/idea.md',
       'uiux-reference': 'N/A',
       'architecture': 'path/arch.md',
     };
-    const text = 'Read $output:raw-idea$ <ref: $output:uiux-reference$> <arch: $output:architecture$> done';
+    const text = 'Read $output:raw-ideas$ <ref: $output:uiux-reference$> <arch: $output:architecture$> done';
     const result = modal._resolveConditionalBlocks(text, resolvedValues);
     // uiux-reference is N/A → block removed; architecture resolves → block kept
     expect(result).not.toContain('ref:');
@@ -171,7 +171,7 @@ describe('FEATURE-042-B: conditional block parsing', () => {
   it('handles template with no <> blocks (no-op)', () => {
     if (!ensureImpl()) return;
     const modal = createWorkflowModal();
-    const resolvedValues = { 'raw-idea': 'path/idea.md' };
+    const resolvedValues = { 'raw-ideas': 'path/idea.md' };
     const text = 'Just a simple template with no blocks';
     const result = modal._resolveConditionalBlocks(text, resolvedValues);
     expect(result).toBe(text);
@@ -220,7 +220,7 @@ describe('FEATURE-042-B: whitespace cleanup', () => {
     if (!ensureImpl()) return;
     const modal = createWorkflowModal();
     const resolvedValues = { 'uiux-reference': 'N/A' };
-    const text = 'Please review $output:raw-idea$ <and uiux reference: $output:uiux-reference$> carefully';
+    const text = 'Please review $output:raw-ideas$ <and uiux reference: $output:uiux-reference$> carefully';
     let result = modal._resolveConditionalBlocks(text, resolvedValues);
     result = result.replace(/\s{2,}/g, ' ').trim();
     // After block removal and whitespace collapse there should be no double spaces
@@ -240,11 +240,11 @@ describe('FEATURE-042-B: whitespace cleanup', () => {
   it('preserves single spaces between words', () => {
     if (!ensureImpl()) return;
     const modal = createWorkflowModal();
-    const resolvedValues = { 'raw-idea': 'path/idea.md' };
-    const text = 'hello <ctx: $output:raw-idea$> world';
+    const resolvedValues = { 'raw-ideas': 'path/idea.md' };
+    const text = 'hello <ctx: $output:raw-ideas$> world';
     let result = modal._resolveConditionalBlocks(text, resolvedValues);
     result = result.replace(/\s{2,}/g, ' ').trim();
-    expect(result).toBe('hello ctx: $output:raw-idea$ world');
+    expect(result).toBe('hello ctx: $output:raw-ideas$ world');
   });
 
   it('handles consecutive <> blocks with whitespace between', () => {
@@ -342,7 +342,7 @@ describe('FEATURE-042-B: unresolved variable warnings', () => {
     if (!ensureImpl()) return;
     const modal = createWorkflowModal();
     // After 042-A resolution, resolved vars are replaced with paths — no $output:...$
-    const text = 'Review x-ipe-docs/ideas/test/raw-idea.md now';
+    const text = 'Review x-ipe-docs/ideas/test/raw-ideas.md now';
     const result = modal._formatUnresolvedWarnings(text);
     expect(result).not.toContain('unresolved-warning');
     expect(result).toBe(text);

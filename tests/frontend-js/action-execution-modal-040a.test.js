@@ -546,4 +546,73 @@ describe('FEATURE-040-A: Modal Generalization & Core Actions', () => {
       expect(onComplete).toHaveBeenCalled();
     });
   });
+
+  /* --------------------------------------------------------------------------
+     TASK-876: _resolveIdeaFiles handles keyed dict deliverables
+     -------------------------------------------------------------------------- */
+  describe('TASK-876: _resolveIdeaFiles with keyed dict deliverables', () => {
+    it('resolves files from keyed dict with string value', async () => {
+      const Modal = globalThis.ActionExecutionModal;
+      if (!Modal) return;
+      globalThis.fetch = vi.fn(async (url) => {
+        if (url.includes('/api/workflow/test')) {
+          return {
+            ok: true,
+            json: async () => ({
+              data: {
+                shared: {
+                  ideation: {
+                    actions: {
+                      compose_idea: {
+                        deliverables: {
+                          'raw-ideas': 'x-ipe-docs/ideas/wf-test/new idea.md',
+                          'ideas-folder': 'x-ipe-docs/ideas/wf-test'
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            })
+          };
+        }
+        return { ok: false };
+      });
+      const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'test' });
+      const files = await modal._resolveIdeaFiles();
+      expect(files).toContain('x-ipe-docs/ideas/wf-test/new idea.md');
+    });
+
+    it('resolves files from keyed dict with array value', async () => {
+      const Modal = globalThis.ActionExecutionModal;
+      if (!Modal) return;
+      globalThis.fetch = vi.fn(async (url) => {
+        if (url.includes('/api/workflow/test')) {
+          return {
+            ok: true,
+            json: async () => ({
+              data: {
+                shared: {
+                  ideation: {
+                    actions: {
+                      compose_idea: {
+                        deliverables: {
+                          'raw-ideas': ['x-ipe-docs/ideas/wf-test/new idea.md', 'x-ipe-docs/ideas/wf-test/sketch.png'],
+                          'ideas-folder': 'x-ipe-docs/ideas/wf-test'
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            })
+          };
+        }
+        return { ok: false };
+      });
+      const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'test' });
+      const files = await modal._resolveIdeaFiles();
+      expect(files).toContain('x-ipe-docs/ideas/wf-test/new idea.md');
+    });
+  });
 });

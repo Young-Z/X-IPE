@@ -78,6 +78,11 @@ input:
   git_strategy: "main-branch-only | dev-session-based"
   git_main_branch: "{auto-detected}"
 
+  # Context (from previous task or project)
+  specification_link: "x-ipe-docs/requirements/FEATURE-XXX/specification.md"
+  mockup_link: "{path | N/A}"       # Derived from specification's Linked Mockups section; N/A if outdated or missing
+  technical_design_link: "x-ipe-docs/requirements/FEATURE-XXX/technical-design.md"
+
   # Tech context (from Technical Design output)
   program_type: "frontend | backend | fullstack | cli | library | skills | mcp | ..."  # non-exhaustive
   tech_stack: []  # e.g. ["Python/Flask", "JavaScript/Vanilla", "HTML/CSS"]
@@ -93,6 +98,15 @@ input:
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
   <field name="feature_id" source="from previous task (Technical Design) output or task board" />
   <field name="extra_context_reference" source="from workflow context or auto-detect from feature artifacts (x-ipe-docs/requirements/FEATURE-XXX/)" />
+  <field name="specification_link" source="IF workflow mode AND extra_context_reference.specification is a path → use it; ELSE → x-ipe-docs/requirements/{feature_id}/specification.md" />
+  <field name="technical_design_link" source="IF workflow mode AND extra_context_reference.tech-design is a path → use it; ELSE → x-ipe-docs/requirements/{feature_id}/technical-design.md" />
+  <field name="mockup_link">
+    <steps>
+      1. READ specification at specification_link, find "Linked Mockups" section
+      2. IF mockup found AND Linked Date >= latest spec/design update → set mockup_link = "{path}"
+      3. ELSE (no mockup, missing section, or Linked Date outdated) → set mockup_link = "N/A"
+    </steps>
+  </field>
   <field name="git_strategy" source="from .x-ipe.yaml" />
   <field name="git_main_branch" source="auto-detect via `git symbolic-ref refs/remotes/origin/HEAD`" />
   <field name="program_type" source="from Technical Design output" />
@@ -170,15 +184,12 @@ BLOCKING: Step 3.1 special-case delegations run BEFORE semantic routing.
     <step_1_2>
       <name>Learn Technical Design</name>
       <action>
-        0. Resolve extra_context_reference inputs (tech-design, specification):
-           workflow mode + file path → READ directly; "auto-detect" → discover; "N/A" → skip
-        1. READ technical_design_link; UNDERSTAND Part 1 (Summary) and Part 2 (Guide)
-        2. NOTE architecture references; CHECK Design Change Log for updates
-        3. CHECK specification.md Linked Mockups:
-           - "current" → READ mockup files, extract layout/components/styling for Phase 3
-           - "outdated"/absent → note and proceed
-        4. CHECK for skill files (.github/skills/) → FLAG for x-ipe-meta-skill-creator in Phase 3
-        5. CHECK for MCP server keywords → FLAG for mcp-builder in Phase 3
+        1. Resolve spec/design from Input Initialization (specification_link, technical_design_link)
+        2. READ technical_design_link; UNDERSTAND Part 1 (Summary) and Part 2 (Guide)
+        3. NOTE architecture references; CHECK Design Change Log for updates
+        4. IF mockup_link != "N/A": READ mockup files, extract layout/components/styling for Phase 3
+        5. CHECK for skill files (.github/skills/) → FLAG for x-ipe-meta-skill-creator in Phase 3
+        6. CHECK for MCP server keywords → FLAG for mcp-builder in Phase 3
       </action>
       <constraints>
         - BLOCKING: Do NOT code until design is understood; STOP and clarify if unclear
@@ -261,10 +272,12 @@ BLOCKING: Step 3.1 special-case delegations run BEFORE semantic routing.
 
         8. INVOKE: FOR EACH matched tool skill (sequentially, backend first):
            a. FILTER AAA scenarios by layer tag
-           b. INVOKE with: aaa_scenarios, source_code_path, feature_context
+           b. INVOKE with: aaa_scenarios, source_code_path, feature_context, mockup_link (if frontend)
            c. RECEIVE: implementation_files, test_files, test_results, lint_status
 
-        9. IF current mockups AND frontend components: pass mockup constraints to frontend tool skill
+        9. IF mockup_link != "N/A" AND frontend components:
+           PASS mockup_link in feature_context to frontend tool skill (e.g., x-ipe-tool-implementation-html5)
+           Tool skill uses mockup for visual fidelity: layout, components, spacing, color, states
 
         10. COLLECT all tool skill outputs for validation
       </action>

@@ -232,3 +232,60 @@ User is instructing that the **specification.md** files (not acceptance-test-cas
 |-------|-------|
 | **Strategy** | `sequential` |
 | **Groups** | `[[0]]` |
+
+---
+
+## Decision: Re-run Acceptance Testing Across All 6 MVP Features
+
+| Field | Value |
+|-------|-------|
+| **DAO ID** | DAO-052 |
+| **Date** | 26-03-11 16:30 |
+| **Source** | human |
+| **Task** | TASK-848 |
+| **Feature** | EPIC-049 (FEATURE-049-A, B, C, D, E, G) |
+| **Workflow** | Knowledge-Base-Implementation |
+
+### 3-Perspective Analysis
+
+| Perspective | Assessment |
+|-------------|-----------|
+| **🧑 Human** | All specs re-aligned to GWT format v2.0, Feature B technical design rewritten, 24 new tests added across features. Prior acceptance test results were validated against older specs/design. User explicitly wants to re-run AC testing to validate against current deliverables. |
+| **🤖 Agent** | Workflow shows all 6 features with `acceptance_testing: done` from prior round. However, upstream deliverables (specification, technical-design, implementation) have changed post-testing: spec ACs reworded to GWT, B's design rewritten, 5 gap tests added (B-04, B-07, E-07, E-08, E-09) plus 19 additional tests. Prior AC results are stale — re-validation is correct engineering practice. |
+| **⚖️ DAO** | Gains: catch regressions from spec/design/code delta; ensure AC traceability to updated GWT criteria; validate 24 new tests actually pass. Losses: time cost of 6 sequential AC runs. Risk of NOT re-running: shipping with unvalidated acceptance criteria. **Verdict: re-run is warranted.** |
+
+### Unit 0 — Re-run acceptance testing for all 6 MVP features
+
+| Field | Value |
+|-------|-------|
+| **Disposition** | `instruction` |
+| **Confidence** | 0.92 |
+| **Suggested Skill** | `x-ipe-task-based-feature-acceptance-test` (strong match) |
+
+**Content:** User commands transition to acceptance testing phase. All 6 MVP features (A, B, C, D, E, G) require re-validation because: (1) all specification.md files re-aligned to GWT format with Test Type column, (2) FEATURE-049-B technical-design.md fully rewritten, (3) 24 new test cases added during code-implementation DoD validation. The `x-ipe-task-based-feature-acceptance-test` skill must be invoked per-feature (single-feature constraint). Workflow actions for `acceptance_testing` should be reset from `done` → re-executed. Execution order respects dependency DAG: A first (no deps), then B/D/E in parallel (depend on A), then C (depends on A+B), then G (depends on A+C).
+
+**Rationale:** `instruction` — user's "let's move to ac testing part" is an explicit command to transition workflow stages. Not a question, not approval of a prior proposal. The phrase "since both spec, tech design and code all have some changes" provides justification context but the primary speech act is a directive. Confidence 0.92 (not higher) because user didn't specify execution order or single-vs-batch preference — DAO infers sequential per-feature from skill constraints.
+
+### Execution Plan
+
+| Field | Value |
+|-------|-------|
+| **Strategy** | `sequential` |
+| **Groups** | `[[A], [B, D, E], [C], [G]]` |
+| **Note** | Skill constraint: single feature per invocation. Groups reflect dependency tiers but execute one feature at a time within each group. |
+
+### Downstream Context for Agent
+
+| Key | Value |
+|-----|-------|
+| **task_id** | TASK-848 |
+| **task_based_skill** | `x-ipe-task-based-feature-acceptance-test` |
+| **execution_mode** | workflow-mode |
+| **workflow_name** | Knowledge-Base-Implementation |
+| **interaction_mode** | dao-represent-human-to-interact |
+| **features_in_scope** | FEATURE-049-A, FEATURE-049-B, FEATURE-049-C, FEATURE-049-D, FEATURE-049-E, FEATURE-049-G |
+| **spec_base_path** | `x-ipe-docs/requirements/EPIC-049/FEATURE-049-{X}/specification.md` |
+| **ac_test_base_path** | `x-ipe-docs/requirements/EPIC-049/FEATURE-049-{X}/acceptance-test-cases.md` |
+| **tech_design_base_path** | `x-ipe-docs/requirements/EPIC-049/FEATURE-049-{X}/technical-design.md` |
+| **reason_for_rerun** | Spec ACs rewritten (GWT v2.0), B tech design rewritten, 24 new tests added |
+| **prior_status** | All 6 features had `acceptance_testing: done` — now stale |

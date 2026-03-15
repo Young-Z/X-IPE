@@ -787,6 +787,7 @@ class ComposeIdeaModal {
             if (removeBtn) {
                 this.kbReferences.splice(Number(removeBtn.dataset.idx), 1);
                 this._updateKbRefCount();
+                this._persistKbReferences();
                 if (this.kbReferences.length) {
                     this._showKbRefPopup(anchor);
                 } else {
@@ -796,6 +797,7 @@ class ComposeIdeaModal {
             if (e.target.closest('.compose-modal-kb-ref-clear-btn')) {
                 this.kbReferences = [];
                 this._updateKbRefCount();
+                this._persistKbReferences();
                 popup.remove();
             }
         });
@@ -809,6 +811,24 @@ class ComposeIdeaModal {
         });
 
         anchor.parentElement.appendChild(popup);
+    }
+
+    _persistKbReferences() {
+        const folder = this.folderPath || (this.folderName ? `x-ipe-docs/ideas/${this.folderName}` : '');
+        if (!folder) return;
+        if (this.kbReferences.length > 0) {
+            fetch('/api/ideas/kb-references', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ folder_path: folder, kb_references: this.kbReferences })
+            }).catch(() => {});
+        } else {
+            fetch('/api/ideas/kb-references', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ folder_path: folder })
+            }).catch(() => {});
+        }
     }
 }
 

@@ -150,3 +150,100 @@ describe('CR-001: Remove pointer-events:none from action-execution-modal.css', (
     }
   });
 });
+
+/* --------------------------------------------------------------------------
+   TASK-876: _dispatchEditModalAction handles keyed dict deliverables
+   -------------------------------------------------------------------------- */
+import { vi, afterEach } from 'vitest';
+
+describe('TASK-876: _dispatchEditModalAction with keyed dict deliverables', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="workflow-view"></div>';
+  });
+
+  afterEach(() => {
+    delete globalThis.ComposeIdeaModal;
+  });
+
+  it('extracts filePath from raw-ideas string (keyed dict, single file)', () => {
+    let captured = null;
+    globalThis.ComposeIdeaModal = class {
+      constructor(opts) { captured = opts; }
+      open() {}
+    };
+    const wfData = {
+      shared: {
+        ideation: {
+          actions: {
+            compose_idea: {
+              status: 'done',
+              deliverables: {
+                'raw-ideas': 'x-ipe-docs/ideas/test/new idea.md',
+                'ideas-folder': 'x-ipe-docs/ideas/test'
+              }
+            }
+          }
+        }
+      }
+    };
+    workflowStage._dispatchEditModalAction('test-wf', 'compose_idea', wfData);
+    expect(captured).not.toBeNull();
+    expect(captured.filePath).toBe('x-ipe-docs/ideas/test/new idea.md');
+    expect(captured.folderPath).toBe('x-ipe-docs/ideas/test');
+    expect(captured.folderName).toBe('test');
+    expect(captured.mode).toBe('edit');
+  });
+
+  it('extracts filePath from raw-ideas array (keyed dict, multiple files)', () => {
+    let captured = null;
+    globalThis.ComposeIdeaModal = class {
+      constructor(opts) { captured = opts; }
+      open() {}
+    };
+    const wfData = {
+      shared: {
+        ideation: {
+          actions: {
+            compose_idea: {
+              status: 'done',
+              deliverables: {
+                'raw-ideas': ['x-ipe-docs/ideas/test/new idea.md', 'x-ipe-docs/ideas/test/sketch.png'],
+                'ideas-folder': 'x-ipe-docs/ideas/test'
+              }
+            }
+          }
+        }
+      }
+    };
+    workflowStage._dispatchEditModalAction('test-wf', 'compose_idea', wfData);
+    expect(captured).not.toBeNull();
+    expect(captured.filePath).toBe('x-ipe-docs/ideas/test/new idea.md');
+    expect(captured.folderPath).toBe('x-ipe-docs/ideas/test');
+    expect(captured.mode).toBe('edit');
+  });
+
+  it('still works with legacy array deliverables', () => {
+    let captured = null;
+    globalThis.ComposeIdeaModal = class {
+      constructor(opts) { captured = opts; }
+      open() {}
+    };
+    const wfData = {
+      shared: {
+        ideation: {
+          actions: {
+            compose_idea: {
+              status: 'done',
+              deliverables: ['x-ipe-docs/ideas/test/new idea.md', 'x-ipe-docs/ideas/test']
+            }
+          }
+        }
+      }
+    };
+    workflowStage._dispatchEditModalAction('test-wf', 'compose_idea', wfData);
+    expect(captured).not.toBeNull();
+    expect(captured.filePath).toBe('x-ipe-docs/ideas/test/new idea.md');
+    expect(captured.folderPath).toBe('x-ipe-docs/ideas/test');
+    expect(captured.mode).toBe('edit');
+  });
+});

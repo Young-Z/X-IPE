@@ -428,3 +428,77 @@ Confirm MODIFICATION classification. The change-request skill should proceed to 
 
 ### Follow-up
 > Rewrite kb-browse-modal.js and kb-browse-modal.css to faithfully implement all 4 mockup scenes. Use the frontend-design skill for pixel-perfect UI matching.
+
+---
+
+## DAO-061
+- **Timestamp:** 2026-03-12T15:30:00+08:00
+- **Task ID:** TASK-851
+- **Feature ID:** FEATURE-049-B, FEATURE-049-C, FEATURE-049-D
+- **Workflow:** Knowledge-Base-Implementation
+- **Calling Skill:** x-ipe-task-based-bug-fix
+- **Source:** human
+- **Disposition:** instruction (×3 units)
+- **Confidence:** 0.92
+
+### Message
+> there are several bugs: 1. upload to didn't show all the folders exists in the knowledge base. 2. upload file drag & drop for both normal and intake is not working, the drag and drop in the intake view also not working. 3. the right panel in the knowledge detailed view should stick to the right
+
+### Guidance Returned
+
+> **Unit 0 — Upload folder picker incomplete:** The "Upload to:" breadcrumb (`data-action="toggle-folder-dropdown"` at L428) has NO handler in `_handleAction()`. The `_getFolderNames()` method (L108-114) only extracts folder names from already-loaded files, which may miss empty or newly-created folders. Fix: (a) Add a `toggle-folder-dropdown` case in the action handler that renders a dropdown listing ALL KB folders, (b) query the KB API for the complete folder tree instead of deriving from loaded file paths.
+>
+> **Unit 1 — Drag & drop not working:** Both `.kb-upload-zone` and `.kb-intake-dropzone` only have click-based action handlers (`trigger-upload`, `trigger-intake-upload`). There are ZERO `dragover`/`dragleave`/`drop` event listeners in the entire modal. The "Drag & drop" text is purely visual. Fix: Add `dragover` (preventDefault + visual feedback), `dragleave` (remove feedback), and `drop` (preventDefault + process `e.dataTransfer.files`) event listeners to both zones. Wire the dropped files into the respective upload flows (normal → `kbFileUpload`, intake → intake file list).
+>
+> **Unit 2 — Right panel not sticky:** `.kb-article-sidebar` (CSS L942) has no sticky positioning. The parent `.kb-article-layout` (L829) uses `overflow: hidden` which prevents CSS sticky from working. Fix: Add `position: sticky; top: 0; align-self: flex-start;` to `.kb-article-sidebar` and change parent overflow to `overflow-y: auto` or move overflow handling to `.kb-article-main` only.
+
+### Rationale
+> User is performing post-implementation QA on commit 8751fdc (KB browse modal redesign). All 3 bugs are confirmed by code inspection — they are genuine missing implementations, not regressions. Each targets a different subsystem (folder data logic, drag event handlers, CSS layout) and can be fixed independently in parallel.
+
+### Suggested Skills
+> **Unit 0:**
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "strong"
+>     reason: "Missing folder dropdown handler and incomplete folder enumeration"
+>     execution_steps:
+>       - phase: "1. Diagnose"
+>         step: "1.1 Reproduce and identify root cause"
+>       - phase: "2. Fix"
+>         step: "2.1 Implement fix"
+>       - phase: "3. Validate"
+>         step: "3.1 Acceptance test"
+>
+> **Unit 1:**
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "strong"
+>     reason: "Missing drag & drop event listeners on upload zones"
+>     execution_steps:
+>       - phase: "1. Diagnose"
+>         step: "1.1 Reproduce and identify root cause"
+>       - phase: "2. Fix"
+>         step: "2.1 Implement fix"
+>       - phase: "3. Validate"
+>         step: "3.1 Acceptance test"
+>
+> **Unit 2:**
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "strong"
+>     reason: "CSS sticky positioning missing on article detail sidebar"
+>     execution_steps:
+>       - phase: "1. Diagnose"
+>         step: "1.1 Reproduce and identify root cause"
+>       - phase: "2. Fix"
+>         step: "2.1 Implement fix"
+>       - phase: "3. Validate"
+>         step: "3.1 Acceptance test"
+
+### Execution Plan
+> - **Strategy:** parallel
+> - **Groups:** [[0, 1, 2]]
+> - **Rationale:** All 3 bugs target different code areas (folder dropdown logic in JS, drag event listeners in JS, CSS positioning). No shared state or data dependencies. Safe to fix concurrently by separate agents.
+
+### Follow-up
+> None — all 3 bugs are clear and actionable. No clarification needed.

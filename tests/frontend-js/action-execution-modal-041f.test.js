@@ -30,13 +30,13 @@ function taggedTemplate() {
         actions: {
           compose_idea: {
             optional: false,
-            deliverables: ['$output:raw-idea', '$output-folder:ideas-folder'],
+            deliverables: ['$output:raw-ideas', '$output-folder:ideas-folder'],
             next_actions_suggested: ['refine_idea']
           },
           refine_idea: {
             optional: false,
             action_context: {
-              'raw-idea': { required: true, candidates: 'ideas-folder' },
+              'raw-ideas': { required: true, candidates: 'ideas-folder' },
               'uiux-reference': { required: false }
             },
             deliverables: ['$output:refined-idea', '$output-folder:refined-ideas-folder'],
@@ -89,14 +89,14 @@ function workflowInstance() {
           compose_idea: {
             status: 'done',
             deliverables: {
-              'raw-idea': 'x-ipe-docs/ideas/test/new-idea.md',
+              'raw-ideas': 'x-ipe-docs/ideas/test/new-idea.md',
               'ideas-folder': 'x-ipe-docs/ideas/test'
             }
           },
           refine_idea: {
             status: 'done',
             context: {
-              'raw-idea': 'x-ipe-docs/ideas/test/new-idea.md',
+              'raw-ideas': 'x-ipe-docs/ideas/test/new-idea.md',
               'uiux-reference': 'N/A'
             },
             deliverables: {
@@ -230,7 +230,7 @@ describe('FEATURE-041-F: Template-Driven Dropdowns', () => {
     await modal.open();
 
     const selects = document.querySelectorAll('.context-ref-group select');
-    // refine_idea has 2 context refs: raw-idea, uiux-reference
+    // refine_idea has 2 context refs: raw-ideas, uiux-reference
     expect(selects.length).toBe(2);
   });
 
@@ -257,7 +257,7 @@ describe('FEATURE-041-F: Template-Driven Dropdowns', () => {
     await modal.open();
 
     const groups = document.querySelectorAll('.context-ref-group');
-    const rawIdeaGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const rawIdeaGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-ideas');
     expect(rawIdeaGroup).not.toBeNull();
     const label = rawIdeaGroup.querySelector('label');
     expect(label.innerHTML).toMatch(/required|\*/);
@@ -299,7 +299,7 @@ describe('FEATURE-041-F: Template-Driven Dropdowns', () => {
     await modal.open();
 
     const groups = document.querySelectorAll('.context-ref-group');
-    const requiredGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const requiredGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-ideas');
     const select = requiredGroup.querySelector('select');
     const options = Array.from(select.options).map(o => o.value);
     expect(options).not.toContain('N/A');
@@ -314,7 +314,7 @@ describe('FEATURE-041-F: Template-Driven Dropdowns', () => {
     await modal.open();
 
     const groups = document.querySelectorAll('.context-ref-group');
-    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-ideas');
     const select = rawGroup.querySelector('select');
     const options = Array.from(select.options).map(o => o.value);
     // Should contain files from the folder
@@ -330,7 +330,7 @@ describe('FEATURE-041-F: Template-Driven Dropdowns', () => {
     await modal.open();
 
     const groups = document.querySelectorAll('.context-ref-group');
-    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-ideas');
     const select = rawGroup.querySelector('select');
     const options = Array.from(select.options).map(o => o.value);
     expect(options.some(o => o.includes('.txt'))).toBe(true);
@@ -371,7 +371,7 @@ describe('FEATURE-041-F: Context Persistence', () => {
     // Call _saveContext
     const ctx = await modal._saveContext();
     expect(ctx).toBeDefined();
-    expect(ctx['raw-idea']).toBeDefined();
+    expect(ctx['raw-ideas']).toBeDefined();
 
     // Verify fetch was called with context in payload
     const postCalls = globalThis.fetch.mock.calls.filter(
@@ -409,7 +409,7 @@ describe('FEATURE-041-F: Reopen Pre-Population', () => {
     await modal.open();
 
     const groups = document.querySelectorAll('.context-ref-group');
-    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-ideas');
     if (rawGroup) {
       const select = rawGroup.querySelector('select');
       // Should be pre-populated with the stored context value
@@ -421,7 +421,7 @@ describe('FEATURE-041-F: Reopen Pre-Population', () => {
     if (!ensureImpl()) return;
     // Instance has context pointing to deleted file
     const instance = workflowInstance();
-    instance.shared.ideation.actions.refine_idea.context['raw-idea'] = 'x-ipe-docs/deleted-file.md';
+    instance.shared.ideation.actions.refine_idea.context['raw-ideas'] = 'x-ipe-docs/deleted-file.md';
     setupFetchMocks({ instance });
 
     const modal = new ActionExecutionModal({
@@ -431,7 +431,7 @@ describe('FEATURE-041-F: Reopen Pre-Population', () => {
     await modal.open();
 
     const groups = document.querySelectorAll('.context-ref-group');
-    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-ideas');
     if (rawGroup) {
       const select = rawGroup.querySelector('select');
       const selectedOption = select.options[select.selectedIndex];
@@ -442,7 +442,7 @@ describe('FEATURE-041-F: Reopen Pre-Population', () => {
   it('should pre-populate "auto-detect" when stored context is "auto-detect"', async () => {
     if (!ensureImpl()) return;
     const instance = workflowInstance();
-    instance.shared.ideation.actions.refine_idea.context['raw-idea'] = 'auto-detect';
+    instance.shared.ideation.actions.refine_idea.context['raw-ideas'] = 'auto-detect';
     setupFetchMocks({ instance });
 
     const modal = new ActionExecutionModal({
@@ -452,7 +452,7 @@ describe('FEATURE-041-F: Reopen Pre-Population', () => {
     await modal.open();
 
     const groups = document.querySelectorAll('.context-ref-group');
-    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-ideas');
     if (rawGroup) {
       const select = rawGroup.querySelector('select');
       expect(select.value).toBe('auto-detect');

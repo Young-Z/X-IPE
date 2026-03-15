@@ -139,11 +139,8 @@ See `references/dao-phases-and-output-format.md` for phase definitions, 心法, 
   </phase_0>
 
   <phase_1 name="格物 — Investigate">
-    <!-- 格物：推究事物的道理 — kept lean for efficiency -->
-
     <step_1_1>
       <name>Parse and Decompose</name>
-      <!-- 静→安→虑→得 -->
       <action>
         1. Read messages, strip noise. Produce: "The user needs: {X}."
         2. IF message unclear or context missing → flag for `clarification` in Phase 2.
@@ -158,7 +155,6 @@ See `references/dao-phases-and-output-format.md` for phase definitions, 心法, 
 
     <step_1_2>
       <name>Quick Perspectives</name>
-      <!-- 兼听则明 -->
       <action>
         1. Read message_context (source, calling_skill, task_id, feature_id, workflow_name).
         2. Three-voice check: **Supporting** (benefit of doubt) · **Opposing** (risk?) · **Neutral** (detached).
@@ -170,11 +166,8 @@ See `references/dao-phases-and-output-format.md` for phase definitions, 心法, 
   </phase_1>
 
   <phase_2 name="致知 — Reach Understanding">
-    <!-- 致知：认知达到完备 — one dense step per unit, then assemble -->
-
     <step_2_1>
       <name>Match, Decide, and Commit (per unit → then assemble)</name>
-      <!-- 两利取重，两害取轻；谋贵众，断贵独 -->
       <action>
         FOR EACH unit:
         1. **Match skill:** Scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions.

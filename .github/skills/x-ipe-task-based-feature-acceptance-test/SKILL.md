@@ -70,6 +70,7 @@ input:
 
   # Context (from previous task or project)
   specification_link: "x-ipe-docs/requirements/FEATURE-XXX/specification.md"
+  mockup_link: "{path | N/A}"       # Derived from specification's Linked Mockups section; N/A if outdated or missing
   technical_design_link: "x-ipe-docs/requirements/FEATURE-XXX/technical-design.md"
 ```
 
@@ -84,8 +85,15 @@ input:
   <field name="feature_id" source="from previous task output or task board or human input" />
   <field name="target_url" source="IF frontend-ui tests exist, resolve from feature's dev server config; IF standalone, from human input; IF no UI tests, N/A" />
   <field name="toolbox_meta_path" source="default: x-ipe-docs/config/tools.json" />
-  <field name="specification_link" source="auto-detect from x-ipe-docs/requirements/{feature_id}/specification.md" />
-  <field name="technical_design_link" source="auto-detect from x-ipe-docs/requirements/{feature_id}/technical-design.md" />
+  <field name="specification_link" source="IF workflow mode AND extra_context_reference.specification is a path → use it; ELSE → x-ipe-docs/requirements/{feature_id}/specification.md" />
+  <field name="technical_design_link" source="IF workflow mode AND extra_context_reference.impl-files is a path → use it; ELSE → x-ipe-docs/requirements/{feature_id}/technical-design.md" />
+  <field name="mockup_link">
+    <steps>
+      1. READ specification at specification_link, find "Linked Mockups" section
+      2. IF mockup found AND Linked Date >= latest spec/design update → set mockup_link = "{path}"
+      3. ELSE (no mockup, missing section, or Linked Date outdated) → set mockup_link = "N/A"
+    </steps>
+  </field>
   <field name="extra_context_reference" source="from workflow context or auto-detect from feature artifacts" />
 </input_init>
 ```
@@ -153,6 +161,7 @@ BLOCKING: Step 4.1 - Tests for a given type are blocked if the required tool is 
         4. Build enabled_tools list — only tools with value `true` count as enabled
         5. Classify enabled tools by capability:
            - frontend_ui_tool: "chrome-devtools-mcp" (browser interaction for UI tests)
+           - frontend_ui_skill: "x-ipe-tool-ui-testing-via-chrome-mcp" (structured UI test execution via chrome MCP)
            - code_test_tools: x-ipe-tool-implementation-* (for backend/unit/integration tests)
         6. BLOCKING: For each enabled tool that has a corresponding skill at .github/skills/{tool-name}/SKILL.md, LOAD that skill now
         7. Output enabled_tools list with capability classification
@@ -166,13 +175,8 @@ BLOCKING: Step 4.1 - Tests for a given type are blocked if the required tool is 
     <step_1_2>
       <name>Classify & Generate Acceptance Test Plan</name>
       <action>
-        0. Resolve extra_context_reference inputs:
-           - FOR EACH ref in [specification, impl-files]:
-             IF workflow mode AND extra_context_reference.{ref} is a file path → READ the file
-             ELIF "auto-detect" → use existing discovery logic below
-             ELIF "N/A" → skip; ELSE (free-mode/absent) → use existing behavior
-        1. READ specification.md at x-ipe-docs/requirements/FEATURE-XXX/specification.md
-        2. READ technical design to determine Technical Scope (Frontend, Backend, Full Stack, CLI, Library)
+        1. READ specification at specification_link (resolved in Input Initialization)
+        2. READ technical design at technical_design_link to determine Technical Scope
         3. EXTRACT all acceptance criteria (AC-X) with testable conditions
         4. CLASSIFY each AC by test_type:
            - "frontend-ui": requires browser interaction (UI rendering, clicks, forms, visual)
@@ -186,13 +190,16 @@ BLOCKING: Step 4.1 - Tests for a given type are blocked if the required tool is 
            - integration → matched code_test_tool skill or chrome-devtools-mcp
         6. DETECT tech_stack from specification and implementation files
         7. SEMANTIC MATCH tech_stack to enabled tool skills (same as code-implementation routing)
-        8. CHECK Linked Mockups section (for UI tests only):
-           a. IF current mockups: READ from mockups/, note for Step 3.1
-           b. IF outdated: FLAG for human, do NOT generate mockup test cases
-           c. IF no mockups: proceed without mockup validation
+        8. CHECK mockup_link (resolved in Input Initialization):
+           a. IF mockup_link != "N/A": note mockup available for Step 3.1 and Step 4.1
+           b. IF mockup_link == "N/A": proceed without mockup validation
         9. CREATE acceptance-test-cases.md using templates/acceptance-test-cases.md
         10. FOR EACH AC: create TC-XXX, map to AC, set priority (P0/P1/P2), set test_type, assign tool, write steps, define expected outcomes
         11. PRIORITIZE: P0=Critical, P1=High, P2=Medium (edge cases)
+        12. GROUP and STORE test cases by test_type in acceptance-test-cases.md:
+            - Create a section per test_type: "## Frontend-UI Tests", "## Backend-API Tests", "## Unit Tests", "## Integration Tests"
+            - Each section lists only TCs of that type with their assigned tool
+            - This grouping enables batch execution per type in Phase 4
       </action>
       <constraints>
         - MANDATORY: Each AC must have at least one test case regardless of type
@@ -250,9 +257,9 @@ BLOCKING: Step 4.1 - Tests for a given type are blocked if the required tool is 
         3. FOR backend-api tests: validate endpoint existence, check error cases (4xx, 5xx), auth requirements
         4. FOR unit tests: validate function signatures, check boundary conditions
         5. REFLECT: false negative risks, missing steps, vague expectations, split candidates
-        6. IF current mockups identified in Step 1.2 (frontend-ui only):
+        6. IF mockup_link != "N/A" (frontend-ui only):
            a. ADD UI/UX visual validation TCs (P1): layout, styling, interactive states
-           b. Reference specific mockup file in each TC description
+           b. Reference mockup_link in each TC description
         7. ROUTE TEST CODE GENERATION (if matched_tool_skill from Step 1.1):
            a. CONVERT refined test cases to AAA scenarios (per test_type group)
            b. INVOKE matched_tool_skill with operation: "implement", aaa_scenarios, feature_context
@@ -276,10 +283,19 @@ BLOCKING: Step 4.1 - Tests for a given type are blocked if the required tool is 
       <action>
         GROUP test cases by test_type and assigned_tool. FOR EACH group:
 
-        1. frontend-ui (chrome-devtools-mcp):
-           - CHECK MCP availability; IF unavailable/disabled: SET group status="blocked"
-           - ELSE: navigate to URL, execute actions via MCP, verify states, screenshot on failure
-           - FOR mockup validation TCs: screenshot + compare with mockup, document deviations
+        1. frontend-ui (x-ipe-tool-ui-testing-via-chrome-mcp):
+           - CHECK if "x-ipe-tool-ui-testing-via-chrome-mcp" is enabled in tools.json
+           - IF enabled AND chrome-devtools-mcp is available:
+             a. LOAD skill x-ipe-tool-ui-testing-via-chrome-mcp (if not already loaded in Step 1.1)
+             b. INVOKE the skill's execute_ui_tests operation with:
+                - test_cases: all frontend-ui TCs from the grouped test plan
+                - target_url: {from input}
+                - mockup_link: {from input, resolved in Input Initialization}
+                - screenshot_on_failure: true
+                - screenshot_dir: x-ipe-docs/requirements/{feature_id}/screenshots/
+             c. COLLECT per-TC results from the tool skill's operation_output
+           - ELIF chrome-devtools-mcp enabled but skill NOT enabled: fall back to direct MCP
+           - ELSE: SET group status="blocked"
 
         2. backend-api (tool skill):
            - Make API calls (curl, httpx, fetch, or test framework), verify response status/body/headers
@@ -301,15 +317,10 @@ BLOCKING: Step 4.1 - Tests for a given type are blocked if the required tool is 
       <action>
         1. UPDATE acceptance-test-cases.md: set status per test case, add execution notes, fill Execution Results
         2. DOCUMENT failures with reason and recommended action
-        3. IF mockup validation performed: add "Mockup Validation Summary" section
-        4. IF outdated mockups flagged: add prominent notice
-        5. GROUP results by test_type in summary:
-           - frontend-ui: X passed / Y total
-           - backend-api: X passed / Y total
-           - unit: X passed / Y total
-           - integration: X passed / Y total
-        6. CALCULATE metrics: total, passed, failed, blocked, pass_rate = (passed/total)*100
-        7. RETURN task completion output with results
+        3. IF mockup_comparison returned by UI tool: add "Mockup Comparison Summary" with gaps and match_score
+        4. GROUP results by test_type in summary (frontend-ui / backend-api / unit / integration: X passed / Y total)
+        5. CALCULATE metrics: total, passed, failed, blocked, pass_rate
+        6. RETURN task completion output with results
       </action>
       <success_criteria>
         - All test cases have a status recorded
@@ -467,19 +478,15 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 | Pattern | When | Then |
 |---------|------|------|
-| Multi-Type Feature | Feature has both UI and API | Classify each AC separately, run UI tests via MCP, API tests via tool skill |
-| Backend-Only Feature | No frontend component | ALL tests route to code tool skills; chrome-devtools-mcp not needed |
-| Form Submission | Form input/submission | Test empty (validation), invalid formats, valid submission, success state |
-| CRUD Operations | Create/Read/Update/Delete | Test Create→list, Read→display, Update→persist, Delete→remove |
+| Multi-Type Feature | Feature has both UI and API | Classify each AC separately, run UI via tool skill, API via code tool |
+| Backend-Only Feature | No frontend component | ALL tests route to code tool skills |
 
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
-| Skip non-UI ACs | Incomplete coverage | Test ALL acceptance criteria regardless of type |
+| Skip non-UI ACs | Incomplete coverage | Test ALL ACs regardless of type |
 | Use disabled tools | Violates config | Only use tools enabled in tools.json |
-| Test without selectors (UI) | Fail to find elements | Analyze HTML first |
-| Skip reflection step | Miss edge cases | Always reflect on each TC |
-| One massive test | Hard to debug | Split into focused tests |
-| Ignore async loading | Flaky tests | Add explicit wait steps |
+| Test without selectors | Fail to find elements | Analyze HTML first |
+| Skip reflection | Miss edge cases | Always reflect on each TC |
 
 ---
 

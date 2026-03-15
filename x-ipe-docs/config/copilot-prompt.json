@@ -10,12 +10,12 @@
         {
           "language": "en",
           "label": "Refine Idea",
-          "command": "refine the idea $output:raw-idea$ <and uiux reference: $output:uiux-reference$> with ideation skill"
+          "command": "refine the idea $output:raw-ideas$ <and uiux reference: $output:uiux-reference$> with ideation skill"
         },
         {
           "language": "zh",
           "label": "完善创意",
-          "command": "使用创意技能, 完善创意 $output:raw-idea$ <并参考UIUX: $output:uiux-reference$>"
+          "command": "使用创意技能, 完善创意 $output:raw-ideas$ <并参考UIUX: $output:uiux-reference$>"
         }
       ]
     },

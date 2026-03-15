@@ -13,6 +13,7 @@ Manages the full lifecycle of engineering workflows:
 
 import fcntl
 import json
+import logging
 import os
 import re
 import shutil
@@ -21,6 +22,8 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 from x_ipe.tracing import x_ipe_tracing
+
+logger = logging.getLogger(__name__)
 
 # Valid action statuses
 VALID_STATUSES = {"pending", "in_progress", "done", "skipped", "failed"}
@@ -446,15 +449,21 @@ class WorkflowManagerService:
                 category = self._deliverable_categories.get(action_key, "implementations")
                 raw_deliverables = action_data.get("deliverables", [])
                 if isinstance(raw_deliverables, dict):
-                    for tag_name, path_str in raw_deliverables.items():
-                        full_path = self._project_root / path_str
-                        deliverables.append({
-                            "name": tag_name,
-                            "path": path_str,
-                            "category": category,
-                            "stage": stage_name,
-                            "exists": full_path.exists(),
-                        })
+                    for tag_name, value in raw_deliverables.items():
+                        if isinstance(value, list):
+                            # CR-003: Expand array into individual entries
+                            for path_str in value:
+                                full_path = self._project_root / path_str
+                                deliverables.append({
+                                    "name": tag_name,
+                                    "path": path_str,
+                                    "category": category,
+                                    "stage": stage_name,
+                                    "exists": full_path.exists(),
+                                })
+                        else:
+                            expanded = self._maybe_expand_kb_reference(tag_name, value, category, stage_name)
+                            deliverables.extend(expanded)
                 elif isinstance(raw_deliverables, list):
                     for path_str in raw_deliverables:
                         full_path = self._project_root / path_str
@@ -476,17 +485,26 @@ class WorkflowManagerService:
                     category = self._deliverable_categories.get(action_key, "implementations")
                     raw_deliverables = action_data.get("deliverables", [])
                     if isinstance(raw_deliverables, dict):
-                        for tag_name, path_str in raw_deliverables.items():
-                            full_path = self._project_root / path_str
-                            deliverables.append({
-                                "name": tag_name,
-                                "path": path_str,
-                                "category": category,
-                                "stage": stage_name,
-                                "feature_id": feat_id,
-                                "feature_name": feat_name,
-                                "exists": full_path.exists(),
-                            })
+                        for tag_name, value in raw_deliverables.items():
+                            if isinstance(value, list):
+                                # CR-003: Expand array into individual entries
+                                for path_str in value:
+                                    full_path = self._project_root / path_str
+                                    deliverables.append({
+                                        "name": tag_name,
+                                        "path": path_str,
+                                        "category": category,
+                                        "stage": stage_name,
+                                        "feature_id": feat_id,
+                                        "feature_name": feat_name,
+                                        "exists": full_path.exists(),
+                                    })
+                            else:
+                                expanded = self._maybe_expand_kb_reference(
+                                    tag_name, value, category, stage_name,
+                                    feature_id=feat_id, feature_name=feat_name
+                                )
+                                deliverables.extend(expanded)
                     elif isinstance(raw_deliverables, list):
                         for path_str in raw_deliverables:
                             full_path = self._project_root / path_str
@@ -503,6 +521,46 @@ class WorkflowManagerService:
         return {"deliverables": deliverables, "count": len(deliverables)}
 
     @x_ipe_tracing()
+    def _maybe_expand_kb_reference(self, tag_name, value, category, stage_name, **extra):
+        """Expand .knowledge-reference.yaml into individual referenced files."""
+        if os.path.basename(value) == ".knowledge-reference.yaml":
+            full_path = self._project_root / value
+            if full_path.exists():
+                try:
+                    content = full_path.read_text(encoding="utf-8")
+                    refs = []
+                    for line in content.splitlines():
+                        stripped = line.strip()
+                        if stripped.startswith("- "):
+                            refs.append(stripped[2:].strip())
+                    if refs:
+                        items = []
+                        for ref_path in refs:
+                            ref_full = self._project_root / ref_path
+                            entry = {
+                                "name": tag_name,
+                                "path": ref_path,
+                                "category": category,
+                                "stage": stage_name,
+                                "exists": ref_full.exists(),
+                            }
+                            entry.update(extra)
+                            items.append(entry)
+                        return items
+                except Exception:
+                    pass  # Fall through to default
+        # Default: return as-is
+        full_path = self._project_root / value
+        entry = {
+            "name": tag_name,
+            "path": value,
+            "category": category,
+            "stage": stage_name,
+            "exists": full_path.exists(),
+        }
+        entry.update(extra)
+        return [entry]
+
     def validate_template(self) -> bool:
         """Static validation of tagged template at load time."""
         template = _load_workflow_template(str(self._project_root))
@@ -539,17 +597,43 @@ class WorkflowManagerService:
 
     @x_ipe_tracing()
     def validate_action_deliverables(self, action: str, deliverables) -> bool:
-        """Runtime validation: check instance keys match template tags."""
+        """Runtime validation: check instance keys match template tags.
+
+        CR-003: Also validates array elements are non-empty strings and
+        rejects array values for $output-folder tags.
+        """
         if not isinstance(deliverables, dict):
             return True  # skip validation for legacy list format
         expected_tags = set(self._get_template_tags(action))
         actual_tags = set(deliverables.keys())
         missing = expected_tags - actual_tags
         if missing:
-            import logging
-            logging.getLogger(__name__).warning(
+            logger.warning(
                 f"Action '{action}' missing deliverable tags: {missing}"
             )
+
+        # CR-003: Reject array values for $output-folder tags
+        folder_tags = self._get_folder_tags(action)
+        for tag_name, value in deliverables.items():
+            if tag_name in folder_tags and isinstance(value, list):
+                logger.error(
+                    f"Action '{action}' folder tag '{tag_name}' must be a "
+                    f"single string, not an array."
+                )
+                return False
+
+        # CR-003: Validate array elements are non-empty strings
+        for tag_name, value in deliverables.items():
+            if isinstance(value, list):
+                for i, element in enumerate(value):
+                    if not isinstance(element, str) or not element.strip():
+                        logger.error(
+                            f"Action '{action}' tag '{tag_name}' array "
+                            f"element [{i}] is invalid: must be a non-empty "
+                            f"string, got {type(element).__name__}"
+                        )
+                        return False
+
         return len(missing) == 0
 
     @x_ipe_tracing()
@@ -582,12 +666,17 @@ class WorkflowManagerService:
                         continue
                     prefix, name = tag_str.split(":", 1)
                     if name == candidates_name:
-                        path = self._get_instance_deliverable(
-                            state, stage_name, act_name, name, feature_id
+                        # CR-003: Get raw value (may be array) for full expansion
+                        raw_value = self._get_instance_deliverable_raw(
+                            state, stage_name, act_name, name
                         )
-                        if path:
+                        if raw_value is not None:
                             rtype = "file" if prefix == "$output" else "folder"
-                            results.append({"type": rtype, "path": path})
+                            if isinstance(raw_value, list):
+                                for path_str in raw_value:
+                                    results.append({"type": rtype, "path": path_str})
+                            else:
+                                results.append({"type": rtype, "path": raw_value})
 
         # Per-feature scoping: check feature lane for matching tags
         if feature_id:
@@ -599,16 +688,43 @@ class WorkflowManagerService:
 
         return results
 
+    def _get_instance_deliverable_raw(self, state, stage_name, action_name, tag_name):
+        """Get raw deliverable value without array-to-first extraction (CR-003).
+
+        Used by resolve_candidates for full array expansion.
+        """
+        shared = state.get("shared", {}).get(stage_name, {})
+        if shared:
+            action_data = shared.get("actions", {}).get(action_name, {})
+            deliverables = action_data.get("deliverables", {})
+            if isinstance(deliverables, dict):
+                value = deliverables.get(tag_name)
+                if value is None and tag_name.endswith("s"):
+                    value = deliverables.get(tag_name[:-1])
+                return value
+        return None
+
     def _get_instance_deliverable(self, state, stage_name, action_name,
                                   tag_name, feature_id=None):
-        """Get a specific deliverable path from instance state."""
+        """Get a specific deliverable path from instance state.
+
+        CR-003: For array-valued tags, returns first element.
+        Backward compat: Falls back from pluralized tag to singular.
+        """
         # Check shared stages
         shared = state.get("shared", {}).get(stage_name, {})
         if shared:
             action_data = shared.get("actions", {}).get(action_name, {})
             deliverables = action_data.get("deliverables", {})
             if isinstance(deliverables, dict):
-                return deliverables.get(tag_name)
+                value = deliverables.get(tag_name)
+                # CR-003: Backward compat — try singular form if plural not found
+                if value is None and tag_name.endswith("s"):
+                    value = deliverables.get(tag_name[:-1])
+                # CR-003: Return first element for arrays
+                if isinstance(value, list):
+                    return value[0] if value else None
+                return value
             elif isinstance(deliverables, list):
                 # Legacy: try to match by template tag order
                 tags = self._get_template_tags(action_name)
@@ -618,7 +734,11 @@ class WorkflowManagerService:
         return None
 
     def _resolve_in_feature(self, state, feature_id, candidates_name, template):
-        """Resolve candidates within a feature lane."""
+        """Resolve candidates within a feature lane.
+
+        CR-003: Handles array-valued deliverables — each array element
+        becomes a separate resolution result.
+        """
         feat = self._find_feature(state, feature_id)
         if not feat:
             return []
@@ -636,12 +756,20 @@ class WorkflowManagerService:
                         action_data = stage_data.get("actions", {}).get(act_name, {})
                         deliverables = action_data.get("deliverables", {})
                         if isinstance(deliverables, dict):
-                            path = deliverables.get(name)
+                            value = deliverables.get(name)
+                            # CR-003: Backward compat — try singular
+                            if value is None and name.endswith("s"):
+                                value = deliverables.get(name[:-1])
                         else:
-                            path = None
-                        if path:
+                            value = None
+                        if value is not None:
                             rtype = "file" if prefix == "$output" else "folder"
-                            results.append({"type": rtype, "path": path})
+                            if isinstance(value, list):
+                                # CR-003: Expand array into individual results
+                                for path_str in value:
+                                    results.append({"type": rtype, "path": path_str})
+                            else:
+                                results.append({"type": rtype, "path": value})
         return results
 
     def _convert_list_to_keyed(self, action: str, deliverables_list: list) -> dict:
@@ -665,6 +793,33 @@ class WorkflowManagerService:
                         tags.append(tag_str.split(":", 1)[1])
                 return tags
         return []
+
+    def _get_folder_tags(self, action: str) -> set:
+        """Return set of tag names for $output-folder deliverables (CR-003)."""
+        template = _load_workflow_template(str(self._project_root))
+        for stage in template.get("stages", {}).values():
+            if action in stage.get("actions", {}):
+                deliverables = stage["actions"][action].get("deliverables", [])
+                return {
+                    tag_str.split(":", 1)[1]
+                    for tag_str in deliverables
+                    if tag_str.startswith("$output-folder:")
+                }
+        return set()
+
+    @staticmethod
+    def _has_array_values(deliverables) -> bool:
+        """Check if any deliverable tag has an array value (CR-003)."""
+        if not isinstance(deliverables, dict):
+            return False
+        return any(isinstance(v, list) for v in deliverables.values())
+
+    @staticmethod
+    def _determine_schema_version(deliverables) -> str | None:
+        """Return '4.0' if array values present, '3.0' for keyed dict, None for legacy."""
+        if not isinstance(deliverables, dict):
+            return None
+        return "4.0" if WorkflowManagerService._has_array_values(deliverables) else "3.0"
 
     @x_ipe_tracing()
     def archive_stale_workflows(self, days: int = 30) -> dict:
@@ -835,8 +990,16 @@ class WorkflowManagerService:
                 stage["actions"][action]["status"] = status
                 if deliverables is not None:
                     stage["actions"][action]["deliverables"] = deliverables
-                    if isinstance(deliverables, dict):
-                        state["schema_version"] = "3.0"
+                    # CR-003: Determine schema version (4.0 for arrays, 3.0 for dict)
+                    new_version = self._determine_schema_version(deliverables)
+                    if new_version:
+                        current = state.get("schema_version", "2.0")
+                        if new_version > current:
+                            state["schema_version"] = new_version
+                    # CR-003/FR-4.3: Default context to {} for keyed deliverables
+                    if isinstance(deliverables, dict) and context is None:
+                        if "context" not in stage["actions"][action]:
+                            stage["actions"][action]["context"] = {}
                 if context is not None:
                     stage["actions"][action]["context"] = context
                 # Add next_actions_suggested when action is done
@@ -864,8 +1027,16 @@ class WorkflowManagerService:
                 stage_data["actions"][action]["status"] = status
                 if deliverables is not None:
                     stage_data["actions"][action]["deliverables"] = deliverables
-                    if isinstance(deliverables, dict):
-                        state["schema_version"] = "3.0"
+                    # CR-003: Determine schema version (4.0 for arrays, 3.0 for dict)
+                    new_version = self._determine_schema_version(deliverables)
+                    if new_version:
+                        current = state.get("schema_version", "2.0")
+                        if new_version > current:
+                            state["schema_version"] = new_version
+                    # CR-003/FR-4.3: Default context to {} for keyed deliverables
+                    if isinstance(deliverables, dict) and context is None:
+                        if "context" not in stage_data["actions"][action]:
+                            stage_data["actions"][action]["context"] = {}
                 if context is not None:
                     stage_data["actions"][action]["context"] = context
                 if status == "done" and action in self._next_actions_map:

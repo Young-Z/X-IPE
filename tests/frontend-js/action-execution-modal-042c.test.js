@@ -30,13 +30,13 @@ function taggedTemplate() {
         actions: {
           compose_idea: {
             optional: false,
-            deliverables: ['$output:raw-idea', '$output-folder:ideas-folder'],
+            deliverables: ['$output:raw-ideas', '$output-folder:ideas-folder'],
             next_actions_suggested: ['refine_idea']
           },
           refine_idea: {
             optional: false,
             action_context: {
-              'raw-idea': { required: true, candidates: 'ideas-folder' },
+              'raw-ideas': { required: true, candidates: 'ideas-folder' },
               'uiux-reference': { required: false }
             },
             deliverables: ['$output:refined-idea', '$output-folder:refined-ideas-folder'],
@@ -89,14 +89,14 @@ function workflowInstance() {
           compose_idea: {
             status: 'done',
             deliverables: {
-              'raw-idea': 'x-ipe-docs/ideas/test/new-idea.md',
+              'raw-ideas': 'x-ipe-docs/ideas/test/new-idea.md',
               'ideas-folder': 'x-ipe-docs/ideas/test'
             }
           },
           refine_idea: {
             status: 'done',
             context: {
-              'raw-idea': 'x-ipe-docs/ideas/test/new-idea.md',
+              'raw-ideas': 'x-ipe-docs/ideas/test/new-idea.md',
               'uiux-reference': 'N/A'
             },
             deliverables: {
@@ -140,12 +140,12 @@ function workflowPromptsConfig() {
           {
             language: 'en',
             label: 'Refine Idea',
-            command: 'refine the idea $output:raw-idea$ <and uiux reference: $output:uiux-reference$> with ideation skill'
+            command: 'refine the idea $output:raw-ideas$ <and uiux reference: $output:uiux-reference$> with ideation skill'
           },
           {
             language: 'zh',
             label: '完善创意',
-            command: '使用创意技能, 完善创意 $output:raw-idea$'
+            command: '使用创意技能, 完善创意 $output:raw-ideas$'
           }
         ]
       }
@@ -239,10 +239,10 @@ describe('FEATURE-042-C: deliverable defaults', () => {
 
     // 042-C: deliverable cache must be populated by _cacheDeliverables()
     expect(modal._deliverableCache).toBeDefined();
-    expect(modal._deliverableCache['raw-idea']).toBe('x-ipe-docs/ideas/test/new-idea.md');
+    expect(modal._deliverableCache['raw-ideas']).toBe('x-ipe-docs/ideas/test/new-idea.md');
 
     const groups = document.querySelectorAll('.context-ref-group');
-    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-ideas');
     expect(rawGroup).not.toBeNull();
     const select = rawGroup.querySelector('select');
     // Should default to the compose_idea deliverable path via _setDeliverableDefaults()
@@ -261,10 +261,10 @@ describe('FEATURE-042-C: deliverable defaults', () => {
 
     // 042-C: cache must exist with null entries for missing deliverables
     expect(modal._deliverableCache).toBeDefined();
-    expect(modal._deliverableCache['raw-idea']).toBeNull();
+    expect(modal._deliverableCache['raw-ideas']).toBeNull();
 
     const groups = document.querySelectorAll('.context-ref-group');
-    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-ideas');
     expect(rawGroup).not.toBeNull();
     const select = rawGroup.querySelector('select');
     expect(select.value).toBe('auto-detect');
@@ -280,10 +280,10 @@ describe('FEATURE-042-C: deliverable defaults', () => {
 
     // 042-C: verify deliverable cache was used for initial default
     expect(modal._deliverableCache).toBeDefined();
-    expect(modal._deliverableCache['raw-idea']).toBe('x-ipe-docs/ideas/test/new-idea.md');
+    expect(modal._deliverableCache['raw-ideas']).toBe('x-ipe-docs/ideas/test/new-idea.md');
 
     const groups = document.querySelectorAll('.context-ref-group');
-    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-ideas');
     const select = rawGroup.querySelector('select');
 
     // Initially defaulted to deliverable via _setDeliverableDefaults()
@@ -332,7 +332,7 @@ describe('FEATURE-042-C: deliverable defaults', () => {
 
     // Change a dropdown selection
     const groups = document.querySelectorAll('.context-ref-group');
-    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-ideas');
     const select = rawGroup.querySelector('select');
     select.value = 'auto-detect';
     select.dispatchEvent(new Event('change'));
@@ -362,10 +362,10 @@ describe('FEATURE-042-C: deliverable defaults', () => {
     await modal.open();
 
     // Cache should have the deliverable from compose_idea
-    expect(modal._deliverableCache['raw-idea']).toBe('x-ipe-docs/ideas/test/new-idea.md');
+    expect(modal._deliverableCache['raw-ideas']).toBe('x-ipe-docs/ideas/test/new-idea.md');
 
     const groups = document.querySelectorAll('.context-ref-group');
-    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-ideas');
     const select = rawGroup.querySelector('select');
 
     // The cached deliverable should be added as an option and selected as default
@@ -491,7 +491,7 @@ describe('FEATURE-042-C: live preview', () => {
 
     // Change dropdown to a different value
     const groups = document.querySelectorAll('.context-ref-group');
-    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-ideas');
     const select = rawGroup.querySelector('select');
     select.value = 'auto-detect';
     select.dispatchEvent(new Event('change'));
@@ -516,7 +516,7 @@ describe('FEATURE-042-C: live preview', () => {
     const content = instructionsEl.textContent || instructionsEl.value || '';
 
     // Resolved content should contain the actual file path, not the placeholder
-    expect(content).not.toMatch(/\$output:raw-idea\$/);
+    expect(content).not.toMatch(/\$output:raw-ideas\$/);
     // 042-C: resolved preview must contain the deliverable path from cache
     expect(content).toContain('x-ipe-docs/ideas/test/new-idea.md');
   });
@@ -554,7 +554,7 @@ describe('FEATURE-042-C: live preview', () => {
 
     // Trigger multiple dropdown changes
     const groups = document.querySelectorAll('.context-ref-group');
-    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-ideas');
     const select = rawGroup.querySelector('select');
 
     select.value = 'auto-detect';
@@ -656,7 +656,7 @@ describe('FEATURE-042-C: command composition', () => {
     });
     await modal.open();
 
-    const rawExtra = 'Use $output:raw-idea$ literally and <>conditional</>';
+    const rawExtra = 'Use $output:raw-ideas$ literally and <>conditional</>';
     const extraInput = document.querySelector('.extra-input');
     extraInput.value = rawExtra;
 
@@ -764,7 +764,7 @@ describe('FEATURE-042-C: edge cases', () => {
     expect(typeof modal._updatePreview).toBe('function');
 
     const groups = document.querySelectorAll('.context-ref-group');
-    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-ideas');
     const select = rawGroup.querySelector('select');
     const instructionsEl = document.querySelector('.instructions-content');
 

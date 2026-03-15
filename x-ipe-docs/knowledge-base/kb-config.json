@@ -1,0 +1,30 @@
+{
+  "tags": {
+    "lifecycle": [
+      "Ideation",
+      "Requirement",
+      "Design",
+      "Implementation",
+      "Testing",
+      "Deployment",
+      "Maintenance"
+    ],
+    "domain": [
+      "API",
+      "Authentication",
+      "UI-UX",
+      "Database",
+      "Infrastructure",
+      "Security",
+      "Performance",
+      "Integration",
+      "Documentation",
+      "Analytics"
+    ]
+  },
+  "agent_write_allowlist": [],
+  "ai_librarian": {
+    "enabled": false,
+    "intake_folder": ".intake"
+  }
+}

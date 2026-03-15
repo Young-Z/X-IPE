@@ -546,4 +546,15 @@ describe('TASK-875: _renderDeliverableCard labels use file names', () => {
     const name = card.querySelector('.deliverable-name');
     expect(name.textContent).toBe('raw-ideas');
   });
+
+  it('shows tag name for hidden/metadata files (dotfiles)', () => {
+    const card = workflowStage._renderDeliverableCard({
+      name: 'kb-references',
+      path: 'x-ipe-docs/ideas/my-idea/.knowledge-reference.yaml',
+      category: 'ideas',
+      exists: true
+    });
+    const name = card.querySelector('.deliverable-name');
+    expect(name.textContent).toBe('kb-references');
+  });
 });

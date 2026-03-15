@@ -81,8 +81,9 @@
       },
       "testing": {
         "_order": 1,
-        "_extra_instruction": "Testing mode: route test execution to appropriate tools by test type. Chrome DevTools MCP for frontend-ui browser tests. Tool skills for backend/unit/integration test code generation.",
+        "_extra_instruction": "Testing mode: route test execution to appropriate tools by test type. Chrome DevTools MCP for frontend-ui browser tests. x-ipe-tool-ui-testing-via-chrome-mcp skill for structured UI test execution. Tool skills for backend/unit/integration test code generation.",
         "chrome-devtools-mcp": true,
+        "x-ipe-tool-ui-testing-via-chrome-mcp": true,
         "x-ipe-tool-implementation-python": true,
         "x-ipe-tool-implementation-typescript": true,
         "x-ipe-tool-implementation-html5": true,

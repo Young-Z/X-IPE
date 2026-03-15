@@ -44,7 +44,7 @@ TAGGED_TEMPLATE = {
             "actions": {
                 "compose_idea": {
                     "optional": False,
-                    "deliverables": ["$output:raw-idea", "$output-folder:ideas-folder"],
+                    "deliverables": ["$output:raw-ideas", "$output-folder:ideas-folder"],
                     "next_actions_suggested": ["refine_idea", "reference_uiux"]
                 },
                 "reference_uiux": {
@@ -55,7 +55,7 @@ TAGGED_TEMPLATE = {
                 "refine_idea": {
                     "optional": False,
                     "action_context": {
-                        "raw-idea": {"required": True, "candidates": "ideas-folder"},
+                        "raw-ideas": {"required": True, "candidates": "ideas-folder"},
                         "uiux-reference": {"required": False}
                     },
                     "deliverables": ["$output:refined-idea", "$output-folder:refined-ideas-folder"],
@@ -215,7 +215,7 @@ class TestKeyedDeliverables:
     def test_update_action_with_dict_deliverables(self, service, sample_workflow):
         """Keyed deliverables dict should be stored directly."""
         deliverables = {
-            "raw-idea": "x-ipe-docs/ideas/test/new-idea.md",
+            "raw-ideas": "x-ipe-docs/ideas/test/new-idea.md",
             "ideas-folder": "x-ipe-docs/ideas/test"
         }
         result = service.update_action_status(
@@ -226,7 +226,7 @@ class TestKeyedDeliverables:
         state = service._read_state(sample_workflow)
         stored = state["shared"]["ideation"]["actions"]["compose_idea"]["deliverables"]
         assert isinstance(stored, dict)
-        assert stored["raw-idea"] == "x-ipe-docs/ideas/test/new-idea.md"
+        assert stored["raw-ideas"] == "x-ipe-docs/ideas/test/new-idea.md"
         assert stored["ideas-folder"] == "x-ipe-docs/ideas/test"
 
     def test_update_action_with_list_deliverables_converts(self, service, sample_workflow):
@@ -243,14 +243,14 @@ class TestKeyedDeliverables:
         state = service._read_state(sample_workflow)
         stored = state["shared"]["ideation"]["actions"]["compose_idea"]["deliverables"]
         assert isinstance(stored, dict)
-        assert stored.get("raw-idea") == "x-ipe-docs/ideas/test/new-idea.md"
+        assert stored.get("raw-ideas") == "x-ipe-docs/ideas/test/new-idea.md"
         assert stored.get("ideas-folder") == "x-ipe-docs/ideas/test"
 
     def test_schema_version_set_on_keyed_deliverables(self, service, sample_workflow):
         """Instance should have schema_version 3.0 when keyed deliverables used."""
         result = service.update_action_status(
             sample_workflow, "compose_idea", "done",
-            deliverables={"raw-idea": "idea.md", "ideas-folder": "ideas/"}
+            deliverables={"raw-ideas": "idea.md", "ideas-folder": "ideas/"}
         )
         assert result["success"] is True
         state = service._read_state(sample_workflow)
@@ -293,10 +293,10 @@ class TestContextField:
         # First complete compose_idea
         service.update_action_status(
             sample_workflow, "compose_idea", "done",
-            deliverables={"raw-idea": "idea.md", "ideas-folder": "ideas/"}
+            deliverables={"raw-ideas": "idea.md", "ideas-folder": "ideas/"}
         )
         # Now update refine_idea with context
-        context = {"raw-idea": "idea.md", "uiux-reference": "N/A"}
+        context = {"raw-ideas": "idea.md", "uiux-reference": "N/A"}
         result = service.update_action_status(
             sample_workflow, "refine_idea", "done",
             deliverables={"refined-idea": "refined.md", "refined-ideas-folder": "refined/"},
@@ -305,13 +305,13 @@ class TestContextField:
         assert result["success"] is True
         state = service._read_state(sample_workflow)
         stored_ctx = state["shared"]["ideation"]["actions"]["refine_idea"].get("context")
-        assert stored_ctx == {"raw-idea": "idea.md", "uiux-reference": "N/A"}
+        assert stored_ctx == {"raw-ideas": "idea.md", "uiux-reference": "N/A"}
 
     def test_context_absent_defaults_to_empty(self, service, sample_workflow):
         """When no context provided, action should have no context field (or empty)."""
         result = service.update_action_status(
             sample_workflow, "compose_idea", "done",
-            deliverables={"raw-idea": "idea.md", "ideas-folder": "ideas/"}
+            deliverables={"raw-ideas": "idea.md", "ideas-folder": "ideas/"}
         )
         assert result["success"] is True
         state = service._read_state(sample_workflow)
@@ -323,9 +323,9 @@ class TestContextField:
         """'auto-detect' value should persist in context field."""
         service.update_action_status(
             sample_workflow, "compose_idea", "done",
-            deliverables={"raw-idea": "idea.md", "ideas-folder": "ideas/"}
+            deliverables={"raw-ideas": "idea.md", "ideas-folder": "ideas/"}
         )
-        context = {"raw-idea": "auto-detect", "uiux-reference": "auto-detect"}
+        context = {"raw-ideas": "auto-detect", "uiux-reference": "auto-detect"}
         result = service.update_action_status(
             sample_workflow, "refine_idea", "in_progress",
             context=context
@@ -333,14 +333,14 @@ class TestContextField:
         assert result["success"] is True
         state = service._read_state(sample_workflow)
         stored = state["shared"]["ideation"]["actions"]["refine_idea"]["context"]
-        assert stored["raw-idea"] == "auto-detect"
+        assert stored["raw-ideas"] == "auto-detect"
         assert stored["uiux-reference"] == "auto-detect"
 
     def test_per_feature_context_stored(self, service, sample_workflow):
         """Feature-level action context should be stored within feature lane."""
         # Setup: complete shared stages and create features
         service.update_action_status(sample_workflow, "compose_idea", "done",
-                                     deliverables={"raw-idea": "idea.md", "ideas-folder": "ideas/"})
+                                     deliverables={"raw-ideas": "idea.md", "ideas-folder": "ideas/"})
         service.update_action_status(sample_workflow, "refine_idea", "done",
                                      deliverables={"refined-idea": "refined.md", "refined-ideas-folder": "refined/"})
         service.update_action_status(sample_workflow, "requirement_gathering", "done",
@@ -389,13 +389,13 @@ class TestTemplateValidation:
                     "actions": {
                         "compose_idea": {
                             "optional": False,
-                            "deliverables": ["$output:raw-idea"],
+                            "deliverables": ["$output:raw-ideas"],
                             "next_actions_suggested": []
                         },
                         "refine_idea": {
                             "optional": False,
                             "action_context": {
-                                "raw-idea": {"required": True, "candidates": "nonexistent-folder"}
+                                "raw-ideas": {"required": True, "candidates": "nonexistent-folder"}
                             },
                             "deliverables": ["$output:refined-idea"],
                             "next_actions_suggested": []
@@ -455,7 +455,7 @@ class TestRuntimeValidation:
         """Instance keys matching template tags should pass."""
         result = service.validate_action_deliverables(
             "compose_idea",
-            {"raw-idea": "idea.md", "ideas-folder": "ideas/"}
+            {"raw-ideas": "idea.md", "ideas-folder": "ideas/"}
         )
         assert result is True
 
@@ -463,7 +463,7 @@ class TestRuntimeValidation:
         """Instance missing a template tag should log warning but not fail hard."""
         result = service.validate_action_deliverables(
             "compose_idea",
-            {"raw-idea": "idea.md"}  # missing ideas-folder
+            {"raw-ideas": "idea.md"}  # missing ideas-folder
         )
         assert result is False  # validation fails but doesn't raise
 
@@ -471,7 +471,7 @@ class TestRuntimeValidation:
         """Instance with extra keys beyond template should be accepted."""
         result = service.validate_action_deliverables(
             "compose_idea",
-            {"raw-idea": "idea.md", "ideas-folder": "ideas/", "extra-key": "bonus.md"}
+            {"raw-ideas": "idea.md", "ideas-folder": "ideas/", "extra-key": "bonus.md"}
         )
         assert result is True
 
@@ -497,7 +497,7 @@ class TestCandidateResolution:
         service.update_action_status(
             sample_workflow, "compose_idea", "done",
             deliverables={
-                "raw-idea": "x-ipe-docs/ideas/test/new-idea.md",
+                "raw-ideas": "x-ipe-docs/ideas/test/new-idea.md",
                 "ideas-folder": "x-ipe-docs/ideas/test"
             }
         )
@@ -515,7 +515,7 @@ class TestCandidateResolution:
         service.update_action_status(
             sample_workflow, "compose_idea", "done",
             deliverables={
-                "raw-idea": "x-ipe-docs/ideas/test/new-idea.md",
+                "raw-ideas": "x-ipe-docs/ideas/test/new-idea.md",
                 "ideas-folder": "x-ipe-docs/ideas/test"
             }
         )
@@ -531,13 +531,13 @@ class TestCandidateResolution:
         # If same-named folder exists in multiple stages, later wins
         service.update_action_status(
             sample_workflow, "compose_idea", "done",
-            deliverables={"raw-idea": "idea.md", "ideas-folder": "ideas/v1"}
+            deliverables={"raw-ideas": "idea.md", "ideas-folder": "ideas/v1"}
         )
         # refine_idea also has refined-ideas-folder
         service.update_action_status(
             sample_workflow, "refine_idea", "done",
             deliverables={"refined-idea": "refined.md", "refined-ideas-folder": "ideas/v2"},
-            context={"raw-idea": "idea.md", "uiux-reference": "N/A"}
+            context={"raw-ideas": "idea.md", "uiux-reference": "N/A"}
         )
         # requirement_gathering wants refined-ideas-folder — should get ideas/v2
         results = service.resolve_candidates(
@@ -549,7 +549,7 @@ class TestCandidateResolution:
         """Per-feature resolution should search feature lane first, then shared."""
         # Setup shared stages
         service.update_action_status(sample_workflow, "compose_idea", "done",
-                                     deliverables={"raw-idea": "idea.md", "ideas-folder": "ideas/"})
+                                     deliverables={"raw-ideas": "idea.md", "ideas-folder": "ideas/"})
         service.update_action_status(sample_workflow, "refine_idea", "done",
                                      deliverables={"refined-idea": "refined.md", "refined-ideas-folder": "refined/"})
         service.update_action_status(sample_workflow, "requirement_gathering", "done",
@@ -583,12 +583,12 @@ class TestBackwardCompat:
         """resolve_deliverables should handle keyed dict format."""
         service.update_action_status(
             sample_workflow, "compose_idea", "done",
-            deliverables={"raw-idea": "idea.md", "ideas-folder": "ideas/"}
+            deliverables={"raw-ideas": "idea.md", "ideas-folder": "ideas/"}
         )
         result = service.resolve_deliverables(sample_workflow)
         results = result["deliverables"]
         names = [r["name"] for r in results]
-        assert "raw-idea" in names or any("idea.md" in r.get("path", "") for r in results)
+        assert "raw-ideas" in names or any("idea.md" in r.get("path", "") for r in results)
 
     def test_resolve_deliverables_handles_list(self, service, sample_workflow):
         """resolve_deliverables should handle legacy list format."""
@@ -608,7 +608,7 @@ class TestBackwardCompat:
         if "idea_folder" in state:
             service.update_action_status(
                 sample_workflow, "compose_idea", "done",
-                deliverables={"raw-idea": "idea.md", "ideas-folder": "ideas/"}
+                deliverables={"raw-ideas": "idea.md", "ideas-folder": "ideas/"}
             )
             state2 = service._read_state(sample_workflow)
             assert "idea_folder" in state2
@@ -627,7 +627,7 @@ class TestActionUpdateAPI:
             "action": "compose_idea",
             "status": "done",
             "deliverables": {
-                "raw-idea": "idea.md",
+                "raw-ideas": "idea.md",
                 "ideas-folder": "ideas/"
             }
         })
@@ -651,14 +651,14 @@ class TestActionUpdateAPI:
         # First complete compose_idea
         client.post(f"/api/workflow/{sample_workflow}/action", json={
             "action": "compose_idea", "status": "done",
-            "deliverables": {"raw-idea": "idea.md", "ideas-folder": "ideas/"}
+            "deliverables": {"raw-ideas": "idea.md", "ideas-folder": "ideas/"}
         })
         # Now refine_idea with context
         resp = client.post(f"/api/workflow/{sample_workflow}/action", json={
             "action": "refine_idea",
             "status": "done",
             "deliverables": {"refined-idea": "refined.md", "refined-ideas-folder": "refined/"},
-            "context": {"raw-idea": "idea.md", "uiux-reference": "N/A"}
+            "context": {"raw-ideas": "idea.md", "uiux-reference": "N/A"}
         })
         assert resp.status_code == 200
         data = resp.get_json()
@@ -677,7 +677,7 @@ class TestCandidatesAPI:
         # Setup
         client.post(f"/api/workflow/{sample_workflow}/action", json={
             "action": "compose_idea", "status": "done",
-            "deliverables": {"raw-idea": "idea.md", "ideas-folder": "x-ipe-docs/ideas/test"}
+            "deliverables": {"raw-ideas": "idea.md", "ideas-folder": "x-ipe-docs/ideas/test"}
         })
         resp = client.get(
             f"/api/workflow/{sample_workflow}/candidates/refine_idea/ideas-folder"

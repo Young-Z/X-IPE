@@ -179,7 +179,19 @@ class ActionExecutionModal {
             const data = json.data || {};
             const stages = data.stages || data.shared || {};
             const composeAction = (stages.ideation && stages.ideation.actions && stages.ideation.actions.compose_idea) || {};
-            const deliverables = composeAction.deliverables || [];
+            const rawDeliverables = composeAction.deliverables || {};
+            let deliverables;
+            if (Array.isArray(rawDeliverables)) {
+                deliverables = rawDeliverables;
+            } else if (typeof rawDeliverables === 'object') {
+                deliverables = [];
+                for (const val of Object.values(rawDeliverables)) {
+                    if (Array.isArray(val)) deliverables.push(...val);
+                    else if (typeof val === 'string') deliverables.push(val);
+                }
+            } else {
+                deliverables = [];
+            }
             // Add compose_idea .md deliverable as primary option
             const primaryMd = deliverables.find(d => d.endsWith('.md'));
             if (primaryMd) files.push(primaryMd);
@@ -236,14 +248,19 @@ class ActionExecutionModal {
         if (!template) return '';
         let resolved = template;
 
+        // CR-003: Helper — format value for template display
+        const toDisplay = (val, tag) => Array.isArray(val) ? `tag:${tag}` : val;
+
         // $output:tag-name$
         resolved = resolved.replace(/\$output:([a-z0-9-]+)\$/g, (match, tag) => {
-            return contextValues[tag] ?? match;
+            const val = contextValues[tag];
+            return val != null ? toDisplay(val, tag) : match;
         });
 
         // $output-folder:tag-name$
         resolved = resolved.replace(/\$output-folder:([a-z0-9-]+)\$/g, (match, tag) => {
-            return contextValues[tag] ?? match;
+            const val = contextValues[tag];
+            return val != null ? toDisplay(val, tag) : match;
         });
 
         // $feature-id$
@@ -263,7 +280,12 @@ class ActionExecutionModal {
                 const refName = group.dataset.refName;
                 const select = group.querySelector('select');
                 if (refName && select) {
-                    values[refName] = select.value;
+                    let val = select.value;
+                    // Parse JSON array values stored by _setDeliverableDefaults
+                    if (val.startsWith('[')) {
+                        try { val = JSON.parse(val); } catch { /* keep as string */ }
+                    }
+                    values[refName] = val;
                 }
             }
         }
@@ -379,13 +401,20 @@ class ActionExecutionModal {
 
             const cached = this._deliverableCache[refName];
             if (cached) {
-                let opt = Array.from(select.options).find(o => o.value === cached);
-                if (!opt) {
-                    // Cached deliverable not in candidates listing — add it explicitly
-                    select.add(new Option(cached, cached));
-                    opt = select.options[select.options.length - 1];
+                if (Array.isArray(cached)) {
+                    // Multiple files — show compact tag label
+                    const tagLabel = `tag:${refName}`;
+                    const tagValue = JSON.stringify(cached);
+                    select.add(new Option(tagLabel, tagValue));
+                    select.value = tagValue;
+                } else {
+                    let opt = Array.from(select.options).find(o => o.value === cached);
+                    if (!opt) {
+                        select.add(new Option(cached, cached));
+                        opt = select.options[select.options.length - 1];
+                    }
+                    select.value = opt.value;
                 }
-                select.value = opt.value;
             }
         }
     }

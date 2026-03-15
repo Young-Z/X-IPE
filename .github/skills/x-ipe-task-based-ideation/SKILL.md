@@ -56,7 +56,7 @@ input:
     name: "N/A"  # workflow name from workflow-{name}.json (NOT the idea folder name), default: N/A
     action: "refine_idea"  # hardcoded — this skill ALWAYS updates the refine_idea action
     extra_context_reference:  # optional, default: N/A for all refs
-      raw-idea: "path | N/A | auto-detect"
+      raw-ideas: "path | N/A | auto-detect"
       uiux-reference: "path | N/A | auto-detect"
   idea_folder_path: "x-ipe-docs/ideas/{folder}"
   toolbox_meta_path: "x-ipe-docs/config/tools.json"
@@ -172,7 +172,7 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
       <name>Analyze Idea Files</name>
       <action>
         0. Resolve extra_context_reference inputs:
-           - FOR EACH ref in [raw-idea, uiux-reference]:
+           - FOR EACH ref in [raw-ideas, uiux-reference]:
              IF workflow mode AND extra_context_reference.{ref} is a file path:
                READ the file at that path
              ELIF extra_context_reference.{ref} is "auto-detect":

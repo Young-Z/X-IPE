@@ -19,7 +19,7 @@
         "compose_idea": {
           "optional": false,
           "deliverables": [
-            "$output:raw-idea",
+            "$output:raw-ideas",
             "$output-folder:ideas-folder"
           ],
           "next_actions_suggested": [
@@ -40,9 +40,9 @@
         "refine_idea": {
           "optional": false,
           "action_context": {
-            "raw-idea": {
+            "raw-ideas": {
               "required": true,
-              "candidates": "refined-ideas-folder"
+              "candidates": "ideas-folder"
             },
             "uiux-reference": {
               "required": false

@@ -1123,3 +1123,101 @@ describe('TASK-880: handleUpdate includes pendingFiles', () => {
     expect(allFiles.length).toBe(1);
   });
 });
+
+/* --------------------------------------------------------------------------
+   KB Reference persistence: clear/remove calls backend API
+   -------------------------------------------------------------------------- */
+describe('KB Reference persistence on clear/remove', () => {
+  let fetchCalls;
+
+  beforeEach(() => {
+    fetchCalls = [];
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      fetchCalls.push({ url, method: opts?.method || 'GET', body: opts?.body });
+      return { ok: true, json: async () => ({ success: true }), text: async () => '' };
+    });
+  });
+
+  it('_persistKbReferences POSTs when references remain', () => {
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      folderPath: 'x-ipe-docs/ideas/test-idea',
+      folderName: 'test-idea'
+    });
+    modal.kbReferences = ['x-ipe-docs/knowledge-base/data-flow.md'];
+    modal._persistKbReferences();
+
+    const postCall = fetchCalls.find(c => c.method === 'POST' && c.url.includes('kb-references'));
+    expect(postCall).toBeDefined();
+    const body = JSON.parse(postCall.body);
+    expect(body.folder_path).toBe('x-ipe-docs/ideas/test-idea');
+    expect(body.kb_references).toEqual(['x-ipe-docs/knowledge-base/data-flow.md']);
+  });
+
+  it('_persistKbReferences DELETEs when references are empty', () => {
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      folderPath: 'x-ipe-docs/ideas/test-idea',
+      folderName: 'test-idea'
+    });
+    modal.kbReferences = [];
+    modal._persistKbReferences();
+
+    const delCall = fetchCalls.find(c => c.method === 'DELETE' && c.url.includes('kb-references'));
+    expect(delCall).toBeDefined();
+    const body = JSON.parse(delCall.body);
+    expect(body.folder_path).toBe('x-ipe-docs/ideas/test-idea');
+  });
+
+  it('Clear All in popup calls _persistKbReferences', () => {
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      folderPath: 'x-ipe-docs/ideas/test-idea',
+      folderName: 'test-idea'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.kbReferences = ['x-ipe-docs/kb/a.md', 'x-ipe-docs/kb/b.md'];
+    modal._updateKbRefCount();
+
+    const countEl = modal.overlay.querySelector('.compose-modal-kb-ref-count');
+    modal._showKbRefPopup(countEl);
+
+    const clearBtn = modal.overlay.querySelector('.compose-modal-kb-ref-clear-btn');
+    expect(clearBtn).not.toBeNull();
+    clearBtn.click();
+
+    expect(modal.kbReferences).toEqual([]);
+    const delCall = fetchCalls.find(c => c.method === 'DELETE');
+    expect(delCall).toBeDefined();
+  });
+
+  it('Remove single ref in popup calls _persistKbReferences', () => {
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      folderPath: 'x-ipe-docs/ideas/test-idea',
+      folderName: 'test-idea'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.kbReferences = ['x-ipe-docs/kb/a.md', 'x-ipe-docs/kb/b.md'];
+    modal._updateKbRefCount();
+
+    const countEl = modal.overlay.querySelector('.compose-modal-kb-ref-count');
+    modal._showKbRefPopup(countEl);
+
+    const removeBtn = modal.overlay.querySelector('[data-idx="0"]');
+    expect(removeBtn).not.toBeNull();
+    removeBtn.click();
+
+    expect(modal.kbReferences).toEqual(['x-ipe-docs/kb/b.md']);
+    const postCall = fetchCalls.find(c => c.method === 'POST');
+    expect(postCall).toBeDefined();
+    const body = JSON.parse(postCall.body);
+    expect(body.kb_references).toEqual(['x-ipe-docs/kb/b.md']);
+  });
+});

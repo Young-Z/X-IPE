@@ -33,12 +33,12 @@ function workflowPromptsConfig() {
           {
             language: 'en',
             label: 'Refine Idea',
-            command: 'refine the idea $output:raw-idea$ with ideation skill'
+            command: 'refine the idea $output:raw-ideas$ with ideation skill'
           },
           {
             language: 'zh',
             label: '完善创意',
-            command: '使用创意技能, 完善创意 $output:raw-idea$'
+            command: '使用创意技能, 完善创意 $output:raw-ideas$'
           }
         ]
       },
@@ -86,13 +86,13 @@ function taggedTemplate() {
         actions: {
           compose_idea: {
             optional: false,
-            deliverables: ['$output:raw-idea', '$output-folder:ideas-folder'],
+            deliverables: ['$output:raw-ideas', '$output-folder:ideas-folder'],
             next_actions_suggested: ['refine_idea']
           },
           refine_idea: {
             optional: false,
             action_context: {
-              'raw-idea': { required: true, candidates: 'ideas-folder' },
+              'raw-ideas': { required: true, candidates: 'ideas-folder' },
               'uiux-reference': { required: false }
             },
             deliverables: ['$output:refined-idea', '$output-folder:refined-ideas-folder'],
@@ -145,14 +145,14 @@ function workflowInstance() {
           compose_idea: {
             status: 'done',
             deliverables: {
-              'raw-idea': 'x-ipe-docs/ideas/test/new-idea.md',
+              'raw-ideas': 'x-ipe-docs/ideas/test/new-idea.md',
               'ideas-folder': 'x-ipe-docs/ideas/test'
             }
           },
           refine_idea: {
             status: 'done',
             context: {
-              'raw-idea': 'x-ipe-docs/ideas/test/new-idea.md',
+              'raw-ideas': 'x-ipe-docs/ideas/test/new-idea.md',
               'uiux-reference': 'N/A'
             },
             deliverables: {
@@ -370,8 +370,8 @@ describe('FEATURE-042-A: _resolveTemplate', () => {
       workflowName: 'test-wf',
     });
     const result = modal._resolveTemplate(
-      'refine the idea $output:raw-idea$ with ideation skill',
-      { 'raw-idea': 'x-ipe-docs/ideas/test/new-idea.md' }
+      'refine the idea $output:raw-ideas$ with ideation skill',
+      { 'raw-ideas': 'x-ipe-docs/ideas/test/new-idea.md' }
     );
     expect(result).toBe('refine the idea x-ipe-docs/ideas/test/new-idea.md with ideation skill');
   });
@@ -464,14 +464,14 @@ describe('FEATURE-042-A: _resolveTemplate', () => {
     expect(result).toBe('broken $output:$ token');
   });
 
-  it('handles unclosed token — $output:raw-idea left as-is', () => {
+  it('handles unclosed token — $output:raw-ideas left as-is', () => {
     if (!ensureImpl()) return;
     const modal = new ActionExecutionModal({
       actionKey: 'refine_idea',
       workflowName: 'test-wf',
     });
-    const result = modal._resolveTemplate('unclosed $output:raw-idea token', {});
-    expect(result).toBe('unclosed $output:raw-idea token');
+    const result = modal._resolveTemplate('unclosed $output:raw-ideas token', {});
+    expect(result).toBe('unclosed $output:raw-ideas token');
   });
 
   it('handles $$ (empty token) left as-is', () => {
@@ -505,8 +505,8 @@ describe('FEATURE-042-A: _resolveTemplate', () => {
       workflowName: 'test-wf',
     });
     const result = modal._resolveTemplate(
-      'file: $output:raw-idea$, again: $output:raw-idea$',
-      { 'raw-idea': 'path/file.md' }
+      'file: $output:raw-ideas$, again: $output:raw-ideas$',
+      { 'raw-ideas': 'path/file.md' }
     );
     expect(result).toBe('file: path/file.md, again: path/file.md');
   });
@@ -528,8 +528,8 @@ describe('FEATURE-042-A: _resolveTemplate', () => {
       workflowName: 'test-wf',
     });
     const result = modal._resolveTemplate(
-      'refine $output:raw-idea$ here',
-      { 'raw-idea': 'auto-detect' }
+      'refine $output:raw-ideas$ here',
+      { 'raw-ideas': 'auto-detect' }
     );
     expect(result).toBe('refine auto-detect here');
   });
@@ -545,6 +545,59 @@ describe('FEATURE-042-A: _resolveTemplate', () => {
       { 'uiux-reference': 'N/A' }
     );
     expect(result).toBe('use N/A ref');
+  });
+
+  // CR-003: Array-valued deliverable tag resolution
+  it('resolves array-valued tag to tag:name label', () => {
+    if (!ensureImpl()) return;
+    const modal = new ActionExecutionModal({
+      actionKey: 'refine_idea',
+      workflowName: 'test-wf',
+    });
+    const result = modal._resolveTemplate(
+      'refine $output:raw-ideas$ here',
+      { 'raw-ideas': ['first.md', 'second.md'] }
+    );
+    expect(result).toBe('refine tag:raw-ideas here');
+  });
+
+  it('resolves single-element array to tag:name label', () => {
+    if (!ensureImpl()) return;
+    const modal = new ActionExecutionModal({
+      actionKey: 'refine_idea',
+      workflowName: 'test-wf',
+    });
+    const result = modal._resolveTemplate(
+      'idea: $output:raw-ideas$',
+      { 'raw-ideas': ['only.md'] }
+    );
+    expect(result).toBe('idea: tag:raw-ideas');
+  });
+
+  it('resolves empty array to tag:name label', () => {
+    if (!ensureImpl()) return;
+    const modal = new ActionExecutionModal({
+      actionKey: 'refine_idea',
+      workflowName: 'test-wf',
+    });
+    const result = modal._resolveTemplate(
+      'idea: $output:raw-ideas$',
+      { 'raw-ideas': [] }
+    );
+    expect(result).toBe('idea: tag:raw-ideas');
+  });
+
+  it('resolves mixed scalar and array values', () => {
+    if (!ensureImpl()) return;
+    const modal = new ActionExecutionModal({
+      actionKey: 'refine_idea',
+      workflowName: 'test-wf',
+    });
+    const result = modal._resolveTemplate(
+      'idea: $output:raw-ideas$, ref: $output:uiux-reference$',
+      { 'raw-ideas': ['idea.md', 'sketch.png'], 'uiux-reference': 'ref.md' }
+    );
+    expect(result).toBe('idea: tag:raw-ideas, ref: ref.md');
   });
 });
 
@@ -601,7 +654,7 @@ describe('FEATURE-042-A: workflow mode prompt loading', () => {
     // After open, instructions area should show the resolved (or raw) template from workflow-prompts
     const instructionsEl = document.querySelector('.instructions-content');
     expect(instructionsEl).not.toBeNull();
-    // The command from workflow-prompts for refine_idea contains "$output:raw-idea$" or a resolved version
+    // The command from workflow-prompts for refine_idea contains "$output:raw-ideas$" or a resolved version
     const text = instructionsEl.textContent;
     expect(text).toContain('refine');
     expect(text).toContain('idea');
@@ -615,9 +668,9 @@ describe('FEATURE-042-A: workflow mode prompt loading', () => {
     });
     await modal.open();
 
-    // Find the raw-idea dropdown and set a value
+    // Find the raw-ideas dropdown and set a value
     const groups = document.querySelectorAll('.context-ref-group');
-    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-idea');
+    const rawGroup = Array.from(groups).find(g => g.dataset.refName === 'raw-ideas');
     if (rawGroup) {
       const select = rawGroup.querySelector('select');
       select.value = 'x-ipe-docs/ideas/test/new-idea.md';
@@ -626,7 +679,7 @@ describe('FEATURE-042-A: workflow mode prompt loading', () => {
       // After change, instructions should reflect the resolved value
       const instructionsEl = document.querySelector('.instructions-content');
       expect(instructionsEl.textContent).toContain('x-ipe-docs/ideas/test/new-idea.md');
-      expect(instructionsEl.textContent).not.toContain('$output:raw-idea$');
+      expect(instructionsEl.textContent).not.toContain('$output:raw-ideas$');
     }
   });
 
@@ -658,7 +711,7 @@ describe('FEATURE-042-A: workflow mode prompt loading', () => {
 
     // The raw template should be stored for re-resolution
     expect(modal._workflowCommandTemplate).toBeDefined();
-    expect(modal._workflowCommandTemplate).toContain('$output:raw-idea$');
+    expect(modal._workflowCommandTemplate).toContain('$output:raw-ideas$');
   });
 });
 
@@ -735,5 +788,78 @@ describe('FEATURE-042-A: backward compatibility', () => {
     const config = workflowPromptsConfig();
     expect(config.version).toBe('3.3');
     expect(config['workflow-prompts']).toBeDefined();
+  });
+});
+
+/* --------------------------------------------------------------------------
+   TASK-877: Array deliverables show as tag:<name> in context dropdown
+   -------------------------------------------------------------------------- */
+describe('TASK-877: _setDeliverableDefaults with array values', () => {
+  let modal;
+  beforeEach(async () => {
+    if (!ensureImpl()) return;
+    mockBootstrap();
+    // Stub fetch to return template + instance with array deliverables
+    globalThis.fetch = vi.fn(async (url) => {
+      if (url.includes('/template')) {
+        return { ok: true, json: async () => ({ actions: { refine_idea: { action_context: { 'raw-ideas': { required: true, candidates: 'compose_idea' }, 'ideas-folder': { required: false } } } } }) };
+      }
+      if (url.includes('/candidates/')) {
+        return { ok: true, json: async () => ([]) };
+      }
+      if (url.includes('/api/workflow/test')) {
+        return {
+          ok: true,
+          json: async () => ({
+            data: {
+              shared: {
+                ideation: {
+                  actions: {
+                    compose_idea: {
+                      status: 'done',
+                      deliverables: {
+                        'raw-ideas': ['x-ipe-docs/ideas/test/idea.md', 'x-ipe-docs/ideas/test/sketch.png'],
+                        'ideas-folder': 'x-ipe-docs/ideas/test'
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          })
+        };
+      }
+      return { ok: false };
+    });
+    modal = new ActionExecutionModal({ actionKey: 'refine_idea', workflowName: 'test' });
+    await modal.open();
+  });
+
+  afterEach(() => {
+    if (modal && modal.overlay) modal.overlay.remove();
+  });
+
+  it('shows tag:<name> label for array-valued deliverables in dropdown', () => {
+    if (!ensureImpl()) return;
+    const group = modal.overlay.querySelector('.context-ref-group[data-ref-name="raw-ideas"]');
+    if (!group) return;
+    const select = group.querySelector('select');
+    const labels = Array.from(select.options).map(o => o.text);
+    // Should have a tag:raw-ideas option
+    expect(labels).toContain('tag:raw-ideas');
+    // Value should be JSON array
+    const tagOpt = Array.from(select.options).find(o => o.text === 'tag:raw-ideas');
+    expect(tagOpt).toBeDefined();
+    expect(JSON.parse(tagOpt.value)).toEqual(['x-ipe-docs/ideas/test/idea.md', 'x-ipe-docs/ideas/test/sketch.png']);
+  });
+
+  it('shows plain path for string-valued deliverables in dropdown', () => {
+    if (!ensureImpl()) return;
+    const group = modal.overlay.querySelector('.context-ref-group[data-ref-name="ideas-folder"]');
+    if (!group) return;
+    const select = group.querySelector('select');
+    const selectedValue = select.value;
+    // Should be the plain folder path, not tag:
+    expect(selectedValue).toBe('x-ipe-docs/ideas/test');
   });
 });

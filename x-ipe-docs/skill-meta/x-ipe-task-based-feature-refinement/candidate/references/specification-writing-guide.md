@@ -27,18 +27,43 @@ As a [user type], I want to [action/goal], so that [benefit/value].
 
 ### Acceptance Criteria Template
 
-Format: `- [ ] Criterion: [Specific, measurable condition]`
+Format: Table with Given/When/Then criterion and Test Type column, grouped by AC ID prefix:
+
+```markdown
+### AC-XXX-01: {AC Group Name}
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-XXX-01a | GIVEN user is on cart page WHEN user adds item THEN cart count increments by 1 | UI |
+| AC-XXX-01b | GIVEN cart has items WHEN total is recalculated THEN update completes within 200ms | UI |
+| AC-XXX-01c | GIVEN valid product payload WHEN POST /api/cart/items THEN 201 returned with item details | API |
+| AC-XXX-01d | GIVEN quantity > 99 WHEN addToCart() is called THEN validation error is returned | Unit |
+```
+
+**AC Format:** Every criterion MUST use **Given/When/Then (GWT)** syntax:
+- `GIVEN [precondition/context] WHEN [action/event] THEN [expected outcome]`
+- Multi-clause: use AND to chain (e.g., `GIVEN ... AND ... WHEN ... THEN ... AND ...`)
+
+**Test Type values:** UI, API, Unit, Integration
 
 **Good Examples:**
-- [ ] User can add up to 50 items to cart
-- [ ] Cart total updates within 200ms of item addition
-- [ ] Error message displays when stock is insufficient
-- [ ] Session persists for 24 hours of inactivity
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-001-01a | GIVEN user is on cart page WHEN user clicks "Add to Cart" 50 times THEN all 50 items are in cart | UI |
+| AC-001-01b | GIVEN item is added to cart WHEN cart total renders THEN total updates within 200ms | UI |
+| AC-001-02a | GIVEN valid item payload WHEN POST /api/cart/items THEN 201 returned with item details | API |
+| AC-001-02b | GIVEN item is out of stock WHEN POST /api/cart/items THEN 409 returned with error message | API |
+| AC-001-03a | GIVEN price is 10.005 WHEN calculateTotal() runs THEN result rounds to 10.01 | Unit |
+| AC-001-04a | GIVEN cart has 3 items WHEN service AND DB restart THEN cart still has 3 items after recovery | Integration |
 
 **Bad Examples (avoid):**
-- [ ] Cart works correctly (too vague)
-- [ ] System is fast (not measurable)
-- [ ] User has good experience (subjective)
+- Cart works correctly (too vague, no GWT)
+- System is fast (not measurable, no GWT)
+- User has good experience (subjective, no GWT)
+- User can add items to cart (missing GIVEN/WHEN/THEN structure)
+- Missing Test Type column (downstream testing cannot route)
+- Using "Manual" as Test Type (all ACs must be automatable)
 
 ---
 
@@ -195,13 +220,22 @@ Format: `- **Name:** [Purpose, version if known]`
 ```markdown
 ## Linked Mockups
 
-| Mockup | Type | Path | Description |
-|--------|------|------|-------------|
-| Dashboard Main | HTML | [mockups/dashboard-v1.html](mockups/dashboard-v1.html) | Main dashboard layout |
-| Settings Panel | HTML | [mockups/settings.html](mockups/settings.html) | User settings page |
+| Mockup | Type | Path | Description | Status | Linked Date |
+|--------|------|------|-------------|--------|-------------|
+| Dashboard Main | HTML | [mockups/dashboard-v1.html](mockups/dashboard-v1.html) | Main dashboard layout | current | 03-11-2026 |
+| Settings Panel | HTML | [mockups/settings.html](mockups/settings.html) | User settings page | current | 03-11-2026 |
 
-> **Note:** UI/UX requirements below are derived from these mockups.
+> **Note:** UI/UX requirements and acceptance criteria below are derived from mockups marked as "current".
+> Mockups marked as "outdated" are directional references only — do not use for AC comparison.
+>
+> **Conflict Resolution:** If specification and mockup diverge, compare Linked Date vs spec Last Updated.
+> If the mockup is newer and not stale → mockup takes precedence (update spec to match).
+> If the spec is newer → spec takes precedence (mockup may need refresh).
 ```
+
+**Status values:** `current` (actively used for ACs) or `outdated` (directional only)
+
+**Linked Date:** The date the mockup was linked to this specification. Used for temporal conflict resolution — when spec and mockup diverge, the newer artifact takes precedence (unless the mockup is marked "outdated").
 
 ---
 
@@ -258,6 +292,7 @@ When analyzing mockups, extract:
 ## Specification Quality Checklist
 
 - [ ] All acceptance criteria are testable
+- [ ] All acceptance criteria have a Test Type assigned (UI/API/Unit/Integration)
 - [ ] User stories provide clear value
 - [ ] Functional requirements are complete
 - [ ] Non-functional requirements defined
