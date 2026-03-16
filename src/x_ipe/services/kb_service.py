@@ -130,6 +130,7 @@ class KBConfig:
     ai_librarian: Dict[str, Any] = field(default_factory=lambda: {
         'enabled': False,
         'intake_folder': '.intake',
+        'skill': 'x-ipe-tool-kb-librarian',
     })
 
     def to_dict(self) -> Dict[str, Any]:
@@ -842,3 +843,101 @@ class KBService:
                 )
         except ImportError:
             raise ValueError(".7z extraction requires py7zr library")
+
+    # ------------------------------------------------------------------
+    # Intake status management (FEATURE-049-F)
+    # ------------------------------------------------------------------
+
+    INTAKE_STATUS_FILE = '.intake-status.json'
+
+    def _read_intake_status(self) -> Dict[str, Any]:
+        """Read .intake-status.json from .intake/ folder.
+
+        Returns empty dict on missing or corrupted file.
+        """
+        status_path = self.kb_root / INTAKE_FOLDER / self.INTAKE_STATUS_FILE
+        if not status_path.exists():
+            return {}
+        try:
+            with open(status_path, 'r', encoding='utf-8') as fh:
+                data = json.load(fh)
+            if not isinstance(data, dict):
+                return {}
+            return data
+        except (json.JSONDecodeError, OSError):
+            import logging
+            logging.getLogger(__name__).warning(
+                'Corrupted %s — treating all intake files as pending',
+                status_path,
+            )
+            return {}
+
+    def _write_intake_status(self, data: Dict[str, Any]) -> None:
+        """Write intake status dict atomically."""
+        status_path = self.kb_root / INTAKE_FOLDER / self.INTAKE_STATUS_FILE
+        self._write_json(status_path, data)
+
+    @x_ipe_tracing()
+    def get_intake_files(self) -> Dict[str, Any]:
+        """List .intake/ files merged with status from .intake-status.json.
+
+        Returns ``{"files": [...], "stats": {"total": N, "pending": N, ...}}``.
+        """
+        intake_dir = self.kb_root / INTAKE_FOLDER
+        if not intake_dir.is_dir():
+            return {'files': [], 'stats': {'total': 0, 'pending': 0, 'processing': 0, 'filed': 0}}
+
+        status_data = self._read_intake_status()
+        files: List[Dict[str, Any]] = []
+
+        try:
+            entries = sorted(intake_dir.iterdir(), key=lambda p: p.name.lower())
+        except PermissionError:
+            return {'files': [], 'stats': {'total': 0, 'pending': 0, 'processing': 0, 'filed': 0}}
+
+        for entry in entries:
+            if not entry.is_file() or entry.name == self.INTAKE_STATUS_FILE:
+                continue
+            stat = entry.stat()
+            entry_status = status_data.get(entry.name, {})
+            files.append({
+                'name': entry.name,
+                'path': f'{INTAKE_FOLDER}/{entry.name}',
+                'size_bytes': stat.st_size,
+                'modified_date': date.fromtimestamp(stat.st_mtime).isoformat(),
+                'file_type': entry.suffix.lstrip('.') if entry.suffix else '',
+                'status': entry_status.get('status', 'pending'),
+                'destination': entry_status.get('destination'),
+            })
+
+        stats = {
+            'total': len(files),
+            'pending': sum(1 for f in files if f['status'] == 'pending'),
+            'processing': sum(1 for f in files if f['status'] == 'processing'),
+            'filed': sum(1 for f in files if f['status'] == 'filed'),
+        }
+        return {'files': files, 'stats': stats}
+
+    @x_ipe_tracing()
+    def update_intake_status(
+        self, filename: str, status: str, destination: str | None = None
+    ) -> Dict[str, Any]:
+        """Update a single file's status in .intake-status.json.
+
+        Raises ``ValueError`` if the file does not exist in ``.intake/``.
+        """
+        intake_dir = self.kb_root / INTAKE_FOLDER
+        file_path = intake_dir / filename
+        if not file_path.is_file() or not file_path.resolve().is_relative_to(intake_dir.resolve()):
+            raise ValueError(f'File not in .intake/: {filename}')
+
+        from datetime import datetime, timezone
+        data = self._read_intake_status()
+        data[filename] = {
+            'status': status,
+            'destination': destination,
+            'updated_at': datetime.now(timezone.utc).isoformat(),
+        }
+        self._write_intake_status(data)
+        self._invalidate_cache()
+        return {'ok': True, 'filename': filename, 'status': status, 'destination': destination}

@@ -35,6 +35,7 @@ class KBBrowseModal {
         this.activeSidebarFolder = 'all';
         this.uploadFolder = '/';
         this.uploadMode = 'normal';
+        this.intakeFilter = 'all';
         this._folderColorMap = {};
         this._onKbChanged = () => { if (this.overlay) this._refreshData(); };
         document.addEventListener('kb:changed', this._onKbChanged);
@@ -74,10 +75,11 @@ class KBBrowseModal {
 
     // ─── Data Loading ──────────────────────────────
     async _loadData() {
-        const [treeRes, filesRes, configRes] = await Promise.allSettled([
+        const [treeRes, filesRes, configRes, intakeRes] = await Promise.allSettled([
             fetch(KBBrowseModal.API.TREE),
             fetch(`${KBBrowseModal.API.FILES}?recursive=true`),
             fetch(KBBrowseModal.API.CONFIG),
+            fetch('/api/kb/intake'),
         ]);
         if (treeRes.status === 'fulfilled' && treeRes.value.ok) {
             const d = await treeRes.value.json();
@@ -90,6 +92,12 @@ class KBBrowseModal {
         if (configRes.status === 'fulfilled' && configRes.value.ok) {
             const d = await configRes.value.json();
             this.config = d.config || d || { tags: { lifecycle: [], domain: [] } };
+        }
+        if (intakeRes.status === 'fulfilled' && intakeRes.value.ok) {
+            const d = await intakeRes.value.json();
+            this._intakeStats = d.stats || { total: 0, pending: 0, processing: 0, filed: 0 };
+        } else {
+            this._intakeStats = { total: 0, pending: 0, processing: 0, filed: 0 };
         }
         this._buildFolderColorMap();
     }
@@ -225,7 +233,7 @@ class KBBrowseModal {
                     <div class="kb-sidebar-intake-link" data-action="show-intake">
                         <i class="bi bi-inbox"></i>
                         <span>\u{1F4E5} Intake</span>
-                        <span class="intake-badge">0</span>
+                        <span class="intake-badge">${this._intakeStats?.pending || 0}</span>
                     </div>
                 </div>
             </div>`;
@@ -599,45 +607,104 @@ class KBBrowseModal {
     async _renderIntakeScene() {
         const scene = this.overlay?.querySelector('[data-scene="intake"]');
         if (!scene) return;
-        const intakeFiles = await this._loadIntakeFiles();
-        this._updateIntakeBadges(intakeFiles.length);
-        const pending = intakeFiles.length;
-        const fileListHtml = intakeFiles.length > 0
-            ? intakeFiles.map(f => `
-                <div class="kb-intake-file-row" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f8fafc;border-radius:8px;margin-bottom:6px;">
-                    <i class="bi bi-file-earmark-text" style="font-size:16px;color:#8b5cf6;"></i>
-                    <span style="flex:1;font-size:13px;color:#1e293b;font-weight:500;">${this._escapeHtml(f.name)}</span>
-                    <span style="font-size:11px;color:#94a3b8;">${this._formatFileSize(f.size_bytes || 0)}</span>
-                    <span style="font-size:10px;color:#8b5cf6;background:#ede9fe;padding:2px 8px;border-radius:6px;">pending</span>
-                </div>`).join('')
-            : `<div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;">No files in intake. Drop or upload files to get started.</div>`;
+        const data = await this._loadIntakeFiles();
+        const allFiles = data.files || [];
+        const stats = data.stats || { total: 0, pending: 0, processing: 0, filed: 0 };
+        this._updateIntakeBadges(stats.pending);
+
+        // Filter by active intake filter
+        const filter = this.intakeFilter || 'all';
+        const files = filter === 'all' ? allFiles : allFiles.filter(f => f.status === filter);
+
+        const filterPill = (label, value, count) => {
+            const active = filter === value ? ' active' : '';
+            return `<span class="kb-filter-chip${active}" data-intake-filter="${value}">${label} <span style="opacity:0.7;">(${count})</span></span>`;
+        };
+
+        const statusBadge = (status) => {
+            const colors = { pending: '#f59e0b', processing: '#3b82f6', filed: '#10b981' };
+            const bgs = { pending: '#fef3c7', processing: '#dbeafe', filed: '#d1fae5' };
+            return `<span style="font-size:10px;color:${colors[status] || '#94a3b8'};background:${bgs[status] || '#f1f5f9'};padding:2px 8px;border-radius:6px;font-weight:600;">${status}</span>`;
+        };
+
+        const actionButtons = (f) => {
+            if (f.status === 'processing') {
+                return `<span style="font-size:11px;color:#94a3b8;font-style:italic;">processing…</span>`;
+            }
+            if (f.status === 'filed') {
+                return `
+                    <button class="kb-content-btn sm" data-action="intake-action" data-intake-op="view" data-intake-file="${this._escapeAttr(f.name)}" data-intake-dest="${this._escapeAttr(f.destination || '')}" title="View in KB"><i class="bi bi-arrow-right-circle"></i></button>
+                    <button class="kb-content-btn sm" data-action="intake-action" data-intake-op="undo" data-intake-file="${this._escapeAttr(f.name)}" data-intake-dest="${this._escapeAttr(f.destination || '')}" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button>`;
+            }
+            // pending
+            return `
+                <button class="kb-content-btn sm" data-action="intake-action" data-intake-op="preview" data-intake-file="${this._escapeAttr(f.name)}" title="Preview"><i class="bi bi-eye"></i></button>
+                <button class="kb-content-btn sm" data-action="intake-action" data-intake-op="assign" data-intake-file="${this._escapeAttr(f.name)}" title="Assign folder"><i class="bi bi-folder-symlink"></i></button>
+                <button class="kb-content-btn sm" data-action="intake-action" data-intake-op="remove" data-intake-file="${this._escapeAttr(f.name)}" title="Remove"><i class="bi bi-x-circle"></i></button>`;
+        };
+
+        const rowStyle = (status) => {
+            if (status === 'processing') return 'background:rgba(59,130,246,0.05);';
+            if (status === 'filed') return 'opacity:0.7;';
+            return '';
+        };
+
+        const fileListHtml = files.length > 0
+            ? `<table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead><tr style="border-bottom:1px solid #e2e8f0;color:#64748b;font-size:11px;text-transform:uppercase;">
+                    <th style="padding:8px 12px;text-align:left;">File</th>
+                    <th style="padding:8px 12px;text-align:right;">Size</th>
+                    <th style="padding:8px 12px;text-align:left;">Uploaded</th>
+                    <th style="padding:8px 12px;text-align:center;">Status</th>
+                    <th style="padding:8px 12px;text-align:left;">Destination</th>
+                    <th style="padding:8px 12px;text-align:right;">Actions</th>
+                </tr></thead>
+                <tbody>${files.map(f => `
+                    <tr style="border-bottom:1px solid #f1f5f9;${rowStyle(f.status)}">
+                        <td style="padding:8px 12px;"><i class="bi bi-file-earmark-text" style="color:#8b5cf6;margin-right:6px;"></i>${this._escapeHtml(f.name)}</td>
+                        <td style="padding:8px 12px;text-align:right;color:#94a3b8;">${this._formatFileSize(f.size_bytes || 0)}</td>
+                        <td style="padding:8px 12px;color:#94a3b8;">${this._formatDate(f.modified_date)}</td>
+                        <td style="padding:8px 12px;text-align:center;">${statusBadge(f.status)}</td>
+                        <td style="padding:8px 12px;color:#64748b;">${f.destination ? this._escapeHtml(f.destination) : '—'}</td>
+                        <td style="padding:8px 12px;text-align:right;white-space:nowrap;">${actionButtons(f)}</td>
+                    </tr>`).join('')}
+                </tbody></table>`
+            : `<div style="text-align:center;padding:40px 20px;color:#94a3b8;">
+                <i class="bi bi-inbox" style="font-size:40px;display:block;margin-bottom:12px;color:#c4b5fd;"></i>
+                <p style="font-size:14px;margin:0 0 8px;">No files in intake</p>
+                <p style="font-size:12px;margin:0;">Drop files here or click "Add files" to get started.</p>
+               </div>`;
 
         scene.innerHTML = `
             <div class="kb-content-header">
                 <div class="kb-content-header-left">
-                    <div class="kb-content-title"><i class="bi bi-inbox" style="color:#8b5cf6;"></i> AI Librarian \u2014 Intake</div>
+                    <div class="kb-content-title"><i class="bi bi-inbox" style="color:#8b5cf6;"></i> AI Librarian — Intake</div>
                 </div>
                 <div class="kb-content-header-right">
-                    <button class="kb-content-btn" data-action="back-to-browse"><i class="bi bi-arrow-left"></i> Back to Browse</button>
+                    <button class="kb-btn-ai-librarian" data-action="run-librarian" ${stats.pending === 0 ? 'disabled' : ''}>
+                        <span>✨</span> Run AI Librarian
+                    </button>
+                    <button class="kb-content-btn" data-action="back-to-browse"><i class="bi bi-arrow-left"></i> Back</button>
                 </div>
             </div>
-            <div class="kb-stats-bar">
-                <div class="kb-stat-item"><span class="kb-stat-num">${intakeFiles.length}</span> files</div>
-                <div class="kb-stat-item"><span class="kb-stat-num">${pending}</span> pending</div>
-                <div class="kb-stat-item"><span class="kb-stat-num">0</span> processing</div>
-                <div class="kb-stat-item"><span class="kb-stat-num">0</span> filed</div>
+            <div class="kb-stats-bar" style="display:flex;gap:16px;padding:8px 24px;flex-wrap:wrap;">
+                <div class="kb-stat-item" style="color:#8b5cf6;"><span class="kb-stat-num" style="font-weight:700;">${stats.total}</span> total</div>
+                <div class="kb-stat-item" style="color:#f59e0b;"><span class="kb-stat-num" style="font-weight:700;">${stats.pending}</span> pending</div>
+                <div class="kb-stat-item" style="color:#3b82f6;"><span class="kb-stat-num" style="font-weight:700;">${stats.processing}</span> processing</div>
+                <div class="kb-stat-item" style="color:#10b981;"><span class="kb-stat-num" style="font-weight:700;">${stats.filed}</span> filed</div>
             </div>
-            <div style="padding:12px 24px 0;display:flex;gap:10px;align-items:center;">
-                <button class="kb-btn-ai-librarian" data-action="run-librarian" ${intakeFiles.length === 0 ? 'disabled' : ''}>
-                    <span>\u2728</span> Run AI Librarian
-                    <span style="font-size:11px;font-weight:400;opacity:0.8;">\u2014 Organize ${intakeFiles.length} file${intakeFiles.length !== 1 ? 's' : ''}</span>
-                </button>
-                <div class="kb-intake-dropzone" data-action="trigger-intake-upload" style="padding:10px 18px;text-align:center;border:2px dashed #c4b5fd;border-radius:10px;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;">
-                    <i class="bi bi-plus-circle" style="font-size:16px;color:#8b5cf6;"></i>
+            <div style="padding:6px 24px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                ${filterPill('All', 'all', stats.total)}
+                ${filterPill('Pending', 'pending', stats.pending)}
+                ${filterPill('Processing', 'processing', stats.processing)}
+                ${filterPill('Filed', 'filed', stats.filed)}
+                <div style="flex:1;"></div>
+                <div class="kb-intake-dropzone" data-action="trigger-intake-upload" style="padding:8px 14px;text-align:center;border:2px dashed #c4b5fd;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                    <i class="bi bi-plus-circle" style="font-size:14px;color:#8b5cf6;"></i>
                     <span style="font-size:12px;color:#475569;">Add files</span>
                 </div>
             </div>
-            <div style="flex:1;overflow-y:auto;padding:16px 24px;">
+            <div style="flex:1;overflow-y:auto;padding:12px 24px;">
                 ${fileListHtml}
             </div>
         `;
@@ -824,6 +891,14 @@ class KBBrowseModal {
                 this._switchUploadMode(uploadModeBtn.dataset.uploadMode);
                 return;
             }
+
+            // Intake filter pill click
+            const intakeFilterChip = target.closest('[data-intake-filter]');
+            if (intakeFilterChip) {
+                this.intakeFilter = intakeFilterChip.dataset.intakeFilter;
+                this._renderIntakeScene();
+                return;
+            }
         });
 
         // Search inputs (debounced)
@@ -939,6 +1014,13 @@ class KBBrowseModal {
                 break;
             case 'run-librarian':
                 this._runAILibrarian();
+                break;
+            case 'intake-action':
+                this._handleIntakeAction(
+                    el.dataset.intakeOp,
+                    el.dataset.intakeFile,
+                    el.dataset.intakeDest || null
+                );
                 break;
             case 'toggle-upload-view':
                 this._toggleUploadView();
@@ -1093,8 +1175,93 @@ class KBBrowseModal {
         this._uploadIntakeFiles(files);
     }
 
+    async _handleIntakeAction(action, filename, destination) {
+        switch (action) {
+            case 'preview':
+                this._showArticle(`.intake/${filename}`);
+                break;
+            case 'assign': {
+                const folders = this._getFolderNames();
+                if (folders.length === 0) {
+                    if (typeof showToast === 'function') showToast('No folders available — create a folder first', 'warning');
+                    return;
+                }
+                // Show a simple folder picker dropdown
+                const picker = document.createElement('div');
+                picker.className = 'kb-upload-folder-dropdown';
+                picker.style.cssText = 'position:fixed;z-index:99999;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-height:200px;overflow-y:auto;padding:4px 0;';
+                const rect = document.activeElement?.getBoundingClientRect() || { top: 200, left: 200 };
+                picker.style.top = `${rect.bottom || 200}px`;
+                picker.style.left = `${rect.left || 200}px`;
+                folders.forEach(name => {
+                    const item = document.createElement('div');
+                    item.style.cssText = 'padding:8px 14px;cursor:pointer;font-size:13px;';
+                    item.textContent = `📁 ${name}`;
+                    item.addEventListener('mouseenter', () => item.style.background = '#f1f5f9');
+                    item.addEventListener('mouseleave', () => item.style.background = '');
+                    item.addEventListener('click', async () => {
+                        picker.remove();
+                        try {
+                            await fetch('/api/kb/intake/status', {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ filename, status: 'pending', destination: name })
+                            });
+                            this._refreshIntakeFiles();
+                        } catch { /* ignore */ }
+                    });
+                    picker.appendChild(item);
+                });
+                document.body.appendChild(picker);
+                const closePicker = (e) => { if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('click', closePicker); } };
+                setTimeout(() => document.addEventListener('click', closePicker), 0);
+                break;
+            }
+            case 'remove':
+                if (typeof showConfirmModal === 'function') {
+                    const ok = await showConfirmModal('Remove File', `Remove "${filename}" from intake?`);
+                    if (!ok) return;
+                }
+                try {
+                    await fetch(`/api/kb/files/${encodeURIComponent('.intake/' + filename)}`, { method: 'DELETE' });
+                    document.dispatchEvent(new CustomEvent('kb:changed'));
+                    this._refreshIntakeFiles();
+                } catch { /* ignore */ }
+                break;
+            case 'view':
+                if (destination) {
+                    this.activeSidebarFolder = destination;
+                    this._showScene('browse');
+                    this._renderSidebarFolders();
+                    this._renderBrowseContent();
+                }
+                break;
+            case 'undo':
+                if (!destination) return;
+                try {
+                    // Move file back from destination to .intake
+                    await fetch('/api/kb/files/move', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ source: `${destination}/${filename}`, target: `.intake/${filename}` })
+                    });
+                    // Reset status to pending
+                    await fetch('/api/kb/intake/status', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ filename, status: 'pending', destination: null })
+                    });
+                    document.dispatchEvent(new CustomEvent('kb:changed'));
+                    this._refreshIntakeFiles();
+                } catch (err) {
+                    if (typeof showToast === 'function') showToast(`Undo failed: ${err.message || 'unknown error'}`, 'error');
+                }
+                break;
+        }
+    }
+
     _runAILibrarian() {
-        const command = 'organize knowledge base intake files with AI Librarian --workflow-mode@Knowledge-Base-Implementation';
+        const command = 'organize knowledge base intake files with AI Librarian';
         if (!window.terminalManager?.sendCopilotPromptCommand) {
             navigator.clipboard?.writeText(command);
             if (typeof showToast === 'function') showToast('Command copied — paste into Copilot CLI', 'info');
@@ -1154,18 +1321,9 @@ class KBBrowseModal {
     }
 
     async _refreshIntakeFiles() {
-        const intakeFiles = await this._loadIntakeFiles();
-        this._updateIntakeBadges(intakeFiles.length);
-        // Update intake files list in browse upload panel
-        const filesEl = this.overlay?.querySelector('[data-role="intake-files"]');
-        if (filesEl) {
-            filesEl.innerHTML = intakeFiles.map(f => `
-                <div class="kb-intake-file">
-                    <i class="bi bi-file-earmark file-icon"></i>
-                    <span class="file-name">${this._escapeHtml(f.name)}</span>
-                    <span class="file-size">${this._formatFileSize(f.size_bytes || 0)}</span>
-                </div>`).join('');
-        }
+        const data = await this._loadIntakeFiles();
+        const intakeFiles = data.files || [];
+        this._updateIntakeBadges(data.stats?.pending || 0);
         // If intake scene is active, re-render it
         if (this.currentScene === 'intake') {
             this._renderIntakeScene();
@@ -1174,11 +1332,10 @@ class KBBrowseModal {
 
     async _loadIntakeFiles() {
         try {
-            const res = await fetch('/api/kb/files?folder=.intake&recursive=true');
-            if (!res.ok) return [];
-            const data = await res.json();
-            return data.files || [];
-        } catch { return []; }
+            const res = await fetch('/api/kb/intake');
+            if (!res.ok) return { files: [], stats: { total: 0, pending: 0, processing: 0, filed: 0 } };
+            return await res.json();
+        } catch { return { files: [], stats: { total: 0, pending: 0, processing: 0, filed: 0 } }; }
     }
 
     _updateIntakeBadges(count) {

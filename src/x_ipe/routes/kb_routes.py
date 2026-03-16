@@ -476,3 +476,48 @@ def upload_files():
         'total': len(results),
         'failed': len(errors)
     }), 201 if results else 400
+
+
+# ---------------------------------------------------------------------------
+# Intake (FEATURE-049-F)
+# ---------------------------------------------------------------------------
+
+
+@kb_bp.route('/api/kb/intake', methods=['GET'])
+@x_ipe_tracing()
+def get_intake():
+    """
+    GET /api/kb/intake
+
+    FEATURE-049-F: Return intake files with merged status and statistics.
+    """
+    svc = _get_kb_service_or_abort()
+    try:
+        return jsonify(svc.get_intake_files())
+    except Exception as exc:
+        return _error('INTERNAL_ERROR', str(exc), 500)
+
+
+@kb_bp.route('/api/kb/intake/status', methods=['PUT'])
+@x_ipe_tracing()
+def update_intake_status():
+    """
+    PUT /api/kb/intake/status
+
+    FEATURE-049-F: Update a single file's intake status.
+    Body: {"filename": "...", "status": "pending|processing|filed", "destination": "..."}
+    """
+    svc = _get_kb_service_or_abort()
+    data = request.get_json(force=True)
+    filename = (data.get('filename') or '').strip()
+    status = (data.get('status') or '').strip()
+    destination = data.get('destination')
+
+    if not filename or status not in ('pending', 'processing', 'filed'):
+        return _error('INVALID_INPUT', 'filename and valid status (pending|processing|filed) required', 400)
+
+    try:
+        result = svc.update_intake_status(filename, status, destination)
+        return jsonify(result)
+    except ValueError as exc:
+        return _error('FILE_NOT_FOUND', str(exc), 404)

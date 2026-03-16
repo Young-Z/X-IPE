@@ -111,7 +111,7 @@ class TestKBRootInitialization:
 
     def test_default_ai_librarian_settings(self, kb_service):
         config = json.loads((kb_service.config_path).read_text())
-        assert config['ai_librarian'] == {'enabled': False, 'intake_folder': '.intake'}
+        assert config['ai_librarian'] == {'enabled': False, 'intake_folder': '.intake', 'skill': 'x-ipe-tool-kb-librarian'}
 
     def test_ensure_kb_root_idempotent(self, kb_service):
         """Calling ensure_kb_root again doesn't overwrite existing config."""
@@ -938,3 +938,214 @@ class TestRouteUpload:
         resp = client.post('/api/kb/upload', data={},
                            content_type='multipart/form-data')
         assert resp.status_code == 400
+
+
+# ===========================================================================
+# FEATURE-049-F: Intake Status Management
+# ===========================================================================
+
+class TestIntakeReadStatus:
+    """Tests for _read_intake_status() and _write_intake_status()."""
+
+    def test_read_status_missing_file(self, kb_service):
+        """Missing .intake-status.json returns empty dict."""
+        result = kb_service._read_intake_status()
+        assert result == {}
+
+    def test_read_status_corrupted_json(self, kb_service):
+        """Corrupted JSON returns empty dict."""
+        intake_dir = kb_service.kb_root / '.intake'
+        intake_dir.mkdir(parents=True, exist_ok=True)
+        status_path = intake_dir / '.intake-status.json'
+        status_path.write_text('NOT VALID JSON {{{', encoding='utf-8')
+        result = kb_service._read_intake_status()
+        assert result == {}
+
+    def test_read_status_not_dict(self, kb_service):
+        """Non-dict JSON returns empty dict."""
+        intake_dir = kb_service.kb_root / '.intake'
+        intake_dir.mkdir(parents=True, exist_ok=True)
+        status_path = intake_dir / '.intake-status.json'
+        status_path.write_text('["a list"]', encoding='utf-8')
+        result = kb_service._read_intake_status()
+        assert result == {}
+
+    def test_write_and_read_status(self, kb_service):
+        """Write status and read it back."""
+        intake_dir = kb_service.kb_root / '.intake'
+        intake_dir.mkdir(parents=True, exist_ok=True)
+        data = {'test.md': {'status': 'pending', 'destination': None, 'updated_at': '2026-01-01T00:00:00Z'}}
+        kb_service._write_intake_status(data)
+        result = kb_service._read_intake_status()
+        assert result == data
+
+
+class TestGetIntakeFiles:
+    """Tests for get_intake_files()."""
+
+    def test_empty_intake_no_folder(self, kb_service):
+        """No .intake/ folder returns empty result."""
+        result = kb_service.get_intake_files()
+        assert result == {'files': [], 'stats': {'total': 0, 'pending': 0, 'processing': 0, 'filed': 0}}
+
+    def test_empty_intake_folder(self, kb_service):
+        """Empty .intake/ folder returns empty result."""
+        (kb_service.kb_root / '.intake').mkdir(parents=True)
+        result = kb_service.get_intake_files()
+        assert result['files'] == []
+        assert result['stats']['total'] == 0
+
+    def test_files_without_status(self, kb_service):
+        """Files in .intake/ with no status.json default to pending."""
+        intake = kb_service.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        (intake / 'notes.md').write_text('Hello', encoding='utf-8')
+        (intake / 'doc.txt').write_text('World', encoding='utf-8')
+        result = kb_service.get_intake_files()
+        assert result['stats']['total'] == 2
+        assert result['stats']['pending'] == 2
+        assert all(f['status'] == 'pending' for f in result['files'])
+        assert all(f['destination'] is None for f in result['files'])
+
+    def test_files_with_status(self, kb_service):
+        """Files merged with .intake-status.json entries."""
+        intake = kb_service.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        (intake / 'a.md').write_text('A', encoding='utf-8')
+        (intake / 'b.pdf').write_bytes(b'\x00' * 100)
+        kb_service._write_intake_status({
+            'a.md': {'status': 'filed', 'destination': 'guides/', 'updated_at': '2026-01-01T00:00:00Z'},
+            'b.pdf': {'status': 'processing', 'destination': None, 'updated_at': '2026-01-01T00:00:00Z'},
+        })
+        result = kb_service.get_intake_files()
+        assert result['stats']['total'] == 2
+        assert result['stats']['filed'] == 1
+        assert result['stats']['processing'] == 1
+        by_name = {f['name']: f for f in result['files']}
+        assert by_name['a.md']['status'] == 'filed'
+        assert by_name['a.md']['destination'] == 'guides/'
+        assert by_name['b.pdf']['status'] == 'processing'
+
+    def test_stale_status_entries_ignored(self, kb_service):
+        """Status entries for deleted files are silently ignored."""
+        intake = kb_service.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        (intake / 'exists.md').write_text('Hi', encoding='utf-8')
+        kb_service._write_intake_status({
+            'exists.md': {'status': 'pending', 'destination': None},
+            'deleted.md': {'status': 'filed', 'destination': 'archive/'},
+        })
+        result = kb_service.get_intake_files()
+        assert result['stats']['total'] == 1
+        assert result['files'][0]['name'] == 'exists.md'
+
+    def test_status_json_excluded_from_files(self, kb_service):
+        """.intake-status.json is not listed as a file."""
+        intake = kb_service.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        (intake / 'note.md').write_text('Note', encoding='utf-8')
+        kb_service._write_intake_status({'note.md': {'status': 'pending'}})
+        result = kb_service.get_intake_files()
+        names = [f['name'] for f in result['files']]
+        assert '.intake-status.json' not in names
+
+    def test_file_metadata_fields(self, kb_service):
+        """Each file has expected metadata fields."""
+        intake = kb_service.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        (intake / 'readme.md').write_text('Hello World', encoding='utf-8')
+        result = kb_service.get_intake_files()
+        f = result['files'][0]
+        assert f['name'] == 'readme.md'
+        assert f['path'] == '.intake/readme.md'
+        assert f['size_bytes'] > 0
+        assert f['file_type'] == 'md'
+        assert 'modified_date' in f
+
+
+class TestUpdateIntakeStatus:
+    """Tests for update_intake_status()."""
+
+    def test_update_valid_file(self, kb_service):
+        """Successfully update status of existing intake file."""
+        intake = kb_service.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        (intake / 'doc.md').write_text('Content', encoding='utf-8')
+        result = kb_service.update_intake_status('doc.md', 'processing', 'guides/')
+        assert result['ok'] is True
+        assert result['status'] == 'processing'
+        assert result['destination'] == 'guides/'
+        # Verify persisted
+        status = kb_service._read_intake_status()
+        assert status['doc.md']['status'] == 'processing'
+
+    def test_update_nonexistent_file_raises(self, kb_service):
+        """Updating status of a missing file raises ValueError."""
+        (kb_service.kb_root / '.intake').mkdir(parents=True)
+        with pytest.raises(ValueError, match='File not in .intake'):
+            kb_service.update_intake_status('missing.md', 'pending')
+
+    def test_update_multiple_times(self, kb_service):
+        """Multiple status updates accumulate correctly."""
+        intake = kb_service.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        (intake / 'a.md').write_text('A', encoding='utf-8')
+        (intake / 'b.md').write_text('B', encoding='utf-8')
+        kb_service.update_intake_status('a.md', 'processing')
+        kb_service.update_intake_status('b.md', 'filed', 'docs/')
+        status = kb_service._read_intake_status()
+        assert status['a.md']['status'] == 'processing'
+        assert status['b.md']['status'] == 'filed'
+        assert status['b.md']['destination'] == 'docs/'
+
+
+class TestIntakeRoutes:
+    """Tests for GET /api/kb/intake and PUT /api/kb/intake/status."""
+
+    def test_get_intake_empty(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        resp = client.get('/api/kb/intake')
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data['files'] == []
+        assert data['stats']['total'] == 0
+
+    def test_get_intake_with_files(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        intake = svc.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        (intake / 'test.md').write_text('Hello', encoding='utf-8')
+        resp = client.get('/api/kb/intake')
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data['stats']['total'] == 1
+        assert data['stats']['pending'] == 1
+
+    def test_put_intake_status_valid(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        intake = svc.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        (intake / 'note.md').write_text('Note', encoding='utf-8')
+        resp = client.put('/api/kb/intake/status',
+                          json={'filename': 'note.md', 'status': 'processing', 'destination': 'guides/'})
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data['ok'] is True
+
+    def test_put_intake_status_invalid(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        resp = client.put('/api/kb/intake/status',
+                          json={'filename': '', 'status': 'invalid'})
+        assert resp.status_code == 400
+
+    def test_put_intake_status_missing_file(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        (svc.kb_root / '.intake').mkdir(parents=True)
+        resp = client.put('/api/kb/intake/status',
+                          json={'filename': 'missing.md', 'status': 'pending'})
+        assert resp.status_code == 404

@@ -6,6 +6,10 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-906 | Acceptance Test | Execute acceptance tests for FEATURE-049-F (KB AI Librarian & Intake): classify 43 ACs by test type, run backend pytest + frontend vitest, document results | Zephyr 🌬️ | ✅ done | 03-16-2026 22:26:00 | [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/acceptance-test-cases.md) | x-ipe-task-based-code-refactor |
+| TASK-905 | Code Implementation | Implement FEATURE-049-F (KB AI Librarian & Intake): backend intake service methods + 2 routes in kb_service.py/kb_routes.py, fix _runAILibrarian() command, enhanced intake scene UI, per-file actions, sidebar badge, backend+frontend tests | Zephyr 🌬️ | ✅ done | 03-16-2026 14:30:00 | 03-16-2026 22:25:00 | x-ipe-task-based-feature-acceptance-test |
+| TASK-904 | Technical Design | Design FEATURE-049-F (KB AI Librarian & Intake) — intake status service, .intake-status.json schema, frontend intake view, config extension | Zephyr 🌬️ | ✅ done | 03-16-2026 14:00:00 | [technical-design.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/technical-design.md) | x-ipe-task-based-code-implementation |
+| TASK-903 | Feature Refinement | Refine FEATURE-049-F (KB AI Librarian & Intake) — create specification.md with 40 ACs, 8 FRs, mockup-linked, GWT format | Zephyr 🌬️ | ✅ done | 03-16-2026 13:48:00 | [specification.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md) | x-ipe-task-based-technical-design |
 | TASK-898 | Technical Design | Design FEATURE-037-B CR-002: ~15 lines in compose-idea-modal.js _selectFile() to add X-Converted header check + sandboxed iframe rendering. Same pattern as FEATURE-038-C CR-001 deliverable-viewer.js | Cipher 🔐 | ✅ done | 03-16-2026 07:17:00 | 03-16-2026 07:19:00 | x-ipe-task-based-code-implementation |
 | TASK-901 | Code Refactor | Assess and refactor FEATURE-038-C CR-001 code: _convert_docx/_convert_msg/_sanitize_converted_html in ideas_routes.py + X-Converted handling in deliverable-viewer.js. Result: No refactoring needed — code already clean (SRP, DRY, KISS, YAGNI). | Cipher 🔐 | ✅ done | 03-16-2026 07:28:00 | 03-16-2026 07:31:00 | x-ipe-task-based-feature-closing |
 | TASK-902 | Feature Closing | Close FEATURE-038-C CR-001: All ACs verified, code committed in v1.1.17, 755 tests pass, no refactoring needed | Cipher 🔐 | ✅ done | 03-16-2026 07:31:00 | 03-16-2026 07:35:00 | — |
@@ -140,11 +144,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 4
+- **Total Active:** 6
 - **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 867
+- **Completed (archived):** 868
 - **Reverted:** 8
 - **Pending Review:** 0
 - **Blocked:** 0
