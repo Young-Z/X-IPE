@@ -1,6 +1,6 @@
 # Technical Design: Compose Idea Modal — Link Existing & Re-Edit
 
-> Feature ID: FEATURE-037-B | Version: v1.1 | Last Updated: 2026-02-19
+> Feature ID: FEATURE-037-B | Version: v1.2 | Last Updated: 2026-03-16
 
 ---
 
@@ -17,6 +17,7 @@
 | `LinkExistingPanel` | File tree browser + preview panel for Link Existing toggle | New class in compose-idea-modal.js | #link-existing #file-tree #preview #compose-idea #frontend |
 | `StageGateChecker` | Reusable check: can a completed action be re-opened? | New utility in workflow-stage.js | #gate-check #re-open #workflow #stage #frontend |
 | `GET /api/ideas/file` | Return raw file content with path security validation | New endpoint in ideas_routes.py | #api #file-read #security #backend |
+| `LinkExistingPanel._selectFile()` (CR-002) | Add X-Converted header detection + sandboxed iframe rendering for .docx/.msg | Modify ~15 lines in compose-idea-modal.js | #preview #converted #docx #msg #frontend |
 
 ### Dependencies
 
@@ -779,3 +780,50 @@ class LinkExistingPanel {
 | Date | Phase | Change Summary |
 |------|-------|----------------|
 | 2026-02-19 | Initial Design | Technical design for FEATURE-037-B. Extends compose-idea-modal.js with LinkExistingPanel and edit mode. Adds StageGateChecker to workflow-stage.js. New GET /api/ideas/file endpoint. CR-001 enrichments: stage gate, confirmation dialog, edit mode with pre-loaded content. |
+| 2026-03-16 | CR-002 | Add .docx/.msg converted preview to Link Existing _selectFile(). Frontend-only change (~15 lines). Same pattern as FEATURE-038-C CR-001 deliverable-viewer.js: check X-Converted header → sandboxed iframe. Handle 413/415 errors. |
+
+---
+
+## CR-002: Converted Binary Preview in Link Existing
+
+### Design Summary
+
+**Scope:** Frontend-only change to `LinkExistingPanel._selectFile()` in `compose-idea-modal.js`.
+**Backend:** Already implemented by FEATURE-038-C CR-001 (shared `GET /api/ideas/file` endpoint returns `X-Converted: true` header for .docx/.msg files).
+
+### Implementation Pattern
+
+Reuse exact pattern from `deliverable-viewer.js` (lines 226-238):
+
+```javascript
+// In _selectFile(), after const resp = await fetch(...):
+// 1. Check X-Converted header
+const isConverted = resp.headers && resp.headers.get('X-Converted') === 'true';
+if (isConverted) {
+    const blob = new Blob([content], { type: 'text/html' });
+    const blobUrl = URL.createObjectURL(blob);
+    const iframe = document.createElement('iframe');
+    iframe.src = blobUrl;
+    iframe.setAttribute('sandbox', 'allow-same-origin');
+    iframe.style.cssText = 'width:100%;height:300px;border:none;';
+    this.previewEl.innerHTML = '';
+    this.previewEl.appendChild(iframe);
+    return;
+}
+// 2. Handle 413 (too large) and 415 (unsupported) errors
+// 3. Existing markdown rendering continues for .md files
+// 4. Other files: show escaped plain text
+```
+
+### Security
+
+- Sandboxed iframe: `sandbox="allow-same-origin"` (NO `allow-scripts`)
+- Backend already sanitizes converted HTML (strips script/iframe/object/embed/on* attributes)
+- Blob URL ensures no network requests from iframe content
+
+### Files Modified
+
+| File | Change | Lines |
+|------|--------|-------|
+| `src/x_ipe/static/js/features/compose-idea-modal.js` | Update `_selectFile()` with X-Converted detection + sandboxed iframe | ~15 lines |
+| `tests/frontend-js/compose-idea-modal.test.js` | Add unit tests for AC-031 through AC-035 | ~60 lines |

@@ -6,6 +6,10 @@
 | DAO-090 | 2026-03-16T04:06:00Z | TASK-891 | x-ipe-task-based-feature-refinement | instruction | 0.95 | Route to Technical Design for FEATURE-038-C CR-001 (.docx/.msg preview) |
 | DAO-093 | 2026-03-16T05:54:11Z | TASK-894 | x-ipe-task-based-feature-acceptance-test | answer | 0.95 | User questions why human-playground is next. Corrected: workflow DAG says acceptance_testing → code_refactor → feature_closing. human_playground is optional FEEDBACK stage, not next. |
 | DAO-094 | 2026-03-16T05:57:58Z | TASK-894 | x-ipe-task-based-feature-acceptance-test | instruction | 0.93 | Two units: (0) proceed with CR-001 pipeline → code_refactor, (1) update human-playground skill to be human-initiated only via x-ipe-meta-skill-creator |
+| DAO-095 | 2026-03-16T06:59:02Z | TASK-895 | N/A | instruction | 0.92 | New CR on FEATURE-037-B: extend .docx/.msg preview to ideation (compose-idea-modal.js _selectFile). Backend already done via FEATURE-038-C CR-001 shared endpoint. Frontend-only change needed. |
+| DAO-096 | 2026-03-16T07:07:23Z | TASK-895 | x-ipe-task-based-change-request | approval | 0.95 | User confirms: proceed with CR on FEATURE-037-B for .docx/.msg preview in ideation |
+| DAO-097 | 2026-03-16T07:10:00Z | TASK-896 | x-ipe-task-based-change-request | approval | 0.96 | CR-002 classification as MODIFICATION to FEATURE-037-B confirmed. Same users, same UI, same endpoint, ~15 LOC frontend change. |
+| DAO-097 | 2026-03-16T07:10:00Z | TASK-896 | x-ipe-task-based-change-request | approval | 0.96 | Confirm CR-002 classification as MODIFICATION to FEATURE-037-B; approve Phase 5 (documentation) |
 
 ## DAO-080
 - **Timestamp:** 2026-03-16T02:09:33Z
@@ -435,3 +439,113 @@
 
 ### Follow-up
 > Execute sequentially: Unit 1 first (skill update is quick, changes workflow understanding), then Unit 0 (code_refactor for CR-001).
+
+## DAO-095
+- **Timestamp:** 2026-03-16T06:59:02Z
+- **Task ID:** TASK-895
+- **Feature ID:** FEATURE-037-B
+- **Workflow:** N/A
+- **Calling Skill:** N/A
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.92
+
+### Message
+> for the docx and msg file, we also need to support the preview in ideation
+
+### Guidance Returned
+> New Change Request on FEATURE-037-B (Compose Idea Modal — Link Existing). The backend conversion for .docx/.msg is already in place via FEATURE-038-C CR-001 (shared endpoint GET /api/ideas/file). The frontend compose-idea-modal.js _selectFile() method needs to detect the X-Converted header and render converted HTML in a sandboxed iframe, same pattern as deliverable-viewer.js. This is a frontend-only CR.
+
+### Rationale
+> User is expanding the .docx/.msg preview scope to ideation. Since the backend endpoint is shared, only the frontend ideation code (compose-idea-modal.js) needs updating. This is a separate CR on FEATURE-037-B, not an extension of FEATURE-038-C CR-001. Engineering workflow: start with change-request skill.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-change-request"
+>     match_strength: "strong"
+>     reason: "New scope change on FEATURE-037-B — same .docx/.msg preview but in ideation context"
+
+### Instruction Units
+> - **Unit 0:** disposition=instruction, skill=x-ipe-task-based-change-request (strong match). New CR on FEATURE-037-B for .docx/.msg preview in ideation.
+
+### Follow-up
+> Create task, load x-ipe-task-based-change-request skill, process CR for FEATURE-037-B.
+
+## DAO-096
+- **Timestamp:** 2026-03-16T07:07:23Z
+- **Task ID:** TASK-895
+- **Feature ID:** FEATURE-037-B
+- **Workflow:** N/A
+- **Calling Skill:** x-ipe-task-based-change-request
+- **Source:** human
+- **Disposition:** approval
+- **Confidence:** 0.95
+
+### Message
+> yes
+
+### Guidance Returned
+> User confirms: proceed with Change Request on FEATURE-037-B for .docx/.msg preview in ideation.
+
+### Rationale
+> Simple confirmation of proposed action. No ambiguity.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-change-request"
+>     match_strength: "strong"
+>     reason: "Confirmed CR on FEATURE-037-B"
+
+### Instruction Units
+> - **Unit 0:** disposition=approval, skill=x-ipe-task-based-change-request (strong match)
+
+### Follow-up
+> Proceed with x-ipe-task-based-change-request for FEATURE-037-B CR-001.
+
+## DAO-097
+- **Timestamp:** 2026-03-16T07:10:00Z
+- **Task ID:** TASK-896
+- **Feature ID:** FEATURE-037-B
+- **Workflow:** N/A
+- **Calling Skill:** x-ipe-task-based-change-request
+- **Source:** ai
+- **Disposition:** approval
+- **Confidence:** 0.96
+
+### Message
+> CR-002 on FEATURE-037-B requests classification confirmation. The CR adds .docx/.msg converted preview to ideation (compose-idea-modal.js `_selectFile`). Agent classified as MODIFICATION (not new feature) with 5 conflicts found (4 expected, 1 unexpected-low). No blockers. Requesting approval to proceed to Phase 5 (documentation updates).
+
+### Guidance Returned
+> **Approved.** Classification as MODIFICATION to FEATURE-037-B is correct. Proceed to Phase 5 (documentation). The reasoning is sound: same users, same UI surface (`compose-idea-modal.js`), same backend endpoint (already implemented via FEATURE-038-C CR-001), frontend-only change (~15 lines). All 5 conflicts are well-understood and mitigations are straightforward. The unexpected-low conflict (FEATURE-038-C CR-001 missing cross-reference) is cosmetic and non-blocking.
+
+### Rationale
+> **High confidence (0.96)** because all four MODIFICATION indicators are met: (1) same feature boundary — `_selectFile()` in compose-idea-modal.js is already part of FEATURE-037-B; (2) same user type — ideation users; (3) no new API surface — backend `/api/ideas/convert-preview` already exists from FEATURE-038-C CR-001; (4) minimal scope — ~15 lines of frontend code. The 5 conflicts break down cleanly: 3 spec updates (AC-004, AC-005, FR-037-B.3) are expected when extending supported formats, 1 code gap is the actual work, and 1 cross-reference omission is low-risk. No scenario exists where this should be a new feature.
+
+### Suggested Skills
+> suggested_skills: []
+
+### Instruction Units
+> - **Unit 0:** disposition=approval
+
+### Follow-up
+> Agent should proceed to Phase 5 of x-ipe-task-based-change-request: update specification (AC-004, AC-005, FR-037-B.3) and technical design to reflect CR-002 scope.
+
+---
+
+## DAO-098
+
+| Field | Value |
+|-------|-------|
+| Timestamp | 2026-03-16T07:28:00Z |
+| Source | human |
+| Task | FEATURE-038-C CR-001 |
+| Disposition | instruction |
+| Confidence | 0.97 |
+
+**Message:** "let's work on FEATURE-038-C CR-001 to complete process"
+
+**Unit 0:** Complete remaining pipeline (code_refactor → feature_closing) for FEATURE-038-C CR-001. All implementation and acceptance testing already done (TASK-890–894). Proceed with code_refactor then feature_closing.
+
+**Suggested Skills:** x-ipe-task-based-code-refactor → x-ipe-task-based-feature-closing
+
+**Execution Plan:** sequential — [[0]] (single unit, two sequential skills)

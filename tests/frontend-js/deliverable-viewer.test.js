@@ -216,8 +216,8 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
       const DV = globalThis.DeliverableViewer;
       expect(DV).toBeDefined();
       const viewer = new DV({ workflowName: 'hello' });
-      // Use a non-image binary file (e.g. .docx) to test the 415 fallback
-      await viewer.showPreview('document.docx');
+      // Use a non-convertible binary file (e.g. .zip) to test the 415 fallback
+      await viewer.showPreview('archive.zip');
       expect(document.querySelector('.deliverable-preview').textContent).toContain('Binary');
     });
 
@@ -601,7 +601,7 @@ describe('CR-001: Convertible Binary Preview (.docx / .msg)', () => {
     expect(iframe.getAttribute('sandbox')).toBe('allow-same-origin');
   });
 
-  it('AC-038-C.04c: shows size message for 413 response', async () => {
+  it('AC-038-C.04f: shows size message for 413 response', async () => {
     const DV = globalThis.DeliverableViewer;
     if (!DV) return;
 
@@ -637,7 +637,7 @@ describe('CR-001: Convertible Binary Preview (.docx / .msg)', () => {
     expect(content.textContent.toLowerCase()).toContain('binary file');
   });
 
-  it('AC-038-C.04d: iframe has no allow-scripts for converted content', async () => {
+  it('AC-038-C.04g: iframe has no allow-scripts for converted content', async () => {
     const DV = globalThis.DeliverableViewer;
     if (!DV) return;
 

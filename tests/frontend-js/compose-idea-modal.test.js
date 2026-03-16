@@ -1221,3 +1221,105 @@ describe('KB Reference persistence on clear/remove', () => {
     expect(body.kb_references).toEqual(['x-ipe-docs/kb/b.md']);
   });
 });
+
+// CR-002: Converted binary preview in Link Existing (_selectFile)
+describe('LinkExistingPanel — CR-002 converted binary preview', () => {
+  let panel, container;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    // Mock URL.createObjectURL
+    globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+    globalThis.URL.revokeObjectURL = vi.fn();
+  });
+
+  function createPanel(fetchMock) {
+    globalThis.fetch = fetchMock;
+    panel = new LinkExistingPanel(container, { onSelect: () => {} });
+    panel.render();
+    return panel;
+  }
+
+  it('AC-031: renders .docx converted HTML in sandboxed iframe', async () => {
+    const headers = new Headers({ 'X-Converted': 'true', 'Content-Type': 'text/html' });
+    const treeFetch = vi.fn(async (url) => {
+      if (url.includes('/api/ideas/tree')) return { ok: true, json: async () => ({ tree: [] }) };
+      return { ok: true, status: 200, headers, text: async () => '<h1>Document Content</h1>' };
+    });
+    createPanel(treeFetch);
+    const itemEl = document.createElement('div');
+    itemEl.classList.add('link-existing-item');
+
+    await panel._selectFile(itemEl, 'ideas/test/file.docx');
+
+    const iframe = panel.previewEl.querySelector('iframe');
+    expect(iframe).not.toBeNull();
+    expect(iframe.getAttribute('sandbox')).toBe('allow-same-origin');
+    expect(iframe.src).toContain('blob:');
+    expect(URL.createObjectURL).toHaveBeenCalled();
+  });
+
+  it('AC-032: renders .msg converted HTML in sandboxed iframe', async () => {
+    const headers = new Headers({ 'X-Converted': 'true', 'Content-Type': 'text/html' });
+    const treeFetch = vi.fn(async (url) => {
+      if (url.includes('/api/ideas/tree')) return { ok: true, json: async () => ({ tree: [] }) };
+      return { ok: true, status: 200, headers, text: async () => '<div>From: sender@test.com</div>' };
+    });
+    createPanel(treeFetch);
+    const itemEl = document.createElement('div');
+    itemEl.classList.add('link-existing-item');
+
+    await panel._selectFile(itemEl, 'ideas/test/email.msg');
+
+    const iframe = panel.previewEl.querySelector('iframe');
+    expect(iframe).not.toBeNull();
+    expect(iframe.getAttribute('sandbox')).toBe('allow-same-origin');
+  });
+
+  it('AC-033: shows error message for 413 (file too large)', async () => {
+    const treeFetch = vi.fn(async (url) => {
+      if (url.includes('/api/ideas/tree')) return { ok: true, json: async () => ({ tree: [] }) };
+      return { ok: false, status: 413, headers: new Headers() };
+    });
+    createPanel(treeFetch);
+    const itemEl = document.createElement('div');
+    itemEl.classList.add('link-existing-item');
+
+    await panel._selectFile(itemEl, 'ideas/test/large.docx');
+
+    expect(panel.previewEl.textContent).toContain('File too large to preview');
+  });
+
+  it('AC-034: shows error message for 415 (unsupported)', async () => {
+    const treeFetch = vi.fn(async (url) => {
+      if (url.includes('/api/ideas/tree')) return { ok: true, json: async () => ({ tree: [] }) };
+      return { ok: false, status: 415, headers: new Headers() };
+    });
+    createPanel(treeFetch);
+    const itemEl = document.createElement('div');
+    itemEl.classList.add('link-existing-item');
+
+    await panel._selectFile(itemEl, 'ideas/test/corrupt.docx');
+
+    expect(panel.previewEl.textContent).toContain('Cannot preview this file');
+  });
+
+  it('AC-035: non-convertible file shows escaped plain text', async () => {
+    const headers = new Headers({ 'Content-Type': 'text/plain' });
+    const treeFetch = vi.fn(async (url) => {
+      if (url.includes('/api/ideas/tree')) return { ok: true, json: async () => ({ tree: [] }) };
+      return { ok: true, status: 200, headers, text: async () => '<script>alert("xss")</script>' };
+    });
+    createPanel(treeFetch);
+    const itemEl = document.createElement('div');
+    itemEl.classList.add('link-existing-item');
+
+    await panel._selectFile(itemEl, 'ideas/test/data.zip');
+
+    const pre = panel.previewEl.querySelector('pre');
+    expect(pre).not.toBeNull();
+    expect(pre.textContent).toContain('<script>alert("xss")</script>');
+    expect(pre.innerHTML).not.toContain('<script>');
+  });
+});

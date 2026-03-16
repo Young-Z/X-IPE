@@ -73,7 +73,7 @@ class TestConvertMsg:
         mock_msg.close.assert_called_once()
 
     def test_convert_msg_html_body_used_when_present(self):
-        """AC-038-C.04g: .msg with HTML body uses htmlBody instead of plain text."""
+        """AC-038-C.04b edge case: .msg with HTML body uses htmlBody instead of plain text."""
         from x_ipe.routes.ideas_routes import _convert_msg
         mock_msg = MagicMock()
         mock_msg.sender = 'alice@example.com'
@@ -116,7 +116,7 @@ class TestSanitizeConvertedHtml:
     """Unit tests for _sanitize_converted_html()."""
 
     def test_strips_script_tags(self):
-        """AC-038-C.04d: Removes <script> tags from converted HTML."""
+        """AC-038-C.04g: Removes <script> tags from converted HTML."""
         from x_ipe.routes.ideas_routes import _sanitize_converted_html
         html = '<p>Hello</p><script>alert("xss")</script><p>World</p>'
         result = _sanitize_converted_html(html)
@@ -126,14 +126,14 @@ class TestSanitizeConvertedHtml:
         assert '<p>World</p>' in result
 
     def test_strips_iframe_tags(self):
-        """AC-038-C.04d: Removes <iframe> tags."""
+        """AC-038-C.04g: Removes <iframe> tags."""
         from x_ipe.routes.ideas_routes import _sanitize_converted_html
         html = '<div><iframe src="evil.com"></iframe></div>'
         result = _sanitize_converted_html(html)
         assert '<iframe' not in result
 
     def test_strips_on_event_attributes(self):
-        """AC-038-C.04d: Removes on* event handler attributes."""
+        """AC-038-C.04g: Removes on* event handler attributes."""
         from x_ipe.routes.ideas_routes import _sanitize_converted_html
         html = '<p onclick="alert(1)" onmouseover="hack()">Text</p>'
         result = _sanitize_converted_html(html)
@@ -142,7 +142,7 @@ class TestSanitizeConvertedHtml:
         assert 'Text' in result
 
     def test_strips_object_embed_tags(self):
-        """AC-038-C.04d: Removes <object> and <embed> tags."""
+        """AC-038-C.04g: Removes <object> and <embed> tags."""
         from x_ipe.routes.ideas_routes import _sanitize_converted_html
         html = '<object data="x"></object><embed src="y"><p>Safe</p>'
         result = _sanitize_converted_html(html)
@@ -233,7 +233,7 @@ class TestFileConversionRoute:
         assert b'Email' in resp.data
 
     def test_oversized_file_returns_413(self, temp_project_dir, app_client):
-        """AC-038-C.04c: File >10MB returns 413."""
+        """AC-038-C.04f: File >10MB returns 413."""
         self._create_file(
             temp_project_dir,
             'x-ipe-docs/ideas/test-idea/big.docx',
@@ -274,7 +274,7 @@ class TestFileConversionRoute:
         assert b'# Hello' in resp.data
 
     def test_html_sanitization_applied(self, temp_project_dir, app_client):
-        """AC-038-C.04d: Converted HTML is sanitized before returning."""
+        """AC-038-C.04g: Converted HTML is sanitized before returning."""
         self._create_file(temp_project_dir, 'x-ipe-docs/ideas/test-idea/evil.docx', b'dummy')
         dirty_html = '<p>Good</p><script>alert(1)</script>'
         with patch('x_ipe.routes.ideas_routes._convert_docx', return_value=dirty_html):

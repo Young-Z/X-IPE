@@ -443,13 +443,15 @@ MAX_CONVERSION_SIZE = 10 * 1024 * 1024  # 10MB
 | Binary file clicked | Show "Binary file" placeholder |
 | Valid .docx (CR-001) | 200 + HTML + X-Converted → sandboxed iframe |
 | Valid .msg (CR-001) | 200 + HTML email layout → sandboxed iframe |
-| Corrupted .docx (CR-001) | 415 → "Preview unavailable for this file" |
-| Password-protected .docx (CR-001) | 415 → "Preview unavailable for this file" |
+| Corrupted .docx (CR-001) | 415 → "Preview unavailable for this file" (backend JSON); frontend shows generic "Binary file — cannot preview" for all 415s (see note below) |
+| Password-protected .docx (CR-001) | 415 → "Preview unavailable for this file" (backend JSON); frontend shows generic "Binary file — cannot preview" for all 415s |
 | .docx > 10MB (CR-001) | 413 → "File too large to preview (max 10MB)" |
 | .msg with no body (CR-001) | Shows metadata headers with empty body |
 | .msg with HTML body (CR-001) | Sanitized HTML body rendered |
 | .msg with plain text body (CR-001) | Body in `<pre>` tag |
 | mammoth import fails (CR-001) | 415 → "Preview unavailable for this file" |
+
+> **Note (AC-038-C.04e vs actual):** The backend returns distinct error messages for conversion failures ("Preview unavailable for this file") vs unconvertible binaries ("Binary file — cannot read as text"), both as 415. However, the frontend does not parse the JSON body — it uses a single hardcoded message ("Binary file — cannot preview") for all 415 responses. AC-038-C.04e specifies the former message should surface to the user. This is a known simplification in the current frontend implementation.
 
 ---
 

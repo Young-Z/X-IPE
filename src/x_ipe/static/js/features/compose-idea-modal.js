@@ -919,9 +919,33 @@ class LinkExistingPanel {
         this.previewEl.innerHTML = '<div class="link-existing-empty">Loading preview...</div>';
         try {
             const resp = await fetch(`/api/ideas/file?path=${encodeURIComponent(path)}`);
-            if (!resp.ok) throw new Error('Not found');
+            if (!resp.ok) {
+                if (resp.status === 413) {
+                    this.previewEl.innerHTML = '<div class="link-existing-empty">File too large to preview</div>';
+                } else if (resp.status === 415) {
+                    this.previewEl.innerHTML = '<div class="link-existing-empty">Cannot preview this file</div>';
+                } else {
+                    throw new Error('Not found');
+                }
+                return;
+            }
             const content = await resp.text();
-            if (typeof marked !== 'undefined') {
+
+            // CR-002: Handle converted binary files (.docx, .msg) via X-Converted header
+            const isConverted = resp.headers && resp.headers.get('X-Converted') === 'true';
+            if (isConverted) {
+                const blob = new Blob([content], { type: 'text/html' });
+                const blobUrl = URL.createObjectURL(blob);
+                const iframe = document.createElement('iframe');
+                iframe.src = blobUrl;
+                iframe.setAttribute('sandbox', 'allow-same-origin');
+                iframe.style.cssText = 'width:100%;height:300px;border:none;';
+                this.previewEl.innerHTML = '';
+                this.previewEl.appendChild(iframe);
+                return;
+            }
+
+            if (path.endsWith('.md') && typeof marked !== 'undefined') {
                 this.previewEl.innerHTML = `<div class="link-existing-preview-content">${marked.parse(content)}</div>`;
             } else {
                 this.previewEl.innerHTML = `<pre class="link-existing-preview-content">${this._escapeHtml(content)}</pre>`;

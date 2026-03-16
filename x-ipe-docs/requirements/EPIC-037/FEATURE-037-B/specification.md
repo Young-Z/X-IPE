@@ -2,9 +2,9 @@
 
 > Feature ID: FEATURE-037-B
 > Epic: EPIC-037 (Compose Idea Modal)
-> Version: v1.1
+> Version: v1.2
 > Status: Refined
-> Last Updated: 02-19-2026
+> Last Updated: 03-16-2026
 
 ## Version History
 
@@ -12,6 +12,7 @@
 |---------|------|-------------|
 | v1.0 | 02-19-2026 | Initial specification (Link Existing + Re-Edit) |
 | v1.1 | 02-19-2026 | CR-001: Enriched Re-Edit with stage gate, confirmation dialog, edit mode, file auto-detection |
+| v1.2 | 03-16-2026 | CR-002: Add .docx/.msg converted preview to Link Existing mode (X-Converted header detection) |
 
 ## Linked Mockups
 
@@ -65,8 +66,8 @@ The primary user is a developer running an X-IPE engineering workflow who needs 
 - **AC-001**: Clicking "Link Existing" toggle replaces the Create New content area with a file tree sidebar and preview panel.
 - **AC-002**: File tree fetches data from `GET /api/ideas/tree` and renders expandable folder/file hierarchy.
 - **AC-003**: A text input above the file tree filters items client-side as the user types (instant filter on folder and file names).
-- **AC-004**: Clicking a `.md` file in the tree renders its content in the preview panel using `marked.js`.
-- **AC-005**: Clicking a non-markdown file (`.pdf`, `.png`, `.txt`, etc.) shows file metadata (name, size, type) in the preview panel.
+- **AC-004**: Clicking a `.md` file in the tree renders its content in the preview panel using `marked.js`. Does not apply to files with `X-Converted: true` response header (see AC-031).
+- **AC-005**: Clicking a non-markdown, non-convertible file (`.pdf`, `.png`, `.txt`, etc.) shows file metadata (name, size, type) in the preview panel. Convertible binary files (`.docx`, `.msg`) are handled by AC-031–AC-035.
 - **AC-006**: "Confirm Link" button in the footer is disabled until a file is selected.
 - **AC-007**: On confirm, the selected file path and its root idea folder name are stored as deliverables via Workflow Manager API, and `compose_idea` auto-completes.
 - **AC-008**: Modal closes on success; workflow stage view refreshes.
@@ -105,6 +106,16 @@ The primary user is a developer running an X-IPE engineering workflow who needs 
 - **AC-029**: Visual styling (colors, spacing, typography) MUST be consistent with mockup — Slate/Emerald palette, DM Sans font, 8px spacing unit.
 - **AC-030**: Interactive elements shown in the mockup MUST be present and functional — toggle buttons, tree expand/collapse, search input, file selection highlight.
 
+### AC Group: Convertible Binary Preview in Link Existing (CR-002)
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|---------------------------|-----------|
+| AC-031 | GIVEN a `.docx` file is selected in the Link Existing file tree WHEN the backend returns HTTP 200 with `X-Converted: true` header THEN the preview panel renders the converted HTML in a sandboxed iframe (sandbox="allow-same-origin", no allow-scripts) | Unit |
+| AC-032 | GIVEN a `.msg` file is selected in the Link Existing file tree WHEN the backend returns HTTP 200 with `X-Converted: true` header THEN the preview panel renders the email content (sender, recipients, date, subject, body) in a sandboxed iframe | Unit |
+| AC-033 | GIVEN a `.docx` or `.msg` file larger than 10MB is selected WHEN the backend returns HTTP 413 THEN the preview panel shows "File too large to preview" error message | Unit |
+| AC-034 | GIVEN a `.docx` or `.msg` file that fails conversion is selected WHEN the backend returns HTTP 415 THEN the preview panel shows "Cannot preview this file" error message | Unit |
+| AC-035 | GIVEN a non-convertible, non-markdown file is selected (e.g., `.zip`, `.bin`) WHEN the backend returns the file content THEN the preview panel shows the content as escaped plain text (no X-Converted header) AND does NOT render it as HTML | Unit |
+
 ## Functional Requirements
 
 ### FR-037-B.1: Link Existing — File Tree Browser
@@ -133,9 +144,9 @@ The primary user is a developer running an X-IPE engineering workflow who needs 
 
 **Details:**
 - Input: Selected file path from tree
-- Process: Fetch file content via `GET /api/ideas/file?path={relative-path}`. For `.md` files, render via `marked.js`. For images (`.png`, `.jpg`), render inline. For other types, show metadata (name, size, extension).
+- Process: Fetch file content via `GET /api/ideas/file?path={relative-path}`. Check response header `X-Converted: true` first — if present, file is converted HTML (`.docx`/`.msg`) and should render in sandboxed iframe. Otherwise: for `.md` files, render via `marked.js`; for images (`.png`, `.jpg`), render inline; for other types, show as escaped plain text. Handle HTTP 413 (too large) and 415 (unsupported) with error messages.
 - Output: Rendered preview in right panel
-- Constraints: Preview is read-only, no editing
+- Constraints: Preview is read-only, no editing. Converted HTML uses `sandbox="allow-same-origin"` (no `allow-scripts`) for security.
 
 ### FR-037-B.4: Link Existing — Confirm & Link
 
@@ -198,6 +209,7 @@ The primary user is a developer running an X-IPE engineering workflow who needs 
 | NFR-037-B.1 | File tree loads within 500ms for up to 200 idea folders |
 | NFR-037-B.2 | Search filter responds within 100ms per keystroke (client-side) |
 | NFR-037-B.3 | Preview panel renders markdown within 300ms |
+| NFR-037-B.3a | Converted HTML preview (.docx/.msg) renders within 500ms including backend conversion (CR-002) |
 | NFR-037-B.4 | Stage gate check completes within 100ms (uses in-memory workflow JSON) |
 | NFR-037-B.5 | Path validation rejects traversal attempts without leaking file system information |
 | NFR-037-B.6 | No memory leaks: EasyMDE and event listeners cleaned up on every modal close (same as 037-A) |
@@ -210,7 +222,7 @@ The primary user is a developer running an X-IPE engineering workflow who needs 
 |-----------|---------------|-------|
 | File tree sidebar | Left panel in Link Existing mode | Expandable folders, file icons, selection highlight |
 | Search input | Text field above file tree | Placeholder "Search ideas..." |
-| Preview panel | Right panel in Link Existing mode | Rendered markdown or file metadata |
+| Preview panel | Right panel in Link Existing mode | Rendered markdown, converted HTML (sandboxed iframe for .docx/.msg), or escaped plain text |
 | Confirm Link button | Footer action button | Disabled until file selected, emerald accent |
 | Confirmation dialog | Modal overlay | "Re-open for editing?" with Confirm/Cancel (CR-001) |
 | Update Idea button | Footer action button in edit mode | Replaces "Submit Idea" label (CR-001) |
@@ -222,7 +234,7 @@ The primary user is a developer running an X-IPE engineering workflow who needs 
 2. User clicks "Link Existing" toggle → file tree + preview panel appear
 3. User optionally types in search to filter tree
 4. User clicks a folder to expand → clicks a file to select
-5. Preview panel shows file content
+5. Preview panel shows file content (markdown rendered via marked.js, .docx/.msg converted HTML in sandboxed iframe, other text as escaped plain text)
 6. User clicks "Confirm Link" → action completes → modal closes
 
 **Flow B — Re-Edit (CR-001):**
@@ -246,6 +258,8 @@ The primary user is a developer running an X-IPE engineering workflow who needs 
 |-------|----------|
 | Link Existing — no selection | Confirm Link disabled, preview shows "Select a file to preview" |
 | Link Existing — file selected | Confirm Link enabled, preview shows content |
+| Link Existing — converted file selected | Confirm Link enabled, preview shows converted HTML in sandboxed iframe (CR-002) |
+| Link Existing — file too large | Preview shows "File too large to preview" error (CR-002) |
 | Link Existing — empty tree | Message: "No existing ideas found. Use Create New instead." |
 | Re-Edit — gate passed | Confirmation dialog shown |
 | Re-Edit — gate failed | Error toast, no modal |
@@ -269,6 +283,7 @@ The primary user is a developer running an X-IPE engineering workflow who needs 
 |-----------|------|-------------|
 | EasyMDE | Library | Markdown editor (already in app) |
 | marked.js | Library | Markdown rendering for preview (already in app) |
+| FEATURE-038-C (CR-001) | Required | Backend `.docx`/`.msg` → HTML conversion via `GET /api/ideas/file` with `X-Converted: true` header (CR-002) |
 
 ## Business Rules
 
@@ -290,6 +305,10 @@ The primary user is a developer running an X-IPE engineering workflow who needs 
 | File path contains `..` or absolute path | API returns 403, request rejected |
 | Very large markdown file (>1MB) | Preview renders normally (marked.js handles large content) |
 | Non-UTF8 file selected for preview | Show metadata only (name, size), no content rendering |
+| .docx file selected in Link Existing | Backend converts to HTML, frontend renders in sandboxed iframe (CR-002) |
+| .msg file selected in Link Existing | Backend converts email to HTML, frontend renders sender/recipients/subject/body in sandboxed iframe (CR-002) |
+| .docx/.msg file > 10MB selected | Backend returns 413, preview shows "File too large to preview" (CR-002) |
+| Corrupt .docx/.msg file selected | Backend returns 415, preview shows "Cannot preview this file" (CR-002) |
 | Multiple users editing same workflow | Last write wins (no concurrency lock) |
 | Ideas tree has 500+ folders | Client-side filter may be slow — NFR-037-B.1 sets 500ms target |
 | Compose_idea status rolled back but modal close before save | Action stays as "pending" — user must re-compose or manual status reset |
