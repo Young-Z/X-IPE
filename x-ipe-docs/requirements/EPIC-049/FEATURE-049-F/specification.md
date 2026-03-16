@@ -1,7 +1,7 @@
 # Feature Specification: KB AI Librarian & Intake
 
 > Feature ID: FEATURE-049-F  
-> Version: v1.0  
+> Version: v1.1  
 > Status: Refined  
 > Last Updated: 03-16-2026
 
@@ -10,6 +10,7 @@
 | Version | Date | Description |
 |---------|------|-------------|
 | v1.0 | 03-16-2026 | Initial specification |
+| v1.1 | 03-16-2026 | CR-001: Added x-ipe-tool-kb-librarian skill to scope (was out-of-scope) |
 
 ## Linked Mockups
 
@@ -131,6 +132,47 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | AC-049-F-09c | GIVEN a filed file's destination folder no longer exists WHEN user clicks "View in KB" THEN an error toast is shown ("Destination folder not found") | UI |
 | AC-049-F-09d | GIVEN user uploads a file with the same name as an existing intake file WHEN upload completes THEN a numeric suffix is added to avoid overwriting (e.g., `file (1).md`) | Unit |
 
+### AC-049-F-10: Skill — Batch Processing
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-049-F-10a | GIVEN pending files exist in `.intake/` WHEN `x-ipe-tool-kb-librarian` skill is invoked via Copilot CLI THEN the skill reads all pending intake files AND updates each file's status to "processing" before starting analysis | Unit |
+| AC-049-F-10b | GIVEN some files have pre-assigned destinations (via UI "Assign folder") AND others have no destination WHEN the skill processes the batch THEN pre-assigned files are moved to their assigned destination AND unassigned files are analyzed by AI to determine the best destination folder | Unit |
+| AC-049-F-10c | GIVEN the `.intake/` folder has no pending files (all are "processing" or "filed") WHEN the skill is invoked THEN it prints "No pending intake files to process" and exits without error | Unit |
+| AC-049-F-10d | GIVEN the `.intake/` folder does not exist WHEN the skill is invoked THEN it prints "Intake folder not found — nothing to process" and exits without error | Unit |
+
+### AC-049-F-11: Skill — AI Content Analysis
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-049-F-11a | GIVEN a pending markdown file in `.intake/` with no pre-assigned destination WHEN the skill analyzes it THEN the skill reads the file content AND examines the existing KB folder structure AND selects the best-matching destination folder | Unit |
+| AC-049-F-11b | GIVEN a pending file WHEN the skill analyzes its content THEN the skill assigns lifecycle tags (from: Ideation, Requirement, Design, Implementation, Testing, Deployment, Maintenance) AND domain tags (from: API, Authentication, UI-UX, Database, Infrastructure, Security, Performance, Integration, Documentation, Analytics) based on content relevance | Unit |
+| AC-049-F-11c | GIVEN the AI determines a file should go to a folder that does not yet exist WHEN the skill processes the file THEN the skill creates the destination folder automatically before moving the file | Unit |
+
+### AC-049-F-12: Skill — Frontmatter Generation
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-049-F-12a | GIVEN a pending markdown file in `.intake/` WHEN the skill processes it THEN YAML frontmatter is generated with fields: `title`, `tags` (lifecycle + domain), `author`, `created`, and `auto_generated: true` | Unit |
+| AC-049-F-12b | GIVEN a pending non-markdown file (PDF, image, ZIP) in `.intake/` WHEN the skill processes it THEN the file is moved without frontmatter modification AND tags are tracked only in `.intake-status.json` | Unit |
+| AC-049-F-12c | GIVEN a markdown file already has partial frontmatter WHEN the skill processes it THEN existing frontmatter fields are preserved AND only missing fields are auto-populated (no overwriting) | Unit |
+
+### AC-049-F-13: Skill — File Movement & Status Updates
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-049-F-13a | GIVEN a file is being processed WHEN the skill moves it to the destination folder THEN the file is moved from `.intake/{filename}` to `{destination}/{filename}` via the KB service move API AND `.intake-status.json` is updated with status "filed" and the destination path | Unit |
+| AC-049-F-13b | GIVEN a file move fails (e.g., permission error, disk full) WHEN the skill encounters the error THEN the file remains in `.intake/` AND status stays "processing" AND the error is logged AND the skill continues processing remaining files | Unit |
+| AC-049-F-13c | GIVEN all files in the batch have been processed WHEN processing completes THEN the skill prints a terminal summary: count of files processed, list of destinations used (e.g., "3 files processed → docs/guides/, docs/references/") | Unit |
+
+### AC-049-F-14: Skill File & Configuration
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-049-F-14a | GIVEN the X-IPE project WHEN `.github/skills/x-ipe-tool-kb-librarian/` is inspected THEN a valid SKILL.md exists following the x-ipe tool skill template with: Purpose, Input Parameters, Operations, Output Result, Definition of Done | Unit |
+| AC-049-F-14b | GIVEN the skill SKILL.md WHEN the trigger patterns are inspected THEN it matches on: "organize knowledge base intake files with AI Librarian", "run AI Librarian", "organize intake" | Unit |
+| AC-049-F-14c | GIVEN the KB config has `ai_librarian.skill = "x-ipe-tool-kb-librarian"` WHEN the skill reads config THEN it uses the tag taxonomy from `kb-config.json` tags section for classification | Unit |
+
 ## Functional Requirements
 
 | ID | Requirement | Input | Process | Output |
@@ -143,6 +185,10 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | FR-049-F.6 | Per-File Actions | User clicks action button per file row | Execute action: Preview (show content), Assign (set destination), Remove (delete), View in KB (navigate), Undo (revert filed) | Action executed, intake view refreshed |
 | FR-049-F.7 | Statistics Bar | Intake file data | Calculate counts by status (total, pending, processing, filed) | Statistics badges displayed in header |
 | FR-049-F.8 | Config Extension | `kb-config.json` ai_librarian section | Read config; gate all intake features behind `enabled` flag | Features shown/hidden based on config |
+| FR-049-F.9 | AI Content Analysis | Pending intake file content + KB folder structure | Analyze content to determine best destination folder; assign lifecycle + domain tags based on relevance | Destination path + tag assignments per file |
+| FR-049-F.10 | Frontmatter Generation | Markdown file content + assigned tags | Generate/merge YAML frontmatter with title, tags, author, created, auto_generated=true; skip for non-markdown files | Updated markdown with frontmatter |
+| FR-049-F.11 | Batch File Processing | All pending intake files | Process each: set status → processing, analyze content, generate frontmatter (markdown only), move to destination, set status → filed | All pending files moved and tagged |
+| FR-049-F.12 | Skill File | x-ipe tool skill template | Create `.github/skills/x-ipe-tool-kb-librarian/SKILL.md` with trigger patterns, input/output contract, operations | Valid tool skill file |
 
 ## Non-Functional Requirements
 
@@ -152,6 +198,7 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | NFR-049-F.2 | Graceful degradation: corrupted `.intake-status.json` treated as all-pending | Error logged, no crash |
 | NFR-049-F.3 | Intake view loads within 500ms for up to 100 files | Performance |
 | NFR-049-F.4 | No new API routes — intake uses existing KB endpoints + filesystem | Simplicity (YAGNI) |
+| NFR-049-F.5 | Skill processes files non-destructively — original content is preserved, only frontmatter is added/merged | Data safety |
 
 ## UI/UX Requirements
 
@@ -185,11 +232,12 @@ Derived from mockup Scene 4:
 | KB File Upload | FEATURE-049-E | ✅ Done | Upload infrastructure, archive extraction, `POST /api/kb/upload` |
 | KB Sidebar & Navigation | FEATURE-049-B | ✅ Done | Sidebar "📥 Intake" entry placeholder |
 
-### External (Future)
+### External
 
 | Dependency | Description | Status |
 |------------|-------------|--------|
-| `x-ipe-tool-kb-librarian` skill | Actual AI classification, file moving, and tagging logic | ❌ Not yet created (separate task) |
+| `x-ipe-tool-kb-librarian` skill | AI classification, file moving, and tagging logic | 🔄 In scope (CR-001) |
+| `x-ipe-meta-skill-creator` skill | Required for creating the tool skill following X-IPE standards | ✅ Available |
 
 ## Business Rules
 
@@ -214,16 +262,16 @@ Derived from mockup Scene 4:
 | Very large `.intake/` (100+ files) | Pagination or virtual scrolling if needed (NFR-049-F.3) |
 | User uploads non-markdown file (PDF, ZIP, image) | Status tracked in `.intake-status.json` (not frontmatter) — works for all file types |
 | AI Librarian skill not yet installed | Button still works (sends command to CLI); skill absence is the CLI agent's concern |
+| Skill encounters a file it cannot classify | Move to a default "unsorted" folder, log warning, continue batch |
+| Skill processes a very large file (>10MB) | Same behavior — file is moved, frontmatter added if markdown |
 
 ## Out of Scope
 
-- **AI Librarian skill file** (`x-ipe-tool-kb-librarian/SKILL.md`) — separate task
-- **AI classification logic** — part of the skill, not this feature
-- **`auto_tag` / `auto_extract_archives` config** — skill-level behavior, add when skill is implemented
 - **`agent_write_allowlist` enforcement** — implemented when skill writes via API
 - **`kb-articles` workflow action context key** — workflow integration for the skill
 - **Batch operations** (select multiple files, bulk assign/remove) — future enhancement
 - **Drag-and-drop reordering** within intake table — not in mockup
+- **Sidecar `.meta.json` for non-markdown files** — YAGNI; tags tracked in status.json only
 
 ## Technical Considerations
 
@@ -233,7 +281,12 @@ Derived from mockup Scene 4:
 - Existing `GET /api/kb/files?folder=.intake` or tree API can list intake files — extend if needed for status merging
 - Config `KBConfig.ai_librarian` needs `skill` field added (default: `"x-ipe-tool-kb-librarian"`)
 - Frontend polls or refreshes intake view after AI Librarian runs to pick up status changes
+- Skill uses KB service methods: `get_intake_files()`, `update_intake_status()`, `move_file()`, `update_file()`, `_parse_frontmatter()`, `_auto_populate_frontmatter()`
+- Skill reads tag taxonomy from kb-config.json (`tags.lifecycle`, `tags.domain`) for AI classification
+- Non-markdown files: moved and status-tracked, but no frontmatter generation (WHAT not HOW)
+- Skill is a tool skill created via `x-ipe-meta-skill-creator` — file at `.github/skills/x-ipe-tool-kb-librarian/SKILL.md`
 
 ## Open Questions
 
 None — all questions resolved via DAO (see `x-ipe-docs/dao/26-03-16/decisions_made_feature_refinement.md`).
+CR-001 questions resolved: batch processing, destination priority (UI-assigned > AI), non-markdown handling, terminal summary, auto-create folders.

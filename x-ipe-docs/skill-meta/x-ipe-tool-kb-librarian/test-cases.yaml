@@ -1,0 +1,160 @@
+# Test Cases for x-ipe-tool-kb-librarian
+
+test_cases:
+  # ─── STRUCTURE TESTS ───
+  - id: TC-S01
+    ac: AC-S01
+    name: "SKILL.md exists with valid frontmatter"
+    type: must_pass
+    given: "candidate/SKILL.md file"
+    when: "parse YAML frontmatter"
+    then: "name field equals 'x-ipe-tool-kb-librarian'"
+    method: file_exists + yaml_parse
+
+  - id: TC-S02
+    ac: AC-S02
+    name: "references/examples.md exists with examples"
+    type: must_pass
+    given: "candidate/references/examples.md"
+    when: "check file contents"
+    then: "file exists and contains at least 1 example"
+    method: file_exists + content_check
+
+  - id: TC-S03
+    ac: AC-S03
+    name: "SKILL.md under 500 lines"
+    type: must_pass
+    given: "candidate/SKILL.md"
+    when: "count lines"
+    then: "line count < 500"
+    method: line_count
+
+  # ─── CONTENT TESTS ───
+  - id: TC-C01
+    ac: AC-C01
+    name: "All required sections present in order"
+    type: must_pass
+    given: "candidate/SKILL.md"
+    when: "parse section headers"
+    then: "14 sections in correct order"
+    method: section_parse
+
+  - id: TC-C02
+    ac: AC-C02
+    name: "Operations use XML structure"
+    type: must_pass
+    given: "candidate/SKILL.md"
+    when: "search for XML operation tags"
+    then: "contains <operation name=\"organize_intake\">"
+    method: regex_match
+
+  - id: TC-C03
+    ac: AC-C03
+    name: "Error Handling table with 3 columns"
+    type: must_pass
+    given: "candidate/SKILL.md"
+    when: "parse Error Handling table"
+    then: "table has columns Error, Cause, Resolution"
+    method: table_parse
+
+  # ─── BEHAVIORAL TESTS ───
+  - id: TC-B01
+    ac: AC-B01
+    name: "Reads KB config for tag taxonomy"
+    type: must_pass
+    given: "candidate/SKILL.md organize_intake operation"
+    when: "check operation steps"
+    then: "mentions loading kb-config.json and extracting tag taxonomy"
+    method: content_check
+
+  - id: TC-B02
+    ac: AC-B02
+    name: "Gets pending intake files"
+    type: must_pass
+    given: "candidate/SKILL.md organize_intake operation"
+    when: "check operation steps"
+    then: "mentions GET /api/kb/intake and filtering to pending"
+    method: content_check
+
+  - id: TC-B03
+    ac: AC-B03
+    name: "Sets status to processing before analysis"
+    type: must_pass
+    given: "candidate/SKILL.md organize_intake operation"
+    when: "check operation step ordering"
+    then: "status processing set BEFORE content read/analysis"
+    method: content_check
+
+  - id: TC-B04
+    ac: AC-B04
+    name: "Respects pre-assigned destinations"
+    type: must_pass
+    given: "candidate/SKILL.md organize_intake operation"
+    when: "check destination logic"
+    then: "pre-assigned destination checked first, AI fallback second"
+    method: content_check
+
+  - id: TC-B05
+    ac: AC-B05
+    name: "Markdown-only frontmatter"
+    type: must_pass
+    given: "candidate/SKILL.md organize_intake operation"
+    when: "check file type handling"
+    then: "markdown gets frontmatter, non-markdown explicitly skips"
+    method: content_check
+
+  - id: TC-B06
+    ac: AC-B06
+    name: "Moves files to destination"
+    type: must_pass
+    given: "candidate/SKILL.md organize_intake operation"
+    when: "check move step"
+    then: "file moved from .intake/ to destination folder"
+    method: content_check
+
+  - id: TC-B07
+    ac: AC-B07
+    name: "Prints terminal summary"
+    type: must_pass
+    given: "candidate/SKILL.md organize_intake operation"
+    when: "check summary step"
+    then: "summary includes count and destination folders"
+    method: content_check
+
+  # ─── SHOULD-PASS TESTS ───
+  - id: TC-C04
+    ac: AC-C04
+    name: "Triggers listed in When to Use"
+    type: should_pass
+    given: "candidate/SKILL.md When to Use section"
+    when: "parse triggers YAML"
+    then: "triggers list is non-empty"
+    method: yaml_parse
+
+  - id: TC-C05
+    ac: AC-C05
+    name: "Key Concepts in About"
+    type: should_pass
+    given: "candidate/SKILL.md About section"
+    when: "search for Key Concepts"
+    then: "contains '**Key Concepts:**'"
+    method: content_check
+
+  - id: TC-C06
+    ac: AC-C06
+    name: "Input Initialization subsection"
+    type: should_pass
+    given: "candidate/SKILL.md Input Parameters section"
+    when: "search for Input Initialization"
+    then: "subsection with <input_init> XML block exists"
+    method: section_parse
+
+  # ─── COULD-PASS TESTS ───
+  - id: TC-C07
+    ac: AC-C07
+    name: "Auto-create folders documented"
+    type: could_pass
+    given: "candidate/SKILL.md"
+    when: "search for folder creation"
+    then: "mentions creating destination folder if not exists"
+    method: content_check

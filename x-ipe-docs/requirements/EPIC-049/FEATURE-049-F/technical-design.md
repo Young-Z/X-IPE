@@ -1,6 +1,6 @@
 # Technical Design: KB AI Librarian & Intake
 
-> Feature ID: FEATURE-049-F | Version: v1.0 | Last Updated: 03-16-2026
+> Feature ID: FEATURE-049-F | Version: v1.1 | Last Updated: 03-16-2026
 
 ---
 
@@ -18,6 +18,7 @@
 | `KBConfig.ai_librarian` extension | Add `skill` field to ai_librarian config | Config schema | #kb #config #backend |
 | `GET /api/kb/intake` | Route returning intake files with merged status | Intake API | #kb #intake #api #route |
 | `PUT /api/kb/intake/status` | Route to update a file's intake status | Status update API | #kb #intake #api #route |
+| `.github/skills/x-ipe-tool-kb-librarian/SKILL.md` | Tool skill: AI-powered intake file organizer — analyzes content, assigns tags, generates frontmatter, moves files | Skill file | #kb #librarian #skill #tool |
 | `KBBrowseModal._renderIntakeScene()` | Full intake view: table, status badges, filters, statistics, per-file actions | Intake UI (mockup Scene 4) | #kb #intake #frontend #ui |
 | `KBBrowseModal._runAILibrarian()` fix | Remove --workflow-mode, use plain NL command | Command fix | #kb #intake #frontend |
 
@@ -367,6 +368,134 @@ In `_renderSidebarFolders()`, update the "📥 Intake" entry to show pending cou
 | Duplicate filename upload | Handled by existing upload route (numeric suffix) | kb_routes upload |
 | ai_librarian.enabled = false | Frontend hides all intake UI | KBBrowseModal |
 
+### Step 9: Create `x-ipe-tool-kb-librarian` Skill (CR-001)
+
+**Files:** `.github/skills/x-ipe-tool-kb-librarian/SKILL.md`
+**program_type:** skills
+**Created via:** `x-ipe-meta-skill-creator`
+
+#### Skill Architecture
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant CLI as Copilot CLI
+    participant Agent as Agent (executing skill)
+    participant KB as KB Service API
+    participant FS as Filesystem
+
+    User->>CLI: "✨ Run AI Librarian"
+    CLI->>Agent: NL command: "organize knowledge base intake files with AI Librarian"
+    Agent->>Agent: Load x-ipe-tool-kb-librarian SKILL.md
+    Agent->>KB: GET /api/kb/config (read tag taxonomy)
+    Agent->>KB: GET /api/kb/intake (get pending files)
+
+    loop For each pending file
+        Agent->>KB: PUT /api/kb/intake/status (status → "processing")
+        Agent->>FS: Read file content
+        Agent->>Agent: AI: analyze content → determine folder + tags
+        alt Markdown file
+            Agent->>Agent: Generate/merge YAML frontmatter
+            Agent->>KB: PUT /api/kb/files/{path} (write updated content)
+        end
+        Agent->>KB: POST /api/kb/files/move (move to destination)
+        Agent->>KB: PUT /api/kb/intake/status (status → "filed", destination)
+    end
+
+    Agent->>CLI: Print summary: "N files processed → folder1/, folder2/"
+```
+
+#### Skill State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> ReadConfig: Skill invoked
+    ReadConfig --> GetIntakeFiles: Config loaded
+    GetIntakeFiles --> CheckPending: Files retrieved
+    CheckPending --> Exit_NoPending: No pending files
+    CheckPending --> ProcessFile: Has pending files
+
+    state ProcessFile {
+        [*] --> SetProcessing
+        SetProcessing --> AnalyzeContent: Status updated
+        AnalyzeContent --> DetermineDestination: Content analyzed
+        DetermineDestination --> AssignTags: Folder selected
+        AssignTags --> GenerateFrontmatter: Tags assigned
+        GenerateFrontmatter --> MoveFile: Frontmatter ready (md) or skipped (non-md)
+        MoveFile --> SetFiled: File moved
+        SetFiled --> [*]: Status → filed
+    }
+
+    ProcessFile --> NextFile: File done
+    NextFile --> ProcessFile: More files
+    NextFile --> PrintSummary: All done
+    PrintSummary --> [*]
+    Exit_NoPending --> [*]
+```
+
+#### Skill SKILL.md Structure
+
+The skill follows the x-ipe tool skill template:
+
+```yaml
+# SKILL.md structure
+name: x-ipe-tool-kb-librarian
+description: "Organize knowledge base intake files — analyze content, assign tags, generate frontmatter, move to destination folders."
+triggers:
+  - "organize knowledge base intake files with AI Librarian"
+  - "run AI Librarian"
+  - "organize intake"
+
+input:
+  kb_root: "auto-detect from project"  # x-ipe-docs/knowledge-base/
+  intake_folder: ".intake"              # from kb-config.json
+
+operations:
+  - organize_intake:
+      1. Read KB config (tag taxonomy, folder structure)
+      2. Get all intake files via GET /api/kb/intake
+      3. Filter to status == "pending"
+      4. For each file:
+         a. Update status → "processing"
+         b. Read file content
+         c. AI: analyze → determine destination folder + lifecycle/domain tags
+         d. If destination pre-assigned in status.json → use it (skip AI folder selection)
+         e. If markdown: generate/merge frontmatter (title, tags, author, created, auto_generated=true)
+         f. If destination folder doesn't exist → create it
+         g. Move file from .intake/ to destination
+         h. Update status → "filed" with destination path
+      5. Print terminal summary
+
+output:
+  files_processed: int
+  destinations: list[str]
+  errors: list[str]  # files that failed (continued processing others)
+```
+
+#### Key Design Decisions (from DAO)
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Processing mode | Batch all pending | KISS — user clicked button = intent to process all |
+| Folder determination | UI-assigned > AI fallback | Respect explicit user choices, AI fills gaps |
+| Non-markdown files | Move + status track, skip frontmatter | Can't inject YAML into PDFs/images |
+| Summary output | Terminal print | Simple, visible, no file overhead |
+| Folder creation | Auto-create if needed | Cheap, reversible, preserves AI accuracy |
+| Existing frontmatter | Preserve + merge (no overwrite) | Non-destructive, respect original metadata |
+
+#### AI Classification Approach
+
+The agent executing this skill uses its LLM capabilities to:
+1. **Read file content** — extract key topics, domain terminology, structure
+2. **Scan KB folder structure** — understand existing organization (via tree API)
+3. **Match content to folder** — semantic matching of content topics to folder names/purposes
+4. **Assign tags** — select from the config-defined taxonomy:
+   - Lifecycle: Ideation, Requirement, Design, Implementation, Testing, Deployment, Maintenance
+   - Domain: API, Authentication, UI-UX, Database, Infrastructure, Security, Performance, Integration, Documentation, Analytics
+5. **Generate title** — derive from filename or first heading
+
+No external AI API calls needed — the executing agent IS the LLM.
+
 ### File Change Summary
 
 | File | Changes | Est. Lines |
@@ -375,7 +504,8 @@ In `_renderSidebarFolders()`, update the "📥 Intake" entry to show pending cou
 | `src/x_ipe/routes/kb_routes.py` | Add `GET /api/kb/intake`, `PUT /api/kb/intake/status` | ~40 |
 | `src/x_ipe/static/js/features/kb-browse-modal.js` | Fix command, enhance intake scene, add status UI, filters, per-file actions | ~250 |
 | `tests/test_kb_service.py` | Add intake service tests | ~100 |
-| `tests/frontend-js/kb-browse-modal-049f.test.js` | New: frontend intake UI tests | ~150 |
+| `tests/frontend-js/kb-intake-049f.test.js` | New: frontend intake UI tests | ~150 |
+| `.github/skills/x-ipe-tool-kb-librarian/SKILL.md` | New: Tool skill file with operations, I/O contract, triggers (CR-001) | ~200 |
 
 ---
 
@@ -384,3 +514,4 @@ In `_renderSidebarFolders()`, update the "📥 Intake" entry to show pending cou
 | Date | Phase | Change Summary |
 |------|-------|----------------|
 | 03-16-2026 | Initial Design | Initial technical design for FEATURE-049-F. Backend: intake status service + 2 routes. Frontend: full intake scene matching mockup Scene 4 with status tracking, filters, per-file actions. Command fix: remove --workflow-mode. |
+| 03-16-2026 | CR-001 Skill Design | Added Step 9: x-ipe-tool-kb-librarian skill design. program_type=skills. Sequence diagram, state machine, SKILL.md structure, AI classification approach, 6 DAO-driven decisions. |
