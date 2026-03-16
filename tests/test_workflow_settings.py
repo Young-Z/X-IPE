@@ -1,11 +1,10 @@
 """
-Acceptance tests for EPIC-044: Interaction Mode Process Preference (CR-002)
+Acceptance tests for EPIC-044: Interaction Mode Process Preference
 
 Covers:
 - FEATURE-044-E: global.process_preference in workflow state & PATCH settings API
 - FEATURE-044-F: Settings validation (interaction_mode enum)
 - Integration: initial state includes global section, update persists
-- Migration: legacy auto_proceed key/values auto-migrated to interaction_mode
 """
 
 import json
@@ -127,61 +126,6 @@ class TestUpdateSettings:
 
 
 # ==============================================================================
-# Migration tests: legacy auto_proceed → interaction_mode
-# ==============================================================================
-
-class TestLegacyMigration:
-    """CR-002: Legacy auto_proceed key/values auto-migrate to interaction_mode."""
-
-    def test_legacy_key_auto_migrates_on_api(self, workflow_service, sample_workflow):
-        """Sending auto_proceed key should be treated as interaction_mode."""
-        result = workflow_service.update_settings(
-            sample_workflow, {"process_preference": {"auto_proceed": "auto"}})
-        assert result["success"]
-        assert result["data"]["process_preference"]["interaction_mode"] == "dao-represent-human-to-interact"
-        assert "auto_proceed" not in result["data"]["process_preference"]
-
-    def test_legacy_value_manual_migrates(self, workflow_service, sample_workflow):
-        result = workflow_service.update_settings(
-            sample_workflow, {"process_preference": {"auto_proceed": "manual"}})
-        assert result["success"]
-        assert result["data"]["process_preference"]["interaction_mode"] == "interact-with-human"
-
-    def test_legacy_value_stop_for_question_migrates(self, workflow_service, sample_workflow):
-        result = workflow_service.update_settings(
-            sample_workflow, {"process_preference": {"auto_proceed": "stop_for_question"}})
-        assert result["success"]
-        assert result["data"]["process_preference"]["interaction_mode"] == "dao-represent-human-to-interact-for-questions-in-skill"
-
-    def test_interaction_mode_takes_precedence_over_auto_proceed(self, workflow_service, sample_workflow):
-        """When both keys provided, interaction_mode wins."""
-        result = workflow_service.update_settings(
-            sample_workflow, {"process_preference": {
-                "auto_proceed": "auto",
-                "interaction_mode": "interact-with-human"
-            }})
-        assert result["success"]
-        assert result["data"]["process_preference"]["interaction_mode"] == "interact-with-human"
-
-    def test_legacy_invalid_value_still_rejected(self, workflow_service, sample_workflow):
-        result = workflow_service.update_settings(
-            sample_workflow, {"process_preference": {"auto_proceed": "turbo"}})
-        assert not result["success"]
-        assert result["error"] == "INVALID_VALUE"
-
-    def test_migration_on_read_legacy_persisted_file(self, workflow_service, sample_workflow):
-        """Simulate a legacy file with auto_proceed key — should be migrated on read."""
-        path = workflow_service._get_workflow_path(sample_workflow)
-        state = json.loads(path.read_text())
-        state["global"]["process_preference"] = {"auto_proceed": "stop_for_question"}
-        path.write_text(json.dumps(state))
-
-        loaded = workflow_service.get_workflow(sample_workflow)
-        assert loaded["global"]["process_preference"]["interaction_mode"] == "dao-represent-human-to-interact-for-questions-in-skill"
-        assert "auto_proceed" not in loaded["global"]["process_preference"]
-
-
-# ==============================================================================
 # API-level tests: PATCH /api/workflow/<name>/settings
 # ==============================================================================
 
@@ -294,11 +238,11 @@ class TestSkillTemplateUpdate:
             assert "require_human_review" not in content, \
                 f"{os.path.basename(os.path.dirname(path))} still has require_human_review"
 
-    def test_no_skill_has_auto_proceed_false(self):
+    def test_no_skill_has_auto_proceed(self):
         for path in self._get_skill_files():
             content = open(path).read()
-            assert "auto_proceed: false" not in content, \
-                f"{os.path.basename(os.path.dirname(path))} still has auto_proceed: false"
+            assert "auto_proceed" not in content, \
+                f"{os.path.basename(os.path.dirname(path))} still has auto_proceed"
 
     def test_all_skills_have_process_preference(self):
         for path in self._get_skill_files():

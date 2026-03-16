@@ -152,15 +152,7 @@ class ActionExecutionModal {
             this._cachedInstance = instance;
             if (instance) {
                 const pref = (instance.global || {}).process_preference || {};
-                this._interactionMode = pref.interaction_mode || pref.auto_proceed || 'interact-with-human';
-                const legacyMap = {
-                    'manual': 'interact-with-human',
-                    'auto': 'dao-represent-human-to-interact',
-                    'stop_for_question': 'dao-represent-human-to-interact-for-questions-in-skill'
-                };
-                if (legacyMap[this._interactionMode]) {
-                    this._interactionMode = legacyMap[this._interactionMode];
-                }
+                this._interactionMode = pref.interaction_mode || 'interact-with-human';
             }
         } catch { /* keep default 'interact-with-human' */ }
     }

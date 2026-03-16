@@ -76,28 +76,6 @@ describe('CR-001/CR-002: --interaction@ flag based on interaction mode', () => {
     });
   }
 
-  function mockFetchWithLegacyAutoProceed(mode) {
-    globalThis.fetch = vi.fn((url) => {
-      if (url.includes('/api/workflow/')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({
-            data: {
-              global: { process_preference: { auto_proceed: mode } },
-              stages: { ideation: { actions: { compose_idea: {
-                deliverables: ['x-ipe-docs/ideas/wf-hello/idea.md']
-              }}}}
-            }
-          })
-        });
-      }
-      if (url.includes('/api/config/copilot-prompt')) {
-        return Promise.resolve({ ok: false });
-      }
-      return Promise.resolve({ ok: false });
-    });
-  }
-
   describe('_loadInteractionMode', () => {
     it('should load interaction_mode from workflow API', async () => {
       mockFetchWithInteractionMode('dao-represent-human-to-interact');
@@ -124,30 +102,6 @@ describe('CR-001/CR-002: --interaction@ flag based on interaction mode', () => {
 
     it('should handle dao-represent-human-to-interact-for-questions-in-skill mode', async () => {
       mockFetchWithInteractionMode('dao-represent-human-to-interact-for-questions-in-skill');
-      const Modal = globalThis.ActionExecutionModal;
-      const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      await modal._loadInteractionMode();
-      expect(modal._interactionMode).toBe('dao-represent-human-to-interact-for-questions-in-skill');
-    });
-
-    it('should migrate legacy auto_proceed "auto" to dao-represent-human-to-interact', async () => {
-      mockFetchWithLegacyAutoProceed('auto');
-      const Modal = globalThis.ActionExecutionModal;
-      const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      await modal._loadInteractionMode();
-      expect(modal._interactionMode).toBe('dao-represent-human-to-interact');
-    });
-
-    it('should migrate legacy auto_proceed "manual" to interact-with-human', async () => {
-      mockFetchWithLegacyAutoProceed('manual');
-      const Modal = globalThis.ActionExecutionModal;
-      const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
-      await modal._loadInteractionMode();
-      expect(modal._interactionMode).toBe('interact-with-human');
-    });
-
-    it('should migrate legacy auto_proceed "stop_for_question" to dao-represent-human-to-interact-for-questions-in-skill', async () => {
-      mockFetchWithLegacyAutoProceed('stop_for_question');
       const Modal = globalThis.ActionExecutionModal;
       const modal = new Modal({ actionKey: 'refine_idea', workflowName: 'hello' });
       await modal._loadInteractionMode();

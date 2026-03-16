@@ -6,7 +6,8 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-888 | Code Refactor | Phase 1: Replace legacy auto_proceed with interaction_mode in backend init, list_workflows(), task board templates, skill-creator templates | Nova ⭐ | 🔄 in_progress | 03-16-2026 03:15:00 | — | — |
+| TASK-889 | Code Refactor | Phase 2: Remove legacy auto_proceed migration layer — LEGACY_KEY/MAP constants, _migrate_interaction_mode(), update_settings() migration, frontend fallbacks, legacyModeMap, migration tests | Nova ⭐ | 🔄 in_progress | 03-16-2026 03:28:00 | — | — |
+| TASK-888 | Code Refactor | Phase 1: Replace legacy auto_proceed with interaction_mode in backend init, list_workflows(), task board templates, skill-creator templates | Nova ⭐ | ✅ done | 03-16-2026 03:20:00 | [workflow_manager_service.py](src/x_ipe/services/workflow_manager_service.py), [templates](/.github/skills/) | — |
 | TASK-887 | Feature Closing | Close FEATURE-029-D CR-001: Verify ACs, code-to-docs review, refactoring analysis, commit and push | Ember 🔥 | ✅ done | 03-16-2026 04:30:00 | [commit f1f25a3](src/x_ipe/static/js/terminal.js) | — |
 | TASK-886 | Human Playground | Create interactive playground for FEATURE-029-D CR-001 border toggle — SKIPPED by human directive | Ember 🔥 | ⏭ skipped | 03-16-2026 04:20:00 | — | x-ipe-task-based-feature-closing |
 | TASK-885 | Acceptance Test | Execute acceptance tests for FEATURE-029-D CR-001: Validate border toggle in browser via Chrome DevTools MCP — click-vs-drag, chevron, handle visibility, persistence, animation guard, touch | Ember 🔥 | ✅ done | 03-16-2026 04:10:00 | [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-029/FEATURE-029-D/acceptance-test-cases.md) | x-ipe-task-based-human-playground |

@@ -2,7 +2,7 @@
  * TASK-676: Bug fix — workflow panel ⋮ button not aligned to right side.
  * CSS: .workflow-panel-info needs flex:1, .workflow-panel-actions needs position:relative.
  * Also verifies action menu toggle and delete button wiring.
- * TASK-785: Auto-proceed dropdown moved from feature toolbar to panel header.
+ * TASK-785: Interaction mode dropdown in panel header.
  */
 import { describe, it, expect, beforeAll, beforeEach, vi, afterEach } from 'vitest';
 import { loadFeatureScript, mockFetch } from './helpers.js';
@@ -54,7 +54,7 @@ describe('workflow panel action menu behavior', () => {
       feature_count: 0,
       created: '2026-01-01',
       last_activity: null,
-      auto_proceed: 'manual',  // legacy field — dropdown reads interaction_mode || auto_proceed
+      interaction_mode: 'interact-with-human',
     });
     document.getElementById('workflow-panels').appendChild(panel);
   });
@@ -179,15 +179,6 @@ describe('TASK-785: interaction mode dropdown in panel header', () => {
     });
     const badge = noModePanel.querySelector('.auto-proceed-btn .badge');
     expect(badge.textContent).toContain('Human Direct');
-  });
-
-  it('migrates legacy auto_proceed value to new mode', () => {
-    const legacyPanel = workflow._renderPanel({
-      name: 'legacy-wf', current_stage: 'Ideation', feature_count: 0,
-      created: '2026-01-01', last_activity: null, auto_proceed: 'auto',
-    });
-    const badge = legacyPanel.querySelector('.auto-proceed-btn .badge');
-    expect(badge.textContent).toContain('DAO Represents Human');
   });
 
   it('dropdown click does not propagate to panel header (no toggle)', () => {

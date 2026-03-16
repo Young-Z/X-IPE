@@ -118,7 +118,7 @@ const workflow = {
         actionsWrap.className = 'workflow-panel-actions';
 
         // Interaction Mode dropdown
-        const currentMode = wf.interaction_mode || wf.auto_proceed || 'interact-with-human';
+        const currentMode = wf.interaction_mode || 'interact-with-human';
         const modeLabels = {
             'interact-with-human': '👤 Human Direct',
             'dao-represent-human-to-interact': '🤖 DAO Represents Human',
@@ -134,12 +134,7 @@ const workflow = {
             'dao-represent-human-to-interact': 'text-bg-success',
             'dao-represent-human-to-interact-for-questions-in-skill': 'text-bg-warning'
         };
-        const legacyModeMap = {
-            'manual': 'interact-with-human',
-            'auto': 'dao-represent-human-to-interact',
-            'stop_for_question': 'dao-represent-human-to-interact-for-questions-in-skill'
-        };
-        const resolvedMode = legacyModeMap[currentMode] || currentMode;
+        const resolvedMode = currentMode;
         const apWrap = document.createElement('div');
         apWrap.className = 'dropdown d-inline-block auto-proceed-header';
         apWrap.innerHTML = `
