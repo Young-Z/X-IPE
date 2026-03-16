@@ -198,4 +198,52 @@ describe('FEATURE-049-F: KB AI Librarian & Intake', () => {
       expect(KBBrowseModal.API.FILES).toBe('/api/kb/files');
     });
   });
+
+  describe('Bug Fix: Librarian panel file list rendering', () => {
+    it('should have _renderIntakeFileList method', () => {
+      if (!ensureImpl()) return;
+      const modal = new KBBrowseModal();
+      expect(typeof modal._renderIntakeFileList).toBe('function');
+    });
+
+    it('should render file rows into kb-intake-files container', () => {
+      if (!ensureImpl()) return;
+      const modal = new KBBrowseModal();
+      // Create a mock overlay with the container
+      modal.overlay = document.createElement('div');
+      const container = document.createElement('div');
+      container.setAttribute('data-role', 'intake-files');
+      modal.overlay.appendChild(container);
+
+      modal._renderIntakeFileList(MOCK_INTAKE_RESPONSE.files);
+      const fileRows = container.querySelectorAll('.kb-intake-file');
+      expect(fileRows.length).toBe(3);
+      expect(container.innerHTML).toContain('notes.md');
+      expect(container.innerHTML).toContain('guide.pdf');
+    });
+
+    it('should clear container when no files', () => {
+      if (!ensureImpl()) return;
+      const modal = new KBBrowseModal();
+      modal.overlay = document.createElement('div');
+      const container = document.createElement('div');
+      container.setAttribute('data-role', 'intake-files');
+      container.innerHTML = '<div>old content</div>';
+      modal.overlay.appendChild(container);
+
+      modal._renderIntakeFileList([]);
+      expect(container.innerHTML).toBe('');
+    });
+  });
+
+  describe('Bug Fix: Action buttons display inline', () => {
+    it('should use inline-flex for kb-content-btn in CSS', async () => {
+      // Read the CSS file and verify inline-flex
+      const fs = await import('fs');
+      const css = fs.readFileSync('src/x_ipe/static/css/kb-browse-modal.css', 'utf8');
+      const btnMatch = css.match(/\.kb-content-btn\s*\{[^}]*display:\s*([\w-]+)/);
+      expect(btnMatch).not.toBeNull();
+      expect(btnMatch[1]).toBe('inline-flex');
+    });
+  });
 });

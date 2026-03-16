@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-911 | Bug Fix | Fix 2 KB intake UI regressions: (1) librarian panel not showing intake file list, only badge count (2) action icons in intake table stacking vertically instead of horizontal | Zephyr 🌬️ | 🔄 in_progress | 03-16-2026 23:38:00 | — | — |
 | TASK-910 | Code Implementation | Create x-ipe-tool-kb-librarian skill via x-ipe-meta-skill-creator: skill-meta.md, candidate/SKILL.md, candidate/references/examples.md, validation, merge | Zephyr 🌬️ | ✅ done | 03-16-2026 23:10:00 | [SKILL.md](.github/skills/x-ipe-tool-kb-librarian/SKILL.md) | x-ipe-task-based-feature-acceptance-test |
 | TASK-909 | Technical Design | Design x-ipe-tool-kb-librarian skill for FEATURE-049-F CR-001: skill structure, operations, data flow, KB service integration | Zephyr 🌬️ | ✅ done | 03-16-2026 23:05:00 | [technical-design.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/technical-design.md) | x-ipe-task-based-code-implementation |
 | TASK-908 | Feature Refinement | Refine FEATURE-049-F v1.1 (CR-001): Add ACs for x-ipe-tool-kb-librarian skill — file analysis, tag assignment, frontmatter generation, file movement, status updates | Zephyr 🌬️ | ✅ done | 03-16-2026 22:52:00 | [specification.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md) | x-ipe-task-based-technical-design |

@@ -1324,6 +1324,8 @@ class KBBrowseModal {
         const data = await this._loadIntakeFiles();
         const intakeFiles = data.files || [];
         this._updateIntakeBadges(data.stats?.pending || 0);
+        // Populate the librarian panel file list on the browse scene
+        this._renderIntakeFileList(intakeFiles);
         // If intake scene is active, re-render it
         if (this.currentScene === 'intake') {
             this._renderIntakeScene();
@@ -1341,6 +1343,23 @@ class KBBrowseModal {
     _updateIntakeBadges(count) {
         const badges = this.overlay?.querySelectorAll('.intake-badge');
         badges?.forEach(b => b.textContent = count);
+    }
+
+    _renderIntakeFileList(files) {
+        const container = this.overlay?.querySelector('[data-role="intake-files"]');
+        if (!container) return;
+        if (!files || files.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+        const statusClass = (s) => `kb-file-status-${s || 'pending'}`;
+        container.innerHTML = files.map(f => `
+            <div class="kb-intake-file">
+                <span class="file-icon"><i class="bi bi-file-earmark-text"></i></span>
+                <span class="file-name">${this._escapeHtml(f.name)}</span>
+                <span class="file-size">${this._formatFileSize(f.size_bytes || 0)}</span>
+                <span class="file-status ${statusClass(f.status)}">${f.status || 'pending'}</span>
+            </div>`).join('');
     }
 
     async _uploadFiles(files, folder) {

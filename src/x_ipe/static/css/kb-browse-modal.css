@@ -346,7 +346,7 @@
     font-size: 12px;
     font-family: var(--kb-font-ui);
     cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 5px;
     transition: all 0.15s;
