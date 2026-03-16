@@ -269,16 +269,16 @@ class WorkflowManagerService:
                         if feats:
                             feature_count = len(feats)
                             break
-                auto_proceed = (state.get("global", {})
-                                .get("process_preference", {})
-                                .get("auto_proceed", "manual"))
+                interaction_mode = (state.get("global", {})
+                                    .get("process_preference", {})
+                                    .get("interaction_mode", "interact-with-human"))
                 results.append({
                     "name": state.get("name", f.stem),
                     "created": state.get("created"),
                     "last_activity": state.get("last_activity"),
                     "current_stage": state.get("current_stage"),
                     "feature_count": feature_count,
-                    "auto_proceed": auto_proceed,
+                    "interaction_mode": interaction_mode,
                 })
             except (json.JSONDecodeError, KeyError):
                 continue
@@ -939,7 +939,7 @@ class WorkflowManagerService:
             "current_stage": "ideation",
             "global": {
                 "process_preference": {
-                    "auto_proceed": "manual",
+                    "interaction_mode": "interact-with-human",
                 },
             },
             "shared": shared,

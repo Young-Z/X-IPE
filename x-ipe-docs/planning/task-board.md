@@ -140,5 +140,5 @@
 ## Global Settings
 
 ```yaml
-auto_proceed: true  # Change to false for manual control
+interaction_mode: "dao-represent-human-to-interact"  # Options: interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill
 ```

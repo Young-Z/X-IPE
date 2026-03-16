@@ -48,10 +48,10 @@ workflow:
 # ─────────────────────────────────────────────────────────────
 inputs:
   required:
-    - name: auto_proceed
-      type: boolean
-      default: false
-      description: Whether to auto-proceed to next task
+    - name: interaction_mode
+      type: string
+      default: "interact-with-human"
+      description: "Interaction mode: interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill"
 
     - name: {input_name}
       type: string | number | boolean | array | object
@@ -75,8 +75,8 @@ outputs:
       value: "${workflow.next_task_based_skill}"
     - name: require_human_review
       value: "${workflow.human_review}"
-    - name: auto_proceed
-      value: "${inputs.auto_proceed}"
+    - name: interaction_mode
+      value: "${inputs.interaction_mode}"
 
   artifacts:
     - name: {artifact_name}
@@ -283,7 +283,7 @@ evaluation:
 | Workflow | category | Yes | Where in lifecycle |
 | Workflow | next_task_based_skill | Yes | Chain destination or null |
 | Workflow | human_review | Yes | Pause for approval |
-| Interface | inputs.required | Yes | At minimum auto_proceed |
+| Interface | inputs.required | Yes | At minimum interaction_mode |
 | Interface | outputs.state | Yes | Task completion state |
 | Interface | outputs.artifacts | If applicable | Created files |
 | Acceptance | must | Yes | All must pass for merge |

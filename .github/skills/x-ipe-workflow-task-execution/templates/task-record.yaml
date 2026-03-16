@@ -48,7 +48,7 @@ category_level_change_summary: ""    # Summary of category-level changes (≤100
 # CONTROL FIELDS
 # =============================================================================
 
-auto_proceed: false                  # Whether to auto-proceed to next task
+interaction_mode: "interact-with-human"  # Options: interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill
 
 # =============================================================================
 # EXAMPLE: Feature-stage task (Code Implementation)
@@ -67,4 +67,4 @@ auto_proceed: false                  # Whether to auto-proceed to next task
 # feature_id: FEATURE-001
 # feature_phase: Code Implementation
 # category_level_change_summary: "FEATURE-001 updated to Done Code Implementation"
-# auto_proceed: true
+# interaction_mode: "dao-represent-human-to-interact"
