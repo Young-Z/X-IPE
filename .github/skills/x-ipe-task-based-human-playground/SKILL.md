@@ -1,6 +1,6 @@
 ---
 name: x-ipe-task-based-human-playground
-description: Create interactive examples for human validation. Use when code is implemented and ready for human testing. Triggers on requests like "create playground", "human testing", "interactive demo".
+description: "Create interactive examples for human validation. Human-initiated only — invoke ONLY when user explicitly requests a playground. Triggers on requests like \"create playground\", \"human testing\", \"interactive demo\", \"I want to test this\". Do NOT auto-suggest after feature_closing."
 ---
 
 # Task-Based Skill: Human Playground
@@ -16,6 +16,8 @@ Execute **Human Playground** tasks by:
 ---
 
 ## Important Notes
+
+⚠️ **HUMAN-INITIATED ONLY:** This skill should ONLY be invoked when the human explicitly requests a playground (e.g., "create playground", "I want to test this interactively", "set up a demo"). It is NOT part of the standard engineering pipeline. The standard pipeline ends at `feature_closing`. Agents MUST NOT auto-suggest this skill as the next step after any pipeline stage.
 
 BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
 

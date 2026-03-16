@@ -43,13 +43,13 @@ IDEATION → REQUIREMENT → IMPLEMENT → VALIDATION → FEEDBACK
 |--------|-------|----------|--------------|
 | acceptance_testing | x-ipe-task-based-feature-acceptance-test | yes | code_refactor |
 | code_refactor | x-ipe-task-based-code-refactor | yes | feature_closing |
-| feature_closing | x-ipe-task-based-feature-closing | yes | human_playground, change_request |
+| feature_closing | x-ipe-task-based-feature-closing | yes | change_request |
 
 ### Stage 5: FEEDBACK (per feature)
 
 | Action | Skill | Required | Next Actions |
 |--------|-------|----------|--------------|
-| human_playground | x-ipe-task-based-human-playground | no | change_request |
+| human_playground | x-ipe-task-based-human-playground | no (human-initiated only) | change_request |
 | change_request | x-ipe-task-based-change-request | no | feature_refinement or feature_breakdown |
 
 ## Standalone Skills (any-time entry)

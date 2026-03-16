@@ -3,6 +3,9 @@
 | Entry ID | Timestamp | Task ID | Calling Skill | Disposition | Confidence | Summary |
 |----------|-----------|---------|---------------|-------------|------------|---------|
 | DAO-080 | 2026-03-16T02:09:33Z | TASK-881 | N/A | instruction | 0.92 | Process UIUX feedback: add expand/collapse toggle to session explorer border |
+| DAO-090 | 2026-03-16T04:06:00Z | TASK-891 | x-ipe-task-based-feature-refinement | instruction | 0.95 | Route to Technical Design for FEATURE-038-C CR-001 (.docx/.msg preview) |
+| DAO-093 | 2026-03-16T05:54:11Z | TASK-894 | x-ipe-task-based-feature-acceptance-test | answer | 0.95 | User questions why human-playground is next. Corrected: workflow DAG says acceptance_testing → code_refactor → feature_closing. human_playground is optional FEEDBACK stage, not next. |
+| DAO-094 | 2026-03-16T05:57:58Z | TASK-894 | x-ipe-task-based-feature-acceptance-test | instruction | 0.93 | Two units: (0) proceed with CR-001 pipeline → code_refactor, (1) update human-playground skill to be human-initiated only via x-ipe-meta-skill-creator |
 
 ## DAO-080
 - **Timestamp:** 2026-03-16T02:09:33Z
@@ -263,3 +266,172 @@
 
 ### Follow-up
 > Proceed to feature closing for FEATURE-029-D CR-001.
+
+| DAO-088 | 2026-03-16T03:41:16Z | TBD | N/A (direct human message) | instruction | 0.85 | UIUX feedback: Add .docx and .msg file content preview to file preview modal and folder view |
+
+## DAO-088
+- **Timestamp:** 2026-03-16T03:41:16Z
+- **Task ID:** TBD
+- **Feature ID:** N/A
+- **Workflow:** test (user's test workflow)
+- **Calling Skill:** N/A (direct human message)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.85
+
+### Message
+> Get uiux feedback, please visit feedback folder x-ipe-docs/uiux-feedback/Feedback-20260316-113736 to get details. Feedback: "for workflow 'test' I have uploaded two files, one it's docx, one is msg. when I preview them in file preview or open in the folder view, we all need to see it's content, you can research see if it's achievable, if so, implement it"
+
+### Guidance Returned
+> Process as a change request to the existing file preview feature. The .msg file currently shows "Binary file — cannot preview" in the preview modal. The CR adds .docx and .msg content preview support to both the file preview modal and folder view. Research feasibility of Python libraries (python-docx for .docx, extract-msg/olefile for .msg) for server-side content extraction, then implement if achievable. Route to x-ipe-task-based-change-request skill to analyze impact on existing preview code.
+
+### Rationale
+> User requests enhancement to existing file preview feature that currently shows "Binary file — cannot preview" for .docx/.msg formats. This is a change request modifying existing functionality (file preview modal + folder view). The user explicitly stated research-first approach ("research see if it's achievable, if so, implement it"). Engineering workflow Stage 5 FEEDBACK → change_request is the correct pipeline position.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-change-request"
+>     match_strength: "strong"
+>     reason: "UIUX feedback requesting modification to existing file preview feature — add .docx and .msg content rendering. This changes existing behavior (binary → rendered content) in an existing UI component."
+>     execution_steps:
+>       - phase: "1. Analysis"
+>         step: "1.1 Impact Analysis — assess existing preview code, identify affected components"
+>       - phase: "2. Challenge"
+### Follow-up
+> None
+
+---
+
+| DAO-089 | 2026-03-16T03:52:00Z | TASK-890 | x-ipe-task-based-change-request | approval | 0.92 | Classification confirmed — MODIFICATION to FEATURE-038-C for .docx/.msg preview |
+
+## DAO-089
+- **Timestamp:** 2026-03-16T03:52:00Z
+- **Task ID:** TASK-890
+- **Feature ID:** FEATURE-038-C
+- **Workflow:** N/A
+- **Calling Skill:** x-ipe-task-based-change-request
+- **Source:** ai
+- **Disposition:** approval
+- **Confidence:** 0.92
+
+### Message
+> CR Challenge + Classification Confirmation (Phases 2.1 + 4.2): Should the CR proceed with classification as MODIFICATION to FEATURE-038-C? Conflict analysis found 6 expected + 3 unexpected conflicts (all mitigated). Scope: .docx via mammoth, .msg via extract-msg, server-side conversion.
+
+### Guidance Returned
+> **APPROVED — Classification as MODIFICATION to FEATURE-038-C is correct.** All four CR challenges satisfied: (1) Necessary — system accepts uploads but can't preview them; (2) No existing workaround — binary pipeline dead-ends at UTF-8 decode; (3) Server-side conversion is the right approach — mammoth/extract-msg are lightweight, keeps frontend thin; (4) Without this, users must download-and-open externally for common business formats. Conflict analysis is thorough — 6 expected spec/design conflicts are natural consequences, 3 unexpected are low-severity with documented mitigations. Scope bounded to .docx and .msg only (YAGNI). Proceed to Feature Refinement.
+
+### Rationale
+> MODIFICATION +6 vs NEW_FEATURE +0 is unambiguous. Same users, same UI, same data model, extends existing preview capability within system boundaries. All conflicts are manageable through spec updates during refinement phase.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-feature-refinement"
+>     match_strength: "strong"
+>     reason: "CR classified as MODIFICATION to FEATURE-038-C. Refinement must update AC-038-C.15, BR-038-C.3, add new ACs for .docx/.msg conversion, and update FEATURE-043-A spec."
+
+### Follow-up
+> Proceed to Feature Refinement for FEATURE-038-C v1.1 (CR-001).
+
+## DAO-090
+- **Timestamp:** 2026-03-16T04:06:00Z
+- **Task ID:** TASK-891
+- **Feature ID:** FEATURE-038-C
+- **Calling Skill:** x-ipe-task-based-feature-refinement
+- **Disposition:** instruction
+- **Confidence:** 0.95
+
+### Context
+> Feature Refinement for FEATURE-038-C v1.1 (CR-001) completed. Spec updated with 23 GWT-format ACs, 8 FRs, 5 NFRs, 5 BRs, updated edge cases, dependencies (mammoth, extract-msg), and technical considerations. DoD verified by sub-agent — all 6 checkpoints pass.
+
+### Decision
+> Proceed to Technical Design for FEATURE-038-C CR-001. Create TASK-892, load x-ipe-task-based-technical-design, design the .docx/.msg file conversion pipeline (backend conversion layer, HTML sanitization, frontend rendering path).
+
+### Rationale
+> Standard pipeline progression: Refinement → Technical Design. Spec v1.1 is complete and DoD-verified. No blockers or open questions. The conversion approach (mammoth + extract-msg) is well-understood from CR-001 analysis.
+
+### Instruction Units
+> - **Unit 0:** disposition=instruction, skill=x-ipe-task-based-technical-design (strong match)
+>   - Execution plan: sequential, groups: [[0]]
+
+### Follow-up
+> Create TASK-892 for Technical Design of FEATURE-038-C CR-001.
+
+## DAO-091
+- **Timestamp:** 2026-03-16T04:16:00Z
+- **Task ID:** TASK-892
+- **Feature ID:** FEATURE-038-C
+- **Calling Skill:** x-ipe-task-based-technical-design
+- **Disposition:** instruction
+- **Confidence:** 0.95
+
+### Context
+> Technical Design for FEATURE-038-C CR-001 completed. Design v1.1 documents: 3 backend helpers (_convert_docx, _convert_msg, _sanitize_converted_html), modified get_idea_file() route, frontend X-Converted header detection. All 8 CR-001 ACs mapped. DoD verified.
+
+### Decision
+> Proceed to Code Implementation for FEATURE-038-C CR-001. Create TASK-893, implement the 6 steps from technical design: add deps, add helpers, modify route, modify frontend, write backend tests, write frontend tests.
+
+### Instruction Units
+> - **Unit 0:** disposition=instruction, skill=x-ipe-task-based-code-implementation (strong match)
+
+### Follow-up
+> Create TASK-893 for Code Implementation of FEATURE-038-C CR-001.
+| DAO-092 | 2026-03-16T05:35:06Z | TASK-893 | x-ipe-task-based-code-implementation | instruction | 0.95 | User confirms: proceed with acceptance testing for FEATURE-038-C CR-001. Route to x-ipe-task-based-feature-acceptance-test |
+
+## DAO-093
+- **Timestamp:** 2026-03-16T05:54:11Z
+- **Task ID:** TASK-894
+- **Feature ID:** FEATURE-038-C
+- **Workflow:** N/A
+- **Calling Skill:** x-ipe-task-based-feature-acceptance-test
+- **Source:** human
+- **Disposition:** answer
+- **Confidence:** 0.95
+
+### Message
+> why the next is human-playground?
+
+### Guidance Returned
+> The engineering workflow DAG says: acceptance_testing → code_refactor → feature_closing. human_playground is in the FEEDBACK stage (Stage 5) and is NOT required. I incorrectly suggested it as the immediate next step. The correct next step is code_refactor, then feature_closing.
+
+### Rationale
+> User correctly questioned the suggested workflow order. Checking references/engineering-workflow.md confirms: Stage 4 VALIDATION has acceptance_testing → code_refactor → feature_closing. human_playground is Stage 5 FEEDBACK and is optional. The agent's earlier suggestion was wrong.
+
+### Suggested Skills
+> suggested_skills: []
+
+### Instruction Units
+> - **Unit 0:** disposition=answer, no skill needed (workflow clarification)
+
+### Follow-up
+> Correct the pipeline: next is code_refactor (if needed), then feature_closing.
+
+## DAO-094
+- **Timestamp:** 2026-03-16T05:57:58Z
+- **Task ID:** TASK-894
+- **Feature ID:** FEATURE-038-C
+- **Workflow:** N/A
+- **Calling Skill:** x-ipe-task-based-feature-acceptance-test
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.93
+
+### Message
+> let's do this, update human playground skill, except human indicate they want to have a playground, otherwise avoid to use it
+
+### Guidance Returned
+> Two instruction units: (0) Proceed with CR-001 pipeline — next engineering step is code_refactor via x-ipe-task-based-code-refactor. (1) Update x-ipe-task-based-human-playground skill to be human-initiated only — remove auto-suggestion from workflow, make it trigger only on explicit human request. Use x-ipe-meta-skill-creator for the modification.
+
+### Rationale
+> User message contains two independent instructions: continue the CR-001 work AND modify the human-playground skill behavior. Unit 0 aligns with engineering-next (acceptance_testing → code_refactor). Unit 1 is a skill modification requiring x-ipe-meta-skill-creator per custom instructions.
+
+### Suggested Skills
+> suggested_skills:
+>   - Unit 0: x-ipe-task-based-code-refactor (strong) — engineering-next after acceptance_testing
+>   - Unit 1: x-ipe-meta-skill-creator (strong) — mandatory for skill modifications
+
+### Instruction Units
+> - **Unit 0:** disposition=instruction, skill=x-ipe-task-based-code-refactor (strong match). Proceed with CR-001 code refactoring.
+> - **Unit 1:** disposition=instruction, skill=x-ipe-meta-skill-creator (strong match). Update human-playground to human-initiated only.
+
+### Follow-up
+> Execute sequentially: Unit 1 first (skill update is quick, changes workflow understanding), then Unit 0 (code_refactor for CR-001).

@@ -558,3 +558,101 @@ describe('TASK-875: _renderDeliverableCard labels use file names', () => {
     expect(name.textContent).toBe('kb-references');
   });
 });
+
+
+// ============================================================================
+// CR-001: .docx/.msg Preview Handling
+// ============================================================================
+
+describe('CR-001: Convertible Binary Preview (.docx / .msg)', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    globalThis.fetch = vi.fn();
+    globalThis.marked = { parse: vi.fn((md) => `<p>${md}</p>`) };
+    // JSDOM does not support URL.createObjectURL — mock it
+    if (!globalThis.URL.createObjectURL) {
+      globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+    }
+    if (!globalThis.URL.revokeObjectURL) {
+      globalThis.URL.revokeObjectURL = vi.fn();
+    }
+    ensureImpl();
+  });
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('AC-038-C.04a: renders X-Converted response in sandboxed iframe', async () => {
+    const DV = globalThis.DeliverableViewer;
+    if (!DV) return; // TDD guard
+
+    globalThis.fetch.mockResolvedValue({
+      ok: true,
+      headers: { get: (k) => k === 'X-Converted' ? 'true' : null },
+      text: async () => '<h1>Converted Doc</h1>',
+    });
+
+    const viewer = new DV({ workflowName: 'test-wf' });
+    await viewer.showPreview('x-ipe-docs/ideas/test/report.docx');
+
+    const iframe = document.querySelector('.deliverable-preview-backdrop iframe');
+    expect(iframe).not.toBeNull();
+    expect(iframe.getAttribute('sandbox')).toBe('allow-same-origin');
+  });
+
+  it('AC-038-C.04c: shows size message for 413 response', async () => {
+    const DV = globalThis.DeliverableViewer;
+    if (!DV) return;
+
+    globalThis.fetch.mockResolvedValue({
+      ok: false,
+      status: 413,
+      headers: { get: () => null },
+    });
+
+    const viewer = new DV({ workflowName: 'test-wf' });
+    await viewer.showPreview('x-ipe-docs/ideas/test/huge.docx');
+
+    const content = document.querySelector('.preview-content');
+    expect(content).not.toBeNull();
+    expect(content.textContent.toLowerCase()).toContain('too large');
+  });
+
+  it('AC-038-C.04h: 415 still shows binary file message (unchanged)', async () => {
+    const DV = globalThis.DeliverableViewer;
+    if (!DV) return;
+
+    globalThis.fetch.mockResolvedValue({
+      ok: false,
+      status: 415,
+      headers: { get: () => null },
+    });
+
+    const viewer = new DV({ workflowName: 'test-wf' });
+    await viewer.showPreview('x-ipe-docs/ideas/test/archive.zip');
+
+    const content = document.querySelector('.preview-content');
+    expect(content).not.toBeNull();
+    expect(content.textContent.toLowerCase()).toContain('binary file');
+  });
+
+  it('AC-038-C.04d: iframe has no allow-scripts for converted content', async () => {
+    const DV = globalThis.DeliverableViewer;
+    if (!DV) return;
+
+    globalThis.fetch.mockResolvedValue({
+      ok: true,
+      headers: { get: (k) => k === 'X-Converted' ? 'true' : null },
+      text: async () => '<p>Safe content</p>',
+    });
+
+    const viewer = new DV({ workflowName: 'test-wf' });
+    await viewer.showPreview('x-ipe-docs/ideas/test/report.docx');
+
+    const iframe = document.querySelector('.deliverable-preview-backdrop iframe');
+    expect(iframe).not.toBeNull();
+    const sandbox = iframe.getAttribute('sandbox');
+    expect(sandbox).not.toContain('allow-scripts');
+  });
+});

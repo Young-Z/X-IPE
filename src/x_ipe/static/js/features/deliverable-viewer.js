@@ -211,7 +211,9 @@ class DeliverableViewer {
         try {
             const resp = await fetch(`/api/ideas/file?path=${encodeURIComponent(filePath)}`);
             if (!resp.ok) {
-                if (resp.status === 415) {
+                if (resp.status === 413) {
+                    content.textContent = 'File too large to preview (max 10MB)';
+                } else if (resp.status === 415) {
                     content.textContent = 'Binary file — cannot preview';
                 } else {
                     content.textContent = 'Failed to load file';
@@ -220,6 +222,22 @@ class DeliverableViewer {
             }
 
             const text = await resp.text();
+
+            // CR-001: Handle converted binary files (.docx, .msg)
+            const isConverted = resp.headers && resp.headers.get('X-Converted') === 'true';
+            if (isConverted) {
+                const blob = new Blob([text], { type: 'text/html' });
+                const blobUrl = URL.createObjectURL(blob);
+                const iframe = document.createElement('iframe');
+                iframe.src = blobUrl;
+                iframe.setAttribute('sandbox', 'allow-same-origin');
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.border = 'none';
+                content.appendChild(iframe);
+                return;
+            }
+
             if (filePath.endsWith('.md')) {
                 if (typeof ContentRenderer !== 'undefined') {
                     const renderer = new ContentRenderer(content);

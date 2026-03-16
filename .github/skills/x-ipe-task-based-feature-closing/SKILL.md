@@ -1,6 +1,6 @@
 ---
 name: x-ipe-task-based-feature-closing
-description: Close completed feature and create pull request. Use when human has validated the playground and feature is ready to ship. Provides procedures for final verification, PR creation, and documentation. Triggers on requests like "close feature", "create PR", "ship feature".
+description: Close completed feature and create pull request. Use when feature is implemented, tested, and ready to ship. Provides procedures for final verification, PR creation, and documentation. Triggers on requests like "close feature", "create PR", "ship feature".
 ---
 
 # Task-Based Skill: Feature Closing

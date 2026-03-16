@@ -11,6 +11,7 @@ Provides:
 - Toolbox config
 - Skills list
 """
+import html
 import json
 import os
 from pathlib import Path
@@ -18,6 +19,10 @@ from flask import Blueprint, jsonify, request, current_app, send_file
 
 from x_ipe.services import IdeasService, SkillsService
 from x_ipe.tracing import x_ipe_tracing
+
+# CR-001: Convertible binary formats
+CONVERTIBLE_EXTENSIONS = {'.docx', '.msg'}
+MAX_CONVERSION_SIZE = 10 * 1024 * 1024  # 10MB
 
 ideas_bp = Blueprint('ideas', __name__)
 
@@ -614,6 +619,66 @@ def validate_drop_target():
 # FILE CONTENT API (FEATURE-037-B)
 # ==========================================================================
 
+
+@x_ipe_tracing(level='DEBUG')
+def _convert_docx(file_path):
+    """Convert .docx file to HTML via mammoth. Returns HTML string."""
+    import mammoth
+    with open(file_path, 'rb') as f:
+        result = mammoth.convert_to_html(f)
+    return result.value
+
+
+@x_ipe_tracing(level='DEBUG')
+def _convert_msg(file_path):
+    """Convert .msg file to structured HTML with email metadata and body."""
+    import extract_msg
+    msg = extract_msg.openMsg(str(file_path))
+    try:
+        sender = html.escape(str(msg.sender or ''))
+        to = html.escape(str(msg.to or ''))
+        cc = html.escape(str(msg.cc or ''))
+        date = html.escape(str(msg.date or ''))
+        subject = html.escape(str(msg.subject or ''))
+
+        if msg.htmlBody:
+            body_section = msg.htmlBody if isinstance(msg.htmlBody, str) else msg.htmlBody.decode('utf-8', errors='replace')
+        elif msg.body:
+            body_section = f'<pre>{html.escape(str(msg.body))}</pre>'
+        else:
+            body_section = ''
+
+        return (
+            f'<div class="msg-preview">'
+            f'<table class="msg-headers">'
+            f'<tr><td><strong>From:</strong></td><td>{sender}</td></tr>'
+            f'<tr><td><strong>To:</strong></td><td>{to}</td></tr>'
+            f'<tr><td><strong>CC:</strong></td><td>{cc}</td></tr>'
+            f'<tr><td><strong>Date:</strong></td><td>{date}</td></tr>'
+            f'<tr><td><strong>Subject:</strong></td><td>{subject}</td></tr>'
+            f'</table>'
+            f'<hr>'
+            f'<div class="msg-body">{body_section}</div>'
+            f'</div>'
+        )
+    finally:
+        msg.close()
+
+
+@x_ipe_tracing(level='DEBUG')
+def _sanitize_converted_html(content):
+    """Strip dangerous elements from converted HTML using BeautifulSoup."""
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(content, 'html.parser')
+    for tag in soup.find_all(['script', 'iframe', 'object', 'embed']):
+        tag.decompose()
+    for tag in soup.find_all(True):
+        for attr in list(tag.attrs):
+            if attr.lower().startswith('on'):
+                del tag[attr]
+    return str(soup)
+
+
 @ideas_bp.route('/api/ideas/file', methods=['GET'])
 @x_ipe_tracing()
 def get_idea_file():
@@ -653,6 +718,25 @@ def get_idea_file():
     binary_prefixes = ('image/', 'application/pdf')
     if mime_type and any(mime_type.startswith(p) for p in binary_prefixes):
         return send_file(target, mimetype=mime_type)
+
+    # CR-001: Convert .docx/.msg to HTML for preview
+    ext = target.suffix.lower()
+    if ext in CONVERTIBLE_EXTENSIONS:
+        file_size = target.stat().st_size
+        if file_size > MAX_CONVERSION_SIZE:
+            return jsonify({'error': 'File too large to preview (max 10MB)'}), 413
+        try:
+            if ext == '.docx':
+                converted_html = _convert_docx(target)
+            else:
+                converted_html = _convert_msg(target)
+            sanitized = _sanitize_converted_html(converted_html)
+            return sanitized, 200, {
+                'Content-Type': 'text/html; charset=utf-8',
+                'X-Converted': 'true'
+            }
+        except Exception:
+            return jsonify({'error': 'Preview unavailable for this file'}), 415
 
     try:
         content = target.read_text(encoding='utf-8')
