@@ -69,7 +69,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-029-A | EPIC-029 | Session Explorer Core | v1.0 | Implemented | [specification.md](x-ipe-docs/requirements/EPIC-029/FEATURE-029-A/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-029/FEATURE-029-A/technical-design.md) | 02-11-2026 | 02-11-2026 16:30:00 |
 | FEATURE-029-B | EPIC-029 | Session Actions | v1.0 | Implemented | - | 02-11-2026 | 02-12-2026 08:30:00 |
 | FEATURE-029-C | EPIC-029 | Session Hover Preview | v1.0 | Complete | - | 02-11-2026 | 02-12-2026 09:30:00 |
-| FEATURE-029-D | EPIC-029 | Explorer UI Controls | v1.1 | Done Acceptance Testing | [specification.md](x-ipe-docs/requirements/EPIC-029/FEATURE-029-D/specification.md) | 02-11-2026 | 03-16-2026 16:10:00 |
+| FEATURE-029-D | EPIC-029 | Explorer UI Controls | v1.1 | Done | [specification.md](x-ipe-docs/requirements/EPIC-029/FEATURE-029-D/specification.md) | 02-11-2026 | 03-16-2026 16:30:00 |
 | FEATURE-030-A | EPIC-030 | UIUX Reference Tab & Console Integration | v1.0 | Completed | [specification.md](x-ipe-docs/requirements/EPIC-030/FEATURE-030-A/specification.md) | 02-13-2026 | 02-13-2026 09:44:00 |
 | FEATURE-030-B | EPIC-030 | UIUX Reference Agent Skill & Toolbar | v2.0 | ✅ Implemented | [specification.md](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B/specification.md) | 02-14-2026 | 02-14-2026 09:20:00 |
 | FEATURE-030-B-THEME | EPIC-030 | Catch Design Theme Mode | v2.0 | ✅ Tested | [specification.md](x-ipe-docs/requirements/EPIC-030/FEATURE-030-B-THEME/specification.md) | 02-14-2026 | 02-14-2026 13:15:00 |
