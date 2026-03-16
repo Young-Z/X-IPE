@@ -1,21 +1,23 @@
 # Feature Specification: Explorer UI Controls
 
 > Feature ID: FEATURE-029-D
-> Version: v1.0
+> Version: v1.1
 > Status: Refined
-> Last Updated: 02-12-2026
+> Last Updated: 03-16-2026
 
 ## Version History
 
-| Version | Date | Description |
-|---------|------|-------------|
-| v1.0 | 02-12-2026 | Initial specification |
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| v1.1 | 03-16-2026 | CR-001: Added border toggle ACs (AC-19–AC-25) in GWT format, updated AC-9, added FR-8/FR-9, edge cases 7-9 | [CR-001](./CR-001.md) |
+| v1.0 | 02-12-2026 | Initial specification | - |
 
 ## Linked Mockups
 
 | Mockup | Type | Path | Description | Status |
 |--------|------|------|-------------|--------|
-| Console Explorer | HTML | [mockups/console-explorer-v1.html](mockups/console-explorer-v1.html) | Full explorer with resize handle, toggle, collapsed scenario | current |
+| Console Explorer v1 | HTML | [console-explorer-v1.html](x-ipe-docs/requirements/EPIC-029/mockups/console-explorer-v1.html) | Full explorer with resize handle, toggle, collapsed scenario | superseded by v2 |
+| Console Explorer v2 | HTML | [console-explorer-v2.html](x-ipe-docs/requirements/EPIC-029/FEATURE-029-D/mockups/console-explorer-v2.html) | Border toggle: chevron on resize handle, visible handle when collapsed, click-to-toggle interaction | current (03-16-2026) |
 
 > **Note:** UI/UX requirements and acceptance criteria below are derived from mockups marked as "current".
 
@@ -31,51 +33,64 @@ The toggle button (already implemented in TASK-322) and collapsed state CSS (alr
 2. **US-2:** As a developer, I want my explorer panel width to persist across page reloads, so that I don't have to resize it every time.
 3. **US-3:** As a developer, I want my explorer collapsed/expanded preference to persist, so the panel stays in my preferred state.
 4. **US-4:** As a developer, I want my session names to persist across page reloads, so I don't lose renamed sessions.
+5. **US-5:** As a developer, I want to click the border between the terminal and explorer to toggle the panel, so I can quickly expand or collapse it without finding the header button. *(Added by CR-001)*
 
 ## Acceptance Criteria
 
 ### Toggle & Collapse (partially implemented)
 
-| AC ID | Criterion | Priority |
-|-------|-----------|----------|
-| AC-1 | Toggle button in terminal header collapses/expands explorer panel with CSS transition | P0 |
-| AC-2 | When collapsed, explorer width is 0, visibility is hidden, and terminal content takes full width | P0 |
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-1 | GIVEN user is viewing the terminal panel WHEN user clicks the toggle button in the terminal header THEN the explorer panel collapses or expands with a CSS transition | UI |
+| AC-2 | GIVEN user has collapsed the explorer panel WHEN the collapse transition completes THEN explorer width is 0, visibility is hidden, AND terminal content takes full width | UI |
 
 ### Drag-to-Resize
 
-| AC ID | Criterion | Priority |
-|-------|-----------|----------|
-| AC-3 | A vertical drag handle (5px wide) is visible between terminal content and explorer panel | P0 |
-| AC-4 | Dragging the handle left increases explorer width; dragging right decreases it | P0 |
-| AC-5 | Explorer width is clamped to the range 160–360px during drag | P0 |
-| AC-6 | Drag handle shows `col-resize` cursor on hover | P1 |
-| AC-7 | Drag handle highlights on hover (subtle accent color) | P1 |
-| AC-8 | Terminal content re-fits (xterm FitAddon) after drag ends | P0 |
-| AC-9 | Drag handle is hidden when explorer is collapsed | P1 |
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-3 | GIVEN terminal panel is open with explorer expanded WHEN user views the area between terminal content and explorer panel THEN a vertical drag handle (5px wide) is visible | UI |
+| AC-4 | GIVEN explorer panel is expanded AND user is dragging the resize handle WHEN user drags left THEN explorer width increases AND WHEN user drags right THEN explorer width decreases | UI |
+| AC-5 | GIVEN user is dragging the resize handle WHEN explorer width would exceed 360px or fall below 160px THEN the width is clamped to the range 160–360px | Unit |
+| AC-6 | GIVEN explorer panel is expanded WHEN user hovers over the drag handle THEN cursor changes to `col-resize` | UI |
+| AC-7 | GIVEN explorer panel is expanded WHEN user hovers over the drag handle THEN handle highlights with a subtle accent color | UI |
+| AC-8 | GIVEN user has been dragging the resize handle WHEN user releases the mouse (mouseup) THEN terminal content re-fits via xterm FitAddon | Integration |
+| AC-9 | GIVEN explorer panel is collapsed WHEN user views the resize handle area THEN the handle remains visible as a thin clickable strip (5px wide) with a chevron indicator (`›`) pointing toward the collapsed panel AND drag-to-resize is disabled (mousemove during drag has no effect). *[Updated by CR-001: was "hidden when collapsed"]* | UI |
 
 ### Persistence
 
-| AC ID | Criterion | Priority |
-|-------|-----------|----------|
-| AC-10 | Explorer panel width is saved to `localStorage` key `console_explorer_width` after resize | P0 |
-| AC-11 | Explorer collapsed/expanded state is saved to `localStorage` key `console_explorer_collapsed` after toggle | P0 |
-| AC-12 | On page load, explorer width is restored from localStorage (default 220px if absent) | P0 |
-| AC-13 | On page load, explorer collapsed state is restored from localStorage (default expanded if absent) | P0 |
-| AC-14 | Explorer panel starts at 220px default width when no localStorage value exists | P0 |
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-10 | GIVEN user has finished resizing the explorer panel WHEN mouseup fires after drag THEN the new width is saved to `localStorage` key `console_explorer_width` | Unit |
+| AC-11 | GIVEN user toggles the explorer panel (collapse or expand) WHEN the toggle action completes THEN the collapsed/expanded state is saved to `localStorage` key `console_explorer_collapsed` | Unit |
+| AC-12 | GIVEN `localStorage` contains a value for `console_explorer_width` WHEN the page loads THEN the explorer width is restored from that value (default 220px if absent) | Unit |
+| AC-13 | GIVEN `localStorage` contains a value for `console_explorer_collapsed` WHEN the page loads THEN the explorer collapsed state is restored (default expanded if absent) | Unit |
+| AC-14 | GIVEN no `localStorage` value exists for `console_explorer_width` WHEN the page loads THEN the explorer panel starts at 220px default width | Unit |
 
 ### Session Identity Persistence
 
-| AC ID | Criterion | Priority |
-|-------|-----------|----------|
-| AC-15 | Session names are stored in localStorage key `console_session_names` as a JSON map of UUID → name | P1 |
-| AC-16 | On page load, if saved session names exist, restored sessions use saved names instead of defaults | P1 |
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-15 | GIVEN user has renamed a session WHEN the name is saved THEN session names are stored in `localStorage` key `console_session_names` as a JSON map of UUID → name | Unit |
+| AC-16 | GIVEN `localStorage` contains saved session names WHEN the page loads THEN restored sessions use saved names instead of defaults | Integration |
 
 ### Mockup Compliance
 
-| AC ID | Criterion | Priority |
-|-------|-----------|----------|
-| AC-17 | Resize handle visual styling MUST match mockup (console-explorer-v1.html): 5px width, subtle border color, accent highlight on hover | P1 |
-| AC-18 | Collapsed state transition MUST match mockup: width→0 with 0.25s ease transition | P1 |
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-17 | GIVEN terminal panel is rendered WHEN user views the resize handle THEN its visual styling matches the mockup (console-explorer-v2.html): 5px width, subtle border color, accent highlight on hover, chevron indicator | UI |
+| AC-18 | GIVEN user triggers a collapse or expand WHEN the CSS transition runs THEN it matches the mockup: width→0 with 0.25s ease transition | UI |
+
+### Border Toggle (added by CR-001)
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-19 | GIVEN explorer panel is expanded AND user presses mousedown on resize handle AND releases mouseup without moving mouse more than 3px WHEN mouseup event fires THEN explorer panel collapses with CSS transition (same as header toggle) | UI |
+| AC-20 | GIVEN explorer panel is collapsed WHEN user clicks the visible handle strip THEN explorer panel expands to its previously stored width from localStorage | UI |
+| AC-21 | GIVEN explorer panel is expanded WHEN user clicks the resize handle without dragging (movement < 3px) THEN explorer panel collapses to width 0 with visibility hidden | UI |
+| AC-22 | GIVEN explorer panel is expanded WHEN user views the resize handle THEN a `‹` chevron indicator is displayed on the handle AND GIVEN explorer panel is collapsed WHEN user views the handle strip THEN a `›` chevron indicator is displayed | UI |
+| AC-23 | GIVEN user clicks the border toggle to expand or collapse WHEN the transition completes THEN the collapsed state is persisted to localStorage key `console_explorer_collapsed` identically to the header button toggle | Unit |
+| AC-24 | GIVEN user presses mousedown on resize handle AND drags mouse more than 3px WHEN mouseup fires THEN the explorer is resized (not toggled) — existing drag behavior is preserved unchanged | UI |
+| AC-25 | GIVEN explorer panel was collapsed AND page reloads WHEN terminal panel is opened THEN the resize handle shows as a thin visible strip with `›` chevron indicator (not hidden) | UI |
 
 ## Functional Requirements
 
@@ -88,6 +103,8 @@ The toggle button (already implemented in TASK-322) and collapsed state CSS (alr
 | FR-5 | **Restore on Load:** On `SessionExplorer` init, read localStorage values and apply width/collapsed state before first render. |
 | FR-6 | **Session Name Persistence:** On rename, save `{uuid: name}` map to `localStorage.setItem('console_session_names', JSON.stringify(map))`. On load, restore names from map. |
 | FR-7 | **Fit After Resize:** After drag ends, call `terminalManager.fitActive()` to re-fit the xterm terminal. |
+| FR-8 | **Border Toggle (CR-001):** On mousedown, record cursor start position. On mouseup, if total cursor movement < 3px, call `toggleExplorer()`. If movement ≥ 3px, treat as drag (existing behavior). When collapsed, the resize handle remains visible (not `display: none`) and shows a chevron indicator (`›`). When expanded, the chevron shows `‹`. Clicking the handle when collapsed expands; clicking when expanded collapses. |
+| FR-9 | **Visible Handle When Collapsed (CR-001):** Instead of hiding the resize handle when explorer is collapsed, keep it visible as a thin 5px-wide strip. Disable drag-to-resize when collapsed — only click-to-expand is active. On expand, re-enable drag-to-resize. |
 
 ## Non-Functional Requirements
 
@@ -107,11 +124,12 @@ The toggle button (already implemented in TASK-322) and collapsed state CSS (alr
 - Pseudo-element: 2px × 24px centered indicator dot, visible on hover
 - Cursor: `col-resize`
 
-### Collapsed State (from mockup)
-- Width transitions to 0 with `0.25s cubic-bezier(0.4, 0, 0.2, 1)`
-- `visibility: hidden` after transition
+### Collapsed State (from mockup, updated by CR-001)
+- Width transitions to 0 with `0.25s ease`
+- `visibility: hidden` after transition (explorer panel only; resize handle stays visible)
 - Border-left removed when collapsed
-- Drag handle hidden when collapsed
+- Drag handle remains visible as a thin clickable strip with chevron indicator (`›`)
+- Drag-to-resize disabled when collapsed; click-to-expand enabled
 
 ### User Flow: Resize
 1. User hovers over drag handle → handle highlights
@@ -123,6 +141,13 @@ The toggle button (already implemented in TASK-322) and collapsed state CSS (alr
 1. User clicks toggle button → explorer collapses/expands with transition
 2. State saved to localStorage
 3. Terminal content re-fits after transition completes
+
+### User Flow: Border Toggle (added by CR-001)
+1. User clicks on the resize handle (without dragging) → explorer collapses/expands with transition
+2. If collapsed: handle shows `›` chevron, clicking expands to previous width
+3. If expanded: handle shows `‹` chevron, clicking collapses panel
+4. State saved to localStorage (same as header toggle)
+5. Terminal content re-fits after transition completes
 
 ## Dependencies
 
@@ -154,6 +179,9 @@ None.
 | 4 | Browser window too narrow for explorer + terminal | Explorer still honors min-width; terminal compresses |
 | 5 | Rapid toggle clicks during animation | Debounce or let CSS transition handle naturally |
 | 6 | Session UUID in localStorage no longer exists on server | Ignore stale entries, use default name |
+| 7 | Click on handle during collapse/expand animation (CR-001) | Ignore click — do not toggle again until current transition completes (300ms guard) |
+| 8 | Very fast mousedown→drag→mouseup under 3px (CR-001) | Treat as click (toggle), not drag — threshold is on total movement distance |
+| 9 | Touch device tap on handle (CR-001) | Treat touch tap as click — toggle explorer (touchstart→touchend without touchmove) |
 
 ## Out of Scope
 

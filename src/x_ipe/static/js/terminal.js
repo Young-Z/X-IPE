@@ -1297,42 +1297,105 @@
         // -- Explorer toggle / resize -----------------------------------------
 
         toggleExplorer() {
+            if (this._toggleAnimating) return;
+            this._toggleAnimating = true;
+            setTimeout(() => { this._toggleAnimating = false; }, 300);
+
             const explorer = document.getElementById('session-explorer');
             if (!explorer) return;
             this.explorerVisible = !this.explorerVisible;
             explorer.classList.toggle('collapsed', !this.explorerVisible);
-            if (this.explorerResizeHandle) this.explorerResizeHandle.style.display = this.explorerVisible ? '' : 'none';
+
+            if (this.explorerResizeHandle) {
+                this.explorerResizeHandle.classList.toggle('collapsed', !this.explorerVisible);
+            }
+
             try { localStorage.setItem(EXPLORER_COLLAPSED_KEY, String(!this.explorerVisible)); } catch {}
-            if (this.explorerVisible) this._updateExplorerWidth(this.explorerWidth);
+            if (this.explorerVisible) {
+                this._updateExplorerWidth(this.explorerWidth);
+            } else {
+                explorer.style.width = '';
+                explorer.style.minWidth = '';
+                explorer.style.maxWidth = '';
+            }
             setTimeout(() => this.terminalManager.fitActive(), 300);
         }
 
         _initExplorerResize() {
             const handle = this.explorerResizeHandle;
             if (!handle) return;
+
             handle.addEventListener('mousedown', (e) => {
                 e.preventDefault();
-                handle.classList.add('dragging');
-                document.body.style.cursor = 'col-resize';
-                document.body.style.userSelect = 'none';
+                const startX = e.clientX;
+                const startY = e.clientY;
+                let isDragging = false;
                 const body = document.getElementById('terminal-body');
+
                 const onMove = (ev) => {
-                    const w = Math.max(EXPLORER_MIN_WIDTH, Math.min(EXPLORER_MAX_WIDTH, body.getBoundingClientRect().right - ev.clientX));
-                    this.explorerWidth = w;
-                    this._updateExplorerWidth(w);
+                    const dx = Math.abs(ev.clientX - startX);
+                    const dy = Math.abs(ev.clientY - startY);
+
+                    if (!isDragging && (dx + dy) >= 3) {
+                        isDragging = true;
+                        handle.classList.add('dragging');
+                        document.body.style.cursor = 'col-resize';
+                        document.body.style.userSelect = 'none';
+                    }
+
+                    if (isDragging && this.explorerVisible) {
+                        const w = Math.max(EXPLORER_MIN_WIDTH, Math.min(EXPLORER_MAX_WIDTH,
+                            body.getBoundingClientRect().right - ev.clientX));
+                        this.explorerWidth = w;
+                        this._updateExplorerWidth(w);
+                    }
                 };
+
                 const onUp = () => {
                     document.removeEventListener('mousemove', onMove);
                     document.removeEventListener('mouseup', onUp);
-                    handle.classList.remove('dragging');
-                    document.body.style.cursor = '';
-                    document.body.style.userSelect = '';
-                    try { localStorage.setItem(EXPLORER_WIDTH_KEY, String(this.explorerWidth)); } catch {}
-                    this.terminalManager.fitActive();
+
+                    if (isDragging) {
+                        handle.classList.remove('dragging');
+                        document.body.style.cursor = '';
+                        document.body.style.userSelect = '';
+                        try { localStorage.setItem(EXPLORER_WIDTH_KEY, String(this.explorerWidth)); } catch {}
+                        this.terminalManager.fitActive();
+                    } else {
+                        this.toggleExplorer();
+                    }
                 };
+
                 document.addEventListener('mousemove', onMove);
                 document.addEventListener('mouseup', onUp);
             });
+
+            // Touch: tap to toggle (drag-to-resize not supported — 5px too narrow for fingers)
+            handle.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                const startX = touch.clientX;
+                const startY = touch.clientY;
+                let moved = false;
+
+                const onTouchMove = (ev) => {
+                    const t = ev.touches[0];
+                    if (Math.abs(t.clientX - startX) + Math.abs(t.clientY - startY) >= 3) {
+                        moved = true;
+                    }
+                };
+
+                const onTouchEnd = () => {
+                    handle.removeEventListener('touchmove', onTouchMove);
+                    handle.removeEventListener('touchend', onTouchEnd);
+                    if (!moved) {
+                        e.preventDefault();
+                        this.toggleExplorer();
+                    }
+                };
+
+                handle.addEventListener('touchmove', onTouchMove);
+                handle.addEventListener('touchend', onTouchEnd);
+            }, { passive: false });
         }
 
         _restoreExplorerState() {
@@ -1349,7 +1412,10 @@
                 if (localStorage.getItem(EXPLORER_COLLAPSED_KEY) === 'true') {
                     this.explorerVisible = false;
                     explorer.classList.add('collapsed');
-                    if (this.explorerResizeHandle) this.explorerResizeHandle.style.display = 'none';
+                    explorer.style.width = '';
+                    explorer.style.minWidth = '';
+                    explorer.style.maxWidth = '';
+                    if (this.explorerResizeHandle) this.explorerResizeHandle.classList.add('collapsed');
                 }
             } catch {}
         }

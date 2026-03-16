@@ -280,7 +280,42 @@
 }
 
 .explorer-resize-handle:hover::after {
+    opacity: 0;  /* CR-001: chevron replaces dot on hover */
+}
+
+/* CR-001: Chevron indicator on resize handle */
+.explorer-resize-handle::before {
+    content: '‹';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    line-height: 1;
+    color: #8b949e;
+    opacity: 0;
+    transition: opacity 0.15s;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.explorer-resize-handle:hover::before {
     opacity: 1;
+}
+
+/* CR-001: Collapsed handle state */
+.explorer-resize-handle.collapsed {
+    cursor: pointer;
+    display: block;
+}
+
+.explorer-resize-handle.collapsed::before {
+    content: '›';
+    opacity: 1;
+}
+
+.explorer-resize-handle.collapsed::after {
+    opacity: 0;
 }
 
 .explorer-header {

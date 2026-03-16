@@ -6,6 +6,13 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-887 | Feature Closing | Close FEATURE-029-D CR-001: Verify ACs, code-to-docs review, refactoring analysis, commit and push | Ember 🔥 | 🔄 in_progress | 03-16-2026 04:22:00 | — | — |
+| TASK-886 | Human Playground | Create interactive playground for FEATURE-029-D CR-001 border toggle — SKIPPED by human directive | Ember 🔥 | ⏭ skipped | 03-16-2026 04:20:00 | — | x-ipe-task-based-feature-closing |
+| TASK-885 | Acceptance Test | Execute acceptance tests for FEATURE-029-D CR-001: Validate border toggle in browser via Chrome DevTools MCP — click-vs-drag, chevron, handle visibility, persistence, animation guard, touch | Ember 🔥 | ✅ done | 03-16-2026 04:10:00 | [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-029/FEATURE-029-D/acceptance-test-cases.md) | x-ipe-task-based-human-playground |
+| TASK-884 | Code Implementation | Implement FEATURE-029-D CR-001: Border toggle — modify _initExplorerResize() for click-vs-drag (3px), add chevron CSS ::before, visible handle when collapsed, animation guard, touch support | Ember 🔥 | ✅ done | 03-16-2026 03:50:00 | [terminal.js](src/x_ipe/static/js/terminal.js), [terminal.css](src/x_ipe/static/css/terminal.css), [tests](tests/frontend-js/explorer-resize-toggle.test.js) | x-ipe-task-based-feature-acceptance-test |
+| TASK-883 | Technical Design | Design FEATURE-029-D CR-001: Border toggle interaction — click-vs-drag 3px threshold, chevron DOM/state, CSS handle visibility when collapsed, cursor switching, toggleExplorer() integration | Ember 🔥 | ✅ done | 03-16-2026 03:10:00 | [technical-design.md](x-ipe-docs/requirements/EPIC-029/FEATURE-029-D/technical-design.md) | x-ipe-task-based-code-implementation |
+| TASK-882 | Feature Refinement | Refine FEATURE-029-D spec for CR-001: Detail border toggle ACs (AC-19–AC-25), update AC-9 edge cases, create mockup v2 | Ember 🔥 | ✅ done | 03-16-2026 02:30:00 | [specification.md](x-ipe-docs/requirements/EPIC-029/FEATURE-029-D/specification.md), [console-explorer-v2.html](x-ipe-docs/requirements/EPIC-029/FEATURE-029-D/mockups/console-explorer-v2.html) | x-ipe-task-based-technical-design |
+| TASK-881 | Change Request | UIUX Feedback: Add expand/collapse toggle on session explorer border — currently only supports resize bigger/smaller | Ember 🔥 | ✅ done | 03-16-2026 02:15:00 | [CR-001.md](x-ipe-docs/requirements/EPIC-029/FEATURE-029-D/CR-001.md), [specification.md](x-ipe-docs/requirements/EPIC-029/FEATURE-029-D/specification.md) | x-ipe-task-based-feature-refinement |
 | TASK-880 | Bug Fix | handleUpdate() missing pendingFiles — uploaded files silently dropped when updating an existing idea in edit mode | Drift 🌊 | ✅ done | 03-14-2026 16:30:00 | [compose-idea-modal.js](src/x_ipe/static/js/features/compose-idea-modal.js), [tests](tests/frontend-js/compose-idea-modal.test.js) | — |
 | TASK-879 | Bug Fix | KB reference file (.knowledge-reference.yaml) not shown as deliverable in workflow stage UI — not registered in template or deliverables dict | Drift 🌊 | ✅ done | 03-14-2026 16:30:00 | [compose-idea-modal.js](src/x_ipe/static/js/features/compose-idea-modal.js), [workflow-template.json](src/x_ipe/resources/config/workflow-template.json), [tests](tests/frontend-js/compose-idea-modal.test.js) | — |
 | TASK-878 | Bug Fix | UIUX Feedback-20260314-234833: Reopen composed idea doesn't restore saved content, idea name, or KB references — editor shows empty, deliverable file not loaded | Drift 🌊 | ✅ done | 03-14-2026 16:15:00 | [compose-idea-modal.js](src/x_ipe/static/js/features/compose-idea-modal.js), [ideas_service.py](src/x_ipe/services/ideas_service.py), [ideas_routes.py](src/x_ipe/routes/ideas_routes.py), [tests](tests/frontend-js/compose-idea-modal.test.js) | — |
@@ -118,11 +125,11 @@
 
 ## Quick Stats
 
-- **Total Active:** 0
-- **In Progress:** 0
+- **Total Active:** 4
+- **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
-- **Completed (archived):** 865
+- **Completed (archived):** 867
 - **Reverted:** 8
 - **Pending Review:** 0
 - **Blocked:** 0

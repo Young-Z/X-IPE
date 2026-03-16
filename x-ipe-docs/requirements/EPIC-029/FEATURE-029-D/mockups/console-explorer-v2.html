@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Console Explorer — Border Toggle (v2, CR-001)</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #0d1117;
+  --bg-surface: #161b22;
+  --bg-elevated: #1c2129;
+  --bg-panel: #21262d;
+  --bg-hover: #292e36;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  --accent: #3fb950;
+  --accent-dim: #238636;
+  --accent-glow: rgba(63, 185, 80, 0.15);
+  --border: #30363d;
+  --border-subtle: #21262d;
+  --explorer-width: 220px;
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --r-sm: 4px;
+  --r-md: 6px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: #080b10;
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ─── Title Bar ─── */
+.title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-deep);
+  border-bottom: 1px solid var(--border);
+  padding: 10px var(--sp-4);
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  height: 44px;
+}
+
+.title-bar__text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+}
+
+.title-bar__badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--bg-deep);
+  background: var(--accent-dim);
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: 0.5px;
+}
+
+/* ─── Description Banner ─── */
+.description {
+  position: fixed;
+  top: 44px; left: 0; right: 0;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 12px var(--sp-4);
+  z-index: 999;
+  line-height: 1.5;
+}
+
+.description__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.description__text {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+.description__text code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  background: var(--bg-panel);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--accent);
+}
+
+/* ─── Scenario Tabs ─── */
+.scenario-bar {
+  position: fixed;
+  top: 108px; left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  background: var(--bg-deep);
+  border-bottom: 1px solid var(--border);
+  padding: var(--sp-2) var(--sp-4);
+  z-index: 998;
+  height: 40px;
+}
+
+.scenario-bar__label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-right: var(--sp-3);
+}
+
+.scenario-tab {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.scenario-tab:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.scenario-tab.active {
+  color: var(--accent);
+  background: var(--bg-elevated);
+  border-color: var(--border);
+}
+
+.scenario-tab .tab-num {
+  font-size: 9px;
+  opacity: 0.5;
+  margin-right: 4px;
+}
+
+/* ─── Main Viewport ─── */
+.viewport {
+  position: fixed;
+  top: 148px;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #080b10;
+  overflow: hidden;
+}
+
+/* ─── Demo Container ─── */
+.demo-frame {
+  width: 680px;
+  height: 380px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px var(--border);
+  position: relative;
+}
+
+/* ─── Terminal Body (the actual demo) ─── */
+.terminal-body {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-deep);
+  position: relative;
+}
+
+.terminal-content {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-deep);
+  padding: var(--sp-3);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.term-line {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.6;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.term-prompt {
+  color: var(--accent);
+}
+
+.term-cmd {
+  color: var(--text-primary);
+}
+
+.term-output {
+  color: var(--text-secondary);
+}
+
+.term-dim {
+  color: var(--text-muted);
+}
+
+.term-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  background: var(--accent);
+  opacity: 0.8;
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* ─── Resize Handle ─── */
+.resize-handle {
+  width: 5px;
+  background: var(--border-subtle);
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, width 0.15s ease;
+  z-index: 10;
+  user-select: none;
+}
+
+.resize-handle.expanded {
+  cursor: col-resize;
+}
+
+.resize-handle.collapsed {
+  cursor: pointer;
+}
+
+.resize-handle:hover {
+  background: var(--accent-dim);
+}
+
+.resize-handle:hover .handle-chevron {
+  opacity: 1;
+  color: var(--text-primary);
+}
+
+.handle-chevron {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.resize-handle.show-chevron .handle-chevron {
+  opacity: 0.7;
+}
+
+/* ─── Session Explorer ─── */
+.session-explorer {
+  width: var(--explorer-width);
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: width 0.25s ease;
+}
+
+.session-explorer.collapsed {
+  width: 0;
+  border-left-color: transparent;
+}
+
+.explorer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.explorer-header__title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.explorer-header__count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--bg-panel);
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+
+.session-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-1) 0;
+}
+
+.session-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.1s;
+  border-left: 2px solid transparent;
+}
+
+.session-item:hover {
+  background: var(--bg-hover);
+}
+
+.session-item.active {
+  background: var(--bg-elevated);
+  border-left-color: var(--accent);
+}
+
+.session-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.session-dot.alive { background: var(--accent); }
+.session-dot.ended { background: var(--text-muted); }
+
+.session-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.session-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.session-time {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ─── Annotations ─── */
+.annotation-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.annotation {
+  position: absolute;
+  pointer-events: none;
+}
+
+.annotation-line {
+  stroke: var(--accent);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  opacity: 0.6;
+}
+
+.annotation-box {
+  position: absolute;
+  background: rgba(35, 134, 54, 0.12);
+  border: 1px solid var(--accent-dim);
+  border-radius: var(--r-sm);
+  padding: 4px 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.annotation-box .label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 1px;
+}
+
+.annotation-box .detail {
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+/* Highlight pulse on handle */
+.handle-highlight {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 5px;
+  right: 220px;
+  pointer-events: none;
+  z-index: 15;
+}
+
+.handle-highlight.pulse {
+  animation: handlePulse 2s ease-in-out infinite;
+}
+
+@keyframes handlePulse {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50% { box-shadow: 0 0 12px 2px var(--accent-glow), inset 0 0 4px var(--accent-glow); }
+}
+
+/* ─── Tooltip ─── */
+.tooltip-demo {
+  position: absolute;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 3px 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  pointer-events: none;
+  z-index: 30;
+}
+
+/* ─── Drag indicator ─── */
+.drag-indicator {
+  position: absolute;
+  pointer-events: none;
+  z-index: 25;
+}
+
+.drag-arrow {
+  font-size: 14px;
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+/* ─── Transition overlay ─── */
+.transition-label {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 3px 10px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 25;
+}
+
+/* ─── Scenario-specific: hide/show ─── */
+.scenario-panel { display: none; }
+.scenario-panel.active { display: block; }
+
+/* ─── Interactive Demo ─── */
+.interactive-frame {
+  width: 680px;
+  height: 380px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px var(--border);
+  position: relative;
+  display: none;
+}
+
+.interactive-frame.active {
+  display: block;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ Title Bar ═══ -->
+<div class="title-bar">
+  <span class="title-bar__text">Console Explorer — Border Toggle (v2, CR-001)</span>
+  <span class="title-bar__badge">MOCKUP</span>
+</div>
+
+<!-- ═══ Description ═══ -->
+<div class="description">
+  <div class="description__title">Border Toggle — Click-to-Collapse/Expand via Resize Handle</div>
+  <div class="description__text">
+    This mockup demonstrates <code>CR-001</code>: clicking the resize handle (border) toggles the session explorer panel.
+    The handle shows a <code>‹</code>/<code>›</code> chevron, collapses/expands with a <code>0.25s ease</code> transition,
+    and remains visible in all states. Drag-resize behavior is unchanged.
+  </div>
+</div>
+
+<!-- ═══ Scenario Tabs ═══ -->
+<div class="scenario-bar">
+  <span class="scenario-bar__label">Scenarios</span>
+  <button class="scenario-tab active" data-scenario="expanded"><span class="tab-num">1</span> Expanded</button>
+  <button class="scenario-tab" data-scenario="collapse"><span class="tab-num">2</span> Click → Collapse</button>
+  <button class="scenario-tab" data-scenario="collapsed"><span class="tab-num">3</span> Collapsed</button>
+  <button class="scenario-tab" data-scenario="expand"><span class="tab-num">4</span> Click → Expand</button>
+  <button class="scenario-tab" data-scenario="drag"><span class="tab-num">5</span> Drag Resize</button>
+  <button class="scenario-tab" data-scenario="interactive"><span class="tab-num">⚡</span> Interactive</button>
+</div>
+
+<!-- ═══ Viewport ═══ -->
+<div class="viewport">
+
+  <!-- ─── Scenario 1: Expanded (Default) ─── -->
+  <div class="scenario-panel active" data-panel="expanded">
+    <div class="demo-frame">
+      <div class="terminal-body">
+        <div class="terminal-content">
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cmd">npm run build</span></div>
+          <div class="term-line"><span class="term-output">✓ Compiled 47 modules in 1.2s</span></div>
+          <div class="term-line"><span class="term-output">✓ Bundle size: 142kb (gzip: 38kb)</span></div>
+          <div class="term-line"><span class="term-dim">─────────────────────────────────</span></div>
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cmd">npm test</span></div>
+          <div class="term-line"><span class="term-output">PASS  src/explorer.test.ts (0.8s)</span></div>
+          <div class="term-line"><span class="term-output">  ✓ toggles on border click (12ms)</span></div>
+          <div class="term-line"><span class="term-output">  ✓ preserves width on expand (8ms)</span></div>
+          <div class="term-line"><span class="term-dim">Tests: 2 passed, 2 total</span></div>
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cursor"></span></div>
+        </div>
+        <div class="resize-handle expanded show-chevron">
+          <span class="handle-chevron">‹</span>
+        </div>
+        <div class="session-explorer">
+          <div class="explorer-header">
+            <span class="explorer-header__title">Sessions</span>
+            <span class="explorer-header__count">3</span>
+          </div>
+          <div class="session-list">
+            <div class="session-item active">
+              <span class="session-dot alive"></span>
+              <div class="session-info">
+                <div class="session-name">build-runner</div>
+                <div class="session-time">2m ago</div>
+              </div>
+            </div>
+            <div class="session-item">
+              <span class="session-dot alive"></span>
+              <div class="session-info">
+                <div class="session-name">dev-server</div>
+                <div class="session-time">14m ago</div>
+              </div>
+            </div>
+            <div class="session-item">
+              <span class="session-dot ended"></span>
+              <div class="session-info">
+                <div class="session-name">lint-check</div>
+                <div class="session-time">1h ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Annotations -->
+      <div class="annotation-layer">
+        <div class="annotation-box" style="right: 228px; top: 50%; transform: translateY(-50%);">
+          <span class="label">Resize Handle</span>
+          <span class="detail">5px wide · cursor: col-resize</span><br>
+          <span class="detail">hover → accent highlight</span><br>
+          <span class="detail">chevron: ‹ (collapse)</span>
+        </div>
+      </div>
+      <div class="handle-highlight pulse"></div>
+    </div>
+  </div>
+
+  <!-- ─── Scenario 2: Click → Collapse ─── -->
+  <div class="scenario-panel" data-panel="collapse">
+    <div class="demo-frame">
+      <div class="terminal-body">
+        <div class="terminal-content">
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cmd">npm run build</span></div>
+          <div class="term-line"><span class="term-output">✓ Compiled 47 modules in 1.2s</span></div>
+          <div class="term-line"><span class="term-output">✓ Bundle size: 142kb (gzip: 38kb)</span></div>
+          <div class="term-line"><span class="term-dim">─────────────────────────────────────────</span></div>
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cmd">npm test</span></div>
+          <div class="term-line"><span class="term-output">PASS  src/explorer.test.ts (0.8s)</span></div>
+          <div class="term-line"><span class="term-output">  ✓ toggles on border click (12ms)</span></div>
+          <div class="term-line"><span class="term-output">  ✓ preserves width on expand (8ms)</span></div>
+          <div class="term-line"><span class="term-dim">Tests: 2 passed, 2 total</span></div>
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cursor"></span></div>
+        </div>
+        <div class="resize-handle collapsed show-chevron" style="background: var(--accent-dim);">
+          <span class="handle-chevron" style="opacity: 1; color: var(--text-primary);">›</span>
+        </div>
+        <div class="session-explorer collapsed"></div>
+      </div>
+      <!-- Annotations -->
+      <div class="annotation-layer">
+        <div class="annotation-box" style="right: 12px; top: 40%; transform: translateY(-50%);">
+          <span class="label">Click detected (no drag)</span>
+          <span class="detail">movement &lt; 3px → toggle</span><br>
+          <span class="detail">width: 220px → 0</span><br>
+          <span class="detail">transition: 0.25s ease</span>
+        </div>
+        <div class="annotation-box" style="right: 12px; top: 65%;">
+          <span class="label">Chevron flipped: ‹ → ›</span>
+          <span class="detail">indicates "click to expand"</span>
+        </div>
+      </div>
+      <div class="transition-label">⟵ panel collapses with 0.25s ease transition ⟶</div>
+    </div>
+  </div>
+
+  <!-- ─── Scenario 3: Collapsed State ─── -->
+  <div class="scenario-panel" data-panel="collapsed">
+    <div class="demo-frame">
+      <div class="terminal-body">
+        <div class="terminal-content">
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cmd">npm run build</span></div>
+          <div class="term-line"><span class="term-output">✓ Compiled 47 modules in 1.2s</span></div>
+          <div class="term-line"><span class="term-output">✓ Bundle size: 142kb (gzip: 38kb)</span></div>
+          <div class="term-line"><span class="term-dim">──────────────────────────────────────────────────</span></div>
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cmd">npm test -- --watch</span></div>
+          <div class="term-line"><span class="term-output">PASS  src/explorer.test.ts (0.8s)</span></div>
+          <div class="term-line"><span class="term-output">  ✓ toggles on border click (12ms)</span></div>
+          <div class="term-line"><span class="term-output">  ✓ preserves width on expand (8ms)</span></div>
+          <div class="term-line"><span class="term-output">  ✓ drag > 3px resizes (5ms)</span></div>
+          <div class="term-line"><span class="term-dim">Tests: 3 passed, 3 total</span></div>
+          <div class="term-line"><span class="term-dim">Watching for changes...</span></div>
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cursor"></span></div>
+        </div>
+        <div class="resize-handle collapsed show-chevron">
+          <span class="handle-chevron" style="opacity: 0.7;">›</span>
+        </div>
+        <div class="session-explorer collapsed"></div>
+      </div>
+      <!-- Tooltip demo -->
+      <div class="tooltip-demo" style="right: 14px; top: 50%; transform: translateY(-50%);">Click to expand</div>
+      <!-- Annotations -->
+      <div class="annotation-layer">
+        <div class="annotation-box" style="right: 12px; top: 16%;">
+          <span class="label">Collapsed State</span>
+          <span class="detail">explorer width: 0</span><br>
+          <span class="detail">handle: 5px strip visible</span><br>
+          <span class="detail">cursor: pointer (not col-resize)</span><br>
+          <span class="detail">chevron: › (expand)</span>
+        </div>
+        <div class="annotation-box" style="right: 12px; bottom: 50px;">
+          <span class="label">Full terminal width reclaimed</span>
+          <span class="detail">content fills entire panel</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Scenario 4: Click → Expand ─── -->
+  <div class="scenario-panel" data-panel="expand">
+    <div class="demo-frame">
+      <div class="terminal-body">
+        <div class="terminal-content">
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cmd">npm run build</span></div>
+          <div class="term-line"><span class="term-output">✓ Compiled 47 modules in 1.2s</span></div>
+          <div class="term-line"><span class="term-output">✓ Bundle size: 142kb (gzip: 38kb)</span></div>
+          <div class="term-line"><span class="term-dim">─────────────────────────────────</span></div>
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cmd">npm test</span></div>
+          <div class="term-line"><span class="term-output">PASS  src/explorer.test.ts (0.8s)</span></div>
+          <div class="term-line"><span class="term-output">  ✓ toggles on border click (12ms)</span></div>
+          <div class="term-line"><span class="term-output">  ✓ preserves width on expand (8ms)</span></div>
+          <div class="term-line"><span class="term-dim">Tests: 2 passed, 2 total</span></div>
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cursor"></span></div>
+        </div>
+        <div class="resize-handle expanded show-chevron" style="background: var(--accent-dim);">
+          <span class="handle-chevron" style="opacity: 1; color: var(--text-primary);">‹</span>
+        </div>
+        <div class="session-explorer">
+          <div class="explorer-header">
+            <span class="explorer-header__title">Sessions</span>
+            <span class="explorer-header__count">3</span>
+          </div>
+          <div class="session-list">
+            <div class="session-item active">
+              <span class="session-dot alive"></span>
+              <div class="session-info">
+                <div class="session-name">build-runner</div>
+                <div class="session-time">2m ago</div>
+              </div>
+            </div>
+            <div class="session-item">
+              <span class="session-dot alive"></span>
+              <div class="session-info">
+                <div class="session-name">dev-server</div>
+                <div class="session-time">14m ago</div>
+              </div>
+            </div>
+            <div class="session-item">
+              <span class="session-dot ended"></span>
+              <div class="session-info">
+                <div class="session-name">lint-check</div>
+                <div class="session-time">1h ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Annotations -->
+      <div class="annotation-layer">
+        <div class="annotation-box" style="right: 228px; top: 35%;">
+          <span class="label">Click detected → Expand</span>
+          <span class="detail">width: 0 → 220px</span><br>
+          <span class="detail">transition: 0.25s ease</span><br>
+          <span class="detail">chevron: › → ‹</span>
+        </div>
+        <div class="annotation-box" style="right: 228px; top: 65%;">
+          <span class="label">Previous width restored</span>
+          <span class="detail">remembers last width before collapse</span>
+        </div>
+      </div>
+      <div class="transition-label">⟶ panel expands back to 220px with 0.25s ease ⟵</div>
+    </div>
+  </div>
+
+  <!-- ─── Scenario 5: Drag Resize (Unchanged) ─── -->
+  <div class="scenario-panel" data-panel="drag">
+    <div class="demo-frame">
+      <div class="terminal-body">
+        <div class="terminal-content">
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cmd">npm run build</span></div>
+          <div class="term-line"><span class="term-output">✓ Compiled 47 modules in 1.2s</span></div>
+          <div class="term-line"><span class="term-dim">─────────────────────────────</span></div>
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cmd">npm test</span></div>
+          <div class="term-line"><span class="term-output">PASS  src/explorer.test.ts</span></div>
+          <div class="term-line"><span class="term-output">  ✓ drag resize (5ms)</span></div>
+          <div class="term-line"><span class="term-dim">Tests: 1 passed</span></div>
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cursor"></span></div>
+        </div>
+        <div class="resize-handle expanded show-chevron">
+          <span class="handle-chevron">‹</span>
+        </div>
+        <div class="session-explorer" style="width: 280px;">
+          <div class="explorer-header">
+            <span class="explorer-header__title">Sessions</span>
+            <span class="explorer-header__count">3</span>
+          </div>
+          <div class="session-list">
+            <div class="session-item active">
+              <span class="session-dot alive"></span>
+              <div class="session-info">
+                <div class="session-name">build-runner</div>
+                <div class="session-time">2m ago</div>
+              </div>
+            </div>
+            <div class="session-item">
+              <span class="session-dot alive"></span>
+              <div class="session-info">
+                <div class="session-name">dev-server</div>
+                <div class="session-time">14m ago</div>
+              </div>
+            </div>
+            <div class="session-item">
+              <span class="session-dot ended"></span>
+              <div class="session-info">
+                <div class="session-name">lint-check</div>
+                <div class="session-time">1h ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Drag arrows annotation -->
+      <div class="annotation-layer">
+        <div class="annotation-box" style="right: 290px; top: 30%;">
+          <span class="label">Drag Resize (unchanged)</span>
+          <span class="detail">mousedown + move &gt; 3px → resize</span><br>
+          <span class="detail">cursor: col-resize</span><br>
+          <span class="detail">no transition during drag</span>
+        </div>
+        <div class="annotation-box" style="right: 290px; top: 58%;">
+          <span class="label">Click vs Drag threshold</span>
+          <span class="detail">movement ≤ 3px → toggle (click)</span><br>
+          <span class="detail">movement &gt; 3px → resize (drag)</span>
+        </div>
+        <div class="drag-indicator" style="right: 284px; top: 50%; transform: translateY(-50%);">
+          <span class="drag-arrow">⟷</span>
+        </div>
+      </div>
+      <div class="transition-label">drag shown at 280px — resized from default 220px</div>
+    </div>
+  </div>
+
+  <!-- ─── Scenario 6: Interactive Demo ─── -->
+  <div class="scenario-panel" data-panel="interactive">
+    <div class="demo-frame" id="interactive-demo">
+      <div class="terminal-body" id="interactive-body">
+        <div class="terminal-content">
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cmd">npm run dev</span></div>
+          <div class="term-line"><span class="term-output">✓ Server running on http://localhost:3000</span></div>
+          <div class="term-line"><span class="term-output">✓ HMR enabled</span></div>
+          <div class="term-line"><span class="term-dim">──────────────────────────────────────</span></div>
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cmd">echo "Click the border to toggle →"</span></div>
+          <div class="term-line"><span class="term-output">Click the border to toggle →</span></div>
+          <div class="term-line"><span class="term-prompt">❯ </span><span class="term-cursor"></span></div>
+        </div>
+        <div class="resize-handle expanded show-chevron" id="interactive-handle">
+          <span class="handle-chevron" id="interactive-chevron">‹</span>
+        </div>
+        <div class="session-explorer" id="interactive-explorer">
+          <div class="explorer-header">
+            <span class="explorer-header__title">Sessions</span>
+            <span class="explorer-header__count">3</span>
+          </div>
+          <div class="session-list">
+            <div class="session-item active">
+              <span class="session-dot alive"></span>
+              <div class="session-info">
+                <div class="session-name">build-runner</div>
+                <div class="session-time">2m ago</div>
+              </div>
+            </div>
+            <div class="session-item">
+              <span class="session-dot alive"></span>
+              <div class="session-info">
+                <div class="session-name">dev-server</div>
+                <div class="session-time">14m ago</div>
+              </div>
+            </div>
+            <div class="session-item">
+              <span class="session-dot ended"></span>
+              <div class="session-info">
+                <div class="session-name">lint-check</div>
+                <div class="session-time">1h ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Live status -->
+      <div class="transition-label" id="interactive-status">state: expanded · width: 220px · click handle to toggle</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  // ─── Tab switching ───
+  const tabs = document.querySelectorAll('.scenario-tab');
+  const panels = document.querySelectorAll('.scenario-panel');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.scenario;
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelector(`[data-panel="${target}"]`).classList.add('active');
+    });
+  });
+
+  // ─── Interactive demo: border toggle ───
+  const handle = document.getElementById('interactive-handle');
+  const explorer = document.getElementById('interactive-explorer');
+  const chevron = document.getElementById('interactive-chevron');
+  const status = document.getElementById('interactive-status');
+
+  let isCollapsed = false;
+  let savedWidth = 220;
+  let mouseDownX = 0;
+  let isDragging = false;
+  const DRAG_THRESHOLD = 3;
+
+  handle.addEventListener('mousedown', (e) => {
+    mouseDownX = e.clientX;
+    isDragging = false;
+
+    const onMouseMove = (e) => {
+      const dx = Math.abs(e.clientX - mouseDownX);
+      if (dx > DRAG_THRESHOLD && !isCollapsed) {
+        isDragging = true;
+        explorer.style.transition = 'none';
+        const rect = document.getElementById('interactive-body').getBoundingClientRect();
+        const newWidth = Math.max(160, Math.min(360, rect.right - e.clientX));
+        explorer.style.width = newWidth + 'px';
+        savedWidth = newWidth;
+        status.textContent = `state: dragging · width: ${Math.round(newWidth)}px · release to finish`;
+      }
+    };
+
+    const onMouseUp = (e) => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+
+      if (!isDragging) {
+        // Click — toggle
+        isCollapsed = !isCollapsed;
+        explorer.style.transition = 'width 0.25s ease';
+
+        if (isCollapsed) {
+          explorer.style.width = '0px';
+          explorer.style.borderLeftColor = 'transparent';
+          chevron.textContent = '›';
+          handle.classList.remove('expanded');
+          handle.classList.add('collapsed');
+          handle.style.cursor = 'pointer';
+          status.textContent = 'state: collapsed · width: 0 · click handle to expand';
+        } else {
+          explorer.style.width = savedWidth + 'px';
+          explorer.style.borderLeftColor = '';
+          chevron.textContent = '‹';
+          handle.classList.remove('collapsed');
+          handle.classList.add('expanded');
+          handle.style.cursor = 'col-resize';
+          status.textContent = `state: expanded · width: ${savedWidth}px · click handle to toggle`;
+        }
+      } else {
+        // Drag end
+        explorer.style.transition = 'width 0.25s ease';
+        status.textContent = `state: expanded · width: ${Math.round(savedWidth)}px · click handle to toggle`;
+      }
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    e.preventDefault();
+  });
+})();
+</script>
+</body>
+</html>
