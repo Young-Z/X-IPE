@@ -323,67 +323,24 @@ task_completion_output:
   workflow:
     name: "{from input}"
   task_output_links:
-    - "{.checkpoint/session-{timestamp}/}"
-  
-  # Dynamic outputs
-  input_analysis:
-    input_type: "source_code_repo | documentation_folder | running_web_app | public_url | single_file"
-    format: "mixed | markdown | python | javascript | html | yaml | json | go | rust | java | ruby | restructuredtext | text | unknown"
-    app_type: "web | cli | mobile | unknown"
-    source_metadata:
-      primary_language: "string | null"
-      framework: "string | null"
-      secondary_app_types: []
-      file_count: int
-      total_size_bytes: int
-      entry_points: ["string"]
-      has_docs: bool
-  
+    - ".checkpoint/session-{timestamp}/"
+    - "x-ipe-docs/knowledge-base/.kb-intake/{extraction_id}/"
+
+  # Dynamic outputs — schemas and examples in references/output-schemas.md
+  input_analysis: { input_type, format, app_type, source_metadata }
   selected_category: "user-manual"
-  deferred_categories: []
-  loaded_tool_skill: "x-ipe-tool-knowledge-extraction-user-manual | null"
-  tool_skill_artifacts:
-    playbook_template: "path | null"
-    collection_template: "path | null"
-    acceptance_criteria: "path | null"
-    app_type_mixins:
-      web: "path | null"
-      cli: "path | null"
-      mobile: "path | null"
+  loaded_tool_skill: "x-ipe-tool-knowledge-extraction-{category} | null"
   checkpoint_path: ".checkpoint/session-{timestamp}/"
-  
-  extraction_summary:
-    sections_extracted: int
-    sections_skipped: int
-    sections_error: int
-    total_warnings: int
-    content_files: ["content/section-{NN}-{slug}.md"]
-  
-  validation_summary:
-    final_coverage_ratio: float
-    exit_reason: "all_criteria_met | max_iterations_reached | plateau_detected | skipped"
-    iterations_completed: int
-    coverage_history: [float]
-    sections_accepted: int
-    sections_needs_more_info: int
-    sections_error: int
-  
-  error_summary:
-    total_errors: int
-    transient_retried: int
-    permanent_halted: int
-    sections_skipped: int
-    resumed_from: "session path | null"
-  
+  extraction_summary: { sections_extracted, sections_skipped, sections_error }
+  validation_summary: { final_coverage_ratio, exit_reason, sections_accepted }
+  error_summary: { total_errors, transient_retried, permanent_halted }
   extraction_status: "complete | partial | failed"
-  quality_score: 0.0
+  quality_score: 0.0  # 0.0–1.0
   quality_label: "high | acceptable | low"
   kb_output_path: "x-ipe-docs/knowledge-base/.kb-intake/{extraction_id}/"
-  task_output_links:
-    - "x-ipe-docs/knowledge-base/.kb-intake/{extraction_id}/.kb-index.json"
-    - "x-ipe-docs/knowledge-base/.kb-intake/{extraction_id}/extraction_report.md"
-    - ".checkpoint/session-{timestamp}/manifest.yaml"
 ```
+
+REFERENCE: See `references/output-schemas.md` for full dynamic output schemas with field types and examples.
 
 ---
 
