@@ -137,17 +137,17 @@ def update_workflow_action(workflow_name: str, action: str, status: str,
 
     Moves an action to a new status and triggers stage gating re-evaluation.
     Supports all workflow actions across the engineering lifecycle including
-    ideation (compose_idea, idea_mockup, idea_architecture), requirements
+    ideation (compose_idea, design_mockup), requirements
     (requirement_gathering, feature_breakdown, feature_refinement),
     design (technical_design), implementation
-    (code_implementation, acceptance_test), and delivery
+    (implementation, acceptance_testing), and delivery
     (human_playground, feature_closing).
 
     Args:
         workflow_name: Name of the workflow.
-        action: Action identifier (e.g. compose_idea, idea_mockup, requirement_gathering,
+        action: Action identifier (e.g. compose_idea, design_mockup, requirement_gathering,
                 feature_breakdown, feature_refinement, technical_design,
-                code_implementation, acceptance_test, human_playground, feature_closing).
+                implementation, acceptance_testing, human_playground, feature_closing).
         status: New status — one of: pending, in_progress, done, skipped, failed.
         feature_id: Required for per-feature actions (implement/validation/feedback stages).
         deliverables: Optional deliverable paths — either a keyed dict (new format:

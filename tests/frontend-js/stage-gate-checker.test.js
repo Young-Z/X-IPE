@@ -26,12 +26,12 @@ describe('StageGateChecker', () => {
       },
       implement: {
         actions: {
-          code_implementation: { status: 'pending', ...(overrides.code_implementation || {}) },
+          implementation: { status: 'pending', ...(overrides.implementation || {}) },
         },
       },
       validation: {
         actions: {
-          acceptance_test: { status: 'pending', ...(overrides.acceptance_test || {}) },
+          acceptance_testing: { status: 'pending', ...(overrides.acceptance_testing || {}) },
         },
       },
       feedback: {
@@ -101,10 +101,10 @@ describe('StageGateChecker', () => {
     });
 
     it('blocks requirement stage when implement has done actions', () => {
-      const stages = makeStages({ code_implementation: { status: 'done' } });
+      const stages = makeStages({ implementation: { status: 'done' } });
       const result = StageGateChecker.canReopen('feature_refinement', stages);
       expect(result.allowed).toBe(false);
-      expect(result.blocker).toBe('code_implementation');
+      expect(result.blocker).toBe('implementation');
       expect(result.stage).toBe('implement');
     });
   });

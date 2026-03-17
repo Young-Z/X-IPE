@@ -27,7 +27,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the workflow state was updated before marking the task complete.
 
-CRITICAL: Only use testing tools that are explicitly enabled (`true`) in `x-ipe-docs/config/tools.json` under `stages.implement.acceptance_test`. Only `true` counts as enabled — `false`, absent, or any other value means DISABLED. The tools.json config is the single source of truth for which tools are allowed.
+CRITICAL: Only use testing tools that are explicitly enabled (`true`) in `x-ipe-docs/config/tools.json` under `stages.implement.acceptance_testing`. Only `true` counts as enabled — `false`, absent, or any other value means DISABLED. The tools.json config is the single source of truth for which tools are allowed.
 
 MANDATORY: For frontend-ui tests, Chrome DevTools MCP is required. If `chrome-devtools-mcp` is disabled in tools.json or MCP is not available, generate test cases but mark UI test execution as blocked.
 
@@ -118,7 +118,7 @@ input:
   </checkpoint>
   <checkpoint required="true">
     <name>Toolbox config accessible</name>
-    <verification>x-ipe-docs/config/tools.json readable with stages.implement.acceptance_test section</verification>
+    <verification>x-ipe-docs/config/tools.json readable with stages.implement.acceptance_testing section</verification>
   </checkpoint>
 </definition_of_ready>
 ```
@@ -437,7 +437,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 <definition_of_done>
   <checkpoint required="true">
     <name>Toolbox config loaded</name>
-    <verification>Step 1.1 completed — enabled_tools list built from tools.json stages.implement.acceptance_test</verification>
+    <verification>Step 1.1 completed — enabled_tools list built from tools.json stages.implement.acceptance_testing</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>All ACs classified and test cases created</name>

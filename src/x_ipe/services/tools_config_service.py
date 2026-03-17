@@ -30,8 +30,8 @@ DEFAULT_CONFIG = {
         "requirement": {"gathering": {}, "analysis": {}},
         "implement": {
             "technical_design": {},
-            "code_implementation": {},
-            "acceptance_test": {}
+            "implementation": {},
+            "acceptance_testing": {}
         },
         "feedback": {
             "bug_fix": {},
@@ -90,6 +90,9 @@ class ToolsConfigService:
             elif version == '3.0':
                 config = self._migrate_v3_to_v31(config)
                 self.save(config)
+            changed = self._normalize_action_keys(config)
+            if changed:
+                self.save(config)
             return config
         
         if self.legacy_path.exists():
@@ -97,6 +100,20 @@ class ToolsConfigService:
         
         return self._create_default()
     
+    @staticmethod
+    def _normalize_action_keys(config: Dict[str, Any]) -> bool:
+        """Rename legacy action keys to canonical workflow names. Returns True if changes made."""
+        renames = {'code_implementation': 'implementation', 'acceptance_test': 'acceptance_testing'}
+        impl = config.get('stages', {}).get('implement', {})
+        changed = False
+        for old_key, new_key in renames.items():
+            if old_key in impl and new_key not in impl:
+                impl[new_key] = impl.pop(old_key)
+                changed = True
+            elif old_key in impl and new_key in impl:
+                impl.pop(old_key)
+                changed = True
+        return changed
     @x_ipe_tracing()
     def save(self, config: Dict[str, Any]) -> bool:
         """
@@ -178,8 +195,8 @@ class ToolsConfigService:
         
         Mapping:
         - feature.consultation → implement.technical_design
-        - feature.implementation → implement.code_implementation
-        - quality.testing → implement.acceptance_test
+        - feature.implementation → implement.implementation
+        - quality.testing → implement.acceptance_testing
         - feature.bug_fix → feedback.bug_fix
         - refactoring.execution → feedback.code_refactor
         - feature.consultation → feedback.refactoring_analysis (copy)
@@ -195,9 +212,9 @@ class ToolsConfigService:
         if 'consultation' in feature:
             implement['technical_design'] = feature['consultation']
         if 'implementation' in feature:
-            implement['code_implementation'] = feature['implementation']
+            implement['implementation'] = feature['implementation']
         if 'testing' in quality:
-            implement['acceptance_test'] = quality['testing']
+            implement['acceptance_testing'] = quality['testing']
         
         feedback = {}
         if 'bug_fix' in feature:
@@ -221,8 +238,8 @@ class ToolsConfigService:
         Migrate v3.0 phase names to v3.1 workflow-aligned names.
         
         Mapping:
-        - implement: consultation→technical_design, implementation→code_implementation,
-          testing→acceptance_test, design/review dropped
+        - implement: consultation→technical_design, implementation→implementation,
+          testing→acceptance_testing, design/review dropped
         - feedback: playground→human_playground, refactoring→code_refactor+refactoring_analysis
         """
         stages = config.get('stages', {})
@@ -232,13 +249,18 @@ class ToolsConfigService:
         if 'consultation' in impl:
             new_impl['technical_design'] = impl['consultation']
         if 'implementation' in impl:
-            new_impl['code_implementation'] = impl['implementation']
+            new_impl['implementation'] = impl['implementation']
         if 'testing' in impl:
-            new_impl['acceptance_test'] = impl['testing']
+            new_impl['acceptance_testing'] = impl['testing']
         # Carry over if already using new names
-        for key in ('technical_design', 'code_implementation', 'acceptance_test'):
+        for key in ('technical_design', 'implementation', 'acceptance_testing'):
             if key in impl and key not in new_impl:
                 new_impl[key] = impl[key]
+        # Backward compat: carry over old names as canonical names
+        if 'code_implementation' in impl and 'implementation' not in new_impl:
+            new_impl['implementation'] = impl['code_implementation']
+        if 'acceptance_test' in impl and 'acceptance_testing' not in new_impl:
+            new_impl['acceptance_testing'] = impl['acceptance_test']
         stages['implement'] = new_impl
         
         fb = stages.get('feedback', {})

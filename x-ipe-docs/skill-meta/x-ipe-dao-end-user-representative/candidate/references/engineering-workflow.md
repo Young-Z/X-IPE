@@ -34,8 +34,8 @@ IDEATION → REQUIREMENT → IMPLEMENT → FEEDBACK
 | Action | Skill | Required | Next Actions |
 |--------|-------|----------|--------------|
 | feature_refinement | x-ipe-task-based-feature-refinement | yes | technical_design |
-| technical_design | x-ipe-task-based-technical-design | yes | code_implementation |
-| code_implementation | x-ipe-task-based-code-implementation | yes | acceptance_testing |
+| technical_design | x-ipe-task-based-technical-design | yes | implementation |
+| implementation | x-ipe-task-based-code-implementation | yes | acceptance_testing |
 | acceptance_testing | x-ipe-task-based-feature-acceptance-test | yes | feature_closing |
 | feature_closing | x-ipe-task-based-feature-closing | yes | → enters FEEDBACK |
 

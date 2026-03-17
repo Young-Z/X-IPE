@@ -49,7 +49,7 @@
         "x-ipe-tool-implementation-mcp": true,
         "x-ipe-tool-implementation-general": true
       },
-      "code_implementation": {
+      "implementation": {
         "_order": 2,
         "_extra_instruction": "",
         "x-ipe-tool-implementation-python": true,
@@ -59,7 +59,7 @@
         "x-ipe-tool-implementation-mcp": true,
         "x-ipe-tool-implementation-general": true
       },
-      "acceptance_test": {
+      "acceptance_testing": {
         "_order": 1,
         "_extra_instruction": "Testing mode: route test execution to appropriate tools by test type. Chrome DevTools MCP for frontend-ui browser tests. x-ipe-tool-ui-testing-via-chrome-mcp skill for structured UI test execution. Tool skills for backend/unit/integration test code generation.",
         "chrome-devtools-mcp": true,

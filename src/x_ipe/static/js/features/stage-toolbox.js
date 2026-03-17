@@ -56,8 +56,8 @@ class StageToolboxModal {
             analysis: 'Analysis',
             // Implement
             technical_design: 'Technical Design',
-            code_implementation: 'Code Implementation',
-            acceptance_test: 'Acceptance Test',
+            implementation: 'Implementation',
+            acceptance_testing: 'Acceptance Testing',
             // Feedback
             bug_fix: 'Bug Fix',
             code_refactor: 'Code Refactor',
