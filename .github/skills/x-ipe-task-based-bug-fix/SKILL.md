@@ -119,13 +119,13 @@ input:
 | Step | Name | Action | Gate |
 |------|------|--------|------|
 | 1 | Understand | Read bug description, categorize severity | Bug understood |
-| 2 | Reproduce | Follow steps to confirm bug occurs | Bug reproduced |
+| 2 | Reproduce | Follow steps to confirm bug occurs; if UI bug + browser tools enabled in config, use them to reproduce | Bug reproduced |
 | 3 | Diagnose | Trace root cause, check technical design | Root cause found |
 | 4 | Design Fix | Identify fix options, choose minimal fix | Fix approach selected |
 | 5 | Conflict Analysis | Detect conflicts with existing logic, validate against user request | Conflicts resolved |
 | 6 | Write Test | Create failing test that reproduces bug | Test fails |
 | 7 | Implement | Write minimum code to fix bug | Test passes |
-| 8 | Verify | Confirm bug fixed, all tests pass | DoD validated |
+| 8 | Verify | Confirm bug fixed, all tests pass; if UI bug, route to browser validation tools from config | DoD validated |
 | 9.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
 | 9.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
@@ -164,6 +164,15 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
       1. IF reproduction steps provided: follow them exactly, confirm bug occurs
          ELSE: analyze symptoms, create hypothesis, design test case, attempt to reproduce
       2. Document exact steps, environment conditions, and error messages
+      3. BROWSER VALIDATION ROUTING (for UI bugs):
+         a. IF program_type includes "frontend" or "fullstack":
+            READ CONFIG: x-ipe-docs/config/tools.json → stages.quality.testing
+            - IF config has chrome-devtools-mcp == true OR x-ipe-tool-ui-testing-via-chrome-mcp == true:
+              → Use browser tools to reproduce the bug visually
+              → Take screenshot/snapshot of the broken state for reference
+              → Check browser console for errors or warnings
+            - ELSE: skip browser reproduction (rely on test-based reproduction)
+         b. ELSE (backend/cli/library): skip browser reproduction
     </action>
     <output>Documented reproduction steps with confirmed bug occurrence</output>
   </step_2>
@@ -280,11 +289,25 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
     <action>
       1. Follow original reproduction steps, confirm bug is fixed
       2. Run full test suite, perform manual smoke test
-      3. Document: what was changed, why it fixes the bug, any side effects
+      3. BROWSER VALIDATION ROUTING (for UI bugs):
+         a. IF program_type includes "frontend" or "fullstack":
+            READ CONFIG: x-ipe-docs/config/tools.json → stages.quality.testing
+            - IF config has chrome-devtools-mcp == true OR x-ipe-tool-ui-testing-via-chrome-mcp == true:
+              → Use browser tools to validate the fix visually:
+                i.   Navigate to the affected page/component
+                ii.  Follow original reproduction steps — confirm bug no longer occurs
+                iii. Take screenshot/snapshot of the fixed state
+                iv.  Check browser console for new errors or warnings introduced by fix
+                v.   Verify no visual regressions in surrounding UI elements
+              → IF browser validation fails: return to Step 7 to adjust fix
+            - ELSE: rely on test suite results only
+         b. ELSE (backend/cli/library): rely on test suite results only
+      4. Document: what was changed, why it fixes the bug, any side effects
     </action>
     <success_criteria>
       - Bug can no longer be reproduced
       - Full test suite passes
+      - Browser validation passes (if UI bug and browser tools enabled in config)
       - Fix is documented
     </success_criteria>
     <output>Verified fix with documentation</output>
@@ -385,6 +408,10 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   <checkpoint required="true">
     <name>Fix documented</name>
     <verification>Check that root cause, fix description, and any side effects are documented</verification>
+  </checkpoint>
+  <checkpoint required="conditional">
+    <name>Browser validation passed (if UI bug and browser tools enabled)</name>
+    <verification>IF program_type is frontend/fullstack AND stages.quality.testing config has chrome-devtools-mcp or x-ipe-tool-ui-testing-via-chrome-mcp enabled: confirm browser-based validation shows fix works visually, no console errors, no visual regressions</verification>
   </checkpoint>
 </definition_of_done>
 ```
