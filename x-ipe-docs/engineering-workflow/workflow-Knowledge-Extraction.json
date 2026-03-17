@@ -1,8 +1,8 @@
 {
-  "schema_version": "3.0",
+  "schema_version": "4.0",
   "name": "Knowledge-Extraction",
   "created": "2026-03-17T03:17:23.200297+00:00",
-  "last_activity": "2026-03-17T08:31:25.706103+00:00",
+  "last_activity": "2026-03-17T10:22:01.343737+00:00",
   "idea_folder": null,
   "current_stage": "validation",
   "global": {
@@ -169,9 +169,7 @@
           },
           "feature_closing": {
             "status": "done",
-            "deliverables": {
-              "closing-report": "commit 05a8a14"
-            },
+            "deliverables": {},
             "context": {},
             "next_actions_suggested": [
               "human_playground",
@@ -229,10 +227,7 @@
           },
           "implementation": {
             "status": "done",
-            "deliverables": {
-              "skill-source": ".github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md",
-              "reference-extraction-heuristics": ".github/skills/x-ipe-task-based-application-knowledge-extractor/references/extraction-engine-heuristics.md"
-            },
+            "deliverables": {},
             "context": {},
             "next_actions_suggested": [
               "acceptance_testing"
@@ -253,10 +248,7 @@
           },
           "feature_closing": {
             "status": "done",
-            "deliverables": {
-              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/",
-              "skill-source": ".github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md"
-            },
+            "deliverables": {},
             "context": {},
             "next_actions_suggested": [
               "human_playground",
@@ -315,10 +307,7 @@
           },
           "implementation": {
             "status": "done",
-            "deliverables": {
-              "skill-md": ".github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md",
-              "validation-loop-heuristics": ".github/skills/x-ipe-task-based-application-knowledge-extractor/references/validation-loop-heuristics.md"
-            },
+            "deliverables": {},
             "context": {},
             "next_actions_suggested": [
               "acceptance_testing"
@@ -366,36 +355,68 @@
         "FEATURE-050-A"
       ],
       "implement": {
-        "status": "locked",
+        "status": "done",
         "actions": {
           "feature_refinement": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "specification": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-D/specification.md",
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-D/"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "technical_design"
+            ]
           },
           "technical_design": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "tech-design": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-D/technical-design.md",
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-D/"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "implementation"
+            ]
           },
           "implementation": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "impl-files": ".github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md",
+              "impl-folder": ".github/skills/x-ipe-task-based-application-knowledge-extractor/"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "acceptance_testing"
+            ]
           }
         }
       },
       "validation": {
-        "status": "locked",
+        "status": "in_progress",
         "actions": {
           "acceptance_testing": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "test-report": "21/21 ACs PASS (structured-review)",
+              "test-folder": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-D/"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "code_refactor"
+            ]
           },
           "code_refactor": {
             "status": "pending",
             "deliverables": []
           },
           "feature_closing": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": [],
+            "next_actions_suggested": [
+              "human_playground",
+              "change_request"
+            ]
           }
         }
       },
@@ -422,28 +443,59 @@
         "FEATURE-050-C"
       ],
       "implement": {
-        "status": "locked",
+        "status": "done",
         "actions": {
           "feature_refinement": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-E/",
+              "specification": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-E/specification.md"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "technical_design"
+            ]
           },
           "technical_design": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-E/",
+              "tech-design": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-E/technical-design.md"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "implementation"
+            ]
           },
           "implementation": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "impl-files": [
+                ".github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md",
+                ".github/skills/x-ipe-task-based-application-knowledge-extractor/references/output-quality-heuristics.md"
+              ],
+              "impl-folder": ".github/skills/x-ipe-task-based-application-knowledge-extractor/"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "acceptance_testing"
+            ]
           }
         }
       },
       "validation": {
-        "status": "locked",
+        "status": "in_progress",
         "actions": {
           "acceptance_testing": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "test-report": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-E/acceptance-test-report.md",
+              "test-folder": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-E/"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "code_refactor"
+            ]
           },
           "code_refactor": {
             "status": "pending",
