@@ -28,3 +28,4 @@
 | 18 | [Part 18](x-ipe-docs/requirements/requirement-details-part-18.md) | EPIC-046 (FEATURE-046-A to FEATURE-046-C) | ~281 |
 | 19 | [Part 19](x-ipe-docs/requirements/requirement-details-part-19.md) | EPIC-047 (FEATURE-047-A to FEATURE-047-C) | ~223 |
 | 20 | [Part 20](x-ipe-docs/requirements/requirement-details-part-20.md) | EPIC-048 (FEATURE-048-A to FEATURE-048-D), **EPIC-049** (FEATURE-049-A to FEATURE-049-G) | ~690 |
+| 21 | [Part 21](x-ipe-docs/requirements/requirement-details-part-21.md) | **EPIC-050** (FEATURE-050-A to FEATURE-050-E) | ~170 |

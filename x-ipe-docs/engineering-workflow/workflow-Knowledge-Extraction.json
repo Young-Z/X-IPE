@@ -1,0 +1,411 @@
+{
+  "schema_version": "3.0",
+  "name": "Knowledge-Extraction",
+  "created": "2026-03-17T03:17:23.200297+00:00",
+  "last_activity": "2026-03-17T06:31:20.203899+00:00",
+  "idea_folder": null,
+  "current_stage": "implement",
+  "global": {
+    "process_preference": {
+      "interaction_mode": "interact-with-human"
+    }
+  },
+  "shared": {
+    "ideation": {
+      "status": "completed",
+      "actions": {
+        "compose_idea": {
+          "status": "done",
+          "deliverables": {
+            "raw-ideas": "x-ipe-docs/ideas/wf-008-knowledge-extraction/new idea.md",
+            "ideas-folder": "x-ipe-docs/ideas/wf-008-knowledge-extraction"
+          },
+          "context": {},
+          "next_actions_suggested": [
+            "refine_idea",
+            "reference_uiux"
+          ]
+        },
+        "refine_idea": {
+          "status": "done",
+          "deliverables": {
+            "refined-idea": "x-ipe-docs/ideas/wf-008-knowledge-extraction/refined-idea/idea-summary-v1.md",
+            "refined-ideas-folder": "x-ipe-docs/ideas/wf-008-knowledge-extraction/refined-idea/"
+          },
+          "context": {},
+          "next_actions_suggested": [
+            "design_mockup",
+            "requirement_gathering"
+          ]
+        },
+        "reference_uiux": {
+          "status": "skipped",
+          "deliverables": [],
+          "optional": true
+        },
+        "design_mockup": {
+          "status": "pending",
+          "deliverables": [],
+          "optional": true
+        }
+      }
+    },
+    "requirement": {
+      "status": "completed",
+      "actions": {
+        "requirement_gathering": {
+          "status": "done",
+          "deliverables": {
+            "requirement-doc": "x-ipe-docs/requirements/requirement-details-part-21.md",
+            "requirements-folder": "x-ipe-docs/requirements/EPIC-050/"
+          },
+          "context": {},
+          "next_actions_suggested": [
+            "feature_breakdown"
+          ]
+        },
+        "feature_breakdown": {
+          "status": "done",
+          "deliverables": {
+            "feature-list-doc": "x-ipe-docs/requirements/requirement-details-part-21.md"
+          },
+          "features_created": [
+            {
+              "id": "FEATURE-050-A",
+              "name": "Extractor Skill Foundation & Input Detection",
+              "depends_on": []
+            },
+            {
+              "id": "FEATURE-050-B",
+              "name": "Source Extraction Engine",
+              "depends_on": [
+                "FEATURE-050-A"
+              ]
+            },
+            {
+              "id": "FEATURE-050-C",
+              "name": "Extract-Validate Loop & Coverage Control",
+              "depends_on": [
+                "FEATURE-050-A",
+                "FEATURE-050-B"
+              ]
+            },
+            {
+              "id": "FEATURE-050-D",
+              "name": "Checkpoint, Resume & Error Handling",
+              "depends_on": [
+                "FEATURE-050-A"
+              ]
+            },
+            {
+              "id": "FEATURE-050-E",
+              "name": "KB Intake Output & Quality Scoring",
+              "depends_on": [
+                "FEATURE-050-C"
+              ]
+            }
+          ],
+          "context": {},
+          "next_actions_suggested": [
+            "FEATURE-050-A"
+          ]
+        }
+      }
+    }
+  },
+  "features": [
+    {
+      "feature_id": "FEATURE-050-A",
+      "name": "Extractor Skill Foundation & Input Detection",
+      "depends_on": [],
+      "implement": {
+        "status": "in_progress",
+        "actions": {
+          "feature_refinement": {
+            "status": "done",
+            "deliverables": {
+              "specification": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/specification.md",
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "technical_design"
+            ]
+          },
+          "technical_design": {
+            "status": "done",
+            "deliverables": {
+              "tech-design": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/technical-design.md",
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "implementation"
+            ]
+          },
+          "implementation": {
+            "status": "pending",
+            "deliverables": []
+          }
+        }
+      },
+      "validation": {
+        "status": "locked",
+        "actions": {
+          "acceptance_testing": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "code_refactor": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "feature_closing": {
+            "status": "pending",
+            "deliverables": []
+          }
+        }
+      },
+      "feedback": {
+        "status": "locked",
+        "actions": {
+          "human_playground": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          }
+        }
+      }
+    },
+    {
+      "feature_id": "FEATURE-050-B",
+      "name": "Source Extraction Engine",
+      "depends_on": [
+        "FEATURE-050-A"
+      ],
+      "implement": {
+        "status": "locked",
+        "actions": {
+          "feature_refinement": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "technical_design": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "implementation": {
+            "status": "pending",
+            "deliverables": []
+          }
+        }
+      },
+      "validation": {
+        "status": "locked",
+        "actions": {
+          "acceptance_testing": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "code_refactor": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "feature_closing": {
+            "status": "pending",
+            "deliverables": []
+          }
+        }
+      },
+      "feedback": {
+        "status": "locked",
+        "actions": {
+          "human_playground": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          }
+        }
+      }
+    },
+    {
+      "feature_id": "FEATURE-050-C",
+      "name": "Extract-Validate Loop & Coverage Control",
+      "depends_on": [
+        "FEATURE-050-A",
+        "FEATURE-050-B"
+      ],
+      "implement": {
+        "status": "locked",
+        "actions": {
+          "feature_refinement": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "technical_design": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "implementation": {
+            "status": "pending",
+            "deliverables": []
+          }
+        }
+      },
+      "validation": {
+        "status": "locked",
+        "actions": {
+          "acceptance_testing": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "code_refactor": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "feature_closing": {
+            "status": "pending",
+            "deliverables": []
+          }
+        }
+      },
+      "feedback": {
+        "status": "locked",
+        "actions": {
+          "human_playground": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          }
+        }
+      }
+    },
+    {
+      "feature_id": "FEATURE-050-D",
+      "name": "Checkpoint, Resume & Error Handling",
+      "depends_on": [
+        "FEATURE-050-A"
+      ],
+      "implement": {
+        "status": "locked",
+        "actions": {
+          "feature_refinement": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "technical_design": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "implementation": {
+            "status": "pending",
+            "deliverables": []
+          }
+        }
+      },
+      "validation": {
+        "status": "locked",
+        "actions": {
+          "acceptance_testing": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "code_refactor": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "feature_closing": {
+            "status": "pending",
+            "deliverables": []
+          }
+        }
+      },
+      "feedback": {
+        "status": "locked",
+        "actions": {
+          "human_playground": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          }
+        }
+      }
+    },
+    {
+      "feature_id": "FEATURE-050-E",
+      "name": "KB Intake Output & Quality Scoring",
+      "depends_on": [
+        "FEATURE-050-C"
+      ],
+      "implement": {
+        "status": "locked",
+        "actions": {
+          "feature_refinement": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "technical_design": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "implementation": {
+            "status": "pending",
+            "deliverables": []
+          }
+        }
+      },
+      "validation": {
+        "status": "locked",
+        "actions": {
+          "acceptance_testing": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "code_refactor": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "feature_closing": {
+            "status": "pending",
+            "deliverables": []
+          }
+        }
+      },
+      "feedback": {
+        "status": "locked",
+        "actions": {
+          "human_playground": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          }
+        }
+      }
+    }
+  ]
+}

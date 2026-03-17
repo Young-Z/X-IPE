@@ -120,12 +120,14 @@ input:
 | 2. 审问之 — Inquire Thoroughly | 2.1 CR Challenge, 2.2 Analyze Impact | Challenge CR assumptions, review existing requirements and features | Impact analyzed |
 | 3. 慎思之 — Think Carefully | 3.1 Detect Conflicts | Analyze spec/design/dependency conflicts with existing features | Conflicts classified |
 | 4. 明辨之 — Discern Clearly | 4.1 Classify CR Type, 4.2 Route Workflow | Classify modification vs new feature, confirm classification | Classification confirmed |
-| 5. 笃行之 — Practice Earnestly | 5.1 Execute & Document | Update documents, create CR record | CR documented |
+| 5. 笃行之 — Practice Earnestly | 5.1 Execute & Document | Resolve conflicts, confirm large-scope changes with human, update spec + docs (both paths), create CR record | CR documented |
 | 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
 | 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Phase 3 must complete before Phase 4 — do NOT classify without conflict analysis.
 BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop_for_question: human confirms; auto: DAO confirms via x-ipe-dao-end-user-representative).
+BLOCKING: Specification MUST be updated for BOTH modification and new_feature classifications.
+BLOCKING: Large-scope CRs require human confirmation of the proposed feature change solution BEFORE Phase 5 document changes are applied.
 
 ---
 
@@ -277,6 +279,19 @@ BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop
                 → Mark affected sections in target document with "[RETIRED by CR-XXX]" header
                 → Add retirement note: reason, date, and reference to CR-XXX.md
                 → Write replacement content in the appropriate location (new section or updated section)
+        0b. Large-scope confirmation gate:
+           - IF CR impacts a large scope of change (multiple features, structural redesign,
+             significant AC rewrites, or new workflows):
+             → Present the proposed feature change solution (spec changes, affected ACs,
+               conflict resolutions) to human for confirmation BEFORE executing changes
+             → Wait for human approval or revision
+             Response source (based on interaction_mode):
+             IF process_preference.interaction_mode == "dao-represent-human-to-interact":
+               → Confirm via x-ipe-dao-end-user-representative
+             ELSE:
+               → Ask human directly
+           - IF CR is small-scope (single feature, minor AC additions/edits):
+             → Proceed without additional confirmation (Phase 4.2 already confirmed classification)
         1. IF classification = "modification":
            a. CREATE CR-XXX.md using templates/change-request.md
            b. UPDATE specification.md: Version History + affected sections/ACs
@@ -285,8 +300,9 @@ BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop
            e. SET next_task_based_skill = x-ipe-task-based-feature-refinement
         2. ELSE (classification = "new_feature"):
            a. UPDATE requirement-details.md: add new requirement
-           b. SET next_task_based_skill = x-ipe-task-based-feature-breakdown
-           c. NOTE: CR-XXX.md created after feature breakdown creates folder
+           b. UPDATE specification.md: Version History + new sections/ACs for the CR changes
+           c. SET next_task_based_skill = x-ipe-task-based-feature-breakdown
+           d. NOTE: CR-XXX.md created after feature breakdown creates folder
         3. Create CR record at FEATURE-XXX/CR-XXX.md
         4. Verify all DoD checkpoints
         5. Verify all DoD checkpoints are met
@@ -296,6 +312,8 @@ BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop
         - CRITICAL: Never override existing mockup files — create new versions
         - CRITICAL: CR files go in feature folders (co-location)
         - CRITICAL: Conflicting documents MUST be handled — minor conflicts updated inline, major conflicts marked retired
+        - CRITICAL: Specification MUST be updated for BOTH classification paths (modification AND new_feature)
+        - BLOCKING: Large-scope CRs MUST get human confirmation (step 0b) before applying document changes
       </constraints>
       <output>CR documented, conflicting docs resolved, next_task_based_skill set</output>
     </step_5_1>
@@ -450,7 +468,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>Version history updated</name>
-    <verification>Specification Version History has CR entry (modification path only)</verification>
+    <verification>Specification Version History has CR entry (both modification and new_feature paths)</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Conflicting documents resolved</name>
@@ -458,7 +476,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>Documents updated</name>
-    <verification>Specification (modification) or requirement-details.md (new feature) updated</verification>
+    <verification>Specification updated (both paths). Additionally: requirement-details.md updated if new_feature or high-level requirement change</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Next task type set</name>

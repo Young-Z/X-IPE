@@ -18,6 +18,7 @@ from pathlib import Path
 from flask import Blueprint, jsonify, request, current_app, send_file
 
 from x_ipe.services import IdeasService, SkillsService
+from x_ipe.services.conversion_utils import convert_docx, convert_msg, sanitize_converted_html
 from x_ipe.tracing import x_ipe_tracing
 
 # CR-001: Convertible binary formats

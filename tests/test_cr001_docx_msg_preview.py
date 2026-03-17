@@ -2,9 +2,9 @@
 Tests for CR-001: .docx/.msg File Content Preview
 
 Covers:
-- _convert_docx() helper: happy path + corrupted file
-- _convert_msg() helper: happy path + error handling
-- _sanitize_converted_html(): strips scripts/iframes/on* attributes
+- convert_docx() helper: happy path + corrupted file
+- convert_msg() helper: happy path + error handling
+- sanitize_converted_html(): strips scripts/iframes/on* attributes
 - GET /api/ideas/file: conversion route integration, 413 size guard, 415 fallback
 """
 import json
@@ -21,36 +21,36 @@ from unittest.mock import patch, MagicMock
 # ============================================================================
 
 class TestConvertDocx:
-    """Unit tests for _convert_docx()."""
+    """Unit tests for convert_docx()."""
 
     def test_convert_docx_returns_html(self, tmp_path):
         """AC-038-C.04a: .docx file returns rendered HTML content."""
-        from x_ipe.routes.ideas_routes import _convert_docx
+        from x_ipe.services.conversion_utils import convert_docx
         mock_result = MagicMock()
         mock_result.value = '<h1>Hello</h1><p>World</p>'
         docx_file = tmp_path / 'test.docx'
         docx_file.write_bytes(b'PK\x03\x04dummy')  # minimal file so open() works
         with patch('mammoth.convert_to_html', return_value=mock_result) as mock_conv:
-            result = _convert_docx(docx_file)
+            result = convert_docx(docx_file)
             assert '<h1>Hello</h1>' in result
             assert '<p>World</p>' in result
             mock_conv.assert_called_once()
 
     def test_convert_docx_corrupted_raises(self, tmp_path):
         """AC-038-C.04e: Corrupted .docx raises exception."""
-        from x_ipe.routes.ideas_routes import _convert_docx
+        from x_ipe.services.conversion_utils import convert_docx
         bad_file = tmp_path / 'bad.docx'
         bad_file.write_bytes(b'not a real docx')
         with pytest.raises(Exception):
-            _convert_docx(bad_file)
+            convert_docx(bad_file)
 
 
 class TestConvertMsg:
-    """Unit tests for _convert_msg()."""
+    """Unit tests for convert_msg()."""
 
     def test_convert_msg_returns_html_with_headers(self):
         """AC-038-C.04b: .msg file returns HTML with From/To/Subject/Body."""
-        from x_ipe.routes.ideas_routes import _convert_msg
+        from x_ipe.services.conversion_utils import convert_msg
         mock_msg = MagicMock()
         mock_msg.sender = 'alice@example.com'
         mock_msg.to = 'bob@example.com'
@@ -62,7 +62,7 @@ class TestConvertMsg:
         mock_msg.close = MagicMock()
 
         with patch('extract_msg.openMsg', return_value=mock_msg):
-            result = _convert_msg('/fake/path.msg')
+            result = convert_msg('/fake/path.msg')
 
         assert 'alice@example.com' in result
         assert 'bob@example.com' in result
@@ -74,7 +74,7 @@ class TestConvertMsg:
 
     def test_convert_msg_html_body_used_when_present(self):
         """AC-038-C.04b edge case: .msg with HTML body uses htmlBody instead of plain text."""
-        from x_ipe.routes.ideas_routes import _convert_msg
+        from x_ipe.services.conversion_utils import convert_msg
         mock_msg = MagicMock()
         mock_msg.sender = 'alice@example.com'
         mock_msg.to = 'bob@example.com'
@@ -86,14 +86,14 @@ class TestConvertMsg:
         mock_msg.close = MagicMock()
 
         with patch('extract_msg.openMsg', return_value=mock_msg):
-            result = _convert_msg('/fake/path.msg')
+            result = convert_msg('/fake/path.msg')
 
         assert '<p>Rich <b>HTML</b> body</p>' in result
         assert 'Fallback plain text' not in result
 
     def test_convert_msg_closes_on_error(self):
         """AC-038-C.04e: .msg close() called even on error."""
-        from x_ipe.routes.ideas_routes import _convert_msg
+        from x_ipe.services.conversion_utils import convert_msg
         mock_msg = MagicMock()
         mock_msg.sender = None
         mock_msg.to = None
@@ -106,20 +106,20 @@ class TestConvertMsg:
 
         with patch('extract_msg.openMsg', return_value=mock_msg):
             # Should not raise — None fields handled gracefully
-            result = _convert_msg('/fake/path.msg')
+            result = convert_msg('/fake/path.msg')
 
         mock_msg.close.assert_called_once()
         assert 'msg-preview' in result
 
 
 class TestSanitizeConvertedHtml:
-    """Unit tests for _sanitize_converted_html()."""
+    """Unit tests for sanitize_converted_html()."""
 
     def test_strips_script_tags(self):
         """AC-038-C.04g: Removes <script> tags from converted HTML."""
-        from x_ipe.routes.ideas_routes import _sanitize_converted_html
+        from x_ipe.services.conversion_utils import sanitize_converted_html
         html = '<p>Hello</p><script>alert("xss")</script><p>World</p>'
-        result = _sanitize_converted_html(html)
+        result = sanitize_converted_html(html)
         assert '<script>' not in result
         assert 'alert' not in result
         assert '<p>Hello</p>' in result
@@ -127,34 +127,34 @@ class TestSanitizeConvertedHtml:
 
     def test_strips_iframe_tags(self):
         """AC-038-C.04g: Removes <iframe> tags."""
-        from x_ipe.routes.ideas_routes import _sanitize_converted_html
+        from x_ipe.services.conversion_utils import sanitize_converted_html
         html = '<div><iframe src="evil.com"></iframe></div>'
-        result = _sanitize_converted_html(html)
+        result = sanitize_converted_html(html)
         assert '<iframe' not in result
 
     def test_strips_on_event_attributes(self):
         """AC-038-C.04g: Removes on* event handler attributes."""
-        from x_ipe.routes.ideas_routes import _sanitize_converted_html
+        from x_ipe.services.conversion_utils import sanitize_converted_html
         html = '<p onclick="alert(1)" onmouseover="hack()">Text</p>'
-        result = _sanitize_converted_html(html)
+        result = sanitize_converted_html(html)
         assert 'onclick' not in result
         assert 'onmouseover' not in result
         assert 'Text' in result
 
     def test_strips_object_embed_tags(self):
         """AC-038-C.04g: Removes <object> and <embed> tags."""
-        from x_ipe.routes.ideas_routes import _sanitize_converted_html
+        from x_ipe.services.conversion_utils import sanitize_converted_html
         html = '<object data="x"></object><embed src="y"><p>Safe</p>'
-        result = _sanitize_converted_html(html)
+        result = sanitize_converted_html(html)
         assert '<object' not in result
         assert '<embed' not in result
         assert '<p>Safe</p>' in result
 
     def test_preserves_safe_html(self):
         """Safe HTML elements pass through unchanged."""
-        from x_ipe.routes.ideas_routes import _sanitize_converted_html
+        from x_ipe.services.conversion_utils import sanitize_converted_html
         html = '<h1>Title</h1><p>Para</p><ul><li>Item</li></ul><table><tr><td>Cell</td></tr></table>'
-        result = _sanitize_converted_html(html)
+        result = sanitize_converted_html(html)
         assert '<h1>Title</h1>' in result
         assert '<p>Para</p>' in result
         assert '<li>Item</li>' in result
@@ -216,7 +216,7 @@ class TestFileConversionRoute:
     def test_docx_returns_200_with_x_converted(self, temp_project_dir, app_client):
         """AC-038-C.04a: .docx returns 200 with X-Converted: true header."""
         self._create_file(temp_project_dir, 'x-ipe-docs/ideas/test-idea/doc.docx', b'dummy')
-        with patch('x_ipe.routes.ideas_routes._convert_docx', return_value='<p>Converted</p>'):
+        with patch('x_ipe.routes.ideas_routes.convert_docx', return_value='<p>Converted</p>'):
             resp = app_client.get('/api/ideas/file?path=x-ipe-docs/ideas/test-idea/doc.docx')
         assert resp.status_code == 200
         assert resp.headers.get('X-Converted') == 'true'
@@ -226,7 +226,7 @@ class TestFileConversionRoute:
     def test_msg_returns_200_with_x_converted(self, temp_project_dir, app_client):
         """AC-038-C.04b: .msg returns 200 with X-Converted: true header."""
         self._create_file(temp_project_dir, 'x-ipe-docs/ideas/test-idea/email.msg', b'dummy')
-        with patch('x_ipe.routes.ideas_routes._convert_msg', return_value='<div>Email</div>'):
+        with patch('x_ipe.routes.ideas_routes.convert_msg', return_value='<div>Email</div>'):
             resp = app_client.get('/api/ideas/file?path=x-ipe-docs/ideas/test-idea/email.msg')
         assert resp.status_code == 200
         assert resp.headers.get('X-Converted') == 'true'
@@ -247,7 +247,7 @@ class TestFileConversionRoute:
     def test_corrupted_docx_returns_415(self, temp_project_dir, app_client):
         """AC-038-C.04e: Corrupted .docx returns 415."""
         self._create_file(temp_project_dir, 'x-ipe-docs/ideas/test-idea/bad.docx', b'corrupted')
-        with patch('x_ipe.routes.ideas_routes._convert_docx', side_effect=Exception('parse error')):
+        with patch('x_ipe.routes.ideas_routes.convert_docx', side_effect=Exception('parse error')):
             resp = app_client.get('/api/ideas/file?path=x-ipe-docs/ideas/test-idea/bad.docx')
         assert resp.status_code == 415
 
@@ -277,7 +277,7 @@ class TestFileConversionRoute:
         """AC-038-C.04g: Converted HTML is sanitized before returning."""
         self._create_file(temp_project_dir, 'x-ipe-docs/ideas/test-idea/evil.docx', b'dummy')
         dirty_html = '<p>Good</p><script>alert(1)</script>'
-        with patch('x_ipe.routes.ideas_routes._convert_docx', return_value=dirty_html):
+        with patch('x_ipe.routes.ideas_routes.convert_docx', return_value=dirty_html):
             resp = app_client.get('/api/ideas/file?path=x-ipe-docs/ideas/test-idea/evil.docx')
         assert resp.status_code == 200
         assert b'<script>' not in resp.data

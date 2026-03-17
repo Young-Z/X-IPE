@@ -12,6 +12,7 @@
 | v1.0 | 03-16-2026 | Initial specification |
 | v1.1 | 03-16-2026 | CR-001: Added x-ipe-tool-kb-librarian skill to scope (was out-of-scope) |
 | v1.2 | 03-17-2026 | CR-002: Replace frontmatter-embedded metadata with `.kb-index.json` registry — hidden file, locally-scoped, folder metadata, description attribute |
+| v1.3 | 03-17-2026 | CR-004: Add rich file preview to KB browse — markdown+DSL, images, docx/msg conversion, PDF, HTML iframe, syntax-highlighted code |
 
 ## Linked Mockups
 
@@ -186,7 +187,19 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | AC-049-F-15f | GIVEN a file exists in a folder but has no entry in `.kb-index.json` WHEN the file is listed THEN default metadata is used (title from filename, no tags, author "unknown", type from extension) | Unit |
 | AC-049-F-15g | GIVEN a new file is created or moved into a folder WHEN the operation completes THEN an entry is auto-populated in that folder's `.kb-index.json` with default metadata | Unit |
 
-## Functional Requirements
+### AC-049-F-16: Rich File Preview (CR-004)
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-049-F-16a | GIVEN a markdown file in KB WHEN user clicks the file card THEN content is rendered with DSL-enhanced markdown (Mermaid diagrams, Architecture DSL, Infographic DSL rendered inline) via ContentRenderer | UI |
+| AC-049-F-16b | GIVEN an image file (PNG, JPG, GIF, SVG, WebP) in KB WHEN user clicks the file card THEN the image is displayed inline in the article scene with proper scaling (max-width: 100%) | UI |
+| AC-049-F-16c | GIVEN a .docx file in KB WHEN user clicks the file card THEN the backend converts it to HTML via mammoth AND the converted HTML is displayed in a sandboxed iframe in the article scene | UI |
+| AC-049-F-16d | GIVEN a PDF file in KB WHEN user clicks the file card THEN the PDF is displayed in an iframe viewer in the article scene | UI |
+| AC-049-F-16e | GIVEN an HTML file in KB WHEN user clicks the file card THEN the HTML is rendered in a sandboxed iframe in the article scene | UI |
+| AC-049-F-16f | GIVEN a code/text file (.py, .js, .json, .yaml, etc.) in KB WHEN user clicks the file card THEN the content is displayed with syntax highlighting | UI |
+| AC-049-F-16g | GIVEN a binary file that cannot be previewed WHEN user clicks the file card THEN a "Cannot preview this file type" message is shown with file metadata (name, size, type) and a download link | UI |
+| AC-049-F-16h | GIVEN `GET /api/kb/files/{path}/preview` endpoint WHEN called with a .docx file path THEN response is converted HTML with `X-Converted: true` header AND `Content-Type: text/html` | API |
+| AC-049-F-16i | GIVEN `GET /api/kb/files/{path}/preview` endpoint WHEN called with an image file path THEN response is the raw binary with correct MIME type (e.g., `image/png`) | API |
 
 | ID | Requirement | Input | Process | Output |
 |----|-------------|-------|---------|--------|
@@ -204,6 +217,7 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | FR-049-F.12 | Skill File | x-ipe tool skill template | Create `.github/skills/x-ipe-tool-kb-librarian/SKILL.md` with trigger patterns, input/output contract, operations | Valid tool skill file |
 | FR-049-F.13 | Folder Metadata | KB folder structure | Subfolders can have metadata entries (title, description, tags) in parent's `.kb-index.json` — key ends with `/` | Folder-level classification and description |
 | FR-049-F.14 | Description Attribute | File/folder metadata | Each index entry supports a `description` field (< 100 words, plain text) for AI-generated or human-provided summaries | Description available for search and display |
+| FR-049-F.15 | Rich File Preview | File card click in KB browse | Detect file type; render markdown+DSL via ContentRenderer, convert docx/msg to HTML, serve images/PDF natively, syntax-highlight code | Rich preview in article scene matching ideation capabilities |
 
 ## Non-Functional Requirements
 
@@ -212,7 +226,7 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | NFR-049-F.1 | `.intake/` folder is excluded from regular KB browsing, tree, and search | Already implemented in FEATURE-049-A |
 | NFR-049-F.2 | Graceful degradation: corrupted `.intake-status.json` treated as all-pending | Error logged, no crash |
 | NFR-049-F.3 | Intake view loads within 500ms for up to 100 files | Performance |
-| NFR-049-F.4 | No new API routes — intake uses existing KB endpoints + filesystem | Simplicity (YAGNI) |
+| NFR-049-F.4 | Minimal new API routes — intake uses existing KB endpoints + filesystem; preview route is the exception for binary file serving | Simplicity (YAGNI) |
 | NFR-049-F.5 | Skill processes files non-destructively — original content is preserved, only frontmatter is added/merged | Data safety |
 
 ## UI/UX Requirements
