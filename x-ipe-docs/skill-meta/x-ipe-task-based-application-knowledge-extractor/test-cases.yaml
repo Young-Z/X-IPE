@@ -1,0 +1,807 @@
+# Test Cases: x-ipe-task-based-application-knowledge-extractor
+# Generated from skill-meta.md acceptance criteria and test scenarios
+# Version: 1.0 | Feature: FEATURE-050-A
+
+test_cases:
+  # ============================================================
+  # STRUCTURE — MUST PASS
+  # ============================================================
+
+  - id: TC-001
+    ac_ref: AC-050A-01a
+    category: structure
+    name: "SKILL.md exists with valid frontmatter"
+    type: must_pass
+    test_method: file_exists + yaml_parse
+    steps:
+      - "Check file exists at candidate/SKILL.md"
+      - "Parse YAML frontmatter between --- delimiters"
+      - "Verify 'name' field equals 'x-ipe-task-based-application-knowledge-extractor'"
+      - "Verify 'description' field contains 'Use when' and 'Triggers on'"
+    expected: "name: x-ipe-task-based-application-knowledge-extractor, description contains 'Use when' and 'Triggers on'"
+
+  - id: TC-002
+    ac_ref: AC-050A-01a
+    category: structure
+    name: "SKILL.md body under 500 lines"
+    type: must_pass
+    test_method: line_count
+    steps:
+      - "Count total lines in candidate/SKILL.md"
+    expected: "Total line count < 500"
+
+  - id: TC-003
+    ac_ref: AC-050A-01a
+    category: structure
+    name: "All 10+ required sections present in correct order"
+    type: must_pass
+    test_method: section_scan
+    steps:
+      - "Scan for ## Purpose section"
+      - "Scan for ## Important Notes section"
+      - "Scan for ## Input Parameters section"
+      - "Scan for ### Input Initialization subsection"
+      - "Scan for ## Definition of Ready section"
+      - "Scan for ## Execution Flow section"
+      - "Scan for ## Phase Definitions section"
+      - "Scan for ## Execution Procedure section (or Phase subsections)"
+      - "Scan for ## Output Result section"
+      - "Scan for ## Definition of Done section"
+      - "Scan for ## Patterns & Anti-Patterns section"
+      - "Scan for ## Examples section"
+      - "Verify order: Purpose before Input Parameters before DoR before Execution Flow before Output Result before DoD"
+    expected: "All 12 sections present in correct sequential order"
+
+  - id: TC-004
+    ac_ref: AC-050A-01a
+    category: structure
+    name: "Input Initialization has <input_init> XML block"
+    type: must_pass
+    test_method: content_search
+    steps:
+      - "Locate ### Input Initialization subsection"
+      - "Search for <input_init> opening tag within XML code block"
+      - "Search for </input_init> closing tag"
+      - "Verify field definitions for task_id, execution_mode, target, purpose"
+    expected: "<input_init> XML block present with standard and skill-specific field definitions"
+
+  - id: TC-005
+    ac_ref: AC-050A-01a
+    category: structure
+    name: "DoR has at most 5 checkpoints"
+    type: must_pass
+    test_method: checkpoint_count
+    steps:
+      - "Locate ## Definition of Ready section"
+      - "Count checkbox items (- [ ])"
+    expected: "DoR checkpoint count <= 5"
+
+  - id: TC-006
+    ac_ref: AC-050A-01a
+    category: structure
+    name: "DoD has at most 10 checkpoints"
+    type: must_pass
+    test_method: checkpoint_count
+    steps:
+      - "Locate ## Definition of Done section"
+      - "Count checkbox items (- [ ])"
+    expected: "DoD checkpoint count <= 10"
+
+  - id: TC-007
+    ac_ref: AC-050A-01a
+    category: structure
+    name: "Execution Flow table has Phase column with all 6 phases"
+    type: must_pass
+    test_method: table_parse
+    steps:
+      - "Locate ## Execution Flow section"
+      - "Parse markdown table"
+      - "Verify Phase column exists with values 1-6"
+      - "Verify phase names: 博学之, 审问之, 慎思之, 明辨之, 笃行之, 继续执行"
+    expected: "6 phases in Execution Flow table with correct names"
+
+  - id: TC-008
+    ac_ref: AC-050A-01a
+    category: structure
+    name: "Phase Definitions table present with all phases"
+    type: must_pass
+    test_method: section_scan
+    steps:
+      - "Locate ## Phase Definitions section"
+      - "Verify subsections for Phase 1 through Phase 6"
+    expected: "Phase Definitions section with subsections covering all 6 phases"
+
+  - id: TC-009
+    ac_ref: AC-050A-01a
+    category: structure
+    name: "Output Result has correct YAML structure with category first"
+    type: must_pass
+    test_method: yaml_parse
+    steps:
+      - "Locate ## Output Result section"
+      - "Parse YAML code block"
+      - "Verify first field under task_completion_output is 'category'"
+      - "Verify 'category' value is 'standalone'"
+    expected: "Output YAML starts with category: 'standalone'"
+
+  - id: TC-010
+    ac_ref: AC-050A-01a
+    category: structure
+    name: "All internal markdown links use project-root-relative paths"
+    type: must_pass
+    test_method: content_search
+    steps:
+      - "Search SKILL.md for all path references"
+      - "Verify no paths start with ../ or ./"
+      - "Verify paths start with x-ipe-docs/ or .github/ or .checkpoint/"
+    expected: "Zero occurrences of ../ or ./ relative path prefixes"
+
+  - id: TC-011
+    ac_ref: AC-050A-01a
+    category: structure
+    name: "references/examples.md has at least 2 examples"
+    type: must_pass
+    test_method: file_exists + section_count
+    steps:
+      - "Check file exists at candidate/references/examples.md"
+      - "Count ## Example sections"
+    expected: "At least 2 example sections (actual: 5)"
+
+  - id: TC-012
+    ac_ref: AC-050A-01a
+    category: structure
+    name: "Phase 1 steps have CONTEXT/DECISION/ACTION/VERIFY/REFERENCE structure"
+    type: must_pass
+    test_method: content_search
+    steps:
+      - "For each step in Phase 1 (1.1, 1.2, 1.3, 1.4):"
+      - "Verify **CONTEXT** header present"
+      - "Verify **DECISION** header present"
+      - "Verify **ACTION** header present"
+      - "Verify **VERIFY** header present"
+      - "Verify **REFERENCE** header present"
+    expected: "All 4 Phase 1 steps have all 5 structural elements"
+
+  - id: TC-013
+    ac_ref: AC-050A-01a
+    category: structure
+    name: "Stub phases 2-4 have markers noting future FEATURE"
+    type: must_pass
+    test_method: content_search
+    steps:
+      - "Locate Phase 2 definition"
+      - "Verify contains 'FEATURE-050-B' and NOT IMPLEMENTED marker"
+      - "Locate Phase 3 definition"
+      - "Verify contains 'FEATURE-050-C' and NOT IMPLEMENTED marker"
+      - "Locate Phase 4 definition"
+      - "Verify contains 'FEATURE-050-D' and NOT IMPLEMENTED marker"
+    expected: "Phases 2-4 reference their respective FEATUREs as stubs"
+
+  - id: TC-014
+    ac_ref: AC-050A-01a
+    category: structure
+    name: "Phase 5 completion step has mode-aware review gate"
+    type: must_pass
+    test_method: content_search
+    steps:
+      - "Locate Step 5.2 — Complete"
+      - "Verify 'Mode-aware review gate' text present"
+      - "Verify 'dao-represent-human-to-interact' branch logic"
+      - "Verify 'interact-with-human' branch logic"
+    expected: "Phase 5.2 contains mode-aware review gate with DAO and manual branches"
+
+  - id: TC-015
+    ac_ref: AC-050A-01a
+    category: structure
+    name: "Phase 6 has Decide Next Action + Execute Next Action"
+    type: must_pass
+    test_method: content_search
+    steps:
+      - "Locate Phase 6 section"
+      - "Verify Step 6.1 — Decide Next Action exists"
+      - "Verify Step 6.2 — Execute Next Action exists"
+      - "Verify DAO routing logic in Step 6.1"
+    expected: "Phase 6 has both steps with DAO routing"
+
+  # ============================================================
+  # INPUT PARAMETERS — MUST PASS
+  # ============================================================
+
+  - id: TC-016
+    ac_ref: AC-050A-01b
+    category: input
+    name: "Input parameters declare target, purpose, config_overrides"
+    type: must_pass
+    test_method: yaml_parse
+    steps:
+      - "Locate ## Input Parameters section"
+      - "Parse YAML code block"
+      - "Verify 'target' field exists with placeholder"
+      - "Verify 'purpose' field exists with value 'user-manual'"
+      - "Verify 'config_overrides' field exists with sub-fields"
+    expected: "All three required input parameters declared"
+
+  # ============================================================
+  # OUTPUT RESULT — MUST PASS
+  # ============================================================
+
+  - id: TC-017
+    ac_ref: AC-050A-01c
+    category: output
+    name: "Output result declares extraction_status, loaded_tool_skills, detected types, checkpoint_path"
+    type: must_pass
+    test_method: yaml_parse
+    steps:
+      - "Locate ## Output Result section"
+      - "Parse YAML code block"
+      - "Verify 'extraction_status' field exists"
+      - "Verify 'loaded_tool_skill' field exists"
+      - "Verify 'input_analysis.input_type' field exists"
+      - "Verify 'input_analysis.format' field exists"
+      - "Verify 'input_analysis.app_type' field exists"
+      - "Verify 'checkpoint_path' field exists"
+    expected: "All required output fields present in YAML"
+
+  # ============================================================
+  # INPUT TYPE DETECTION — MUST PASS
+  # ============================================================
+
+  - id: TC-018
+    ac_ref: AC-050A-02a
+    category: input_detection
+    name: "Detect source_code_repo for directories with Python/JS source files"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Set target to directory containing package.json/pyproject.toml/Cargo.toml"
+      - "Execute Step 1.1 — Analyze Input"
+      - "Verify input_type classification"
+    expected: "input_type = 'source_code_repo'"
+
+  - id: TC-019
+    ac_ref: AC-050A-02b
+    category: input_detection
+    name: "Detect documentation_folder for directories with only markdown"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Set target to directory containing only .md/.rst/.txt files"
+      - "Execute Step 1.1 — Analyze Input"
+      - "Verify input_type classification"
+    expected: "input_type = 'documentation_folder'"
+
+  - id: TC-020
+    ac_ref: AC-050A-02c
+    category: input_detection
+    name: "Detect public_url for https:// URLs"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Set target to 'https://docs.example.com/getting-started'"
+      - "Execute Step 1.1 — Analyze Input"
+      - "Verify input_type classification"
+    expected: "input_type = 'public_url'"
+
+  - id: TC-021
+    ac_ref: AC-050A-02d
+    category: input_detection
+    name: "Detect running_web_app for localhost URLs"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Set target to 'http://localhost:5000'"
+      - "Execute Step 1.1 — Analyze Input"
+      - "Verify input_type classification"
+    expected: "input_type = 'running_web_app'"
+
+  - id: TC-022
+    ac_ref: AC-050A-02e
+    category: input_detection
+    name: "Detect single_file for single file paths"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Set target to '/Users/dev/README.md' (single file)"
+      - "Execute Step 1.1 — Analyze Input"
+      - "Verify input_type classification"
+    expected: "input_type = 'single_file'"
+
+  - id: TC-023
+    ac_ref: AC-050A-02f
+    category: input_detection
+    name: "Return error for non-existent paths"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Set target to '/nonexistent/path/does/not/exist'"
+      - "Execute Input Initialization validation"
+      - "Verify error is returned"
+    expected: "status = 'blocked', error contains 'does not exist'"
+
+  # ============================================================
+  # TOOL SKILL LOADING — MUST PASS
+  # ============================================================
+
+  - id: TC-024
+    ac_ref: AC-050A-04a
+    category: tool_skill_loading
+    name: "Discover and load tool skills via glob pattern"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Execute Step 1.3 — Load Tool Skill"
+      - "Verify glob pattern '.github/skills/x-ipe-tool-knowledge-extraction-*/SKILL.md' is used"
+      - "Verify discovered skill is loaded"
+    expected: "Tool skill discovered via glob and loaded successfully"
+
+  - id: TC-025
+    ac_ref: AC-050A-04b
+    category: tool_skill_loading
+    name: "Tool skill returns playbook, collection template, acceptance criteria paths"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Load tool skill x-ipe-tool-knowledge-extraction-user-manual"
+      - "Verify playbook_template path extracted"
+      - "Verify collection_template path extracted"
+      - "Verify acceptance_criteria path extracted"
+    expected: "All three artifact paths returned from loaded tool skill"
+
+  - id: TC-026
+    ac_ref: AC-050A-04c
+    category: tool_skill_loading
+    name: "Halt with error when no matching tool skill exists"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Ensure no tool skill matches glob for selected category"
+      - "Execute Step 1.3 — Load Tool Skill"
+      - "Verify error is returned"
+    expected: "status = 'blocked', error = 'No tool skill found for category ...'"
+
+  # ============================================================
+  # CHECKPOINT — MUST PASS
+  # ============================================================
+
+  - id: TC-027
+    ac_ref: AC-050A-06a
+    category: checkpoint
+    name: "Create .checkpoint/ folder in working directory"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Execute Step 1.4 — Initialize Handoff"
+      - "Verify .checkpoint/ directory created in CWD"
+      - "Verify session subfolder .checkpoint/session-{timestamp}/ created"
+      - "Verify manifest.yaml file exists in session folder"
+    expected: ".checkpoint/session-{timestamp}/ created with manifest.yaml"
+
+  # ============================================================
+  # APP TYPE DETECTION — SHOULD PASS
+  # ============================================================
+
+  - id: TC-028
+    ac_ref: AC-050A-03a
+    category: app_type_detection
+    name: "Detect web app type for package.json + HTML"
+    type: should_pass
+    test_method: behavioral
+    steps:
+      - "Set target to directory with package.json containing 'express' + .html files"
+      - "Execute Step 1.1 app_type detection"
+      - "Verify app_type classification"
+    expected: "app_type = 'web'"
+
+  - id: TC-029
+    ac_ref: AC-050A-03b
+    category: app_type_detection
+    name: "Detect cli app type for argparse/click/commander"
+    type: should_pass
+    test_method: behavioral
+    steps:
+      - "Set target to directory with Python files containing 'import argparse'"
+      - "Execute Step 1.1 app_type detection"
+      - "Verify app_type classification"
+    expected: "app_type = 'cli'"
+
+  - id: TC-030
+    ac_ref: AC-050A-03c
+    category: app_type_detection
+    name: "Detect mobile app type for React Native/Flutter/Swift"
+    type: should_pass
+    test_method: behavioral
+    steps:
+      - "Set target to directory with package.json containing 'react-native'"
+      - "Execute Step 1.1 app_type detection"
+      - "Verify app_type classification"
+    expected: "app_type = 'mobile'"
+
+  - id: TC-031
+    ac_ref: AC-050A-03d
+    category: app_type_detection
+    name: "Classify unknown for documentation folders"
+    type: should_pass
+    test_method: behavioral
+    steps:
+      - "Set target to directory with only .md files (no code)"
+      - "Execute Step 1.1 app_type detection"
+      - "Verify app_type classification"
+    expected: "app_type = 'unknown'"
+
+  # ============================================================
+  # TOOL SKILL SELECTION — SHOULD PASS
+  # ============================================================
+
+  - id: TC-032
+    ac_ref: AC-050A-04d
+    category: tool_skill_loading
+    name: "Select only tool skill matching extraction category"
+    type: should_pass
+    test_method: behavioral
+    steps:
+      - "Set up multiple tool skills via glob"
+      - "Set selected_category to 'user-manual'"
+      - "Execute Step 1.3 — Load Tool Skill"
+      - "Verify only user-manual tool skill is loaded"
+    expected: "loaded_tool_skill = 'x-ipe-tool-knowledge-extraction-user-manual'"
+
+  # ============================================================
+  # CHECKPOINT ADVANCED — SHOULD PASS
+  # ============================================================
+
+  - id: TC-033
+    ac_ref: AC-050A-06b
+    category: checkpoint
+    name: "Write extracted content to temp file in .checkpoint/"
+    type: should_pass
+    test_method: behavioral
+    steps:
+      - "Execute handoff initialization"
+      - "Verify content/ subfolder created in session directory"
+    expected: ".checkpoint/session-{timestamp}/content/ directory exists"
+
+  - id: TC-034
+    ac_ref: AC-050A-06c
+    category: checkpoint
+    name: "Read tool skill feedback from file path"
+    type: should_pass
+    test_method: behavioral
+    steps:
+      - "Execute handoff initialization"
+      - "Verify feedback/ subfolder created in session directory"
+    expected: ".checkpoint/session-{timestamp}/feedback/ directory exists"
+
+  - id: TC-035
+    ac_ref: AC-050A-06d
+    category: checkpoint
+    name: "Create timestamped subfolder when .checkpoint/ exists"
+    type: should_pass
+    test_method: behavioral
+    steps:
+      - "Pre-create .checkpoint/ directory"
+      - "Execute Step 1.4 — Initialize Handoff"
+      - "Verify new timestamped subfolder created (no conflict)"
+    expected: "New session-{timestamp} folder created inside existing .checkpoint/"
+
+  # ============================================================
+  # CATEGORY SELECTION — COULD HAVE
+  # ============================================================
+
+  - id: TC-036
+    ac_ref: AC-050A-05a
+    category: category_selection
+    name: "Suggest applicable categories for source code with REST endpoints"
+    type: could_have
+    test_method: behavioral
+    steps:
+      - "Set target to repo with Flask REST endpoints"
+      - "Execute category analysis (future)"
+      - "Verify suggested categories include 'user-manual' and 'API-reference'"
+    expected: "Multiple categories suggested based on input analysis"
+
+  - id: TC-037
+    ac_ref: AC-050A-05b
+    category: category_selection
+    name: "Select v1-supported category and log deferred categories"
+    type: could_have
+    test_method: behavioral
+    steps:
+      - "Execute Step 1.2 with multiple applicable categories"
+      - "Verify only v1-supported category selected"
+      - "Verify non-v1 categories logged as deferred"
+    expected: "selected_category = 'user-manual', deferred_categories logged"
+
+  - id: TC-038
+    ac_ref: AC-050A-05c
+    category: category_selection
+    name: "Halt with error when no applicable category detected"
+    type: could_have
+    test_method: behavioral
+    steps:
+      - "Set purpose to unrecognized category"
+      - "Execute Step 1.2 — Select Category"
+      - "Verify error halt"
+    expected: "status = 'blocked', error = 'Unknown category ...'"
+
+  # ============================================================
+  # HAPPY PATH SCENARIOS
+  # ============================================================
+
+  - id: TC-039
+    ac_ref: scenario-1
+    category: happy_path
+    name: "Local Flask Web App → User Manual Extraction (full flow)"
+    type: must_pass
+    test_method: end_to_end
+    steps:
+      - "Set target to local Flask app directory with app.py, requirements.txt, templates/, docs/"
+      - "Set purpose to 'user-manual'"
+      - "Execute full Phase 1 (Steps 1.1 through 1.4)"
+      - "Verify input_type = 'source_code_repo'"
+      - "Verify format = 'mixed'"
+      - "Verify app_type = 'web'"
+      - "Verify framework = 'flask'"
+      - "Verify selected_category = 'user-manual'"
+      - "Verify tool skill loaded"
+      - "Verify .checkpoint/ created with manifest"
+      - "Verify status = 'ready_for_extraction'"
+    expected: "Complete foundation phase: input analyzed, category selected, tool loaded, checkpoint initialized"
+
+  - id: TC-040
+    ac_ref: scenario-2
+    category: happy_path
+    name: "Public URL Documentation → User Manual Extraction"
+    type: must_pass
+    test_method: end_to_end
+    steps:
+      - "Set target to 'https://docs.example.com/getting-started'"
+      - "Set purpose to 'user-manual'"
+      - "Execute full Phase 1"
+      - "Verify input_type = 'public_url'"
+      - "Verify format = 'html'"
+      - "Verify app_type = 'unknown'"
+      - "Verify status = 'ready_for_extraction'"
+    expected: "Foundation complete for public URL target"
+
+  # ============================================================
+  # EDGE CASE SCENARIOS
+  # ============================================================
+
+  - id: TC-041
+    ac_ref: scenario-3
+    category: edge_case
+    name: "Empty directory halts with error"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Set target to empty directory"
+      - "Execute Step 1.1 — Analyze Input"
+      - "Verify error returned"
+    expected: "status = 'blocked', error = 'Input directory is empty'"
+
+  - id: TC-042
+    ac_ref: scenario-4
+    category: edge_case
+    name: "Inaccessible URL halts with error"
+    type: should_pass
+    test_method: behavioral
+    steps:
+      - "Set target to 'https://nonexistent.example.com/docs'"
+      - "Execute Input Initialization validation"
+      - "Verify error returned with HTTP status"
+    expected: "status = 'blocked', error contains 'URL not reachable'"
+
+  - id: TC-043
+    ac_ref: AC-050A-01b
+    category: edge_case
+    name: "Missing target parameter halts with error"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Omit target parameter from input"
+      - "Execute Input Initialization validation"
+      - "Verify error returned"
+    expected: "Error: 'Parameter target is required'"
+
+  - id: TC-044
+    ac_ref: AC-050A-01b
+    category: edge_case
+    name: "Unsupported category halts with error"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Set purpose to 'API-reference' (not v1-supported)"
+      - "Execute Step 1.2 — Select Category"
+      - "Verify error halt"
+    expected: "Error: 'Category API-reference is not supported in v1. Supported: user-manual'"
+
+  # ============================================================
+  # BLOCKING SCENARIOS
+  # ============================================================
+
+  - id: TC-045
+    ac_ref: scenario-5
+    category: blocking
+    name: "No tool skill found halts with installation instruction"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Ensure no x-ipe-tool-knowledge-extraction-* skill files exist"
+      - "Execute Step 1.3 — Load Tool Skill"
+      - "Verify error includes installation guidance"
+    expected: "Error: 'No tool skill found for category user-manual. Install x-ipe-tool-knowledge-extraction-user-manual.'"
+
+  - id: TC-046
+    ac_ref: AC-050A-01a
+    category: blocking
+    name: "v1 scope enforced — only user-manual category"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Attempt extraction with purpose = 'architecture'"
+      - "Verify v1 filter rejects non-supported categories"
+    expected: "Error listing v1-supported categories"
+
+  # ============================================================
+  # TECHNICAL DESIGN ALIGNMENT
+  # ============================================================
+
+  - id: TC-047
+    ac_ref: AC-050A-01a
+    category: design_alignment
+    name: "SKILL.md implements InputAnalyzer component"
+    type: must_pass
+    test_method: content_search
+    steps:
+      - "Verify Step 1.1 implements input type detection (source_code_repo, documentation_folder, public_url, running_web_app, single_file)"
+      - "Verify format detection (markdown, python, html, mixed, etc.)"
+      - "Verify app_type detection (web, cli, mobile, unknown)"
+      - "Verify InputAnalysis object structure matches technical design"
+    expected: "InputAnalyzer logic fully present in Step 1.1"
+
+  - id: TC-048
+    ac_ref: AC-050A-01a
+    category: design_alignment
+    name: "SKILL.md implements CategorySelector component"
+    type: must_pass
+    test_method: content_search
+    steps:
+      - "Verify Step 1.2 implements category validation against v1-supported list"
+      - "Verify hardcoded filter for v1 (user-manual only)"
+      - "Verify error handling for unsupported categories"
+    expected: "CategorySelector logic present in Step 1.2"
+
+  - id: TC-049
+    ac_ref: AC-050A-01a
+    category: design_alignment
+    name: "SKILL.md implements ToolSkillLoader component"
+    type: must_pass
+    test_method: content_search
+    steps:
+      - "Verify Step 1.3 uses glob discovery pattern"
+      - "Verify category-based filtering of tool skills"
+      - "Verify artifact extraction (playbook, collection template, acceptance criteria)"
+      - "Verify error when no tool skill found"
+    expected: "ToolSkillLoader logic present in Step 1.3"
+
+  - id: TC-050
+    ac_ref: AC-050A-01a
+    category: design_alignment
+    name: "SKILL.md implements HandoffProtocol component"
+    type: must_pass
+    test_method: content_search
+    steps:
+      - "Verify Step 1.4 creates .checkpoint/session-{timestamp}/ in CWD"
+      - "Verify manifest.yaml creation with correct schema"
+      - "Verify content/ and feedback/ subdirectories"
+      - "Verify file-based handoff rule (no inline content)"
+    expected: "HandoffProtocol logic present in Step 1.4"
+
+  - id: TC-051
+    ac_ref: AC-050A-01a
+    category: design_alignment
+    name: "SKILL.md references correct heuristic tables"
+    type: must_pass
+    test_method: content_search
+    steps:
+      - "Verify Step 1.1 REFERENCE links to input-detection-heuristics.md"
+      - "Verify Step 1.2 REFERENCE links to category-taxonomy.md"
+      - "Verify Step 1.4 REFERENCE links to handoff-protocol.md"
+    expected: "All reference documents correctly linked in REFERENCE sections"
+
+  - id: TC-052
+    ac_ref: AC-050A-01a
+    category: design_alignment
+    name: "ToolSkillArtifacts data model matches technical design"
+    type: must_pass
+    test_method: yaml_parse
+    steps:
+      - "Parse Output Result YAML"
+      - "Verify tool_skill_artifacts has playbook_template, collection_template, acceptance_criteria fields"
+      - "Compare against ToolSkillArtifacts model in technical-design.md"
+    expected: "Artifact structure matches: playbook_template, collection_template, acceptance_criteria"
+
+  # ============================================================
+  # REFERENCE FILES
+  # ============================================================
+
+  - id: TC-053
+    ac_ref: AC-050A-01a
+    category: references
+    name: "All 4 reference files exist"
+    type: must_pass
+    test_method: file_exists
+    steps:
+      - "Check candidate/references/input-detection-heuristics.md exists"
+      - "Check candidate/references/handoff-protocol.md exists"
+      - "Check candidate/references/category-taxonomy.md exists"
+      - "Check candidate/references/examples.md exists"
+    expected: "All 4 reference files present"
+
+  - id: TC-054
+    ac_ref: AC-050A-01a
+    category: references
+    name: "All 2 template files exist"
+    type: must_pass
+    test_method: file_exists
+    steps:
+      - "Check candidate/templates/checkpoint-manifest.md exists"
+      - "Check candidate/templates/input-analysis-output.md exists"
+    expected: "Both template files present"
+
+  - id: TC-055
+    ac_ref: AC-050A-02a
+    category: references
+    name: "Input detection heuristics cover all 5 input types"
+    type: must_pass
+    test_method: content_search
+    steps:
+      - "Read input-detection-heuristics.md"
+      - "Verify source_code_repo detection rules"
+      - "Verify documentation_folder detection rules"
+      - "Verify public_url detection rules"
+      - "Verify running_web_app detection rules"
+      - "Verify single_file detection rules"
+    expected: "All 5 input types have detection heuristics defined"
+
+  - id: TC-056
+    ac_ref: AC-050A-03a
+    category: references
+    name: "Input detection heuristics cover web/cli/mobile app types"
+    type: should_pass
+    test_method: content_search
+    steps:
+      - "Read input-detection-heuristics.md"
+      - "Verify web framework detection (Flask, Django, Express, Rails)"
+      - "Verify CLI framework detection (argparse, click, commander, clap)"
+      - "Verify mobile framework detection (React Native, Flutter, Swift, Kotlin)"
+    expected: "Framework markers defined for web, cli, and mobile app types"
+
+  # ============================================================
+  # MULTI-FRAMEWORK EDGE CASE
+  # ============================================================
+
+  - id: TC-057
+    ac_ref: AC-050A-03a
+    category: edge_case
+    name: "Multi-framework repo uses priority resolution (web > cli > mobile)"
+    type: should_pass
+    test_method: behavioral
+    steps:
+      - "Set target to repo with both Flask (web) and click (cli) markers"
+      - "Execute Step 1.1 app_type detection"
+      - "Verify highest-priority app_type selected"
+      - "Verify secondary types in source_metadata.secondary_app_types"
+    expected: "app_type = 'web', secondary_app_types = ['cli']"
+
+  - id: TC-058
+    ac_ref: AC-050A-06a
+    category: edge_case
+    name: "Checkpoint created in CWD not inside target directory"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Set target to /some/external/path"
+      - "Execute Step 1.4 — Initialize Handoff"
+      - "Verify .checkpoint/ created in CWD, NOT in /some/external/path/"
+    expected: ".checkpoint/ is in CWD, not target directory"

@@ -145,7 +145,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-049-E | EPIC-049 | KB File Upload | v1.0 | Implemented | [specification.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-E/specification.md) | 03-11-2026 | 03-11-2026 11:30:00 |
 | FEATURE-049-F | EPIC-049 | KB AI Librarian & Intake | v1.0 | Planned | FEATURE-049-A, FEATURE-049-E | 03-11-2026 | 03-11-2026 05:18:00 |
 | FEATURE-049-G | EPIC-049 | KB Reference Picker | v1.0 | Implemented | [specification.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/specification.md) | 03-11-2026 | 03-11-2026 11:45:00 |
-| FEATURE-050-A | EPIC-050 | Extractor Skill Foundation & Input Detection | v1.0 | Designed | [specification.md](x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/technical-design.md) | 03-17-2026 | 03-17-2026 07:15:00 |
+| FEATURE-050-A | EPIC-050 | Extractor Skill Foundation & Input Detection | v1.0 | Implemented | [specification.md](x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/technical-design.md), [SKILL.md](.github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md) | 03-17-2026 | 03-17-2026 07:45:00 |
 | FEATURE-050-B | EPIC-050 | Source Extraction Engine | v1.0 | Planned | FEATURE-050-A | 03-17-2026 | 03-17-2026 06:19:00 |
 | FEATURE-050-C | EPIC-050 | Extract-Validate Loop & Coverage Control | v1.0 | Planned | FEATURE-050-A, FEATURE-050-B | 03-17-2026 | 03-17-2026 06:19:00 |
 | FEATURE-050-D | EPIC-050 | Checkpoint, Resume & Error Handling | v1.0 | Planned | FEATURE-050-A | 03-17-2026 | 03-17-2026 06:19:00 |

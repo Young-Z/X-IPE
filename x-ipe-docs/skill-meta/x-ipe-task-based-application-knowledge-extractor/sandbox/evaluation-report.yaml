@@ -1,0 +1,108 @@
+# Evaluation Report: x-ipe-task-based-application-knowledge-extractor
+# Round 4: Evaluate Results
+# Date: 2025-07-14
+
+evaluation_report:
+  skill_name: x-ipe-task-based-application-knowledge-extractor
+  date: "2025-07-14"
+
+  summary:
+    total_tests: 58
+    must_pass_total: 44
+    must_pass_passed: 43
+    must_pass_rate: "97.7%"
+    should_pass_total: 11
+    should_pass_passed: 11
+    should_pass_rate: "100%"
+    could_have_total: 3
+    could_have_passed: 3
+
+  verdict: FAIL
+  # FAIL because must_pass_rate != 100% (43/44)
+  # Only 1 must_pass test failed: TC-041
+
+  failures:
+    - id: TC-041
+      type: must_pass
+      category: edge_case
+      name: "Empty directory halts with error"
+      reason: >
+        SKILL.md Step 1.1 (Analyze Input) does not explicitly handle empty
+        directories as a separate DECISION branch. The procedure has a generic
+        catch-all ("Cannot classify input type") but lacks the specific error
+        message "Input directory is empty" that the test case expects. The
+        examples.md file (Example 4) shows this error, but the procedure
+        itself does not include an explicit check for empty directories before
+        attempting input type classification. Fix: Add a DECISION branch in
+        Step 1.1 that checks if the target directory is empty and returns a
+        specific error message.
+
+  quality_observations:
+    - id: OBS-001
+      severity: minor
+      description: >
+        SKILL.md uses escaped backticks (\`\`\`yaml) in 6 out of 8 code blocks
+        instead of regular backticks (```yaml). This is a formatting defect that
+        would cause markdown renderers to display raw backtick characters instead
+        of syntax-highlighted code blocks. The XML code block (```xml) uses
+        regular backticks correctly. Fix: Replace all escaped backtick sequences
+        with regular triple backticks.
+
+    - id: OBS-002
+      severity: info
+      description: >
+        Line count is 494/500 — very close to the limit. Future additions
+        should consider extracting content to reference files.
+
+    - id: OBS-003
+      severity: info
+      description: >
+        DoD has exactly 10 checkpoints (the maximum). Any additions would
+        require consolidation.
+
+  quality_scores:
+    structure: 5/5
+    # All 12 sections present in correct order, frontmatter valid,
+    # <input_init> XML block present, DoR/DoD within limits,
+    # Execution Flow table complete, Phase Definitions complete,
+    # reference and template files all present
+    content: 4/5
+    # All behavioral tests pass — input detection, tool skill loading,
+    # checkpoint protocol, category selection, error handling all described.
+    # -1 for missing explicit empty directory handling (TC-041) and
+    # escaped backtick formatting defect (OBS-001)
+    behavior: 5/5
+    # All behavioral/procedural tests pass: input type detection for all 5
+    # types, app type detection (web/cli/mobile/unknown), tool skill glob
+    # discovery, category validation, checkpoint creation, mode-aware review
+    # gate, DAO routing, happy path scenarios, edge cases (except TC-041),
+    # blocking scenarios, design alignment with technical design
+    overall: 4/5
+    # Excellent skill quality overall. One must_pass failure (TC-041) and
+    # one formatting defect (escaped backticks) prevent a 5/5 rating.
+    # Both are straightforward fixes.
+
+  notes: >
+    The skill is very close to passing. Only 1 must_pass test failed (TC-041:
+    empty directory handling). The fix is surgical — add a DECISION branch in
+    Step 1.1 to check for empty directories before input type classification.
+    Additionally, the escaped backtick formatting in code blocks (OBS-001)
+    should be fixed to ensure proper markdown rendering. Both fixes are
+    low-risk and localized. After these fixes, the skill should achieve
+    100% must_pass rate and full PASS verdict.
+
+  recommended_fixes:
+    - priority: P0
+      test_id: TC-041
+      fix: >
+        In SKILL.md Step 1.1 DECISION section, add before the input type
+        classification: "IF target is directory AND directory is empty (0 files)
+        → halt with error: 'Input directory is empty'"
+
+    - priority: P1
+      observation_id: OBS-001
+      fix: >
+        Replace all escaped backtick sequences (\`\`\`) with regular triple
+        backticks (```) in SKILL.md code blocks. Affects Input Parameters,
+        Input Initialization validation, Output Result, and inline code
+        references.

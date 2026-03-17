@@ -75,13 +75,15 @@ Target users are AI agents within X-IPE that orchestrate knowledge extraction wo
 | AC-050A-04c | GIVEN extraction category is "user-manual" AND no matching tool skill exists WHEN the extractor attempts to load tool skills THEN it halts with error message: "No tool skill found for category 'user-manual'. Install x-ipe-tool-knowledge-extraction-user-manual." | Unit |
 | AC-050A-04d | GIVEN multiple tool skills match the glob pattern WHEN the extractor loads tool skills THEN it selects only the one matching the current extraction category | Unit |
 
-### AC-050A-05: Dynamic Category Selection
+### AC-050A-05: Category Selection (v1: User-Provided Purpose Validation)
+
+> **v1 Implementation Note:** In v1, category selection validates the user-provided `purpose` parameter against supported categories ("user-manual" only). AI-driven category suggestion (analyzing input to infer applicable categories) is deferred to a future version.
 
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
-| AC-050A-05a | GIVEN the fixed taxonomy contains categories: user-manual, API-reference, architecture, runbook, configuration WHEN the extractor analyzes a source code repo with REST endpoints THEN it suggests applicable categories including "API-reference" AND "user-manual" | Unit |
-| AC-050A-05b | GIVEN the AI suggests categories ["user-manual", "API-reference"] AND v1 only supports "user-manual" WHEN the extractor selects the processing category THEN it selects "user-manual" AND logs that "API-reference" is deferred | Unit |
-| AC-050A-05c | GIVEN the AI analyzes input and finds no applicable categories WHEN category selection runs THEN it halts with error: "No applicable extraction category detected for this input" | Unit |
+| AC-050A-05a | GIVEN the fixed taxonomy defines 5 categories: user-manual, API-reference, architecture, runbook, configuration WHEN the user provides purpose="user-manual" THEN the extractor validates the purpose against supported v1 categories AND proceeds with "user-manual" | Unit |
+| AC-050A-05b | GIVEN v1 only supports "user-manual" WHEN the user provides purpose="API-reference" THEN the extractor halts with: "Category 'API-reference' is not supported in v1. Supported: user-manual" AND logs the unsupported category | Unit |
+| AC-050A-05c | GIVEN the user provides an unknown purpose value WHEN category validation runs THEN the extractor halts with error: "Unknown category '{purpose}'. Valid categories: user-manual, API-reference, architecture, runbook, configuration" | Unit |
 
 ### AC-050A-06: File-Based Handoff Protocol
 

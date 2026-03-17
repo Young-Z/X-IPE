@@ -1,0 +1,237 @@
+# Execution Log: x-ipe-task-based-application-knowledge-extractor
+# Round 3: Run Tests
+# Date: 2025-07-14
+# Base path: x-ipe-docs/skill-meta/x-ipe-task-based-application-knowledge-extractor/candidate/
+
+execution_log:
+  - id: TC-001
+    result: PASS
+    notes: "Frontmatter valid: name correct, description has 'Use when' and 'Triggers on'"
+
+  - id: TC-002
+    result: PASS
+    notes: "Line count: 494 (limit 500)"
+
+  - id: TC-003
+    result: PASS
+    notes: "12/12 sections present, order correct"
+
+  - id: TC-004
+    result: PASS
+    notes: "<input_init> XML block with all required field definitions"
+
+  - id: TC-005
+    result: PASS
+    notes: "DoR checkpoints: 4 (limit 5)"
+
+  - id: TC-006
+    result: PASS
+    notes: "DoD checkpoints: 10 (limit 10)"
+
+  - id: TC-007
+    result: PASS
+    notes: "Phase names: 6/6, Phase numbers: 6/6"
+
+  - id: TC-008
+    result: PASS
+    notes: "Phase definitions: 6/6"
+
+  - id: TC-009
+    result: PASS
+    notes: "First field: 'category: "standalone"' — NOTE: code blocks use escaped backticks (formatting defect)"
+
+  - id: TC-010
+    result: PASS
+    notes: "Relative path patterns: 0"
+
+  - id: TC-011
+    result: PASS
+    notes: "Examples: 5"
+
+  - id: TC-012
+    result: PASS
+    notes: "All 4 steps have all 5 elements"
+
+  - id: TC-013
+    result: PASS
+    notes: "Phases 2-4 reference FEATURE-050-B/C/D with NOT IMPLEMENTED stubs"
+
+  - id: TC-014
+    result: PASS
+    notes: "Mode-aware review gate present with DAO and manual branches in Step 5.2"
+
+  - id: TC-015
+    result: PASS
+    notes: "Phase 6 has Steps 6.1/6.2 with DAO routing"
+
+  - id: TC-016
+    result: PASS
+    notes: "All three input parameters declared"
+
+  - id: TC-017
+    result: PASS
+    notes: "All required output fields present in Output Result YAML"
+
+  - id: TC-018
+    result: PASS
+    notes: "Step 1.1 describes source_code_repo detection"
+
+  - id: TC-019
+    result: PASS
+    notes: "Step 1.1 describes documentation_folder detection"
+
+  - id: TC-020
+    result: PASS
+    notes: "Step 1.1 describes public_url detection"
+
+  - id: TC-021
+    result: PASS
+    notes: "Step 1.1 describes running_web_app detection"
+
+  - id: TC-022
+    result: PASS
+    notes: "Step 1.1 describes single_file detection"
+
+  - id: TC-023
+    result: PASS
+    notes: "Error for non-existent paths described in validation"
+
+  - id: TC-024
+    result: PASS
+    notes: "Glob discovery pattern present in Step 1.3"
+
+  - id: TC-025
+    result: PASS
+    notes: "Three artifact paths extracted in Step 1.3"
+
+  - id: TC-026
+    result: PASS
+    notes: "Error for missing tool skill in Step 1.3"
+
+  - id: TC-027
+    result: PASS
+    notes: ".checkpoint/ setup with manifest in Step 1.4"
+
+  - id: TC-028
+    result: PASS
+    notes: "Web app detection in Step 1.1"
+
+  - id: TC-029
+    result: PASS
+    notes: "CLI app detection in Step 1.1"
+
+  - id: TC-030
+    result: PASS
+    notes: "Mobile app detection in Step 1.1"
+
+  - id: TC-031
+    result: PASS
+    notes: "Unknown app type described in Step 1.1"
+
+  - id: TC-032
+    result: PASS
+    notes: "Category-based filtering in Step 1.3"
+
+  - id: TC-033
+    result: PASS
+    notes: "content/ subfolder in Step 1.4"
+
+  - id: TC-034
+    result: PASS
+    notes: "feedback/ subfolder in Step 1.4"
+
+  - id: TC-035
+    result: PASS
+    notes: "Existing checkpoint handling in Step 1.4"
+
+  - id: TC-036
+    result: PASS
+    notes: "Multiple categories mentioned in Step 1.2"
+
+  - id: TC-037
+    result: PASS
+    notes: "Deferred categories in Step 1.2"
+
+  - id: TC-038
+    result: PASS
+    notes: "Unknown category error in Step 1.2"
+
+  - id: TC-039
+    result: PASS
+    notes: "Example 1 covers Flask web app full flow"
+
+  - id: TC-040
+    result: PASS
+    notes: "Example 2 covers public URL flow"
+
+  - id: TC-041
+    result: FAIL
+    notes: "FAIL: SKILL.md Step 1.1 does not explicitly handle empty directory case. 'Cannot classify' catch-all exists but specific 'empty' error missing. examples.md has it but procedure does not."
+
+  - id: TC-042
+    result: PASS
+    notes: "URL not reachable error described"
+
+  - id: TC-043
+    result: PASS
+    notes: "Missing target parameter error described"
+
+  - id: TC-044
+    result: PASS
+    notes: "Unsupported category error described"
+
+  - id: TC-045
+    result: PASS
+    notes: "Installation guidance in error message"
+
+  - id: TC-046
+    result: PASS
+    notes: "v1 scope enforced"
+
+  - id: TC-047
+    result: PASS
+    notes: "InputAnalyzer fully present in Step 1.1"
+
+  - id: TC-048
+    result: PASS
+    notes: "CategorySelector in Step 1.2"
+
+  - id: TC-049
+    result: PASS
+    notes: "ToolSkillLoader in Step 1.3"
+
+  - id: TC-050
+    result: PASS
+    notes: "HandoffProtocol in Step 1.4"
+
+  - id: TC-051
+    result: PASS
+    notes: "All reference links present in REFERENCE sections"
+
+  - id: TC-052
+    result: PASS
+    notes: "ToolSkillArtifacts structure matches design"
+
+  - id: TC-053
+    result: PASS
+    notes: "All 4 reference files exist"
+
+  - id: TC-054
+    result: PASS
+    notes: "Both template files exist"
+
+  - id: TC-055
+    result: PASS
+    notes: "All 5 input types covered in heuristics"
+
+  - id: TC-056
+    result: PASS
+    notes: "Web/CLI/Mobile frameworks covered"
+
+  - id: TC-057
+    result: PASS
+    notes: "Priority resolution described"
+
+  - id: TC-058
+    result: PASS
+    notes: "CWD rule enforced"
