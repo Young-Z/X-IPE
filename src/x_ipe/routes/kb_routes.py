@@ -521,3 +521,95 @@ def update_intake_status():
         return jsonify(result)
     except ValueError as exc:
         return _error('FILE_NOT_FOUND', str(exc), 404)
+
+
+# ---------------------------------------------------------------------------
+# KB Index (.kb-index.json) — CR-003
+# ---------------------------------------------------------------------------
+
+@kb_bp.route('/api/kb/index', methods=['GET'])
+@x_ipe_tracing()
+def get_kb_index():
+    """
+    GET /api/kb/index?folder=
+
+    CR-003: Read all entries from a folder's .kb-index.json.
+    Query param 'folder' is optional (defaults to KB root).
+    """
+    svc = _get_kb_service_or_abort()
+    folder = (request.args.get('folder') or '').strip()
+    try:
+        folder_path = svc._resolve_safe_path(folder) if folder else svc.kb_root
+        if not folder_path.is_dir():
+            return _error('FOLDER_NOT_FOUND', f'Folder not found: {folder}', 404)
+        index = svc._read_kb_index(folder_path)
+        return jsonify({'success': True, 'folder': folder or '/', 'index': index})
+    except ValueError as exc:
+        return _error('INVALID_PATH', str(exc), 400)
+    except Exception as exc:
+        return _error('INTERNAL_ERROR', str(exc), 500)
+
+
+@kb_bp.route('/api/kb/index/entry', methods=['PUT'])
+@x_ipe_tracing()
+def set_kb_index_entry():
+    """
+    PUT /api/kb/index/entry
+
+    CR-003: Set/update a single entry in a folder's .kb-index.json.
+    Body: {"folder": "...", "name": "filename.ext", "entry": {...}}
+    folder is optional (defaults to KB root).
+    name may end with '/' to indicate a folder entry.
+    """
+    svc = _get_kb_service_or_abort()
+    data = request.get_json(force=True)
+    folder = (data.get('folder') or '').strip()
+    name = (data.get('name') or '').strip()
+    entry = data.get('entry')
+
+    if not name:
+        return _error('INVALID_INPUT', 'name is required', 400)
+    if not isinstance(entry, dict):
+        return _error('INVALID_INPUT', 'entry must be a JSON object', 400)
+
+    try:
+        folder_path = svc._resolve_safe_path(folder) if folder else svc.kb_root
+        if not folder_path.is_dir():
+            return _error('FOLDER_NOT_FOUND', f'Folder not found: {folder}', 404)
+        svc._set_index_entry(folder_path, name, entry)
+        svc._invalidate_cache()
+        return jsonify({'success': True, 'folder': folder or '/', 'name': name, 'entry': entry})
+    except ValueError as exc:
+        return _error('INVALID_PATH', str(exc), 400)
+    except Exception as exc:
+        return _error('INTERNAL_ERROR', str(exc), 500)
+
+
+@kb_bp.route('/api/kb/index/entry', methods=['DELETE'])
+@x_ipe_tracing()
+def remove_kb_index_entry():
+    """
+    DELETE /api/kb/index/entry
+
+    CR-003: Remove an entry from a folder's .kb-index.json.
+    Body: {"folder": "...", "name": "filename.ext"}
+    """
+    svc = _get_kb_service_or_abort()
+    data = request.get_json(force=True)
+    folder = (data.get('folder') or '').strip()
+    name = (data.get('name') or '').strip()
+
+    if not name:
+        return _error('INVALID_INPUT', 'name is required', 400)
+
+    try:
+        folder_path = svc._resolve_safe_path(folder) if folder else svc.kb_root
+        if not folder_path.is_dir():
+            return _error('FOLDER_NOT_FOUND', f'Folder not found: {folder}', 404)
+        svc._remove_index_entry(folder_path, name)
+        svc._invalidate_cache()
+        return jsonify({'success': True, 'folder': folder or '/', 'name': name, 'removed': True})
+    except ValueError as exc:
+        return _error('INVALID_PATH', str(exc), 400)
+    except Exception as exc:
+        return _error('INTERNAL_ERROR', str(exc), 500)

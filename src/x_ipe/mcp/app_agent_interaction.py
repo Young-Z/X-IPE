@@ -6,6 +6,11 @@ CLI agents and the X-IPE Flask backend.
 
 Tools:
     save_uiux_reference — persist UIUX reference data to an idea folder
+    get_workflow_state — read workflow state
+    update_workflow_action — update workflow action status
+    get_kb_index — read a folder's .kb-index.json entries
+    set_kb_index_entry — create/update an entry in .kb-index.json
+    remove_kb_index_entry — remove an entry from .kb-index.json
 """
 from fastmcp import FastMCP
 import requests
@@ -188,6 +193,97 @@ def update_workflow_action(workflow_name: str, action: str, status: str,
 def main():
     """Entry point for x-ipe-mcp console script (stdio transport)."""
     mcp.run()
+
+
+# ---------------------------------------------------------------------------
+# KB Index (.kb-index.json) — CR-003
+# ---------------------------------------------------------------------------
+
+@mcp.tool
+def get_kb_index(folder: str = "") -> dict:
+    """Read all entries from a folder's .kb-index.json metadata registry.
+
+    Returns the full index including version and all file/folder entries.
+    Each entry contains title, description, tags, author, type, etc.
+
+    Args:
+        folder: Relative folder path within the KB root. Empty string
+                or omitted for KB root.
+    """
+    base = _resolve_base_url()
+    try:
+        resp = requests.get(
+            f"{base}/api/kb/index",
+            params={"folder": folder} if folder else {},
+            timeout=10,
+        )
+        return resp.json()
+    except requests.ConnectionError:
+        return {
+            "success": False,
+            "error": "BACKEND_UNREACHABLE",
+            "message": f"Cannot connect to X-IPE backend at {base}",
+        }
+
+
+@mcp.tool
+def set_kb_index_entry(name: str, entry: dict, folder: str = "") -> dict:
+    """Create or update a metadata entry in a folder's .kb-index.json.
+
+    Use this to set metadata (title, description, tags, author, type, etc.)
+    for any file or subfolder in the knowledge base. Works for ALL file types
+    including images, PDFs, videos — not just markdown.
+
+    For files: name is the filename (e.g. "photo.png", "report.pdf")
+    For folders: name ends with "/" (e.g. "guides/")
+
+    Args:
+        name: Filename or foldername/ to set the entry for.
+        entry: Metadata dict with fields like title, description, tags,
+               author, created, type, auto_generated.
+        folder: Relative folder path containing the file. Empty for KB root.
+    """
+    base = _resolve_base_url()
+    try:
+        resp = requests.put(
+            f"{base}/api/kb/index/entry",
+            json={"folder": folder, "name": name, "entry": entry},
+            timeout=10,
+        )
+        return resp.json()
+    except requests.ConnectionError:
+        return {
+            "success": False,
+            "error": "BACKEND_UNREACHABLE",
+            "message": f"Cannot connect to X-IPE backend at {base}",
+        }
+
+
+@mcp.tool
+def remove_kb_index_entry(name: str, folder: str = "") -> dict:
+    """Remove a metadata entry from a folder's .kb-index.json.
+
+    Removes the entry for the specified file or folder. The actual file
+    is NOT deleted — only its metadata entry in the index.
+
+    Args:
+        name: Filename or foldername/ whose entry to remove.
+        folder: Relative folder path containing the file. Empty for KB root.
+    """
+    base = _resolve_base_url()
+    try:
+        resp = requests.delete(
+            f"{base}/api/kb/index/entry",
+            json={"folder": folder, "name": name},
+            timeout=10,
+        )
+        return resp.json()
+    except requests.ConnectionError:
+        return {
+            "success": False,
+            "error": "BACKEND_UNREACHABLE",
+            "message": f"Cannot connect to X-IPE backend at {base}",
+        }
 
 
 if __name__ == "__main__":

@@ -156,7 +156,7 @@ input:
             * Derive title from filename
             * Generate description from context/filename
             * type field set automatically from file extension
-          - Write entry to destination folder’s .kb-index.json via KBService._set_index_entry()
+          - Write entry via MCP tool `set_kb_index_entry(name, entry, folder)`
 
        f. Move file to destination:
           - Move file from .intake/{filename} to {destination_folder}/{filename}

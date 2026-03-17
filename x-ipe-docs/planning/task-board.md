@@ -6,6 +6,9 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-921 | CR + Implementation | CR-003 for FEATURE-049-F: Add MCP tools (get_kb_index, set_kb_index_entry, remove_kb_index_entry) to app-agent-interaction MCP server + Flask routes + tests | Zephyr 🌬️ | 🔄 in_progress | 03-17-2026 05:20:00 | | — |
+| TASK-920 | Ideation | Refine idea for knowledge-extraction skill (x-ipe-task-based-application-knowledge-extractor) and auto-detect UIUX references. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 05:05:00 | [idea-summary-v1.md](x-ipe-docs/ideas/wf-008-knowledge-extraction/refined-idea/idea-summary-v1.md) | x-ipe-task-based-requirement-gathering |
+| TASK-919 | Skill Update | Restructure workflow stages: merge VALIDATION into IMPLEMENT (refine→design→code→test→close), create FEEDBACK stage (bugfix, refactor, playground, CR), update engineering-workflow.md | Zephyr 🌬️ | ✅ done | 03-17-2026 03:25:00 | [02a2115] | — |
 | TASK-918 | Skill Update | Convert x-ipe-task-based-user-manual to x-ipe-tool-readme-updator (tool skill), update feature-closing with optional_tools.readme_updator toggle | Zephyr 🌬️ | ✅ done | 03-17-2026 03:11:00 | [SKILL.md](.github/skills/x-ipe-tool-readme-updator/SKILL.md) | — |
 | TASK-917 | Skill Update | Update x-ipe-task-based-change-request: make specification update unconditional (both modification and new_feature), add human confirmation gate for large-scope changes before executing Phase 5 | Ember 🔥 | ✅ done | 03-17-2026 02:55:00 | | — |
 | TASK-916 | Code Implementation | Implement FEATURE-049-F CR-002: .kb-index.json registry in kb_service.py — 9 new index methods, refactored CRUD, 26 new tests, updated librarian skill | Zephyr 🌬️ | ✅ done | 03-17-2026 04:00:00 | [64b9f10] | x-ipe-task-based-feature-acceptance-test |
@@ -156,8 +159,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 7
-- **In Progress:** 0
+- **Total Active:** 8
+- **In Progress:** 1
 - **Pending:** 0
 - **Deferred:** 0
 - **Completed (archived):** 868

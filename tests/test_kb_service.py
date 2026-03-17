@@ -1152,8 +1152,119 @@ class TestIntakeRoutes:
 
 
 # ===========================================================================
-# CR-002: .kb-index.json Metadata Registry
+# CR-003: KB Index API Routes
 # ===========================================================================
+
+class TestKBIndexRoutes:
+    """CR-003: REST API routes for .kb-index.json CRUD."""
+
+    def test_get_index_empty(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        resp = client.get('/api/kb/index')
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data['success'] is True
+        assert data['index']['entries'] == {}
+
+    def test_get_index_with_entries(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        svc._set_index_entry(svc.kb_root, 'doc.md', {'title': 'Doc', 'type': 'markdown'})
+        resp = client.get('/api/kb/index')
+        data = resp.get_json()
+        assert 'doc.md' in data['index']['entries']
+        assert data['index']['entries']['doc.md']['title'] == 'Doc'
+
+    def test_get_index_subfolder(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        sub = svc.kb_root / 'guides'
+        sub.mkdir()
+        svc._set_index_entry(sub, 'setup.md', {'title': 'Setup'})
+        resp = client.get('/api/kb/index?folder=guides')
+        data = resp.get_json()
+        assert data['success'] is True
+        assert 'setup.md' in data['index']['entries']
+
+    def test_get_index_nonexistent_folder(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        resp = client.get('/api/kb/index?folder=nonexistent')
+        assert resp.status_code == 404
+
+    def test_set_index_entry(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        resp = client.put('/api/kb/index/entry', json={
+            'name': 'photo.png',
+            'entry': {'title': 'Team Photo', 'type': 'image', 'description': 'Team meeting'},
+        })
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data['success'] is True
+        assert data['name'] == 'photo.png'
+        # Verify actually written
+        entry = svc._get_index_entry(svc.kb_root, 'photo.png')
+        assert entry['title'] == 'Team Photo'
+
+    def test_set_index_entry_in_subfolder(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        (svc.kb_root / 'docs').mkdir()
+        resp = client.put('/api/kb/index/entry', json={
+            'folder': 'docs',
+            'name': 'readme.md',
+            'entry': {'title': 'README', 'type': 'markdown'},
+        })
+        assert resp.status_code == 200
+        entry = svc._get_index_entry(svc.kb_root / 'docs', 'readme.md')
+        assert entry['title'] == 'README'
+
+    def test_set_index_entry_missing_name(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        resp = client.put('/api/kb/index/entry', json={
+            'entry': {'title': 'No Name'},
+        })
+        assert resp.status_code == 400
+
+    def test_set_index_entry_missing_entry(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        resp = client.put('/api/kb/index/entry', json={
+            'name': 'test.md',
+        })
+        assert resp.status_code == 400
+
+    def test_remove_index_entry(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        svc._set_index_entry(svc.kb_root, 'doomed.md', {'title': 'Doomed'})
+        resp = client.delete('/api/kb/index/entry', json={
+            'name': 'doomed.md',
+        })
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data['removed'] is True
+        assert svc._get_index_entry(svc.kb_root, 'doomed.md') is None
+
+    def test_remove_index_entry_missing_name(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        resp = client.delete('/api/kb/index/entry', json={})
+        assert resp.status_code == 400
+
+    def test_set_folder_entry(self, client, app):
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        resp = client.put('/api/kb/index/entry', json={
+            'name': 'guides/',
+            'entry': {'title': 'Guides', 'description': 'How-to guides'},
+        })
+        assert resp.status_code == 200
+        entry = svc._get_index_entry(svc.kb_root, 'guides/')
+        assert entry['title'] == 'Guides'
 
 class TestKBIndex:
     """CR-002: .kb-index.json per-folder metadata registry."""
