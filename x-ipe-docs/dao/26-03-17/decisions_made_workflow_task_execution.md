@@ -120,3 +120,23 @@ Agent violated the workflow: attempted to create the user manual tool skill dire
 **Execution Plan:** sequential [[0], [1]] — extractor CR first (defines the interface), then tool skill update (implements the interface)
 
 **Suggested Skills:** x-ipe-task-based-change-request (both units)
+
+---
+
+### DAO-120
+
+| Field | Value |
+|-------|-------|
+| timestamp | 2026-03-17T15:24:56Z |
+| source | human |
+| task_id | TASK-948 |
+| workflow | Knowledge-Extraction |
+
+**instruction_units:**
+
+| # | disposition | content | suggested_skills |
+|---|------------|---------|-----------------|
+| 0 | instruction | Rename `.kb-intake` → `.intake` across extractor skill; remove `.kb-index.json` generation — intake folder just holds raw output for downstream processing | x-ipe-task-based-bug-fix (strong) |
+
+**execution_plan:** sequential, groups: [[0]]
+**confidence:** 0.95

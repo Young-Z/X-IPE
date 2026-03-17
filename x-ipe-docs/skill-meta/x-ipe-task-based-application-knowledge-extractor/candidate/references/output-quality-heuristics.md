@@ -63,59 +63,18 @@
   Per-section flag:
   - If section_quality_score < 0.50 → set quality_flag: "low" in manifest per_section entry
 
-## §4. .kb-index.json Schema
+## §4. Intake Folder Convention
 
-  ```json
-  {
-    "schema_version": "1.0",
-    "title": "{purpose} — {target_name}",
-    "category": "user-manual",
-    "extraction_id": "session-{timestamp}",
-    "quality_score": 0.85,
-    "quality_label": "high",
-    "created_at": "2026-03-17T15:00:00Z",
-    "source_summary": {
-      "input_type": "source_code_repo",
-      "target": "./my-app/",
-      "file_count": 42,
-      "primary_language": "Python"
-    },
-    "sections": [
-      {
-        "id": 1,
-        "title": "Overview",
-        "file": "section-01-overview.md",
-        "quality_score": 0.92,
-        "quality_flag": null
-      }
-    ],
-    "excluded_sections": [
-      {
-        "id": 4,
-        "title": "Troubleshooting",
-        "status": "error",
-        "reason": "Source file not found: docs/TROUBLESHOOT.md"
-      }
-    ]
-  }
-  ```
+  The extractor deposits raw output into `.intake/{extraction_id}/`. No index file is generated — downstream skills (e.g., KB librarian) own indexing and cataloguing.
 
-  Field requirements:
-  - title: "{purpose} — {target basename or URL host}"
-  - category: always "user-manual" in v1
-  - extraction_id: matches session folder name
-  - quality_score: overall from §2 (float, 2dp)
-  - quality_label: from §3 classification
-  - sections[]: one entry per accepted section, ordered by section_id
-  - excluded_sections[]: one entry per error/skipped section
-  - source_summary: subset of input_analysis from Phase 1
-  - created_at: ISO 8601 timestamp at packaging time
-  - schema_version: "1.0" (matches manifest convention)
+  Folder contents:
+  - `section-{NN}-{slug}.md` — one article per accepted section
+  - `extraction_report.md` — summary with scores, validation stats, error log, provenance
 
 ## §5. Article File Format
 
   File name: `section-{NN}-{slug}.md` (matches checkpoint content naming)
-  Location: `.kb-intake/{extraction_id}/section-{NN}-{slug}.md`
+  Location: `.intake/{extraction_id}/section-{NN}-{slug}.md`
 
   ```markdown
   ---
@@ -139,11 +98,11 @@
   {validated markdown content from packed/ file — copied verbatim}
   ```
 
-  Encoding: UTF-8, no BOM. All article files and .kb-index.json.
+  Encoding: UTF-8, no BOM. All article files.
 
 ## §6. extraction_report.md Template
 
-  Location: `.kb-intake/{extraction_id}/extraction_report.md`
+  Location: `.intake/{extraction_id}/extraction_report.md`
 
   ```markdown
   # Extraction Report
@@ -212,6 +171,6 @@
   | Section has 0 ACs (implicitly accepted) | Completeness = 1.0 |
   | Section accepted on first pass | Accuracy = 1.0 (1/1) |
   | Coverage ratio = 0.0 | Completeness = 0.0; section still packaged if "accepted" |
-  | Re-running Phase 5 | Idempotent: overwrite .kb-intake/{extraction_id}/ |
-  | .kb-intake/ folder missing | Create x-ipe-docs/knowledge-base/.kb-intake/ automatically |
-  | Packed content file missing | Mark section "error" in index, add to excluded_sections |
+  | Re-running Phase 5 | Idempotent: overwrite .intake/{extraction_id}/ |
+  | .intake/ folder missing | Create x-ipe-docs/knowledge-base/.intake/ automatically |
+  | Packed content file missing | Mark section "error", skip article generation |

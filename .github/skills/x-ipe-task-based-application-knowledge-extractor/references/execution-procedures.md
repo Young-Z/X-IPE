@@ -226,23 +226,21 @@ For EACH section in collection template order:
 **CONTEXT:** Read all packed content files from `.x-ipe-checkpoint/session-{timestamp}/packed/`. Read quality scores from Step 5.1. Read manifest for provenance data (target, loaded_tool_skill, timestamps). Derive `extraction_id` from session folder name.
 
 **DECISION — Determine Output Path & Status:**
-- Output folder: `x-ipe-docs/knowledge-base/.kb-intake/{extraction_id}/`
+- Output folder: `x-ipe-docs/knowledge-base/.intake/{extraction_id}/`
 - IF zero accepted sections → extraction_status = "failed" (still generate report)
 - IF all accepted → extraction_status = "complete"
 - IF some accepted, some error/skipped → extraction_status = "partial"
 
 **ACTION — Write Output Files:**
-1. Create output folder (and `.kb-intake/` parent if needed)
-2. Generate `.kb-index.json` per reference schema: title, category, extraction_id, quality_score, quality_label, sections[], excluded_sections[], source_summary, created_at, schema_version "1.0"
-3. For each accepted section: write article `.md` with YAML frontmatter (section_id, title, quality_score, quality_dimensions, provenance) + validated content from packed files
-4. For error/skipped sections: add to `excluded_sections[]` in index with status and reason; no article file
-5. Generate `extraction_report.md`: Summary, Per-Section Scores (sorted quality ascending), Validation Statistics, Error Log, Provenance
-6. All files UTF-8, no BOM
+1. Create output folder (and `.intake/` parent if needed)
+2. For each accepted section: write article `.md` with YAML frontmatter (section_id, title, quality_score, quality_dimensions, provenance) + validated content from packed files
+3. For error/skipped sections: no article file generated
+4. Generate `extraction_report.md`: Summary, Per-Section Scores (sorted quality ascending), Validation Statistics, Error Log, Provenance
+5. All files UTF-8, no BOM
 
 **VERIFY:**
-- ✅ `.kb-index.json` exists with all required fields; article count matches accepted sections
+- ✅ Article count matches accepted sections
 - ✅ `extraction_report.md` exists with 5 sections; per-section table sorted ascending
-- ✅ Excluded sections in index but no article files
 
 **REFERENCE:** `references/output-quality-heuristics.md` §4–§7
 
@@ -255,7 +253,7 @@ For EACH section in collection template order:
 **ACTION:**
 1. Update manifest: `status` → "complete", `completed_at` → ISO 8601
 2. Populate Output Result: `extraction_status`, `quality_score`, `quality_label`, `kb_output_path`
-3. Set `task_output_links[]`: .kb-index.json, extraction_report.md, manifest paths
+3. Set `task_output_links[]`: extraction_report.md, manifest paths
 4. Update task-board.md → completed
 5. Remove `{checkpoint_path}/content/` and `feedback/` dirs
 6. Preserve: `manifest.yaml`, `packed/`, `collection-template.md`

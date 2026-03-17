@@ -118,7 +118,7 @@ input:
 | 3. 慎思之 | 3.1 | Validate & Coverage Loop | Validate against criteria, iterate for gaps | coverage met or max iterations |
 | 4. 明辨之 | 4.1 | Resume, Checkpoint & Error Handling | Detect prior sessions, save checkpoints, classify errors | errors handled |
 | 5. 笃行之 | 5.1 | Quality Scoring | Delegate to tool skill score_quality, loop if low | scores computed |
-| 5. 笃行之 | 5.2 | Package KB Articles & Report | Generate .kb-intake/ output files | output packaged |
+| 5. 笃行之 | 5.2 | Package KB Articles & Report | Generate .intake/ output files | output packaged |
 | 6. 继续执行 | 6.1 | Finalize & Clean Up | Update manifest, cleanup temp files | manifest finalized |
 | 6. 继续执行 | 6.2 | Route Next Action | DAO-assisted routing to KB librarian | next action decided |
 
@@ -270,16 +270,15 @@ input:
   <step_5_2>
     <name>Package KB Articles & Report</name>
     <action>
-      1. Create x-ipe-docs/knowledge-base/.kb-intake/{extraction_id}/
-      2. Generate .kb-index.json with sections, quality scores, provenance
-      3. Write article .md files for accepted sections with YAML frontmatter
-      4. Generate extraction_report.md (summary, scores, validation stats, error log, provenance)
+      1. Create x-ipe-docs/knowledge-base/.intake/{extraction_id}/
+      2. Write article .md files for accepted sections with YAML frontmatter
+      3. Generate extraction_report.md (summary, scores, validation stats, error log, provenance)
     </action>
     <constraints>
       - All files UTF-8, no BOM
-      - Error/skipped sections go to excluded_sections[] in index — no article files
+      - No index file generated — downstream skills (e.g., KB librarian) own indexing
     </constraints>
-    <output>.kb-intake/ folder with .kb-index.json, article files, extraction_report.md</output>
+    <output>.intake/ folder with article files and extraction_report.md</output>
   </step_5_2>
 </phase_5>
 
@@ -332,7 +331,7 @@ task_completion_output:
     name: "{from input}"
   task_output_links:
     - ".x-ipe-checkpoint/session-{timestamp}/"
-    - "x-ipe-docs/knowledge-base/.kb-intake/{extraction_id}/"
+    - "x-ipe-docs/knowledge-base/.intake/{extraction_id}/"
 
   # Dynamic outputs — schemas and examples in references/output-schemas.md
   input_analysis: { input_type, format, app_type, source_metadata }
@@ -345,7 +344,7 @@ task_completion_output:
   extraction_status: "complete | partial | failed"
   quality_score: 0.0  # 0.0–1.0
   quality_label: "high | acceptable | low"
-  kb_output_path: "x-ipe-docs/knowledge-base/.kb-intake/{extraction_id}/"
+  kb_output_path: "x-ipe-docs/knowledge-base/.intake/{extraction_id}/"
 ```
 
 REFERENCE: See `references/output-schemas.md` for full dynamic output schemas with field types and examples.
@@ -361,7 +360,7 @@ REFERENCE: See `references/output-schemas.md` for full dynamic output schemas wi
   </checkpoint>
   <checkpoint required="true">
     <name>Phase 5 Complete</name>
-    <verification>Quality scores computed (4 dimensions), articles packaged in .kb-intake/, extraction report generated</verification>
+    <verification>Quality scores computed (4 dimensions), articles packaged in .intake/, extraction report generated</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Phase 6 Complete</name>
