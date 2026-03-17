@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-947 | Change Request | CR on EPIC-050 extractor skill: refocus phases on knowledge extraction, add chrome devtools option, delegate quality scoring to tool skills. Also update EPIC-051 tool skill with quality scoring capability. Workflow: Knowledge-Extraction | Nova ☄️ | 🔄 in_progress | 03-17-2026 | | x-ipe-task-based-change-request |
 | TASK-946 | Change Request | CR-001 on FEATURE-051-A: Optimize user manual templates with ToC, content splitting (>800 lines), cross-file linking, scenario instructions with images, naming conventions. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [CR-001.md](x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/CR-001.md), [specification.md v1.1](x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/specification.md) | — |
 | TASK-945 | Feature Refinement | Create specification and technical design for FEATURE-051-A (User Manual Tool Skill). 25 ACs across 6 groups. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [specification.md](x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/technical-design.md) | x-ipe-task-based-technical-design |
 | TASK-944 | Requirement Gathering | Gather requirements for x-ipe-tool-knowledge-extraction-user-manual tool skill. EPIC-051, single feature (FEATURE-051-A). Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [part-21](x-ipe-docs/requirements/requirement-details-part-21.md) | x-ipe-task-based-feature-breakdown |
@@ -133,7 +134,9 @@
 
 ---
 
+
 ## Completed Tasks
+| TASK-033 | Implement CR-002: Refocus Extractor on Knowledge Learning | Execute CR-002 that adds Chrome DevTools extraction support, tool skill feedback during extraction, and delegates quality scoring to tool skills. Affects extractor SKILL.md (4 changes), execution-procedures.md (4 changes), and adds score_quality operation to user manual tool skill. | EPIC-050, EPIC-051 | ✅ completed | Atom | 03-17-2026 | 03-17-2026 |
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------|--------------|--------------|-------|

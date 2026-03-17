@@ -88,3 +88,35 @@ Agent violated the workflow: attempted to create the user manual tool skill dire
 **Rationale:** User is commanding enhancement of existing templates. Single unit — all 5 points are cohesive improvements to the same deliverable. Route through CR skill to assess impact, then implement.
 
 **Suggested Skills:** x-ipe-task-based-change-request (strong — modifying existing delivered feature)
+
+---
+
+### DAO-119
+
+| Field | Value |
+|-------|-------|
+| Timestamp | 2026-03-17T13:08:33Z |
+| Source | human |
+| Task ID | pending (TASK-947) |
+| Feature ID | FEATURE-050-* (EPIC-050) + FEATURE-051-A (EPIC-051) |
+| Workflow | Knowledge-Extraction |
+| Calling Skill | x-ipe-workflow-task-execution |
+
+**Need:** Refocus the Application Knowledge Extractor skill on its core responsibility (learn knowledge → leverage tool skills). 5 improvements: (1) Study Broadly should guide knowledge extraction techniques including chrome devtools screenshots, (2) Enable chrome devtools as option, (3) Inquire/Think phases should call tool skills for feedback on extracted info, (4) Quality scoring in Discern Clearly should delegate to tool skills (not self-score), (5) Ensure tool skill has quality scoring capability.
+
+**Perspectives:**
+- Supporting: This correctly refocuses the extractor as an orchestrator that delegates domain expertise to tool skills. Current skill does too much domain-specific work itself. Chrome devtools integration adds real value for UI-heavy apps.
+- Opposing: Significant restructuring of a recently completed skill. But the user's points are architecturally sound — the two-tier design was always intended to have tool skills own domain validation.
+- Neutral: This is a CR on EPIC-050 (extractor) + potentially EPIC-051 (tool skill quality scoring). Multi-unit: Unit 0 = CR on extractor skill, Unit 1 = capability check/addition on tool skill.
+
+**Disposition:** instruction
+**Confidence:** 0.92
+**Rationale:** User is commanding architectural improvement to align with original two-tier design intent. Route through CR skill for both EPICs.
+
+**Instruction Units:**
+- Unit 0: CR on EPIC-050 extractor skill — refocus phases, add chrome devtools option, delegate quality scoring to tool skills (points 1-4)
+- Unit 1: Check/add quality scoring capability to tool skill EPIC-051 (point 5)
+
+**Execution Plan:** sequential [[0], [1]] — extractor CR first (defines the interface), then tool skill update (implements the interface)
+
+**Suggested Skills:** x-ipe-task-based-change-request (both units)

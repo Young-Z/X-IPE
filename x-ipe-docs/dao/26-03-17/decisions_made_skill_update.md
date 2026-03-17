@@ -104,6 +104,8 @@
 > None
 
 | DAO-103 | 2026-03-17T03:16:00Z | TASK-NEW | N/A (direct human message) | instruction | 0.92 | Restructure workflow: IMPLEMENT absorbs acceptance_test+feature_closing; VALIDATION removed; new FEEDBACK stage with bug_fix, code_refactor, human_playground, change_request |
+| DAO-104 | 2026-03-17T11:55:27Z | TASK-946 | N/A (direct human message) | instruction | 0.95 | Make application knowledge extractor format/app-type handling generic instead of hardcoded |
+| DAO-105 | 2026-03-17T12:28:15.613Z | TASK-947 | N/A (direct human message) | instruction | 0.96 | Rename the application knowledge extractor checkpoint folder from `.checkpoint/` to `.x-ipe-checkpoint/` |
 
 ## DAO-103
 - **Timestamp:** 2026-03-17T03:16:00Z
@@ -135,6 +137,76 @@
 >   - skill_name: "x-ipe-meta-skill-creator"
 >     match_strength: "partial"
 >     reason: "Updating engineering-workflow.md reference and propagating stage changes to affected skills"
+
+### Follow-up
+> None
+
+## DAO-105
+- **Timestamp:** 2026-03-17T12:28:15.613Z
+- **Task ID:** TASK-947
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A (direct human message)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.96
+
+### Message
+> the .checkpoint/ used by x-ipe-task-based-application-knowledge-extractor should be renamed to `.x-ipe-checkpoint/`
+
+### Guidance Returned
+> Update `x-ipe-task-based-application-knowledge-extractor` through `x-ipe-meta-skill-creator` by renaming the checkpoint handoff root from `.checkpoint/` to `.x-ipe-checkpoint/` across the candidate skill, bundled references/templates, skill-meta docs, tests, and validation artifacts, then merge the validated candidate to production.
+
+### Rationale
+> The user gave a direct, bounded instruction to update an existing X-IPE skill. This is a skill update request, so `x-ipe-meta-skill-creator` is the correct downstream skill, and the rename must be applied consistently across the candidate workspace and its dependent artifacts rather than as a one-off production edit.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-meta-skill-creator"
+>     match_strength: "strong"
+>     reason: "The request modifies an existing X-IPE task-based skill and its bundled resources, which must go through the candidate-based skill-creator workflow."
+>     execution_steps:
+>       - phase: "Round 1"
+>         step: "Update candidate skill and bundled resources"
+>       - phase: "Rounds 2-4"
+>         step: "Refresh validation artifacts and evaluate the candidate"
+>       - phase: "Merge"
+>         step: "Merge candidate to production after validation"
+
+### Follow-up
+> Create task-board entry TASK-947, update candidate files first, refresh validation artifacts if needed, merge to production, and run final verification.
+
+## DAO-104
+- **Timestamp:** 2026-03-17T11:55:27Z
+- **Task ID:** TASK-946
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A (direct human message)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.95
+
+### Message
+> let's update x-ipe-task-based-application-knowledge-extractor, should support multi format or app type, no need to hit the potential types or format like (markdown, python, html, mixed) or (web, cli, mobile, unknown), it should be generic
+
+### Guidance Returned
+> Update `x-ipe-task-based-application-knowledge-extractor` through `x-ipe-meta-skill-creator` by removing hardcoded format and app-type enumerations from the candidate skill and its bundled references/templates. Keep the extractor’s detection workflow, but describe format/app-type handling generically so multiple or emerging classifications are supported without enumerating fixed values.
+
+### Rationale
+> The user gave a direct, bounded instruction to generalize an existing X-IPE skill. This is a skill update request, so `x-ipe-meta-skill-creator` is the correct downstream skill, and the change should be applied consistently across the candidate workspace rather than as a one-line edit in production.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-meta-skill-creator"
+>     match_strength: "strong"
+>     reason: "The request modifies an existing X-IPE task-based skill and its bundled resources, which must go through the candidate-based skill-creator workflow."
+>     execution_steps:
+>       - phase: "Round 1"
+>         step: "Update candidate skill and bundled resources"
+>       - phase: "Rounds 2-4"
+>         step: "Refresh validation artifacts and evaluate the candidate"
+>       - phase: "Merge"
+>         step: "Merge candidate to production after validation"
 
 ### Follow-up
 > None

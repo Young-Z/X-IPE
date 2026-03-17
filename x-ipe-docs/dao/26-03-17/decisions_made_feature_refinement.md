@@ -95,3 +95,49 @@
 **Decision:** Include "paused" status in Phase 4 scope, but keep it minimal.
 
 **Rationale:** "Paused" status is semantically inseparable from checkpoint/resume — you pause to checkpoint, you resume from paused. The manifest template already lists `paused` as a valid status value (line 60 of `checkpoint-manifest.md`), so this is about implementing the transitions (`extracting → paused`, `paused → extracting`) rather than inventing new schema. Including it in Phase 4 avoids creating a separate micro-task for a tightly coupled concept. Scope is limited to: (1) add `paused` as a status transition, (2) write checkpoint on pause, (3) resume from paused state. No new manifest fields required.
+# DAO Decisions Log — Feature Refinement
+
+## Registry
+
+| Entry ID | Timestamp | Task ID | Calling Skill | Disposition | Confidence | Summary |
+|----------|-----------|---------|---------------|-------------|------------|---------|
+| DAO-001 | 2026-03-17T00:00:00Z | N/A | CLI | instruction | 0.95 | Create spec and technical design for FEATURE-051-A |
+
+---
+
+## DAO-001
+- **Timestamp:** 2026-03-17T00:00:00Z
+- **Task ID:** N/A (will be created)
+- **Feature ID:** FEATURE-051-A
+- **Workflow:** N/A
+- **Calling Skill:** CLI
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.95
+
+### Message
+> Create the specification and technical design for FEATURE-051-A (User Manual Tool Skill). Read requirements from requirement-details-part-21.md EPIC-051 section. Create specification.md and technical-design.md following templates with specific AC groupings and implementation plan.
+
+### Guidance Returned
+> Proceed with feature refinement using x-ipe-task-based-feature-refinement skill. Create both deliverables following the specified structure.
+
+### Rationale
+> Clear feature refinement request with well-defined deliverables, context, and structure. Strong match to feature refinement workflow.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-feature-refinement"
+>     match_strength: "strong"
+>     reason: "Explicit request to create specification and technical design for a feature"
+>     execution_steps:
+>       - phase: "1. Load Context"
+>         step: "1.1 Query feature board"
+>       - phase: "2. Gather Information"
+>         step: "2.1 Read requirements"
+>       - phase: "3. Create Specification"
+>         step: "3.1 Write specification.md"
+>       - phase: "4. Create Technical Design"
+>         step: "4.1 Write technical-design.md"
+
+### Follow-up
+> None

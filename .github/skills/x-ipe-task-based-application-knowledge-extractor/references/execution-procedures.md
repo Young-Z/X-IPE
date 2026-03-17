@@ -22,9 +22,18 @@
 
 **ACTION — Detect Format & App Type:**
 - Call input detection heuristics (see `references/input-detection-heuristics.md`)
-- Detect format: analyze file extensions (.md → markdown, .py → python, mixed → mixed)
-- Detect app_type: framework markers (Flask/Django → web, argparse/click → cli, React Native → mobile, none → unknown)
+- Detect one or more source format labels from file extensions, MIME hints, or content signatures; store a concise summary in `format` and preserve the full set in `source_metadata.detected_formats`
+- Detect one or more application-context labels from framework markers, runtime clues, and entry points; store a concise summary in `app_type` and preserve the full set in `source_metadata.detected_app_types`
 - Collect source_metadata: primary_language, framework, file_count, total_size_bytes, entry_points, has_docs
+
+**ACTION — Plan Extraction Techniques:**
+- Based on input_type, plan which tools are available:
+  - `source_code_repo` / `documentation_folder` → grep, glob, file reading, code analysis
+  - `public_url` / `running_web_app` → Chrome DevTools MCP (navigate_page, take_snapshot, take_screenshot)
+  - `single_file` → direct file read
+- IF input_type involves UI → plan screenshot capture points (login screens, dashboards, key workflows)
+- IF images can aid knowledge explanation → mark sections for screenshot capture in manifest
+- Store planned techniques in `source_metadata.extraction_techniques[]`
 
 **VERIFY:** ✅ InputAnalysis created with input_type, format, app_type, source_metadata
 
@@ -56,7 +65,8 @@
 **ACTION — Load Tool Skill:**
 - Read SKILL.md, parse frontmatter (name, categories)
 - Extract artifact paths: playbook_template, collection_template, acceptance_criteria
-- Read app-type mixin paths (web, cli, mobile overrides)
+- Read app-type mixin paths as a label-keyed map of optional overrides
+- Resolve applicable mixins by exact `app_type`, then `source_metadata.detected_app_types` order, and fall back to the base template when no key matches
 - Verify artifact paths exist
 
 **VERIFY:** ✅ loaded_tool_skill set, artifact paths exist, supports "user-manual"
@@ -67,7 +77,7 @@
 
 ### Step 1.4 — Initialize Handoff
 
-**CONTEXT:** Determine checkpoint path `.checkpoint/session-{timestamp}/` in CWD.
+**CONTEXT:** Determine checkpoint path `.x-ipe-checkpoint/session-{timestamp}/` in CWD.
 
 **DECISION:** If path exists → create new timestamped subfolder; else → create it.
 
@@ -108,6 +118,11 @@ For EACH section in collection template order:
 6. IF `config_overrides.web_search_enabled`: augment with purpose-driven search (supplementary only)
 7. Write to `{checkpoint_path}/content/section-{NN}-{slug}.md` (see reference for format)
 8. Update `manifest.yaml` with section result (status, content_file, files_read, warnings, timestamps)
+9. **Tool Skill Early Feedback:** After writing each section, call loaded tool skill's `validate_section` operation:
+   - Pass section_id and content_file_path
+   - Read feedback: if criteria failures indicate missing content → adjust prompts and re-extract BEFORE moving to next section
+   - Write early feedback to `{checkpoint_path}/feedback/section-{NN}-{slug}-early.md`
+   - This reduces Phase 3 iteration count by catching gaps early
 
 **VERIFY:**
 - ✅ All template sections processed (each has status: extracted | skipped | empty | error | partial)
@@ -135,7 +150,7 @@ For EACH section in collection template order:
 - No content from Phase 2 → skip Phase 3 entirely
 
 **ACTION — Iteration Loop (up to max_validation_iterations):**
-1. Validate each non-accepted section against acceptance criteria (per-criterion pass/fail)
+1. Call tool skill's validate_section operation for each non-accepted section — tool skill evaluates per-criterion pass/fail; extractor does NOT self-validate against criteria
 2. Write feedback to `{checkpoint_path}/feedback/section-{NN}-{slug}-iter-{M}.md`
 3. Lock accepted sections — not re-validated in later iterations
 4. Compute `coverage_ratio = criteria_met / total_criteria`; check exit conditions
@@ -155,7 +170,7 @@ For EACH section in collection template order:
 
 ### Step 4.1 — Resume, Checkpoint & Error Handling
 
-**CONTEXT — Cross-Cutting Behavior:** Phase 4 wraps Phases 1–3 (not sequential). On invocation: scan `.checkpoint/session-*/manifest.yaml` sorted by timestamp desc; select most recent with status "paused"|"extracting". If valid → resume (skip accepted sections). If corrupted (YAML parse fail or schema_version ≠ "1.0") → log warning, start fresh. Config: `max_retries` (default 3 total attempts).
+**CONTEXT — Cross-Cutting Behavior:** Phase 4 wraps Phases 1–3 (not sequential). On invocation: scan `.x-ipe-checkpoint/session-*/manifest.yaml` sorted by timestamp desc; select most recent with status "paused"|"extracting". If valid → resume (skip accepted sections). If corrupted (YAML parse fail or schema_version ≠ "1.0") → log warning, start fresh. Config: `max_retries` (default 3 total attempts).
 
 **DECISION — Error Classification & Recovery:**
 - Transient error (timeout, rate limit, temp lock) → immediate retry, max 2 retries (3 total)
@@ -180,32 +195,35 @@ For EACH section in collection template order:
 
 ## Phase 5: 笃行之 — Practice Earnestly
 
-### Step 5.1 — Quality Scoring
+### Step 5.1 — Quality Scoring (Tool Skill Delegated)
 
-**CONTEXT — Gather Scoring Inputs (Deterministic Only — No LLM):**
-- Read manifest `phase_3.per_section[]`: for each section, extract `criteria_met`, `criteria_total`, `iterations_validated`, `validation_status`
-- Read collection template: count prescribed sub-sections (H3 headings / extraction prompts) per section
-- Read packed content files: count present sub-sections (H2/H3 headings matching template) per section
-- Read source file modification dates from `source_metadata` (if local); for URLs default freshness to 0.5
+**CONTEXT:** Quality assessment is delegated to the tool skill because it has domain expertise on what constitutes good content for the extraction category.
 
-**DECISION — Classify Quality Threshold:**
-- Compute per-section `section_quality_score` (see reference for 4-dimension formula)
-- Compute `overall_quality_score` = arithmetic mean of section scores (exclude error/skipped from mean; count as 0.0 per BR-2)
-- Classify: ≥ 0.80 → "high"; 0.50–0.79 → "acceptable"; < 0.50 → "low"
-- IF "acceptable" → log warning with lowest-scoring sections; IF "low" → log warning with sections below 0.50
-- Per-section: IF section score < 0.50 → set `quality_flag: "low"` in manifest
+**DECISION — Score Source:**
+- IF tool skill has `score_quality` operation → call it for each section
+- IF tool skill lacks `score_quality` → fall back to validate_section pass-rate as proxy score (criteria_met / criteria_total)
 
-**ACTION:** Compute all scores per reference formulas. Write quality results to manifest: `phase_5.quality_scores[]`, `phase_5.overall_quality_score`, `phase_5.quality_label`. Scoring is non-blocking — always proceed to Step 5.2.
+**ACTION — Delegate Quality Scoring:**
+1. For each accepted section: call tool skill `score_quality` operation with section content path and section_id
+2. Collect per-section scores from tool skill response
+3. Compute `overall_quality_score` = arithmetic mean of section scores (exclude error/skipped; count as 0.0)
+4. Classify: ≥ 0.80 → "high"; 0.50–0.79 → "acceptable"; < 0.50 → "low"
+5. IF quality_label is "low" AND quality_loop not already triggered:
+   - Set quality_loop_triggered = true
+   - Identify lowest-scoring sections (below 0.50)
+   - Loop back to Phase 2 Step 2.1 for targeted re-extraction of those sections
+   - After re-extraction, re-run Phase 3 validation, then return here for re-scoring
+6. Write quality results to manifest: phase_5.quality_scores[], overall_quality_score, quality_label
 
-**VERIFY:** ✅ Every section has `section_quality_score` (0.0–1.0, 2dp); overall score and label set; identical inputs → identical scores
+**VERIFY:** ✅ Every section has quality score from tool skill (or proxy); overall score and label set; quality loop triggered if "low"
 
-**REFERENCE:** `references/output-quality-heuristics.md` §1–§3
+**REFERENCE:** Tool skill's `score_quality` operation documentation
 
 ---
 
 ### Step 5.2 — Package KB Articles & Report
 
-**CONTEXT:** Read all packed content files from `.checkpoint/session-{timestamp}/packed/`. Read quality scores from Step 5.1. Read manifest for provenance data (target, loaded_tool_skill, timestamps). Derive `extraction_id` from session folder name.
+**CONTEXT:** Read all packed content files from `.x-ipe-checkpoint/session-{timestamp}/packed/`. Read quality scores from Step 5.1. Read manifest for provenance data (target, loaded_tool_skill, timestamps). Derive `extraction_id` from session folder name.
 
 **DECISION — Determine Output Path & Status:**
 - Output folder: `x-ipe-docs/knowledge-base/.kb-intake/{extraction_id}/`

@@ -254,3 +254,45 @@
 ### Follow-up
 > None
 
+---
+## Decision Entry
+
+**Timestamp:** 2026-03-17  
+**Task ID:** (To be assigned by consuming agent)  
+**Feature ID:** EPIC-050, EPIC-051  
+**Workflow Stage:** requirements → design/implementation (CR impacts existing features)  
+**Calling Skill:** N/A (direct user request)  
+**Source:** human
+
+### User Message
+```
+Implement a Change Request on the Application Knowledge Extractor (EPIC-050) and User Manual Tool Skill (EPIC-051).
+
+[Full detailed CR specification with 6 file changes across 2 skills]
+```
+
+### Interpretation
+The user needs: Implement CR-002 that refocuses the Application Knowledge Extractor skill on knowledge learning and tool skill delegation, including adding a score_quality operation to the User Manual Tool Skill.
+
+**Decomposition:** 1 instruction unit (compound task with interdependent changes serving unified architectural goal)
+
+### Disposition Selection (Unit 0)
+**Chosen:** `instruction`  
+**Alternatives considered:** pass_through (too passive for explicit CR with full spec)
+
+**Rationale:** User provides complete CR specification with exact changes, constraints, and impact analysis. This is a command to execute CR-002 implementation. The instruction disposition triggers x-ipe-task-based-change-request skill which will:
+1. Analyze impact on existing requirements/specs/code
+2. Detect conflicts across modified features
+3. Route appropriately (modification → refinement workflow)
+4. Execute systematic multi-file changes with validation
+
+**Suggested Skills:**
+- x-ipe-task-based-change-request (strong match: explicit CR-002 with classification, impact analysis, cross-skill coordination)
+
+**利 (Gains):** Restores intended two-tier architecture (extractor orchestrates, tool skills own domain knowledge), enables better quality feedback loop, clear implementation path
+
+**害 (Harms):** Multi-file coordination risk (6 files), line limit pressure (≤500 lines each), requires context preservation across surgical edits
+
+**Confidence:** 0.85 (clear spec with constraints, but multi-file complexity)
+
+---

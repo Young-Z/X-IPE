@@ -55,9 +55,9 @@ not_for:
 
 ```yaml
 input:
-  operation: "get_artifacts | get_collection_template | validate_section | get_mixin | pack_section"
+  operation: "get_artifacts | get_collection_template | validate_section | get_mixin | pack_section | score_quality"
   category: "user-manual"
-  section_id: "string | null"       # Required for validate_section, pack_section
+  section_id: "string | null"       # Required for validate_section, pack_section, score_quality
   content_path: "string | null"     # Path to extracted content file
   app_type: "web | cli | mobile | null"  # Required for get_mixin
   config:
@@ -80,7 +80,7 @@ input:
     </steps>
   </field>
 
-  <field name="content_path" source="Caller provides path to extracted content in .checkpoint/">
+  <field name="content_path" source="Caller provides path to extracted content in .x-ipe-checkpoint/">
     <steps>
       1. Path must exist and be readable
       2. Content must be UTF-8 markdown
@@ -228,7 +228,7 @@ input:
 <operation name="pack_section">
   <input>
     <field name="section_id" type="string" required="true">Section identifier (e.g., "overview", "installation")</field>
-    <field name="content_path" type="string" required="true">Path to validated content file in .checkpoint/</field>
+    <field name="content_path" type="string" required="true">Path to validated content file in .x-ipe-checkpoint/</field>
     <field name="split_mode" type="boolean" required="false" default="false">If true, output as standalone sub-markdown file with Instructions and Screenshots sections</field>
   </input>
   <action>
@@ -258,12 +258,41 @@ input:
 
 ---
 
+### Operation: score_quality
+
+**When:** Extractor Phase 5 requests quality assessment for a section.
+
+```xml
+<operation name="score_quality">
+  <action>
+    1. Read content at content_path for the given section_id
+    2. Load acceptance criteria for the section from templates/acceptance-criteria.md
+    3. Evaluate content across 4 quality dimensions:
+       a. **Completeness** (0.0–1.0): ratio of REQ criteria satisfied
+       b. **Structure** (0.0–1.0): proper heading hierarchy, code blocks, lists
+       c. **Clarity** (0.0–1.0): actionable instructions, concrete examples present
+       d. **Freshness** (0.0–1.0): content references current versions, no stale info
+    4. Compute section_quality_score = weighted mean (completeness: 0.4, structure: 0.2, clarity: 0.3, freshness: 0.1)
+    5. Generate improvement_hints[] for any dimension below 0.6
+  </action>
+  <constraints>
+    - BLOCKING: section_id and content_path are required
+    - CRITICAL: Scoring is based on domain expertise — this skill defines what "quality" means for user manuals
+  </constraints>
+  <output>
+    quality_result: { section_id, section_quality_score, dimensions: {completeness, structure, clarity, freshness}, improvement_hints[] }
+  </output>
+</operation>
+```
+
+---
+
 ## Output Result
 
 ```yaml
 operation_output:
   success: true | false
-  operation: "get_artifacts | get_collection_template | validate_section | get_mixin | pack_section"
+  operation: "get_artifacts | get_collection_template | validate_section | get_mixin | pack_section | score_quality"
   result:
     # get_artifacts
     artifact_paths:
@@ -284,6 +313,16 @@ operation_output:
       criteria: [{ id: "string", status: "pass | fail", feedback: "string" }]
     # pack_section
     formatted_content: "string"
+    # score_quality
+    quality_result:
+      section_id: "{id}"
+      section_quality_score: 0.0  # 0.0–1.0
+      dimensions:
+        completeness: 0.0
+        structure: 0.0
+        clarity: 0.0
+        freshness: 0.0
+      improvement_hints: ["string"]
   errors: []
 ```
 
@@ -314,12 +353,13 @@ operation_output:
 
 | Error | Cause | Resolution |
 |-------|-------|------------|
-| `INVALID_OPERATION` | operation not one of the 5 defined | Check operation name matches exactly |
-| `MISSING_SECTION_ID` | section_id null for validate/pack | Provide section_id matching playbook template |
-| `MISSING_CONTENT_PATH` | content_path null for validate/pack | Provide path to extracted content file |
+| `INVALID_OPERATION` | operation not one of the 6 defined | Check operation name matches exactly |
+| `MISSING_SECTION_ID` | section_id null for validate/pack/score_quality | Provide section_id matching playbook template |
+| `MISSING_CONTENT_PATH` | content_path null for validate/pack/score_quality | Provide path to extracted content file |
 | `CONTENT_NOT_FOUND` | content_path file does not exist | Verify file was written by extractor |
 | `INVALID_APP_TYPE` | app_type not web/cli/mobile | Use one of: web, cli, mobile |
 | `TEMPLATE_NOT_FOUND` | Template file missing from skill | Re-install skill or verify file paths |
+| `SCORING_FAILED` | Unable to evaluate content quality | Verify content exists and is readable |
 
 ---
 
@@ -329,7 +369,7 @@ operation_output:
 |------|---------|
 | `templates/playbook-template.md` | Base user manual section layout (7 sections) |
 | `templates/collection-template.md` | Per-section extraction prompts |
-| `templates/acceptance-criteria.md` | Per-section validation rules |
+| `templates/acceptance-criteria.md` | Per-section validation rules, also used for quality scoring |
 | `templates/mixin-web.md` | Web app-specific sections and prompts |
 | `templates/mixin-cli.md` | CLI app-specific sections and prompts |
 | `templates/mixin-mobile.md` | Mobile app-specific sections and prompts |
