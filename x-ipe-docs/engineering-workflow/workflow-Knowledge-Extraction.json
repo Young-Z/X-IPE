@@ -2,7 +2,7 @@
   "schema_version": "4.0",
   "name": "Knowledge-Extraction",
   "created": "2026-03-17T03:17:23.200297+00:00",
-  "last_activity": "2026-03-17T10:22:01.343737+00:00",
+  "last_activity": "2026-03-17T10:22:39.157068+00:00",
   "idea_folder": null,
   "current_stage": "validation",
   "global": {
@@ -502,8 +502,12 @@
             "deliverables": []
           },
           "feature_closing": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": [],
+            "next_actions_suggested": [
+              "human_playground",
+              "change_request"
+            ]
           }
         }
       },
