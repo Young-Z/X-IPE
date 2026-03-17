@@ -183,11 +183,13 @@ BLOCKING: Step 4.1 - Tests for a given type are blocked if the required tool is 
            - "backend-api": requires HTTP/API calls (endpoints, responses, status codes)
            - "unit": requires code-level testing (functions, classes, logic)
            - "integration": requires multi-component verification (data flow, service interaction)
+           - "structured-review": non-executable deliverables (skills/SKILL.md, prompt templates, reference docs, config files) — verified via checklist-based review
         5. MATCH each test_type to the best enabled tool:
            - frontend-ui → chrome-devtools-mcp (if enabled)
            - backend-api → matched code_test_tool skill (python/typescript/etc.)
            - unit → matched code_test_tool skill
            - integration → matched code_test_tool skill or chrome-devtools-mcp
+           - structured-review → agent self-review (no external tool needed)
         6. DETECT tech_stack from specification and implementation files
         7. SEMANTIC MATCH tech_stack to enabled tool skills (same as code-implementation routing)
         8. CHECK mockup_link (resolved in Input Initialization):
@@ -197,7 +199,7 @@ BLOCKING: Step 4.1 - Tests for a given type are blocked if the required tool is 
         10. FOR EACH AC: create TC-XXX, map to AC, set priority (P0/P1/P2), set test_type, assign tool, write steps, define expected outcomes
         11. PRIORITIZE: P0=Critical, P1=High, P2=Medium (edge cases)
         12. GROUP and STORE test cases by test_type in acceptance-test-cases.md:
-            - Create a section per test_type: "## Frontend-UI Tests", "## Backend-API Tests", "## Unit Tests", "## Integration Tests"
+            - Create a section per test_type: "## Frontend-UI Tests", "## Backend-API Tests", "## Unit Tests", "## Integration Tests", "## Structured-Review Tests"
             - Each section lists only TCs of that type with their assigned tool
             - This grouping enables batch execution per type in Phase 4
       </action>
@@ -306,8 +308,13 @@ BLOCKING: Step 4.1 - Tests for a given type are blocked if the required tool is 
         4. integration (tool skill or chrome-devtools-mcp):
            - Initialize services, trigger flow, verify end-to-end state
 
+        5. structured-review (agent self-review — for skills, prompts, docs, configs):
+           FOR EACH TC: read deliverable file(s) → evaluate AC criterion against content →
+           check presence (keyword search, section/structural validation) → cross-reference with spec →
+           set pass/fail/partial with evidence (cited section/line). Build coverage map: every AC must have definitive result.
+
         See references/detailed-procedures.md for command patterns per type.
-        5. CONTINUE with remaining tests even if some fail
+        6. CONTINUE with remaining tests even if some fail
       </action>
       <output>Test execution results per test case, grouped by type</output>
     </step_4_1>
@@ -318,7 +325,7 @@ BLOCKING: Step 4.1 - Tests for a given type are blocked if the required tool is 
         1. UPDATE acceptance-test-cases.md: set status per test case, add execution notes, fill Execution Results
         2. DOCUMENT failures with reason and recommended action
         3. IF mockup_comparison returned by UI tool: add "Mockup Comparison Summary" with gaps and match_score
-        4. GROUP results by test_type in summary (frontend-ui / backend-api / unit / integration: X passed / Y total)
+        4. GROUP results by test_type in summary (frontend-ui / backend-api / unit / integration / structured-review: X passed / Y total)
         5. CALCULATE metrics: total, passed, failed, blocked, pass_rate
         6. RETURN task completion output with results
       </action>
@@ -418,13 +425,13 @@ task_completion_output:
   feature_phase: "Acceptance Testing"
 
   # Acceptance test results
-  test_types_tested: ["frontend-ui", "backend-api", "unit", "integration"]
+  test_types_tested: ["frontend-ui", "backend-api", "unit", "integration", "structured-review"]
   test_cases_created: "{count}"
   tests_passed: "{count}"
   tests_failed: "{count}"
   tests_blocked: "{count}"
   pass_rate: "{X}%"
-  results_by_type: { frontend_ui: {passed, failed, blocked}, backend_api: {...}, unit: {...}, integration: {...} }
+  results_by_type: { frontend_ui: {passed, failed, blocked}, backend_api: {...}, unit: {...}, integration: {...}, structured_review: {...} }
 ```
 
 ---
@@ -436,32 +443,20 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 ```xml
 <definition_of_done>
   <checkpoint required="true">
-    <name>Toolbox config loaded</name>
-    <verification>Step 1.1 completed — enabled_tools list built from tools.json stages.validation.acceptance_test</verification>
+    <name>Config loaded and ACs classified</name>
+    <verification>enabled_tools built from tools.json; acceptance-test-cases.md has TC→AC mapping with test_type and assigned_tool</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>All ACs classified and test cases created</name>
-    <verification>acceptance-test-cases.md exists with TC mapped to AC, each TC has test_type and assigned_tool</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Implementation analyzed per test type</name>
-    <verification>Frontend-ui tests have selectors; backend-api tests have endpoints; unit tests have function refs</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Test cases reflected and refined</name>
-    <verification>Reflection checklist passed for each TC</verification>
+    <name>Implementation analyzed and tests refined</name>
+    <verification>Frontend-ui tests have selectors; backend-api have endpoints; unit have function refs; structured-review have deliverable paths. Reflection checklist passed.</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Tests executed or marked blocked per type</name>
     <verification>Each TC has Pass/Fail/Blocked status; blocked only if required tool disabled/unavailable</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Test results documented with per-type breakdown</name>
-    <verification>Execution Results section has overall metrics and results_by_type summary</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>acceptance-test-cases.md saved to feature folder</name>
-    <verification>File exists at x-ipe-docs/requirements/FEATURE-XXX/acceptance-test-cases.md</verification>
+    <name>Results documented with per-type breakdown</name>
+    <verification>acceptance-test-cases.md saved at x-ipe-docs/requirements/FEATURE-XXX/ with metrics and results_by_type</verification>
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Workflow Action Updated</name>
@@ -480,9 +475,11 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 |---------|------|------|
 | Multi-Type Feature | Feature has both UI and API | Classify each AC separately, run UI via tool skill, API via code tool |
 | Backend-Only Feature | No frontend component | ALL tests route to code tool skills |
+| Skills/Non-Code Feature | Deliverables are SKILL.md, prompts, configs, docs | ALL ACs use structured-review: read deliverable, verify criterion, document evidence |
 
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
+| Skip AC testing for skills | Incomplete validation — skills are deliverables too | Use structured-review test type for every AC |
 | Skip non-UI ACs | Incomplete coverage | Test ALL ACs regardless of type |
 | Use disabled tools | Violates config | Only use tools enabled in tools.json |
 | Test without selectors | Fail to find elements | Analyze HTML first |

@@ -240,7 +240,8 @@ BLOCKING: Step 3.1 special-case delegations run BEFORE semantic routing.
       <name>Route and Invoke Tool Skills</name>
       <action>
         1. CHECK special-case delegations FIRST:
-           a. IF program_type == "skills": DELEGATE to x-ipe-meta-skill-creator (skip AAA; skill-creator has own testing); VERIFY DoD; JUMP to step_4_2
+           a. IF program_type == "skills": DELEGATE to x-ipe-meta-skill-creator; VERIFY DoD; JUMP to step_4_2
+              NOTE: Acceptance testing is NOT skipped — x-ipe-task-based-feature-acceptance-test will run structured-review tests on the deliverables
            b. IF MCP server detected: DELEGATE to mcp-builder; VERIFY quality checks; JUMP to step_4_2
 
         2. DISCOVER: SCAN .github/skills/x-ipe-tool-implementation-*/ for available tool skills
@@ -428,7 +429,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>AAA scenarios generated OR special-case delegation invoked</name>
-    <verification>Either AAA scenarios exist with coverage validated, or program_type triggered skill-creator/mcp-builder delegation</verification>
+    <verification>Either AAA scenarios exist with coverage validated, or program_type triggered skill-creator/mcp-builder delegation (acceptance testing still required via feature-acceptance-test skill)</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Tool skills invoked and all assertions pass</name>

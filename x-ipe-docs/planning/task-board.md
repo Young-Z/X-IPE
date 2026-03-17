@@ -6,8 +6,10 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-935 | Bug Fix | Fix deliverables panel UIUX feedback (Feedback-20260317-161023): remove duplicate `feature-docs-folder` chip rendering and improve sub-header separator/alignment | Echo 📡 | 🔄 in_progress | 03-17-2026 16:29:56 | | — |
-| TASK-934 | Change Request | CR for FEATURE-049-B: Add description field to KB article sidebar DETAILS section (UIUX Feedback-20260317-160429) | Ember 🔥 | 🔄 in_progress | 03-17-2026 16:17:00 | | x-ipe-task-based-feature-refinement |
+| TASK-940 | Bug Fix | Use real folder names for deliverables folder chips instead of tag names when folder paths end with `/` (e.g. show `FEATURE-050-A/`) | Echo 📡 | 🔄 in_progress | 03-17-2026 09:16:51 | | — |
+| TASK-939 | Bug Fix | Process UIUX feedback Feedback-20260317-170937: sort feedback entries in A-Z, 0-9 ascending order in the feedback panel | Quill ✒️ | 🔄 in_progress | 03-17-2026 17:17:30 | | — |
+| TASK-936 | Process Improvement | Enforce AC testing for program_type=skills: add Structured Review test type to acceptance-test skill, remove skip-AAA exception from code-implementation skill | Nova ☄️ | 🔄 in_progress | 03-17-2026 09:55:00 | | — |
+| TASK-935 | Feature Refinement | Refine specification for FEATURE-050-D: Checkpoint, Resume & Error Handling (Phase 4). program_type=skills. Workflow: Knowledge-Extraction | Nova ☄️ | 🔄 in_progress | 03-17-2026 09:27:00 | | x-ipe-task-based-technical-design |
 | TASK-929 | Bug Fix | Fix workflow action naming inconsistencies: align `code_implementation`→`implementation`, `acceptance_test`→`acceptance_testing`, `idea_mockup`→`design_mockup` across MCP, skills, frontend, tools config | Drift 🌊 | ✅ done | 03-17-2026 07:28:00 | [f620cf0] | — |
 | TASK-933 | Code Implementation | Implement FEATURE-050-C: Extract-Validate Loop. Update SKILL.md Phase 3, create validation-loop-heuristics.md. program_type=skills. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 09:25:00 | [SKILL.md, validation-loop-heuristics.md] | x-ipe-task-based-feature-closing |
 | TASK-932 | Technical Design | Design FEATURE-050-C: Extract-Validate Loop. program_type=skills. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 09:10:00 | [technical-design.md](x-ipe-docs/requirements/EPIC-050/FEATURE-050-C/technical-design.md) | x-ipe-task-based-code-implementation |
@@ -26,7 +28,7 @@
 | TASK-924 | Technical Design | Design FEATURE-050-A: Extractor Skill Foundation & Input Detection. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 06:30:00 | 03-17-2026 07:15:00 | x-ipe-task-based-code-implementation |
 | TASK-925 | Code Implementation | Implement FEATURE-050-A: Extractor Skill Foundation & Input Detection. program_type=skills, delegate to x-ipe-meta-skill-creator. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 07:20:00 | 03-17-2026 07:45:00 | x-ipe-task-based-feature-acceptance-test |
 | TASK-920 | Ideation | Refine idea for knowledge-extraction skill (x-ipe-task-based-application-knowledge-extractor) and auto-detect UIUX references. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 05:05:00 | [idea-summary-v1.md](x-ipe-docs/ideas/wf-008-knowledge-extraction/refined-idea/idea-summary-v1.md) | x-ipe-task-based-requirement-gathering |
-| TASK-919 | Skill Update | Restructure workflow stages: merge VALIDATION into IMPLEMENT (refine→design→code→test→close), create FEEDBACK stage (bugfix, refactor, playground, CR), update engineering-workflow.md + toolbox modal UI | Zephyr 🌬️ | ✅ done | 03-17-2026 03:25:00 | [02a2115] [f8d5c29] | — |
+| TASK-919 | Skill Update | Restructure workflow stages: 5-stage pipeline (IDEATION→REQUIREMENT→IMPLEMENT→VALIDATION→FEEDBACK), update engineering-workflow.md + toolbox modal UI + Python migrations v3.2 + skill config paths | Zephyr 🌬️ | ✅ done | 03-17-2026 03:25:00 | [490741a] | — |
 | TASK-918 | Skill Update | Convert x-ipe-task-based-user-manual to x-ipe-tool-readme-updator (tool skill), update feature-closing with optional_tools.readme_updator toggle | Zephyr 🌬️ | ✅ done | 03-17-2026 03:11:00 | [SKILL.md](.github/skills/x-ipe-tool-readme-updator/SKILL.md) | — |
 | TASK-917 | Skill Update | Update x-ipe-task-based-change-request: make specification update unconditional (both modification and new_feature), add human confirmation gate for large-scope changes before executing Phase 5 | Ember 🔥 | ✅ done | 03-17-2026 02:55:00 | | — |
 | TASK-916 | Code Implementation | Implement FEATURE-049-F CR-002: .kb-index.json registry in kb_service.py — 9 new index methods, refactored CRUD, 26 new tests, updated librarian skill | Zephyr 🌬️ | ✅ done | 03-17-2026 04:00:00 | [64b9f10] | x-ipe-task-based-feature-acceptance-test |
@@ -128,6 +130,10 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------|--------------|--------------|-------|
+| TASK-934 | Change Request | CR for FEATURE-049-B: Add description field to KB article sidebar DETAILS section (UIUX Feedback-20260317-160429) | Ember 🔥 | ✅ done | 03-17-2026 16:56:00 | [CR-003.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/CR-003.md), [specification.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/specification.md), [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/acceptance-test-cases.md), [kb-interface-v2.html](x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v2.html), [kb-browse-modal.js](src/x_ipe/static/js/features/kb-browse-modal.js), [kb-browse-modal-article-detail.test.js](tests/frontend-js/kb-browse-modal-article-detail.test.js) | Processed UIUX feedback into CR-003, added wrapped description field to KB article Details section, versioned mockup/spec docs, updated acceptance cases, and validated with targeted Vitest plus full `npm test`. |
+| TASK-938 | Bug Fix | Remove `feature_closing` deliverables from workflow template and clean existing Knowledge-Extraction workflow data so commit metadata does not appear as deliverables | Echo 📡 | ✅ done | 03-17-2026 17:13:17 | [workflow_manager_service.py](src/x_ipe/services/workflow_manager_service.py), [workflow-template.json](x-ipe-docs/config/workflow-template.json), [workflow-Knowledge-Extraction.json](x-ipe-docs/engineering-workflow/workflow-Knowledge-Extraction.json), [test_workflow_manager.py](tests/test_workflow_manager.py) | Removed `feature_closing` deliverable tags, pruned stale closing metadata on workflow read, cleaned existing Knowledge-Extraction workflow data, and added regression coverage. |
+| TASK-937 | Feature Acceptance Test | Independently validate TASK-934 / CR-003 for FEATURE-049-B: verify CR docs, spec/mockup updates, implementation intent, and tests | Echo 📡 | ✅ done | 03-17-2026 17:15:00 | [CR-003.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/CR-003.md), [kb-browse-modal-article-detail.test.js](tests/frontend-js/kb-browse-modal-article-detail.test.js) | Validated CR-003 docs/JS/CSS/mockup/tests; gap found: FEATURE-049-B acceptance-test-cases.md lacks AC-049-B-11 coverage entries. Targeted Vitest + npm test passed. |
+| TASK-936 | Bug Fix | Fix deliverables panel UIUX feedback (Feedback-20260317-161023): remove duplicate `feature-docs-folder` chip rendering and improve sub-header separator/alignment | Echo 📡 | ✅ done | 03-17-2026 16:37:35 | [workflow-stage.js](src/x_ipe/static/js/features/workflow-stage.js), [workflow.css](src/x_ipe/static/css/workflow.css), [deliverable-grouping.test.js](tests/frontend-js/deliverable-grouping.test.js) | Deduped repeated folder chips, added a right-aligned chip rail with full-width separator, validated via targeted Vitest and `npm test` |
 | TASK-827 | Skill Update | Add engineering workflow reference to x-ipe-dao-end-user-representative: create references/engineering-workflow.md with full DAG, update Step 2.1 to consult workflow position | Cipher 🔐 | ✅ done | 03-11-2026 10:57:00 | - | - |
 | TASK-826 | Skill Update | Optimize x-ipe-dao-end-user-representative: (1) add yy-mm-dd date subfolders for DAO logs, update Phase 3 paths; (2) restore DoR/DoD/Input Init to mandatory XML format per skill creator template | Cipher 🔐 | ✅ done | 03-11-2026 03:21:00 | - | - |
 | TASK-823 | Design Mockup | KB interface mockup — 4 scenes: Browse Articles (grid/list, 2D tags, sort, dual-mode upload w/ folder picker), Article Detail, Reference Picker (copy+insert), 📥 Intake (AI Librarian file management) | Echo 📡 | ✅ done | 03-11-2026 03:50:00 | [kb-interface-v1.html](x-ipe-docs/ideas/wf-007-knowledge-base-implementation/mockups/kb-interface-v1.html) | x-ipe-task-based-requirement-gathering |
@@ -178,10 +184,10 @@
 ## Quick Stats
 
 - **Total Active:** 9
-- **In Progress:** 2
+- **In Progress:** 3
 - **Pending:** 0
+- **Completed (archived):** 871
 - **Deferred:** 0
-- **Completed (archived):** 868
 - **Reverted:** 8
 - **Pending Review:** 0
 - **Blocked:** 0
