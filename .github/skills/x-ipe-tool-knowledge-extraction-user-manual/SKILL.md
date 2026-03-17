@@ -1,0 +1,329 @@
+---
+name: x-ipe-tool-knowledge-extraction-user-manual
+description: Provides playbook, collection template, acceptance criteria, and app-type mixins for user manual knowledge extraction. Loaded by x-ipe-task-based-application-knowledge-extractor during Phase 1. Triggers on category "user-manual".
+categories:
+  - "user-manual"
+---
+
+# Knowledge Extraction — User Manual
+
+## Purpose
+
+AI Agents follow this skill to provide user manual extraction artifacts:
+1. Base playbook template defining user manual section layout
+2. Collection template with per-section extraction prompts
+3. Acceptance criteria for validating extracted content
+4. App-type mixins (web/cli/mobile) for platform-specific overlays
+
+---
+
+## Important Notes
+
+BLOCKING: This is a **tool skill** — it provides templates and validation only. The extraction process is driven by `x-ipe-task-based-application-knowledge-extractor`.
+CRITICAL: All template files MUST exist at the paths declared in `get_artifacts` output. The extractor verifies existence before proceeding.
+
+---
+
+## About
+
+This skill is a template provider for the Application Knowledge Extractor. When the extractor receives a `purpose: "user-manual"` request, it discovers this skill by globbing `.github/skills/x-ipe-tool-knowledge-extraction-*/SKILL.md` and matching `categories: ["user-manual"]` in the frontmatter.
+
+**Key Concepts:**
+- **Playbook Template** — Defines the standard user manual section layout (7 sections)
+- **Collection Template** — Per-section extraction prompts guiding what to look for in source
+- **Acceptance Criteria** — Validation rules per section (checklist format)
+- **App-Type Mixin** — Platform-specific overlay adding sections/prompts for web, CLI, or mobile apps
+
+---
+
+## When to Use
+
+```yaml
+triggers:
+  - "user-manual extraction"
+  - "category: user-manual"
+  - "extract user manual knowledge"
+
+not_for:
+  - "API reference extraction" → use x-ipe-tool-knowledge-extraction-api-reference (future)
+  - "Direct user manual authoring" → use x-ipe-task-based-user-manual
+```
+
+---
+
+## Input Parameters
+
+```yaml
+input:
+  operation: "get_artifacts | get_collection_template | validate_section | get_mixin | pack_section"
+  category: "user-manual"
+  section_id: "string | null"       # Required for validate_section, pack_section
+  content_path: "string | null"     # Path to extracted content file
+  app_type: "web | cli | mobile | null"  # Required for get_mixin
+  config:
+    web_search_enabled: false
+    max_files_per_section: 20
+    max_iterations: 3
+```
+
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="operation" source="Caller specifies which operation to perform" />
+  <field name="category" source="Always 'user-manual' for this skill" />
+
+  <field name="section_id" source="Caller provides section identifier">
+    <steps>
+      1. Required for validate_section and pack_section operations
+      2. Must match an H2 slug from playbook template (e.g., "1-overview", "2-installation-setup")
+    </steps>
+  </field>
+
+  <field name="content_path" source="Caller provides path to extracted content in .checkpoint/">
+    <steps>
+      1. Path must exist and be readable
+      2. Content must be UTF-8 markdown
+    </steps>
+  </field>
+
+  <field name="app_type" source="Caller specifies target platform for get_mixin">
+    <steps>
+      1. Must be one of: web, cli, mobile
+      2. IF null and operation is get_mixin → return error INVALID_APP_TYPE
+    </steps>
+  </field>
+
+  <field name="config" source="Caller provides or uses defaults">
+    <steps>
+      1. web_search_enabled defaults to false
+      2. max_files_per_section defaults to 20
+      3. max_iterations defaults to 3
+    </steps>
+  </field>
+</input_init>
+```
+
+---
+
+## Definition of Ready
+
+```xml
+<definition_of_ready>
+  <checkpoint required="true">
+    <name>Template files exist</name>
+    <verification>All files in templates/ directory are present and readable</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Valid operation requested</name>
+    <verification>operation parameter matches one of the 5 defined operations</verification>
+  </checkpoint>
+  <checkpoint required="false">
+    <name>Content file exists (for validate/pack)</name>
+    <verification>IF operation is validate_section or pack_section THEN content_path file exists</verification>
+  </checkpoint>
+</definition_of_ready>
+```
+
+---
+
+## Operations
+
+### Operation: get_artifacts
+
+**When:** Extractor Step 1.3 loads this skill and needs paths to all templates.
+
+```xml
+<operation name="get_artifacts">
+  <action>
+    1. Return paths to all template files relative to skill root:
+       - playbook_template: templates/playbook-template.md
+       - collection_template: templates/collection-template.md
+       - acceptance_criteria: templates/acceptance-criteria.md
+    2. Return mixin paths:
+       - app_type_mixins.web: templates/mixin-web.md
+       - app_type_mixins.cli: templates/mixin-cli.md
+       - app_type_mixins.mobile: templates/mixin-mobile.md
+    3. Return config defaults:
+       - web_search_enabled: false
+       - max_files_per_section: 20
+  </action>
+  <output>
+    artifact_paths object with playbook_template, collection_template,
+    acceptance_criteria, and app_type_mixins map
+  </output>
+</operation>
+```
+
+### Operation: get_collection_template
+
+**When:** Extractor Step 2.1 reads section-specific extraction prompts.
+
+```xml
+<operation name="get_collection_template">
+  <action>
+    1. Read templates/collection-template.md
+    2. IF section_id provided → extract only that section's content
+    3. ELSE → return full template with all 7 sections
+    4. Each section contains HTML comments with EXTRACTION PROMPTS
+  </action>
+  <constraints>
+    - BLOCKING: Do NOT modify prompt content; return as-is from template
+  </constraints>
+  <output>Markdown content with extraction prompts in HTML comments</output>
+</operation>
+```
+
+### Operation: validate_section
+
+**When:** Extractor Step 3.1 validates extracted content against acceptance criteria.
+
+```xml
+<operation name="validate_section">
+  <action>
+    1. Read templates/acceptance-criteria.md
+    2. Extract criteria for the given section_id
+    3. Read content at content_path
+    4. Evaluate each criterion against the content:
+       a. For each checkbox item, check if content satisfies the rule
+       b. Mark as PASS or FAIL with brief feedback
+    5. Return validation result with per-criterion status
+  </action>
+  <constraints>
+    - BLOCKING: section_id and content_path are required
+    - CRITICAL: ALL criteria must be evaluated — do not skip any
+  </constraints>
+  <output>
+    validation_result: { section_id, passed: bool, criteria: [{id, status, feedback}] }
+  </output>
+</operation>
+```
+
+### Operation: get_mixin
+
+**When:** Extractor needs platform-specific extraction prompts.
+
+```xml
+<operation name="get_mixin">
+  <action>
+    1. Resolve mixin file from app_type:
+       - web → templates/mixin-web.md
+       - cli → templates/mixin-cli.md
+       - mobile → templates/mixin-mobile.md
+    2. Read and return the mixin template content
+    3. Mixin contains additional sections and extraction prompts to merge with base template
+  </action>
+  <constraints>
+    - BLOCKING: app_type is required and must be web, cli, or mobile
+  </constraints>
+  <output>Mixin markdown content with additional sections and prompts</output>
+</operation>
+```
+
+### Operation: pack_section
+
+**When:** Extractor packs validated content into final user manual format.
+
+```xml
+<operation name="pack_section">
+  <action>
+    1. Read the playbook template to get section heading and structure
+    2. Read validated content at content_path
+    3. Format content under proper H2 heading with consistent style:
+       a. Apply section numbering from playbook
+       b. Ensure subsection headings use H3
+       c. Wrap code examples in fenced code blocks
+       d. Normalize list formatting
+    4. Return formatted section ready for assembly
+  </action>
+  <constraints>
+    - BLOCKING: section_id and content_path are required
+    - CRITICAL: Do not alter factual content — only apply formatting
+  </constraints>
+  <output>Formatted markdown section ready for final assembly</output>
+</operation>
+```
+
+---
+
+## Output Result
+
+```yaml
+operation_output:
+  success: true | false
+  operation: "get_artifacts | get_collection_template | validate_section | get_mixin | pack_section"
+  result:
+    # get_artifacts
+    artifact_paths:
+      playbook_template: "templates/playbook-template.md"
+      collection_template: "templates/collection-template.md"
+      acceptance_criteria: "templates/acceptance-criteria.md"
+      app_type_mixins:
+        web: "templates/mixin-web.md"
+        cli: "templates/mixin-cli.md"
+        mobile: "templates/mixin-mobile.md"
+    config_defaults:
+      web_search_enabled: false
+      max_files_per_section: 20
+    # validate_section
+    validation_result:
+      section_id: "{id}"
+      passed: true | false
+      criteria: [{ id: "string", status: "pass | fail", feedback: "string" }]
+    # pack_section
+    formatted_content: "string"
+  errors: []
+```
+
+---
+
+## Definition of Done
+
+```xml
+<definition_of_done>
+  <checkpoint required="true">
+    <name>Operation completed</name>
+    <verification>operation_output.success is true</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Result matches operation</name>
+    <verification>Returned result fields match the requested operation type</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Template files intact</name>
+    <verification>No template files were modified during operation</verification>
+  </checkpoint>
+</definition_of_done>
+```
+
+---
+
+## Error Handling
+
+| Error | Cause | Resolution |
+|-------|-------|------------|
+| `INVALID_OPERATION` | operation not one of the 5 defined | Check operation name matches exactly |
+| `MISSING_SECTION_ID` | section_id null for validate/pack | Provide section_id matching playbook template |
+| `MISSING_CONTENT_PATH` | content_path null for validate/pack | Provide path to extracted content file |
+| `CONTENT_NOT_FOUND` | content_path file does not exist | Verify file was written by extractor |
+| `INVALID_APP_TYPE` | app_type not web/cli/mobile | Use one of: web, cli, mobile |
+| `TEMPLATE_NOT_FOUND` | Template file missing from skill | Re-install skill or verify file paths |
+
+---
+
+## Templates
+
+| File | Purpose |
+|------|---------|
+| `templates/playbook-template.md` | Base user manual section layout (7 sections) |
+| `templates/collection-template.md` | Per-section extraction prompts |
+| `templates/acceptance-criteria.md` | Per-section validation rules |
+| `templates/mixin-web.md` | Web app-specific sections and prompts |
+| `templates/mixin-cli.md` | CLI app-specific sections and prompts |
+| `templates/mixin-mobile.md` | Mobile app-specific sections and prompts |
+
+---
+
+## Examples
+
+See [references/examples.md](references/examples.md) for usage examples.

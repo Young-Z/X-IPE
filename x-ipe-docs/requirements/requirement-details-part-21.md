@@ -207,3 +207,81 @@ Create a two-tier AI skill system for structured knowledge extraction from appli
 - KB intake format must align with EPIC-049 FEATURE-049-F (AI Librarian) expectations
 - Quality threshold should be configurable (default TBD in open questions)
 - Output metadata should include extraction source, timestamp, category, quality score
+
+---
+
+## EPIC-051: User Manual Knowledge Extraction Tool Skill
+
+> Version: 1.0
+> Source: EPIC-050 external dependency — the extractor skill requires this tool skill for "user-manual" category extraction
+> Depends On: EPIC-050 (Application Knowledge Extractor — consumes this skill's artifacts)
+> Scope: Single feature — one tool skill, one deliverable
+
+### Project Overview
+
+Build a **tool skill** (`x-ipe-tool-knowledge-extraction-user-manual`) that provides domain expertise for extracting user manual knowledge from applications. This skill is NOT an extractor — it is the "instructor" that tells the extractor WHAT to look for, HOW to validate it, and HOW to structure the output.
+
+The tool skill provides four categories of artifacts:
+1. **Playbook template** — defines the section layout of a user manual (7 sections)
+2. **Collection template** — extraction prompts per section (tells the extractor what to search for in source)
+3. **Acceptance criteria** — per-section validation rules (pass/fail criteria for extracted content)
+4. **App-type mixins** — web/cli/mobile-specific section overlays that augment the base template
+
+### User Request
+
+Create the tool skill referenced as an external dependency by EPIC-050. The Application Knowledge Extractor (SKILL.md) globs `.github/skills/x-ipe-tool-knowledge-extraction-*/SKILL.md`, matches by category, and loads artifact paths. This skill provides the "user-manual" category expertise.
+
+### Clarifications
+
+| Question | Answer (DAO-resolved) |
+|----------|----------------------|
+| What sections should a user manual cover? | 7 sections: Overview, Installation & Setup, Getting Started, Core Features, Configuration, Troubleshooting, FAQ & Reference |
+| How does the extractor discover this skill? | Glob `.github/skills/x-ipe-tool-knowledge-extraction-*/SKILL.md`, filter by `categories: ["user-manual"]` in frontmatter |
+| What operations does the extractor call? | get_artifacts (Phase 1), get_collection_template (Phase 2), validate_section (Phase 3), get_mixin (Phase 1), pack_section (Phase 5) |
+| What app-type mixins are needed? | web (UI/auth/navigation), cli (commands/flags/subcommands), mobile (gestures/permissions/stores) |
+| Does this skill execute extraction itself? | No — it is source-agnostic. It provides templates and validates content. The extractor does the hands-on work. |
+| How are acceptance criteria structured? | Per-section checklist. Each section has 3-5 required criteria (e.g., "Installation must have copy-pasteable commands") |
+| Config overrides? | web_search_enabled (default false), max_files_per_section (default 20), max_iterations (default 3) |
+
+### High-Level Requirements
+
+1. **Artifact Discovery Interface:** SKILL.md frontmatter declares `categories: ["user-manual"]` and artifact paths (playbook_template, collection_template, acceptance_criteria, app_type_mixins). The extractor reads these paths programmatically.
+
+2. **Playbook Template (7-Section Base Layout):** Define the canonical structure of a user manual: Overview, Installation & Setup, Getting Started, Core Features, Configuration, Troubleshooting, FAQ & Reference. Each section has a heading and description of what content belongs there.
+
+3. **Collection Template (Extraction Prompts):** For each of the 7 sections, provide specific extraction prompts as HTML comments telling the extractor what to search for in the source (e.g., "look for README install section, Makefile, scripts/setup.*" for Installation).
+
+4. **Acceptance Criteria (Per-Section Validation):** For each section, define 3-5 pass/fail criteria that the extractor's validation loop checks against (e.g., "Installation must list system prerequisites with version requirements"). These drive the Phase 3 extract-validate loop.
+
+5. **App-Type Mixins (Web/CLI/Mobile):** Three overlay templates that add app-type-specific extraction prompts and acceptance criteria to the base template: web (UI flows, auth, screenshots), CLI (commands, flags, shell completion), mobile (gestures, permissions, app stores).
+
+6. **Operations API:** Expose 5 operations callable by the extractor: get_artifacts, get_collection_template, validate_section, get_mixin, pack_section. Each operation is documented in SKILL.md with inputs, actions, and outputs.
+
+7. **Content Packing Guidance:** For the pack_section operation, provide formatting rules for how validated content should be structured in the final user manual output (heading hierarchy, code block formatting, cross-references).
+
+### Constraints
+
+- **Source-agnostic:** This skill NEVER accesses source files, URLs, or running apps directly. It only provides templates and validates content.
+- **File-based handoff:** All communication with the extractor uses `.checkpoint/` file paths, not inline text.
+- **500-line SKILL.md limit:** Keep SKILL.md concise; move detailed templates, prompts, and criteria to `templates/` and `references/` folders.
+- **Single feature:** This is a small, focused tool skill. One feature covers all requirements — no multi-feature breakdown needed.
+- **v1 scope:** User manual category only. No API-reference, architecture, or runbook templates.
+- **Skill conventions:** Must follow X-IPE skill conventions (SKILL.md, references/, templates/ folders, tool skill template format).
+
+### Open Questions
+
+- None — scope is well-defined by EPIC-050 interface contract.
+
+### Linked Mockups
+
+| Mockup Function Name | Mockup Link |
+|---------------------|-------------|
+| N/A — no UI component | N/A |
+
+---
+
+## Feature List
+
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+|------------|---------|---------------|---------|-------------------|-------------------|
+| FEATURE-051-A | EPIC-051 | User Manual Tool Skill | v1.0 | Complete tool skill with playbook, collection template, acceptance criteria, app-type mixins, and 5 operations | None |

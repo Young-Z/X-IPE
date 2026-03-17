@@ -1,0 +1,75 @@
+# User Manual — Acceptance Criteria
+
+> Per-section validation rules for the Application Knowledge Extractor.
+> Each H2 matches a playbook section. Checklist items are evaluated by the `validate_section` operation.
+> A section passes validation only when ALL required items (marked `[REQ]`) are satisfied.
+
+---
+
+## Section Validation Rules
+
+### 1. Overview
+
+- [ ] `[REQ]` Contains description of what the application does (at least 2 sentences)
+- [ ] `[REQ]` Identifies target audience or use case
+- [ ] `[REQ]` Lists at least 3 key features or capabilities
+- [ ] `[OPT]` Includes high-level architecture or workflow summary
+- [ ] `[OPT]` Mentions the technology stack or platform
+
+### 2. Installation & Setup
+
+- [ ] `[REQ]` Lists system prerequisites with version requirements
+- [ ] `[REQ]` Provides copy-pasteable install commands
+- [ ] `[REQ]` Includes verification step to confirm successful install
+- [ ] `[OPT]` Covers Docker or containerized setup alternative
+- [ ] `[OPT]` Documents initial configuration (API keys, database init)
+
+### 3. Getting Started
+
+- [ ] `[REQ]` Provides a quick start path completable in under 5 minutes
+- [ ] `[REQ]` Walks through the basic happy-path workflow with concrete steps
+- [ ] `[REQ]` Includes at least one example command or action with expected output
+- [ ] `[OPT]` References sample data or seed scripts if available
+- [ ] `[OPT]` Links to more detailed tutorials or guides
+
+### 4. Core Features
+
+- [ ] `[REQ]` Documents at least 3 distinct features
+- [ ] `[REQ]` Each feature has a description of what it does
+- [ ] `[REQ]` Each feature has usage instructions (steps or commands)
+- [ ] `[OPT]` Features include example usage or screenshots
+- [ ] `[OPT]` Features include tips or best practices
+
+### 5. Configuration
+
+- [ ] `[REQ]` Identifies configuration file location and format
+- [ ] `[REQ]` Lists environment variables with descriptions and defaults
+- [ ] `[REQ]` Documents at least 3 configurable settings
+- [ ] `[OPT]` Explains profile or environment management (dev/staging/prod)
+- [ ] `[OPT]` Includes runtime flags or command-line options
+
+### 6. Troubleshooting
+
+- [ ] `[REQ]` Lists at least 3 common issues with symptoms and solutions
+- [ ] `[REQ]` Explains how to enable debug or verbose mode
+- [ ] `[REQ]` Provides at least one diagnostic step (checking logs, health endpoint)
+- [ ] `[OPT]` Catalogs error messages with explanations
+- [ ] `[OPT]` Includes links to support channels or issue tracker
+
+### 7. FAQ & Reference
+
+- [ ] `[REQ]` Contains at least 5 frequently asked questions with answers
+- [ ] `[REQ]` Includes glossary of domain-specific terms (at least 3 terms)
+- [ ] `[OPT]` Documents keyboard shortcuts if applicable
+- [ ] `[OPT]` Summarizes version history or links to changelog
+- [ ] `[OPT]` Provides quick-reference tables or cheat sheets
+
+---
+
+## Validation Scoring
+
+| Rating | Criteria |
+|--------|----------|
+| **PASS** | ALL `[REQ]` items satisfied for the section |
+| **PARTIAL** | At least 50% of `[REQ]` items satisfied — needs iteration |
+| **FAIL** | Fewer than 50% of `[REQ]` items satisfied — re-extract |

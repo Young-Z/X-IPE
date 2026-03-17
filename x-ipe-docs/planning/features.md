@@ -150,3 +150,4 @@ This board tracks all features across the project lifecycle.
 | FEATURE-050-C | EPIC-050 | Extract-Validate Loop & Coverage Control | v1.0 | Implemented | [specification.md](x-ipe-docs/requirements/EPIC-050/FEATURE-050-C/specification.md) | 03-17-2026 | 03-17-2026 09:26:00 |
 | FEATURE-050-D | EPIC-050 | Checkpoint, Resume & Error Handling | v1.0 | Implemented | [specification.md](x-ipe-docs/requirements/EPIC-050/FEATURE-050-D/specification.md) | 03-17-2026 | 03-17-2026 10:00:00 |
 | FEATURE-050-E | EPIC-050 | KB Intake Output & Quality Scoring | v1.0 | Implemented | FEATURE-050-C | 03-17-2026 | 03-17-2026 |
+| FEATURE-051-A | EPIC-051 | User Manual Tool Skill | v1.0 | Implemented | [specification.md](x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/specification.md) | 03-17-2026 | 03-17-2026 |
