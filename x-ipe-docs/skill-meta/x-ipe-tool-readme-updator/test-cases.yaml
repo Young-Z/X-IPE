@@ -1,0 +1,155 @@
+# ═══════════════════════════════════════════════════════════
+# TEST CASES — x-ipe-tool-readme-updator
+# Generated: Round 2 of x-ipe-meta-skill-creator
+# ═══════════════════════════════════════════════════════════
+
+skill: x-ipe-tool-readme-updator
+candidate_path: x-ipe-docs/skill-meta/x-ipe-tool-readme-updator/candidate/SKILL.md
+examples_path: x-ipe-docs/skill-meta/x-ipe-tool-readme-updator/candidate/references/examples.md
+
+test_cases:
+  # ── STRUCTURE (must-pass) ──────────────────────────────────
+  - id: AC-S01
+    name: "Frontmatter is valid"
+    category: structure
+    priority: must
+    type: structural
+    steps:
+      - "Parse YAML frontmatter between --- delimiters"
+      - "Check 'name' field starts with 'x-ipe-tool-'"
+      - "Check 'description' field is non-empty and contains trigger keywords"
+    expected: "name = 'x-ipe-tool-readme-updator', description contains 'update README'"
+    pass_criteria: "name starts with 'x-ipe-tool-' AND description is non-empty"
+
+  - id: AC-S02
+    name: "references/examples.md exists with content"
+    category: structure
+    priority: must
+    type: structural
+    steps:
+      - "Check file exists at candidate/references/examples.md"
+      - "Verify file contains at least 1 example (## Example heading)"
+    expected: "File exists and contains at least 1 example"
+    pass_criteria: "File exists AND line count > 10 AND contains '## Example'"
+
+  - id: AC-S03
+    name: "SKILL.md body under 500 lines"
+    category: structure
+    priority: must
+    type: structural
+    steps:
+      - "Count total lines in SKILL.md"
+    expected: "< 500 lines"
+    pass_criteria: "Line count < 500"
+
+  # ── CONTENT (must-pass) ────────────────────────────────────
+  - id: AC-C01
+    name: "All required sections present in correct order"
+    category: content
+    priority: must
+    type: structural
+    steps:
+      - "Extract all ## and ### headings"
+      - "Verify required sections appear in order: Purpose, Important Notes, About, When to Use, Input Parameters, Input Initialization, Definition of Ready, Operations, Output Result, Definition of Done, Error Handling, Examples"
+    expected: "All sections present in correct order"
+    pass_criteria: "All 12 sections found in sequence"
+
+  - id: AC-C02
+    name: "Operations use XML structure"
+    category: content
+    priority: must
+    type: structural
+    steps:
+      - "Search for <operation name=...> tag in SKILL.md"
+      - "Verify closing </operation> tag exists"
+    expected: "At least one <operation> XML block found"
+    pass_criteria: "Regex '<operation name=' matches at least once"
+
+  - id: AC-C03
+    name: "Error Handling table present with correct columns"
+    category: content
+    priority: must
+    type: structural
+    steps:
+      - "Find '## Error Handling' section"
+      - "Verify markdown table exists with columns: Error, Cause, Resolution"
+    expected: "Table with 3 columns and at least 1 data row"
+    pass_criteria: "Table header contains 'Error', 'Cause', 'Resolution'"
+
+  # ── CONTENT (should-pass) ──────────────────────────────────
+  - id: AC-C04
+    name: "When to Use includes triggers and not_for"
+    category: content
+    priority: should
+    type: structural
+    steps:
+      - "Find '## When to Use' section"
+      - "Verify triggers: list is non-empty"
+      - "Verify not_for: list is non-empty"
+    expected: "Both triggers and not_for present"
+    pass_criteria: "triggers: and not_for: both found"
+
+  - id: AC-C05
+    name: "Key Concepts in About section"
+    category: content
+    priority: should
+    type: structural
+    steps:
+      - "Find '## About' section"
+      - "Verify '**Key Concepts:**' text present"
+    expected: "'**Key Concepts:**' found in About section"
+    pass_criteria: "String '**Key Concepts:**' found"
+
+  - id: AC-C06
+    name: "Input Initialization subsection with input_init XML"
+    category: content
+    priority: should
+    type: structural
+    steps:
+      - "Find '### Input Initialization' subsection"
+      - "Verify <input_init> XML block present"
+    expected: "### Input Initialization with <input_init> block"
+    pass_criteria: "'### Input Initialization' and '<input_init>' both found"
+
+  # ── BEHAVIOR (manual — require runtime) ────────────────────
+  - id: AC-B01
+    name: "Tool identifies run commands from config"
+    category: behavior
+    priority: must
+    type: manual
+    steps:
+      - "Execute update_readme on a project with pyproject.toml or package.json"
+      - "Verify operation_output.result.run_command is non-empty"
+    expected: "run_command string returned"
+    pass_criteria: "run_command is non-empty string"
+
+  - id: AC-B02
+    name: "Tool verifies commands execute successfully"
+    category: behavior
+    priority: must
+    type: manual
+    steps:
+      - "Execute update_readme with a valid project"
+      - "Verify that the tool attempted to run the discovered command"
+      - "Verify operation_output.success = true"
+    expected: "Commands verified and success=true"
+    pass_criteria: "operation_output.success is true"
+
+  - id: AC-B03
+    name: "Tool updates README with required subsections"
+    category: behavior
+    priority: must
+    type: manual
+    steps:
+      - "Execute update_readme on a project"
+      - "Read the updated README.md"
+      - "Verify subsections: Prerequisites, Installation, Running, Testing"
+    expected: "All 4 subsections present in README"
+    pass_criteria: "README contains all 4 subsection headings"
+
+summary:
+  total: 12
+  structural: 9
+  manual: 3
+  must_pass: 9
+  should_pass: 3

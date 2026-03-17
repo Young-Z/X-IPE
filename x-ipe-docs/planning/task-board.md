@@ -6,8 +6,9 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-918 | Skill Update | Convert x-ipe-task-based-user-manual to x-ipe-tool-readme-updator (tool skill), update feature-closing with optional_tools.readme_updator toggle | Zephyr 🌬️ | ✅ done | 03-17-2026 03:11:00 | [SKILL.md](.github/skills/x-ipe-tool-readme-updator/SKILL.md) | — |
 | TASK-917 | Skill Update | Update x-ipe-task-based-change-request: make specification update unconditional (both modification and new_feature), add human confirmation gate for large-scope changes before executing Phase 5 | Ember 🔥 | ✅ done | 03-17-2026 02:55:00 | | — |
-| TASK-916 | Code Implementation | Implement FEATURE-049-F CR-002: .kb-index.json registry in kb_service.py — new index methods, refactor frontmatter→index, migration, update routes, update librarian skill, update tests | Zephyr 🌬️ | 🔄 in_progress | 03-17-2026 03:10:00 | | x-ipe-task-based-feature-acceptance-test |
+| TASK-916 | Code Implementation | Implement FEATURE-049-F CR-002: .kb-index.json registry in kb_service.py — 9 new index methods, refactored CRUD, 26 new tests, updated librarian skill | Zephyr 🌬️ | ✅ done | 03-17-2026 04:00:00 | [64b9f10] | x-ipe-task-based-feature-acceptance-test |
 | TASK-915 | Technical Design | Design FEATURE-049-F CR-002: .kb-index.json registry architecture — read/write methods, migration from frontmatter, folder metadata, description field, API compatibility | Zephyr 🌬️ | ✅ done | 03-17-2026 03:00:00 | [technical-design.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/technical-design.md) | x-ipe-task-based-code-implementation |
 | TASK-914 | Feature Refinement | Refine FEATURE-049-F v1.2 (CR-002): Update ACs for .kb-index.json registry, add folder metadata + description ACs, update frontmatter→index terminology | Zephyr 🌬️ | ✅ done | 03-17-2026 02:50:00 | [specification.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md) | x-ipe-task-based-technical-design |
 | TASK-913 | Change Request | CR-002 for FEATURE-049-F: Replace frontmatter-embedded metadata with `.kb-index.json` registry — hidden file, locally-scoped, folder metadata support, description attribute | Zephyr 🌬️ | ✅ done | 03-17-2026 02:43:00 | [CR-002.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/CR-002.md) | x-ipe-task-based-feature-refinement |
@@ -155,8 +156,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 6
-- **In Progress:** 1
+- **Total Active:** 7
+- **In Progress:** 0
 - **Pending:** 0
 - **Deferred:** 0
 - **Completed (archived):** 868

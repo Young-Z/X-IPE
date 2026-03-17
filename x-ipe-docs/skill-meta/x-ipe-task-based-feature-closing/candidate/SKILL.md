@@ -1,6 +1,6 @@
 ---
 name: x-ipe-task-based-feature-closing
-description: Close completed feature and create pull request. Use when human has validated the playground and feature is ready to ship. Provides procedures for final verification, PR creation, and documentation. Triggers on requests like "close feature", "create PR", "ship feature".
+description: Close completed feature and create pull request. Use when feature is implemented, tested, and ready to ship. Provides procedures for final verification, PR creation, and documentation. Triggers on requests like "close feature", "create PR", "ship feature".
 ---
 
 # Task-Based Skill: Feature Closing
@@ -35,7 +35,7 @@ IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "Feature Closing"
+  task_based_skill: "x-ipe-task-based-feature-closing"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
@@ -47,7 +47,11 @@ input:
 
   # Task type attributes
   category: "feature-stage"
-  next_task_based_skill: "User Manual"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-user-manual"
+      condition: "Document the completed feature"
+    - skill: "x-ipe-task-based-feature-refinement"
+      condition: "Start next feature from backlog"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   feature_phase: "Feature Closing"
@@ -65,6 +69,10 @@ input:
   # Context (from previous task or project)
   specification_path: "x-ipe-docs/features/{FEATURE-XXX}/specification.md"
   test_results: "all passing"
+
+  # Optional tools (end-user toggles)
+  optional_tools:
+    readme_updator: false  # when true, invoke x-ipe-tool-readme-updator in Phase 3
 ```
 
 ### Input Initialization
@@ -119,6 +127,12 @@ input:
       1. Check x-ipe-docs/features/{feature_id}/specification.md
       2. IF exists → use path
       3. ELSE → check x-ipe-docs/requirements/{feature_id}/specification.md (legacy)
+    </steps>
+  </field>
+  <field name="optional_tools.readme_updator" source="end-user toggle, default false">
+    <steps>
+      1. IF caller provides optional_tools.readme_updator → use value
+      2. ELSE → default to false (skip README update)
     </steps>
   </field>
 </input_init>
@@ -228,10 +242,15 @@ BLOCKING: Phase 1 to Phase 2 is BLOCKED if any acceptance criterion is not met. 
     <step_3_1>
       <name>Update Project Files</name>
       <action>
-        1. Update README if feature is user-facing
-        2. Update API docs if endpoints were added/changed
-        3. Ensure complex logic has code comments
-        4. Verify all feature doc artifacts are present in x-ipe-docs/features/{FEATURE-XXX}/
+        1. IF optional_tools.readme_updator == true:
+           → Invoke x-ipe-tool-readme-updator with:
+             operation: "update_readme"
+             config.feature_context: { feature_id, feature_title }
+           → Tool identifies, verifies, and documents run/test commands in README
+        2. ELSE: Update README manually if feature is user-facing
+        3. Update API docs if endpoints were added/changed
+        4. Ensure complex logic has code comments
+        5. Verify all feature doc artifacts are present in x-ipe-docs/features/{FEATURE-XXX}/
       </action>
       <constraints>
         - CRITICAL: All user-facing changes must be documented in README
@@ -380,7 +399,11 @@ BLOCKING: Phase 1 to Phase 2 is BLOCKED if any acceptance criterion is not met. 
 task_completion_output:
   category: "feature-stage"
   status: completed | blocked
-  next_task_based_skill: "User Manual"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-user-manual"
+      condition: "Document the completed feature"
+    - skill: "x-ipe-task-based-feature-refinement"
+      condition: "Start next feature from backlog"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"

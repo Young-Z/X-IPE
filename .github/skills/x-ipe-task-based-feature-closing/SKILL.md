@@ -69,6 +69,10 @@ input:
   # Context (from previous task or project)
   specification_path: "x-ipe-docs/features/{FEATURE-XXX}/specification.md"
   test_results: "all passing"
+
+  # Optional tools (end-user toggles)
+  optional_tools:
+    readme_updator: false  # when true, invoke x-ipe-tool-readme-updator in Phase 3
 ```
 
 ### Input Initialization
@@ -123,6 +127,12 @@ input:
       1. Check x-ipe-docs/features/{feature_id}/specification.md
       2. IF exists → use path
       3. ELSE → check x-ipe-docs/requirements/{feature_id}/specification.md (legacy)
+    </steps>
+  </field>
+  <field name="optional_tools.readme_updator" source="end-user toggle, default false">
+    <steps>
+      1. IF caller provides optional_tools.readme_updator → use value
+      2. ELSE → default to false (skip README update)
     </steps>
   </field>
 </input_init>
@@ -232,10 +242,15 @@ BLOCKING: Phase 1 to Phase 2 is BLOCKED if any acceptance criterion is not met. 
     <step_3_1>
       <name>Update Project Files</name>
       <action>
-        1. Update README if feature is user-facing
-        2. Update API docs if endpoints were added/changed
-        3. Ensure complex logic has code comments
-        4. Verify all feature doc artifacts are present in x-ipe-docs/features/{FEATURE-XXX}/
+        1. IF optional_tools.readme_updator == true:
+           → Invoke x-ipe-tool-readme-updator with:
+             operation: "update_readme"
+             config.feature_context: { feature_id, feature_title }
+           → Tool identifies, verifies, and documents run/test commands in README
+        2. ELSE: Update README manually if feature is user-facing
+        3. Update API docs if endpoints were added/changed
+        4. Ensure complex logic has code comments
+        5. Verify all feature doc artifacts are present in x-ipe-docs/features/{FEATURE-XXX}/
       </action>
       <constraints>
         - CRITICAL: All user-facing changes must be documented in README
