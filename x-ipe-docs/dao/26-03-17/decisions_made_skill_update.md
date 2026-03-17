@@ -102,3 +102,39 @@
 
 ### Follow-up
 > None
+
+| DAO-103 | 2026-03-17T03:16:00Z | TASK-NEW | N/A (direct human message) | instruction | 0.92 | Restructure workflow: IMPLEMENT absorbs acceptance_test+feature_closing; VALIDATION removed; new FEEDBACK stage with bug_fix, code_refactor, human_playground, change_request |
+
+## DAO-103
+- **Timestamp:** 2026-03-17T03:16:00Z
+- **Task ID:** TASK-NEW
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A (direct human message)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.92
+
+### Message
+> feature closing config should belong to feature stage. let's introduce a stage at the end called feedback stage. put bug fix, refactoring into there
+
+### Guidance Returned
+> Restructure the 5-stage pipeline into 4 stages:
+> Stage 1: IDEATION (unchanged)
+> Stage 2: REQUIREMENT (unchanged)
+> Stage 3: IMPLEMENT → refinement → design → code → acceptance_test → feature_closing
+> Stage 4: FEEDBACK → bug_fix, code_refactor, human_playground, change_request
+> VALIDATION stage removed; its actions absorbed into IMPLEMENT and FEEDBACK.
+> Update engineering-workflow.md, affected skill Output Result YAMLs, and Standalone Skills table.
+
+### Rationale
+> Feature_closing is the natural terminus of the per-feature flow. Bug fix and refactoring are post-ship improvement activities. Merging acceptance_testing into IMPLEMENT and creating a dedicated FEEDBACK stage better reflects the actual development lifecycle. Human confirmed the exact intended structure.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-meta-skill-creator"
+>     match_strength: "partial"
+>     reason: "Updating engineering-workflow.md reference and propagating stage changes to affected skills"
+
+### Follow-up
+> None
