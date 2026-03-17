@@ -43,7 +43,7 @@ triggers:
   - "update README with run instructions"
 
 not_for:
-  - "standalone user manual task" → use x-ipe-task-based-user-manual
+  - "knowledge extraction from applications" → use x-ipe-task-based-application-knowledge-extractor
 ```
 
 ---

@@ -40,7 +40,7 @@ Each row specifies which step's `<constraints>` block receives the new entry. If
 | 9 | `x-ipe-task-based-refactoring-analysis` | Step 7: Generate Refactoring Suggestions | Primary analysis output step |
 | 10 | `x-ipe-task-based-improve-code-quality` | Step 5: Sync Tests | Documentation sync step |
 | 11 | `x-ipe-task-based-code-implementation` | Step 5: Implement Code | Primary code output step; add constraint about generated docs/comments |
-| 12 | `x-ipe-task-based-user-manual` | Step 3: Update README | Primary manual output step; add `<constraints>` if absent |
+| 12 | `x-ipe-task-based-user-manual` _(deprecated → x-ipe-tool-readme-updator)_ | Step 3: Update README | Primary manual output step; add `<constraints>` if absent |
 | 13 | `x-ipe-meta-skill-creator` | Step 4: Round 1 (Meta + Draft) | Template for future skills |
 
 ## Verification

@@ -116,7 +116,7 @@ Update all 12+ skills that generate markdown files to follow the new full-path c
 | `x-ipe-task-based-refactoring-analysis` | `analysis-{task_id}.md` | Full paths to analyzed files |
 | `x-ipe-task-based-improve-code-quality` | `{module}-requirements.md` | Full paths to source files |
 | `x-ipe-task-based-code-implementation` | various docs | Full paths to test files, design |
-| `x-ipe-task-based-user-manual` | `README.md` | Full paths to config, docs |
+| `x-ipe-task-based-user-manual` _(deprecated → x-ipe-tool-readme-updator)_ | `README.md` | Full paths to config, docs |
 
 Each skill's execution procedure should include a constraint: "All internal links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`)."
 

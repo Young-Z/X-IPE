@@ -54,7 +54,7 @@ FEATURE-043-C ensures all markdown-generating skills produce internal links usin
   9. `x-ipe-task-based-refactoring-analysis`
   10. `x-ipe-task-based-improve-code-quality`
   11. `x-ipe-task-based-code-implementation`
-  12. `x-ipe-task-based-user-manual`
+  12. `x-ipe-task-based-user-manual` _(deprecated → x-ipe-tool-readme-updator)_
 
 - **FR-043-C.1.3:** The constraint MUST be placed in an existing `<constraints>` block of the primary output-generating step. If no `<constraints>` block exists, add one to the step that produces markdown output.
 

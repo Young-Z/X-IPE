@@ -46,7 +46,7 @@ triggers:
 
 not_for:
   - "API reference extraction" → use x-ipe-tool-knowledge-extraction-api-reference (future)
-  - "Direct user manual authoring" → use x-ipe-task-based-user-manual
+  - "Direct README update" → use x-ipe-tool-readme-updator
 ```
 
 ---

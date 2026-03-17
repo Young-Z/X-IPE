@@ -27,7 +27,7 @@ triggers:
 
 not_for:
   - "x-ipe-tool-knowledge-extraction-api-reference: API reference extraction"
-  - "x-ipe-task-based-user-manual: Direct user manual authoring"
+  - "x-ipe-tool-readme-updator: Direct README update"
 
 # ─────────────────────────────────────────────────────────────
 # INTERFACE

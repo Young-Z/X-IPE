@@ -76,7 +76,7 @@ From user feedback (Feedback-20260303-212659): links in rendered markdown (idea 
     - `x-ipe-task-based-refactoring-analysis`
     - `x-ipe-task-based-improve-code-quality`
     - `x-ipe-task-based-code-implementation`
-    - `x-ipe-task-based-user-manual`
+    - `x-ipe-task-based-user-manual` _(deprecated → x-ipe-tool-readme-updator)_
 17. **HR-043.17:** The `x-ipe-meta-skill-creator` skill template MUST be updated to include the path convention for all future skills
 
 #### Part 4: Existing File Migration

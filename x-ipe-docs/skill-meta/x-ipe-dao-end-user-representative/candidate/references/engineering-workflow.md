@@ -59,7 +59,6 @@ IDEATION → REQUIREMENT → IMPLEMENT → VALIDATION → FEEDBACK
 |-------|---------|
 | x-ipe-task-based-dev-environment | Set up dev environment |
 | x-ipe-task-based-project-init | Initialize project structure |
-| x-ipe-task-based-user-manual | Create/update README |
 | x-ipe-task-based-doc-viewer | Generate doc viewer (TERMINAL) |
 
 ## Feedback Loops

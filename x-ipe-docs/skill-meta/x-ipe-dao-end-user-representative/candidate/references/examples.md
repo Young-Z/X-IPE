@@ -245,9 +245,9 @@ operation_output:
         rationale_summary: "Documentation update — independent of sidebar code."
         depends_on: []
         suggested_skills:
-          - skill_name: "x-ipe-task-based-user-manual"
+          - skill_name: "x-ipe-tool-readme-updator"
             match_strength: "strong"
-            reason: "README update"
+            reason: "README update (tool skill, invoked via feature-closing)"
       - disposition: instruction
         content: "Run full acceptance tests after bug fix and docs are complete."
         rationale_summary: "Tests should verify the final state after all changes."

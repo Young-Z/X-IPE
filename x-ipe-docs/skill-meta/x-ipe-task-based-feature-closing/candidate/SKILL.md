@@ -48,8 +48,6 @@ input:
   # Task type attributes
   category: "feature-stage"
   next_task_based_skill:
-    - skill: "x-ipe-task-based-user-manual"
-      condition: "Document the completed feature"
     - skill: "x-ipe-task-based-feature-refinement"
       condition: "Start next feature from backlog"
   process_preference:
@@ -400,8 +398,6 @@ task_completion_output:
   category: "feature-stage"
   status: completed | blocked
   next_task_based_skill:
-    - skill: "x-ipe-task-based-user-manual"
-      condition: "Document the completed feature"
     - skill: "x-ipe-task-based-feature-refinement"
       condition: "Start next feature from backlog"
   process_preference:

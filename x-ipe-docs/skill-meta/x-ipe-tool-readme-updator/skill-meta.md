@@ -26,7 +26,7 @@ triggers:
   - "update README with run instructions"
 
 not_for:
-  - "x-ipe-task-based-user-manual: standalone lifecycle task with task board management"
+  - "x-ipe-task-based-application-knowledge-extractor: knowledge extraction from applications"
 
 # ─────────────────────────────────────────────────────────────
 # INTERFACE
