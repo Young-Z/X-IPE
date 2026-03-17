@@ -188,9 +188,10 @@ input:
   <step_1_4>
     <name>Initialize Handoff</name>
     <action>
-      1. Create .x-ipe-checkpoint/session-{timestamp}/ in CWD with content/ and feedback/ subdirs
-      2. Write manifest.yaml using templates/checkpoint-manifest.md
-      3. Set manifest status to "initialized"
+      1. Determine checkpoint path: .x-ipe-checkpoint/session-{timestamp}/ in CWD
+      2. Create session manifest using template (templates/checkpoint-manifest.md)
+      3. Create content/, feedback/, and screenshots/ subdirectories
+      4. Write initial manifest
     </action>
     <constraints>
       - BLOCKING: CWD not writable → halt
@@ -291,11 +292,12 @@ input:
     <action>
       1. Update manifest: status → "complete", completed_at → ISO 8601
       2. Populate Output Result with extraction_status, quality_score, quality_label, kb_output_path
-      3. Remove checkpoint content/ and feedback/ dirs; preserve manifest.yaml and packed/
+      3. Clean up session: IF success/partial → remove entire session folder (all output already in .intake/); IF failed → preserve for debugging
       4. Update task-board.md → completed
     </action>
     <constraints>
-      - Must preserve manifest.yaml and packed/ for audit trail
+      - On success: remove entire .x-ipe-checkpoint/session-{timestamp}/ (output is in .intake/)
+      - On failure: preserve session folder for debugging
     </constraints>
     <output>Finalized manifest, populated Output Result, cleaned temp dirs</output>
   </step_6_1>

@@ -28,7 +28,8 @@ This document defines the file-based handoff protocol used by the Application Kn
 └── session-{timestamp}/
     ├── manifest.yaml              # Session manifest
     ├── content/                   # Extracted content chunks (FEATURE-050-B)
-    └── feedback/                  # Tool skill feedback (FEATURE-050-C)
+    ├── feedback/                  # Tool skill feedback (FEATURE-050-C)
+    └── screenshots/               # Screenshots captured during extraction
 ```
 
 ---
@@ -90,6 +91,23 @@ Feedback files written by tool skills during validation (FEATURE-050-C):
 ├── section-02-feedback.yaml
 └── ...
 ```
+
+---
+
+## Screenshots
+
+Screenshots captured during extraction (e.g., via Chrome DevTools) are stored inside the session folder:
+
+```
+.x-ipe-checkpoint/session-{timestamp}/screenshots/
+├── 04-core-features-{feature-slug}-{description}.png
+├── 05-workflows-{scenario-slug}-{description}.png
+└── ...
+```
+
+**Session Isolation:** Each extraction session stores screenshots in its own session folder. This prevents collisions between concurrent extractions and enables clean session-level cleanup.
+
+**Naming Convention:** Screenshots follow the tool skill's naming convention: `{nn}-{section-slug}-{description}.png`
 
 ---
 

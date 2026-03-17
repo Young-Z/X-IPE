@@ -79,7 +79,8 @@ PER-FEATURE DETAIL (extract for EACH feature individually):
 
 SCREENSHOT GUIDANCE:
 - For each major feature, capture a screenshot showing the feature in action
-- Name: 04-core-features-{feature-slug}-{description}.png
+- Save to: references/04-core-features-{feature-slug}-{description}.png
+- Reference in markdown as: ![{Alt text}](references/04-core-features-{feature-slug}-{description}.png)
 - Prioritize: main UI state, key dialogs, result/output views
 
 WHEN CONTENT IS THIN:
@@ -115,7 +116,8 @@ PER-SCENARIO DETAIL:
 
 SCREENSHOT GUIDANCE:
 - Capture key transition points in the workflow (start state, intermediate states, end state)
-- Name: 05-workflows-{scenario-slug}-{description}.png
+- Save to: references/05-workflows-{scenario-slug}-{description}.png
+- Reference in markdown as: ![{Alt text}](references/05-workflows-{scenario-slug}-{description}.png)
 
 WHEN CONTENT IS THIN:
 - If no explicit workflow docs exist → flag INCOMPLETE

@@ -6,6 +6,8 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-950 | Skill Update | Apply LL-001 to extractor: session-scoped screenshots + post-gen session cleanup. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [482a9eb] | — |
+| TASK-951 | Skill Update | Apply LL-001 to tool-user-manual: screenshots in references/ subfolder. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [482a9eb] | — |
 | TASK-947 | Change Request | CR on EPIC-050 extractor skill: refocus phases on knowledge extraction, add chrome devtools option, delegate quality scoring to tool skills. Also update EPIC-051 tool skill with quality scoring capability. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [CR-002](x-ipe-docs/requirements/EPIC-050/CR-002.md) | - |
 | TASK-946 | Change Request | CR-001 on FEATURE-051-A: Optimize user manual templates with ToC, content splitting (>800 lines), cross-file linking, scenario instructions with images, naming conventions. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [CR-001.md](x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/CR-001.md), [specification.md v1.1](x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/specification.md) | — |
 | TASK-945 | Feature Refinement | Create specification and technical design for FEATURE-051-A (User Manual Tool Skill). 25 ACs across 6 groups. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [specification.md](x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/technical-design.md) | x-ipe-task-based-technical-design |

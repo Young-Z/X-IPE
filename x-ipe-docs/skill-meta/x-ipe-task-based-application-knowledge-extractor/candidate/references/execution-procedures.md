@@ -114,7 +114,7 @@ For EACH section in collection template order:
 2. Apply skip rules (see `references/extraction-engine-heuristics.md` for evaluation order)
 3. Read/browse/inspect using the capability from DECISION above
 4. **Synthesize** knowledge into coherent content — do NOT raw-dump files
-5. Screenshots: user-provided first → Chrome DevTools auto-capture → graceful skip
+5. Screenshots: user-provided first → Chrome DevTools auto-capture → graceful skip. Save all screenshots to `{checkpoint_path}/screenshots/` (session-scoped, not flat).
 6. IF `config_overrides.web_search_enabled`: augment with purpose-driven search (supplementary only)
 7. Write to `{checkpoint_path}/content/section-{NN}-{slug}.md` (see reference for format)
 8. Update `manifest.yaml` with section result (status, content_file, files_read, warnings, timestamps)
@@ -258,10 +258,14 @@ For EACH section in collection template order:
 2. Populate Output Result: `extraction_status`, `quality_score`, `quality_label`, `kb_output_path`
 3. Set `task_output_links[]`: extraction_report.md, manifest paths
 4. Update task-board.md → completed
-5. Remove `{checkpoint_path}/content/` and `feedback/` dirs
-6. Preserve: `manifest.yaml`, `packed/`, `collection-template.md`
+5. IF extraction_status == "complete" or "partial":
+   - Remove ENTIRE session folder `{checkpoint_path}` (manifest, content, feedback, screenshots, packed — all)
+   - Rationale: all useful output is already in `.intake/{extraction_id}/`; checkpoint was temporary
+6. IF extraction_status == "failed":
+   - Preserve session folder for debugging (do NOT remove)
+   - Log: "Session preserved for debugging at {checkpoint_path}"
 
-**VERIFY:** ✅ Manifest "complete"; Output Result populated; temp dirs removed; packed/ + manifest preserved
+**VERIFY:** ✅ Manifest "complete"; Output Result populated; session folder removed on success OR preserved on failure
 
 ---
 

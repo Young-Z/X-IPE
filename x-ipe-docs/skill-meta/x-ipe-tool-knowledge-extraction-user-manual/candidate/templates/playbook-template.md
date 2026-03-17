@@ -80,11 +80,11 @@
   - **Description** — What it does and why a user would use it
   - **Instructions** — Step-by-step usage guide (numbered steps with concrete commands or UI paths)
   - **Example** — Concrete usage example with expected output
-  - **Screenshots** — Reference screenshots for UI features: `![{Alt text}]({nn}-core-features-{feature-slug}.png)`
+  - **Screenshots** — Reference screenshots for UI features: `![{Alt text}](references/{nn}-core-features-{feature-slug}.png)`
   - **Tips** — Best practices, common pitfalls, or power-user shortcuts (optional but recommended)
 
-**Screenshot convention:** `04-core-features-{feature-slug}-{description}.png`
-(e.g., `04-core-features-user-mgmt-create-dialog.png`)
+**Screenshot convention:** `references/04-core-features-{feature-slug}-{description}.png`
+(e.g., `references/04-core-features-user-mgmt-create-dialog.png`)
 
 **When content is insufficient:** If extracted content lacks detail for any feature subsection (e.g., missing instructions or only has a one-liner description), flag it as INCOMPLETE and request the extractor to gather more source material for that specific feature.
 
@@ -101,11 +101,11 @@
   - **Prerequisites** — What must be set up before starting
   - **Steps** — Numbered walkthrough referencing features from Section 4 (with cross-links)
   - **Expected Result** — What success looks like
-  - **Screenshots** — Key UI states during the workflow: `![{Alt text}]({nn}-workflows-{scenario-slug}.png)`
+  - **Screenshots** — Key UI states during the workflow: `![{Alt text}](references/{nn}-workflows-{scenario-slug}.png)`
   - **Tips** — Variations, shortcuts, or "what if" guidance (optional)
 
-**Screenshot convention:** `05-workflows-{scenario-slug}-{description}.png`
-(e.g., `05-workflows-deploy-prod-pipeline-view.png`)
+**Screenshot convention:** `references/05-workflows-{scenario-slug}-{description}.png`
+(e.g., `references/05-workflows-deploy-prod-pipeline-view.png`)
 
 **Minimum:** At least 3 scenarios covering the most common user journeys.
 
@@ -155,8 +155,8 @@
 
 **File naming convention:**
 - Sub-markdown files: `{nn}-{section-slug}.md` (e.g., `01-overview.md`, `04-core-features.md`)
-- Screenshot images: `{nn}-{section-slug}-{description}.png` (e.g., `04-core-features-dashboard-view.png`)
-- All files stored in the same output directory alongside the main playbook
+- Screenshot images: `references/{nn}-{section-slug}-{description}.png` (e.g., `references/04-core-features-dashboard-view.png`)
+- Sub-markdown files stored alongside the main playbook; all images stored in `references/` subfolder
 
 **Sub-file structure:**
 Each sub-markdown file follows this structure:
@@ -174,7 +174,7 @@ Each sub-markdown file follows this structure:
 ## Screenshots
 
 <!-- Optional — include when documenting UI features -->
-![{Alt text}]({nn}-{section-slug}-{description}.png)
+![{Alt text}](references/{nn}-{section-slug}-{description}.png)
 ```
 
 **When to split:**

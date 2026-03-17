@@ -8,6 +8,15 @@
 
 This template defines the structure of the session manifest file (`manifest.yaml`) created in `.x-ipe-checkpoint/session-{timestamp}/`. The manifest is the single source of truth for extraction session state.
 
+**Session Directory Structure:**
+```
+.x-ipe-checkpoint/session-{timestamp}/
+├── manifest.yaml          # This file
+├── content/              # Extracted content chunks
+├── feedback/             # Tool skill validation feedback
+└── screenshots/          # Screenshots captured during extraction
+```
+
 ---
 
 ## Template
