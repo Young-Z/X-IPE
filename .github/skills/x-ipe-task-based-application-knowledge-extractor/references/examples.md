@@ -64,7 +64,7 @@ tool_skill_artifacts:
 
 **Step 1.4 — Initialize Handoff:**
 ```yaml
-checkpoint_path: ".checkpoint/session-20260317-143022/"
+checkpoint_path: ".x-ipe-checkpoint/session-20260317-143022/"
 ```
 
 ### Output
@@ -74,7 +74,7 @@ status: "ready_for_extraction"
 input_analysis: {...}
 selected_category: "user-manual"
 loaded_tool_skill: "x-ipe-tool-knowledge-extraction-user-manual"
-checkpoint_path: ".checkpoint/session-20260317-143022/"
+checkpoint_path: ".x-ipe-checkpoint/session-20260317-143022/"
 extraction_status: "foundation_only"
 ```
 
@@ -98,7 +98,7 @@ input_analysis:
   input_type: "public_url"
   format: "html"
   app_type: "unknown"
-checkpoint_path: ".checkpoint/session-20260317-150045/"
+checkpoint_path: ".x-ipe-checkpoint/session-20260317-150045/"
 ```
 
 ---

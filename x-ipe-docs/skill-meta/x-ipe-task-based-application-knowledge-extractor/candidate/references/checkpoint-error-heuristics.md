@@ -57,7 +57,7 @@ If a transition is attempted that does not appear in the table above:
 ### Detection (runs BEFORE Phase 1 Step 1.1)
 
 ```
-1. SCAN:     Glob .checkpoint/session-*/manifest.yaml
+1. SCAN:     Glob .x-ipe-checkpoint/session-*/manifest.yaml
 2. FILTER:   Select manifests where:
                - status IN ("paused", "extracting")
                - target matches current invocation target
@@ -104,7 +104,7 @@ Sessions with status "complete" are NOT resumable (BR-4). Start fresh session.
 
 For each section in `manifest.sections[]`:
 ```yaml
-- section_id: int
+- section_id: string
   slug: "string"
   status: "pending | extracted | accepted | needs-more-info | error | skipped"
   content_file: "content/section-{NN}-{slug}.md | null"
@@ -188,7 +188,7 @@ WHILE attempt <= max_retries:
 
 ```yaml
 error_log:                              # append-only array in manifest.yaml
-  - section_id: int                     # section index (matches sections[] entry)
+  - section_id: string                  # "N-slug" format (matches sections[] entry)
     error_type: "transient | permanent" # 2-tier classification
     message: "string"                   # human-readable error description
     retry_count: int                    # 0 for permanent, 0-2 for transient
@@ -205,12 +205,12 @@ error_log:                              # append-only array in manifest.yaml
 
 ```yaml
 error_log:
-  - section_id: 3
+  - section_id: "3-getting-started"
     error_type: "transient"
     message: "LLM API timeout after 15s — exhausted 2 retries"
     retry_count: 2
     timestamp: "2026-03-17T15:02:30Z"
-  - section_id: 4
+  - section_id: "4-core-features"
     error_type: "permanent"
     message: "Source file not found: docs/TROUBLESHOOT.md"
     retry_count: 0

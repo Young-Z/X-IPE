@@ -6,7 +6,7 @@
 
 ## Purpose
 
-This template defines the structure of the session manifest file (`manifest.yaml`) created in `.checkpoint/session-{timestamp}/`. The manifest is the single source of truth for extraction session state.
+This template defines the structure of the session manifest file (`manifest.yaml`) created in `.x-ipe-checkpoint/session-{timestamp}/`. The manifest is the single source of truth for extraction session state.
 
 ---
 
@@ -165,9 +165,9 @@ deferred_categories: []
 
 loaded_tool_skill: "x-ipe-tool-knowledge-extraction-user-manual"
 tool_skill_artifacts:
-  playbook_template: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/templates/playbook-web.md"
+  playbook_template: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/templates/playbook-template.md"
   collection_template: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/templates/collection-template.md"
-  acceptance_criteria: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/references/acceptance-criteria.md"
+  acceptance_criteria: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/templates/acceptance-criteria.md"
 
 status: "initialized"
 sections: []
@@ -205,9 +205,9 @@ deferred_categories: []
 
 loaded_tool_skill: "x-ipe-tool-knowledge-extraction-user-manual"
 tool_skill_artifacts:
-  playbook_template: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/templates/playbook-web.md"
+  playbook_template: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/templates/playbook-template.md"
   collection_template: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/templates/collection-template.md"
-  acceptance_criteria: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/references/acceptance-criteria.md"
+  acceptance_criteria: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/templates/acceptance-criteria.md"
 
 status: "extracting"
 sections:
@@ -331,7 +331,7 @@ def create_manifest(session_id, target, purpose, input_analysis, selected_catego
         "error_log": []
     }
     
-    manifest_path = f".checkpoint/{session_id}/manifest.yaml"
+    manifest_path = f".x-ipe-checkpoint/{session_id}/manifest.yaml"
     with open(manifest_path, 'w') as f:
         yaml.dump(manifest, f, default_flow_style=False, sort_keys=False)
     

@@ -177,7 +177,7 @@ phase_3:
   sections_needs_more_info: int
   sections_error: int
   per_section:
-    - section_id: 1
+    - section_id: "1-overview"
       slug: "overview"
       validation_status: "accepted | needs-more-info | error"
       criteria_met: 3

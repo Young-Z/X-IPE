@@ -6,7 +6,7 @@
 
 ## Purpose
 
-This template defines the structure of the session manifest file (`manifest.yaml`) created in `.checkpoint/session-{timestamp}/`. The manifest is the single source of truth for extraction session state.
+This template defines the structure of the session manifest file (`manifest.yaml`) created in `.x-ipe-checkpoint/session-{timestamp}/`. The manifest is the single source of truth for extraction session state.
 
 ---
 
@@ -165,9 +165,9 @@ deferred_categories: []
 
 loaded_tool_skill: "x-ipe-tool-knowledge-extraction-user-manual"
 tool_skill_artifacts:
-  playbook_template: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/templates/playbook-web.md"
+  playbook_template: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/templates/playbook-template.md"
   collection_template: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/templates/collection-template.md"
-  acceptance_criteria: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/references/acceptance-criteria.md"
+  acceptance_criteria: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/templates/acceptance-criteria.md"
 
 status: "initialized"
 sections: []
@@ -205,9 +205,9 @@ deferred_categories: []
 
 loaded_tool_skill: "x-ipe-tool-knowledge-extraction-user-manual"
 tool_skill_artifacts:
-  playbook_template: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/templates/playbook-web.md"
+  playbook_template: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/templates/playbook-template.md"
   collection_template: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/templates/collection-template.md"
-  acceptance_criteria: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/references/acceptance-criteria.md"
+  acceptance_criteria: ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/templates/acceptance-criteria.md"
 
 status: "extracting"
 sections:
@@ -331,7 +331,7 @@ def create_manifest(session_id, target, purpose, input_analysis, selected_catego
         "error_log": []
     }
     
-    manifest_path = f".checkpoint/{session_id}/manifest.yaml"
+    manifest_path = f".x-ipe-checkpoint/{session_id}/manifest.yaml"
     with open(manifest_path, 'w') as f:
         yaml.dump(manifest, f, default_flow_style=False, sort_keys=False)
     
@@ -358,6 +358,6 @@ def create_manifest(session_id, target, purpose, input_analysis, selected_catego
 
 ## References
 
-- **Handoff Protocol:** `x-ipe-docs/skill-meta/x-ipe-task-based-application-knowledge-extractor/candidate/references/handoff-protocol.md`
+- **Handoff Protocol:** `.github/skills/x-ipe-task-based-application-knowledge-extractor/references/handoff-protocol.md`
 - **Technical Design:** `x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/technical-design.md` (Checkpoint Location & Manifest section)
-- **SKILL.md Step 1.4:** `x-ipe-docs/skill-meta/x-ipe-task-based-application-knowledge-extractor/candidate/SKILL.md` (Phase 1, Step 1.4)
+- **SKILL.md Step 1.4:** `.github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md` (Phase 1, Step 1.4)

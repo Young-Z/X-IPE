@@ -6,7 +6,7 @@
 
 ## Purpose
 
-This document defines the file-based handoff protocol used by the Application Knowledge Extractor to exchange knowledge with tool skills. All communication occurs via files in `.checkpoint/` folder.
+This document defines the file-based handoff protocol used by the Application Knowledge Extractor to exchange knowledge with tool skills. All communication occurs via files in `.x-ipe-checkpoint/` folder.
 
 ---
 
@@ -14,22 +14,21 @@ This document defines the file-based handoff protocol used by the Application Kn
 
 ### Key Principles
 
-1. **File-Based Only:** All data exchange uses files in `.checkpoint/`, never inline YAML
+1. **File-Based Only:** All data exchange uses files in `.x-ipe-checkpoint/`, never inline YAML
 2. **Session Isolation:** Each extraction session has its own timestamped folder
 3. **Structured Manifest:** Session state tracked in `manifest.yaml`
-4. **Location Rule:** `.checkpoint/` created in CWD (project root), NEVER inside target directory
+4. **Location Rule:** `.x-ipe-checkpoint/` created in CWD (project root), NEVER inside target directory
 
 ---
 
 ## Folder Structure
 
 ```
-.checkpoint/
+.x-ipe-checkpoint/
 └── session-{timestamp}/
     ├── manifest.yaml              # Session manifest
     ├── content/                   # Extracted content chunks (FEATURE-050-B)
-    ├── feedback/                  # Tool skill feedback (FEATURE-050-C)
-    └── artifacts/                 # Tool skill artifacts
+    └── feedback/                  # Tool skill feedback (FEATURE-050-C)
 ```
 
 ---
@@ -73,7 +72,7 @@ error_log: []
 Content files written by extractor during extraction (FEATURE-050-B):
 
 ```
-.checkpoint/session-{timestamp}/content/
+.x-ipe-checkpoint/session-{timestamp}/content/
 ├── section-01-{slug}.md
 ├── section-02-{slug}.md
 └── ...
@@ -86,7 +85,7 @@ Content files written by extractor during extraction (FEATURE-050-B):
 Feedback files written by tool skills during validation (FEATURE-050-C):
 
 ```
-.checkpoint/session-{timestamp}/feedback/
+.x-ipe-checkpoint/session-{timestamp}/feedback/
 ├── section-01-feedback.yaml
 ├── section-02-feedback.yaml
 └── ...
@@ -98,14 +97,14 @@ Feedback files written by tool skills during validation (FEATURE-050-C):
 
 ### Extractor → Tool Skill
 
-1. Extractor writes content to `.checkpoint/session-{timestamp}/content/section-{N}-{slug}.md`
+1. Extractor writes content to `.x-ipe-checkpoint/session-{timestamp}/content/section-{N}-{slug}.md`
 2. Extractor updates manifest
 3. Extractor invokes tool skill with file path (not inline content)
 
 ### Tool Skill → Extractor
 
 1. Tool skill reads content file
-2. Tool skill writes feedback to `.checkpoint/session-{timestamp}/feedback/section-{N}-feedback.yaml`
+2. Tool skill writes feedback to `.x-ipe-checkpoint/session-{timestamp}/feedback/section-{N}-feedback.yaml`
 3. Tool skill returns feedback file path
 4. Extractor reads feedback and processes
 
@@ -114,4 +113,4 @@ Feedback files written by tool skills during validation (FEATURE-050-C):
 ## References
 
 - **Technical Design:** `x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/technical-design.md`
-- **Checkpoint Manifest Template:** `x-ipe-docs/skill-meta/x-ipe-task-based-application-knowledge-extractor/candidate/templates/checkpoint-manifest.md`
+- **Checkpoint Manifest Template:** `.github/skills/x-ipe-task-based-application-knowledge-extractor/templates/checkpoint-manifest.md`

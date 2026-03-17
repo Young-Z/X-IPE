@@ -121,6 +121,7 @@ For EACH section in collection template order:
 9. **Tool Skill Early Feedback:** After writing each section, call loaded tool skill's `validate_section` operation:
    - Pass section_id and content_file_path
    - Read feedback: if criteria failures indicate missing content → adjust prompts and re-extract BEFORE moving to next section
+   - Check for `incomplete` criteria and `missing_info[]`. If present, adjust extraction prompts to specifically target the missing content described in `missing_info` entries.
    - Write early feedback to `{checkpoint_path}/feedback/section-{NN}-{slug}-early.md`
    - This reduces Phase 3 iteration count by catching gaps early
 
@@ -148,6 +149,7 @@ For EACH section in collection template order:
 - iterations ≥ max → exit "max_iterations_reached"
 - coverage_ratio not improving (iteration > 1) → exit "plateau_detected"
 - No content from Phase 2 → skip Phase 3 entirely
+- IF any criteria has status `incomplete` with `missing_info[]` → treat as extractable gap (not content failure). Feed `missing_info` descriptions back to Phase 2 as targeted extraction prompts.
 
 **ACTION — Iteration Loop (up to max_validation_iterations):**
 1. Call tool skill's validate_section operation for each non-accepted section — tool skill evaluates per-criterion pass/fail; extractor does NOT self-validate against criteria
@@ -206,7 +208,8 @@ For EACH section in collection template order:
 **ACTION — Delegate Quality Scoring:**
 1. For each accepted section: call tool skill `score_quality` operation with section content path and section_id
 2. Collect per-section scores from tool skill response
-3. Compute `overall_quality_score` = arithmetic mean of section scores (exclude error/skipped; count as 0.0)
+3. Log `is_key_section` in per-section manifest entry. When deciding which sections to re-extract, prioritize `is_key_section: true` sections. Pass `improvement_hints[]` as context to Phase 2 for targeted improvement.
+4. Compute `overall_quality_score` = arithmetic mean of section scores (exclude error/skipped; count as 0.0)
 4. Classify: ≥ 0.80 → "high"; 0.50–0.79 → "acceptable"; < 0.50 → "low"
 5. IF quality_label is "low" AND quality_loop not already triggered:
    - Set quality_loop_triggered = true

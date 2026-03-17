@@ -88,7 +88,7 @@ operation_output:
 # Input
 operation: validate_section
 section_id: "2-installation-setup"
-content_path: ".checkpoint/session-20260317/content/section-02-installation-setup.md"
+content_path: ".x-ipe-checkpoint/session-20260317/content/section-02-installation-setup.md"
 
 # Extracted content at that path:
 # ## Installation & Setup
@@ -143,7 +143,7 @@ operation_output:
 # Input
 operation: pack_section
 section_id: "2-installation-setup"
-content_path: ".checkpoint/session-20260317/content/section-02-installation-setup.md"
+content_path: ".x-ipe-checkpoint/session-20260317/content/section-02-installation-setup.md"
 
 # Output
 operation_output:

@@ -116,7 +116,7 @@ input:
   </checkpoint>
   <checkpoint required="true">
     <name>Valid operation requested</name>
-    <verification>operation parameter matches one of the 5 defined operations</verification>
+    <verification>operation parameter matches one of the 6 defined operations</verification>
   </checkpoint>
   <checkpoint required="false">
     <name>Content file exists (for validate/pack)</name>
@@ -232,7 +232,7 @@ input:
 ```xml
 <operation name="pack_section">
   <input>
-    <field name="section_id" type="string" required="true">Section identifier (e.g., "overview", "installation")</field>
+    <field name="section_id" type="string" required="true">Section identifier (e.g., "1-overview", "2-installation-setup")</field>
     <field name="content_path" type="string" required="true">Path to validated content file in .x-ipe-checkpoint/</field>
     <field name="split_mode" type="boolean" required="false" default="false">If true, output as standalone sub-markdown file with Instructions and Screenshots sections</field>
   </input>

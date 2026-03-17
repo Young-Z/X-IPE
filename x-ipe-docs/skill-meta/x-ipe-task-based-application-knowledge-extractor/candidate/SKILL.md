@@ -208,7 +208,8 @@ input:
       3. Synthesize knowledge into coherent content (never raw-dump files)
       4. Write to checkpoint/content/section-{NN}-{slug}.md, update manifest per-section
       5. Call tool skill validate_section operation on extracted content for early feedback
-      6. IF tool skill feedback indicates gaps → adjust extraction prompts and re-extract before moving to next section
+      6. IF validation result contains criteria with status `incomplete` AND `missing_info[]` is non-empty → use `missing_info` entries to form targeted re-extraction prompts for the specific content gaps
+      7. IF tool skill feedback indicates gaps → adjust extraction prompts and re-extract before moving to next section
     </action>
     <constraints>
       - BLOCKING: All content must go through file paths in checkpoint — no inline content
@@ -225,7 +226,8 @@ input:
       1. Call tool skill validate_section operation for each section (per-criterion pass/fail) — do NOT self-validate
       2. Write feedback to checkpoint/feedback/, lock accepted sections
       3. Compute coverage_ratio, check exit conditions (all met / max iterations / plateau)
-      4. Re-extract failing sections with adjusted prompts if iterations remain
+      4. IF any criteria has status `incomplete` with `missing_info[]` → treat as extractable gap (not content failure). Feed `missing_info` descriptions back to Phase 2 as targeted extraction prompts
+      5. Re-extract failing sections with adjusted prompts if iterations remain
     </action>
     <constraints>
       - Max iterations capped by config_overrides.max_validation_iterations (default 3)
@@ -257,7 +259,8 @@ input:
     <action>
       1. For each accepted section: call tool skill score_quality operation with section content and context
       2. Aggregate per-section scores into overall_quality_score (arithmetic mean)
-      3. Classify: ≥ 0.80 → "high"; 0.50–0.79 → "acceptable"; < 0.50 → "low"
+      3. Record `is_key_section` flag in manifest. When quality_label is 'low', prioritize re-extraction of sections where `is_key_section` is true. Use `improvement_hints[]` as re-extraction guidance.
+      4. Classify: ≥ 0.80 → "high"; 0.50–0.79 → "acceptable"; < 0.50 → "low"
       4. IF quality_label is "low" → loop back to Phase 2 for re-extraction of lowest-scoring sections (max 1 quality loop)
     </action>
     <constraints>

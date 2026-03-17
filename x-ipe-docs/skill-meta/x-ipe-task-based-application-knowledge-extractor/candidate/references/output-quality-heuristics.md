@@ -8,11 +8,12 @@
   - If section has no criteria (implicitly accepted): completeness = 1.0
   - Range: 0.0 – 1.0
 
-### §1.2 Accuracy Dimension (Weight: 0.30)
-  - Formula: accuracy = 1 / section.iterations_validated
-    (accepted on pass 1 = 1.0; pass 2 = 0.5; pass 3 = 0.33)
-  - Capped at 1.0 (minimum 1 iteration)
-  - If section status is "error": accuracy = 0.0
+### §1.2 Clarity Dimension (Weight: 0.30)
+  - Measures: actionable instructions present, concrete examples included, unambiguous language
+  - Formula: clarity = tool_skill_clarity_score (from score_quality response)
+  - Fallback (no tool skill): clarity = 1 / section.iterations_validated
+    (accepted on pass 1 = 1.0; pass 2 = 0.5; pass 3 = 0.33; capped at 1.0)
+  - If section status is "error": clarity = 0.0
   - Range: 0.0 – 1.0
 
 ### §1.3 Structure Dimension (Weight: 0.20)
@@ -35,8 +36,10 @@
     - If unavailable: default to 0.5
   - Range: 0.0 – 1.0
 
-### §1.5 Per-Section Weighted Score
-  - Formula: section_score = (completeness × 0.40) + (accuracy × 0.30)
+### §1.5 Per-Section Weighted Score (Fallback Only)
+  > **Note:** When tool skill `score_quality` is available, use the tool skill's per-section weighted score as-is. The extractor's overall quality_score is the arithmetic mean of all section scores returned by the tool skill. The weights below are **fallback-only** — used only when no tool skill `score_quality` is available.
+
+  - Formula: section_score = (completeness × 0.40) + (clarity × 0.30)
                             + (structure × 0.20) + (freshness × 0.10)
   - Round to 2 decimal places
   - Range: 0.0 – 1.0
@@ -78,12 +81,12 @@
 
   ```markdown
   ---
-  section_id: 1
+  section_id: "1-overview"
   title: "Overview"
   quality_score: 0.92
   quality_dimensions:
     completeness: 1.0
-    accuracy: 1.0
+    clarity: 1.0
     structure: 0.8
     freshness: 0.7
   provenance:
@@ -121,8 +124,8 @@
 
   <!-- Sorted by quality_score ASCENDING (lowest first) -->
 
-  | # | Section | Score | Label | Completeness | Accuracy | Structure | Freshness |
-  |---|---------|-------|-------|-------------|----------|-----------|-----------|
+  | # | Section | Score | Label | Completeness | Clarity | Structure | Freshness |
+  |---|---------|-------|-------|-------------|---------|-----------|-----------|
   | 4 | Troubleshooting | 0.00 | excluded | — | — | — | — |
   | 2 | Installation | 0.65 | acceptable | 0.80 | 0.50 | 0.60 | 0.70 |
   | 1 | Overview | 0.92 | high | 1.00 | 1.00 | 0.80 | 0.70 |
@@ -169,7 +172,7 @@
   | Single section | overall_score = that section's score |
   | Source files have no mtime (URLs) | Freshness defaults to 0.5 |
   | Section has 0 ACs (implicitly accepted) | Completeness = 1.0 |
-  | Section accepted on first pass | Accuracy = 1.0 (1/1) |
+  | Section accepted on first pass | Clarity fallback = 1.0 (1/1) |
   | Coverage ratio = 0.0 | Completeness = 0.0; section still packaged if "accepted" |
   | Re-running Phase 5 | Idempotent: overwrite .intake/{extraction_id}/ |
   | .intake/ folder missing | Create x-ipe-docs/knowledge-base/.intake/ automatically |
