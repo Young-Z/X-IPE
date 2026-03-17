@@ -19,17 +19,17 @@ CONFIG_FILE = 'tools.json'
 LEGACY_PATH = 'x-ipe-docs/ideas/.ideation-tools.json'
 
 DEFAULT_CONFIG = {
-    "version": "2.0",
+    "version": "3.0",
     "stages": {
         "ideation": {
             "ideation": {"x-ipe-tool-infographic-syntax": False, "mermaid": False},
             "mockup": {"frontend-design": True},
+            "architecture": {},
             "sharing": {}
         },
         "requirement": {"gathering": {}, "analysis": {}},
-        "feature": {"design": {}, "implementation": {}},
-        "quality": {"testing": {}, "review": {}},
-        "refactoring": {"analysis": {}, "execution": {}}
+        "implement": {"design": {}, "implementation": {}, "testing": {}, "review": {}},
+        "feedback": {"bug_fix": {}, "playground": {}, "refactoring": {}, "change_request": {}}
     }
 }
 
@@ -64,7 +64,7 @@ class ToolsConfigService:
         Load config, migrating from legacy if needed.
         
         Order of operations:
-        1. If x-ipe-docs/config/tools.json exists, load it
+        1. If x-ipe-docs/config/tools.json exists, load and migrate if needed
         2. Else if legacy .ideation-tools.json exists, migrate it
         3. Else create default config
         
@@ -72,7 +72,11 @@ class ToolsConfigService:
             Configuration dictionary with version and stages
         """
         if self.config_path.exists():
-            return self._read_config()
+            config = self._read_config()
+            if config.get('version') == '2.0':
+                config = self._migrate_v2_to_v3(config)
+                self.save(config)
+            return config
         
         if self.legacy_path.exists():
             return self._migrate_legacy()
@@ -153,6 +157,51 @@ class ToolsConfigService:
             return config
         except (json.JSONDecodeError, IOError):
             return self._create_default()
+    
+    def _migrate_v2_to_v3(self, config: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Migrate v2.0 stages (feature/quality/refactoring) to v3.0 (implement/feedback).
+        
+        Mapping:
+        - feature.design, feature.implementation, feature.consultation → implement
+        - quality.testing, quality.review → implement
+        - feature.bug_fix, feature.playground → feedback
+        - refactoring.analysis, refactoring.execution → feedback.refactoring
+        """
+        stages = config.get('stages', {})
+        feature = stages.pop('feature', {})
+        quality = stages.pop('quality', {})
+        refactoring = stages.pop('refactoring', {})
+        
+        # Build implement stage from feature + quality
+        implement = {}
+        for phase_key in ('design', 'implementation', 'consultation'):
+            if phase_key in feature:
+                implement[phase_key] = feature[phase_key]
+        for phase_key in ('testing', 'review'):
+            if phase_key in quality:
+                implement[phase_key] = quality[phase_key]
+        
+        # Build feedback stage from feature bug_fix/playground + refactoring
+        feedback = {}
+        for phase_key in ('bug_fix', 'playground'):
+            if phase_key in feature:
+                feedback[phase_key] = feature[phase_key]
+        # Merge refactoring analysis + execution tools into single refactoring phase
+        refactoring_tools = {}
+        for phase_key in ('analysis', 'execution'):
+            if phase_key in refactoring:
+                for tool, val in refactoring[phase_key].items():
+                    refactoring_tools[tool] = val
+        if refactoring_tools:
+            feedback['refactoring'] = refactoring_tools
+        feedback.setdefault('change_request', {})
+        
+        stages['implement'] = implement
+        stages['feedback'] = feedback
+        config['stages'] = stages
+        config['version'] = '3.0'
+        return config
     
     def _create_default(self) -> Dict[str, Any]:
         """

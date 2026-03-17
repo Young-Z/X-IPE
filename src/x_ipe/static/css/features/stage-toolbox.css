@@ -164,19 +164,14 @@
     color: #3b82f6;
 }
 
-.toolbox-accordion[data-stage="feature"] .toolbox-accordion-icon {
+.toolbox-accordion[data-stage="implement"] .toolbox-accordion-icon {
     background: rgba(16, 185, 129, 0.12);
     color: #10b981;
 }
 
-.toolbox-accordion[data-stage="quality"] .toolbox-accordion-icon {
-    background: rgba(139, 92, 246, 0.12);
-    color: #8b5cf6;
-}
-
-.toolbox-accordion[data-stage="refactoring"] .toolbox-accordion-icon {
-    background: rgba(239, 68, 68, 0.12);
-    color: #ef4444;
+.toolbox-accordion[data-stage="feedback"] .toolbox-accordion-icon {
+    background: rgba(249, 115, 22, 0.12);
+    color: #f97316;
 }
 
 .toolbox-accordion-info {
