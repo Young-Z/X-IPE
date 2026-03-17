@@ -29,7 +29,7 @@ CRITICAL: All template files MUST exist at the paths declared in `get_artifacts`
 This skill is a template provider for the Application Knowledge Extractor. When the extractor receives a `purpose: "user-manual"` request, it discovers this skill by globbing `.github/skills/x-ipe-tool-knowledge-extraction-*/SKILL.md` and matching `categories: ["user-manual"]` in the frontmatter.
 
 **Key Concepts:**
-- **Playbook Template** — Defines the standard user manual section layout (7 sections)
+- **Playbook Template** — Defines the standard user manual section layout (8 sections)
 - **Collection Template** — Per-section extraction prompts guiding what to look for in source
 - **Acceptance Criteria** — Validation rules per section (checklist format)
 - **App-Type Mixin** — Platform-specific overlay adding sections/prompts for web, CLI, or mobile apps
@@ -164,7 +164,7 @@ input:
   <action>
     1. Read templates/collection-template.md
     2. IF section_id provided → extract only that section's content
-    3. ELSE → return full template with all 7 sections
+    3. ELSE → return full template with all 8 sections
     4. Each section contains HTML comments with EXTRACTION PROMPTS
   </action>
   <constraints>
@@ -187,14 +187,19 @@ input:
     4. Evaluate each criterion against the content:
        a. For each checkbox item, check if content satisfies the rule
        b. Mark as PASS or FAIL with brief feedback
-    5. Return validation result with per-criterion status
+    5. IF any REQ criterion fails due to insufficient source material (not poor writing):
+       a. Mark criterion as INCOMPLETE (distinct from FAIL)
+       b. Add to `missing_info[]` with description of what content is needed
+       c. The extractor should use `missing_info` to request more source material
+    6. Return validation result with per-criterion status
   </action>
   <constraints>
     - BLOCKING: section_id and content_path are required
     - CRITICAL: ALL criteria must be evaluated — do not skip any
+    - CRITICAL: Distinguish FAIL (content exists but is wrong) from INCOMPLETE (content is missing/thin)
   </constraints>
   <output>
-    validation_result: { section_id, passed: bool, criteria: [{id, status, feedback}] }
+    validation_result: { section_id, passed: bool, criteria: [{id, status, feedback}], missing_info: [] }
   </output>
 </operation>
 ```
@@ -272,15 +277,26 @@ input:
        b. **Structure** (0.0–1.0): proper heading hierarchy, code blocks, lists
        c. **Clarity** (0.0–1.0): actionable instructions, concrete examples present
        d. **Freshness** (0.0–1.0): content references current versions, no stale info
-    4. Compute section_quality_score = weighted mean (completeness: 0.4, structure: 0.2, clarity: 0.3, freshness: 0.1)
+    4. Apply section-aware weighting:
+       - **Sections 4 (Core Features) and 5 (Common Workflow Scenarios):**
+         Weighted mean: completeness 0.35, structure 0.15, clarity 0.40, freshness 0.10
+         (clarity weighted highest — these sections MUST have actionable step-by-step instructions)
+       - **All other sections:**
+         Weighted mean: completeness 0.40, structure 0.20, clarity 0.30, freshness 0.10
     5. Generate improvement_hints[] for any dimension below 0.6
+    6. **For sections 4 and 5 ONLY:** Apply critical-but-constructive feedback mode:
+       a. Be MORE specific in improvement_hints (name exact missing subsections, features, or scenarios)
+       b. Lower the "acceptable" threshold: score < 0.70 → generate hints (not just < 0.60)
+       c. If instructions are vague or generic → explicitly call out "Instructions lack step-by-step detail"
+       d. If no screenshots referenced → hint "No screenshot references found — add for UI features"
   </action>
   <constraints>
     - BLOCKING: section_id and content_path are required
     - CRITICAL: Scoring is based on domain expertise — this skill defines what "quality" means for user manuals
+    - CRITICAL: Sections 4 and 5 receive stricter evaluation — they are the core value of the manual
   </constraints>
   <output>
-    quality_result: { section_id, section_quality_score, dimensions: {completeness, structure, clarity, freshness}, improvement_hints[] }
+    quality_result: { section_id, section_quality_score, dimensions: {completeness, structure, clarity, freshness}, improvement_hints[], is_key_section: bool }
   </output>
 </operation>
 ```
@@ -310,7 +326,8 @@ operation_output:
     validation_result:
       section_id: "{id}"
       passed: true | false
-      criteria: [{ id: "string", status: "pass | fail", feedback: "string" }]
+      criteria: [{ id: "string", status: "pass | fail | incomplete", feedback: "string" }]
+      missing_info: ["string"]  # content gaps requiring more extraction
     # pack_section
     formatted_content: "string"
     # score_quality
@@ -323,6 +340,7 @@ operation_output:
         clarity: 0.0
         freshness: 0.0
       improvement_hints: ["string"]
+      is_key_section: false  # true for sections 4 and 5 (stricter evaluation)
   errors: []
 ```
 
@@ -367,7 +385,7 @@ operation_output:
 
 | File | Purpose |
 |------|---------|
-| `templates/playbook-template.md` | Base user manual section layout (7 sections) |
+| `templates/playbook-template.md` | Base user manual section layout (8 sections) |
 | `templates/collection-template.md` | Per-section extraction prompts |
 | `templates/acceptance-criteria.md` | Per-section validation rules, also used for quality scoring |
 | `templates/mixin-web.md` | Web app-specific sections and prompts |

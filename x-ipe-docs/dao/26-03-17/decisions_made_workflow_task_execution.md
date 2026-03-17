@@ -140,3 +140,23 @@ Agent violated the workflow: attempted to create the user manual tool skill dire
 
 **execution_plan:** sequential, groups: [[0]]
 **confidence:** 0.95
+
+---
+
+### DAO-121
+
+| Field | Value |
+|-------|-------|
+| timestamp | 2026-03-17T15:38:52Z |
+| source | human |
+| task_id | TASK-949 |
+| workflow | Knowledge-Extraction |
+
+**instruction_units:**
+
+| # | disposition | content | suggested_skills |
+|---|------------|---------|-----------------|
+| 0 | instruction | 4 changes to user manual tool skill: (1) Section 4 Core Features needs detailed subsections with instructions + screenshot refs, (2) request more info from extractor when content insufficient, (3) add Common Workflow Scenarios section after Core Features with template, (4) weight sections 4+5 higher in quality scoring with critical constructive feedback | x-ipe-task-based-change-request (strong) |
+
+**execution_plan:** sequential, groups: [[0]]
+**confidence:** 0.95

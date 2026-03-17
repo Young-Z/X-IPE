@@ -70,17 +70,68 @@ SOURCE PRIORITY:
 - What are the feature entry points? (look for route handlers, CLI commands, menu items)
 - Are there best practices or tips per feature? (look for "tips", "best practices", "pro tips" sections)
 
+PER-FEATURE DETAIL (extract for EACH feature individually):
+- Step-by-step instructions: What does a user click/type to use this feature?
+- Input/output: What goes in, what comes out?
+- UI elements: What does the user see? (capture screenshots if web/app via Chrome DevTools)
+- Edge cases: What happens with invalid input, empty state, or limits?
+- Permissions: Does this feature require specific roles or access?
+
+SCREENSHOT GUIDANCE:
+- For each major feature, capture a screenshot showing the feature in action
+- Name: 04-core-features-{feature-slug}-{description}.png
+- Prioritize: main UI state, key dialogs, result/output views
+
+WHEN CONTENT IS THIN:
+- If a feature has only a one-liner description and no usage detail → flag INCOMPLETE
+- Request extractor to: read source code for the feature entry point, check test files for behavior, run the app and capture screenshots
+
 SOURCE PRIORITY:
 1. README.md feature descriptions
 2. docs/ directory organized by feature
 3. CLI --help output for each command
 4. Source code docstrings and comments on public APIs
 5. Test files (describe blocks reveal feature behavior)
+6. Running application UI (Chrome DevTools screenshots)
 -->
 
 ---
 
-## 5. Configuration
+## 5. Common Workflow Scenarios
+
+<!-- EXTRACTION PROMPTS:
+- What are the most common end-to-end user journeys? (look for tutorials, guides, example scripts, demo workflows)
+- How do features combine in real usage? (look for integration tests, e2e tests, CI/CD pipelines)
+- What does onboarding a new user look like? (look for onboarding docs, getting-started-advanced, setup wizards)
+- Are there documented use cases or stories? (look for use-case docs, user stories, case studies)
+- What recurring patterns appear in issues/discussions? (look for "how do I" questions, common support requests)
+
+PER-SCENARIO DETAIL:
+- Goal: What is the user trying to accomplish?
+- Prerequisites: What must already be set up?
+- Steps: Numbered walkthrough showing which features are used and in what order
+- Expected result: What does success look like?
+- Cross-references: Link back to relevant Section 4 features
+
+SCREENSHOT GUIDANCE:
+- Capture key transition points in the workflow (start state, intermediate states, end state)
+- Name: 05-workflows-{scenario-slug}-{description}.png
+
+WHEN CONTENT IS THIN:
+- If no explicit workflow docs exist → flag INCOMPLETE
+- Request extractor to: analyze test suites for multi-step flows, check example/ directories, examine CI pipelines for typical usage patterns
+
+SOURCE PRIORITY:
+1. docs/tutorials/ or docs/guides/ directories
+2. examples/ directory with multi-step scripts
+3. Integration/e2e test files (reveal realistic usage flows)
+4. README.md workflow or usage sections
+5. Issue tracker "how to" threads
+-->
+
+---
+
+## 6. Configuration
 
 <!-- EXTRACTION PROMPTS:
 - Where is the configuration file? (look for config/, settings/, .env, *.config.js, *.yaml)
@@ -98,7 +149,7 @@ SOURCE PRIORITY:
 
 ---
 
-## 6. Troubleshooting
+## 7. Troubleshooting
 
 <!-- EXTRACTION PROMPTS:
 - Are there documented common issues? (look for TROUBLESHOOTING.md, FAQ sections, "Known Issues" in README)
@@ -117,7 +168,7 @@ SOURCE PRIORITY:
 
 ---
 
-## 7. FAQ & Reference
+## 8. FAQ & Reference
 
 <!-- EXTRACTION PROMPTS:
 - Is there an existing FAQ? (look for FAQ.md, docs/faq.*, "Frequently Asked Questions" sections)

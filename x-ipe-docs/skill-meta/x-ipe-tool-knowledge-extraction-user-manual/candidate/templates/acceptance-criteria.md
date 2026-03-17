@@ -36,11 +36,24 @@
 
 - [ ] `[REQ]` Documents at least 3 distinct features
 - [ ] `[REQ]` Each feature has a description of what it does
-- [ ] `[REQ]` Each feature has usage instructions (steps or commands)
-- [ ] `[OPT]` Features include example usage or screenshots
+- [ ] `[REQ]` Each feature has step-by-step usage instructions (not just a description)
+- [ ] `[REQ]` Each feature includes at least one concrete example with expected output
+- [ ] `[REQ]` Features reference screenshots for UI-visible actions (or explain why N/A)
 - [ ] `[OPT]` Features include tips or best practices
+- [ ] `[OPT]` Features document edge cases or error handling
+- [ ] `[OPT]` Features note required permissions or roles
 
-### 5. Configuration
+### 5. Common Workflow Scenarios
+
+- [ ] `[REQ]` Contains at least 3 end-to-end workflow scenarios
+- [ ] `[REQ]` Each scenario states a clear goal
+- [ ] `[REQ]` Each scenario has numbered steps referencing features from Section 4
+- [ ] `[REQ]` Each scenario describes the expected result
+- [ ] `[OPT]` Scenarios include screenshots of key workflow states
+- [ ] `[OPT]` Scenarios include prerequisites
+- [ ] `[OPT]` Scenarios provide tips or variations
+
+### 6. Configuration
 
 - [ ] `[REQ]` Identifies configuration file location and format
 - [ ] `[REQ]` Lists environment variables with descriptions and defaults
@@ -48,7 +61,7 @@
 - [ ] `[OPT]` Explains profile or environment management (dev/staging/prod)
 - [ ] `[OPT]` Includes runtime flags or command-line options
 
-### 6. Troubleshooting
+### 7. Troubleshooting
 
 - [ ] `[REQ]` Lists at least 3 common issues with symptoms and solutions
 - [ ] `[REQ]` Explains how to enable debug or verbose mode
@@ -56,7 +69,7 @@
 - [ ] `[OPT]` Catalogs error messages with explanations
 - [ ] `[OPT]` Includes links to support channels or issue tracker
 
-### 7. FAQ & Reference
+### 8. FAQ & Reference
 
 - [ ] `[REQ]` Contains at least 5 frequently asked questions with answers
 - [ ] `[REQ]` Includes glossary of domain-specific terms (at least 3 terms)

@@ -17,18 +17,20 @@
 | 2 | Installation & Setup | [Installation & Setup](#2-installation--setup) |
 | 3 | Getting Started | [Getting Started](#3-getting-started) |
 | 4 | Core Features | [Core Features](#4-core-features) |
-| 5 | Configuration | [Configuration](#5-configuration) |
-| 6 | Troubleshooting | [Troubleshooting](#6-troubleshooting) |
-| 7 | FAQ & Reference | [FAQ & Reference](#7-faq--reference) |
+| 5 | Common Workflow Scenarios | [Common Workflow Scenarios](#5-common-workflow-scenarios) |
+| 6 | Configuration | [Configuration](#6-configuration) |
+| 7 | Troubleshooting | [Troubleshooting](#7-troubleshooting) |
+| 8 | FAQ & Reference | [FAQ & Reference](#8-faq--reference) |
 
 <!-- SPLIT MODE EXAMPLE:
 | 1 | Overview | [Overview](01-overview.md) |
 | 2 | Installation & Setup | [Installation & Setup](02-installation-setup.md) |
 | 3 | Getting Started | [Getting Started](03-getting-started.md) |
 | 4 | Core Features | [Core Features](04-core-features.md) |
-| 5 | Configuration | [Configuration](05-configuration.md) |
-| 6 | Troubleshooting | [Troubleshooting](06-troubleshooting.md) |
-| 7 | FAQ & Reference | [FAQ & Reference](07-faq-reference.md) |
+| 5 | Common Workflow Scenarios | [Common Workflow Scenarios](05-common-workflow-scenarios.md) |
+| 6 | Configuration | [Configuration](06-configuration.md) |
+| 7 | Troubleshooting | [Troubleshooting](07-troubleshooting.md) |
+| 8 | FAQ & Reference | [FAQ & Reference](08-faq-reference.md) |
 -->
 
 ---
@@ -70,19 +72,48 @@
 
 ## 4. Core Features
 
-**What belongs here:** Feature-by-feature usage guide covering all primary capabilities.
+**What belongs here:** Feature-by-feature usage guide covering all primary capabilities. This is the main body of the user manual — each feature should be detailed enough for a user to understand and use it independently.
 
 **Subsections:**
 - One H3 per feature (e.g., `### User Management`, `### Data Export`)
-- Each feature subsection includes:
-  - What it does
-  - How to use it (steps or commands)
-  - Example usage
-  - Tips or best practices
+- Each feature subsection MUST include:
+  - **Description** — What it does and why a user would use it
+  - **Instructions** — Step-by-step usage guide (numbered steps with concrete commands or UI paths)
+  - **Example** — Concrete usage example with expected output
+  - **Screenshots** — Reference screenshots for UI features: `![{Alt text}]({nn}-core-features-{feature-slug}.png)`
+  - **Tips** — Best practices, common pitfalls, or power-user shortcuts (optional but recommended)
+
+**Screenshot convention:** `04-core-features-{feature-slug}-{description}.png`
+(e.g., `04-core-features-user-mgmt-create-dialog.png`)
+
+**When content is insufficient:** If extracted content lacks detail for any feature subsection (e.g., missing instructions or only has a one-liner description), flag it as INCOMPLETE and request the extractor to gather more source material for that specific feature.
 
 ---
 
-## 5. Configuration
+## 5. Common Workflow Scenarios
+
+**What belongs here:** End-to-end workflow walkthroughs showing how multiple features work together to accomplish real-world tasks. Unlike Section 4 (which documents individual features), this section demonstrates feature combinations in context.
+
+**Subsections:**
+- One H3 per scenario (e.g., `### Onboarding a New Team Member`, `### Deploying to Production`)
+- Each scenario MUST include:
+  - **Goal** — What the user wants to accomplish (1 sentence)
+  - **Prerequisites** — What must be set up before starting
+  - **Steps** — Numbered walkthrough referencing features from Section 4 (with cross-links)
+  - **Expected Result** — What success looks like
+  - **Screenshots** — Key UI states during the workflow: `![{Alt text}]({nn}-workflows-{scenario-slug}.png)`
+  - **Tips** — Variations, shortcuts, or "what if" guidance (optional)
+
+**Screenshot convention:** `05-workflows-{scenario-slug}-{description}.png`
+(e.g., `05-workflows-deploy-prod-pipeline-view.png`)
+
+**Minimum:** At least 3 scenarios covering the most common user journeys.
+
+**When content is insufficient:** If source material doesn't reveal common workflows clearly, flag as INCOMPLETE and request the extractor to analyze usage patterns, test files, or example scripts for workflow evidence.
+
+---
+
+## 6. Configuration
 
 **What belongs here:** All user-facing settings, options, and customization points.
 
@@ -94,7 +125,7 @@
 
 ---
 
-## 6. Troubleshooting
+## 7. Troubleshooting
 
 **What belongs here:** Common problems users encounter and how to resolve them.
 
@@ -106,7 +137,7 @@
 
 ---
 
-## 7. FAQ & Reference
+## 8. FAQ & Reference
 
 **What belongs here:** Frequently asked questions and reference material.
 
