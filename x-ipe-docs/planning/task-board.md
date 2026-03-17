@@ -6,8 +6,13 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-935 | Bug Fix | Fix deliverables panel UIUX feedback (Feedback-20260317-161023): remove duplicate `feature-docs-folder` chip rendering and improve sub-header separator/alignment | Echo 📡 | 🔄 in_progress | 03-17-2026 16:29:56 | | — |
+| TASK-934 | Change Request | CR for FEATURE-049-B: Add description field to KB article sidebar DETAILS section (UIUX Feedback-20260317-160429) | Ember 🔥 | 🔄 in_progress | 03-17-2026 16:17:00 | | x-ipe-task-based-feature-refinement |
 | TASK-929 | Bug Fix | Fix workflow action naming inconsistencies: align `code_implementation`→`implementation`, `acceptance_test`→`acceptance_testing`, `idea_mockup`→`design_mockup` across MCP, skills, frontend, tools config | Drift 🌊 | ✅ done | 03-17-2026 07:28:00 | [f620cf0] | — |
-| TASK-930 | Code Implementation | Implement FEATURE-050-B: Source Extraction Engine. Update SKILL.md Phase 2 stub, create extraction-engine-heuristics.md reference. program_type=skills. Workflow: Knowledge-Extraction | Nova ☄️ | 🔄 in_progress | 03-17-2026 08:45:00 | | x-ipe-task-based-feature-closing |
+| TASK-933 | Code Implementation | Implement FEATURE-050-C: Extract-Validate Loop. Update SKILL.md Phase 3, create validation-loop-heuristics.md. program_type=skills. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 09:25:00 | [SKILL.md, validation-loop-heuristics.md] | x-ipe-task-based-feature-closing |
+| TASK-932 | Technical Design | Design FEATURE-050-C: Extract-Validate Loop. program_type=skills. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 09:10:00 | [technical-design.md](x-ipe-docs/requirements/EPIC-050/FEATURE-050-C/technical-design.md) | x-ipe-task-based-code-implementation |
+| TASK-931 | Feature Refinement | Refine specification for FEATURE-050-C: Extract-Validate Loop & Coverage Control. 25 ACs, 6 groups. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 09:00:00 | [specification.md](x-ipe-docs/requirements/EPIC-050/FEATURE-050-C/specification.md) | x-ipe-task-based-technical-design |
+| TASK-930 | Code Implementation | Implement FEATURE-050-B: Source Extraction Engine. Update SKILL.md Phase 2 stub, create extraction-engine-heuristics.md reference. program_type=skills. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 08:50:00 | [0a22a7f] | x-ipe-task-based-feature-closing |
 | TASK-929 | Technical Design | Design FEATURE-050-B: Source Extraction Engine. program_type=skills. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 08:40:00 | [technical-design.md](x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/technical-design.md) | x-ipe-task-based-code-implementation |
 | TASK-928 | Feature Refinement | Refine specification for FEATURE-050-B: Source Extraction Engine. 29 ACs, 7 groups, 7 FRs, 3 NFRs. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 08:30:00 | [specification.md](x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/specification.md) | x-ipe-task-based-technical-design |
 | TASK-927 | Feature Closing | Close FEATURE-050-A: Extractor Skill Foundation & Input Detection. Verify ACs, code-to-docs review, commit, output summary. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 08:10:00 | [05a8a14] | x-ipe-task-based-feature-refinement |
@@ -172,8 +177,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 8
-- **In Progress:** 1
+- **Total Active:** 9
+- **In Progress:** 2
 - **Pending:** 0
 - **Deferred:** 0
 - **Completed (archived):** 868

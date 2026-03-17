@@ -13,7 +13,7 @@ triggers:
 
 # Application Knowledge Extractor
 
-> **Version:** 1.1.0 | **Status:** Candidate | **Feature:** FEATURE-050-B
+> **Version:** 1.2.0 | **Status:** Candidate | **Feature:** FEATURE-050-C
 
 ## Purpose
 
@@ -36,17 +36,11 @@ triggers:
 
 ### 🎯 Implemented Phases
 
-This version implements **Phase 1 (Foundation)** and **Phase 2 (Extraction)**:
-- ✅ Input analysis (detect type, format, app-type)
-- ✅ Category selection (v1: hardcoded filter)
-- ✅ Tool skill loading (glob discover, load, get artifacts)
-- ✅ Handoff protocol initialization (.checkpoint/ setup)
-- ✅ Source content extraction (template-guided, per-section)
+- ✅ Phase 1 (Foundation): Input analysis, category selection, tool skill loading, handoff init
+- ✅ Phase 2 (Extraction): Template-guided, per-section source content extraction
+- ✅ Phase 3 (Validation): Extract-validate loop with coverage tracking and gap classification
 
-**NOT Yet Implemented (future features):**
-- ❌ Validation & coverage loop (FEATURE-050-C)
-- ❌ Checkpoint persistence & resume (FEATURE-050-D)
-- ❌ KB intake output generation (FEATURE-050-E)
+**NOT Yet Implemented:** Phase 4 (Checkpoint & Resume), Phase 5 (KB Intake Output)
 
 ---
 
@@ -81,37 +75,19 @@ input:
 
 ```xml
 <input_init>
-  <!-- Standard fields (auto-populated by workflow) -->
-  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
-  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="category" derive="Read from this skill's Output Result `category` field → 'standalone'" />
-  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
-
-  <!-- Skill-specific fields -->
-  <field name="target" source="user-provided (path or URL to application/documentation)" />
-  <field name="purpose" source="user-provided, must be v1-supported category ('user-manual')" />
-  <field name="config_overrides" source="optional user-provided overrides, defaults: max_retries=3, web_search_enabled=true, timeout_seconds=15" />
+  <field name="task_id" source="auto-generated" />
+  <field name="execution_mode" source="workflow or free-mode" />
+  <field name="target" source="user-provided (path or URL)" />
+  <field name="purpose" source="user-provided, v1: 'user-manual' only" />
+  <field name="config_overrides" source="optional, defaults: max_retries=3, web_search_enabled=true, timeout_seconds=15, max_files_per_section=50, max_validation_iterations=3, coverage_target=0.8" />
 </input_init>
 ```
 
-**CONTEXT — Validate Prerequisites:**
-- ✅ \`target\` parameter is provided (path or URL)
-- ✅ \`purpose\` parameter matches a v1-supported category ("user-manual")
-- ✅ Target path exists (if local) OR URL is reachable (if remote)
-- ✅ Working directory is writable (for .checkpoint/ creation)
-
-**DECISION — Validation Gates:**
-- IF \`target\` is missing → halt with error: "Parameter 'target' is required"
-- IF \`purpose\` is not "user-manual" → halt with error: "Category '{purpose}' is not supported in v1. Supported: user-manual"
-- IF target path does not exist → halt with error: "Target path '{target}' does not exist"
-- IF target URL returns non-200 status → halt with error: "URL not reachable (HTTP {status})"
-- IF working directory is not writable → halt with error: "Working directory is not writable. Cannot create .checkpoint/ folder"
-
-**ACTION — Initialize:**
-- Set default \`config_overrides\` if not provided: \`max_retries=3, web_search_enabled=true, timeout_seconds=15\`
-- Resolve symlinks in target path (if local)
-- Log input parameters for debugging
+**Validation Gates:**
+- IF `target` missing → halt; IF `purpose` not "user-manual" → halt
+- IF target path missing or URL unreachable → halt
+- IF CWD not writable → halt
+- Set defaults for unspecified config_overrides
 
 ---
 
@@ -129,8 +105,8 @@ input:
 | Phase | Name | Steps | Feature |
 |-------|------|-------|---------|
 | 1 | 博学之 — Study Broadly | 1.1 Analyze Input, 1.2 Select Category, 1.3 Load Tool Skill, 1.4 Initialize Handoff | FEATURE-050-A ✅ |
-| 2 | 审问之 — Inquire Thoroughly | 2.1 Extract Source Content | FEATURE-050-B 🔜 |
-| 3 | 慎思之 — Think Carefully | 3.1 Validate & Coverage Loop | FEATURE-050-C 🔜 |
+| 2 | 审问之 — Inquire Thoroughly | 2.1 Extract Source Content | FEATURE-050-B ✅ |
+| 3 | 慎思之 — Think Carefully | 3.1 Validate & Coverage Loop | FEATURE-050-C ✅ |
 | 4 | 明辨之 — Discern Clearly | 4.1 Handle Errors & Checkpoints | FEATURE-050-D 🔜 |
 | 5 | 笃行之 — Practice Earnestly | 5.1 Generate KB Intake Output, 5.2 Complete | FEATURE-050-E 🔜 + Completion |
 | 6 | 继续执行 — Continue Execution | 6.1 Decide Next Action, 6.2 Execute Next Action | Standard |
@@ -320,9 +296,36 @@ For EACH section in collection template order:
 
 ---
 
-### Phase 3-4: Future Implementation Stubs
+### Phase 3: 慎思之 — Think Carefully (Validation Loop)
 
-**Phase 3 (慎思之):** Validation & coverage loop — See FEATURE-050-C specification
+#### Step 3.1 — Validate & Iterate
+
+**CONTEXT:** Read `tool_skill_artifacts.acceptance_criteria` from Phase 1. Load Phase 2 content from manifest. Config: `max_validation_iterations` (default 3), `coverage_target` (default 0.8). Update manifest: phase_3.status → "in_progress".
+
+**DECISION — Exit Conditions (checked per iteration):**
+- All sections accepted → exit "all_criteria_met"
+- iterations ≥ max → exit "max_iterations_reached"
+- coverage_ratio not improving (iteration > 1) → exit "plateau_detected"
+- No content from Phase 2 → skip Phase 3 entirely
+
+**ACTION — Iteration Loop (up to max_validation_iterations):**
+1. Validate each non-accepted section against acceptance criteria (per-criterion pass/fail)
+2. Write feedback to `{checkpoint_path}/feedback/section-{NN}-{slug}-iter-{M}.md`
+3. Lock accepted sections — not re-validated in later iterations
+4. Compute `coverage_ratio = criteria_met / total_criteria`; check exit conditions
+5. Classify gaps as "depth" (shallow) or "breadth" (missing topics) — see reference
+6. Re-extract failing sections via Phase 2 Step 2.1 with adjusted prompts
+
+**VERIFY:**
+- ✅ All sections have final validation_status (accepted | needs-more-info | error)
+- ✅ Feedback files in `{checkpoint_path}/feedback/`, manifest updated with phase_3 results
+- ✅ phase_3.final_coverage_ratio, exit_reason, coverage_history recorded
+
+**REFERENCE:** `references/validation-loop-heuristics.md`, `references/handoff-protocol.md`
+
+---
+
+### Phase 4: Future Implementation Stub
 
 **Phase 4 (明辨之):** Error handling & checkpoints — See FEATURE-050-D specification
 
@@ -447,6 +450,16 @@ task_completion_output:
     total_warnings: int
     content_files: ["content/section-{NN}-{slug}.md"]
   
+  # Phase 3 outputs (FEATURE-050-C)
+  validation_summary:
+    final_coverage_ratio: float  # 0.0-1.0
+    exit_reason: "all_criteria_met | max_iterations_reached | plateau_detected | skipped"
+    iterations_completed: int
+    coverage_history: [float]  # per-iteration coverage ratios
+    sections_accepted: int
+    sections_needs_more_info: int
+    sections_error: int
+  
   # Future fields (FEATURE-050-E)
   extraction_status: "foundation_only | complete | partial | failed"
   quality_score: null  # 0.0-1.0 in FEATURE-050-E
@@ -456,37 +469,29 @@ task_completion_output:
 
 ## Definition of Done (DoD)
 
-- [ ] **Phase 1 Complete:** All steps in Phase 1 executed successfully
-- [ ] **InputAnalysis Created:** input_type, format, app_type, source_metadata populated
-- [ ] **Category Selected:** "user-manual" selected and validated
-- [ ] **Tool Skill Loaded:** \`x-ipe-tool-knowledge-extraction-user-manual\` loaded with artifact paths
-- [ ] **Checkpoint Initialized:** \`.checkpoint/session-{timestamp}/\` created with manifest.yaml
-- [ ] **Phase 2 Complete:** All template sections extracted, content files written
-- [ ] **Manifest Updated:** Per-section status, content_file, files_read, warnings in manifest.yaml
-- [ ] **Output Result Populated:** All dynamic fields in output YAML set
+- [ ] **Phase 1 Complete:** Input analysis, category selection, tool skill loading, checkpoint init all passed
+- [ ] **Phase 2 Complete:** All template sections extracted, content files written, manifest updated
+- [ ] **Phase 3 Complete:** Validation loop executed, coverage_ratio computed, feedback files written
+- [ ] **Output Result Populated:** All dynamic fields (input_analysis, extraction_summary, validation_summary) set
 - [ ] **Task Board Updated:** Task moved to Completed section
-- [ ] **Verification:** All VERIFY checkpoints in Phase 1 + Phase 2 steps passed
+- [ ] **Verification:** All VERIFY checkpoints in Phase 1–3 steps passed
 
 ---
 
 ## Patterns & Anti-Patterns
 
-### ✅ Patterns (Do This)
-
-1. **Auto-Detect First:** Always run input analysis before category selection or tool skill loading
-2. **File-Based Handoff:** Use \`.checkpoint/\` folder for all knowledge exchange; never inline content in YAML
-3. **Fail Fast:** Halt immediately when tool skill not found or target not accessible
-4. **Synthesize, Don't Dump:** Extract and organize knowledge — never raw-copy files into content
+### ✅ Do This
+1. **Auto-Detect First:** Run input analysis before category selection or tool skill loading
+2. **File-Based Handoff:** Use `.checkpoint/` for all knowledge exchange; never inline content
+3. **Fail Fast:** Halt when tool skill not found or target not accessible
+4. **Synthesize, Don't Dump:** Extract and organize — never raw-copy files into content
 5. **Section-by-Section:** Follow collection template order; one content file per section
-6. **Reference Documentation:** Link to references/ for details; keep SKILL.md under 500 lines
 
-### ❌ Anti-Patterns (Don't Do This)
-
-1. **Inline Content Exchange:** Passing extracted content directly in YAML instead of file paths
-2. **Raw File Dumps:** Copying file contents verbatim into section files without synthesis
-3. **Skip Validation:** Proceeding without validating target exists/reachable
-4. **Checkpoint Inside Target:** Creating \`.checkpoint/\` inside target directory instead of CWD
-5. **Multi-Category Parallel:** Attempting multiple extraction categories in one session
+### ❌ Don't Do This
+1. **Inline Content Exchange:** Passing content directly in YAML instead of file paths
+2. **Raw File Dumps:** Copying file contents verbatim without synthesis
+3. **Checkpoint Inside Target:** Creating `.checkpoint/` inside target directory instead of CWD
+4. **Multi-Category Parallel:** Attempting multiple extraction categories in one session
 
 ---
 
