@@ -1,9 +1,9 @@
 # Feature Specification: KB AI Librarian & Intake
 
 > Feature ID: FEATURE-049-F  
-> Version: v1.1  
+> Version: v1.2  
 > Status: Refined  
-> Last Updated: 03-16-2026
+> Last Updated: 03-17-2026
 
 ## Version History
 
@@ -11,6 +11,7 @@
 |---------|------|-------------|
 | v1.0 | 03-16-2026 | Initial specification |
 | v1.1 | 03-16-2026 | CR-001: Added x-ipe-tool-kb-librarian skill to scope (was out-of-scope) |
+| v1.2 | 03-17-2026 | CR-002: Replace frontmatter-embedded metadata with `.kb-index.json` registry — hidden file, locally-scoped, folder metadata, description attribute |
 
 ## Linked Mockups
 
@@ -149,13 +150,13 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | AC-049-F-11b | GIVEN a pending file WHEN the skill analyzes its content THEN the skill assigns lifecycle tags (from: Ideation, Requirement, Design, Implementation, Testing, Deployment, Maintenance) AND domain tags (from: API, Authentication, UI-UX, Database, Infrastructure, Security, Performance, Integration, Documentation, Analytics) based on content relevance | Unit |
 | AC-049-F-11c | GIVEN the AI determines a file should go to a folder that does not yet exist WHEN the skill processes the file THEN the skill creates the destination folder automatically before moving the file | Unit |
 
-### AC-049-F-12: Skill — Frontmatter Generation
+### AC-049-F-12: Skill — Metadata Index Generation (CR-002: replaces Frontmatter Generation)
 
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
-| AC-049-F-12a | GIVEN a pending markdown file in `.intake/` WHEN the skill processes it THEN YAML frontmatter is generated with fields: `title`, `tags` (lifecycle + domain), `author`, `created`, and `auto_generated: true` | Unit |
-| AC-049-F-12b | GIVEN a pending non-markdown file (PDF, image, ZIP) in `.intake/` WHEN the skill processes it THEN the file is moved without frontmatter modification AND tags are tracked only in `.intake-status.json` | Unit |
-| AC-049-F-12c | GIVEN a markdown file already has partial frontmatter WHEN the skill processes it THEN existing frontmatter fields are preserved AND only missing fields are auto-populated (no overwriting) | Unit |
+| AC-049-F-12a | GIVEN a pending file (any type) in `.intake/` WHEN the skill processes it THEN a metadata entry is written to the destination folder's `.kb-index.json` with fields: `title`, `description` (< 100 words), `tags` (lifecycle + domain), `author`, `created`, `type` (markdown/image/video/pdf/document/other), and `auto_generated: true` | Unit |
+| AC-049-F-12b | GIVEN a pending non-markdown file (PDF, image, video, ZIP) in `.intake/` WHEN the skill processes it THEN the file is moved to the destination AND receives a full metadata entry in `.kb-index.json` (same fields as markdown files) — the file content is NOT modified | Unit |
+| AC-049-F-12c | GIVEN a file already has an entry in the destination `.kb-index.json` WHEN the skill processes a new version of that file THEN existing metadata fields are preserved AND only missing fields are auto-populated (no overwriting) | Unit |
 
 ### AC-049-F-13: Skill — File Movement & Status Updates
 
@@ -173,6 +174,18 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | AC-049-F-14b | GIVEN the skill SKILL.md WHEN the trigger patterns are inspected THEN it matches on: "organize knowledge base intake files with AI Librarian", "run AI Librarian", "organize intake" | Unit |
 | AC-049-F-14c | GIVEN the KB config has `ai_librarian.skill = "x-ipe-tool-kb-librarian"` WHEN the skill reads config THEN it uses the tag taxonomy from `kb-config.json` tags section for classification | Unit |
 
+### AC-049-F-15: Metadata Index Structure (CR-002)
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-049-F-15a | GIVEN a KB folder WHEN `.kb-index.json` is inspected THEN it is a hidden file (dot-prefixed) containing `version` (string) and `entries` (object keyed by filename or foldername with trailing `/`) | Unit |
+| AC-049-F-15b | GIVEN a `.kb-index.json` file WHEN an entry has a `description` field THEN the description is plain text with fewer than 100 words | Unit |
+| AC-049-F-15c | GIVEN a KB folder with subfolders WHEN `.kb-index.json` is read THEN subfolder entries (keys ending with `/`) can have metadata: `title`, `description`, and `tags` — enabling folder-level classification | Unit |
+| AC-049-F-15d | GIVEN a `.kb-index.json` WHEN it is read THEN it indexes ONLY the files and immediate subfolders in its own directory — it does NOT index files in nested subdirectories (each subfolder has its own `.kb-index.json`) | Unit |
+| AC-049-F-15e | GIVEN the KBService builds the file tree WHEN files are listed for a folder THEN metadata is read from that folder's `.kb-index.json` instead of parsing YAML frontmatter from file content | Unit |
+| AC-049-F-15f | GIVEN a file exists in a folder but has no entry in `.kb-index.json` WHEN the file is listed THEN default metadata is used (title from filename, no tags, author "unknown", type from extension) | Unit |
+| AC-049-F-15g | GIVEN a new file is created or moved into a folder WHEN the operation completes THEN an entry is auto-populated in that folder's `.kb-index.json` with default metadata | Unit |
+
 ## Functional Requirements
 
 | ID | Requirement | Input | Process | Output |
@@ -186,9 +199,11 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | FR-049-F.7 | Statistics Bar | Intake file data | Calculate counts by status (total, pending, processing, filed) | Statistics badges displayed in header |
 | FR-049-F.8 | Config Extension | `kb-config.json` ai_librarian section | Read config; gate all intake features behind `enabled` flag | Features shown/hidden based on config |
 | FR-049-F.9 | AI Content Analysis | Pending intake file content + KB folder structure | Analyze content to determine best destination folder; assign lifecycle + domain tags based on relevance | Destination path + tag assignments per file |
-| FR-049-F.10 | Frontmatter Generation | Markdown file content + assigned tags | Generate/merge YAML frontmatter with title, tags, author, created, auto_generated=true; skip for non-markdown files | Updated markdown with frontmatter |
-| FR-049-F.11 | Batch File Processing | All pending intake files | Process each: set status → processing, analyze content, generate frontmatter (markdown only), move to destination, set status → filed | All pending files moved and tagged |
+| FR-049-F.10 | Metadata Index Management | File/folder metadata + `.kb-index.json` | Read/write `.kb-index.json` per folder; auto-populate entries for new files; preserve existing entries on update | Metadata entries in hidden `.kb-index.json` per folder |
+| FR-049-F.11 | Batch File Processing | All pending intake files | Process each: set status → processing, analyze content, generate index entry (all file types), move to destination, set status → filed | All pending files moved and metadata indexed |
 | FR-049-F.12 | Skill File | x-ipe tool skill template | Create `.github/skills/x-ipe-tool-kb-librarian/SKILL.md` with trigger patterns, input/output contract, operations | Valid tool skill file |
+| FR-049-F.13 | Folder Metadata | KB folder structure | Subfolders can have metadata entries (title, description, tags) in parent's `.kb-index.json` — key ends with `/` | Folder-level classification and description |
+| FR-049-F.14 | Description Attribute | File/folder metadata | Each index entry supports a `description` field (< 100 words, plain text) for AI-generated or human-provided summaries | Description available for search and display |
 
 ## Non-Functional Requirements
 
@@ -260,10 +275,10 @@ Derived from mockup Scene 4:
 | Upload file with duplicate name in `.intake/` | Add numeric suffix (e.g., `file (1).md`) |
 | Filed file's destination folder deleted | "View in KB" shows error toast |
 | Very large `.intake/` (100+ files) | Pagination or virtual scrolling if needed (NFR-049-F.3) |
-| User uploads non-markdown file (PDF, ZIP, image) | Status tracked in `.intake-status.json` (not frontmatter) — works for all file types |
+| User uploads non-markdown file (PDF, ZIP, image) | Full metadata entry in `.kb-index.json` — same fields as markdown files; file content not modified |
 | AI Librarian skill not yet installed | Button still works (sends command to CLI); skill absence is the CLI agent's concern |
 | Skill encounters a file it cannot classify | Move to a default "unsorted" folder, log warning, continue batch |
-| Skill processes a very large file (>10MB) | Same behavior — file is moved, frontmatter added if markdown |
+| Skill processes a very large file (>10MB) | Same behavior — file is moved, metadata entry added to `.kb-index.json` |
 
 ## Out of Scope
 
@@ -271,7 +286,8 @@ Derived from mockup Scene 4:
 - **`kb-articles` workflow action context key** — workflow integration for the skill
 - **Batch operations** (select multiple files, bulk assign/remove) — future enhancement
 - **Drag-and-drop reordering** within intake table — not in mockup
-- **Sidecar `.meta.json` for non-markdown files** — YAGNI; tags tracked in status.json only
+- **Sidecar `.meta.json` for non-markdown files** — replaced by `.kb-index.json` registry (CR-002)
+- **YAML frontmatter for metadata** — replaced by `.kb-index.json` registry (CR-002); existing frontmatter in markdown files is NOT removed but no longer the source of truth
 
 ## Technical Considerations
 
@@ -281,12 +297,16 @@ Derived from mockup Scene 4:
 - Existing `GET /api/kb/files?folder=.intake` or tree API can list intake files — extend if needed for status merging
 - Config `KBConfig.ai_librarian` needs `skill` field added (default: `"x-ipe-tool-kb-librarian"`)
 - Frontend polls or refreshes intake view after AI Librarian runs to pick up status changes
-- Skill uses KB service methods: `get_intake_files()`, `update_intake_status()`, `move_file()`, `update_file()`, `_parse_frontmatter()`, `_auto_populate_frontmatter()`
+- `.kb-index.json` schema (CR-002): `{ "version": "1.0", "entries": { "filename.ext": { "title": "...", "description": "< 100 words", "tags": { "domain": [...], "lifecycle": [...] }, "author": "...", "created": "YYYY-MM-DD", "type": "markdown|image|video|pdf|document|other", "auto_generated": true }, "subfolder/": { "title": "...", "description": "...", "tags": {...} } } }`
+- Each `.kb-index.json` is locally-scoped — indexes only files and immediate subfolders in its directory
+- Metadata is read from `.kb-index.json` instead of parsing YAML frontmatter from file content
+- Skill uses KB service methods: `get_intake_files()`, `update_intake_status()`, `move_file()`, `_read_kb_index()`, `_write_kb_index()`
 - Skill reads tag taxonomy from kb-config.json (`tags.lifecycle`, `tags.domain`) for AI classification
-- Non-markdown files: moved and status-tracked, but no frontmatter generation (WHAT not HOW)
+- Non-markdown files: moved, metadata indexed in `.kb-index.json`, same fields as markdown
 - Skill is a tool skill created via `x-ipe-meta-skill-creator` — file at `.github/skills/x-ipe-tool-kb-librarian/SKILL.md`
 
 ## Open Questions
 
 None — all questions resolved via DAO (see `x-ipe-docs/dao/26-03-16/decisions_made_feature_refinement.md`).
 CR-001 questions resolved: batch processing, destination priority (UI-assigned > AI), non-markdown handling, terminal summary, auto-create folders.
+CR-002 questions resolved: metadata storage (`.kb-index.json` registry), locally-scoped indexes, folder metadata, description attribute (< 100 words).

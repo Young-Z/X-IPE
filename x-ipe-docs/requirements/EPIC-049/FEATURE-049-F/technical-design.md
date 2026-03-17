@@ -496,16 +496,172 @@ The agent executing this skill uses its LLM capabilities to:
 
 No external AI API calls needed — the executing agent IS the LLM.
 
+### Step 10: `.kb-index.json` Metadata Registry (CR-002)
+
+**Motivation:** Replace frontmatter-embedded metadata with a centralized, per-folder JSON registry. Works for ALL file types (images, videos, PDFs) and supports folder-level metadata.
+
+#### Architecture Overview
+
+```mermaid
+graph TB
+    subgraph "KB Folder: guides/"
+        IDX1[".kb-index.json"]
+        F1["setup.md"]
+        F2["diagram.png"]
+        SF1["tutorials/"]
+    end
+
+    subgraph "KB Folder: guides/tutorials/"
+        IDX2[".kb-index.json"]
+        F3["quickstart.md"]
+        F4["demo.mp4"]
+    end
+
+    IDX1 -->|indexes| F1
+    IDX1 -->|indexes| F2
+    IDX1 -->|indexes| SF1
+    IDX2 -->|indexes| F3
+    IDX2 -->|indexes| F4
+
+    style IDX1 fill:#f9f,stroke:#333
+    style IDX2 fill:#f9f,stroke:#333
+```
+
+**Key Design Principle:** Each `.kb-index.json` is locally-scoped — it indexes ONLY the files and immediate subfolders in its own directory. Nested subdirectories have their own `.kb-index.json`.
+
+#### `.kb-index.json` Schema
+
+```json
+{
+  "version": "1.0",
+  "entries": {
+    "setup.md": {
+      "title": "Environment Setup Guide",
+      "description": "Step-by-step guide for setting up the local development environment with required tools and dependencies.",
+      "tags": {
+        "domain": ["infrastructure"],
+        "lifecycle": ["implementation"]
+      },
+      "author": "yzhang",
+      "created": "2026-03-16",
+      "type": "markdown",
+      "auto_generated": false
+    },
+    "diagram.png": {
+      "title": "Architecture Diagram",
+      "description": "High-level system architecture showing component interactions and data flow paths.",
+      "tags": {
+        "domain": ["infrastructure"],
+        "lifecycle": ["design"]
+      },
+      "author": "unknown",
+      "created": "2026-03-16",
+      "type": "image",
+      "auto_generated": false
+    },
+    "tutorials/": {
+      "title": "Tutorial Materials",
+      "description": "Collection of quickstart guides and demo videos for onboarding new team members.",
+      "tags": {
+        "domain": ["documentation"],
+        "lifecycle": ["implementation"]
+      }
+    }
+  }
+}
+```
+
+**Schema Rules:**
+- `version`: Always `"1.0"` (for future schema migrations)
+- Keys: filename for files, foldername + `/` for subfolders
+- `type` field (files only): `markdown`, `image`, `video`, `pdf`, `document`, `other`
+- `description`: Max 100 words, plain text
+- `auto_generated`: Whether metadata was AI-generated (default `false`)
+- Missing entry = file has no metadata (defaults from filename/extension)
+- Folder entries do NOT have `type`, `author`, `created`, or `auto_generated` fields
+
+#### Type Detection
+
+```python
+EXTENSION_TYPE_MAP = {
+    '.md': 'markdown',
+    '.png': 'image', '.jpg': 'image', '.jpeg': 'image',
+    '.gif': 'image', '.svg': 'image', '.webp': 'image',
+    '.mp4': 'video', '.mov': 'video', '.webm': 'video', '.avi': 'video',
+    '.pdf': 'pdf',
+    '.doc': 'document', '.docx': 'document', '.xls': 'document',
+    '.xlsx': 'document', '.ppt': 'document', '.pptx': 'document',
+}
+# Default: 'other'
+```
+
+#### New/Refactored Methods in `kb_service.py`
+
+| Method | Type | Purpose |
+|--------|------|---------|
+| `_read_kb_index(folder_path)` | New | Read `.kb-index.json` from folder; return `{}` entries if missing |
+| `_write_kb_index(folder_path, index_data)` | New | Atomic write `.kb-index.json` to folder (temp+rename) |
+| `_get_index_entry(folder_path, name)` | New | Get single entry from folder's index; return `None` if missing |
+| `_set_index_entry(folder_path, name, entry)` | New | Set/update single entry in folder's index |
+| `_remove_index_entry(folder_path, name)` | New | Remove entry from folder's index |
+| `_auto_populate_index_entry(filename)` | Refactor | Default metadata from filename/extension (was `_auto_populate_frontmatter`) |
+| `_detect_file_type(filename)` | New | Map file extension to type string |
+| `_migrate_frontmatter_to_index(folder_path)` | New | One-time: read YAML frontmatter from .md files, write to `.kb-index.json` |
+
+#### Migration Strategy (Frontmatter → Index)
+
+```
+For each KB folder:
+  1. Scan for .md files with YAML frontmatter
+  2. Parse frontmatter (title, tags, author, created)
+  3. Write entries to .kb-index.json (preserve all existing values)
+  4. Do NOT remove frontmatter from .md files (non-destructive)
+  5. Mark index entries with auto_generated: false (human-authored frontmatter)
+```
+
+After migration, `_ensure_file_index()` reads from `.kb-index.json` instead of parsing frontmatter.
+
+#### API Compatibility
+
+The API response shape is preserved — no frontend changes needed:
+
+```
+Before (frontmatter):  file.frontmatter.title → from YAML in .md file
+After (index):         file.frontmatter.title → from .kb-index.json entry
+```
+
+The `frontmatter` key in API responses is kept for backwards compatibility but now sourced from the index. Future API versions may rename it to `metadata`.
+
+#### Sequence: File Creation with Index Entry
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Routes
+    participant KBService
+    participant FS as Filesystem
+
+    Client->>Routes: POST /api/kb/files (content, metadata)
+    Routes->>KBService: create_file(path, content, metadata)
+    KBService->>FS: Write file content (no frontmatter injection)
+    KBService->>KBService: _auto_populate_index_entry(filename)
+    KBService->>KBService: merge provided metadata with defaults
+    KBService->>KBService: _set_index_entry(folder, filename, entry)
+    KBService->>FS: Atomic write .kb-index.json
+    KBService-->>Routes: {name, path, metadata}
+    Routes-->>Client: 201 Created
+```
+
 ### File Change Summary
 
 | File | Changes | Est. Lines |
 |------|---------|------------|
-| `src/x_ipe/services/kb_service.py` | Add `get_intake_files()`, `update_intake_status()`, `_read_intake_status()`, `_write_intake_status()`, update `KBConfig.ai_librarian` default | ~90 |
-| `src/x_ipe/routes/kb_routes.py` | Add `GET /api/kb/intake`, `PUT /api/kb/intake/status` | ~40 |
-| `src/x_ipe/static/js/features/kb-browse-modal.js` | Fix command, enhance intake scene, add status UI, filters, per-file actions | ~250 |
-| `tests/test_kb_service.py` | Add intake service tests | ~100 |
-| `tests/frontend-js/kb-intake-049f.test.js` | New: frontend intake UI tests | ~150 |
-| `.github/skills/x-ipe-tool-kb-librarian/SKILL.md` | New: Tool skill file with operations, I/O contract, triggers (CR-001) | ~200 |
+| `src/x_ipe/services/kb_service.py` | Add `_read_kb_index()`, `_write_kb_index()`, `_get/set/remove_index_entry()`, `_auto_populate_index_entry()`, `_detect_file_type()`, `_migrate_frontmatter_to_index()`. Refactor tree building to read from index. Update `create_file()`, `update_file()`, `move_file()` to write index entries. Keep `_parse_frontmatter()` for migration only. | ~150 |
+| `src/x_ipe/routes/kb_routes.py` | Minimal — API response shape preserved. Update `create_file`/`update_file` params for metadata (was frontmatter). | ~10 |
+| `src/x_ipe/static/js/features/kb-browse-modal.js` | No changes — consumes same `file.frontmatter` JSON shape from API | 0 |
+| `.github/skills/x-ipe-tool-kb-librarian/SKILL.md` | Update procedure: generate index entries instead of frontmatter. Remove markdown-only gate. All file types get metadata. | ~30 |
+| `tests/test_kb_service.py` | Update frontmatter tests → index tests. Add `.kb-index.json` read/write/migrate tests. | ~80 |
+| `tests/frontend-js/kb-intake-049f.test.js` | No changes — tests mock API response, not internal storage | 0 |
 
 ---
 
@@ -515,3 +671,4 @@ No external AI API calls needed — the executing agent IS the LLM.
 |------|-------|----------------|
 | 03-16-2026 | Initial Design | Initial technical design for FEATURE-049-F. Backend: intake status service + 2 routes. Frontend: full intake scene matching mockup Scene 4 with status tracking, filters, per-file actions. Command fix: remove --workflow-mode. |
 | 03-16-2026 | CR-001 Skill Design | Added Step 9: x-ipe-tool-kb-librarian skill design. program_type=skills. Sequence diagram, state machine, SKILL.md structure, AI classification approach, 6 DAO-driven decisions. |
+| 03-17-2026 | CR-002 Metadata Registry | Added Step 10: .kb-index.json registry design. Replaces frontmatter-embedded metadata. Per-folder hidden JSON index, folder metadata support, description field (< 100 words). Migration strategy, API compatibility, new/refactored methods. |

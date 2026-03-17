@@ -1149,3 +1149,228 @@ class TestIntakeRoutes:
         resp = client.put('/api/kb/intake/status',
                           json={'filename': 'missing.md', 'status': 'pending'})
         assert resp.status_code == 404
+
+
+# ===========================================================================
+# CR-002: .kb-index.json Metadata Registry
+# ===========================================================================
+
+class TestKBIndex:
+    """CR-002: .kb-index.json per-folder metadata registry."""
+
+    def test_read_kb_index_missing_returns_empty(self, kb_service):
+        idx = kb_service._read_kb_index(kb_service.kb_root)
+        assert idx['version'] == '1.0'
+        assert idx['entries'] == {}
+
+    def test_write_and_read_kb_index(self, kb_service):
+        data = {'version': '1.0', 'entries': {'test.md': {'title': 'Test'}}}
+        kb_service._write_kb_index(kb_service.kb_root, data)
+        result = kb_service._read_kb_index(kb_service.kb_root)
+        assert result['entries']['test.md']['title'] == 'Test'
+
+    def test_read_kb_index_corrupted_returns_empty(self, kb_service):
+        idx_path = kb_service.kb_root / '.kb-index.json'
+        idx_path.write_text('not valid json!!!', encoding='utf-8')
+        idx = kb_service._read_kb_index(kb_service.kb_root)
+        assert idx['entries'] == {}
+
+    def test_set_and_get_index_entry(self, kb_service):
+        entry = {'title': 'Hello', 'type': 'markdown'}
+        kb_service._set_index_entry(kb_service.kb_root, 'hello.md', entry)
+        result = kb_service._get_index_entry(kb_service.kb_root, 'hello.md')
+        assert result['title'] == 'Hello'
+        assert result['type'] == 'markdown'
+
+    def test_get_index_entry_missing_returns_none(self, kb_service):
+        result = kb_service._get_index_entry(kb_service.kb_root, 'nope.md')
+        assert result is None
+
+    def test_remove_index_entry(self, kb_service):
+        kb_service._set_index_entry(kb_service.kb_root, 'bye.md', {'title': 'Bye'})
+        kb_service._remove_index_entry(kb_service.kb_root, 'bye.md')
+        assert kb_service._get_index_entry(kb_service.kb_root, 'bye.md') is None
+
+    def test_remove_index_entry_missing_noop(self, kb_service):
+        # Should not raise
+        kb_service._remove_index_entry(kb_service.kb_root, 'nonexistent.md')
+
+    def test_detect_kb_file_type(self, kb_service):
+        assert kb_service._detect_kb_file_type('doc.md') == 'markdown'
+        assert kb_service._detect_kb_file_type('pic.png') == 'image'
+        assert kb_service._detect_kb_file_type('vid.mp4') == 'video'
+        assert kb_service._detect_kb_file_type('report.pdf') == 'pdf'
+        assert kb_service._detect_kb_file_type('slides.pptx') == 'document'
+        assert kb_service._detect_kb_file_type('data.csv') == 'other'
+
+    def test_auto_populate_index_entry_defaults(self, kb_service):
+        entry = kb_service._auto_populate_index_entry('my-notes.md')
+        assert entry['title'] == 'My Notes'
+        assert entry['author'] == 'unknown'
+        assert entry['type'] == 'markdown'
+        assert entry['description'] == ''
+        assert entry['tags'] == {'lifecycle': [], 'domain': []}
+        assert entry['auto_generated'] is False
+
+    def test_auto_populate_index_entry_with_metadata(self, kb_service):
+        entry = kb_service._auto_populate_index_entry('photo.jpg', {
+            'title': 'Team Photo',
+            'description': 'Team meeting 2026',
+            'author': 'alice',
+        })
+        assert entry['title'] == 'Team Photo'
+        assert entry['description'] == 'Team meeting 2026'
+        assert entry['author'] == 'alice'
+        assert entry['type'] == 'image'
+
+    def test_index_entry_to_frontmatter_conversion(self, kb_service):
+        entry = {
+            'title': 'Test',
+            'description': 'A test file',
+            'tags': {'lifecycle': ['Draft'], 'domain': ['API']},
+            'author': 'bob',
+            'created': '2026-03-17',
+            'auto_generated': False,
+        }
+        fm = kb_service._index_entry_to_frontmatter(entry)
+        assert fm.title == 'Test'
+        assert fm.description == 'A test file'
+        assert fm.tags.lifecycle == ['Draft']
+        assert fm.author == 'bob'
+
+    def test_create_file_writes_index_entry(self, kb_service):
+        kb_service.create_file('indexed.md', 'Body', {'title': 'Indexed'})
+        entry = kb_service._get_index_entry(kb_service.kb_root, 'indexed.md')
+        assert entry is not None
+        assert entry['title'] == 'Indexed'
+        assert entry['type'] == 'markdown'
+
+    def test_create_file_no_frontmatter_in_content(self, kb_service):
+        """New files should NOT have YAML frontmatter injected into content."""
+        kb_service.create_file('clean.md', 'Just body', {'title': 'Clean'})
+        raw = (kb_service.kb_root / 'clean.md').read_text(encoding='utf-8')
+        assert not raw.startswith('---')
+        assert raw == 'Just body'
+
+    def test_create_binary_file_writes_index_entry(self, kb_service):
+        result = kb_service.create_binary_file('photo.png', b'\x89PNG\r\n',
+                                                metadata={'title': 'Photo'})
+        entry = kb_service._get_index_entry(kb_service.kb_root, 'photo.png')
+        assert entry is not None
+        assert entry['title'] == 'Photo'
+        assert entry['type'] == 'image'
+        assert result['frontmatter']['title'] == 'Photo'
+
+    def test_delete_file_removes_index_entry(self, kb_service):
+        kb_service.create_file('doomed.md', 'Gone')
+        assert kb_service._get_index_entry(kb_service.kb_root, 'doomed.md') is not None
+        kb_service.delete_file('doomed.md')
+        assert kb_service._get_index_entry(kb_service.kb_root, 'doomed.md') is None
+
+    def test_move_file_transfers_index_entry(self, kb_service):
+        kb_service.create_file('src/doc.md', 'Hi', {'title': 'Doc'})
+        kb_service.create_folder('dst')
+        kb_service.move_file('src/doc.md', 'dst/doc.md')
+        # Source folder should NOT have the entry
+        src_folder = kb_service.kb_root / 'src'
+        assert kb_service._get_index_entry(src_folder, 'doc.md') is None
+        # Destination folder SHOULD have it
+        dst_folder = kb_service.kb_root / 'dst'
+        entry = kb_service._get_index_entry(dst_folder, 'doc.md')
+        assert entry is not None
+        assert entry['title'] == 'Doc'
+
+    def test_update_file_updates_index_entry(self, kb_service):
+        kb_service.create_file('evolve.md', 'V1', {'title': 'V1'})
+        kb_service.update_file('evolve.md', frontmatter={'title': 'V2'})
+        entry = kb_service._get_index_entry(kb_service.kb_root, 'evolve.md')
+        assert entry['title'] == 'V2'
+
+    def test_get_file_returns_index_metadata(self, kb_service):
+        kb_service.create_file('meta.md', 'Body', {
+            'title': 'Meta Test',
+            'description': 'Testing index metadata',
+        })
+        result = kb_service.get_file('meta.md')
+        assert result['frontmatter']['title'] == 'Meta Test'
+        assert result['frontmatter']['description'] == 'Testing index metadata'
+
+    def test_tree_excludes_kb_index_file(self, kb_service):
+        kb_service.create_file('visible.md', 'Hi')
+        tree = kb_service.get_tree()
+        names = [n.name for n in tree]
+        assert '.kb-index.json' not in names
+        assert 'visible.md' in names
+
+    def test_description_field_in_to_dict(self, kb_service):
+        result = kb_service.create_file('desc.md', 'Body', {
+            'title': 'Desc Test',
+            'description': 'Short description',
+        })
+        assert result['frontmatter']['description'] == 'Short description'
+
+    def test_locally_scoped_index_per_folder(self, kb_service):
+        """Each folder has its own .kb-index.json — not shared."""
+        kb_service.create_file('root-file.md', 'Root')
+        kb_service.create_file('sub/nested.md', 'Nested')
+        # Root index should have root-file.md but NOT nested.md
+        root_entry = kb_service._get_index_entry(kb_service.kb_root, 'root-file.md')
+        assert root_entry is not None
+        root_nested = kb_service._get_index_entry(kb_service.kb_root, 'nested.md')
+        assert root_nested is None
+        # Sub index should have nested.md
+        sub_folder = kb_service.kb_root / 'sub'
+        sub_entry = kb_service._get_index_entry(sub_folder, 'nested.md')
+        assert sub_entry is not None
+
+
+class TestKBIndexMigration:
+    """CR-002: Migration from frontmatter to .kb-index.json."""
+
+    def test_migrate_reads_frontmatter_from_md(self, kb_service):
+        """Migration extracts YAML frontmatter and writes to index."""
+        _create_md_file(kb_service.kb_root, 'legacy.md',
+                        frontmatter={'title': 'Legacy', 'author': 'old-author'},
+                        body='Legacy content')
+        kb_service._migrate_frontmatter_to_index(kb_service.kb_root)
+        entry = kb_service._get_index_entry(kb_service.kb_root, 'legacy.md')
+        assert entry is not None
+        assert entry['title'] == 'Legacy'
+        assert entry['author'] == 'old-author'
+        assert entry['type'] == 'markdown'
+
+    def test_migrate_skips_if_index_exists(self, kb_service):
+        """Migration is a no-op if .kb-index.json already exists."""
+        kb_service._set_index_entry(kb_service.kb_root, 'existing.md', {'title': 'Existing'})
+        _create_md_file(kb_service.kb_root, 'new.md',
+                        frontmatter={'title': 'New'}, body='Content')
+        kb_service._migrate_frontmatter_to_index(kb_service.kb_root)
+        # Should NOT have migrated new.md since index already existed
+        entry = kb_service._get_index_entry(kb_service.kb_root, 'new.md')
+        assert entry is None
+
+    def test_migrate_handles_md_without_frontmatter(self, kb_service):
+        """MD files without frontmatter get auto-populated entries."""
+        _create_md_file(kb_service.kb_root, 'plain.md', body='No frontmatter here')
+        kb_service._migrate_frontmatter_to_index(kb_service.kb_root)
+        entry = kb_service._get_index_entry(kb_service.kb_root, 'plain.md')
+        assert entry is not None
+        assert entry['title'] == 'Plain'  # auto-populated from filename
+
+    def test_migrate_handles_non_markdown_files(self, kb_service):
+        """Non-markdown files get auto-populated entries during migration."""
+        (kb_service.kb_root / 'photo.png').write_bytes(b'\x89PNG')
+        kb_service._migrate_frontmatter_to_index(kb_service.kb_root)
+        entry = kb_service._get_index_entry(kb_service.kb_root, 'photo.png')
+        assert entry is not None
+        assert entry['type'] == 'image'
+
+    def test_build_tree_fallback_to_frontmatter(self, kb_service):
+        """When no .kb-index.json exists, _build_tree falls back to frontmatter."""
+        _create_md_file(kb_service.kb_root, 'old-style.md',
+                        frontmatter={'title': 'Old Style'}, body='Content')
+        kb_service._invalidate_cache()
+        tree = kb_service.get_tree()
+        file_node = [n for n in tree if n.name == 'old-style.md']
+        assert len(file_node) == 1
+        assert file_node[0].frontmatter.title == 'Old Style'
