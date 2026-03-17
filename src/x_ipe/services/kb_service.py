@@ -420,16 +420,27 @@ class KBService:
     KB_INDEX_VERSION = '1.0'
 
     def _read_kb_index(self, folder_path: Path) -> Dict[str, Any]:
-        """Read .kb-index.json from folder. Returns empty entries dict if missing/corrupted."""
+        """Read .kb-index.json from folder. Returns empty entries dict if missing/corrupted.
+        
+        Handles both formats:
+        - Canonical: {"version": "1.0", "entries": {"file.md": {...}}}
+        - Flat (legacy): {"file.md": {...}} — auto-wrapped into canonical form
+        """
         index_path = folder_path / KB_INDEX_FILE
         if not index_path.exists():
             return {'version': self.KB_INDEX_VERSION, 'entries': {}}
         try:
             with open(index_path, 'r', encoding='utf-8') as fh:
                 data = json.load(fh)
-            if not isinstance(data, dict) or 'entries' not in data:
+            if not isinstance(data, dict):
                 return {'version': self.KB_INDEX_VERSION, 'entries': {}}
-            return data
+            if 'entries' in data:
+                return data
+            # Flat format: all top-level keys are entry names
+            # (exclude 'version' if present at top level)
+            entries = {k: v for k, v in data.items()
+                       if k != 'version' and isinstance(v, dict)}
+            return {'version': data.get('version', self.KB_INDEX_VERSION), 'entries': entries}
         except (json.JSONDecodeError, OSError):
             import logging
             logging.getLogger(__name__).warning(
@@ -583,6 +594,8 @@ class KBService:
 
         files: List[KBNode] = []
         entries = target.rglob('*') if recursive else target.iterdir()
+        # Cache indexes per folder for efficiency
+        _index_cache: Dict[Path, Dict[str, Any]] = {}
         for entry in entries:
             if not entry.is_file():
                 continue
@@ -590,7 +603,16 @@ class KBService:
                 continue
             rel = str(entry.relative_to(self.kb_root)).replace('\\', '/')
             stat = entry.stat()
-            fm = self._frontmatter_index.get(rel) or self._parse_frontmatter_safe(entry)
+            # Read the index for this file's parent folder (cached)
+            parent = entry.parent
+            if parent not in _index_cache:
+                idx = self._read_kb_index(parent)
+                _index_cache[parent] = idx.get('entries', {})
+            idx_entry = _index_cache[parent].get(entry.name)
+            if idx_entry:
+                fm = self._index_entry_to_frontmatter(idx_entry)
+            else:
+                fm = self._frontmatter_index.get(rel) or self._parse_frontmatter_safe(entry)
             files.append(self._build_file_node(rel, entry.name, stat, fm))
         return self._sort_files(files, sort)
 
