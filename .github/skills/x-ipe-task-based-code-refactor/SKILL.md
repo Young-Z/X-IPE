@@ -260,7 +260,7 @@ BLOCKING: Phase 4 halts if any test fails (must fix or revert).
       <action>
         0. TOOL SKILL ROUTING (config-filtered):
            a. DISCOVER: Scan .github/skills/x-ipe-tool-implementation-*/
-           b. READ CONFIG: Read x-ipe-docs/config/tools.json → stages.refactoring.execution
+           b. READ CONFIG: Read x-ipe-docs/config/tools.json → stages.feedback.code_refactor
               - IF section missing/empty → config_active = false (all tools enabled)
               - ELSE → config_active = true (opt-in); force-enable general
            c. FILTER: IF config_active → only ENABLED tools participate

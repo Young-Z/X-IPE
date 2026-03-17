@@ -19,7 +19,7 @@ CONFIG_FILE = 'tools.json'
 LEGACY_PATH = 'x-ipe-docs/ideas/.ideation-tools.json'
 
 DEFAULT_CONFIG = {
-    "version": "3.0",
+    "version": "3.1",
     "stages": {
         "ideation": {
             "ideation": {"x-ipe-tool-infographic-syntax": False, "mermaid": False},
@@ -28,8 +28,18 @@ DEFAULT_CONFIG = {
             "sharing": {}
         },
         "requirement": {"gathering": {}, "analysis": {}},
-        "implement": {"design": {}, "implementation": {}, "testing": {}, "review": {}},
-        "feedback": {"bug_fix": {}, "playground": {}, "refactoring": {}, "change_request": {}}
+        "implement": {
+            "technical_design": {},
+            "code_implementation": {},
+            "acceptance_test": {}
+        },
+        "feedback": {
+            "bug_fix": {},
+            "code_refactor": {},
+            "refactoring_analysis": {},
+            "human_playground": {},
+            "change_request": {}
+        }
     }
 }
 
@@ -73,8 +83,12 @@ class ToolsConfigService:
         """
         if self.config_path.exists():
             config = self._read_config()
-            if config.get('version') == '2.0':
+            version = config.get('version', '1.0')
+            if version == '2.0':
                 config = self._migrate_v2_to_v3(config)
+                self.save(config)
+            elif version == '3.0':
+                config = self._migrate_v3_to_v31(config)
                 self.save(config)
             return config
         
@@ -160,47 +174,90 @@ class ToolsConfigService:
     
     def _migrate_v2_to_v3(self, config: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Migrate v2.0 stages (feature/quality/refactoring) to v3.0 (implement/feedback).
+        Migrate v2.0 stages (feature/quality/refactoring) to v3.1 (implement/feedback).
         
         Mapping:
-        - feature.design, feature.implementation, feature.consultation → implement
-        - quality.testing, quality.review → implement
-        - feature.bug_fix, feature.playground → feedback
-        - refactoring.analysis, refactoring.execution → feedback.refactoring
+        - feature.consultation → implement.technical_design
+        - feature.implementation → implement.code_implementation
+        - quality.testing → implement.acceptance_test
+        - feature.bug_fix → feedback.bug_fix
+        - refactoring.execution → feedback.code_refactor
+        - feature.consultation → feedback.refactoring_analysis (copy)
+        - feature.playground → feedback.human_playground
+        - Unused phases (design, review) are dropped
         """
         stages = config.get('stages', {})
         feature = stages.pop('feature', {})
         quality = stages.pop('quality', {})
         refactoring = stages.pop('refactoring', {})
         
-        # Build implement stage from feature + quality
         implement = {}
-        for phase_key in ('design', 'implementation', 'consultation'):
-            if phase_key in feature:
-                implement[phase_key] = feature[phase_key]
-        for phase_key in ('testing', 'review'):
-            if phase_key in quality:
-                implement[phase_key] = quality[phase_key]
+        if 'consultation' in feature:
+            implement['technical_design'] = feature['consultation']
+        if 'implementation' in feature:
+            implement['code_implementation'] = feature['implementation']
+        if 'testing' in quality:
+            implement['acceptance_test'] = quality['testing']
         
-        # Build feedback stage from feature bug_fix/playground + refactoring
         feedback = {}
-        for phase_key in ('bug_fix', 'playground'):
-            if phase_key in feature:
-                feedback[phase_key] = feature[phase_key]
-        # Merge refactoring analysis + execution tools into single refactoring phase
-        refactoring_tools = {}
-        for phase_key in ('analysis', 'execution'):
-            if phase_key in refactoring:
-                for tool, val in refactoring[phase_key].items():
-                    refactoring_tools[tool] = val
-        if refactoring_tools:
-            feedback['refactoring'] = refactoring_tools
+        if 'bug_fix' in feature:
+            feedback['bug_fix'] = feature['bug_fix']
+        if 'execution' in refactoring:
+            feedback['code_refactor'] = refactoring['execution']
+        if 'consultation' in feature:
+            feedback['refactoring_analysis'] = copy.deepcopy(feature['consultation'])
+        if 'playground' in feature:
+            feedback['human_playground'] = feature['playground']
         feedback.setdefault('change_request', {})
         
         stages['implement'] = implement
         stages['feedback'] = feedback
         config['stages'] = stages
-        config['version'] = '3.0'
+        config['version'] = '3.1'
+        return config
+    
+    def _migrate_v3_to_v31(self, config: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Migrate v3.0 phase names to v3.1 workflow-aligned names.
+        
+        Mapping:
+        - implement: consultation→technical_design, implementation→code_implementation,
+          testing→acceptance_test, design/review dropped
+        - feedback: playground→human_playground, refactoring→code_refactor+refactoring_analysis
+        """
+        stages = config.get('stages', {})
+        
+        impl = stages.get('implement', {})
+        new_impl = {}
+        if 'consultation' in impl:
+            new_impl['technical_design'] = impl['consultation']
+        if 'implementation' in impl:
+            new_impl['code_implementation'] = impl['implementation']
+        if 'testing' in impl:
+            new_impl['acceptance_test'] = impl['testing']
+        # Carry over if already using new names
+        for key in ('technical_design', 'code_implementation', 'acceptance_test'):
+            if key in impl and key not in new_impl:
+                new_impl[key] = impl[key]
+        stages['implement'] = new_impl
+        
+        fb = stages.get('feedback', {})
+        new_fb = {}
+        new_fb['bug_fix'] = fb.get('bug_fix', {})
+        if 'refactoring' in fb:
+            new_fb['code_refactor'] = fb['refactoring']
+            new_fb['refactoring_analysis'] = copy.deepcopy(fb['refactoring'])
+        if 'playground' in fb:
+            new_fb['human_playground'] = fb['playground']
+        # Carry over if already using new names
+        for key in ('code_refactor', 'refactoring_analysis', 'human_playground'):
+            if key in fb and key not in new_fb:
+                new_fb[key] = fb[key]
+        new_fb.setdefault('change_request', fb.get('change_request', {}))
+        stages['feedback'] = new_fb
+        
+        config['stages'] = stages
+        config['version'] = '3.1'
         return config
     
     def _create_default(self) -> Dict[str, Any]:

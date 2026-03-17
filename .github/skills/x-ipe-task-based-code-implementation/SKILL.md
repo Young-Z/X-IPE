@@ -245,7 +245,7 @@ BLOCKING: Step 3.1 special-case delegations run BEFORE semantic routing.
 
         2. DISCOVER: SCAN .github/skills/x-ipe-tool-implementation-*/ for available tool skills
 
-        3. READ CONFIG: Read x-ipe-docs/config/tools.json → extract stages.feature.implementation section
+        3. READ CONFIG: Read x-ipe-docs/config/tools.json → extract stages.implement.code_implementation section
            - IF section missing OR empty (only _order key, no tool entries) → config_active = false
            - ELSE (has tool entries beyond _order and _extra_instruction) → config_active = true
 
@@ -263,7 +263,7 @@ BLOCKING: Step 3.1 special-case delegations run BEFORE semantic routing.
            - IF general was disabled or undeclared → override to ENABLED
            - Log warning: "x-ipe-tool-implementation-general cannot be disabled — safety net fallback"
 
-        6. LOAD _extra_instruction: IF stages.feature.implementation._extra_instruction exists → use as supplementary semantic routing context
+        6. LOAD _extra_instruction: IF stages.implement.code_implementation._extra_instruction exists → use as supplementary semantic routing context
 
         7. SEMANTIC MATCH: FOR EACH tech_stack entry: semantically match to ENABLED tool skill only
            - No match among enabled skills → assign x-ipe-tool-implementation-general

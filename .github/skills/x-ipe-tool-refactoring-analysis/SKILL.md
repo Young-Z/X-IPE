@@ -158,7 +158,7 @@ input:
     Phase 4 — Generate Suggestions:
       1. CONSULT TOOL SKILLS (config-filtered):
          a. DISCOVER: Scan .github/skills/x-ipe-tool-implementation-*/ for available tools
-         b. READ CONFIG: Read x-ipe-docs/config/tools.json → stages.feature.consultation
+         b. READ CONFIG: Read x-ipe-docs/config/tools.json → stages.feedback.refactoring_analysis
             - IF section missing/empty → config_active = false (all tools enabled)
             - ELSE → config_active = true (opt-in filtering); force-enable general
          c. FILTER: IF config_active → only ENABLED tools participate

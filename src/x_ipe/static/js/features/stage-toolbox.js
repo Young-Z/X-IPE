@@ -46,20 +46,23 @@ class StageToolboxModal {
         
         // Phase labels for display
         this.phaseLabels = {
+            // Ideation
             ideation: 'Brainstorming',
             mockup: 'Mockup & Prototyping',
             sharing: 'Sharing & Export',
             architecture: 'Architecture',
+            // Requirement
             gathering: 'Gathering',
             analysis: 'Analysis',
-            design: 'Design',
-            implementation: 'Implementation',
-            consultation: 'Consultation',
-            review: 'Review',
-            testing: 'Testing',
+            // Implement
+            technical_design: 'Technical Design',
+            code_implementation: 'Code Implementation',
+            acceptance_test: 'Acceptance Test',
+            // Feedback
             bug_fix: 'Bug Fix',
-            playground: 'Playground',
-            refactoring: 'Refactoring',
+            code_refactor: 'Code Refactor',
+            refactoring_analysis: 'Refactoring Analysis',
+            human_playground: 'Human Playground',
             change_request: 'Change Request'
         };
         

@@ -13,7 +13,7 @@ This document provides concrete execution examples for the Feature Acceptance Te
 ### Step 1.1: Load Toolbox Config
 
 ```
-Read x-ipe-docs/config/tools.json → stages.quality.testing:
+Read x-ipe-docs/config/tools.json → stages.implement.acceptance_test:
   chrome-devtools-mcp: true
   x-ipe-tool-implementation-python: true
   x-ipe-tool-implementation-typescript: true
@@ -149,7 +149,7 @@ Output:
 ### Step 1.1: Load Toolbox Config
 
 ```
-Read tools.json → stages.quality.testing:
+Read tools.json → stages.implement.acceptance_test:
   chrome-devtools-mcp: false  ← DISABLED
   x-ipe-tool-implementation-python: true
 

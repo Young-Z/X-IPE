@@ -5,51 +5,6 @@
     "theme-name": "theme-default"
   },
   "stages": {
-    "feature": {
-      "design": {
-        "_order": 1
-      },
-      "implementation": {
-        "_order": 2,
-        "_extra_instruction": "",
-        "x-ipe-tool-implementation-python": true,
-        "x-ipe-tool-implementation-html5": true,
-        "x-ipe-tool-implementation-typescript": true,
-        "x-ipe-tool-implementation-java": true,
-        "x-ipe-tool-implementation-mcp": true,
-        "x-ipe-tool-implementation-general": true
-      },
-      "consultation": {
-        "_order": 3,
-        "_extra_instruction": "Consultation mode: read tool capabilities for informational use only. Do not invoke tools for code execution.",
-        "x-ipe-tool-implementation-python": true,
-        "x-ipe-tool-implementation-html5": true,
-        "x-ipe-tool-implementation-typescript": true,
-        "x-ipe-tool-implementation-java": true,
-        "x-ipe-tool-implementation-mcp": true,
-        "x-ipe-tool-implementation-general": true
-      },
-      "playground": {
-        "_order": 4,
-        "_extra_instruction": "Playground mode: create self-contained runnable examples for human validation. File extension and run command determined by matched tool.",
-        "x-ipe-tool-implementation-python": true,
-        "x-ipe-tool-implementation-typescript": true,
-        "x-ipe-tool-implementation-html5": true,
-        "x-ipe-tool-implementation-java": true,
-        "x-ipe-tool-implementation-mcp": true,
-        "x-ipe-tool-implementation-general": true
-      },
-      "bug_fix": {
-        "_order": 5,
-        "_extra_instruction": "Bug fix mode: TDD gate required — test must fail before fix. Tool skill receives operation 'fix' with mini AAA scenarios from bug context.",
-        "x-ipe-tool-implementation-python": true,
-        "x-ipe-tool-implementation-typescript": true,
-        "x-ipe-tool-implementation-html5": true,
-        "x-ipe-tool-implementation-java": true,
-        "x-ipe-tool-implementation-mcp": true,
-        "x-ipe-tool-implementation-general": true
-      }
-    },
     "ideation": {
       "architecture": {
         "_order": 3,
@@ -75,11 +30,36 @@
         "_order": 4
       }
     },
-    "quality": {
-      "review": {
+    "requirement": {
+      "analysis": {
         "_order": 2
       },
-      "testing": {
+      "gathering": {
+        "_order": 1
+      }
+    },
+    "implement": {
+      "technical_design": {
+        "_order": 3,
+        "_extra_instruction": "Consultation mode: read tool capabilities for informational use only. Do not invoke tools for code execution.",
+        "x-ipe-tool-implementation-python": true,
+        "x-ipe-tool-implementation-html5": true,
+        "x-ipe-tool-implementation-typescript": true,
+        "x-ipe-tool-implementation-java": true,
+        "x-ipe-tool-implementation-mcp": true,
+        "x-ipe-tool-implementation-general": true
+      },
+      "code_implementation": {
+        "_order": 2,
+        "_extra_instruction": "",
+        "x-ipe-tool-implementation-python": true,
+        "x-ipe-tool-implementation-html5": true,
+        "x-ipe-tool-implementation-typescript": true,
+        "x-ipe-tool-implementation-java": true,
+        "x-ipe-tool-implementation-mcp": true,
+        "x-ipe-tool-implementation-general": true
+      },
+      "acceptance_test": {
         "_order": 1,
         "_extra_instruction": "Testing mode: route test execution to appropriate tools by test type. Chrome DevTools MCP for frontend-ui browser tests. x-ipe-tool-ui-testing-via-chrome-mcp skill for structured UI test execution. Tool skills for backend/unit/integration test code generation.",
         "chrome-devtools-mcp": true,
@@ -92,11 +72,18 @@
         "x-ipe-tool-implementation-general": true
       }
     },
-    "refactoring": {
-      "analysis": {
-        "_order": 1
+    "feedback": {
+      "bug_fix": {
+        "_order": 5,
+        "_extra_instruction": "Bug fix mode: TDD gate required — test must fail before fix. Tool skill receives operation 'fix' with mini AAA scenarios from bug context.",
+        "x-ipe-tool-implementation-python": true,
+        "x-ipe-tool-implementation-typescript": true,
+        "x-ipe-tool-implementation-html5": true,
+        "x-ipe-tool-implementation-java": true,
+        "x-ipe-tool-implementation-mcp": true,
+        "x-ipe-tool-implementation-general": true
       },
-      "execution": {
+      "code_refactor": {
         "_order": 2,
         "_extra_instruction": "Refactor mode: preserve behavior, structure changes only. Tool skill receives operation 'refactor' with per-phase AAA scenarios. Orchestrator manages git checkpoints.",
         "x-ipe-tool-implementation-python": true,
@@ -105,15 +92,28 @@
         "x-ipe-tool-implementation-java": true,
         "x-ipe-tool-implementation-mcp": true,
         "x-ipe-tool-implementation-general": true
-      }
-    },
-    "requirement": {
-      "analysis": {
-        "_order": 2
       },
-      "gathering": {
-        "_order": 1
-      }
+      "refactoring_analysis": {
+        "_order": 2,
+        "_extra_instruction": "Refactor mode: preserve behavior, structure changes only. Tool skill receives operation 'refactor' with per-phase AAA scenarios. Orchestrator manages git checkpoints.",
+        "x-ipe-tool-implementation-python": true,
+        "x-ipe-tool-implementation-typescript": true,
+        "x-ipe-tool-implementation-html5": true,
+        "x-ipe-tool-implementation-java": true,
+        "x-ipe-tool-implementation-mcp": true,
+        "x-ipe-tool-implementation-general": true
+      },
+      "human_playground": {
+        "_order": 4,
+        "_extra_instruction": "Playground mode: create self-contained runnable examples for human validation. File extension and run command determined by matched tool.",
+        "x-ipe-tool-implementation-python": true,
+        "x-ipe-tool-implementation-typescript": true,
+        "x-ipe-tool-implementation-html5": true,
+        "x-ipe-tool-implementation-java": true,
+        "x-ipe-tool-implementation-mcp": true,
+        "x-ipe-tool-implementation-general": true
+      },
+      "change_request": {}
     }
   },
   "tracing_enabled": false,
@@ -124,5 +124,5 @@
     "/api/proxy"
   ],
   "tracing_stop_at": null,
-  "version": "2.0"
+  "version": "3.1"
 }

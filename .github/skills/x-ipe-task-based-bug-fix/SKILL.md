@@ -166,7 +166,7 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
       2. Document exact steps, environment conditions, and error messages
       3. BROWSER VALIDATION ROUTING (for UI bugs):
          a. IF program_type includes "frontend" or "fullstack":
-            READ CONFIG: x-ipe-docs/config/tools.json → stages.quality.testing
+            READ CONFIG: x-ipe-docs/config/tools.json → stages.feedback.bug_fix
             - IF config has chrome-devtools-mcp == true OR x-ipe-tool-ui-testing-via-chrome-mcp == true:
               → Use browser tools to reproduce the bug visually
               → Take screenshot/snapshot of the broken state for reference
@@ -291,7 +291,7 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
       2. Run full test suite, perform manual smoke test
       3. BROWSER VALIDATION ROUTING (for UI bugs):
          a. IF program_type includes "frontend" or "fullstack":
-            READ CONFIG: x-ipe-docs/config/tools.json → stages.quality.testing
+            READ CONFIG: x-ipe-docs/config/tools.json → stages.feedback.bug_fix
             - IF config has chrome-devtools-mcp == true OR x-ipe-tool-ui-testing-via-chrome-mcp == true:
               → Use browser tools to validate the fix visually:
                 i.   Navigate to the affected page/component
@@ -411,7 +411,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="conditional">
     <name>Browser validation passed (if UI bug and browser tools enabled)</name>
-    <verification>IF program_type is frontend/fullstack AND stages.quality.testing config has chrome-devtools-mcp or x-ipe-tool-ui-testing-via-chrome-mcp enabled: confirm browser-based validation shows fix works visually, no console errors, no visual regressions</verification>
+    <verification>IF program_type is frontend/fullstack AND stages.feedback.bug_fix config has chrome-devtools-mcp or x-ipe-tool-ui-testing-via-chrome-mcp enabled: confirm browser-based validation shows fix works visually, no console errors, no visual regressions</verification>
   </checkpoint>
 </definition_of_done>
 ```
