@@ -13,14 +13,14 @@ triggers:
 
 # Application Knowledge Extractor
 
-> **Version:** 1.4.0 | **Status:** Candidate | **Feature:** FEATURE-050-E
+> **Version:** 1.4.0
 
 ## Purpose
 
 1. **Extract knowledge** from diverse application sources (source code repos, documentation folders, public URLs, running web apps, single files)
 2. **Auto-detect input type** (source_code_repo, documentation_folder, public_url, running_web_app, single_file), format (markdown, python, html, mixed), and app type (web, cli, mobile, unknown)
-3. **Load tool skills** dynamically based on extraction category (e.g., \`x-ipe-tool-knowledge-extraction-user-manual\`) to obtain playbooks, collection templates, and acceptance criteria
-4. **Package extracted knowledge** into KB intake format via \`.intake/\` pipeline (FEATURE-050-E) following tool skill guidance
+3. **Load tool skills** dynamically based on extraction category (e.g., `x-ipe-tool-knowledge-extraction-user-manual`) to obtain playbooks, collection templates, and acceptance criteria
+4. **Package extracted knowledge** into KB intake format via `.intake/` pipeline following tool skill guidance
 
 ---
 
@@ -29,18 +29,10 @@ triggers:
 ### ⚠️ BLOCKING Rules
 
 1. **v1 Scope:** Only "user-manual" extraction category is supported. Requests for other categories (API-reference, architecture, runbook, configuration) will halt with error listing v1-supported categories.
-2. **Tool Skill Required:** Extraction cannot proceed without a matching tool skill (e.g., \`x-ipe-tool-knowledge-extraction-user-manual\`). If no tool skill is found, the skill halts with error.
-3. **File-Based Handoff:** All knowledge exchange between extractor and tool skills MUST use \`.checkpoint/\` folder. Inline text exchange is prohibited.
-4. **Checkpoint Location:** \`.checkpoint/\` is created in CWD (project root), NEVER inside target directory. For URL-only targets, CWD is used.
+2. **Tool Skill Required:** Extraction cannot proceed without a matching tool skill (e.g., `x-ipe-tool-knowledge-extraction-user-manual`). If no tool skill is found, the skill halts with error.
+3. **File-Based Handoff:** All knowledge exchange between extractor and tool skills MUST use `.checkpoint/` folder. Inline text exchange is prohibited.
+4. **Checkpoint Location:** `.checkpoint/` is created in CWD (project root), NEVER inside target directory. For URL-only targets, CWD is used.
 5. **One Category Per Run:** No parallel multi-category extraction. One extraction session processes one category.
-
-### 🎯 Implemented Phases
-
-- ✅ Phase 1 (Foundation): Input analysis, category selection, tool skill loading, handoff init
-- ✅ Phase 2 (Extraction): Template-guided, per-section source content extraction
-- ✅ Phase 3 (Validation): Extract-validate loop with coverage tracking and gap classification
-- ✅ Phase 4 (Checkpoint): Resume detection, section-level checkpoint, 2-tier error handling
-- ✅ Phase 5 (KB Output): Quality scoring, KB article packaging, extraction report generation
 
 ---
 
@@ -93,292 +85,226 @@ input:
 
 ## Definition of Ready (DoR)
 
-- [ ] **Task exists on task-board.md** with status "pending" or "in_progress"
-- [ ] **Input validation passed:** target exists/reachable, purpose is v1-supported
-- [ ] **Working directory writable:** .checkpoint/ can be created
-- [ ] **Tool skill discoverable:** \`.github/skills/x-ipe-tool-knowledge-extraction-*/SKILL.md\` path is accessible
+<definition_of_ready>
+  <checkpoint required="true">
+    <name>Task Exists</name>
+    <verification>Task exists on task-board.md with status pending or in_progress</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Input Validated</name>
+    <verification>Target exists/reachable, purpose is v1-supported category</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Working Directory Writable</name>
+    <verification>.checkpoint/ can be created in CWD</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Tool Skill Discoverable</name>
+    <verification>.github/skills/x-ipe-tool-knowledge-extraction-*/SKILL.md path accessible</verification>
+  </checkpoint>
+</definition_of_ready>
 
 ---
 
 ## Execution Flow
 
-| Phase | Name | Steps | Feature |
-|-------|------|-------|---------|
-| 1 | 博学之 — Study Broadly | 1.1 Analyze Input, 1.2 Select Category, 1.3 Load Tool Skill, 1.4 Initialize Handoff | FEATURE-050-A ✅ |
-| 2 | 审问之 — Inquire Thoroughly | 2.1 Extract Source Content | FEATURE-050-B ✅ |
-| 3 | 慎思之 — Think Carefully | 3.1 Validate & Coverage Loop | FEATURE-050-C ✅ |
-| 4 | 明辨之 — Discern Clearly | 4.1 Resume, Checkpoint & Error Handling | FEATURE-050-D ✅ |
-| 5 | 笃行之 — Practice Earnestly | 5.1 Quality Scoring, 5.2 Package KB Articles & Report | FEATURE-050-E ✅ |
-| 6 | 继续执行 — Continue Execution | 6.1 Finalize & Clean Up, 6.2 Route Next Action | FEATURE-050-E ✅ |
+| Phase | Step | Name | Action | Gate |
+|-------|------|------|--------|------|
+| 1. 博学之 | 1.1 | Analyze Input | Classify input type, detect format/app-type | input classified |
+| 1. 博学之 | 1.2 | Select Category | Validate purpose against v1 categories | category selected |
+| 1. 博学之 | 1.3 | Load Tool Skill | Find and load matching tool skill | tool skill loaded |
+| 1. 博学之 | 1.4 | Initialize Handoff | Create .checkpoint/ and session manifest | handoff ready |
+| 2. 审问之 | 2.1 | Extract Source Content | Per-section template-guided extraction | content files written |
+| 3. 慎思之 | 3.1 | Validate & Coverage Loop | Validate against criteria, iterate for gaps | coverage met or max iterations |
+| 4. 明辨之 | 4.1 | Resume, Checkpoint & Error Handling | Detect prior sessions, save checkpoints, classify errors | errors handled |
+| 5. 笃行之 | 5.1 | Quality Scoring | Compute 4-dimension quality scores | scores computed |
+| 5. 笃行之 | 5.2 | Package KB Articles & Report | Generate .kb-intake/ output files | output packaged |
+| 6. 继续执行 | 6.1 | Finalize & Clean Up | Update manifest, cleanup temp files | manifest finalized |
+| 6. 继续执行 | 6.2 | Route Next Action | DAO-assisted routing to KB librarian | next action decided |
 
 ---
 
-## Phase Definitions
+## Phase Definitions (5-Phase Learning Method — 博学之，审问之，慎思之，明辨之，笃行之)
 
-### Phase 1: 博学之 — Study Broadly (Foundation)
-
-**Status:** ✅ FEATURE-050-A — Input analysis, category selection, tool skill loading, handoff initialization
-
-### Phase 2: 审问之 — Inquire Thoroughly (Source Extraction)
-
-**Status:** ✅ FEATURE-050-B — Template-guided per-section source content extraction with manifest tracking
-
-### Phase 3: 慎思之 — Think Carefully (Validation Loop)
-
-**Status:** ✅ FEATURE-050-C — Validate content against tool skill criteria, iterate extraction for coverage gaps
-
-### Phase 4: 明辨之 — Discern Clearly (Error Handling)
-
-**Status:** ✅ FEATURE-050-D — Resume detection, section-level checkpoint, 2-tier error handling, state machine
-
-### Phase 5: 笃行之 — Practice Earnestly (KB Output & Quality Scoring)
-
-**Status:** ✅ FEATURE-050-E — Quality scoring (4 dimensions), KB article packaging, extraction report
-
-### Phase 6: 继续执行 — Continue Execution
-
-**Status:** ✅ FEATURE-050-E — Manifest finalization, cleanup, next action routing
+| Phase | Chinese | English | SE Purpose | Typical Activities |
+|-------|---------|---------|------------|-------------------|
+| 1 | 博学之 (Bóxué) | Study Broadly | Gather comprehensive context | Analyze input, select category, load tool skill, init handoff |
+| 2 | 审问之 (Shěnwèn) | Inquire Thoroughly | Extract source content | Template-guided per-section source content extraction |
+| 3 | 慎思之 (Shènsī) | Think Carefully | Validate & iterate | Validate content against criteria, iterate for coverage gaps |
+| 4 | 明辨之 (Míngbiàn) | Discern Clearly | Handle errors & checkpoints | Resume detection, checkpoint saves, error classification |
+| 5 | 笃行之 (Dǔxíng) | Practice Earnestly | Package output | Quality scoring, KB article packaging, extraction report |
+| 6 | 继续执行 | Route and Execute | Finalize & route next action | Cleanup temp files, route to KB librarian |
 
 ---
 
 ## Execution Procedure
 
-### Phase 1: 博学之 — Study Broadly (Foundation)
-
-#### Step 1.1 — Analyze Input
-
-**CONTEXT:** Read target parameter (path or URL). Determine if local path or remote URL.
-
-**DECISION — Classify Input Type:**
-- IF target is local directory AND empty → halt with error
-- IF directory with package.json/pyproject.toml/Cargo.toml → input_type = "source_code_repo"
-- IF directory with only .md/.rst/.txt files → input_type = "documentation_folder"
-- IF `localhost:*` or `127.0.0.1:*` → input_type = "running_web_app"
-- IF `https?://*` (not localhost) → input_type = "public_url"
-- IF single file → input_type = "single_file"
-- ELSE → halt with error
-
-**ACTION — Detect Format & App Type:**
-- Call input detection heuristics (see `references/input-detection-heuristics.md`)
-- Detect format: analyze file extensions (.md → markdown, .py → python, mixed → mixed)
-- Detect app_type: framework markers (Flask/Django → web, argparse/click → cli, React Native → mobile, none → unknown)
-- Collect source_metadata: primary_language, framework, file_count, total_size_bytes, entry_points, has_docs
-
-**VERIFY:** ✅ InputAnalysis created with input_type, format, app_type, source_metadata
-
-**REFERENCE:** `references/input-detection-heuristics.md`, `templates/input-analysis-output.md`
-
----
-
-#### Step 1.2 — Select Category
-
-**CONTEXT:** Read purpose parameter, check against v1-supported categories.
-
-**DECISION — Category Selection (v1):**
-- IF purpose == "user-manual" → selected_category = "user-manual"
-- IF purpose in ["API-reference", "architecture", "runbook", "configuration"] → halt: "Not supported in v1"
-- ELSE → halt: "Unknown category"
-
-**VERIFY:** ✅ selected_category is "user-manual"
-
-**REFERENCE:** `references/category-taxonomy.md`
-
----
-
-#### Step 1.3 — Load Tool Skill
-
-**CONTEXT:** Glob `.github/skills/x-ipe-tool-knowledge-extraction-*/SKILL.md`, filter by category.
-
-**DECISION:** 0 matches → halt (install tool skill); 1 match → load; multiple → filter by frontmatter category.
-
-**ACTION — Load Tool Skill:**
-- Read SKILL.md, parse frontmatter (name, categories)
-- Extract artifact paths: playbook_template, collection_template, acceptance_criteria
-- Read app-type mixin paths (web, cli, mobile overrides)
-- Verify artifact paths exist
-
-**VERIFY:** ✅ loaded_tool_skill set, artifact paths exist, supports "user-manual"
-
-**REFERENCE:** `x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/technical-design.md` (Tool Skill Interface Contract)
-
----
-
-#### Step 1.4 — Initialize Handoff
-
-**CONTEXT:** Determine checkpoint path `.checkpoint/session-{timestamp}/` in CWD.
-
-**DECISION:** If path exists → create new timestamped subfolder; else → create it.
-
-**ACTION — Create Session Manifest:**
-- Create directory structure: `manifest.yaml`, `content/`, `feedback/`
-- Write manifest using template (`templates/checkpoint-manifest.md`)
-- Fields: schema_version, session_id, created_at, target, purpose, input_analysis, selected_category, loaded_tool_skill, status ("initialized")
-
-**VERIFY:** ✅ Checkpoint dir exists, manifest.yaml written with status "initialized"
-
-**REFERENCE:** `references/handoff-protocol.md`, `templates/checkpoint-manifest.md`
-
----
-
-### Phase 2: 审问之 — Inquire Thoroughly (Source Extraction)
-
-#### Step 2.1 — Extract Source Content
-
-**CONTEXT — Read Collection Template:**
-- Read `tool_skill_artifacts.collection_template` file from Phase 1 output
-- Parse sections: each H2 heading = one section with extraction prompts in HTML comments
-- Create `{checkpoint_path}/content/` directory; update manifest status → "extracting"
-- Load `config_overrides`: web_search_enabled (default true), max_files_per_section (default 50)
-
-**DECISION — Extraction Capability per input_type:**
-- `source_code_repo` / `documentation_folder` → **local file reading** (enumerate, skip, filter, read)
-- `single_file` → **direct file read** (one file, map relevant portions per section)
-- `public_url` → **Chrome DevTools browsing** (navigate_page, take_snapshot; follow up to 5 links/section)
-- `running_web_app` → **Chrome DevTools navigation + interaction** (navigate, click, take_snapshot, take_screenshot)
-
-**ACTION — Per-Section Extraction Loop:**
-For EACH section in collection template order:
-1. Identify relevant source materials matching section extraction prompts
-2. Apply skip rules (see `references/extraction-engine-heuristics.md` for evaluation order)
-3. Read/browse/inspect using the capability from DECISION above
-4. **Synthesize** knowledge into coherent content — do NOT raw-dump files
-5. Screenshots: user-provided first → Chrome DevTools auto-capture → graceful skip
-6. IF `config_overrides.web_search_enabled`: augment with purpose-driven search (supplementary only)
-7. Write to `{checkpoint_path}/content/section-{NN}-{slug}.md` (see reference for format)
-8. Update `manifest.yaml` with section result (status, content_file, files_read, warnings, timestamps)
-
-**VERIFY:**
-- ✅ All template sections processed (each has status: extracted | skipped | empty | error | partial)
-- ✅ Content files exist in `{checkpoint_path}/content/` for each extracted section
-- ✅ Manifest updated per-section with status, content_file, files_read, warnings, timestamps
-- ✅ Phase 2 overall status in manifest is "phase_2_complete"
-- ✅ All content via file paths in checkpoint — no inline content
-
-**REFERENCE:**
-- Extraction heuristics: `.github/skills/x-ipe-task-based-application-knowledge-extractor/references/extraction-engine-heuristics.md`
-- Handoff protocol: `.github/skills/x-ipe-task-based-application-knowledge-extractor/references/handoff-protocol.md`
-
----
-
-### Phase 3: 慎思之 — Think Carefully (Validation Loop)
-
-#### Step 3.1 — Validate & Iterate
-
-**CONTEXT:** Read `tool_skill_artifacts.acceptance_criteria` from Phase 1. Load Phase 2 content from manifest. Config: `max_validation_iterations` (default 3), `coverage_target` (default 0.8). Update manifest: phase_3.status → "in_progress".
-
-**DECISION — Exit Conditions (checked per iteration):**
-- All sections accepted → exit "all_criteria_met"
-- iterations ≥ max → exit "max_iterations_reached"
-- coverage_ratio not improving (iteration > 1) → exit "plateau_detected"
-- No content from Phase 2 → skip Phase 3 entirely
-
-**ACTION — Iteration Loop (up to max_validation_iterations):**
-1. Validate each non-accepted section against acceptance criteria (per-criterion pass/fail)
-2. Write feedback to `{checkpoint_path}/feedback/section-{NN}-{slug}-iter-{M}.md`
-3. Lock accepted sections — not re-validated in later iterations
-4. Compute `coverage_ratio = criteria_met / total_criteria`; check exit conditions
-5. Classify gaps as "depth" (shallow) or "breadth" (missing topics) — see reference
-6. Re-extract failing sections via Phase 2 Step 2.1 with adjusted prompts
-
-**VERIFY:**
-- ✅ All sections have final validation_status (accepted | needs-more-info | error)
-- ✅ Feedback files in `{checkpoint_path}/feedback/`, manifest updated with phase_3 results
-- ✅ phase_3.final_coverage_ratio, exit_reason, coverage_history recorded
-
-**REFERENCE:** `references/validation-loop-heuristics.md`, `references/handoff-protocol.md`
-
----
-
-### Phase 4: 明辨之 — Discern Clearly (Checkpoint & Error Handling)
-
-#### Step 4.1 — Resume, Checkpoint & Error Handling
-
-**CONTEXT — Cross-Cutting Behavior:** Phase 4 wraps Phases 1–3 (not sequential). On invocation: scan `.checkpoint/session-*/manifest.yaml` sorted by timestamp desc; select most recent with status "paused"|"extracting". If valid → resume (skip accepted sections). If corrupted (YAML parse fail or schema_version ≠ "1.0") → log warning, start fresh. Config: `max_retries` (default 3 total attempts).
-
-**DECISION — Error Classification & Recovery:**
-- Transient error (timeout, rate limit, temp lock) → immediate retry, max 2 retries (3 total)
-- Permanent error (not found, permission denied, unsupported) → no retry, mark section "error"
-- Exhausted retries → mark "error", log to error_log[], continue next section (fail-open)
-- Recovery: DAO mode → autonomous skip/adjust/halt; manual mode → surface options to human
-
-**ACTION — Checkpoint & State Machine:**
-1. After each section extraction/validation: persist manifest (status, updated_at, content_file)
-2. On pause: status → "paused"; on resume: add event_log entry, refresh updated_at
-3. Valid transitions: initialized→extracting, extracting→validating|paused, validating→paused, paused→extracting|validating, any→error|complete. Reject invalid with warning.
-4. Append to error_log[]: {section_id, error_type, message, retry_count, timestamp}
-
-**VERIFY:**
-- ✅ Manifest status reflects valid state machine transition at every step
-- ✅ error_log[] entries have required fields; resumed sessions skip accepted sections
-- ✅ Corrupted checkpoints → fresh start with warning logged
-
-**REFERENCE:** `references/checkpoint-error-heuristics.md`, `references/handoff-protocol.md`
-
----
-
-### Phase 5: 笃行之 — Practice Earnestly (KB Output & Quality Scoring)
-
-#### Step 5.1 — Quality Scoring
-
-**CONTEXT — Gather Scoring Inputs (Deterministic Only — No LLM):**
-- Read manifest `phase_3.per_section[]`: for each section, extract `criteria_met`, `criteria_total`, `iterations_validated`, `validation_status`
-- Read collection template: count prescribed sub-sections (H3 headings / extraction prompts) per section
-- Read packed content files: count present sub-sections (H2/H3 headings matching template) per section
-- Read source file modification dates from `source_metadata` (if local); for URLs default freshness to 0.5
-
-**DECISION — Classify Quality Threshold:**
-- Compute per-section `section_quality_score` (see reference for 4-dimension formula)
-- Compute `overall_quality_score` = arithmetic mean of section scores (exclude error/skipped from mean; count as 0.0 per BR-2)
-- Classify: ≥ 0.80 → "high"; 0.50–0.79 → "acceptable"; < 0.50 → "low"
-- IF "acceptable" → log warning with lowest-scoring sections; IF "low" → log warning with sections below 0.50
-- Per-section: IF section score < 0.50 → set `quality_flag: "low"` in manifest
-
-**ACTION:** Compute all scores per reference formulas. Write quality results to manifest: `phase_5.quality_scores[]`, `phase_5.overall_quality_score`, `phase_5.quality_label`. Scoring is non-blocking — always proceed to Step 5.2.
-
-**VERIFY:** ✅ Every section has `section_quality_score` (0.0–1.0, 2dp); overall score and label set; identical inputs → identical scores
-
-**REFERENCE:** `references/output-quality-heuristics.md` §1–§3
-
----
-
-#### Step 5.2 — Package KB Articles & Report
-
-**CONTEXT:** Read all packed content files from `.checkpoint/session-{timestamp}/packed/`. Read quality scores from Step 5.1. Read manifest for provenance data (target, loaded_tool_skill, timestamps). Derive `extraction_id` from session folder name.
-
-**DECISION — Determine Output Path & Status:**
-- Output folder: `x-ipe-docs/knowledge-base/.kb-intake/{extraction_id}/`
-- IF zero accepted sections → extraction_status = "failed" (still generate report)
-- IF all accepted → extraction_status = "complete"
-- IF some accepted, some error/skipped → extraction_status = "partial"
-
-**ACTION — Write Output Files:**
-1. Create output folder (and `.kb-intake/` parent if needed)
-2. Generate `.kb-index.json` per reference schema: title, category, extraction_id, quality_score, quality_label, sections[], excluded_sections[], source_summary, created_at, schema_version "1.0"
-3. For each accepted section: write article `.md` with YAML frontmatter (section_id, title, quality_score, quality_dimensions, provenance) + validated content from packed files
-4. For error/skipped sections: add to `excluded_sections[]` in index with status and reason; no article file
-5. Generate `extraction_report.md`: Summary, Per-Section Scores (sorted quality ascending), Validation Statistics, Error Log, Provenance
-6. All files UTF-8, no BOM
-
-**VERIFY:**
-- ✅ `.kb-index.json` exists with all required fields; article count matches accepted sections
-- ✅ `extraction_report.md` exists with 5 sections; per-section table sorted ascending
-- ✅ Excluded sections in index but no article files
-
-**REFERENCE:** `references/output-quality-heuristics.md` §4–§7
-
----
-
-### Phase 6: 继续执行 — Continue Execution
-
-#### Step 6.1 — Finalize & Clean Up
-
-**ACTION:** 1) Update manifest: `status` → "complete", `completed_at` → ISO 8601. 2) Populate Output Result: `extraction_status`, `quality_score`, `quality_label`, `kb_output_path`. 3) Set `task_output_links[]`: .kb-index.json, extraction_report.md, manifest paths. 4) Update task-board.md → completed. 5) Remove `{checkpoint_path}/content/` and `feedback/` dirs. 6) Preserve: `manifest.yaml`, `packed/`, `collection-template.md`.
-
-**VERIFY:** ✅ Manifest "complete"; Output Result populated; temp dirs removed; packed/ + manifest preserved
-
-#### Step 6.2 — Route Next Action
-
-**DECISION:** DAO mode → log completion, future: invoke `x-ipe-tool-kb-librarian`; manual → present to human.
+<procedure>
+<phase_1 name="博学之 — Study Broadly">
+  <step_1_1>
+    <name>Analyze Input</name>
+    <action>
+      1. Read target parameter, classify input_type (source_code_repo, documentation_folder, public_url, running_web_app, single_file)
+      2. Detect format (markdown, python, html, mixed) and app_type (web, cli, mobile, unknown)
+      3. Build InputAnalysis object with source_metadata
+    </action>
+    <constraints>
+      - BLOCKING: Empty directory or unreachable URL → halt with error
+    </constraints>
+    <output>InputAnalysis {input_type, format, app_type, source_metadata}</output>
+  </step_1_1>
+
+  <step_1_2>
+    <name>Select Category</name>
+    <action>
+      1. Read purpose parameter from input
+      2. Validate against v1-supported categories (user-manual only)
+      3. Halt with error if unsupported or unknown category
+    </action>
+    <constraints>
+      - BLOCKING: purpose not "user-manual" → halt listing v1-supported categories
+    </constraints>
+    <output>selected_category = "user-manual"</output>
+  </step_1_2>
+
+  <step_1_3>
+    <name>Load Tool Skill</name>
+    <action>
+      1. Glob .github/skills/x-ipe-tool-knowledge-extraction-*/SKILL.md, filter by category
+      2. Parse frontmatter, extract artifact paths (playbook, collection template, acceptance criteria)
+      3. Read app-type mixin paths, verify all artifact paths exist
+    </action>
+    <constraints>
+      - BLOCKING: 0 matching tool skills → halt with install instructions
+    </constraints>
+    <output>loaded_tool_skill, tool_skill_artifacts {playbook_template, collection_template, acceptance_criteria, app_type_mixins}</output>
+  </step_1_3>
+
+  <step_1_4>
+    <name>Initialize Handoff</name>
+    <action>
+      1. Create .checkpoint/session-{timestamp}/ in CWD with content/ and feedback/ subdirs
+      2. Write manifest.yaml using templates/checkpoint-manifest.md
+      3. Set manifest status to "initialized"
+    </action>
+    <constraints>
+      - BLOCKING: CWD not writable → halt
+    </constraints>
+    <output>.checkpoint/session-{timestamp}/manifest.yaml with status "initialized"</output>
+  </step_1_4>
+</phase_1>
+
+<phase_2 name="审问之 — Inquire Thoroughly">
+  <step_2_1>
+    <name>Extract Source Content</name>
+    <action>
+      1. Read collection template from Phase 1 artifacts, parse H2 sections with extraction prompts
+      2. For each section: identify relevant sources, apply skip rules, extract/browse content
+      3. Synthesize knowledge into coherent content (never raw-dump files)
+      4. Write to checkpoint/content/section-{NN}-{slug}.md, update manifest per-section
+    </action>
+    <constraints>
+      - BLOCKING: All content must go through file paths in checkpoint — no inline content
+      - Extraction capability varies by input_type (local read vs Chrome DevTools)
+    </constraints>
+    <output>Content files in checkpoint/content/, manifest sections[] updated with status per section</output>
+  </step_2_1>
+</phase_2>
+
+<phase_3 name="慎思之 — Think Carefully">
+  <step_3_1>
+    <name>Validate & Coverage Loop</name>
+    <action>
+      1. Load acceptance criteria from tool skill, validate each section (per-criterion pass/fail)
+      2. Write feedback to checkpoint/feedback/, lock accepted sections
+      3. Compute coverage_ratio, check exit conditions (all met / max iterations / plateau)
+      4. Re-extract failing sections with adjusted prompts if iterations remain
+    </action>
+    <constraints>
+      - Max iterations capped by config_overrides.max_validation_iterations (default 3)
+    </constraints>
+    <output>Per-section validation_status, final_coverage_ratio, exit_reason, coverage_history</output>
+  </step_3_1>
+</phase_3>
+
+<phase_4 name="明辨之 — Discern Clearly">
+  <step_4_1>
+    <name>Resume, Checkpoint & Error Handling</name>
+    <action>
+      1. Cross-cutting: scan .checkpoint/ for resumable sessions (paused/extracting)
+      2. Classify errors as transient (retry up to 3) or permanent (mark error, continue)
+      3. Persist manifest after every section, enforce valid state machine transitions
+      4. Append to error_log[] with section_id, error_type, message, retry_count, timestamp
+    </action>
+    <constraints>
+      - BLOCKING: Invalid state transitions rejected with warning
+      - Corrupted checkpoints (YAML parse fail) → fresh start with warning
+    </constraints>
+    <output>Manifest with valid state transitions, error_log[], resume capability</output>
+  </step_4_1>
+</phase_4>
+
+<phase_5 name="笃行之 — Practice Earnestly">
+  <step_5_1>
+    <name>Quality Scoring</name>
+    <action>
+      1. Gather deterministic scoring inputs (criteria met, sub-section counts, freshness) — no LLM
+      2. Compute per-section section_quality_score using 4-dimension formula
+      3. Compute overall_quality_score (arithmetic mean), classify as high/acceptable/low
+    </action>
+    <constraints>
+      - Scoring is deterministic: identical inputs → identical scores
+      - Non-blocking: always proceed to Step 5.2 regardless of score
+    </constraints>
+    <output>phase_5.quality_scores[], overall_quality_score, quality_label</output>
+  </step_5_1>
+
+  <step_5_2>
+    <name>Package KB Articles & Report</name>
+    <action>
+      1. Create x-ipe-docs/knowledge-base/.kb-intake/{extraction_id}/
+      2. Generate .kb-index.json with sections, quality scores, provenance
+      3. Write article .md files for accepted sections with YAML frontmatter
+      4. Generate extraction_report.md (summary, scores, validation stats, error log, provenance)
+    </action>
+    <constraints>
+      - All files UTF-8, no BOM
+      - Error/skipped sections go to excluded_sections[] in index — no article files
+    </constraints>
+    <output>.kb-intake/ folder with .kb-index.json, article files, extraction_report.md</output>
+  </step_5_2>
+</phase_5>
+
+<phase_6 name="继续执行 — Route and Execute">
+  <step_6_1>
+    <name>Finalize & Clean Up</name>
+    <action>
+      1. Update manifest: status → "complete", completed_at → ISO 8601
+      2. Populate Output Result with extraction_status, quality_score, quality_label, kb_output_path
+      3. Remove checkpoint content/ and feedback/ dirs; preserve manifest.yaml and packed/
+      4. Update task-board.md → completed
+    </action>
+    <constraints>
+      - Must preserve manifest.yaml and packed/ for audit trail
+    </constraints>
+    <output>Finalized manifest, populated Output Result, cleaned temp dirs</output>
+  </step_6_1>
+
+  <step_6_2>
+    <name>Route Next Action</name>
+    <action>
+      1. DAO mode → log completion, route to x-ipe-tool-kb-librarian
+      2. Manual mode → present completion summary to human
+    </action>
+    <constraints>
+      - Routing decision follows process_preference.interaction_mode
+    </constraints>
+    <output>Next action routed or human notified</output>
+  </step_6_2>
+</phase_6>
+</procedure>
+
+REFERENCE: See `references/execution-procedures.md` for detailed CONTEXT/DECISION/ACTION/VERIFY blocks per step.
 
 ---
 
@@ -407,14 +333,14 @@ task_completion_output:
     source_metadata:
       primary_language: "string | null"
       framework: "string | null"
-      secondary_app_types: []  # Lower-priority app types detected (e.g., both web + cli)
+      secondary_app_types: []
       file_count: int
       total_size_bytes: int
       entry_points: ["string"]
       has_docs: bool
   
   selected_category: "user-manual"
-  deferred_categories: []  # v1: none
+  deferred_categories: []
   loaded_tool_skill: "x-ipe-tool-knowledge-extraction-user-manual | null"
   tool_skill_artifacts:
     playbook_template: "path | null"
@@ -426,7 +352,6 @@ task_completion_output:
       mobile: "path | null"
   checkpoint_path: ".checkpoint/session-{timestamp}/"
   
-  # Phase 2 outputs (FEATURE-050-B)
   extraction_summary:
     sections_extracted: int
     sections_skipped: int
@@ -434,17 +359,15 @@ task_completion_output:
     total_warnings: int
     content_files: ["content/section-{NN}-{slug}.md"]
   
-  # Phase 3 outputs (FEATURE-050-C)
   validation_summary:
-    final_coverage_ratio: float  # 0.0-1.0
+    final_coverage_ratio: float
     exit_reason: "all_criteria_met | max_iterations_reached | plateau_detected | skipped"
     iterations_completed: int
-    coverage_history: [float]  # per-iteration coverage ratios
+    coverage_history: [float]
     sections_accepted: int
     sections_needs_more_info: int
     sections_error: int
   
-  # Phase 4 outputs (FEATURE-050-D)
   error_summary:
     total_errors: int
     transient_retried: int
@@ -452,9 +375,8 @@ task_completion_output:
     sections_skipped: int
     resumed_from: "session path | null"
   
-  # Phase 5 outputs (FEATURE-050-E)
   extraction_status: "complete | partial | failed"
-  quality_score: 0.0       # 0.0–1.0, overall quality (2 decimal places)
+  quality_score: 0.0
   quality_label: "high | acceptable | low"
   kb_output_path: "x-ipe-docs/knowledge-base/.kb-intake/{extraction_id}/"
   task_output_links:
@@ -467,15 +389,28 @@ task_completion_output:
 
 ## Definition of Done (DoD)
 
-- [ ] **Phase 1 Complete:** Input analysis, category selection, tool skill loading, checkpoint init all passed
-- [ ] **Phase 2 Complete:** All template sections extracted, content files written, manifest updated
-- [ ] **Phase 3 Complete:** Validation loop executed, coverage_ratio computed, feedback files written
-- [ ] **Phase 4 Complete:** Checkpoint saves after each section, errors classified and logged, resume detection works
-- [ ] **Phase 5 Complete:** Quality scores computed (4 dimensions), articles packaged in .kb-intake/, extraction report generated
-- [ ] **Phase 6 Complete:** Manifest finalized, Output Result populated, temp files cleaned up
-- [ ] **Output Result Populated:** All dynamic fields (input_analysis, extraction/validation/error/quality summaries) set
-- [ ] **Task Board Updated:** Task moved to Completed section
-- [ ] **Verification:** All VERIFY checkpoints in Phase 1–6 steps passed
+<definition_of_done>
+  <checkpoint required="true">
+    <name>Phases 1-4 Complete</name>
+    <verification>Input analyzed, content extracted, validation loop run, checkpoints saved</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Phase 5 Complete</name>
+    <verification>Quality scores computed (4 dimensions), articles packaged in .kb-intake/, extraction report generated</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Phase 6 Complete</name>
+    <verification>Manifest finalized, Output Result populated, temp files cleaned up</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Output Result Populated</name>
+    <verification>All dynamic fields set: input_analysis, extraction/validation/error/quality summaries</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Verification Passed</name>
+    <verification>All VERIFY checkpoints in Phase 1-6 steps passed</verification>
+  </checkpoint>
+</definition_of_done>
 
 ---
 
@@ -498,4 +433,4 @@ task_completion_output:
 
 ## Examples
 
-For detailed execution examples, see: \`.github/skills/x-ipe-task-based-application-knowledge-extractor/references/examples.md\`
+For detailed execution examples, see: `references/examples.md`
