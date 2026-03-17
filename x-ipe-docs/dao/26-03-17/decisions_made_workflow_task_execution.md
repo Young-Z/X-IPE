@@ -44,3 +44,47 @@ Two related units: (1) Why the structural gap exists (critique), (2) Instruction
 - 害: Minimal — unit 0 is low-risk cleanup, unit 1 follows established process
 
 ### Confidence: 0.95
+
+---
+
+## DAO-117 · 2026-03-17T11:41:12Z
+
+**Source:** human (correction) | **Workflow:** Knowledge-Extraction
+**Trigger:** Agent skipped requirement→design→implement lifecycle, jumped directly to skill-creator
+
+### Disposition: critique
+Agent violated the workflow: attempted to create the user manual tool skill directly without going through requirement gathering → feature breakdown → refinement → technical design → implementation. Even with "one feature" constraint, the full lifecycle must be followed.
+
+### Corrective Action
+1. Stop the rogue skill creation agent
+2. Remove any premature candidate files
+3. Start properly: requirement gathering for the tool skill
+4. Follow: requirements → breakdown (1 feature) → refinement → design → implement via skill-creator → AC test → close
+
+### Confidence: 1.0 (user explicit correction)
+
+---
+
+### DAO-118
+
+| Field | Value |
+|-------|-------|
+| Timestamp | 2026-03-17T12:27:09Z |
+| Source | human |
+| Task ID | TASK-944 (EPIC-051 context) |
+| Feature ID | FEATURE-051-A |
+| Workflow | Knowledge-Extraction |
+| Calling Skill | x-ipe-workflow-task-execution |
+
+**Need:** Optimize user manual tool skill templates with 5 structural improvements: (1) Table of Contents linking to scenarios, (2) content splitting when playbook > 800 lines, (3) ToC cross-linking to sub-files, (4) scenario-level markdown with instructions + images, (5) naming conventions for sub-files and images.
+
+**Perspectives:**
+- Supporting: Practical improvements for real-world large manuals. ToC + splitting + naming conventions are industry standard.
+- Opposing: Adds complexity to recently completed skill. But these are quality-of-life improvements, not scope creep.
+- Neutral: This is a Change Request on EPIC-051. All 5 points target the same artifact set (templates in user manual tool skill).
+
+**Disposition:** instruction
+**Confidence:** 0.90
+**Rationale:** User is commanding enhancement of existing templates. Single unit — all 5 points are cohesive improvements to the same deliverable. Route through CR skill to assess impact, then implement.
+
+**Suggested Skills:** x-ipe-task-based-change-request (strong — modifying existing delivered feature)
