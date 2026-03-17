@@ -13,7 +13,7 @@ triggers:
 
 # Application Knowledge Extractor
 
-> **Version:** 1.0.0 | **Status:** Candidate | **Feature:** FEATURE-050-A
+> **Version:** 1.1.0 | **Status:** Candidate | **Feature:** FEATURE-050-B
 
 ## Purpose
 
@@ -34,16 +34,16 @@ triggers:
 4. **Checkpoint Location:** \`.checkpoint/\` is created in CWD (project root), NEVER inside target directory. For URL-only targets, CWD is used.
 5. **One Category Per Run:** No parallel multi-category extraction. One extraction session processes one category.
 
-### 🎯 Foundation Phase Only (FEATURE-050-A)
+### 🎯 Implemented Phases
 
-This version implements **Phase 1 (Foundation)** only:
+This version implements **Phase 1 (Foundation)** and **Phase 2 (Extraction)**:
 - ✅ Input analysis (detect type, format, app-type)
 - ✅ Category selection (v1: hardcoded filter)
 - ✅ Tool skill loading (glob discover, load, get artifacts)
 - ✅ Handoff protocol initialization (.checkpoint/ setup)
+- ✅ Source content extraction (template-guided, per-section)
 
 **NOT Yet Implemented (future features):**
-- ❌ Source content extraction (FEATURE-050-B)
 - ❌ Validation & coverage loop (FEATURE-050-C)
 - ❌ Checkpoint persistence & resume (FEATURE-050-D)
 - ❌ KB intake output generation (FEATURE-050-E)
@@ -158,12 +158,14 @@ input:
 
 ### Phase 2: 审问之 — Inquire Thoroughly (Source Extraction)
 
-**Status:** 🔜 FEATURE-050-B — NOT IMPLEMENTED
+**Status:** ✅ FEATURE-050-B — IMPLEMENTED
 
-**Planned Steps:**
-1. **Step 2.1 — Extract Source Content:** Read files (for source_code_repo/documentation_folder), browse web (for public_url/running_web_app), inspect app (for running_web_app), gather content following tool skill playbook
+**Steps:**
+1. **Step 2.1 — Extract Source Content:** Read collection template, iterate sections, extract knowledge per input_type (file reading / web browsing / app inspection), write section content files, update manifest
 
-**Deliverables:** Extracted content chunks in \`.checkpoint/session-{timestamp}/content/\`
+**Deliverables:**
+- Content files: `.checkpoint/session-{timestamp}/content/section-{NN}-{slug}.md`
+- Updated manifest with per-section status, timestamps, warnings
 
 ### Phase 3: 慎思之 — Think Carefully (Validation Loop)
 
@@ -205,128 +207,120 @@ input:
 
 #### Step 1.1 — Analyze Input
 
-**CONTEXT — Understand the Target:**
-- Read target parameter (path or URL)
-- Determine if local path or remote URL
-- For local path: check if directory or single file
-- For remote URL: check if localhost (running_web_app) or public (public_url)
+**CONTEXT:** Read target parameter (path or URL). Determine if local path or remote URL.
 
 **DECISION — Classify Input Type:**
-- IF target is local directory AND directory is empty → halt with error: "Input directory is empty"
-- IF target is directory with package.json/pyproject.toml/Cargo.toml → input_type = "source_code_repo"
-- IF target is directory with only .md/.rst/.txt files → input_type = "documentation_folder"
-- IF target matches \`localhost:*\` or \`127.0.0.1:*\` → input_type = "running_web_app"
-- IF target matches \`https?://*\` (not localhost) → input_type = "public_url"
-- IF target is single file → input_type = "single_file"
-- ELSE → halt with error: "Cannot classify input type for target '{target}'"
+- IF target is local directory AND empty → halt with error
+- IF directory with package.json/pyproject.toml/Cargo.toml → input_type = "source_code_repo"
+- IF directory with only .md/.rst/.txt files → input_type = "documentation_folder"
+- IF `localhost:*` or `127.0.0.1:*` → input_type = "running_web_app"
+- IF `https?://*` (not localhost) → input_type = "public_url"
+- IF single file → input_type = "single_file"
+- ELSE → halt with error
 
 **ACTION — Detect Format & App Type:**
-- Call input detection heuristics (see \`.github/skills/x-ipe-task-based-application-knowledge-extractor/references/input-detection-heuristics.md\`)
-- Detect format: analyze file extensions (e.g., .md → markdown, .py → python, mixed extensions → mixed)
-- Detect app_type: analyze framework markers (Flask/Django → web, argparse/click → cli, React Native → mobile, none → unknown)
+- Call input detection heuristics (see `references/input-detection-heuristics.md`)
+- Detect format: analyze file extensions (.md → markdown, .py → python, mixed → mixed)
+- Detect app_type: framework markers (Flask/Django → web, argparse/click → cli, React Native → mobile, none → unknown)
 - Collect source_metadata: primary_language, framework, file_count, total_size_bytes, entry_points, has_docs
 
-**VERIFY:**
-- ✅ InputAnalysis object created with: input_type, format, app_type, source_metadata
-- ✅ Input type is one of: source_code_repo, documentation_folder, public_url, running_web_app, single_file
-- ✅ Format is one of: markdown, python, javascript, html, mixed, yaml, json, go, rust, java, ruby, restructuredtext, text, unknown
-- ✅ App type is one of: web, cli, mobile, unknown
+**VERIFY:** ✅ InputAnalysis created with input_type, format, app_type, source_metadata
 
-**REFERENCE:**
-- Input detection heuristics: \`.github/skills/x-ipe-task-based-application-knowledge-extractor/references/input-detection-heuristics.md\`
-- Input analysis output template: \`.github/skills/x-ipe-task-based-application-knowledge-extractor/templates/input-analysis-output.md\`
+**REFERENCE:** `references/input-detection-heuristics.md`, `templates/input-analysis-output.md`
 
 ---
 
 #### Step 1.2 — Select Category
 
-**CONTEXT — Validate Purpose:**
-- Read purpose parameter ("user-manual" in v1)
-- Check against v1-supported categories
+**CONTEXT:** Read purpose parameter, check against v1-supported categories.
 
 **DECISION — Category Selection (v1):**
 - IF purpose == "user-manual" → selected_category = "user-manual"
-- IF purpose in ["API-reference", "architecture", "runbook", "configuration"] → halt with error: "Category '{purpose}' is not supported in v1. Supported: user-manual"
-- ELSE → halt with error: "Unknown category '{purpose}'"
+- IF purpose in ["API-reference", "architecture", "runbook", "configuration"] → halt: "Not supported in v1"
+- ELSE → halt: "Unknown category"
 
-**ACTION — Log Selection:**
-- Log selected category: "user-manual"
-- Log deferred categories (if applicable): none in v1
+**VERIFY:** ✅ selected_category is "user-manual"
 
-**VERIFY:**
-- ✅ selected_category is "user-manual"
-- ✅ Purpose validation passed
-
-**REFERENCE:**
-- Category taxonomy: \`.github/skills/x-ipe-task-based-application-knowledge-extractor/references/category-taxonomy.md\`
+**REFERENCE:** `references/category-taxonomy.md`
 
 ---
 
 #### Step 1.3 — Load Tool Skill
 
-**CONTEXT — Discover Tool Skills:**
-- Use glob pattern: \`.github/skills/x-ipe-tool-knowledge-extraction-*/SKILL.md\`
-- Filter results by selected category ("user-manual")
+**CONTEXT:** Glob `.github/skills/x-ipe-tool-knowledge-extraction-*/SKILL.md`, filter by category.
 
-**DECISION — Select Tool Skill:**
-- IF glob returns 0 matches → halt with error: "No tool skill found for category 'user-manual'. Install x-ipe-tool-knowledge-extraction-user-manual."
-- IF glob returns 1 match → load that skill
-- IF glob returns multiple matches → filter by category match in SKILL.md frontmatter, select first alphabetical match
+**DECISION:** 0 matches → halt (install tool skill); 1 match → load; multiple → filter by frontmatter category.
 
 **ACTION — Load Tool Skill:**
-- Read SKILL.md of matched skill
-- Parse frontmatter to extract: skill name, supported categories
-- Read templates section to extract: playbook_template_path, collection_template_path, acceptance_criteria_path
-- Read app-type mixin paths (if any): web, cli, mobile overrides
+- Read SKILL.md, parse frontmatter (name, categories)
+- Extract artifact paths: playbook_template, collection_template, acceptance_criteria
+- Read app-type mixin paths (web, cli, mobile overrides)
 - Verify artifact paths exist
 
-**VERIFY:**
-- ✅ loaded_tool_skill name is set (e.g., "x-ipe-tool-knowledge-extraction-user-manual")
-- ✅ Artifact paths exist: playbook_template_path, collection_template_path, acceptance_criteria_path
-- ✅ Tool skill supports category "user-manual"
+**VERIFY:** ✅ loaded_tool_skill set, artifact paths exist, supports "user-manual"
 
-**REFERENCE:**
-- Tool skill discovery logic: Step 1.3 ACTION section
-- Tool skill interface contract: \`x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/technical-design.md\` (Tool Skill Interface Contract section)
+**REFERENCE:** `x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/technical-design.md` (Tool Skill Interface Contract)
 
 ---
 
 #### Step 1.4 — Initialize Handoff
 
-**CONTEXT — Prepare Checkpoint Folder:**
-- Determine checkpoint path: \`.checkpoint/session-{timestamp}/\` in CWD
-- Check if \`.checkpoint/\` already exists (from previous run)
+**CONTEXT:** Determine checkpoint path `.checkpoint/session-{timestamp}/` in CWD.
 
-**DECISION — Handle Existing Checkpoint:**
-- IF \`.checkpoint/session-{timestamp}/\` already exists → create new timestamped subfolder to avoid conflict
-- ELSE → create \`.checkpoint/session-{timestamp}/\`
+**DECISION:** If path exists → create new timestamped subfolder; else → create it.
 
 **ACTION — Create Session Manifest:**
-- Create checkpoint directory structure:
-  ```
-  .checkpoint/session-{timestamp}/
-  ├── manifest.yaml
-  ├── content/          # for extracted content chunks (FEATURE-050-B)
-  └── feedback/         # for tool skill feedback (FEATURE-050-C)
-  ```
-- Write session manifest YAML using template: \`.github/skills/x-ipe-task-based-application-knowledge-extractor/templates/checkpoint-manifest.md\`
-- Manifest fields: schema_version, session_id, created_at, target, purpose, input_analysis, selected_category, loaded_tool_skill, status ("initialized")
+- Create directory structure: `manifest.yaml`, `content/`, `feedback/`
+- Write manifest using template (`templates/checkpoint-manifest.md`)
+- Fields: schema_version, session_id, created_at, target, purpose, input_analysis, selected_category, loaded_tool_skill, status ("initialized")
 
-**VERIFY:**
-- ✅ Checkpoint directory exists: \`.checkpoint/session-{timestamp}/\`
-- ✅ Manifest file exists: \`.checkpoint/session-{timestamp}/manifest.yaml\`
-- ✅ Manifest contains: session_id, target, purpose, input_analysis, selected_category, loaded_tool_skill
-- ✅ Manifest status is "initialized"
+**VERIFY:** ✅ Checkpoint dir exists, manifest.yaml written with status "initialized"
 
-**REFERENCE:**
-- Handoff protocol: \`.github/skills/x-ipe-task-based-application-knowledge-extractor/references/handoff-protocol.md\`
-- Checkpoint manifest template: \`.github/skills/x-ipe-task-based-application-knowledge-extractor/templates/checkpoint-manifest.md\`
+**REFERENCE:** `references/handoff-protocol.md`, `templates/checkpoint-manifest.md`
 
 ---
 
-### Phase 2-4: Future Implementation Stubs
+### Phase 2: 审问之 — Inquire Thoroughly (Source Extraction)
 
-**Phase 2 (审问之):** Source content extraction — See FEATURE-050-B specification
+#### Step 2.1 — Extract Source Content
+
+**CONTEXT — Read Collection Template:**
+- Read `tool_skill_artifacts.collection_template` file from Phase 1 output
+- Parse sections: each H2 heading = one section with extraction prompts in HTML comments
+- Create `{checkpoint_path}/content/` directory; update manifest status → "extracting"
+- Load `config_overrides`: web_search_enabled (default true), max_files_per_section (default 50)
+
+**DECISION — Extraction Capability per input_type:**
+- `source_code_repo` / `documentation_folder` → **local file reading** (enumerate, skip, filter, read)
+- `single_file` → **direct file read** (one file, map relevant portions per section)
+- `public_url` → **Chrome DevTools browsing** (navigate_page, take_snapshot; follow up to 5 links/section)
+- `running_web_app` → **Chrome DevTools navigation + interaction** (navigate, click, take_snapshot, take_screenshot)
+
+**ACTION — Per-Section Extraction Loop:**
+For EACH section in collection template order:
+1. Identify relevant source materials matching section extraction prompts
+2. Apply skip rules (see `references/extraction-engine-heuristics.md` for evaluation order)
+3. Read/browse/inspect using the capability from DECISION above
+4. **Synthesize** knowledge into coherent content — do NOT raw-dump files
+5. Screenshots: user-provided first → Chrome DevTools auto-capture → graceful skip
+6. IF `config_overrides.web_search_enabled`: augment with purpose-driven search (supplementary only)
+7. Write to `{checkpoint_path}/content/section-{NN}-{slug}.md` (see reference for format)
+8. Update `manifest.yaml` with section result (status, content_file, files_read, warnings, timestamps)
+
+**VERIFY:**
+- ✅ All template sections processed (each has status: extracted | skipped | empty | error | partial)
+- ✅ Content files exist in `{checkpoint_path}/content/` for each extracted section
+- ✅ Manifest updated per-section with status, content_file, files_read, warnings, timestamps
+- ✅ Phase 2 overall status in manifest is "phase_2_complete"
+- ✅ All content via file paths in checkpoint — no inline content
+
+**REFERENCE:**
+- Extraction heuristics: `.github/skills/x-ipe-task-based-application-knowledge-extractor/references/extraction-engine-heuristics.md`
+- Handoff protocol: `.github/skills/x-ipe-task-based-application-knowledge-extractor/references/handoff-protocol.md`
+
+---
+
+### Phase 3-4: Future Implementation Stubs
 
 **Phase 3 (慎思之):** Validation & coverage loop — See FEATURE-050-C specification
 
@@ -349,15 +343,17 @@ input:
 
 #### Step 5.2 — Complete
 
-**CONTEXT — Verify Foundation Complete:**
-- Check all Phase 1 steps completed:
+**CONTEXT — Verify Phases Complete:**
+- Check Phase 1 + Phase 2 completed:
   - ✅ Input analysis complete (InputAnalysis object exists)
   - ✅ Category selected ("user-manual")
   - ✅ Tool skill loaded (artifact paths obtained)
   - ✅ Handoff initialized (.checkpoint/ created with manifest)
+  - ✅ Source extraction complete (content files written, manifest phase_2_complete)
 
 **DECISION — Determine Completion Status:**
-- IF all Phase 1 steps complete → status = "ready_for_extraction" (foundation complete, awaiting FEATURE-050-B)
+- IF Phase 1 + Phase 2 complete → status = "extraction_complete" (awaiting FEATURE-050-C validation)
+- IF only Phase 1 complete → status = "ready_for_extraction"
 - IF any step failed → status = "blocked"
 
 **ACTION — Update Task Board & Review Gate:**
@@ -382,30 +378,20 @@ input:
 
 #### Step 6.1 — Decide Next Action
 
-**CONTEXT — Evaluate Status:**
-- Collect the full context and task_completion_output from this skill execution.
-- IF status == "ready_for_extraction" → next action is "wait for FEATURE-050-B implementation"
-- IF status == "blocked" → next action is "report error to user"
-- IF status == "completed" (future with full extraction) → next action is "invoke x-ipe-tool-kb-librarian"
+**CONTEXT:** Collect task_completion_output. Route based on status:
+- "extraction_complete" → invoke x-ipe-tool-kb-librarian (future: after FEATURE-050-C validation)
+- "ready_for_extraction" → wait for Phase 2 extraction
+- "blocked" → report error
 
 **DECISION — Mode-Aware Routing:**
-- IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-  → Invoke x-ipe-dao-end-user-representative with:
-    type: "routing"
-    completed_skill_output: {full task_completion_output YAML from this skill}
-    next_task_based_skill: "x-ipe-tool-kb-librarian"
-    context: "Skill completed. Study the context and full output to decide best next action."
-  → DAO studies the complete context and decides the best next action
-- ELSE (manual):
-  → Present next task suggestion to human and wait for instruction
+- IF interaction_mode == "dao-represent-human-to-interact": invoke DAO for routing
+- ELSE: present suggestion to human
 
 ---
 
 #### Step 6.2 — Execute Next Action
 
-**ACTION:**
-- v1: Log message: "Foundation phase complete. Source extraction requires FEATURE-050-B."
-- Future: Invoke x-ipe-tool-kb-librarian with extracted KB files
+**ACTION:** Log completion status. Future: invoke x-ipe-tool-kb-librarian with extracted KB files.
 
 ---
 
@@ -414,7 +400,7 @@ input:
 ```yaml
 task_completion_output:
   category: "standalone"
-  status: "ready_for_extraction | blocked"
+  status: "extraction_complete | ready_for_extraction | blocked"
   next_task_based_skill:
     - skill: "x-ipe-tool-kb-librarian"
       condition: "Organize extracted KB files into knowledge base"
@@ -453,6 +439,14 @@ task_completion_output:
       mobile: "path | null"
   checkpoint_path: ".checkpoint/session-{timestamp}/"
   
+  # Phase 2 outputs (FEATURE-050-B)
+  extraction_summary:
+    sections_extracted: int
+    sections_skipped: int
+    sections_error: int
+    total_warnings: int
+    content_files: ["content/section-{NN}-{slug}.md"]
+  
   # Future fields (FEATURE-050-E)
   extraction_status: "foundation_only | complete | partial | failed"
   quality_score: null  # 0.0-1.0 in FEATURE-050-E
@@ -467,11 +461,11 @@ task_completion_output:
 - [ ] **Category Selected:** "user-manual" selected and validated
 - [ ] **Tool Skill Loaded:** \`x-ipe-tool-knowledge-extraction-user-manual\` loaded with artifact paths
 - [ ] **Checkpoint Initialized:** \`.checkpoint/session-{timestamp}/\` created with manifest.yaml
+- [ ] **Phase 2 Complete:** All template sections extracted, content files written
+- [ ] **Manifest Updated:** Per-section status, content_file, files_read, warnings in manifest.yaml
 - [ ] **Output Result Populated:** All dynamic fields in output YAML set
 - [ ] **Task Board Updated:** Task moved to Completed section
-- [ ] **Error Handling:** If any step failed, status = "blocked" with error message
-- [ ] **Verification:** All VERIFY checkpoints in Phase 1 steps passed
-- [ ] **Documentation:** Session manifest contains complete audit trail
+- [ ] **Verification:** All VERIFY checkpoints in Phase 1 + Phase 2 steps passed
 
 ---
 
@@ -481,17 +475,18 @@ task_completion_output:
 
 1. **Auto-Detect First:** Always run input analysis before category selection or tool skill loading
 2. **File-Based Handoff:** Use \`.checkpoint/\` folder for all knowledge exchange; never inline content in YAML
-3. **Fail Fast:** Halt immediately when tool skill not found or target not accessible; don't continue with partial state
-4. **Timestamped Sessions:** Use \`session-{timestamp}\` naming to avoid conflicts between concurrent extractions
-5. **Reference Documentation:** Link to references/ for details; keep SKILL.md under 500 lines
+3. **Fail Fast:** Halt immediately when tool skill not found or target not accessible
+4. **Synthesize, Don't Dump:** Extract and organize knowledge — never raw-copy files into content
+5. **Section-by-Section:** Follow collection template order; one content file per section
+6. **Reference Documentation:** Link to references/ for details; keep SKILL.md under 500 lines
 
 ### ❌ Anti-Patterns (Don't Do This)
 
 1. **Inline Content Exchange:** Passing extracted content directly in YAML instead of file paths
-2. **Hardcoded Tool Skill Paths:** Manually specifying tool skill paths instead of glob discovery
+2. **Raw File Dumps:** Copying file contents verbatim into section files without synthesis
 3. **Skip Validation:** Proceeding without validating target exists/reachable
 4. **Checkpoint Inside Target:** Creating \`.checkpoint/\` inside target directory instead of CWD
-5. **Multi-Category Parallel:** Attempting multiple extraction categories in one session (v1 does not support this)
+5. **Multi-Category Parallel:** Attempting multiple extraction categories in one session
 
 ---
 
