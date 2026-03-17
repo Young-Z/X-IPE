@@ -1,7 +1,7 @@
 # Feature Specification: User Manual Tool Skill
 
 > Feature ID: FEATURE-051-A  
-> Version: v1.0  
+> Version: v1.1  
 > Status: Refined  
 > Last Updated: 03-17-2026
 
@@ -9,6 +9,7 @@
 
 | Version | Date | Description |
 |---------|------|-------------|
+| v1.1 | 03-17-2026 | CR-001: Add ToC, content splitting, cross-linking, scenario instructions, naming conventions |
 | v1.0 | 03-17-2026 | Initial specification |
 
 ## Linked Mockups
@@ -99,6 +100,17 @@ This skill is **source-agnostic** — it never touches source files, URLs, or ru
 | AC-051-06b | GIVEN each operation is documented WHEN operation details are read THEN each includes: input parameters (YAML), action description, and output format (YAML) | Unit |
 | AC-051-06c | GIVEN operations follow tool skill template format WHEN SKILL.md is parsed THEN each operation is defined in an XML block with `<operation>`, `<input>`, `<action>`, `<output>` tags | Unit |
 | AC-051-06d | GIVEN the extractor calls an operation WHEN inputs are provided THEN the operation returns output in the declared format without side effects (read-only, no file writes) | Integration |
+
+### AC-051-07: Content Structure & Navigation
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-051-07a | GIVEN the playbook template is assembled WHEN rendered THEN it includes a Table of Contents section at the top linking to all 7 sections | Unit |
+| AC-051-07b | GIVEN the assembled playbook content WHEN total line count exceeds 800 lines THEN each section is written as a separate sub-markdown file instead of inline | Unit |
+| AC-051-07c | GIVEN the ToC section WHEN sections are split into sub-files THEN ToC entries link to the sub-markdown file paths (not inline anchors) | Unit |
+| AC-051-07d | GIVEN a scenario sub-markdown file WHEN created THEN it includes an "Instructions" section explaining how to use the scenario content | Unit |
+| AC-051-07e | GIVEN a scenario sub-markdown file WHEN it documents UI features THEN it includes references to screenshots with alt text | Unit |
+| AC-051-07f | GIVEN sub-markdown files and images WHEN created THEN they follow naming convention: files as `{nn}-{section-slug}.md`, images as `{nn}-{section-slug}-{description}.png` | Unit |
 
 ## Functional Requirements
 

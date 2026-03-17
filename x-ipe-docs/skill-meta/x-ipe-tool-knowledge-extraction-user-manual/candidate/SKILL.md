@@ -226,21 +226,33 @@ input:
 
 ```xml
 <operation name="pack_section">
+  <input>
+    <field name="section_id" type="string" required="true">Section identifier (e.g., "overview", "installation")</field>
+    <field name="content_path" type="string" required="true">Path to validated content file in .checkpoint/</field>
+    <field name="split_mode" type="boolean" required="false" default="false">If true, output as standalone sub-markdown file with Instructions and Screenshots sections</field>
+  </input>
   <action>
     1. Read the playbook template to get section heading and structure
     2. Read validated content at content_path
-    3. Format content under proper H2 heading with consistent style:
-       a. Apply section numbering from playbook
-       b. Ensure subsection headings use H3
-       c. Wrap code examples in fenced code blocks
-       d. Normalize list formatting
-    4. Return formatted section ready for assembly
+    3. IF split_mode is true:
+       a. Create standalone sub-markdown file with naming convention: {nn}-{section-slug}.md
+       b. Structure: H1 heading → ## Instructions → ## Content → ## Screenshots (optional)
+       c. Instructions section explains what this section covers and how to use it
+       d. Screenshots section includes references to images following naming convention: {nn}-{section-slug}-{description}.png
+    4. ELSE (split_mode is false):
+       a. Format content under proper H2 heading with consistent style
+       b. Apply section numbering from playbook
+       c. Ensure subsection headings use H3
+       d. Wrap code examples in fenced code blocks
+       e. Normalize list formatting
+    5. Return formatted section ready for assembly
   </action>
   <constraints>
     - BLOCKING: section_id and content_path are required
     - CRITICAL: Do not alter factual content — only apply formatting
+    - CRITICAL: Follow naming convention for sub-files and images per Content Splitting Guidelines in playbook-template.md
   </constraints>
-  <output>Formatted markdown section ready for final assembly</output>
+  <output>Formatted markdown section (inline or sub-file path) ready for final assembly</output>
 </operation>
 ```
 

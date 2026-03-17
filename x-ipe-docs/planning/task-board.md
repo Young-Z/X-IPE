@@ -6,6 +6,8 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-947 | Skill Update | Rename the x-ipe-task-based-application-knowledge-extractor checkpoint folder from `.checkpoint/` to `.x-ipe-checkpoint/` across candidate, production, skill-meta, tests, and validation artifacts. | Echo 📡 | 🔄 in_progress | 03-17-2026 12:28:15 | - | — |
+| TASK-946 | Change Request | CR-001 on FEATURE-051-A: Optimize user manual templates with ToC, content splitting (>800 lines), cross-file linking, scenario instructions with images, naming conventions. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [CR-001.md](x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/CR-001.md), [specification.md v1.1](x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/specification.md) | — |
 | TASK-945 | Feature Refinement | Create specification and technical design for FEATURE-051-A (User Manual Tool Skill). 25 ACs across 6 groups. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [specification.md](x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/specification.md), [technical-design.md](x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/technical-design.md) | x-ipe-task-based-technical-design |
 | TASK-944 | Requirement Gathering | Gather requirements for x-ipe-tool-knowledge-extraction-user-manual tool skill. EPIC-051, single feature (FEATURE-051-A). Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [part-21](x-ipe-docs/requirements/requirement-details-part-21.md) | x-ipe-task-based-feature-breakdown |
 | TASK-943 | Skill Refactor | Restructure x-ipe-task-based-application-knowledge-extractor SKILL.md via skill-creator: (1) XML procedure/phase/step structure, (2) XML DoR/DoD, (3) extract inline procedures to references/, (4) remove FEATURE-050-* dev tracking artifacts. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | 1e5ac39 | - |
@@ -136,6 +138,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------|--------------|--------------|-------|
+| TASK-946 | Skill Update | Update x-ipe-task-based-application-knowledge-extractor to make format/app-type handling generic: remove hardcoded enumerations from candidate SKILL.md and bundled references/templates, validate, then merge. | Echo 📡 | ✅ done | 03-17-2026 20:17:37 | [SKILL.md](.github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md), [skill-meta.md](x-ipe-docs/skill-meta/x-ipe-task-based-application-knowledge-extractor/skill-meta.md), [evaluation-report.yaml](x-ipe-docs/skill-meta/x-ipe-task-based-application-knowledge-extractor/sandbox/evaluation-report.yaml) | Generalized format/app-type language to open-ended summary labels, added `detected_formats`/`detected_app_types`, documented mixin lookup fallback, merged candidate to production, and verified `npm test` plus 8/8 sandbox validation checks. |
 | TASK-941 | Bug Fix | Use the shared folder display-name logic for ideation edit modal folders so idea folders like `wf-008-knowledge-extraction` render consistently with deliverable folder labels | Echo 📡 | ✅ done | 03-17-2026 17:48:30 | [workflow-stage.js](src/x_ipe/static/js/features/workflow-stage.js), [workflow-stage-running.test.js](tests/frontend-js/workflow-stage-running.test.js) | Ideation edit modal folder names now reuse the shared folder display-name logic with a safe fallback, including trailing-slash idea folders, and were validated with targeted Vitest plus full `npm test`. |
 | TASK-940 | Bug Fix | Use real folder names for deliverables folder chips instead of tag names when folder paths end with `/` (e.g. show `FEATURE-050-A/`) | Echo 📡 | ✅ done | 03-17-2026 17:35:00 | [deliverable-viewer.js](src/x_ipe/static/js/features/deliverable-viewer.js), [deliverable-viewer.test.js](tests/frontend-js/deliverable-viewer.test.js), [deliverable-grouping.test.js](tests/frontend-js/deliverable-grouping.test.js) | Folder chips and folder deliverable labels now use the real folder basename, preserve trailing `/` for explicit folders, keep empty-path fallback behavior, and were validated with targeted Vitest plus full `npm test`. |
 | TASK-939 | Bug Fix | Process UIUX feedback Feedback-20260317-170937: sort feedback entries in A-Z, 0-9 ascending order in the feedback panel | Quill ✒️ | ✅ done | 03-17-2026 17:29:51 | [uiux_feedback_service.py](src/x_ipe/services/uiux_feedback_service.py), [uiux_feedback_routes.py](src/x_ipe/routes/uiux_feedback_routes.py), [test_uiux_feedback_storage.py](tests/test_uiux_feedback_storage.py) | Changed feedback listing to ascending name order, added regression coverage, verified targeted pytest (37 passed), `npm test` passed, and confirmed recent feedback folders render in ascending order. |
@@ -192,10 +195,10 @@
 
 ## Quick Stats
 
-- **Total Active:** 8
-- **In Progress:** 2
+- **Total Active:** 9
+- **In Progress:** 3
 - **Pending:** 0
-- **Completed (archived):** 873
+- **Completed (archived):** 874
 - **Deferred:** 0
 - **Reverted:** 8
 - **Pending Review:** 0

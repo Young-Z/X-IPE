@@ -193,3 +193,64 @@
 
 ### Follow-up
 > None
+
+| DAO-109 | 2026-03-17T$(date +%H:%M:%S) | TASK-TBD | N/A | instruction | 0.95 | Implement CR-001 on FEATURE-051-A: Add ToC, content splitting, cross-linking, scenario instructions, naming conventions to user manual tool |
+
+## DAO-109
+- **Timestamp:** $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+- **Task ID:** TASK-TBD (will be created by task-board-management)
+- **Feature ID:** FEATURE-051-A
+- **Workflow:** N/A
+- **Calling Skill:** N/A (direct user instruction)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.95
+
+### Message
+> Implement a Change Request (CR) on FEATURE-051-A — the User Manual Tool Skill.
+> 
+> Change Request Description: Optimize user manual templates with 5 structural improvements:
+> 1. Table of Contents (ToC) — Add a content section at the top of the playbook that links to different scenarios/sections
+> 2. Content splitting for large playbooks — Estimate content size. If assembled playbook exceeds 800 lines, each scenario/section should be a separate sub-markdown file
+> 3. Cross-file linking in ToC — ToC should link to both inline sections AND separate sub-markdown files when content is split
+> 4. Scenario-level markdown — Each scenario sub-file should have an instructions section explaining how to use that scenario, plus support for images/screenshots
+> 5. Naming conventions — Both sub-markdown files and images should follow naming conventions
+
+### Guidance Returned
+> Execute change request CR-001 on FEATURE-051-A following x-ipe-task-based-change-request skill procedure:
+> 1. Create task on task-board.md via x-ipe+all+task-board-management
+> 2. Load x-ipe-task-based-change-request skill
+> 3. Analyze CR impact (classification: modification to existing feature)
+> 4. Update specification.md with new AC group AC-051-07
+> 5. Update playbook-template.md with ToC and content splitting guidelines
+> 6. Update SKILL.md pack_section operation for split_mode support
+> 7. Sync candidate files
+> 8. Create CR-001.md record
+> 9. Validate all changes maintain backward compatibility
+
+### Rationale
+> This is a standard change request for an existing feature. The user provided detailed requirements covering 5 structural improvements. Classification: modification (adds ACs to existing feature without changing core functionality). Match strength: strong — keywords "change request", "CR", "modify feature" align with x-ipe-task-based-change-request skill. Engineering workflow position: FEEDBACK stage → change_request action. No conflicts detected — all changes are additive.
+
+### Suggested Skills
+> - skill_name: "x-ipe-task-based-change-request"
+>   match_strength: "strong"
+>   reason: "User explicitly requests implementing a Change Request (CR-001) on an existing feature with detailed modifications"
+>   execution_steps:
+>     - phase: "1. Preparation"
+>       step: "1.1 Load Change Request Context"
+>     - phase: "1. Preparation"
+>       step: "1.2 Validate Definition of Ready"
+>     - phase: "2. Analysis"
+>       step: "2.1 Classify Change Request"
+>     - phase: "2. Analysis"
+>       step: "2.2 Analyze Impact and Conflicts"
+>     - phase: "3. Routing"
+>       step: "3.1 Route to Appropriate Workflow"
+>     - phase: "4. Execution"
+>       step: "4.1 Execute Routed Workflow"
+>     - phase: "5. Completion"
+>       step: "5.1 Validate Definition of Done"
+
+### Follow-up
+> None
+

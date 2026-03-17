@@ -5,6 +5,34 @@
 
 ---
 
+## Table of Contents
+
+<!-- TOC_MODE: inline | split -->
+<!-- When TOC_MODE is "split", each entry links to a sub-markdown file -->
+<!-- When TOC_MODE is "inline", each entry links to an anchor in this document -->
+
+| # | Section | Link |
+|---|---------|------|
+| 1 | Overview | [Overview](#1-overview) |
+| 2 | Installation & Setup | [Installation & Setup](#2-installation--setup) |
+| 3 | Getting Started | [Getting Started](#3-getting-started) |
+| 4 | Core Features | [Core Features](#4-core-features) |
+| 5 | Configuration | [Configuration](#5-configuration) |
+| 6 | Troubleshooting | [Troubleshooting](#6-troubleshooting) |
+| 7 | FAQ & Reference | [FAQ & Reference](#7-faq--reference) |
+
+<!-- SPLIT MODE EXAMPLE:
+| 1 | Overview | [Overview](01-overview.md) |
+| 2 | Installation & Setup | [Installation & Setup](02-installation-setup.md) |
+| 3 | Getting Started | [Getting Started](03-getting-started.md) |
+| 4 | Core Features | [Core Features](04-core-features.md) |
+| 5 | Configuration | [Configuration](05-configuration.md) |
+| 6 | Troubleshooting | [Troubleshooting](06-troubleshooting.md) |
+| 7 | FAQ & Reference | [FAQ & Reference](07-faq-reference.md) |
+-->
+
+---
+
 ## 1. Overview
 
 **What belongs here:** A concise description of what the application does, who it's for, and the key value it provides.
@@ -87,3 +115,38 @@
 - **Glossary** — Definitions of domain-specific or application-specific terms
 - **Keyboard Shortcuts** — If applicable, table of shortcuts
 - **Version History** — Summary of major version changes relevant to users
+
+---
+
+## Content Splitting Guidelines
+
+**Threshold:** If the assembled playbook exceeds **800 lines**, split into sub-files.
+
+**File naming convention:**
+- Sub-markdown files: `{nn}-{section-slug}.md` (e.g., `01-overview.md`, `04-core-features.md`)
+- Screenshot images: `{nn}-{section-slug}-{description}.png` (e.g., `04-core-features-dashboard-view.png`)
+- All files stored in the same output directory alongside the main playbook
+
+**Sub-file structure:**
+Each sub-markdown file follows this structure:
+```
+# {Section Number}. {Section Title}
+
+## Instructions
+
+{Brief explanation of what this section covers and how to use it}
+
+## Content
+
+{Extracted and validated content for this section}
+
+## Screenshots
+
+<!-- Optional — include when documenting UI features -->
+![{Alt text}]({nn}-{section-slug}-{description}.png)
+```
+
+**When to split:**
+1. Estimate total lines after all sections are assembled
+2. IF total > 800 lines → create sub-files + update ToC to split mode
+3. IF total ≤ 800 lines → keep inline + use inline ToC mode
