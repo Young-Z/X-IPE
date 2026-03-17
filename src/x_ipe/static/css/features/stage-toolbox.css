@@ -169,6 +169,11 @@
     color: #10b981;
 }
 
+.toolbox-accordion[data-stage="validation"] .toolbox-accordion-icon {
+    background: rgba(139, 92, 246, 0.12);
+    color: #8b5cf6;
+}
+
 .toolbox-accordion[data-stage="feedback"] .toolbox-accordion-icon {
     background: rgba(249, 115, 22, 0.12);
     color: #f97316;

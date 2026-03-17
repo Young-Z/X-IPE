@@ -5,8 +5,8 @@ DAO uses this reference in Step 2.1 to suggest the engineering-correct next skil
 ## Stage Pipeline
 
 ```
-IDEATION → REQUIREMENT → IMPLEMENT → FEEDBACK
-(shared)    (shared)      (per-feat)  (per-feat)
+IDEATION → REQUIREMENT → IMPLEMENT → VALIDATION → FEEDBACK
+(shared)    (shared)      (per-feat)  (per-feat)   (per-feat)
 ```
 
 ## Stage Actions & Skill Mapping
@@ -34,17 +34,22 @@ IDEATION → REQUIREMENT → IMPLEMENT → FEEDBACK
 | Action | Skill | Required | Next Actions |
 |--------|-------|----------|--------------|
 | feature_refinement | x-ipe-task-based-feature-refinement | yes | technical_design |
-| technical_design | x-ipe-task-based-technical-design | yes | implementation |
-| implementation | x-ipe-task-based-code-implementation | yes | acceptance_testing |
-| acceptance_testing | x-ipe-task-based-feature-acceptance-test | yes | feature_closing |
-| feature_closing | x-ipe-task-based-feature-closing | yes | → enters FEEDBACK |
+| technical_design | x-ipe-task-based-technical-design | yes | code_implementation |
+| code_implementation | x-ipe-task-based-code-implementation | yes | → enters VALIDATION |
 
-### Stage 4: FEEDBACK (per feature)
+### Stage 4: VALIDATION (per feature)
 
 | Action | Skill | Required | Next Actions |
 |--------|-------|----------|--------------|
-| bug_fix | x-ipe-task-based-bug-fix | no | acceptance_testing (re-enters IMPLEMENT) |
-| code_refactor | x-ipe-task-based-code-refactor | no | acceptance_testing (re-enters IMPLEMENT) |
+| acceptance_test | x-ipe-task-based-feature-acceptance-test | yes | code_refactor |
+| code_refactor | x-ipe-task-based-code-refactor | no | feature_closing |
+| feature_closing | x-ipe-task-based-feature-closing | yes | → enters FEEDBACK |
+
+### Stage 5: FEEDBACK (per feature)
+
+| Action | Skill | Required | Next Actions |
+|--------|-------|----------|--------------|
+| bug_fix | x-ipe-task-based-bug-fix | no | acceptance_test (re-enters VALIDATION) |
 | human_playground | x-ipe-task-based-human-playground | no (human-initiated only) | change_request |
 | change_request | x-ipe-task-based-change-request | no | feature_refinement or feature_breakdown |
 
@@ -60,8 +65,8 @@ IDEATION → REQUIREMENT → IMPLEMENT → FEEDBACK
 ## Feedback Loops
 
 ```
-Quality loop:    acceptance_testing → feature_closing → code_refactor → acceptance_testing
-Discovery loop:  human_playground → bug_fix → acceptance_testing
+Quality loop:    acceptance_test → code_refactor → feature_closing → acceptance_test
+Discovery loop:  human_playground → bug_fix → acceptance_test
 Scope loop:      change_request → feature_refinement (or feature_breakdown)
 ```
 

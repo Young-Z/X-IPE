@@ -75,17 +75,29 @@ def temp_project_with_legacy_config(temp_project_dir):
 def default_config():
     """Default tools configuration"""
     return {
-        "version": "2.0",
+        "version": "3.2",
         "stages": {
             "ideation": {
                 "ideation": {"x-ipe-tool-infographic-syntax": False, "mermaid": False},
                 "mockup": {"frontend-design": True},
+                "architecture": {},
                 "sharing": {}
             },
             "requirement": {"gathering": {}, "analysis": {}},
-            "feature": {"design": {}, "implementation": {}},
-            "quality": {"testing": {}, "review": {}},
-            "refactoring": {"analysis": {}, "execution": {}}
+            "implement": {
+                "technical_design": {},
+                "code_implementation": {}
+            },
+            "validation": {
+                "acceptance_test": {},
+                "code_refactor": {},
+                "refactoring_analysis": {}
+            },
+            "feedback": {
+                "bug_fix": {},
+                "human_playground": {},
+                "change_request": {}
+            }
         }
     }
 
@@ -94,17 +106,29 @@ def default_config():
 def sample_config():
     """Sample tools configuration with some tools enabled"""
     return {
-        "version": "2.0",
+        "version": "3.2",
         "stages": {
             "ideation": {
                 "ideation": {"x-ipe-tool-infographic-syntax": True, "mermaid": True},
                 "mockup": {"frontend-design": True},
+                "architecture": {},
                 "sharing": {}
             },
             "requirement": {"gathering": {}, "analysis": {}},
-            "feature": {"design": {}, "implementation": {}},
-            "quality": {"testing": {}, "review": {}},
-            "refactoring": {"analysis": {}, "execution": {}}
+            "implement": {
+                "technical_design": {},
+                "code_implementation": {}
+            },
+            "validation": {
+                "acceptance_test": {},
+                "code_refactor": {},
+                "refactoring_analysis": {}
+            },
+            "feedback": {
+                "bug_fix": {},
+                "human_playground": {},
+                "change_request": {}
+            }
         }
     }
 
@@ -170,7 +194,7 @@ class TestToolsConfigServiceLoad:
         service = ToolsConfigService(temp_project_with_config_dir)
         config = service.load()
         
-        assert config['version'] == '2.0'
+        assert config['version'] == '3.2'
         assert config['stages']['ideation']['ideation']['x-ipe-tool-infographic-syntax'] == True
         assert config['stages']['ideation']['ideation']['mermaid'] == True
     
@@ -181,7 +205,7 @@ class TestToolsConfigServiceLoad:
         service = ToolsConfigService(temp_project_dir)
         config = service.load()
         
-        assert config['version'] == '2.0'
+        assert config['version'] == '3.2'
         assert 'stages' in config
         assert config['stages']['ideation']['mockup']['frontend-design'] == True
         
@@ -213,7 +237,7 @@ class TestToolsConfigServiceLoad:
         config = service.load()
         
         # Should return default config
-        assert config['version'] == '2.0'
+        assert config['version'] == '3.2'
         assert 'stages' in config
 
 
@@ -231,7 +255,7 @@ class TestToolsConfigServiceMigration:
         config = service.load()
         
         # Should have new version
-        assert config['version'] == '2.0'
+        assert config['version'] == '3.2'
         
         # Should preserve legacy tool states
         assert config['stages']['ideation']['ideation']['x-ipe-tool-infographic-syntax'] == True
@@ -308,7 +332,7 @@ class TestToolsConfigServiceMigration:
         config = service.load()
         
         # Should return default config
-        assert config['version'] == '2.0'
+        assert config['version'] == '3.2'
 
 
 class TestToolsConfigServiceSave:
@@ -325,7 +349,7 @@ class TestToolsConfigServiceSave:
         assert config_path.exists()
         
         saved = json.loads(config_path.read_text())
-        assert saved['version'] == '2.0'
+        assert saved['version'] == '3.2'
         assert saved['stages']['ideation']['ideation']['x-ipe-tool-infographic-syntax'] == True
     
     def test_save_creates_config_directory(self, temp_project_dir, sample_config):
@@ -387,7 +411,7 @@ class TestGetToolsConfigAPI:
         data = response.get_json()
         assert data['success'] == True
         assert 'config' in data
-        assert data['config']['version'] == '2.0'
+        assert data['config']['version'] == '3.2'
     
     def test_get_returns_default_when_no_config(self, test_client):
         """GET /api/config/tools returns default config when no file exists"""
@@ -396,7 +420,7 @@ class TestGetToolsConfigAPI:
         assert response.status_code == 200
         data = response.get_json()
         assert data['success'] == True
-        assert data['config']['version'] == '2.0'
+        assert data['config']['version'] == '3.2'
         assert 'stages' in data['config']
     
     def test_get_response_structure(self, test_client):
@@ -414,9 +438,9 @@ class TestGetToolsConfigAPI:
         stages = config['stages']
         assert 'ideation' in stages
         assert 'requirement' in stages
-        assert 'feature' in stages
-        assert 'quality' in stages
-        assert 'refactoring' in stages
+        assert 'implement' in stages
+        assert 'validation' in stages
+        assert 'feedback' in stages
 
 
 class TestPostToolsConfigAPI:

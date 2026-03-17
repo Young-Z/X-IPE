@@ -19,7 +19,7 @@ class StageToolboxModal {
         
         // Stage metadata (display info only - tools come from config)
         // Order matters - this defines display order
-        this.stageOrder = ['ideation', 'requirement', 'implement', 'feedback'];
+        this.stageOrder = ['ideation', 'requirement', 'implement', 'validation', 'feedback'];
         
         this.stageMeta = {
             ideation: {
@@ -35,12 +35,17 @@ class StageToolboxModal {
             implement: {
                 icon: 'bi-code-slash',
                 title: 'Implement Stage',
-                subtitle: 'Design, implement and validate features'
+                subtitle: 'Design and implement features'
+            },
+            validation: {
+                icon: 'bi-shield-check',
+                title: 'Validation Stage',
+                subtitle: 'Testing, refactoring and closing'
             },
             feedback: {
                 icon: 'bi-arrow-repeat',
                 title: 'Feedback Stage',
-                subtitle: 'Bug fixes, refactoring and iteration'
+                subtitle: 'Bug fixes and iteration'
             }
         };
         
@@ -56,12 +61,13 @@ class StageToolboxModal {
             analysis: 'Analysis',
             // Implement
             technical_design: 'Technical Design',
-            implementation: 'Implementation',
-            acceptance_testing: 'Acceptance Testing',
-            // Feedback
-            bug_fix: 'Bug Fix',
+            code_implementation: 'Code Implementation',
+            // Validation
+            acceptance_test: 'Acceptance Test',
             code_refactor: 'Code Refactor',
             refactoring_analysis: 'Refactoring Analysis',
+            // Feedback
+            bug_fix: 'Bug Fix',
             human_playground: 'Human Playground',
             change_request: 'Change Request'
         };
