@@ -42,3 +42,36 @@
 
 ### Follow-up
 > None — clear workflow progression. After code implementation completes, the next step will be acceptance_testing via x-ipe-task-based-feature-acceptance-test.
+
+---
+
+### DAO Entry — TASK-932 Technical Design FEATURE-050-C
+
+- **Timestamp:** 2026-03-17T09:10:00Z
+- **Task:** TASK-932 — Technical Design for FEATURE-050-C (Extract-Validate Loop & Coverage Control)
+- **Disposition:** instruction
+- **Skill:** x-ipe-task-based-technical-design (strong match)
+- **Confidence:** 0.95
+- **Rationale:** User provided complete detailed instructions for creating a two-part technical design document for FEATURE-050-C. Single instruction unit, direct skill match, no ambiguity.
+- **Outcome:** Technical design created at `x-ipe-docs/requirements/EPIC-050/FEATURE-050-C/technical-design.md`
+
+
+---
+
+### DAO Entry — TASK-937 Technical Design (FEATURE-050-D)
+
+- **Timestamp:** 2026-03-17T09:42:00Z
+- **Task ID:** TASK-937
+- **Feature:** FEATURE-050-D
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.95
+
+**Need:** Create technical design document for FEATURE-050-D (Checkpoint, Resume & Error Handling — Phase 4). All design decisions pre-resolved via DAO-110.
+
+**Instruction Unit:**
+- disposition: instruction
+- suggested_skill: x-ipe-task-based-technical-design (strong match)
+- content: Create two-part technical design at `x-ipe-docs/requirements/EPIC-050/FEATURE-050-D/technical-design.md`. Part 1: AC-to-deliverable mapping + line budget. Part 2: Implementation plan with state machine, error_log schema, resume algorithm, SKILL.md step content, reference file plan.
+- execution_plan: sequential, groups: [[0]]
+

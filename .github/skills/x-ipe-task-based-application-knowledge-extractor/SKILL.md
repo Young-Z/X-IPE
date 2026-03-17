@@ -13,7 +13,7 @@ triggers:
 
 # Application Knowledge Extractor
 
-> **Version:** 1.2.0 | **Status:** Candidate | **Feature:** FEATURE-050-C
+> **Version:** 1.3.0 | **Status:** Candidate | **Feature:** FEATURE-050-D
 
 ## Purpose
 
@@ -39,8 +39,9 @@ triggers:
 - ✅ Phase 1 (Foundation): Input analysis, category selection, tool skill loading, handoff init
 - ✅ Phase 2 (Extraction): Template-guided, per-section source content extraction
 - ✅ Phase 3 (Validation): Extract-validate loop with coverage tracking and gap classification
+- ✅ Phase 4 (Checkpoint): Resume detection, section-level checkpoint, 2-tier error handling
 
-**NOT Yet Implemented:** Phase 4 (Checkpoint & Resume), Phase 5 (KB Intake Output)
+**NOT Yet Implemented:** Phase 5 (KB Intake Output)
 
 ---
 
@@ -107,7 +108,7 @@ input:
 | 1 | 博学之 — Study Broadly | 1.1 Analyze Input, 1.2 Select Category, 1.3 Load Tool Skill, 1.4 Initialize Handoff | FEATURE-050-A ✅ |
 | 2 | 审问之 — Inquire Thoroughly | 2.1 Extract Source Content | FEATURE-050-B ✅ |
 | 3 | 慎思之 — Think Carefully | 3.1 Validate & Coverage Loop | FEATURE-050-C ✅ |
-| 4 | 明辨之 — Discern Clearly | 4.1 Handle Errors & Checkpoints | FEATURE-050-D 🔜 |
+| 4 | 明辨之 — Discern Clearly | 4.1 Resume, Checkpoint & Error Handling | FEATURE-050-D ✅ |
 | 5 | 笃行之 — Practice Earnestly | 5.1 Generate KB Intake Output, 5.2 Complete | FEATURE-050-E 🔜 + Completion |
 | 6 | 继续执行 — Continue Execution | 6.1 Decide Next Action, 6.2 Execute Next Action | Standard |
 
@@ -325,9 +326,30 @@ For EACH section in collection template order:
 
 ---
 
-### Phase 4: Future Implementation Stub
+### Phase 4: 明辨之 — Discern Clearly (Checkpoint & Error Handling)
 
-**Phase 4 (明辨之):** Error handling & checkpoints — See FEATURE-050-D specification
+#### Step 4.1 — Resume, Checkpoint & Error Handling
+
+**CONTEXT — Cross-Cutting Behavior:** Phase 4 wraps Phases 1–3 (not sequential). On invocation: scan `.checkpoint/session-*/manifest.yaml` sorted by timestamp desc; select most recent with status "paused"|"extracting". If valid → resume (skip accepted sections). If corrupted (YAML parse fail or schema_version ≠ "1.0") → log warning, start fresh. Config: `max_retries` (default 3 total attempts).
+
+**DECISION — Error Classification & Recovery:**
+- Transient error (timeout, rate limit, temp lock) → immediate retry, max 2 retries (3 total)
+- Permanent error (not found, permission denied, unsupported) → no retry, mark section "error"
+- Exhausted retries → mark "error", log to error_log[], continue next section (fail-open)
+- Recovery: DAO mode → autonomous skip/adjust/halt; manual mode → surface options to human
+
+**ACTION — Checkpoint & State Machine:**
+1. After each section extraction/validation: persist manifest (status, updated_at, content_file)
+2. On pause: status → "paused"; on resume: add event_log entry, refresh updated_at
+3. Valid transitions: initialized→extracting, extracting→validating|paused, validating→paused, paused→extracting|validating, any→error|complete. Reject invalid with warning.
+4. Append to error_log[]: {section_id, error_type, message, retry_count, timestamp}
+
+**VERIFY:**
+- ✅ Manifest status reflects valid state machine transition at every step
+- ✅ error_log[] entries have required fields; resumed sessions skip accepted sections
+- ✅ Corrupted checkpoints → fresh start with warning logged
+
+**REFERENCE:** `references/checkpoint-error-heuristics.md`, `references/handoff-protocol.md`
 
 ---
 
@@ -335,45 +357,19 @@ For EACH section in collection template order:
 
 #### Step 5.1 — Generate KB Intake Output (FEATURE-050-E Stub)
 
-**Status:** 🔜 NOT IMPLEMENTED — Placeholder for FEATURE-050-E
-
-**Planned Actions:**
-- Quality scoring of extracted knowledge
-- Generate \`.intake/\` pipeline files
-- Prepare for librarian handoff
+**Status:** 🔜 NOT IMPLEMENTED — Quality scoring, `.intake/` pipeline, librarian handoff.
 
 ---
 
 #### Step 5.2 — Complete
 
-**CONTEXT — Verify Phases Complete:**
-- Check Phase 1 + Phase 2 completed:
-  - ✅ Input analysis complete (InputAnalysis object exists)
-  - ✅ Category selected ("user-manual")
-  - ✅ Tool skill loaded (artifact paths obtained)
-  - ✅ Handoff initialized (.checkpoint/ created with manifest)
-  - ✅ Source extraction complete (content files written, manifest phase_2_complete)
+**CONTEXT:** Verify Phases 1–4 complete: input analysis exists, category selected, tool skill loaded, handoff initialized, extraction done, validation done, checkpoint saved, errors logged.
 
-**DECISION — Determine Completion Status:**
-- IF Phase 1 + Phase 2 complete → status = "extraction_complete" (awaiting FEATURE-050-C validation)
-- IF only Phase 1 complete → status = "ready_for_extraction"
-- IF any step failed → status = "blocked"
+**DECISION:** IF all phases complete → "extraction_complete"; IF partially complete → "ready_for_extraction"; IF failed → "blocked".
 
-**ACTION — Update Task Board & Review Gate:**
-1. Update task-board.md: move task to Completed section
-2. Set task output_links: [".checkpoint/session-{timestamp}/"]
-3. Log completion summary
-4. Mode-aware review gate:
-   - IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-     Skip human review. If any open questions remain, invoke
-     x-ipe-dao-end-user-representative to resolve them autonomously.
-   - ELIF process_preference.interaction_mode == "dao-represent-human-to-interact-for-questions-in-skill" OR "interact-with-human":
-     Present results to human and wait for approval.
+**ACTION:** Update task-board.md, set output_links, log summary. Mode-aware: DAO mode → skip review; manual → present to human.
 
-**VERIFY:**
-- ✅ Task status on task-board.md is "completed"
-- ✅ Output result YAML populated
-- ✅ DoD checklist satisfied
+**VERIFY:** ✅ Task completed on board, output YAML populated, DoD satisfied
 
 ---
 
@@ -381,20 +377,12 @@ For EACH section in collection template order:
 
 #### Step 6.1 — Decide Next Action
 
-**CONTEXT:** Collect task_completion_output. Route based on status:
-- "extraction_complete" → invoke x-ipe-tool-kb-librarian (future: after FEATURE-050-C validation)
-- "ready_for_extraction" → wait for Phase 2 extraction
-- "blocked" → report error
-
-**DECISION — Mode-Aware Routing:**
-- IF interaction_mode == "dao-represent-human-to-interact": invoke DAO for routing
-- ELSE: present suggestion to human
-
----
+**CONTEXT:** Route based on status: "extraction_complete" → invoke kb-librarian; "blocked" → report error.
+**DECISION:** DAO mode → invoke DAO for routing; manual → present to human.
 
 #### Step 6.2 — Execute Next Action
 
-**ACTION:** Log completion status. Future: invoke x-ipe-tool-kb-librarian with extracted KB files.
+**ACTION:** Log completion. Future: invoke x-ipe-tool-kb-librarian with extracted KB files.
 
 ---
 
@@ -460,6 +448,14 @@ task_completion_output:
     sections_needs_more_info: int
     sections_error: int
   
+  # Phase 4 outputs (FEATURE-050-D)
+  error_summary:
+    total_errors: int
+    transient_retried: int
+    permanent_halted: int
+    sections_skipped: int
+    resumed_from: "session path | null"
+  
   # Future fields (FEATURE-050-E)
   extraction_status: "foundation_only | complete | partial | failed"
   quality_score: null  # 0.0-1.0 in FEATURE-050-E
@@ -472,7 +468,8 @@ task_completion_output:
 - [ ] **Phase 1 Complete:** Input analysis, category selection, tool skill loading, checkpoint init all passed
 - [ ] **Phase 2 Complete:** All template sections extracted, content files written, manifest updated
 - [ ] **Phase 3 Complete:** Validation loop executed, coverage_ratio computed, feedback files written
-- [ ] **Output Result Populated:** All dynamic fields (input_analysis, extraction_summary, validation_summary) set
+- [ ] **Phase 4 Active:** Checkpoint saves after each section, errors classified and logged, resume detection works
+- [ ] **Output Result Populated:** All dynamic fields (input_analysis, extraction_summary, validation_summary, error_summary) set
 - [ ] **Task Board Updated:** Task moved to Completed section
 - [ ] **Verification:** All VERIFY checkpoints in Phase 1–3 steps passed
 

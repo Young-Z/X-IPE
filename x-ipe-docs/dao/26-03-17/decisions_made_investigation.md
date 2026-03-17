@@ -28,6 +28,8 @@
 | DAO-114 | 2026-03-17T09:11:17Z | TASK-939 | N/A (direct human message) | instruction | 0.95 | Process UIUX feedback Feedback-20260317-170937 as a single bug-fix task to sort feedback entries in ascending A-Z, 0-9 order |
 | DAO-115 | 2026-03-17T09:16:51Z | TASK-940 | N/A (direct human message) | instruction | 0.96 | Use real folder names for deliverables folder chips instead of tag names when folder paths end with `/` |
 | DAO-116 | 2026-03-17T09:29:51Z | TASK-939 | N/A (direct human message) | instruction | 0.96 | Continue TASK-939 to finish validation, complete independent review, and close the task if the fix remains clean |
+| DAO-117 | 2026-03-17T09:28:20Z | TASK-940 | N/A (direct human message) | approval | 0.99 | Continue TASK-940 bug-fix execution for real folder-name deliverable chips |
+| DAO-118 | 2026-03-17T09:41:37Z | TASK-941 | N/A (direct human message) | instruction | 0.96 | Use the same shared folder display-name logic for ideation edit modal folders like `wf-008-knowledge-extraction` |
 
 ## DAO-108
 - **Timestamp:** 2026-03-17T16:13:00Z
@@ -58,6 +60,39 @@
 >         step: "1.1 Reproduce and identify root cause"
 >       - phase: "2. Fix"
 >         step: "2.1 Implement fix with failing test first"
+
+### Follow-up
+> None
+
+## DAO-118
+- **Timestamp:** 2026-03-17T09:41:37Z
+- **Task ID:** TASK-941
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A (direct human message)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.96
+
+### Message
+> I found the ideation folder for example: wf-008-knowledge-extraction, uses a different implementation, maybe let's use the same consistent logic, so pleaes update the ideation folder display logic as well
+
+### Guidance Returned
+> Treat this as a focused frontend bug fix. Update the ideation edit modal folder-name path in `workflow-stage.js` to use the same shared folder display-name logic as deliverable folder labels, so idea folders such as `wf-008-knowledge-extraction` render consistently. Use x-ipe-task-based-bug-fix.
+
+### Rationale
+> The user is reporting another inconsistent existing UI behavior in the same workflow surface. The smallest useful intervention is a follow-up bug fix that reuses the already-established shared folder-name logic instead of maintaining a second ideation-specific implementation.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "strong"
+>     reason: "The request targets inconsistent existing frontend behavior and asks for a logic alignment fix rather than a new feature"
+>     execution_steps:
+>       - phase: "1. Understand"
+>         step: "1 Understand the Bug"
+>       - phase: "6. Write Test"
+>         step: "6 Write Failing Test"
 
 ### Follow-up
 > None
@@ -327,6 +362,39 @@
 **Changes Required:**
 1. `x-ipe-task-based-feature-acceptance-test/SKILL.md` — Add "Structured Review" test type for skills/non-code deliverables
 2. `x-ipe-task-based-code-implementation/SKILL.md` — Remove the skip-AAA-for-skills exception; ensure next_task routes to acceptance testing
+
+## DAO-117
+- **Timestamp:** 2026-03-17T09:28:20Z
+- **Task ID:** TASK-940
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A (direct human message)
+- **Source:** human
+- **Disposition:** approval
+- **Confidence:** 0.99
+
+### Message
+> continue
+
+### Guidance Returned
+> Continue the current TASK-940 bug-fix flow without changing scope. Proceed from conflict analysis into failing-test reproduction, implement the minimal folder-chip label fix, validate with existing JS tests, and then close the task.
+
+### Rationale
+> The user’s message is a direct go-ahead on an already-scoped in-flight task, not a new request. The smallest useful intervention is approval-like guidance to continue the existing execution path.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "strong"
+>     reason: "The current work remains the same active frontend bug-fix task"
+>     execution_steps:
+>       - phase: "7. Implement"
+>         step: "7 Implement"
+>       - phase: "8. Verify"
+>         step: "8 Verify"
+
+### Follow-up
+> None
 
 ## DAO-115
 - **Timestamp:** 2026-03-17T09:16:51Z
