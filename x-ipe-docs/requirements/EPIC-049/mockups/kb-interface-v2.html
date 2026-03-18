@@ -1,0 +1,3291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X-IPE Knowledge Base — UI Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   X-IPE Knowledge Base Mockup — "Knowledge Atelier"
+   Aesthetic: Dark chrome + warm editorial content
+   ═══════════════════════════════════════════════════════════ */
+
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+}
+
+:root {
+  /* X-IPE Chrome Colors (exact match) */
+  --top-bar-bg: #1e1e1e;
+  --sidebar-bg: #1e1e2e;
+  --sidebar-text: #cdd6f4;
+  --sidebar-hover: #313244;
+  --sidebar-active: #45475a;
+  --content-bg: #ffffff;
+  --border-subtle: #313244;
+
+  /* Brand Theme Tokens */
+  --accent: #10b981;
+  --accent-light: #d1fae5;
+  --accent-dark: #059669;
+  --primary: #0f172a;
+  --secondary: #475569;
+  --neutral: #e2e8f0;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* Category Colors */
+  --cat-requirements: #3b82f6;
+  --cat-design: #f59e0b;
+  --cat-technical: #10b981;
+  --cat-market: #8b5cf6;
+  --cat-brand: #ec4899;
+  --cat-general: #64748b;
+
+  /* Typography */
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-ui: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Layout */
+  --top-bar-height: 36px;
+  --sidebar-width: 280px;
+  --content-header-height: 50px;
+  --terminal-height: 36px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-ui);
+  color: var(--primary);
+  background: var(--sidebar-bg);
+  overflow: hidden;
+}
+
+/* ── App Container ── */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ═══════════════════════════
+   TOP BAR (36px)
+   ═══════════════════════════ */
+.top-bar {
+  height: var(--top-bar-height);
+  min-height: var(--top-bar-height);
+  background: var(--top-bar-bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  border-bottom: 1px solid #333;
+  z-index: 300;
+}
+
+.top-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.top-bar-brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+.top-bar-brand i { color: var(--accent); font-size: 15px; }
+
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+.breadcrumb-nav .sep { opacity: 0.4; }
+.breadcrumb-nav .current { color: #e2e8f0; }
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.top-btn {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  transition: all 0.15s;
+}
+.top-btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.top-btn-primary:hover { background: var(--accent-dark); }
+.top-btn-ghost {
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.top-btn-ghost:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+.top-btn-icon {
+  background: transparent;
+  color: #94a3b8;
+  padding: 0 6px;
+}
+.top-btn-icon:hover { color: #e2e8f0; }
+
+/* ═══════════════════════════
+   MIDDLE SECTION
+   ═══════════════════════════ */
+.middle-section {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ═══════════════════════════
+   SIDEBAR (280px)
+   ═══════════════════════════ */
+.sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.project-switcher {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.project-switcher select {
+  width: 100%;
+  background: var(--sidebar-hover);
+  color: var(--sidebar-text);
+  border: 1px solid var(--sidebar-active);
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-family: var(--font-ui);
+  outline: none;
+  cursor: pointer;
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 0;
+}
+
+/* Sidebar scrollbar */
+.sidebar-content::-webkit-scrollbar { width: 4px; }
+.sidebar-content::-webkit-scrollbar-track { background: transparent; }
+.sidebar-content::-webkit-scrollbar-thumb { background: var(--sidebar-active); border-radius: 4px; }
+
+/* Section headers */
+.nav-section { margin-bottom: 2px; }
+
+.nav-section-header {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  user-select: none;
+  background: rgba(49,50,68,0.35);
+  border-radius: 6px;
+  margin: 2px 8px;
+  transition: background 0.15s;
+  font-size: 13px;
+  font-weight: 500;
+  gap: 8px;
+}
+.nav-section-header:hover { background: var(--sidebar-hover); }
+.nav-section-header i.section-icon { font-size: 14px; opacity: 0.8; }
+.nav-section-header .chevron {
+  margin-left: auto;
+  font-size: 10px;
+  opacity: 0.5;
+  transition: transform 0.2s;
+}
+.nav-section-header.expanded .chevron { transform: rotate(180deg); }
+
+/* Section content */
+.nav-section-content {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease;
+}
+.nav-section-content.open { max-height: 600px; }
+
+/* Sidebar child */
+.sidebar-child {
+  display: flex;
+  align-items: center;
+  padding: 5px 12px 5px 28px;
+  cursor: pointer;
+  font-size: 12.5px;
+  color: var(--sidebar-text);
+  gap: 7px;
+  transition: background 0.12s;
+  border-radius: 4px;
+  margin: 1px 8px;
+}
+.sidebar-child:hover { background: var(--sidebar-hover); }
+.sidebar-child.active { background: var(--sidebar-active); color: #fff; }
+.sidebar-child i { font-size: 12px; opacity: 0.7; }
+
+/* KB category items */
+.kb-category {
+  display: flex;
+  align-items: center;
+  padding: 5px 12px 5px 36px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--sidebar-text);
+  gap: 7px;
+  transition: all 0.12s;
+  border-radius: 4px;
+  margin: 1px 8px;
+  position: relative;
+}
+.kb-category:hover { background: var(--sidebar-hover); }
+.kb-category.active { background: var(--sidebar-active); }
+.kb-category.drag-over {
+  background: rgba(16,185,129,0.15);
+  border: 1px dashed #10b981;
+  margin: 0 7px;
+  box-shadow: 0 0 8px rgba(16,185,129,0.2);
+}
+.kb-category.drag-over::after {
+  content: 'Drop here';
+  position: absolute;
+  right: 8px;
+  font-size: 9px;
+  font-weight: 600;
+  color: #10b981;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.kb-category .cat-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.kb-category .cat-count {
+  margin-left: auto;
+  font-size: 10px;
+  color: #94a3b8;
+  background: rgba(255,255,255,0.06);
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+
+/* KB article items */
+.kb-article-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 12px 4px 52px;
+  cursor: pointer;
+  font-size: 11.5px;
+  color: #94a3b8;
+  gap: 6px;
+  transition: all 0.12s;
+  border-radius: 4px;
+  margin: 0 8px;
+}
+.kb-article-item:hover { background: var(--sidebar-hover); color: var(--sidebar-text); }
+.kb-article-item.active { color: #fff; background: rgba(16,185,129,0.15); }
+.kb-article-item i { font-size: 10px; opacity: 0.6; }
+
+/* Sidebar search */
+.sidebar-search {
+  padding: 6px 12px 8px;
+}
+.sidebar-search input {
+  width: 100%;
+  background: var(--sidebar-hover);
+  border: 1px solid transparent;
+  color: var(--sidebar-text);
+  padding: 5px 8px 5px 28px;
+  border-radius: 5px;
+  font-size: 11.5px;
+  font-family: var(--font-ui);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.sidebar-search input:focus { border-color: var(--accent); }
+.sidebar-search input::placeholder { color: #64748b; }
+.sidebar-search { position: relative; }
+.sidebar-search i {
+  position: absolute;
+  left: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: #64748b;
+}
+
+/* ═══════════════════════════
+   RESIZE HANDLE
+   ═══════════════════════════ */
+.resize-handle {
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.resize-handle:hover { background: var(--accent); }
+
+/* ═══════════════════════════
+   CONTENT AREA
+   ═══════════════════════════ */
+.content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--content-bg);
+  min-width: 0;
+}
+
+.content-header {
+  height: var(--content-header-height);
+  min-height: var(--content-header-height);
+  padding: 0 20px;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fafbfc;
+}
+
+.content-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.content-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.content-title i { color: var(--accent); font-size: 16px; }
+
+.content-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.content-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+}
+
+/* Custom scrollbar for content */
+.content-body::-webkit-scrollbar { width: 6px; }
+.content-body::-webkit-scrollbar-track { background: transparent; }
+.content-body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 6px; }
+.content-body::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* ═══════════════════════════
+   TERMINAL PANEL (collapsed)
+   ═══════════════════════════ */
+.terminal-panel {
+  height: var(--terminal-height);
+  min-height: var(--terminal-height);
+  background: #252526;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 10px;
+  color: #ccc;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+.terminal-panel:hover { background: #2d2d2d; }
+.terminal-label {
+  font-size: 11px;
+  color: #ccc;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.terminal-label i { font-size: 12px; }
+.terminal-tab {
+  font-size: 11px;
+  color: #94a3b8;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.terminal-tab.active { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+.terminal-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.terminal-actions button {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+.terminal-actions button:hover { color: #e2e8f0; background: rgba(255,255,255,0.06); }
+
+/* ═══════════════════════════
+   SCENE: KB BROWSE VIEW
+   ═══════════════════════════ */
+.scene { display: none; }
+.scene.active { display: flex; flex-direction: column; height: 100%; }
+
+/* Search & Filter bar */
+.kb-toolbar {
+  padding: 16px 24px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.kb-search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kb-search-box {
+  flex: 1;
+  position: relative;
+}
+.kb-search-box input {
+  width: 100%;
+  padding: 9px 14px 9px 36px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-family: var(--font-ui);
+  color: var(--primary);
+  outline: none;
+  transition: all 0.2s;
+  background: #fff;
+}
+.kb-search-box input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.12);
+}
+.kb-search-box input::placeholder { color: #94a3b8; }
+.kb-search-box i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.kb-view-toggle {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 6px;
+  padding: 2px;
+}
+.kb-view-btn {
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #64748b;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+.kb-view-btn.active { background: #fff; color: var(--primary); box-shadow: var(--shadow-sm); }
+
+.kb-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.filter-label {
+  font-size: 11.5px;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-right: 2px;
+}
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all 0.15s;
+  background: #f1f5f9;
+  color: #64748b;
+}
+.filter-chip:hover { border-color: #cbd5e1; }
+.filter-chip.active {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+  border-color: var(--accent);
+}
+.filter-chip .chip-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+}
+
+/* Article cards grid */
+.kb-cards-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+.kb-cards-container::-webkit-scrollbar { width: 6px; }
+.kb-cards-container::-webkit-scrollbar-track { background: transparent; }
+.kb-cards-container::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 6px; }
+
+.kb-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* Article card */
+.kb-card {
+  background: #fff;
+  border: 1px solid #e8ecf1;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+.kb-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.kb-card-accent {
+  height: 3px;
+  width: 100%;
+}
+
+.kb-card-body {
+  padding: 16px 18px;
+}
+
+.kb-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.kb-card-category {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.kb-card-date {
+  font-size: 10.5px;
+  color: #94a3b8;
+  margin-left: auto;
+}
+
+.kb-card-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.kb-card-excerpt {
+  font-size: 12.5px;
+  color: var(--secondary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.kb-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.kb-tag {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-weight: 500;
+}
+.kb-card-author {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  color: #94a3b8;
+}
+.kb-card-author .author-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Hero card (first card, spans 2 columns) */
+.kb-card.hero {
+  grid-column: span 2;
+}
+.kb-card.hero .kb-card-accent { height: 4px; }
+.kb-card.hero .kb-card-body { padding: 20px 24px; }
+.kb-card.hero .kb-card-title { font-size: 22px; margin-bottom: 8px; }
+.kb-card.hero .kb-card-excerpt { -webkit-line-clamp: 3; font-size: 13.5px; }
+
+/* Auto-generated badge */
+.auto-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* ─── Needs-Tags badge ─── */
+.needs-tags-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  color: #b45309;
+  background: #fef3c7;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 600;
+  border: 1px solid #fcd34d;
+  animation: tagPulse 2s ease-in-out infinite;
+}
+@keyframes tagPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ─── Sort dropdown ─── */
+.kb-sort-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 4px;
+  padding-left: 10px;
+  border-left: 1px solid #e2e8f0;
+}
+.kb-sort-label {
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+.kb-sort-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") no-repeat right 8px center;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 5px 26px 5px 10px;
+  font-size: 12px;
+  font-family: var(--font-ui);
+  color: var(--primary);
+  cursor: pointer;
+  transition: border-color 0.15s;
+  min-width: 140px;
+}
+.kb-sort-select:hover { border-color: #cbd5e1; }
+.kb-sort-select:focus { border-color: var(--accent); outline: none; }
+
+/* ─── Untagged filter chip (special) ─── */
+.filter-chip-untagged {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: #fef3c7;
+  color: #b45309;
+  border: 1.5px solid #fcd34d;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.filter-chip-untagged:hover { background: #fde68a; }
+.filter-chip-untagged.active { background: #f59e0b; color: #fff; border-color: #d97706; }
+
+/* ═══════════════════════════
+   LIST VIEW MODE
+   ═══════════════════════════ */
+.kb-list-view {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+.kb-list-view.active { display: flex; }
+.kb-cards-container.hidden { display: none; }
+
+.kb-list-header {
+  display: grid;
+  grid-template-columns: 28px 1fr 140px 180px 180px 100px;
+  gap: 8px;
+  padding: 8px 24px;
+  border-bottom: 2px solid #e2e8f0;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  background: #fafbfc;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.kb-list-col {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+.kb-list-col:hover { color: var(--primary); }
+.kb-list-col .sort-arrow { font-size: 9px; opacity: 0.5; }
+.kb-list-col.sorted .sort-arrow { opacity: 1; color: var(--accent); }
+
+.kb-list-rows {
+  flex: 1;
+  overflow-y: auto;
+}
+.kb-list-rows::-webkit-scrollbar { width: 6px; }
+.kb-list-rows::-webkit-scrollbar-track { background: transparent; }
+.kb-list-rows::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 6px; }
+
+.kb-list-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 140px 180px 180px 100px;
+  gap: 8px;
+  padding: 9px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 12.5px;
+  color: var(--primary);
+  cursor: pointer;
+  transition: background 0.12s;
+  align-items: center;
+}
+.kb-list-row:hover { background: #f8fafc; }
+.kb-list-row .list-icon { color: #64748b; font-size: 14px; }
+.kb-list-row .list-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kb-list-row .list-folder {
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kb-list-row .list-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.kb-list-row .list-date {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* Stats row */
+.kb-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 24px;
+  background: #fafbfc;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 11.5px;
+  color: #94a3b8;
+}
+.kb-stat {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.kb-stat-num { color: var(--primary); font-weight: 600; }
+
+/* ═══════════════════════════
+   SCENE: ARTICLE DETAIL VIEW
+   ═══════════════════════════ */
+.article-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.article-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 48px;
+  max-width: 780px;
+}
+.article-main::-webkit-scrollbar { width: 6px; }
+.article-main::-webkit-scrollbar-track { background: transparent; }
+.article-main::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 6px; }
+
+.article-header {
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e8ecf1;
+}
+.article-breadcrumb {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.article-breadcrumb a {
+  color: var(--accent);
+  text-decoration: none;
+  cursor: pointer;
+}
+.article-breadcrumb a:hover { text-decoration: underline; }
+
+.article-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--primary);
+  margin-bottom: 14px;
+  letter-spacing: -0.02em;
+}
+
+.article-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12.5px;
+  color: #94a3b8;
+}
+.article-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.article-meta-item i { font-size: 13px; }
+
+/* Article rendered content */
+.article-content {
+  font-size: 15px;
+  line-height: 1.75;
+  color: #334155;
+}
+.article-content h2 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--primary);
+  margin: 28px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.article-content h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary);
+  margin: 22px 0 10px;
+}
+.article-content p { margin-bottom: 14px; }
+.article-content ul {
+  margin: 0 0 14px 20px;
+}
+.article-content li {
+  margin-bottom: 6px;
+}
+.article-content code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #be185d;
+}
+.article-content pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin: 16px 0;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.article-content pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+.article-content blockquote {
+  border-left: 3px solid var(--accent);
+  padding: 12px 16px;
+  margin: 16px 0;
+  background: #f0fdf4;
+  border-radius: 0 6px 6px 0;
+  color: var(--secondary);
+  font-style: italic;
+}
+
+/* Article metadata sidebar */
+.article-sidebar {
+  width: 260px;
+  min-width: 260px;
+  border-left: 1px solid #e8ecf1;
+  background: #fafbfc;
+  overflow-y: auto;
+  padding: 24px 20px;
+}
+
+.meta-section {
+  margin-bottom: 24px;
+}
+.meta-section-title {
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  margin-bottom: 10px;
+}
+
+.meta-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.meta-tag {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 10px;
+  background: #e8ecf1;
+  color: #475569;
+  font-weight: 500;
+}
+.meta-tag.accent {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+}
+
+.meta-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 12.5px;
+  border-bottom: 1px solid #eef2f6;
+}
+.meta-field-wrap {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.meta-field-label { color: #94a3b8; }
+.meta-field-value { color: var(--primary); font-weight: 500; }
+.meta-field-wrap .meta-field-value {
+  width: 100%;
+  white-space: normal;
+  text-align: left;
+  word-break: break-word;
+  line-height: 1.45;
+}
+
+.meta-workflows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.meta-workflow-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: rgba(16,185,129,0.06);
+  transition: background 0.15s;
+}
+.meta-workflow-link:hover { background: rgba(16,185,129,0.12); }
+.meta-workflow-link i { font-size: 12px; }
+
+.meta-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.meta-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-size: 12.5px;
+  font-weight: 500;
+  font-family: var(--font-ui);
+  color: var(--primary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.meta-action-btn:hover { border-color: var(--accent); color: var(--accent); }
+.meta-action-btn i { font-size: 13px; }
+.meta-action-btn.primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.meta-action-btn.primary:hover { background: var(--accent-dark); }
+
+/* ═══════════════════════════
+   SCENE: REFERENCE PICKER MODAL
+   ═══════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+  z-index: 1051;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+.modal-overlay.active { display: flex; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-container {
+  width: 90vw;
+  max-width: 820px;
+  height: 80vh;
+  max-height: 600px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.95) translateY(10px);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modal-overlay.active .modal-container {
+  transform: scale(1) translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.modal-header-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.modal-header-title .emoji { font-size: 18px; }
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: color 0.2s, background-color 0.2s;
+}
+.modal-close:hover { color: #1e293b; background-color: #f1f5f9; }
+
+.modal-search {
+  padding: 12px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.modal-search input {
+  width: 100%;
+  padding: 8px 12px 8px 34px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: var(--font-ui);
+  color: var(--primary);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.modal-search input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
+}
+.modal-search input::placeholder { color: #94a3b8; }
+.modal-search { position: relative; }
+.modal-search i {
+  position: absolute;
+  left: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.modal-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Folder tree (left) */
+.modal-tree {
+  width: 220px;
+  min-width: 220px;
+  border-right: 1px solid #e8ecf1;
+  overflow-y: auto;
+  padding: 12px 0;
+  background: #fafbfc;
+}
+
+.tree-category {
+  display: flex;
+  align-items: center;
+  padding: 7px 16px;
+  cursor: pointer;
+  font-size: 12.5px;
+  color: var(--secondary);
+  gap: 8px;
+  transition: all 0.12s;
+  position: relative;
+}
+.tree-category:hover { background: #f1f5f9; }
+.tree-category.active {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+  font-weight: 500;
+}
+.tree-category .tree-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.tree-category i { font-size: 12px; }
+.tree-count {
+  margin-left: auto;
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+/* Article list (right) */
+.modal-articles {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.modal-article-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  cursor: pointer;
+  gap: 12px;
+  transition: background 0.12s;
+  border-bottom: 1px solid #f8fafc;
+}
+.modal-article-row:hover { background: #f8fafc; }
+.modal-article-row.selected { background: var(--accent-light); }
+
+.modal-article-checkbox {
+  width: 18px; height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  font-size: 11px;
+  color: transparent;
+}
+.modal-article-row.selected .modal-article-checkbox {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.modal-article-info { flex: 1; min-width: 0; }
+.modal-article-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--primary);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.modal-article-path {
+  font-size: 11px;
+  color: #94a3b8;
+  font-family: var(--font-mono);
+}
+
+.modal-article-tags {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.modal-article-tag {
+  font-size: 9.5px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* Modal footer */
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.modal-selected-info {
+  font-size: 12.5px;
+  color: #94a3b8;
+}
+.modal-selected-info strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.modal-footer-actions {
+  display: flex;
+  gap: 8px;
+}
+.modal-btn {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+.modal-btn-cancel {
+  background: #fff;
+  color: #64748b;
+  border-color: #e2e8f0;
+}
+.modal-btn-cancel:hover { background: #f1f5f9; color: #334155; }
+.modal-btn-copy {
+  background: #fff;
+  color: var(--secondary);
+  border: 1.5px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  position: relative;
+}
+.modal-btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+.modal-btn-copy.copied {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent-dark);
+}
+.modal-btn-insert {
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.modal-btn-insert:hover { background: var(--accent-dark); }
+
+/* ═══════════════════════════
+   SCENE SELECTOR
+   ═══════════════════════════ */
+.scene-selector {
+  position: fixed;
+  bottom: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  background: rgba(15,23,42,0.92);
+  padding: 5px 6px;
+  border-radius: 10px;
+  z-index: 500;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(8px);
+}
+.scene-btn {
+  padding: 6px 14px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 11.5px;
+  font-weight: 500;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  border-radius: 7px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.scene-btn:hover { color: #e2e8f0; }
+.scene-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ═══════════════════════════
+   UPLOAD DROP ZONE (Browse view)
+   ═══════════════════════════ */
+.upload-zone {
+  border: 2px dashed #d1d5db;
+  border-radius: 10px;
+  padding: 24px;
+  text-align: center;
+  margin-top: 12px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.upload-zone:hover {
+  border-color: var(--accent);
+  background: rgba(16,185,129,0.04);
+}
+.upload-zone i {
+  font-size: 28px;
+  color: #cbd5e1;
+  margin-bottom: 8px;
+  display: block;
+}
+.upload-zone-text {
+  font-size: 13px;
+  color: #94a3b8;
+}
+.upload-zone-text strong {
+  color: var(--accent);
+  cursor: pointer;
+}
+.upload-zone-hint {
+  font-size: 11px;
+  color: #cbd5e1;
+  margin-top: 4px;
+}
+
+/* ═══════════════════════════
+   UPLOAD MODE TOGGLE
+   ═══════════════════════════ */
+.upload-section {
+  margin-top: 12px;
+  border: 1px solid #e8ecf1;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.upload-mode-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #f8fafc;
+  border-bottom: 1px solid #e8ecf1;
+}
+.upload-mode-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  font-size: 12.5px;
+  font-weight: 500;
+  font-family: var(--font-ui);
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  position: relative;
+}
+.upload-mode-btn:first-child { border-right: 1px solid #e8ecf1; }
+.upload-mode-btn:hover { background: #f1f5f9; color: var(--primary); }
+.upload-mode-btn.active {
+  background: #fff;
+  color: var(--primary);
+  font-weight: 600;
+}
+.upload-mode-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  border-radius: 2px;
+}
+.upload-mode-btn.mode-normal.active::after { background: var(--accent); }
+.upload-mode-btn.mode-librarian.active::after { background: #8b5cf6; }
+
+.upload-mode-content {
+  padding: 20px;
+}
+
+/* ─── Normal mode ─── */
+.upload-normal .upload-zone { margin-top: 0; }
+
+/* Upload folder path selector */
+.upload-folder-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  position: relative;
+}
+.upload-folder-label {
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.upload-folder-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #1e1e2e;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 12.5px;
+  color: #e2e8f0;
+  flex: 1;
+  transition: border-color 0.15s, background 0.15s;
+}
+.upload-folder-breadcrumb:hover { border-color: #10b981; background: rgba(16,185,129,0.05); }
+.upload-folder-new {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #94a3b8;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+.upload-folder-new:hover { border-color: #10b981; color: #10b981; background: rgba(16,185,129,0.06); }
+
+/* Folder dropdown */
+.upload-folder-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 72px;
+  right: 42px;
+  background: #1e1e2e;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  z-index: 50;
+  padding: 6px;
+  margin-top: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.upload-folder-dropdown.open { display: block; }
+.ufd-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  color: #cdd6f4;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.ufd-item:hover { background: rgba(255,255,255,0.06); }
+.ufd-item.active { background: rgba(16,185,129,0.12); color: #10b981; font-weight: 600; }
+.ufd-item i { font-size: 13px; color: #94a3b8; }
+.ufd-item.active i { color: #10b981; }
+.ufd-sub { padding-left: 36px; }
+
+/* ─── AI Librarian mode ─── */
+.upload-librarian { display: none; }
+.upload-librarian.active { display: block; }
+.upload-normal.hidden { display: none; }
+
+.intake-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.intake-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.intake-title .intake-icon {
+  font-size: 16px;
+}
+.intake-badge {
+  background: #8b5cf6;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+.intake-subtitle {
+  font-size: 11.5px;
+  color: #94a3b8;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+/* Intake file list */
+.intake-files {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.intake-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #faf5ff;
+  border: 1px solid #e9d5ff;
+  font-size: 12.5px;
+  transition: all 0.15s;
+}
+.intake-file:hover { border-color: #c4b5fd; }
+.intake-file .file-icon { color: #8b5cf6; font-size: 14px; }
+.intake-file .file-name { flex: 1; font-weight: 500; color: var(--primary); }
+.intake-file .file-size { font-size: 11px; color: #94a3b8; }
+.intake-file .file-status {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.file-status-pending { background: #fef3c7; color: #b45309; }
+.file-status-processing { background: #ede9fe; color: #7c3aed; }
+.file-status-filed { background: var(--accent-light); color: var(--accent-dark); }
+
+/* AI Librarian button */
+.btn-ai-librarian {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 20px;
+  border: 2px solid #8b5cf6;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+.btn-ai-librarian:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(139,92,246,0.35);
+}
+.btn-ai-librarian:active { transform: translateY(0); }
+.btn-ai-librarian .sparkle {
+  font-size: 16px;
+}
+.btn-ai-librarian-hint {
+  font-size: 10.5px;
+  color: #a78bfa;
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* Intake drop zone (smaller) */
+.intake-dropzone {
+  border: 2px dashed #c4b5fd;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  transition: all 0.2s;
+  cursor: pointer;
+  margin-bottom: 14px;
+}
+.intake-dropzone:hover { border-color: #8b5cf6; background: rgba(139,92,246,0.04); }
+.intake-dropzone i { font-size: 22px; color: #c4b5fd; margin-bottom: 4px; display: block; }
+.intake-dropzone-text { font-size: 12px; color: #94a3b8; }
+.intake-dropzone-text strong { color: #8b5cf6; cursor: pointer; }
+
+/* Intake scene — action buttons & filter pills */
+.intake-action-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #94a3b8;
+  border-radius: 6px;
+  padding: 4px 7px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s;
+}
+.intake-action-btn:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; border-color: rgba(255,255,255,0.2); }
+
+.intake-filter {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #94a3b8;
+  border-radius: 16px;
+  padding: 4px 12px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-sans);
+}
+.intake-filter:hover { border-color: #8b5cf6; color: #c4b5fd; }
+.intake-filter.active { background: rgba(139,92,246,0.15); border-color: #8b5cf6; color: #c4b5fd; font-weight: 600; }
+
+.intake-row { transition: opacity 0.2s, background 0.15s; }
+.intake-row:hover { background: rgba(255,255,255,0.03); }
+
+/* ═══════════════════════════
+   ANIMATIONS
+   ═══════════════════════════ */
+.kb-card {
+  animation: cardReveal 0.4s ease both;
+}
+.kb-card:nth-child(1) { animation-delay: 0.05s; }
+.kb-card:nth-child(2) { animation-delay: 0.1s; }
+.kb-card:nth-child(3) { animation-delay: 0.15s; }
+.kb-card:nth-child(4) { animation-delay: 0.2s; }
+.kb-card:nth-child(5) { animation-delay: 0.25s; }
+.kb-card:nth-child(6) { animation-delay: 0.3s; }
+
+@keyframes cardReveal {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tag dimension styles */
+.kb-tag-lifecycle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  padding: 2px 8px 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+  border-left: 3px solid #f59e0b;
+  letter-spacing: 0.02em;
+}
+.kb-tag-lifecycle::before {
+  content: "▸";
+  font-size: 8px;
+  opacity: 0.7;
+}
+
+.kb-tag-domain {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 500;
+  background: transparent;
+  color: #2563eb;
+  border: 1.5px solid #93c5fd;
+  letter-spacing: 0.01em;
+}
+.kb-tag-domain::before {
+  content: "#";
+  font-size: 9px;
+  opacity: 0.6;
+  font-weight: 700;
+}
+
+/* Smaller variants for cards and modal */
+.kb-tag-lifecycle.sm, .kb-tag-domain.sm {
+  font-size: 9px;
+  padding: 1px 6px 1px 5px;
+}
+
+/* Meta sidebar variants */
+.meta-tag-lifecycle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 5px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+  border-left: 3px solid #f59e0b;
+}
+.meta-tag-lifecycle::before {
+  content: "▸";
+  font-size: 9px;
+  opacity: 0.7;
+}
+
+.meta-tag-domain {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+  background: transparent;
+  color: #2563eb;
+  border: 1.5px solid #93c5fd;
+}
+.meta-tag-domain::before {
+  content: "#";
+  font-size: 10px;
+  opacity: 0.6;
+  font-weight: 700;
+}
+
+/* Filter row dimension labels */
+.filter-dimension-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-right: 4px;
+}
+.filter-dimension-lifecycle {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+  border-left: 3px solid #f59e0b;
+}
+.filter-dimension-domain {
+  background: transparent;
+  color: #2563eb;
+  border: 1.5px solid #93c5fd;
+}
+.cat-requirements { background: var(--cat-requirements); }
+.cat-design { background: var(--cat-design); }
+.cat-technical { background: var(--cat-technical); }
+.cat-market { background: var(--cat-market); }
+.cat-brand { background: var(--cat-brand); }
+.cat-general { background: var(--cat-general); }
+
+.cat-bg-requirements { background: rgba(59,130,246,0.08); color: var(--cat-requirements); }
+.cat-bg-design { background: rgba(245,158,11,0.08); color: var(--cat-design); }
+.cat-bg-technical { background: rgba(16,185,129,0.08); color: var(--cat-technical); }
+.cat-bg-market { background: rgba(139,92,246,0.08); color: var(--cat-market); }
+.cat-bg-brand { background: rgba(236,72,153,0.08); color: var(--cat-brand); }
+.cat-bg-general { background: rgba(100,116,139,0.08); color: var(--cat-general); }
+
+/* ═══════════════════════════
+   RESPONSIVE (mockup note)
+   ═══════════════════════════ */
+@media (max-width: 900px) {
+  .kb-card.hero { grid-column: span 1; }
+  .article-sidebar { display: none; }
+  .modal-tree { width: 180px; min-width: 180px; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- ═══ TOP BAR ═══ -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <a class="top-bar-brand" href="#">
+        <i class="bi bi-journal-code"></i>X-IPE
+      </a>
+      <nav class="breadcrumb-nav">
+        <span class="sep">/</span>
+        <span id="breadcrumb-context">Knowledge Base</span>
+      </nav>
+    </div>
+    <div class="top-bar-right">
+      <button class="top-btn top-btn-primary" id="btn-new-article">
+        <i class="bi bi-plus-lg"></i> New Article
+      </button>
+      <button class="top-btn top-btn-ghost" id="btn-upload">
+        <i class="bi bi-cloud-upload"></i> Upload
+      </button>
+      <button class="top-btn top-btn-icon" title="Stage Toolbox">
+        <i class="bi bi-tools"></i>
+      </button>
+      <button class="top-btn top-btn-icon" title="Settings">
+        <i class="bi bi-gear-fill"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ MIDDLE SECTION ═══ -->
+  <div class="middle-section">
+
+    <!-- ── SIDEBAR ── -->
+    <nav class="sidebar">
+      <div class="project-switcher">
+        <select>
+          <option>📁 my-saas-app</option>
+        </select>
+      </div>
+
+      <div class="sidebar-search">
+        <i class="bi bi-search"></i>
+        <input type="text" placeholder="Search KB…" />
+      </div>
+
+      <div class="sidebar-content">
+
+        <!-- Workplace section (collapsed) -->
+        <div class="nav-section">
+          <div class="nav-section-header" onclick="toggleSection(this)">
+            <i class="bi bi-briefcase section-icon"></i>
+            <span>Workplace</span>
+            <i class="bi bi-chevron-down chevron"></i>
+          </div>
+          <div class="nav-section-content">
+            <div class="sidebar-child"><i class="bi bi-folder"></i> Ideation</div>
+            <div class="sidebar-child"><i class="bi bi-chat-square-text"></i> UIUX Feedbacks</div>
+            <div class="sidebar-child"><i class="bi bi-graph-up"></i> Application Tracing</div>
+          </div>
+        </div>
+
+        <!-- Ideas section (collapsed) -->
+        <div class="nav-section">
+          <div class="nav-section-header" onclick="toggleSection(this)">
+            <i class="bi bi-lightbulb section-icon"></i>
+            <span>Ideas</span>
+            <i class="bi bi-chevron-down chevron"></i>
+          </div>
+          <div class="nav-section-content">
+            <div class="sidebar-child"><i class="bi bi-file-text"></i> Knowledge Base</div>
+            <div class="sidebar-child"><i class="bi bi-file-text"></i> Analytics Dashboard</div>
+          </div>
+        </div>
+
+        <!-- ★ KNOWLEDGE BASE section (expanded, highlighted) -->
+        <div class="nav-section">
+          <div class="nav-section-header expanded" onclick="toggleSection(this)" style="background: rgba(16,185,129,0.12); border-left: 2px solid var(--accent);">
+            <i class="bi bi-book section-icon" style="color: var(--accent);"></i>
+            <span style="color: #fff; font-weight: 600;">Knowledge Base</span>
+            <i class="bi bi-chevron-down chevron"></i>
+          </div>
+          <div class="nav-section-content open">
+            <div class="kb-category active" data-cat="all" onclick="filterCategory(this, 'all')">
+              <div class="cat-dot" style="background: var(--accent);"></div>
+              <span>All Articles</span>
+              <span class="cat-count">12</span>
+            </div>
+            <div class="kb-category" data-cat="legacy" onclick="filterCategory(this, 'legacy')">
+              <div class="cat-dot" style="background: var(--cat-requirements);"></div>
+              <span>📁 legacy-platform</span>
+              <span class="cat-count">3</span>
+            </div>
+            <div class="kb-category" data-cat="research" onclick="filterCategory(this, 'research')">
+              <div class="cat-dot" style="background: var(--cat-market);"></div>
+              <span>📁 research</span>
+              <span class="cat-count">2</span>
+            </div>
+            <div class="kb-article-item" style="padding-left:60px;">
+              <i class="bi bi-folder2"></i> competitors
+            </div>
+            <div class="kb-category" data-cat="api" onclick="filterCategory(this, 'api')">
+              <div class="cat-dot" style="background: var(--cat-technical);"></div>
+              <span>📁 api-guidelines</span>
+              <span class="cat-count">4</span>
+            </div>
+            <div class="kb-article-item active">
+              <i class="bi bi-file-earmark-text"></i> rest-conventions.md
+            </div>
+            <div class="kb-article-item">
+              <i class="bi bi-file-earmark-text"></i> auth-patterns.md
+            </div>
+            <div class="kb-category" data-cat="brand" onclick="filterCategory(this, 'brand')">
+              <div class="cat-dot" style="background: var(--cat-brand);"></div>
+              <span>📁 brand-assets</span>
+              <span class="cat-count">1</span>
+            </div>
+            <div class="kb-category" data-cat="onboarding" onclick="filterCategory(this, 'onboarding')">
+              <div class="cat-dot" style="background: var(--cat-general);"></div>
+              <span>📁 team-docs</span>
+              <span class="cat-count">2</span>
+            </div>
+            <div style="margin:6px 8px 2px; padding:5px 12px; background:rgba(139,92,246,0.12); border-radius:6px; border-left:2px solid #8b5cf6; display:flex; align-items:center; gap:7px; cursor:pointer; font-size:12px; color:#c4b5fd;" onclick="switchUploadMode('librarian')">
+              <i class="bi bi-inbox" style="font-size:13px;color:#a78bfa;"></i>
+              <span style="font-weight:500;">📥 Intake</span>
+              <span style="margin-left:auto; background:#8b5cf6; color:#fff; font-size:9px; font-weight:700; padding:1px 6px; border-radius:8px;">3</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Workflows section (collapsed) -->
+        <div class="nav-section">
+          <div class="nav-section-header" onclick="toggleSection(this)">
+            <i class="bi bi-diagram-3 section-icon"></i>
+            <span>Workflows</span>
+            <i class="bi bi-chevron-down chevron"></i>
+          </div>
+          <div class="nav-section-content">
+            <div class="sidebar-child"><i class="bi bi-file"></i> Knowledge-Base-Implementation</div>
+            <div class="sidebar-child"><i class="bi bi-file"></i> User-Auth-Flow</div>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+
+    <div class="resize-handle"></div>
+
+    <!-- ── CONTENT AREA ── -->
+    <main class="content-area">
+
+      <!-- ═══════════════════════════════════
+           SCENE 1: KB BROWSE VIEW
+           ═══════════════════════════════════ -->
+      <div class="scene active" id="scene-browse">
+        <div class="content-header">
+          <div class="content-header-left">
+            <div class="content-title">
+              <i class="bi bi-book"></i>
+              Knowledge Base
+            </div>
+          </div>
+          <div class="content-header-right">
+            <button class="top-btn top-btn-ghost" title="Reference KB from other workflows" onclick="showScene('reference')">
+              <i class="bi bi-link-45deg"></i> 📚 Reference KB
+            </button>
+          </div>
+        </div>
+
+        <div class="kb-stats">
+          <div class="kb-stat"><span class="kb-stat-num">8</span> articles</div>
+          <div class="kb-stat"><span class="kb-stat-num">5</span> folders</div>
+          <div class="kb-stat"><span class="kb-stat-num">7</span> lifecycle tags</div>
+          <div class="kb-stat"><span class="kb-stat-num">10</span> domain tags</div>
+          <div class="kb-stat"><span class="kb-stat-num">3</span> auto-generated</div>
+          <div class="kb-stat" style="color:#b45309;"><span class="kb-stat-num" style="color:#b45309;">2</span> untagged</div>
+        </div>
+
+        <div class="kb-toolbar">
+          <div class="kb-search-row">
+            <div class="kb-search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Search articles by keyword, title, or content…" />
+            </div>
+            <div class="kb-view-toggle">
+              <button class="kb-view-btn active" onclick="switchView('grid')" title="Grid view"><i class="bi bi-grid-3x3-gap"></i></button>
+              <button class="kb-view-btn" onclick="switchView('list')" title="List view"><i class="bi bi-list-ul"></i></button>
+            </div>
+            <div class="kb-sort-group">
+              <span class="kb-sort-label">Sort:</span>
+              <select class="kb-sort-select" onchange="sortArticles(this.value)">
+                <option value="modified">Last Modified</option>
+                <option value="name">Name A → Z</option>
+                <option value="created">Date Created</option>
+                <option value="untagged">Untagged First</option>
+              </select>
+            </div>
+          </div>
+          <div class="kb-filter-row">
+            <span class="filter-dimension-label filter-dimension-lifecycle">▸ Lifecycle</span>
+            <span class="filter-chip active">All</span>
+            <span class="filter-chip">ideation</span>
+            <span class="filter-chip" style="background:rgba(245,158,11,0.12);color:#92400e;border-color:#fcd34d;">requirement</span>
+            <span class="filter-chip">design</span>
+            <span class="filter-chip" style="background:rgba(245,158,11,0.12);color:#92400e;border-color:#fcd34d;">implementation</span>
+            <span class="filter-chip">testing</span>
+            <span class="filter-chip">deployment</span>
+            <span class="filter-chip">maintenance</span>
+            <span style="width:1px; height:18px; background:#e2e8f0; margin:0 4px;"></span>
+            <span class="filter-chip-untagged"><i class="bi bi-exclamation-triangle"></i> Untagged <strong style="font-size:10px;">(2)</strong></span>
+          </div>
+          <div class="kb-filter-row">
+            <span class="filter-dimension-label filter-dimension-domain"># Domain</span>
+            <span class="filter-chip active">All</span>
+            <span class="filter-chip">api</span>
+            <span class="filter-chip">auth</span>
+            <span class="filter-chip">ui-ux</span>
+            <span class="filter-chip">market-research</span>
+            <span class="filter-chip">brand</span>
+            <span class="filter-chip">architecture</span>
+            <span class="filter-chip">onboarding</span>
+          </div>
+          <div class="kb-filter-row" style="font-size:10.5px; color:#94a3b8; gap:4px;">
+            <i class="bi bi-info-circle" style="font-size:11px;"></i>
+            2D taxonomy from <span style="font-family:var(--font-mono); font-size:10px; background:#f1f5f9; padding:1px 5px; border-radius:3px;">kb-config.json</span> —
+            <span class="kb-tag-lifecycle sm">lifecycle</span> × <span class="kb-tag-domain sm">domain</span>
+          </div>
+        </div>
+
+        <div class="kb-cards-container">
+          <div class="kb-cards-grid">
+
+            <!-- HERO CARD -->
+            <div class="kb-card hero" onclick="showScene('article')">
+              <div class="kb-card-accent cat-requirements"></div>
+              <div class="kb-card-body">
+                <div class="kb-card-meta">
+                  <span class="kb-card-category cat-bg-requirements">📁 legacy-platform</span>
+                  <span class="auto-badge"><i class="bi bi-robot"></i> Auto</span>
+                  <span class="kb-card-date">Mar 8, 2026</span>
+                </div>
+                <div class="kb-card-title">Legacy SaaS Platform — Complete User Manual v2</div>
+                <div class="kb-card-excerpt">
+                  Comprehensive user documentation covering all modules: authentication, billing, team management, API integrations, and admin panel. Imported from the existing platform documentation during project onboarding.
+                </div>
+                <div class="kb-card-footer">
+                  <span class="kb-tag-lifecycle sm">requirement</span>
+                  <span class="kb-tag-domain sm">onboarding</span>
+                  <span class="kb-card-author">
+                    <span class="author-dot" style="background:var(--info);">Y</span>
+                    yzhang
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="kb-card" onclick="showScene('article')">
+              <div class="kb-card-accent cat-technical"></div>
+              <div class="kb-card-body">
+                <div class="kb-card-meta">
+                  <span class="kb-card-category cat-bg-technical">📁 api-guidelines</span>
+                  <span class="kb-card-date">Mar 9, 2026</span>
+                </div>
+                <div class="kb-card-title">REST Conventions</div>
+                <div class="kb-card-excerpt">
+                  RESTful conventions, error response formats, pagination patterns, and rate limiting strategy for the new platform API layer.
+                </div>
+                <div class="kb-card-footer">
+                  <span class="kb-tag-lifecycle sm">design</span>
+                  <span class="kb-tag-lifecycle sm">implementation</span>
+                  <span class="kb-tag-domain sm">api</span>
+                  <span class="kb-card-author">
+                    <span class="author-dot" style="background:var(--accent);">Y</span>
+                    yzhang
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="kb-card" onclick="showScene('article')">
+              <div class="kb-card-accent cat-design"></div>
+              <div class="kb-card-body">
+                <div class="kb-card-meta">
+                  <span class="kb-card-category cat-bg-design">📁 research/competitors</span>
+                  <span class="kb-card-date">Mar 7, 2026</span>
+                </div>
+                <div class="kb-card-title">Competitor Dashboard Analysis</div>
+                <div class="kb-card-excerpt">
+                  Side-by-side comparison of 5 competitor dashboards — layout patterns, data density, and navigation approaches.
+                </div>
+                <div class="kb-card-footer">
+                  <span class="kb-tag-lifecycle sm">ideation</span>
+                  <span class="kb-tag-domain sm">ui-ux</span>
+                  <span class="kb-card-author">
+                    <span class="author-dot" style="background:var(--warning);">A</span>
+                    agent
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="kb-card" onclick="showScene('article')">
+              <div class="kb-card-accent cat-technical"></div>
+              <div class="kb-card-body">
+                <div class="kb-card-meta">
+                  <span class="kb-card-category cat-bg-technical">📁 api-guidelines</span>
+                  <span class="auto-badge"><i class="bi bi-robot"></i> Auto</span>
+                  <span class="kb-card-date">Mar 10, 2026</span>
+                </div>
+                <div class="kb-card-title">Authentication Patterns — JWT vs Sessions</div>
+                <div class="kb-card-excerpt">
+                  Research findings on modern auth patterns with security trade-offs for SPA + API architectures.
+                </div>
+                <div class="kb-card-footer">
+                  <span class="kb-tag-lifecycle sm">design</span>
+                  <span class="kb-tag-lifecycle sm">implementation</span>
+                  <span class="kb-tag-domain sm">auth</span>
+                  <span class="kb-card-author">
+                    <span class="author-dot" style="background:var(--accent);">I</span>
+                    ideation
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="kb-card" onclick="showScene('article')">
+              <div class="kb-card-accent cat-market"></div>
+              <div class="kb-card-body">
+                <div class="kb-card-meta">
+                  <span class="kb-card-category cat-bg-market">📁 research</span>
+                  <span class="auto-badge"><i class="bi bi-robot"></i> Auto</span>
+                  <span class="kb-card-date">Mar 6, 2026</span>
+                </div>
+                <div class="kb-card-title">AI Agent Platform Market — 2026 Landscape</div>
+                <div class="kb-card-excerpt">
+                  Comprehensive market analysis of AI-powered development platforms, competitive positioning, and emerging trends.
+                </div>
+                <div class="kb-card-footer">
+                  <span class="kb-tag-lifecycle sm">ideation</span>
+                  <span class="kb-tag-domain sm">market-research</span>
+                  <span class="kb-card-author">
+                    <span class="author-dot" style="background:var(--cat-market);">I</span>
+                    ideation
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="kb-card" onclick="showScene('article')">
+              <div class="kb-card-accent cat-brand"></div>
+              <div class="kb-card-body">
+                <div class="kb-card-meta">
+                  <span class="kb-card-category cat-bg-brand">📁 brand-assets</span>
+                  <span class="kb-card-date">Mar 5, 2026</span>
+                </div>
+                <div class="kb-card-title">Brand Color Palette & Typography</div>
+                <div class="kb-card-excerpt">
+                  Official brand guidelines — primary emerald accent, Catppuccin Mocha dark theme, typography scale, and component specs.
+                </div>
+                <div class="kb-card-footer">
+                  <span class="kb-tag-lifecycle sm">design</span>
+                  <span class="kb-tag-domain sm">brand</span>
+                  <span class="kb-card-author">
+                    <span class="author-dot" style="background:var(--cat-brand);">Y</span>
+                    yzhang
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 7 — UNTAGGED (needs tags) -->
+            <div class="kb-card" onclick="showScene('article')" style="border-color:#fcd34d;">
+              <div class="kb-card-accent" style="background:linear-gradient(90deg,#fbbf24,#f59e0b);"></div>
+              <div class="kb-card-body">
+                <div class="kb-card-meta">
+                  <span class="kb-card-category" style="background:#fef3c7;color:#92400e;">📁 team-docs</span>
+                  <span class="needs-tags-badge"><i class="bi bi-tag"></i> Needs Tags</span>
+                  <span class="kb-card-date">Mar 11, 2026</span>
+                </div>
+                <div class="kb-card-title">Sprint Retro Notes — Q1 2026</div>
+                <div class="kb-card-excerpt">
+                  Extracted from uploaded archive team-docs-q1.zip — retrospective notes, action items, and velocity charts from 6 sprints.
+                </div>
+                <div class="kb-card-footer">
+                  <span style="font-size:10px;color:#b45309;font-style:italic;">No tags assigned — click to tag</span>
+                  <span class="kb-card-author">
+                    <span class="author-dot" style="background:#f59e0b;">Y</span>
+                    yzhang
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 8 — UNTAGGED (needs tags) -->
+            <div class="kb-card" onclick="showScene('article')" style="border-color:#fcd34d;">
+              <div class="kb-card-accent" style="background:linear-gradient(90deg,#fbbf24,#f59e0b);"></div>
+              <div class="kb-card-body">
+                <div class="kb-card-meta">
+                  <span class="kb-card-category" style="background:#fef3c7;color:#92400e;">📁 team-docs</span>
+                  <span class="needs-tags-badge"><i class="bi bi-tag"></i> Needs Tags</span>
+                  <span class="kb-card-date">Mar 11, 2026</span>
+                </div>
+                <div class="kb-card-title">Team Onboarding Checklist</div>
+                <div class="kb-card-excerpt">
+                  Step-by-step onboarding guide for new developers — environment setup, access provisioning, code review process, and tooling overview.
+                </div>
+                <div class="kb-card-footer">
+                  <span style="font-size:10px;color:#b45309;font-style:italic;">No tags assigned — click to tag</span>
+                  <span class="kb-card-author">
+                    <span class="author-dot" style="background:#f59e0b;">Y</span>
+                    yzhang
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ═══ DUAL-MODE UPLOAD SECTION ═══ -->
+          <div class="upload-section">
+            <div class="upload-mode-bar">
+              <button class="upload-mode-btn mode-normal active" onclick="switchUploadMode('normal')">
+                <i class="bi bi-cloud-arrow-up"></i> Normal Upload
+              </button>
+              <button class="upload-mode-btn mode-librarian" onclick="switchUploadMode('librarian')">
+                <i class="bi bi-robot"></i> 📚 AI Librarian
+                <span class="intake-badge">3</span>
+              </button>
+            </div>
+            <div class="upload-mode-content">
+              <!-- Normal mode -->
+              <div class="upload-normal" id="upload-normal">
+                <!-- Folder path selector -->
+                <div class="upload-folder-picker">
+                  <span class="upload-folder-label">Upload to:</span>
+                  <div class="upload-folder-breadcrumb" onclick="toggleFolderDropdown()">
+                    <i class="bi bi-folder2-open" style="color:#10b981;font-size:13px;"></i>
+                    <span id="upload-folder-path">/ research / competitors</span>
+                    <i class="bi bi-chevron-down" style="font-size:10px;color:#94a3b8;margin-left:auto;"></i>
+                  </div>
+                  <button class="upload-folder-new" title="Create new folder" onclick="event.stopPropagation();">
+                    <i class="bi bi-folder-plus"></i>
+                  </button>
+                  <!-- Folder dropdown tree -->
+                  <div class="upload-folder-dropdown" id="upload-folder-dropdown">
+                    <div class="ufd-item active" onclick="selectUploadFolder('/', this)"><i class="bi bi-house-door"></i> / (root)</div>
+                    <div class="ufd-item" onclick="selectUploadFolder('/api-guidelines', this)"><i class="bi bi-folder2"></i> api-guidelines</div>
+                    <div class="ufd-item" onclick="selectUploadFolder('/brand-assets', this)"><i class="bi bi-folder2"></i> brand-assets</div>
+                    <div class="ufd-item" onclick="selectUploadFolder('/legacy-platform', this)"><i class="bi bi-folder2"></i> legacy-platform</div>
+                    <div class="ufd-item" onclick="selectUploadFolder('/research', this)"><i class="bi bi-folder2"></i> research</div>
+                    <div class="ufd-item ufd-sub" onclick="selectUploadFolder('/research/competitors', this)"><i class="bi bi-folder2"></i> competitors</div>
+                    <div class="ufd-item" onclick="selectUploadFolder('/team-docs', this)"><i class="bi bi-folder2"></i> team-docs</div>
+                  </div>
+                </div>
+                <div class="upload-zone" style="margin-top:0;">
+                  <i class="bi bi-cloud-arrow-up"></i>
+                  <div class="upload-zone-text">
+                    Drag & drop files or archives here, or <strong>browse</strong>
+                  </div>
+                  <div class="upload-zone-hint">Files go to <strong id="upload-dest-hint">/ research / competitors</strong> · Supports .md, .pdf, .png, .jpg, .svg, .zip, .7z · Max 10MB</div>
+                </div>
+              </div>
+              <!-- AI Librarian mode -->
+              <div class="upload-librarian" id="upload-librarian">
+                <div class="intake-header">
+                  <div class="intake-title">
+                    <span class="intake-icon">📥</span> Intake
+                    <span class="intake-badge">3</span>
+                  </div>
+                </div>
+                <div class="intake-subtitle">
+                  Drop files here for AI-assisted organization. The AI Librarian will analyze content, suggest folder placement, and auto-tag lifecycle & domain dimensions.
+                </div>
+                <div class="intake-dropzone">
+                  <i class="bi bi-inbox"></i>
+                  <div class="intake-dropzone-text">
+                    Drop files into <strong>Intake</strong> for AI processing
+                  </div>
+                </div>
+                <div class="intake-files">
+                  <div class="intake-file">
+                    <i class="bi bi-file-earmark-text file-icon"></i>
+                    <span class="file-name">sprint-retro-notes-q1.md</span>
+                    <span class="file-size">24 KB</span>
+                    <span class="file-status file-status-pending">Pending</span>
+                  </div>
+                  <div class="intake-file">
+                    <i class="bi bi-file-earmark-zip file-icon"></i>
+                    <span class="file-name">legacy-api-docs.zip</span>
+                    <span class="file-size">1.2 MB</span>
+                    <span class="file-status file-status-pending">Pending</span>
+                  </div>
+                  <div class="intake-file">
+                    <i class="bi bi-file-earmark-pdf file-icon"></i>
+                    <span class="file-name">competitor-analysis-2026.pdf</span>
+                    <span class="file-size">340 KB</span>
+                    <span class="file-status file-status-pending">Pending</span>
+                  </div>
+                </div>
+                <button class="btn-ai-librarian" onclick="runAILibrarian()">
+                  <span class="sparkle">✨</span> Run AI Librarian
+                  <span style="font-size:11px;font-weight:400;opacity:0.8;">— Organize 3 files</span>
+                </button>
+                <div class="btn-ai-librarian-hint">Opens a Copilot CLI session to classify, move & tag your files</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ LIST VIEW (hidden by default) ═══ -->
+        <div class="kb-list-view" id="kb-list-view">
+          <div class="kb-list-header">
+            <div class="kb-list-col"></div>
+            <div class="kb-list-col sorted">Name <span class="sort-arrow">▾</span></div>
+            <div class="kb-list-col">Folder</div>
+            <div class="kb-list-col">Lifecycle</div>
+            <div class="kb-list-col">Domain</div>
+            <div class="kb-list-col">Modified <span class="sort-arrow">▾</span></div>
+          </div>
+          <div class="kb-list-rows">
+            <div class="kb-list-row" onclick="showScene('article')">
+              <i class="bi bi-file-earmark-text list-icon"></i>
+              <span class="list-name">Legacy SaaS Platform — Complete User Manual v2</span>
+              <span class="list-folder">📁 legacy-platform</span>
+              <span class="list-tags"><span class="kb-tag-lifecycle sm">requirement</span></span>
+              <span class="list-tags"><span class="kb-tag-domain sm">onboarding</span></span>
+              <span class="list-date">Mar 8</span>
+            </div>
+            <div class="kb-list-row" onclick="showScene('article')">
+              <i class="bi bi-file-earmark-code list-icon"></i>
+              <span class="list-name">REST Conventions</span>
+              <span class="list-folder">📁 api-guidelines</span>
+              <span class="list-tags"><span class="kb-tag-lifecycle sm">design</span> <span class="kb-tag-lifecycle sm">implementation</span></span>
+              <span class="list-tags"><span class="kb-tag-domain sm">api</span></span>
+              <span class="list-date">Mar 9</span>
+            </div>
+            <div class="kb-list-row" onclick="showScene('article')">
+              <i class="bi bi-file-earmark-bar-graph list-icon"></i>
+              <span class="list-name">Competitor Dashboard Analysis</span>
+              <span class="list-folder">📁 research/competitors</span>
+              <span class="list-tags"><span class="kb-tag-lifecycle sm">ideation</span></span>
+              <span class="list-tags"><span class="kb-tag-domain sm">ui-ux</span></span>
+              <span class="list-date">Mar 7</span>
+            </div>
+            <div class="kb-list-row" onclick="showScene('article')">
+              <i class="bi bi-file-earmark-lock list-icon"></i>
+              <span class="list-name">Authentication Patterns — JWT vs Sessions</span>
+              <span class="list-folder">📁 api-guidelines</span>
+              <span class="list-tags"><span class="kb-tag-lifecycle sm">design</span> <span class="kb-tag-lifecycle sm">implementation</span></span>
+              <span class="list-tags"><span class="kb-tag-domain sm">auth</span></span>
+              <span class="list-date">Mar 10</span>
+            </div>
+            <div class="kb-list-row" onclick="showScene('article')">
+              <i class="bi bi-file-earmark-richtext list-icon"></i>
+              <span class="list-name">AI Agent Platform Market — 2026 Landscape</span>
+              <span class="list-folder">📁 research</span>
+              <span class="list-tags"><span class="kb-tag-lifecycle sm">ideation</span></span>
+              <span class="list-tags"><span class="kb-tag-domain sm">market-research</span></span>
+              <span class="list-date">Mar 6</span>
+            </div>
+            <div class="kb-list-row" onclick="showScene('article')">
+              <i class="bi bi-file-earmark-image list-icon"></i>
+              <span class="list-name">Brand Color Palette & Typography</span>
+              <span class="list-folder">📁 brand-assets</span>
+              <span class="list-tags"><span class="kb-tag-lifecycle sm">design</span></span>
+              <span class="list-tags"><span class="kb-tag-domain sm">brand</span></span>
+              <span class="list-date">Mar 5</span>
+            </div>
+            <!-- Untagged rows — highlighted -->
+            <div class="kb-list-row" onclick="showScene('article')" style="background:#fffbeb;">
+              <i class="bi bi-file-earmark-text list-icon" style="color:#b45309;"></i>
+              <span class="list-name">Sprint Retro Notes — Q1 2026 <span class="needs-tags-badge" style="margin-left:6px;"><i class="bi bi-tag"></i> Needs Tags</span></span>
+              <span class="list-folder">📁 team-docs</span>
+              <span class="list-tags"><span style="font-size:10px;color:#b45309;font-style:italic;">—</span></span>
+              <span class="list-tags"><span style="font-size:10px;color:#b45309;font-style:italic;">—</span></span>
+              <span class="list-date">Mar 11</span>
+            </div>
+            <div class="kb-list-row" onclick="showScene('article')" style="background:#fffbeb;">
+              <i class="bi bi-file-earmark-text list-icon" style="color:#b45309;"></i>
+              <span class="list-name">Team Onboarding Checklist <span class="needs-tags-badge" style="margin-left:6px;"><i class="bi bi-tag"></i> Needs Tags</span></span>
+              <span class="list-folder">📁 team-docs</span>
+              <span class="list-tags"><span style="font-size:10px;color:#b45309;font-style:italic;">—</span></span>
+              <span class="list-tags"><span style="font-size:10px;color:#b45309;font-style:italic;">—</span></span>
+              <span class="list-date">Mar 11</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══════════════════════════════════
+           SCENE 2: ARTICLE DETAIL VIEW
+           ═══════════════════════════════════ -->
+      <div class="scene" id="scene-article">
+        <div class="content-header">
+          <div class="content-header-left">
+            <div class="content-title">
+              <i class="bi bi-file-earmark-text" style="color: var(--cat-technical);"></i>
+              rest-conventions.md
+            </div>
+          </div>
+          <div class="content-header-right">
+            <button class="top-btn top-btn-ghost" onclick="showScene('browse')">
+              <i class="bi bi-arrow-left"></i> Back
+            </button>
+          </div>
+        </div>
+
+        <div class="article-layout">
+          <div class="article-main">
+            <div class="article-header">
+              <div class="article-breadcrumb">
+                <a onclick="showScene('browse')">Knowledge Base</a>
+                <span>›</span>
+                <a>api-guidelines</a>
+                <span>›</span>
+                <span>rest-conventions.md</span>
+              </div>
+              <h1 class="article-title">REST Conventions</h1>
+              <div class="article-meta-row">
+                <span class="article-meta-item"><i class="bi bi-person"></i> yzhang</span>
+                <span class="article-meta-item"><i class="bi bi-calendar3"></i> Mar 9, 2026</span>
+                <span class="article-meta-item"><i class="bi bi-clock"></i> 6 min read</span>
+                <span class="article-meta-item"><i class="bi bi-eye"></i> 14 views</span>
+              </div>
+            </div>
+
+            <div class="article-content">
+              <blockquote>
+                These guidelines establish consistent API patterns across the platform. All new endpoints must follow these conventions.
+              </blockquote>
+
+              <h2>Resource Naming Conventions</h2>
+              <p>Use plural nouns for resource collections. Avoid verbs in URLs — let HTTP methods express the action. Nest resources only one level deep to avoid brittle coupling.</p>
+
+              <pre><code># Good
+GET    /api/v1/users
+GET    /api/v1/users/{id}
+GET    /api/v1/users/{id}/projects
+POST   /api/v1/projects
+
+# Avoid
+GET    /api/v1/getUsers
+GET    /api/v1/users/{id}/projects/{pid}/tasks/{tid}/comments</code></pre>
+
+              <h2>Error Response Format</h2>
+              <p>All errors follow a consistent envelope. The <code>code</code> field is a machine-readable string, while <code>message</code> is human-readable. Always include a <code>request_id</code> for debugging.</p>
+
+              <pre><code>{
+  "error": {
+    "code": "RESOURCE_NOT_FOUND",
+    "message": "User with ID 42 was not found",
+    "request_id": "req_abc123",
+    "details": []
+  }
+}</code></pre>
+
+              <h2>Pagination</h2>
+              <p>Use cursor-based pagination for collections. Return a <code>next_cursor</code> field when more results are available. Clients pass the cursor via the <code>after</code> query parameter.</p>
+
+              <h3>Query Parameters</h3>
+              <ul>
+                <li><code>limit</code> — Number of items per page (default: 20, max: 100)</li>
+                <li><code>after</code> — Cursor for next page</li>
+                <li><code>sort</code> — Sort field (e.g., <code>created_at</code>)</li>
+                <li><code>order</code> — Sort direction (<code>asc</code> or <code>desc</code>)</li>
+              </ul>
+
+              <h2>Rate Limiting</h2>
+              <p>Include rate limit headers on every response. When limits are exceeded, return <code>429 Too Many Requests</code> with a <code>Retry-After</code> header.</p>
+
+              <pre><code>X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 87
+X-RateLimit-Reset: 1709942400</code></pre>
+            </div>
+          </div>
+
+          <!-- Article metadata sidebar -->
+          <div class="article-sidebar">
+            <div class="meta-section">
+              <div class="meta-section-title">Actions</div>
+              <div class="meta-actions">
+                <button class="meta-action-btn primary"><i class="bi bi-pencil"></i> Edit Article</button>
+                <button class="meta-action-btn"><i class="bi bi-download"></i> Download</button>
+                <button class="meta-action-btn"><i class="bi bi-trash3"></i> Delete</button>
+              </div>
+            </div>
+
+            <div class="meta-section">
+              <div class="meta-section-title">Lifecycle</div>
+              <div class="meta-tags">
+                <span class="meta-tag-lifecycle">design</span>
+                <span class="meta-tag-lifecycle">implementation</span>
+              </div>
+            </div>
+
+            <div class="meta-section">
+              <div class="meta-section-title">Domain</div>
+              <div class="meta-tags">
+                <span class="meta-tag-domain">api</span>
+                <span class="meta-tag-domain">architecture</span>
+              </div>
+            </div>
+
+            <div class="meta-section">
+              <div class="meta-section-title">Details</div>
+              <div class="meta-field">
+                <span class="meta-field-label">Folder</span>
+                <span class="meta-field-value">api-guidelines/</span>
+              </div>
+              <div class="meta-field meta-field-wrap">
+                <span class="meta-field-label">Description</span>
+                <span class="meta-field-value">Practical conventions for naming, versioning, status codes, and payload structure across REST APIs.</span>
+              </div>
+              <div class="meta-field">
+                <span class="meta-field-label">Author</span>
+                <span class="meta-field-value">yzhang</span>
+              </div>
+              <div class="meta-field">
+                <span class="meta-field-label">Created</span>
+                <span class="meta-field-value">Mar 9, 2026</span>
+              </div>
+              <div class="meta-field">
+                <span class="meta-field-label">Auto-generated</span>
+                <span class="meta-field-value">No</span>
+              </div>
+              <div class="meta-field" style="border:none;">
+                <span class="meta-field-label">File size</span>
+                <span class="meta-field-value">4.2 KB</span>
+              </div>
+            </div>
+
+            <div class="meta-section">
+              <div class="meta-section-title">Linked Workflows</div>
+              <div class="meta-workflows">
+                <div class="meta-workflow-link">
+                  <i class="bi bi-diagram-3"></i>
+                  Knowledge-Base-Implementation
+                </div>
+                <div class="meta-workflow-link">
+                  <i class="bi bi-diagram-3"></i>
+                  User-Auth-Flow
+                </div>
+              </div>
+            </div>
+
+            <div class="meta-section">
+              <div class="meta-section-title">File Path</div>
+              <div style="font-family: var(--font-mono); font-size: 11px; color: #64748b; word-break: break-all; line-height: 1.5; background: #f1f5f9; padding: 8px 10px; border-radius: 6px;">
+                knowledge-base/api-guidelines/rest-conventions.md
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           SCENE 3: REFERENCE PICKER (shown as content, modal overlaid separately)
+           ═══════════════════════════════════ -->
+      <div class="scene" id="scene-reference-bg">
+        <div class="content-header">
+          <div class="content-header-left">
+            <div class="content-title">
+              <i class="bi bi-lightbulb" style="color: var(--warning);"></i>
+              Ideation — Knowledge Base Feature
+            </div>
+          </div>
+        </div>
+        <div style="flex:1; padding: 24px; opacity: 0.4; filter: blur(1px);">
+          <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; height: 100%;">
+            <div style="font-size: 14px; color: #64748b; margin-bottom: 12px;">Editing idea-summary-v1.md</div>
+            <div style="font-family: var(--font-mono); font-size: 13px; color: #94a3b8; line-height: 1.8;">
+              # Idea Summary — Knowledge Base for X-IPE<br><br>
+              > Idea ID: IDEA-036<br>
+              > Folder: wf-007-knowledge-base-implementation<br><br>
+              ## Overview<br><br>
+              A project-scoped Knowledge Base (KB) integrated into X-IPE…
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           SCENE 4: 📥 INTAKE — AI Librarian File Management
+           ═══════════════════════════════════ -->
+      <div class="scene" id="scene-intake">
+        <div class="content-header">
+          <div class="content-header-left">
+            <div class="content-title">
+              <i class="bi bi-inbox" style="color: #8b5cf6;"></i>
+              📥 Intake — AI Librarian
+            </div>
+          </div>
+          <div class="content-header-right">
+            <button class="top-btn" style="background:linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%);color:#fff;border:none;font-weight:600;gap:6px;" onclick="runAILibrarianIntake()">
+              <span class="sparkle">✨</span> Run AI Librarian
+            </button>
+          </div>
+        </div>
+
+        <!-- Intake stats bar -->
+        <div style="padding:12px 24px 0; display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+          <div style="display:flex; gap:6px; align-items:center;">
+            <span style="font-size:20px; font-weight:700; color:#8b5cf6;">5</span>
+            <span style="font-size:12px; color:#94a3b8;">files in intake</span>
+          </div>
+          <div style="width:1px; height:20px; background:#333;"></div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <span style="font-size:20px; font-weight:700; color:#f59e0b;">3</span>
+            <span style="font-size:12px; color:#94a3b8;">pending</span>
+          </div>
+          <div style="width:1px; height:20px; background:#333;"></div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <span style="font-size:20px; font-weight:700; color:#3b82f6;">1</span>
+            <span style="font-size:12px; color:#94a3b8;">processing</span>
+          </div>
+          <div style="width:1px; height:20px; background:#333;"></div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <span style="font-size:20px; font-weight:700; color:#10b981;">1</span>
+            <span style="font-size:12px; color:#94a3b8;">filed</span>
+          </div>
+
+          <!-- Status filter pills -->
+          <div style="margin-left:auto; display:flex; gap:6px;">
+            <button class="intake-filter active" onclick="filterIntake(this,'all')">All</button>
+            <button class="intake-filter" onclick="filterIntake(this,'pending')">Pending</button>
+            <button class="intake-filter" onclick="filterIntake(this,'processing')">Processing</button>
+            <button class="intake-filter" onclick="filterIntake(this,'filed')">Filed</button>
+          </div>
+        </div>
+
+        <!-- Intake file table -->
+        <div style="padding:16px 24px; flex:1; overflow-y:auto;">
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+              <tr style="border-bottom:1px solid #333; color:#94a3b8; font-size:11px; text-transform:uppercase; letter-spacing:0.05em;">
+                <th style="text-align:left; padding:8px 12px; font-weight:600;">File</th>
+                <th style="text-align:left; padding:8px 12px; font-weight:600; width:80px;">Size</th>
+                <th style="text-align:left; padding:8px 12px; font-weight:600; width:110px;">Uploaded</th>
+                <th style="text-align:left; padding:8px 12px; font-weight:600; width:110px;">Status</th>
+                <th style="text-align:left; padding:8px 12px; font-weight:600; width:180px;">Destination</th>
+                <th style="text-align:right; padding:8px 12px; font-weight:600; width:100px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Row 1: Pending -->
+              <tr class="intake-row" data-status="pending" style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                <td style="padding:10px 12px; display:flex; align-items:center; gap:8px;">
+                  <i class="bi bi-file-earmark-text" style="color:#94a3b8;"></i>
+                  <span style="color:#e2e8f0; font-weight:500;">sprint-retro-notes-q1.md</span>
+                </td>
+                <td style="padding:10px 12px; color:#94a3b8;">24 KB</td>
+                <td style="padding:10px 12px; color:#94a3b8;">Mar 11, 2026</td>
+                <td style="padding:10px 12px;">
+                  <span class="file-status file-status-pending">Pending</span>
+                </td>
+                <td style="padding:10px 12px; color:#64748b; font-style:italic;">—</td>
+                <td style="padding:10px 12px; text-align:right; display:flex; gap:4px; justify-content:flex-end;">
+                  <button class="intake-action-btn" title="Preview"><i class="bi bi-eye"></i></button>
+                  <button class="intake-action-btn" title="Assign folder"><i class="bi bi-folder-symlink"></i></button>
+                  <button class="intake-action-btn" title="Remove" style="color:#ef4444;"><i class="bi bi-x-lg"></i></button>
+                </td>
+              </tr>
+              <!-- Row 2: Pending -->
+              <tr class="intake-row" data-status="pending" style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                <td style="padding:10px 12px; display:flex; align-items:center; gap:8px;">
+                  <i class="bi bi-file-earmark-zip" style="color:#f59e0b;"></i>
+                  <span style="color:#e2e8f0; font-weight:500;">legacy-api-docs.zip</span>
+                  <span style="font-size:10px; background:rgba(245,158,11,0.15); color:#f59e0b; padding:1px 6px; border-radius:4px;">archive</span>
+                </td>
+                <td style="padding:10px 12px; color:#94a3b8;">1.2 MB</td>
+                <td style="padding:10px 12px; color:#94a3b8;">Mar 11, 2026</td>
+                <td style="padding:10px 12px;">
+                  <span class="file-status file-status-pending">Pending</span>
+                </td>
+                <td style="padding:10px 12px; color:#64748b; font-style:italic;">—</td>
+                <td style="padding:10px 12px; text-align:right; display:flex; gap:4px; justify-content:flex-end;">
+                  <button class="intake-action-btn" title="Preview"><i class="bi bi-eye"></i></button>
+                  <button class="intake-action-btn" title="Assign folder"><i class="bi bi-folder-symlink"></i></button>
+                  <button class="intake-action-btn" title="Remove" style="color:#ef4444;"><i class="bi bi-x-lg"></i></button>
+                </td>
+              </tr>
+              <!-- Row 3: Pending -->
+              <tr class="intake-row" data-status="pending" style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                <td style="padding:10px 12px; display:flex; align-items:center; gap:8px;">
+                  <i class="bi bi-file-earmark-pdf" style="color:#ef4444;"></i>
+                  <span style="color:#e2e8f0; font-weight:500;">competitor-analysis-2026.pdf</span>
+                </td>
+                <td style="padding:10px 12px; color:#94a3b8;">340 KB</td>
+                <td style="padding:10px 12px; color:#94a3b8;">Mar 10, 2026</td>
+                <td style="padding:10px 12px;">
+                  <span class="file-status file-status-pending">Pending</span>
+                </td>
+                <td style="padding:10px 12px; color:#64748b; font-style:italic;">—</td>
+                <td style="padding:10px 12px; text-align:right; display:flex; gap:4px; justify-content:flex-end;">
+                  <button class="intake-action-btn" title="Preview"><i class="bi bi-eye"></i></button>
+                  <button class="intake-action-btn" title="Assign folder"><i class="bi bi-folder-symlink"></i></button>
+                  <button class="intake-action-btn" title="Remove" style="color:#ef4444;"><i class="bi bi-x-lg"></i></button>
+                </td>
+              </tr>
+              <!-- Row 4: Processing -->
+              <tr class="intake-row" data-status="processing" style="border-bottom:1px solid rgba(255,255,255,0.06); background:rgba(59,130,246,0.04);">
+                <td style="padding:10px 12px; display:flex; align-items:center; gap:8px;">
+                  <i class="bi bi-file-earmark-text" style="color:#94a3b8;"></i>
+                  <span style="color:#e2e8f0; font-weight:500;">architecture-decisions-adr.md</span>
+                </td>
+                <td style="padding:10px 12px; color:#94a3b8;">18 KB</td>
+                <td style="padding:10px 12px; color:#94a3b8;">Mar 10, 2026</td>
+                <td style="padding:10px 12px;">
+                  <span class="file-status file-status-processing">Processing…</span>
+                </td>
+                <td style="padding:10px 12px; color:#3b82f6; font-size:12px;">
+                  <i class="bi bi-arrow-right" style="font-size:10px;"></i> api-guidelines/
+                </td>
+                <td style="padding:10px 12px; text-align:right; display:flex; gap:4px; justify-content:flex-end;">
+                  <button class="intake-action-btn" title="Preview"><i class="bi bi-eye"></i></button>
+                  <button class="intake-action-btn" title="Override destination"><i class="bi bi-folder-symlink"></i></button>
+                  <button class="intake-action-btn" title="Cancel" style="color:#ef4444;"><i class="bi bi-x-lg"></i></button>
+                </td>
+              </tr>
+              <!-- Row 5: Filed -->
+              <tr class="intake-row" data-status="filed" style="border-bottom:1px solid rgba(255,255,255,0.06); background:rgba(16,185,129,0.04); opacity:0.7;">
+                <td style="padding:10px 12px; display:flex; align-items:center; gap:8px;">
+                  <i class="bi bi-file-earmark-image" style="color:#94a3b8;"></i>
+                  <span style="color:#e2e8f0; font-weight:500;">logo-variants-2026.svg</span>
+                </td>
+                <td style="padding:10px 12px; color:#94a3b8;">82 KB</td>
+                <td style="padding:10px 12px; color:#94a3b8;">Mar 9, 2026</td>
+                <td style="padding:10px 12px;">
+                  <span class="file-status file-status-filed">Filed ✓</span>
+                </td>
+                <td style="padding:10px 12px; color:#10b981; font-size:12px;">
+                  <i class="bi bi-check-circle" style="font-size:10px;"></i> brand-assets/
+                  <span style="margin-left:4px; font-size:10px; color:#94a3b8;">▸ design · # brand</span>
+                </td>
+                <td style="padding:10px 12px; text-align:right; display:flex; gap:4px; justify-content:flex-end;">
+                  <button class="intake-action-btn" title="View in KB"><i class="bi bi-box-arrow-up-right"></i></button>
+                  <button class="intake-action-btn" title="Undo" style="color:#f59e0b;"><i class="bi bi-arrow-counterclockwise"></i></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Drop zone at bottom -->
+          <div style="margin-top:20px; border:2px dashed rgba(139,92,246,0.3); border-radius:10px; padding:20px; text-align:center; color:#8b5cf6; font-size:13px; cursor:pointer;">
+            <i class="bi bi-cloud-arrow-up" style="font-size:24px; display:block; margin-bottom:6px; opacity:0.6;"></i>
+            Drop more files into Intake, or <span style="text-decoration:underline; cursor:pointer;">browse</span>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ═══ TERMINAL PANEL (collapsed) ═══ -->
+  <div class="terminal-panel">
+    <div class="terminal-label"><i class="bi bi-terminal"></i> Terminal</div>
+    <div class="terminal-tab active">Output</div>
+    <div class="terminal-tab">Problems</div>
+    <div class="terminal-tab">Debug Console</div>
+    <div class="terminal-actions">
+      <button title="New Terminal"><i class="bi bi-plus"></i></button>
+      <button title="Toggle Terminal"><i class="bi bi-chevron-up"></i></button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ REFERENCE PICKER MODAL (overlaid on scene 3) ═══ -->
+<div class="modal-overlay" id="modal-reference">
+  <div class="modal-container">
+    <div class="modal-header">
+      <div class="modal-header-title">
+        <span class="emoji">📚</span> Reference Knowledge Base
+      </div>
+      <button class="modal-close" onclick="showScene('browse')"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="modal-search">
+      <i class="bi bi-search"></i>
+      <input type="text" placeholder="Search by keyword or tag (e.g. lifecycle:design, domain:api)…" />
+    </div>
+    <div style="padding:6px 20px 0; display:flex; gap:5px; flex-wrap:wrap; border-bottom:1px solid #f1f5f9; padding-bottom:10px; align-items:center;">
+      <span class="filter-dimension-label filter-dimension-lifecycle" style="font-size:9px; padding:2px 6px;">▸ Lifecycle</span>
+      <span class="filter-chip" style="font-size:10px; padding:2px 8px;">ideation</span>
+      <span class="filter-chip" style="font-size:10px; padding:2px 8px;">requirement</span>
+      <span class="filter-chip" style="font-size:10px; padding:2px 8px; background:rgba(245,158,11,0.12);color:#92400e;border-color:#fcd34d;">design</span>
+      <span class="filter-chip" style="font-size:10px; padding:2px 8px;">implementation</span>
+      <span style="color:#d1d5db; font-size:14px; line-height:22px; margin:0 2px;">│</span>
+      <span class="filter-dimension-label filter-dimension-domain" style="font-size:9px; padding:2px 6px;"># Domain</span>
+      <span class="filter-chip" style="font-size:10px; padding:2px 8px;">api</span>
+      <span class="filter-chip" style="font-size:10px; padding:2px 8px;">auth</span>
+      <span class="filter-chip" style="font-size:10px; padding:2px 8px;">brand</span>
+    </div>
+    <div class="modal-body">
+      <!-- Folder tree (user-defined folders — selectable) -->
+      <div class="modal-tree">
+        <div class="tree-category active">
+          <div class="tree-dot" style="background:var(--accent);"></div>
+          <span>All Folders</span>
+          <span class="tree-count">12</span>
+        </div>
+        <div class="tree-category" style="background:#f0fdf4; border-left:2px solid var(--accent);">
+          <i class="bi bi-folder2-open" style="font-size:12px; color:var(--accent);"></i>
+          <span>legacy-platform</span>
+          <span class="tree-count">3</span>
+        </div>
+        <div class="tree-category">
+          <i class="bi bi-folder2" style="font-size:12px; color:#94a3b8;"></i>
+          <span>research</span>
+          <span class="tree-count">2</span>
+        </div>
+        <div class="tree-category" style="background: var(--accent-light); color: var(--accent-dark); font-weight: 500;">
+          <i class="bi bi-folder2-open" style="font-size:12px;"></i>
+          <span>api-guidelines</span>
+          <span class="tree-count">4</span>
+        </div>
+        <div class="tree-category">
+          <i class="bi bi-folder2" style="font-size:12px; color:#94a3b8;"></i>
+          <span>brand-assets</span>
+          <span class="tree-count">1</span>
+        </div>
+        <div class="tree-category">
+          <i class="bi bi-folder2" style="font-size:12px; color:#94a3b8;"></i>
+          <span>team-docs</span>
+          <span class="tree-count">2</span>
+        </div>
+        <div style="padding:10px 16px; border-top:1px solid #e8ecf1; margin-top:8px;">
+          <div style="font-size:10px; color:#94a3b8; font-weight:500; margin-bottom:6px;">SELECT FOLDER</div>
+          <div style="font-size:11px; color:#059669; cursor:pointer; display:flex; align-items:center; gap:5px; padding:5px 8px; background:#f0fdf4; border-radius:5px; border:1px dashed #86efac;">
+            <i class="bi bi-folder-plus" style="font-size:12px;"></i>
+            Reference entire folder
+          </div>
+        </div>
+      </div>
+
+      <!-- Article & folder list -->
+      <div class="modal-articles">
+        <!-- Folder reference row -->
+        <div class="modal-article-row selected" style="background: #f0fdf4; border-left: 2px solid var(--accent);">
+          <div class="modal-article-checkbox" style="background:var(--accent); border-color:var(--accent); color:#fff;"><i class="bi bi-check"></i></div>
+          <div class="modal-article-info">
+            <div class="modal-article-title"><i class="bi bi-folder-fill" style="color:var(--accent); margin-right:4px; font-size:12px;"></i> legacy-platform/</div>
+            <div class="modal-article-path">knowledge-base/legacy-platform/ — 3 files</div>
+          </div>
+          <div class="modal-article-tags">
+            <span class="kb-tag-lifecycle sm">requirement</span>
+          </div>
+        </div>
+        <div class="modal-article-row selected">
+          <div class="modal-article-checkbox"><i class="bi bi-check"></i></div>
+          <div class="modal-article-info">
+            <div class="modal-article-title">REST Conventions</div>
+            <div class="modal-article-path">knowledge-base/api-guidelines/rest-conventions.md</div>
+          </div>
+          <div class="modal-article-tags">
+            <span class="kb-tag-lifecycle sm">design</span>
+            <span class="kb-tag-domain sm">api</span>
+          </div>
+        </div>
+        <div class="modal-article-row">
+          <div class="modal-article-checkbox"><i class="bi bi-check"></i></div>
+          <div class="modal-article-info">
+            <div class="modal-article-title">Authentication Patterns — JWT vs Sessions</div>
+            <div class="modal-article-path">knowledge-base/api-guidelines/auth-patterns.md</div>
+          </div>
+          <div class="modal-article-tags">
+            <span class="kb-tag-lifecycle sm">design</span>
+            <span class="kb-tag-domain sm">auth</span>
+          </div>
+        </div>
+        <div class="modal-article-row">
+          <div class="modal-article-checkbox"><i class="bi bi-check"></i></div>
+          <div class="modal-article-info">
+            <div class="modal-article-title">Database Migration Strategy</div>
+            <div class="modal-article-path">knowledge-base/api-guidelines/db-migration-strategy.md</div>
+          </div>
+          <div class="modal-article-tags">
+            <span class="kb-tag-lifecycle sm">implementation</span>
+          </div>
+        </div>
+        <div class="modal-article-row">
+          <div class="modal-article-checkbox"><i class="bi bi-check"></i></div>
+          <div class="modal-article-info">
+            <div class="modal-article-title">Error Handling Conventions</div>
+            <div class="modal-article-path">knowledge-base/api-guidelines/error-handling.md</div>
+          </div>
+          <div class="modal-article-tags">
+            <span class="kb-tag-lifecycle sm">implementation</span>
+            <span class="kb-tag-domain sm">api</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-selected-info">
+        <strong>2</strong> articles selected — will be inserted as markdown links
+      </div>
+      <div class="modal-footer-actions">
+        <button class="modal-btn modal-btn-cancel" onclick="showScene('browse')">Cancel</button>
+        <button class="modal-btn modal-btn-copy" onclick="copyToClipboard()" title="Copy references to clipboard">
+          <i class="bi bi-clipboard"></i> Copy
+        </button>
+        <button class="modal-btn modal-btn-insert" onclick="showScene('browse')">
+          <i class="bi bi-link-45deg"></i> Insert References
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCENE SELECTOR ═══ -->
+<div class="scene-selector">
+  <button class="scene-btn active" onclick="showScene('browse')">
+    <i class="bi bi-grid-3x3-gap"></i> Browse Articles
+  </button>
+  <button class="scene-btn" onclick="showScene('article')">
+    <i class="bi bi-file-text"></i> Article Detail
+  </button>
+  <button class="scene-btn" onclick="showScene('reference')">
+    <i class="bi bi-link-45deg"></i> 📚 Reference Picker
+  </button>
+  <button class="scene-btn" onclick="showScene('intake')" style="border-color:#8b5cf6;">
+    <i class="bi bi-inbox"></i> 📥 Intake
+  </button>
+</div>
+
+<script>
+// Scene management
+function showScene(name) {
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.scene-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('modal-reference').classList.remove('active');
+
+  const breadcrumb = document.getElementById('breadcrumb-context');
+
+  if (name === 'browse') {
+    document.getElementById('scene-browse').classList.add('active');
+    document.querySelectorAll('.scene-btn')[0].classList.add('active');
+    breadcrumb.textContent = 'Knowledge Base';
+  } else if (name === 'article') {
+    document.getElementById('scene-article').classList.add('active');
+    document.querySelectorAll('.scene-btn')[1].classList.add('active');
+    breadcrumb.textContent = 'Knowledge Base › Technical › API Design Guidelines';
+  } else if (name === 'reference') {
+    document.getElementById('scene-reference-bg').classList.add('active');
+    document.getElementById('modal-reference').classList.add('active');
+    document.querySelectorAll('.scene-btn')[2].classList.add('active');
+    breadcrumb.textContent = 'Ideation — Knowledge Base Feature';
+  } else if (name === 'intake') {
+    document.getElementById('scene-intake').classList.add('active');
+    document.querySelectorAll('.scene-btn')[3].classList.add('active');
+    breadcrumb.textContent = 'Knowledge Base › 📥 Intake';
+  }
+}
+
+// View switching (grid ↔ list)
+function switchView(mode) {
+  const gridContainer = document.querySelector('.kb-cards-container');
+  const listView = document.getElementById('kb-list-view');
+  const btns = document.querySelectorAll('.kb-view-btn');
+
+  if (mode === 'list') {
+    gridContainer.classList.add('hidden');
+    listView.classList.add('active');
+    btns[0].classList.remove('active');
+    btns[1].classList.add('active');
+  } else {
+    gridContainer.classList.remove('hidden');
+    listView.classList.remove('active');
+    btns[0].classList.add('active');
+    btns[1].classList.remove('active');
+  }
+}
+
+// Sort handler (mockup only — shows dropdown interaction)
+function sortArticles(value) {
+  const label = { modified: 'Last Modified', name: 'Name A→Z', created: 'Date Created', untagged: 'Untagged First' };
+  console.log('Sort by:', label[value] || value);
+}
+
+// Folder picker for Normal Upload
+function toggleFolderDropdown() {
+  document.getElementById('upload-folder-dropdown').classList.toggle('open');
+}
+function selectUploadFolder(path, el) {
+  document.querySelectorAll('.ufd-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  const display = path === '/' ? '/ (root)' : path.replace(/\//g, ' / ');
+  document.getElementById('upload-folder-path').textContent = display;
+  document.getElementById('upload-dest-hint').textContent = display;
+  document.getElementById('upload-folder-dropdown').classList.remove('open');
+}
+// Close dropdown on outside click
+document.addEventListener('click', (e) => {
+  const dd = document.getElementById('upload-folder-dropdown');
+  if (dd && !e.target.closest('.upload-folder-picker')) dd.classList.remove('open');
+});
+
+// Upload mode switching (Normal ↔ AI Librarian)
+function switchUploadMode(mode) {
+  const normalPanel = document.getElementById('upload-normal');
+  const librarianPanel = document.getElementById('upload-librarian');
+  const btns = document.querySelectorAll('.upload-mode-btn');
+
+  btns.forEach(b => b.classList.remove('active'));
+
+  if (mode === 'librarian') {
+    normalPanel.classList.add('hidden');
+    librarianPanel.classList.add('active');
+    btns[1].classList.add('active');
+  } else {
+    normalPanel.classList.remove('hidden');
+    librarianPanel.classList.remove('active');
+    btns[0].classList.add('active');
+  }
+}
+
+// AI Librarian simulation
+function runAILibrarian() {
+  const btn = document.querySelector('.btn-ai-librarian');
+  btn.innerHTML = '<span class="sparkle">⏳</span> Opening Copilot CLI session…';
+  btn.style.background = 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)';
+
+  setTimeout(() => {
+    // Simulate files being processed
+    document.querySelectorAll('.file-status-pending').forEach((el, i) => {
+      setTimeout(() => {
+        el.className = 'file-status file-status-processing';
+        el.textContent = 'Processing…';
+        setTimeout(() => {
+          el.className = 'file-status file-status-filed';
+          el.textContent = 'Filed ✓';
+        }, 800 + i * 400);
+      }, i * 600);
+    });
+
+    setTimeout(() => {
+      btn.innerHTML = '<span class="sparkle">✅</span> All 3 files organized';
+      btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+      btn.style.borderColor = '#10b981';
+      document.querySelector('.btn-ai-librarian-hint').textContent = 'Files moved to folders and tagged — check your Knowledge Base';
+    }, 3000);
+  }, 500);
+}
+
+// Sidebar section toggle
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const isOpen = content.classList.contains('open');
+
+  if (isOpen) {
+    content.classList.remove('open');
+    header.classList.remove('expanded');
+  } else {
+    content.classList.add('open');
+    header.classList.add('expanded');
+  }
+}
+
+// Category filter (sidebar)
+function filterCategory(el, cat) {
+  document.querySelectorAll('.kb-category').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// Sidebar folder drag-and-drop support
+document.querySelectorAll('.kb-category[data-cat]:not([data-cat="all"])').forEach(folder => {
+  folder.addEventListener('dragover', (e) => { e.preventDefault(); folder.classList.add('drag-over'); });
+  folder.addEventListener('dragleave', () => { folder.classList.remove('drag-over'); });
+  folder.addEventListener('drop', (e) => {
+    e.preventDefault();
+    folder.classList.remove('drag-over');
+    const folderName = folder.querySelector('span').textContent.replace('📁 ', '');
+    console.log('Dropped to folder:', folderName);
+    // Brief flash to confirm drop
+    folder.style.background = 'rgba(16,185,129,0.25)';
+    setTimeout(() => { folder.style.background = ''; }, 600);
+  });
+});
+
+// Intake scene: filter by status
+function filterIntake(btn, status) {
+  document.querySelectorAll('.intake-filter').forEach(f => f.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.intake-row').forEach(row => {
+    if (status === 'all' || row.dataset.status === status) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+
+// Intake scene: Run AI Librarian (full scene version)
+function runAILibrarianIntake() {
+  const btn = document.querySelector('#scene-intake .content-header-right button');
+  btn.innerHTML = '<span class="sparkle">⏳</span> Processing…';
+  btn.style.opacity = '0.7';
+
+  const rows = document.querySelectorAll('.intake-row[data-status="pending"]');
+  rows.forEach((row, i) => {
+    setTimeout(() => {
+      row.dataset.status = 'processing';
+      row.style.background = 'rgba(59,130,246,0.04)';
+      row.querySelector('.file-status').className = 'file-status file-status-processing';
+      row.querySelector('.file-status').textContent = 'Processing…';
+      setTimeout(() => {
+        row.dataset.status = 'filed';
+        row.style.background = 'rgba(16,185,129,0.04)';
+        row.style.opacity = '0.7';
+        row.querySelector('.file-status').className = 'file-status file-status-filed';
+        row.querySelector('.file-status').textContent = 'Filed ✓';
+        const dest = row.querySelectorAll('td')[4];
+        const folders = ['research/', 'api-guidelines/', 'team-docs/'];
+        dest.innerHTML = '<i class="bi bi-check-circle" style="font-size:10px;color:#10b981;"></i> ' + (folders[i] || 'research/');
+        dest.style.color = '#10b981';
+        dest.style.fontStyle = 'normal';
+        dest.style.fontSize = '12px';
+      }, 800);
+    }, i * 700);
+  });
+
+  setTimeout(() => {
+    btn.innerHTML = '<span class="sparkle">✅</span> All files organized';
+    btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+    btn.style.opacity = '1';
+  }, rows.length * 700 + 1000);
+}
+
+// Filter chip toggle
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    chip.classList.toggle('active');
+  });
+});
+
+// View toggle
+document.querySelectorAll('.kb-view-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.kb-view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// Modal article row selection toggle
+document.querySelectorAll('.modal-article-row').forEach(row => {
+  row.addEventListener('click', () => {
+    row.classList.toggle('selected');
+    updateSelectedCount();
+  });
+});
+
+function updateSelectedCount() {
+  const count = document.querySelectorAll('.modal-article-row.selected').length;
+  document.querySelector('.modal-selected-info').innerHTML =
+    `<strong>${count}</strong> article${count !== 1 ? 's' : ''} selected — insert or copy to clipboard`;
+}
+
+function copyToClipboard() {
+  const selected = document.querySelectorAll('.modal-article-row.selected .modal-article-path');
+  const paths = Array.from(selected).map(el => el.textContent).join('\n');
+  navigator.clipboard.writeText(paths).then(() => {
+    const btn = document.querySelector('.modal-btn-copy');
+    btn.classList.add('copied');
+    btn.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+    }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>

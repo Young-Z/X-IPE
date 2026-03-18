@@ -28,7 +28,7 @@ class UiuxFeedbackService:
             days: Number of days to look back (default 2)
         
         Returns:
-            List of feedback entries sorted by date descending
+            List of feedback entries sorted by name ascending
         """
         entries = []
         cutoff = datetime.now() - timedelta(days=days)
@@ -55,8 +55,8 @@ class UiuxFeedbackService:
                 entry['mtime'] = mtime
                 entries.append(entry)
         
-        # Sort by date descending (newest first)
-        entries.sort(key=lambda x: x['mtime'], reverse=True)
+        # Return entries in ascending A-Z, 0-9 order for the feedback panel.
+        entries.sort(key=lambda entry: (entry.get('name') or entry.get('id') or '').casefold())
         
         # Remove mtime from output (internal use only)
         for entry in entries:

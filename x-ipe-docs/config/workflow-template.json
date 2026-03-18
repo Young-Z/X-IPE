@@ -236,9 +236,7 @@
               "required": false
             }
           },
-          "deliverables": [
-            "$output:closing-report"
-          ],
+          "deliverables": [],
           "next_actions_suggested": [
             "human_playground",
             "change_request"

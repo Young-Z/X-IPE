@@ -447,6 +447,18 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
       expect(chip.textContent).toContain('wf-001-test');
     });
 
+    it('should preserve trailing slash when folder path ends with slash', () => {
+      const DV = globalThis.DeliverableViewer;
+      const viewer = new DV({ workflowName: 'hello' });
+      const chip = viewer.renderFolderChip({
+        path: 'x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/',
+        name: 'feature-docs-folder',
+        category: 'requirements'
+      });
+      expect(chip.textContent).toContain('FEATURE-050-B/');
+      expect(chip.textContent).not.toContain('feature-docs-folder');
+    });
+
     it('should include a folder icon', () => {
       const DV = globalThis.DeliverableViewer;
       const viewer = new DV({ workflowName: 'hello' });
@@ -502,6 +514,19 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
       });
       const name = card.querySelector('.deliverable-name');
       expect(name.textContent).toBe('ideas-folder');
+    });
+
+    it('renderFolderDeliverable preserves trailing slash for folder paths', () => {
+      const DV = globalThis.DeliverableViewer;
+      expect(DV).toBeDefined();
+      const viewer = new DV({ workflowName: 'hello' });
+      const card = viewer.renderFolderDeliverable({
+        path: 'x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/',
+        name: 'feature-docs-folder',
+        category: 'folders'
+      });
+      const name = card.querySelector('.deliverable-name');
+      expect(name.textContent).toBe('FEATURE-050-B/');
     });
   });
 });

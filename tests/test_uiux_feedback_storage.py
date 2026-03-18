@@ -381,16 +381,17 @@ class TestListFeedback:
         assert len(entries) == 1
         assert entries[0]['name'] == 'Feedback-Recent'
     
-    def test_list_feedback_sorted_desc_by_time(self, tmp_path):
-        """Feedback should be sorted descending by creation time"""
+    def test_list_feedback_sorted_ascending_by_name(self, tmp_path):
+        """Feedback should be sorted in ascending A-Z, 0-9 order by name"""
         from x_ipe.services.uiux_feedback_service import UiuxFeedbackService
         import time
         
         service = UiuxFeedbackService(str(tmp_path))
         
-        # Create first entry
+        # Create entries in the same order as the expected ascending result so
+        # current mtime-descending behavior fails before the fix.
         service.save_feedback({
-            'name': 'Feedback-First',
+            'name': 'Feedback-20260317-170936',
             'url': 'http://localhost:3000',
             'elements': ['button']
         })
@@ -399,7 +400,7 @@ class TestListFeedback:
         
         # Create second entry
         service.save_feedback({
-            'name': 'Feedback-Second',
+            'name': 'Feedback-20260317-170937',
             'url': 'http://localhost:3000',
             'elements': ['button']
         })
@@ -407,9 +408,8 @@ class TestListFeedback:
         entries = service.list_feedback(days=2)
         
         assert len(entries) == 2
-        # Second (newer) should be first
-        assert entries[0]['name'] == 'Feedback-Second'
-        assert entries[1]['name'] == 'Feedback-First'
+        assert entries[0]['name'] == 'Feedback-20260317-170936'
+        assert entries[1]['name'] == 'Feedback-20260317-170937'
     
     def test_list_feedback_excludes_old_entries(self, tmp_path):
         """Entries older than specified days should not be listed"""

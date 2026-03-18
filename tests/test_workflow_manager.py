@@ -792,6 +792,35 @@ class TestWorkflowTemplateMigration:
         result = workflow_service.update_action_status("old-wf4", "code_refactor", "done", feature_id="FEAT-D")
         assert result["success"] is True, f"Should succeed but got: {result}"
 
+    def test_stale_feature_closing_deliverables_pruned_on_read_and_resolve(self, workflow_service, workflow_dir):
+        """Stale feature_closing deliverables should be removed when no template tags exist."""
+        workflow_service.create_workflow("old-wf5")
+        workflow_service.update_action_status("old-wf5", "compose_idea", "done")
+        workflow_service.update_action_status("old-wf5", "refine_idea", "done")
+        workflow_service.update_action_status("old-wf5", "requirement_gathering", "done")
+        workflow_service.update_action_status("old-wf5", "feature_breakdown", "done")
+        workflow_service.add_features("old-wf5", [
+            {"id": "FEAT-E", "name": "Feature E", "depends_on": []},
+        ])
+
+        path = os.path.join(workflow_dir, "workflow-old-wf5.json")
+        with open(path) as f:
+            state = json.load(f)
+
+        feature_closing = state["features"][0]["validation"]["actions"]["feature_closing"]
+        feature_closing["status"] = "done"
+        feature_closing["deliverables"] = {"closing-report": "commit deadbee"}
+
+        with open(path, "w") as f:
+            json.dump(state, f)
+
+        refreshed = workflow_service.get_workflow("old-wf5")
+        closing_action = refreshed["features"][0]["validation"]["actions"]["feature_closing"]
+        assert closing_action["deliverables"] == {}
+
+        resolved = workflow_service.resolve_deliverables("old-wf5")
+        assert all(item["path"] != "commit deadbee" for item in resolved["deliverables"])
+
 
 class TestWorkflowTracing:
     """Verify tracing decorators are applied to public methods."""

@@ -1,23 +1,25 @@
 # Feature Specification: KB Sidebar & Navigation
 
 > Feature ID: FEATURE-049-B  
-> Version: v1.0  
+> Version: v1.2  
 > Status: Refined  
-> Last Updated: 03-11-2026
+> Last Updated: 03-17-2026
 
 ## Version History
 
-| Version | Date | Description |
-|---------|------|-------------|
-| v1.0 | 03-11-2026 | Initial specification — template conformance with GWT criteria, test type legend, linked mockups |
-| v1.1 | 03-12-2026 | CR-002: Add top-bar KB button + browse modal (tree+content split pane). Sidebar KB unchanged. |
+| Version | Date | Description | Change Request |
+|---------|------|-------------|----------------|
+| v1.2 | 03-17-2026 | CR-003: Show KB article description in the Details section when frontmatter description exists. | [CR-003](./CR-003.md) |
+| v1.1 | 03-12-2026 | CR-002: Add top-bar KB button + browse modal (tree+content split pane). Sidebar KB unchanged. | [CR-002](./CR-002.md) |
+| v1.0 | 03-11-2026 | Initial specification — template conformance with GWT criteria, test type legend, linked mockups | - |
 
 ## Linked Mockups
 
 | Mockup | Type | Path | Description | Status | Linked Date |
 |--------|------|------|-------------|--------|-------------|
 | KB Browse Articles | HTML | [x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html](x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html) | Scene 1 — Browse Articles grid view with sidebar tree | current | 03-11-2026 |
-| KB Article Detail | HTML | [x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html](x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html) | Scene 2 — Article Detail view with sidebar navigation | current | 03-11-2026 |
+| KB Article Detail v1 | HTML | [x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html](x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html) | Scene 2 — Article Detail view before description field | outdated | 03-11-2026 |
+| KB Article Detail v2 | HTML | [x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v2.html](x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v2.html) | Scene 2 — Article Detail view with wrapped description field in Details section | current | 03-17-2026 |
 | Reference Picker Modal | HTML | [x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html](x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html) | Scene 3 — Reference Picker Modal | current | 03-11-2026 |
 | AI Librarian Intake | HTML | [x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html](x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v1.html) | Scene 4 — AI Librarian Intake | current | 03-11-2026 |
 
@@ -31,6 +33,8 @@ FEATURE-049-B delivers the Knowledge Base sidebar section and interactive folder
 The sidebar renders a hierarchical folder tree that mirrors the KB file system structure, supporting expand/collapse navigation, file click to open content, and drag-and-drop to move files between folders. Visual feedback via emerald dashed borders and background highlights guides the drag-drop experience.
 
 This feature depends on FEATURE-049-A (KB Backend & Storage Foundation) for the tree API and file move endpoints. It uses vanilla JavaScript with Bootstrap 5 components, following existing X-IPE sidebar patterns. The sidebar auto-refreshes after write operations via a custom `kb:changed` event.
+
+The KB browse modal article detail scene also surfaces metadata for the opened knowledge file. As of CR-003, the Details section includes the frontmatter description when the file provides one.
 
 ## User Stories
 
@@ -110,6 +114,14 @@ As a developer using X-IPE, I want a Knowledge Base section in the sidebar with 
 |-------|------------------------------|-----------|
 | AC-049-B-10a | GIVEN KB contains up to 500 files WHEN sidebar tree renders THEN rendering completes within 500ms | UI |
 
+### AC-049-B-11: Article Detail Metadata Sidebar
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|------------------------------|-----------|
+| AC-049-B-11a | GIVEN a user opens a KB article in the browse modal WHEN the file frontmatter contains a description THEN the Details section displays a `Description` field with that text | UI |
+| AC-049-B-11b | GIVEN a user opens a KB article in the browse modal WHEN the file has no description or only whitespace THEN the Details section omits the `Description` field | UI |
+| AC-049-B-11c | GIVEN the displayed description spans multiple lines WHEN rendered in the Details section THEN the text wraps inside the sidebar without overlapping adjacent metadata fields | UI |
+
 > **Test Type Legend:**
 > - **UI** — Browser/DOM interaction test (clicks, renders, layout)
 > - **API** — HTTP request/response test (status codes, response body)
@@ -127,6 +139,7 @@ As a developer using X-IPE, I want a Knowledge Base section in the sidebar with 
 | FR-049-B-05 | Tree auto-refresh on custom event `kb:changed` dispatched after any KB write operation |
 | FR-049-B-06 | Drag-drop on KB sidebar folders uses `dragover`/`dragleave`/`drop` HTML5 events with visual feedback CSS classes |
 | FR-049-B-07 | Drop handler calls `PUT /api/kb/files/move` or `PUT /api/kb/folders/move` depending on dragged item type |
+| FR-049-B-08 | KB article detail Details section renders `frontmatter.description` as a wrapped metadata row when the description is present and non-empty |
 
 ## Non-Functional Requirements
 
@@ -147,6 +160,7 @@ As a developer using X-IPE, I want a Knowledge Base section in the sidebar with 
 - **UX-049-B-05:** Invalid drop target (folder into itself) shows CSS shake animation for 300ms
 - **UX-049-B-06:** Tree indentation uses 16px per level for nested folders
 - **UX-049-B-07:** Empty state message ("No articles yet") centered in KB section area with muted text
+- **UX-049-B-08:** Article detail description metadata wraps within the sidebar using a stacked label/value layout so long text remains readable
 
 ## Dependencies
 
@@ -164,6 +178,7 @@ As a developer using X-IPE, I want a Knowledge Base section in the sidebar with 
 3. Drag-drop is KB-internal only in V1 (no cross-section drag)
 4. Intake placeholder is non-functional until FEATURE-049-F
 5. Section position: after Project Plan, before Requirements
+6. KB article detail `Description` metadata is shown only when the file frontmatter contains a non-empty description
 
 ## Edge Cases & Constraints
 

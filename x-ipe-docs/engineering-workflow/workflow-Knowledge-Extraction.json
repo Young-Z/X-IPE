@@ -2,7 +2,7 @@
   "schema_version": "4.0",
   "name": "Knowledge-Extraction",
   "created": "2026-03-17T03:17:23.200297+00:00",
-  "last_activity": "2026-03-17T10:22:39.157068+00:00",
+  "last_activity": "2026-03-17T14:17:58.219668+00:00",
   "idea_folder": null,
   "current_stage": "validation",
   "global": {
@@ -57,7 +57,7 @@
           "status": "done",
           "deliverables": {
             "requirement-doc": "x-ipe-docs/requirements/requirement-details-part-21.md",
-            "requirements-folder": "x-ipe-docs/requirements/EPIC-050/"
+            "requirements-folder": "x-ipe-docs/requirements/"
           },
           "context": {},
           "next_actions_suggested": [
@@ -71,43 +71,14 @@
           },
           "features_created": [
             {
-              "id": "FEATURE-050-A",
-              "name": "Extractor Skill Foundation & Input Detection",
+              "id": "FEATURE-051-A",
+              "name": "User Manual Tool Skill",
               "depends_on": []
-            },
-            {
-              "id": "FEATURE-050-B",
-              "name": "Source Extraction Engine",
-              "depends_on": [
-                "FEATURE-050-A"
-              ]
-            },
-            {
-              "id": "FEATURE-050-C",
-              "name": "Extract-Validate Loop & Coverage Control",
-              "depends_on": [
-                "FEATURE-050-A",
-                "FEATURE-050-B"
-              ]
-            },
-            {
-              "id": "FEATURE-050-D",
-              "name": "Checkpoint, Resume & Error Handling",
-              "depends_on": [
-                "FEATURE-050-A"
-              ]
-            },
-            {
-              "id": "FEATURE-050-E",
-              "name": "KB Intake Output & Quality Scoring",
-              "depends_on": [
-                "FEATURE-050-C"
-              ]
             }
           ],
           "context": {},
           "next_actions_suggested": [
-            "FEATURE-050-A"
+            "FEATURE-051-A"
           ]
         }
       }
@@ -160,8 +131,15 @@
         "status": "in_progress",
         "actions": {
           "acceptance_testing": {
-            "status": "skipped",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "test-report": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/acceptance-test-report.md",
+              "test-folder": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "code_refactor"
+            ]
           },
           "code_refactor": {
             "status": "pending",
@@ -239,8 +217,15 @@
         "status": "in_progress",
         "actions": {
           "acceptance_testing": {
-            "status": "skipped",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "test-folder": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/",
+              "test-report": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/acceptance-test-report.md"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "code_refactor"
+            ]
           },
           "code_refactor": {
             "status": "pending",
@@ -319,16 +304,27 @@
         "status": "in_progress",
         "actions": {
           "acceptance_testing": {
-            "status": "skipped",
-            "deliverables": []
+            "status": "done",
+            "deliverables": {
+              "test-folder": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-C/",
+              "test-report": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-C/acceptance-test-report.md"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "code_refactor"
+            ]
           },
           "code_refactor": {
             "status": "pending",
             "deliverables": []
           },
           "feature_closing": {
-            "status": "pending",
-            "deliverables": []
+            "status": "done",
+            "deliverables": [],
+            "next_actions_suggested": [
+              "human_playground",
+              "change_request"
+            ]
           }
         }
       },
@@ -491,6 +487,92 @@
             "deliverables": {
               "test-report": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-E/acceptance-test-report.md",
               "test-folder": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-E/"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "code_refactor"
+            ]
+          },
+          "code_refactor": {
+            "status": "pending",
+            "deliverables": []
+          },
+          "feature_closing": {
+            "status": "done",
+            "deliverables": [],
+            "next_actions_suggested": [
+              "human_playground",
+              "change_request"
+            ]
+          }
+        }
+      },
+      "feedback": {
+        "status": "locked",
+        "actions": {
+          "human_playground": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          },
+          "change_request": {
+            "status": "skipped",
+            "deliverables": [],
+            "optional": true
+          }
+        }
+      }
+    },
+    {
+      "feature_id": "FEATURE-051-A",
+      "name": "User Manual Tool Skill",
+      "depends_on": [],
+      "implement": {
+        "status": "done",
+        "actions": {
+          "feature_refinement": {
+            "status": "done",
+            "deliverables": {
+              "specification": "x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/specification.md",
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "technical_design"
+            ]
+          },
+          "technical_design": {
+            "status": "done",
+            "deliverables": {
+              "feature-docs-folder": "x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/",
+              "tech-design": "x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/technical-design.md"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "implementation"
+            ]
+          },
+          "implementation": {
+            "status": "done",
+            "deliverables": {
+              "impl-folder": ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/",
+              "impl-files": ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/SKILL.md"
+            },
+            "context": {},
+            "next_actions_suggested": [
+              "acceptance_testing"
+            ]
+          }
+        }
+      },
+      "validation": {
+        "status": "in_progress",
+        "actions": {
+          "acceptance_testing": {
+            "status": "done",
+            "deliverables": {
+              "test-report": "x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/acceptance-test-report.md",
+              "test-folder": "x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/"
             },
             "context": {},
             "next_actions_suggested": [

@@ -518,7 +518,9 @@ const workflowStage = {
                 }
             }
             if (folderPath) {
-                folderName = folderPath.split('/').pop() || '';
+                folderName = typeof DeliverableViewer !== 'undefined'
+                    ? DeliverableViewer.getFolderDisplayName(folderPath, '')
+                    : folderPath.replace(/\/$/, '').split('/').pop() || '';
             }
 
             const modal = new ComposeIdeaModal({
@@ -1030,18 +1032,22 @@ const workflowStage = {
                     const section = document.createElement('div');
                     section.className = 'deliverables-feature-section';
 
-                    // Separate folders from files
-                    const folders = [];
+                    // Separate folders from files and dedupe repeated folder outputs
+                    const folderMap = new Map();
                     const files = [];
                     sectionItems.forEach(item => {
                         if (viewer && DeliverableViewer.isFolderType(item.path)) {
-                            folders.push(item);
+                            const folderKey = item.path || item.name || `folder-${folderMap.size}`;
+                            if (!folderMap.has(folderKey)) {
+                                folderMap.set(folderKey, item);
+                            }
                         } else {
                             files.push(item);
                         }
                     });
+                    const folders = Array.from(folderMap.values());
 
-                    // Title row: subtitle + inline folder chips
+                    // Title row: subtitle + right-aligned folder chips
                     const titleRow = document.createElement('div');
                     titleRow.className = 'deliverables-section-title-row';
                     const sTitle = document.createElement('div');
@@ -1049,13 +1055,18 @@ const workflowStage = {
                     sTitle.textContent = titleText;
                     titleRow.appendChild(sTitle);
 
-                    folders.forEach(item => {
-                        const chip = viewer.renderFolderChip(item);
-                        if (folderModal) {
-                            chip.addEventListener('click', () => folderModal.open(item.path));
-                        }
-                        titleRow.appendChild(chip);
-                    });
+                    if (folders.length > 0) {
+                        const folderChips = document.createElement('div');
+                        folderChips.className = 'deliverables-section-folder-chips';
+                        folders.forEach(item => {
+                            const chip = viewer.renderFolderChip(item);
+                            if (folderModal) {
+                                chip.addEventListener('click', () => folderModal.open(item.path));
+                            }
+                            folderChips.appendChild(chip);
+                        });
+                        titleRow.appendChild(folderChips);
+                    }
                     section.appendChild(titleRow);
 
                     // File cards grid (only non-folder items)

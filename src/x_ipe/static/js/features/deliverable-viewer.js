@@ -19,6 +19,18 @@ class DeliverableViewer {
     }
 
     /**
+     * Resolve a display name for folder paths, preserving trailing slash for explicit folders.
+     */
+    static getFolderDisplayName(path, fallbackName = '') {
+        if (typeof path !== 'string' || path.length === 0) return fallbackName;
+        const hasTrailingSlash = path.endsWith('/');
+        const trimmedPath = hasTrailingSlash ? path.slice(0, -1) : path;
+        const basename = trimmedPath.split('/').pop();
+        if (!basename) return fallbackName;
+        return hasTrailingSlash ? `${basename}/` : basename;
+    }
+
+    /**
      * Check if a deliverable path represents a folder.
      * Uses file-extension detection: a dot followed by 1-10 non-space chars at end
      * indicates a file. Folder names may contain dots (e.g. "001. Feature Name").
@@ -39,7 +51,7 @@ class DeliverableViewer {
         const chip = document.createElement('span');
         chip.className = 'deliverable-folder-chip clickable';
         chip.style.cursor = 'pointer';
-        const label = item.path ? item.path.split('/').pop() || item.name : item.name;
+        const label = DeliverableViewer.getFolderDisplayName(item.path, item.name);
         chip.textContent = `📁 ${label}`;
         chip.title = item.path || '';
         return chip;
@@ -62,7 +74,7 @@ class DeliverableViewer {
 
         const nameEl = document.createElement('div');
         nameEl.className = 'deliverable-name';
-        nameEl.textContent = item.path ? item.path.split('/').pop() || item.name : item.name;
+        nameEl.textContent = DeliverableViewer.getFolderDisplayName(item.path, item.name);
         nameEl.title = item.path;
         info.appendChild(nameEl);
 

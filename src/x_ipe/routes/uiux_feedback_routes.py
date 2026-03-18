@@ -22,7 +22,7 @@ def list_feedback():
         days: Number of days to look back (default 2)
     
     Returns:
-        200: {"entries": [...]}
+        200: {"entries": [...]} ordered by feedback name ascending
     """
     project_root = current_app.config.get('PROJECT_ROOT', '.')
     days = request.args.get('days', 2, type=int)

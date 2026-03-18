@@ -349,6 +349,13 @@ class WorkflowManagerService:
         if "error" in state and state.get("success") is False:
             return state
 
+        if deliverables is not None and not self.validate_action_deliverables(action, deliverables):
+            return {
+                "success": False,
+                "error": "INVALID_DELIVERABLES",
+                "message": f"Deliverables for action '{action}' do not match the current workflow template",
+            }
+
         # Find the action in the state
         if feature_id:
             updated, err = self._update_feature_action(state, action, status, feature_id, deliverables, context)
@@ -588,10 +595,16 @@ class WorkflowManagerService:
         expected_tags = set(self._get_template_tags(action))
         actual_tags = set(deliverables.keys())
         missing = expected_tags - actual_tags
+        unexpected = actual_tags - expected_tags
         if missing:
             logger.warning(
                 f"Action '{action}' missing deliverable tags: {missing}"
             )
+        if unexpected:
+            logger.error(
+                f"Action '{action}' has unexpected deliverable tags: {unexpected}"
+            )
+            return False
 
         # CR-003: Reject array values for $output-folder tags
         folder_tags = self._get_folder_tags(action)
@@ -615,7 +628,7 @@ class WorkflowManagerService:
                         )
                         return False
 
-        return len(missing) == 0
+        return True
 
     @x_ipe_tracing()
     def resolve_candidates(self, workflow_name: str, action: str,
@@ -1275,4 +1288,17 @@ class WorkflowManagerService:
                 for a in obsolete:
                     del current_actions[a]
                     changed = True
+                
+                for action_name, action_data in current_actions.items():
+                    deliverables = action_data.get("deliverables")
+                    if isinstance(deliverables, dict):
+                        expected_tags = set(self._get_template_tags(action_name))
+                        filtered = {
+                            tag_name: value
+                            for tag_name, value in deliverables.items()
+                            if tag_name in expected_tags
+                        }
+                        if filtered != deliverables:
+                            action_data["deliverables"] = filtered
+                            changed = True
         return changed

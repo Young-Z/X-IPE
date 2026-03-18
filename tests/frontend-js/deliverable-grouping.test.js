@@ -3,7 +3,8 @@
  * Validates that _renderDeliverables groups items by feature_id
  * instead of by stage.
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest';
+import { loadFeatureScript } from './helpers.js';
 
 /**
  * Standalone test of the grouping logic extracted from _renderDeliverables.
@@ -94,5 +95,106 @@ describe('FEATURE-036-E CR-001: Deliverables grouping logic', () => {
         ];
         const { byFeature } = groupDeliverables(items);
         expect(byFeature['F-001'].items).toHaveLength(4);
+    });
+});
+
+describe('TASK-936: Deliverables panel folder chip rendering', () => {
+    beforeAll(() => {
+        loadFeatureScript('deliverable-viewer.js');
+        loadFeatureScript('workflow-stage.js');
+    });
+
+    beforeEach(() => {
+        document.body.innerHTML = '<div id="root"></div>';
+        globalThis.fetch = vi.fn();
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = '';
+    });
+
+    async function renderDeliverables(items) {
+        globalThis.fetch.mockResolvedValue({
+            ok: true,
+            json: async () => ({ data: { deliverables: items } }),
+        });
+
+        const container = document.getElementById('root');
+        await workflowStage._renderDeliverables(container, 'test-wf');
+        return container.querySelector('.deliverables-feature-section');
+    }
+
+    it('deduplicates repeated folder outputs for the same feature into a single chip', async () => {
+        const section = await renderDeliverables([
+            {
+                name: 'feature-docs-folder',
+                path: 'x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/',
+                category: 'implementations',
+                stage: 'feature_refinement',
+                exists: true,
+                feature_id: 'FEATURE-050-B',
+                feature_name: 'Source Extraction Engine',
+            },
+            {
+                name: 'feature-docs-folder',
+                path: 'x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/',
+                category: 'implementations',
+                stage: 'technical_design',
+                exists: true,
+                feature_id: 'FEATURE-050-B',
+                feature_name: 'Source Extraction Engine',
+            },
+            {
+                name: 'feature-docs-folder',
+                path: 'x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/',
+                category: 'implementations',
+                stage: 'implementation',
+                exists: true,
+                feature_id: 'FEATURE-050-B',
+                feature_name: 'Source Extraction Engine',
+            },
+            {
+                name: 'technical-design.md',
+                path: 'x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/technical-design.md',
+                category: 'requirements',
+                stage: 'technical_design',
+                exists: true,
+                feature_id: 'FEATURE-050-B',
+                feature_name: 'Source Extraction Engine',
+            },
+        ]);
+
+        const chips = section.querySelectorAll('.deliverable-folder-chip');
+        expect(chips).toHaveLength(1);
+        expect(chips[0].textContent).toContain('FEATURE-050-B/');
+    });
+
+    it('renders folder chips inside a dedicated trailing container in the title row', async () => {
+        const section = await renderDeliverables([
+            {
+                name: 'feature-docs-folder',
+                path: 'x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/',
+                category: 'implementations',
+                stage: 'implementation',
+                exists: true,
+                feature_id: 'FEATURE-050-B',
+                feature_name: 'Source Extraction Engine',
+            },
+            {
+                name: 'specification.md',
+                path: 'x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/specification.md',
+                category: 'requirements',
+                stage: 'feature_refinement',
+                exists: true,
+                feature_id: 'FEATURE-050-B',
+                feature_name: 'Source Extraction Engine',
+            },
+        ]);
+
+        const titleRow = section.querySelector('.deliverables-section-title-row');
+        const chipsContainer = titleRow.querySelector('.deliverables-section-folder-chips');
+        expect(chipsContainer).not.toBeNull();
+        expect(chipsContainer.querySelectorAll('.deliverable-folder-chip')).toHaveLength(1);
+        expect(titleRow.firstElementChild.classList.contains('deliverables-feature-section-title')).toBe(true);
     });
 });

@@ -12,6 +12,7 @@ const CSS_WORKFLOW = resolve(import.meta.dirname, '../../src/x_ipe/static/css/wo
 const CSS_MODAL = resolve(import.meta.dirname, '../../src/x_ipe/static/css/features/action-execution-modal.css');
 
 beforeAll(() => {
+  loadFeatureScript('deliverable-viewer.js');
   loadFeatureScript('workflow-stage.js');
 });
 
@@ -219,6 +220,34 @@ describe('TASK-876: _dispatchEditModalAction with keyed dict deliverables', () =
     expect(captured).not.toBeNull();
     expect(captured.filePath).toBe('x-ipe-docs/ideas/test/new idea.md');
     expect(captured.folderPath).toBe('x-ipe-docs/ideas/test');
+    expect(captured.mode).toBe('edit');
+  });
+
+  it('uses shared folder display naming for ideas-folder paths with trailing slash', () => {
+    let captured = null;
+    globalThis.ComposeIdeaModal = class {
+      constructor(opts) { captured = opts; }
+      open() {}
+    };
+    const wfData = {
+      shared: {
+        ideation: {
+          actions: {
+            compose_idea: {
+              status: 'done',
+              deliverables: {
+                'raw-ideas': 'x-ipe-docs/ideas/wf-008-knowledge-extraction/new idea.md',
+                'ideas-folder': 'x-ipe-docs/ideas/wf-008-knowledge-extraction/'
+              }
+            }
+          }
+        }
+      }
+    };
+    workflowStage._dispatchEditModalAction('test-wf', 'compose_idea', wfData);
+    expect(captured).not.toBeNull();
+    expect(captured.folderPath).toBe('x-ipe-docs/ideas/wf-008-knowledge-extraction/');
+    expect(captured.folderName).toBe('wf-008-knowledge-extraction/');
     expect(captured.mode).toBe('edit');
   });
 

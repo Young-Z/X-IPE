@@ -519,6 +519,7 @@ class KBBrowseModal {
         const title = fm.title || data.name || 'Untitled';
         const folder = data.path?.includes('/') ? data.path.split('/')[0] : '';
         const fileName = data.path?.split('/').pop() || '';
+        const description = typeof fm.description === 'string' ? fm.description.trim() : '';
         const created = this._formatDate(fm.created || data.modified_date);
         const fileSize = this._formatFileSize(data.size_bytes || 0);
 
@@ -584,6 +585,7 @@ class KBBrowseModal {
                     <div class="kb-meta-section">
                         <div class="kb-meta-section-title">Details</div>
                         <div class="kb-meta-field"><span class="kb-meta-field-label">Folder</span><span class="kb-meta-field-value">${this._escapeHtml(folder || '/')}</span></div>
+                        ${description ? `<div class="kb-meta-field kb-meta-field-wrap"><span class="kb-meta-field-label">Description</span><span class="kb-meta-field-value">${this._escapeHtml(description)}</span></div>` : ''}
                         <div class="kb-meta-field"><span class="kb-meta-field-label">Author</span><span class="kb-meta-field-value">${this._escapeHtml(fm.author || 'unknown')}</span></div>
                         <div class="kb-meta-field"><span class="kb-meta-field-label">Created</span><span class="kb-meta-field-value">${this._escapeHtml(created)}</span></div>
                         <div class="kb-meta-field"><span class="kb-meta-field-label">Auto-generated</span><span class="kb-meta-field-value">${fm.auto_generated ? 'Yes' : 'No'}</span></div>

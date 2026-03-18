@@ -997,6 +997,18 @@
 .kb-meta-field:last-child { border-bottom: none; }
 .kb-meta-field-label { color: #94a3b8; }
 .kb-meta-field-value { color: var(--kb-primary); font-weight: 500; }
+.kb-meta-field-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+.kb-meta-field-wrap .kb-meta-field-value {
+    width: 100%;
+    white-space: normal;
+    text-align: left;
+    word-break: break-word;
+    line-height: 1.45;
+}
 
 .kb-meta-actions { display: flex; flex-direction: column; gap: 6px; }
 .kb-meta-action-btn {
