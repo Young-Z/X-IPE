@@ -150,7 +150,7 @@ classDiagram
         -_read_intake_status() Dict
         -_write_intake_status(data) None
         -_build_intake_tree(dir_path, status_data, depth) List~Dict~
-        -_derive_folder_status(children) str
+        -$_derive_folder_status(children) str
         -_count_pending_deep(items) int
         +get_tree() List~KBNode~
         +list_files(folder, sort, recursive) List~KBNode~
@@ -167,10 +167,11 @@ classDiagram
 
     class KBBrowseModal {
         -uploadMode: string
-        -intakeFiles: Array
-        -intakeStats: Object
+        -_intakeItems: Array
+        -_intakeStats: Object
         -intakeFilter: string
         -_expandedFolders: Set
+        -_intakePendingDeep: number
         +_renderIntakeScene() void
         +_renderIntakeRow(item, depth) string
         +_toggleFolder(path) void
@@ -329,7 +330,7 @@ def _build_intake_tree(self, dir_path: Path, status_data: dict, depth: int = 0) 
     except PermissionError:
         return items
     for entry in entries:
-        if entry.name == self.INTAKE_STATUS_FILE or entry.name.startswith('.'):
+        if entry.name.startswith('.'):
             continue
         rel_path = str(entry.relative_to(self.kb_root / INTAKE_FOLDER))
         if entry.is_dir():
@@ -358,15 +359,13 @@ def _build_intake_tree(self, dir_path: Path, status_data: dict, depth: int = 0) 
     return items
 ```
 
-**`_derive_folder_status(children)`** — Private helper (CR-005). Derives folder status from children:
+**`_derive_folder_status(children)`** — Static private helper (CR-005). Derives folder status from children:
 ```python
-def _derive_folder_status(self, children: list) -> str:
+@staticmethod
+def _derive_folder_status(children: list) -> str:
     statuses = set()
     for child in children:
-        if child['type'] == 'folder':
-            statuses.add(child['status'])  # already derived recursively
-        else:
-            statuses.add(child['status'])
+        statuses.add(child.get('status', 'pending'))
     if 'pending' in statuses:
         return 'pending'
     if 'processing' in statuses:
@@ -443,6 +442,8 @@ _runAILibrarian() {
 **New instance state (CR-005):**
 ```javascript
 this._expandedFolders = new Set(); // tracks expanded folder paths
+this._intakeItems = [];            // cached intake tree items
+this._intakePendingDeep = 0;       // deep count of pending files (for sidebar badge)
 ```
 
 Update `_renderIntakeScene()` to match mockup Scene 4 with folder tree:
@@ -492,7 +493,7 @@ _renderIntakeRow(item, depth = 0) {
 
     const sizeCell = isFolder
         ? `<td>${item.item_count} item${item.item_count !== 1 ? 's' : ''}</td>`
-        : `<td>${this._formatSize(item.size_bytes)}</td>`;
+        : `<td>${this._formatFileSize(item.size_bytes || 0)}</td>`;
 
     // ... status badge, destination, actions (per type) ...
     let rows = `<tr class="kb-intake-row" data-item-path="${this._escapeAttr(item.path)}">${nameCell}${sizeCell}...rest...</tr>`;
@@ -563,9 +564,12 @@ Update `_refreshIntakeFiles()` to use `pending_deep_count` for sidebar badge:
 ```javascript
 async _refreshIntakeFiles() {
     const data = await this._loadIntakeFiles();
-    this._intakeItems = data.items || [];
+    const intakeFiles = data.items || data.files || [];
+    this._intakeItems = intakeFiles;
     this._intakeStats = data.stats || {};
-    this._updateIntakeBadges(data.pending_deep_count || 0);  // deep count for sidebar
+    this._intakePendingDeep = data.pending_deep_count ?? data.stats?.pending ?? 0;
+    this._updateIntakeBadges(this._intakePendingDeep);
+    this._renderIntakeFileList(intakeFiles);
     if (this.currentScene === 'intake') {
         this._renderIntakeScene();
     }
@@ -594,7 +598,7 @@ Implement a single dispatcher method `_handleIntakeAction(action, item)` that ro
 
 #### 8. Frontend: Sidebar Intake Badge (~10 lines)
 
-In `_renderSidebarFolders()`, update the "📥 Intake" entry to show pending count badge fetched from `GET /api/kb/intake` stats.
+In `_renderSidebarFolders()`, update the "📥 Intake" entry to show pending count badge using `this._intakePendingDeep` (sourced from `pending_deep_count` in the API response, with fallback to `stats.pending`). This ensures the sidebar badge reflects deep file-level pending count, not top-level item count.
 
 ### Edge Cases & Error Handling
 

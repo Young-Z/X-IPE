@@ -349,7 +349,7 @@ Derived from mockup Scene 4:
 ## Technical Considerations
 
 - `.intake-status.json` schema: `{ "filename.ext": { "status": "pending|processing|filed", "destination": "folder/path/", "updated_at": "ISO8601" } }` — keys are relative file paths (e.g., `subfolder/file.md` for nested files); folder entries are NOT stored (status derived from children)
-- `GET /api/kb/intake` response schema (CR-005): `{ "items": [ { "name": "file.md", "type": "file", "size": 1234, "uploaded": "ISO8601", "status": "pending", "destination": null, "path": "file.md" }, { "name": "folder/", "type": "folder", "item_count": 3, "status": "pending", "path": "folder", "children": [ ... ] } ], "stats": { "total": N, "pending": N, "processing": N, "filed": N }, "pending_deep_count": N }`
+- `GET /api/kb/intake` response schema (CR-005): `{ "items": [ { "name": "file.md", "type": "file", "size_bytes": 1234, "modified_date": "2026-03-16", "file_type": "md", "status": "pending", "destination": null, "path": "file.md" }, { "name": "folder", "type": "folder", "item_count": 3, "status": "pending", "path": "folder", "children": [ ... ] } ], "stats": { "total": N, "pending": N, "processing": N, "filed": N }, "pending_deep_count": N }`
 - Folder status derivation priority: pending > processing > filed (any pending child makes folder pending)
 - Expand/collapse state is client-side only — not persisted across page reloads
 - The `_runAILibrarian()` method should use plain command: `'organize knowledge base intake files with AI Librarian'`
