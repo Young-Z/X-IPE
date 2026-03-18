@@ -91,3 +91,9 @@
 | DAO-ID | Timestamp | Task | Touchpoint | Disposition | Confidence | Summary |
 |--------|-----------|------|------------|-------------|------------|---------|
 | DAO-100 | 2026-03-18T15:52:11Z | TASK-978 | "How would you avoid it later" — process improvement question | answer+instruction | 0.95 | Two concrete prevention measures: (1) always run Chrome DevTools smoke test for UI-classified ACs during acceptance testing, (2) capture lesson learned in x-ipe-meta-lesson-learned for the acceptance-test and code-implementation skills. |
+
+---
+
+| DAO-ID | Timestamp | Task | Touchpoint | Disposition | Confidence | Summary |
+|--------|-----------|------|------------|-------------|------------|---------|
+| DAO-101 | 2026-03-18T15:55:55Z | TASK-979 | DOCX shows "Cannot preview this file type" in KB browse | instruction | 0.98 | Root cause: KB `/api/kb/files/{path}/raw` serves raw binary with `send_file()` — no DOCX/MSG conversion, no X-Converted header. The ideas `/api/ideas/file` endpoint has conversion logic. Fix: add conversion for .docx/.msg in KB raw endpoint using shared `conversion_utils`. |

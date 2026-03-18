@@ -8,8 +8,12 @@ from flask import Blueprint, jsonify, request, current_app, send_file
 from pathlib import Path
 
 from x_ipe.tracing import x_ipe_tracing
+from x_ipe.services.conversion_utils import convert_docx, convert_msg, sanitize_converted_html
 
 kb_bp = Blueprint('kb', __name__)
+
+CONVERTIBLE_EXTENSIONS = {'.docx', '.msg'}
+MAX_CONVERSION_SIZE = 10 * 1024 * 1024  # 10MB
 
 
 def _error(code: str, message: str, status: int):
@@ -94,12 +98,32 @@ def get_file_raw(file_path):
     GET /api/kb/files/{path}/raw
 
     TASK-957: Serve raw file bytes for inline preview (images, PDFs, etc.).
+    CR-008: Convert .docx/.msg to HTML for preview (matching ideas endpoint).
     """
     svc = _get_kb_service_or_abort()
     try:
         resolved = svc._resolve_safe_path(file_path)
         if not resolved.is_file():
             return _error('NOT_FOUND', f'File not found: {file_path}', 404)
+
+        ext = resolved.suffix.lower()
+        if ext in CONVERTIBLE_EXTENSIONS:
+            file_size = resolved.stat().st_size
+            if file_size > MAX_CONVERSION_SIZE:
+                return jsonify({'error': 'File too large to preview (max 10MB)'}), 413
+            try:
+                if ext == '.docx':
+                    converted_html = convert_docx(resolved)
+                else:
+                    converted_html = convert_msg(resolved)
+                sanitized = sanitize_converted_html(converted_html)
+                return sanitized, 200, {
+                    'Content-Type': 'text/html; charset=utf-8',
+                    'X-Converted': 'true'
+                }
+            except Exception:
+                return jsonify({'error': 'Preview unavailable for this file'}), 415
+
         return send_file(resolved)
     except ValueError as exc:
         return _error('BAD_REQUEST', str(exc), 400)
