@@ -204,6 +204,30 @@ class TestFileWatcherDebounce:
         finally:
             watcher.stop()
 
+    def test_transient_temp_file_does_not_emit_deleted_event(self, temp_project, mock_socketio):
+        """Transient files added and deleted in one batch should be ignored."""
+        from x_ipe.services.file_service import FileWatcherHandler
+        from watchfiles import Change
+
+        handler = FileWatcherHandler(
+            callback=lambda event: mock_socketio.emit('content_changed', event),
+            debounce_seconds=0.01,
+            project_root=str(temp_project),
+        )
+
+        transient_file = temp_project / "draft.txt.tmp"
+        handler.handle_changes({
+            (Change.added, str(transient_file)),
+            (Change.deleted, str(transient_file)),
+        })
+        time.sleep(0.05)
+
+        delete_calls = [
+            c for c in mock_socketio.emit.call_args_list
+            if c[0][0] == 'content_changed' and c[0][1].get('action') == 'deleted'
+        ]
+        assert len(delete_calls) == 0
+
 
 # =============================================================================
 # Integration Tests: WebSocket content_changed Events

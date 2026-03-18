@@ -15,8 +15,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler, FileSystemEvent
+from watchfiles import Change, watch
 
 from x_ipe.tracing import x_ipe_tracing
 
@@ -217,11 +216,10 @@ class ProjectService:
         return items
 
 
-class FileWatcherHandler(FileSystemEventHandler):
+class FileWatcherHandler:
     """Handler for file system events with debouncing and gitignore support"""
 
     def __init__(self, callback, debounce_seconds: float = 0.1, ignore_patterns: List[str] = None, project_root: str = None):
-        super().__init__()
         self.callback = callback
         self.debounce_seconds = debounce_seconds
         self.ignore_patterns = ignore_patterns or []
@@ -229,6 +227,20 @@ class FileWatcherHandler(FileSystemEventHandler):
         self._pending_events: Dict[str, Dict] = {}
         self._lock = threading.Lock()
         self._timer: Optional[threading.Timer] = None
+        self._known_files = self._snapshot_known_files()
+
+    def _snapshot_known_files(self) -> set[str]:
+        """Capture the initial file set so watchfiles events can be normalized."""
+        if not self.project_root or not self.project_root.exists():
+            return set()
+
+        known_files: set[str] = set()
+        for path in self.project_root.rglob('*'):
+            if path.is_file():
+                path_str = str(path)
+                if not self._should_ignore(path_str):
+                    known_files.add(path_str)
+        return known_files
 
     def _should_ignore(self, path: str) -> bool:
         """Check if path matches any gitignore pattern."""
@@ -293,19 +305,47 @@ class FileWatcherHandler(FileSystemEventHandler):
             }
         self._schedule_callback()
 
-    def on_created(self, event: FileSystemEvent):
+    def handle_changes(self, changes: set[tuple[Change, str]]) -> None:
+        """Convert watchfiles changes to the existing callback contract."""
+        grouped_changes: Dict[str, set[Change]] = {}
+        for change, path in changes:
+            grouped_changes.setdefault(path, set()).add(change)
+
+        for path, change_set in grouped_changes.items():
+            path_obj = Path(path)
+
+            if Change.deleted in change_set:
+                if path in self._known_files or Change.modified in change_set:
+                    self._known_files.discard(path)
+                    self._add_event('deleted', path)
+                continue
+
+            if path_obj.exists() and path_obj.is_dir():
+                continue
+
+            if Change.modified in change_set:
+                self._known_files.add(path)
+                self._add_event('modified', path)
+                continue
+
+            if Change.added in change_set:
+                event_type = 'modified' if path in self._known_files else 'created'
+                self._known_files.add(path)
+                self._add_event(event_type, path)
+
+    def on_created(self, event: Any):
         if not event.is_directory:
             self._add_event('created', event.src_path)
 
-    def on_deleted(self, event: FileSystemEvent):
+    def on_deleted(self, event: Any):
         if not event.is_directory:
             self._add_event('deleted', event.src_path)
 
-    def on_modified(self, event: FileSystemEvent):
+    def on_modified(self, event: Any):
         if not event.is_directory:
             self._add_event('modified', event.src_path)
 
-    def on_moved(self, event: FileSystemEvent):
+    def on_moved(self, event: Any):
         if not event.is_directory:
             self._add_event('deleted', event.src_path)
             self._add_event('created', event.dest_path)
@@ -315,7 +355,7 @@ class FileWatcher:
     """
     Watches project directories for changes and emits WebSocket events.
     
-    Uses watchdog library for cross-platform file system monitoring.
+    Uses watchfiles for cross-platform file system monitoring.
     Respects .gitignore patterns to avoid monitoring ignored directories.
     """
 
@@ -331,7 +371,9 @@ class FileWatcher:
         self.project_root = Path(project_root).resolve()
         self.socketio = socketio
         self.debounce_seconds = debounce_seconds
-        self.observer: Optional[Observer] = None
+        self.observer: Optional[threading.Thread] = None
+        self._stop_event = threading.Event()
+        self._ready_event = threading.Event()
         self._running = False
         self.ignore_patterns = self._load_gitignore()
 
@@ -382,31 +424,68 @@ class FileWatcher:
         """Start watching project directories"""
         if self._running:
             return
-        
-        handler = FileWatcherHandler(
-            self._emit_event, 
-            self.debounce_seconds,
-            ignore_patterns=self.ignore_patterns,
-            project_root=str(self.project_root)
+
+        self._stop_event = threading.Event()
+        self._ready_event = threading.Event()
+        self.observer = threading.Thread(
+            target=self._watch_loop,
+            name="x-ipe-file-watcher",
+            daemon=True,
         )
-        self.observer = Observer()
-        
-        # Watch the entire project root
-        self.observer.schedule(handler, str(self.project_root), recursive=True)
         self.observer.start()
         self._running = True
+        self._ready_event.wait(timeout=max(0.2, self.debounce_seconds * 4))
 
     @x_ipe_tracing(level="INFO")
     def stop(self):
         """Stop watching"""
         if self.observer and self._running:
-            self.observer.stop()
+            self._stop_event.set()
             self.observer.join()
             self._running = False
+            self.observer = None
 
     @property
     def is_running(self) -> bool:
         return self._running
+
+    def _watch_loop(self) -> None:
+        """Run the watchfiles loop and forward changes through the existing handler."""
+        handler = FileWatcherHandler(
+            self._emit_event,
+            self.debounce_seconds,
+            ignore_patterns=self.ignore_patterns,
+            project_root=str(self.project_root)
+        )
+        debounce_ms = max(10, int(self.debounce_seconds * 1000))
+        step_ms = max(10, min(debounce_ms, 50))
+
+        for changes in watch(
+            str(self.project_root),
+            stop_event=self._stop_event,
+            debounce=debounce_ms,
+            step=step_ms,
+            rust_timeout=100,
+            recursive=True,
+            yield_on_timeout=True,
+        ):
+            if not self._ready_event.is_set():
+                if not changes:
+                    self._ready_event.set()
+                    continue
+
+                if all(
+                    change == Change.added and
+                    (Path(path).is_dir() or path in handler._known_files)
+                    for change, path in changes
+                ):
+                    self._ready_event.set()
+                    continue
+
+                self._ready_event.set()
+
+            if changes:
+                handler.handle_changes(changes)
 
 
 class ContentService:

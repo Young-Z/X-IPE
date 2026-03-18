@@ -880,7 +880,7 @@ Improvements include:
 | **Skills System** | Custom skill definitions in `.github/skills/` (Anthropic-style skills protocol) |
 | **Backend** | Python 3.12+, Flask, Flask-SocketIO, eventlet |
 | **Frontend** | HTML/CSS, Bootstrap 5, JavaScript, xterm.js |
-| **Real-time** | WebSocket (Socket.IO), watchdog (file monitoring) |
+| **Real-time** | WebSocket (Socket.IO), watchfiles (file monitoring) |
 | **Testing** | pytest, pytest-flask |
 | **Package Manager** | uv |
 
