@@ -57,3 +57,60 @@ Feedback content: KB intake view shows file count as 0 when a folder is uploaded
 
 ### Follow-up
 > None
+
+---
+
+## 2026-03-18 | CR-006 Classification Confirmation — FEATURE-049-F Content Width
+
+**Context:**
+- Source: ai
+- Task: TASK-CR006
+- Feature: FEATURE-049-F
+- Workflow: N/A
+- Calling skill: x-ipe-task-based-change-request
+
+**Message:**
+> CR-006 for FEATURE-049-F requests widening the KB article content/image rendering area from max-width: 780px to full available width with margins. This is a CSS layout change. Classification proposed as `modification`. Agent requests confirmation to proceed to Phase 5.
+
+**Instruction Units:**
+
+### Unit 0: Confirm CR-006 classification as `modification`
+**Disposition:** approval
+**Suggested Skill:** x-ipe-task-based-change-request (strong match — continue Phase 5)
+**Rationale:** Classification evidence is thorough: CSS-only change within existing FEATURE-049-F, no new data models/workflows/integrations, builds on CR-004. One minor AC conflict (AC-049-F-16b) is well-understood. Small-scope assessment is accurate. Approval is the smallest useful intervention.
+**Content:** Classification confirmed as `modification`. Proceed to Phase 5. During Phase 5, clarify AC-049-F-16b wording to distinguish image scaling behavior from container width change.
+
+| Entry ID | Timestamp | Task ID | Calling Skill | Disposition | Confidence | Summary |
+|----------|-----------|---------|---------------|-------------|------------|---------|
+| DAO-087 | 2026-03-18T10:15:00Z | TASK-CR006 | x-ipe-task-based-change-request | approval | 0.93 | CR-006 classification confirmed as modification — CSS layout change within FEATURE-049-F |
+
+## DAO-087
+- **Timestamp:** 2026-03-18T10:15:00Z
+- **Task ID:** TASK-CR006
+- **Feature ID:** FEATURE-049-F
+- **Workflow:** N/A
+- **Calling Skill:** x-ipe-task-based-change-request
+- **Source:** ai
+- **Disposition:** approval
+- **Confidence:** 0.93
+
+### Message
+> CR-006 for FEATURE-049-F requests widening KB article content/image rendering area from max-width: 780px to full available width with margins. Classification proposed: modification. Reasoning: CSS-only change within existing feature, no new data models/workflows/integrations, one minor AC conflict (AC-049-F-16b). Small-scope assessment. Agent requests confirmation to proceed to Phase 5.
+
+### Guidance Returned
+> Classification confirmed as `modification`. Reasoning is well-evidenced: CSS-only layout change within existing FEATURE-049-F, no new data models/workflows/integrations, builds on CR-004. The minor AC-049-F-16b conflict (image scaling vs container width) is acknowledged — clarify AC wording during Phase 5 to distinguish scope. Proceed to Phase 5.
+
+### Rationale
+> Thorough conflict analysis supports `modification`. Small-scope CSS change exhibits no characteristics of `extension` or `new_feature`. One minor AC wording conflict is manageable. Approval is the smallest useful intervention to unblock Phase 5.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-change-request"
+>     match_strength: "strong"
+>     reason: "Agent is mid-execution of change-request skill; confirmation unblocks Phase 5 continuation"
+>     execution_steps:
+>       - phase: "5. Apply Changes"
+>         step: "5.1 Update specification and ACs"
+
+### Follow-up
+> During Phase 5, update AC-049-F-16b wording to clarify that `max-width: 100%` refers to image scaling within its container, not the container width itself.
