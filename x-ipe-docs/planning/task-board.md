@@ -6,7 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-958 | Feature Closing | Close CR-005 folder support for FEATURE-049-F: verify ACs, code-to-docs review, refactoring analysis, push to main. DAO mode. | Ember 🔥 | 🔄 in_progress | 03-18-2026 | — | — |
+| TASK-958 | Feature Closing | Close CR-005 folder support for FEATURE-049-F: verify ACs, code-to-docs review, refactoring analysis, push to main. DAO mode. | Ember 🔥 | ✅ done | 03-18-2026 | [6797efa](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/) | — |
 | TASK-956 | Acceptance Test | Validate CR-005 folder support ACs for FEATURE-049-F: backend tree/status/cascade tests, frontend tree rendering/toggle/filter/action tests, structured review of API response schema. DAO mode. | Ember 🔥 | ✅ done | 03-18-2026 | [acceptance-test-report-cr005.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/acceptance-test-report-cr005.md), [4e7101f](src/) | x-ipe-task-based-feature-closing |
 | TASK-955 | Code Implementation | Implement CR-005 folder support for FEATURE-049-F: backend tree builder, derived status, deep pending count, folder cascade; frontend tree rendering with expand/collapse, filter, folder actions. Fullstack (Python/Flask + JS). DAO mode. | Ember 🔥 | ✅ done | 03-18-2026 | [541b0f5](tests/), [518d23a](src/) | x-ipe-task-based-feature-acceptance-test |
 | TASK-954 | Technical Design | Design CR-005 folder support delta for FEATURE-049-F: tree data model, derived status algorithm, folder actions, pre-loaded API response, folder tree UI rendering. DAO mode. | Ember 🔥 | ✅ done | 03-18-2026 | [technical-design.md v1.2](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/technical-design.md) | x-ipe-task-based-code-implementation |
@@ -209,9 +209,9 @@
 ## Quick Stats
 
 - **Total Active:** 10
-- **In Progress:** 2
+- **In Progress:** 1
 - **Pending:** 0
-- **Completed (archived):** 878
+- **Completed (archived):** 879
 - **Deferred:** 0
 - **Reverted:** 8
 - **Pending Review:** 0
