@@ -986,14 +986,18 @@ class TestGetIntakeFiles:
     def test_empty_intake_no_folder(self, kb_service):
         """No .intake/ folder returns empty result."""
         result = kb_service.get_intake_files()
-        assert result == {'files': [], 'stats': {'total': 0, 'pending': 0, 'processing': 0, 'filed': 0}}
+        assert result == {
+            'items': [], 'stats': {'total': 0, 'pending': 0, 'processing': 0, 'filed': 0},
+            'pending_deep_count': 0,
+        }
 
     def test_empty_intake_folder(self, kb_service):
         """Empty .intake/ folder returns empty result."""
         (kb_service.kb_root / '.intake').mkdir(parents=True)
         result = kb_service.get_intake_files()
-        assert result['files'] == []
+        assert result['items'] == []
         assert result['stats']['total'] == 0
+        assert result['pending_deep_count'] == 0
 
     def test_files_without_status(self, kb_service):
         """Files in .intake/ with no status.json default to pending."""
@@ -1004,8 +1008,9 @@ class TestGetIntakeFiles:
         result = kb_service.get_intake_files()
         assert result['stats']['total'] == 2
         assert result['stats']['pending'] == 2
-        assert all(f['status'] == 'pending' for f in result['files'])
-        assert all(f['destination'] is None for f in result['files'])
+        files_only = [i for i in result['items'] if i['type'] == 'file']
+        assert all(f['status'] == 'pending' for f in files_only)
+        assert all(f['destination'] is None for f in files_only)
 
     def test_files_with_status(self, kb_service):
         """Files merged with .intake-status.json entries."""
@@ -1021,7 +1026,7 @@ class TestGetIntakeFiles:
         assert result['stats']['total'] == 2
         assert result['stats']['filed'] == 1
         assert result['stats']['processing'] == 1
-        by_name = {f['name']: f for f in result['files']}
+        by_name = {i['name']: i for i in result['items']}
         assert by_name['a.md']['status'] == 'filed'
         assert by_name['a.md']['destination'] == 'guides/'
         assert by_name['b.pdf']['status'] == 'processing'
@@ -1037,7 +1042,7 @@ class TestGetIntakeFiles:
         })
         result = kb_service.get_intake_files()
         assert result['stats']['total'] == 1
-        assert result['files'][0]['name'] == 'exists.md'
+        assert result['items'][0]['name'] == 'exists.md'
 
     def test_status_json_excluded_from_files(self, kb_service):
         """.intake-status.json is not listed as a file."""
@@ -1046,7 +1051,7 @@ class TestGetIntakeFiles:
         (intake / 'note.md').write_text('Note', encoding='utf-8')
         kb_service._write_intake_status({'note.md': {'status': 'pending'}})
         result = kb_service.get_intake_files()
-        names = [f['name'] for f in result['files']]
+        names = [i['name'] for i in result['items']]
         assert '.intake-status.json' not in names
 
     def test_file_metadata_fields(self, kb_service):
@@ -1055,9 +1060,10 @@ class TestGetIntakeFiles:
         intake.mkdir(parents=True)
         (intake / 'readme.md').write_text('Hello World', encoding='utf-8')
         result = kb_service.get_intake_files()
-        f = result['files'][0]
+        f = result['items'][0]
         assert f['name'] == 'readme.md'
-        assert f['path'] == '.intake/readme.md'
+        assert f['path'] == 'readme.md'
+        assert f['type'] == 'file'
         assert f['size_bytes'] > 0
         assert f['file_type'] == 'md'
         assert 'modified_date' in f
@@ -1080,9 +1086,9 @@ class TestUpdateIntakeStatus:
         assert status['doc.md']['status'] == 'processing'
 
     def test_update_nonexistent_file_raises(self, kb_service):
-        """Updating status of a missing file raises ValueError."""
+        """Updating status of a missing path raises ValueError."""
         (kb_service.kb_root / '.intake').mkdir(parents=True)
-        with pytest.raises(ValueError, match='File not in .intake'):
+        with pytest.raises(ValueError, match='Path not in .intake'):
             kb_service.update_intake_status('missing.md', 'pending')
 
     def test_update_multiple_times(self, kb_service):
@@ -1099,6 +1105,165 @@ class TestUpdateIntakeStatus:
         assert status['b.md']['destination'] == 'docs/'
 
 
+# CR-005: Folder Support Tests
+class TestIntakeFolderTree:
+    """CR-005: Tree builder, derived status, deep count, folder cascade."""
+
+    def test_tree_with_nested_directory(self, kb_service):
+        """Nested directories produce tree with children."""
+        intake = kb_service.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        sub = intake / 'docs'
+        sub.mkdir()
+        (sub / 'api.md').write_text('API', encoding='utf-8')
+        (sub / 'setup.md').write_text('Setup', encoding='utf-8')
+        (intake / 'readme.md').write_text('Readme', encoding='utf-8')
+        result = kb_service.get_intake_files()
+        # Folders sort before files
+        assert result['items'][0]['type'] == 'folder'
+        assert result['items'][0]['name'] == 'docs'
+        assert result['items'][0]['item_count'] == 2
+        assert len(result['items'][0]['children']) == 2
+        assert result['items'][1]['type'] == 'file'
+        assert result['items'][1]['name'] == 'readme.md'
+
+    def test_tree_skips_hidden_files(self, kb_service):
+        """Hidden files (starting with .) are excluded from tree."""
+        intake = kb_service.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        (intake / '.hidden').write_text('secret', encoding='utf-8')
+        (intake / 'visible.md').write_text('Hello', encoding='utf-8')
+        result = kb_service.get_intake_files()
+        names = [i['name'] for i in result['items']]
+        assert '.hidden' not in names
+        assert 'visible.md' in names
+
+    def test_tree_uses_relative_paths(self, kb_service):
+        """File paths are relative to .intake/ root."""
+        intake = kb_service.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        sub = intake / 'sub'
+        sub.mkdir()
+        (sub / 'file.md').write_text('Nested', encoding='utf-8')
+        result = kb_service.get_intake_files()
+        folder = result['items'][0]
+        assert folder['path'] == 'sub'
+        child = folder['children'][0]
+        assert child['path'] == 'sub/file.md'
+
+    def test_derive_folder_status_pending_priority(self, kb_service):
+        """If any child is pending, folder status is pending."""
+        from x_ipe.services.kb_service import KBService
+        children = [
+            {'status': 'filed'},
+            {'status': 'pending'},
+            {'status': 'processing'},
+        ]
+        assert KBService._derive_folder_status(children) == 'pending'
+
+    def test_derive_folder_status_processing_priority(self, kb_service):
+        """If no pending but processing, folder status is processing."""
+        from x_ipe.services.kb_service import KBService
+        children = [
+            {'status': 'filed'},
+            {'status': 'processing'},
+        ]
+        assert KBService._derive_folder_status(children) == 'processing'
+
+    def test_derive_folder_status_all_filed(self, kb_service):
+        """If all children filed, folder status is filed."""
+        from x_ipe.services.kb_service import KBService
+        children = [
+            {'status': 'filed'},
+            {'status': 'filed'},
+        ]
+        assert KBService._derive_folder_status(children) == 'filed'
+
+    def test_derive_folder_status_empty(self, kb_service):
+        """Empty folder defaults to pending."""
+        from x_ipe.services.kb_service import KBService
+        assert KBService._derive_folder_status([]) == 'pending'
+
+    def test_count_pending_deep(self, kb_service):
+        """Recursively counts only pending files."""
+        items = [
+            {'type': 'file', 'status': 'pending'},
+            {'type': 'file', 'status': 'filed'},
+            {'type': 'folder', 'status': 'pending', 'children': [
+                {'type': 'file', 'status': 'pending'},
+                {'type': 'file', 'status': 'processing'},
+            ]},
+        ]
+        assert kb_service._count_pending_deep(items) == 2
+
+    def test_count_pending_deep_empty(self, kb_service):
+        """No items returns 0."""
+        assert kb_service._count_pending_deep([]) == 0
+
+    def test_update_folder_cascade(self, kb_service):
+        """Updating a folder cascades status to all child files."""
+        intake = kb_service.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        sub = intake / 'docs'
+        sub.mkdir()
+        (sub / 'a.md').write_text('A', encoding='utf-8')
+        (sub / 'b.md').write_text('B', encoding='utf-8')
+        result = kb_service.update_intake_status('docs', 'processing', 'guides/')
+        assert result['ok'] is True
+        status = kb_service._read_intake_status()
+        assert status['docs/a.md']['status'] == 'processing'
+        assert status['docs/b.md']['status'] == 'processing'
+        assert status['docs/a.md']['destination'] == 'guides/'
+
+    def test_update_relative_path_file(self, kb_service):
+        """Can update status using relative path for nested files."""
+        intake = kb_service.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        sub = intake / 'sub'
+        sub.mkdir()
+        (sub / 'nested.md').write_text('Nested', encoding='utf-8')
+        result = kb_service.update_intake_status('sub/nested.md', 'filed', 'archive/')
+        assert result['ok'] is True
+        status = kb_service._read_intake_status()
+        assert status['sub/nested.md']['status'] == 'filed'
+
+    def test_pending_deep_count_in_response(self, kb_service):
+        """get_intake_files includes pending_deep_count with correct value."""
+        intake = kb_service.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        sub = intake / 'docs'
+        sub.mkdir()
+        (sub / 'a.md').write_text('A', encoding='utf-8')
+        (sub / 'b.md').write_text('B', encoding='utf-8')
+        (intake / 'readme.md').write_text('Readme', encoding='utf-8')
+        kb_service._write_intake_status({
+            'docs/a.md': {'status': 'filed', 'destination': 'guides/'},
+        })
+        result = kb_service.get_intake_files()
+        # b.md and readme.md are pending, a.md is filed
+        assert result['pending_deep_count'] == 2
+
+    def test_folder_cascade_nested(self, kb_service):
+        """Folder cascade works for deeply nested structures."""
+        intake = kb_service.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        sub = intake / 'level1'
+        sub.mkdir()
+        sub2 = sub / 'level2'
+        sub2.mkdir()
+        (sub2 / 'deep.md').write_text('Deep', encoding='utf-8')
+        result = kb_service.update_intake_status('level1', 'filed', 'archive/')
+        status = kb_service._read_intake_status()
+        assert status['level1/level2/deep.md']['status'] == 'filed'
+
+    def test_path_traversal_rejected(self, kb_service):
+        """Path traversal attempts are rejected."""
+        intake = kb_service.kb_root / '.intake'
+        intake.mkdir(parents=True)
+        with pytest.raises(ValueError, match='Path not in .intake'):
+            kb_service.update_intake_status('../../../etc/passwd', 'pending')
+
+
 class TestIntakeRoutes:
     """Tests for GET /api/kb/intake and PUT /api/kb/intake/status."""
 
@@ -1108,8 +1273,9 @@ class TestIntakeRoutes:
         resp = client.get('/api/kb/intake')
         assert resp.status_code == 200
         data = resp.get_json()
-        assert data['files'] == []
+        assert data['items'] == []
         assert data['stats']['total'] == 0
+        assert data['pending_deep_count'] == 0
 
     def test_get_intake_with_files(self, client, app):
         svc = app.config['KB_SERVICE']
