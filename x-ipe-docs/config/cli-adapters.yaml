@@ -27,8 +27,8 @@ adapters:
     display_name: "Claude Code CLI"
     command: "claude"
     run_args: ""
-    inline_prompt_flag: "-p"
-    prompt_format: '{command} {inline_prompt_flag} "{escaped_prompt}"'
+    inline_prompt_flag: ""
+    prompt_format: '{command} "{escaped_prompt}"'
     instructions_file: ".claude/instructions.md"
     skills_folder: ".claude/skills/"
     mcp_config_path: ".mcp.json"

@@ -85,3 +85,31 @@
 
 ### Follow-up
 > None
+
+## DAO-088
+- **Timestamp:** 2026-03-18T17:39:44Z
+- **Task ID:** TASK-NEW
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A (initial user message)
+- **Source:** human
+- **Disposition:** instruction (x3 units)
+- **Confidence:** 0.88
+
+### Message
+> Get uiux feedback, please visit feedback folder x-ipe-docs/uiux-feedback/Feedback-20260318-173426 to get details. Three feedback items: (1) Workflow mode zh instructions should display in Chinese, (2) Claude code command should not use -p flag, (3) x-ipe upgrade should support language switch.
+
+### Guidance Returned
+> 3 instruction units: Unit 0 → Change Request (workflow i18n), Unit 1 → Bug Fix (claude -p flag), Unit 2 → Change Request (upgrade lang switch). All independent — parallel execution.
+
+### Rationale
+> Three distinct feedback items targeting different subsystems. Feedback #1 and #3 are feature gaps (change requests), #2 is a command format bug. All independent — no shared files or output dependencies.
+
+### Suggested Skills
+> suggested_skills:
+>   - Unit 0: x-ipe-task-based-change-request (strong) — workflow mode i18n gap
+>   - Unit 1: x-ipe-task-based-bug-fix (strong) — incorrect -p flag in command
+>   - Unit 2: x-ipe-task-based-change-request (strong) — upgrade missing lang support
+
+### Follow-up
+> None

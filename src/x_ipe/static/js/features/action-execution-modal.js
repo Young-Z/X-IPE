@@ -96,11 +96,22 @@ class ActionExecutionModal {
         }
         if (!config) return;
 
+        // Load project language from config (default 'en')
+        let language = 'en';
+        try {
+            const cfgResp = await fetch('/api/config');
+            if (cfgResp.ok) {
+                const cfgData = await cfgResp.json();
+                language = cfgData.language || 'en';
+            }
+        } catch (e) { /* ignore — fall back to 'en' */ }
+
         // FEATURE-042-A: Workflow-mode branch — use workflow-prompts array
         if (this.workflowName) {
             const wpEntry = this._getWorkflowPrompt(this.actionKey);
             if (wpEntry && wpEntry['prompt-details']) {
-                const detail = wpEntry['prompt-details'].find(d => d.language === 'en')
+                const detail = wpEntry['prompt-details'].find(d => d.language === language)
+                    || wpEntry['prompt-details'].find(d => d.language === 'en')
                     || wpEntry['prompt-details'][0];
                 if (detail) {
                     this._workflowCommandTemplate = detail.command;
@@ -115,7 +126,8 @@ class ActionExecutionModal {
         const entry = this._getConfigEntry(config);
         if (!entry) return;
 
-        const detail = entry['prompt-details'].find(d => d.language === 'en')
+        const detail = entry['prompt-details'].find(d => d.language === language)
+            || entry['prompt-details'].find(d => d.language === 'en')
             || entry['prompt-details'][0];
         let command = detail.command;
 
