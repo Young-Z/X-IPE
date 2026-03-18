@@ -1090,10 +1090,7 @@ class KBBrowseModal {
                 if (this.currentArticle) this._downloadArticle(this.currentArticle);
                 break;
             case 'trigger-upload':
-                if (typeof window.kbFileUpload !== 'undefined') {
-                    this.close();
-                    window.kbFileUpload.open();
-                }
+                this._triggerNormalFileInput();
                 break;
             case 'trigger-intake-upload':
                 this._triggerIntakeFileInput();
@@ -1248,14 +1245,8 @@ class KBBrowseModal {
     }
 
     _handleNormalDrop(files) {
-        if (typeof window.kbFileUpload !== 'undefined' && window.kbFileUpload.uploadFiles) {
-            // Use kbFileUpload's upload with current folder
-            const folder = this.uploadFolder === '/' ? '' : this.uploadFolder;
-            window.kbFileUpload.uploadFiles(files, folder);
-        } else {
-            // Fallback: POST directly to API
-            this._uploadFiles(files, this.uploadFolder === '/' ? '' : this.uploadFolder);
-        }
+        const folder = this.uploadFolder === '/' ? '' : this.uploadFolder;
+        this._uploadFilesWithFeedback(files, folder);
     }
 
     _handleIntakeDrop(files) {
@@ -1398,6 +1389,52 @@ class KBBrowseModal {
             if (input.files?.length) this._uploadIntakeFiles(input.files);
         });
         input.click();
+    }
+
+    _triggerNormalFileInput() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.multiple = true;
+        input.addEventListener('change', () => {
+            if (input.files?.length) {
+                const folder = this.uploadFolder === '/' ? '' : this.uploadFolder;
+                this._uploadFilesWithFeedback(input.files, folder);
+            }
+        });
+        input.click();
+    }
+
+    async _uploadFilesWithFeedback(files, folder) {
+        const zone = this.overlay?.querySelector('.kb-upload-zone');
+        if (!zone) return;
+        zone.style.pointerEvents = 'none';
+        zone.style.opacity = '0.6';
+        try {
+            const formData = new FormData();
+            for (const file of files) formData.append('files', file);
+            if (folder) formData.append('folder', folder);
+            const res = await fetch('/api/kb/upload', { method: 'POST', body: formData });
+            if (res.ok) {
+                const data = await res.json();
+                const count = data.uploaded?.length ?? files.length;
+                document.dispatchEvent(new CustomEvent('kb:changed'));
+                this._showUploadFeedback(zone, `✅ ${count} file(s) uploaded`, 'success', 3000);
+            } else {
+                this._showUploadFeedback(zone, '❌ Upload failed', 'error', 5000);
+            }
+        } catch {
+            this._showUploadFeedback(zone, '❌ Upload failed', 'error', 5000);
+        } finally {
+            zone.style.pointerEvents = '';
+            zone.style.opacity = '';
+        }
+    }
+
+    _showUploadFeedback(zone, message, type, duration) {
+        const originalHTML = zone.innerHTML;
+        const color = type === 'success' ? '#10b981' : '#ef4444';
+        zone.innerHTML = `<div style="color:${color};font-size:13px;font-weight:600;">${message}</div>`;
+        setTimeout(() => { zone.innerHTML = originalHTML; }, duration);
     }
 
     async _uploadIntakeFiles(files) {

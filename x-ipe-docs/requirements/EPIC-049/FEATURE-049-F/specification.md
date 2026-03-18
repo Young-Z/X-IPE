@@ -1,7 +1,7 @@
 # Feature Specification: KB AI Librarian & Intake
 
 > Feature ID: FEATURE-049-F  
-> Version: v1.6  
+> Version: v1.7  
 > Status: Refined  
 > Last Updated: 03-18-2026
 
@@ -16,6 +16,7 @@
 | v1.4 | 03-18-2026 | CR-005: Folder support in intake — fix count logic for top-level items (folders + files), add folder tree display with expand/collapse in intake file list view |
 | v1.5 | 03-18-2026 | CR-005 Refinement: Folder status derived from children, pre-loaded tree (no lazy loading), folder-specific actions (assign/remove/undo), filter propagation, deep-count badge, AI Librarian processes files individually |
 | v1.6 | 03-18-2026 | CR-006: Widen article content/image rendering area to span full available width with margins — remove max-width: 780px constraint on `.kb-article-main`, add responsive padding |
+| v1.7 | 03-18-2026 | [CR-007](./CR-007.md): Normal Upload zone — add click-to-browse native file selection and upload success indication |
 
 ## Linked Mockups
 
@@ -56,6 +57,10 @@ The intake workflow separates the "upload" action from the "organize" action, le
 
 9. **As a** KB user, **I want to** see documents and images displayed at the full available width of the article view, **so that** I can read and preview content without wasted horizontal space. *(CR-006)*
 
+10. **As a** KB user, **I want to** click the Normal Upload zone to open a native file selection dialog, **so that** I can upload files without relying solely on drag-and-drop. *(CR-007)*
+
+11. **As a** KB user, **I want to** see a success indication after uploading files via the Normal Upload zone, **so that** I know my upload completed successfully. *(CR-007)*
+
 ## Acceptance Criteria
 
 ### AC-049-F-01: Upload Mode Toggle
@@ -66,6 +71,10 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | AC-049-F-01b | GIVEN upload mode is AI Librarian WHEN user clicks "Normal" toggle button THEN upload mode switches back to Normal AND subsequent uploads go to the selected destination folder | UI |
 | AC-049-F-01c | GIVEN `ai_librarian.enabled` is `false` in kb-config.json WHEN KB browse modal loads THEN upload mode toggle is hidden AND only Normal upload mode is available | UI |
 | AC-049-F-01d | GIVEN upload mode is AI Librarian WHEN user drops files onto the intake drop zone THEN files are uploaded to `.intake/` folder AND intake file list refreshes to show new files with "Pending" status | UI |
+| AC-049-F-01e | GIVEN upload mode is Normal WHEN user clicks the upload zone or the "browse" text THEN a native file selection dialog opens with `multiple` file selection enabled *(CR-007)* | UI |
+| AC-049-F-01f | GIVEN user selects files via the native file dialog in Normal Upload mode WHEN files are chosen THEN files are uploaded to the selected destination folder via `POST /api/kb/upload` AND `kb:changed` event is dispatched on success *(CR-007)* | UI |
+| AC-049-F-01g | GIVEN files are uploaded via Normal Upload zone (drag-and-drop or file dialog) WHEN upload completes successfully THEN the upload zone displays a temporary success message (e.g., "✅ N file(s) uploaded") that auto-clears after a few seconds *(CR-007)* | UI |
+| AC-049-F-01h | GIVEN files are uploaded via Normal Upload zone WHEN upload fails (network error or server error) THEN the upload zone displays a temporary error message (e.g., "❌ Upload failed") that auto-clears after a few seconds *(CR-007)* | UI |
 
 ### AC-049-F-02: Intake Item Listing (CR-005: updated from "File Listing")
 
@@ -254,6 +263,8 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | FR-049-F.18 | Folder Actions (CR-005) | User clicks action on folder row | Folder-specific actions: Assign (bulk-set destination for all children), Remove (delete folder + all contents), Undo (revert all filed children to pending). No Preview action for folders | Folder-level batch operations |
 | FR-049-F.19 | Pre-loaded Intake Tree (CR-005) | `GET /api/kb/intake` | Return full nested tree in single API call; folders include `children` arrays with files and sub-folders recursively; no lazy-loading endpoint | Complete tree in one response |
 | FR-049-F.20 | Full-Width Article Layout (CR-006) | Article scene active | Article main content area expands to fill available horizontal space instead of fixed max-width; left/right padding provides readability margins; sidebar remains fixed at 260px | Content and previews displayed at full available width |
+| FR-049-F.21 | Normal Upload Click-to-Browse (CR-007) | User clicks upload zone or "browse" text in Normal Upload mode | Create hidden `<input type="file" multiple>`, trigger native file dialog, upload selected files to destination folder via `POST /api/kb/upload` | Files uploaded, `kb:changed` event dispatched |
+| FR-049-F.22 | Normal Upload Feedback (CR-007) | Normal Upload completes (success or failure) | Show temporary status message in upload zone: "✅ N file(s) uploaded" on success, "❌ Upload failed" on error; auto-clear after timeout | User sees upload result, message clears automatically |
 
 ## Non-Functional Requirements
 
@@ -303,6 +314,13 @@ Derived from mockup Scene 4:
    - Images, iframes (PDF/docx/HTML), and code blocks scale to the full container width
    - Sidebar remains fixed at 260px; main content fills the remaining space via flexbox
    - On viewports < 900px (sidebar hidden), content uses full width with padding
+
+8. **Normal Upload Zone Behavior (CR-007):**
+   - Clicking anywhere on the upload zone (including "browse" text) opens a native file selection dialog — does NOT open a separate upload modal
+   - After successful upload: temporary success message "✅ N file(s) uploaded" replaces the default drop zone text, auto-clears after 3 seconds
+   - After failed upload: temporary error message "❌ Upload failed" in red/error styling, auto-clears after 5 seconds
+   - During upload: zone is non-interactive (prevents duplicate uploads)
+   - After message clears: zone returns to default state ("Drag & drop files here, or **browse**")
 
 ## Dependencies
 
@@ -355,6 +373,10 @@ Derived from mockup Scene 4:
 | Folder with mixed-status children (CR-005) | Folder visible in all relevant filter views (e.g., visible in both "Pending" and "Filed" filters if it has children with both statuses) |
 | Folder removal with some filed children (CR-005) | Confirmation dialog warns: "This folder contains filed items. Remove anyway?" |
 | Very large nested tree (500+ items) (CR-005) | Pre-loading handles up to 500 items; beyond that, consider pagination (NFR-049-F.6) |
+| User clicks upload zone while upload is in progress (CR-007) | Click is ignored — zone is non-interactive during upload |
+| User drops files while success message is displayed (CR-007) | Accept the drop, start new upload, replace success message with new upload status |
+| File dialog cancelled without selecting files (CR-007) | No action taken, no error shown |
+| Network error during Normal Upload (CR-007) | Show "❌ Upload failed" in zone, auto-clear after 5 seconds |
 
 ## Out of Scope
 
@@ -384,6 +406,8 @@ Derived from mockup Scene 4:
 - Skill reads tag taxonomy from kb-config.json (`tags.lifecycle`, `tags.domain`) for AI classification
 - Non-markdown files: moved, metadata indexed in `.kb-index.json`, same fields as markdown
 - Skill is a tool skill created via `x-ipe-meta-skill-creator` — file at `.github/skills/x-ipe-tool-kb-librarian/SKILL.md`
+- Normal Upload click-to-browse (CR-007): Follow `_triggerIntakeFileInput()` pattern — create hidden `<input type="file" multiple>`, trigger `.click()`, handle `change` event → call `_uploadFiles()`; replace existing `trigger-upload` action which currently opens the separate `KBFileUpload` modal
+- Normal Upload feedback (CR-007): After `_uploadFiles()` resolves, inject temporary message into `.kb-upload-zone` element; use `setTimeout` for auto-clear (3s success, 5s error); restore original zone content after clear
 
 ## Open Questions
 

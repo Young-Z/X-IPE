@@ -114,3 +114,42 @@ Feedback content: KB intake view shows file count as 0 when a folder is uploaded
 
 ### Follow-up
 > During Phase 5, update AC-049-F-16b wording to clarify that `max-width: 100%` refers to image scaling within its container, not the container width itself.
+
+---
+
+| DAO-090 | 2026-03-18T12:57:54Z | TASK-968 | N/A | instruction | 0.90 | Process UIUX feedback for KB upload zone: add success indication + click-to-browse support |
+
+## DAO-090
+- **Timestamp:** 2026-03-18T12:57:54Z
+- **Task ID:** TASK-968
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.90
+
+### Message
+> Get uiux feedback, please visit feedback folder x-ipe-docs/uiux-feedback/Feedback-20260318-205614 to get details. Feedback: "the normal uploading should have an indication the uploading is succeed, and now only support drag and drop, can we also support click open a native file selection window to select."
+
+### Guidance Returned
+> Process this UIUX feedback as a change request for the KB Normal Upload zone. The feedback requests two improvements: (1) add visual upload success indication after file upload completes, (2) enable click-to-browse native file selection in addition to drag-and-drop. Use x-ipe-task-based-change-request skill following the FEEDBACK stage workflow. The screenshot shows the upload zone already has "browse" text but it may not be functional.
+
+### Rationale
+> User is providing structured UIUX feedback from testing the KB upload feature. This maps to FEEDBACK stage → change_request action. Strong match with x-ipe-task-based-change-request skill. Both improvements target the same component and should be handled as a single CR. Confidence high because intent is clear and feedback is well-structured with screenshot evidence.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-change-request"
+>     match_strength: "strong"
+>     reason: "UIUX feedback requesting modifications to existing KB upload feature — maps to FEEDBACK stage change_request action"
+>     execution_steps:
+>       - phase: "1. CR Analysis"
+>         step: "1.1 Analyze impact on existing requirements"
+>       - phase: "2. Conflict Detection"
+>         step: "2.1 Check spec/design/code conflicts"
+>       - phase: "3. Routing"
+>         step: "3.1 Determine if CR modifies existing feature or requires new feature"
+
+### Follow-up
+> None

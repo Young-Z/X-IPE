@@ -1,6 +1,6 @@
 # Technical Design: KB AI Librarian & Intake
 
-> Feature ID: FEATURE-049-F | Version: v1.3 | Last Updated: 03-18-2026
+> Feature ID: FEATURE-049-F | Version: v1.4 | Last Updated: 03-18-2026
 
 ---
 
@@ -24,6 +24,9 @@
 | `KBBrowseModal._renderIntakeScene()` | Full intake view: tree table with expand/collapse, status badges, filters, statistics, per-item actions | Intake UI (mockup Scene 4) | #kb #intake #frontend #ui |
 | `KBBrowseModal._renderIntakeRow()` | Render single intake row — file or folder with indentation, toggle, icons, actions | Tree row rendering (CR-005) | #kb #intake #frontend #ui |
 | `KBBrowseModal._runAILibrarian()` fix | Remove --workflow-mode, use plain NL command | Command fix | #kb #intake #frontend |
+| `KBBrowseModal._triggerNormalFileInput()` | Create hidden `<input type="file" multiple>` and trigger native file dialog for Normal Upload zone | Click-to-browse (CR-007) | #kb #upload #frontend |
+| `KBBrowseModal._uploadFilesWithFeedback()` | Upload files via `/api/kb/upload` and display success/error feedback in upload zone | Upload feedback (CR-007) | #kb #upload #frontend |
+| `KBBrowseModal._showUploadFeedback()` | Show temporary success/error message in upload zone, auto-clear after timeout | UI feedback (CR-007) | #kb #upload #frontend |
 
 ### Dependencies
 
@@ -984,6 +987,138 @@ Remove the fixed `max-width` constraint and let the content area fill available 
 
 ---
 
+### Step 12: Normal Upload Click-to-Browse & Success Indication (CR-007)
+
+**Scope:** [Frontend — JS only]
+**Program type:** frontend
+**Tech stack:** JavaScript
+
+#### Problem
+
+The Normal Upload zone in `kb-browse-modal.js` has two UX gaps:
+1. **Click-to-browse:** Clicking the zone triggers `trigger-upload` action (line 1092-1097) which closes the browse modal and opens the full `KBFileUpload` modal — not a native file dialog.
+2. **No feedback:** `_uploadFiles()` (line 1460-1470) posts files silently — no success/error indication to the user.
+
+The Intake zone already solves both: `_triggerIntakeFileInput()` opens a native file dialog, and `_uploadIntakeFiles()` refreshes the file list after upload.
+
+#### Solution Design
+
+**1. Click-to-browse — `_triggerNormalFileInput()`:**
+
+Replace the `trigger-upload` action handler with a new method that follows the Intake pattern:
+
+```javascript
+// kb-browse-modal.js — new method
+_triggerNormalFileInput() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.addEventListener('change', () => {
+        if (input.files?.length) {
+            const folder = this.uploadFolder === '/' ? '' : this.uploadFolder;
+            this._uploadFilesWithFeedback(input.files, folder);
+        }
+    });
+    input.click();
+}
+```
+
+Update `trigger-upload` action handler:
+```javascript
+// BEFORE (line 1092-1097):
+case 'trigger-upload':
+    if (typeof window.kbFileUpload !== 'undefined') {
+        this.close();
+        window.kbFileUpload.open();
+    }
+    break;
+
+// AFTER:
+case 'trigger-upload':
+    this._triggerNormalFileInput();
+    break;
+```
+
+**2. Upload feedback — `_showUploadFeedback()` + `_uploadFilesWithFeedback()`:**
+
+Wrap `_uploadFiles()` to show result in the upload zone:
+
+```javascript
+// kb-browse-modal.js — new methods
+async _uploadFilesWithFeedback(files, folder) {
+    const zone = this.overlay?.querySelector('.kb-upload-zone');
+    if (!zone) return;
+    // Disable zone during upload
+    zone.style.pointerEvents = 'none';
+    zone.style.opacity = '0.6';
+    try {
+        const formData = new FormData();
+        for (const file of files) formData.append('files', file);
+        if (folder) formData.append('folder', folder);
+        const res = await fetch('/api/kb/upload', { method: 'POST', body: formData });
+        if (res.ok) {
+            const data = await res.json();
+            const count = data.uploaded?.length ?? files.length;
+            document.dispatchEvent(new CustomEvent('kb:changed'));
+            this._showUploadFeedback(zone, `✅ ${count} file(s) uploaded`, 'success', 3000);
+        } else {
+            this._showUploadFeedback(zone, '❌ Upload failed', 'error', 5000);
+        }
+    } catch {
+        this._showUploadFeedback(zone, '❌ Upload failed', 'error', 5000);
+    } finally {
+        zone.style.pointerEvents = '';
+        zone.style.opacity = '';
+    }
+}
+
+_showUploadFeedback(zone, message, type, duration) {
+    const originalHTML = zone.innerHTML;
+    const color = type === 'success' ? '#10b981' : '#ef4444';
+    zone.innerHTML = `<div style="color:${color};font-size:13px;font-weight:600;">${message}</div>`;
+    setTimeout(() => { zone.innerHTML = originalHTML; }, duration);
+}
+```
+
+**3. Update drag-and-drop handler:**
+
+Update `_handleNormalDrop()` to use the feedback-enabled upload:
+
+```javascript
+// BEFORE (line 1250-1258):
+_handleNormalDrop(files) {
+    if (typeof window.kbFileUpload !== 'undefined' && window.kbFileUpload.uploadFiles) {
+        const folder = this.uploadFolder === '/' ? '' : this.uploadFolder;
+        window.kbFileUpload.uploadFiles(files, folder);
+    } else {
+        this._uploadFiles(files, this.uploadFolder === '/' ? '' : this.uploadFolder);
+    }
+}
+
+// AFTER:
+_handleNormalDrop(files) {
+    const folder = this.uploadFolder === '/' ? '' : this.uploadFolder;
+    this._uploadFilesWithFeedback(files, folder);
+}
+```
+
+#### Affected Files & LOC Estimate
+
+| File | Change | LOC |
+|------|--------|-----|
+| `src/x_ipe/static/js/features/kb-browse-modal.js` | Add `_triggerNormalFileInput()`, `_uploadFilesWithFeedback()`, `_showUploadFeedback()`; update `trigger-upload` handler and `_handleNormalDrop()` | ~35 |
+
+#### AC Coverage
+
+| AC | Design Coverage |
+|----|-----------------|
+| AC-049-F-01e | `_triggerNormalFileInput()` creates `<input type="file" multiple>` and triggers click |
+| AC-049-F-01f | `_uploadFilesWithFeedback()` posts to `/api/kb/upload` and dispatches `kb:changed` |
+| AC-049-F-01g | `_showUploadFeedback()` displays "✅ N file(s) uploaded" with 3s auto-clear |
+| AC-049-F-01h | `_showUploadFeedback()` displays "❌ Upload failed" with 5s auto-clear |
+
+---
+
 ## Design Change Log
 
 | Date | Phase | Change Summary |
@@ -993,3 +1128,4 @@ Remove the fixed `max-width` constraint and let the content area fill available 
 | 03-17-2026 | CR-002 Metadata Registry | Added Step 10: .kb-index.json registry design. Replaces frontmatter-embedded metadata. Per-folder hidden JSON index, folder metadata support, description field (< 100 words). Migration strategy, API compatibility, new/refactored methods. |
 | 03-18-2026 | CR-005 Folder Support | Backend: refactored `get_intake_files()` for nested tree via `_build_intake_tree()`, derived folder status via `_derive_folder_status()`, deep pending count. API response changed: `files`→`items`, added `children`/`type`/`item_count`/`pending_deep_count`. Frontend: added `_renderIntakeRow()` with indent/chevron/folder icons, `_toggleFolder()` for expand/collapse, `_filterIntakeItems()` for recursive filter propagation, folder-specific actions (Assign cascades, Remove recursive, Undo cascades). DAO decisions: derived status, pre-loaded tree, no lazy loading, deep-count badge. |
 | 03-18-2026 | CR-006 Full-Width Layout | CSS-only: Remove `max-width: 780px` from `.kb-article-main` in `kb-browse-modal.css`. Existing `flex: 1` + `padding: 48px` handles expansion and margins. No JS, backend, or sidebar changes needed. ~1 LOC change. |
+| 03-18-2026 | CR-007 Normal Upload UX | JS-only: Replace `trigger-upload` action (which opens KBFileUpload modal) with `_triggerNormalFileInput()` using hidden file input pattern from Intake zone. Add `_showUploadFeedback()` to display temporary success/error message in `.kb-upload-zone`. ~30 LOC change. |
