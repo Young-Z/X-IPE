@@ -68,3 +68,26 @@
 
 ### Follow-up
 > None
+
+---
+
+| DAO-ID | Timestamp | Task | Touchpoint | Disposition | Confidence | Summary |
+|--------|-----------|------|------------|-------------|------------|---------|
+| DAO-099 | 2026-03-18T15:49:17Z | TASK-978 | Runtime SyntaxError: await in non-async function | instruction | 0.98 | `_renderArticleScene()` in kb-browse-modal.js used `await` but wasn't declared `async`. Made method async + awaited at call site. This is exactly why Chrome DevTools UI testing would have caught this — the unit tests run in Node/jsdom which doesn't execute the actual browser script loading. |
+
+## DAO-099 — Bug Fix: await SyntaxError in _renderArticleScene
+
+### Context
+> User reported browser error: "Uncaught SyntaxError: await is only valid in async functions and the top level bodies of modules"
+
+### Disposition: `instruction`
+
+> **Content:** Fix `kb-browse-modal.js`: make `_renderArticleScene` async, await it in `_showArticle()`. Root cause: CR-008 added `await this._filePreviewRenderer.renderPreview(...)` inside a sync method.
+>
+> **Rationale:** Clear syntax bug from CR-008 implementation. The Vitest tests didn't catch this because jsdom evaluates scripts differently from the browser. This validates the user's earlier question about using Chrome DevTools for UI testing.
+
+---
+
+| DAO-ID | Timestamp | Task | Touchpoint | Disposition | Confidence | Summary |
+|--------|-----------|------|------------|-------------|------------|---------|
+| DAO-100 | 2026-03-18T15:52:11Z | TASK-978 | "How would you avoid it later" — process improvement question | answer+instruction | 0.95 | Two concrete prevention measures: (1) always run Chrome DevTools smoke test for UI-classified ACs during acceptance testing, (2) capture lesson learned in x-ipe-meta-lesson-learned for the acceptance-test and code-implementation skills. |

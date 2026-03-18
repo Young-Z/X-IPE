@@ -34,7 +34,7 @@ The KB AI Librarian automates the organization of files dropped into the knowled
 **Key Concepts:**
 - **Intake Folder** — The `.intake/` directory under the KB root where new files are dropped for processing
 - **Intake Status** — Tracked in `.intake-status.json`: `pending` → `processing` → `filed`
-- **Tag Taxonomy** — Lifecycle tags (7) and domain tags (10) defined in `kb-config.json`
+- **Tag Taxonomy** — Lifecycle tags (7) and domain tags (10) defined in `knowledgebase-config.json`
 - **Frontmatter** — YAML metadata block at the top of markdown files (title, tags, author, created, auto_generated)
 - **Destination Folder** — Target folder within the KB where a file should live, determined by UI assignment or AI analysis
 
@@ -51,7 +51,7 @@ triggers:
 
 not_for:
   - "Browsing KB files or managing intake UI — use KB Browse Modal frontend"
-  - "Configuring KB settings — edit kb-config.json directly"
+  - "Configuring KB settings — edit knowledgebase-config.json directly"
   - "Creating new KB articles from scratch — use KB editor"
 ```
 
@@ -76,7 +76,7 @@ input:
   <field name="kb_root" source="Auto-detected from project structure">
     <steps>
       1. Look for x-ipe-docs/knowledge-base/ in the project root
-      2. IF not found, check kb-config.json for configured root
+      2. IF not found, check knowledgebase-config.json for configured root
       3. IF still not found, fail with KB_ROOT_NOT_FOUND
     </steps>
   </field>
@@ -99,7 +99,7 @@ input:
   </checkpoint>
   <checkpoint required="true">
     <name>KB config readable</name>
-    <verification>kb-config.json exists and contains tag taxonomy (tags.lifecycle, tags.domain)</verification>
+    <verification>knowledgebase-config.json exists and contains tag taxonomy (tags.lifecycle, tags.domain)</verification>
   </checkpoint>
 </definition_of_ready>
 ```
@@ -116,7 +116,7 @@ input:
 <operation name="organize_intake">
   <action>
     1. Read KB configuration:
-       - Load kb-config.json from KB root
+       - Load knowledgebase-config.json from KB root
        - Extract tag taxonomy: tags.lifecycle[] and tags.domain[]
        - Extract folder structure for destination matching
 
@@ -142,7 +142,7 @@ input:
           - IF destination folder does not exist → create it
 
        d. Assign tags:
-          - Analyze content against the tag taxonomy from kb-config.json
+          - Analyze content against the tag taxonomy from knowledgebase-config.json
           - Select 1-2 lifecycle tags (e.g., "Design", "Implementation")
           - Select 1-3 domain tags (e.g., "API", "Security")
           - Use conservative tagging — only assign tags with clear evidence in content
@@ -232,7 +232,7 @@ operation_output:
 |-------|-------|------------|
 | `KB_ROOT_NOT_FOUND` | No knowledge-base/ folder in project | Verify KB is initialized; check project structure |
 | `INTAKE_FOLDER_NOT_FOUND` | No .intake/ directory under KB root | Create .intake/ folder or check KB config |
-| `CONFIG_MISSING_TAGS` | kb-config.json missing tag taxonomy | Add tags.lifecycle and tags.domain arrays to config |
+| `CONFIG_MISSING_TAGS` | knowledgebase-config.json missing tag taxonomy | Add tags.lifecycle and tags.domain arrays to config |
 | `FILE_READ_ERROR` | Cannot read file from .intake/ | Check file permissions; skip file and continue |
 | `MOVE_FAILED` | File move operation failed | Check destination path validity and permissions; retry once |
 | `NO_PENDING_FILES` | All intake files already processed | Not an error — print message and exit with success |

@@ -64,7 +64,7 @@ test_cases:
     type: must_pass
     given: "candidate/SKILL.md organize_intake operation"
     when: "check operation steps"
-    then: "mentions loading kb-config.json and extracting tag taxonomy"
+    then: "mentions loading knowledgebase-config.json and extracting tag taxonomy"
     method: content_check
 
   - id: TC-B02

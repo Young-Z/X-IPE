@@ -54,3 +54,20 @@
 
 ### Suggested Skill
 > - `x-ipe-task-based-feature-closing` (strong match)
+
+---
+
+| DAO-ID | Timestamp | Task | Touchpoint | Disposition | Confidence | Summary |
+|--------|-----------|------|------------|-------------|------------|---------|
+| DAO-098 | 2026-03-18T15:49:17Z | TASK-978 | Human asks why Chrome DevTools wasn't used for UI tests | answer | 0.90 | Valid question. Agent chose source code review over Chrome DevTools for AC-18m/18n/18o. Chrome DevTools MCP was enabled and the skill mandates it for frontend-ui tests. Agent's rationale (structural delegation checks, not visual) was technically defensible but deviated from skill procedure. Honest answer + offer to run browser tests if desired. |
+
+## DAO-098 — Answer: Why Chrome DevTools wasn't used for UI tests
+
+### Context
+> User asks why the 3 UI acceptance criteria (AC-049-F-18m, 18n, 18o) were verified via source code review instead of Chrome DevTools MCP, which was enabled in tools.json.
+
+### Disposition: `answer`
+
+> **Content:** Honest explanation of the decision rationale, acknowledging the skill procedure says Chrome DevTools is required for frontend-ui tests. Offer to run browser-based verification if user wants.
+>
+> **Rationale:** This is a legitimate question about process compliance. The agent made a judgment call that these ACs test code structure (delegation patterns) rather than visual rendering, but the skill is clear that Chrome DevTools should be used for frontend-ui classified tests.

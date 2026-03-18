@@ -27,7 +27,7 @@ triggers:
 
 not_for:
   - "Manual file browsing or intake UI interaction — that's the KB Browse Modal frontend"
-  - "Knowledge base configuration — use kb-config.json directly"
+  - "Knowledge base configuration — use knowledgebase-config.json directly"
 
 # ─────────────────────────────────────────────────────────────
 # INTERFACE
@@ -112,7 +112,7 @@ acceptance_criteria:
       category: behavior
       criterion: Operation reads KB config for tag taxonomy
       test: content_check
-      expected: "GET /api/kb/config or read kb-config.json"
+      expected: "GET /api/kb/config or read knowledgebase-config.json"
 
     - id: AC-B02
       category: behavior
@@ -185,7 +185,7 @@ dependencies:
   artifacts:
     - path: "x-ipe-docs/knowledge-base/.intake/"
       description: "Intake folder must exist with files to process"
-    - path: "x-ipe-docs/knowledge-base/kb-config.json"
+    - path: "x-ipe-docs/knowledge-base/knowledgebase-config.json"
       description: "KB config with tag taxonomy"
 
 # ─────────────────────────────────────────────────────────────
