@@ -1,6 +1,6 @@
 # Technical Design: KB AI Librarian & Intake
 
-> Feature ID: FEATURE-049-F | Version: v1.1 | Last Updated: 03-16-2026
+> Feature ID: FEATURE-049-F | Version: v1.2 | Last Updated: 03-18-2026
 
 ---
 
@@ -13,13 +13,16 @@
 
 | Component | Responsibility | Scope/Impact | Tags |
 |-----------|----------------|--------------|------|
-| `KBService.get_intake_files()` | List .intake/ files merged with status from .intake-status.json | Intake file listing with status | #kb #intake #service #backend |
-| `KBService.update_intake_status()` | Update a single file's status/destination in .intake-status.json | Status persistence | #kb #intake #status #backend |
+| `KBService.get_intake_files()` | List .intake/ items (files AND folders) as nested tree, merge with status from .intake-status.json, derive folder statuses from children | Intake item listing with status | #kb #intake #service #backend |
+| `KBService.update_intake_status()` | Update a single file's status/destination in .intake-status.json; folder assign cascades to all children | Status persistence | #kb #intake #status #backend |
+| `KBService._build_intake_tree()` | Recursively build nested tree of .intake/ items with derived folder status and deep pending count | Tree data model (CR-005) | #kb #intake #tree #backend |
+| `KBService._derive_folder_status()` | Compute folder status from children: pending > processing > filed | Status derivation (CR-005) | #kb #intake #status #backend |
 | `KBConfig.ai_librarian` extension | Add `skill` field to ai_librarian config | Config schema | #kb #config #backend |
-| `GET /api/kb/intake` | Route returning intake files with merged status | Intake API | #kb #intake #api #route |
-| `PUT /api/kb/intake/status` | Route to update a file's intake status | Status update API | #kb #intake #api #route |
+| `GET /api/kb/intake` | Route returning intake items as nested tree with pre-loaded children and deep pending count | Intake API | #kb #intake #api #route |
+| `PUT /api/kb/intake/status` | Route to update a file's intake status (folder assign cascades) | Status update API | #kb #intake #api #route |
 | `.github/skills/x-ipe-tool-kb-librarian/SKILL.md` | Tool skill: AI-powered intake file organizer — analyzes content, assigns tags, generates frontmatter, moves files | Skill file | #kb #librarian #skill #tool |
-| `KBBrowseModal._renderIntakeScene()` | Full intake view: table, status badges, filters, statistics, per-file actions | Intake UI (mockup Scene 4) | #kb #intake #frontend #ui |
+| `KBBrowseModal._renderIntakeScene()` | Full intake view: tree table with expand/collapse, status badges, filters, statistics, per-item actions | Intake UI (mockup Scene 4) | #kb #intake #frontend #ui |
+| `KBBrowseModal._renderIntakeRow()` | Render single intake row — file or folder with indentation, toggle, icons, actions | Tree row rendering (CR-005) | #kb #intake #frontend #ui |
 | `KBBrowseModal._runAILibrarian()` fix | Remove --workflow-mode, use plain NL command | Command fix | #kb #intake #frontend |
 
 ### Dependencies
@@ -35,31 +38,44 @@
 ### Major Flow
 
 1. User toggles to "AI Librarian" upload mode → files upload to `.intake/` via existing `POST /api/kb/upload` with `folder=.intake`
-2. Intake view calls `GET /api/kb/intake` → service reads `.intake/` files + `.intake-status.json` → returns merged list
-3. User clicks "✨ Run AI Librarian" → plain NL command sent to Copilot CLI → AI skill (future) processes files, updates `.intake-status.json`, moves files
-4. Intake view refreshes → shows updated statuses (Pending → Processing → Filed)
-5. User can: Preview files, Assign destination manually, Remove files, View filed files in KB, Undo filed files
+2. Intake view calls `GET /api/kb/intake` → service recursively reads `.intake/` items (files + folders) + `.intake-status.json` → returns pre-loaded nested tree with derived folder statuses and deep pending count
+3. Frontend renders tree table — folders show chevron toggle (▶/▼), folder icon, item count; files show file icon, size. All children pre-loaded (client-side expand/collapse)
+4. User clicks "✨ Run AI Librarian" → plain NL command sent to Copilot CLI → AI skill processes individual files, updates `.intake-status.json`, moves files
+5. Intake view refreshes → shows updated statuses; folder statuses auto-derive from children
+6. User can: Preview files, Assign destination (files or folders — folder cascades to children), Remove (files or folders — folder removes recursively), Undo filed (files or folders — folder undoes all children)
 
 ### Usage Example
 
 ```python
-# Backend: get intake files with status
+# Backend: get intake items as nested tree
 svc = app.config['KB_SERVICE']
-files = svc.get_intake_files()
-# Returns: [
-#   {"name": "notes.md", "size_bytes": 1024, "status": "pending", "destination": None, ...},
-#   {"name": "doc.pdf", "size_bytes": 34000, "status": "filed", "destination": "guides/", ...}
-# ]
+result = svc.get_intake_files()
+# Returns: {
+#   "items": [
+#     {"name": "notes.md", "type": "file", "size_bytes": 1024, "status": "pending", ...},
+#     {"name": "extracted-docs/", "type": "folder", "item_count": 3, "status": "pending",
+#      "children": [
+#        {"name": "readme.md", "type": "file", "size_bytes": 512, "status": "pending", ...},
+#        {"name": "images/", "type": "folder", "item_count": 2, "status": "filed", "children": [...]}
+#      ]}
+#   ],
+#   "stats": {"total": 2, "pending": 1, "processing": 0, "filed": 1},
+#   "pending_deep_count": 4
+# }
 
-# Backend: update status
-svc.update_intake_status("notes.md", status="processing", destination="api-guidelines/")
+# Backend: update status (folder assign cascades to all children)
+svc.update_intake_status("extracted-docs/readme.md", status="processing", destination="guides/")
 ```
 
 ```javascript
-// Frontend: trigger AI Librarian
-_runAILibrarian() {
-    const command = 'organize knowledge base intake files with AI Librarian';
-    window.terminalManager.sendCopilotPromptCommand(command);
+// Frontend: expand/collapse folder (client-side, no API call)
+_toggleFolder(folderPath) {
+    if (this._expandedFolders.has(folderPath)) {
+        this._expandedFolders.delete(folderPath);
+    } else {
+        this._expandedFolders.add(folderPath);
+    }
+    this._renderIntakeScene();
 }
 ```
 
@@ -129,10 +145,13 @@ classDiagram
     class KBService {
         -kb_root: Path
         -config_path: Path
-        +get_intake_files() List~Dict~
+        +get_intake_files() Dict
         +update_intake_status(filename, status, destination) Dict
         -_read_intake_status() Dict
         -_write_intake_status(data) None
+        -_build_intake_tree(dir_path, status_data, depth) List~Dict~
+        -_derive_folder_status(children) str
+        -_count_pending_deep(items) int
         +get_tree() List~KBNode~
         +list_files(folder, sort, recursive) List~KBNode~
         +get_config() Dict
@@ -149,13 +168,16 @@ classDiagram
     class KBBrowseModal {
         -uploadMode: string
         -intakeFiles: Array
-        -intakeStatus: Object
+        -intakeStats: Object
         -intakeFilter: string
+        -_expandedFolders: Set
         +_renderIntakeScene() void
+        +_renderIntakeRow(item, depth) string
+        +_toggleFolder(path) void
         +_runAILibrarian() void
-        +_loadIntakeFiles() Array
-        +_filterIntakeByStatus(status) Array
-        +_handleIntakeAction(action, file) void
+        +_loadIntakeFiles() Object
+        +_filterIntakeItems(items, status) Array
+        +_handleIntakeAction(action, item) void
     }
 
     KBService --> KBConfig: reads config
@@ -205,24 +227,62 @@ ai_librarian: Dict[str, Any] = field(default_factory=lambda: {
 
 ```json
 {
-  "files": [
+  "items": [
     {
       "name": "sprint-retro-notes-q1.md",
-      "path": ".intake/sprint-retro-notes-q1.md",
+      "path": "sprint-retro-notes-q1.md",
+      "type": "file",
       "size_bytes": 24576,
       "modified_date": "2026-03-11T00:00:00",
       "file_type": "md",
       "status": "pending",
       "destination": null
+    },
+    {
+      "name": "extracted-docs",
+      "path": "extracted-docs",
+      "type": "folder",
+      "item_count": 3,
+      "status": "pending",
+      "children": [
+        {
+          "name": "readme.md",
+          "path": "extracted-docs/readme.md",
+          "type": "file",
+          "size_bytes": 1024,
+          "modified_date": "2026-03-11T00:00:00",
+          "file_type": "md",
+          "status": "pending",
+          "destination": null
+        },
+        {
+          "name": "images",
+          "path": "extracted-docs/images",
+          "type": "folder",
+          "item_count": 2,
+          "status": "filed",
+          "children": []
+        }
+      ]
     }
   ],
   "stats": {
-    "total": 5,
-    "pending": 3,
-    "processing": 1,
+    "total": 2,
+    "pending": 1,
+    "processing": 0,
     "filed": 1
-  }
+  },
+  "pending_deep_count": 4
 }
+```
+
+**Response field changes (CR-005):**
+- `files` → `items` (renamed to reflect files + folders)
+- Each item has `type: "file"|"folder"`
+- Folders have `item_count`, `children` array, NO `size_bytes`/`file_type`
+- Folder `status` is derived (not from `.intake-status.json`)
+- `stats.total` = top-level item count only
+- `pending_deep_count` = total pending files across all folders (for sidebar badge)
 ```
 
 #### PUT /api/kb/intake/status Request/Response
@@ -252,7 +312,7 @@ ai_librarian: Dict[str, Any] = field(default_factory=lambda: {
 })
 ```
 
-#### 2. Backend: Intake Service Methods (~80 lines in kb_service.py)
+#### 2. Backend: Intake Service Methods (~120 lines in kb_service.py)
 
 Add to `KBService`:
 
@@ -260,19 +320,85 @@ Add to `KBService`:
 
 **`_write_intake_status(data)`** — Private helper. Writes status dict to `.intake-status.json` using the existing `_write_json()` method (atomic temp+rename pattern, same as config writes).
 
-**`get_intake_files()`** — Public method:
-1. List all files in `.intake/` using `os.scandir()` (skip `.intake-status.json` itself and directories)
-2. Read status via `_read_intake_status()`
-3. For each file: merge filesystem metadata (name, size, modified) with status entry (default: `pending`, destination: `null`)
-4. Calculate stats: total, pending, processing, filed counts
-5. Return `{"files": [...], "stats": {...}}`
+**`_build_intake_tree(dir_path, status_data, depth=0)`** — Private helper (CR-005). Recursively builds nested tree:
+```python
+def _build_intake_tree(self, dir_path: Path, status_data: dict, depth: int = 0) -> list:
+    items = []
+    try:
+        entries = sorted(dir_path.iterdir(), key=lambda p: (p.is_file(), p.name.lower()))
+    except PermissionError:
+        return items
+    for entry in entries:
+        if entry.name == self.INTAKE_STATUS_FILE or entry.name.startswith('.'):
+            continue
+        rel_path = str(entry.relative_to(self.kb_root / INTAKE_FOLDER))
+        if entry.is_dir():
+            children = self._build_intake_tree(entry, status_data, depth + 1)
+            items.append({
+                'name': entry.name,
+                'path': rel_path,
+                'type': 'folder',
+                'item_count': len(children),
+                'status': self._derive_folder_status(children),
+                'children': children,
+            })
+        elif entry.is_file():
+            stat = entry.stat()
+            entry_status = status_data.get(rel_path, {})
+            items.append({
+                'name': entry.name,
+                'path': rel_path,
+                'type': 'file',
+                'size_bytes': stat.st_size,
+                'modified_date': date.fromtimestamp(stat.st_mtime).isoformat(),
+                'file_type': entry.suffix.lstrip('.') if entry.suffix else '',
+                'status': entry_status.get('status', 'pending'),
+                'destination': entry_status.get('destination'),
+            })
+    return items
+```
 
-**`update_intake_status(filename, status, destination=None)`** — Public method:
-1. Verify file exists in `.intake/` (raise ValueError if not)
-2. Read current status dict
-3. Update/add entry for filename
-4. Write back atomically
-5. Invalidate cache
+**`_derive_folder_status(children)`** — Private helper (CR-005). Derives folder status from children:
+```python
+def _derive_folder_status(self, children: list) -> str:
+    statuses = set()
+    for child in children:
+        if child['type'] == 'folder':
+            statuses.add(child['status'])  # already derived recursively
+        else:
+            statuses.add(child['status'])
+    if 'pending' in statuses:
+        return 'pending'
+    if 'processing' in statuses:
+        return 'processing'
+    if 'filed' in statuses:
+        return 'filed'
+    return 'pending'  # empty folder defaults to pending
+```
+
+**`_count_pending_deep(items)`** — Private helper (CR-005). Counts all pending files across nested tree:
+```python
+def _count_pending_deep(self, items: list) -> int:
+    count = 0
+    for item in items:
+        if item['type'] == 'file' and item['status'] == 'pending':
+            count += 1
+        elif item['type'] == 'folder':
+            count += self._count_pending_deep(item.get('children', []))
+    return count
+```
+
+**`get_intake_files()`** — Refactored (CR-005):
+1. Build nested tree via `_build_intake_tree()` (replaces flat `iterdir()` loop)
+2. Calculate top-level stats from tree root items
+3. Calculate `pending_deep_count` via `_count_pending_deep()`
+4. Return `{"items": [...], "stats": {...}, "pending_deep_count": N}`
+
+**`update_intake_status(filename, status, destination=None)`** — Extended (CR-005):
+1. `filename` is now a relative path (e.g., `subfolder/file.md`)
+2. Verify file exists in `.intake/` at the relative path
+3. For folder assign: detect if target is directory → recursively update ALL child files in `.intake-status.json`
+4. Write back atomically, invalidate cache
 
 #### 3. Backend: Intake Routes (~40 lines in kb_routes.py)
 
@@ -312,44 +438,159 @@ _runAILibrarian() {
 }
 ```
 
-#### 5. Frontend: Enhanced Intake Scene (~200 lines in kb-browse-modal.js)
+#### 5. Frontend: Enhanced Intake Scene (~250 lines in kb-browse-modal.js)
 
-Update `_renderIntakeScene()` to match mockup Scene 4:
+**New instance state (CR-005):**
+```javascript
+this._expandedFolders = new Set(); // tracks expanded folder paths
+```
+
+Update `_renderIntakeScene()` to match mockup Scene 4 with folder tree:
 
 **Header:** Title + "✨ Run AI Librarian" gradient purple button
-**Statistics bar:** Total (purple), Pending (orange), Processing (blue), Filed (green) badges
+**Statistics bar:** Total (purple), Pending (orange), Processing (blue), Filed (green) badges — stats use top-level counts; sidebar badge uses `pending_deep_count`
 **Filter pills:** All | Pending | Processing | Filed — toggles `this.intakeFilter`
-**Intake table:** File | Size | Uploaded | Status | Destination | Actions columns
-**Empty state:** When `files.length === 0`, show drop zone with "Drop more files into Intake, or browse" message instead of table
+**Intake table:** Name | Size/Items | Uploaded | Status | Destination | Actions columns
+**Empty state:** When `items.length === 0`, show drop zone with "Drop more files into Intake, or browse" message instead of table
 **Row styling:** Pending = normal, Processing = blue bg, Filed = dimmed (opacity 0.7)
-**Actions per status:**
-- Pending: Preview (eye), Assign (folder), Remove (X)
-- Processing: all disabled
-- Filed: View in KB (arrow), Undo (refresh)
+**Actions per status and type:**
+- File Pending: Preview (eye), Assign (folder), Remove (X)
+- File Processing: all disabled
+- File Filed: View in KB (arrow), Undo (refresh)
+- Folder Pending: Assign (folder), Remove (X) — NO Preview
+- Folder Filed: Undo (refresh) — cascades to children
+- Folder Processing: all disabled
 **Drop zone:** Purple dashed border at bottom
+
+**`_renderIntakeRow(item, depth=0)`** — New method (CR-005). Renders a single table row:
+```javascript
+_renderIntakeRow(item, depth = 0) {
+    const indent = depth * 20; // 20px per nesting level
+    const isFolder = item.type === 'folder';
+    const isExpanded = this._expandedFolders.has(item.path);
+
+    let nameCell = '';
+    if (isFolder) {
+        const chevron = isExpanded ? 'bi-chevron-down' : 'bi-chevron-right';
+        const folderIcon = isExpanded ? 'bi-folder2-open' : 'bi-folder';
+        nameCell = `
+            <td style="padding-left:${indent + 8}px">
+                <span class="kb-intake-toggle" data-intake-toggle="${this._escapeAttr(item.path)}"
+                      style="cursor:pointer;margin-right:4px">
+                    <i class="bi ${chevron}"></i>
+                </span>
+                <i class="bi ${folderIcon}" style="margin-right:6px;color:#8b5cf6"></i>
+                ${this._escapeHtml(item.name)}
+            </td>`;
+    } else {
+        nameCell = `
+            <td style="padding-left:${indent + 24}px">
+                <i class="bi bi-file-earmark-text" style="margin-right:6px;opacity:0.6"></i>
+                ${this._escapeHtml(item.name)}
+            </td>`;
+    }
+
+    const sizeCell = isFolder
+        ? `<td>${item.item_count} item${item.item_count !== 1 ? 's' : ''}</td>`
+        : `<td>${this._formatSize(item.size_bytes)}</td>`;
+
+    // ... status badge, destination, actions (per type) ...
+    let rows = `<tr class="kb-intake-row" data-item-path="${this._escapeAttr(item.path)}">${nameCell}${sizeCell}...rest...</tr>`;
+
+    // Render children if folder is expanded
+    if (isFolder && isExpanded && item.children) {
+        for (const child of item.children) {
+            rows += this._renderIntakeRow(child, depth + 1);
+        }
+    }
+    return rows;
+}
+```
+
+**`_toggleFolder(path)`** — New method (CR-005):
+```javascript
+_toggleFolder(path) {
+    if (this._expandedFolders.has(path)) {
+        this._expandedFolders.delete(path);
+    } else {
+        this._expandedFolders.add(path);
+    }
+    this._renderIntakeScene(); // re-render with new expand state
+}
+```
+
+**`_filterIntakeItems(items, status)`** — New method (CR-005). Recursive filter that preserves folder hierarchy:
+```javascript
+_filterIntakeItems(items, status) {
+    if (!status || status === 'all') return items;
+    return items.filter(item => {
+        if (item.type === 'file') return item.status === status;
+        // Folder: show if ANY descendant matches
+        const filteredChildren = this._filterIntakeItems(item.children || [], status);
+        return filteredChildren.length > 0;
+    }).map(item => {
+        if (item.type === 'folder') {
+            return { ...item, children: this._filterIntakeItems(item.children || [], status) };
+        }
+        return item;
+    });
+}
+```
+
+**Event delegation (CR-005):** Add handler for `data-intake-toggle` clicks in the intake scene event listener:
+```javascript
+const toggle = e.target.closest('[data-intake-toggle]');
+if (toggle) {
+    this._toggleFolder(toggle.dataset.intakeToggle);
+    return;
+}
+```
 
 #### 6. Frontend: Intake Data Loading (~30 lines)
 
-Update `_loadIntakeFiles()` to use `GET /api/kb/intake`:
+Update `_loadIntakeFiles()` to use `GET /api/kb/intake` and handle nested tree response:
 ```javascript
 async _loadIntakeFiles() {
     try {
         const res = await fetch('/api/kb/intake');
-        if (!res.ok) return { files: [], stats: { total: 0, pending: 0, processing: 0, filed: 0 } };
+        if (!res.ok) return { items: [], stats: { total: 0, pending: 0, processing: 0, filed: 0 }, pending_deep_count: 0 };
         return await res.json();
-    } catch { return { files: [], stats: { total: 0, pending: 0, processing: 0, filed: 0 } }; }
+    } catch { return { items: [], stats: { total: 0, pending: 0, processing: 0, filed: 0 }, pending_deep_count: 0 }; }
 }
 ```
 
-#### 7. Frontend: Per-File Action Handlers (~60 lines)
+Update `_refreshIntakeFiles()` to use `pending_deep_count` for sidebar badge:
+```javascript
+async _refreshIntakeFiles() {
+    const data = await this._loadIntakeFiles();
+    this._intakeItems = data.items || [];
+    this._intakeStats = data.stats || {};
+    this._updateIntakeBadges(data.pending_deep_count || 0);  // deep count for sidebar
+    if (this.currentScene === 'intake') {
+        this._renderIntakeScene();
+    }
+}
+```
 
-Implement a single dispatcher method `_handleIntakeAction(action, file)` that routes to action-specific logic:
+#### 7. Frontend: Per-Item Action Handlers (~80 lines)
 
-**Preview:** Reuse existing article preview (call `_showScene('article')` with file data)
-**Assign folder:** Show folder picker (reuse existing `_showFolderPicker()` from browse modal — the picker already lists KB folders excluding `.intake/`), then `PUT /api/kb/intake/status` with destination
-**Remove:** Confirm → `DELETE /api/kb/files/.intake/{filename}` → refresh
-**View in KB:** Navigate browse view to destination folder
-**Undo:** `PUT /api/kb/files/move` (source: destination path, target: `.intake/{filename}`) → `PUT /api/kb/intake/status` (status: pending, destination: null) → refresh
+Implement a single dispatcher method `_handleIntakeAction(action, item)` that routes to action-specific logic:
+
+**Preview (file only):** Reuse existing article preview (call `_showScene('article')` with file data)
+**Assign folder (file or folder):** Show folder picker (reuse existing `_showFolderPicker()` from browse modal), then `PUT /api/kb/intake/status` with destination. For folders: backend cascades to all children.
+**Remove (file or folder):** Confirm → `DELETE /api/kb/files/.intake/{path}` → refresh. For folders: confirmation warns "This will delete the folder and all its contents."
+**View in KB (file only):** Navigate browse view to destination folder
+**Undo (file or folder):** For file: `PUT /api/kb/files/move` (source: destination, target: `.intake/{filename}`) → `PUT /api/kb/intake/status` (status: pending, destination: null) → refresh. For folder: `PUT /api/kb/intake/status` with folder path → backend cascades undo to all children → refresh
+
+**Action dispatch table (CR-005):**
+
+| Action | File | Folder |
+|--------|------|--------|
+| Preview | ✅ `_showArticle()` | ❌ Not available |
+| Assign | ✅ Single file update | ✅ Cascades to all children |
+| Remove | ✅ Delete file | ✅ Delete folder + contents |
+| View in KB | ✅ Navigate to dest | ❌ Not available |
+| Undo | ✅ Move back + reset | ✅ Cascades undo to all children |
 
 #### 8. Frontend: Sidebar Intake Badge (~10 lines)
 
@@ -367,6 +608,12 @@ In `_renderSidebarFolders()`, update the "📥 Intake" entry to show pending cou
 | Undo filed: destination folder gone | Move fails → show error toast | Frontend |
 | Duplicate filename upload | Handled by existing upload route (numeric suffix) | kb_routes upload |
 | ai_librarian.enabled = false | Frontend hides all intake UI | KBBrowseModal |
+| Empty folder in .intake/ (CR-005) | Show folder row with "0 items"; expanding shows no children | _renderIntakeRow |
+| Deeply nested folders 5+ levels (CR-005) | Recursive tree build + rendering with cumulative indentation | _build_intake_tree / _renderIntakeRow |
+| Folder with mixed-status children (CR-005) | Folder shown in all matching filter views; derived status = highest priority | _filterIntakeItems / _derive_folder_status |
+| Folder removal with filed children (CR-005) | Confirmation warns "This folder contains filed items" | _handleIntakeAction |
+| Large tree 500+ items (CR-005) | Pre-loaded in single API call; no pagination needed (NFR-049-F.6) | get_intake_files |
+| Status.json has path for deleted subfolder (CR-005) | Stale entries ignored — only files present on disk are included | _build_intake_tree |
 
 ### Step 9: Create `x-ipe-tool-kb-librarian` Skill (CR-001)
 
@@ -656,12 +903,12 @@ sequenceDiagram
 
 | File | Changes | Est. Lines |
 |------|---------|------------|
-| `src/x_ipe/services/kb_service.py` | Add `_read_kb_index()`, `_write_kb_index()`, `_get/set/remove_index_entry()`, `_auto_populate_index_entry()`, `_detect_file_type()`, `_migrate_frontmatter_to_index()`. Refactor tree building to read from index. Update `create_file()`, `update_file()`, `move_file()` to write index entries. Keep `_parse_frontmatter()` for migration only. | ~150 |
-| `src/x_ipe/routes/kb_routes.py` | Minimal — API response shape preserved. Update `create_file`/`update_file` params for metadata (was frontmatter). | ~10 |
-| `src/x_ipe/static/js/features/kb-browse-modal.js` | No changes — consumes same `file.frontmatter` JSON shape from API | 0 |
+| `src/x_ipe/services/kb_service.py` | Refactor `get_intake_files()` to build nested tree. Add `_build_intake_tree()`, `_derive_folder_status()`, `_count_pending_deep()`. Extend `update_intake_status()` for relative paths and folder-cascade assign. Add `_read_kb_index()`, `_write_kb_index()`, `_get/set/remove_index_entry()`, `_auto_populate_index_entry()`, `_detect_file_type()`, `_migrate_frontmatter_to_index()`. | ~220 |
+| `src/x_ipe/routes/kb_routes.py` | Update `GET /api/kb/intake` response (items→nested tree). Update `PUT /api/kb/intake/status` for relative paths and folder targets. | ~20 |
+| `src/x_ipe/static/js/features/kb-browse-modal.js` | Refactor `_renderIntakeScene()` for tree rendering. Add `_renderIntakeRow()`, `_toggleFolder()`, `_filterIntakeItems()`. Add `_expandedFolders` state. Update `_handleIntakeAction()` for folder actions. Update `_refreshIntakeFiles()` for `pending_deep_count`. | ~120 |
 | `.github/skills/x-ipe-tool-kb-librarian/SKILL.md` | Update procedure: generate index entries instead of frontmatter. Remove markdown-only gate. All file types get metadata. | ~30 |
-| `tests/test_kb_service.py` | Update frontmatter tests → index tests. Add `.kb-index.json` read/write/migrate tests. | ~80 |
-| `tests/frontend-js/kb-intake-049f.test.js` | No changes — tests mock API response, not internal storage | 0 |
+| `tests/test_kb_service.py` | Add tests for `_build_intake_tree()`, `_derive_folder_status()`, `_count_pending_deep()`, folder-cascade assign, nested tree response. Update existing intake tests for `items` key (was `files`). | ~100 |
+| `tests/frontend-js/kb-intake-049f.test.js` | Add tests for `_renderIntakeRow()`, `_toggleFolder()`, `_filterIntakeItems()`, folder actions, expand/collapse state, indentation. Update mocks for nested tree API response. | ~80 |
 
 ---
 
@@ -672,3 +919,4 @@ sequenceDiagram
 | 03-16-2026 | Initial Design | Initial technical design for FEATURE-049-F. Backend: intake status service + 2 routes. Frontend: full intake scene matching mockup Scene 4 with status tracking, filters, per-file actions. Command fix: remove --workflow-mode. |
 | 03-16-2026 | CR-001 Skill Design | Added Step 9: x-ipe-tool-kb-librarian skill design. program_type=skills. Sequence diagram, state machine, SKILL.md structure, AI classification approach, 6 DAO-driven decisions. |
 | 03-17-2026 | CR-002 Metadata Registry | Added Step 10: .kb-index.json registry design. Replaces frontmatter-embedded metadata. Per-folder hidden JSON index, folder metadata support, description field (< 100 words). Migration strategy, API compatibility, new/refactored methods. |
+| 03-18-2026 | CR-005 Folder Support | Backend: refactored `get_intake_files()` for nested tree via `_build_intake_tree()`, derived folder status via `_derive_folder_status()`, deep pending count. API response changed: `files`→`items`, added `children`/`type`/`item_count`/`pending_deep_count`. Frontend: added `_renderIntakeRow()` with indent/chevron/folder icons, `_toggleFolder()` for expand/collapse, `_filterIntakeItems()` for recursive filter propagation, folder-specific actions (Assign cascades, Remove recursive, Undo cascades). DAO decisions: derived status, pre-loaded tree, no lazy loading, deep-count badge. |

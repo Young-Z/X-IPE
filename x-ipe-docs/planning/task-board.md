@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-954 | Technical Design | Design CR-005 folder support delta for FEATURE-049-F: tree data model, derived status algorithm, folder actions, pre-loaded API response, folder tree UI rendering. DAO mode. | Ember 🔥 | 🔄 in_progress | 03-18-2026 | — | x-ipe-task-based-code-implementation |
 | TASK-953 | Feature Refinement | Refine FEATURE-049-F specification for CR-005 (folder support in intake). Update ACs, UI/UX requirements, functional requirements for folder tree display and count logic. DAO mode. | Ember 🔥 | ✅ done | 03-18-2026 | [specification.md v1.5](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md) | x-ipe-task-based-technical-design |
 | TASK-952 | Change Request | CR for KB intake: fix file count logic for uploaded folders (shows 0) and add folder tree display with expand/collapse in intake file list view. Source: UIUX Feedback Feedback-20260318-083710 | Ember 🔥 | ✅ done | 03-18-2026 | [CR-005.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/CR-005.md), [specification.md v1.4](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md) | x-ipe-task-based-feature-refinement |
 | TASK-950 | Skill Update | Apply LL-001 to extractor: session-scoped screenshots + post-gen session cleanup. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [482a9eb] | — |
