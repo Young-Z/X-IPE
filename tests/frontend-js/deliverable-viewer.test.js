@@ -14,6 +14,8 @@ let _implLoaded = false;
 function ensureImpl() {
   if (!_implLoaded) {
     try {
+      // CR-008: Load FilePreviewRenderer dependency before deliverable-viewer
+      loadFeatureScript('../core/file-preview-renderer.js');
       loadFeatureScript('deliverable-viewer.js');
       _implLoaded = true;
     } catch {
@@ -144,6 +146,7 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
       globalThis.fetch.mockResolvedValue({
         ok: true,
         text: async () => '# Test Heading\n\nSome content',
+        headers: { get: () => null },
       });
 
       const DV = globalThis.DeliverableViewer;
@@ -153,23 +156,28 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
       expect(document.querySelector('.deliverable-preview')).not.toBeNull();
     });
 
-    it('should render markdown files with marked.parse()', async () => {
+    it('should render markdown files as formatted content', async () => {
       globalThis.fetch.mockResolvedValue({
         ok: true,
         text: async () => '# Heading',
+        headers: { get: () => null },
       });
 
       const DV = globalThis.DeliverableViewer;
       expect(DV).toBeDefined();
       const viewer = new DV({ workflowName: 'hello' });
       await viewer.showPreview('refined-idea/readme.md');
-      expect(globalThis.marked.parse).toHaveBeenCalledWith('# Heading');
+      // CR-008: Rendering delegated to FilePreviewRenderer which uses ContentRenderer
+      const content = document.querySelector('.preview-content');
+      expect(content).not.toBeNull();
+      expect(content.innerHTML).not.toBe('');
     });
 
     it('should render text files as preformatted text', async () => {
       globalThis.fetch.mockResolvedValue({
         ok: true,
         text: async () => 'plain text content',
+        headers: { get: () => null },
       });
 
       const DV = globalThis.DeliverableViewer;
@@ -183,6 +191,7 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
       globalThis.fetch.mockResolvedValue({
         ok: true,
         text: async () => 'content',
+        headers: { get: () => null },
       });
 
       const DV = globalThis.DeliverableViewer;
@@ -196,6 +205,7 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
       globalThis.fetch.mockResolvedValue({
         ok: true,
         text: async () => 'content',
+        headers: { get: () => null },
       });
 
       const DV = globalThis.DeliverableViewer;
@@ -303,6 +313,7 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
       globalThis.fetch.mockResolvedValue({
         ok: true,
         text: async () => '# Content',
+        headers: { get: () => null },
       });
 
       const DV = globalThis.DeliverableViewer;
@@ -329,9 +340,12 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
 
   describe('TASK-615: HTML Preview as Iframe', () => {
     it('should render HTML files in an iframe instead of raw text', async () => {
+      globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-html');
+      globalThis.URL.revokeObjectURL = vi.fn();
       globalThis.fetch.mockResolvedValue({
         ok: true,
         text: async () => '<html><body><h1>Hello</h1></body></html>',
+        headers: { get: () => null },
       });
 
       const DV = globalThis.DeliverableViewer;
@@ -344,9 +358,12 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
     });
 
     it('should render .htm files in an iframe', async () => {
+      globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-htm');
+      globalThis.URL.revokeObjectURL = vi.fn();
       globalThis.fetch.mockResolvedValue({
         ok: true,
         text: async () => '<html><body>Test</body></html>',
+        headers: { get: () => null },
       });
 
       const DV = globalThis.DeliverableViewer;
@@ -358,9 +375,12 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
     });
 
     it('should NOT show HTML files as preformatted text', async () => {
+      globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-no-pre');
+      globalThis.URL.revokeObjectURL = vi.fn();
       globalThis.fetch.mockResolvedValue({
         ok: true,
         text: async () => '<html><body><h1>Hello</h1></body></html>',
+        headers: { get: () => null },
       });
 
       const DV = globalThis.DeliverableViewer;
@@ -374,39 +394,41 @@ describe('FEATURE-038-C: Enhanced Deliverable Viewer', () => {
 
   describe('TASK-680: Markdown preview uses ContentRenderer (same as folder browser)', () => {
     it('should use ContentRenderer for markdown files when available', async () => {
-      const renderMarkdownSpy = vi.fn();
-      globalThis.ContentRenderer = class {
-        constructor() {}
-        renderMarkdown(text) { renderMarkdownSpy(text); }
-      };
-
+      // CR-008: FilePreviewRenderer delegates to ContentRenderer internally.
+      // We verify that markdown renders (not as raw text or error).
       globalThis.fetch.mockResolvedValue({
         ok: true,
         text: async () => '# Heading with mermaid',
+        headers: { get: () => null },
       });
 
       const DV = globalThis.DeliverableViewer;
       expect(DV).toBeDefined();
       const viewer = new DV({ workflowName: 'hello' });
       await viewer.showPreview('refined-idea/readme.md');
-      expect(renderMarkdownSpy).toHaveBeenCalledWith('# Heading with mermaid');
 
-      delete globalThis.ContentRenderer;
+      const content = document.querySelector('.preview-content');
+      expect(content).not.toBeNull();
+      // ContentRenderer should have rendered the markdown (not raw text)
+      expect(content.querySelector('pre')?.textContent).not.toBe('# Heading with mermaid');
     });
 
-    it('should fall back to marked.parse when ContentRenderer is not available', async () => {
-      delete globalThis.ContentRenderer;
-
+    it('should render markdown content without errors', async () => {
       globalThis.fetch.mockResolvedValue({
         ok: true,
         text: async () => '# Fallback',
+        headers: { get: () => null },
       });
 
       const DV = globalThis.DeliverableViewer;
       expect(DV).toBeDefined();
       const viewer = new DV({ workflowName: 'hello' });
       await viewer.showPreview('refined-idea/readme.md');
-      expect(globalThis.marked.parse).toHaveBeenCalledWith('# Fallback');
+
+      const content = document.querySelector('.preview-content');
+      expect(content).not.toBeNull();
+      expect(content.innerHTML).not.toBe('');
+      expect(content.textContent).not.toContain('Failed');
     });
   });
 

@@ -1,6 +1,6 @@
 # Technical Design: KB AI Librarian & Intake
 
-> Feature ID: FEATURE-049-F | Version: v1.4 | Last Updated: 03-18-2026
+> Feature ID: FEATURE-049-F | Version: v1.5 | Last Updated: 03-18-2026
 
 ---
 
@@ -27,6 +27,7 @@
 | `KBBrowseModal._triggerNormalFileInput()` | Create hidden `<input type="file" multiple>` and trigger native file dialog for Normal Upload zone | Click-to-browse (CR-007) | #kb #upload #frontend |
 | `KBBrowseModal._uploadFilesWithFeedback()` | Upload files via `/api/kb/upload` and display success/error feedback in upload zone | Upload feedback (CR-007) | #kb #upload #frontend |
 | `KBBrowseModal._showUploadFeedback()` | Show temporary success/error message in upload zone, auto-clear after timeout | UI feedback (CR-007) | #kb #upload #frontend |
+| `FilePreviewRenderer` | Shared file preview component: type detection by extension, format-specific rendering (markdown/images/PDF/DOCX/MSG/HTML/code), configurable API endpoint, blob URL lifecycle, loading/error states | Core shared component (CR-008) | #core #preview #renderer #shared |
 
 ### Dependencies
 
@@ -37,6 +38,9 @@
 | `KBBrowseModal` | FEATURE-049-C | N/A | Browse modal class with scene switching, upload modes, intake scaffolding |
 | `POST /api/kb/upload` | FEATURE-049-E | N/A | File upload with folder parameter (used for .intake uploads) |
 | `PUT /api/kb/files/move` | FEATURE-049-A | N/A | Move files between folders (used for undo-filed) |
+| `ContentRenderer` | Core | N/A | Markdown+DSL rendering for .md file previews (used by FilePreviewRenderer) |
+| `/api/ideas/file` | Ideas Routes | N/A | File serving endpoint with DOCX/MSG conversion (used by FilePreviewRenderer for ideas) |
+| `/api/kb/files/{path}/raw` | FEATURE-049-F (CR-008) | N/A | KB file raw endpoint (used by FilePreviewRenderer for KB; will migrate to `/preview` when CR-004 completes) |
 
 ### Major Flow
 
@@ -46,6 +50,7 @@
 4. User clicks "✨ Run AI Librarian" → plain NL command sent to Copilot CLI → AI skill processes individual files, updates `.intake-status.json`, moves files
 5. Intake view refreshes → shows updated statuses; folder statuses auto-derive from children
 6. User can: Preview files, Assign destination (files or folders — folder cascades to children), Remove (files or folders — folder removes recursively), Undo filed (files or folders — folder undoes all children)
+7. File preview in any location (KB browse article scene, deliverable viewer): consumer creates `FilePreviewRenderer` with endpoint config → calls `renderPreview(filePath, container)` → renderer detects extension → routes to type-specific handler (image/PDF/markdown/DOCX/HTML/code) → loading indicator shown → content rendered or error displayed → blob URLs tracked for cleanup
 
 ### Usage Example
 
@@ -80,6 +85,27 @@ _toggleFolder(folderPath) {
     }
     this._renderIntakeScene();
 }
+```
+
+```javascript
+// CR-008: FilePreviewRenderer — shared preview from any consumer
+import { FilePreviewRenderer } from './core/file-preview-renderer.js';
+
+// KB browse modal consumer
+const kbRenderer = new FilePreviewRenderer({
+    apiEndpoint: '/api/kb/files/{path}/raw',
+    endpointStyle: 'path'  // path segment interpolation
+});
+await kbRenderer.renderPreview('guides/setup.docx', containerEl);
+kbRenderer.destroy();  // revokes blob URLs
+
+// Deliverable viewer consumer
+const dvRenderer = new FilePreviewRenderer({
+    apiEndpoint: '/api/ideas/file?path={path}',
+    endpointStyle: 'query'  // query parameter interpolation
+});
+await dvRenderer.renderPreview('output/report.pdf', previewDiv);
+dvRenderer.destroy();
 ```
 
 ---
@@ -175,6 +201,7 @@ classDiagram
         -intakeFilter: string
         -_expandedFolders: Set
         -_intakePendingDeep: number
+        -_filePreviewRenderer: FilePreviewRenderer
         +_renderIntakeScene() void
         +_renderIntakeRow(item, depth) string
         +_toggleFolder(path) void
@@ -184,8 +211,23 @@ classDiagram
         +_handleIntakeAction(action, item) void
     }
 
+    class FilePreviewRenderer {
+        -_options: Object
+        -_currentBlobUrl: string
+        -_requestCounter: number
+        +renderPreview(filePath, container) Promise
+        +destroy() void
+        +detectType(filePath)$ string
+    }
+
+    class ContentRenderer {
+        +renderMarkdown(content) void
+    }
+
     KBService --> KBConfig: reads config
     KBBrowseModal --> KBService: via REST API
+    KBBrowseModal --> FilePreviewRenderer: delegates preview
+    FilePreviewRenderer --> ContentRenderer: renders .md
 ```
 
 ### Data Models
@@ -702,7 +744,7 @@ triggers:
 
 input:
   kb_root: "auto-detect from project"  # x-ipe-docs/knowledge-base/
-  intake_folder: ".intake"              # from kb-config.json
+  intake_folder: ".intake"              # from knowledgebase-config.json
 
 operations:
   - organize_intake:
@@ -1119,7 +1161,458 @@ _handleNormalDrop(files) {
 
 ---
 
-## Design Change Log
+### Step 13: Shared File Preview Component (CR-008)
+
+> **Scope:** Extract `FilePreviewRenderer` to `core/file-preview-renderer.js`; unify KB browse and deliverable viewer preview rendering via a shared, configurable component.
+
+#### Class Diagram
+
+```mermaid
+classDiagram
+    class FilePreviewRenderer {
+        -_options: Object
+        -_currentBlobUrl: string|null
+        -_requestCounter: number
+        +constructor(options)
+        +renderPreview(filePath, container) Promise~void~
+        +destroy() void
+        -_buildUrl(filePath) string
+        -_showLoading(container) void
+        -_showError(container, message, filePath) void
+        -_renderImage(container, url, filePath) void
+        -_renderPdf(container, url) void
+        -_renderMarkdown(container, text) void
+        -_renderConvertedHtml(container, html) void
+        -_renderHtml(container, html) void
+        -_renderCode(container, text, ext) void
+        -_revokeBlobUrl() void
+        -_createBlobIframe(container, content, type, sandbox) void
+        +static detectType(filePath) string
+        +static FILE_TYPES: Object
+    }
+
+    class ContentRenderer {
+        +constructor(containerOrId)
+        +renderMarkdown(content) void
+    }
+
+    class KBBrowseModal {
+        -_filePreviewRenderer: FilePreviewRenderer
+        +_renderArticleContent(data) void
+    }
+
+    class DeliverableViewer {
+        -_filePreviewRenderer: FilePreviewRenderer
+        +showPreview(filePath) void
+    }
+
+    FilePreviewRenderer --> ContentRenderer : uses for .md
+    KBBrowseModal --> FilePreviewRenderer : delegates preview
+    DeliverableViewer --> FilePreviewRenderer : delegates preview
+```
+
+#### Workflow Diagram
+
+```mermaid
+sequenceDiagram
+    participant Consumer as KB Browse / Deliverable Viewer
+    participant FPR as FilePreviewRenderer
+    participant API as API Endpoint
+    participant CR as ContentRenderer
+
+    Consumer->>FPR: renderPreview(filePath, container)
+    FPR->>FPR: validate path (reject "..")
+    FPR->>FPR: detectType(filePath)
+    FPR->>FPR: _showLoading(container)
+    FPR->>FPR: _revokeBlobUrl() (cleanup previous)
+    FPR->>FPR: _requestCounter++ (stale guard)
+
+    alt Image file
+        FPR->>Consumer: <img src=url> (no fetch)
+    else PDF file
+        FPR->>Consumer: <iframe src=url> (no fetch)
+    else Text/Convertible file
+        FPR->>API: fetch(_buildUrl(filePath))
+        API-->>FPR: Response (text + headers)
+        alt X-Converted: true (DOCX/MSG)
+            FPR->>FPR: _createBlobIframe(sandbox=allow-same-origin)
+        else Markdown (.md)
+            FPR->>CR: renderMarkdown(text)
+            CR-->>FPR: rendered HTML
+        else HTML (.html/.htm)
+            FPR->>FPR: _createBlobIframe(sandbox=allow-scripts allow-same-origin)
+        else Code/Text
+            FPR->>FPR: _renderCode(<pre> + highlight.js)
+        end
+    end
+
+    alt HTTP Error
+        FPR->>Consumer: _showError(413/415/generic)
+    end
+```
+
+#### FilePreviewRenderer API Design
+
+**Constructor Options:**
+
+```javascript
+/**
+ * @param {Object} options
+ * @param {string} options.apiEndpoint - URL pattern with {path} placeholder
+ *   e.g., '/api/kb/files/{path}/raw' or '/api/ideas/file?path={path}'
+ * @param {string} [options.endpointStyle='path'] - How {path} is interpolated:
+ *   'path' → encodeURIComponent segments joined with '/'
+ *   'query' → single encodeURIComponent for query param
+ * @param {string} [options.downloadUrl] - URL pattern for download link on unsupported types
+ */
+```
+
+**Static File Type Map:**
+
+```javascript
+static FILE_TYPES = {
+    image: new Set(['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'bmp', 'ico']),
+    pdf: new Set(['pdf']),
+    markdown: new Set(['md']),
+    html: new Set(['html', 'htm']),
+    code: new Set([
+        'py', 'js', 'ts', 'json', 'yaml', 'yml', 'xml', 'css',
+        'txt', 'sh', 'bash', 'go', 'java', 'rb', 'rs', 'c', 'cpp', 'h',
+        'toml', 'ini', 'cfg', 'log', 'csv', 'sql', 'r', 'kt', 'swift'
+    ])
+};
+
+static detectType(filePath) {
+    const ext = filePath.split('.').pop().toLowerCase();
+    if (FilePreviewRenderer.FILE_TYPES.image.has(ext)) return 'image';
+    if (FilePreviewRenderer.FILE_TYPES.pdf.has(ext)) return 'pdf';
+    if (FilePreviewRenderer.FILE_TYPES.markdown.has(ext)) return 'markdown';
+    if (FilePreviewRenderer.FILE_TYPES.html.has(ext)) return 'html';
+    if (FilePreviewRenderer.FILE_TYPES.code.has(ext)) return 'code';
+    return 'unknown';
+}
+```
+
+#### Core Method: `renderPreview(filePath, container)`
+
+```javascript
+async renderPreview(filePath, container) {
+    // 1. Security: reject path traversal
+    if (filePath.includes('..')) {
+        this._showError(container, 'Invalid file path', filePath);
+        return;
+    }
+
+    // 2. Stale request guard
+    const requestId = ++this._requestCounter;
+
+    // 3. Cleanup previous blob URL
+    this._revokeBlobUrl();
+
+    // 4. Loading indicator
+    this._showLoading(container);
+
+    // 5. Detect file type
+    const type = FilePreviewRenderer.detectType(filePath);
+    const url = this._buildUrl(filePath);
+
+    // 6. Image — direct <img>, no fetch
+    if (type === 'image') {
+        this._renderImage(container, url, filePath);
+        return;
+    }
+
+    // 7. PDF — direct <iframe>, no fetch
+    if (type === 'pdf') {
+        this._renderPdf(container, url);
+        return;
+    }
+
+    // 8. Unknown type — show "cannot preview" immediately (no fetch)
+    if (type === 'unknown') {
+        this._showError(container, 'Cannot preview this file type', filePath);
+        return;
+    }
+
+    // 9. Fetch text content (markdown, html, code, convertible)
+    try {
+        const resp = await fetch(url);
+
+        // Stale response guard
+        if (requestId !== this._requestCounter) return;
+
+        if (!resp.ok) {
+            const msg = resp.status === 413 ? 'File too large to preview (max 10MB)'
+                      : resp.status === 415 ? 'Binary file \u2014 cannot preview'
+                      : 'Failed to load file';
+            this._showError(container, msg, filePath);
+            return;
+        }
+
+        const text = await resp.text();
+        if (requestId !== this._requestCounter) return;
+
+        // 10. Check X-Converted header (DOCX/MSG → HTML)
+        const isConverted = resp.headers.get('X-Converted') === 'true';
+        if (isConverted) {
+            this._renderConvertedHtml(container, text);
+            return;
+        }
+
+        // 11. Route by type
+        if (type === 'markdown') {
+            this._renderMarkdown(container, text);
+        } else if (type === 'html') {
+            this._renderHtml(container, text);
+        } else {
+            this._renderCode(container, text, filePath.split('.').pop().toLowerCase());
+        }
+    } catch (err) {
+        if (requestId !== this._requestCounter) return;
+        this._showError(container, 'Failed to load file', filePath);
+    }
+}
+```
+
+#### Rendering Methods
+
+**`_renderImage(container, url, filePath)`:**
+```javascript
+_renderImage(container, url, filePath) {
+    container.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = filePath.split('/').pop();
+    img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;display:block;margin:auto';
+    img.onerror = () => this._showError(container, 'Cannot preview this image', filePath);
+    container.appendChild(img);
+}
+```
+
+**`_renderPdf(container, url)`:**
+```javascript
+_renderPdf(container, url) {
+    container.innerHTML = '';
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.style.cssText = 'width:100%;height:100%;border:none';
+    container.appendChild(iframe);
+}
+```
+
+**`_renderMarkdown(container, text)`:**
+```javascript
+_renderMarkdown(container, text) {
+    container.innerHTML = '';
+    if (typeof ContentRenderer !== 'undefined') {
+        const renderer = new ContentRenderer(container);
+        renderer.renderMarkdown(text);
+    } else if (typeof marked !== 'undefined') {
+        container.innerHTML = marked.parse(text);
+    } else {
+        const pre = document.createElement('pre');
+        pre.textContent = text;
+        container.appendChild(pre);
+    }
+}
+```
+
+**`_renderConvertedHtml(container, html)` and `_renderHtml(container, html)`:**
+```javascript
+_renderConvertedHtml(container, html) {
+    // DOCX/MSG converted HTML — sandbox without scripts
+    this._createBlobIframe(container, html, 'text/html', 'allow-same-origin');
+}
+
+_renderHtml(container, html) {
+    // Native HTML — sandbox with scripts
+    this._createBlobIframe(container, html, 'text/html', 'allow-scripts allow-same-origin');
+}
+
+_createBlobIframe(container, content, mimeType, sandbox) {
+    container.innerHTML = '';
+    const blob = new Blob([content], { type: mimeType });
+    this._currentBlobUrl = URL.createObjectURL(blob);
+    const iframe = document.createElement('iframe');
+    iframe.src = this._currentBlobUrl;
+    iframe.setAttribute('sandbox', sandbox);
+    iframe.style.cssText = 'width:100%;height:100%;border:none';
+    container.appendChild(iframe);
+}
+```
+
+**`_renderCode(container, text, ext)`:**
+```javascript
+_renderCode(container, text, ext) {
+    container.innerHTML = '';
+    const pre = document.createElement('pre');
+    const code = document.createElement('code');
+    code.textContent = text;
+    if (typeof hljs !== 'undefined') {
+        code.className = `language-${ext}`;
+        pre.appendChild(code);
+        hljs.highlightElement(code);
+    } else {
+        pre.appendChild(code);
+    }
+    container.appendChild(pre);
+}
+```
+
+#### Blob URL Lifecycle Management
+
+```javascript
+_revokeBlobUrl() {
+    if (this._currentBlobUrl) {
+        URL.revokeObjectURL(this._currentBlobUrl);
+        this._currentBlobUrl = null;
+    }
+}
+
+destroy() {
+    this._revokeBlobUrl();
+    this._requestCounter++;  // invalidate any in-flight requests
+}
+```
+
+**Lifecycle rules:**
+- `_revokeBlobUrl()` called at start of every `renderPreview()` — cleans up previous
+- `destroy()` called when consumer removes the preview container (e.g., modal close, scene switch)
+- `_requestCounter` incremented in `destroy()` to invalidate in-flight fetches
+
+#### URL Building
+
+```javascript
+_buildUrl(filePath) {
+    const pattern = this._options.apiEndpoint;
+    if (this._options.endpointStyle === 'query') {
+        return pattern.replace('{path}', encodeURIComponent(filePath));
+    }
+    // 'path' style: encode each segment separately
+    const encodedPath = filePath.split('/').map(encodeURIComponent).join('/');
+    return pattern.replace('{path}', encodedPath);
+}
+```
+
+#### Loading and Error States
+
+```javascript
+_showLoading(container) {
+    container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888">Loading preview...</div>';
+}
+
+_showError(container, message, filePath) {
+    const name = filePath ? filePath.split('/').pop() : '';
+    let html = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#888;gap:8px">`;
+    html += `<div>${message}</div>`;
+    if (name) html += `<div style="font-size:0.85em;opacity:0.7">${name}</div>`;
+    if (this._options.downloadUrl && filePath) {
+        const dlUrl = this._options.downloadUrl.replace('{path}', encodeURIComponent(filePath));
+        html += `<a href="${dlUrl}" download style="font-size:0.85em">Download file</a>`;
+    }
+    html += `</div>`;
+    container.innerHTML = html;
+}
+```
+
+#### Consumer Integration: KB Browse Modal
+
+**Current code** in `kb-browse-modal.js` (lines 532-542):
+```javascript
+// BEFORE: Manual type detection + marked.js only
+const IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']);
+if (data.binary && IMAGE_EXTS.has((data.file_type || '').toLowerCase())) {
+    const rawUrl = `${KBBrowseModal.API.FILES}/${encodeURIComponent(data.path)}/raw`;
+    rendered = `<img class="kb-image-preview" src="${rawUrl}" alt="..." />`;
+} else if (typeof marked !== 'undefined') {
+    rendered = marked.parse(data.content || '');
+} else {
+    rendered = `<pre>${this._escapeHtml(data.content || '')}</pre>`;
+}
+```
+
+**After: Delegate to FilePreviewRenderer:**
+```javascript
+// AFTER: Use shared FilePreviewRenderer
+// In constructor or scene init:
+this._filePreviewRenderer = new FilePreviewRenderer({
+    apiEndpoint: '/api/kb/files/{path}/raw',
+    endpointStyle: 'path'
+});
+
+// In _renderArticleContent():
+const contentEl = articleMain.querySelector('.kb-article-body') || articleMain;
+await this._filePreviewRenderer.renderPreview(data.path, contentEl);
+
+// On scene switch / modal close:
+if (this._filePreviewRenderer) {
+    this._filePreviewRenderer.destroy();
+}
+```
+
+#### Consumer Integration: Deliverable Viewer
+
+**Current code** in `deliverable-viewer.js` (lines 155-280):
+```javascript
+// BEFORE: 120+ lines of inline type detection and rendering in showPreview()
+```
+
+**After: Delegate to FilePreviewRenderer:**
+```javascript
+// AFTER: Replace showPreview() body
+async showPreview(filePath) {
+    if (!this._filePreviewRenderer) {
+        this._filePreviewRenderer = new FilePreviewRenderer({
+            apiEndpoint: '/api/ideas/file?path={path}',
+            endpointStyle: 'query'
+        });
+    }
+
+    // Create modal backdrop + preview container (existing modal creation code stays)
+    const backdrop = document.createElement('div');
+    backdrop.className = 'deliverable-preview-backdrop';
+    // ... existing modal structure ...
+
+    const content = preview.querySelector('.deliverable-preview-content');
+    await this._filePreviewRenderer.renderPreview(filePath, content);
+
+    // On close:
+    closeBtn.addEventListener('click', () => {
+        this._filePreviewRenderer.destroy();
+        backdrop.remove();
+    });
+}
+```
+
+#### Affected Files & LOC Estimate
+
+| File | Change | LOC |
+|------|--------|-----|
+| `src/x_ipe/static/js/core/file-preview-renderer.js` | **NEW** — FilePreviewRenderer class with type detection, format-specific rendering, blob lifecycle, loading/error states | ~180 |
+| `src/x_ipe/static/js/features/kb-browse-modal.js` | Replace manual preview in `_renderArticleContent()` with `FilePreviewRenderer`; add `_filePreviewRenderer` field; call `destroy()` on scene switch | ~15 (net reduction) |
+| `src/x_ipe/static/js/features/deliverable-viewer.js` | Replace inline `showPreview()` body with `FilePreviewRenderer` delegation; add `destroy()` on close | ~15 (net reduction, removes ~100 lines) |
+| `src/x_ipe/templates/index.html` (or equivalent) | Add `<script src="/static/js/core/file-preview-renderer.js">` | ~1 |
+
+#### AC Coverage
+
+| AC | Design Coverage |
+|----|-----------------|
+| AC-049-F-18a | `FilePreviewRenderer` class in `core/file-preview-renderer.js` with `renderPreview(filePath, container, options)` returning Promise |
+| AC-049-F-18b | `_renderMarkdown()` delegates to `ContentRenderer` with DSL support (Mermaid, Architecture DSL, Infographic DSL) |
+| AC-049-F-18c | `_renderImage()` creates `<img>` with max-width/height 100%, object-fit contain, onerror handler |
+| AC-049-F-18d | `_renderConvertedHtml()` checks `X-Converted: true` header, creates blob iframe with `sandbox="allow-same-origin"` |
+| AC-049-F-18e | `_renderPdf()` creates `<iframe>` with direct src URL, width/height 100%, border none |
+| AC-049-F-18f | `_renderHtml()` fetches HTML, creates blob URL iframe with `sandbox="allow-scripts allow-same-origin"` |
+| AC-049-F-18g | `_renderCode()` uses `<pre><code>` with highlight.js when available, plain text fallback |
+| AC-049-F-18h | Constructor accepts `options.apiEndpoint` with `{path}` placeholder; `_buildUrl()` supports both path and query styles |
+| AC-049-F-18i | `_showError()` displays "Cannot preview this file type" with filename and optional download link |
+| AC-049-F-18j | `renderPreview()` maps HTTP errors: 413→"File too large to preview (max 10MB)", 415→"Binary file — cannot preview", else→"Failed to load file" |
+| AC-049-F-18k | `_revokeBlobUrl()` called before every new render; `destroy()` for final cleanup |
+| AC-049-F-18l | `renderPreview()` rejects paths with `..` before any fetch |
+| AC-049-F-18m | KB browse modal integration: `_filePreviewRenderer` with KB endpoint, `destroy()` on scene switch |
+| AC-049-F-18n | Deliverable viewer integration: `_filePreviewRenderer` with ideas endpoint, `destroy()` on modal close |
+| AC-049-F-18o | `_showLoading()` displays centered "Loading preview..." text in container before content renders |
+| AC-049-F-18p | `FILE_TYPES` static map includes all required image and code extensions |
 
 | Date | Phase | Change Summary |
 |------|-------|----------------|
@@ -1129,3 +1622,4 @@ _handleNormalDrop(files) {
 | 03-18-2026 | CR-005 Folder Support | Backend: refactored `get_intake_files()` for nested tree via `_build_intake_tree()`, derived folder status via `_derive_folder_status()`, deep pending count. API response changed: `files`→`items`, added `children`/`type`/`item_count`/`pending_deep_count`. Frontend: added `_renderIntakeRow()` with indent/chevron/folder icons, `_toggleFolder()` for expand/collapse, `_filterIntakeItems()` for recursive filter propagation, folder-specific actions (Assign cascades, Remove recursive, Undo cascades). DAO decisions: derived status, pre-loaded tree, no lazy loading, deep-count badge. |
 | 03-18-2026 | CR-006 Full-Width Layout | CSS-only: Remove `max-width: 780px` from `.kb-article-main` in `kb-browse-modal.css`. Existing `flex: 1` + `padding: 48px` handles expansion and margins. No JS, backend, or sidebar changes needed. ~1 LOC change. |
 | 03-18-2026 | CR-007 Normal Upload UX | JS-only: Replace `trigger-upload` action (which opens KBFileUpload modal) with `_triggerNormalFileInput()` using hidden file input pattern from Intake zone. Add `_showUploadFeedback()` to display temporary success/error message in `.kb-upload-zone`. ~30 LOC change. |
+| 03-18-2026 | CR-008 Shared File Preview | New `FilePreviewRenderer` class in `core/file-preview-renderer.js` (~180 LOC). Extracts and unifies preview logic from deliverable-viewer.js and kb-browse-modal.js. Configurable API endpoint (path vs query style), static file type detection map, format-specific renderers (image/PDF/markdown+DSL/DOCX-MSG/HTML/code), blob URL lifecycle management (`_revokeBlobUrl`/`destroy`), stale request guard, loading/error states. KB browse modal and deliverable viewer delegate to shared renderer. Net code reduction ~100 LOC. |

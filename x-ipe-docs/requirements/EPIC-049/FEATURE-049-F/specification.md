@@ -17,6 +17,7 @@
 | v1.5 | 03-18-2026 | CR-005 Refinement: Folder status derived from children, pre-loaded tree (no lazy loading), folder-specific actions (assign/remove/undo), filter propagation, deep-count badge, AI Librarian processes files individually |
 | v1.6 | 03-18-2026 | CR-006: Widen article content/image rendering area to span full available width with margins — remove max-width: 780px constraint on `.kb-article-main`, add responsive padding |
 | v1.7 | 03-18-2026 | [CR-007](./CR-007.md): Normal Upload zone — add click-to-browse native file selection and upload success indication |
+| v1.8 | 03-18-2026 | [CR-008](./CR-008.md): Shared File Preview — extract `FilePreviewRenderer` component to `core/`, unify KB browse and deliverable viewer preview logic, ensure format parity across preview locations. Refined: 16 ACs (AC-049-F-18a–18p), error handling, loading states, memory management, path security, edge cases |
 
 ## Linked Mockups
 
@@ -61,6 +62,8 @@ The intake workflow separates the "upload" action from the "organize" action, le
 
 11. **As a** KB user, **I want to** see a success indication after uploading files via the Normal Upload zone, **so that** I know my upload completed successfully. *(CR-007)*
 
+12. **As a** KB user, **I want** file preview in KB browse to support the same formats as the workflow deliverable preview (DOCX, images, PDF, HTML, code), **so that** I get a consistent preview experience across the application. *(CR-008)*
+
 ## Acceptance Criteria
 
 ### AC-049-F-01: Upload Mode Toggle
@@ -69,7 +72,7 @@ The intake workflow separates the "upload" action from the "organize" action, le
 |-------|-------------------------------|-----------|
 | AC-049-F-01a | GIVEN user is on KB browse modal upload view AND AI Librarian is enabled in config WHEN user clicks "📚 AI Librarian" toggle button THEN upload mode switches to AI Librarian AND drop zone shows intake-specific description AND subsequent uploads go to `.intake/` folder | UI |
 | AC-049-F-01b | GIVEN upload mode is AI Librarian WHEN user clicks "Normal" toggle button THEN upload mode switches back to Normal AND subsequent uploads go to the selected destination folder | UI |
-| AC-049-F-01c | GIVEN `ai_librarian.enabled` is `false` in kb-config.json WHEN KB browse modal loads THEN upload mode toggle is hidden AND only Normal upload mode is available | UI |
+| AC-049-F-01c | GIVEN `ai_librarian.enabled` is `false` in knowledgebase-config.json WHEN KB browse modal loads THEN upload mode toggle is hidden AND only Normal upload mode is available | UI |
 | AC-049-F-01d | GIVEN upload mode is AI Librarian WHEN user drops files onto the intake drop zone THEN files are uploaded to `.intake/` folder AND intake file list refreshes to show new files with "Pending" status | UI |
 | AC-049-F-01e | GIVEN upload mode is Normal WHEN user clicks the upload zone or the "browse" text THEN a native file selection dialog opens with `multiple` file selection enabled *(CR-007)* | UI |
 | AC-049-F-01f | GIVEN user selects files via the native file dialog in Normal Upload mode WHEN files are chosen THEN files are uploaded to the selected destination folder via `POST /api/kb/upload` AND `kb:changed` event is dispatched on success *(CR-007)* | UI |
@@ -139,10 +142,10 @@ The intake workflow separates the "upload" action from the "organize" action, le
 
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
-| AC-049-F-07a | GIVEN kb-config.json has `ai_librarian.enabled = true` WHEN KB browse modal loads THEN intake features (upload toggle, intake view, Run AI Librarian button) are available | Unit |
-| AC-049-F-07b | GIVEN kb-config.json has `ai_librarian.enabled = false` WHEN KB browse modal loads THEN all intake features are hidden AND normal upload is the only option | Unit |
+| AC-049-F-07a | GIVEN knowledgebase-config.json has `ai_librarian.enabled = true` WHEN KB browse modal loads THEN intake features (upload toggle, intake view, Run AI Librarian button) are available | Unit |
+| AC-049-F-07b | GIVEN knowledgebase-config.json has `ai_librarian.enabled = false` WHEN KB browse modal loads THEN all intake features are hidden AND normal upload is the only option | Unit |
 | AC-049-F-07c | GIVEN `ai_librarian` config exists WHEN `GET /api/kb/config` is called THEN response includes `ai_librarian` object with `enabled`, `intake_folder`, and `skill` fields | API |
-| AC-049-F-07d | GIVEN default kb-config.json is created WHEN KB initializes for the first time THEN `ai_librarian` defaults to `{ enabled: false, intake_folder: ".intake", skill: "x-ipe-tool-kb-librarian" }` | Unit |
+| AC-049-F-07d | GIVEN default knowledgebase-config.json is created WHEN KB initializes for the first time THEN `ai_librarian` defaults to `{ enabled: false, intake_folder: ".intake", skill: "x-ipe-tool-kb-librarian" }` | Unit |
 
 ### AC-049-F-08: Intake Status Backend (CR-005: updated for folder support)
 
@@ -204,7 +207,7 @@ The intake workflow separates the "upload" action from the "organize" action, le
 |-------|-------------------------------|-----------|
 | AC-049-F-14a | GIVEN the X-IPE project WHEN `.github/skills/x-ipe-tool-kb-librarian/` is inspected THEN a valid SKILL.md exists following the x-ipe tool skill template with: Purpose, Input Parameters, Operations, Output Result, Definition of Done | Unit |
 | AC-049-F-14b | GIVEN the skill SKILL.md WHEN the trigger patterns are inspected THEN it matches on: "organize knowledge base intake files with AI Librarian", "run AI Librarian", "organize intake" | Unit |
-| AC-049-F-14c | GIVEN the KB config has `ai_librarian.skill = "x-ipe-tool-kb-librarian"` WHEN the skill reads config THEN it uses the tag taxonomy from `kb-config.json` tags section for classification | Unit |
+| AC-049-F-14c | GIVEN the KB config has `ai_librarian.skill = "x-ipe-tool-kb-librarian"` WHEN the skill reads config THEN it uses the tag taxonomy from `knowledgebase-config.json` tags section for classification | Unit |
 
 ### AC-049-F-15: Metadata Index Structure (CR-002)
 
@@ -241,6 +244,27 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | AC-049-F-17c | GIVEN an image/PDF/docx/HTML preview is displayed in the article view WHEN the content renders THEN the preview element (image, iframe) scales to use the full width of the expanded content area (respecting container padding) | UI |
 | AC-049-F-17d | GIVEN the viewport width is less than 900px WHEN the article view renders THEN the sidebar is hidden AND the main content area uses the full viewport width with padding | UI |
 
+### AC-049-F-18: Shared File Preview Component (CR-008)
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-049-F-18a | GIVEN the codebase WHEN `src/x_ipe/static/js/core/file-preview-renderer.js` is inspected THEN a `FilePreviewRenderer` class exists with a public `renderPreview(filePath, container)` method that returns a Promise (configuration is constructor-level via `{ apiEndpoint, endpointStyle, downloadUrl }`) | Unit |
+| AC-049-F-18b | GIVEN a `FilePreviewRenderer` instance WHEN `renderPreview` is called with a `.md` file path THEN the content is fetched from the configured API endpoint AND rendered via `ContentRenderer` with DSL-enhanced rendering (Mermaid, Architecture DSL, Infographic DSL) | Unit |
+| AC-049-F-18c | GIVEN a `FilePreviewRenderer` instance WHEN `renderPreview` is called with an image file (PNG, JPG, JPEG, GIF, SVG, WebP, BMP, ICO) THEN an `<img>` element is created with `src` pointing to the API endpoint, `max-width: 100%`, `max-height: 100%`, and `object-fit: contain` AND an `onerror` handler shows "Cannot preview this image" | Unit |
+| AC-049-F-18d | GIVEN a `FilePreviewRenderer` instance WHEN `renderPreview` is called AND the API response has `X-Converted: true` header (DOCX/MSG conversion) THEN the converted HTML is rendered in a sandboxed iframe via Blob URL with `sandbox="allow-same-origin"` | Unit |
+| AC-049-F-18e | GIVEN a `FilePreviewRenderer` instance WHEN `renderPreview` is called with a `.pdf` file THEN an `<iframe>` is created with `src` pointing to the API endpoint, `width: 100%`, `height: 100%`, and `border: none` | Unit |
+| AC-049-F-18f | GIVEN a `FilePreviewRenderer` instance WHEN `renderPreview` is called with an `.html` or `.htm` file THEN the HTML content is fetched, wrapped in a Blob URL, and rendered in a sandboxed iframe with `sandbox="allow-scripts allow-same-origin"` | Unit |
+| AC-049-F-18g | GIVEN a `FilePreviewRenderer` instance WHEN `renderPreview` is called with a code/text file (.py, .js, .json, .yaml, .css, .xml, .txt, etc.) THEN the content is displayed in a `<pre>` element with syntax highlighting via highlight.js (if available) OR plain text fallback | Unit |
+| AC-049-F-18h | GIVEN `FilePreviewRenderer` is instantiated with `options.apiEndpoint` set to a URL pattern WHEN `renderPreview` is called THEN the configured endpoint pattern is used for fetching (supporting both `/api/kb/files/{path}/raw` with `endpointStyle: 'path'` and `/api/ideas/file?path={path}` with `endpointStyle: 'query'`) | Unit |
+| AC-049-F-18i | GIVEN a `FilePreviewRenderer` instance WHEN `renderPreview` is called with a file that cannot be previewed (unknown binary type) THEN the container shows "Cannot preview this file type" message with the filename AND a download link (if `options.downloadUrl` is provided) | Unit |
+| AC-049-F-18j | GIVEN a `FilePreviewRenderer` instance WHEN `renderPreview` encounters a network error or HTTP error (4xx/5xx) THEN the container shows an appropriate error message: "File too large to preview (max 10MB)" for 413, "Binary file — cannot preview" for 415, "Failed to load file" for other errors | Unit |
+| AC-049-F-18k | GIVEN a `FilePreviewRenderer` instance creates a Blob URL for iframe rendering WHEN the preview container is removed from DOM or a new preview replaces it THEN the previous Blob URL is revoked via `URL.revokeObjectURL()` to prevent memory leaks | Unit |
+| AC-049-F-18l | GIVEN a `FilePreviewRenderer` instance WHEN `renderPreview` is called with a file path containing `..` THEN the request is rejected with a security error (no fetch attempt made) | Unit |
+| AC-049-F-18m | GIVEN the KB browse modal WHEN a file is previewed in the article scene THEN `FilePreviewRenderer` is used for rendering (not direct `marked.parse()` or manual file type detection) AND `options.apiEndpoint` is set to the KB preview endpoint pattern | UI |
+| AC-049-F-18n | GIVEN the deliverable viewer WHEN a file is previewed THEN `FilePreviewRenderer` is used for rendering (replacing the inline `showPreview` logic) AND `options.apiEndpoint` is set to the ideas file endpoint pattern | UI |
+| AC-049-F-18o | GIVEN a `FilePreviewRenderer` instance WHEN `renderPreview` is called THEN a loading indicator (spinner or "Loading preview...") is shown in the container until the content is fully rendered or an error occurs | UI |
+| AC-049-F-18p | GIVEN the `FilePreviewRenderer` class WHEN its supported file type detection is inspected THEN image extensions include at minimum: png, jpg, jpeg, gif, svg, webp, bmp, ico AND code/text extensions include at minimum: py, js, ts, json, yaml, yml, xml, css, html, htm, txt, md, sh, bash, go, java, rb, rs, c, cpp, h | Unit |
+
 | ID | Requirement | Input | Process | Output |
 |----|-------------|-------|---------|--------|
 | FR-049-F.1 | Upload Mode Toggle | User click on mode toggle | Switch between Normal and AI Librarian upload modes; AI Librarian routes uploads to `.intake/` | Mode state updated, UI reflects active mode |
@@ -250,7 +274,7 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | FR-049-F.5 | AI Librarian Trigger | User clicks "✨ Run AI Librarian" button | Send plain natural language command to Copilot CLI via terminal manager | CLI session receives prompt; modal closes |
 | FR-049-F.6 | Per-File Actions | User clicks action button per file row | Execute action: Preview (show content), Assign (set destination), Remove (delete), View in KB (navigate), Undo (revert filed) | Action executed, intake view refreshed |
 | FR-049-F.7 | Statistics Bar | Intake file data | Calculate counts by status (total, pending, processing, filed) | Statistics badges displayed in header |
-| FR-049-F.8 | Config Extension | `kb-config.json` ai_librarian section | Read config; gate all intake features behind `enabled` flag | Features shown/hidden based on config |
+| FR-049-F.8 | Config Extension | `knowledgebase-config.json` ai_librarian section | Read config; gate all intake features behind `enabled` flag | Features shown/hidden based on config |
 | FR-049-F.9 | AI Content Analysis | Pending intake file content + KB folder structure | Analyze content to determine best destination folder; assign lifecycle + domain tags based on relevance | Destination path + tag assignments per file |
 | FR-049-F.10 | Metadata Index Management | File/folder metadata + `.kb-index.json` | Read/write `.kb-index.json` per folder; auto-populate entries for new files; preserve existing entries on update | Metadata entries in hidden `.kb-index.json` per folder |
 | FR-049-F.11 | Batch File Processing | All pending intake files | Process each: set status → processing, analyze content, generate index entry (all file types), move to destination, set status → filed | All pending files moved and metadata indexed |
@@ -265,6 +289,7 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | FR-049-F.20 | Full-Width Article Layout (CR-006) | Article scene active | Article main content area expands to fill available horizontal space instead of fixed max-width; left/right padding provides readability margins; sidebar remains fixed at 260px | Content and previews displayed at full available width |
 | FR-049-F.21 | Normal Upload Click-to-Browse (CR-007) | User clicks upload zone or "browse" text in Normal Upload mode | Create hidden `<input type="file" multiple>`, trigger native file dialog, upload selected files to destination folder via `POST /api/kb/upload` | Files uploaded, `kb:changed` event dispatched |
 | FR-049-F.22 | Normal Upload Feedback (CR-007) | Normal Upload completes (success or failure) | Show temporary status message in upload zone: "✅ N file(s) uploaded" on success, "❌ Upload failed" on error; auto-clear after timeout | User sees upload result, message clears automatically |
+| FR-049-F.23 | Shared File Preview Component (CR-008) | File preview request from any preview location | Extract `FilePreviewRenderer` class to `core/file-preview-renderer.js`; encapsulates file type detection, format-specific rendering (markdown+DSL, images, DOCX/MSG, PDF, HTML, code/text), configurable API endpoint; KB browse and deliverable viewer both use this component | Consistent preview behavior across all locations using shared component |
 
 ## Non-Functional Requirements
 
@@ -322,6 +347,16 @@ Derived from mockup Scene 4:
    - During upload: zone is non-interactive (prevents duplicate uploads)
    - After message clears: zone returns to default state ("Drag & drop files here, or **browse**")
 
+9. **Shared File Preview Behavior (CR-008):**
+   - All preview locations (KB browse article scene, deliverable viewer) use the same `FilePreviewRenderer` component for consistent rendering behavior
+   - Loading state: a centered spinner or "Loading preview..." text is shown in the preview container while content is being fetched
+   - Error states: user-friendly error messages replace the spinner — "File too large to preview (max 10MB)" for 413, "Binary file — cannot preview" for 415, "Failed to load file" for generic errors
+   - Unpreviewed file types: show filename, file type info, and a download link (if available) in a styled placeholder
+   - Image previews: images scale responsively within the container (`max-width: 100%`), centered, with `object-fit: contain`
+   - Iframe previews (DOCX/MSG/PDF/HTML): iframes fill `width: 100%` and `height: 100%` of the preview container, no visible border
+   - Code/text previews: monospace font, syntax highlighting when highlight.js is available, plain text fallback otherwise
+   - Markdown previews: rendered with full DSL support (Mermaid diagrams inline, Architecture DSL, Infographic DSL) via ContentRenderer
+
 ## Dependencies
 
 ### Internal
@@ -338,6 +373,9 @@ Derived from mockup Scene 4:
 |------------|-------------|--------|
 | `x-ipe-tool-kb-librarian` skill | AI classification, file moving, and tagging logic | 🔄 In scope (CR-001) |
 | `x-ipe-meta-skill-creator` skill | Required for creating the tool skill following X-IPE standards | ✅ Available |
+| ContentRenderer (`core/content-renderer.js`) | Markdown+DSL rendering engine used by FilePreviewRenderer for .md files (CR-008) | ✅ Available |
+| `conversion_utils.py` | Backend DOCX/MSG→HTML conversion shared utilities (CR-004 extracts from ideas_routes.py) (CR-008) | 🔄 In scope (CR-004) |
+| CR-004 Rich File Preview | KB preview endpoint `/api/kb/files/{path}/preview` + type detection (CR-008 depends on) | 🔄 In progress (TASK-925) |
 
 ## Business Rules
 
@@ -354,6 +392,9 @@ Derived from mockup Scene 4:
 | BR-049-F-09 | Folder Assign/Remove/Undo actions apply recursively to ALL children (CR-005) |
 | BR-049-F-10 | AI Librarian processes individual files, not folders as units. Files within one folder may be assigned to different KB destinations (CR-005) |
 | BR-049-F-11 | Sidebar badge shows deep-count of individual pending FILES (not top-level items). Stats bar shows top-level item counts (CR-005) |
+| BR-049-F-12 | FilePreviewRenderer determines file type by extension only — no MIME sniffing. Extension-to-type mapping is internal to the class (CR-008) |
+| BR-049-F-13 | FilePreviewRenderer renders images directly via `<img>` src URL (no fetch + blob). DOCX/MSG/HTML use fetch + blob URL iframe. PDF uses direct `<iframe>` src URL. Markdown/code use fetch + inline render (CR-008) |
+| BR-049-F-14 | FilePreviewRenderer MUST revoke Blob URLs when replacing preview content or when the component is destroyed, to prevent memory leaks (CR-008) |
 
 ## Edge Cases & Constraints
 
@@ -377,6 +418,14 @@ Derived from mockup Scene 4:
 | User drops files while success message is displayed (CR-007) | Accept the drop, start new upload, replace success message with new upload status |
 | File dialog cancelled without selecting files (CR-007) | No action taken, no error shown |
 | Network error during Normal Upload (CR-007) | Show "❌ Upload failed" in zone, auto-clear after 5 seconds |
+| Empty file (0 bytes) previewed via FilePreviewRenderer (CR-008) | Show empty preview container with no error — blank content is valid |
+| Very large file (>10MB) previewed via FilePreviewRenderer (CR-008) | API returns 413; FilePreviewRenderer shows "File too large to preview (max 10MB)" message |
+| Unknown binary file (.exe, .bin, .zip) previewed via FilePreviewRenderer (CR-008) | API returns 415; FilePreviewRenderer shows "Cannot preview this file type" with download link |
+| File path contains `..` passed to FilePreviewRenderer (CR-008) | Preview rejected before fetch — shows security error message |
+| Blob URL iframe created then user navigates to different file (CR-008) | Previous Blob URL is revoked via `URL.revokeObjectURL()` before new preview renders |
+| DOCX conversion fails server-side (corrupted file) (CR-008) | API returns error; FilePreviewRenderer shows "Failed to load file" |
+| SVG file with embedded scripts (CR-008) | Rendered as `<img>` tag (not inline SVG) — scripts cannot execute in `<img>` context |
+| Concurrent preview requests (rapid file switching) (CR-008) | Only the latest request's result is rendered; stale responses are discarded |
 
 ## Out of Scope
 
@@ -387,6 +436,7 @@ Derived from mockup Scene 4:
 - **Lazy loading of folder children** — pre-loaded for simplicity per YAGNI; add if performance requires it (CR-005)
 - **Sidecar `.meta.json` for non-markdown files** — replaced by `.kb-index.json` registry (CR-002)
 - **YAML frontmatter for metadata** — replaced by `.kb-index.json` registry (CR-002); existing frontmatter in markdown files is NOT removed but no longer the source of truth
+- **Cross-feature preview unification** — Folder Browser Modal (FEATURE-039-A/B) and Link Preview Manager (FEATURE-043-A/B) should adopt `FilePreviewRenderer` via their own future CRs, not this CR (CR-008)
 
 ## Technical Considerations
 
@@ -403,11 +453,12 @@ Derived from mockup Scene 4:
 - Each `.kb-index.json` is locally-scoped — indexes only files and immediate subfolders in its directory
 - Metadata is read from `.kb-index.json` instead of parsing YAML frontmatter from file content
 - Skill uses KB service methods: `get_intake_files()`, `update_intake_status()`, `move_file()`, `_read_kb_index()`, `_write_kb_index()`
-- Skill reads tag taxonomy from kb-config.json (`tags.lifecycle`, `tags.domain`) for AI classification
+- Skill reads tag taxonomy from knowledgebase-config.json (`tags.lifecycle`, `tags.domain`) for AI classification
 - Non-markdown files: moved, metadata indexed in `.kb-index.json`, same fields as markdown
 - Skill is a tool skill created via `x-ipe-meta-skill-creator` — file at `.github/skills/x-ipe-tool-kb-librarian/SKILL.md`
 - Normal Upload click-to-browse (CR-007): Follow `_triggerIntakeFileInput()` pattern — create hidden `<input type="file" multiple>`, trigger `.click()`, handle `change` event → call `_uploadFiles()`; replace existing `trigger-upload` action which currently opens the separate `KBFileUpload` modal
 - Normal Upload feedback (CR-007): After `_uploadFiles()` resolves, inject temporary message into `.kb-upload-zone` element; use `setTimeout` for auto-clear (3s success, 5s error); restore original zone content after clear
+- Shared File Preview (CR-008): `FilePreviewRenderer` in `core/file-preview-renderer.js` encapsulates file type detection + format-specific rendering; accepts `options.apiEndpoint` to support both `/api/kb/files/{path}/preview` and `/api/ideas/file?path=`; uses `ContentRenderer` for markdown+DSL, Blob URL iframe for HTML/converted DOCX/MSG, native `<img>` for images, native iframe for PDF, `<pre>` for code/text; KB browse modal and deliverable viewer both delegate to this shared component
 
 ## Open Questions
 

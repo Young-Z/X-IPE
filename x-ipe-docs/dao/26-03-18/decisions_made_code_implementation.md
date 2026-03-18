@@ -96,3 +96,35 @@
 
 ### Follow-up
 > After acceptance testing completes, the next DAG step is human_playground (Stage 5: FEEDBACK) or feature_closing (Stage 6: DELIVERY) depending on workflow configuration.
+
+---
+
+| DAO-ID | Timestamp | Task | Touchpoint | Disposition | Confidence | Summary |
+|--------|-----------|------|------------|-------------|------------|---------|
+| DAO-096 | 2026-03-18T14:52:24Z | TASK-976 | Post Code Implementation routing | instruction | 0.95 | User confirms "go for it" — proceed to feature acceptance testing for CR-008 FilePreviewRenderer |
+
+## DAO-096 — Routing: Post Code Implementation (CR-008)
+
+### Context
+> TASK-976 (Code Implementation for CR-008 FEATURE-049-F) completed successfully. FilePreviewRenderer created (~210 LOC), KB browse modal and deliverable viewer refactored to delegate. 36 new tests + 52 updated tests all pass (859 total). User says "go for it" to proceed.
+
+### Disposition: `instruction`
+
+> **Content:** Proceed with feature acceptance testing for FEATURE-049-F CR-008. Execute acceptance tests against the implemented FilePreviewRenderer and its consumer integrations (KB browse modal, deliverable viewer). Validate all 16 ACs (AC-049-F-18a through 18p).
+>
+> **Rationale:** Code implementation is complete with all unit tests passing. The engineering workflow DAG positions acceptance testing as the mandatory next stage after implementation. User explicitly confirmed continuation. No ambiguity.
+
+### Suggested Skill
+> - `x-ipe-task-based-feature-acceptance-test` (strong match)
+>   - Execution steps:
+>     - phase: "1. Study & Gather Context"
+>       step: "1.1 Query feature board and read specification"
+>     - phase: "2. Generate Test Cases"
+>       step: "2.1 Generate acceptance test cases from ACs"
+>     - phase: "3. Execute Tests"
+>       step: "3.1 Run acceptance tests"
+>     - phase: "4. Validation"
+>       step: "4.1 Verify all ACs are satisfied"
+
+### Follow-up
+> After acceptance testing completes, the next DAG step is human_playground (Stage 5: FEEDBACK) or feature_closing (Stage 6: DELIVERY) depending on workflow configuration.

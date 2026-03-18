@@ -151,6 +151,7 @@ class DeliverableViewer {
 
     /**
      * Show inline preview for a file.
+     * CR-008: Delegates rendering to shared FilePreviewRenderer.
      */
     async showPreview(filePath) {
         // Security: reject path traversal
@@ -162,7 +163,17 @@ class DeliverableViewer {
         const existingBackdrop = document.querySelector('.deliverable-preview-backdrop');
         if (existingBackdrop) existingBackdrop.remove();
 
-        const close = () => backdrop.remove();
+        // Cleanup previous renderer
+        if (this._filePreviewRenderer) {
+            this._filePreviewRenderer.destroy();
+        }
+
+        const close = () => {
+            if (this._filePreviewRenderer) {
+                this._filePreviewRenderer.destroy();
+            }
+            backdrop.remove();
+        };
 
         // Backdrop overlay (contains the modal)
         const backdrop = document.createElement('div');
@@ -194,89 +205,12 @@ class DeliverableViewer {
         requestAnimationFrame(() => backdrop.classList.add('active'));
         this._previewContainer = preview;
 
-        const ext = filePath.split('.').pop().toLowerCase();
-
-        // Handle image files directly (no text API needed)
-        if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'bmp', 'ico'].includes(ext)) {
-            const img = document.createElement('img');
-            img.src = `/api/ideas/file?path=${encodeURIComponent(filePath)}`;
-            img.alt = filePath.split('/').pop();
-            img.style.maxWidth = '100%';
-            img.style.maxHeight = '100%';
-            img.style.objectFit = 'contain';
-            img.onerror = () => { content.textContent = 'Cannot preview this image'; };
-            content.appendChild(img);
-            return;
-        }
-
-        // Handle PDF files directly
-        if (ext === 'pdf') {
-            const iframe = document.createElement('iframe');
-            iframe.src = `/api/ideas/file?path=${encodeURIComponent(filePath)}`;
-            iframe.style.width = '100%';
-            iframe.style.height = '100%';
-            iframe.style.border = 'none';
-            content.appendChild(iframe);
-            return;
-        }
-
-        try {
-            const resp = await fetch(`/api/ideas/file?path=${encodeURIComponent(filePath)}`);
-            if (!resp.ok) {
-                if (resp.status === 413) {
-                    content.textContent = 'File too large to preview (max 10MB)';
-                } else if (resp.status === 415) {
-                    content.textContent = 'Binary file — cannot preview';
-                } else {
-                    content.textContent = 'Failed to load file';
-                }
-                return;
-            }
-
-            const text = await resp.text();
-
-            // CR-001: Handle converted binary files (.docx, .msg)
-            const isConverted = resp.headers && resp.headers.get('X-Converted') === 'true';
-            if (isConverted) {
-                const blob = new Blob([text], { type: 'text/html' });
-                const blobUrl = URL.createObjectURL(blob);
-                const iframe = document.createElement('iframe');
-                iframe.src = blobUrl;
-                iframe.setAttribute('sandbox', 'allow-same-origin');
-                iframe.style.width = '100%';
-                iframe.style.height = '100%';
-                iframe.style.border = 'none';
-                content.appendChild(iframe);
-                return;
-            }
-
-            if (filePath.endsWith('.md')) {
-                if (typeof ContentRenderer !== 'undefined') {
-                    const renderer = new ContentRenderer(content);
-                    renderer.renderMarkdown(text);
-                } else {
-                    content.innerHTML = typeof marked !== 'undefined' && marked.parse
-                        ? marked.parse(text)
-                        : `<pre>${this._escapeHtml(text)}</pre>`;
-                }
-            } else if (filePath.endsWith('.html') || filePath.endsWith('.htm')) {
-                const blob = new Blob([text], { type: 'text/html' });
-                const blobUrl = URL.createObjectURL(blob);
-                const iframe = document.createElement('iframe');
-                iframe.src = blobUrl;
-                iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-                iframe.style.width = '100%';
-                iframe.style.height = '100%';
-                iframe.style.border = 'none';
-                content.appendChild(iframe);
-            } else {
-                const pre = document.createElement('pre');
-                pre.textContent = text;
-                content.appendChild(pre);
-            }
-        } catch {
-            content.textContent = 'Error loading preview';
-        }
+        // CR-008: Use shared FilePreviewRenderer
+        this._filePreviewRenderer = new FilePreviewRenderer({
+            apiEndpoint: '/api/ideas/file?path={path}',
+            endpointStyle: 'query'
+        });
+        await this._filePreviewRenderer.renderPreview(filePath, content);
     }
 
     _escapeHtml(text) {

@@ -3,6 +3,7 @@
 | Entry ID | Timestamp | Task ID | Calling Skill | Disposition | Confidence | Summary |
 |----------|-----------|---------|---------------|-------------|------------|---------|
 | DAO-086 | 2026-03-18T01:57:30Z | TASK-TBD | N/A | instruction | 0.90 | Process UIUX feedback: KB article preview should render image files (.jpg etc.) inline |
+| DAO-087 | 2026-03-18T13:17:04Z | TASK-TBD | N/A | instruction | 0.95 | Fix stale `kb-config.json` references → should be `knowledgebase-config.json` |
 
 ## DAO-086
 - **Timestamp:** 2026-03-18T01:57:30Z
@@ -36,3 +37,34 @@
 
 ### Follow-up
 > Check TASK-925 (CR-004) status first — if image preview code exists but isn't working, fix it. If not yet implemented, add image rendering to kb-article-main for .jpg/.png/.gif/.webp/.svg files.
+
+## DAO-087
+- **Timestamp:** 2026-03-18T13:17:04Z
+- **Task ID:** TASK-TBD
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.95
+
+### Message
+> kb_config.json should be knowledgebase_config.json, i believe someplace still reference wrong name
+
+### Guidance Returned
+> Fix stale references: the actual config file is `knowledgebase-config.json` (constant `KB_CONFIG_FILE` in kb_service.py:27), but ~60 references across docstrings, documentation, specifications, technical designs, and skill files still use the old name `kb-config.json`. Update all stale references to use the correct name `knowledgebase-config.json`.
+
+### Rationale
+> Clear bug fix — the code correctly uses `knowledgebase-config.json` but documentation/docstrings lag behind. Single domain, single skill, high confidence.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "strong"
+>     reason: "Stale file name references in docstrings and documentation — straightforward find-and-replace bug"
+>     execution_steps:
+>       - phase: "1. Diagnosis"
+>         step: "1.1 Reproduce & confirm"
+
+### Follow-up
+> None

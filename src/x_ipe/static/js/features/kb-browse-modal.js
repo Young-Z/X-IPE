@@ -60,6 +60,11 @@ class KBBrowseModal {
 
     close() {
         if (!this.overlay) return;
+        // CR-008: Cleanup FilePreviewRenderer
+        if (this._filePreviewRenderer) {
+            this._filePreviewRenderer.destroy();
+            this._filePreviewRenderer = null;
+        }
         this.overlay.classList.remove('active');
         setTimeout(() => {
             if (this.overlay?.parentNode) this.overlay.parentNode.removeChild(this.overlay);
@@ -529,16 +534,20 @@ class KBBrowseModal {
         const created = this._formatDate(fm.created || data.modified_date);
         const fileSize = this._formatFileSize(data.size_bytes || 0);
 
-        // Render content based on file type
-        const IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']);
+        // CR-008: Use shared FilePreviewRenderer for article content
+        const useSharedRenderer = typeof FilePreviewRenderer !== 'undefined';
         let rendered = '';
-        if (data.binary && IMAGE_EXTS.has((data.file_type || '').toLowerCase())) {
-            const rawUrl = `${KBBrowseModal.API.FILES}/${encodeURIComponent(data.path)}/raw`;
-            rendered = `<img class="kb-image-preview" src="${rawUrl}" alt="${this._escapeHtml(fm.title || data.name)}" />`;
-        } else if (typeof marked !== 'undefined') {
-            try { rendered = marked.parse(data.content || ''); } catch { rendered = this._escapeHtml(data.content || ''); }
-        } else {
-            rendered = `<pre>${this._escapeHtml(data.content || '')}</pre>`;
+        if (!useSharedRenderer) {
+            // Fallback: original inline rendering (safety net if FilePreviewRenderer not loaded)
+            const IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']);
+            if (data.binary && IMAGE_EXTS.has((data.file_type || '').toLowerCase())) {
+                const rawUrl = `${KBBrowseModal.API.FILES}/${encodeURIComponent(data.path)}/raw`;
+                rendered = `<img class="kb-image-preview" src="${rawUrl}" alt="${this._escapeHtml(fm.title || data.name)}" />`;
+            } else if (typeof marked !== 'undefined') {
+                try { rendered = marked.parse(data.content || ''); } catch { rendered = this._escapeHtml(data.content || ''); }
+            } else {
+                rendered = `<pre>${this._escapeHtml(data.content || '')}</pre>`;
+            }
         }
 
         const breadcrumbParts = data.path ? data.path.split('/') : [fileName];
@@ -571,7 +580,7 @@ class KBBrowseModal {
                             <span class="kb-article-meta-item"><i class="bi bi-file-earmark"></i> ${this._escapeHtml(fileSize)}</span>
                         </div>
                     </div>
-                    <div class="kb-article-content">${rendered}</div>
+                    <div class="kb-article-content">${useSharedRenderer ? '' : rendered}</div>
                 </div>
                 <div class="kb-article-sidebar">
                     <div class="kb-meta-section">
@@ -609,9 +618,24 @@ class KBBrowseModal {
             </div>
         `;
 
-        // Syntax highlighting
-        if (typeof hljs !== 'undefined') {
+        // Syntax highlighting (fallback path only)
+        if (!useSharedRenderer && typeof hljs !== 'undefined') {
             scene.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
+        }
+
+        // CR-008: Use FilePreviewRenderer for article content
+        if (useSharedRenderer) {
+            if (this._filePreviewRenderer) {
+                this._filePreviewRenderer.destroy();
+            }
+            this._filePreviewRenderer = new FilePreviewRenderer({
+                apiEndpoint: `${KBBrowseModal.API.FILES}/{path}/raw`,
+                endpointStyle: 'path'
+            });
+            const contentEl = scene.querySelector('.kb-article-content');
+            if (contentEl) {
+                await this._filePreviewRenderer.renderPreview(data.path, contentEl);
+            }
         }
     }
 

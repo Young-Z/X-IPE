@@ -34,3 +34,23 @@
 
 ### Follow-up
 > None
+
+---
+
+| DAO-ID | Timestamp | Task | Touchpoint | Disposition | Confidence | Summary |
+|--------|-----------|------|------------|-------------|------------|---------|
+| DAO-097 | 2026-03-18T14:55:00Z | TASK-977 | Post Acceptance Testing routing | instruction | 0.95 | All 16 ACs pass (19 TCs, 100% pass rate). Proceed to feature closing for CR-008. |
+
+## DAO-097 — Routing: Post Acceptance Testing (CR-008)
+
+### Context
+> TASK-977 acceptance testing for CR-008 FEATURE-049-F completed. 19 test cases across 16 ACs — all pass. 36 unit tests via Vitest + 3 UI tests via source code review. Full test suite (859 tests) still green.
+
+### Disposition: `instruction`
+
+> **Content:** Proceed with feature closing for CR-008. All acceptance criteria validated. Create a commit with all CR-008 changes.
+>
+> **Rationale:** 100% pass rate across all ACs. The engineering workflow DAG positions feature_closing as the next stage. No failures or blockers.
+
+### Suggested Skill
+> - `x-ipe-task-based-feature-closing` (strong match)
