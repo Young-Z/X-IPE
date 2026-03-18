@@ -1,7 +1,7 @@
 # Feature Specification: KB AI Librarian & Intake
 
 > Feature ID: FEATURE-049-F  
-> Version: v1.5  
+> Version: v1.6  
 > Status: Refined  
 > Last Updated: 03-18-2026
 
@@ -15,6 +15,7 @@
 | v1.3 | 03-17-2026 | CR-004: Add rich file preview to KB browse — markdown+DSL, images, docx/msg conversion, PDF, HTML iframe, syntax-highlighted code |
 | v1.4 | 03-18-2026 | CR-005: Folder support in intake — fix count logic for top-level items (folders + files), add folder tree display with expand/collapse in intake file list view |
 | v1.5 | 03-18-2026 | CR-005 Refinement: Folder status derived from children, pre-loaded tree (no lazy loading), folder-specific actions (assign/remove/undo), filter propagation, deep-count badge, AI Librarian processes files individually |
+| v1.6 | 03-18-2026 | CR-006: Widen article content/image rendering area to span full available width with margins — remove max-width: 780px constraint on `.kb-article-main`, add responsive padding |
 
 ## Linked Mockups
 
@@ -52,6 +53,8 @@ The intake workflow separates the "upload" action from the "organize" action, le
 7. **As a** KB user, **I want to** see uploaded folders as expandable tree items in the intake view, **so that** I can browse folder contents and manage them at both folder and file level. *(CR-005)*
 
 8. **As a** KB user, **I want to** assign or remove entire folders at once, **so that** I can efficiently manage batches of related files without acting on each file individually. *(CR-005)*
+
+9. **As a** KB user, **I want to** see documents and images displayed at the full available width of the article view, **so that** I can read and preview content without wasted horizontal space. *(CR-006)*
 
 ## Acceptance Criteria
 
@@ -211,7 +214,7 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
 | AC-049-F-16a | GIVEN a markdown file in KB WHEN user clicks the file card THEN content is rendered with DSL-enhanced markdown (Mermaid diagrams, Architecture DSL, Infographic DSL rendered inline) via ContentRenderer | UI |
-| AC-049-F-16b | GIVEN an image file (PNG, JPG, GIF, SVG, WebP) in KB WHEN user clicks the file card THEN the image is displayed inline in the article scene with proper scaling (max-width: 100%) | UI |
+| AC-049-F-16b | GIVEN an image file (PNG, JPG, GIF, SVG, WebP) in KB WHEN user clicks the file card THEN the image is displayed inline in the article scene with responsive scaling (max-width: 100% of available container width) | UI |
 | AC-049-F-16c | GIVEN a .docx file in KB WHEN user clicks the file card THEN the backend converts it to HTML via mammoth AND the converted HTML is displayed in a sandboxed iframe in the article scene | UI |
 | AC-049-F-16d | GIVEN a PDF file in KB WHEN user clicks the file card THEN the PDF is displayed in an iframe viewer in the article scene | UI |
 | AC-049-F-16e | GIVEN an HTML file in KB WHEN user clicks the file card THEN the HTML is rendered in a sandboxed iframe in the article scene | UI |
@@ -219,6 +222,15 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | AC-049-F-16g | GIVEN a binary file that cannot be previewed WHEN user clicks the file card THEN a "Cannot preview this file type" message is shown with file metadata (name, size, type) and a download link | UI |
 | AC-049-F-16h | GIVEN `GET /api/kb/files/{path}/preview` endpoint WHEN called with a .docx file path THEN response is converted HTML with `X-Converted: true` header AND `Content-Type: text/html` | API |
 | AC-049-F-16i | GIVEN `GET /api/kb/files/{path}/preview` endpoint WHEN called with an image file path THEN response is the raw binary with correct MIME type (e.g., `image/png`) | API |
+
+### AC-049-F-17: Full-Width Article Content Layout (CR-006)
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-049-F-17a | GIVEN the KB article view is displayed WHEN the article scene renders THEN the main content area (`.kb-article-main`) expands to fill the available horizontal space (no fixed max-width constraint) with left and right padding for readability margins | UI |
+| AC-049-F-17b | GIVEN the KB article view has a sidebar visible WHEN the article scene renders THEN the sidebar retains its fixed 260px width AND the main content area fills the remaining space | UI |
+| AC-049-F-17c | GIVEN an image/PDF/docx/HTML preview is displayed in the article view WHEN the content renders THEN the preview element (image, iframe) scales to use the full width of the expanded content area (respecting container padding) | UI |
+| AC-049-F-17d | GIVEN the viewport width is less than 900px WHEN the article view renders THEN the sidebar is hidden AND the main content area uses the full viewport width with padding | UI |
 
 | ID | Requirement | Input | Process | Output |
 |----|-------------|-------|---------|--------|
@@ -241,6 +253,7 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | FR-049-F.17 | Folder Status Derivation (CR-005) | Children statuses from `.intake-status.json` | Derive folder status: "pending" if ≥1 child pending, "processing" if any processing with no pending, "filed" if all children filed. Applied recursively for nested folders | Computed status per folder, no stored folder status |
 | FR-049-F.18 | Folder Actions (CR-005) | User clicks action on folder row | Folder-specific actions: Assign (bulk-set destination for all children), Remove (delete folder + all contents), Undo (revert all filed children to pending). No Preview action for folders | Folder-level batch operations |
 | FR-049-F.19 | Pre-loaded Intake Tree (CR-005) | `GET /api/kb/intake` | Return full nested tree in single API call; folders include `children` arrays with files and sub-folders recursively; no lazy-loading endpoint | Complete tree in one response |
+| FR-049-F.20 | Full-Width Article Layout (CR-006) | Article scene active | Article main content area expands to fill available horizontal space instead of fixed max-width; left/right padding provides readability margins; sidebar remains fixed at 260px | Content and previews displayed at full available width |
 
 ## Non-Functional Requirements
 
@@ -283,6 +296,13 @@ Derived from mockup Scene 4:
    - Folder actions: Assign + Remove (for pending), Undo (for filed) — no Preview button
    - Folder status badge same as files (Pending orange, Processing blue, Filed green) but derived from children
    - Nested rows share the same table structure (no separate sub-table)
+
+7. **Full-Width Article Content (CR-006):**
+   - Article main content area (`.kb-article-main`) expands to fill all available horizontal space — no fixed `max-width` constraint
+   - Left and right padding (32px–48px) provides comfortable readability margins
+   - Images, iframes (PDF/docx/HTML), and code blocks scale to the full container width
+   - Sidebar remains fixed at 260px; main content fills the remaining space via flexbox
+   - On viewports < 900px (sidebar hidden), content uses full width with padding
 
 ## Dependencies
 
@@ -370,3 +390,4 @@ Derived from mockup Scene 4:
 None — all questions resolved via DAO (see `x-ipe-docs/dao/26-03-16/decisions_made_feature_refinement.md`, `x-ipe-docs/dao/26-03-18/decisions_made_change_request.md`). CR-005 folder support decisions: derived folder status, pre-loaded tree, folder-specific actions, filter propagation, deep-count badge, per-file AI Librarian processing.
 CR-001 questions resolved: batch processing, destination priority (UI-assigned > AI), non-markdown handling, terminal summary, auto-create folders.
 CR-002 questions resolved: metadata storage (`.kb-index.json` registry), locally-scoped indexes, folder metadata, description attribute (< 100 words).
+CR-006 decisions resolved: remove max-width: 780px constraint, use padding for margins, sidebar unaffected (flexbox), AC-049-F-16b clarified for container-relative scaling.

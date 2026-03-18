@@ -1,6 +1,6 @@
 # Technical Design: KB AI Librarian & Intake
 
-> Feature ID: FEATURE-049-F | Version: v1.2 | Last Updated: 03-18-2026
+> Feature ID: FEATURE-049-F | Version: v1.3 | Last Updated: 03-18-2026
 
 ---
 
@@ -916,6 +916,74 @@ sequenceDiagram
 
 ---
 
+### Step 11: Full-Width Article Content Layout (CR-006)
+
+**Scope:** [Frontend — CSS only]
+**Program type:** frontend
+**Tech stack:** CSS
+
+#### Problem
+
+The `.kb-article-main` container has `max-width: 780px` (line 837 of `kb-browse-modal.css`), which constrains all content — images, documents, markdown, code — to a narrow column. This wastes significant horizontal space, especially on wide screens, and makes image/document previews appear small.
+
+#### Solution Design
+
+Remove the fixed `max-width` constraint and let the content area fill available space via flexbox. The existing `flex: 1` on `.kb-article-main` already handles dynamic sizing — the `max-width: 780px` artificially caps it.
+
+**CSS Changes (1 file, ~3 lines):**
+
+```css
+/* kb-browse-modal.css — .kb-article-main (line 834-839) */
+
+/* BEFORE: */
+.kb-article-main {
+    flex: 1;
+    padding: 32px 48px;
+    max-width: 780px;      /* ← REMOVE this line */
+    min-height: 0;
+}
+
+/* AFTER: */
+.kb-article-main {
+    flex: 1;
+    padding: 32px 48px;    /* 48px L/R padding provides readability margins */
+    min-height: 0;
+}
+```
+
+**Why this works:**
+- `flex: 1` already makes `.kb-article-main` expand to fill available space
+- `padding: 32px 48px` provides comfortable left/right margins (48px each side)
+- `.kb-article-sidebar` at `width: 260px; min-width: 260px` remains fixed — flexbox gives it priority, main content takes the remainder
+- `.kb-image-preview` with `max-width: 100%` scales to the wider container automatically
+- `@media (max-width: 900px)` hides the sidebar → content gets full width minus padding
+- No JavaScript changes — layout is purely CSS-driven
+
+**No changes needed for:**
+- `.kb-article-sidebar` — fixed width, unaffected
+- `.kb-image-preview` — `max-width: 100%` works at any container width
+- `.kb-article-content` — no width constraints, inherits from parent
+- `.kb-article-header-block` — no width constraints
+- Iframes (PDF/docx/HTML) — already use `width: 100%` in rendered markup
+- Media queries — existing `@media (max-width: 900px)` sidebar hiding is unaffected
+
+#### Affected Files & LOC Estimate
+
+| File | Change | LOC |
+|------|--------|-----|
+| `src/x_ipe/static/css/kb-browse-modal.css` | Remove `max-width: 780px` from `.kb-article-main` | ~1 |
+
+#### AC Coverage
+
+| AC | Design Coverage |
+|----|-----------------|
+| AC-049-F-17a | Removing `max-width` lets `flex: 1` expand main area; `padding: 48px` provides margins |
+| AC-049-F-17b | `.kb-article-sidebar` `width: 260px; min-width: 260px` stays fixed; main takes remainder |
+| AC-049-F-17c | `.kb-image-preview` `max-width: 100%` and iframes `width: 100%` scale to wider container |
+| AC-049-F-17d | `@media (max-width: 900px)` already hides sidebar; no `max-width` means full width usage |
+
+---
+
 ## Design Change Log
 
 | Date | Phase | Change Summary |
@@ -924,3 +992,4 @@ sequenceDiagram
 | 03-16-2026 | CR-001 Skill Design | Added Step 9: x-ipe-tool-kb-librarian skill design. program_type=skills. Sequence diagram, state machine, SKILL.md structure, AI classification approach, 6 DAO-driven decisions. |
 | 03-17-2026 | CR-002 Metadata Registry | Added Step 10: .kb-index.json registry design. Replaces frontmatter-embedded metadata. Per-folder hidden JSON index, folder metadata support, description field (< 100 words). Migration strategy, API compatibility, new/refactored methods. |
 | 03-18-2026 | CR-005 Folder Support | Backend: refactored `get_intake_files()` for nested tree via `_build_intake_tree()`, derived folder status via `_derive_folder_status()`, deep pending count. API response changed: `files`→`items`, added `children`/`type`/`item_count`/`pending_deep_count`. Frontend: added `_renderIntakeRow()` with indent/chevron/folder icons, `_toggleFolder()` for expand/collapse, `_filterIntakeItems()` for recursive filter propagation, folder-specific actions (Assign cascades, Remove recursive, Undo cascades). DAO decisions: derived status, pre-loaded tree, no lazy loading, deep-count badge. |
+| 03-18-2026 | CR-006 Full-Width Layout | CSS-only: Remove `max-width: 780px` from `.kb-article-main` in `kb-browse-modal.css`. Existing `flex: 1` + `padding: 48px` handles expansion and margins. No JS, backend, or sidebar changes needed. ~1 LOC change. |
