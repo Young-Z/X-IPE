@@ -6,7 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
-| TASK-957 | Bug Fix | KB article preview does not render image files (.jpg, .png, etc.) inline — only shows metadata. Fix to display images in div.kb-article-main. Source: UIUX Feedback Feedback-20260318-095642 | Spark ✨ | 🔄 in_progress | 03-18-2026 | — | — |
+| TASK-958 | Feature Closing | Close CR-005 folder support for FEATURE-049-F: verify ACs, code-to-docs review, refactoring analysis, push to main. DAO mode. | Ember 🔥 | 🔄 in_progress | 03-18-2026 | — | — |
 | TASK-956 | Acceptance Test | Validate CR-005 folder support ACs for FEATURE-049-F: backend tree/status/cascade tests, frontend tree rendering/toggle/filter/action tests, structured review of API response schema. DAO mode. | Ember 🔥 | ✅ done | 03-18-2026 | [acceptance-test-report-cr005.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/acceptance-test-report-cr005.md), [4e7101f](src/) | x-ipe-task-based-feature-closing |
 | TASK-955 | Code Implementation | Implement CR-005 folder support for FEATURE-049-F: backend tree builder, derived status, deep pending count, folder cascade; frontend tree rendering with expand/collapse, filter, folder actions. Fullstack (Python/Flask + JS). DAO mode. | Ember 🔥 | ✅ done | 03-18-2026 | [541b0f5](tests/), [518d23a](src/) | x-ipe-task-based-feature-acceptance-test |
 | TASK-954 | Technical Design | Design CR-005 folder support delta for FEATURE-049-F: tree data model, derived status algorithm, folder actions, pre-loaded API response, folder tree UI rendering. DAO mode. | Ember 🔥 | ✅ done | 03-18-2026 | [technical-design.md v1.2](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/technical-design.md) | x-ipe-task-based-code-implementation |
@@ -144,6 +144,7 @@
 
 
 ## Completed Tasks
+| TASK-957 | Bug Fix | KB article preview renders image files (.jpg, .png, etc.) inline. Added /api/kb/files/{path}/raw route + frontend image type detection + CSS. 4 Python + 6 JS tests. | Spark ✨ | ✅ completed | 03-18-2026 | [9928d31] | Source: UIUX Feedback Feedback-20260318-095642 |
 | TASK-033 | Implement CR-002: Refocus Extractor on Knowledge Learning | Execute CR-002 that adds Chrome DevTools extraction support, tool skill feedback during extraction, and delegates quality scoring to tool skills. Affects extractor SKILL.md (4 changes), execution-procedures.md (4 changes), and adds score_quality operation to user manual tool skill. | EPIC-050, EPIC-051 | ✅ completed | Atom | 03-17-2026 | 03-17-2026 |
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Notes |
@@ -207,7 +208,7 @@
 
 ## Quick Stats
 
-- **Total Active:** 11
+- **Total Active:** 10
 - **In Progress:** 2
 - **Pending:** 0
 - **Completed (archived):** 878
