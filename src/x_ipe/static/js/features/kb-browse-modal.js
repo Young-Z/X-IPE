@@ -513,13 +513,13 @@ class KBBrowseModal {
             if (!res.ok) throw new Error('Failed to load');
             const data = await res.json();
             this.currentArticle = data;
-            this._renderArticleScene(data);
+            await this._renderArticleScene(data);
         } catch (err) {
             scene.innerHTML = `<div class="kb-empty-state"><i class="bi bi-exclamation-triangle"></i><p>Failed to load article: ${this._escapeHtml(err.message)}</p></div>`;
         }
     }
 
-    _renderArticleScene(data) {
+    async _renderArticleScene(data) {
         const scene = this.overlay?.querySelector('[data-scene="article"]');
         if (!scene) return;
 
