@@ -915,7 +915,19 @@ class LinkExistingPanel {
         this.selectedPath = path;
         this.onSelect(path);
 
-        // Fetch file preview
+        // CR-008: Use shared FilePreviewRenderer for consistent preview
+        if (typeof FilePreviewRenderer !== 'undefined') {
+            this.previewEl.innerHTML = '';
+            if (this._filePreviewRenderer) this._filePreviewRenderer.destroy();
+            this._filePreviewRenderer = new FilePreviewRenderer({
+                apiEndpoint: '/api/ideas/file?path={path}',
+                endpointStyle: 'query'
+            });
+            await this._filePreviewRenderer.renderPreview(path, this.previewEl);
+            return;
+        }
+
+        // Fallback: original logic if FilePreviewRenderer not loaded
         this.previewEl.innerHTML = '<div class="link-existing-empty">Loading preview...</div>';
         try {
             const resp = await fetch(`/api/ideas/file?path=${encodeURIComponent(path)}`);
@@ -931,7 +943,6 @@ class LinkExistingPanel {
             }
             const content = await resp.text();
 
-            // CR-002: Handle converted binary files (.docx, .msg) via X-Converted header
             const isConverted = resp.headers && resp.headers.get('X-Converted') === 'true';
             if (isConverted) {
                 const blob = new Blob([content], { type: 'text/html' });
@@ -970,6 +981,11 @@ class LinkExistingPanel {
     }
 
     destroy() {
+        // CR-008: Cleanup FilePreviewRenderer
+        if (this._filePreviewRenderer) {
+            this._filePreviewRenderer.destroy();
+            this._filePreviewRenderer = null;
+        }
         this.container.innerHTML = '';
         this.selectedPath = null;
     }

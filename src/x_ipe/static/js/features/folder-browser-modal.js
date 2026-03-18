@@ -57,6 +57,11 @@ class FolderBrowserModal {
             this.abortController.abort();
             this.abortController = null;
         }
+        // CR-008: Cleanup FilePreviewRenderer
+        if (this._filePreviewRenderer) {
+            this._filePreviewRenderer.destroy();
+            this._filePreviewRenderer = null;
+        }
         document.removeEventListener('keydown', this._onEscape);
 
         this.backdrop.classList.remove('active');
@@ -397,6 +402,26 @@ class FolderBrowserModal {
         if (itemEl) itemEl.classList.add('selected');
         this.currentFile = filePath;
 
+        // CR-008: Use shared FilePreviewRenderer for all file types
+        if (typeof FilePreviewRenderer !== 'undefined') {
+            this.previewPanel.innerHTML = '';
+            this.previewPanel.appendChild(this._makePreviewHeader(filePath));
+            const contentEl = document.createElement('div');
+            contentEl.className = 'folder-browser-preview-content';
+            contentEl.style.cssText = 'flex:1;overflow:auto;position:relative';
+            this.previewPanel.appendChild(contentEl);
+
+            if (this._filePreviewRenderer) this._filePreviewRenderer.destroy();
+            this._filePreviewRenderer = new FilePreviewRenderer({
+                apiEndpoint: '/api/ideas/file?path={path}',
+                endpointStyle: 'query',
+                downloadUrl: '/api/ideas/file?path={path}'
+            });
+            await this._filePreviewRenderer.renderPreview(filePath, contentEl);
+            return;
+        }
+
+        // Fallback: original logic if FilePreviewRenderer not loaded
         const ext = filePath.substring(filePath.lastIndexOf('.')).toLowerCase();
 
         // Image preview

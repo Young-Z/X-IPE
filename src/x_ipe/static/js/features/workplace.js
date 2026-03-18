@@ -1106,7 +1106,9 @@ class WorkplaceManager {
         if (this.fileType === 'image') {
             bodyContent = this._renderImage();
         } else if (this.fileType === 'binary') {
-            bodyContent = this._renderBinaryPlaceholder();
+            // CR-008: Use shared FilePreviewRenderer for binary files
+            bodyContent = typeof FilePreviewRenderer !== 'undefined'
+                ? '' : this._renderBinaryPlaceholder();
         } else if (isHtmlFile) {
             // HTML file: show rendered preview
             bodyContent = this._renderHtmlPreview(content);
@@ -1148,6 +1150,19 @@ class WorkplaceManager {
         
         // Bind copilot button with hover dropdown
         this._bindCopilotButton();
+        
+        // CR-008: Use FilePreviewRenderer for binary files (DOCX, MSG, etc.)
+        if (this.fileType === 'binary' && typeof FilePreviewRenderer !== 'undefined') {
+            if (this._filePreviewRenderer) this._filePreviewRenderer.destroy();
+            this._filePreviewRenderer = new FilePreviewRenderer({
+                apiEndpoint: '/api/file/raw?path={path}',
+                endpointStyle: 'query'
+            });
+            const contentBody = document.getElementById('workplace-content-body');
+            if (contentBody) {
+                this._filePreviewRenderer.renderPreview(this.currentPath, contentBody);
+            }
+        }
         
         // Render Mermaid diagrams if any
         if (this.fileType === 'markdown' && typeof mermaid !== 'undefined') {

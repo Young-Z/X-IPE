@@ -14,8 +14,14 @@ import os
 from pathlib import Path
 from flask import Blueprint, render_template, jsonify, request, current_app, send_file
 
+from flask import Response
+
 from x_ipe.services import ProjectService, ContentService
+from x_ipe.services.conversion_utils import convert_docx, convert_msg, sanitize_converted_html
 from x_ipe.tracing import x_ipe_tracing
+
+CONVERTIBLE_EXTENSIONS = {'.docx', '.msg'}
+MAX_CONVERSION_SIZE = 10 * 1024 * 1024  # 10MB
 
 main_bp = Blueprint('main', __name__)
 
@@ -145,6 +151,57 @@ def get_file_content():
         service = ContentService(project_root)
         result = service.get_content(file_path)
         return jsonify(result)
+    except FileNotFoundError:
+        return jsonify({'error': 'File not found'}), 404
+    except PermissionError:
+        return jsonify({'error': 'Access denied'}), 403
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@main_bp.route('/api/file/raw')
+@x_ipe_tracing()
+def get_file_raw():
+    """
+    GET /api/file/raw?path=<relative_path>
+
+    CR-008: Serve raw file content for FilePreviewRenderer.
+    Converts .docx/.msg to HTML with X-Converted header.
+    Returns raw bytes for all other file types.
+    """
+    file_path = request.args.get('path')
+    if not file_path:
+        return jsonify({'error': 'Path parameter required'}), 400
+
+    project_root = current_app.config.get('PROJECT_ROOT')
+
+    try:
+        full_path = (Path(project_root) / file_path).resolve()
+
+        if not str(full_path).startswith(str(Path(project_root).resolve())):
+            return jsonify({'error': 'Access denied'}), 403
+
+        if not full_path.exists() or not full_path.is_file():
+            return jsonify({'error': 'File not found'}), 404
+
+        ext = full_path.suffix.lower()
+
+        if ext in CONVERTIBLE_EXTENSIONS:
+            file_size = full_path.stat().st_size
+            if file_size > MAX_CONVERSION_SIZE:
+                return jsonify({'error': 'File too large to preview (max 10MB)'}), 413
+            try:
+                if ext == '.docx':
+                    converted_html = convert_docx(full_path)
+                else:
+                    converted_html = convert_msg(full_path)
+                sanitized = sanitize_converted_html(converted_html)
+                return Response(sanitized, content_type='text/html; charset=utf-8',
+                                headers={'X-Converted': 'true'})
+            except Exception:
+                return jsonify({'error': 'Preview unavailable for this file'}), 415
+
+        return send_file(full_path)
     except FileNotFoundError:
         return jsonify({'error': 'File not found'}), 404
     except PermissionError:

@@ -108,7 +108,32 @@ class LinkPreviewManager {
             document.addEventListener('keydown', this._escHandler);
         }
 
-        // Fetch and display
+        // CR-008: Use shared FilePreviewRenderer for consistent preview
+        if (typeof FilePreviewRenderer !== 'undefined') {
+            this._contentArea.innerHTML = '';
+            if (this._filePreviewRenderer) this._filePreviewRenderer.destroy();
+            this._filePreviewRenderer = new FilePreviewRenderer({
+                apiEndpoint: '/api/file/raw?path={path}',
+                endpointStyle: 'query'
+            });
+            try {
+                await this._filePreviewRenderer.renderPreview(cleanPath, this._contentArea);
+                this._updateBreadcrumb();
+                // Re-attach link preview for rendered markdown
+                const mdBody = this._contentArea.querySelector('.markdown-body');
+                if (mdBody && !mdBody._linkPreviewAttached) {
+                    LinkPreviewManager.attachTo(mdBody);
+                    mdBody._linkPreviewAttached = true;
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    this._showError(`Failed to load file: ${cleanPath}`, cleanPath, true);
+                }
+            }
+            return;
+        }
+
+        // Fallback: original fetch logic if FilePreviewRenderer not loaded
         try {
             const data = await this._fetchFile(cleanPath);
             if (data) {
@@ -116,7 +141,7 @@ class LinkPreviewManager {
                 this._updateBreadcrumb();
             }
         } catch (err) {
-            if (err.name === 'AbortError') return; // intentional cancel
+            if (err.name === 'AbortError') return;
             if (err.type === 'not_found') {
                 this._showError(`File not found: ${cleanPath}`, cleanPath, false);
             } else {
@@ -232,6 +257,11 @@ class LinkPreviewManager {
         if (this._abortController) {
             this._abortController.abort();
             this._abortController = null;
+        }
+        // CR-008: Cleanup FilePreviewRenderer
+        if (this._filePreviewRenderer) {
+            this._filePreviewRenderer.destroy();
+            this._filePreviewRenderer = null;
         }
         this._isOpen = false;
         // FEATURE-043-B: Clear navigation state
