@@ -113,3 +113,31 @@
 
 ### Follow-up
 > None
+
+## DAO-089
+- **Timestamp:** 2026-03-18T20:50:54Z
+- **Task ID:** TASK-967
+- **Feature ID:** N/A
+- **Workflow:** N/A
+- **Calling Skill:** N/A (initial user message)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.92
+
+### Message
+> For workflow mode, original logic is compose idea -> refine idea -> requirement gathering. Now change that refine idea is not mandatory, so compose idea can have candidate action to requirement gathering.
+
+### Guidance Returned
+> Make refine_idea optional in workflow config. Add requirement_gathering to compose_idea's next_actions_suggested. Update: workflow-template.json, workflow_manager_service.py, workflow-stage.js, engineering-workflow.md.
+
+### Rationale
+> User explicitly requests a workflow config change — clear, bounded, reversible. No ambiguity.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "partial"
+>     reason: "workflow config change — closest to config fix"
+
+### Follow-up
+> None

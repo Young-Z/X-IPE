@@ -24,7 +24,8 @@
           ],
           "next_actions_suggested": [
             "refine_idea",
-            "reference_uiux"
+            "reference_uiux",
+            "requirement_gathering"
           ]
         },
         "reference_uiux": {
@@ -38,7 +39,7 @@
           ]
         },
         "refine_idea": {
-          "optional": false,
+          "optional": true,
           "action_context": {
             "raw-ideas": {
               "required": true,

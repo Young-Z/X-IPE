@@ -132,8 +132,8 @@ def _default_config():
     stage_config = {
         "ideation": {
             "type": "shared",
-            "mandatory_actions": ["compose_idea", "refine_idea"],
-            "optional_actions": ["reference_uiux", "design_mockup"],
+            "mandatory_actions": ["compose_idea"],
+            "optional_actions": ["reference_uiux", "refine_idea", "design_mockup"],
             "next_stage": "requirement",
         },
         "requirement": {
@@ -173,7 +173,7 @@ def _default_config():
         "change_request": "requirements",
     }
     next_actions_map = {
-        "compose_idea": ["refine_idea", "reference_uiux"],
+        "compose_idea": ["refine_idea", "reference_uiux", "requirement_gathering"],
         "refine_idea": ["design_mockup", "requirement_gathering"],
         "reference_uiux": ["design_mockup", "refine_idea"],
         "design_mockup": ["requirement_gathering"],

@@ -15,9 +15,9 @@ IDEATION → REQUIREMENT → IMPLEMENT → VALIDATION → FEEDBACK
 
 | Action | Skill | Required | Next Actions |
 |--------|-------|----------|--------------|
-| compose_idea | x-ipe-task-based-ideation | yes | refine_idea, reference_uiux |
+| compose_idea | x-ipe-task-based-ideation | yes | refine_idea, reference_uiux, requirement_gathering |
 | reference_uiux | (UIUX reference workflow) | no | design_mockup, refine_idea |
-| refine_idea | x-ipe-task-based-ideation | yes | design_mockup, requirement_gathering |
+| refine_idea | x-ipe-task-based-ideation | no | design_mockup, requirement_gathering |
 | design_mockup | x-ipe-task-based-idea-mockup | no | requirement_gathering |
 | (architecture) | x-ipe-task-based-idea-to-architecture | no | requirement_gathering |
 | (share) | x-ipe-task-based-share-idea | no | TERMINAL |

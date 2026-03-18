@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-967 | Config Change | Make refine_idea optional in workflow; compose_idea can suggest requirement_gathering directly. Source: user request. DAO mode. | Sage 🌿 | ✅ done | 03-18-2026 | [workflow-template.json](x-ipe-docs/config/workflow-template.json), [workflow_manager_service.py](src/x_ipe/services/workflow_manager_service.py) | — |
 | TASK-966 | Bug Fix | Workflow mode instructions hardcode 'en' language — should respect project language config (zh etc). Source: Feedback-20260318-173426 #1. DAO mode. | Sage 🌿 | ✅ done | 03-18-2026 | [action-execution-modal.js](src/x_ipe/static/js/features/action-execution-modal.js) | — |
 | TASK-965 | Bug Fix | Claude Code CLI adapter uses wrong `-p` flag in command. Should be `claude "prompt"` not `claude -p "prompt"`. Source: Feedback-20260318-173426 #2. DAO mode. | Sage 🌿 | ✅ done | 03-18-2026 | [cli-adapters.yaml](x-ipe-docs/config/cli-adapters.yaml) | — |
 | TASK-964 | Feature Closing | Close CR-006 full-width layout for FEATURE-049-F: verify ACs, commit changes. DAO mode. | Flux ⚡ | ✅ done | 03-18-2026 | [0dc862e](src/x_ipe/static/css/kb-browse-modal.css) | — |

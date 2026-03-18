@@ -234,7 +234,7 @@ class TestStageGating:
     def test_complete_mandatory_ideation_unlocks_requirement(self, workflow_service, sample_workflow):
         """AC: All mandatory ideation actions done → requirement unlocks on-demand."""
         workflow_service.update_action_status(sample_workflow, "compose_idea", "done")
-        workflow_service.update_action_status(sample_workflow, "refine_idea", "done")
+        # refine_idea is now optional — only compose_idea is mandatory
         # Stage gating is on-demand: attempting to update an action in the locked
         # stage triggers the unlock check.
         result = workflow_service.update_action_status(
@@ -246,8 +246,7 @@ class TestStageGating:
     def test_optional_actions_dont_block(self, workflow_service, sample_workflow):
         """AC: Optional actions (skipped/pending) do not block stage progression."""
         workflow_service.update_action_status(sample_workflow, "compose_idea", "done")
-        workflow_service.update_action_status(sample_workflow, "refine_idea", "done")
-        # reference_uiux and design_mockup are optional — left as pending
+        # refine_idea, reference_uiux, and design_mockup are all optional — left as pending
         # On-demand unlock: attempting a requirement action triggers unlock.
         result = workflow_service.update_action_status(
             sample_workflow, "requirement_gathering", "in_progress"
@@ -257,8 +256,8 @@ class TestStageGating:
 
     def test_partial_mandatory_keeps_locked(self, workflow_service, sample_workflow):
         """AC: Not all mandatory done → next stage stays locked."""
-        workflow_service.update_action_status(sample_workflow, "compose_idea", "done")
-        # refine_idea still pending
+        # compose_idea is the only mandatory ideation action now;
+        # requirement stays locked until compose_idea is done.
         state = workflow_service.get_workflow(sample_workflow)
         assert state["shared"]["requirement"]["status"] == "locked"
 
@@ -509,13 +508,13 @@ class TestNextAction:
     def test_next_action_initial_state(self, workflow_service, sample_workflow):
         """AC: Initial state suggests first mandatory ideation action."""
         result = workflow_service.get_next_action(sample_workflow)
-        assert result["action"] in ("compose_idea", "refine_idea")
+        assert result["action"] == "compose_idea"
         assert result["stage"] == "ideation"
 
     def test_next_action_after_ideation_complete(self, workflow_service, sample_workflow):
         """AC: After ideation complete, suggests first requirement action."""
         workflow_service.update_action_status(sample_workflow, "compose_idea", "done")
-        workflow_service.update_action_status(sample_workflow, "refine_idea", "done")
+        # refine_idea is optional — only compose_idea needed to complete ideation
         result = workflow_service.get_next_action(sample_workflow)
         assert result["stage"] == "requirement"
 
