@@ -529,9 +529,13 @@ class KBBrowseModal {
         const created = this._formatDate(fm.created || data.modified_date);
         const fileSize = this._formatFileSize(data.size_bytes || 0);
 
-        // Render markdown
+        // Render content based on file type
+        const IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']);
         let rendered = '';
-        if (typeof marked !== 'undefined') {
+        if (data.binary && IMAGE_EXTS.has((data.file_type || '').toLowerCase())) {
+            const rawUrl = `${KBBrowseModal.API.FILES}/${encodeURIComponent(data.path)}/raw`;
+            rendered = `<img class="kb-image-preview" src="${rawUrl}" alt="${this._escapeHtml(fm.title || data.name)}" />`;
+        } else if (typeof marked !== 'undefined') {
             try { rendered = marked.parse(data.content || ''); } catch { rendered = this._escapeHtml(data.content || ''); }
         } else {
             rendered = `<pre>${this._escapeHtml(data.content || '')}</pre>`;

@@ -4,7 +4,7 @@ FEATURE-049-A: KB Backend & Storage Foundation — Routes
 Flask Blueprint exposing REST API endpoints under /api/kb/ for Knowledge Base
 file/folder CRUD, config, tree, and search operations.
 """
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request, current_app, send_file
 from pathlib import Path
 
 from x_ipe.tracing import x_ipe_tracing
@@ -85,6 +85,26 @@ def list_files():
 # ---------------------------------------------------------------------------
 # File CRUD
 # ---------------------------------------------------------------------------
+
+
+@kb_bp.route('/api/kb/files/<path:file_path>/raw', methods=['GET'])
+@x_ipe_tracing()
+def get_file_raw(file_path):
+    """
+    GET /api/kb/files/{path}/raw
+
+    TASK-957: Serve raw file bytes for inline preview (images, PDFs, etc.).
+    """
+    svc = _get_kb_service_or_abort()
+    try:
+        resolved = svc._resolve_safe_path(file_path)
+        if not resolved.is_file():
+            return _error('NOT_FOUND', f'File not found: {file_path}', 404)
+        return send_file(resolved)
+    except ValueError as exc:
+        return _error('BAD_REQUEST', str(exc), 400)
+    except Exception as exc:
+        return _error('INTERNAL_ERROR', str(exc), 500)
 
 
 @kb_bp.route('/api/kb/files/<path:file_path>', methods=['GET'])

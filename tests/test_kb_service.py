@@ -1651,3 +1651,56 @@ class TestKBIndexMigration:
         file_node = [n for n in tree if n.name == 'old-style.md']
         assert len(file_node) == 1
         assert file_node[0].frontmatter.title == 'Old Style'
+
+
+# ===========================================================================
+# TASK-957: Raw file serving for image preview
+# ===========================================================================
+
+
+class TestFileRawServing:
+    """GET /api/kb/files/<path>/raw — serve raw file bytes for preview."""
+
+    def test_raw_image_returns_bytes_with_correct_mimetype(self, client, app):
+        """Serving a .png image returns raw bytes and image/png content type."""
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        img_data = b'\x89PNG\r\n\x1a\n' + b'\x00' * 100
+        (Path(svc.kb_root) / 'photo.png').write_bytes(img_data)
+
+        resp = client.get('/api/kb/files/photo.png/raw')
+        assert resp.status_code == 200
+        assert resp.data == img_data
+        assert 'image/png' in resp.content_type
+
+    def test_raw_jpg_returns_correct_mimetype(self, client, app):
+        """Serving a .jpg image returns image/jpeg content type."""
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        jpg_data = b'\xff\xd8\xff\xe0' + b'\x00' * 50
+        (Path(svc.kb_root) / 'pic.jpg').write_bytes(jpg_data)
+
+        resp = client.get('/api/kb/files/pic.jpg/raw')
+        assert resp.status_code == 200
+        assert 'image/jpeg' in resp.content_type
+
+    def test_raw_nonexistent_file_returns_404(self, client, app):
+        """Missing file returns 404."""
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+
+        resp = client.get('/api/kb/files/missing.jpg/raw')
+        assert resp.status_code == 404
+
+    def test_raw_subfolder_file_works(self, client, app):
+        """Serving a file from a subfolder works correctly."""
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        subdir = Path(svc.kb_root) / 'domain'
+        subdir.mkdir(exist_ok=True)
+        img_data = b'\x89PNG\r\n\x1a\n' + b'\x00' * 50
+        (subdir / 'chart.png').write_bytes(img_data)
+
+        resp = client.get('/api/kb/files/domain/chart.png/raw')
+        assert resp.status_code == 200
+        assert resp.data == img_data

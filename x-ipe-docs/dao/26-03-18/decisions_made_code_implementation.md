@@ -5,6 +5,7 @@
 | Entry ID | Timestamp | Task ID | Calling Skill | Disposition | Confidence | Summary |
 |----------|-----------|---------|---------------|-------------|------------|---------|
 | DAO-084 | 2026-03-18T11:30:00Z | TASK-954 | x-ipe-task-based-technical-design | instruction | 0.95 | Proceed to Code Implementation for FEATURE-049-F CR-005 folder support in KB intake |
+| DAO-085 | 2026-03-18T14:45:00Z | TASK-955 | x-ipe-task-based-code-implementation | instruction | 0.95 | Code implementation complete — proceed to acceptance testing for FEATURE-049-F CR-005 |
 
 ---
 
@@ -51,3 +52,47 @@
 
 ### Follow-up
 > None — standard workflow progression. After code implementation completes, the next DAG step is acceptance_test (Stage 4: VALIDATION).
+
+---
+
+## DAO-085 — Code Implementation Complete — Proceed to Acceptance Testing
+
+- **Timestamp:** 2026-03-18T14:45:00Z
+- **Task ID:** TASK-955
+- **Feature ID:** FEATURE-049-F
+- **Workflow:** N/A
+- **Calling Skill:** x-ipe-task-based-code-implementation
+- **Source:** ai
+- **Disposition:** instruction
+- **Confidence:** 0.95
+
+### Message
+> TASK-955 Code Implementation is done. Backend tree builder, derived status, deep pending count, folder cascade are implemented. Frontend tree rendering, expand/collapse, filter, folder actions are implemented. 31 new tests added (17 frontend + 14 backend), all passing. Ready to proceed to acceptance testing per engineering workflow DAG.
+
+### Guidance Returned
+> Code implementation for FEATURE-049-F (CR-005: folder tree display with expand/collapse in KB intake) is complete and verified. All 954 tests pass (796 JS + 158 Python), including 31 new tests covering backend tree building, derived status, deep pending count, folder cascade, and frontend tree rendering with expand/collapse, filter, and folder actions. Proceed to acceptance testing. Agent should create a new TASK for acceptance testing and follow x-ipe-task-based-feature-acceptance-test skill procedure.
+
+### Rationale
+> **Supporting perspective:** Implementation is complete with comprehensive test coverage — 14 backend tests (tree builder, derived status, deep pending count, folder cascade) and 17 frontend tests (tree rendering, expand/collapse, filter, folder actions). All 954 tests pass. The engineering workflow DAG clearly maps implementation → acceptance_testing as the next step (Stage 3 → Stage 4: VALIDATION).
+>
+> **Opposing perspective:** None identified. All implementation deliverables are committed, tests are green, and the workflow progression is standard.
+>
+> **Neutral perspective:** This is a routine DAG progression. The agent has satisfied the Definition of Done for code implementation (code committed, tests passing, no regressions). Acceptance testing is the natural next step to validate against specification acceptance criteria.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-feature-acceptance-test"
+>     match_strength: "strong"
+>     reason: "Engineering DAG next step after code_implementation. Implementation is complete with all tests passing. Acceptance testing validates against specification ACs."
+>     execution_steps:
+>       - phase: "1. Preparation"
+>         step: "1.1 Read specification acceptance criteria for FEATURE-049-F"
+>       - phase: "2. Test Generation"
+>         step: "2.1 Generate acceptance test cases from specification ACs"
+>       - phase: "3. Execution"
+>         step: "3.1 Execute acceptance tests against implemented feature"
+>       - phase: "4. Validation"
+>         step: "4.1 Verify all ACs are satisfied"
+
+### Follow-up
+> After acceptance testing completes, the next DAG step is human_playground (Stage 5: FEEDBACK) or feature_closing (Stage 6: DELIVERY) depending on workflow configuration.

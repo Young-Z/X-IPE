@@ -6,6 +6,8 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-957 | Bug Fix | KB article preview does not render image files (.jpg, .png, etc.) inline — only shows metadata. Fix to display images in div.kb-article-main. Source: UIUX Feedback Feedback-20260318-095642 | Spark ✨ | 🔄 in_progress | 03-18-2026 | — | — |
+| TASK-956 | Acceptance Test | Validate CR-005 folder support ACs for FEATURE-049-F: backend tree/status/cascade tests, frontend tree rendering/toggle/filter/action tests, structured review of API response schema. DAO mode. | Ember 🔥 | ✅ done | 03-18-2026 | [acceptance-test-report-cr005.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/acceptance-test-report-cr005.md), [4e7101f](src/) | x-ipe-task-based-feature-closing |
 | TASK-955 | Code Implementation | Implement CR-005 folder support for FEATURE-049-F: backend tree builder, derived status, deep pending count, folder cascade; frontend tree rendering with expand/collapse, filter, folder actions. Fullstack (Python/Flask + JS). DAO mode. | Ember 🔥 | ✅ done | 03-18-2026 | [541b0f5](tests/), [518d23a](src/) | x-ipe-task-based-feature-acceptance-test |
 | TASK-954 | Technical Design | Design CR-005 folder support delta for FEATURE-049-F: tree data model, derived status algorithm, folder actions, pre-loaded API response, folder tree UI rendering. DAO mode. | Ember 🔥 | ✅ done | 03-18-2026 | [technical-design.md v1.2](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/technical-design.md) | x-ipe-task-based-code-implementation |
 | TASK-953 | Feature Refinement | Refine FEATURE-049-F specification for CR-005 (folder support in intake). Update ACs, UI/UX requirements, functional requirements for folder tree display and count logic. DAO mode. | Ember 🔥 | ✅ done | 03-18-2026 | [specification.md v1.5](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md) | x-ipe-task-based-technical-design |
@@ -205,10 +207,10 @@
 
 ## Quick Stats
 
-- **Total Active:** 10
+- **Total Active:** 11
 - **In Progress:** 2
 - **Pending:** 0
-- **Completed (archived):** 877
+- **Completed (archived):** 878
 - **Deferred:** 0
 - **Reverted:** 8
 - **Pending Review:** 0
