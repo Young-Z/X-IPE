@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-953 | Feature Refinement | Refine FEATURE-049-F specification for CR-005 (folder support in intake). Update ACs, UI/UX requirements, functional requirements for folder tree display and count logic. DAO mode. | Ember 🔥 | 🔄 in_progress | 03-18-2026 | — | x-ipe-task-based-technical-design |
 | TASK-952 | Change Request | CR for KB intake: fix file count logic for uploaded folders (shows 0) and add folder tree display with expand/collapse in intake file list view. Source: UIUX Feedback Feedback-20260318-083710 | Ember 🔥 | ✅ done | 03-18-2026 | [CR-005.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/CR-005.md), [specification.md v1.4](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md) | x-ipe-task-based-feature-refinement |
 | TASK-950 | Skill Update | Apply LL-001 to extractor: session-scoped screenshots + post-gen session cleanup. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [482a9eb] | — |
 | TASK-951 | Skill Update | Apply LL-001 to tool-user-manual: screenshots in references/ subfolder. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [482a9eb] | — |
@@ -202,8 +203,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 9
-- **In Progress:** 2
+- **Total Active:** 10
+- **In Progress:** 3
 - **Pending:** 0
 - **Completed (archived):** 876
 - **Deferred:** 0

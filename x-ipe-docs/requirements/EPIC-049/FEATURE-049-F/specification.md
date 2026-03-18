@@ -1,9 +1,9 @@
 # Feature Specification: KB AI Librarian & Intake
 
 > Feature ID: FEATURE-049-F  
-> Version: v1.2  
+> Version: v1.5  
 > Status: Refined  
-> Last Updated: 03-17-2026
+> Last Updated: 03-18-2026
 
 ## Version History
 
@@ -14,6 +14,7 @@
 | v1.2 | 03-17-2026 | CR-002: Replace frontmatter-embedded metadata with `.kb-index.json` registry — hidden file, locally-scoped, folder metadata, description attribute |
 | v1.3 | 03-17-2026 | CR-004: Add rich file preview to KB browse — markdown+DSL, images, docx/msg conversion, PDF, HTML iframe, syntax-highlighted code |
 | v1.4 | 03-18-2026 | CR-005: Folder support in intake — fix count logic for top-level items (folders + files), add folder tree display with expand/collapse in intake file list view |
+| v1.5 | 03-18-2026 | CR-005 Refinement: Folder status derived from children, pre-loaded tree (no lazy loading), folder-specific actions (assign/remove/undo), filter propagation, deep-count badge, AI Librarian processes files individually |
 
 ## Linked Mockups
 
@@ -48,6 +49,10 @@ The intake workflow separates the "upload" action from the "organize" action, le
 
 6. **As a** KB user, **I want to** undo a "Filed" result, **so that** I can re-process a file if the AI placed it incorrectly.
 
+7. **As a** KB user, **I want to** see uploaded folders as expandable tree items in the intake view, **so that** I can browse folder contents and manage them at both folder and file level. *(CR-005)*
+
+8. **As a** KB user, **I want to** assign or remove entire folders at once, **so that** I can efficiently manage batches of related files without acting on each file individually. *(CR-005)*
+
 ## Acceptance Criteria
 
 ### AC-049-F-01: Upload Mode Toggle
@@ -65,13 +70,15 @@ The intake workflow separates the "upload" action from the "organize" action, le
 |-------|-------------------------------|-----------|
 | AC-049-F-02a | GIVEN items (files or folders) exist in `.intake/` folder WHEN intake view loads THEN all top-level intake items are displayed in a table with columns: Name, Size/Items, Uploaded, Status, Destination, Actions (per mockup Scene 4). Folders show a folder icon and item count; files show a file icon and byte size | UI |
 | AC-049-F-02b | GIVEN `.intake/` folder is empty WHEN intake view loads THEN empty state message is shown with drop zone prompt ("Drop more files into Intake, or browse") | UI |
-| AC-049-F-02c | GIVEN intake items exist with mixed statuses WHEN user clicks "Pending" filter pill THEN only items with Pending status are shown | UI |
-| AC-049-F-02d | GIVEN intake items exist with mixed statuses WHEN user clicks "Processing" filter pill THEN only items with Processing status are shown | UI |
-| AC-049-F-02e | GIVEN intake items exist with mixed statuses WHEN user clicks "Filed" filter pill THEN only items with Filed status are shown | UI |
+| AC-049-F-02c | GIVEN intake items exist with mixed statuses WHEN user clicks "Pending" filter pill THEN only items with Pending status are shown AND folders are shown if ANY descendant file has Pending status | UI |
+| AC-049-F-02d | GIVEN intake items exist with mixed statuses WHEN user clicks "Processing" filter pill THEN only items with Processing status are shown AND folders are shown if ANY descendant file has Processing status | UI |
+| AC-049-F-02e | GIVEN intake items exist with mixed statuses WHEN user clicks "Filed" filter pill THEN only items with Filed status are shown AND folders are shown if ANY descendant file has Filed status | UI |
 | AC-049-F-02f | GIVEN any filter is active WHEN user clicks "All" filter pill THEN all items regardless of status are shown | UI |
-| AC-049-F-02g | GIVEN a folder exists in intake WHEN user clicks the folder row expand toggle THEN the folder's immediate children (files and sub-folders) are loaded and displayed as indented rows below the folder row | UI |
+| AC-049-F-02g | GIVEN a folder exists in intake AND all children are pre-loaded in the API response WHEN user clicks the folder row expand toggle THEN the folder's immediate children (files and sub-folders) are revealed as indented rows below the folder row (client-side show/hide, no additional API call) | UI |
 | AC-049-F-02h | GIVEN a folder row is expanded WHEN user clicks the collapse toggle THEN child rows are hidden and the toggle returns to collapsed state | UI |
-| AC-049-F-02i | GIVEN a sub-folder exists inside an expanded folder WHEN user clicks the sub-folder expand toggle THEN sub-folder's children are loaded and displayed with further indentation (recursive) | UI |
+| AC-049-F-02i | GIVEN a sub-folder exists inside an expanded folder WHEN user clicks the sub-folder expand toggle THEN sub-folder's children are revealed with further indentation (recursive, all pre-loaded) | UI |
+| AC-049-F-02j | GIVEN a folder row is rendered in the intake table WHEN the row displays THEN it shows: a chevron toggle (▶ collapsed / ▼ expanded), a folder icon (`bi-folder`/`bi-folder2-open`), the folder name, item count (e.g., "3 items") in the Size column, and no file-size value | UI |
+| AC-049-F-02k | GIVEN nested items are displayed in expanded folders WHEN child rows render THEN each nesting level adds 20px left padding relative to its parent row for visual hierarchy | UI |
 
 ### AC-049-F-03: Status Tracking
 
@@ -102,6 +109,10 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | AC-049-F-05d | GIVEN a file has "Filed" status WHEN user clicks "View in KB" (arrow icon) action THEN KB browse modal navigates to the file's destination folder | UI |
 | AC-049-F-05e | GIVEN a file has "Filed" status WHEN user clicks "Undo" (orange refresh icon) action THEN file is moved back to `.intake/` from its destination AND `.intake-status.json` entry reverts to `"pending"` AND destination is cleared | UI |
 | AC-049-F-05f | GIVEN a file has "Processing" status WHEN intake view renders that row THEN action buttons are disabled (no actions during processing) | UI |
+| AC-049-F-05g | GIVEN a folder has derived "Pending" status (≥1 child is pending) WHEN intake view renders the folder row THEN available actions are: Assign (folder-symlink icon) and Remove (red X icon). Preview action is NOT shown for folders | UI |
+| AC-049-F-05h | GIVEN a folder with derived "Pending" status WHEN user clicks "Assign folder" action on the folder THEN a folder picker is shown AND upon selection, the destination is saved for ALL children of the folder (recursively) in `.intake-status.json` | UI |
+| AC-049-F-05i | GIVEN a folder exists in intake WHEN user clicks Remove action on the folder THEN confirmation is requested AND upon confirm the folder and ALL its contents are deleted from `.intake/` AND intake view refreshes | UI |
+| AC-049-F-05j | GIVEN a folder has derived "Filed" status (all children filed) WHEN intake view renders the folder row THEN available action is: Undo (orange refresh icon). Undo reverts ALL children to "pending" status | UI |
 
 ### AC-049-F-06: Statistics & Badges (CR-005: updated counts to include folders)
 
@@ -109,7 +120,8 @@ The intake workflow separates the "upload" action from the "organize" action, le
 |-------|-------------------------------|-----------|
 | AC-049-F-06a | GIVEN intake items (files and/or folders) exist WHEN intake view loads THEN statistics bar shows: total top-level item count (purple badge), pending count (orange), processing count (blue), filed count (green) — per mockup Scene 4. Counts reflect top-level items only (not deep file count within folders) | UI |
 | AC-049-F-06b | GIVEN items are uploaded or status changes WHEN intake view refreshes THEN statistics bar counts update accordingly | UI |
-| AC-049-F-06c | GIVEN intake has pending items WHEN KB sidebar renders THEN "📥 Intake" entry shows a pending count badge (counting top-level pending items) | UI |
+| AC-049-F-06c | GIVEN intake has pending files (including files inside folders) WHEN KB sidebar renders THEN "📥 Intake" entry shows a pending count badge with deep-count of individual pending FILES across all folders (not just top-level items) | UI |
+| AC-049-F-06d | GIVEN a folder in `.intake/` contains children with mixed statuses WHEN folder status is determined THEN status is derived: "pending" if ≥1 child is pending, "processing" if any child is processing AND none are pending, "filed" if ALL children are filed | Unit |
 
 ### AC-049-F-07: Configuration
 
@@ -124,12 +136,13 @@ The intake workflow separates the "upload" action from the "organize" action, le
 
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
-| AC-049-F-08a | GIVEN `.intake/` folder exists with files and/or subdirectories AND `.intake-status.json` exists WHEN `kb_service` reads intake items THEN it returns merged data: item metadata from filesystem (type file or folder, size or item_count) + status/destination from JSON | Unit |
+| AC-049-F-08a | GIVEN `.intake/` folder exists with files and/or subdirectories AND `.intake-status.json` exists WHEN `kb_service` reads intake items THEN it returns a nested tree structure: item metadata from filesystem (type file or folder, size or item_count) + status/destination from JSON for files, derived status for folders | Unit |
 | AC-049-F-08b | GIVEN `.intake-status.json` is corrupted (invalid JSON) WHEN intake status is read THEN all items default to "pending" status AND error is logged | Unit |
 | AC-049-F-08c | GIVEN a new file is uploaded to `.intake/` WHEN upload completes THEN file appears in intake listing with "Pending" status (no status.json update needed) | Integration |
-| AC-049-F-08d | GIVEN user assigns a destination to a pending item (file or folder) WHEN assignment is saved THEN `.intake-status.json` is updated with destination path for that item | Unit |
-| AC-049-F-08e | GIVEN a folder exists in `.intake/` WHEN `kb_service` reads intake items THEN the folder appears as a top-level item with `type: "folder"`, `item_count` (number of immediate children), and `status` from `.intake-status.json` (defaulting to "pending") | Unit |
-| AC-049-F-08f | GIVEN `GET /api/kb/intake` is called with query parameter `children_of=<path>` WHEN the path is a valid folder inside `.intake/` THEN response contains the immediate children (files and sub-folders) of that folder with their metadata and status | API |
+| AC-049-F-08d | GIVEN user assigns a destination to a pending item (file or folder) WHEN assignment is saved THEN `.intake-status.json` is updated with destination path for that item (folder assign updates all children recursively) | Unit |
+| AC-049-F-08e | GIVEN a folder exists in `.intake/` WHEN `kb_service` reads intake items THEN the folder appears as a top-level item with `type: "folder"`, `item_count` (number of immediate children), `children` array (pre-loaded nested items), and `status` derived from children (not stored in `.intake-status.json`) | Unit |
+| AC-049-F-08f | GIVEN `GET /api/kb/intake` is called WHEN the `.intake/` folder contains subdirectories THEN response contains a nested tree with ALL items pre-loaded (folders include `children` arrays with their files and sub-folders recursively) — no separate endpoint for folder children | API |
+| AC-049-F-08g | GIVEN a folder contains children with statuses [pending, filed] WHEN `kb_service` derives folder status THEN status is "pending" (any pending child → folder is pending). GIVEN all children are "filed" THEN folder status is "filed". GIVEN any child is "processing" with no pending children THEN folder status is "processing" | Unit |
 
 ### AC-049-F-09: Edge Cases
 
@@ -224,6 +237,10 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | FR-049-F.13 | Folder Metadata | KB folder structure | Subfolders can have metadata entries (title, description, tags) in parent's `.kb-index.json` — key ends with `/` | Folder-level classification and description |
 | FR-049-F.14 | Description Attribute | File/folder metadata | Each index entry supports a `description` field (< 100 words, plain text) for AI-generated or human-provided summaries | Description available for search and display |
 | FR-049-F.15 | Rich File Preview | File card click in KB browse | Detect file type; render markdown+DSL via ContentRenderer, convert docx/msg to HTML, serve images/PDF natively, syntax-highlight code | Rich preview in article scene matching ideation capabilities |
+| FR-049-F.16 | Folder Tree Display (CR-005) | Intake API response with nested items | Render top-level items; folders show expand/collapse chevron and folder icon; expanding reveals pre-loaded children with indentation (20px per level); recursive sub-folder support | Hierarchical intake view with expand/collapse |
+| FR-049-F.17 | Folder Status Derivation (CR-005) | Children statuses from `.intake-status.json` | Derive folder status: "pending" if ≥1 child pending, "processing" if any processing with no pending, "filed" if all children filed. Applied recursively for nested folders | Computed status per folder, no stored folder status |
+| FR-049-F.18 | Folder Actions (CR-005) | User clicks action on folder row | Folder-specific actions: Assign (bulk-set destination for all children), Remove (delete folder + all contents), Undo (revert all filed children to pending). No Preview action for folders | Folder-level batch operations |
+| FR-049-F.19 | Pre-loaded Intake Tree (CR-005) | `GET /api/kb/intake` | Return full nested tree in single API call; folders include `children` arrays with files and sub-folders recursively; no lazy-loading endpoint | Complete tree in one response |
 
 ## Non-Functional Requirements
 
@@ -234,6 +251,7 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | NFR-049-F.3 | Intake view loads within 500ms for up to 100 files | Performance |
 | NFR-049-F.4 | Minimal new API routes — intake uses existing KB endpoints + filesystem; preview route is the exception for binary file serving | Simplicity (YAGNI) |
 | NFR-049-F.5 | Skill processes files non-destructively — original content is preserved, only frontmatter is added/merged | Data safety |
+| NFR-049-F.6 | Pre-loaded intake tree handles up to 500 total items (files + folders combined) without performance degradation | Performance (CR-005) |
 
 ## UI/UX Requirements
 
@@ -255,7 +273,16 @@ Derived from mockup Scene 4:
 
 4. **Drop Zone (Bottom):** Dashed purple border (`rgba(139,92,246,0.3)`), cloud-upload icon, "Drop more files into Intake, or browse" text.
 
-5. **Sidebar Badge:** "📥 Intake" entry in KB sidebar with pending count badge.
+5. **Sidebar Badge:** "📥 Intake" entry in KB sidebar with deep-count pending files badge (counts all individual pending files across all folders).
+
+6. **Folder Tree Display (CR-005):**
+   - Folder rows: chevron toggle (▶/▼) + `bi-folder`/`bi-folder2-open` icon + folder name + item count badge (e.g., "3 items")
+   - Expand/collapse is instant (pre-loaded data, no loading spinners)
+   - Indentation: 20px per nesting level applied via `padding-left`
+   - Expanded folder icon changes from `bi-folder` to `bi-folder2-open`
+   - Folder actions: Assign + Remove (for pending), Undo (for filed) — no Preview button
+   - Folder status badge same as files (Pending orange, Processing blue, Filed green) but derived from children
+   - Nested rows share the same table structure (no separate sub-table)
 
 ## Dependencies
 
@@ -284,7 +311,11 @@ Derived from mockup Scene 4:
 | BR-049-F-04 | Archive extraction in AI Librarian mode follows the same rules as normal upload (FEATURE-049-E) |
 | BR-049-F-05 | The AI Librarian command is plain natural language — no `--workflow-mode` or other flags |
 | BR-049-F-06 | Stale entries in `.intake-status.json` (files that no longer exist) are silently ignored |
-| BR-049-F-07 | Per-file actions vary by status: Pending → Preview/Assign/Remove; Processing → disabled; Filed → View in KB/Undo |
+| BR-049-F-07 | Per-item actions vary by status and type: Files — Pending → Preview/Assign/Remove; Processing → disabled; Filed → View in KB/Undo. Folders — Pending → Assign/Remove; Processing → disabled; Filed → Undo |
+| BR-049-F-08 | Folder status is derived from children: "pending" if ≥1 child pending, "processing" if any processing (none pending), "filed" if all children filed. Folders have NO explicit status in `.intake-status.json` (CR-005) |
+| BR-049-F-09 | Folder Assign/Remove/Undo actions apply recursively to ALL children (CR-005) |
+| BR-049-F-10 | AI Librarian processes individual files, not folders as units. Files within one folder may be assigned to different KB destinations (CR-005) |
+| BR-049-F-11 | Sidebar badge shows deep-count of individual pending FILES (not top-level items). Stats bar shows top-level item counts (CR-005) |
 
 ## Edge Cases & Constraints
 
@@ -299,6 +330,11 @@ Derived from mockup Scene 4:
 | AI Librarian skill not yet installed | Button still works (sends command to CLI); skill absence is the CLI agent's concern |
 | Skill encounters a file it cannot classify | Move to a default "unsorted" folder, log warning, continue batch |
 | Skill processes a very large file (>10MB) | Same behavior — file is moved, metadata entry added to `.kb-index.json` |
+| Empty folder in `.intake/` (CR-005) | Show folder row with "0 items" count; expanding shows empty state within the folder |
+| Deeply nested folder structure (5+ levels) (CR-005) | Support recursive expand/collapse with cumulative indentation; no depth limit |
+| Folder with mixed-status children (CR-005) | Folder visible in all relevant filter views (e.g., visible in both "Pending" and "Filed" filters if it has children with both statuses) |
+| Folder removal with some filed children (CR-005) | Confirmation dialog warns: "This folder contains filed items. Remove anyway?" |
+| Very large nested tree (500+ items) (CR-005) | Pre-loading handles up to 500 items; beyond that, consider pagination (NFR-049-F.6) |
 
 ## Out of Scope
 
@@ -306,12 +342,16 @@ Derived from mockup Scene 4:
 - **`kb-articles` workflow action context key** — workflow integration for the skill
 - **Batch operations** (select multiple files, bulk assign/remove) — future enhancement
 - **Drag-and-drop reordering** within intake table — not in mockup
+- **Lazy loading of folder children** — pre-loaded for simplicity per YAGNI; add if performance requires it (CR-005)
 - **Sidecar `.meta.json` for non-markdown files** — replaced by `.kb-index.json` registry (CR-002)
 - **YAML frontmatter for metadata** — replaced by `.kb-index.json` registry (CR-002); existing frontmatter in markdown files is NOT removed but no longer the source of truth
 
 ## Technical Considerations
 
-- `.intake-status.json` schema: `{ "filename.ext": { "status": "pending|processing|filed", "destination": "folder/path/", "updated_at": "ISO8601" } }`
+- `.intake-status.json` schema: `{ "filename.ext": { "status": "pending|processing|filed", "destination": "folder/path/", "updated_at": "ISO8601" } }` — keys are relative file paths (e.g., `subfolder/file.md` for nested files); folder entries are NOT stored (status derived from children)
+- `GET /api/kb/intake` response schema (CR-005): `{ "items": [ { "name": "file.md", "type": "file", "size": 1234, "uploaded": "ISO8601", "status": "pending", "destination": null, "path": "file.md" }, { "name": "folder/", "type": "folder", "item_count": 3, "status": "pending", "path": "folder", "children": [ ... ] } ], "stats": { "total": N, "pending": N, "processing": N, "filed": N }, "pending_deep_count": N }`
+- Folder status derivation priority: pending > processing > filed (any pending child makes folder pending)
+- Expand/collapse state is client-side only — not persisted across page reloads
 - The `_runAILibrarian()` method should use plain command: `'organize knowledge base intake files with AI Librarian'`
 - Existing `POST /api/kb/upload` with `folder=.intake` handles intake uploads — no new route needed
 - Existing `GET /api/kb/files?folder=.intake` or tree API can list intake files — extend if needed for status merging
@@ -327,6 +367,6 @@ Derived from mockup Scene 4:
 
 ## Open Questions
 
-None — all questions resolved via DAO (see `x-ipe-docs/dao/26-03-16/decisions_made_feature_refinement.md`).
+None — all questions resolved via DAO (see `x-ipe-docs/dao/26-03-16/decisions_made_feature_refinement.md`, `x-ipe-docs/dao/26-03-18/decisions_made_change_request.md`). CR-005 folder support decisions: derived folder status, pre-loaded tree, folder-specific actions, filter propagation, deep-count badge, per-file AI Librarian processing.
 CR-001 questions resolved: batch processing, destination priority (UI-assigned > AI), non-markdown handling, terminal summary, auto-create folders.
 CR-002 questions resolved: metadata storage (`.kb-index.json` registry), locally-scoped indexes, folder metadata, description attribute (< 100 words).
