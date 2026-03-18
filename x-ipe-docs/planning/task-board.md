@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-952 | Change Request | CR for KB intake: fix file count logic for uploaded folders (shows 0) and add folder tree display with expand/collapse in intake file list view. Source: UIUX Feedback Feedback-20260318-083710 | Ember 🔥 | ✅ done | 03-18-2026 | [CR-005.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/CR-005.md), [specification.md v1.4](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md) | x-ipe-task-based-feature-refinement |
 | TASK-950 | Skill Update | Apply LL-001 to extractor: session-scoped screenshots + post-gen session cleanup. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [482a9eb] | — |
 | TASK-951 | Skill Update | Apply LL-001 to tool-user-manual: screenshots in references/ subfolder. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [482a9eb] | — |
 | TASK-947 | Change Request | CR on EPIC-050 extractor skill: refocus phases on knowledge extraction, add chrome devtools option, delegate quality scoring to tool skills. Also update EPIC-051 tool skill with quality scoring capability. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 | [CR-002](x-ipe-docs/requirements/EPIC-050/CR-002.md) | - |
@@ -201,10 +202,10 @@
 
 ## Quick Stats
 
-- **Total Active:** 8
+- **Total Active:** 9
 - **In Progress:** 2
 - **Pending:** 0
-- **Completed (archived):** 875
+- **Completed (archived):** 876
 - **Deferred:** 0
 - **Reverted:** 8
 - **Pending Review:** 0

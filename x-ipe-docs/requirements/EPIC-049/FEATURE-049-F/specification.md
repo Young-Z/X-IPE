@@ -13,6 +13,7 @@
 | v1.1 | 03-16-2026 | CR-001: Added x-ipe-tool-kb-librarian skill to scope (was out-of-scope) |
 | v1.2 | 03-17-2026 | CR-002: Replace frontmatter-embedded metadata with `.kb-index.json` registry — hidden file, locally-scoped, folder metadata, description attribute |
 | v1.3 | 03-17-2026 | CR-004: Add rich file preview to KB browse — markdown+DSL, images, docx/msg conversion, PDF, HTML iframe, syntax-highlighted code |
+| v1.4 | 03-18-2026 | CR-005: Folder support in intake — fix count logic for top-level items (folders + files), add folder tree display with expand/collapse in intake file list view |
 
 ## Linked Mockups
 
@@ -58,16 +59,19 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | AC-049-F-01c | GIVEN `ai_librarian.enabled` is `false` in kb-config.json WHEN KB browse modal loads THEN upload mode toggle is hidden AND only Normal upload mode is available | UI |
 | AC-049-F-01d | GIVEN upload mode is AI Librarian WHEN user drops files onto the intake drop zone THEN files are uploaded to `.intake/` folder AND intake file list refreshes to show new files with "Pending" status | UI |
 
-### AC-049-F-02: Intake File Listing
+### AC-049-F-02: Intake Item Listing (CR-005: updated from "File Listing")
 
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
-| AC-049-F-02a | GIVEN files exist in `.intake/` folder WHEN intake view loads THEN all intake files are displayed in a table with columns: File, Size, Uploaded, Status, Destination, Actions (per mockup Scene 4) | UI |
+| AC-049-F-02a | GIVEN items (files or folders) exist in `.intake/` folder WHEN intake view loads THEN all top-level intake items are displayed in a table with columns: Name, Size/Items, Uploaded, Status, Destination, Actions (per mockup Scene 4). Folders show a folder icon and item count; files show a file icon and byte size | UI |
 | AC-049-F-02b | GIVEN `.intake/` folder is empty WHEN intake view loads THEN empty state message is shown with drop zone prompt ("Drop more files into Intake, or browse") | UI |
-| AC-049-F-02c | GIVEN intake files exist with mixed statuses WHEN user clicks "Pending" filter pill THEN only files with Pending status are shown | UI |
-| AC-049-F-02d | GIVEN intake files exist with mixed statuses WHEN user clicks "Processing" filter pill THEN only files with Processing status are shown | UI |
-| AC-049-F-02e | GIVEN intake files exist with mixed statuses WHEN user clicks "Filed" filter pill THEN only files with Filed status are shown | UI |
-| AC-049-F-02f | GIVEN any filter is active WHEN user clicks "All" filter pill THEN all files regardless of status are shown | UI |
+| AC-049-F-02c | GIVEN intake items exist with mixed statuses WHEN user clicks "Pending" filter pill THEN only items with Pending status are shown | UI |
+| AC-049-F-02d | GIVEN intake items exist with mixed statuses WHEN user clicks "Processing" filter pill THEN only items with Processing status are shown | UI |
+| AC-049-F-02e | GIVEN intake items exist with mixed statuses WHEN user clicks "Filed" filter pill THEN only items with Filed status are shown | UI |
+| AC-049-F-02f | GIVEN any filter is active WHEN user clicks "All" filter pill THEN all items regardless of status are shown | UI |
+| AC-049-F-02g | GIVEN a folder exists in intake WHEN user clicks the folder row expand toggle THEN the folder's immediate children (files and sub-folders) are loaded and displayed as indented rows below the folder row | UI |
+| AC-049-F-02h | GIVEN a folder row is expanded WHEN user clicks the collapse toggle THEN child rows are hidden and the toggle returns to collapsed state | UI |
+| AC-049-F-02i | GIVEN a sub-folder exists inside an expanded folder WHEN user clicks the sub-folder expand toggle THEN sub-folder's children are loaded and displayed with further indentation (recursive) | UI |
 
 ### AC-049-F-03: Status Tracking
 
@@ -99,13 +103,13 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | AC-049-F-05e | GIVEN a file has "Filed" status WHEN user clicks "Undo" (orange refresh icon) action THEN file is moved back to `.intake/` from its destination AND `.intake-status.json` entry reverts to `"pending"` AND destination is cleared | UI |
 | AC-049-F-05f | GIVEN a file has "Processing" status WHEN intake view renders that row THEN action buttons are disabled (no actions during processing) | UI |
 
-### AC-049-F-06: Statistics & Badges
+### AC-049-F-06: Statistics & Badges (CR-005: updated counts to include folders)
 
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
-| AC-049-F-06a | GIVEN intake files exist WHEN intake view loads THEN statistics bar shows: total file count (purple badge), pending count (orange), processing count (blue), filed count (green) — per mockup Scene 4 | UI |
-| AC-049-F-06b | GIVEN files are uploaded or status changes WHEN intake view refreshes THEN statistics bar counts update accordingly | UI |
-| AC-049-F-06c | GIVEN intake has pending files WHEN KB sidebar renders THEN "📥 Intake" entry shows a pending count badge | UI |
+| AC-049-F-06a | GIVEN intake items (files and/or folders) exist WHEN intake view loads THEN statistics bar shows: total top-level item count (purple badge), pending count (orange), processing count (blue), filed count (green) — per mockup Scene 4. Counts reflect top-level items only (not deep file count within folders) | UI |
+| AC-049-F-06b | GIVEN items are uploaded or status changes WHEN intake view refreshes THEN statistics bar counts update accordingly | UI |
+| AC-049-F-06c | GIVEN intake has pending items WHEN KB sidebar renders THEN "📥 Intake" entry shows a pending count badge (counting top-level pending items) | UI |
 
 ### AC-049-F-07: Configuration
 
@@ -116,14 +120,16 @@ The intake workflow separates the "upload" action from the "organize" action, le
 | AC-049-F-07c | GIVEN `ai_librarian` config exists WHEN `GET /api/kb/config` is called THEN response includes `ai_librarian` object with `enabled`, `intake_folder`, and `skill` fields | API |
 | AC-049-F-07d | GIVEN default kb-config.json is created WHEN KB initializes for the first time THEN `ai_librarian` defaults to `{ enabled: false, intake_folder: ".intake", skill: "x-ipe-tool-kb-librarian" }` | Unit |
 
-### AC-049-F-08: Intake Status Backend
+### AC-049-F-08: Intake Status Backend (CR-005: updated for folder support)
 
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
-| AC-049-F-08a | GIVEN `.intake/` folder exists with files AND `.intake-status.json` exists WHEN `kb_service` reads intake files THEN it returns merged data: file metadata from filesystem + status/destination from JSON | Unit |
-| AC-049-F-08b | GIVEN `.intake-status.json` is corrupted (invalid JSON) WHEN intake status is read THEN all files default to "pending" status AND error is logged | Unit |
+| AC-049-F-08a | GIVEN `.intake/` folder exists with files and/or subdirectories AND `.intake-status.json` exists WHEN `kb_service` reads intake items THEN it returns merged data: item metadata from filesystem (type file or folder, size or item_count) + status/destination from JSON | Unit |
+| AC-049-F-08b | GIVEN `.intake-status.json` is corrupted (invalid JSON) WHEN intake status is read THEN all items default to "pending" status AND error is logged | Unit |
 | AC-049-F-08c | GIVEN a new file is uploaded to `.intake/` WHEN upload completes THEN file appears in intake listing with "Pending" status (no status.json update needed) | Integration |
-| AC-049-F-08d | GIVEN user assigns a folder to a pending file WHEN assignment is saved THEN `.intake-status.json` is updated with destination path for that file | Unit |
+| AC-049-F-08d | GIVEN user assigns a destination to a pending item (file or folder) WHEN assignment is saved THEN `.intake-status.json` is updated with destination path for that item | Unit |
+| AC-049-F-08e | GIVEN a folder exists in `.intake/` WHEN `kb_service` reads intake items THEN the folder appears as a top-level item with `type: "folder"`, `item_count` (number of immediate children), and `status` from `.intake-status.json` (defaulting to "pending") | Unit |
+| AC-049-F-08f | GIVEN `GET /api/kb/intake` is called with query parameter `children_of=<path>` WHEN the path is a valid folder inside `.intake/` THEN response contains the immediate children (files and sub-folders) of that folder with their metadata and status | API |
 
 ### AC-049-F-09: Edge Cases
 
