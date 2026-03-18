@@ -40,6 +40,7 @@ class KBBrowseModal {
         this._expandedFolders = new Set();
         this._intakeItems = [];
         this._intakeStats = {};
+        this._intakePendingDeep = 0;
         this._onKbChanged = () => { if (this.overlay) this._refreshData(); };
         document.addEventListener('kb:changed', this._onKbChanged);
     }
@@ -99,8 +100,10 @@ class KBBrowseModal {
         if (intakeRes.status === 'fulfilled' && intakeRes.value.ok) {
             const d = await intakeRes.value.json();
             this._intakeStats = d.stats || { total: 0, pending: 0, processing: 0, filed: 0 };
+            this._intakePendingDeep = d.pending_deep_count ?? this._intakeStats.pending ?? 0;
         } else {
             this._intakeStats = { total: 0, pending: 0, processing: 0, filed: 0 };
+            this._intakePendingDeep = 0;
         }
         this._buildFolderColorMap();
     }
@@ -236,7 +239,7 @@ class KBBrowseModal {
                     <div class="kb-sidebar-intake-link" data-action="show-intake">
                         <i class="bi bi-inbox"></i>
                         <span>\u{1F4E5} Intake</span>
-                        <span class="intake-badge">${this._intakeStats?.pending || 0}</span>
+                        <span class="intake-badge">${this._intakePendingDeep || 0}</span>
                     </div>
                 </div>
             </div>`;
@@ -617,7 +620,8 @@ class KBBrowseModal {
         const stats = data.stats || { total: 0, pending: 0, processing: 0, filed: 0 };
         this._intakeItems = allItems;
         this._intakeStats = stats;
-        this._updateIntakeBadges(data.pending_deep_count ?? stats.pending ?? 0);
+        this._intakePendingDeep = data.pending_deep_count ?? stats.pending ?? 0;
+        this._updateIntakeBadges(this._intakePendingDeep);
 
         const filter = this.intakeFilter || 'all';
         const items = this._filterIntakeItems(allItems, filter);
@@ -1410,7 +1414,8 @@ class KBBrowseModal {
         const intakeFiles = data.items || data.files || [];
         this._intakeItems = intakeFiles;
         this._intakeStats = data.stats || {};
-        this._updateIntakeBadges(data.pending_deep_count ?? data.stats?.pending ?? 0);
+        this._intakePendingDeep = data.pending_deep_count ?? data.stats?.pending ?? 0;
+        this._updateIntakeBadges(this._intakePendingDeep);
         this._renderIntakeFileList(intakeFiles);
         if (this.currentScene === 'intake') {
             this._renderIntakeScene();
