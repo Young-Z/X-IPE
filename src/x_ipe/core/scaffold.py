@@ -15,6 +15,8 @@ class ScaffoldManager:
         "x-ipe-docs/ideas",
         "x-ipe-docs/config",
         "x-ipe-docs/themes",
+        "x-ipe-docs/knowledge-base",
+        "x-ipe-docs/knowledge-base/.intake",
     ]
     
     GITIGNORE_ENTRIES: list = []  # No X-IPE specific gitignore entries needed
@@ -338,7 +340,7 @@ class ScaffoldManager:
         target_dir = self.project_root / "x-ipe-docs" / "config"
         
         # Copy each config file individually (don't overwrite existing)
-        config_files = ["copilot-prompt.json", "tools.json", "workflow-template.json", "cli-adapters.yaml", ".env.example"]
+        config_files = ["copilot-prompt.json", "tools.json", "workflow-template.json", "cli-adapters.yaml", "knowledgebase-config.json", ".env.example"]
         for filename in config_files:
             source_file = config_source / filename
             target_file = target_dir / filename

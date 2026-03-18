@@ -1086,67 +1086,146 @@ class KBService:
         status_path = self.kb_root / INTAKE_FOLDER / self.INTAKE_STATUS_FILE
         self._write_json(status_path, data)
 
-    @x_ipe_tracing()
-    def get_intake_files(self) -> Dict[str, Any]:
-        """List .intake/ files merged with status from .intake-status.json.
+    def _build_intake_tree(
+        self, dir_path: Path, status_data: Dict[str, Any], depth: int = 0,
+    ) -> List[Dict[str, Any]]:
+        """Recursively build nested tree of .intake/ items (CR-005).
 
-        Returns ``{"files": [...], "stats": {"total": N, "pending": N, ...}}``.
+        Files get status from *status_data*; folders derive status from children.
         """
-        intake_dir = self.kb_root / INTAKE_FOLDER
-        if not intake_dir.is_dir():
-            return {'files': [], 'stats': {'total': 0, 'pending': 0, 'processing': 0, 'filed': 0}}
-
-        status_data = self._read_intake_status()
-        files: List[Dict[str, Any]] = []
-
+        intake_root = self.kb_root / INTAKE_FOLDER
+        items: List[Dict[str, Any]] = []
         try:
-            entries = sorted(intake_dir.iterdir(), key=lambda p: p.name.lower())
+            entries = sorted(
+                dir_path.iterdir(),
+                key=lambda p: (p.is_file(), p.name.lower()),
+            )
         except PermissionError:
-            return {'files': [], 'stats': {'total': 0, 'pending': 0, 'processing': 0, 'filed': 0}}
+            return items
 
         for entry in entries:
-            if not entry.is_file() or entry.name == self.INTAKE_STATUS_FILE:
+            if entry.name.startswith('.'):
                 continue
-            stat = entry.stat()
-            entry_status = status_data.get(entry.name, {})
-            files.append({
-                'name': entry.name,
-                'path': f'{INTAKE_FOLDER}/{entry.name}',
-                'size_bytes': stat.st_size,
-                'modified_date': date.fromtimestamp(stat.st_mtime).isoformat(),
-                'file_type': entry.suffix.lstrip('.') if entry.suffix else '',
-                'status': entry_status.get('status', 'pending'),
-                'destination': entry_status.get('destination'),
-            })
+            rel_path = str(entry.relative_to(intake_root))
+            if entry.is_dir():
+                children = self._build_intake_tree(entry, status_data, depth + 1)
+                items.append({
+                    'name': entry.name,
+                    'path': rel_path,
+                    'type': 'folder',
+                    'item_count': len(children),
+                    'status': self._derive_folder_status(children),
+                    'children': children,
+                })
+            elif entry.is_file():
+                stat = entry.stat()
+                entry_status = status_data.get(rel_path, {})
+                items.append({
+                    'name': entry.name,
+                    'path': rel_path,
+                    'type': 'file',
+                    'size_bytes': stat.st_size,
+                    'modified_date': date.fromtimestamp(stat.st_mtime).isoformat(),
+                    'file_type': entry.suffix.lstrip('.') if entry.suffix else '',
+                    'status': entry_status.get('status', 'pending'),
+                    'destination': entry_status.get('destination'),
+                })
+        return items
+
+    @staticmethod
+    def _derive_folder_status(children: List[Dict[str, Any]]) -> str:
+        """Derive folder status from children: pending > processing > filed (CR-005)."""
+        statuses: set[str] = set()
+        for child in children:
+            statuses.add(child.get('status', 'pending'))
+        if 'pending' in statuses:
+            return 'pending'
+        if 'processing' in statuses:
+            return 'processing'
+        if 'filed' in statuses:
+            return 'filed'
+        return 'pending'  # empty folder defaults to pending
+
+    def _count_pending_deep(self, items: List[Dict[str, Any]]) -> int:
+        """Count all pending files across nested tree (CR-005)."""
+        count = 0
+        for item in items:
+            if item.get('type') == 'file' and item.get('status') == 'pending':
+                count += 1
+            elif item.get('type') == 'folder':
+                count += self._count_pending_deep(item.get('children', []))
+        return count
+
+    @x_ipe_tracing()
+    def get_intake_files(self) -> Dict[str, Any]:
+        """List .intake/ items as nested tree merged with status (CR-005).
+
+        Returns ``{"items": [...], "stats": {...}, "pending_deep_count": N}``.
+        """
+        empty = {
+            'items': [], 'stats': {'total': 0, 'pending': 0, 'processing': 0, 'filed': 0},
+            'pending_deep_count': 0,
+        }
+        intake_dir = self.kb_root / INTAKE_FOLDER
+        if not intake_dir.is_dir():
+            return empty
+
+        status_data = self._read_intake_status()
+        items = self._build_intake_tree(intake_dir, status_data)
 
         stats = {
-            'total': len(files),
-            'pending': sum(1 for f in files if f['status'] == 'pending'),
-            'processing': sum(1 for f in files if f['status'] == 'processing'),
-            'filed': sum(1 for f in files if f['status'] == 'filed'),
+            'total': len(items),
+            'pending': sum(1 for i in items if i['status'] == 'pending'),
+            'processing': sum(1 for i in items if i['status'] == 'processing'),
+            'filed': sum(1 for i in items if i['status'] == 'filed'),
         }
-        return {'files': files, 'stats': stats}
+        return {
+            'items': items,
+            'stats': stats,
+            'pending_deep_count': self._count_pending_deep(items),
+        }
 
     @x_ipe_tracing()
     def update_intake_status(
         self, filename: str, status: str, destination: str | None = None
     ) -> Dict[str, Any]:
-        """Update a single file's status in .intake-status.json.
+        """Update a file or folder's status in .intake-status.json (CR-005).
 
-        Raises ``ValueError`` if the file does not exist in ``.intake/``.
+        *filename* may be a relative path (e.g. ``subfolder/file.md``).
+        If *filename* points to a directory, cascades the update to all child
+        files recursively.
+
+        Raises ``ValueError`` if the path does not exist in ``.intake/``.
         """
         intake_dir = self.kb_root / INTAKE_FOLDER
-        file_path = intake_dir / filename
-        if not file_path.is_file() or not file_path.resolve().is_relative_to(intake_dir.resolve()):
-            raise ValueError(f'File not in .intake/: {filename}')
+        target_path = intake_dir / filename
+        if not target_path.resolve().is_relative_to(intake_dir.resolve()):
+            raise ValueError(f'Path not in .intake/: {filename}')
+        if not target_path.exists():
+            raise ValueError(f'Path not in .intake/: {filename}')
 
         from datetime import datetime, timezone
+        now = datetime.now(timezone.utc).isoformat()
         data = self._read_intake_status()
-        data[filename] = {
-            'status': status,
-            'destination': destination,
-            'updated_at': datetime.now(timezone.utc).isoformat(),
-        }
+
+        if target_path.is_dir():
+            # Cascade to all child files
+            for child in target_path.rglob('*'):
+                if child.is_file() and not child.name.startswith('.'):
+                    rel = str(child.relative_to(intake_dir))
+                    data[rel] = {
+                        'status': status,
+                        'destination': destination,
+                        'updated_at': now,
+                    }
+        else:
+            rel = str(target_path.relative_to(intake_dir))
+            data[rel] = {
+                'status': status,
+                'destination': destination,
+                'updated_at': now,
+            }
+
         self._write_intake_status(data)
         self._invalidate_cache()
         return {'ok': True, 'filename': filename, 'status': status, 'destination': destination}

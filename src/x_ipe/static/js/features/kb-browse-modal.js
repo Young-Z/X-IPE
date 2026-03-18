@@ -37,6 +37,9 @@ class KBBrowseModal {
         this.uploadMode = 'normal';
         this.intakeFilter = 'all';
         this._folderColorMap = {};
+        this._expandedFolders = new Set();
+        this._intakeItems = [];
+        this._intakeStats = {};
         this._onKbChanged = () => { if (this.overlay) this._refreshData(); };
         document.addEventListener('kb:changed', this._onKbChanged);
     }
@@ -610,67 +613,31 @@ class KBBrowseModal {
         const scene = this.overlay?.querySelector('[data-scene="intake"]');
         if (!scene) return;
         const data = await this._loadIntakeFiles();
-        const allFiles = data.files || [];
+        const allItems = data.items || data.files || [];
         const stats = data.stats || { total: 0, pending: 0, processing: 0, filed: 0 };
-        this._updateIntakeBadges(stats.pending);
+        this._intakeItems = allItems;
+        this._intakeStats = stats;
+        this._updateIntakeBadges(data.pending_deep_count ?? stats.pending ?? 0);
 
-        // Filter by active intake filter
         const filter = this.intakeFilter || 'all';
-        const files = filter === 'all' ? allFiles : allFiles.filter(f => f.status === filter);
+        const items = this._filterIntakeItems(allItems, filter);
 
         const filterPill = (label, value, count) => {
             const active = filter === value ? ' active' : '';
             return `<span class="kb-filter-chip${active}" data-intake-filter="${value}">${label} <span style="opacity:0.7;">(${count})</span></span>`;
         };
 
-        const statusBadge = (status) => {
-            const colors = { pending: '#f59e0b', processing: '#3b82f6', filed: '#10b981' };
-            const bgs = { pending: '#fef3c7', processing: '#dbeafe', filed: '#d1fae5' };
-            return `<span style="font-size:10px;color:${colors[status] || '#94a3b8'};background:${bgs[status] || '#f1f5f9'};padding:2px 8px;border-radius:6px;font-weight:600;">${status}</span>`;
-        };
-
-        const actionButtons = (f) => {
-            if (f.status === 'processing') {
-                return `<span style="font-size:11px;color:#94a3b8;font-style:italic;">processing…</span>`;
-            }
-            if (f.status === 'filed') {
-                return `
-                    <button class="kb-content-btn sm" data-action="intake-action" data-intake-op="view" data-intake-file="${this._escapeAttr(f.name)}" data-intake-dest="${this._escapeAttr(f.destination || '')}" title="View in KB"><i class="bi bi-arrow-right-circle"></i></button>
-                    <button class="kb-content-btn sm" data-action="intake-action" data-intake-op="undo" data-intake-file="${this._escapeAttr(f.name)}" data-intake-dest="${this._escapeAttr(f.destination || '')}" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button>`;
-            }
-            // pending
-            return `
-                <button class="kb-content-btn sm" data-action="intake-action" data-intake-op="preview" data-intake-file="${this._escapeAttr(f.name)}" title="Preview"><i class="bi bi-eye"></i></button>
-                <button class="kb-content-btn sm" data-action="intake-action" data-intake-op="assign" data-intake-file="${this._escapeAttr(f.name)}" title="Assign folder"><i class="bi bi-folder-symlink"></i></button>
-                <button class="kb-content-btn sm" data-action="intake-action" data-intake-op="remove" data-intake-file="${this._escapeAttr(f.name)}" title="Remove"><i class="bi bi-x-circle"></i></button>`;
-        };
-
-        const rowStyle = (status) => {
-            if (status === 'processing') return 'background:rgba(59,130,246,0.05);';
-            if (status === 'filed') return 'opacity:0.7;';
-            return '';
-        };
-
-        const fileListHtml = files.length > 0
+        const tableHtml = items.length > 0
             ? `<table style="width:100%;border-collapse:collapse;font-size:13px;">
                 <thead><tr style="border-bottom:1px solid #e2e8f0;color:#64748b;font-size:11px;text-transform:uppercase;">
-                    <th style="padding:8px 12px;text-align:left;">File</th>
-                    <th style="padding:8px 12px;text-align:right;">Size</th>
+                    <th style="padding:8px 12px;text-align:left;">Name</th>
+                    <th style="padding:8px 12px;text-align:right;">Size / Items</th>
                     <th style="padding:8px 12px;text-align:left;">Uploaded</th>
                     <th style="padding:8px 12px;text-align:center;">Status</th>
                     <th style="padding:8px 12px;text-align:left;">Destination</th>
                     <th style="padding:8px 12px;text-align:right;">Actions</th>
                 </tr></thead>
-                <tbody>${files.map(f => `
-                    <tr style="border-bottom:1px solid #f1f5f9;${rowStyle(f.status)}">
-                        <td style="padding:8px 12px;"><i class="bi bi-file-earmark-text" style="color:#8b5cf6;margin-right:6px;"></i>${this._escapeHtml(f.name)}</td>
-                        <td style="padding:8px 12px;text-align:right;color:#94a3b8;">${this._formatFileSize(f.size_bytes || 0)}</td>
-                        <td style="padding:8px 12px;color:#94a3b8;">${this._formatDate(f.modified_date)}</td>
-                        <td style="padding:8px 12px;text-align:center;">${statusBadge(f.status)}</td>
-                        <td style="padding:8px 12px;color:#64748b;">${f.destination ? this._escapeHtml(f.destination) : '—'}</td>
-                        <td style="padding:8px 12px;text-align:right;white-space:nowrap;">${actionButtons(f)}</td>
-                    </tr>`).join('')}
-                </tbody></table>`
+                <tbody>${items.map(item => this._renderIntakeRow(item, 0)).join('')}</tbody></table>`
             : `<div style="text-align:center;padding:40px 20px;color:#94a3b8;">
                 <i class="bi bi-inbox" style="font-size:40px;display:block;margin-bottom:12px;color:#c4b5fd;"></i>
                 <p style="font-size:14px;margin:0 0 8px;">No files in intake</p>
@@ -707,12 +674,114 @@ class KBBrowseModal {
                 </div>
             </div>
             <div style="flex:1;overflow-y:auto;padding:12px 24px;">
-                ${fileListHtml}
+                ${tableHtml}
             </div>
         `;
-        // Attach drag & drop to the intake scene dropzone
         const intakeZone = scene.querySelector('.kb-intake-dropzone');
         if (intakeZone) this._attachDropHandlers(intakeZone, 'intake');
+    }
+
+    // ─── Intake Tree Helpers (CR-005) ────────────────
+    _renderIntakeRow(item, depth = 0) {
+        const indent = depth * 20;
+        const isFolder = item.type === 'folder';
+        const isExpanded = this._expandedFolders.has(item.path);
+
+        const statusColors = { pending: '#f59e0b', processing: '#3b82f6', filed: '#10b981' };
+        const statusBgs = { pending: '#fef3c7', processing: '#dbeafe', filed: '#d1fae5' };
+        const statusBadge = `<span style="font-size:10px;color:${statusColors[item.status] || '#94a3b8'};background:${statusBgs[item.status] || '#f1f5f9'};padding:2px 8px;border-radius:6px;font-weight:600;">${item.status}</span>`;
+
+        const rowStyle = item.status === 'processing' ? 'background:rgba(59,130,246,0.05);' : item.status === 'filed' ? 'opacity:0.7;' : '';
+
+        let nameCell;
+        if (isFolder) {
+            const chevron = isExpanded ? 'bi-chevron-down' : 'bi-chevron-right';
+            const folderIcon = isExpanded ? 'bi-folder2-open' : 'bi-folder';
+            nameCell = `<td style="padding:8px 12px;padding-left:${indent + 8}px;">
+                <span class="kb-intake-toggle" data-intake-toggle="${this._escapeAttr(item.path)}" style="cursor:pointer;margin-right:4px;">
+                    <i class="bi ${chevron}"></i>
+                </span>
+                <i class="bi ${folderIcon}" style="margin-right:6px;color:#8b5cf6;"></i>
+                ${this._escapeHtml(item.name)}
+            </td>`;
+        } else {
+            nameCell = `<td style="padding:8px 12px;padding-left:${indent + 24}px;">
+                <i class="bi bi-file-earmark-text" style="margin-right:6px;opacity:0.6;"></i>
+                ${this._escapeHtml(item.name)}
+            </td>`;
+        }
+
+        const sizeCell = isFolder
+            ? `<td style="padding:8px 12px;text-align:right;color:#94a3b8;">${item.item_count} item${item.item_count !== 1 ? 's' : ''}</td>`
+            : `<td style="padding:8px 12px;text-align:right;color:#94a3b8;">${this._formatFileSize(item.size_bytes || 0)}</td>`;
+
+        const dateCell = isFolder
+            ? `<td style="padding:8px 12px;color:#94a3b8;">—</td>`
+            : `<td style="padding:8px 12px;color:#94a3b8;">${this._formatDate(item.modified_date)}</td>`;
+
+        const destCell = `<td style="padding:8px 12px;color:#64748b;">${item.destination ? this._escapeHtml(item.destination) : '—'}</td>`;
+
+        const actions = this._intakeActionButtons(item);
+        const actionsCell = `<td style="padding:8px 12px;text-align:right;white-space:nowrap;">${actions}</td>`;
+
+        let rows = `<tr style="border-bottom:1px solid #f1f5f9;${rowStyle}" data-item-path="${this._escapeAttr(item.path)}">${nameCell}${sizeCell}${dateCell}<td style="padding:8px 12px;text-align:center;">${statusBadge}</td>${destCell}${actionsCell}</tr>`;
+
+        if (isFolder && isExpanded && item.children) {
+            for (const child of item.children) {
+                rows += this._renderIntakeRow(child, depth + 1);
+            }
+        }
+        return rows;
+    }
+
+    _intakeActionButtons(item) {
+        const isFolder = item.type === 'folder';
+        const path = this._escapeAttr(item.path);
+        const dest = this._escapeAttr(item.destination || '');
+        const itemType = isFolder ? 'folder' : 'file';
+
+        if (item.status === 'processing') {
+            return `<span style="font-size:11px;color:#94a3b8;font-style:italic;">processing…</span>`;
+        }
+        if (item.status === 'filed') {
+            let btns = '';
+            if (!isFolder) {
+                btns += `<button class="kb-content-btn sm" data-action="intake-action" data-intake-op="view" data-intake-file="${path}" data-intake-dest="${dest}" data-intake-type="${itemType}" title="View in KB"><i class="bi bi-arrow-right-circle"></i></button>`;
+            }
+            btns += `<button class="kb-content-btn sm" data-action="intake-action" data-intake-op="undo" data-intake-file="${path}" data-intake-dest="${dest}" data-intake-type="${itemType}" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button>`;
+            return btns;
+        }
+        // pending
+        let btns = '';
+        if (!isFolder) {
+            btns += `<button class="kb-content-btn sm" data-action="intake-action" data-intake-op="preview" data-intake-file="${path}" data-intake-type="${itemType}" title="Preview"><i class="bi bi-eye"></i></button>`;
+        }
+        btns += `<button class="kb-content-btn sm" data-action="intake-action" data-intake-op="assign" data-intake-file="${path}" data-intake-type="${itemType}" title="Assign folder"><i class="bi bi-folder-symlink"></i></button>`;
+        btns += `<button class="kb-content-btn sm" data-action="intake-action" data-intake-op="remove" data-intake-file="${path}" data-intake-type="${itemType}" title="Remove"><i class="bi bi-x-circle"></i></button>`;
+        return btns;
+    }
+
+    _toggleFolder(path) {
+        if (this._expandedFolders.has(path)) {
+            this._expandedFolders.delete(path);
+        } else {
+            this._expandedFolders.add(path);
+        }
+        this._renderIntakeScene();
+    }
+
+    _filterIntakeItems(items, status) {
+        if (!status || status === 'all') return items;
+        return items.filter(item => {
+            if (item.type === 'file') return item.status === status;
+            const filteredChildren = this._filterIntakeItems(item.children || [], status);
+            return filteredChildren.length > 0;
+        }).map(item => {
+            if (item.type === 'folder') {
+                return { ...item, children: this._filterIntakeItems(item.children || [], status) };
+            }
+            return item;
+        });
     }
 
     // ─── Scene Navigation ──────────────────────────
@@ -894,6 +963,13 @@ class KBBrowseModal {
                 return;
             }
 
+            // Intake folder toggle click (CR-005)
+            const toggle = target.closest('[data-intake-toggle]');
+            if (toggle) {
+                this._toggleFolder(toggle.dataset.intakeToggle);
+                return;
+            }
+
             // Intake filter pill click
             const intakeFilterChip = target.closest('[data-intake-filter]');
             if (intakeFilterChip) {
@@ -1021,7 +1097,8 @@ class KBBrowseModal {
                 this._handleIntakeAction(
                     el.dataset.intakeOp,
                     el.dataset.intakeFile,
-                    el.dataset.intakeDest || null
+                    el.dataset.intakeDest || null,
+                    el.dataset.intakeType || 'file'
                 );
                 break;
             case 'toggle-upload-view':
@@ -1177,10 +1254,14 @@ class KBBrowseModal {
         this._uploadIntakeFiles(files);
     }
 
-    async _handleIntakeAction(action, filename, destination) {
+    async _handleIntakeAction(action, itemPath, destination, itemType = 'file') {
+        const isFolder = itemType === 'folder';
+        const displayName = itemPath.includes('/') ? itemPath : itemPath;
+
         switch (action) {
             case 'preview':
-                this._showArticle(`.intake/${filename}`);
+                if (isFolder) return;
+                this._showArticle(`.intake/${itemPath}`);
                 break;
             case 'assign': {
                 const folders = this._getFolderNames();
@@ -1188,7 +1269,6 @@ class KBBrowseModal {
                     if (typeof showToast === 'function') showToast('No folders available — create a folder first', 'warning');
                     return;
                 }
-                // Show a simple folder picker dropdown
                 const picker = document.createElement('div');
                 picker.className = 'kb-upload-folder-dropdown';
                 picker.style.cssText = 'position:fixed;z-index:99999;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-height:200px;overflow-y:auto;padding:4px 0;';
@@ -1207,7 +1287,7 @@ class KBBrowseModal {
                             await fetch('/api/kb/intake/status', {
                                 method: 'PUT',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ filename, status: 'pending', destination: name })
+                                body: JSON.stringify({ filename: itemPath, status: 'pending', destination: name })
                             });
                             this._refreshIntakeFiles();
                         } catch { /* ignore */ }
@@ -1219,18 +1299,21 @@ class KBBrowseModal {
                 setTimeout(() => document.addEventListener('click', closePicker), 0);
                 break;
             }
-            case 'remove':
+            case 'remove': {
+                const label = isFolder ? 'folder and all its contents' : 'file';
                 if (typeof showConfirmModal === 'function') {
-                    const ok = await showConfirmModal('Remove File', `Remove "${filename}" from intake?`);
+                    const ok = await showConfirmModal('Remove', `Remove ${label} "${displayName}" from intake?`);
                     if (!ok) return;
                 }
                 try {
-                    await fetch(`/api/kb/files/${encodeURIComponent('.intake/' + filename)}`, { method: 'DELETE' });
+                    await fetch(`/api/kb/files/${encodeURIComponent('.intake/' + itemPath)}`, { method: 'DELETE' });
                     document.dispatchEvent(new CustomEvent('kb:changed'));
                     this._refreshIntakeFiles();
                 } catch { /* ignore */ }
                 break;
+            }
             case 'view':
+                if (isFolder) return;
                 if (destination) {
                     this.activeSidebarFolder = destination;
                     this._showScene('browse');
@@ -1241,17 +1324,17 @@ class KBBrowseModal {
             case 'undo':
                 if (!destination) return;
                 try {
-                    // Move file back from destination to .intake
-                    await fetch('/api/kb/files/move', {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ source: `${destination}/${filename}`, target: `.intake/${filename}` })
-                    });
-                    // Reset status to pending
+                    if (!isFolder) {
+                        await fetch('/api/kb/files/move', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ source: `${destination}/${itemPath}`, target: `.intake/${itemPath}` })
+                        });
+                    }
                     await fetch('/api/kb/intake/status', {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ filename, status: 'pending', destination: null })
+                        body: JSON.stringify({ filename: itemPath, status: 'pending', destination: null })
                     });
                     document.dispatchEvent(new CustomEvent('kb:changed'));
                     this._refreshIntakeFiles();
@@ -1324,22 +1407,23 @@ class KBBrowseModal {
 
     async _refreshIntakeFiles() {
         const data = await this._loadIntakeFiles();
-        const intakeFiles = data.files || [];
-        this._updateIntakeBadges(data.stats?.pending || 0);
-        // Populate the librarian panel file list on the browse scene
+        const intakeFiles = data.items || data.files || [];
+        this._intakeItems = intakeFiles;
+        this._intakeStats = data.stats || {};
+        this._updateIntakeBadges(data.pending_deep_count ?? data.stats?.pending ?? 0);
         this._renderIntakeFileList(intakeFiles);
-        // If intake scene is active, re-render it
         if (this.currentScene === 'intake') {
             this._renderIntakeScene();
         }
     }
 
     async _loadIntakeFiles() {
+        const empty = { items: [], stats: { total: 0, pending: 0, processing: 0, filed: 0 }, pending_deep_count: 0 };
         try {
             const res = await fetch('/api/kb/intake');
-            if (!res.ok) return { files: [], stats: { total: 0, pending: 0, processing: 0, filed: 0 } };
+            if (!res.ok) return empty;
             return await res.json();
-        } catch { return { files: [], stats: { total: 0, pending: 0, processing: 0, filed: 0 } }; }
+        } catch { return empty; }
     }
 
     _updateIntakeBadges(count) {

@@ -1,0 +1,19 @@
+{
+  "tags": {
+    "lifecycle": ["draft", "active", "deprecated", "archived"],
+    "domain": ["backend", "frontend", "devops", "testing", "design"]
+  },
+  "allowed_extensions": [
+    ".md", ".txt", ".json", ".yaml", ".yml", ".csv", ".tsv",
+    ".html", ".htm", ".css", ".js", ".ts", ".jsx", ".tsx", ".vue", ".svelte",
+    ".xml", ".toml", ".ini", ".cfg", ".env", ".sh", ".bat", ".ps1",
+    ".py", ".rb", ".java", ".go", ".rs", ".c", ".cpp", ".h", ".hpp", ".cs",
+    ".swift", ".kt", ".scala", ".r", ".m", ".sql", ".graphql",
+    ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".odt", ".ods", ".odp",
+    ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".ico", ".bmp", ".tiff",
+    ".mp3", ".mp4", ".wav", ".ogg", ".webm",
+    ".zip", ".7z", ".tar", ".gz",
+    ".woff", ".woff2", ".ttf", ".otf", ".eot",
+    ".msg"
+  ]
+}
