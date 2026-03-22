@@ -6,6 +6,38 @@
  * constructs CLI command, dispatches to terminal via idle session detection.
  */
 class ActionExecutionModal {
+    /* --- i18n Label Map --------------------------------------------------- */
+    static _I18N = {
+        en: {
+            actionContext: 'Action Context',
+            instructions: 'Instructions',
+            extraInstructions: 'Extra Instructions',
+            inputFile: 'Input File',
+            inProgress: 'Execution in progress…',
+            cancel: 'Cancel',
+            noInstructions: 'No instructions available for this action.',
+            extraPlaceholder: 'Optional: add context or constraints…',
+            filePathPlaceholder: 'Enter file path...',
+            close: 'Close',
+            optional: '(optional)',
+            required: '*',
+        },
+        zh: {
+            actionContext: '操作上下文',
+            instructions: '指令',
+            extraInstructions: '额外指令',
+            inputFile: '输入文件',
+            inProgress: '执行中…',
+            cancel: '取消',
+            noInstructions: '此操作没有可用的指令。',
+            extraPlaceholder: '可选：添加上下文或约束…',
+            filePathPlaceholder: '输入文件路径…',
+            close: '关闭',
+            optional: '(可选)',
+            required: '*',
+        }
+    };
+
     constructor({ actionKey, workflowName, skillName, onComplete, status, triggerBtn, featureId }) {
         this.actionKey = actionKey;
         this.workflowName = workflowName;
@@ -20,6 +52,12 @@ class ActionExecutionModal {
         this._templateCache = null;
         this._actionContextDef = null;
         this._interactionMode = 'interact-with-human';
+        this._language = 'en';
+    }
+
+    _i18n(key) {
+        const labels = ActionExecutionModal._I18N[this._language] || ActionExecutionModal._I18N.en;
+        return labels[key] ?? (ActionExecutionModal._I18N.en[key] || key);
     }
 
     /* --- Lifecycle -------------------------------------------------------- */
@@ -105,6 +143,7 @@ class ActionExecutionModal {
                 language = cfgData.language || 'en';
             }
         } catch (e) { /* ignore — fall back to 'en' */ }
+        this._language = language;
 
         // FEATURE-042-A: Workflow-mode branch — use workflow-prompts array
         if (this.workflowName) {
@@ -604,7 +643,7 @@ class ActionExecutionModal {
         container.innerHTML = '';
 
         const heading = document.createElement('h4');
-        heading.textContent = 'Action Context';
+        heading.textContent = this._i18n('actionContext');
         container.appendChild(heading);
 
         for (const [refName, refDef] of Object.entries(actionContextDef)) {
@@ -625,9 +664,9 @@ class ActionExecutionModal {
         const label = document.createElement('label');
         label.textContent = refName.replace(/-/g, ' ');
         if (refDef.required) {
-            label.innerHTML += ' <span class="required">*</span>';
+            label.innerHTML += ` <span class="required">${this._i18n('required')}</span>`;
         } else {
-            label.innerHTML += ' <span class="optional">(optional)</span>';
+            label.innerHTML += ` <span class="optional">${this._escapeHtml(this._i18n('optional'))}</span>`;
         }
         group.appendChild(label);
 
@@ -728,43 +767,43 @@ class ActionExecutionModal {
             <div class="modal-container">
                 <div class="modal-header">
                     <span class="modal-title">${this._escapeHtml(title)}</span>
-                    <button class="modal-close-btn" title="Close">&times;</button>
+                    <button class="modal-close-btn" title="${this._escapeHtml(this._i18n('close'))}">&times;</button>
                 </div>
                 <div class="modal-body">
                     ${isInProgress ? `
                         <div class="in-progress-message">
                             <i class="bi bi-arrow-repeat spin"></i>
-                            <span>Execution in progress…</span>
+                            <span>${this._escapeHtml(this._i18n('inProgress'))}</span>
                         </div>
                     ` : `
                         ${this._inputFiles && this._inputFiles.length > 0 ? `
                         <div class="input-selector-section">
-                            <div class="instructions-label">Input File</div>
+                            <div class="instructions-label">${this._escapeHtml(this._i18n('inputFile'))}</div>
                             <select class="input-selector">
                                 ${this._inputFiles.map((f, i) => `<option value="${this._escapeHtml(f)}" ${i === 0 ? 'selected' : ''}>${this._escapeHtml(f.split('/').pop())} <span class="path-hint">(${this._escapeHtml(f)})</span></option>`).join('')}
                             </select>
                         </div>
                         ` : this._commandTemplate && (this._commandTemplate.includes('<input-file>') || this._commandTemplate.includes('<current-idea-file>')) ? `
                         <div class="input-selector-section">
-                            <div class="instructions-label">Input File</div>
-                            <input type="text" class="input-path-manual" placeholder="Enter file path...">
+                            <div class="instructions-label">${this._escapeHtml(this._i18n('inputFile'))}</div>
+                            <input type="text" class="input-path-manual" placeholder="${this._escapeHtml(this._i18n('filePathPlaceholder'))}">
                         </div>
                         ` : ''}
                         <div class="instructions-section">
-                            <div class="instructions-label">Instructions</div>
+                            <div class="instructions-label">${this._escapeHtml(this._i18n('instructions'))}</div>
                             <div class="instructions-content">${hasInstructions
                                 ? this._escapeHtml(this._buildPreviewText())
-                                : '<em>No instructions available for this action.</em>'}</div>
+                                : `<em>${this._escapeHtml(this._i18n('noInstructions'))}</em>`}</div>
                         </div>
                         <div class="extra-instructions-section">
-                            <div class="extra-label">Extra Instructions</div>
-                            <textarea class="extra-input" maxlength="500" placeholder="Optional: add context or constraints…"></textarea>
+                            <div class="extra-label">${this._escapeHtml(this._i18n('extraInstructions'))}</div>
+                            <textarea class="extra-input" maxlength="500" placeholder="${this._escapeHtml(this._i18n('extraPlaceholder'))}"></textarea>
                             <div class="char-counter">0/500</div>
                         </div>
                     `}
                 </div>
                 <div class="modal-footer">
-                    <button class="cancel-btn">Cancel</button>
+                    <button class="cancel-btn">${this._escapeHtml(this._i18n('cancel'))}</button>
                     ${!isInProgress ? `<button class="copilot-btn" ${!hasInstructions ? 'disabled' : ''}>🤖 Copilot</button>` : ''}
                 </div>
             </div>
