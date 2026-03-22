@@ -6,36 +6,20 @@
  * constructs CLI command, dispatches to terminal via idle session detection.
  */
 class ActionExecutionModal {
-    /* --- i18n Label Map --------------------------------------------------- */
-    static _I18N = {
-        en: {
-            actionContext: 'Action Context',
-            instructions: 'Instructions',
-            extraInstructions: 'Extra Instructions',
-            inputFile: 'Input File',
-            inProgress: 'Execution in progress…',
-            cancel: 'Cancel',
-            noInstructions: 'No instructions available for this action.',
-            extraPlaceholder: 'Optional: add context or constraints…',
-            filePathPlaceholder: 'Enter file path...',
-            close: 'Close',
-            optional: '(optional)',
-            required: '*',
-        },
-        zh: {
-            actionContext: '操作上下文',
-            instructions: '指令',
-            extraInstructions: '额外指令',
-            inputFile: '输入文件',
-            inProgress: '执行中…',
-            cancel: '取消',
-            noInstructions: '此操作没有可用的指令。',
-            extraPlaceholder: '可选：添加上下文或约束…',
-            filePathPlaceholder: '输入文件路径…',
-            close: '关闭',
-            optional: '(可选)',
-            required: '*',
-        }
+    /* --- i18n: default labels (fallback when config unavailable) ----------- */
+    static _DEFAULT_LABELS = {
+        actionContext: 'Action Context',
+        instructions: 'Instructions',
+        extraInstructions: 'Extra Instructions',
+        inputFile: 'Input File',
+        inProgress: 'Execution in progress…',
+        cancel: 'Cancel',
+        noInstructions: 'No instructions available for this action.',
+        extraPlaceholder: 'Optional: add context or constraints…',
+        filePathPlaceholder: 'Enter file path...',
+        close: 'Close',
+        optional: '(optional)',
+        required: '*',
     };
 
     constructor({ actionKey, workflowName, skillName, onComplete, status, triggerBtn, featureId }) {
@@ -53,11 +37,13 @@ class ActionExecutionModal {
         this._actionContextDef = null;
         this._interactionMode = 'interact-with-human';
         this._language = 'en';
+        this._labels = null;
     }
 
     _i18n(key) {
-        const labels = ActionExecutionModal._I18N[this._language] || ActionExecutionModal._I18N.en;
-        return labels[key] ?? (ActionExecutionModal._I18N.en[key] || key);
+        return this._labels?.[key]
+            ?? ActionExecutionModal._DEFAULT_LABELS[key]
+            ?? key;
     }
 
     /* --- Lifecycle -------------------------------------------------------- */
@@ -144,6 +130,14 @@ class ActionExecutionModal {
             }
         } catch (e) { /* ignore — fall back to 'en' */ }
         this._language = language;
+
+        // Load UI labels from config (data-driven, same pattern as _resolvePromptDetails)
+        const modalLabels = config['ui-labels']?.['action-execution-modal'];
+        if (modalLabels && Array.isArray(modalLabels)) {
+            this._labels = modalLabels.find(d => d.language === language)
+                || modalLabels.find(d => d.language === 'en')
+                || null;
+        }
 
         // FEATURE-042-A: Workflow-mode branch — use workflow-prompts array
         if (this.workflowName) {

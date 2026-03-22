@@ -42,7 +42,41 @@ function workflowPromptsConfig() {
           }
         ]
       }
-    ]
+    ],
+    'ui-labels': {
+      'action-execution-modal': [
+        {
+          language: 'en',
+          actionContext: 'Action Context',
+          instructions: 'Instructions',
+          extraInstructions: 'Extra Instructions',
+          inputFile: 'Input File',
+          inProgress: 'Execution in progress…',
+          cancel: 'Cancel',
+          noInstructions: 'No instructions available for this action.',
+          extraPlaceholder: 'Optional: add context or constraints…',
+          filePathPlaceholder: 'Enter file path...',
+          close: 'Close',
+          optional: '(optional)',
+          required: '*'
+        },
+        {
+          language: 'zh',
+          actionContext: '操作上下文',
+          instructions: '指令',
+          extraInstructions: '额外指令',
+          inputFile: '输入文件',
+          inProgress: '执行中…',
+          cancel: '取消',
+          noInstructions: '此操作没有可用的指令。',
+          extraPlaceholder: '可选：添加上下文或约束…',
+          filePathPlaceholder: '输入文件路径…',
+          close: '关闭',
+          optional: '(可选)',
+          required: '*'
+        }
+      ]
+    }
   };
 }
 

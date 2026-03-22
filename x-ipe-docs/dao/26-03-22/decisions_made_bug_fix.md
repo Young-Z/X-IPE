@@ -36,3 +36,31 @@
 
 ### Follow-up
 > None
+
+---
+
+### DAO-104
+
+| Field | Value |
+|-------|-------|
+| ID | DAO-104 |
+| Timestamp | 2026-03-22T14:19:25Z |
+| Task ID | TASK-983 |
+| Feature ID | N/A |
+| Disposition | answer |
+| Confidence | 0.90 |
+| Content | User asks if copilot button dropdown in ideation view uses same i18n approach — answer with codebase facts |
+
+---
+
+### DAO-105
+
+| Field | Value |
+|-------|-------|
+| ID | DAO-105 |
+| Timestamp | 2026-03-22T14:39:02Z |
+| Task ID | TASK-984 |
+| Feature ID | N/A |
+| Disposition | instruction |
+| Confidence | 0.92 |
+| Content | Refactor action-execution-modal i18n from static _I18N code map to data-driven config approach (matching copilot button dropdown pattern in workplace.js). Move labels to copilot-prompt.json ui-labels section. |
