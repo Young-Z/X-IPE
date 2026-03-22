@@ -20,13 +20,13 @@
 | `kb_bp` (Blueprint) | REST API endpoints under `/api/kb/` | External API surface for all KB features | #kb #routes #api |
 | `KBNode` | Data model for tree nodes (file/folder) | Tree responses, sidebar rendering | #kb #model #tree |
 | `FrontmatterData` | Parsed YAML frontmatter data model | File metadata across all KB APIs | #kb #model #frontmatter |
-| `KBConfig` | kb-config.json schema + defaults | Tag taxonomy, AI Librarian config | #kb #model #config |
+| `KBConfig` | knowledgebase-config.json schema + defaults | Tag taxonomy, AI Librarian config | #kb #model #config |
 
 ### Scope & Boundaries
 
 **In scope:** File-system-based KB service, REST API (12 endpoints), YAML frontmatter parsing, tag taxonomy config, URL bookmark format, search by filename/frontmatter/tags, in-memory caching.
 
-**Out of scope:** Frontend UI (FEATURE-049-B–G), full-text body search (V2), pagination (YAGNI ≤500 files), kb-config.json modification API (V2), archive extraction (FEATURE-049-E), AI Librarian intake (FEATURE-049-F).
+**Out of scope:** Frontend UI (FEATURE-049-B–G), full-text body search (V2), pagination (YAGNI ≤500 files), knowledgebase-config.json modification API (V2), archive extraction (FEATURE-049-E), AI Librarian intake (FEATURE-049-F).
 
 ### Dependencies
 
@@ -41,7 +41,7 @@
 
 ### Major Flow
 
-1. **Initialization:** App factory creates `KBService(project_root)` → service resolves KB root path → auto-creates root + `kb-config.json` if missing
+1. **Initialization:** App factory creates `KBService(project_root)` → service resolves KB root path → auto-creates root + `knowledgebase-config.json` if missing
 2. **Tree request:** `GET /api/kb/tree` → `KBService.get_tree()` walks directory, builds `KBNode` tree, excludes `.intake/`, caches result → returns nested JSON
 3. **File CRUD:** Route validates path → `KBService` performs file I/O with path-traversal guard → parses/writes frontmatter → invalidates cache → returns resource
 4. **Search:** `GET /api/kb/search?q=...&tag=...` → `KBService.search()` iterates cached file index, matches query against filename + frontmatter fields → returns matching files
@@ -84,7 +84,7 @@ src/x_ipe/
 
 x-ipe-docs/
 └── knowledge-base/            # KB root (auto-created)
-    ├── kb-config.json         # Tag taxonomy + config (auto-created)
+    ├── knowledgebase-config.json         # Tag taxonomy + config (auto-created)
     └── {user folders & files}
 ```
 
@@ -196,7 +196,7 @@ class KBNode:
 
 @dataclass
 class KBConfig:
-    """kb-config.json schema."""
+    """knowledgebase-config.json schema."""
     tags: Dict[str, List[str]] = field(default_factory=lambda: {
         'lifecycle': ['Ideation', 'Requirement', 'Design', 'Implementation',
                       'Testing', 'Deployment', 'Maintenance'],
@@ -392,7 +392,7 @@ All errors follow this standard pattern (NFR-049-A-04):
 | 409 | `CONFLICT` | Duplicate folder name at same level |
 | 413 | `PAYLOAD_TOO_LARGE` | File >10MB |
 | 415 | `UNSUPPORTED_MEDIA_TYPE` | Invalid file extension |
-| 500 | `INTERNAL_ERROR` | Corrupt kb-config.json, file I/O failure |
+| 500 | `INTERNAL_ERROR` | Corrupt knowledgebase-config.json, file I/O failure |
 
 ### KBService Class Design
 
@@ -582,7 +582,7 @@ def _validate_file_type(self, filename: str) -> None:
 
 | Scenario | Implementation |
 |----------|---------------|
-| KB root doesn't exist | `ensure_kb_root()` called in constructor — creates dir + `kb-config.json` |
+| KB root doesn't exist | `ensure_kb_root()` called in constructor — creates dir + `knowledgebase-config.json` |
 | No YAML frontmatter | `_parse_frontmatter()` returns `None` — file metadata has `frontmatter: null` |
 | Malformed YAML | `yaml.YAMLError` caught → return `None` (graceful degradation) |
 | Path traversal `../` | `_resolve_safe_path()` checks `is_relative_to()` → raises `ValueError` → 400 |
@@ -592,7 +592,7 @@ def _validate_file_type(self, filename: str) -> None:
 | Move folder into itself | Check destination starts with source path → 400 |
 | `.intake/` in tree | `_build_tree()` skips entries named `.intake` |
 | Empty search query | Return all files (unfiltered) |
-| Corrupt kb-config.json | `json.JSONDecodeError` caught → 500 with descriptive message |
+| Corrupt knowledgebase-config.json | `json.JSONDecodeError` caught → 500 with descriptive message |
 | `.url.md` missing url | Check frontmatter for `url` field → 400 if missing |
 | Non-markdown files | Return file metadata without frontmatter parsing |
 

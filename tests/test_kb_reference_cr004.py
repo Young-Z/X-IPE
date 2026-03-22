@@ -78,6 +78,19 @@ class TestKbReferenceYamlWriter:
         yaml_path = folder / '.knowledge-reference.yaml'
         assert not yaml_path.exists()
 
+    def test_chinese_filenames_stored_as_unicode_not_escaped(self, ideas_service, tmp_path):
+        """Chinese filenames must be stored as native Unicode, not \\uXXXX escapes."""
+        folder = tmp_path / 'test-idea'
+        folder.mkdir()
+        refs = ['x-ipe-docs/knowledge-base/测试文档.docx']
+
+        ideas_service._write_kb_references(folder, refs)
+
+        yaml_path = folder / '.knowledge-reference.yaml'
+        raw = yaml_path.read_text(encoding='utf-8')
+        assert '\\u' not in raw, f"YAML contains escaped Unicode: {raw}"
+        assert '测试文档' in raw, f"YAML missing Chinese characters: {raw}"
+
 
 class TestSaveKbReferences:
     """Tests for save_kb_references (immediate write endpoint)."""

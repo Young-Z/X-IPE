@@ -332,6 +332,54 @@ class TestActionStatus:
         else:
             assert stored == original
 
+    def test_update_action_accepts_optional_kb_reference_deliverable(self, workflow_service, sample_workflow):
+        """Compose idea should accept kb-references when KB references were selected."""
+        deliverables = {
+            "raw-ideas": "x-ipe-docs/ideas/my-idea/new idea.md",
+            "ideas-folder": "x-ipe-docs/ideas/my-idea",
+            "kb-references": "x-ipe-docs/ideas/my-idea/.knowledge-reference.yaml",
+        }
+
+        result = workflow_service.update_action_status(
+            sample_workflow, "compose_idea", "done", deliverables=deliverables
+        )
+
+        assert result["success"] is True
+        state = workflow_service.get_workflow(sample_workflow)
+        stored = state["shared"]["ideation"]["actions"]["compose_idea"]["deliverables"]
+        assert stored["kb-references"] == "x-ipe-docs/ideas/my-idea/.knowledge-reference.yaml"
+
+    def test_resolve_deliverables_decodes_chinese_kb_reference_filenames(
+        self, workflow_service, sample_workflow, temp_project_dir
+    ):
+        """KB reference YAML with Chinese filenames must resolve to proper Unicode, not \\uXXXX."""
+        # Setup: complete compose_idea with a kb-references deliverable
+        idea_folder = os.path.join(temp_project_dir, "x-ipe-docs", "ideas", "my-idea")
+        os.makedirs(idea_folder, exist_ok=True)
+
+        # Write a .knowledge-reference.yaml that references a Chinese filename
+        yaml_path = os.path.join(idea_folder, ".knowledge-reference.yaml")
+        with open(yaml_path, "w") as f:
+            f.write('knowledge-reference:\n- "x-ipe-docs/knowledge-base/\\u6D4B\\u8BD5\\u6587\\u6863.docx"\n')
+
+        deliverables = {
+            "raw-ideas": "x-ipe-docs/ideas/my-idea/new idea.md",
+            "ideas-folder": "x-ipe-docs/ideas/my-idea",
+            "kb-references": "x-ipe-docs/ideas/my-idea/.knowledge-reference.yaml",
+        }
+        workflow_service.update_action_status(
+            sample_workflow, "compose_idea", "done", deliverables=deliverables
+        )
+
+        resolved = workflow_service.resolve_deliverables(sample_workflow)
+        kb_items = [d for d in resolved["deliverables"] if "知识" in d.get("path", "") or "测试" in d.get("path", "")]
+        # The manual line parser must decode YAML escapes — no literal backslash-u
+        all_paths = [d["path"] for d in resolved["deliverables"]]
+        escaped_paths = [p for p in all_paths if "\\u" in p or p.startswith('"')]
+        assert escaped_paths == [], (
+            f"Deliverable paths contain literal Unicode escapes or YAML quotes: {escaped_paths}"
+        )
+
     def test_update_action_invalid_status_rejected(self, workflow_service, sample_workflow):
         """AC: Invalid status rejected."""
         result = workflow_service.update_action_status(

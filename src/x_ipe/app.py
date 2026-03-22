@@ -89,6 +89,9 @@ def create_app(config=None):
                 static_folder='static',
                 template_folder='templates')
     
+    # Preserve non-ASCII characters (Chinese, etc.) in JSON responses
+    app.json.ensure_ascii = False
+    
     # Load configuration
     if config is None:
         config_name = os.environ.get('FLASK_ENV', 'development')

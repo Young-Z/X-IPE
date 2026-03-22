@@ -33,7 +33,7 @@ Add a **Knowledge Base** as a first-class feature in X-IPE with:
 - **Project-scoped storage** under `x-ipe-docs/knowledge-base/` with free-form user-defined folder structure (like OneDrive/Google Drive)
 - **Multiple content types**: Markdown (first-class, editable in-app), PDFs, images, and URL bookmarks
 - **YAML frontmatter** for metadata (lifecycle + domain tags from predefined 2D taxonomy, author, auto-generated flag)
-- **2D tag taxonomy** — lifecycle tags (SDLC phases) × domain tags (project-specific topics) defined in `kb-config.json`
+- **2D tag taxonomy** — lifecycle tags (SDLC phases) × domain tags (project-specific topics) defined in `knowledgebase-config.json`
 - **Workflow integration** via `kb-articles` key in action context
 - **Agent READ + WRITE** access with configurable allowlist
 - **Keyword search + 2D tag filter** for discovery
@@ -69,7 +69,7 @@ layer "Service Layer" cols 12 rows 1 color "#fff3e0"
 layer "Storage Layer" cols 12 rows 1 color "#fce4ec"
   module "File System" cols 12 grid 3 x 1
     component "x-ipe-docs/knowledge-base/" cols 4
-    component "kb-config.json" cols 4
+    component "knowledgebase-config.json" cols 4
     component "Git Version Control" cols 4
 @enduml
 ```
@@ -129,7 +129,7 @@ mindmap
       File upload button
       Preserve original folder structure
     Tags
-      2D taxonomy in kb-config.json
+      2D taxonomy in knowledgebase-config.json
       Lifecycle dimension: SDLC phases
       Domain dimension: project topics
       Users extend domain tags freely
@@ -174,10 +174,10 @@ mindmap
 
 - **File-based storage only** — No database; KB lives in `x-ipe-docs/knowledge-base/` under git version control
 - **Free-form folder structure** — No predefined categories; users create their own folder hierarchy
-- **Predefined 2D tags only** — Lifecycle (SDLC phase) and domain (topic) tags must be from `kb-config.json`; prevents sprawl and enables consistent filtering
+- **Predefined 2D tags only** — Lifecycle (SDLC phase) and domain (topic) tags must be from `knowledgebase-config.json`; prevents sprawl and enables consistent filtering
 - **10MB max file size** — Prevents git repo bloat from large binaries
 - **No separate ID system** — File paths ARE canonical identifiers (e.g., `knowledge-base/api-guidelines/rest-conventions.md`)
-- **Agent write allowlist** — Only skills listed in `kb-config.json` can auto-write to KB (prevents noise)
+- **Agent write allowlist** — Only skills listed in `knowledgebase-config.json` can auto-write to KB (prevents noise)
 - **No global KB in V1** — Each project has its own KB; cross-project sharing is V2
 - **No version history UI** — Git provides history; explicit version UI deferred to V2
 - **No auto-tagging in V1** — Users manually assign categories and tags
@@ -189,7 +189,7 @@ The folder structure is **entirely user-defined** — like OneDrive or Google Dr
 ```
 x-ipe-docs/
 └── knowledge-base/
-    ├── kb-config.json                    # Configuration (tags, allowlist, settings)
+    ├── knowledgebase-config.json                    # Configuration (tags, allowlist, settings)
     ├── legacy-platform/                  # User-created: imported from existing project
     │   ├── user-manual-v2.md
     │   ├── api-spec.pdf
@@ -211,8 +211,8 @@ x-ipe-docs/
 ```yaml
 ---
 title: "REST Conventions"
-lifecycle: [design, implementation]       # SDLC phases (from tags.lifecycle in kb-config.json)
-domain: [api, architecture]               # Subject areas (from tags.domain in kb-config.json)
+lifecycle: [design, implementation]       # SDLC phases (from tags.lifecycle in knowledgebase-config.json)
+domain: [api, architecture]               # Subject areas (from tags.domain in knowledgebase-config.json)
 author: "user | agent-name"
 auto_generated: false                    # true if created by AI agent
 created: 2026-03-10
@@ -221,7 +221,7 @@ linked_workflows: []                     # Workflows referencing this article
 ---
 ```
 
-### kb-config.json Schema
+### knowledgebase-config.json Schema
 
 ```json
 {
@@ -364,9 +364,9 @@ The KB feature will reuse these established X-IPE patterns:
 
 1. **Project-scoped only (V1)** — No global KB. Each workflow's KB lives in its own `x-ipe-docs/knowledge-base/`. Keeps scope clean and avoids multi-project conflicts.
 2. **Free-form folder structure** — No predefined categories or enforced directory names. Users create any folder hierarchy they want, just like OneDrive or Google Drive. Original folder structure preserved on upload.
-3. **2D tag taxonomy in kb-config.json** — Lifecycle tags (SDLC phases: ideation → maintenance) × Domain tags (project topics: api, auth, ui-ux, etc.). Every article sits at the intersection of "what phase" and "what topic." Lifecycle tags are fixed; domain tags are user-extensible.
+3. **2D tag taxonomy in knowledgebase-config.json** — Lifecycle tags (SDLC phases: ideation → maintenance) × Domain tags (project topics: api, auth, ui-ux, etc.). Every article sits at the intersection of "what phase" and "what topic." Lifecycle tags are fixed; domain tags are user-extensible.
 4. **File paths as IDs** — `knowledge-base/api-guidelines/rest-conventions.md` is both the storage path and the canonical reference ID. No separate ID registry needed.
-5. **Agent write allowlist in kb-config.json** — Centralized config controls which skills can auto-write, preventing noise from utility skills.
+5. **Agent write allowlist in knowledgebase-config.json** — Centralized config controls which skills can auto-write, preventing noise from utility skills.
 6. **Context injection via `kb-articles` key** — Extends existing `update_workflow_action` context dict. No new mechanism required.
 7. **Migration = file move** — Existing docs can be moved to `knowledge-base/` maintaining their original folder structure, with optional frontmatter addition.
 8. **Cross-workflow KB shortcut** — A "📚 Reference KB" picker available in all editors/modals to browse and insert KB references, making KB a first-class resource across all workflow phases.

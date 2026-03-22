@@ -51,7 +51,7 @@
 |------|---------------|-------|-------|
 | Input | project_root | `{temp_dir}` | Pytest `tmp_path` fixture |
 | Expected | kb_root | `{temp_dir}/x-ipe-docs/knowledge-base/` | Auto-created |
-| Expected | config_file | `kb-config.json` | Auto-generated with defaults |
+| Expected | config_file | `knowledgebase-config.json` | Auto-generated with defaults |
 | Expected | lifecycle_tags | Ideation, Requirement, Design, Implementation, Testing, Deployment, Maintenance | 7 default tags |
 | Expected | domain_tags | API, Authentication, UI-UX, Database, Infrastructure, Security, Performance, Integration, Documentation, Analytics | 10 default tags |
 
@@ -61,15 +61,15 @@
 |------|--------|----------------|------------|-----------------|
 | 1 | Initialize KB service | `KBService(project_root)` | temp directory | Service created |
 | 2 | Call ensure_kb_root | `kb_service.ensure_kb_root()` | — | KB root directory created |
-| 3 | Verify config | `kb-config.json` | — | Contains default lifecycle, domain tags, empty allowlist, ai_librarian |
+| 3 | Verify config | `knowledgebase-config.json` | — | Contains default lifecycle, domain tags, empty allowlist, ai_librarian |
 | 4 | Call again | `kb_service.ensure_kb_root()` | — | Idempotent — no overwrite |
 
-**Expected Outcome:** KB root directory and `kb-config.json` auto-created with correct default tags; repeated calls are idempotent.
+**Expected Outcome:** KB root directory and `knowledgebase-config.json` auto-created with correct default tags; repeated calls are idempotent.
 
 | TC | Description | Type | Test Function | Status |
 |----|-------------|------|---------------|--------|
 | TC-001 | Auto-create KB root directory on first API call | unit | `test_ensure_kb_root_creates_directory` | ✅ Pass |
-| TC-002 | Auto-generate `kb-config.json` with defaults | unit | `test_ensure_kb_root_creates_config` | ✅ Pass |
+| TC-002 | Auto-generate `knowledgebase-config.json` with defaults | unit | `test_ensure_kb_root_creates_config` | ✅ Pass |
 | TC-003 | Default lifecycle tags match spec | unit | `test_default_lifecycle_tags` | ✅ Pass |
 | TC-004 | Default domain tags match spec | unit | `test_default_domain_tags` | ✅ Pass |
 | TC-005 | Empty `agent_write_allowlist` array in config | unit | `test_default_agent_write_allowlist` | ✅ Pass |
@@ -118,7 +118,7 @@
 | 6 | Verify metadata | File node | — | size_bytes, modified_date, file_type present |
 | 7 | Test route | `GET /api/kb/tree` | — | Returns 200 with tree JSON |
 
-**Expected Outcome:** Tree API returns complete folder/file hierarchy excluding `.intake/` and `kb-config.json`, with file metadata on leaf nodes.
+**Expected Outcome:** Tree API returns complete folder/file hierarchy excluding `.intake/` and `knowledgebase-config.json`, with file metadata on leaf nodes.
 
 | TC | Description | Type | Test Function | Status |
 |----|-------------|------|---------------|--------|
@@ -126,7 +126,7 @@
 | TC-009 | Tree includes files | unit | `test_get_tree_with_files` | ✅ Pass |
 | TC-010 | Tree includes folders with children | unit | `test_get_tree_with_folders` | ✅ Pass |
 | TC-011 | `.intake/` excluded from tree | unit | `test_get_tree_excludes_intake` | ✅ Pass |
-| TC-012 | `kb-config.json` excluded from tree | unit | `test_get_tree_excludes_config` | ✅ Pass |
+| TC-012 | `knowledgebase-config.json` excluded from tree | unit | `test_get_tree_excludes_config` | ✅ Pass |
 | TC-013 | File nodes include size, modified_date, file_type | unit | `test_get_tree_file_has_metadata` | ✅ Pass |
 | TC-014 | `GET /api/kb/tree` route returns 200 | backend-api | `test_get_tree_route` | ✅ Pass |
 
@@ -410,7 +410,7 @@
 **Assigned Tool:** pytest
 
 **Preconditions:**
-- KB root initialized with valid `kb-config.json`
+- KB root initialized with valid `knowledgebase-config.json`
 - Corrupted config file for error case
 
 **Test Data:**

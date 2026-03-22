@@ -308,7 +308,7 @@ A project-scoped Knowledge Base (KB) integrated into X-IPE that serves as persis
 |----------|--------|
 | KB scope per project vs per workflow? | **Shared** — one KB per project under `x-ipe-docs/knowledge-base/`, all workflows access the same KB |
 | Folder structure predefined or user-defined? | **User-defined** — free-form like OneDrive/Google Drive. No predefined categories. Users create/manage folders freely |
-| Tags predefined or user-defined? | **Predefined** — 2D taxonomy in `kb-config.json`: lifecycle tags (SDLC phases) × domain tags (project topics) |
+| Tags predefined or user-defined? | **Predefined** — 2D taxonomy in `knowledgebase-config.json`: lifecycle tags (SDLC phases) × domain tags (project topics) |
 | Markdown editor type? | **Simple code-editor** with markdown preview panel (reuse EPIC-037 Compose Idea Modal pattern with EasyMDE) |
 | Agent auto-write behavior? | Agents wire to **AI Librarian skill** (`x-ipe-tool-kb-librarian`) which auto-handles placement and tagging. No direct KB writes |
 | Search implementation? | **Simple first** — filename + frontmatter/tags. Full-text content search deferred to V2 |
@@ -324,7 +324,7 @@ A project-scoped Knowledge Base (KB) integrated into X-IPE that serves as persis
 #### HR-049.1: KB Storage & Folder Structure
 1. KB files stored under `x-ipe-docs/knowledge-base/` within the project repository
 2. Folder structure is entirely user-defined (create, rename, move, delete folders)
-3. `kb-config.json` at KB root stores configuration: predefined tags, AI Librarian settings, agent write allowlist
+3. `knowledgebase-config.json` at KB root stores configuration: predefined tags, AI Librarian settings, agent write allowlist
 4. Supported file types: Markdown (`.md`, first-class with in-app editing), PDF, images (`.png`, `.jpg`, `.svg`), URL bookmarks (`.url.md`)
 5. Maximum file size: 10MB per file
 6. YAML frontmatter on all `.md` articles: title, tags (lifecycle + domain), author, created date, auto-generated flag
@@ -387,7 +387,7 @@ A project-scoped Knowledge Base (KB) integrated into X-IPE that serves as persis
 9. Multi-select support for batch referencing
 
 #### HR-049.8: 2D Tag Taxonomy
-1. Tags defined in `kb-config.json` under `tags.lifecycle` and `tags.domain`
+1. Tags defined in `knowledgebase-config.json` under `tags.lifecycle` and `tags.domain`
 2. **Lifecycle tags** (vertical — SDLC phases): Ideation, Requirement, Design, Implementation, Testing, Deployment, Maintenance
 3. **Domain tags** (horizontal — project topics): API, Authentication, UI/UX, Database, Infrastructure, Security, Performance, Integration, Documentation, Analytics
 4. Visual differentiation: lifecycle = amber gradient pill with `▸` prefix + left border accent; domain = blue outlined pill with `#` prefix + border-only style
@@ -396,7 +396,7 @@ A project-scoped Knowledge Base (KB) integrated into X-IPE that serves as persis
 
 #### HR-049.9: Agent Integration
 1. Agents access KB via `x-ipe-tool-kb-librarian` skill (tool-type, agent-invoked)
-2. Agent write access controlled by `agent_write_allowlist` in `kb-config.json`
+2. Agent write access controlled by `agent_write_allowlist` in `knowledgebase-config.json`
 3. Agent-generated articles tagged with `[auto-generated]` flag in frontmatter
 4. Workflow integration: `kb-articles` key in action context for referencing KB articles during workflow execution
 5. AI Librarian skill handles: file organization, tag assignment, frontmatter generation, folder placement
@@ -421,7 +421,7 @@ A project-scoped Knowledge Base (KB) integrated into X-IPE that serves as persis
 - File-based storage only — no database, no external search index
 - Project-scoped — no cross-project KB sharing in V1
 - 10MB max per individual file
-- Tags are predefined in `kb-config.json` — no ad-hoc tag creation from UI in V1
+- Tags are predefined in `knowledgebase-config.json` — no ad-hoc tag creation from UI in V1
 - Full-text content search deferred to V2
 - Agent writes MUST go through AI Librarian skill — no direct file writes
 
@@ -468,7 +468,7 @@ A project-scoped Knowledge Base (KB) integrated into X-IPE that serves as persis
 
 | Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
 |------------|---------|---------------|---------|-------------------|-------------------|
-| FEATURE-049-A | EPIC-049 | KB Backend & Storage Foundation | v1.0 | Backend APIs for file/folder CRUD, kb-config.json, YAML frontmatter parsing, 2D tag taxonomy model, URL bookmark format | None |
+| FEATURE-049-A | EPIC-049 | KB Backend & Storage Foundation | v1.0 | Backend APIs for file/folder CRUD, knowledgebase-config.json, YAML frontmatter parsing, 2D tag taxonomy model, URL bookmark format | None |
 | FEATURE-049-B | EPIC-049 | KB Sidebar & Navigation | v1.0 | New sidebar section with collapsible folder tree, expand/collapse, drag-drop folder highlight | FEATURE-049-A |
 | FEATURE-049-C | EPIC-049 | KB Browse & Search | v1.0 | Grid view with cards, sort dropdown, keyword search (filename+tags), 2D tag filter chips, untagged badge | FEATURE-049-A, FEATURE-049-B |
 | FEATURE-049-D | EPIC-049 | KB Article Editor | v1.0 | Create/edit markdown articles via modal (reuse EPIC-037 pattern), EasyMDE editor, frontmatter editing | FEATURE-049-A |
@@ -490,15 +490,15 @@ A project-scoped Knowledge Base (KB) integrated into X-IPE that serves as persis
 
 **Acceptance Criteria:**
 - [ ] KB root folder `x-ipe-docs/knowledge-base/` created on project init (or first KB access)
-- [ ] `kb-config.json` schema supports: `tags.lifecycle[]`, `tags.domain[]`, `agent_write_allowlist[]`, `ai_librarian` settings
+- [ ] `knowledgebase-config.json` schema supports: `tags.lifecycle[]`, `tags.domain[]`, `agent_write_allowlist[]`, `ai_librarian` settings
 - [ ] Backend API: list folders, create folder, rename folder, delete folder (with contents confirmation)
 - [ ] Backend API: list files in folder (with frontmatter metadata), get file content, create file, update file, delete file
 - [ ] Backend API: move file/folder to new parent folder
 - [ ] YAML frontmatter parsing for `.md` files: title, tags (lifecycle + domain), author, created, auto_generated
 - [ ] URL bookmark format: `.url.md` files with `url`, `title`, `tags`, `notes` frontmatter fields
 - [ ] File type validation: `.md`, `.pdf`, `.png`, `.jpg`, `.svg`, `.url.md` accepted; 10MB max per file
-- [ ] 2D tag taxonomy model: lifecycle tags (7 SDLC phases) × domain tags (10 topics) from kb-config.json
-- [ ] API endpoint to read/update kb-config.json tag definitions
+- [ ] 2D tag taxonomy model: lifecycle tags (7 SDLC phases) × domain tags (10 topics) from knowledgebase-config.json
+- [ ] API endpoint to read/update knowledgebase-config.json tag definitions
 
 **Dependencies:**
 - None (foundation feature)
@@ -635,7 +635,7 @@ A project-scoped Knowledge Base (KB) integrated into X-IPE that serves as persis
 - [ ] "✨ Run AI Librarian" button triggers CLI agent session via `x-ipe-tool-kb-librarian` skill
 - [ ] AI Librarian auto-handles: move files to folders, assign lifecycle+domain tags, generate frontmatter
 - [ ] Filed files disappear from Intake and appear in destination folders
-- [ ] Agent write access controlled by `agent_write_allowlist` in kb-config.json
+- [ ] Agent write access controlled by `agent_write_allowlist` in knowledgebase-config.json
 - [ ] Agent-generated articles tagged with `auto_generated: true` in frontmatter
 - [ ] Workflow context integration: `kb-articles` key in action context for referencing KB articles
 - [ ] `x-ipe-tool-kb-librarian` skill created (tool-type, agent-invoked)

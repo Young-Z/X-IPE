@@ -140,7 +140,7 @@ class MCPDeployerService:
 
         if merged_count > 0:
             target_path.parent.mkdir(parents=True, exist_ok=True)
-            target_path.write_text(json.dumps(target_config, indent=2) + "\n")
+            target_path.write_text(json.dumps(target_config, indent=2, ensure_ascii=False) + "\n")
             result.created.append(target_path)
         elif skipped_count > 0:
             result.skipped.append(target_path)

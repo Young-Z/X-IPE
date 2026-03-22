@@ -169,7 +169,7 @@ class IdeasService:
         yaml_path = folder_path / '.knowledge-reference.yaml'
         data = {'knowledge-reference': kb_references}
         with open(yaml_path, 'w') as f:
-            yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+            yaml.dump(data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
     
     def _resolve_folder_path(self, folder_path: str) -> Path:
         """Resolve a folder path (relative to project root or ideas root) to absolute Path."""
@@ -646,7 +646,7 @@ class IdeasService:
             
             toolbox_path = self.ideas_root / self.TOOLBOX_FILE
             with open(toolbox_path, 'w') as f:
-                json.dump(config, f, indent=2)
+                json.dump(config, f, indent=2, ensure_ascii=False)
             return {'success': True}
         except IOError as e:
             return {'success': False, 'error': str(e)}

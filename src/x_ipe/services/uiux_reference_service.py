@@ -181,7 +181,7 @@ class UiuxReferenceService:
         )
         try:
             with os.fdopen(tmp_fd, "w") as f:
-                json.dump(referenced, f, indent=2)
+                json.dump(referenced, f, indent=2, ensure_ascii=False)
             os.rename(tmp_path, str(ref_path))
         except Exception:
             try:

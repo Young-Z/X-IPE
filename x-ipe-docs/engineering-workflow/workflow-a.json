@@ -1,0 +1,64 @@
+{
+  "schema_version": "3.0",
+  "name": "a",
+  "created": "2026-03-18T15:52:56.179905+00:00",
+  "last_activity": "2026-03-21T04:36:12.336309+00:00",
+  "idea_folder": null,
+  "current_stage": "ideation",
+  "global": {
+    "process_preference": {
+      "interaction_mode": "interact-with-human"
+    }
+  },
+  "shared": {
+    "ideation": {
+      "status": "in_progress",
+      "actions": {
+        "compose_idea": {
+          "status": "done",
+          "deliverables": {
+            "raw-ideas": "x-ipe-docs/ideas/wf-016-a/new idea.md",
+            "ideas-folder": "x-ipe-docs/ideas/wf-016-a",
+            "kb-references": "x-ipe-docs/ideas/wf-016-a/.knowledge-reference.yaml"
+          },
+          "context": {},
+          "next_actions_suggested": [
+            "refine_idea",
+            "reference_uiux",
+            "requirement_gathering"
+          ]
+        },
+        "reference_uiux": {
+          "status": "pending",
+          "deliverables": [],
+          "optional": true
+        },
+        "refine_idea": {
+          "status": "pending",
+          "deliverables": [],
+          "optional": true
+        },
+        "design_mockup": {
+          "status": "pending",
+          "deliverables": [],
+          "optional": true
+        }
+      }
+    },
+    "requirement": {
+      "status": "locked",
+      "actions": {
+        "requirement_gathering": {
+          "status": "pending",
+          "deliverables": []
+        },
+        "feature_breakdown": {
+          "status": "pending",
+          "deliverables": [],
+          "features_created": []
+        }
+      }
+    }
+  },
+  "features": []
+}

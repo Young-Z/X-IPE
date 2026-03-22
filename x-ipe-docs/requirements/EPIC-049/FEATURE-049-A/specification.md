@@ -36,8 +36,8 @@ This is the MVP foundation: no UI components are included (those are in FEATURE-
 1. **US-049-A-1:** As a frontend component, I want to list all folders and files in the KB with their metadata, so that I can render the sidebar tree and browse views.
 2. **US-049-A-2:** As a frontend component, I want to create, rename, move, and delete folders, so that users can organize their knowledge base freely.
 3. **US-049-A-3:** As a frontend component, I want to create and update markdown files with YAML frontmatter, so that articles are stored with proper metadata.
-4. **US-049-A-4:** As a frontend component, I want to read kb-config.json for tag definitions, so that I can render tag filter chips and tag selection dropdowns.
-5. **US-049-A-5:** As a system, I want kb-config.json to be auto-created with default tags on first KB access, so that setup is frictionless.
+4. **US-049-A-4:** As a frontend component, I want to read knowledgebase-config.json for tag definitions, so that I can render tag filter chips and tag selection dropdowns.
+5. **US-049-A-5:** As a system, I want knowledgebase-config.json to be auto-created with default tags on first KB access, so that setup is frictionless.
 6. **US-049-A-6:** As a frontend component, I want to search files by filename and frontmatter fields, so that users can find articles quickly.
 7. **US-049-A-7:** As a frontend component, I want to read and create URL bookmark files (.url.md), so that users can save external references.
 
@@ -48,9 +48,9 @@ This is the MVP foundation: no UI components are included (those are in FEATURE-
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|------------------------------|-----------|
 | AC-049-A-01a | GIVEN KB root directory does not exist WHEN any KB API endpoint is called THEN KB root is auto-created at `x-ipe-docs/knowledge-base/` | API |
-| AC-049-A-01b | GIVEN KB root is initialized for the first time WHEN `kb-config.json` is auto-generated THEN it contains default lifecycle tags: Ideation, Requirement, Design, Implementation, Testing, Deployment, Maintenance | Unit |
-| AC-049-A-01c | GIVEN KB root is initialized for the first time WHEN `kb-config.json` is auto-generated THEN it contains default domain tags: API, Authentication, UI-UX, Database, Infrastructure, Security, Performance, Integration, Documentation, Analytics | Unit |
-| AC-049-A-01d | GIVEN KB root is initialized for the first time WHEN `kb-config.json` is auto-generated THEN it includes empty `agent_write_allowlist` array AND `ai_librarian` settings object | Unit |
+| AC-049-A-01b | GIVEN KB root is initialized for the first time WHEN `knowledgebase-config.json` is auto-generated THEN it contains default lifecycle tags: Ideation, Requirement, Design, Implementation, Testing, Deployment, Maintenance | Unit |
+| AC-049-A-01c | GIVEN KB root is initialized for the first time WHEN `knowledgebase-config.json` is auto-generated THEN it contains default domain tags: API, Authentication, UI-UX, Database, Infrastructure, Security, Performance, Integration, Documentation, Analytics | Unit |
+| AC-049-A-01d | GIVEN KB root is initialized for the first time WHEN `knowledgebase-config.json` is auto-generated THEN it includes empty `agent_write_allowlist` array AND `ai_librarian` settings object | Unit |
 
 ### AC-049-A-02: Folder Listing API
 
@@ -115,9 +115,9 @@ This is the MVP foundation: no UI components are included (those are in FEATURE-
 
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|------------------------------|-----------|
-| AC-049-A-08a | GIVEN kb-config.json exists with tag definitions WHEN GET /api/kb/config is called THEN response contains parsed config including tags.lifecycle and tags.domain arrays | API |
+| AC-049-A-08a | GIVEN knowledgebase-config.json exists with tag definitions WHEN GET /api/kb/config is called THEN response contains parsed config including tags.lifecycle and tags.domain arrays | API |
 | AC-049-A-08b | GIVEN GET /api/kb/config returns tag arrays WHEN tag values are inspected THEN they contain string values matching the predefined taxonomy | Unit |
-| AC-049-A-08c | GIVEN kb-config.json includes agent and AI sections WHEN GET /api/kb/config is called THEN response includes agent_write_allowlist AND ai_librarian configuration sections | API |
+| AC-049-A-08c | GIVEN knowledgebase-config.json includes agent and AI sections WHEN GET /api/kb/config is called THEN response includes agent_write_allowlist AND ai_librarian configuration sections | API |
 
 ### AC-049-A-09: Search API
 
@@ -159,7 +159,7 @@ This is the MVP foundation: no UI components are included (those are in FEATURE-
 - **FR-049-A-01:** KB service module (`kb_service.py`) handles all file system operations for the knowledge base
 - **FR-049-A-02:** KB routes module (`kb_routes.py`) exposes REST API endpoints under `/api/kb/` prefix
 - **FR-049-A-03:** All file paths in API responses are relative to KB root (`x-ipe-docs/knowledge-base/`)
-- **FR-049-A-04:** kb-config.json schema validated on read; invalid config returns 500 with descriptive error
+- **FR-049-A-04:** knowledgebase-config.json schema validated on read; invalid config returns 500 with descriptive error
 - **FR-049-A-05:** All write operations (create, update, move, delete) return the affected resource in response body
 - **FR-049-A-06:** Frontmatter serialization uses Python `yaml.safe_dump` with `default_flow_style=False`
 
@@ -189,22 +189,22 @@ None — this is a backend-only feature. UI is provided by FEATURE-049-B through
 
 - **BR-049-A-01:** The `.intake/` folder is reserved for AI Librarian staging and MUST be excluded from all browse/search APIs
 - **BR-049-A-02:** Files >10MB are rejected at the API level — no partial uploads
-- **BR-049-A-03:** Tag values in frontmatter are validated against kb-config.json taxonomy; unknown tags are preserved but flagged
-- **BR-049-A-04:** Auto-created kb-config.json uses the exact default tags from HR-049.8; no customization during auto-creation
+- **BR-049-A-03:** Tag values in frontmatter are validated against knowledgebase-config.json taxonomy; unknown tags are preserved but flagged
+- **BR-049-A-04:** Auto-created knowledgebase-config.json uses the exact default tags from HR-049.8; no customization during auto-creation
 - **BR-049-A-05:** Folder deletion is recursive — all files and sub-folders are deleted
 
 ## Edge Cases & Constraints
 
 | Scenario | Expected Behavior |
 |----------|-------------------|
-| KB root doesn't exist on first API call | Auto-create root + kb-config.json with defaults |
+| KB root doesn't exist on first API call | Auto-create root + knowledgebase-config.json with defaults |
 | .md file has no YAML frontmatter block | Return file with frontmatter fields as null |
 | .md file has malformed YAML frontmatter | Return file with frontmatter as null (graceful degradation) |
 | Folder name contains special characters | Allow any characters valid for the OS file system; reject `/` and `\0` |
 | File path traversal attempt (`../`) | Reject with 400 Bad Request — all paths must resolve within KB root |
 | Empty folder listing | Return empty array (not error) |
 | Concurrent write to same file | Last-write-wins (file-system semantics) |
-| kb-config.json manually corrupted | Return 500 with descriptive error message |
+| knowledgebase-config.json manually corrupted | Return 500 with descriptive error message |
 | Delete KB root folder | Reject with 403 Forbidden — root cannot be deleted |
 | Search with empty query string | Return all files (unfiltered listing) |
 
@@ -213,7 +213,7 @@ None — this is a backend-only feature. UI is provided by FEATURE-049-B through
 - Full-text content search within markdown body (V2)
 - File versioning / history (git provides this)
 - Pagination for file listings (YAGNI for ≤500 files)
-- kb-config.json modification API (V2 — manual edit only for V1)
+- knowledgebase-config.json modification API (V2 — manual edit only for V1)
 - Archive extraction (.zip/.7z) — handled by FEATURE-049-E
 - Real-time file watching / websocket notifications
 - Binary file content serving (PDFs/images served as static files)

@@ -6,6 +6,7 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-982 | Bug Fix | Chinese filenames display as Unicode escape sequences (e.g., `\u6D4B\u8BD5\u6587\u6863.doc` instead of `测试文档.doc`). Discovered during TASK-981 verification. DAO mode. | Echo 📡 | ✅ done | 03-21-2026 | [ideas_service.py](src/x_ipe/services/ideas_service.py), [workflow_manager_service.py](src/x_ipe/services/workflow_manager_service.py), [app.py](src/x_ipe/app.py) | — |
 | TASK-980 | Bug Fix | CR-008 follow-up: Unify 4 remaining preview locations (workplace.js, folder-browser-modal.js, compose-idea-modal.js, link-preview-manager.js) to use shared FilePreviewRenderer. Added /api/file/raw endpoint with DOCX/MSG conversion. All 6 preview locations now unified. DAO mode. | Pulse 💫 | ✅ done | 03-18-2026 | [commit c3bb2cf](main) | — |
 | TASK-973 | Change Request | CR-008 for FEATURE-049-F: Unify file preview across KB browse, workflow deliverables, and all other preview locations — shared preview component for consistency. Source: UIUX Feedback Feedback-20260318-213942. DAO mode. | Pulse 💫 | ✅ done | 03-18-2026 | [CR-008.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/CR-008.md), [specification.md v1.8](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md) | x-ipe-task-based-feature-refinement |
 | TASK-974 | Feature Refinement | Refine FEATURE-049-F specification for CR-008: Detail FilePreviewRenderer shared component ACs, UI/UX requirements, edge cases, technical considerations. DAO mode. | Pulse 💫 | ✅ done | 03-18-2026 | 03-18-2026 | x-ipe-task-based-technical-design |
@@ -170,6 +171,8 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Notes |
 |---------|-----------|-------------|------|--------|--------------|--------------|-------|
+| TASK-981 | Bug Fix | UIUX Feedback Feedback-20260321-090349: Creating an idea with a knowledge base reference fails and the compose action remains in progress. DAO mode. | Echo | ✅ completed | 03-21-2026 09:25:00 | [workflow-template.json](x-ipe-docs/config/workflow-template.json), [test_workflow_manager.py](tests/test_workflow_manager.py) | Restored `compose_idea` support for optional `kb-references` deliverables in the live workflow template, added a regression test, and verified the focused backend/frontend suites. Unrelated pre-existing failures remain in `tests/test_workflow_manager.py::TestWorkflowTracing::test_service_methods_have_tracing` and full `npm test` unhandled errors from KB sidebar/intake tests. |
+| TASK-982 | Bug Fix | Chinese filenames display as Unicode escape sequences (`\u6D4B...` instead of `测试文档.doc`). Two root causes: (1) `yaml.dump()` in `_write_kb_references` missing `allow_unicode=True`, (2) manual YAML parser in `_maybe_expand_kb_reference` not decoding `\uXXXX` escapes. Also added `ensure_ascii=False` to Flask JSON and 4 other `json.dump` calls as defense-in-depth. DAO mode. | Echo 📡 | ✅ completed | 03-21-2026 | [ideas_service.py](src/x_ipe/services/ideas_service.py), [workflow_manager_service.py](src/x_ipe/services/workflow_manager_service.py), [app.py](src/x_ipe/app.py) | Fixed YAML + YAML parser + Flask JSON + 4 json.dump calls. Repaired 6 corrupted YAML files. 2 regression tests added. 87/88 Python tests pass (1 pre-existing). 125/125 JS tests pass. |
 | TASK-966 | Code Refactor | Replace `watchdog` with `watchfiles` in backend file watching while preserving `FileWatcher` behavior and public lifecycle methods. DAO mode. | Sage 🌿 | ✅ completed | 03-18-2026 07:46:02 | [file_service.py](src/x_ipe/services/file_service.py), [analysis-TASK-966.md](x-ipe-docs/refactoring/analysis-TASK-966.md), [validation-TASK-966.md](x-ipe-docs/refactoring/validation-TASK-966.md) | Replaced watcher engine with `watchfiles`, preserved event semantics via normalization, updated dependency metadata/docs, and validated with watcher-focused pytest. Unrelated failures remain in `test_navigation.py::test_get_structure_returns_five_sections` and broader `npm test`. |
 | TASK-965 | KB Librarian | Organize pending `ideation-user-manual` intake files: analyze content, assign metadata, generate index entries, and move files into a dedicated KB folder. DAO mode. | Nova ☄️ | ✅ completed | 03-18-2026 | [ideation-user-manual/](x-ipe-docs/knowledge-base/ideation-user-manual/), [.kb-index.json](x-ipe-docs/knowledge-base/ideation-user-manual/.kb-index.json) | Filed all 25 intake files into `ideation-user-manual/`, wrote per-file metadata plus a root folder entry, and cleared `.intake/` pending items. |
 | TASK-948 | Skill Cleanup | Remove deprecated x-ipe-task-based-user-manual skill folder and update ~24 stale references across production skills, candidate files, and docs. Follow-up to TASK-918 (conversion to x-ipe-tool-readme-updator). | Flux ⚡ | 🔄 in_progress | 03-17-2026 | — | — |
@@ -231,7 +234,7 @@
 
 ## Quick Stats
 
-- **Total Active:** 10
+- **Total Active:** 11
 - **In Progress:** 1
 - **Pending:** 0
 - **Completed (archived):** 881

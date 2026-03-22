@@ -97,3 +97,21 @@
 | DAO-ID | Timestamp | Task | Touchpoint | Disposition | Confidence | Summary |
 |--------|-----------|------|------------|-------------|------------|---------|
 | DAO-101 | 2026-03-18T15:55:55Z | TASK-979 | DOCX shows "Cannot preview this file type" in KB browse | instruction | 0.98 | Root cause: KB `/api/kb/files/{path}/raw` serves raw binary with `send_file()` — no DOCX/MSG conversion, no X-Converted header. The ideas `/api/ideas/file` endpoint has conversion logic. Fix: add conversion for .docx/.msg in KB raw endpoint using shared `conversion_utils`. |
+
+---
+### DAO-103 — Unify remaining preview locations
+
+| Field | Value |
+|-------|-------|
+| Timestamp | 2026-03-18T16:12:00Z |
+| Source | human |
+| Task | TASK-979 → new TASK-980 |
+| Feature | FEATURE-049-F |
+| Disposition | instruction |
+| Confidence | 0.95 |
+
+**Need:** User confirms fixing all 4 remaining file preview locations (workplace.js, folder-browser-modal.js, compose-idea-modal.js, link-preview-manager.js) to use the shared FilePreviewRenderer for consistent DOCX/MSG/etc. preview support.
+
+**Decision:** Proceed with bug fix to unify all preview locations. This is a functional consistency bug — same file type renders differently depending on where it's viewed.
+
+**Rationale:** The shared FilePreviewRenderer (CR-008) was only integrated into 2 of 6 locations. The remaining 4 have hardcoded "cannot preview" messages for file types (DOCX, MSG) that the server can convert. All preview locations should behave identically.

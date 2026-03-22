@@ -326,7 +326,7 @@ class ScaffoldManager:
         
         if merged_count > 0:
             global_copilot_dir.mkdir(parents=True, exist_ok=True)
-            global_mcp.write_text(json.dumps(global_config, indent=2) + "\n")
+            global_mcp.write_text(json.dumps(global_config, indent=2, ensure_ascii=False) + "\n")
             self.created.append(global_mcp)
         elif skipped_count > 0:
             self.skipped.append(global_mcp)

@@ -4,7 +4,7 @@ FEATURE-049-A: KB Backend & Storage Foundation
 KBService: File/folder CRUD, tree building, search, frontmatter parsing, config management.
 KBNode: Tree node data model (file or folder).
 FrontmatterData / TagSet: Parsed YAML frontmatter models.
-KBConfig: kb-config.json schema + defaults.
+KBConfig: knowledgebase-config.json schema + defaults.
 """
 import json
 import os
@@ -114,7 +114,7 @@ class KBNode:
 
 @dataclass
 class KBConfig:
-    """kb-config.json schema."""
+    """knowledgebase-config.json schema."""
     tags: Dict[str, List[str]] = field(default_factory=lambda: {
         'lifecycle': [
             'Ideation', 'Requirement', 'Design', 'Implementation',

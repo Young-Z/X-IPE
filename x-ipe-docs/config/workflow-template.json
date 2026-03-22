@@ -20,7 +20,8 @@
           "optional": false,
           "deliverables": [
             "$output:raw-ideas",
-            "$output-folder:ideas-folder"
+            "$output-folder:ideas-folder",
+            "$output:kb-references"
           ],
           "next_actions_suggested": [
             "refine_idea",

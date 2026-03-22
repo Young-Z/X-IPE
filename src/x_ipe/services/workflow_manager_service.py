@@ -18,6 +18,7 @@ import os
 import re
 import shutil
 import tempfile
+import yaml
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -516,11 +517,10 @@ class WorkflowManagerService:
             if full_path.exists():
                 try:
                     content = full_path.read_text(encoding="utf-8")
-                    refs = []
-                    for line in content.splitlines():
-                        stripped = line.strip()
-                        if stripped.startswith("- "):
-                            refs.append(stripped[2:].strip())
+                    parsed = yaml.safe_load(content)
+                    refs = parsed.get("knowledge-reference", []) if isinstance(parsed, dict) else []
+                    if not isinstance(refs, list):
+                        refs = []
                     if refs:
                         items = []
                         for ref_path in refs:
