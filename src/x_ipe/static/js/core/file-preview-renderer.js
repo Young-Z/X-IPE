@@ -95,10 +95,32 @@ class FilePreviewRenderer {
                 return;
             }
 
-            const text = await resp.text();
+            let text = await resp.text();
             if (requestId !== this._requestCounter) return;
 
-            const isConverted = resp.headers.get('X-Converted') === 'true';
+            // X-Converted header signals server-side conversion (e.g. .docx → HTML).
+            const xConverted = resp.headers.get('X-Converted') === 'true';
+            let isConverted = xConverted;
+
+            // When running inside the simulator's srcdoc iframe, a fetch interceptor
+            // routes requests through /api/proxy which JSON-wraps HTML responses:
+            // {"success": true, "html": "...", "content_type": "text/html; ..."}
+            // Unwrap the proxy response so the original content is used.
+            if (!isConverted && type === 'unknown') {
+                const contentType = (resp.headers.get('Content-Type') || '').toLowerCase();
+                if (contentType.includes('application/json')) {
+                    try {
+                        const json = JSON.parse(text);
+                        if (json.success && json.html && json.content_type &&
+                            json.content_type.includes('text/html')) {
+                            text = json.html;
+                            isConverted = true;
+                        }
+                    } catch { /* not JSON, continue */ }
+                } else if (contentType.includes('text/html')) {
+                    isConverted = true;
+                }
+            }
             if (isConverted) {
                 this._renderConvertedHtml(container, text);
                 return;

@@ -4,13 +4,21 @@ FEATURE-049-A: KB Backend & Storage Foundation — Routes
 Flask Blueprint exposing REST API endpoints under /api/kb/ for Knowledge Base
 file/folder CRUD, config, tree, and search operations.
 """
-from flask import Blueprint, jsonify, request, current_app, send_file
+from flask import Blueprint, jsonify, request, current_app, send_file, make_response
 from pathlib import Path
 
 from x_ipe.tracing import x_ipe_tracing
 from x_ipe.services.conversion_utils import convert_docx, convert_msg, sanitize_converted_html
 
 kb_bp = Blueprint('kb', __name__)
+
+
+@kb_bp.after_request
+def _add_cors_headers(response):
+    """Allow cross-origin access from srcdoc iframes (origin: null)."""
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Expose-Headers'] = 'X-Converted'
+    return response
 
 CONVERTIBLE_EXTENSIONS = {'.docx', '.msg'}
 MAX_CONVERSION_SIZE = 10 * 1024 * 1024  # 10MB

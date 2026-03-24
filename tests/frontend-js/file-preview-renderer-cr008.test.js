@@ -312,7 +312,7 @@ describe('CR-008: FilePreviewRenderer', () => {
       globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         text: async () => 'binary content',
-        headers: { get: () => null }
+        headers: { get: (h) => h === 'Content-Type' ? 'application/octet-stream' : null }
       });
 
       const renderer = new FilePreviewRenderer({
@@ -328,7 +328,7 @@ describe('CR-008: FilePreviewRenderer', () => {
       globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         text: async () => 'binary content',
-        headers: { get: () => null }
+        headers: { get: (h) => h === 'Content-Type' ? 'application/octet-stream' : null }
       });
 
       const renderer = new FilePreviewRenderer({
@@ -353,6 +353,50 @@ describe('CR-008: FilePreviewRenderer', () => {
       const renderer = new FilePreviewRenderer({
         apiEndpoint: '/api/ideas/file?path={path}',
         endpointStyle: 'query'
+      });
+      await renderer.renderPreview('report.docx', container);
+
+      const iframe = container.querySelector('iframe');
+      expect(iframe).not.toBeNull();
+      expect(iframe.getAttribute('sandbox')).toBe('allow-same-origin');
+    });
+
+    it('should detect converted content via Content-Type when X-Converted header is hidden by CORS', async () => {
+      // Simulates srcdoc iframe where custom headers are invisible (origin: null)
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: async () => '<html><body>Converted DOCX</body></html>',
+        headers: { get: (h) => h === 'Content-Type' ? 'text/html; charset=utf-8' : null }
+      });
+
+      const renderer = new FilePreviewRenderer({
+        apiEndpoint: '/api/kb/files/{path}/raw',
+        endpointStyle: 'path'
+      });
+      await renderer.renderPreview('report.docx', container);
+
+      const iframe = container.querySelector('iframe');
+      expect(iframe).not.toBeNull();
+      expect(iframe.getAttribute('sandbox')).toBe('allow-same-origin');
+    });
+
+    it('should unwrap proxy JSON response and render converted content', async () => {
+      // Simulates the proxy wrapping: when fetch interceptor in srcdoc iframe
+      // routes requests through /api/proxy, HTML responses become JSON
+      const proxyResponse = JSON.stringify({
+        success: true,
+        html: '<html><body>Converted DOCX via proxy</body></html>',
+        content_type: 'text/html; charset=utf-8'
+      });
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: async () => proxyResponse,
+        headers: { get: (h) => h === 'Content-Type' ? 'application/json' : null }
+      });
+
+      const renderer = new FilePreviewRenderer({
+        apiEndpoint: '/api/kb/files/{path}/raw',
+        endpointStyle: 'path'
       });
       await renderer.renderPreview('report.docx', container);
 
