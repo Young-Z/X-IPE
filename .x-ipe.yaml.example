@@ -3,9 +3,15 @@
 # Place this file at your project root as ".x-ipe.yaml" (without .example)
 # X-IPE will auto-discover it when launched from any subdirectory.
 #
+# Layered configuration:
+#   X-IPE ships with built-in defaults (src/x_ipe/defaults/.x-ipe.yaml).
+#   This project-level file overrides those defaults — you only need to
+#   specify the values you want to change.  Nested sections are deep-merged,
+#   so e.g. overriding "server.port" alone keeps the default "server.host".
+#
 # Example project structure:
 #   my-project/
-#   ├── .x-ipe.yaml        <- This config file
+#   ├── .x-ipe.yaml        <- This config file (overrides package defaults)
 #   ├── src/
 #   ├── x-ipe-docs/
 #   └── x-ipe/             <- X-IPE application folder

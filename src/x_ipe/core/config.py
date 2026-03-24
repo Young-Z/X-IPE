@@ -2,13 +2,16 @@
 X-IPE Configuration Module
 
 Handles loading and parsing of .x-ipe.yaml configuration files.
-Provides sensible defaults when no config file exists.
+Package-bundled defaults are loaded first, then overridden by any
+project-level .x-ipe.yaml found in the project directory.
 """
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 import yaml
+
+from .config_utils import load_package_defaults, deep_merge
 
 
 CONFIG_FILE_NAME = ".x-ipe.yaml"
@@ -34,10 +37,14 @@ class XIPEConfig:
     @classmethod
     def load(cls, start_dir: Path = None) -> "XIPEConfig":
         """
-        Load config from .x-ipe.yaml or use defaults.
+        Load config with layered defaults.
+
+        Resolution order (later overrides earlier):
+        1. Package-bundled defaults (src/x_ipe/defaults/.x-ipe.yaml)
+        2. Project-level .x-ipe.yaml (in start_dir)
         
         Args:
-            start_dir: Directory to start searching for config.
+            start_dir: Directory to search for project config.
                        Defaults to current working directory.
         
         Returns:
@@ -51,15 +58,22 @@ class XIPEConfig:
             start_dir = Path.cwd()
         start_dir = Path(start_dir).resolve()
         
-        # Find config file
+        # Layer 1: Package defaults
+        pkg_defaults = load_package_defaults()
+        
+        # Layer 2: Project config (if found)
         config_path = cls._find_config(start_dir)
         
-        if config_path is None:
-            # No config file, use defaults
-            return cls.defaults(start_dir)
+        if config_path is not None:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                project_raw = yaml.safe_load(f) or {}
+            merged = deep_merge(pkg_defaults, project_raw)
+            return cls._parse_raw(merged, config_path.parent, config_path)
         
-        # Parse config file
-        return cls._parse_config(config_path)
+        if pkg_defaults:
+            return cls._parse_raw(pkg_defaults, start_dir, config_path=None)
+        
+        return cls.defaults(start_dir)
     
     @classmethod
     def defaults(cls, project_root: Path) -> "XIPEConfig":
@@ -112,24 +126,30 @@ class XIPEConfig:
             yaml.YAMLError: If YAML is invalid.
         """
         with open(config_path, 'r', encoding='utf-8') as f:
-            raw = yaml.safe_load(f)
+            raw = yaml.safe_load(f) or {}
+        return cls._parse_raw(raw, config_path.parent, config_path)
+    
+    @classmethod
+    def _parse_raw(cls, raw: dict, base_dir: Path, config_path: Optional[Path] = None) -> "XIPEConfig":
+        """
+        Parse a raw config dict and return XIPEConfig.
         
-        if raw is None:
-            raw = {}
-        
+        Args:
+            raw: Parsed YAML dict (may be merged already).
+            base_dir: Directory for resolving relative paths.
+            config_path: Original config file path (None for package defaults only).
+        """
         # Validate version
         version = raw.get('version', 1)
         if version != SUPPORTED_VERSION:
             raise ValueError(f"Unsupported config version: {version}. Expected: {SUPPORTED_VERSION}")
         
-        config_dir = config_path.parent
-        
-        # Parse paths (relative to config file location)
+        # Parse paths (relative to base_dir)
         paths = raw.get('paths', {})
-        project_root = cls._resolve_path(config_dir, paths.get('project_root', '.'))
-        docs_path = cls._resolve_path(config_dir, paths.get('docs', 'x-ipe-docs'))
-        skills_path = cls._resolve_path(config_dir, paths.get('skills', '.github/skills'))
-        runtime_path = cls._resolve_path(config_dir, paths.get('runtime', '.x-ipe'))
+        project_root = cls._resolve_path(base_dir, paths.get('project_root', '.'))
+        docs_path = cls._resolve_path(base_dir, paths.get('docs', 'x-ipe-docs'))
+        skills_path = cls._resolve_path(base_dir, paths.get('skills', '.github/skills'))
+        runtime_path = cls._resolve_path(base_dir, paths.get('runtime', '.x-ipe'))
         
         # Parse server settings
         server = raw.get('server', {})

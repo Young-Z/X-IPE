@@ -3,6 +3,10 @@ FEATURE-010: Project Root Configuration
 
 ConfigData: Data class for resolved config values
 ConfigService: Discovery, parsing, validation of .x-ipe.yaml
+
+Supports layered configuration:
+  1. Package-bundled defaults (src/x_ipe/defaults/.x-ipe.yaml)
+  2. Project-level .x-ipe.yaml overrides (discovered from start_dir upwards)
 """
 import os
 import yaml
@@ -11,6 +15,7 @@ from typing import Optional
 from dataclasses import dataclass
 
 from x_ipe.tracing import x_ipe_tracing
+from x_ipe.core.config_utils import load_package_defaults, deep_merge
 
 
 CONFIG_FILE_NAME = '.x-ipe.yaml'
@@ -87,20 +92,36 @@ class ConfigService:
     @x_ipe_tracing()
     def load(self) -> Optional[ConfigData]:
         """
-        Discover, parse, and validate config file.
+        Discover, parse, and validate config with layered defaults.
+
+        Resolution order (later overrides earlier):
+        1. Package-bundled defaults (src/x_ipe/defaults/.x-ipe.yaml)
+        2. Project-level .x-ipe.yaml (discovered from start_dir upwards)
         
         Returns:
-            ConfigData if valid config found, None otherwise.
+            ConfigData if valid config produced, None otherwise.
         """
+        # Layer 1: Package defaults
+        pkg_defaults = load_package_defaults()
+        
+        # Layer 2: Project config (if discovered)
         config_path = self._discover()
-        if not config_path:
+        project_raw = None
+        if config_path:
+            project_raw = self._parse(config_path)
+            if project_raw is None:
+                return None
+        
+        # Merge layers
+        if project_raw is not None:
+            merged = deep_merge(pkg_defaults, project_raw)
+            config_data = self._validate(config_path, merged)
+        elif pkg_defaults:
+            merged = pkg_defaults
+            config_data = self._validate(None, merged)
+        else:
             return None
         
-        raw_config = self._parse(config_path)
-        if not raw_config:
-            return None
-        
-        config_data = self._validate(config_path, raw_config)
         if config_data:
             self._config_data = config_data
         return config_data
@@ -147,14 +168,26 @@ class ConfigService:
             self._error = f"Cannot read config file: {e}"
             return None
     
-    def _validate(self, config_path: Path, raw: dict) -> Optional[ConfigData]:
+    def _validate(self, config_path: Optional[Path], raw: dict,
+                  base_dir: Optional[Path] = None) -> Optional[ConfigData]:
         """
         Validate config content and resolve paths.
+        
+        Args:
+            config_path: Path to the discovered project config file, or None
+                         when using package defaults only.
+            raw: Merged config dict to validate.
+            base_dir: Directory for resolving relative paths. Defaults to
+                      config_path.parent if config_path is given, else
+                      self.start_dir.
         
         Returns:
             ConfigData if valid, None on validation error.
         """
-        config_dir = config_path.parent
+        if base_dir is None:
+            base_dir = config_path.parent if config_path else self.start_dir
+        
+        config_file_display = str(config_path) if config_path else "package-defaults"
         
         # Check version
         version = raw.get('version')
@@ -168,12 +201,12 @@ class ConfigService:
             self._error = "Missing required field: paths.project_root"
             return None
         
-        # Resolve paths relative to config file location
-        project_root = (config_dir / paths['project_root']).resolve()
+        # Resolve paths relative to base directory
+        project_root = (base_dir / paths['project_root']).resolve()
         
         # x_ipe_app is optional, defaults to project_root
         x_ipe_app_path = paths.get('x_ipe_app', paths['project_root'])
-        x_ipe_app = (config_dir / x_ipe_app_path).resolve()
+        x_ipe_app = (base_dir / x_ipe_app_path).resolve()
         
         # Validate paths exist and are directories
         if not project_root.exists() or not project_root.is_dir():
@@ -205,7 +238,7 @@ class ConfigService:
             return None
         
         return ConfigData(
-            config_file_path=str(config_path),
+            config_file_path=config_file_display,
             version=version,
             project_root=str(project_root),
             x_ipe_app=str(x_ipe_app),

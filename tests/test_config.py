@@ -590,14 +590,17 @@ class TestConfigServiceLoad:
         assert result.version == 1
         assert result.file_tree_scope == "project_root"
 
-    def test_load_returns_none_when_no_config(self, temp_dir_no_config):
-        """load() returns None when no config file exists"""
+    def test_load_returns_package_defaults_when_no_config(self, temp_dir_no_config):
+        """load() returns package defaults when no project config file exists"""
         from x_ipe.services import ConfigService
         
         service = ConfigService(str(temp_dir_no_config))
         result = service.load()
         
-        assert result is None
+        assert result is not None
+        assert result.config_file_path == "package-defaults"
+        assert result.language == "en"
+        assert result.file_tree_scope == "project_root"
 
     def test_load_stores_config_in_property(self, temp_project_structure):
         """load() stores result in config property"""
@@ -745,7 +748,9 @@ class TestConfigIntegration:
         config_service = ConfigService(str(temp_dir_no_config))
         config_data = config_service.load()
         
-        assert config_data is None
+        # Now returns package defaults instead of None
+        assert config_data is not None
+        assert config_data.config_file_path == "package-defaults"
         
         # Should still be able to create ProjectService with cwd
         project_service = ProjectService(str(temp_dir_no_config))
