@@ -1562,3 +1562,55 @@ describe('TASK-990 Bug 2: loadEditContent loads existing files', () => {
     expect(removeBtn).toBeTruthy();
   });
 });
+
+/* --------------------------------------------------------------------------
+   TASK-990 follow-up: handleUpdate must include existingFiles in deliverables
+   -------------------------------------------------------------------------- */
+describe('TASK-990 follow-up: handleUpdate preserves existing files in deliverables', () => {
+  it('includes existingFiles paths in raw-ideas deliverables', async () => {
+    let capturedWorkflowBody = null;
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      if (url === '/api/ideas/upload' && opts?.body instanceof FormData) {
+        return {
+          ok: true, status: 409,
+          json: async () => ({
+            folder_path: 'x-ipe-docs/ideas/wf-001-test',
+            files_uploaded: ['new idea.md']
+          })
+        };
+      }
+      if (url.includes('/api/workflow/') && url.includes('/action')) {
+        capturedWorkflowBody = JSON.parse(opts.body);
+        return { ok: true, json: async () => ({ success: true }), text: async () => '' };
+      }
+      return { ok: true, json: async () => ({ success: true }), text: async () => '' };
+    });
+
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/wf-001-test/new idea.md',
+      folderPath: 'x-ipe-docs/ideas/wf-001-test',
+      folderName: 'wf-001-test'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.easyMDE = { value: () => '# Updated idea', toTextArea: () => {} };
+    modal.existingFiles = [
+      { name: '测试文档.docx', type: 'file' },
+    ];
+    modal.pendingFiles = [];
+    modal.kbReferences = [];
+    modal.submitBtn = { disabled: false, set textContent(v) {} };
+
+    await modal.handleUpdate();
+
+    expect(capturedWorkflowBody).not.toBeNull();
+    const deliverables = capturedWorkflowBody.deliverables;
+    const rawIdeas = deliverables['raw-ideas'];
+    // Should be an array containing BOTH the uploaded md AND the existing docx
+    expect(Array.isArray(rawIdeas)).toBe(true);
+    expect(rawIdeas).toContain('x-ipe-docs/ideas/wf-001-test/new idea.md');
+    expect(rawIdeas).toContain('x-ipe-docs/ideas/wf-001-test/测试文档.docx');
+  });
+});

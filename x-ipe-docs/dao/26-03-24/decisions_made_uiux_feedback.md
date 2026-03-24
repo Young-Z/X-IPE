@@ -4,6 +4,7 @@
 |----------|-----------|---------|---------------|-------------|------------|---------|
 | DAO-001 | 2026-03-24T06:12:23Z | TBD | N/A (human-initiated) | instruction | 0.85 | Investigate UIUX feedback simulator browser preview bug — blank viewport when viewing KB content |
 | DAO-008 | 2026-03-24T08:30:00Z | TASK-990 | N/A (human-initiated) | instruction | 0.90 | Process compose idea bugs: deliverable not shown, state not restored on reopen, add uploaded file remove button |
+| DAO-009 | 2026-03-24T09:16:13Z | TASK-990 | x-ipe-task-based-bug-fix | instruction | 0.95 | Follow-up: existing files disappear from deliverables after Update Idea — handleUpdate() must include existingFiles |
 
 ## DAO-001
 - **Timestamp:** 2026-03-24T06:12:23Z
@@ -173,3 +174,15 @@
 
 ### Follow-up
 > None
+
+## DAO-009
+- **Timestamp:** 2026-03-24T09:16:13Z
+- **Task ID:** TASK-990
+- **Calling Skill:** x-ipe-task-based-bug-fix
+- **Disposition:** instruction
+- **Confidence:** 0.95
+- **Summary:** Follow-up regression from TASK-990 fix: existing files (测试文档.docx) disappear from deliverable panel after clicking "Update Idea" in edit mode. Root cause: handleUpdate() only includes newly uploaded files in deliverables, not existingFiles. Continue TASK-990 bug fix.
+- **Instruction Units:** 1
+  - Unit 0: Fix handleUpdate() to include existingFiles in deliverables so existing server-side files are preserved on update.
+- **Execution Plan:** sequential, groups: [[0]]
+- **Suggested Skill:** x-ipe-task-based-bug-fix (strong — continuation of TASK-990)

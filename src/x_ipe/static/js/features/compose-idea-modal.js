@@ -786,6 +786,13 @@ class ComposeIdeaModal {
             const folder_path = uploadData.folder_path || this.folderPath;
             const filesUploaded = uploadData.files_uploaded || [];
             const filePaths = filesUploaded.map(f => `${folder_path}/${f}`);
+            // Include existing server-side files not re-uploaded
+            for (const ef of this.existingFiles) {
+                const efPath = `${folder_path}/${ef.name}`;
+                if (!filePaths.includes(efPath)) {
+                    filePaths.push(efPath);
+                }
+            }
             const primaryFile = filePaths[0] || this.filePath;
             const rawIdeas = filePaths.length === 1 ? filePaths[0] : filePaths;
 
