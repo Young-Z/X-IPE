@@ -56,7 +56,7 @@ workflow:
 # ─────────────────────────────────────────────────────────────
 inputs:
   required:
-    - name: auto_proceed
+    - name: interaction_mode
       type: boolean
       default: false
       description: Whether to auto-proceed to next task
@@ -82,8 +82,8 @@ outputs:
       value: Feature Breakdown
     - name: require_human_review
       value: true
-    - name: auto_proceed
-      value: "${inputs.auto_proceed}"
+    - name: interaction_mode
+      value: "${inputs.interaction_mode}"
 
   artifacts:
     - name: requirement_details

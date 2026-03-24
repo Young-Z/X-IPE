@@ -26,7 +26,7 @@ CRITICAL: Only use tools that are explicitly enabled (`true`) in `x-ipe-docs/con
 
 **Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the workflow state was updated before marking the task complete.
 
-IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -35,12 +35,20 @@ IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask t
 ```yaml
 input:
   task_id: "{TASK-XXX}"
-  task_based_skill: "Ideation"
+  task_based_skill: "x-ipe-task-based-ideation"
   
   category: ideation-stage
-  next_task_based_skill: "Idea Mockup | Idea to Architecture"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-idea-mockup"
+      condition: "Create visual mockup of the idea"
+    - skill: "x-ipe-task-based-idea-to-architecture"
+      condition: "Create architecture diagram for the idea"
+    - skill: "x-ipe-task-based-share-idea"
+      condition: "Share the refined idea with stakeholders"
+    - skill: "x-ipe-task-based-requirement-gathering"
+      condition: "Skip to requirements if idea is already clear"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
@@ -48,7 +56,7 @@ input:
     name: "N/A"  # workflow name from workflow-{name}.json (NOT the idea folder name), default: N/A
     action: "refine_idea"  # hardcoded — this skill ALWAYS updates the refine_idea action
     extra_context_reference:  # optional, default: N/A for all refs
-      raw-idea: "path | N/A | auto-detect"
+      raw-ideas: "path | N/A | auto-detect"
       uiux-reference: "path | N/A | auto-detect"
   idea_folder_path: "x-ipe-docs/ideas/{folder}"
   toolbox_meta_path: "x-ipe-docs/config/tools.json"
@@ -65,7 +73,7 @@ input:
     NOTE: workflow.name is the {name} part from workflow-{name}.json filename — it is NOT the idea folder name.
     The idea folder name is auto-generated as wf-{NNN}-{sanitized-idea-name} under x-ipe-docs/ideas/.
   </field>
-  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
+  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
 
   <field name="idea_folder_path">
     <steps>
@@ -164,7 +172,7 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
       <name>Analyze Idea Files</name>
       <action>
         0. Resolve extra_context_reference inputs:
-           - FOR EACH ref in [raw-idea, uiux-reference]:
+           - FOR EACH ref in [raw-ideas, uiux-reference]:
              IF workflow mode AND extra_context_reference.{ref} is a file path:
                READ the file at that path
              ELIF extra_context_reference.{ref} is "auto-detect":
@@ -219,9 +227,9 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
     <step_2_2>
       <name>Brainstorming Session</name>
       <action>
-        1. Ask yourself two questions, 'which mode auto_proceed is in?'
+        1. Ask yourself two questions, 'which mode interaction_mode is in?'
         2. Ask questions in batches (3-5 at a time) to avoid overwhelming, iterate based on user responses
-        3. Wait for response based on auto_proceed condition before proceeding
+        3. Wait for response based on interaction_mode condition before proceeding
         4. Build on previous answers
         5. Challenge assumptions constructively
         6. IF extra_instructions is provided and non-empty:
@@ -229,11 +237,11 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
            - Treat as user preference that supplements (not replaces) the idea content
         7. When the user describes something visual (UI layouts, flows, system structure), proactively generate visual artifacts to enrich the brainstorming -- select the most appropriate enabled tool from step 1.1's tool list for the content type
 
-        Response source (based on auto_proceed):
-        IF process_preference.auto_proceed == "auto":
+        Response source (based on interaction_mode):
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Resolve ambiguities via x-ipe-dao-end-user-representative
           → Build comprehensive brainstorming notes from source material + decisions
-        ELSE (manual/stop_for_question):
+        ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human for response
       </action>
       <constraints>
@@ -340,10 +348,10 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
         4. Ask if any aspects of the idea are missing or unclear
         5. IF human/DAO identifies gaps → revise specific sections
 
-        Response source (based on auto_proceed):
-        IF process_preference.auto_proceed == "auto":
+        Response source (based on interaction_mode):
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Auto-select next task from next_task_based_skill after DoD verification
-        ELSE (manual/stop_for_question):
+        ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human if idea is complete before proceeding
       </action>
       <constraints>
@@ -361,14 +369,14 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
       <action>
         Collect the full context and task_completion_output from this skill execution.
 
-        IF process_preference.auto_proceed == "auto":
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Invoke x-ipe-dao-end-user-representative with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"
             context: "Skill completed. Study the context and full output to decide best next action."
           → DAO studies the complete context and decides the best next action
-        ELSE (manual):
+        ELSE (interact-with-human):
           → Present next task suggestion to human and wait for instruction
       </action>
       <constraints>
@@ -404,9 +412,17 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
 task_completion_output:
   category: ideation-stage
   status: completed | blocked
-  next_task_based_skill: "Idea Mockup | Idea to Architecture"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-idea-mockup"
+      condition: "Create visual mockup of the idea"
+    - skill: "x-ipe-task-based-idea-to-architecture"
+      condition: "Create architecture diagram for the idea"
+    - skill: "x-ipe-task-based-share-idea"
+      condition: "Share the refined idea with stakeholders"
+    - skill: "x-ipe-task-based-requirement-gathering"
+      condition: "Skip to requirements if idea is already clear"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   task_output_links:
     - "x-ipe-docs/ideas/{folder}/refined-idea/idea-summary-vN.md"
     - "x-ipe-docs/ideas/{folder}/refined-idea/"
@@ -482,14 +498,9 @@ CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD
     <step_output>improvement_decisions, finalized_approach</step_output>
   </checkpoint>
   <checkpoint required="true">
-    <name>Summary Created</name>
-    <verification>x-ipe-docs/ideas/{folder}/refined-idea/idea-summary-vN.md exists</verification>
-    <step_output>idea_summary_path</step_output>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Idea summary complete</name>
-    <verification>Idea summary complete with all sections filled and key decisions documented</verification>
-    <step_output>next_task_choice</step_output>
+    <name>Summary Created and Complete</name>
+    <verification>x-ipe-docs/ideas/{folder}/refined-idea/idea-summary-vN.md exists with all sections filled and key decisions documented</verification>
+    <step_output>idea_summary_path, next_task_choice</step_output>
   </checkpoint>
   <checkpoint required="recommended">
     <name>Principles Researched</name>

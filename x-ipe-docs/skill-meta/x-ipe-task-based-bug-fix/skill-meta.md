@@ -53,7 +53,7 @@ workflow:
 # ─────────────────────────────────────────────────────────────
 inputs:
   required:
-    - name: auto_proceed
+    - name: interaction_mode
       type: boolean
       default: false
       description: Whether to auto-proceed to next task

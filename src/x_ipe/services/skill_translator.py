@@ -63,15 +63,17 @@ class SkillTranslator:
         adapter,  # CLIAdapterData
         project_root: Path,
         template_path: Optional[Path] = None,
+        dao_intercept: bool = False,
     ) -> Optional[Path]:
         """Generate CLI-specific instruction file from canonical template."""
         if adapter.name == 'copilot':
             return None  # No-op
 
         if template_path is None:
+            template_name = INSTRUCTIONS_TEMPLATE if dao_intercept else 'instructions-template-no-dao.md'
             template_path = (
                 Path(__file__).parent.parent
-                / 'resources' / 'templates' / INSTRUCTIONS_TEMPLATE
+                / 'resources' / 'templates' / template_name
             )
 
         if not template_path.exists():

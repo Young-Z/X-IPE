@@ -44,7 +44,7 @@ workflow:
 # ─────────────────────────────────────────────────────────────
 inputs:
   required:
-    - name: auto_proceed
+    - name: interaction_mode
       type: boolean
       default: false
       description: Whether to auto-proceed to next task
@@ -78,8 +78,8 @@ outputs:
       value: "x-ipe-task-based-feature-refinement | x-ipe-task-based-feature-breakdown"
     - name: require_human_review
       value: yes
-    - name: auto_proceed
-      value: "${inputs.auto_proceed}"
+    - name: interaction_mode
+      value: "${inputs.interaction_mode}"
 
   artifacts:
     - name: cr_document

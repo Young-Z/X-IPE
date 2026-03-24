@@ -128,6 +128,38 @@
             pointer-events: none;
             opacity: 0.55;
         }
+        
+        /* DAO Toggle Section */
+        .dao-icon-box {
+            width: 40px;
+            height: 40px;
+            background: #eef2ff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4f46e5;
+            font-size: 1.25rem;
+        }
+        
+        .dao-note {
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 6px;
+            padding: 0.625rem 0.875rem;
+            font-size: 0.8125rem;
+            color: #3730a3;
+        }
+        
+        .form-switch .form-check-input {
+            width: 3em;
+            height: 1.5em;
+            cursor: pointer;
+        }
+        
+        .form-switch .form-check-label {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -238,6 +270,37 @@
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" class="btn btn-success" id="confirmLanguageBtn">Proceed</button>
                     </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- DAO Message Interception Toggle -->
+        <div class="settings-card card" id="daoCard">
+            <div class="card-header">
+                <span>
+                    <i class="bi bi-shield-check me-2"></i>
+                    DAO Message Interception
+                </span>
+                <span class="badge language-badge" id="daoBadge">
+                    <i class="bi bi-x-circle me-1"></i><span id="daoBadgeText">Off</span>
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <div class="dao-icon-box">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="form-check form-switch mb-1">
+                            <input class="form-check-input" type="checkbox" role="switch" id="daoToggle">
+                            <label class="form-check-label fw-medium" for="daoToggle">Enable DAO as message interceptor</label>
+                        </div>
+                        <p class="text-muted mb-0" style="font-size: 0.875rem;">When enabled, every user message is processed through the DAO human representative skill before action. When disabled, the agent classifies requests directly into skills. DAO within-skill interaction is unaffected.</p>
+                    </div>
+                </div>
+                <div class="dao-note">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Toggling this will regenerate the copilot instructions file for the active project.
                 </div>
             </div>
         </div>
@@ -804,12 +867,90 @@
         }
         
         /**
+         * DaoManager - Handles DAO message interception toggle
+         */
+        class DaoManager {
+            constructor() {
+                this.toggle = document.getElementById('daoToggle');
+                this.badge = document.getElementById('daoBadge');
+                this.badgeText = document.getElementById('daoBadgeText');
+                this.enabled = false;
+                this.switching = false;
+                this.bindEvents();
+            }
+            
+            init(enabled) {
+                this.enabled = !!enabled;
+                this.toggle.checked = this.enabled;
+                this.updateBadge();
+            }
+            
+            bindEvents() {
+                this.toggle.addEventListener('change', () => this.onToggle());
+            }
+            
+            async onToggle() {
+                if (this.switching) return;
+                
+                const newValue = this.toggle.checked;
+                this.switching = true;
+                this.toggle.disabled = true;
+                
+                try {
+                    const response = await fetch('/api/config/dao-intercept', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ dao_intercept: newValue })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.enabled = newValue;
+                        this.updateBadge();
+                        this.showToast(data.message, 'success');
+                    } else {
+                        this.toggle.checked = this.enabled;
+                        this.showToast(data.error || 'Failed to toggle DAO', 'error');
+                    }
+                } catch (error) {
+                    this.toggle.checked = this.enabled;
+                    this.showToast('Network error — please try again.', 'error');
+                } finally {
+                    this.switching = false;
+                    this.toggle.disabled = false;
+                }
+            }
+            
+            updateBadge() {
+                if (this.enabled) {
+                    this.badge.className = 'badge bg-success language-badge';
+                    this.badge.innerHTML = '<i class="bi bi-check2 me-1"></i><span id="daoBadgeText">On</span>';
+                } else {
+                    this.badge.className = 'badge bg-secondary language-badge';
+                    this.badge.innerHTML = '<i class="bi bi-x-circle me-1"></i><span id="daoBadgeText">Off</span>';
+                }
+            }
+            
+            showToast(message, type) {
+                if (type === 'success') {
+                    document.getElementById('toastMessage').textContent = message;
+                    new bootstrap.Toast(document.getElementById('successToast')).show();
+                } else if (type === 'error') {
+                    document.getElementById('errorToastMessage').textContent = message;
+                    new bootstrap.Toast(document.getElementById('errorToast')).show();
+                }
+            }
+        }
+        
+        /**
          * ConfigManager - Displays project configuration from .x-ipe.yaml
          * FEATURE-010: Project Root Configuration
          */
         class ConfigManager {
-            constructor(languageManager) {
+            constructor(languageManager, daoManager) {
                 this.languageManager = languageManager;
+                this.daoManager = daoManager;
                 this.configCard = document.getElementById('projectConfigCard');
                 this.configContent = document.getElementById('configContent');
                 this.statusBadge = document.getElementById('configStatusBadge');
@@ -824,6 +965,10 @@
                     // Wire language from config to LanguageManager
                     if (this.languageManager) {
                         this.languageManager.init(data.language || 'en');
+                    }
+                    // Wire DAO toggle from config to DaoManager
+                    if (this.daoManager) {
+                        this.daoManager.init(data.dao_intercept || false);
                     }
                 } catch (error) {
                     console.error('Failed to load config:', error);
@@ -900,7 +1045,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             projectManager = new ProjectFoldersManager();
             const languageManager = new LanguageManager();
-            new ConfigManager(languageManager);
+            const daoManager = new DaoManager();
+            new ConfigManager(languageManager, daoManager);
         });
     </script>
 </body>

@@ -60,7 +60,7 @@ Output standard summary
 ### Step 6: Routing
 
 ```
-auto_proceed = true, next_task_based_skill = Feature Closing
+interaction_mode = "dao-represent-human-to-interact", next_task_based_skill = Feature Closing
 → Start TASK-002 from Step 2
 ```
 

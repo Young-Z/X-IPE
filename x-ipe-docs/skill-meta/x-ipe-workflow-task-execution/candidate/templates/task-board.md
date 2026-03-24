@@ -5,7 +5,7 @@
 ## Global Settings
 
 ```yaml
-auto_proceed: false  # Set to true for automatic task chaining
+interaction_mode: "interact-with-human"  # Set to "dao-represent-human-to-interact" for automatic task chaining
 ```
 
 ---

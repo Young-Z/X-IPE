@@ -207,10 +207,11 @@ def switch_language():
             config = yaml.safe_load(f) or {}
         
         cli_name = config.get('cli', 'copilot')
+        dao_intercept = config.get('dao_intercept', False)
         
         # Step 1: Extract instructions FIRST (atomicity — AC-CR2-5)
         scaffold = ScaffoldManager(project_root, dry_run=False, force=True)
-        scaffold.copy_copilot_instructions(cli_name=cli_name, language=language)
+        scaffold.copy_copilot_instructions(cli_name=cli_name, language=language, dao_intercept=dao_intercept)
         
         # Step 2: Only after success, update .x-ipe.yaml
         config['language'] = language
@@ -230,4 +231,82 @@ def switch_language():
         return jsonify({
             'success': False,
             'error': f'Failed to switch language: {str(e)}'
+        }), 500
+
+
+@settings_bp.route('/api/config/dao-intercept', methods=['POST'])
+@x_ipe_tracing()
+def toggle_dao_intercept():
+    """
+    POST /api/config/dao-intercept
+    
+    Toggle DAO message interception on/off and regenerate instructions.
+    
+    Request body:
+        - dao_intercept: boolean (true to enable, false to disable)
+    
+    Response (success):
+        - success: true
+        - dao_intercept: boolean
+        - message: string
+    
+    Response (error):
+        - success: false
+        - error: string
+    """
+    from x_ipe.core.scaffold import ScaffoldManager
+    
+    config_data = current_app.config.get('X_IPE_CONFIG')
+    if not config_data:
+        return jsonify({
+            'success': False,
+            'error': 'Project not initialized. No .x-ipe.yaml detected.'
+        }), 400
+    
+    data = request.get_json() or {}
+    dao_intercept = data.get('dao_intercept')
+    
+    if dao_intercept is None or not isinstance(dao_intercept, bool):
+        return jsonify({
+            'success': False,
+            'error': 'Missing or invalid required field: dao_intercept (boolean)'
+        }), 400
+    
+    config_path = Path(config_data.config_file_path)
+    if config_data.config_file_path == "package-defaults":
+        from x_ipe.core.config_utils import get_package_defaults_path
+        config_path = get_package_defaults_path()
+    project_root = Path(config_data.project_root)
+    
+    try:
+        # Read current YAML config
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = yaml.safe_load(f) or {}
+        
+        cli_name = config.get('cli', 'copilot')
+        language = config.get('language', 'en')
+        
+        # Step 1: Regenerate instructions with new DAO setting
+        scaffold = ScaffoldManager(project_root, dry_run=False, force=True)
+        scaffold.copy_copilot_instructions(cli_name=cli_name, language=language, dao_intercept=dao_intercept)
+        
+        # Step 2: Update .x-ipe.yaml
+        config['dao_intercept'] = dao_intercept
+        with open(config_path, 'w', encoding='utf-8') as f:
+            yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+        
+        # Step 3: Update in-memory config
+        config_data.dao_intercept = dao_intercept
+        
+        label = 'enabled' if dao_intercept else 'disabled'
+        return jsonify({
+            'success': True,
+            'dao_intercept': dao_intercept,
+            'message': f'DAO message interception {label}'
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Failed to toggle DAO interception: {str(e)}'
         }), 500

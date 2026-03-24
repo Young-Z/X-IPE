@@ -1,10 +1,11 @@
 """Tests for FEATURE-047-C: Instruction Resource DAO Interception.
 
 Covers:
-- DAO interception guidance in repo-local instructions
-- Packaged instruction sync (en/zh)
+- DAO interception guidance in repo-local instructions (with-DAO variant)
+- Packaged instruction sync (en/zh) — both DAO and no-DAO variants
 - Bounded DAO description
 - No internal backbone exposure
+- No-DAO variants omit DAO interception mandate
 """
 
 from pathlib import Path
@@ -15,7 +16,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 class TestRepoLocalInstructions:
-    """AC-047-C.1 through AC-047-C.4: Repo-local instructions have DAO guidance."""
+    """Repo-local instructions match no-DAO variant (dao_intercept defaults to false)."""
 
     INSTRUCTIONS_PATH = ROOT / ".github" / "copilot-instructions.md"
 
@@ -23,37 +24,38 @@ class TestRepoLocalInstructions:
         return self.INSTRUCTIONS_PATH.read_text(encoding="utf-8")
 
     def test_mentions_dao_skill(self):
-        """AC-047-C.1: Instructions reference x-ipe-dao-end-user-representative."""
+        """Instructions still reference x-ipe-dao-end-user-representative for within-skill use."""
         assert "x-ipe-dao-end-user-representative" in self._read()
 
-    def test_describes_auto_mode_dao_interception(self):
-        """AC-047-C.2: Instructions explain DAO is called in auto mode at human touchpoints."""
-        content = self._read().lower()
-        assert "auto" in content
-        # Should describe that DAO handles decision points in auto mode
-        assert "human representative" in content or "human-representative" in content or "dao" in content.lower()
-
-    def test_manual_mode_still_asks_human(self):
-        """AC-047-C.3: Instructions clarify manual/stop_for_question still ask human."""
+    def test_no_dao_first_mandate(self):
+        """Default (dao_intercept=false): no DAO-first interception mandate."""
         content = self._read()
-        assert "manual" in content.lower()
+        assert "EVERY user message MUST be processed through" not in content
+        assert "DAO-First" not in content
 
-    def test_dao_described_as_bounded(self):
-        """AC-047-C.4: DAO is described as bounded — represents intent, not task execution."""
-        content = self._read().lower()
-        assert "bounded" in content or "does not" in content or "not execute" in content or "not absorb" in content
+    def test_keeps_skill_first_gate(self):
+        """Still enforces skill-first workflow."""
+        content = self._read()
+        assert "Skill-First" in content
+        assert "task-board.md" in content
 
     def test_no_internal_backbone_exposed(self):
-        """BR-047-C.2: No 道 or 7-step backbone in instructions."""
+        """No 道 or 7-step backbone in instructions."""
         content = self._read()
         assert "静虑" not in content
         assert "兼听" not in content
         assert "审势" not in content
 
     def test_uses_process_preference(self):
-        """Instructions use process_preference.interaction_mode, not require_human_review."""
+        """Instructions use process_preference.interaction_mode for within-skill DAO."""
         content = self._read()
         assert "process_preference.interaction_mode" in content
+
+    def test_synced_with_no_dao_en_variant(self):
+        """Repo-local matches the packaged no-DAO EN variant."""
+        repo_local = self._read()
+        no_dao_en = (ROOT / "src" / "x_ipe" / "resources" / "copilot-instructions-en-no-dao.md").read_text(encoding="utf-8")
+        assert repo_local == no_dao_en
 
 
 class TestPackagedEnglishInstructions:
@@ -74,12 +76,15 @@ class TestPackagedEnglishInstructions:
         assert "process_preference.interaction_mode" in content
 
     def test_synced_with_repo_local(self):
-        """AC-047-C.5: Packaged EN matches repo-local for DAO section."""
+        """Packaged EN (DAO variant) has DAO content that repo-local (no-DAO) does not."""
         repo_local = (ROOT / ".github" / "copilot-instructions.md").read_text(encoding="utf-8")
         packaged = self._read()
-        # Both should contain the DAO interception section
+        # Both reference DAO skill (within-skill use)
         assert "x-ipe-dao-end-user-representative" in repo_local
         assert "x-ipe-dao-end-user-representative" in packaged
+        # But only the DAO variant has the interception mandate
+        assert "DAO-First" in packaged
+        assert "DAO-First" not in repo_local
 
 
 class TestPackagedChineseInstructions:
@@ -98,3 +103,110 @@ class TestPackagedChineseInstructions:
         """AC-047-C.6: ZH instructions have auto mode DAO guidance."""
         content = self._read()
         assert "auto" in content.lower()
+
+
+class TestNoDaoEnglishInstructions:
+    """No-DAO EN variant: DAO interception removed, within-skill DAO kept."""
+
+    PATH = ROOT / "src" / "x_ipe" / "resources" / "copilot-instructions-en-no-dao.md"
+
+    def _read(self):
+        return self.PATH.read_text(encoding="utf-8")
+
+    def test_no_dao_first_mandate(self):
+        """No-DAO variant must NOT contain DAO-first interception mandate."""
+        content = self._read()
+        assert "EVERY user message MUST be processed through" not in content
+        assert "DAO-First" not in content
+
+    def test_no_instruction_units_loop(self):
+        """No-DAO variant must NOT contain instruction_units/execution_plan loop."""
+        content = self._read()
+        assert "instruction_units[]" not in content
+        assert "execution_plan" not in content
+
+    def test_no_dao_in_preflight(self):
+        """No-DAO variant pre-flight checklist should not have DAO step."""
+        content = self._read()
+        assert "Did I process this message through DAO?" not in content
+
+    def test_keeps_interaction_mode_note(self):
+        """No-DAO variant still references interaction_mode for within-skill use."""
+        content = self._read()
+        assert "process_preference.interaction_mode" in content
+
+    def test_keeps_skill_first_gate(self):
+        """No-DAO variant still enforces skill-first workflow."""
+        content = self._read()
+        assert "Skill-First" in content
+        assert "task-board.md" in content
+
+    def test_mentions_dao_for_within_skill(self):
+        """No-DAO variant still mentions DAO in within-skill context."""
+        content = self._read()
+        assert "x-ipe-dao-end-user-representative" in content
+
+    def test_no_internal_backbone_exposed(self):
+        """No 7-step backbone in no-DAO instructions."""
+        content = self._read()
+        assert "静虑" not in content
+        assert "兼听" not in content
+        assert "审势" not in content
+
+
+class TestNoDaoChineseInstructions:
+    """No-DAO ZH variant: DAO interception removed, within-skill DAO kept."""
+
+    PATH = ROOT / "src" / "x_ipe" / "resources" / "copilot-instructions-zh-no-dao.md"
+
+    def _read(self):
+        return self.PATH.read_text(encoding="utf-8")
+
+    def test_no_dao_first_mandate(self):
+        """No-DAO ZH variant must NOT contain DAO-first interception mandate."""
+        content = self._read()
+        assert "每条用户消息必须先经过" not in content
+        assert "DAO优先" not in content
+
+    def test_no_instruction_units_loop(self):
+        """No-DAO ZH variant must NOT contain instruction_units loop."""
+        content = self._read()
+        assert "instruction_units[]" not in content
+        assert "execution_plan" not in content
+
+    def test_keeps_interaction_mode_note(self):
+        """No-DAO ZH variant still references interaction_mode."""
+        content = self._read()
+        assert "process_preference.interaction_mode" in content
+
+    def test_keeps_skill_first_gate(self):
+        """No-DAO ZH variant still enforces skill-first workflow."""
+        content = self._read()
+        assert "技能优先" in content
+        assert "task-board.md" in content
+
+
+class TestNoDaoTemplateInstructions:
+    """No-DAO template variant for non-copilot CLIs."""
+
+    PATH = ROOT / "src" / "x_ipe" / "resources" / "templates" / "instructions-template-no-dao.md"
+
+    def _read(self):
+        return self.PATH.read_text(encoding="utf-8")
+
+    def test_no_dao_first_mandate(self):
+        """Template no-DAO variant must NOT contain DAO-first mandate."""
+        content = self._read()
+        assert "EVERY user message MUST be processed through" not in content
+        assert "DAO-First" not in content
+
+    def test_keeps_skill_first_gate(self):
+        """Template no-DAO variant still enforces skill-first workflow."""
+        content = self._read()
+        assert "Skill-First" in content
+        assert "task-board.md" in content
+
+    def test_keeps_interaction_mode_note(self):
+        """Template no-DAO variant still references interaction_mode."""
+        content = self._read()
+        assert "process_preference.interaction_mode" in content

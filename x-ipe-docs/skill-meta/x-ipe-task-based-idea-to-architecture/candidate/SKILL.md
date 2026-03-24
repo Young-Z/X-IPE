@@ -35,7 +35,7 @@ CRITICAL: Architecture diagrams must focus on system-level design, not implement
 | Scalability considerations | Specific library choices |
 | Security boundaries | Deployment scripts |
 
-IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -45,7 +45,7 @@ IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask t
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "Idea to Architecture"
+  task_based_skill: "x-ipe-task-based-idea-to-architecture"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
@@ -54,9 +54,15 @@ input:
 
   # Task type attributes
   category: "ideation-stage"
-  next_task_based_skill: "Requirement Gathering"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-requirement-gathering"
+      condition: "Proceed to requirements after architecture"
+    - skill: "x-ipe-task-based-idea-mockup"
+      condition: "Create visual mockup if not done"
+    - skill: "x-ipe-task-based-share-idea"
+      condition: "Share the architecture with stakeholders"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
 
   # Required inputs
   current_idea_folder: "{path}"   # e.g., x-ipe-docs/ideas/mobile-app-idea
@@ -73,7 +79,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
+  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
   <field name="current_idea_folder" source="previous Ideation task output OR human input">
     <steps>
       1. IF previous task was "Ideation" → extract from task_output_links.current_idea_folder
@@ -169,10 +175,10 @@ BLOCKING (manual/stop_for_question): Step 5.4 - present diagrams, ask if archite
            - Ask "Which idea folder for architecture?" with available options
            - Set current_idea_folder = selected folder
 
-           Response source (based on auto_proceed):
-           IF process_preference.auto_proceed == "auto":
+           Response source (based on interaction_mode):
+           IF process_preference.interaction_mode == "dao-represent-human-to-interact":
              → Resolve via x-ipe-dao-end-user-representative
-           ELSE (manual/stop_for_question):
+           ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
              → Ask human for selection
         2. Verify folder exists on disk
         3. Verify idea-summary-vN.md exists in folder
@@ -309,14 +315,14 @@ BLOCKING (manual/stop_for_question): Step 5.4 - present diagrams, ask if archite
       <action>
         Collect the full context and task_completion_output from this skill execution.
 
-        IF process_preference.auto_proceed == "auto":
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Invoke x-ipe-dao-end-user-representative with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"
             context: "Skill completed. Study the context and full output to decide best next action."
           → DAO studies the complete context and decides the best next action
-        ELSE (manual):
+        ELSE (interact-with-human):
           → Present next task suggestion to human and wait for instruction
       </action>
       <constraints>
@@ -351,10 +357,10 @@ BLOCKING (manual/stop_for_question): Step 5.4 - present diagrams, ask if archite
 ```yaml
 task_completion_output:
   category: "ideation-stage"
-  task_based_skill: "Idea to Architecture"
+  task_based_skill: "x-ipe-task-based-idea-to-architecture"
   status: "completed"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
@@ -368,9 +374,15 @@ task_completion_output:
     - type: "data-flow"
       path: "{current_idea_folder}/architecture/data-flow-v1.md"
   idea_summary_version: "v{N+1}"
-  next_task_based_skill: "Requirement Gathering"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-requirement-gathering"
+      condition: "Proceed to requirements after architecture"
+    - skill: "x-ipe-task-based-idea-mockup"
+      condition: "Create visual mockup if not done"
+    - skill: "x-ipe-task-based-share-idea"
+      condition: "Share the architecture with stakeholders"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   task_output_links:
     - "{current_idea_folder}/architecture/system-architecture-v1.md"
     - "{current_idea_folder}/architecture/data-flow-v1.md"

@@ -22,7 +22,7 @@ data_model:  # Required
   core: [{field}: {type}]  # Required: array - set during planning
   execution: [{field}: {type}]  # Optional: array - set by task-based skills
   closing: [{field}: {type}]  # Optional: array - set by category skills
-  control: [auto_proceed: boolean]  # Required: array - routing flags
+  control: [interaction_mode: string]  # Required: array - routing flags
 
 states:  # Required
   values: [pending, in_progress, blocked, completed, cancelled]  # Required: array<enum>
@@ -76,7 +76,7 @@ lifecycle:
 data_model:
   core: [task_id: string, task_based_skill: string, category: string, status: enum]
   execution: [next_task_based_skill: string|null, require_human_review: boolean]
-  control: [auto_proceed: boolean]
+  control: [interaction_mode: string]
 
 states: {values: [pending, in_progress, completed], terminal: [completed], transitions: "pending→in_progress→completed"}
 
@@ -84,10 +84,10 @@ routing:
   task_based_skills: [{pattern: "implement|code", task_based_skill: x-ipe-task-based-code-implementation, category: feature-stage}]
   category_skills: [{category: feature-stage, skill: x-ipe+feature+feature-board-management, required: true}]
 
-decision_points: [{name: human_review_gate, condition: "require_human_review=true AND auto_proceed=false", on_true: "STOP", on_false: "Continue"}]
+decision_points: [{name: human_review_gate, condition: "require_human_review=true AND interaction_mode=interact-with-human", on_true: "STOP", on_false: "Continue"}]
 error_handling: [{error_type: skill_not_found, recovery: "Log warning, continue manually"}]
 acceptance_criteria: {must: [{id: AC-001, description: "Task on board before work"}], could: [{id: AC-002, description: "Auto-advance"}]}
 ---
 ```
 
-**Flow:** Planning → Execute → Closing → END (auto_proceed=true chains to next task)
+**Flow:** Planning → Execute → Closing → END (interaction_mode=dao-represent-human-to-interact chains to next task)

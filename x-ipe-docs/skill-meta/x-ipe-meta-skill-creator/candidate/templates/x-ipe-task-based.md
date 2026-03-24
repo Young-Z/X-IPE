@@ -56,7 +56,7 @@ input:
 
   # Process preference (3-mode auto-proceed system)
   process_preference:
-    auto_proceed: "manual | auto | stop_for_question"  # default: manual
+    interaction_mode: "interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill"  # default: interact-with-human
 
   # Required inputs
   {input_1}: "{default_value}"
@@ -147,7 +147,7 @@ BLOCKING: {Additional rule that must not be skipped}
 - Phases 2, 3, 4 may use `<skip reason="..." />` when genuinely non-applicable.
 - Phase names MUST always be bilingual (Chinese + English).
 - Phase order is fixed: 1 → 2 → 3 → 4 → 5. No reordering.
-- auto_proceed in Phase 2: agent self-resolves via `x-ipe-dao-end-user-representative` (not skipped).
+- interaction_mode in Phase 2: agent self-resolves via `x-ipe-dao-end-user-representative` (not skipped).
 
 **Common Skip Reasons:**
 
@@ -189,7 +189,7 @@ BLOCKING: {Additional rule that must not be skipped}
       <name>{Step Name}</name>
       <action>
         1. {Question assumptions, probe gaps, challenge inputs}
-        2. IF process_preference.auto_proceed == "auto":
+        2. IF process_preference.interaction_mode == "dao-represent-human-to-interact":
              Invoke x-ipe-dao-end-user-representative to self-resolve
            ELSE:
              Ask human for clarification
@@ -246,10 +246,10 @@ BLOCKING: {Additional rule that must not be skipped}
         1. Verify all DoD checkpoints
         2. Output task completion summary
         3. Mode-aware review gate:
-           IF process_preference.auto_proceed == "auto":
+           IF process_preference.interaction_mode == "dao-represent-human-to-interact":
              Skip human review. If any open questions remain, invoke
              x-ipe-dao-end-user-representative to resolve them autonomously.
-           ELIF process_preference.auto_proceed == "stop_for_question" OR "manual":
+           ELIF process_preference.interaction_mode == "dao-represent-human-to-interact-for-questions-in-skill" OR "interact-with-human":
              Present results to human and wait for approval.
       </action>
       <output>Task completion output</output>
@@ -263,7 +263,7 @@ BLOCKING: {Additional rule that must not be skipped}
       <action>
         Collect the full context and task_completion_output from this skill execution.
 
-        IF process_preference.auto_proceed == "auto":
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Invoke x-ipe-dao-end-user-representative with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
@@ -308,7 +308,7 @@ task_completion_output:
   status: completed | blocked
   next_task_based_skill: "{Next Task-Based Skill}"
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"

@@ -33,7 +33,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 | Resource Leak | Slowdown/crash | Missing cleanup |
 | Integration | External fail | API changes |
 
-IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -54,7 +54,7 @@ input:
   category: "standalone"
   next_task_based_skill: null
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
 
   # Required inputs
   bug_description: "{description of the bug}"
@@ -77,7 +77,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
+  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
   <field name="bug_description" source="from human input" />
   <field name="expected_behavior" source="from human input" />
   <field name="actual_behavior" source="from human input" />
@@ -165,14 +165,14 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
          ELSE: analyze symptoms, create hypothesis, design test case, attempt to reproduce
       2. Document exact steps, environment conditions, and error messages
       3. BROWSER VALIDATION ROUTING (for UI bugs):
-         a. IF program_type includes "frontend" or "fullstack":
+         a. IF context indicates this is a UI bug (e.g., visual issue, CSS problem, DOM behavior, browser rendering):
             READ CONFIG: x-ipe-docs/config/tools.json → stages.feedback.bug_fix
-            - IF config has chrome-devtools-mcp == true OR x-ipe-tool-ui-testing-via-chrome-mcp == true:
+            - IF config has x-ipe-tool-ui-testing-via-chrome-mcp == true:
               → Use browser tools to reproduce the bug visually
               → Take screenshot/snapshot of the broken state for reference
               → Check browser console for errors or warnings
             - ELSE: skip browser reproduction (rely on test-based reproduction)
-         b. ELSE (backend/cli/library): skip browser reproduction
+         b. ELSE: skip browser reproduction
     </action>
     <output>Documented reproduction steps with confirmed bug occurrence</output>
   </step_2>
@@ -233,10 +233,10 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
          - IF confirmed: proceed to Step 6
          - IF clarified: return to Step 4 (Design Fix) with updated understanding
 
-         Response source (based on auto_proceed):
-         IF process_preference.auto_proceed == "auto":
+         Response source (based on interaction_mode):
+         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
            → Resolve via x-ipe-dao-end-user-representative
-         ELSE (manual/stop_for_question):
+         ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
            → Ask human for decision
     </action>
     <constraints>
@@ -290,9 +290,9 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
       1. Follow original reproduction steps, confirm bug is fixed
       2. Run full test suite, perform manual smoke test
       3. BROWSER VALIDATION ROUTING (for UI bugs):
-         a. IF program_type includes "frontend" or "fullstack":
+         a. IF context indicates this is a UI bug (e.g., visual issue, CSS problem, DOM behavior, browser rendering):
             READ CONFIG: x-ipe-docs/config/tools.json → stages.feedback.bug_fix
-            - IF config has chrome-devtools-mcp == true OR x-ipe-tool-ui-testing-via-chrome-mcp == true:
+            - IF config has x-ipe-tool-ui-testing-via-chrome-mcp == true:
               → Use browser tools to validate the fix visually:
                 i.   Navigate to the affected page/component
                 ii.  Follow original reproduction steps — confirm bug no longer occurs
@@ -301,7 +301,7 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
                 v.   Verify no visual regressions in surrounding UI elements
               → IF browser validation fails: return to Step 7 to adjust fix
             - ELSE: rely on test suite results only
-         b. ELSE (backend/cli/library): rely on test suite results only
+         b. ELSE: rely on test suite results only
       4. Document: what was changed, why it fixes the bug, any side effects
     </action>
     <success_criteria>
@@ -319,18 +319,18 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
       <action>
         Collect the full context and task_completion_output from this skill execution.
 
-        IF process_preference.auto_proceed == "auto":
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Invoke x-ipe-dao-end-user-representative with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"
             context: "Skill completed. Study the context and full output to decide best next action."
           → DAO studies the complete context and decides the best next action
-        ELSE (manual):
+        ELSE (interact-with-human):
           → Present next task suggestion to human and wait for instruction
       </action>
       <constraints>
-        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
+        - BLOCKING (interact-with-human): Human MUST confirm or redirect before proceeding
         - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
       </constraints>
       <output>Next action decided with execution context</output>
@@ -364,7 +364,7 @@ task_completion_output:
   status: completed | blocked
   next_task_based_skill: null
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
@@ -411,7 +411,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="conditional">
     <name>Browser validation passed (if UI bug and browser tools enabled)</name>
-    <verification>IF program_type is frontend/fullstack AND stages.feedback.bug_fix config has chrome-devtools-mcp or x-ipe-tool-ui-testing-via-chrome-mcp enabled: confirm browser-based validation shows fix works visually, no console errors, no visual regressions</verification>
+    <verification>IF context indicates UI bug AND stages.feedback.bug_fix config has x-ipe-tool-ui-testing-via-chrome-mcp enabled: confirm browser-based validation shows fix works visually, no console errors, no visual regressions</verification>
   </checkpoint>
 </definition_of_done>
 ```

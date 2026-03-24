@@ -1,28 +1,14 @@
-# X-IPE Package Default Configuration
-# =====================================
-# This file ships with the X-IPE package and provides sensible defaults.
-# Place a .x-ipe.yaml at your project root to override any of these values.
-#
-# Override behavior:
-#   - Values in your project .x-ipe.yaml take precedence over these defaults
-#   - You only need to specify the values you want to change
-#   - Nested sections are deep-merged (e.g., override just server.port)
-
-version: 1
-
-paths:
-  project_root: "."
-
-defaults:
-  file_tree_scope: "project_root"
-  terminal_cwd: "project_root"
-
-language: "en"
-
 console:
   auto_execute_prompt: false
-
+dao_intercept: false
+defaults:
+  file_tree_scope: project_root
+  terminal_cwd: project_root
+language: en
+paths:
+  project_root: .
 server:
-  host: "127.0.0.1"
-  port: 5858
   debug: false
+  host: 127.0.0.1
+  port: 5858
+version: 1

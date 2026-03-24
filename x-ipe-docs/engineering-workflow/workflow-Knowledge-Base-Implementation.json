@@ -196,9 +196,7 @@
           },
           "feature_closing": {
             "status": "done",
-            "deliverables": {
-              "closing-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-A/acceptance-test-cases.md"
-            },
+            "deliverables": {},
             "next_actions_suggested": [
               "human_playground",
               "change_request"
@@ -242,21 +240,14 @@
           },
           "technical_design": {
             "status": "done",
-            "deliverables": {
-              "technical-design": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/technical-design.md"
-            },
+            "deliverables": {},
             "next_actions_suggested": [
               "implementation"
             ]
           },
           "implementation": {
             "status": "done",
-            "deliverables": {
-              "impl-sidebar-js": "src/x_ipe/static/js/features/sidebar.js",
-              "impl-sidebar-css": "src/x_ipe/static/css/sidebar.css",
-              "impl-file-service": "src/x_ipe/services/file_service.py",
-              "tests": "tests/frontend-js/kb-sidebar.test.js"
-            },
+            "deliverables": {},
             "next_actions_suggested": [
               "acceptance_testing"
             ]
@@ -287,9 +278,7 @@
           },
           "feature_closing": {
             "status": "done",
-            "deliverables": {
-              "closing-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/acceptance-test-cases.md"
-            },
+            "deliverables": {},
             "next_actions_suggested": [
               "human_playground",
               "change_request"
@@ -344,11 +333,7 @@
           },
           "implementation": {
             "status": "done",
-            "deliverables": {
-              "impl-js": "src/x_ipe/static/js/features/kb-browse.js",
-              "impl-css": "src/x_ipe/static/css/kb-browse.css",
-              "tests": "tests/frontend-js/kb-browse.test.js"
-            },
+            "deliverables": {},
             "next_actions_suggested": [
               "acceptance_testing"
             ]
@@ -379,9 +364,7 @@
           },
           "feature_closing": {
             "status": "done",
-            "deliverables": {
-              "closing-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-C/acceptance-test-cases.md"
-            },
+            "deliverables": {},
             "next_actions_suggested": [
               "human_playground",
               "change_request"
@@ -435,11 +418,7 @@
           },
           "implementation": {
             "status": "done",
-            "deliverables": {
-              "impl-editor": "src/x_ipe/static/js/features/kb-article-editor.js",
-              "impl-css": "src/x_ipe/static/css/kb-article-editor.css",
-              "tests": "tests/frontend-js/kb-article-editor.test.js"
-            },
+            "deliverables": {},
             "next_actions_suggested": [
               "acceptance_testing"
             ]
@@ -470,9 +449,7 @@
           },
           "feature_closing": {
             "status": "done",
-            "deliverables": {
-              "closing-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-D/acceptance-test-cases.md"
-            },
+            "deliverables": {},
             "next_actions_suggested": [
               "human_playground",
               "change_request"
@@ -528,12 +505,7 @@
           },
           "implementation": {
             "status": "done",
-            "deliverables": {
-              "impl-js": "src/x_ipe/static/js/features/kb-file-upload.js",
-              "impl-css": "src/x_ipe/static/css/kb-file-upload.css",
-              "backend": "src/x_ipe/routes/kb_routes.py",
-              "tests": "tests/frontend-js/kb-file-upload.test.js"
-            },
+            "deliverables": {},
             "next_actions_suggested": [
               "acceptance_testing"
             ]
@@ -564,9 +536,7 @@
           },
           "feature_closing": {
             "status": "done",
-            "deliverables": {
-              "closing-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-E/acceptance-test-cases.md"
-            },
+            "deliverables": {},
             "next_actions_suggested": [
               "human_playground",
               "change_request"
@@ -658,9 +628,7 @@
           },
           "feature_closing": {
             "status": "done",
-            "deliverables": {
-              "closing-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/acceptance-test-cases.md"
-            },
+            "deliverables": {},
             "context": {},
             "next_actions_suggested": [
               "human_playground",
@@ -717,11 +685,7 @@
           },
           "implementation": {
             "status": "done",
-            "deliverables": {
-              "impl-css": "src/x_ipe/static/css/kb-reference-picker.css",
-              "impl-js": "src/x_ipe/static/js/features/kb-reference-picker.js",
-              "tests": "tests/frontend-js/kb-reference-picker.test.js"
-            },
+            "deliverables": {},
             "next_actions_suggested": [
               "acceptance_testing"
             ]
@@ -752,9 +716,7 @@
           },
           "feature_closing": {
             "status": "done",
-            "deliverables": {
-              "closing-report": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/acceptance-test-cases.md"
-            },
+            "deliverables": {},
             "next_actions_suggested": [
               "human_playground",
               "change_request"

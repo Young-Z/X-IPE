@@ -22,7 +22,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` and `x-ipe+all+task-board-manage
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -32,7 +32,7 @@ IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask t
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "Share Idea"
+  task_based_skill: "x-ipe-task-based-share-idea"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
@@ -41,9 +41,9 @@ input:
 
   # Task type attributes
   category: "standalone"
-  next_task_based_skill: null
+  next_task_based_skill: null  # terminal skill
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
 
   # Required inputs
   idea_folder: "x-ipe-docs/ideas/{folder}"
@@ -62,7 +62,7 @@ input:
   <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="process_preference.auto_proceed" source="from caller (x-ipe-workflow-task-execution) or default 'manual'" />
+  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
   <field name="idea_folder" source="human input | auto-detect">
     <steps>
       1. If human provides explicit folder path, use it
@@ -192,10 +192,10 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
         2. Allow multiple selections
         3. Wait for format confirmation
 
-        Response source (based on auto_proceed):
-        IF process_preference.auto_proceed == "auto":
+        Response source (based on interaction_mode):
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Resolve via x-ipe-dao-end-user-representative (default: pptx if unresolvable)
-        ELSE (manual/stop_for_question):
+        ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human to confirm format(s)
       </action>
       <constraints>
@@ -258,10 +258,10 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
         3. List generated files with paths and sizes
         4. Present file list with paths and sizes
 
-        Completion gate (based on auto_proceed):
-        IF process_preference.auto_proceed == "auto":
+        Completion gate (based on interaction_mode):
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Auto-proceed after verification
-        ELSE (manual/stop_for_question):
+        ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human to confirm receipt
       </action>
       <success_criteria>
@@ -278,14 +278,14 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
       <action>
         Collect the full context and task_completion_output from this skill execution.
 
-        IF process_preference.auto_proceed == "auto":
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
           → Invoke x-ipe-dao-end-user-representative with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"
             context: "Skill completed. Study the context and full output to decide best next action."
           → DAO studies the complete context and decides the best next action
-        ELSE (manual):
+        ELSE (interact-with-human):
           → Present next task suggestion to human and wait for instruction
       </action>
       <constraints>
@@ -321,10 +321,10 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
 task_completion_output:
   category: "standalone"
   status: completed | blocked
-  task_based_skill: "Share Idea"
-  next_task_based_skill: null
+  task_based_skill: "x-ipe-task-based-share-idea"
+  next_task_based_skill: null  # terminal skill
   process_preference:
-    auto_proceed: "{from input process_preference.auto_proceed}"
+    interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"

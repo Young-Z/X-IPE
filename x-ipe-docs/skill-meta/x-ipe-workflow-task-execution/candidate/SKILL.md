@@ -28,7 +28,7 @@ MANDATORY: NEVER use `manage_todo_list` (VS Code internal) as substitute for tas
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point for each skill.
 
-IMPORTANT: When `process_preference.auto_proceed == "auto"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue. When `manual` or `stop_for_question`, always wait for human feedback before proceeding to the next task.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue. When `manual` or `stop_for_question`, always wait for human feedback before proceeding to the next task.
 
 ---
 
@@ -52,7 +52,7 @@ input:
   execution:
     next_task_based_skill: "{task_based_skill} | null"
     process_preference:
-      auto_proceed: "manual | auto | stop_for_question"  # default: manual
+      interaction_mode: "interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill"  # default: manual
     task_output_links: ["{links}"] | null
     dynamic_attributes: {}
 
@@ -94,7 +94,7 @@ input:
 
   <!-- Execution fields (populated after Step 3) -->
   <field name="execution.next_task_based_skill" source="From task-based skill output" />
-  <field name="execution.process_preference.auto_proceed" source="Resolved from: (a) workflow-{name}.json global.process_preference in workflow-mode, (b) CLI flag --proceed@auto or --proceed@stop-for-question in free-mode, (c) Semantic understanding from user message, (d) default: manual" />
+  <field name="execution.process_preference.interaction_mode" source="Resolved from: (a) workflow-{name}.json global.process_preference in workflow-mode, (b) CLI flag --proceed@auto or --proceed@stop-for-question in free-mode, (c) Semantic understanding from user message, (d) default: manual" />
   <field name="execution.task_output_links" source="From task-based skill output" />
 
   <!-- Git strategy (resolved during Step 2 DoR) -->
@@ -306,7 +306,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
         status: {new_status}
         next_task_based_skill: {task_based_skill} | null
         process_preference:
-          auto_proceed: "{from input process_preference.auto_proceed}"
+          interaction_mode: "{from input process_preference.interaction_mode}"
         task_output_links: [{links}] | null
         {dynamic_attributes}: per skill definition
     </skill_output_contract>
@@ -366,15 +366,15 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
            → Skip workflow status verification
 
       4. Auto-Proceed Freshness Check:
-         Re-read the current process_preference.auto_proceed value from its source:
+         Re-read the current process_preference.interaction_mode value from its source:
            - workflow-mode: from workflow-{name}.json global.process_preference
            - free-mode: from CLI flag or user message
-         IF the value has changed since Step 2 → update process_preference.auto_proceed for Step 6 routing.
+         IF the value has changed since Step 2 → update process_preference.interaction_mode for Step 6 routing.
 
       5. Human Review Check (mode-aware):
-         IF process_preference.auto_proceed == "auto":
+         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
            → Skip human review, proceed directly
-         ELIF process_preference.auto_proceed == "stop_for_question" OR "manual":
+         ELIF process_preference.interaction_mode == "dao-represent-human-to-interact-for-questions-in-skill" OR "manual":
            → Output summary and STOP for human review
     </actions>
     <output_template>
@@ -387,7 +387,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
       > Execution Mode: {execution_mode}
       > Workflow: {workflow.name}
       > Category Changes: {category_level_change_summary}
-      > Process Preference: {process_preference.auto_proceed}
+      > Process Preference: {process_preference.interaction_mode}
       > Task Output Links: {task_output_links}
       > --- Dynamic Attributes ---
       > {attr_1}: {value}
@@ -411,7 +411,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
 
       ELSE IF routing was not handled by the task-based skill:
         IF next_task_based_skill EXISTS:
-          IF process_preference.auto_proceed == "auto":
+          IF process_preference.interaction_mode == "dao-represent-human-to-interact":
             → Invoke x-ipe-dao-end-user-representative with:
               type: "routing"
               completed_skill_output: {full task_completion_output YAML}
@@ -420,10 +420,10 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
             → IF multiple next_actions_suggested (workflow-mode):
                 invoke x-ipe-dao-end-user-representative (type: routing) to choose
             → Start execution from Step 1 (Planning — to create/verify task on board)
-          ELIF process_preference.auto_proceed == "stop_for_question":
+          ELIF process_preference.interaction_mode == "dao-represent-human-to-interact-for-questions-in-skill":
             → Invoke x-ipe-dao-end-user-representative with same context
             → Present DAO's recommendation to human and wait for confirmation
-          ELSE (manual):
+          ELSE (interact-with-human):
             → Present next task suggestion to human and wait for instruction
         ELSE:
           → STOP (no next task defined)
@@ -455,7 +455,7 @@ output:
     name: "{workflow.name}"
   category_level_change_summary: "{summary} | null"
   process_preference:
-    auto_proceed: "manual | auto | stop_for_question"
+    interaction_mode: "interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill"
   task_output_links: ["{links}"] | null
   next_task_based_skill: "{task_based_skill} | null"
   dynamic_attributes: {}  # Per task-based skill
@@ -494,7 +494,7 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 **Discovery rule:**
 1. Scan `.github/skills/x-ipe-task-based-*/SKILL.md`
-2. Each skill's Output Result YAML declares: `category`, `next_task_based_skill`, `process_preference.auto_proceed`
+2. Each skill's Output Result YAML declares: `category`, `next_task_based_skill`, `process_preference.interaction_mode`
 3. Each skill's `description` in frontmatter contains trigger keywords for request matching
 
 **Request matching:**
@@ -502,7 +502,7 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 2. Match user request against trigger keywords (e.g., "fix bug" matches `x-ipe-task-based-bug-fix`)
 3. See [references/examples.md](.github/skills/x-ipe-workflow-task-execution/references/examples.md) for common request-to-skill patterns
 
-> **Note:** When `process_preference.auto_proceed` is `auto` or `stop_for_question`, human review at skill completion is handled by the mode-aware gate in Step 5. In `auto` mode, review is skipped entirely. In `stop_for_question` mode, review still stops for human approval.
+> **Note:** When `process_preference.interaction_mode` is `dao-represent-human-to-interact` or `dao-represent-human-to-interact-for-questions-in-skill`, human review at skill completion is handled by the mode-aware gate in Step 5. In `dao-represent-human-to-interact` mode, review is skipped entirely. In `dao-represent-human-to-interact-for-questions-in-skill` mode, review still stops for human approval.
 
 ---
 

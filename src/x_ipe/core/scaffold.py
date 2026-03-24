@@ -131,12 +131,13 @@ class ScaffoldManager:
                 shutil.copytree(skills_source, target, dirs_exist_ok=True)
         self.created.append(target)
     
-    def copy_copilot_instructions(self, cli_name: Optional[str] = None, language: str = "en") -> None:
+    def copy_copilot_instructions(self, cli_name: Optional[str] = None, language: str = "en", dao_intercept: bool = False) -> None:
         """Copy or merge instructions file to CLI-specific location.
         
         Args:
             cli_name: CLI adapter name. Determines target path (e.g. .opencode/instructions.md).
             language: Language code for bilingual template extraction ('en' or 'zh').
+            dao_intercept: If True, use DAO-first instruction variant; if False, use no-DAO variant.
         """
         # For non-copilot CLIs, use SkillTranslator to generate instructions
         adapter = None
@@ -156,14 +157,21 @@ class ScaffoldManager:
             if not self.dry_run:
                 from x_ipe.services.skill_translator import SkillTranslator
                 translator = SkillTranslator()
-                translator.generate_instructions(adapter, self.project_root)
+                translator.generate_instructions(adapter, self.project_root, dao_intercept=dao_intercept)
             self.created.append(target)
             return
         
         # Default copilot behavior — load language-specific instructions file
-        source = self._get_resource_path(f"copilot-instructions-{language}.md")
+        # Select DAO or no-DAO variant based on dao_intercept setting
+        if dao_intercept:
+            resource_name = f"copilot-instructions-{language}.md"
+        else:
+            resource_name = f"copilot-instructions-{language}-no-dao.md"
+        source = self._get_resource_path(resource_name)
         if source is None or not source.exists():
-            # Fallback to EN if requested language not found
+            # Fallback: try the DAO variant for the language, then EN
+            source = self._get_resource_path(f"copilot-instructions-{language}.md")
+        if source is None or not source.exists():
             source = self._get_resource_path("copilot-instructions-en.md")
         if source is None or not source.exists():
             return

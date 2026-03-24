@@ -64,6 +64,7 @@
       "bug_fix": {
         "_order": 5,
         "_extra_instruction": "Bug fix mode: TDD gate required — test must fail before fix. Tool skill receives operation 'fix' with mini AAA scenarios from bug context.",
+        "x-ipe-tool-ui-testing-via-chrome-mcp": true,
         "x-ipe-tool-implementation-python": true,
         "x-ipe-tool-implementation-typescript": true,
         "x-ipe-tool-implementation-html5": true,

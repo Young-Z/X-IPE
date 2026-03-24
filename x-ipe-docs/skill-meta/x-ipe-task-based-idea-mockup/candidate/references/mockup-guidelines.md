@@ -324,7 +324,7 @@ Examples:
 ```yaml
 category: ideation-stage
 task_based_skill: Idea Mockup
-auto_proceed: {from input Auto Proceed}
+interaction_mode: {from input Interaction Mode}
 idea_id: IDEA-XXX
 current_idea_folder: {Current Idea Folder}
 mockup_tools_used:
