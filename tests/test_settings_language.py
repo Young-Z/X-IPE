@@ -383,3 +383,60 @@ class TestLanguageSwitchEdgeCases:
         assert config.get('version') == 1
         assert config.get('cli') == 'copilot'
         assert config.get('language') == 'zh'
+
+
+class TestLanguageSwitchWithPackageDefaults:
+    """Tests for language switch when using package-defaults config (TASK-988)."""
+
+    def test_switch_language_with_package_defaults_config(self, tmp_path, temp_db_path):
+        """Language switch succeeds when config_file_path is 'package-defaults'."""
+        from src.app import create_app
+        from x_ipe.services.config_service import ConfigData
+        from x_ipe.core.config_utils import get_package_defaults_path
+
+        pkg_defaults_path = get_package_defaults_path()
+
+        config_data = ConfigData(
+            config_file_path='package-defaults',
+            version=1,
+            project_root=str(tmp_path),
+            x_ipe_app=str(tmp_path),
+            file_tree_scope='project_root',
+            terminal_cwd='project_root',
+            language='en',
+        )
+
+        # Create .github dir for scaffold
+        (tmp_path / '.github').mkdir(parents=True, exist_ok=True)
+        (tmp_path / '.github' / 'copilot-instructions.md').write_text('# Test')
+
+        app = create_app({
+            'TESTING': True,
+            'PROJECT_ROOT': str(tmp_path),
+            'SETTINGS_DB_PATH': temp_db_path,
+            'X_IPE_CONFIG': config_data,
+        })
+        client = app.test_client()
+
+        with patch('x_ipe.core.scaffold.ScaffoldManager') as MockScaffold:
+            MockScaffold.return_value.copy_copilot_instructions.return_value = None
+            response = client.post(
+                '/api/config/language',
+                data=json.dumps({'language': 'zh'}),
+                content_type='application/json'
+            )
+
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data['success'] is True
+        assert data['language'] == 'zh'
+
+        # Verify the package defaults file was updated
+        with open(pkg_defaults_path, 'r') as f:
+            pkg_config = yaml.safe_load(f)
+        assert pkg_config.get('language') == 'zh'
+
+        # Restore original language in package defaults
+        pkg_config['language'] = 'en'
+        with open(pkg_defaults_path, 'w') as f:
+            yaml.dump(pkg_config, f, default_flow_style=False, allow_unicode=True)

@@ -196,6 +196,9 @@ def switch_language():
         }), 400
     
     config_path = Path(config_data.config_file_path)
+    if config_data.config_file_path == "package-defaults":
+        from x_ipe.core.config_utils import get_package_defaults_path
+        config_path = get_package_defaults_path()
     project_root = Path(config_data.project_root)
     
     try:
