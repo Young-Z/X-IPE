@@ -68,7 +68,7 @@ class UIUXFeedbackManager {
                             <span class="browser-dot green"></span>
                         </div>
                         <div class="url-bar">
-                            <input type="text" id="url-input" class="url-input" placeholder="http://localhost:3000 or idea://folder/file.html" list="url-hints" />
+                            <input type="text" id="url-input" class="url-input" placeholder="http://localhost:3000 or idea://folder/file.html or kb://folder/file.md" list="url-hints" />
                             <datalist id="url-hints">
                                 <option value="idea://">
                                 <option value="http://localhost:3000">
@@ -381,6 +381,11 @@ class UIUXFeedbackManager {
             return { valid: true, url: url, isIdea: true };
         }
         
+        // Handle kb:// URLs (for knowledge-base files)
+        if (url.startsWith('kb://')) {
+            return { valid: true, url: url, isKb: true };
+        }
+        
         // Handle file:// URLs
         if (url.startsWith('file://')) {
             return { valid: true, url: url };
@@ -428,6 +433,12 @@ class UIUXFeedbackManager {
             // Handle idea:// protocol - fetch from x-ipe-docs/ideas
             if (validation.isIdea) {
                 await this._loadIdeaUrl(url);
+                return;
+            }
+            
+            // Handle kb:// protocol - fetch from knowledge-base
+            if (validation.isKb) {
+                await this._loadKbUrl(url);
                 return;
             }
             
@@ -503,6 +514,109 @@ class UIUXFeedbackManager {
         } finally {
             this.setLoading(false);
         }
+    }
+    
+    /**
+     * Load a kb:// URL from the knowledge-base folder
+     * @param {string} kbUrl - URL in format kb://path/to/file.ext
+     */
+    async _loadKbUrl(kbUrl) {
+        const IMAGE_EXTS = new Set(['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'bmp', 'ico']);
+        const MD_EXTS = new Set(['md']);
+        const HTML_EXTS = new Set(['html', 'htm']);
+        const PDF_EXTS = new Set(['pdf']);
+
+        try {
+            const kbPath = kbUrl.replace('kb://', '');
+            const ext = (kbPath.split('.').pop() || '').toLowerCase();
+
+            // Images: render directly with img tag pointing to API (no fetch needed)
+            if (IMAGE_EXTS.has(ext)) {
+                const imgUrl = `/api/kb/files/${encodeURIComponent(kbPath)}/raw`;
+                const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f5f5f5}img{max-width:100%;max-height:100vh}</style>
+</head><body><img src="${imgUrl}" alt="${this._escapeHtml(kbPath)}"></body></html>`;
+                this.renderContent(html);
+                this.state.currentUrl = kbUrl;
+                this.updateStatus(`Loaded: ${kbUrl}`);
+                return;
+            }
+
+            // PDF: embed using object tag
+            if (PDF_EXTS.has(ext)) {
+                const pdfUrl = `/api/kb/files/${encodeURIComponent(kbPath)}/raw`;
+                const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>body{margin:0;height:100vh}object{width:100%;height:100%}</style>
+</head><body><object data="${pdfUrl}" type="application/pdf" width="100%" height="100%">
+<p>PDF preview not available. <a href="${pdfUrl}">Download</a></p>
+</object></body></html>`;
+                this.renderContent(html);
+                this.state.currentUrl = kbUrl;
+                this.updateStatus(`Loaded: ${kbUrl}`);
+                return;
+            }
+
+            // All other types: fetch content from API
+            const apiUrl = `/api/kb/files/${encodeURIComponent(kbPath)}/raw`;
+            const response = await fetch(apiUrl);
+
+            if (!response.ok) {
+                const errorMsg = response.status === 413 ? 'File too large to preview'
+                               : response.status === 415 ? 'Cannot preview binary file'
+                               : `Failed to load KB file: ${response.status}`;
+                this.showError(errorMsg);
+                return;
+            }
+
+            const isConverted = response.headers.get('X-Converted') === 'true';
+            const text = await response.text();
+            let html;
+
+            if (isConverted) {
+                // DOCX/MSG auto-converted to HTML by backend
+                html = this._wrapKbContent(text, kbPath);
+            } else if (MD_EXTS.has(ext)) {
+                const rendered = typeof marked !== 'undefined'
+                    ? marked.parse(text)
+                    : `<pre>${this._escapeHtml(text)}</pre>`;
+                html = this._wrapKbContent(rendered, kbPath);
+            } else if (HTML_EXTS.has(ext)) {
+                html = text;
+            } else {
+                // Code / text files
+                html = this._wrapKbContent(
+                    `<pre><code>${this._escapeHtml(text)}</code></pre>`, kbPath
+                );
+            }
+
+            html = this._injectInspectorScript(html);
+            this.renderContent(html);
+            this.state.currentUrl = kbUrl;
+            this.updateStatus(`Loaded: ${kbUrl}`);
+        } catch (e) {
+            this.showError(`Failed to load KB file: ${e.message}`);
+        } finally {
+            this.setLoading(false);
+        }
+    }
+
+    /**
+     * Wrap KB content in a styled HTML document shell
+     */
+    _wrapKbContent(bodyHtml, filePath) {
+        const fileName = filePath.split('/').pop() || filePath;
+        return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+       line-height: 1.6; padding: 24px; margin: 0; color: #1a1a1a; background: #fff; max-width: 800px; }
+pre { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 16px; overflow-x: auto; }
+code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 14px; }
+img { max-width: 100%; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #e1e4e8; padding: 8px 12px; text-align: left; }
+h1, h2, h3 { margin-top: 1.5em; margin-bottom: 0.5em; }
+</style>
+</head><body>${bodyHtml}</body></html>`;
     }
     
     /**
