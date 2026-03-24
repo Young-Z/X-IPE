@@ -108,6 +108,7 @@ class ComposeIdeaModal {
         this.validator = null;
         this.namer = new AutoFolderNamer();
         this.pendingFiles = [];
+        this.existingFiles = [];
         this.abortController = null;
         this.nameValid = false;
         // FEATURE-037-B: Edit mode params
@@ -458,23 +459,54 @@ class ComposeIdeaModal {
         this.updateSubmitState();
     }
 
+    removeExistingFile(index) {
+        const file = this.existingFiles[index];
+        if (!file) return;
+        const filePath = `${this.folderPath}/${file.name}`;
+        fetch('/api/ideas/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: filePath })
+        }).catch(() => {});
+        this.existingFiles.splice(index, 1);
+        this.renderFileList();
+        this.updateSubmitState();
+    }
+
     renderFileList() {
         const list = this.overlay.querySelector('.compose-modal-file-list');
         if (!list) return;
 
-        list.innerHTML = this.pendingFiles.map((file, i) => `
+        const pendingHtml = this.pendingFiles.map((file, i) => `
             <div class="compose-modal-file-item">
                 <div class="compose-modal-file-item-info">
                     <i class="bi bi-file-earmark"></i>
                     <span>${this._escapeHtml(file.name)}</span>
                     <span class="compose-modal-file-item-size">${this._formatSize(file.size)}</span>
                 </div>
-                <button class="compose-modal-file-remove" data-index="${i}" title="Remove">&times;</button>
+                <button class="compose-modal-file-remove" data-index="${i}" data-type="pending" title="Remove">&times;</button>
             </div>
         `).join('');
 
+        const existingHtml = this.existingFiles.map((file, i) => `
+            <div class="compose-modal-file-item">
+                <div class="compose-modal-file-item-info">
+                    <i class="bi bi-file-earmark-check"></i>
+                    <span>${this._escapeHtml(file.name)}</span>
+                </div>
+                <button class="compose-modal-file-remove" data-index="${i}" data-type="existing" title="Remove">&times;</button>
+            </div>
+        `).join('');
+
+        list.innerHTML = pendingHtml + existingHtml;
+
         list.querySelectorAll('.compose-modal-file-remove').forEach(btn => {
-            btn.addEventListener('click', () => this.removeFile(parseInt(btn.dataset.index)));
+            const idx = parseInt(btn.dataset.index);
+            if (btn.dataset.type === 'existing') {
+                btn.addEventListener('click', () => this.removeExistingFile(idx));
+            } else {
+                btn.addEventListener('click', () => this.removeFile(idx));
+            }
         });
     }
 
@@ -486,9 +518,9 @@ class ComposeIdeaModal {
             this.submitBtn.disabled = !this._linkedPath;
             return;
         }
-        const hasContent = this.activeTab === 'compose'
-            ? (this.easyMDE ? this.easyMDE.value().trim().length > 0 : false)
-            : this.pendingFiles.length > 0;
+        const hasComposeContent = this.easyMDE ? this.easyMDE.value().trim().length > 0 : false;
+        const hasUploadContent = this.pendingFiles.length > 0 || this.existingFiles.length > 0;
+        const hasContent = hasComposeContent || hasUploadContent;
         this.submitBtn.disabled = !(this.nameValid && hasContent && (this.activeMode === 'create' || this.editMode));
     }
 
@@ -546,6 +578,12 @@ class ComposeIdeaModal {
                     formData.append('files', file);
                 }
             } else {
+                // Upload tab active — still include compose text if non-empty
+                const content = this.easyMDE ? this.easyMDE.value().trim() : '';
+                if (content) {
+                    const blob = new Blob([this.easyMDE.value()], { type: 'text/markdown' });
+                    formData.append('files', blob, 'new idea.md');
+                }
                 for (const file of this.pendingFiles) {
                     formData.append('files', file);
                 }
@@ -582,7 +620,7 @@ class ComposeIdeaModal {
             if (this.kbReferences.length > 0) {
                 deliverables['kb-references'] = `${folder_path}/.knowledge-reference.yaml`;
             }
-            await fetch(`/api/workflow/${this.workflowName}/action`, {
+            const actionRes = await fetch(`/api/workflow/${this.workflowName}/action`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -592,6 +630,7 @@ class ComposeIdeaModal {
                 }),
                 signal: this.abortController.signal
             });
+            if (!actionRes.ok) throw new Error('Failed to update workflow action');
 
             this.onComplete({ file: primaryFile, files: filePaths, folder: folder_path });
             this.close();
@@ -649,14 +688,16 @@ class ComposeIdeaModal {
             return;
         }
 
-        // Start KB reference loading in parallel
+        // Start KB reference and existing files loading in parallel
         const kbPromise = this.folderPath ? this._loadKbReferences() : Promise.resolve();
+        const filesPromise = this.folderPath ? this._loadExistingFiles() : Promise.resolve();
 
         // Skip binary files — they can't be edited in the text editor
         const ext = (this.filePath.split('.').pop() || '').toLowerCase();
         const textEditable = ['md', 'txt', 'py', 'js', 'ts', 'css', 'html', 'json', 'yaml', 'yml', 'toml', 'cfg', 'ini', 'sh', 'bat'];
         if (!textEditable.includes(ext)) {
             await kbPromise;
+            await filesPromise;
             return;
         }
         try {
@@ -664,6 +705,7 @@ class ComposeIdeaModal {
             if (!resp.ok) {
                 this.showToast('Could not load file content', 'error');
                 await kbPromise;
+                await filesPromise;
                 return;
             }
             const content = await resp.text();
@@ -675,6 +717,7 @@ class ComposeIdeaModal {
             this.showToast('Failed to load file for editing', 'error');
         }
         await kbPromise;
+        await filesPromise;
     }
 
     async _loadKbReferences() {
@@ -688,6 +731,23 @@ class ComposeIdeaModal {
             }
         } catch (_) {
             // Non-critical — silently ignore KB reference load failures
+        }
+    }
+
+    async _loadExistingFiles() {
+        try {
+            const resp = await fetch(`/api/ideas/folder-contents?path=${encodeURIComponent(this.folderPath)}`);
+            if (!resp.ok) return;
+            const data = await resp.json();
+            if (data.success && Array.isArray(data.items)) {
+                this.existingFiles = data.items.filter(item =>
+                    item.type === 'file' && !item.name.startsWith('.')
+                );
+                this.renderFileList();
+                this.updateSubmitState();
+            }
+        } catch (_) {
+            // Non-critical — silently ignore folder listing failures
         }
     }
 

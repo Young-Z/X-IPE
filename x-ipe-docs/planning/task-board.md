@@ -5,7 +5,9 @@
 ## Active Tasks
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
+| TASK-988 | Skill Update | Migrate auto_proceed → interaction_mode in bug-fix production SKILL.md + sync 8 candidate SKILL.md from production. DAO mode. | Drift 🌊 | ✅ done | 03-24-2026 | — | — |
 | TASK-989 | Bug Fix | KB preview rendering defects: (1) preview window height not fully utilizing available space, (2) docx icons (ww, lz, mj) not rendering correctly vs original format. Source: Feedback-20260324-154826. FEATURE-049-F. DAO mode. | Spark ⚡ | ✅ done | 03-24-2026 | [kb-browse-modal.css](src/x_ipe/static/css/kb-browse-modal.css), [file-preview-renderer.js](src/x_ipe/static/js/core/file-preview-renderer.js), [kb-preview-rendering-fix.test.js](tests/frontend-js/kb-preview-rendering-fix.test.js) | — |
+| TASK-990 | Bug Fix | Compose idea bugs: (1) new idea file not shown in deliverable panel after submit, (2) typed idea text and uploaded file not restored when reopening compose idea, (3) need cross icon to remove uploaded files. Source: Feedback-20260324-161921. DAO mode. | Pixel 🎨 | ✅ done | 03-24-2026 | [compose-idea-modal.js](src/x_ipe/static/js/features/compose-idea-modal.js), [compose-idea-modal.test.js](tests/frontend-js/compose-idea-modal.test.js) | — |
 | TASK-987 | Skill Update | Bug-fix skill: (1) simplify UI detection from program_type to context check, (2) add x-ipe-tool-ui-testing-via-chrome-mcp to tools.json. DAO mode. | Drift 🌊 | ✅ done | 03-24-2026 | — | — |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
 | TASK-988 | Bug Fix | Language switch fails with FileNotFoundError when config_file_path is "package-defaults" (regression from TASK-986 layered config). Settings should write to package-bundled default .x-ipe.yaml when no project config exists. Source: Feedback-20260324-150712. DAO mode. | Ember 🔥 | ✅ done | 03-24-2026 | [settings_routes.py](src/x_ipe/routes/settings_routes.py), [test_settings_language.py](tests/test_settings_language.py) | — |
@@ -177,6 +179,7 @@
 | TASK-033 | Implement CR-002: Refocus Extractor on Knowledge Learning | Execute CR-002 that adds Chrome DevTools extraction support, tool skill feedback during extraction, and delegates quality scoring to tool skills. Affects extractor SKILL.md (4 changes), execution-procedures.md (4 changes), and adds score_quality operation to user manual tool skill. | EPIC-050, EPIC-051 | ✅ completed | Atom | 03-17-2026 | 03-17-2026 |
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Notes |
+| TASK-988 | Skill Update | Migrate auto_proceed → interaction_mode in bug-fix production SKILL.md + sync 8 candidate SKILL.md from production. DAO mode. | Drift 🌊 | ✅ done | 03-24-2026 | — | — |
 | TASK-987 | Skill Update | Bug-fix skill: (1) simplify UI detection from program_type to context check, (2) add x-ipe-tool-ui-testing-via-chrome-mcp to tools.json. DAO mode. | Drift 🌊 | ✅ done | 03-24-2026 | — | — |
 |---------|-----------|-------------|------|--------|--------------|--------------|-------|
 | TASK-981 | Bug Fix | UIUX Feedback Feedback-20260321-090349: Creating an idea with a knowledge base reference fails and the compose action remains in progress. DAO mode. | Echo | ✅ completed | 03-21-2026 09:25:00 | [workflow-template.json](x-ipe-docs/config/workflow-template.json), [test_workflow_manager.py](tests/test_workflow_manager.py) | Restored `compose_idea` support for optional `kb-references` deliverables in the live workflow template, added a regression test, and verified the focused backend/frontend suites. Unrelated pre-existing failures remain in `tests/test_workflow_manager.py::TestWorkflowTracing::test_service_methods_have_tracing` and full `npm test` unhandled errors from KB sidebar/intake tests. |
@@ -204,6 +207,7 @@
 ## Cancelled Tasks
 
 | Task ID | Task | Description | Reason | Last Updated | Output Links |
+| TASK-988 | Skill Update | Migrate auto_proceed → interaction_mode in bug-fix production SKILL.md + sync 8 candidate SKILL.md from production. DAO mode. | Drift 🌊 | ✅ done | 03-24-2026 | — | — |
 | TASK-987 | Skill Update | Bug-fix skill: (1) simplify UI detection from program_type to context check, (2) add x-ipe-tool-ui-testing-via-chrome-mcp to tools.json. DAO mode. | Drift 🌊 | ✅ done | 03-24-2026 | — | — |
 |---------|-----------|-------------|--------|--------------|--------------|
 | TASK-042 | Human Playground | Interactive testing for FEATURE-003: Content Editor | No longer needed | 01-23-2026 04:52:00 | - |
@@ -243,8 +247,8 @@
 
 ## Quick Stats
 
-- **Total Active:** 12
-- **In Progress:** 1
+- **Total Active:** 13
+- **In Progress:** 0
 - **Pending:** 0
 - **Completed (archived):** 881
 - **Deferred:** 0

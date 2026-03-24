@@ -1323,3 +1323,242 @@ describe('LinkExistingPanel — CR-002 converted binary preview', () => {
     expect(pre.innerHTML).not.toContain('<script>');
   });
 });
+
+/* --------------------------------------------------------------------------
+   TASK-990: Bug 1 — Compose text lost when submitting from upload tab
+   -------------------------------------------------------------------------- */
+describe('TASK-990 Bug 1: handleSubmit includes compose content on upload tab', () => {
+  let modal;
+  let capturedFormData;
+
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    capturedFormData = null;
+    globalThis.EasyMDE = class {
+      constructor() { this.codemirror = { on: () => {} }; }
+      value() { return 'My idea content from compose'; }
+      toTextArea() {}
+    };
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      if (url === '/api/ideas/upload' && opts?.body instanceof FormData) {
+        capturedFormData = opts.body;
+        return {
+          ok: true, status: 200,
+          json: async () => ({
+            folder_path: 'x-ipe-docs/ideas/wf-001-test',
+            files_uploaded: ['new idea.md', 'doc.docx']
+          })
+        };
+      }
+      if (url.includes('/api/workflow/') && url.includes('/action')) {
+        return { ok: true, json: async () => ({ success: true }), text: async () => '' };
+      }
+      return { ok: true, json: async () => ({ tree: [], success: true }), text: async () => '' };
+    });
+    globalThis.marked = { parse: (s) => s };
+
+    modal = new ComposeIdeaModal({ workflowName: 'test' });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.initEasyMDE();
+    document.body.appendChild(modal.overlay);
+  });
+
+  it('includes compose text as "new idea.md" even when activeTab is upload', async () => {
+    const fakeFile = new File(['docx-data'], 'doc.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    modal.pendingFiles = [fakeFile];
+    modal.activeTab = 'upload';
+    modal.namer.generate = vi.fn(async () => 'wf-001-test');
+    modal.nameInput.value = 'test-idea';
+    modal.nameValid = true;
+    modal.submitBtn.disabled = false;
+    modal.validator.validate = vi.fn(() => ({ valid: true, sanitized: 'test-idea' }));
+
+    await modal.handleSubmit();
+
+    expect(capturedFormData).not.toBeNull();
+    const allFiles = capturedFormData.getAll('files');
+    const fileNames = allFiles.map(f => f.name);
+    // Should have BOTH: compose blob (new idea.md) AND the uploaded file
+    expect(fileNames).toContain('new idea.md');
+    expect(fileNames).toContain('doc.docx');
+  });
+});
+
+/* --------------------------------------------------------------------------
+   TASK-990: Bug 1b — updateSubmitState should enable submit when either tab
+   has content, not only the active tab
+   -------------------------------------------------------------------------- */
+describe('TASK-990 Bug 1b: updateSubmitState cross-tab content', () => {
+  let modal;
+
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    globalThis.EasyMDE = class {
+      constructor() { this.codemirror = { on: () => {} }; }
+      value() { return 'some content'; }
+      toTextArea() {}
+    };
+    globalThis.fetch = vi.fn(async () => ({ ok: true, json: async () => ({ tree: [], success: true }), text: async () => '' }));
+    globalThis.marked = { parse: (s) => s };
+
+    modal = new ComposeIdeaModal({ workflowName: 'workflow-test' });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.initEasyMDE();
+    document.body.appendChild(modal.overlay);
+  });
+
+  it('enables submit when compose has content but activeTab is upload', () => {
+    modal.activeTab = 'upload';
+    modal.easyMDE = { value: () => 'My idea text' };
+    modal.pendingFiles = [];
+    modal.nameValid = true;
+    modal.updateSubmitState();
+
+    expect(modal.submitBtn.disabled).toBe(false);
+  });
+
+  it('enables submit when upload has files but activeTab is compose', () => {
+    modal.activeTab = 'compose';
+    modal.easyMDE = { value: () => '' };
+    modal.pendingFiles = [new File(['data'], 'test.pdf')];
+    modal.nameValid = true;
+    modal.updateSubmitState();
+
+    expect(modal.submitBtn.disabled).toBe(false);
+  });
+});
+
+/* --------------------------------------------------------------------------
+   TASK-990: Bug 1c — handleSubmit should check workflow action response
+   -------------------------------------------------------------------------- */
+describe('TASK-990 Bug 1c: handleSubmit checks workflow action response', () => {
+  let modal;
+  let toastShown;
+
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    toastShown = null;
+    globalThis.EasyMDE = class {
+      constructor() { this.codemirror = { on: () => {} }; }
+      value() { return 'My idea'; }
+      toTextArea() {}
+    };
+    globalThis.fetch = vi.fn(async (url, opts) => {
+      if (url === '/api/ideas/upload') {
+        return {
+          ok: true, status: 200,
+          json: async () => ({
+            folder_path: 'x-ipe-docs/ideas/wf-001-test',
+            files_uploaded: ['new idea.md']
+          })
+        };
+      }
+      if (url.includes('/api/workflow/') && url.includes('/action')) {
+        return { ok: false, status: 500, text: async () => 'Server error' };
+      }
+      return { ok: true, json: async () => ({ tree: [], success: true }), text: async () => '' };
+    });
+    globalThis.marked = { parse: (s) => s };
+
+    modal = new ComposeIdeaModal({ workflowName: 'test' });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.initEasyMDE();
+    document.body.appendChild(modal.overlay);
+    modal.showToast = vi.fn((msg) => { toastShown = msg; });
+  });
+
+  it('throws error when workflow action update fails', async () => {
+    modal.activeTab = 'compose';
+    modal.namer.generate = vi.fn(async () => 'wf-001-test');
+    modal.nameInput.value = 'test-idea';
+    modal.nameValid = true;
+    modal.submitBtn.disabled = false;
+    modal.validator.validate = vi.fn(() => ({ valid: true, sanitized: 'test-idea' }));
+
+    await modal.handleSubmit();
+
+    // Should have shown an error toast because the workflow action failed
+    expect(toastShown).toBeTruthy();
+    expect(toastShown).toContain('Failed');
+  });
+});
+
+/* --------------------------------------------------------------------------
+   TASK-990: Bug 2 — loadEditContent should load existing files from folder
+   -------------------------------------------------------------------------- */
+describe('TASK-990 Bug 2: loadEditContent loads existing files', () => {
+  it('fetches folder contents and populates existingFiles', async () => {
+    const folderItems = [
+      { name: 'new idea.md', type: 'file' },
+      { name: '测试文档.docx', type: 'file' },
+    ];
+    globalThis.fetch = vi.fn(async (url) => {
+      if (url.includes('/api/ideas/folder-contents')) {
+        return { ok: true, json: async () => ({ success: true, items: folderItems }) };
+      }
+      if (url.includes('/api/ideas/kb-references')) {
+        return { ok: true, json: async () => ({ success: true, kb_references: [] }) };
+      }
+      // File content fetch
+      return { ok: true, text: async () => '# My Idea' };
+    });
+
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/wf-001-test/new idea.md',
+      folderPath: 'x-ipe-docs/ideas/wf-001-test',
+      folderName: 'wf-001-test'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.easyMDE = { value: vi.fn() };
+
+    await modal.loadEditContent();
+
+    // Should have called the folder-contents API
+    const folderCall = globalThis.fetch.mock.calls.find(c => c[0].includes('/api/ideas/folder-contents'));
+    expect(folderCall).toBeTruthy();
+    // Should have populated existingFiles
+    expect(modal.existingFiles).toBeDefined();
+    expect(modal.existingFiles.length).toBe(2);
+  });
+
+  it('renders existing files with remove buttons in file list', async () => {
+    const folderItems = [
+      { name: '测试文档.docx', type: 'file' },
+    ];
+    globalThis.fetch = vi.fn(async (url) => {
+      if (url.includes('/api/ideas/folder-contents')) {
+        return { ok: true, json: async () => ({ success: true, items: folderItems }) };
+      }
+      if (url.includes('/api/ideas/kb-references')) {
+        return { ok: true, json: async () => ({ success: true, kb_references: [] }) };
+      }
+      return { ok: true, text: async () => '# My Idea' };
+    });
+
+    const modal = new ComposeIdeaModal({
+      workflowName: 'test',
+      mode: 'edit',
+      filePath: 'x-ipe-docs/ideas/wf-001-test/new idea.md',
+      folderPath: 'x-ipe-docs/ideas/wf-001-test',
+      folderName: 'wf-001-test'
+    });
+    modal.createDOM();
+    modal.bindEvents();
+    modal.easyMDE = { value: vi.fn() };
+
+    await modal.loadEditContent();
+
+    // File list should contain the existing file with a remove button
+    const fileList = modal.overlay.querySelector('.compose-modal-file-list');
+    expect(fileList).toBeTruthy();
+    expect(fileList.textContent).toContain('测试文档.docx');
+    const removeBtn = fileList.querySelector('.compose-modal-file-remove');
+    expect(removeBtn).toBeTruthy();
+  });
+});

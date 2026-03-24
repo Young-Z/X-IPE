@@ -3,6 +3,7 @@
 | Entry ID | Timestamp | Task ID | Calling Skill | Disposition | Confidence | Summary |
 |----------|-----------|---------|---------------|-------------|------------|---------|
 | DAO-001 | 2026-03-24T06:12:23Z | TBD | N/A (human-initiated) | instruction | 0.85 | Investigate UIUX feedback simulator browser preview bug — blank viewport when viewing KB content |
+| DAO-008 | 2026-03-24T08:30:00Z | TASK-990 | N/A (human-initiated) | instruction | 0.90 | Process compose idea bugs: deliverable not shown, state not restored on reopen, add uploaded file remove button |
 
 ## DAO-001
 - **Timestamp:** 2026-03-24T06:12:23Z
@@ -110,6 +111,65 @@
 >         step: "2.1 Implement fix"
 >       - phase: "3. Verify"
 >         step: "3.1 Run tests and verify fix"
+
+### Follow-up
+> None
+
+---
+
+### DAO-007
+
+| Field | Value |
+|-------|-------|
+| Timestamp | 2026-03-24 |
+| Source | ai |
+| Calling Skill | x-ipe-task-based-bug-fix (Step 9.1) |
+| Task ID | TASK-989 |
+| Feature ID | N/A |
+| Workflow | N/A |
+
+**Message:** Bug fix TASK-989 completed (standalone). Both KB preview rendering defects fixed and verified. next_task_based_skill: null. What should the agent do next?
+
+**Disposition:** answer
+**Confidence:** 0.92
+
+**Content:** Task complete — no follow-up skill required. TASK-989 was a standalone bug fix from UIUX feedback (Feedback-20260324-154826). Both reported defects are resolved: (1) preview height now fills available space via flex layout, (2) docx avatar icons constrained to 2em inline height. All 883 tests pass, browser verification confirmed. Report completion to user and await next instruction.
+
+**Rationale:** Standalone category with null next_task_based_skill. The UIUX feedback contained exactly 2 bugs, both addressed in this single task. No remaining items in the feedback folder require action. Clean completion — return control to user.
+
+---
+
+## DAO-008
+- **Timestamp:** 2026-03-24T08:30:00Z
+- **Task ID:** TASK-990
+- **Feature ID:** N/A (compose idea action)
+- **Workflow:** N/A
+- **Calling Skill:** N/A (human-initiated)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.90
+
+### Message
+> Get uiux feedback, please visit feedback folder x-ipe-docs/uiux-feedback/Feedback-20260324-161921 to get details. Three issues: (1) After composing idea with typed text, uploaded file '测试文档.docx' and referenced knowledge 'AI工具会议纪要.docx', submitting doesn't show new idea file in deliverable panel. (2) Reopening compose idea doesn't restore typed text or uploaded file. (3) Need cross icon beside uploaded file for removal.
+
+### Guidance Returned
+> Process as bug fix on compose idea modal. Issues 1 & 2 are bugs in state persistence/restoration and deliverable display. Issue 3 is a minor UX enhancement tightly coupled to the upload flow. All target compose-idea-modal.js and related backend. Load x-ipe-task-based-bug-fix skill, create task on board, diagnose root cause, and fix.
+
+### Rationale
+> All three issues target the compose idea workflow — specifically compose-idea-modal.js state management. Issue 1 (deliverable not appearing) suggests the submit handler doesn't properly register the idea file as a deliverable. Issue 2 (state not restored) suggests the modal init doesn't load persisted state. Issue 3 (remove button) is a small UX addition in the same upload area. Treating as one cohesive bug fix task is efficient.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "strong"
+>     reason: "User reports broken compose idea behavior — deliverables not shown, state not restored on reopen"
+>     execution_steps:
+>       - phase: "1. Diagnose"
+>         step: "1.1 Reproduce and identify root cause"
+>       - phase: "2. Fix"
+>         step: "2.1 Implement fix with failing test first"
+>       - phase: "3. Verify"
+>         step: "3.1 Confirm fix resolves the issue"
 
 ### Follow-up
 > None
