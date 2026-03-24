@@ -76,3 +76,40 @@
 **Need:** (1) Revert kb:// commit (wrong fix), (2) Implement Option 3 — add `<base href>` to srcdoc to fix relative URL resolution in simulator iframe.
 
 **Rationale:** User confirmed Option 3 after evaluating alternatives. Sequential: revert first, then apply correct fix.
+
+| DAO-006 | 2026-03-24T07:52:03Z | TASK-TBD | N/A (human-initiated) | instruction | 0.85 | Process KB preview feedback: height underutilization + docx icon rendering issues in FEATURE-049-F |
+
+## DAO-006
+- **Timestamp:** 2026-03-24T07:52:03Z
+- **Task ID:** TASK-TBD
+- **Feature ID:** FEATURE-049-F
+- **Workflow:** N/A
+- **Calling Skill:** N/A (human-initiated)
+- **Source:** human
+- **Disposition:** instruction
+- **Confidence:** 0.85
+
+### Message
+> Get uiux feedback, please visit feedback folder x-ipe-docs/uiux-feedback/Feedback-20260324-154826 to get details. Two issues: (1) KB preview window height not fully utilizing available space. (2) Icons in docx preview (ww, lz, mj) not rendering correctly — should match original docx format.
+
+### Guidance Returned
+> Process as bug fix on KB article preview component (FEATURE-049-F). Both issues are rendering defects in the existing preview: height layout and icon fidelity. Load x-ipe-task-based-bug-fix skill, create task on board, diagnose root cause in preview rendering code, and fix.
+
+### Rationale
+> Both issues target the same KB preview rendering pipeline (div.kb-article-content). TASK-925 / CR-004 is already in-progress for rich file preview. These are rendering quality bugs best handled via bug-fix workflow in FEEDBACK stage.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-bug-fix"
+>     match_strength: "strong"
+>     reason: "KB preview rendering defects — height underutilization and icon rendering fidelity issues"
+>     execution_steps:
+>       - phase: "1. Diagnose"
+>         step: "1.1 Reproduce and identify root cause"
+>       - phase: "2. Fix"
+>         step: "2.1 Implement fix"
+>       - phase: "3. Verify"
+>         step: "3.1 Run tests and verify fix"
+
+### Follow-up
+> None
