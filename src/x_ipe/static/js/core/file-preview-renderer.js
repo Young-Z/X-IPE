@@ -217,6 +217,8 @@ class FilePreviewRenderer {
 <html><head><meta charset="utf-8"><style class="docx-preview-base">
 body { margin: 0; padding: 16px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: #334155; }
 p img { max-height: 2em; vertical-align: middle; }
+p > img + br { display: none; }
+p > img + * > br:first-child { display: none; }
 p > img:only-child { max-height: none; max-width: 100%; display: block; margin: 8px auto; }
 table { border-collapse: collapse; width: 100%; margin: 12px 0; }
 td, th { border: 1px solid #e2e8f0; padding: 6px 10px; }

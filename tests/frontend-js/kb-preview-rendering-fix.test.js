@@ -152,6 +152,27 @@ describe('TASK-989 Bug 2: Docx icon rendering', () => {
     expect(capturedBlobContent).toContain('max-width');
   });
 
+  it('should hide br tags after inline images to preserve inline flow', async () => {
+    const docxHtml = '<p><img src="data:image/png;base64,abc"><strong><br>Warren WANG </strong>已开始听录</p>';
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      text: async () => docxHtml,
+      headers: { get: (h) => h === 'X-Converted' ? 'true' : null }
+    });
+
+    const renderer = new FilePreviewRenderer({
+      apiEndpoint: '/api/kb/files/{path}/raw',
+      endpointStyle: 'path'
+    });
+    await renderer.renderPreview('doc.docx', container);
+
+    await new Promise(r => setTimeout(r, 10));
+
+    // CSS rules to hide br tags that break inline image+text flow
+    expect(capturedBlobContent).toContain('img + br { display: none');
+    expect(capturedBlobContent).toContain('img + * > br:first-child { display: none');
+  });
+
   it('should NOT inject stylesheet for regular HTML files', async () => {
     const htmlContent = '<html><body><img src="photo.jpg"></body></html>';
     globalThis.fetch = vi.fn().mockResolvedValue({
