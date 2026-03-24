@@ -6,6 +6,8 @@
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
 |---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-986 | Code Implementation | Add layered .x-ipe.yaml config: bundle default config in package (src/x_ipe/resources/config/), load as fallback in both entry points (uv run python -m x_ipe.app + x-ipe serve), deep-merge project-level .x-ipe.yaml over defaults. DAO mode. | Ember 🔥 | 🔄 in_progress | 03-24-2026 | — | — |
+| TASK-985 | Bug Fix | UIUX feedback simulator browser shows blank viewport when previewing KB content — "cannot preview" in simulator but works in direct KB access. Source: Feedback-20260324-141037. DAO mode. | Ember 🔥 | ✅ done | 03-24-2026 | [uiux-feedback.js](src/x_ipe/static/js/uiux-feedback.js), [uiux-feedback-kb-url.test.js](tests/frontend-js/uiux-feedback-kb-url.test.js) | — |
 | TASK-984 | Code Refactor | Refactor action-execution-modal i18n from static _I18N code map to data-driven config in copilot-prompt.json (matching copilot button dropdown pattern). Move labels to ui-labels section. DAO mode. | Ember 🔥 | ✅ done | 03-22-2026 | [action-execution-modal.js](src/x_ipe/static/js/features/action-execution-modal.js), [copilot-prompt.json](src/x_ipe/resources/config/copilot-prompt.json) | — |
 | TASK-983 | Bug Fix | Instruction modal text not localized to Chinese when .x-ipe.yaml language=zh. The INSTRUCTIONS section (e.g., "Refine Idea" modal) shows English text; should be Chinese except CLI flags (--workflow-mode etc). Source: Feedback-20260322-215956. DAO mode. | Ember 🔥 | ✅ done | 03-22-2026 | [action-execution-modal.js](src/x_ipe/static/js/features/action-execution-modal.js), [action-execution-modal-i18n.test.js](tests/frontend-js/action-execution-modal-i18n.test.js) | — |
 | TASK-982 | Bug Fix | Chinese filenames display as Unicode escape sequences (e.g., `\u6D4B\u8BD5\u6587\u6863.doc` instead of `测试文档.doc`). Discovered during TASK-981 verification. DAO mode. | Echo 📡 | ✅ done | 03-21-2026 | [ideas_service.py](src/x_ipe/services/ideas_service.py), [workflow_manager_service.py](src/x_ipe/services/workflow_manager_service.py), [app.py](src/x_ipe/app.py) | — |
@@ -236,7 +238,7 @@
 
 ## Quick Stats
 
-- **Total Active:** 11
+- **Total Active:** 12
 - **In Progress:** 1
 - **Pending:** 0
 - **Completed (archived):** 881

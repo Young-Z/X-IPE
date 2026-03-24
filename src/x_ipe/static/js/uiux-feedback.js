@@ -622,7 +622,20 @@ class UIUXFeedbackManager {
         }
         
         if (this.elements.iframe) {
-            this.elements.iframe.srcdoc = html;
+            // srcdoc sets iframe origin to about:blank, breaking relative API URLs.
+            // Inject <base href> so relative paths resolve against the real server.
+            let fixedHtml = html;
+            if (!html.includes('<base')) {
+                const baseTag = `<base href="${window.location.origin}/">`;
+                if (html.includes('<head>')) {
+                    fixedHtml = html.replace('<head>', `<head>${baseTag}`);
+                } else if (html.includes('<html')) {
+                    fixedHtml = html.replace(/<html[^>]*>/, `$&<head>${baseTag}</head>`);
+                } else {
+                    fixedHtml = `<head>${baseTag}</head>${html}`;
+                }
+            }
+            this.elements.iframe.srcdoc = fixedHtml;
         }
     }
     
