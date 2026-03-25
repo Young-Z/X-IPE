@@ -82,7 +82,7 @@ input:
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
   <field name="current_idea_folder" source="previous Ideation task output OR human input">
     <steps>
-      1. IF previous task was "Ideation" → extract from task_output_links.current_idea_folder
+      1. IF previous task was "Ideation" → use previous task output's current_idea_folder field
       2. ELIF human provides path → use it
       3. IF null → list folders under x-ipe-docs/ideas/ and ask human to select
       4. Validate: folder exists AND contains idea-summary-vN.md

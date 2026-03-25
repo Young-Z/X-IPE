@@ -86,7 +86,7 @@ input:
   </field>
   <field name="mockup_list" source="previous task | human input | N/A">
     <steps>
-      1. Check previous task (Idea Mockup) output for task_output_links
+      1. Check previous task (Idea Mockup) output for mockup_list (array of {mockup_name, mockup_link})
       2. If not available, ask human for mockup links
       3. If none provided, set to N/A
     </steps>

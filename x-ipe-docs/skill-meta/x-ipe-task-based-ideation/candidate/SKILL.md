@@ -415,7 +415,7 @@ task_completion_output:
   idea_id: "IDEA-XXX"
   idea_status: Refined
   idea_version: "vN"
-  idea_folder: "{original folder name}"
+  current_idea_folder: "x-ipe-docs/ideas/{folder}"
 ```
 
 ---

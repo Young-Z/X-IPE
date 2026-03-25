@@ -5,6 +5,7 @@
 ## Active Tasks
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
+| TASK-995 | Skill Update | Fix I/O chain compatibility across ideation-stage skills: ideation output field name/format, mockup/arch input_init broken reference, share-idea missing predecessor ref, mockup_list format mismatch with requirement-gathering. | Cipher 🔑 | ✅ done | 03-25-2026 | [ideation](../../.github/skills/x-ipe-task-based-ideation/SKILL.md), [mockup](../../.github/skills/x-ipe-task-based-idea-mockup/SKILL.md), [architecture](../../.github/skills/x-ipe-task-based-idea-to-architecture/SKILL.md), [share-idea](../../.github/skills/x-ipe-task-based-share-idea/SKILL.md), [req-gathering](../../.github/skills/x-ipe-task-based-requirement-gathering/SKILL.md) | — |
 | TASK-994 | Skill Update | Add docx tool skill as DOCX conversion method in x-ipe-task-based-share-idea. Route DOCX format to docx skill instead of pandoc-only fallback. | Zephyr 🌬️ | ✅ done | 03-25-2026 | [SKILL.md](.github/skills/x-ipe-task-based-share-idea/SKILL.md) | — |
 | TASK-993 | Skill Validation | Validate all ideation-stage skills (4 task-based + 2 tool) against x-ipe-meta-skill-creator guidelines. Fix structural/content issues. | Cipher 🔑 | ✅ done | 03-25-2026 | [ideation SKILL.md](.github/skills/x-ipe-task-based-ideation/SKILL.md), [mockup SKILL.md](.github/skills/x-ipe-task-based-idea-mockup/SKILL.md), [architecture SKILL.md](.github/skills/x-ipe-task-based-idea-to-architecture/SKILL.md) | — |
 | TASK-992 | Skill Update | Add production-patterns reference + lesson-learned consultation + reflection checklist to x-ipe-meta-skill-creator. Addresses 5 high-impact gaps from content audit. | Cipher 🔑 | ✅ done | 03-25-2026 | [12. reference-production-patterns.md](.github/skills/x-ipe-meta-skill-creator/references/12.%20reference-production-patterns.md), [SKILL.md](.github/skills/x-ipe-meta-skill-creator/SKILL.md) | — |
@@ -254,7 +255,7 @@
 - **Total Active:** 15
 - **In Progress:** 0
 - **Pending:** 0
-- **Completed (archived):** 883
+- **Completed (archived):** 884
 - **Deferred:** 0
 - **Reverted:** 8
 - **Pending Review:** 0

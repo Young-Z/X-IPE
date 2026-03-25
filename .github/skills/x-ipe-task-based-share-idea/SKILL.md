@@ -63,11 +63,12 @@ input:
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
-  <field name="idea_folder" source="human input | auto-detect">
+  <field name="idea_folder" source="previous task output | human input | auto-detect">
     <steps>
-      1. If human provides explicit folder path, use it
-      2. Otherwise, scan x-ipe-docs/ideas/ for most recent folder (by modification time)
-      3. Confirm resolved folder with human before proceeding
+      1. IF previous task output has current_idea_folder → use it (map to idea_folder)
+      2. ELIF human provides explicit folder path → use it
+      3. ELSE → scan x-ipe-docs/ideas/ for most recent folder (by modification time)
+      4. Confirm resolved folder with human before proceeding
     </steps>
   </field>
   <field name="toolbox_meta" source="default: x-ipe-docs/config/tools.json" />
