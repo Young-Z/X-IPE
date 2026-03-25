@@ -381,8 +381,6 @@ task_completion_output:
       condition: "Create visual mockup if not done"
     - skill: "x-ipe-task-based-share-idea"
       condition: "Share the architecture with stakeholders"
-  process_preference:
-    interaction_mode: "{from input process_preference.interaction_mode}"
   task_output_links:
     - "{current_idea_folder}/architecture/system-architecture-v1.md"
     - "{current_idea_folder}/architecture/data-flow-v1.md"

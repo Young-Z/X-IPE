@@ -366,37 +366,17 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
   <phase_6 name="继续执行（Continue Execute）">
     <step_6_1>
       <name>Decide Next Action</name>
-      <action>
-        Collect the full context and task_completion_output from this skill execution.
-
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-dao-end-user-representative with:
-            type: "routing"
-            completed_skill_output: {full task_completion_output YAML from this skill}
-            next_task_based_skill: "{from output}"
-            context: "Skill completed. Study the context and full output to decide best next action."
-          → DAO studies the complete context and decides the best next action
-        ELSE (interact-with-human):
-          → Present next task suggestion to human and wait for instruction
-      </action>
+      <action>Collect task_completion_output. IF interaction_mode == "dao-represent-human-to-interact": invoke x-ipe-dao-end-user-representative with type: "routing", completed_skill_output, next_task_based_skill. ELSE: present next task suggestion to human.</action>
       <constraints>
-        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
-        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
+        - BLOCKING (manual): Human MUST confirm or redirect
+        - BLOCKING (auto): Auto-select next task via DAO after DoD verification
       </constraints>
-      <output>Next action decided with execution context</output>
+      <output>Next action decided</output>
     </step_6_1>
     <step_6_2>
       <name>Execute Next Action</name>
-      <action>
-        Based on the decision from Step 6.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
-      </action>
-      <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
-      </constraints>
+      <action>Load target skill's SKILL.md, generate execution plan, start from first phase.</action>
+      <constraints>MUST load skill before executing — follows target skill's procedure.</constraints>
       <output>Next task execution started</output>
     </step_6_2>
   </phase_6>
@@ -438,74 +418,49 @@ task_completion_output:
   idea_folder: "{original folder name}"
 ```
 
-### Next Task Selection
-
-After ideation completes, ask human to choose (auto mode: auto-select from next_task_based_skill):
-
-```yaml
-next_task_options:
-  - option: "Idea Mockup"
-    best_for: "Ideas with strong UI focus"
-  - option: "Idea to Architecture"
-    best_for: "Ideas requiring system design, integrations"
-  - option: "Skip to Requirement Gathering"
-    best_for: "Simple ideas or when mockups/architecture not needed"
-```
-
 ---
 
 ## Definition of Done
 
 CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 
-CRITICAL: Every step output in Execution Procedure MUST have a corresponding DoD checkpoint.
-
 ```xml
 <definition_of_done>
   <checkpoint required="true">
     <name>Config Loaded</name>
     <verification>x-ipe-docs/config/tools.json loaded, enabled tool list output, and enabled skill-backed tools loaded</verification>
-    <step_output>tool_config, enabled_tool_list, extra_instructions, loaded_tool_skills</step_output>
   </checkpoint>
   <checkpoint required="true">
     <name>Files Analyzed</name>
     <verification>All files in idea folder analyzed</verification>
-    <step_output>initial_analysis</step_output>
   </checkpoint>
   <checkpoint required="true">
     <name>Understanding Summary Shared</name>
     <verification>Initial understanding summary shared with user</verification>
-    <step_output>understanding_summary</step_output>
   </checkpoint>
   <checkpoint required="true">
     <name>Brainstorming Complete</name>
     <verification>Idea is well-defined with clear goals</verification>
-    <step_output>brainstorming_notes, artifacts[]</step_output>
   </checkpoint>
   <checkpoint required="true">
     <name>Draft Created</name>
     <verification>Idea draft generated, enabled tools from step 1.1 used where appropriate</verification>
-    <step_output>idea_summary_path</step_output>
   </checkpoint>
   <checkpoint required="true">
     <name>Critique Received</name>
     <verification>Sub-agent provided constructive feedback</verification>
-    <step_output>critique_feedback</step_output>
   </checkpoint>
   <checkpoint required="true">
     <name>Feedback Addressed</name>
     <verification>All critique items addressed — accepted or explicitly deferred with rationale</verification>
-    <step_output>improvement_decisions, finalized_approach</step_output>
   </checkpoint>
   <checkpoint required="true">
     <name>Summary Created and Complete</name>
     <verification>x-ipe-docs/ideas/{folder}/refined-idea/idea-summary-vN.md exists with all sections filled and key decisions documented</verification>
-    <step_output>idea_summary_path, next_task_choice</step_output>
   </checkpoint>
   <checkpoint required="recommended">
     <name>Principles Researched</name>
     <verification>Common principles researched if topic is established; web-search tool used when enabled and needed</verification>
-    <step_output>common_principles[], references[], web_research_summary</step_output>
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Workflow Action Status Updated</name>

@@ -5,7 +5,8 @@
 ## Active Tasks
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
-| TASK-993 | Skill Validation | Validate all ideation-stage skills (4 task-based + 2 tool) against x-ipe-meta-skill-creator guidelines. Fix structural/content issues. | Cipher 🔑 | 🔄 in_progress | 03-25-2026 | — | — |
+| TASK-994 | Skill Update | Add docx tool skill as DOCX conversion method in x-ipe-task-based-share-idea. Route DOCX format to docx skill instead of pandoc-only fallback. | Zephyr 🌬️ | ✅ done | 03-25-2026 | [SKILL.md](.github/skills/x-ipe-task-based-share-idea/SKILL.md) | — |
+| TASK-993 | Skill Validation | Validate all ideation-stage skills (4 task-based + 2 tool) against x-ipe-meta-skill-creator guidelines. Fix structural/content issues. | Cipher 🔑 | ✅ done | 03-25-2026 | [ideation SKILL.md](.github/skills/x-ipe-task-based-ideation/SKILL.md), [mockup SKILL.md](.github/skills/x-ipe-task-based-idea-mockup/SKILL.md), [architecture SKILL.md](.github/skills/x-ipe-task-based-idea-to-architecture/SKILL.md) | — |
 | TASK-992 | Skill Update | Add production-patterns reference + lesson-learned consultation + reflection checklist to x-ipe-meta-skill-creator. Addresses 5 high-impact gaps from content audit. | Cipher 🔑 | ✅ done | 03-25-2026 | [12. reference-production-patterns.md](.github/skills/x-ipe-meta-skill-creator/references/12.%20reference-production-patterns.md), [SKILL.md](.github/skills/x-ipe-meta-skill-creator/SKILL.md) | — |
 | TASK-991 | Skill Update | Add Python lint script (scripts/lint_dsl.py) to x-ipe-tool-architecture-dsl skill for validating generated DSL code. Implements grammar validation rules E001-E009, W001. Update SKILL.md DoD to call linter. Pattern from ontology-1.0.4/scripts/ontology.py. DAO mode. | Ember 🔥 | ✅ done | 03-25-2026 | [lint_dsl.py](.github/skills/x-ipe-tool-architecture-dsl/scripts/lint_dsl.py), [SKILL.md v4.0](.github/skills/x-ipe-tool-architecture-dsl/SKILL.md) | — |
 | TASK-988 | Skill Update | Migrate auto_proceed → interaction_mode in bug-fix production SKILL.md + sync 8 candidate SKILL.md from production. DAO mode. | Drift 🌊 | ✅ done | 03-24-2026 | — | — |
@@ -250,10 +251,10 @@
 
 ## Quick Stats
 
-- **Total Active:** 14
+- **Total Active:** 15
 - **In Progress:** 0
 - **Pending:** 0
-- **Completed (archived):** 882
+- **Completed (archived):** 883
 - **Deferred:** 0
 - **Reverted:** 8
 - **Pending Review:** 0

@@ -108,13 +108,13 @@ input:
 
 | Phase | Step | Name | Action | Gate |
 |-------|------|------|--------|------|
-| 1. 博学之 (Study Broadly) | 1.1 | Load Config | Read toolbox meta sharing section; detect conversion tools | Config loaded |
+| 1. 博学之 (Study Broadly) | 1.1 | Load Config | Read toolbox meta sharing section; detect conversion tools and tool skills | Config loaded |
 | | 1.2 | Identify Source | Locate latest `idea-summary-vN.md` in idea folder | Source found |
 | 2. 审问之 (Inquire Thoroughly) | 2.1 | Confirm Format | Ask human for target format(s) from enabled options | Format(s) confirmed |
 | 3. 慎思之 (Think Carefully) | — | SKIP | No trade-offs; conversion is mechanical once format confirmed | — |
 | 4. 明辨之 (Discern Clearly) | — | SKIP | Format already confirmed in Phase 2; no alternatives to evaluate | — |
 | 5. 笃行之 (Practice Earnestly) | 5.1 | Prepare Content | Restructure content for each target format | Content ready |
-| | 5.2 | Convert | Generate output files via pandoc, MCP, or manual fallback | Files generated |
+| | 5.2 | Convert | Generate output files via tool skills, pandoc, MCP, or manual fallback | Files generated |
 | | 5.3 | Verify & Complete | Confirm output files exist with size > 0; report to human | DoD validated |
 | 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
 | 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
@@ -149,12 +149,15 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
            - pandoc (which pandoc)
            - MCP document tools (check available MCP servers)
            - python-pptx / python-docx (pip show)
-        6. Log active formats, extra_instructions, and available tools
+        6. Detect available format-specific tool skills:
+           - IF DOCX enabled: check .github/skills/docx/SKILL.md exists → load as docx_tool_skill
+           - IF PPTX enabled: check .github/skills/pptx/SKILL.md exists → load as pptx_tool_skill
+        7. Log active formats, extra_instructions, available tools, and loaded tool skills
       </action>
       <constraints>
         - CRITICAL: Report available tools before proceeding
       </constraints>
-      <output>Enabled formats list, available tools, extra_instructions</output>
+      <output>Enabled formats list, available tools, loaded tool skills, extra_instructions</output>
       <reference>
         Supported formats and config key mapping:
         | Config Key                         | Extension | Best For           |
@@ -226,9 +229,15 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
            - Overview, Problem, Solution as bullet points
            - Key Features, Success Criteria, Next Steps
            - Max 5-7 bullets per slide; add speaker notes
-        3. For DOCX/PDF: use markdown content directly,
-           preserve headers, tables, and formatting
-        4. For HTML: use markdown content with web-friendly structure
+           - IF pptx_tool_skill loaded: follow its content and design guidance
+        3. For DOCX:
+           - IF docx_tool_skill loaded: follow its Core Rules for document structure
+             (use named styles over direct formatting, proper heading hierarchy,
+              Word numbering definitions for lists, explicit page layout)
+           - Structure content with Heading 1/2/3 hierarchy matching idea summary sections
+           - Preserve tables, lists, and emphasis formatting
+        4. For PDF: use markdown content directly, preserve headers, tables, formatting
+        5. For HTML: use markdown content with web-friendly structure
       </action>
       <output>Format-specific content ready for conversion</output>
     </step_5_1>
@@ -236,16 +245,19 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
     <step_5_2>
       <name>Execute Conversion</name>
       <action>
-        1. Select conversion method based on detected tools:
-           IF pandoc available:
-             pandoc -t {format} -o "formal-{source_name}.{ext}" "{source_file}"
-           ELSE IF MCP document tools available:
-             Use mcp-documents/convert, mcp-office/create-presentation, or mcp-office/create-document
-           ELSE (manual fallback):
-             Inform human that automatic conversion is unavailable, provide structured content for manual copy-paste, suggest alternatives (Google Docs, CloudConvert). Mark task as partially complete.
+        1. For each requested format, select conversion method (priority order):
+           a. Format-specific tool skill (highest priority):
+              - DOCX: IF docx_tool_skill loaded → invoke `docx` skill for document generation
+              - PPTX: IF pptx_tool_skill loaded → invoke `pptx` skill for presentation generation
+           b. pandoc (IF available AND no tool skill for this format):
+              pandoc -t {format} -o "formal-{source_name}.{ext}" "{source_file}"
+           c. MCP document tools (IF available AND no higher-priority tool):
+              Use mcp-documents/convert, mcp-office/create-presentation, or mcp-office/create-document
+           d. Manual fallback (no tools available for this format):
+              Inform human that automatic conversion is unavailable, provide structured content for manual copy-paste, suggest alternatives (Google Docs, CloudConvert). Mark format as partially complete.
         2. Generate each requested format sequentially
         3. Output naming: formal-{source_filename}.{extension}
-           Example: idea-summary-v1.md -> formal-idea-summary-v1.pptx
+           Example: idea-summary-v1.md -> formal-idea-summary-v1.docx
       </action>
       <output>Generated document files in {idea_folder}</output>
     </step_5_2>
@@ -402,13 +414,24 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ### Pattern: No Conversion Tools Available
 
-**When:** Neither pandoc nor MCP tools are available
+**When:** Neither tool skills, pandoc, nor MCP tools are available for a format
 **Then:**
 ```
 1. Inform human: "Document conversion tools not available"
 2. Provide structured content in clipboard-friendly format
 3. Suggest alternatives (Google Docs, CloudConvert, manual copy)
 4. Mark task as partially complete
+```
+
+### Pattern: Tool-Skill-Routed Conversion
+
+**When:** A format-specific tool skill is available (e.g., `docx` for .docx, `pptx` for .pptx)
+**Then:**
+```
+1. Load the tool skill from .github/skills/{skill-name}/SKILL.md
+2. Follow the tool skill's rules and guidelines for document creation
+3. Generate the output file following the tool skill's best practices
+4. Verify output with the tool skill's quality checks (e.g., round-trip compatibility)
 ```
 
 ### Pattern: Presentation-Optimized Content
@@ -431,35 +454,30 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Overwriting existing files | Loses previous versions | Use versioned naming |
 | Ignoring conversion errors | Human doesn't know it failed | Report errors clearly |
 | Skipping verification | May generate empty files | Always verify output size > 0 |
+| Ignoring tool skill when available | Misses format-specific quality rules | Always prefer tool skill over generic pandoc |
 
 ---
 
 ## Examples
 
-**Scenario:** User wants to share `idea-summary-v1.md` as a PowerPoint
+**Scenario 1:** User shares `idea-summary-v1.md` as PowerPoint (pptx tool skill available)
 
 ```
-1. Execute Task Flow from x-ipe-workflow-task-execution skill
+1. Load Config: tools.json pptx=true; pptx tool skill loaded
+2. Source: x-ipe-docs/ideas/mobile-app-idea/idea-summary-v1.md
+3. Human confirms: PowerPoint (.pptx)
+4. Prepare: Restructure for slides following pptx skill guidance
+5. Convert: Invoke pptx tool skill → formal-idea-summary-v1.pptx (245 KB)
+6. Verify: File exists, size > 0, report to human
+```
 
-2. Load Config:
-   - tools.json: pptx=true, pdf=true, docx=false
-   - pandoc detected at /usr/local/bin/pandoc
+**Scenario 2:** User shares `idea-summary-v2.md` as Word document (docx tool skill available)
 
-3. Identify Source:
-   - Found: x-ipe-docs/ideas/mobile-app-idea/idea-summary-v1.md
-
-4. Confirm Format:
-   - Human selects: PowerPoint (.pptx)
-
-5. Prepare Content:
-   - Restructure for slides, create bullet points
-
-6. Convert:
-   - pandoc -t pptx -o "formal-idea-summary-v1.pptx" "idea-summary-v1.md"
-
-7. Verify:
-   - File created: formal-idea-summary-v1.pptx (245 KB)
-   - Report: "Created formal-idea-summary-v1.pptx in x-ipe-docs/ideas/mobile-app-idea/"
-
-8. Resume Task Flow from x-ipe-workflow-task-execution skill
+```
+1. Load Config: tools.json docx=true; docx tool skill loaded
+2. Source: x-ipe-docs/ideas/ai-assistant/idea-summary-v2.md
+3. Human confirms: Word (.docx)
+4. Prepare: Structure with heading hierarchy, named styles, Word numbering (per docx skill Core Rules)
+5. Convert: Invoke docx tool skill → formal-idea-summary-v2.docx (128 KB)
+6. Verify: File exists, size > 0, report to human
 ```
