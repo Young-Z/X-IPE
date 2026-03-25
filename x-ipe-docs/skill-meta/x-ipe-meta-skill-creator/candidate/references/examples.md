@@ -17,7 +17,7 @@ input:
   
 output:
   skill_type: x-ipe-task-based
-  template: templates/x-ipe-task-based-skill.md
+  template: templates/x-ipe-task-based.md
 ```
 
 ### Step 2: Gather Examples

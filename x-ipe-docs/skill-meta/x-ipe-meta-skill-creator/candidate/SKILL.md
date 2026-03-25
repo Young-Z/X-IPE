@@ -16,18 +16,6 @@ Guide for creating effective X-IPE skills by:
 
 ---
 
-## Important Notes
-
-⛔ **NEVER directly edit files in `.github/skills/{skill-name}/`.**
-All skill modifications — updates, bug fixes, enhancements — MUST go through the candidate workflow:
-1. Edit in `x-ipe-docs/skill-meta/{skill-name}/candidate/`
-2. Validate via reflection + tests (Rounds 2–3)
-3. Merge candidate → `.github/skills/{skill-name}/` only after validation
-
-This ensures traceability, rollback capability, and quality control. Direct edits to live skills bypass validation and risk breaking production behavior.
-
----
-
 ## About X-IPE Skills
 
 Skills are modular, self-contained packages that extend AI Agent capabilities by providing specialized knowledge, workflows, and tools.
@@ -54,13 +42,23 @@ Skills are modular, self-contained packages that extend AI Agent capabilities by
 
 ## Important Notes
 
+BLOCKING: **NEVER directly edit files in `.github/skills/{skill-name}/`.**
+All skill modifications MUST go through the candidate workflow:
+1. Edit in `x-ipe-docs/skill-meta/{skill-name}/candidate/`
+2. Validate via reflection + tests (Rounds 2–3)
+3. Merge candidate → `.github/skills/{skill-name}/` only after validation
+
 BLOCKING: Read [skill-general-guidelines-v2.md](.github/skills/x-ipe-meta-skill-creator/references/skill-general-guidelines-v2.md) for core principles and patterns before creating skills.
 
 CRITICAL: SKILL.md body must stay under 500 lines. Move examples to references/.
 
+CRITICAL: DoR ≤ 5 checkpoints, DoD ≤ 10 checkpoints. If over limit, keep only the most critical checks and merge related ones.
+
 MANDATORY: All 6 skill types have complete templates in the templates/ folder.
 
 CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL actions. Do NOT split actions into separate blocks (e.g., `<branch>`). Conditional logic (IF/THEN/ELSE) belongs inline within the `<action>` numbered list.
+
+CRITICAL: Before populating skill content, check `x-ipe-docs/skill-meta/{related-skill}/x-ipe-meta-lesson-learned.md` for lessons from similar skills. Apply relevant lessons to avoid repeating known mistakes. Reference: [12. reference-production-patterns.md](.github/skills/x-ipe-meta-skill-creator/references/12.%20reference-production-patterns.md)
 
 ---
 
@@ -230,7 +228,13 @@ input:
     <name>Round 2: Reflect + Test Cases</name>
     <requires>skill-meta.md, candidate/</requires>
     <action>
-      1. Reflect on candidate against skill-meta
+      1. Reflect on candidate against skill-meta using this checklist:
+         a. Does skill load all referenced tool skills explicitly? (not guess behavior)
+         b. Does it read project config (tools.json/.x-ipe.yaml) when gating optional features?
+         c. Does it document anti-patterns for common failure modes? (if 3+ steps)
+         d. Does it include known limitations with workarounds? (if external dependencies)
+         e. Are output naming conventions defined? (if skill produces files)
+         f. Were lessons from related skills consulted and applied?
       2. Generate test cases from acceptance criteria
     </action>
     <success_criteria>
@@ -383,83 +387,50 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 
 ```xml
 <definition_of_done>
-  <!-- Step Output Verification -->
   <checkpoint required="true">
-    <name>Step 1-3 Outputs Complete</name>
-    <verification>skill_type, template_path, examples[], resources_plan[] defined</verification>
+    <name>Planning Complete</name>
+    <verification>skill_type, template_path, examples[], resources_plan[] defined; skill-meta.md created from template</verification>
     <step_output>skill_type, template_path, examples[], trigger_patterns[], resources_plan[]</step_output>
   </checkpoint>
   <checkpoint required="true">
-    <name>Step 4 Outputs Complete</name>
-    <verification>skill-meta.md and candidate/ folder created with ALL bundled resources (references/, scripts/, templates/) inside candidate/</verification>
+    <name>Candidate Created</name>
+    <verification>candidate/SKILL.md + all bundled resources (references/, scripts/, templates/) exist in candidate/</verification>
     <step_output>skill-meta.md, candidate/</step_output>
   </checkpoint>
   <checkpoint required="true">
-    <name>Step 5 Outputs Complete</name>
-    <verification>test-cases.yaml exists in x-ipe-docs/skill-meta/{skill-name}/</verification>
-    <step_output>candidate/, test-cases.yaml</step_output>
+    <name>Validation Passed</name>
+    <verification>test-cases.yaml created, sandbox executed, evaluation passed (must_pass=100%, should_pass>=80%)</verification>
+    <step_output>candidate/, test-cases.yaml, sandbox/{outputs}, execution-log.yaml, evaluation-report.yaml</step_output>
   </checkpoint>
   <checkpoint required="true">
-    <name>Step 6 Outputs Complete</name>
-    <verification>sandbox/ folder with test outputs and execution-log.yaml exist</verification>
-    <step_output>sandbox/{outputs}, execution-log.yaml</step_output>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Step 7 Outputs Complete</name>
-    <verification>evaluation-report.yaml exists with pass/fail results</verification>
-    <step_output>evaluation-report.yaml</step_output>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Step 8 Output Complete</name>
-    <verification>Skill merged to .github/skills/{skill-name}/ or iteration documented</verification>
+    <name>Merged with Parity</name>
+    <verification>Skill merged to .github/skills/{skill-name}/ AND every production file has corresponding candidate/ file</verification>
     <step_output>merge_status</step_output>
   </checkpoint>
   <checkpoint required="true">
-    <name>Candidate-Production Parity</name>
-    <verification>Every file in .github/skills/{skill-name}/ has a corresponding file in candidate/ — no files were created directly in production</verification>
+    <name>SKILL.md Structure Valid</name>
+    <verification>Frontmatter valid (name + triggers), section order correct, keywords used (not emoji), line count under 500</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Step 9 Output Complete</name>
-    <verification>Cross-references validated (auto-discovery fields declared if x-ipe-task-based)</verification>
-    <step_output>cross_references_valid</step_output>
-  </checkpoint>
-  
-  <!-- Quality Verification -->
-  <checkpoint required="true">
-    <name>Candidate SKILL.md Created</name>
-    <verification>File exists at x-ipe-docs/skill-meta/{skill-name}/candidate/SKILL.md</verification>
+    <name>DoR/DoD Within Limits</name>
+    <verification>Created skill has DoR at most 5 and DoD at most 10 checkpoints</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>SKILL.md Created</name>
-    <verification>File exists at .github/skills/{skill-name}/SKILL.md</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Frontmatter Valid</name>
-    <verification>name (1-64 chars) and description (includes triggers)</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Section Order Correct</name>
-    <verification>Follows cognitive flow per skill type</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Line Count Under Limit</name>
-    <verification>SKILL.md < 500 lines</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Keywords Used</name>
-    <verification>Uses BLOCKING/CRITICAL/MANDATORY (not emoji)</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Step Outputs Covered in Created Skill</name>
-    <verification>Every step output in created skill has corresponding DoD checkpoint</verification>
+    <name>Step Outputs Covered</name>
+    <verification>Every step output in created skill has a corresponding DoD checkpoint</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Cross-References Valid</name>
-    <verification>Auto-discovery fields present in Output Result (if x-ipe-task-based)</verification>
+    <verification>Auto-discovery fields in Output Result (if task-based), Input Initialization present, bidirectional refs verified</verification>
+    <step_output>cross_references_valid</step_output>
   </checkpoint>
-  <checkpoint required="true">
+  <checkpoint required="recommended">
     <name>Input Initialization Present</name>
-    <verification>Skills with non-trivial input resolution have ### Input Initialization subsection under Input Parameters</verification>
+    <verification>Skills with non-trivial input resolution have Input Initialization subsection with input_init block</verification>
+  </checkpoint>
+  <checkpoint required="recommended">
+    <name>Examples Documented</name>
+    <verification>references/examples.md exists with concrete usage scenarios</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -495,12 +466,7 @@ BLOCKING: Always use the appropriate template. Never create SKILL.md or skill-me
 | [7-10. example-*.md](.github/skills/x-ipe-meta-skill-creator/references) | Task IO, structured summary, DoR/DoD, gate conditions |
 | [11. reference-quality-standards.md](.github/skills/x-ipe-meta-skill-creator/references/11. reference-quality-standards.md) | Quality standards |
 | [examples.md](.github/skills/x-ipe-meta-skill-creator/references/examples.md) | Concrete execution examples |
-
----
-
-## Example
-
-See [references/examples.md](.github/skills/x-ipe-meta-skill-creator/references/examples.md) for concrete execution examples.
+| [12. reference-production-patterns.md](.github/skills/x-ipe-meta-skill-creator/references/12.%20reference-production-patterns.md) | Production patterns: lessons integration, tool loading, config gating, anti-patterns, limitations |
 
 ---
 

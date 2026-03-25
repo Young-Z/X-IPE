@@ -5,6 +5,8 @@
 > 严格按照技能中的步骤执行！不得跳过、重排或自行发挥。
 > 严格按照技能中的步骤执行！不得跳过、重排或自行发挥。
 
+> **适用范围：** 这些规则仅适用于 X-IPE 项目代码库的工作。一般编程问题、解释或不涉及修改 X-IPE 文件的对话不受技能/任务看板工作流约束。
+
 ## 开始之前
 
 **时机：** 在新会话中开始第一个 x-ipe 工作流任务时
@@ -77,16 +79,9 @@
 
 ## ⚠️ 严格要求：任务匹配与技能执行
 
-### 强制任务分类
+### 强制工作流
 
-**在做任何工作之前**，Agent 必须：
-
-1. **将工作分类到对应技能** — 使用自动发现（扫描 `.github/skills/x-ipe-task-based-*/`）
-2. **在 task-board.md 上创建任务** 通过 `x-ipe+all+task-board-management` 技能 ← **阻断操作**
-3. **加载对应技能** 从 `.github/skills/` 文件夹
-4. **按照技能的执行流程** 逐步执行
-5. **完成技能的完成定义 (DoD)** 才能标记完成
-6. **更新 task-board.md** 的完成状态 ← **必须操作**
+所有工作遵循下方的预检清单。使用 `x-ipe+all+task-board-management` 创建/更新任务。
 
 ### 任务技能识别
 
@@ -95,9 +90,9 @@
 阻断：不要维护硬编码的注册表。技能通过自动发现获取。
 
 **发现规则：**
-1. 扫描 `.github/skills/x-ipe-task-based-*/SKILL.md`
-2. 每个技能的 Output Result YAML 声明：`category`、`next_task_based_skill`、`process_preference.interaction_mode`
-3. 每个技能 frontmatter 中的 `description` 包含用于请求匹配的触发关键词
+1. 如果上下文中已有技能附件列表，直接用于匹配（无需扫描文件系统）
+2. 否则，扫描 `.github/skills/x-ipe-task-based-*/SKILL.md`
+3. 每个技能的 `description` 包含用于请求匹配的触发关键词
 
 **请求匹配：** 将用户请求与每个技能描述中的触发关键词进行匹配（如"修复bug" → `x-ipe-task-based-bug-fix`，"实现功能" → `x-ipe-task-based-code-implementation`）。
 
@@ -124,32 +119,13 @@
 - 用户说"修复这个" → 你必须使用 `x-ipe-task-based-bug-fix` 技能，不要直接修复
 - 用户说"添加这个功能" → 你必须先识别正确的任务技能
 
-### ⚠️ 不要跳过技能
-
-**禁止的操作：**
-- ❌ 没有在 task-board.md 上创建任务就开始工作
-- ❌ 用 `manage_todo_list` 替代 task-board.md
-- ❌ 完成工作后不更新 task-board.md
-- ❌ 不检查已有测试就直接写代码
-- ❌ 不先写失败测试就修复 bug
-- ❌ 不阅读技术设计就实现功能
-- ❌ 不按照技能执行流程做更改
-- ❌ 不使用 `x-ipe-task-based-code-refactor` 技能就重构代码
-
-**必须的操作：**
-- ✅ 必须先将请求分类到对应的任务技能
-- ✅ 开始工作前必须在 task-board.md 上创建任务
-- ✅ 必须加载并遵循对应技能
-- ✅ 必须检查前置条件 (DoR)
-- ✅ 必须完成完成定义 (DoD)
-- ✅ 完成工作后必须更新 task-board.md
-
 ---
 
 ## 开发原则
 
 始终遵循：
 1. **SOLID** - 设计原则
+2. **DRY** - 不要重复自己
 3. **YAGNI** - 你不会需要它
 4. **KISS** - 保持简单
 

@@ -5,6 +5,8 @@
 > Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
 > Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
 
+> **Scope:** These rules apply only when working on the X-IPE project codebase. General programming questions, explanations, or conversations that don't modify X-IPE files are exempt from the skill/task-board workflow.
+
 ## Before You Start
 
 **When:** Starting first x-ipe workflow task in a new session
@@ -77,16 +79,9 @@ If ANY of these are missing → **STOP. Do not touch code.**
 
 ## ⚠️ STRICT: Task Matching & Skill Enforcement
 
-### Mandatory Task Classification
+### Mandatory Workflow
 
-**Before doing ANY work**, the agent MUST:
-
-1. **Classify the work** into a task-based skill using auto-discovery (scan `.github/skills/x-ipe-task-based-*/`)
-2. **Create task on task-board.md** via `x-ipe+all+task-board-management` skill ← **BLOCKING**
-3. **Load the corresponding skill** from `.github/skills/` folder
-4. **Follow the skill's execution procedure** step-by-step
-5. **Complete the skill's Definition of Done (DoD)** before marking complete
-6. **Update task-board.md** with completion status ← **MANDATORY**
+All work follows the Pre-Flight Checklist below. Use `x-ipe+all+task-board-management` to create/update tasks.
 
 ### Task-Based Skill Identification
 
@@ -95,9 +90,9 @@ If ANY of these are missing → **STOP. Do not touch code.**
 BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 **Discovery rule:**
-1. Scan `.github/skills/x-ipe-task-based-*/SKILL.md`
-2. Each skill's Output Result YAML declares: `category`, `next_task_based_skill`, `process_preference.interaction_mode`
-3. Each skill's `description` in frontmatter contains trigger keywords for request matching
+1. If the skills attachment is available in context, use it for matching (no filesystem scan needed)
+2. Otherwise, scan `.github/skills/x-ipe-task-based-*/SKILL.md`
+3. Each skill's `description` contains trigger keywords for request matching
 
 **Request matching:** Match user request against trigger keywords in each skill's description (e.g., "fix bug" → `x-ipe-task-based-bug-fix`, "implement feature" → `x-ipe-task-based-code-implementation`).
 
@@ -124,32 +119,13 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 - User says "fix this" → You must use `x-ipe-task-based-bug-fix` skill, NOT just fix it
 - User says "add this feature" → You must identify the right task-based skill first
 
-### ⚠️ DO NOT Skip Skills
-
-**Forbidden Actions:**
-- ❌ Starting work without creating task on task-board.md first
-- ❌ Using `manage_todo_list` as a substitute for task-board.md
-- ❌ Completing work without updating task-board.md
-- ❌ Jumping straight to code without checking for existing tests
-- ❌ Fixing bugs without writing a failing test first
-- ❌ Implementing features without reading technical design
-- ❌ Making changes without following the skill's execution procedure
-- ❌ Refactoring code without using `x-ipe-task-based-code-refactor` skill
-
-**Required Actions:**
-- ✅ Always classify requests into task-based skills first
-- ✅ Always create task on task-board.md BEFORE starting work
-- ✅ Always load and follow the corresponding skill
-- ✅ Always check prerequisites (DoR) before starting
-- ✅ Always complete Definition of Done (DoD) before finishing
-- ✅ Always update task-board.md AFTER completing work
-
 ---
 
 ## Development Principles
 
 Always follow:
 1. **SOLID** - Design principles
+2. **DRY** - Don't Repeat Yourself
 3. **YAGNI** - You Aren't Gonna Need It
 4. **KISS** - Keep It Simple
 

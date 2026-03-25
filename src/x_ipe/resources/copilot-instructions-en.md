@@ -5,6 +5,8 @@
 > Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
 > Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
 
+> **Scope:** These rules apply only when working on the X-IPE project codebase. General programming questions, explanations, or conversations that don't modify X-IPE files are exempt from the skill/task-board workflow.
+
 ## Before You Start
 
 ## ⚠️ CRITICAL: DAO-First — Every Message Through Human Representative
@@ -20,6 +22,8 @@
    - **Context-aware routing** — DAO considers the current task, feature, and workflow state when interpreting
    - **Disposition-driven branching** — The agent's next action is determined by a clear, bounded signal, not raw text parsing
    - **Bounded scope** — DAO interprets intent only. It does NOT execute tasks, write code, or absorb skill responsibilities
+
+> **Note:** Session initialization (nickname selection below) runs once at session start and is exempt from DAO-first.
 
 **When:** Starting first x-ipe workflow task in a new session
 **Then:**
@@ -101,17 +105,9 @@ If ANY of steps 1–5 are missing for the CURRENT unit → **STOP. Do not touch 
 
 ## ⚠️ STRICT: Task Matching & Skill Enforcement
 
-### Mandatory Task Classification
+### Mandatory Workflow
 
-**Before doing ANY work**, the agent MUST:
-
-1. **Process message through DAO** — call `x-ipe-dao-end-user-representative` to interpret user intent
-2. **Classify the work** into a task-based skill using auto-discovery (scan `.github/skills/x-ipe-task-based-*/`)
-3. **Create task on task-board.md** via `x-ipe+all+task-board-management` skill ← **BLOCKING**
-4. **Load the corresponding skill** from `.github/skills/` folder
-5. **Follow the skill's execution procedure** step-by-step
-6. **Complete the skill's Definition of Done (DoD)** before marking complete
-7. **Update task-board.md** with completion status ← **MANDATORY**
+All work follows the Pre-Flight Checklist below. Use `x-ipe+all+task-board-management` to create/update tasks.
 
 ### Task-Based Skill Identification
 
@@ -120,9 +116,9 @@ If ANY of steps 1–5 are missing for the CURRENT unit → **STOP. Do not touch 
 BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 **Discovery rule:**
-1. Scan `.github/skills/x-ipe-task-based-*/SKILL.md`
-2. Each skill's Output Result YAML declares: `category`, `next_task_based_skill`, `process_preference.interaction_mode`
-3. Each skill's `description` in frontmatter contains trigger keywords for request matching
+1. If the skills attachment is available in context, use it for matching (no filesystem scan needed)
+2. Otherwise, scan `.github/skills/x-ipe-task-based-*/SKILL.md`
+3. Each skill's `description` contains trigger keywords for request matching
 
 **Request matching:** Match user request against trigger keywords in each skill's description (e.g., "fix bug" → `x-ipe-task-based-bug-fix`, "implement feature" → `x-ipe-task-based-code-implementation`).
 
@@ -150,34 +146,13 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 - User says "fix this" → You must use `x-ipe-task-based-bug-fix` skill, NOT just fix it
 - User says "add this feature" → You must identify the right task-based skill first
 
-### ⚠️ DO NOT Skip Skills
-
-**Forbidden Actions:**
-- ❌ Processing user messages without going through DAO first
-- ❌ Starting work without creating task on task-board.md first
-- ❌ Using `manage_todo_list` as a substitute for task-board.md
-- ❌ Completing work without updating task-board.md
-- ❌ Jumping straight to code without checking for existing tests
-- ❌ Fixing bugs without writing a failing test first
-- ❌ Implementing features without reading technical design
-- ❌ Making changes without following the skill's execution procedure
-- ❌ Refactoring code without using `x-ipe-task-based-code-refactor` skill
-
-**Required Actions:**
-- ✅ Always process user messages through `x-ipe-dao-end-user-representative` FIRST
-- ✅ Always create task on task-board.md BEFORE starting work
-- ✅ Always identify task-based skill first
-- ✅ Always load and follow the corresponding skill
-- ✅ Always check prerequisites (DoR) before starting
-- ✅ Always complete Definition of Done (DoD) before finishing
-- ✅ Always update task-board.md AFTER completing work
-
 ---
 
 ## Development Principles
 
 Always follow:
 1. **SOLID** - Design principles
+2. **DRY** - Don't Repeat Yourself
 3. **YAGNI** - You Aren't Gonna Need It
 4. **KISS** - Keep It Simple
 

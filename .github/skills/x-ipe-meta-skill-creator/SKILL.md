@@ -16,18 +16,6 @@ Guide for creating effective X-IPE skills by:
 
 ---
 
-## Important Notes
-
-⛔ **NEVER directly edit files in `.github/skills/{skill-name}/`.**
-All skill modifications — updates, bug fixes, enhancements — MUST go through the candidate workflow:
-1. Edit in `x-ipe-docs/skill-meta/{skill-name}/candidate/`
-2. Validate via reflection + tests (Rounds 2–3)
-3. Merge candidate → `.github/skills/{skill-name}/` only after validation
-
-This ensures traceability, rollback capability, and quality control. Direct edits to live skills bypass validation and risk breaking production behavior.
-
----
-
 ## About X-IPE Skills
 
 Skills are modular, self-contained packages that extend AI Agent capabilities by providing specialized knowledge, workflows, and tools.
@@ -54,15 +42,21 @@ Skills are modular, self-contained packages that extend AI Agent capabilities by
 
 ## Important Notes
 
+BLOCKING: **NEVER directly edit files in `.github/skills/{skill-name}/`.**
+All skill modifications MUST go through the candidate workflow:
+1. Edit in `x-ipe-docs/skill-meta/{skill-name}/candidate/`
+2. Validate via reflection + tests (Rounds 2–3)
+3. Merge candidate → `.github/skills/{skill-name}/` only after validation
+
 BLOCKING: Read [skill-general-guidelines-v2.md](.github/skills/x-ipe-meta-skill-creator/references/skill-general-guidelines-v2.md) for core principles and patterns before creating skills.
 
-CRITICAL: SKILL.md body must stay under 500 lines. Move examples to references/.
-
-CRITICAL: DoR ≤ 5 checkpoints, DoD ≤ 10 checkpoints. If over limit, keep only the most critical checks and merge related ones.
+CRITICAL: SKILL.md body must stay under 500 lines. Move examples to references/. DoR ≤ 5 checkpoints, DoD ≤ 10 checkpoints — if over limit, merge related checks.
 
 MANDATORY: All 6 skill types have complete templates in the templates/ folder.
 
 CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL actions. Do NOT split actions into separate blocks (e.g., `<branch>`). Conditional logic (IF/THEN/ELSE) belongs inline within the `<action>` numbered list.
+
+CRITICAL: Before populating skill content, check `x-ipe-docs/skill-meta/{related-skill}/x-ipe-meta-lesson-learned.md` for lessons from similar skills. Apply relevant lessons to avoid repeating known mistakes. Reference: [12. reference-production-patterns.md](.github/skills/x-ipe-meta-skill-creator/references/12.%20reference-production-patterns.md)
 
 ---
 
@@ -261,7 +255,12 @@ input:
     <name>Round 2: Reflect + Test Cases</name>
     <requires>skill-meta.md, candidate/</requires>
     <action>
-      1. Reflect on candidate against skill-meta
+      1. Reflect on candidate against skill-meta using this checklist:
+         a. Does skill load all referenced tool skills explicitly? (not guess behavior)
+         b. Does it gate optional features via project config (tools.json/.x-ipe.yaml)?
+         c. Does it document anti-patterns? (if 3+ steps) Limitations? (if external deps)
+         d. Are output naming conventions defined? (if skill produces files)
+         e. Were lessons from related skills consulted and applied?
       2. Generate test cases from acceptance criteria
     </action>
     <success_criteria>
@@ -490,6 +489,7 @@ BLOCKING: Always use the appropriate template. Never create SKILL.md or skill-me
 | [7-10. example-*.md](.github/skills/x-ipe-meta-skill-creator/references) | Task IO, structured summary, DoR/DoD, gate conditions |
 | [11. reference-quality-standards.md](.github/skills/x-ipe-meta-skill-creator/references/11. reference-quality-standards.md) | Quality standards |
 | [examples.md](.github/skills/x-ipe-meta-skill-creator/references/examples.md) | Concrete execution examples |
+| [12. reference-production-patterns.md](.github/skills/x-ipe-meta-skill-creator/references/12.%20reference-production-patterns.md) | Production patterns: lessons integration, tool loading, config gating, anti-patterns, limitations |
 
 ---
 
