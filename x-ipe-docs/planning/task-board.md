@@ -5,7 +5,7 @@
 ## Active Tasks
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
-| TASK-991 | Skill Update | Add Python lint script (scripts/lint_dsl.py) to x-ipe-tool-architecture-dsl skill for validating generated DSL code. Implements grammar validation rules E001-E009, W001. Update SKILL.md DoD to call linter. Pattern from ontology-1.0.4/scripts/ontology.py. DAO mode. | Ember 🔥 | 🔄 in_progress | 03-25-2026 | — | — |
+| TASK-991 | Skill Update | Add Python lint script (scripts/lint_dsl.py) to x-ipe-tool-architecture-dsl skill for validating generated DSL code. Implements grammar validation rules E001-E009, W001. Update SKILL.md DoD to call linter. Pattern from ontology-1.0.4/scripts/ontology.py. DAO mode. | Ember 🔥 | ✅ done | 03-25-2026 | [lint_dsl.py](.github/skills/x-ipe-tool-architecture-dsl/scripts/lint_dsl.py), [SKILL.md v4.0](.github/skills/x-ipe-tool-architecture-dsl/SKILL.md) | — |
 | TASK-988 | Skill Update | Migrate auto_proceed → interaction_mode in bug-fix production SKILL.md + sync 8 candidate SKILL.md from production. DAO mode. | Drift 🌊 | ✅ done | 03-24-2026 | — | — |
 | TASK-989 | Bug Fix | KB preview rendering defects: (1) preview window height not fully utilizing available space, (2) docx icons (ww, lz, mj) not rendering correctly vs original format. Source: Feedback-20260324-154826. FEATURE-049-F. DAO mode. | Spark ⚡ | ✅ done | 03-24-2026 | [kb-browse-modal.css](src/x_ipe/static/css/kb-browse-modal.css), [file-preview-renderer.js](src/x_ipe/static/js/core/file-preview-renderer.js), [kb-preview-rendering-fix.test.js](tests/frontend-js/kb-preview-rendering-fix.test.js) | — |
 | TASK-990 | Bug Fix | Compose idea bugs: (1) new idea file not shown in deliverable panel after submit, (2) typed idea text and uploaded file not restored when reopening compose idea, (3) need cross icon to remove uploaded files. Source: Feedback-20260324-161921. DAO mode. | Pixel 🎨 | ✅ done | 03-24-2026 | [compose-idea-modal.js](src/x_ipe/static/js/features/compose-idea-modal.js), [compose-idea-modal.test.js](tests/frontend-js/compose-idea-modal.test.js) | — |
@@ -249,9 +249,9 @@
 ## Quick Stats
 
 - **Total Active:** 14
-- **In Progress:** 1
+- **In Progress:** 0
 - **Pending:** 0
-- **Completed (archived):** 881
+- **Completed (archived):** 882
 - **Deferred:** 0
 - **Reverted:** 8
 - **Pending Review:** 0
