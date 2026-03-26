@@ -304,7 +304,7 @@ BLOCKING (auto): Proceed automatically after DoD verification.
           → Resolve via x-ipe-dao-end-user-representative, log rationale
         ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human for confirmation
-        5. Document final scope boundaries
+        4. Document final scope boundaries
       </action>
       <output>Final scope boundaries (in-scope and out-of-scope items)</output>
     </step_4_2>
@@ -341,8 +341,7 @@ BLOCKING (auto): Proceed automatically after DoD verification.
               - deliverables: {"requirement-doc": "{path}", "requirements-folder": "{path}"}
            b. Log: "Workflow action status updated to done"
         2. Verify all DoD checkpoints
-        3. Verify all DoD checkpoints are met
-        4. IF manual/stop_for_question:
+        3. IF manual/stop_for_question:
               → Present requirements document to human
               → Ask if any requirements are missing, incorrect, or unclear
               → IF human identifies issues → revise specific sections

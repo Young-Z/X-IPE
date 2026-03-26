@@ -391,6 +391,9 @@ task_completion_output:
     - "x-ipe-docs/refactoring/validation-{context}.md"
     - "{paths to refactored files}"
 
+  # Feature context pass-through
+  feature_id: "{from input refactoring_scope.feature_id or N/A}"
+
   refactoring_summary:
     files_modified: "<count>"
     files_created: "<count>"

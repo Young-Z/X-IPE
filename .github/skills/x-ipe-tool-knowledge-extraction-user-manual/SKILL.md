@@ -1,5 +1,6 @@
 ---
 name: x-ipe-tool-knowledge-extraction-user-manual
+version: "2.0"
 description: Provides playbook, collection template, acceptance criteria, and app-type mixins for user manual knowledge extraction. Loaded by x-ipe-task-based-application-knowledge-extractor during Phase 1. Triggers on category "user-manual".
 categories:
   - "user-manual"
@@ -55,11 +56,12 @@ not_for:
 
 ```yaml
 input:
-  operation: "get_artifacts | get_collection_template | validate_section | get_mixin | pack_section | score_quality"
+  operation: "get_artifacts | get_collection_template | validate_section | get_mixin | pack_section | score_quality | test_walkthrough"
   category: "user-manual"
   section_id: "string | null"       # Required for validate_section, pack_section, score_quality
   content_path: "string | null"     # Path to extracted content file
   app_type: "web | cli | mobile | null"  # Required for get_mixin
+  app_url: "string | null"          # Optional URL for live walkthrough testing
   config:
     web_search_enabled: false
     max_files_per_section: 20
@@ -94,6 +96,14 @@ input:
     </steps>
   </field>
 
+  <field name="app_url" source="Caller provides URL for live walkthrough testing">
+    <steps>
+      1. Optional — only used by test_walkthrough operation
+      2. IF provided AND Chrome DevTools MCP available → live testing mode
+      3. IF null → offline validation mode (structural checks only)
+    </steps>
+  </field>
+
   <field name="config" source="Caller provides or uses defaults">
     <steps>
       1. web_search_enabled defaults to false
@@ -116,7 +126,7 @@ input:
   </checkpoint>
   <checkpoint required="true">
     <name>Valid operation requested</name>
-    <verification>operation parameter matches one of the 6 defined operations</verification>
+    <verification>operation parameter matches one of the 7 defined operations</verification>
   </checkpoint>
   <checkpoint required="false">
     <name>Content file exists (for validate/pack)</name>
@@ -273,31 +283,85 @@ input:
   <action>
     1. Read content at content_path for the given section_id
     2. Load acceptance criteria for the section from templates/acceptance-criteria.md
-    3. Evaluate content across 4 quality dimensions:
+    3. Evaluate content across 5 quality dimensions:
        a. **Completeness** (0.0–1.0): ratio of REQ criteria satisfied
        b. **Structure** (0.0–1.0): proper heading hierarchy, code blocks, lists
        c. **Clarity** (0.0–1.0): actionable instructions, concrete examples present
-       d. **Freshness** (0.0–1.0): content references current versions, no stale info
+       d. **Followability** (0.0–1.0): can instructions be followed literally without guessing?
+          - Each step has explicit action verb (click, type, press, wait, select)
+          - Each step has expected outcome
+          - No implicit knowledge between steps
+          - Async operations have completion indicators
+          - Different interaction patterns (modal vs CLI dispatch) are clearly distinguished
+       e. **Freshness** (0.0–1.0): content references current versions, no stale info
     4. Apply section-aware weighting:
        - **Sections 4 (Core Features) and 5 (Common Workflow Scenarios):**
-         Weighted mean: completeness 0.35, structure 0.15, clarity 0.40, freshness 0.10
-         (clarity weighted highest — these sections MUST have actionable step-by-step instructions)
+         Weighted mean: completeness 0.25, structure 0.10, clarity 0.30, followability 0.25, freshness 0.10
+       - **Section 3 (Getting Started):**
+         Weighted mean: completeness 0.25, structure 0.10, clarity 0.25, followability 0.30, freshness 0.10
+         (followability weighted highest — getting started MUST be literally followable)
        - **All other sections:**
-         Weighted mean: completeness 0.40, structure 0.20, clarity 0.30, freshness 0.10
+         Weighted mean: completeness 0.35, structure 0.20, clarity 0.25, followability 0.10, freshness 0.10
     5. Generate improvement_hints[] for any dimension below 0.6
-    6. **For sections 4 and 5 ONLY:** Apply critical-but-constructive feedback mode:
+    6. **For sections 3, 4, and 5:** Apply critical-but-constructive feedback mode:
        a. Be MORE specific in improvement_hints (name exact missing subsections, features, or scenarios)
        b. Lower the "acceptable" threshold: score < 0.70 → generate hints (not just < 0.60)
        c. If instructions are vague or generic → explicitly call out "Instructions lack step-by-step detail"
        d. If no screenshots referenced → hint "No screenshot references found — add for UI features"
+       e. If followability < 0.70 → hint "Steps cannot be followed literally — add explicit actions and expected outcomes"
   </action>
   <constraints>
     - BLOCKING: section_id and content_path are required
     - CRITICAL: Scoring is based on domain expertise — this skill defines what "quality" means for user manuals
-    - CRITICAL: Sections 4 and 5 receive stricter evaluation — they are the core value of the manual
+    - CRITICAL: Sections 3, 4, and 5 receive stricter evaluation — they are the core value of the manual
   </constraints>
   <output>
-    quality_result: { section_id, section_quality_score, dimensions: {completeness, structure, clarity, freshness}, improvement_hints[], is_key_section: bool }
+    quality_result: { section_id, section_quality_score, dimensions: {completeness, structure, clarity, followability, freshness}, improvement_hints[], is_key_section: bool }
+  </output>
+</operation>
+```
+
+### Operation: test_walkthrough
+
+**When:** After extraction and validation are complete, test if the manual can actually be followed.
+
+```xml
+<operation name="test_walkthrough">
+  <action>
+    1. Read the scenario/walkthrough from the manual at content_path
+    2. Parse each numbered step into discrete actions
+    3. For each step, classify the expected interaction:
+       - CLICK: click a button/link (element name specified)
+       - FILL: type into an input field (field name + value specified)
+       - DISPATCH: send command to terminal (command + "press Enter" specified)
+       - WAIT: wait for a state change (expected outcome specified)
+       - VERIFY: check that UI state matches description
+    4. IF app_url is provided AND Chrome DevTools MCP is available:
+       a. Navigate to app_url
+       b. For each step: take_snapshot → find matching element → perform action → take_snapshot → verify expected outcome
+       c. Record step results: {step_number, action, expected, actual, passed: bool}
+    5. IF app_url is NOT available (offline validation):
+       a. For each step, verify:
+          - Step specifies exact UI element or exact command
+          - Step includes explicit user action verb (click, type, press Enter, wait)
+          - Step includes expected outcome ("you should see...")
+          - No implicit knowledge assumed between consecutive steps
+       b. Record: {step_number, has_element: bool, has_action: bool, has_outcome: bool, has_gap: bool}
+    6. Compute followability_score = steps_passed / steps_total
+    7. Generate gap_report — for each failed step, classify the issue:
+       - MISSING_ACTION: step doesn't specify what user should do (e.g., no "press Enter", no "click X")
+       - MISSING_ELEMENT: step doesn't name the UI element or target
+       - MISSING_OUTCOME: step doesn't describe expected result
+       - WRONG_STATE: (live mode only) actual UI doesn't match description
+       - IMPLICIT_KNOWLEDGE: step assumes knowledge not previously documented
+  </action>
+  <constraints>
+    - CRITICAL: Steps must be followed LITERALLY — do not infer intent
+    - CRITICAL: If a step says "generate CLI command" but doesn't say "press Enter to execute" → mark as FAIL with issue_type MISSING_ACTION
+    - BLOCKING: content_path is required
+  </constraints>
+  <output>
+    walkthrough_result: { scenario_id, steps_total, steps_passed, steps_failed, followability_score, gap_report: [{step, issue_type, issue, suggestion}] }
   </output>
 </operation>
 ```
@@ -309,7 +373,7 @@ input:
 ```yaml
 operation_output:
   success: true | false
-  operation: "get_artifacts | get_collection_template | validate_section | get_mixin | pack_section | score_quality"
+  operation: "get_artifacts | get_collection_template | validate_section | get_mixin | pack_section | score_quality | test_walkthrough"
   result:
     # get_artifacts
     artifact_paths:
@@ -339,9 +403,18 @@ operation_output:
         completeness: 0.0
         structure: 0.0
         clarity: 0.0
+        followability: 0.0
         freshness: 0.0
       improvement_hints: ["string"]
-      is_key_section: false  # true for sections 4 and 5 (stricter evaluation)
+      is_key_section: false  # true for sections 3, 4, and 5 (stricter evaluation)
+    # test_walkthrough
+    walkthrough_result:
+      scenario_id: "{id}"
+      steps_total: 0
+      steps_passed: 0
+      steps_failed: 0
+      followability_score: 0.0  # 0.0–1.0
+      gap_report: [{ step: 0, issue: "string", suggestion: "string" }]
   errors: []
 ```
 
@@ -372,9 +445,9 @@ operation_output:
 
 | Error | Cause | Resolution |
 |-------|-------|------------|
-| `INVALID_OPERATION` | operation not one of the 6 defined | Check operation name matches exactly |
+| `INVALID_OPERATION` | operation not one of the 7 defined | Check operation name matches exactly |
 | `MISSING_SECTION_ID` | section_id null for validate/pack/score_quality | Provide section_id matching playbook template |
-| `MISSING_CONTENT_PATH` | content_path null for validate/pack/score_quality | Provide path to extracted content file |
+| `MISSING_CONTENT_PATH` | content_path null for validate/pack/score_quality/test_walkthrough | Provide path to extracted content file |
 | `CONTENT_NOT_FOUND` | content_path file does not exist | Verify file was written by extractor |
 | `INVALID_APP_TYPE` | app_type not web/cli/mobile | Use one of: web, cli, mobile |
 | `TEMPLATE_NOT_FOUND` | Template file missing from skill | Re-install skill or verify file paths |

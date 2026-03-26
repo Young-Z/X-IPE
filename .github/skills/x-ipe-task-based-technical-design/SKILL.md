@@ -104,9 +104,9 @@ input:
   </field>
   <field name="mockup_list" source="previous task | human input | N/A">
     <steps>
-      1. Check previous task output for mockup links (task_output_links)
-      2. If not available, ask human for mockup links
-      3. If none provided, set to N/A
+      1. IF previous task was "Feature Refinement" → use previous task output's mockup_list field (or derive from linked_mockups)
+      2. ELIF human provides explicit mockup links → use human-provided value
+      3. ELSE → set to N/A
     </steps>
   </field>
 </input_init>

@@ -81,11 +81,12 @@ input:
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
-  <field name="feature_id" source="previous task (Acceptance Test) output OR task board OR human input">
+  <field name="feature_id" source="previous task (Acceptance Test or Code Refactor) output OR task board OR human input">
     <steps>
-      1. IF previous task was "Feature Acceptance Test" → extract from task_output_links.feature_id
-      2. ELIF task board has feature_id in task data → use it
-      3. ELSE → IF interaction_mode == "dao-represent-human-to-interact": derive from workflow context or x-ipe-dao-end-user-representative; ELSE: ask human for feature_id
+      1. IF previous task was "Feature Acceptance Test" → use previous task output's feature_id field
+      2. ELIF previous task was "Code Refactor" → use previous task output's feature_id field
+      3. ELIF task board has feature_id in task data → use it
+      4. ELSE → IF interaction_mode == "dao-represent-human-to-interact": derive from workflow context or x-ipe-dao-end-user-representative; ELSE: ask human for feature_id
     </steps>
   </field>
   <field name="feature_title" source="feature specification OR features.md">
@@ -460,48 +461,11 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Patterns & Anti-Patterns
 
-### Pattern: All Criteria Met
-
-**When:** Every acceptance criterion passes verification
-**Then:**
-```
-1. Verify criteria - all met
-2. Code-to-docs review - no gaps found
-3. Update project files - complete
-4. Refactoring analysis - score 8/10, no urgent issues
-5. Create PR - PR #123
-6. Output summary (refactoring: optional improvements only)
-7. DONE
-```
-
-### Pattern: Criteria Not Met
-
-**When:** One or more acceptance criteria fail verification
-**Then:**
-```
-1. Verify criteria - 1 not met
-2. STOP
-3. Report to human with options:
-   a) Address the gap
-   b) Modify criterion
-   c) Defer to future
-4. Wait for guidance
-```
-
-### Pattern: Minor Issues Found
-
-**When:** Criteria met but with minor fixable issues
-**Then:**
-```
-1. Verify criteria - met with minor issues
-2. Fix minor issues inline
-3. Re-verify - all met
-4. Code-to-docs review - updated spec
-5. Refactoring analysis - score 5/10, refactoring recommended
-6. Continue to PR (with refactoring flag in summary)
-```
-
-### Anti-Patterns
+| Pattern | When | Then |
+|---------|------|------|
+| All Criteria Met | Every AC passes | Review docs → update files → refactoring analysis → create PR → summary |
+| Criteria Not Met | One or more AC fail | STOP → report to human with options (address/modify/defer) → wait for guidance |
+| Minor Issues Found | Criteria met with minor fixable issues | Fix inline → re-verify → review docs → continue to PR (flag refactoring) |
 
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|

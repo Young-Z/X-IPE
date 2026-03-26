@@ -168,11 +168,57 @@ For EACH section in collection template order:
 
 ---
 
+## Phase 3.5: 实践验证 — Validate by Practice
+
+### Step 3.5.1 — Walkthrough Testing
+
+**CONTEXT:** After Phase 3 validates content against acceptance criteria (structural completeness), Phase 3.5 validates that the content is actually *followable* by walking through the running application step-by-step. This phase only applies to `running_web_app` and `public_url` input types where Chrome DevTools is available.
+
+**DECISION — Applicability Gate:**
+- IF input_type == "running_web_app" OR input_type == "public_url" → proceed with live walkthrough
+- IF input_type == "source_code_repo" OR "documentation_folder" OR "single_file" → SKIP this phase entirely (use tool skill `test_walkthrough` in `offline` mode within Phase 3 instead)
+
+**DECISION — Scenario Selection:**
+- IF Section 5 (Common Workflow Scenarios) exists and has content → select the scenario most likely to be a user's first experience (e.g., "Building a New Application")
+- IF no Section 5 → fall back to Section 3 (Quick Start / Getting Started)
+- IF neither exists → SKIP phase with warning: "No walkthrough scenario available"
+
+**ACTION — Walkthrough Test Loop (max 2 iterations):**
+1. Read the selected scenario content file from `{checkpoint_path}/content/`
+2. Call tool skill `test_walkthrough` operation:
+   - `content_path`: path to the scenario content file
+   - `app_url`: the running app URL (from `input.target`)
+   - `mode`: "live" (Chrome DevTools-based)
+3. Process `gap_report` from tool skill response. For each failed step, classify:
+   - **MISSING_ACTION:** Step doesn't specify what to do (e.g., "press Enter to execute", "click Submit")
+   - **MISSING_ELEMENT:** Step doesn't name the UI element (e.g., "the button" instead of "the 'Create Project' button")
+   - **MISSING_OUTCOME:** Step doesn't say what happens after (e.g., no "you should see..." confirmation)
+   - **WRONG_STATE:** Actual UI doesn't match described state (e.g., element not found, different layout)
+   - **IMPLICIT_KNOWLEDGE:** Step assumes knowledge not documented (e.g., terminal conventions, keyboard shortcuts)
+4. For each gap: trace back to the specific section and location in the content file
+5. Feed gaps back to Phase 2 for targeted re-extraction of affected sections:
+   - Build gap-specific prompts (e.g., "CLI_DISPATCH interaction at step 4 missing: user must press Enter to execute the command. Document what the terminal shows and how to confirm completion.")
+   - Re-extract only the affected sections, preserving accepted content
+6. Check followability_score from gap_report:
+   - IF `followability_score >= 0.7` → proceed to Phase 4
+   - IF `followability_score < 0.7` AND iteration < 2 → re-extract and retest
+   - IF `followability_score < 0.7` AND iteration == 2 → proceed with warning
+
+**VERIFY:**
+- ✅ Walkthrough test executed against running application (or skipped for offline input types)
+- ✅ All gaps classified and traced to specific sections
+- ✅ Affected sections re-extracted with gap-specific prompts (if gaps found)
+- ✅ `walkthrough_results` recorded: followability_score, gaps_found, gaps_fixed, iterations_used
+
+**REFERENCE:** `references/validation-loop-heuristics.md` (Walkthrough Testing section)
+
+---
+
 ## Phase 4: 明辨之 — Discern Clearly
 
 ### Step 4.1 — Resume, Checkpoint & Error Handling
 
-**CONTEXT — Cross-Cutting Behavior:** Phase 4 wraps Phases 1–3 (not sequential). On invocation: scan `.x-ipe-checkpoint/session-*/manifest.yaml` sorted by timestamp desc; select most recent with status "paused"|"extracting". If valid → resume (skip accepted sections). If corrupted (YAML parse fail or schema_version ≠ "1.0") → log warning, start fresh. Config: `max_retries` (default 3 total attempts).
+**CONTEXT — Cross-Cutting Behavior:** Phase 4 wraps Phases 1–3.5 (not sequential). On invocation: scan `.x-ipe-checkpoint/session-*/manifest.yaml` sorted by timestamp desc; select most recent with status "paused"|"extracting". If valid → resume (skip accepted sections). If corrupted (YAML parse fail or schema_version ≠ "1.0") → log warning, start fresh. Config: `max_retries` (default 3 total attempts).
 
 **DECISION — Error Classification & Recovery:**
 - Transient error (timeout, rate limit, temp lock) → immediate retry, max 2 retries (3 total)
@@ -207,7 +253,7 @@ For EACH section in collection template order:
 
 **ACTION — Delegate Quality Scoring:**
 1. For each accepted section: call tool skill `score_quality` operation with section content path and section_id
-2. Collect per-section scores from tool skill response
+2. Collect per-section scores from tool skill response — tool skill now returns 5 dimensions: completeness, structure, clarity, followability, freshness
 3. Log `is_key_section` in per-section manifest entry. When deciding which sections to re-extract, prioritize `is_key_section: true` sections. Pass `improvement_hints[]` as context to Phase 2 for targeted improvement.
 4. Compute `overall_quality_score` = arithmetic mean of section scores (exclude error/skipped; count as 0.0)
 4. Classify: ≥ 0.80 → "high"; 0.50–0.79 → "acceptable"; < 0.50 → "low"

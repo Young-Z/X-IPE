@@ -1,0 +1,111 @@
+# Test Cases — x-ipe-tool-knowledge-extraction-user-manual v2.0
+# Generated: Round 2 Reflect + Tests
+# Skill: Tool skill providing playbook, collection template, acceptance criteria,
+#         and app-type mixins for user manual knowledge extraction.
+
+test_cases:
+  - id: TC-T01
+    name: "test_walkthrough gap_report includes MISSING_ACTION classification"
+    type: must_pass
+    scenario: "Verify that the test_walkthrough operation classifies gaps using MISSING_ACTION for steps that don't specify keyboard actions (e.g., missing 'press Enter')"
+    input: "SKILL.md test_walkthrough operation definition"
+    expected_output: "gap_report entries use issue_type MISSING_ACTION when a step doesn't specify what the user should do"
+    verification: "grep -c 'MISSING_ACTION' SKILL.md → ≥ 1"
+    result: pass
+    evidence: "MISSING_ACTION found 2 times — in gap classification list (line ~357) and in constraints (line ~360)"
+
+  - id: TC-T02
+    name: "score_quality returns followability dimension (5 dimensions total)"
+    type: must_pass
+    scenario: "Verify that the score_quality operation evaluates 5 quality dimensions including followability, not just the original 4"
+    input: "SKILL.md score_quality operation definition"
+    expected_output: "5 dimensions: completeness, structure, clarity, followability, freshness"
+    verification: "grep 'followability' SKILL.md → ≥ 1; check score_quality has all 5 listed"
+    result: pass
+    evidence: "'followability' found 10 times in SKILL.md. score_quality operation lists all 5: completeness (a), structure (b), clarity (c), followability (d), freshness (e). Output schema includes all 5 in dimensions object."
+
+  - id: TC-T03
+    name: "score_quality hints include followability warning when < 0.70"
+    type: must_pass
+    scenario: "Verify that score_quality generates improvement hint 'Steps cannot be followed literally' when followability score is below 0.70 for key sections"
+    input: "SKILL.md score_quality operation, section 6.e"
+    expected_output: "Explicit hint text: 'Steps cannot be followed literally — add explicit actions and expected outcomes'"
+    verification: "grep 'Steps cannot be followed literally' SKILL.md → 1"
+    result: pass
+    evidence: "Found at line ~311: 'If followability < 0.70 → hint \"Steps cannot be followed literally — add explicit actions and expected outcomes\"'"
+
+  - id: TC-T04
+    name: "acceptance-criteria has REQ for 'press Enter' in CLI dispatch features"
+    type: should_pass
+    scenario: "Verify that templates/acceptance-criteria.md includes [REQ] validation rules requiring 'press Enter' documentation for CLI dispatch interactions"
+    input: "templates/acceptance-criteria.md"
+    expected_output: "At least one [REQ] criterion mentioning 'press Enter' for CLI dispatch"
+    verification: "grep 'press Enter' acceptance-criteria.md | grep -c 'REQ' → ≥ 1"
+    result: pass
+    evidence: "Found 2 REQ criteria: Section 3 line 34 ('press Enter to execute') and Section 4 line 47 (CLI dispatch document Enter requirement)"
+
+  - id: TC-T05
+    name: "playbook-template uses [Action][Element]→[Expected] format"
+    type: should_pass
+    scenario: "Verify that playbook-template.md prescribes the [Action][Element]→[Expected] step format for features and workflows"
+    input: "templates/playbook-template.md"
+    expected_output: "Step format includes [Action], [Element], and [Expected] markers"
+    verification: "grep -c '\\[Action\\]' playbook-template.md → ≥ 1"
+    result: pass
+    evidence: "Found 2 instances: Section 4 (line 83) '1. [Action] Click/Type/Press... [Element] \"Button Label\" → [Expected] \"You should see...\"' and Section 5 (line 105) '1. [Action] ... [Element] ... → [Expected] ...'"
+
+  - id: TC-T06
+    name: "SKILL.md has all 7 operations defined"
+    type: must_pass
+    scenario: "Verify that SKILL.md defines exactly 7 operations: get_artifacts, get_collection_template, validate_section, get_mixin, pack_section, score_quality, test_walkthrough"
+    input: "SKILL.md Operations section"
+    expected_output: "7 <operation name=...> XML blocks"
+    verification: "grep -c '<operation name=' SKILL.md → 7"
+    result: pass
+    evidence: "grep found 7 operation blocks: get_artifacts, get_collection_template, validate_section, get_mixin, pack_section, score_quality, test_walkthrough"
+
+  - id: TC-T07
+    name: "SKILL.md is under 500 lines"
+    type: must_pass
+    scenario: "Verify that the SKILL.md body stays under the 500-line limit"
+    input: "SKILL.md"
+    expected_output: "Line count < 500"
+    verification: "wc -l SKILL.md → < 500"
+    result: pass
+    evidence: "473 lines (under 500 limit)"
+
+  - id: TC-T08
+    name: "test_walkthrough supports live and offline modes"
+    type: must_pass
+    scenario: "Verify that test_walkthrough operation handles both live mode (with app_url + Chrome DevTools) and offline mode (structural checks only)"
+    input: "SKILL.md test_walkthrough operation"
+    expected_output: "Operation describes both modes: live (step 4) and offline (step 5)"
+    verification: "grep 'app_url.*provided.*Chrome' and grep 'offline validation' in SKILL.md"
+    result: pass
+    evidence: "Live mode at step 4: 'IF app_url is provided AND Chrome DevTools MCP is available'. Offline mode at step 5: 'IF app_url is NOT available (offline validation)'"
+
+  - id: TC-T09
+    name: "collection-template includes interaction pattern detection prompts"
+    type: should_pass
+    scenario: "Verify that templates/collection-template.md includes INTERACTION PATTERN DETECTION section with CLI_DISPATCH documentation requirements"
+    input: "templates/collection-template.md"
+    expected_output: "INTERACTION PATTERN DETECTION block listing FORM, MODAL, CLI_DISPATCH, NAVIGATION, TOGGLE"
+    verification: "grep -c 'INTERACTION PATTERN DETECTION' collection-template.md → ≥ 1"
+    result: pass
+    evidence: "Found at line 80: 'INTERACTION PATTERN DETECTION:' with all 5 patterns listed (lines 82-86) and CLI_DISPATCH documentation requirements (lines 88-91)"
+
+  - id: TC-T10
+    name: "Frontmatter has correct name and description"
+    type: must_pass
+    scenario: "Verify that SKILL.md frontmatter has name 'x-ipe-tool-knowledge-extraction-user-manual' and description mentioning playbook, collection template, acceptance criteria"
+    input: "SKILL.md frontmatter (lines 1-7)"
+    expected_output: "name: x-ipe-tool-knowledge-extraction-user-manual, description mentions key artifacts"
+    verification: "grep 'name: x-ipe-tool-knowledge-extraction-user-manual' SKILL.md → 1"
+    result: pass
+    evidence: "Line 2: 'name: x-ipe-tool-knowledge-extraction-user-manual'. Line 4: description mentions 'playbook, collection template, acceptance criteria, and app-type mixins'"
+
+# Summary
+# must_pass:  7/7 passed (TC-T01, TC-T02, TC-T03, TC-T06, TC-T07, TC-T08, TC-T10)
+# should_pass: 3/3 passed (TC-T04, TC-T05, TC-T09)
+# Total: 10/10 passed
+# Verdict: ✅ PASS

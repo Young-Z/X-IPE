@@ -58,6 +58,8 @@ input:
   next_task_based_skill:
     - skill: "x-ipe-task-based-code-refactor"
       condition: "Refactor code for quality improvements"
+    - skill: "x-ipe-task-based-feature-closing"
+      condition: "Close feature if no refactoring needed"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
 
@@ -410,6 +412,8 @@ task_completion_output:
   next_task_based_skill:
     - skill: "x-ipe-task-based-code-refactor"
       condition: "Refactor code for quality improvements"
+    - skill: "x-ipe-task-based-feature-closing"
+      condition: "Close feature if no refactoring needed"
   process_preference:
   workflow:
     name: "{from input}"

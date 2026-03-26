@@ -55,7 +55,7 @@ IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "Technical Design"
+  task_based_skill: "x-ipe-task-based-technical-design"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
@@ -66,7 +66,9 @@ input:
 
   # Task type attributes
   category: "feature-stage"
-  next_task_based_skill: "Code Implementation"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-code-implementation"
+      condition: "Implement the designed feature"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   feature_phase: "Technical Design"
@@ -102,9 +104,9 @@ input:
   </field>
   <field name="mockup_list" source="previous task | human input | N/A">
     <steps>
-      1. Check previous task output for mockup links (task_output_links)
-      2. If not available, ask human for mockup links
-      3. If none provided, set to N/A
+      1. IF previous task was "Feature Refinement" → use previous task output's mockup_list field (or derive from linked_mockups)
+      2. ELIF human provides explicit mockup links → use human-provided value
+      3. ELSE → set to N/A
     </steps>
   </field>
 </input_init>
@@ -142,7 +144,7 @@ input:
 | 1. 博学之 — Study Broadly | 1.1 Query Feature Board, 1.2 Read Specification | Load feature data, read specification | Full context gathered |
 | 2. 审问之 — Inquire Thoroughly | 2.1 Reference Architecture, 2.2 Research Best Practices | Check existing patterns, research libraries and best practices | Research complete |
 | 3. 慎思之 — Think Carefully | 3.1 Create Technical Design Document | Write two-part technical design document | Design written |
-| 4. 明辨之 — Discern Clearly | 4.1 Review Design | Present design, confirm architecture decisions | Design approved |
+| 4. 明辨之 — Discern Clearly | 4.1 Self-Critique Design | AI validates design against spec; escalates ONLY specific unresolvable conflicts | Design validated |
 | 5. 笃行之 — Practice Earnestly | 5.1 Complete | Verify DoD, update workflow, output summary | Task complete |
 | 继续执行 | 6.1 | Decide Next Action | Next action decided |
 | 继续执行 | 6.2 | Execute Next Action | Execution started |
@@ -219,15 +221,24 @@ BLOCKING (auto): Proceed automatically after DoD verification.
     <step_2_2>
       <name>Research Best Practices</name>
       <action>
-        1. SEARCH for official documentation
-        2. LOOK for existing libraries (don't reinvent the wheel)
-        3. CHECK reference implementations
-        4. REVIEW API documentation for planned libraries
-        5. IF mockup_list provided AND scope includes [Frontend] or [Full Stack]:
-           OPEN and thoroughly analyze all mockup files. EXTRACT exact layout structure, component hierarchy, spacing, colors, and interaction patterns. DOCUMENT these as binding constraints for implementation. CRITICAL: The mockup is the source of truth for visual design — the technical design MUST faithfully translate mockup visuals into component specifications so that Code Implementation follows the mockup precisely.
-        6. DOCUMENT findings for design decisions
+        1. CONSULT TOOL SKILLS (config-filtered):
+           a. DISCOVER: Scan .github/skills/x-ipe-tool-implementation-*/ for available tools
+           b. READ CONFIG: Read x-ipe-docs/config/tools.json → stages.implement.technical_design
+              - IF section missing/empty → config_active = false (all discovered tools enabled)
+              - ELSE → config_active = true (opt-in filtering); force-enable general
+           c. FILTER: IF config_active → only ENABLED tools participate
+           d. FOR EACH enabled tool: read "Built-In Practices" and "Operations" sections
+           e. DOCUMENT as "Tool Capability Summary" (informational only — not binding)
+        2. SEARCH official documentation, libraries, reference implementations, API docs
+        3. IF mockup_list provided AND scope includes [Frontend] or [Full Stack]:
+           OPEN and analyze all mockup files. EXTRACT layout, components, spacing, colors, interactions. The mockup is source of truth for visual design.
+        4. DOCUMENT findings for design decisions (include tool capability summary)
       </action>
-      <output>Research findings informing design decisions (including mockup-derived UI constraints if applicable)</output>
+      <constraints>
+        - Tool consultation is INFORMATIONAL ONLY — do not invoke tools for code execution
+        - Part 2 format MUST remain independent of tool availability (FR-048.1.5)
+      </constraints>
+      <output>Research findings including tool capability summary and mockup constraints if applicable</output>
     </step_2_2>
 
   </phase_2>
@@ -255,6 +266,10 @@ BLOCKING (auto): Proceed automatically after DoD verification.
              - Other types may emerge as tech evolves — use descriptive lowercase names
            - tech_stack: list all technologies used (e.g. ["Python/Flask", "JavaScript/Vanilla", "HTML/CSS", "pytest"])
            - These are passed to downstream skills (Test Generation, Code Implementation) to determine test types
+        7. LEVERAGE tool capability summary from Step 2.2:
+           - Reference tool built-in practices instead of duplicating (e.g., "Python tool enforces PEP 8")
+           - Focus Part 2 on what tools NEED: module boundaries, API contracts, data models
+           - Note: Part 2 format remains independent of tool availability
       </action>
       <constraints>
         - MANDATORY: Part 1 must have component table with Tags for semantic search
@@ -269,24 +284,30 @@ BLOCKING (auto): Proceed automatically after DoD verification.
 
   <phase_4 name="明辨之 — Discern Clearly">
     <step_4_1>
-      <name>Review Design</name>
+      <name>Self-Critique Design</name>
       <action>
-        IF process_preference.interaction_mode == "interact-with-human" OR interaction_mode == "dao-represent-human-to-interact-for-questions-in-skill":
-          → Present technical design to human
-          → Ask if architecture decisions and component structure are correct
-          → IF human identifies issues → revise specific sections
-        ELIF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-dao-end-user-representative with:
-            type: "approval"
-            context: "Review technical design for architecture decisions and component structure correctness"
-            artifact: {path to technical-design.md}
-          → IF DAO identifies issues → revise specific sections
+        1. AI self-critique — validate the design against objective criteria:
+           a. Every specification acceptance criterion maps to a component or flow
+           b. No contradictions between chosen patterns (e.g., stateless API + server-side sessions)
+           c. Technology choices are compatible (versions, licenses, runtime)
+           d. No over-engineering: each component has a clear reason from the spec
+        2. Collect unresolved_questions[] — ONLY items AI genuinely cannot decide:
+           - Trade-offs needing user preference (e.g., "Redis vs Memcached?")
+           - Business-domain constraints AI lacks context for
+           - Conflicting requirements needing human prioritization
+        3. IF unresolved_questions is EMPTY → design is validated, proceed
+        4. IF unresolved_questions is NON-EMPTY:
+           IF process_preference.interaction_mode == "dao-represent-human-to-interact":
+             → Invoke x-ipe-dao-end-user-representative with specific questions list
+           ELSE:
+             → Present ONLY the specific questions to human (not "review the whole design")
+           → Incorporate answers, revise affected sections
       </action>
       <constraints>
-        - BLOCKING (manual/stop_for_question): Human MUST confirm design before proceeding
-        - BLOCKING (auto): DAO review before proceeding
+        - MUST NOT ask broad "is this correct?" — only ask specific, bounded questions
+        - IF self-critique passes with zero questions → skip human/DAO entirely
       </constraints>
-      <output>Design reviewed and approved</output>
+      <output>Design validated (self-critique passed or specific questions resolved)</output>
     </step_4_1>
 
   </phase_4>
@@ -365,7 +386,9 @@ BLOCKING (auto): Proceed automatically after DoD verification.
 task_completion_output:
   category: "feature-stage"
   status: completed | blocked
-  next_task_based_skill: "Code Implementation"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-code-implementation"
+      condition: "Implement the designed feature"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
@@ -443,41 +466,11 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Patterns & Anti-Patterns
 
-### Pattern: API-Based Feature
-
-**When:** Feature exposes REST/GraphQL endpoints
-**Then:**
-```
-1. Focus Part 2 on API specification
-2. Include request/response schemas
-3. Document authentication requirements
-4. Add sequence diagrams for complex flows
-```
-
-### Pattern: Background Service
-
-**When:** Feature runs as background process
-**Then:**
-```
-1. Design for fault tolerance
-2. Include retry/backoff strategies
-3. Document monitoring points
-4. Add state diagrams for lifecycle
-```
-
-### Pattern: UI-Heavy Feature
-
-**When:** Feature is primarily frontend
-**Then:**
-```
-1. Focus on component architecture
-2. Document state management
-3. Include wireframes or mockup references
-4. Describe user interaction flows
-5. CRITICAL: Mockup is the source of truth for visual design - technical design must specify components, layout, and styling that faithfully reproduce the mockup so Code Implementation follows it precisely
-```
-
-### Anti-Patterns
+| Pattern | When | Key Actions |
+|---------|------|-------------|
+| API-Based | REST/GraphQL endpoints | Focus Part 2 on API spec, request/response schemas, auth, sequence diagrams |
+| Background Service | Background process | Fault tolerance, retry/backoff, monitoring points, state diagrams |
+| UI-Heavy | Primarily frontend | Component architecture, state management, mockup references (mockup = source of truth) |
 
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
@@ -487,13 +480,8 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Monolithic design | Hard to change | Design modular components |
 | Missing workflows | Hard to understand | Always include Mermaid diagrams |
 | No tags | Hard for AI to find | Always add searchable tags |
-
 ---
 
 ## Examples
 
-See [references/examples.md](.github/skills/x-ipe-task-based-technical-design/references/examples.md) for detailed execution examples including:
-- User authentication technical design
-- Complex feature with multiple modules
-- Missing specification (blocked)
-- Design update from change request
+See [references/examples.md](.github/skills/x-ipe-task-based-technical-design/references/examples.md) for detailed execution examples.

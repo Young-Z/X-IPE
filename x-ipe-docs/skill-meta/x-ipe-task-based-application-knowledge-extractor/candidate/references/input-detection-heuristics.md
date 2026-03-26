@@ -45,6 +45,7 @@ This document defines the heuristic rules used by the Application Knowledge Extr
 
 | Signal | App Type | Priority |
 |--------|----------|----------|
+| `package.json` with `"start"` script + HTML/JSX/TSX files | `web` | 1 |
 | Flask/Django/Express/Rails markers | `web` | 1 |
 | argparse, click, commander, clap | `cli` | 2 |
 | React Native, Flutter, Swift, Kotlin | `mobile` | 3 |

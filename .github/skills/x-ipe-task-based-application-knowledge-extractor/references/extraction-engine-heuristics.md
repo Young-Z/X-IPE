@@ -79,10 +79,37 @@ Warning: `<!-- EXTRACTION_WARNING: Section truncated — {total} files matched, 
 ```
 1. NAVIGATE: Chrome DevTools navigate_page to app URL
 2. INTERACT: Click navigation, fill forms to demonstrate functionality
-3. CAPTURE: take_snapshot after each interaction, take_screenshot for visual evidence
-4. EXTRACT: Combine snapshots, screenshots, observed behavior
-5. SYNTHESIZE: Describe application behavior in section context
-6. ERROR: If app unresponsive → warning, mark section "partial"
+3. DETECT INTERACTION PATTERNS: Classify each interactive element:
+   - FORM: User fills fields → submits → sees result
+   - MODAL: Click opens popup → user interacts → popup closes
+   - CLI_DISPATCH: Click sends command to terminal → user must press Enter to execute
+   - NAVIGATION: Click moves to different page
+   - TOGGLE: Click changes state in-place
+4. CAPTURE: take_snapshot after each interaction, take_screenshot for visual evidence
+5. EXTRACT: Combine snapshots, screenshots, observed behavior
+6. SYNTHESIZE: Describe application behavior in section context
+7. ERROR: If app unresponsive → warning, mark section "partial"
+```
+
+#### CLI_DISPATCH Pattern (CRITICAL)
+
+When a UI element dispatches a command to a terminal or system process:
+```
+MUST document ALL of the following:
+  1. What terminal/system receives the command (e.g., "integrated terminal", "system shell")
+  2. That the user MUST press Enter to execute the command
+  3. What the expected terminal output looks like (exact text or pattern)
+  4. How to know when execution completes (e.g., "prompt returns", "success message appears")
+  5. What to do if the command fails (error messages, troubleshooting)
+
+Example — GOOD:
+  "Click 'Run Build'. This copies a build command to the integrated terminal.
+   Press Enter to execute. You should see 'Build completed successfully' after
+   10-30 seconds. If you see 'Error:', check that all dependencies are installed."
+
+Example — BAD:
+  "Click 'Run Build' to build the project."
+  (Missing: terminal, Enter, expected output, completion signal)
 ```
 
 ### single_file
@@ -165,9 +192,39 @@ Per section, in order:
   1. User-provided: Check for images in target directory or user-specified paths
      → Reference: ![description](relative/path/to/image.png)
   2. Auto-capture: Chrome DevTools take_screenshot (running_web_app or public_url only)
-     → Save to: {checkpoint_path}/content/screenshots/section-{N}-{slug}.png
+     → Save to: {checkpoint_path}/screenshots/{section_nn}-{step_nn}-{description}.png
   3. Graceful skip: For source_code_repo/documentation_folder/single_file
      → No screenshots expected — skip silently (no warning)
+```
+
+### Action-Level Screenshot Strategy (running_web_app / public_url)
+
+```
+For workflow-heavy sections, capture screenshots at EACH STEP, not just per feature:
+
+Section 3 (Getting Started / Quick Start):
+  → Screenshot at key milestone steps (e.g., after initial setup, first success)
+
+Section 4 (Core Features):
+  → Screenshot of each feature's PRIMARY UI state
+  → One screenshot per feature showing the main interaction surface
+
+Section 5 (Workflows / Scenarios):
+  → Screenshot at EACH STEP of the workflow:
+     - BEFORE: the UI state before the action (what the user should see)
+     - AFTER: the UI state after the action (confirming the expected outcome)
+  → This is CRITICAL for followability — the reader must be able to
+     compare their screen to the screenshot at every step
+
+Naming convention:
+  screenshots/{section_nn}-{step_nn}-{description}.png
+  Examples:
+    screenshots/05-01-click-new-project-button.png
+    screenshots/05-02-fill-project-name-field.png
+    screenshots/05-03-project-created-confirmation.png
+
+Reference in content:
+  ![Step 1: Click New Project](screenshots/05-01-click-new-project-button.png)
 ```
 
 ---

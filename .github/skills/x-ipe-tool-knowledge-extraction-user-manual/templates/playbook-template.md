@@ -77,8 +77,10 @@
 **Subsections:**
 - One H3 per feature (e.g., `### User Management`, `### Data Export`)
 - Each feature subsection MUST include:
+  - **Interaction Pattern** — One of: FORM | MODAL | CLI_DISPATCH | NAVIGATION | TOGGLE
   - **Description** — What it does and why a user would use it
-  - **Instructions** — Step-by-step usage guide (numbered steps with concrete commands or UI paths)
+  - **Instructions** — Step-by-step usage guide using the format:
+    1. [Action] Click/Type/Press... [Element] "Button Label" → [Expected] "You should see..."
   - **Example** — Concrete usage example with expected output
   - **Screenshots** — Reference screenshots for UI features: `![{Alt text}](references/{nn}-core-features-{feature-slug}.png)`
   - **Tips** — Best practices, common pitfalls, or power-user shortcuts (optional but recommended)
@@ -99,7 +101,9 @@
 - Each scenario MUST include:
   - **Goal** — What the user wants to accomplish (1 sentence)
   - **Prerequisites** — What must be set up before starting
-  - **Steps** — Numbered walkthrough referencing features from Section 4 (with cross-links)
+  - **Steps** — Numbered walkthrough referencing features from Section 4 (with cross-links), using the format:
+    1. [Action] ... [Element] ... → [Expected] ...
+       ⚠️ If this dispatches a CLI command: Press **Enter** to execute. Wait for completion (1-5 min).
   - **Expected Result** — What success looks like
   - **Screenshots** — Key UI states during the workflow: `![{Alt text}](references/{nn}-workflows-{scenario-slug}.png)`
   - **Tips** — Variations, shortcuts, or "what if" guidance (optional)

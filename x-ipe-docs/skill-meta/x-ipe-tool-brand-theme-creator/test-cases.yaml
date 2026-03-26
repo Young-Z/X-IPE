@@ -1,0 +1,358 @@
+# Test Cases for x-ipe-tool-brand-theme-creator v2.0.0
+# Generated during Step 6 (Round 2: Reflect + Test Cases) of skill-creator workflow
+# Derived from acceptance criteria in skill-meta.md
+
+test_cases:
+  # ═══════════════════════════════════════════════════════════
+  # STRUCTURE TESTS
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC-01
+    name: "SKILL.md exists with valid frontmatter"
+    category: structure
+    priority: must
+    given: "Candidate directory at x-ipe-docs/skill-meta/x-ipe-tool-brand-theme-creator/candidate/"
+    when: "SKILL.md is read"
+    then: "File exists with YAML frontmatter containing name and description fields with trigger keywords"
+    verification: "grep for '---' delimited frontmatter block; verify name: x-ipe-tool-brand-theme-creator and description contains 'create theme', 'brand theme', 'design system'"
+
+  - id: TC-02
+    name: "SKILL.md under 500 lines"
+    category: structure
+    priority: must
+    given: "SKILL.md in candidate directory"
+    when: "Line count is checked"
+    then: "File has fewer than 500 lines"
+    verification: "wc -l candidate/SKILL.md returns < 500"
+
+  - id: TC-03
+    name: "examples.md exists with content"
+    category: structure
+    priority: must
+    given: "Candidate directory"
+    when: "references/examples.md is read"
+    then: "File exists with at least 6 examples covering web link, image, text, and minimal input scenarios"
+    verification: "File exists at candidate/references/examples.md; grep for 'Example 1' through 'Example 9'"
+
+  - id: TC-04
+    name: "component-extraction.md reference exists"
+    category: structure
+    priority: must
+    given: "Candidate directory"
+    when: "references/component-extraction.md is read"
+    then: "File exists with extraction patterns for buttons, cards, inputs, links, badges, navigation"
+    verification: "File exists; grep for 'Buttons', 'Cards', 'Form Inputs', 'Links', 'Badges', 'Navigation' section headers"
+    ac_ref: AC-S02
+
+  - id: TC-05
+    name: "DoR has 5 or fewer checkpoints"
+    category: structure
+    priority: must
+    given: "SKILL.md Definition of Ready section"
+    when: "Checkpoint count is verified"
+    then: "3 or fewer checkpoints defined"
+    verification: "Count <checkpoint> elements in definition_of_ready XML block"
+
+  - id: TC-06
+    name: "DoD has 10 or fewer checkpoints"
+    category: structure
+    priority: must
+    given: "SKILL.md Definition of Done section"
+    when: "Checkpoint count is verified"
+    then: "7 or fewer checkpoints defined"
+    verification: "Count <checkpoint> elements in definition_of_done XML block"
+
+  # ═══════════════════════════════════════════════════════════
+  # CONTENT TESTS
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC-07
+    name: "Required sections present in cognitive flow order"
+    category: content
+    priority: must
+    given: "SKILL.md in candidate directory"
+    when: "Section headers are checked in order"
+    then: "Sections appear in order: Purpose → About → Important Notes → Anti-Patterns → Input Parameters → Definition of Ready → Execution Flow → Execution Procedure → Output Result → Definition of Done → Templates → Examples → References"
+    verification: "grep -n '## ' SKILL.md and verify section order matches CONTEXT → DECISION → ACTION → VERIFY → REFERENCE flow"
+
+  - id: TC-08
+    name: "Execution Procedure uses XML format"
+    category: content
+    priority: must
+    given: "SKILL.md Execution Procedure section"
+    when: "Procedure format is checked"
+    then: "Procedure is wrapped in <procedure> XML tags with <step_N> elements"
+    verification: "grep for '<procedure', '<step_1>', '</procedure>' in SKILL.md"
+
+  - id: TC-09
+    name: "Error handling present in procedure steps"
+    category: content
+    priority: must
+    given: "SKILL.md Execution Procedure"
+    when: "Constraint blocks are checked"
+    then: "Steps contain <constraints> with BLOCKING/CRITICAL annotations for error scenarios"
+    verification: "grep for '<constraints>' and 'BLOCKING' within procedure steps"
+
+  - id: TC-10
+    name: "All markdown links use project-root-relative paths"
+    category: content
+    priority: must
+    given: "SKILL.md in candidate directory"
+    when: "Internal links are checked"
+    then: "No ../ relative paths; all links use .github/skills/ or x-ipe-docs/ root-relative format"
+    verification: "grep for '../' in SKILL.md returns no results; all links start with .github/ or x-ipe-docs/"
+
+  - id: TC-11
+    name: "extract_components input parameter documented"
+    category: content
+    priority: must
+    given: "SKILL.md Input Parameters section"
+    when: "Parameter list is checked"
+    then: "extract_components parameter exists with type boolean, default true, and description"
+    verification: "grep for 'extract_components' in input parameters YAML block"
+    ac_ref: AC-S01
+
+  - id: TC-12
+    name: "Anti-patterns section exists in SKILL.md"
+    category: content
+    priority: must
+    given: "SKILL.md with 7 execution steps"
+    when: "Anti-patterns section is checked"
+    then: "Anti-Patterns section exists with table of anti-patterns and recommended alternatives"
+    verification: "grep for '## Anti-Patterns' in SKILL.md; verify table has at least 4 entries"
+
+  - id: TC-13
+    name: "input_init block present under Input Parameters"
+    category: content
+    priority: must
+    given: "SKILL.md Input Parameters section"
+    when: "input_init block is checked"
+    then: "<input_init> block exists with initialization steps for reading and defaulting parameters"
+    verification: "grep for '<input_init>' and '</input_init>' in SKILL.md"
+
+  - id: TC-14
+    name: "Output naming conventions defined"
+    category: content
+    priority: must
+    given: "SKILL.md Important Notes and Output Result sections"
+    when: "Output file naming is checked"
+    then: "Output path x-ipe-docs/themes/theme-{name}/ documented with theme- prefix requirement"
+    verification: "grep for 'theme-{name}' and 'theme-' prefix requirement in Important Notes"
+
+  # ═══════════════════════════════════════════════════════════
+  # NEW FEATURE TESTS
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC-15
+    name: "Component extraction reference link in SKILL.md"
+    category: new_feature
+    priority: must
+    given: "SKILL.md References section"
+    when: "Reference links are checked"
+    then: "Link to references/component-extraction.md exists in References section"
+    verification: "grep for 'component-extraction.md' in SKILL.md References section"
+    ac_ref: AC-S01
+
+  - id: TC-16
+    name: "Component placeholders documented in template-placeholders.md"
+    category: new_feature
+    priority: must
+    given: "references/template-placeholders.md"
+    when: "Component placeholder table is checked"
+    then: "Placeholders exist for BTN_*, CARD_*, INPUT_*, LINK_*, BADGE_*, NAV_* tokens"
+    verification: "grep for '{{BTN_PADDING}}', '{{CARD_RADIUS}}', '{{INPUT_RADIUS}}', '{{LINK_COLOR}}', '{{BADGE_BG}}', '{{NAV_HEIGHT}}' in template-placeholders.md"
+
+  - id: TC-17
+    name: "design-system-template.md includes Links section"
+    category: new_feature
+    priority: must
+    given: "templates/design-system-template.md"
+    when: "Component Specs sections are checked"
+    then: "Links section exists with link_color, link_hover_color, link_decoration placeholders"
+    verification: "grep for '### Links' and 'link_color' in design-system-template.md"
+    ac_ref: AC-S03
+
+  - id: TC-18
+    name: "design-system-template.md includes Badges section"
+    category: new_feature
+    priority: must
+    given: "templates/design-system-template.md"
+    when: "Component Specs sections are checked"
+    then: "Badges section exists with badge_bg, badge_padding, badge_radius placeholders"
+    verification: "grep for '### Badges' and 'badge_bg' in design-system-template.md"
+    ac_ref: AC-S03
+
+  - id: TC-19
+    name: "design-system-template.md includes Navigation section"
+    category: new_feature
+    priority: must
+    given: "templates/design-system-template.md"
+    when: "Component Specs sections are checked"
+    then: "Navigation section exists with nav_height, nav_bg, nav_padding placeholders"
+    verification: "grep for '### Navigation' and 'nav_height' in design-system-template.md"
+    ac_ref: AC-S03
+
+  - id: TC-20
+    name: "examples.md includes web link component extraction example"
+    category: new_feature
+    priority: must
+    given: "references/examples.md"
+    when: "Component extraction examples are checked"
+    then: "Example 7 covers web link with component extraction showing buttons, cards, inputs, links, badges, navigation"
+    verification: "grep for 'Example 7' and 'Component Extraction' in examples.md; verify extracted component values listed"
+
+  - id: TC-21
+    name: "examples.md includes image component identification example"
+    category: new_feature
+    priority: must
+    given: "references/examples.md"
+    when: "Component extraction examples are checked"
+    then: "Example 8 covers image input with component identification"
+    verification: "grep for 'Example 8' and 'Component Identification' in examples.md"
+
+  - id: TC-22
+    name: "examples.md includes text description component style example"
+    category: new_feature
+    priority: must
+    given: "references/examples.md"
+    when: "Component extraction examples are checked"
+    then: "Example 9 covers text description with component style derivation"
+    verification: "grep for 'Example 9' and 'Component Style' in examples.md"
+
+  - id: TC-23
+    name: "HTML template includes Links visual preview"
+    category: new_feature
+    priority: must
+    given: "templates/component-visualization-template.html"
+    when: "Components section is checked"
+    then: "Links preview section renders link elements with theme styling"
+    verification: "grep for '<!-- Links -->' and 'class=\"link\"' in HTML template"
+
+  - id: TC-24
+    name: "HTML template includes Badges visual preview"
+    category: new_feature
+    priority: must
+    given: "templates/component-visualization-template.html"
+    when: "Components section is checked"
+    then: "Badges preview section renders badge elements with theme styling"
+    verification: "grep for '<!-- Badges -->' and 'class=\"badge\"' in HTML template"
+
+  - id: TC-25
+    name: "HTML template includes Navigation visual preview"
+    category: new_feature
+    priority: must
+    given: "templates/component-visualization-template.html"
+    when: "Components section is checked"
+    then: "Navigation preview section renders nav bar with theme styling"
+    verification: "grep for '<!-- Navigation -->' and 'class=\"sample-nav\"' in HTML template"
+
+  - id: TC-26
+    name: "HTML template JSON-LD includes component specs"
+    category: new_feature
+    priority: must
+    given: "templates/component-visualization-template.html"
+    when: "JSON-LD block is checked"
+    then: "JSON-LD contains components object with buttons, cards, inputs, links, badges, navigation"
+    verification: "grep for '\"components\"' and '\"buttons\"', '\"badges\"', '\"navigation\"' within JSON-LD script block"
+
+  - id: TC-27
+    name: "HTML template has CSS for link, badge, and nav components"
+    category: new_feature
+    priority: should
+    given: "templates/component-visualization-template.html"
+    when: "CSS styles are checked"
+    then: "CSS rules exist for .link, .badge, .sample-nav, .nav-item classes"
+    verification: "grep for '.link {', '.badge {', '.sample-nav {', '.nav-item {' in HTML template style block"
+
+  # ═══════════════════════════════════════════════════════════
+  # BEHAVIORAL TESTS
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC-28
+    name: "Component extraction documented as best-effort"
+    category: behavior
+    priority: must
+    given: "SKILL.md Important Notes section"
+    when: "Component extraction description is checked"
+    then: "Text explicitly states component extraction is best-effort and should never block theme generation"
+    verification: "grep for 'best-effort' in Important Notes; verify 'Never block theme generation' language present"
+    ac_ref: AC-B03
+
+  - id: TC-29
+    name: "Fallback to defaults when extraction fails"
+    category: behavior
+    priority: must
+    given: "SKILL.md Step 3 procedure"
+    when: "Default handling is checked"
+    then: "Step 3 applies defaults from references/component-extraction.md for each component type NOT extracted in Step 1"
+    verification: "grep for 'NOT extracted in Step 1' and 'apply defaults' in Step 3 action"
+    ac_ref: AC-B03
+
+  - id: TC-30
+    name: "Extracted values take precedence over defaults"
+    category: behavior
+    priority: must
+    given: "SKILL.md Step 3 and references/component-extraction.md merge logic"
+    when: "Merge behavior is checked"
+    then: "Both SKILL.md and component-extraction.md state extracted values take precedence"
+    verification: "grep for 'extracted values take precedence' or 'extracted.*precedence' in both files"
+
+  - id: TC-31
+    name: "Backward compatibility with extract_components=false"
+    category: behavior
+    priority: must
+    given: "SKILL.md procedure and input parameters"
+    when: "extract_components is set to false"
+    then: "Theme generates with only color/font tokens; component extraction step is skipped; defaults still applied"
+    verification: "verify Step 1 has conditional 'IF extract_components == true'; verify component defaults still apply in Step 3"
+    ac_ref: AC-B01
+
+  - id: TC-32
+    name: "User confirmation required before generation"
+    category: behavior
+    priority: must
+    given: "SKILL.md Step 2 procedure"
+    when: "Confirmation step is checked"
+    then: "Step 2 has BLOCKING constraint requiring user confirmation before proceeding"
+    verification: "grep for 'BLOCKING: Do not proceed.*without user confirmation' in Step 2 constraints"
+    ac_ref: AC-C06
+
+  - id: TC-33
+    name: "Theme folder prefix auto-prepend"
+    category: behavior
+    priority: must
+    given: "SKILL.md Step 2 and Step 6"
+    when: "Theme name handling is checked"
+    then: "Both steps verify and auto-prepend 'theme-' prefix if missing"
+    verification: "grep for 'prepend.*theme-' in Step 2 and Step 6"
+    ac_ref: AC-C07
+
+  - id: TC-34
+    name: "Both files always generated together"
+    category: behavior
+    priority: must
+    given: "SKILL.md Important Notes"
+    when: "Output file requirements are checked"
+    then: "CRITICAL note states both design-system.md and component-visualization.html must be generated"
+    verification: "grep for 'Both.*design-system.md.*component-visualization.html.*must be generated' in Important Notes"
+    ac_ref: AC-C01
+
+  - id: TC-35
+    name: "All colors must use hex format"
+    category: behavior
+    priority: must
+    given: "SKILL.md Step 1 constraints"
+    when: "Color format constraint is checked"
+    then: "CRITICAL constraint requires hex values only; no RGB or HSL"
+    verification: "grep for 'CRITICAL.*hex values only.*no RGB or HSL' in Step 1 constraints"
+    ac_ref: AC-C04
+
+  - id: TC-36
+    name: "No unreplaced placeholders in output"
+    category: behavior
+    priority: must
+    given: "SKILL.md Step 5 and Step 7"
+    when: "Placeholder verification is checked"
+    then: "Step 5 constraint requires all placeholders replaced; Step 7 validates no {{PLACEHOLDER}} strings remain"
+    verification: "grep for 'BLOCKING.*All placeholders must be replaced' in Step 5; grep for 'PLACEHOLDER.*remain' in Step 7"
+    ac_ref: AC-C02

@@ -77,6 +77,21 @@ PER-FEATURE DETAIL (extract for EACH feature individually):
 - Edge cases: What happens with invalid input, empty state, or limits?
 - Permissions: Does this feature require specific roles or access?
 
+INTERACTION PATTERN DETECTION:
+For each feature/action, identify its interaction pattern:
+- FORM: User fills fields → submits → sees result in same page
+- MODAL: Click triggers popup → user interacts → popup closes
+- CLI_DISPATCH: Click sends command to external system (terminal) → user must execute
+- NAVIGATION: Click moves to different page/view
+- TOGGLE: Click changes state in-place
+
+For CLI_DISPATCH patterns (most error-prone), MUST document:
+1. What system/terminal receives the command
+2. Whether user must press Enter to execute (YES in most cases)
+3. What the expected terminal output looks like
+4. How to know when execution completes
+5. What success/failure looks like
+
 SCREENSHOT GUIDANCE:
 - For each major feature, capture a screenshot showing the feature in action
 - Save to: references/04-core-features-{feature-slug}-{description}.png
@@ -113,6 +128,13 @@ PER-SCENARIO DETAIL:
 - Steps: Numbered walkthrough showing which features are used and in what order
 - Expected result: What does success look like?
 - Cross-references: Link back to relevant Section 4 features
+
+EXPECTED OUTCOMES:
+For each step in a workflow scenario, document:
+1. The exact UI element to interact with (button label, input field name)
+2. The exact action to perform (click, type "X", press Enter, wait 30s)
+3. The expected result AFTER the action ("you should see ✓ next to Compose Idea")
+4. How long to wait if async (e.g., "AI processing takes 1-5 minutes")
 
 SCREENSHOT GUIDANCE:
 - Capture key transition points in the workflow (start state, intermediate states, end state)

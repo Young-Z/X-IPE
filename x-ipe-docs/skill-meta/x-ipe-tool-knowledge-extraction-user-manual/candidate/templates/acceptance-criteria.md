@@ -29,6 +29,9 @@
 - [ ] `[REQ]` Provides a quick start path completable in under 5 minutes
 - [ ] `[REQ]` Walks through the basic happy-path workflow with concrete steps
 - [ ] `[REQ]` Includes at least one example command or action with expected output
+- [ ] `[REQ]` Quick start must specify exact UI actions (click X, type Y, press Enter)
+- [ ] `[REQ]` Each step must include expected outcome ("you should see...")
+- [ ] `[REQ]` If actions dispatch commands to terminal/CLI, must explicitly state "press Enter to execute"
 - [ ] `[OPT]` References sample data or seed scripts if available
 - [ ] `[OPT]` Links to more detailed tutorials or guides
 
@@ -39,6 +42,9 @@
 - [ ] `[REQ]` Each feature has step-by-step usage instructions (not just a description)
 - [ ] `[REQ]` Each feature includes at least one concrete example with expected output
 - [ ] `[REQ]` Features reference screenshots for UI-visible actions (or explain why N/A)
+- [ ] `[REQ]` Each feature must classify its interaction pattern (form/modal/CLI dispatch/navigation/toggle)
+- [ ] `[REQ]` CLI dispatch features must document: what system receives command, whether Enter is needed, how to know when complete
+- [ ] `[REQ]` Each step-by-step instruction must include the exact UI element name/label to interact with
 - [ ] `[OPT]` Features include tips or best practices
 - [ ] `[OPT]` Features document edge cases or error handling
 - [ ] `[OPT]` Features note required permissions or roles
@@ -49,6 +55,9 @@
 - [ ] `[REQ]` Each scenario states a clear goal
 - [ ] `[REQ]` Each scenario has numbered steps referencing features from Section 4
 - [ ] `[REQ]` Each scenario describes the expected result
+- [ ] `[REQ]` At least 1 scenario must be verifiable end-to-end (every step has exact action + expected outcome)
+- [ ] `[REQ]` Scenario steps must not assume implicit knowledge between consecutive steps
+- [ ] `[REQ]` Steps involving async operations (AI processing, builds) must specify how to know when complete
 - [ ] `[OPT]` Scenarios include screenshots of key workflow states
 - [ ] `[OPT]` Scenarios include prerequisites
 - [ ] `[OPT]` Scenarios provide tips or variations

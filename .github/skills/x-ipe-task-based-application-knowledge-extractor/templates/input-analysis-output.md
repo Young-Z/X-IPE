@@ -343,6 +343,6 @@ def create_input_analysis(target: str) -> InputAnalysis:
 
 ## References
 
-- **Input Detection Heuristics:** `.github/skills/x-ipe-task-based-application-knowledge-extractor/references/input-detection-heuristics.md`
+- **Input Detection Heuristics:** `x-ipe-docs/skill-meta/x-ipe-task-based-application-knowledge-extractor/candidate/references/input-detection-heuristics.md`
 - **Technical Design:** `x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/technical-design.md` (InputAnalysis data model)
-- **SKILL.md Step 1.1:** `.github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md` (Phase 1, Step 1.1)
+- **SKILL.md Step 1.1:** `x-ipe-docs/skill-meta/x-ipe-task-based-application-knowledge-extractor/candidate/SKILL.md` (Phase 1, Step 1.1)

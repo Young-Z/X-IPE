@@ -5,6 +5,12 @@
 ## Active Tasks
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
+| TASK-1001 | Skill Update | Update knowledge extraction + user manual skills based on hands-on testing feedback: (1) Add functional validation phase (walkthrough testing), (2) Update acceptance criteria to be task-oriented not just structural, (3) Add interaction pattern detection, (4) Add "Followability" quality dimension, (5) Require action-level screenshots, (6) Add test_walkthrough operation. Covers both x-ipe-task-based-application-knowledge-extractor and x-ipe-tool-knowledge-extraction-user-manual. | Nova ✨ | ✅ done | 03-25-2026 | [extractor v2.0](../../.github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md), [tool v2.0](../../.github/skills/x-ipe-tool-knowledge-extraction-user-manual/SKILL.md) | — |
+| TASK-1000 | Skill Validation | Phase 1+2: Validate and fix feature-stage skills (feature-refinement, technical-design, code-implementation, feature-acceptance-test, code-refactor, feature-closing). Inner issues + inter-skill I/O chain. | Cipher 🔑 | ✅ done | 03-25-2026 | [refinement](../../.github/skills/x-ipe-task-based-feature-refinement/SKILL.md), [design](../../.github/skills/x-ipe-task-based-technical-design/SKILL.md), [impl](../../.github/skills/x-ipe-task-based-code-implementation/SKILL.md), [test](../../.github/skills/x-ipe-task-based-feature-acceptance-test/SKILL.md), [refactor](../../.github/skills/x-ipe-task-based-code-refactor/SKILL.md), [closing](../../.github/skills/x-ipe-task-based-feature-closing/SKILL.md) | — |
+| TASK-999 | Knowledge Extraction | Extract user manual knowledge from X-IPE workflow mode (running web app at http://127.0.0.1:5858/). Study how to use workflow mode to create applications and generate user manual. | Zephyr 🌬️ | ✅ done | 03-25-2026 | [user-manual](../../x-ipe-docs/knowledge-base/.intake/EXTRACT-999/user-manual.md) | x-ipe-tool-kb-librarian |
+| TASK-998 | Skill Validation | Phase 2: Fix inter-skill I/O chain issues across requirement-stage (req-gathering → feature-breakdown → feature-refinement). Fix mockup_path→mockup_link, step numbering, feature_ids reference, mockup source chain. | Cipher 🔑 | ✅ done | 03-25-2026 | [feature-breakdown](../../.github/skills/x-ipe-task-based-feature-breakdown/SKILL.md), [feature-refinement](../../.github/skills/x-ipe-task-based-feature-refinement/SKILL.md) | — |
+| TASK-997 | Skill Validation | Phase 1: Validate and fix inner issues in requirement-stage skills (requirement-gathering + feature-breakdown). Structural/content quality fixes. | Cipher 🔑 | ✅ done | 03-25-2026 | [req-gathering](../../.github/skills/x-ipe-task-based-requirement-gathering/SKILL.md), [feature-breakdown](../../.github/skills/x-ipe-task-based-feature-breakdown/SKILL.md) | — |
+| TASK-996 | Skill Update | Enhance x-ipe-tool-brand-theme-creator to extract basic UI component patterns (buttons, cards, inputs, links, badges, nav) from reference materials, not just colors/fonts. Update SKILL.md, input-sources.md, design-system-template.md, template-placeholders.md, and examples.md. | Ember 🔥 | ✅ done | 03-25-2026 | [SKILL.md v2.0](.github/skills/x-ipe-tool-brand-theme-creator/SKILL.md), [component-extraction.md](.github/skills/x-ipe-tool-brand-theme-creator/references/component-extraction.md) | — |
 | TASK-995 | Skill Update | Fix I/O chain compatibility across ideation-stage skills: ideation output field name/format, mockup/arch input_init broken reference, share-idea missing predecessor ref, mockup_list format mismatch with requirement-gathering. | Cipher 🔑 | ✅ done | 03-25-2026 | [ideation](../../.github/skills/x-ipe-task-based-ideation/SKILL.md), [mockup](../../.github/skills/x-ipe-task-based-idea-mockup/SKILL.md), [architecture](../../.github/skills/x-ipe-task-based-idea-to-architecture/SKILL.md), [share-idea](../../.github/skills/x-ipe-task-based-share-idea/SKILL.md), [req-gathering](../../.github/skills/x-ipe-task-based-requirement-gathering/SKILL.md) | — |
 | TASK-994 | Skill Update | Add docx tool skill as DOCX conversion method in x-ipe-task-based-share-idea. Route DOCX format to docx skill instead of pandoc-only fallback. | Zephyr 🌬️ | ✅ done | 03-25-2026 | [SKILL.md](.github/skills/x-ipe-task-based-share-idea/SKILL.md) | — |
 | TASK-993 | Skill Validation | Validate all ideation-stage skills (4 task-based + 2 tool) against x-ipe-meta-skill-creator guidelines. Fix structural/content issues. | Cipher 🔑 | ✅ done | 03-25-2026 | [ideation SKILL.md](.github/skills/x-ipe-task-based-ideation/SKILL.md), [mockup SKILL.md](.github/skills/x-ipe-task-based-idea-mockup/SKILL.md), [architecture SKILL.md](.github/skills/x-ipe-task-based-idea-to-architecture/SKILL.md) | — |
@@ -252,10 +258,10 @@
 
 ## Quick Stats
 
-- **Total Active:** 15
+- **Total Active:** 18
 - **In Progress:** 0
 - **Pending:** 0
-- **Completed (archived):** 884
+- **Completed (archived):** 888
 - **Deferred:** 0
 - **Reverted:** 8
 - **Pending Review:** 0

@@ -96,9 +96,10 @@ input:
   </field>
   <field name="mockup_list" source="previous task (Idea Mockup) output links OR human input OR N/A">
     <steps>
-      1. IF previous task was "Idea Mockup" → extract from task_output_links.mockup_list
-      2. ELIF human provides explicit mockup paths → use human-provided value
-      3. ELSE → set to "N/A"
+      1. IF previous task was "Idea Mockup" → use previous task output's mockup_list field (array of {mockup_name, mockup_link})
+      2. ELIF previous task was "Requirement Gathering" → inherit from its mockup_list output
+      3. ELIF human provides explicit mockup paths → use human-provided value
+      4. ELSE → set to "N/A"
     </steps>
   </field>
   <field name="requirement_doc" source="auto-detect from x-ipe-docs/requirements/">
@@ -117,7 +118,7 @@ input:
 ```yaml
 mockup_list:
   - mockup_name: "Description of what function the mockup is for"
-    mockup_path: "URL or path to the mockup"
+    mockup_link: "URL or path to the mockup"
 ```
 
 ---
@@ -328,8 +329,7 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
       <action>
         1. IF workflow-mode: call update_workflow_action with status "done", features list
         2. Verify all DoD checkpoints
-        3. Verify all DoD checkpoints are met
-        4. IF manual/stop_for_question: present feature breakdown, ask if any features are missing or miscategorized
+        3. IF manual/stop_for_question: present feature breakdown, ask if any features are missing or miscategorized
       </action>
       <output>Task completion output, workflow_action_updated</output>
     </step_5_3>
@@ -409,7 +409,7 @@ task_completion_output:
   dedup_gaps: []
   linked_mockups:
     - mockup_name: "Description of mockup function"
-      mockup_path: "x-ipe-docs/requirements/EPIC-XXX/mockups/mockup-name.html"
+      mockup_link: "x-ipe-docs/requirements/EPIC-XXX/mockups/mockup-name.html"
 ```
 
 ---

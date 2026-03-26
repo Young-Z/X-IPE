@@ -200,3 +200,136 @@ phase_3:
 | Re-extraction produces empty content | Mark section "error", continue others |
 | Iteration config = 0 | Clamp to 1 (minimum 1 iteration) |
 | Coverage target = 0 | All sections accepted on first iteration |
+
+---
+
+## Walkthrough Testing (Phase 3.5)
+
+> Reference for Phase 3.5 (实践验证 — Validate by Practice) walkthrough-based validation.
+> This phase validates that extracted content is literally followable by testing it against the running application.
+
+### Applicability
+
+```
+ONLY for input types with Chrome DevTools access:
+  - running_web_app → LIVE walkthrough via Chrome DevTools
+  - public_url → LIVE walkthrough via Chrome DevTools
+  - source_code_repo → SKIP (use tool skill test_walkthrough in offline mode)
+  - documentation_folder → SKIP
+  - single_file → SKIP
+```
+
+### Walkthrough Gap Classification
+
+```
+For each step that fails during walkthrough, classify the gap:
+
+MISSING_ACTION:
+  The step does not specify what physical action to take.
+  Examples:
+    - "Run the command" (missing: type it and press Enter)
+    - "Execute the build" (missing: which button, which terminal, which command)
+  Fix: Add explicit action verb + target (e.g., "Press Enter in the terminal to execute")
+
+MISSING_ELEMENT:
+  The step references a UI element vaguely or incorrectly.
+  Examples:
+    - "Click the button" (which button?)
+    - "Enter text in the field" (which field?)
+  Fix: Name the element exactly as shown in UI (e.g., "Click the 'Create Project' button")
+
+MISSING_OUTCOME:
+  The step does not describe what should happen after the action.
+  Examples:
+    - "Click Submit" (then what?)
+    - "Run the test" (what does success look like?)
+  Fix: Add expected outcome (e.g., "You should see 'Project created successfully'")
+
+WRONG_STATE:
+  The described UI state does not match reality.
+  Examples:
+    - Step says "Click 'Settings' in the sidebar" but sidebar has no Settings link
+    - Step references a form field that no longer exists
+  Fix: Re-extract with current UI state via Chrome DevTools
+
+IMPLICIT_KNOWLEDGE:
+  The step assumes knowledge that isn't documented elsewhere in the manual.
+  Examples:
+    - "Open a terminal" (user may not know how)
+    - "SSH into the server" (assumes SSH knowledge)
+    - "Press Enter" not mentioned after a CLI command is pasted
+  Fix: Either document the prerequisite or add inline explanation
+```
+
+### Followability Score Computation
+
+```
+followability_score = steps_passed / total_steps
+
+Where:
+  steps_passed = steps where the walkthrough agent successfully:
+    1. Identified what action to take from the text alone
+    2. Found the named UI element
+    3. Performed the action
+    4. Observed the described outcome
+  total_steps = all steps in the scenario
+
+Threshold: 0.7 (70% of steps must be followable)
+```
+
+### Walkthrough Feedback File Format
+
+```markdown
+# Walkthrough Feedback: {Scenario Title}
+
+<!-- Iteration: {M} | Input Type: {input_type} | Date: {ISO 8601} -->
+
+## Results
+
+| Step | Description | Result | Gap Type | Section |
+|------|------------|--------|----------|---------|
+| 1 | Open the application | pass | — | 03-getting-started |
+| 2 | Click 'New Project' | pass | — | 05-workflows |
+| 3 | Enter project name | fail | MISSING_ELEMENT | 05-workflows |
+| 4 | Run build command | fail | MISSING_ACTION | 05-workflows |
+
+## Summary
+
+- Steps passed: 2/4 (50%)
+- Followability score: 0.50
+- Gaps by type: MISSING_ELEMENT (1), MISSING_ACTION (1)
+
+## Gap Details
+
+- **Step 3 (MISSING_ELEMENT):** Text says "enter the project name" but doesn't
+  specify which field. The form has 3 text inputs. Needs: "In the 'Project Name'
+  field (the first text input), type your project name."
+- **Step 4 (MISSING_ACTION):** Text says "Run the build command" but doesn't
+  mention pressing Enter. The UI pastes a command into the terminal. Needs:
+  "Press Enter in the terminal to execute the build command. Wait for
+  'Build successful' to appear (about 30 seconds)."
+```
+
+Location: `{checkpoint_path}/feedback/walkthrough-{scenario_slug}-iter-{M}.md`
+
+### Manifest Updates (Phase 3.5)
+
+```yaml
+# Phase 3.5 additions to manifest.yaml
+phase_3_5:
+  status: "validated | skipped"
+  skip_reason: "offline_input_type | no_scenario_available"  # only if skipped
+  started_at: "ISO 8601"
+  completed_at: "ISO 8601"
+  scenario_used: "section-05-workflows | section-03-getting-started"
+  iteration_count: int  # 1 or 2
+  followability_score: float  # 0.0 - 1.0
+  gaps_found: int
+  gaps_fixed: int
+  gap_details:
+    - step: int
+      gap_type: "MISSING_ACTION | MISSING_ELEMENT | MISSING_OUTCOME | WRONG_STATE | IMPLICIT_KNOWLEDGE"
+      section_id: "string"
+      fixed: bool
+  feedback_files: ["feedback/walkthrough-{slug}-iter-1.md"]
+```

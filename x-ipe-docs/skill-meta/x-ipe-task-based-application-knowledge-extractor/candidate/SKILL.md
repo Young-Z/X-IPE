@@ -13,7 +13,7 @@ triggers:
 
 # Application Knowledge Extractor
 
-> **Version:** 1.5.1
+> **Version:** 2.0.0
 
 ## Purpose
 
@@ -116,6 +116,7 @@ input:
 | 1. 博学之 | 1.4 | Initialize Handoff | Create .x-ipe-checkpoint/ and session manifest | handoff ready |
 | 2. 审问之 | 2.1 | Extract Source Content | Per-section template-guided extraction | content files written |
 | 3. 慎思之 | 3.1 | Validate & Coverage Loop | Validate against criteria, iterate for gaps | coverage met or max iterations |
+| 3.5 实践验证 | 3.5.1 | Walkthrough Testing | Follow manual through running app, test each step literally | followability ≥ 0.7 or max iterations |
 | 4. 明辨之 | 4.1 | Resume, Checkpoint & Error Handling | Detect prior sessions, save checkpoints, classify errors | errors handled |
 | 5. 笃行之 | 5.1 | Quality Scoring | Delegate to tool skill score_quality, loop if low | scores computed |
 | 5. 笃行之 | 5.2 | Package KB Articles & Report | Generate .intake/ output files | output packaged |
@@ -131,6 +132,7 @@ input:
 | 1 | 博学之 (Bóxué) | Study Broadly | Gather comprehensive context | Analyze input, select category, load tool skill, init handoff |
 | 2 | 审问之 (Shěnwèn) | Inquire Thoroughly | Extract source content | Template-guided per-section source content extraction |
 | 3 | 慎思之 (Shènsī) | Think Carefully | Validate & iterate | Validate content against criteria, iterate for coverage gaps |
+| 3.5 | 实践验证 (Shíjiàn Yànzhèng) | Validate by Practice | Test manual against running app | Walk through scenarios literally, record gaps, feed back for re-extraction |
 | 4 | 明辨之 (Míngbiàn) | Discern Clearly | Handle errors & checkpoints | Resume detection, checkpoint saves, error classification |
 | 5 | 笃行之 (Dǔxíng) | Practice Earnestly | Package output | Tool-skill-delegated quality scoring, KB article packaging, extraction report |
 | 6 | 继续执行 | Route and Execute | Finalize & route next action | Cleanup temp files, route to KB librarian |
@@ -207,10 +209,20 @@ input:
       1. Read collection template from Phase 1 artifacts, parse H2 sections with extraction prompts
       2. For each section: identify relevant sources, apply skip rules, extract/browse content
       3. Synthesize knowledge into coherent content (never raw-dump files)
-      4. Write to checkpoint/content/section-{NN}-{slug}.md, update manifest per-section
-      5. Call tool skill validate_section operation on extracted content for early feedback
-      6. IF validation result contains criteria with status `incomplete` AND `missing_info[]` is non-empty → use `missing_info` entries to form targeted re-extraction prompts for the specific content gaps
-      7. IF tool skill feedback indicates gaps → adjust extraction prompts and re-extract before moving to next section
+      4. FOR running_web_app / public_url targets: Detect interaction patterns per element:
+         - FORM, MODAL, CLI_DISPATCH, NAVIGATION, TOGGLE
+         - For CLI_DISPATCH: MUST document terminal target, Enter-to-execute requirement, expected output, and completion signal
+         - Record patterns in content file alongside feature descriptions
+      5. Screenshot strategy for running_web_app / public_url:
+         a. Section 4 (Core Features): screenshot of each feature's primary UI state
+         b. Section 5 (Workflows): screenshot at EACH STEP (before-action + after-action)
+         c. Section 3 (Getting Started): screenshot at key quick start steps
+         d. Name: screenshots/{section_nn}-{step_nn}-{description}.png
+         e. Reference in content: ![Step N: Description](screenshots/{filename})
+      6. Write to checkpoint/content/section-{NN}-{slug}.md, update manifest per-section
+      7. Call tool skill validate_section operation on extracted content for early feedback
+      8. IF validation result contains criteria with status `incomplete` AND `missing_info[]` is non-empty → use `missing_info` entries to form targeted re-extraction prompts for the specific content gaps
+      9. IF tool skill feedback indicates gaps → adjust extraction prompts and re-extract before moving to next section
     </action>
     <constraints>
       - BLOCKING: All content must go through file paths in checkpoint — no inline content
@@ -237,6 +249,39 @@ input:
   </step_3_1>
 </phase_3>
 
+<phase_3_5 name="实践验证 — Validate by Practice">
+  <step_3_5_1>
+    <name>Walkthrough Testing</name>
+    <action>
+      1. APPLICABILITY: Only for input_type running_web_app or public_url (Chrome DevTools available).
+         For source_code_repo / documentation_folder / single_file → SKIP this phase (use tool skill test_walkthrough in offline mode instead)
+      2. Select the primary workflow scenario from Section 5 (Common Workflow Scenarios)
+         - Pick the scenario most likely to be a user's first experience
+         - IF no Section 5 scenario exists yet → use Section 3 Quick Start
+      3. Call tool skill `test_walkthrough` operation with:
+         - content_path: path to the scenario content file
+         - app_url: the running app URL (from input.target)
+         - mode: "live" (Chrome DevTools-based)
+      4. Process gap_report from test_walkthrough — for each failed step, classify:
+         - MISSING_ACTION: step doesn't specify what to do (e.g., "press Enter")
+         - MISSING_ELEMENT: step doesn't name the UI element
+         - MISSING_OUTCOME: step doesn't say what happens after
+         - WRONG_STATE: actual UI doesn't match described state
+         - IMPLICIT_KNOWLEDGE: step assumes knowledge not documented
+      5. Feed each gap back to Phase 2 for targeted re-extraction of that section
+      6. IF followability_score < 0.7 → re-extract affected sections with gap-specific prompts
+      7. IF followability_score >= 0.7 → proceed to Phase 4
+      8. Max 2 walkthrough iterations (test → fix → retest)
+    </action>
+    <constraints>
+      - BLOCKING: Only runs for running_web_app / public_url input types
+      - CRITICAL: Follow steps LITERALLY — do not infer or improvise
+      - CRITICAL: Each gap must be traced back to a specific section for targeted re-extraction
+    </constraints>
+    <output>walkthrough_results: {followability_score, gaps_found, gaps_fixed, iterations_used}</output>
+  </step_3_5_1>
+</phase_3_5>
+
 <phase_4 name="明辨之 — Discern Clearly">
   <step_4_1>
     <name>Resume, Checkpoint & Error Handling</name>
@@ -259,10 +304,11 @@ input:
     <name>Quality Scoring (Tool Skill Delegated)</name>
     <action>
       1. For each accepted section: call tool skill score_quality operation with section content and context
-      2. Aggregate per-section scores into overall_quality_score (arithmetic mean)
-      3. Record `is_key_section` flag in manifest. When quality_label is 'low', prioritize re-extraction of sections where `is_key_section` is true. Use `improvement_hints[]` as re-extraction guidance.
-      4. Classify: ≥ 0.80 → "high"; 0.50–0.79 → "acceptable"; < 0.50 → "low"
-      4. IF quality_label is "low" → loop back to Phase 2 for re-extraction of lowest-scoring sections (max 1 quality loop)
+      2. Tool skill returns 5 dimensions: completeness, structure, clarity, followability, freshness
+      3. Aggregate per-section scores into overall_quality_score (arithmetic mean)
+      4. Record `is_key_section` flag in manifest. When quality_label is 'low', prioritize re-extraction of sections where `is_key_section` is true. Use `improvement_hints[]` as re-extraction guidance.
+      5. Classify: ≥ 0.80 → "high"; 0.50–0.79 → "acceptable"; < 0.50 → "low"
+      6. IF quality_label is "low" → loop back to Phase 2 for re-extraction of lowest-scoring sections (max 1 quality loop)
     </action>
     <constraints>
       - BLOCKING: Quality scoring MUST be delegated to tool skill — extractor does NOT self-score
@@ -361,11 +407,11 @@ REFERENCE: See `references/output-schemas.md` for full dynamic output schemas wi
 <definition_of_done>
   <checkpoint required="true">
     <name>Phases 1-4 Complete</name>
-    <verification>Input analyzed, content extracted, validation loop run, checkpoints saved</verification>
+    <verification>Input analyzed, content extracted, validation loop run, walkthrough tested (if applicable), checkpoints saved</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Phase 5 Complete</name>
-    <verification>Quality scores computed (4 dimensions), articles packaged in .intake/, extraction report generated</verification>
+    <verification>Quality scores computed (5 dimensions), articles packaged in .intake/, extraction report generated</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Phase 6 Complete</name>
@@ -391,12 +437,14 @@ REFERENCE: See `references/output-schemas.md` for full dynamic output schemas wi
 3. **Fail Fast:** Halt when tool skill not found or target not accessible
 4. **Synthesize, Don't Dump:** Extract and organize — never raw-copy files into content
 5. **Section-by-Section:** Follow collection template order; one content file per section
+6. **Walkthrough Test:** For running apps, follow the manual literally to find gaps before packaging
 
 ### ❌ Don't Do This
 1. **Inline Content Exchange:** Passing content directly in YAML instead of file paths
 2. **Raw File Dumps:** Copying file contents verbatim without synthesis
 3. **Checkpoint Inside Target:** Creating `.x-ipe-checkpoint/` inside target directory instead of CWD
 4. **Multi-Category Parallel:** Attempting multiple extraction categories in one session
+5. **Implicit Knowledge:** Assuming the reader knows to press Enter, click a specific button, etc. without documenting it
 
 ---
 

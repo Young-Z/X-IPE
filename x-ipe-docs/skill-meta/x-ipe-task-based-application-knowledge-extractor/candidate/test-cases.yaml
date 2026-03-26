@@ -1,0 +1,152 @@
+# Test Cases — x-ipe-task-based-application-knowledge-extractor v2.0.0
+# Generated: Round 2 Reflect + Tests
+# Skill: Task skill for extracting knowledge from applications and packaging
+#         into KB intake format. v2.0.0 adds Phase 3.5 walkthrough testing,
+#         interaction pattern detection, and action-level screenshots.
+
+test_cases:
+  - id: TC-E01
+    name: "Phase 3.5 exists in execution flow between Phase 3 and Phase 4"
+    type: must_pass
+    scenario: "Verify that Phase 3.5 (实践验证 — Validate by Practice) is present in the Execution Flow table and in the procedure, positioned after Phase 3 and before Phase 4"
+    input: "SKILL.md Execution Flow table and procedure XML"
+    expected_output: "Phase 3.5 row in table; phase_3_5 XML block between phase_3 and phase_4"
+    verification: "grep '3\\.5' SKILL.md → ≥ 2 (table + procedure)"
+    result: pass
+    evidence: "Found in Execution Flow table (line 119: '3.5 实践验证 | 3.5.1 | Walkthrough Testing') and in Phase Definitions table (line 135). Procedure block <phase_3_5> at line 252 is between </phase_3> at line 250 and <phase_4> at line 285."
+
+  - id: TC-E02
+    name: "Phase 3.5 is skipped for source_code_repo input type"
+    type: must_pass
+    scenario: "Verify that Phase 3.5 explicitly states it only applies to running_web_app/public_url and is skipped for source_code_repo, documentation_folder, single_file"
+    input: "SKILL.md Phase 3.5 step 3.5.1"
+    expected_output: "APPLICABILITY clause skipping source_code_repo/documentation_folder/single_file"
+    verification: "grep 'source_code_repo' in Phase 3.5 section shows SKIP instruction"
+    result: pass
+    evidence: "Line 257: 'For source_code_repo / documentation_folder / single_file → SKIP this phase (use tool skill test_walkthrough in offline mode instead)'. Also line 277 constraint: 'BLOCKING: Only runs for running_web_app / public_url input types'"
+
+  - id: TC-E03
+    name: "Phase 3.5 runs for running_web_app input type"
+    type: must_pass
+    scenario: "Verify that Phase 3.5 explicitly runs for running_web_app input type"
+    input: "SKILL.md Phase 3.5 step 3.5.1"
+    expected_output: "APPLICABILITY clause includes running_web_app"
+    verification: "grep 'running_web_app' in Phase 3.5 section → present"
+    result: pass
+    evidence: "Line 256: 'APPLICABILITY: Only for input_type running_web_app or public_url (Chrome DevTools available)'. Line 277: 'BLOCKING: Only runs for running_web_app / public_url input types'"
+
+  - id: TC-E04
+    name: "Step 2.1 includes interaction pattern detection for web apps"
+    type: must_pass
+    scenario: "Verify that Step 2.1 (Extract Source Content) includes interaction pattern detection listing FORM, MODAL, CLI_DISPATCH, NAVIGATION, TOGGLE"
+    input: "SKILL.md Phase 2 step 2.1"
+    expected_output: "Point 4 lists interaction patterns with CLI_DISPATCH documentation requirements"
+    verification: "grep 'Detect interaction patterns' in step 2.1 → present with all 5 pattern types"
+    result: pass
+    evidence: "Lines 212-215: 'Detect interaction patterns per element: FORM, MODAL, CLI_DISPATCH, NAVIGATION, TOGGLE. For CLI_DISPATCH: MUST document terminal target, Enter-to-execute requirement, expected output, and completion signal'"
+
+  - id: TC-E05
+    name: "CLI_DISPATCH pattern requires documenting 'press Enter'"
+    type: must_pass
+    scenario: "Verify that CLI_DISPATCH interaction pattern requires explicit documentation of Enter-to-execute requirement"
+    input: "SKILL.md Step 2.1 and Phase 3.5"
+    expected_output: "CLI_DISPATCH documentation includes Enter-to-execute mention"
+    verification: "grep 'Enter-to-execute\\|press Enter' SKILL.md → ≥ 1"
+    result: pass
+    evidence: "Found 3 references: Line 215 'Enter-to-execute requirement', extractor Phase 3.5 gap example 'press Enter', and anti-pattern line 447 'press Enter'"
+
+  - id: TC-E06
+    name: "Screenshot strategy is action-level for workflows"
+    type: should_pass
+    scenario: "Verify that Step 2.1 screenshot strategy prescribes action-level (before+after) screenshots for workflow sections, not just page-level"
+    input: "SKILL.md Step 2.1 point 5"
+    expected_output: "Section 5 screenshots at EACH STEP (before-action + after-action)"
+    verification: "grep 'EACH STEP' SKILL.md → ≥ 1"
+    result: pass
+    evidence: "Line 218: 'Section 5 (Workflows): screenshot at EACH STEP (before-action + after-action)'"
+
+  - id: TC-E07
+    name: "Quality scoring references 5 dimensions"
+    type: should_pass
+    scenario: "Verify that Step 5.1 (Quality Scoring) references 5 quality dimensions from the tool skill"
+    input: "SKILL.md Phase 5 step 5.1"
+    expected_output: "Tool skill returns 5 dimensions: completeness, structure, clarity, followability, freshness"
+    verification: "grep '5 dimensions' SKILL.md → ≥ 1"
+    result: pass
+    evidence: "Found 2 references: Line 307 'Tool skill returns 5 dimensions: completeness, structure, clarity, followability, freshness' and DoD line 414 'Quality scores computed (5 dimensions)'"
+
+  - id: TC-E08
+    name: "SKILL.md is under 500 lines"
+    type: must_pass
+    scenario: "Verify that the SKILL.md body stays under the 500-line limit"
+    input: "SKILL.md"
+    expected_output: "Line count < 500"
+    verification: "wc -l SKILL.md → < 500"
+    result: pass
+    evidence: "453 lines (under 500 limit)"
+
+  - id: TC-E09
+    name: "Version is 2.0.0"
+    type: must_pass
+    scenario: "Verify that the SKILL.md declares version 2.0.0"
+    input: "SKILL.md version declaration"
+    expected_output: "Version: 2.0.0"
+    verification: "grep 'Version.*2\\.0\\.0' SKILL.md → 1"
+    result: pass
+    evidence: "Line 16: '> **Version:** 2.0.0'"
+
+  - id: TC-E10
+    name: "Execution Flow table includes all phases including 3.5"
+    type: must_pass
+    scenario: "Verify that the Execution Flow table has rows for Phase 1 through 6 including Phase 3.5"
+    input: "SKILL.md Execution Flow table"
+    expected_output: "Table has phases: 1 (4 steps), 2 (1 step), 3 (1 step), 3.5 (1 step), 4 (1 step), 5 (2 steps), 6 (2 steps)"
+    verification: "Count rows in Execution Flow table → 12 rows covering phases 1-6 with 3.5"
+    result: pass
+    evidence: "Table at lines 111-124 has 12 data rows: 1.1-1.4 (Phase 1), 2.1 (Phase 2), 3.1 (Phase 3), 3.5.1 (Phase 3.5), 4.1 (Phase 4), 5.1-5.2 (Phase 5), 6.1-6.2 (Phase 6)"
+
+  - id: TC-E11
+    name: "Reference file execution-procedures.md has Phase 3.5"
+    type: must_pass
+    scenario: "Verify that references/execution-procedures.md includes detailed Phase 3.5 step"
+    input: "references/execution-procedures.md"
+    expected_output: "Phase 3.5 section with CONTEXT/DECISION/ACTION/VERIFY blocks"
+    verification: "grep 'Phase 3.5' references/execution-procedures.md → ≥ 1"
+    result: pass
+    evidence: "Line 171: '## Phase 3.5: 实践验证 — Validate by Practice', line 173: '### Step 3.5.1 — Walkthrough Testing' with full CONTEXT/DECISION/ACTION/VERIFY structure"
+
+  - id: TC-E12
+    name: "Reference file output-quality-heuristics.md has followability dimension"
+    type: must_pass
+    scenario: "Verify that references/output-quality-heuristics.md includes §1.4 Followability Dimension"
+    input: "references/output-quality-heuristics.md"
+    expected_output: "Section §1.4 Followability Dimension with weight 0.15"
+    verification: "grep 'Followability Dimension' references/output-quality-heuristics.md → ≥ 1"
+    result: pass
+    evidence: "Line 26: '### §1.4 Followability Dimension (Weight: 0.15)' with formula, fallback, key signals, and Phase 3.5 integration"
+
+  - id: TC-E13
+    name: "Reference file validation-loop-heuristics.md has walkthrough section"
+    type: should_pass
+    scenario: "Verify that references/validation-loop-heuristics.md includes Walkthrough Testing section for Phase 3.5"
+    input: "references/validation-loop-heuristics.md"
+    expected_output: "Walkthrough Testing section with gap classification and followability scoring"
+    verification: "grep 'Walkthrough Testing' references/validation-loop-heuristics.md → ≥ 1"
+    result: pass
+    evidence: "Line 206: '## Walkthrough Testing (Phase 3.5)' with applicability matrix, gap classification (MISSING_ACTION, MISSING_ELEMENT, etc.), followability score computation, feedback file format, and manifest updates"
+
+  - id: TC-E14
+    name: "Reference file extraction-engine-heuristics.md has interaction patterns"
+    type: should_pass
+    scenario: "Verify that references/extraction-engine-heuristics.md includes interaction pattern detection and CLI_DISPATCH documentation"
+    input: "references/extraction-engine-heuristics.md"
+    expected_output: "Interaction pattern classification and CLI_DISPATCH pattern section"
+    verification: "grep 'CLI_DISPATCH Pattern' references/extraction-engine-heuristics.md → ≥ 1"
+    result: pass
+    evidence: "Line 82: 'DETECT INTERACTION PATTERNS', line 94: '#### CLI_DISPATCH Pattern (CRITICAL)' with terminal target, Enter requirement, expected output, completion signal documentation"
+
+# Summary
+# must_pass:  10/10 passed (TC-E01 through TC-E05, TC-E08 through TC-E12)
+# should_pass: 4/4 passed (TC-E06, TC-E07, TC-E13, TC-E14)
+# Total: 14/14 passed
+# Verdict: ✅ PASS

@@ -52,7 +52,7 @@ IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "Code Implementation"
+  task_based_skill: "x-ipe-task-based-code-implementation"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode
@@ -64,7 +64,9 @@ input:
 
   # Task type attributes
   category: "feature-stage"
-  next_task_based_skill: "Feature Acceptance Test"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-feature-acceptance-test"
+      condition: "Verify implementation with acceptance tests"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   feature_phase: "Code Implementation"
@@ -75,6 +77,11 @@ input:
   # Git strategy (from .x-ipe.yaml, passed by workflow)
   git_strategy: "main-branch-only | dev-session-based"
   git_main_branch: "{auto-detected}"
+
+  # Context (from previous task or project)
+  specification_link: "x-ipe-docs/requirements/FEATURE-XXX/specification.md"
+  mockup_link: "{path | N/A}"       # Derived from specification's Linked Mockups section; N/A if outdated or missing
+  technical_design_link: "x-ipe-docs/requirements/FEATURE-XXX/technical-design.md"
 
   # Tech context (from Technical Design output)
   program_type: "frontend | backend | fullstack | cli | library | skills | mcp | ..."  # non-exhaustive
@@ -91,6 +98,15 @@ input:
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
   <field name="feature_id" source="from previous task (Technical Design) output or task board" />
   <field name="extra_context_reference" source="from workflow context or auto-detect from feature artifacts (x-ipe-docs/requirements/FEATURE-XXX/)" />
+  <field name="specification_link" source="IF workflow mode AND extra_context_reference.specification is a path → use it; ELSE → x-ipe-docs/requirements/{feature_id}/specification.md" />
+  <field name="technical_design_link" source="IF workflow mode AND extra_context_reference.tech-design is a path → use it; ELSE → x-ipe-docs/requirements/{feature_id}/technical-design.md" />
+  <field name="mockup_link">
+    <steps>
+      1. READ specification at specification_link, find "Linked Mockups" section
+      2. IF mockup found AND Linked Date >= latest spec/design update → set mockup_link = "{path}"
+      3. ELSE (no mockup, missing section, or Linked Date outdated) → set mockup_link = "N/A"
+    </steps>
+  </field>
   <field name="git_strategy" source="from .x-ipe.yaml" />
   <field name="git_main_branch" source="auto-detect via `git symbolic-ref refs/remotes/origin/HEAD`" />
   <field name="program_type" source="from Technical Design output" />
@@ -168,15 +184,12 @@ BLOCKING: Step 3.1 special-case delegations run BEFORE semantic routing.
     <step_1_2>
       <name>Learn Technical Design</name>
       <action>
-        0. Resolve extra_context_reference inputs (tech-design, specification):
-           workflow mode + file path → READ directly; "auto-detect" → discover; "N/A" → skip
-        1. READ technical_design_link; UNDERSTAND Part 1 (Summary) and Part 2 (Guide)
-        2. NOTE architecture references; CHECK Design Change Log for updates
-        3. CHECK specification.md Linked Mockups:
-           - "current" → READ mockup files, extract layout/components/styling for Phase 3
-           - "outdated"/absent → note and proceed
-        4. CHECK for skill files (.github/skills/) → FLAG for x-ipe-meta-skill-creator in Phase 3
-        5. CHECK for MCP server keywords → FLAG for mcp-builder in Phase 3
+        1. Resolve spec/design from Input Initialization (specification_link, technical_design_link)
+        2. READ technical_design_link; UNDERSTAND Part 1 (Summary) and Part 2 (Guide)
+        3. NOTE architecture references; CHECK Design Change Log for updates
+        4. IF mockup_link != "N/A": READ mockup files, extract layout/components/styling for Phase 3
+        5. CHECK for skill files (.github/skills/) → FLAG for x-ipe-meta-skill-creator in Phase 3
+        6. CHECK for MCP server keywords → FLAG for mcp-builder in Phase 3
       </action>
       <constraints>
         - BLOCKING: Do NOT code until design is understood; STOP and clarify if unclear
@@ -227,25 +240,55 @@ BLOCKING: Step 3.1 special-case delegations run BEFORE semantic routing.
       <name>Route and Invoke Tool Skills</name>
       <action>
         1. CHECK special-case delegations FIRST:
-           a. IF program_type == "skills": DELEGATE to x-ipe-meta-skill-creator (skip AAA; skill-creator has own testing); VERIFY DoD; JUMP to step_4_2
+           a. IF program_type == "skills": DELEGATE to x-ipe-meta-skill-creator; VERIFY DoD; JUMP to step_4_2
+              NOTE: Acceptance testing is NOT skipped — x-ipe-task-based-feature-acceptance-test will run structured-review tests on the deliverables
            b. IF MCP server detected: DELEGATE to mcp-builder; VERIFY quality checks; JUMP to step_4_2
-        2. SCAN .github/skills/x-ipe-tool-implementation-*/ for available tool skills
-        3. FOR EACH tech_stack entry: semantically match to discovered tool skill
-           - No match → assign x-ipe-tool-implementation-general
+
+        2. DISCOVER: SCAN .github/skills/x-ipe-tool-implementation-*/ for available tool skills
+
+        3. READ CONFIG: Read x-ipe-docs/config/tools.json → extract stages.implement.implementation section
+           - IF section missing OR empty (only _order key, no tool entries) → config_active = false
+           - ELSE (has tool entries beyond _order and _extra_instruction) → config_active = true
+
+        4. FILTER ENABLED TOOLS:
+           IF config_active == false:
+             → All discovered tools treated as ENABLED (backwards compatibility)
+           ELSE (config_active == true):
+             → FOR EACH discovered tool skill:
+               a. Look up key "x-ipe-tool-implementation-{name}" in config
+               b. IF key exists AND value is true → ENABLED
+               c. IF key exists AND value is false → DISABLED, log: "skipped x-ipe-tool-implementation-{name} (disabled)"
+               d. IF key does NOT exist (undeclared) → DISABLED (opt-in required), log: "skipped x-ipe-tool-implementation-{name} (undeclared, default disabled)"
+
+        5. FORCE-ENABLE GENERAL: x-ipe-tool-implementation-general is ALWAYS enabled
+           - IF general was disabled or undeclared → override to ENABLED
+           - Log warning: "x-ipe-tool-implementation-general cannot be disabled — safety net fallback"
+
+        6. LOAD _extra_instruction: IF stages.implement.implementation._extra_instruction exists → use as supplementary semantic routing context
+
+        7. SEMANTIC MATCH: FOR EACH tech_stack entry: semantically match to ENABLED tool skill only
+           - No match among enabled skills → assign x-ipe-tool-implementation-general
            - General insufficient → signal "new tool skill needed"
            dao-represent-human → log gap via DAO, continue; else → ask human
-        4. FOR EACH matched tool skill (sequentially, backend first):
+
+        8. INVOKE: FOR EACH matched tool skill (sequentially, backend first):
            a. FILTER AAA scenarios by layer tag
-           b. INVOKE with: aaa_scenarios, source_code_path, feature_context
+           b. INVOKE with: aaa_scenarios, source_code_path, feature_context, mockup_link (if frontend)
            c. RECEIVE: implementation_files, test_files, test_results, lint_status
-        5. IF current mockups AND frontend components: pass mockup constraints to frontend tool skill
-        6. COLLECT all tool skill outputs for validation
+
+        9. IF mockup_link != "N/A" AND frontend components:
+           PASS mockup_link in feature_context to frontend tool skill (e.g., x-ipe-tool-implementation-html5)
+           Tool skill uses mockup for visual fidelity: layout, components, spacing, color, states
+
+        10. COLLECT all tool skill outputs for validation
       </action>
       <constraints>
         - BLOCKING: Special-case check runs BEFORE semantic routing
         - CRITICAL: Tool skills invoked sequentially, NOT in parallel
+        - CRITICAL: Only ENABLED tools participate in semantic matching (step 7)
         - MANDATORY: Use standard tool skill I/O contract (see references/implementation-guidelines.md)
         - MANDATORY: All internal markdown links MUST use full project-root-relative paths
+        - MANDATORY: Log diagnostic messages for all skipped (disabled/undeclared) tools
       </constraints>
       <output>All tool skill outputs collected</output>
     </step_3_1>
@@ -353,7 +396,9 @@ See [references/implementation-guidelines.md](.github/skills/x-ipe-task-based-co
 task_completion_output:
   category: "feature-stage"
   status: completed | blocked
-  next_task_based_skill: "Feature Acceptance Test"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-feature-acceptance-test"
+      condition: "Verify implementation with acceptance tests"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
@@ -379,24 +424,16 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 ```xml
 <definition_of_done>
   <checkpoint required="true">
-    <name>Feature board queried for context</name>
-    <verification>Feature Data Model received with all links</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Technical design learned and understood</name>
-    <verification>Agent can describe implementation plan from design</verification>
+    <name>Context gathered (board queried + design learned)</name>
+    <verification>Feature Data Model received with all links; agent can describe implementation plan from design</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>AAA scenarios generated OR special-case delegation invoked</name>
-    <verification>Either AAA scenarios exist with coverage validated, or program_type triggered skill-creator/mcp-builder delegation</verification>
+    <verification>Either AAA scenarios exist with coverage validated, or program_type triggered skill-creator/mcp-builder delegation (acceptance testing still required via feature-acceptance-test skill)</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Tool skills invoked and results collected</name>
-    <verification>All matched tool skills returned implementation_files, test_files, test_results, lint_status</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>All Assert clauses pass</name>
-    <verification>Aggregated validation report shows all pass (or delegation DoD satisfied)</verification>
+    <name>Tool skills invoked and all assertions pass</name>
+    <verification>All matched tool skills returned implementation_files, test_files, test_results, lint_status; aggregated validation report shows all pass (or delegation DoD satisfied)</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Implementation matches technical design</name>
@@ -407,36 +444,20 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <verification>If feature has current mockups in specification, UI layout/components/styling match the mockup</verification>
   </checkpoint>
   <checkpoint required="if-applicable">
-    <name>Skill files created via skill creator</name>
-    <verification>If technical design includes .github/skills/ files, they were created by x-ipe-meta-skill-creator (not directly)</verification>
-  </checkpoint>
-  <checkpoint required="if-applicable">
-    <name>MCP server built via mcp-builder</name>
-    <verification>If specification or technical design requires MCP server, it was built using mcp-builder skill (not directly)</verification>
+    <name>Special-case delegations used correctly (skill-creator / mcp-builder)</name>
+    <verification>If design includes .github/skills/ files, created by x-ipe-meta-skill-creator; if it requires MCP server, built using mcp-builder skill (not directly)</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>No extra features added (YAGNI)</name>
-    <verification>Review code for functionality not specified in design</verification>
+    <name>Code follows YAGNI and KISS principles</name>
+    <verification>No functionality beyond design spec; no unnecessary abstractions or over-engineering</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Code is simple (KISS)</name>
-    <verification>No unnecessary abstractions or over-engineering</verification>
+    <name>Linter passes and test coverage ≥80% for new code</name>
+    <verification>Run ruff check / eslint with zero errors; run pytest --cov=src tests/ and check coverage report</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Linter passes</name>
-    <verification>Run ruff check / eslint with zero errors</verification>
-  </checkpoint>
-  <checkpoint required="recommended">
-    <name>Test coverage at least 80% for new code</name>
-    <verification>Run pytest --cov=src tests/; check coverage report</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>All public functions have @x_ipe_tracing decorators</name>
-    <verification>Grep for public functions without decorators in modified files (skip if only skill files)</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Sensitive parameters have redact=[] specified</name>
-    <verification>Grep for password/token/secret/key params; verify redact is set (skip if only skill files)</verification>
+    <name>Tracing decorators and redact annotations applied</name>
+    <verification>Public functions have @x_ipe_tracing decorators; password/token/secret/key params have redact=[] set (skip if only skill files)</verification>
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Workflow Action Updated</name>
@@ -466,7 +487,6 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Add "nice to have" features | YAGNI violation | Only implement what's in design |
 | Complex code for coverage | Maintenance nightmare | Keep simple, accept 80% |
 | Ignore mockups | UI drifts from design | Use current mockups as visual spec |
-| Create skills/MCP directly | Won't follow standards | Delegate to skill-creator/mcp-builder |
 | Copy-paste code | DRY violation | Extract reusable functions |
 
 ---

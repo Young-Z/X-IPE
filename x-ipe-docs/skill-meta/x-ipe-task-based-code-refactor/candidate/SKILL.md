@@ -38,7 +38,7 @@ IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "Code Refactor"
+  task_based_skill: "x-ipe-task-based-code-refactor"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"
@@ -50,7 +50,11 @@ input:
 
   # Task type attributes
   category: "feature-stage | standalone"
-  next_task_based_skill: "Feature Closing"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-feature-acceptance-test"
+      condition: "Re-verify after refactoring"
+    - skill: "x-ipe-task-based-feature-closing"
+      condition: "Close feature if refactoring is the final step"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
 
@@ -137,9 +141,9 @@ input:
 
 | Phase | Steps | Action | Gate |
 |-------|-------|--------|------|
-| 1. 博学之 — Study Broadly | 1.1 Analyze Scope & Quality | Invoke `x-ipe-tool-refactoring-analysis` | Analysis complete, human approves |
+| 1. 博学之 — Study Broadly | 1.1 Analyze Scope & Quality | Invoke `x-ipe-tool-refactoring-analysis`, self-validate findings | Analysis complete |
 | 2. 审问之 — Inquire Thoroughly | 2.1 Sync Docs & Tests | Invoke `x-ipe-tool-code-quality-sync` | All aligned, coverage ≥ 80% |
-| 3. 慎思之 — Think Carefully | 3.1 Generate Refactoring Plan | Design target structure, propose plan | Human approves plan |
+| 3. 慎思之 — Think Carefully | 3.1 Generate Refactoring Plan | Design target structure, AI self-validates plan | Plan validated |
 | 4. 明辨之 — Discern Clearly | 4.1 Execute Refactoring | Apply changes incrementally with tests | All tests pass |
 | 5. 笃行之 — Practice Earnestly | 5.1 Validate & Complete | Verify improvement, update refs, apply tracing | DoD verified |
 | 继续执行 | 6.1 Decide Next Action | DAO-assisted next task decision | Next action decided |
@@ -168,22 +172,27 @@ BLOCKING: Phase 4 halts if any test fails (must fix or revert).
            - quality_baseline_path: "x-ipe-docs/planning/project-quality-evaluation.md"
         2. RECEIVE output: refactoring_scope (expanded), code_quality_evaluated,
            refactoring_suggestion, refactoring_principle, report_path
-        3. PRESENT analysis summary to human:
-           - Overall quality score
-           - Gaps per dimension
-           - Suggested refactoring goals and principles
-        4. Present analysis findings and wait for confirmation that issues are correctly identified
-
-          Response source (based on interaction_mode):
-          IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-            → Resolve concerns via x-ipe-dao-end-user-representative, proceed automatically
-          ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
-            → Ask human to confirm analysis findings
+        3. AI self-critique — validate analysis against objective criteria:
+           a. Every item in refactoring_scope maps to a measurable quality gap
+           b. No suggestions contradict each other (e.g., "extract class" + "inline class" on same target)
+           c. Suggestions stay within the requested scope — no scope creep
+           d. Quality scores are consistent (e.g., high complexity score but low smell count = investigate)
+        4. Collect unresolved_questions[] — ONLY genuine ambiguities:
+           - Scope conflicts: "You asked to refactor module X, but the analysis shows module Y is the root cause — include Y?"
+           - Priority conflicts: "Both DRY and performance improvements are needed but they conflict — which to prioritize?"
+        5. IF unresolved_questions is EMPTY → analysis validated, proceed
+        6. IF unresolved_questions is NON-EMPTY:
+           IF process_preference.interaction_mode == "dao-represent-human-to-interact":
+             → Invoke x-ipe-dao-end-user-representative with specific questions list
+           ELSE:
+             → Present ONLY the specific questions to human
+           → Incorporate answers, update analysis
       </action>
       <constraints>
-        - BLOCKING: Do not proceed to Step 2 without approved analysis
+        - MUST NOT ask broad "are these findings correct?" — only ask specific, bounded questions
+        - IF self-critique passes with zero questions → skip human/DAO entirely
       </constraints>
-      <output>Approved analysis: refactoring_scope, code_quality_evaluated, suggestions, principles</output>
+      <output>Validated analysis: refactoring_scope, code_quality_evaluated, suggestions, principles</output>
     </step_1_1>
   </phase_1>
 
@@ -220,20 +229,28 @@ BLOCKING: Phase 4 halts if any test fails (must fix or revert).
            - KISS: Simplifications
            - YAGNI: Remove unused code
         3. CREATE refactoring_plan with phases ordered by goal priority
-        4. VALIDATE plan against constraints from refactoring_principle
-        5. Present refactoring plan and wait for confirmation that plan addresses the right issues
-
-          Response source (based on interaction_mode):
-          IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-            → Resolve via x-ipe-dao-end-user-representative
-          ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
-            → Ask human to confirm plan
+        4. AI self-critique — validate plan against objective criteria:
+           a. Every identified issue from Step 1 has a corresponding plan item
+           b. No plan item exceeds the approved refactoring_scope
+           c. Plan respects refactoring_principle constraints (no new dependencies, etc.)
+           d. Phases are ordered so earlier phases don't break later ones
+           e. Each phase is independently testable — can verify before moving on
+        5. Collect unresolved_questions[] — ONLY genuine trade-offs:
+           - "Extracting this module improves DRY but adds a new dependency — acceptable?"
+           - "Two valid refactoring orders exist: A→B is safer but slower, B→A is faster but riskier"
+        6. IF unresolved_questions is EMPTY → plan validated, proceed
+        7. IF unresolved_questions is NON-EMPTY:
+           IF process_preference.interaction_mode == "dao-represent-human-to-interact":
+             → Invoke x-ipe-dao-end-user-representative with specific trade-off questions
+           ELSE:
+             → Present ONLY the specific trade-offs to human
+           → Incorporate answers, update plan
       </action>
       <constraints>
-        - BLOCKING (manual/stop_for_question): Do not proceed to Step 4 without human confirming plan addresses issues
-        - BLOCKING (auto): Do not proceed to Step 4 without DAO approval from x-ipe-dao-end-user-representative
+        - MUST NOT ask broad "does this plan look right?" — only ask specific trade-off questions
+        - IF self-critique passes with zero questions → skip human/DAO entirely
       </constraints>
-      <output>Approved refactoring_plan with phases and principle mappings</output>
+      <output>Validated refactoring_plan with phases and principle mappings</output>
     </step_3_1>
   </phase_3>
 
@@ -241,22 +258,30 @@ BLOCKING: Phase 4 halts if any test fails (must fix or revert).
     <step_4_1>
       <name>Execute Refactoring</name>
       <action>
+        0. TOOL SKILL ROUTING (config-filtered):
+           a. DISCOVER: Scan .github/skills/x-ipe-tool-implementation-*/
+           b. READ CONFIG: Read x-ipe-docs/config/tools.json → stages.validation.code_refactor
+              - IF section missing/empty → config_active = false (all tools enabled)
+              - ELSE → config_active = true (opt-in); force-enable general
+           c. FILTER: IF config_active → only ENABLED tools participate
+           d. SEMANTIC MATCH: Match tech_stack to enabled tool skill
+           e. IF no match → fall back to inline refactoring (current behavior)
         FOR EACH phase in refactoring_plan:
           1. CREATE checkpoint: git commit -m "checkpoint: before phase {N}"
-          2. Apply changes following principle_applied, update imports
-          3. RUN tests after each change (based on program_type/tech_stack):
-             - Backend/CLI: pytest (or equivalent)
-             - Frontend: Vitest/Jest for JS logic tests
-             - Fullstack: Run ALL test suites
-          4. IF tests fail:
+          2. GENERATE per-phase AAA scenarios describing target state
+          3. INVOKE matched tool skill with operation: "refactor", AAA scenarios, source/test paths
+             - Tool skill handles: code writing, test running, linting
+             - feature_context optional; synthetic fallback: REFACTOR-{task_id}
+          4. IF tool skill reports test failure:
              - Fix if import/reference issue
-             - REVERT if behavior changed
+             - REVERT phase if behavior changed (orchestrator manages rollback)
              - Update test if change is legitimate
           5. COMMIT: git commit -m "refactor({scope}): {desc} [principle: {p}]"
       </action>
       <constraints>
         - BLOCKING: Must fix or revert if any test fails before continuing
         - CRITICAL: Structure changes only — preserve existing behavior
+        - CRITICAL: Orchestrator manages checkpoints/commits — tool skills do NOT manage git
       </constraints>
       <output>Refactored code with incremental commits per phase</output>
     </step_4_1>
@@ -351,7 +376,11 @@ BLOCKING: Phase 4 halts if any test fails (must fix or revert).
 task_completion_output:
   category: "feature-stage | standalone"
   status: completed | blocked
-  next_task_based_skill: "Feature Closing"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-feature-acceptance-test"
+      condition: "Re-verify after refactoring"
+    - skill: "x-ipe-task-based-feature-closing"
+      condition: "Close feature if refactoring is the final step"
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
@@ -361,6 +390,9 @@ task_completion_output:
     - "x-ipe-docs/refactoring/analysis-{context}.md"
     - "x-ipe-docs/refactoring/validation-{context}.md"
     - "{paths to refactored files}"
+
+  # Feature context pass-through
+  feature_id: "{from input refactoring_scope.feature_id or N/A}"
 
   refactoring_summary:
     files_modified: "<count>"
@@ -441,51 +473,18 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 
 ## Patterns & Anti-Patterns
 
-### Pattern: Full Refactoring Flow
-
-**When:** User says "refactor this code"
-**Then:**
-```
-1. Step 1: Invoke analysis tool → get scope, quality, suggestions
-2. Step 2: Invoke sync tool → align docs, reach 80% coverage
-3. Step 3: Generate plan from suggestions → approval (human or DAO per mode)
-4. Step 4: Execute incrementally with tests
-5. Step 5: Validate, update refs, commit
-```
-
-### Pattern: Rollback on Failure
-
-**When:** Tests fail after a change
-**Then:**
-```
-1. STOP current work
-2. Analyze failure cause
-3. REVERT if behavior changed
-4. Fix if import/reference issue
-5. Update test if change is legitimate
-```
-
-### Pattern: Tracing Preservation
-
-**When:** Moving, splitting, or renaming functions
-**Then:**
-```
-1. Keep @x_ipe_tracing decorators on moved functions
-2. Preserve redact=[] parameters
-3. Add decorators to new public functions in split modules
-4. Apply x-ipe-tool-tracing-instrumentation for new code
-```
-
-### Anti-Patterns
+| Pattern | When | Then |
+|---------|------|------|
+| Full Flow | "refactor this code" | Analysis → sync → plan → execute incrementally → validate → commit |
+| Rollback | Tests fail after change | STOP, analyze, REVERT if behavior changed, fix if import issue |
+| Tracing | Moving/renaming functions | Keep @x_ipe_tracing decorators, preserve redact=[], add to new public functions |
 
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
-| Big bang refactor | High risk, hard to debug failures | Small incremental changes |
-| Skip analysis step | Missing scope, quality gaps | Always run analysis tool first |
-| Skip doc sync | Refactoring without baseline | Always run sync tool first |
+| Big bang refactor | High risk, hard to debug | Small incremental changes |
+| Skip analysis/sync | Missing baseline | Always run analysis + sync first |
 | Skip test runs | Silent regressions | Test after EVERY change |
-| Change behavior | Refactoring must preserve semantics | Structure only, same behavior |
-
+| Change behavior | Refactoring preserves semantics | Structure only, same behavior |
 ---
 
 ## References

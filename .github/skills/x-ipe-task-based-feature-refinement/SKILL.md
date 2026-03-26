@@ -71,7 +71,7 @@ input:
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
   <field name="feature_id" source="previous task (Feature Breakdown) output OR task board OR human input">
     <steps>
-      1. IF previous task was "Feature Breakdown" → extract from task_output_links.feature_ids
+      1. IF previous task was "Feature Breakdown" → use previous task output's feature_ids field (iterate: one refinement task per feature_id)
       2. ELIF task board has feature_id in task data → use it
       3. ELSE → IF interaction_mode == "dao-represent-human-to-interact": derive from workflow context or x-ipe-dao-end-user-representative; ELSE: ask human for feature_id
     </steps>
@@ -88,10 +88,11 @@ input:
   </field>
   <field name="mockup_list" source="see Mockup List Resolution section below">
     <steps>
-      1. IF previous task was "Idea Mockup" → extract from task_output_links
-      2. ELIF human provides explicit path → use human-provided value
-      3. ELIF idea-summary-vN.md exists → extract from "Mockups &amp; Prototypes" section
-      4. ELSE → set to "N/A"
+      1. IF previous task was "Idea Mockup" → use previous task output's mockup_list field
+      2. ELIF previous task was "Feature Breakdown" → inherit from its mockup_list output (or derive from linked_mockups)
+      3. ELIF human provides explicit path → use human-provided value
+      4. ELIF idea-summary-vN.md exists → extract from "Mockups &amp; Prototypes" section
+      5. ELSE → set to "N/A"
     </steps>
   </field>
 </input_init>
@@ -340,9 +341,8 @@ BLOCKING (auto): Proceed automatically after DoD verification.
         1. IF workflow-mode: call update_workflow_action with:
            - workflow_name, action, status: "done", feature_id
            - deliverables: {"specification": "{path}", "feature-docs-folder": "{path}"}
-        2. Verify all DoD checkpoints
-        3. Verify all DoD checkpoints are met
-        4. IF manual/stop_for_question: present specification, ask if anything is missing or incorrect
+        2. Verify all DoD checkpoints are met
+        3. IF manual/stop_for_question: present specification, ask if anything is missing or incorrect
       </action>
       <output>Task completion output with specification path, workflow_action_updated</output>
     </step_5_2>
@@ -417,7 +417,7 @@ task_completion_output:
   mockup_list: "{updated with copied paths if mockups were copied}"
   linked_mockups:  # if applicable
     - mockup_name: "Description of mockup function"
-      mockup_path: "x-ipe-docs/requirements/FEATURE-XXX/mockups/mockup-name.html"
+      mockup_link: "x-ipe-docs/requirements/FEATURE-XXX/mockups/mockup-name.html"
 ```
 
 ---

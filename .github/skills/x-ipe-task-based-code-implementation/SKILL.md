@@ -487,7 +487,6 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Add "nice to have" features | YAGNI violation | Only implement what's in design |
 | Complex code for coverage | Maintenance nightmare | Keep simple, accept 80% |
 | Ignore mockups | UI drifts from design | Use current mockups as visual spec |
-| Create skills/MCP directly | Won't follow standards | Delegate to skill-creator/mcp-builder |
 | Copy-paste code | DRY violation | Extract reusable functions |
 
 ---
