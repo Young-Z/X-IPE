@@ -617,6 +617,14 @@
 .deliverable-preview .preview-header { padding: 14px 20px; font-size: 14px; font-weight: 600; color: #1e293b; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; }
 .deliverable-preview .preview-close { cursor: pointer; color: #94a3b8; font-size: 18px; line-height: 1; padding: 4px; border-radius: 4px; transition: all 0.15s; }
 .deliverable-preview .preview-close:hover { color: #1e293b; background: #f1f5f9; }
+/* CR-002: Preview toolbar styles */
+.deliverable-preview .preview-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.deliverable-preview .preview-toolbar-group { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.deliverable-preview .preview-download-btn { cursor: pointer; color: #94a3b8; font-size: 16px; line-height: 1; padding: 4px; border-radius: 4px; transition: all 0.15s; text-decoration: none; display: inline-flex; align-items: center; }
+.deliverable-preview .preview-download-btn:hover { color: #3b82f6; background: #eff6ff; }
+.deliverable-preview .preview-toggle-btn { cursor: pointer; color: #94a3b8; font-size: 14px; line-height: 1; padding: 4px 6px; border-radius: 4px; transition: all 0.15s; user-select: none; }
+.deliverable-preview .preview-toggle-btn:hover { color: #1e293b; background: #f1f5f9; }
+.deliverable-preview .preview-raw-content { white-space: pre-wrap; word-wrap: break-word; font-size: 13px; background: #f8fafc; padding: 16px; border-radius: 6px; border: 1px solid #e2e8f0; font-family: 'SF Mono', 'Fira Code', monospace; line-height: 1.6; color: #334155; margin: 0; }
 .deliverable-preview .preview-content { padding: 20px; overflow-y: auto; flex: 1; font-size: 14px; color: #334155; line-height: 1.7; }
 .deliverable-preview .preview-content pre { white-space: pre-wrap; word-wrap: break-word; font-size: 13px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; }
 .deliverable-preview .preview-content h1, .deliverable-preview .preview-content h2, .deliverable-preview .preview-content h3 { color: #0f172a; margin-top: 1em; }

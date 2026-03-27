@@ -103,3 +103,71 @@ npm test -- tests/frontend-js/deliverable-viewer.test.js          # 50 passed (4
 
 - **Frontend:** 750/750 passed (32 test files)
 - **Backend (related):** 172/173 passed (1 pre-existing failure unrelated to CR-001)
+
+---
+
+## CR-002: Preview Header Toolbar — Acceptance Test Results
+
+**Tested by:** Quill ✒️ (TASK-1007)
+**Date:** 2026-03-27
+**Method:** Vitest unit/integration tests (JSDOM)
+
+### Test Results Summary
+
+| # | TC ID | AC | Test Case | Type | Result |
+|---|-------|----|-----------|------|--------|
+| 1 | TC-001 | 06a | Header toolbar layout for text-renderable file | unit | ✅ PASS |
+| 2 | TC-002 | 06b | Header hides toggle for non-text file | unit | ✅ PASS |
+| 3 | TC-003 | 06c | Download link has href with download=true | unit | ✅ PASS |
+| 4 | TC-004 | 06f | Smart default raw for /src/ path | unit | ✅ PASS |
+| 5 | TC-005 | 06g | Smart default auto for non-src path | unit | ✅ PASS |
+| 6 | TC-006 | 06j | Non-text under /src/ hides toggle | unit | ✅ PASS |
+| 7 | TC-007 | 06a,b | isTextRenderable classifications (6 sub-tests) | unit | ✅ PASS |
+| 8 | TC-008 | 06f,g | renderMode constructor option (2 sub-tests) | unit | ✅ PASS |
+| 9 | TC-009 | 06d,e,h | setRenderMode re-renders cached content (4 sub-tests) | unit | ✅ PASS |
+| 10 | TC-010 | 06i | destroy clears cache | unit | ✅ PASS |
+| 11 | TC-011 | 06d | Toggle switches preview → raw (end-to-end) | integration | ✅ PASS |
+| 12 | TC-012 | 06h | Toggle does not trigger new fetch | integration | ✅ PASS |
+| 13 | TC-013 | 06i | File switch resets to smart default | integration | ✅ PASS |
+
+### Metrics
+
+| Metric | Value |
+|--------|-------|
+| Total ACs | 10 (AC-038-C.06a–06j) |
+| Total TCs | 13 |
+| Passed | 13 |
+| Failed | 0 |
+| Blocked | 0 |
+| Pass Rate | **100%** |
+
+### AC Coverage Matrix
+
+| AC ID | Criterion | Test Cases | Status |
+|-------|-----------|-----------|--------|
+| AC-038-C.06a | Header toolbar for text-renderable | TC-001, TC-007 | ✅ |
+| AC-038-C.06b | Header toolbar for non-text | TC-002, TC-007 | ✅ |
+| AC-038-C.06c | Download icon triggers download | TC-003 | ✅ |
+| AC-038-C.06d | Toggle preview → raw | TC-009, TC-011 | ✅ |
+| AC-038-C.06e | Toggle raw → preview | TC-009 | ✅ |
+| AC-038-C.06f | Smart default raw for /src/ | TC-004, TC-008 | ✅ |
+| AC-038-C.06g | Smart default auto for non-src | TC-005, TC-008 | ✅ |
+| AC-038-C.06h | Toggle re-renders without API call | TC-009, TC-012 | ✅ |
+| AC-038-C.06i | File switch resets toggle | TC-010, TC-013 | ✅ |
+| AC-038-C.06j | Non-text under /src/ hides toggle | TC-006 | ✅ |
+
+### Backend Verification
+
+`?download=true` bypass added at [ideas_routes.py:717-718](src/x_ipe/routes/ideas_routes.py). Returns `send_file(target, as_attachment=True)` before conversion logic. Verified via code inspection.
+
+### Execution Commands
+
+```bash
+npm test -- tests/frontend-js/file-preview-renderer-cr008.test.js  # 53 passed (15 CR-002)
+npm test -- tests/frontend-js/deliverable-viewer.test.js           # 59 passed (9 CR-002)
+```
+
+### Full Suite Regression
+
+- **Frontend:** 915/915 passed (41 test files)
+- **Pre-existing:** 2 unhandled errors in kb-intake-049f.test.js (unrelated to CR-002)

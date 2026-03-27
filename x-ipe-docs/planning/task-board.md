@@ -5,6 +5,13 @@
 ## Active Tasks
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
+| TASK-1008 | Feature Closing | Close CR-002 for FEATURE-038-C: Verify ACs, code-to-docs review, refactoring analysis, commit and push to main. | Quill ✒️ | 🔄 in_progress | 03-27-2026 | — | — |
+| TASK-1007 | Acceptance Test | Execute acceptance tests for CR-002 FEATURE-038-C: Validate 10 ACs (06a-06j) covering toolbar header, download, toggle, smart defaults, state reset. | Quill ✒️ | ✅ done | 03-27-2026 | [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-038/FEATURE-038-C/acceptance-test-cases.md) | x-ipe-task-based-feature-closing |
+| TASK-1006 | Code Implementation | Implement CR-002 for FEATURE-038-C: FilePreviewRenderer renderMode + cache, DeliverableViewer toolbar header, smart default, download bypass, CSS, tests. | Quill ✒️ | ✅ done | 03-26-2026 | [file-preview-renderer.js](src/x_ipe/static/js/core/file-preview-renderer.js), [deliverable-viewer.js](src/x_ipe/static/js/features/deliverable-viewer.js), [workflow.css](src/x_ipe/static/css/workflow.css), [ideas_routes.py](src/x_ipe/routes/ideas_routes.py) | x-ipe-task-based-feature-acceptance-test |
+| TASK-1005 | Technical Design | Design CR-002 for FEATURE-038-C: Extend FilePreviewRenderer with renderMode + cached re-render, update DeliverableViewer.showPreview() header with download/toggle/toolbar, add smart default logic, CSS for toolbar icons. | Quill ✒️ | ✅ done | 03-26-2026 | [technical-design.md v1.2](x-ipe-docs/requirements/EPIC-038/FEATURE-038-C/technical-design.md) | x-ipe-task-based-code-implementation |
+| TASK-1004 | Feature Refinement | Refine FEATURE-038-C specification for CR-002: Detail ACs, UI/UX requirements, edge cases for download icon, preview/raw toggle, and smart default mode in deliverable preview modal header. | Quill ✒️ | ✅ done | 03-26-2026 | [specification.md v1.3](../../x-ipe-docs/requirements/EPIC-038/FEATURE-038-C/specification.md) | x-ipe-task-based-technical-design |
+| TASK-1003 | Change Request | CR-002 for FEATURE-038-C: Add download icon, preview/raw toggle, and smart default mode (raw for src/ files) to deliverable preview modal header. Source: Feedback-20260326-212334. | Quill ✒️ | ✅ done | 03-26-2026 | [CR-002.md](../../x-ipe-docs/requirements/EPIC-038/FEATURE-038-C/CR-002.md), [specification.md v1.2](../../x-ipe-docs/requirements/EPIC-038/FEATURE-038-C/specification.md) | x-ipe-task-based-feature-refinement |
+| TASK-1002 | Skill Validation | Phase 1+2: Validate and fix feedback-stage skills (human-playground, change-request, bug-fix). Inner issues + inter-skill I/O chain. | Frost ❄️ | ✅ done | 03-26-2026 | [change-request](../../.github/skills/x-ipe-task-based-change-request/SKILL.md), [bug-fix](../../.github/skills/x-ipe-task-based-bug-fix/SKILL.md) | — |
 | TASK-1001 | Skill Update | Update knowledge extraction + user manual skills based on hands-on testing feedback: (1) Add functional validation phase (walkthrough testing), (2) Update acceptance criteria to be task-oriented not just structural, (3) Add interaction pattern detection, (4) Add "Followability" quality dimension, (5) Require action-level screenshots, (6) Add test_walkthrough operation. Covers both x-ipe-task-based-application-knowledge-extractor and x-ipe-tool-knowledge-extraction-user-manual. | Nova ✨ | ✅ done | 03-25-2026 | [extractor v2.0](../../.github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md), [tool v2.0](../../.github/skills/x-ipe-tool-knowledge-extraction-user-manual/SKILL.md) | — |
 | TASK-1000 | Skill Validation | Phase 1+2: Validate and fix feature-stage skills (feature-refinement, technical-design, code-implementation, feature-acceptance-test, code-refactor, feature-closing). Inner issues + inter-skill I/O chain. | Cipher 🔑 | ✅ done | 03-25-2026 | [refinement](../../.github/skills/x-ipe-task-based-feature-refinement/SKILL.md), [design](../../.github/skills/x-ipe-task-based-technical-design/SKILL.md), [impl](../../.github/skills/x-ipe-task-based-code-implementation/SKILL.md), [test](../../.github/skills/x-ipe-task-based-feature-acceptance-test/SKILL.md), [refactor](../../.github/skills/x-ipe-task-based-code-refactor/SKILL.md), [closing](../../.github/skills/x-ipe-task-based-feature-closing/SKILL.md) | — |
 | TASK-999 | Knowledge Extraction | Extract user manual knowledge from X-IPE workflow mode (running web app at http://127.0.0.1:5858/). Study how to use workflow mode to create applications and generate user manual. | Zephyr 🌬️ | ✅ done | 03-25-2026 | [user-manual](../../x-ipe-docs/knowledge-base/.intake/EXTRACT-999/user-manual.md) | x-ipe-tool-kb-librarian |
@@ -258,10 +265,10 @@
 
 ## Quick Stats
 
-- **Total Active:** 18
+- **Total Active:** 19
 - **In Progress:** 0
 - **Pending:** 0
-- **Completed (archived):** 888
+- **Completed (archived):** 889
 - **Deferred:** 0
 - **Reverted:** 8
 - **Pending Review:** 0

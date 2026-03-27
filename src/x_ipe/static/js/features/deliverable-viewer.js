@@ -152,6 +152,7 @@ class DeliverableViewer {
     /**
      * Show inline preview for a file.
      * CR-008: Delegates rendering to shared FilePreviewRenderer.
+     * CR-002: Enhanced header with download, toggle, and smart defaults.
      */
     async showPreview(filePath) {
         // Security: reject path traversal
@@ -183,34 +184,92 @@ class DeliverableViewer {
         const preview = document.createElement('div');
         preview.className = 'deliverable-preview';
 
-        const header = document.createElement('div');
-        header.className = 'preview-header';
-        const titleSpan = document.createElement('span');
-        titleSpan.textContent = filePath.split('/').pop();
-        header.appendChild(titleSpan);
-        const closeBtn = document.createElement('span');
-        closeBtn.className = 'preview-close';
-        closeBtn.textContent = '✕';
-        closeBtn.onclick = close;
-        header.appendChild(closeBtn);
-        preview.appendChild(header);
-
         const content = document.createElement('div');
         content.className = 'preview-content';
-        preview.appendChild(content);
 
-        backdrop.appendChild(preview);
-        document.body.appendChild(backdrop);
-        // Trigger animation
-        requestAnimationFrame(() => backdrop.classList.add('active'));
-        this._previewContainer = preview;
+        // CR-002: Determine smart default render mode
+        const smartDefault = this._getSmartDefault(filePath);
+        const isTextRenderable = FilePreviewRenderer.isTextRenderable(filePath);
 
         // CR-008: Use shared FilePreviewRenderer
         this._filePreviewRenderer = new FilePreviewRenderer({
             apiEndpoint: '/api/ideas/file?path={path}',
-            endpointStyle: 'query'
+            endpointStyle: 'query',
+            renderMode: isTextRenderable ? smartDefault : 'auto'
         });
+
+        // CR-002: Build enhanced header with toolbar
+        const header = this._buildPreviewHeader(filePath, content, close);
+        preview.appendChild(header);
+        preview.appendChild(content);
+
+        backdrop.appendChild(preview);
+        document.body.appendChild(backdrop);
+        requestAnimationFrame(() => backdrop.classList.add('active'));
+        this._previewContainer = preview;
+
         await this._filePreviewRenderer.renderPreview(filePath, content);
+    }
+
+    /**
+     * CR-002: Build preview header with download, toggle, and close buttons.
+     */
+    _buildPreviewHeader(filePath, contentEl, closeFn) {
+        const header = document.createElement('div');
+        header.className = 'preview-header';
+
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'preview-title';
+        titleSpan.textContent = filePath.split('/').pop();
+        header.appendChild(titleSpan);
+
+        const toolbar = document.createElement('span');
+        toolbar.className = 'preview-toolbar-group';
+
+        // Download button
+        const downloadBtn = document.createElement('a');
+        downloadBtn.className = 'preview-download-btn';
+        downloadBtn.title = 'Download';
+        const downloadUrl = `/api/ideas/file?path=${encodeURIComponent(filePath)}&download=true`;
+        downloadBtn.href = downloadUrl;
+        downloadBtn.download = filePath.split('/').pop();
+        downloadBtn.innerHTML = '⬇';
+        toolbar.appendChild(downloadBtn);
+
+        // Toggle button (only for text-renderable files)
+        const isTextRenderable = FilePreviewRenderer.isTextRenderable(filePath);
+        if (isTextRenderable) {
+            const toggleBtn = document.createElement('span');
+            toggleBtn.className = 'preview-toggle-btn';
+            toggleBtn.title = this._filePreviewRenderer.getRenderMode() === 'raw' ? 'Preview' : 'Raw';
+            toggleBtn.innerHTML = this._filePreviewRenderer.getRenderMode() === 'raw' ? '👁' : '&lt;/&gt;';
+            toggleBtn.onclick = () => {
+                const current = this._filePreviewRenderer.getRenderMode();
+                const next = current === 'raw' ? 'auto' : 'raw';
+                this._filePreviewRenderer.setRenderMode(next, contentEl);
+                toggleBtn.innerHTML = next === 'raw' ? '👁' : '&lt;/&gt;';
+                toggleBtn.title = next === 'raw' ? 'Preview' : 'Raw';
+            };
+            toolbar.appendChild(toggleBtn);
+        }
+
+        // Close button
+        const closeBtn = document.createElement('span');
+        closeBtn.className = 'preview-close';
+        closeBtn.textContent = '✕';
+        closeBtn.onclick = closeFn;
+        toolbar.appendChild(closeBtn);
+
+        header.appendChild(toolbar);
+        return header;
+    }
+
+    /**
+     * CR-002: Determine smart default render mode based on file path.
+     * Files under a /src/ path segment default to 'raw', others to 'auto'.
+     */
+    _getSmartDefault(filePath) {
+        return /\/src\//.test(filePath) ? 'raw' : 'auto';
     }
 
     _escapeHtml(text) {

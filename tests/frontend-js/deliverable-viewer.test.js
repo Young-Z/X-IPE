@@ -702,4 +702,179 @@ describe('CR-001: Convertible Binary Preview (.docx / .msg)', () => {
     const sandbox = iframe.getAttribute('sandbox');
     expect(sandbox).not.toContain('allow-scripts');
   });
+
+  // CR-002: Preview header toolbar, download, toggle, smart defaults
+  describe('CR-002: Preview header toolbar', () => {
+    let DV;
+    beforeEach(() => {
+      DV = globalThis.DeliverableViewer;
+      globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+      globalThis.URL.revokeObjectURL = vi.fn();
+    });
+
+    it('shows download, toggle, and close in header for text-renderable file', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: async () => '# Hello',
+        headers: { get: () => null }
+      });
+      globalThis.marked = { parse: vi.fn((md) => `<p>${md}</p>`) };
+
+      const viewer = new DV({ workflowName: 'test-wf' });
+      await viewer.showPreview('x-ipe-docs/ideas/test/readme.md');
+
+      const header = document.querySelector('.preview-header');
+      expect(header).not.toBeNull();
+      expect(header.querySelector('.preview-title')).not.toBeNull();
+      expect(header.querySelector('.preview-download-btn')).not.toBeNull();
+      expect(header.querySelector('.preview-toggle-btn')).not.toBeNull();
+      expect(header.querySelector('.preview-close')).not.toBeNull();
+    });
+
+    it('hides toggle button for non-text-renderable file (image)', async () => {
+      const viewer = new DV({ workflowName: 'test-wf' });
+      await viewer.showPreview('x-ipe-docs/ideas/test/logo.png');
+
+      const header = document.querySelector('.preview-header');
+      expect(header.querySelector('.preview-download-btn')).not.toBeNull();
+      expect(header.querySelector('.preview-toggle-btn')).toBeNull();
+      expect(header.querySelector('.preview-close')).not.toBeNull();
+    });
+
+    it('download link has correct href with download=true', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: async () => 'content',
+        headers: { get: () => null }
+      });
+      globalThis.marked = { parse: vi.fn((md) => `<p>${md}</p>`) };
+
+      const viewer = new DV({ workflowName: 'test-wf' });
+      await viewer.showPreview('x-ipe-docs/ideas/test/readme.md');
+
+      const downloadBtn = document.querySelector('.preview-download-btn');
+      expect(downloadBtn.href).toContain('download=true');
+      expect(downloadBtn.getAttribute('download')).toBe('readme.md');
+    });
+  });
+
+  describe('CR-002: Smart defaults', () => {
+    let DV;
+    beforeEach(() => {
+      DV = globalThis.DeliverableViewer;
+      globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+      globalThis.URL.revokeObjectURL = vi.fn();
+    });
+
+    it('defaults to raw mode for files under /src/ path', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: async () => 'const x = 1;',
+        headers: { get: () => null }
+      });
+
+      const viewer = new DV({ workflowName: 'test-wf' });
+      await viewer.showPreview('x-ipe-docs/ideas/project/src/app.js');
+
+      // Should render in raw mode — look for raw <pre>
+      const pre = document.querySelector('.preview-raw-content');
+      expect(pre).not.toBeNull();
+      expect(pre.textContent).toBe('const x = 1;');
+    });
+
+    it('defaults to auto mode for non-src files', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: async () => '# Hello',
+        headers: { get: () => null }
+      });
+      globalThis.marked = { parse: vi.fn((md) => `<p>${md}</p>`) };
+
+      const viewer = new DV({ workflowName: 'test-wf' });
+      await viewer.showPreview('x-ipe-docs/ideas/project/README.md');
+
+      // Should render in auto/preview mode — no raw pre
+      const pre = document.querySelector('.preview-raw-content');
+      expect(pre).toBeNull();
+    });
+
+    it('hides toggle for non-text file even under /src/', async () => {
+      const viewer = new DV({ workflowName: 'test-wf' });
+      await viewer.showPreview('x-ipe-docs/ideas/project/src/images/logo.png');
+
+      const toggleBtn = document.querySelector('.preview-toggle-btn');
+      expect(toggleBtn).toBeNull();
+    });
+  });
+
+  describe('CR-002: Toggle interaction', () => {
+    let DV;
+    beforeEach(() => {
+      DV = globalThis.DeliverableViewer;
+      globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+      globalThis.URL.revokeObjectURL = vi.fn();
+    });
+
+    it('toggle switches from auto to raw mode', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: async () => '# Hello',
+        headers: { get: () => null }
+      });
+      globalThis.marked = { parse: vi.fn((md) => `<p>${md}</p>`) };
+
+      const viewer = new DV({ workflowName: 'test-wf' });
+      await viewer.showPreview('x-ipe-docs/ideas/test/readme.md');
+
+      // Initially in auto mode — no raw pre
+      expect(document.querySelector('.preview-raw-content')).toBeNull();
+
+      // Click toggle
+      const toggleBtn = document.querySelector('.preview-toggle-btn');
+      toggleBtn.click();
+
+      // Now in raw mode
+      const pre = document.querySelector('.preview-raw-content');
+      expect(pre).not.toBeNull();
+      expect(pre.textContent).toBe('# Hello');
+    });
+
+    it('toggle does not trigger new fetch', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: async () => '# Hello',
+        headers: { get: () => null }
+      });
+      globalThis.marked = { parse: vi.fn((md) => `<p>${md}</p>`) };
+
+      const viewer = new DV({ workflowName: 'test-wf' });
+      await viewer.showPreview('x-ipe-docs/ideas/test/readme.md');
+
+      const fetchCallCount = globalThis.fetch.mock.calls.length;
+      const toggleBtn = document.querySelector('.preview-toggle-btn');
+      toggleBtn.click();
+
+      expect(globalThis.fetch.mock.calls.length).toBe(fetchCallCount);
+    });
+
+    it('opening new file resets to its smart default', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: async () => '# Content',
+        headers: { get: () => null }
+      });
+      globalThis.marked = { parse: vi.fn((md) => `<p>${md}</p>`) };
+
+      const viewer = new DV({ workflowName: 'test-wf' });
+
+      // Open first file and toggle to raw
+      await viewer.showPreview('x-ipe-docs/ideas/test/readme.md');
+      document.querySelector('.preview-toggle-btn').click();
+      expect(document.querySelector('.preview-raw-content')).not.toBeNull();
+
+      // Open second file (non-src) — should be in auto mode
+      await viewer.showPreview('x-ipe-docs/ideas/test/doc.md');
+      expect(document.querySelector('.preview-raw-content')).toBeNull();
+    });
+  });
 });

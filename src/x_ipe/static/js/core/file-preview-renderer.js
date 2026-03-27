@@ -33,10 +33,16 @@ class FilePreviewRenderer {
         this._options = {
             apiEndpoint: options.apiEndpoint || '/api/ideas/file?path={path}',
             endpointStyle: options.endpointStyle || 'path',
-            downloadUrl: options.downloadUrl || null
+            downloadUrl: options.downloadUrl || null,
+            renderMode: options.renderMode || 'auto'
         };
         this._currentBlobUrl = null;
         this._requestCounter = 0;
+        this._renderMode = this._options.renderMode;
+        this._cachedText = null;
+        this._cachedFilePath = null;
+        this._cachedContainer = null;
+        this._cachedIsConverted = false;
     }
 
     /**
@@ -52,6 +58,36 @@ class FilePreviewRenderer {
         if (FilePreviewRenderer.FILE_TYPES.html.has(ext)) return 'html';
         if (FilePreviewRenderer.FILE_TYPES.code.has(ext)) return 'code';
         return 'unknown';
+    }
+
+    /**
+     * Check if a file type supports text-renderable toggling (preview/raw).
+     * @param {string} filePath
+     * @returns {boolean}
+     */
+    static isTextRenderable(filePath) {
+        const type = FilePreviewRenderer.detectType(filePath);
+        return type === 'markdown' || type === 'code' || type === 'html';
+    }
+
+    /**
+     * Get the current render mode.
+     * @returns {string} 'auto' or 'raw'
+     */
+    getRenderMode() {
+        return this._renderMode;
+    }
+
+    /**
+     * Switch render mode and re-render cached content.
+     * @param {string} mode - 'auto' or 'raw'
+     * @param {HTMLElement} container - DOM element to render into
+     */
+    setRenderMode(mode, container) {
+        this._renderMode = mode;
+        if (this._cachedText !== null && container) {
+            this._renderContent(container, this._cachedText, this._cachedFilePath, this._cachedIsConverted);
+        }
     }
 
     /**
@@ -122,7 +158,11 @@ class FilePreviewRenderer {
                 }
             }
             if (isConverted) {
-                this._renderConvertedHtml(container, text);
+                this._cachedText = text;
+                this._cachedFilePath = filePath;
+                this._cachedContainer = container;
+                this._cachedIsConverted = true;
+                this._renderContent(container, text, filePath, true);
                 return;
             }
 
@@ -131,13 +171,11 @@ class FilePreviewRenderer {
                 return;
             }
 
-            if (type === 'markdown') {
-                this._renderMarkdown(container, text);
-            } else if (type === 'html') {
-                this._renderHtml(container, text);
-            } else {
-                this._renderCode(container, text, filePath.split('.').pop().toLowerCase());
-            }
+            this._cachedText = text;
+            this._cachedFilePath = filePath;
+            this._cachedContainer = container;
+            this._cachedIsConverted = false;
+            this._renderContent(container, text, filePath, false);
         } catch {
             if (requestId !== this._requestCounter) return;
             this._showError(container, 'Failed to load file', filePath);
@@ -150,9 +188,49 @@ class FilePreviewRenderer {
     destroy() {
         this._revokeBlobUrl();
         this._requestCounter++;
+        this._cachedText = null;
+        this._cachedFilePath = null;
+        this._cachedContainer = null;
+        this._cachedIsConverted = false;
     }
 
     // --- Private methods ---
+
+    /**
+     * Render content based on current renderMode.
+     * In 'raw' mode, always renders plain text. In 'auto' mode, uses rich rendering.
+     */
+    _renderContent(container, text, filePath, isConverted) {
+        if (this._renderMode === 'raw' && !isConverted) {
+            this._renderRaw(container, text);
+            return;
+        }
+
+        if (isConverted) {
+            this._renderConvertedHtml(container, text);
+            return;
+        }
+
+        const type = FilePreviewRenderer.detectType(filePath);
+        if (type === 'markdown') {
+            this._renderMarkdown(container, text);
+        } else if (type === 'html') {
+            this._renderHtml(container, text);
+        } else {
+            this._renderCode(container, text, filePath.split('.').pop().toLowerCase());
+        }
+    }
+
+    /**
+     * Render plain text in a <pre> element using textContent (safe, no HTML injection).
+     */
+    _renderRaw(container, text) {
+        container.innerHTML = '';
+        const pre = document.createElement('pre');
+        pre.className = 'preview-raw-content';
+        pre.textContent = text;
+        container.appendChild(pre);
+    }
 
     _buildUrl(filePath) {
         const pattern = this._options.apiEndpoint;

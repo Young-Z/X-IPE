@@ -1,9 +1,9 @@
 # Feature Specification: Enhanced Deliverable Viewer
 
 > Feature ID: FEATURE-038-C
-> Version: v1.1
+> Version: v1.3
 > Status: Refined
-> Last Updated: 03-16-2026
+> Last Updated: 03-26-2026
 
 ## Version History
 
@@ -11,6 +11,8 @@
 |---------|------|-------------|
 | v1.0 | 02-20-2026 | Initial specification — folder-type deliverables with file-tree and inline preview |
 | v1.1 | 03-16-2026 | [CR-001](CR-001.md): Add .docx and .msg file content preview via server-side conversion (mammoth + extract-msg). Updates AC-038-C.15, BR-038-C.3, Out-of-Scope. |
+| v1.2 | 03-26-2026 | [CR-002](CR-002.md): Add download icon, preview/raw toggle, and smart default mode (raw for `*/src/*` files) to deliverable preview modal header. Updates Out-of-Scope, adds US-038-C.4/5, AC-038-C.06, FR-038-C.9/10/11, BR-038-C.6/7. |
+| v1.3 | 03-26-2026 | Refinement of CR-002: Expand AC-038-C.06 (7→10 ACs) with toggle visibility rules (hidden for non-text files), per-file mode reset, download for all file types. Add UI/UX components and user flow for toolbar. Add CR-002 edge cases. Update FR-038-C.10 with visibility logic. |
 
 ## Linked Mockups
 
@@ -40,6 +42,8 @@ This is a **CR on FEATURE-036-E** (Deliverables, Polling & Lifecycle).
 - **US-038-C.1:** As a workflow user, I want to see the contents of a folder deliverable as a file tree, so that I can understand what files the action produced.
 - **US-038-C.2:** As a workflow user, I want to click a file in the tree to preview its content inline, so that I can quickly review outputs without opening external tools.
 - **US-038-C.3 (CR-001):** As a workflow user, I want to preview .docx and .msg files in the deliverable viewer, so that I can read uploaded business documents without downloading them.
+- **US-038-C.4 (CR-002):** As a workflow user, I want to download a file directly from the preview modal, so that I can save it locally without closing the modal and navigating elsewhere.
+- **US-038-C.5 (CR-002):** As a workflow user, I want to toggle between rendered preview and raw text view in the preview modal, so that I can see either the formatted output or the unprocessed source content.
 
 ## Acceptance Criteria
 
@@ -91,6 +95,21 @@ This is a **CR on FEATURE-036-E** (Deliverables, Polling & Lifecycle).
 | AC-038-C.05b | GIVEN a folder with up to 50 files WHEN the tree renders THEN it completes within 500ms | Unit |
 | AC-038-C.05c | GIVEN a `.docx` or `.msg` file up to 10MB WHEN conversion runs THEN it completes within 3 seconds | Unit |
 
+### AC-038-C.06: Preview Header Toolbar (CR-002)
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-038-C.06a | GIVEN the deliverable preview modal is open for a text-renderable file (markdown, code, html) WHEN the header renders THEN it displays: filename (left), and a toolbar group (right) containing download icon, preview/raw toggle icon, and close button | UI |
+| AC-038-C.06b | GIVEN the preview modal is open for a non-text file (image, PDF, binary, .docx, .msg) WHEN the header renders THEN it displays: filename (left), and a toolbar group (right) containing download icon and close button only (no toggle icon) | UI |
+| AC-038-C.06c | GIVEN the preview modal is showing any file WHEN user clicks the download icon THEN the browser downloads the file using the original filename | Unit |
+| AC-038-C.06d | GIVEN the preview is in preview mode WHEN user clicks the toggle icon THEN the content re-renders as raw plain text in `<pre>` (no markdown rendering, no syntax highlighting) AND the toggle icon updates to indicate raw mode is active | UI |
+| AC-038-C.06e | GIVEN the preview is in raw mode WHEN user clicks the toggle icon THEN the content re-renders in preview mode (markdown rendered as HTML, code syntax-highlighted) AND the toggle icon updates to indicate preview mode is active | UI |
+| AC-038-C.06f | GIVEN a file path containing `/src/` as a path segment WHEN the preview modal opens THEN the default mode is raw AND the toggle icon indicates raw mode | Unit |
+| AC-038-C.06g | GIVEN a file path NOT containing `/src/` as a path segment WHEN the preview modal opens THEN the default mode is preview AND the toggle icon indicates preview mode | Unit |
+| AC-038-C.06h | GIVEN the preview modal with toggle icon WHEN the user toggles between modes THEN the FilePreviewRenderer re-renders without re-fetching the file content from the API | Unit |
+| AC-038-C.06i | GIVEN the user has toggled to raw mode on file A WHEN the user selects a different file B THEN file B opens in its own default mode (smart defaults applied independently) AND the toggle state from file A is NOT carried over | Unit |
+| AC-038-C.06j | GIVEN a file under `/src/` path (e.g., `src/x_ipe/app.py`) WHEN the file type is non-text (e.g., `src/images/logo.png`) THEN the `/src/` smart default is ignored AND the toggle icon is hidden (non-text rules take precedence) | Unit |
+
 ## Functional Requirements
 
 **FR-038-C.1: Folder Detection in Deliverable Rendering**
@@ -133,6 +152,21 @@ This is a **CR on FEATURE-036-E** (Deliverables, Polling & Lifecycle).
 - Process: Check file size before conversion. If > 10MB, return error response without attempting conversion.
 - Output: 413 status with "File too large to preview" message, or proceed to conversion
 
+**FR-038-C.9: Download from Preview Header (CR-002)**
+- Input: File path of currently previewed file
+- Process: Render a download `<a>` element in the preview header with `href` pointing to `GET /api/ideas/file?path={file}` and `download` attribute set to filename
+- Output: Clicking the icon triggers native browser file download
+
+**FR-038-C.10: Preview/Raw Toggle (CR-002)**
+- Input: Toggle icon click event; file type classification from FilePreviewRenderer
+- Process: Toggle is only rendered for text-renderable file types (markdown, code, html). For non-text types (image, pdf, binary, converted .docx/.msg), the toggle icon is omitted from the header. When visible and clicked, switch `FilePreviewRenderer` render mode between `auto` (type-detected preview) and `raw` (plain `<pre>` text). Re-render content without re-fetching from API. Toggle state resets to the smart default when a different file is opened.
+- Output: Content area updates to show rendered or raw view; toggle icon updates to reflect current mode
+
+**FR-038-C.11: Smart Default Mode (CR-002)**
+- Input: File path opened in preview modal
+- Process: Check if path contains `/src/` as a path segment (regex `/\/src\//`). If match → set initial render mode to `raw`. Otherwise → set to `auto` (preview).
+- Output: Preview opens in the appropriate default mode based on file location
+
 ## Non-Functional Requirements
 
 - **NFR-038-C.1:** File-tree render must complete within 500ms for folders with up to 50 files
@@ -152,6 +186,16 @@ This is a **CR on FEATURE-036-E** (Deliverables, Polling & Lifecycle).
 | Preview Pane | Below tree, shows file content | Markdown rendered, text as preformatted |
 | Preview Header | File name above content | Shows active file name |
 
+### Components (CR-002: Preview Header Toolbar)
+
+| Component | Description | Behavior |
+|-----------|-------------|----------|
+| Preview Header (updated) | Flex row: filename (left) + toolbar group (right) | Layout uses `display: flex; justify-content: space-between; align-items: center` |
+| Download Icon | `<a>` element with download emoji/icon (⬇️) | Click triggers native browser file download. Visible for ALL file types. Styled as small button with hover background. |
+| Preview/Raw Toggle | Icon button: `👁️` (preview mode) / `</>` (raw mode) | Click toggles render mode. Only visible for text-renderable files (markdown, code, html). Hidden for images, PDF, binary, .docx, .msg. Has `title` tooltip showing current mode name. |
+| Close Button | Existing `✕` span | Click closes the modal (unchanged) |
+| Toolbar Group | `<span>` wrapper for download + toggle + close | `display: flex; align-items: center; gap: 8px`. Groups right-aligned icons. |
+
 ### User Flow
 
 ```
@@ -164,6 +208,22 @@ This is a **CR on FEATURE-036-E** (Deliverables, Polling & Lifecycle).
 7. User clicks collapse toggle — tree and preview collapse
 ```
 
+### User Flow (CR-002: Single-File Preview Modal)
+
+```
+1. User clicks a single-file deliverable card (e.g., "technical-design.md")
+2. Modal opens with preview header: filename | [⬇️] [👁️] [✕]
+3. File renders in default mode:
+   - Files NOT under /src/ → preview mode (markdown rendered, code highlighted)
+   - Files under /src/ → raw mode (plain text)
+4. User clicks ⬇️ → file downloads via browser
+5. User clicks 👁️↔</> → content toggles between preview and raw mode
+6. User clicks a different file (if in folder browser context):
+   - Toggle resets to the new file's smart default
+   - Toggle visibility updates (hidden if new file is image/PDF/binary)
+7. User clicks ✕ or backdrop or Escape → modal closes
+```
+
 ## Dependencies
 
 ### Internal
@@ -174,6 +234,7 @@ This is a **CR on FEATURE-036-E** (Deliverables, Polling & Lifecycle).
 | `GET /api/ideas/file` | Data source | File content retrieval for preview |
 | `GET /api/ideas/folder-contents` | Data source | Folder listing for tree |
 | `marked.js` | Rendering | Already loaded globally for markdown rendering |
+| `FilePreviewRenderer` (CR-002) | Shared component | Needs `renderMode` extension for raw/auto toggle support. Shared by KB browse, folder browser, deliverable viewer. |
 
 ### External
 
@@ -187,6 +248,10 @@ This is a **CR on FEATURE-036-E** (Deliverables, Polling & Lifecycle).
 - **BR-038-C.3:** Preview supports text-based files AND convertible binary formats (`.docx`, `.msg`). Unconvertible binary files show a placeholder message. (Updated by CR-001)
 - **BR-038-C.4 (CR-001):** Conversion is server-side only — no client-side parsing libraries. The frontend receives ready-to-render HTML.
 - **BR-038-C.5 (CR-001):** Only `.docx` and `.msg` are convertible formats. Other Office formats (`.doc`, `.xls`, `.pptx`) remain unconvertible and show the binary placeholder.
+- **BR-038-C.6 (CR-002):** The smart default mode uses path-segment matching (`/src/` in path), not prefix matching. Paths like `src_backup/file.js` do NOT match.
+- **BR-038-C.7 (CR-002):** Raw mode shows the unprocessed file content as plain text in `<pre>`. No markdown rendering, no syntax highlighting, no HTML iframe rendering.
+- **BR-038-C.8 (CR-002):** Toggle visibility is determined by file type classification: text-renderable types (markdown, code, html) show the toggle; non-text types (image, pdf, binary, server-converted) hide it.
+- **BR-038-C.9 (CR-002):** Toggle state does not persist across files. Each file opens in its own smart default mode.
 
 ## Edge Cases & Constraints
 
@@ -204,16 +269,23 @@ This is a **CR on FEATURE-036-E** (Deliverables, Polling & Lifecycle).
 | .msg with HTML body (CR-001) | HTML body sanitized and rendered; plain text body rendered in `<pre>` |
 | .msg with no body (CR-001) | Shows metadata headers only (From, To, Subject, Date) with empty body |
 | .docx/.msg > 10MB (CR-001) | Shows "File too large to preview (max 10MB)" without attempting conversion |
+| Toggle on image/PDF file (CR-002) | Toggle icon hidden — only download and close buttons in header |
+| Toggle on .docx/.msg file (CR-002) | Toggle icon hidden — converted content is always rendered as preview (server-side HTML) |
+| File under /src/ that is an image (CR-002) | `/src/` smart default ignored — non-text rule takes precedence, toggle hidden |
+| User rapidly toggles raw/preview (CR-002) | Debounce re-render — only process latest toggle state |
+| File with unknown extension under /src/ (CR-002) | Treated as text (existing behavior), defaults to raw mode per smart default |
+| Toggle then download (CR-002) | Download always serves the original file regardless of current toggle mode |
 
 ## Out of Scope
 
 - **File editing** — preview is read-only
-- **File download** — no download button
+- **~~File download~~** — ~~no download button~~ (Moved in-scope by CR-002: download icon added to preview header)
 - **Image/unconvertible binary preview** — only text-based and convertible formats (.docx, .msg) are supported (Updated by CR-001)
 - **File search within tree** — browse only
 - **Syntax highlighting** — plain preformatted text for code files
 - **Other Office formats (CR-001)** — `.doc`, `.xls`, `.xlsx`, `.ppt`, `.pptx` remain unsupported
 - **.msg attachments (CR-001)** — email attachments are not extracted or previewed
+- **Raw mode for binary files (CR-002)** — raw toggle only applies to text-renderable files; binary files always show placeholder
 
 ## Technical Considerations
 
@@ -226,6 +298,11 @@ This is a **CR on FEATURE-036-E** (Deliverables, Polling & Lifecycle).
 - **(CR-001)** Converted HTML returned with `X-Converted: true` response header so frontend knows to render as HTML
 - **(CR-001)** `beautifulsoup4` (already a dependency) used for HTML sanitization of converted output
 - **(CR-001)** Frontend renders converted HTML in the existing HTML preview path (sandboxed container)
+- **(CR-002)** Extend `FilePreviewRenderer` with `renderMode` option (`auto` | `raw`): `auto` = current behavior; `raw` = plain `<pre>` text
+- **(CR-002)** Add `setRenderMode(mode)` method to FilePreviewRenderer for runtime toggle without re-fetch
+- **(CR-002)** Download icon in preview header uses `<a download>` pattern from folder-browser-modal.js `_makePreviewHeader`
+- **(CR-002)** Smart default detection: `filePath.match(/\/src\//)` — simple regex on path string
+- **(CR-002)** Toggle icon states: preview mode = `👁️` (eye); raw mode = `</>` (code brackets)
 
 ## Open Questions
 

@@ -598,4 +598,148 @@ describe('CR-008: FilePreviewRenderer', () => {
       expect(container.textContent).not.toContain('stale');
     });
   });
+
+  // CR-002: isTextRenderable, renderMode, setRenderMode, _renderRaw, _renderContent
+  describe('CR-002: isTextRenderable', () => {
+    it('returns true for markdown files', () => {
+      expect(FilePreviewRenderer.isTextRenderable('doc.md')).toBe(true);
+    });
+
+    it('returns true for code files', () => {
+      expect(FilePreviewRenderer.isTextRenderable('app.js')).toBe(true);
+      expect(FilePreviewRenderer.isTextRenderable('style.css')).toBe(true);
+      expect(FilePreviewRenderer.isTextRenderable('data.json')).toBe(true);
+    });
+
+    it('returns true for html files', () => {
+      expect(FilePreviewRenderer.isTextRenderable('page.html')).toBe(true);
+      expect(FilePreviewRenderer.isTextRenderable('page.htm')).toBe(true);
+    });
+
+    it('returns false for image files', () => {
+      expect(FilePreviewRenderer.isTextRenderable('logo.png')).toBe(false);
+      expect(FilePreviewRenderer.isTextRenderable('photo.jpg')).toBe(false);
+    });
+
+    it('returns false for pdf files', () => {
+      expect(FilePreviewRenderer.isTextRenderable('report.pdf')).toBe(false);
+    });
+
+    it('returns false for unknown extensions', () => {
+      expect(FilePreviewRenderer.isTextRenderable('data.xyz')).toBe(false);
+    });
+  });
+
+  describe('CR-002: renderMode option', () => {
+    it('defaults renderMode to auto', () => {
+      const renderer = new FilePreviewRenderer();
+      expect(renderer.getRenderMode()).toBe('auto');
+    });
+
+    it('accepts renderMode option in constructor', () => {
+      const renderer = new FilePreviewRenderer({ renderMode: 'raw' });
+      expect(renderer.getRenderMode()).toBe('raw');
+    });
+  });
+
+  describe('CR-002: setRenderMode re-renders cached content', () => {
+    it('renders raw content as <pre> with textContent', () => {
+      const renderer = new FilePreviewRenderer({ renderMode: 'auto' });
+      // Manually set cache
+      renderer._cachedText = '# Hello World';
+      renderer._cachedFilePath = 'readme.md';
+      renderer._cachedIsConverted = false;
+
+      renderer.setRenderMode('raw', container);
+
+      expect(renderer.getRenderMode()).toBe('raw');
+      const pre = container.querySelector('pre.preview-raw-content');
+      expect(pre).not.toBeNull();
+      expect(pre.textContent).toBe('# Hello World');
+    });
+
+    it('renders auto mode with rich rendering for markdown', () => {
+      function MockRenderer() { this.link = function() { return ''; }; }
+      globalThis.marked = {
+        parse: vi.fn((md) => `<h1>Hello</h1>`),
+        Renderer: MockRenderer,
+        setOptions: vi.fn()
+      };
+      const renderer = new FilePreviewRenderer({ renderMode: 'raw' });
+      renderer._cachedText = '# Hello';
+      renderer._cachedFilePath = 'readme.md';
+      renderer._cachedIsConverted = false;
+
+      renderer.setRenderMode('auto', container);
+
+      expect(renderer.getRenderMode()).toBe('auto');
+      expect(container.querySelector('pre.preview-raw-content')).toBeNull();
+    });
+
+    it('does nothing if no cached content', () => {
+      const renderer = new FilePreviewRenderer();
+      renderer.setRenderMode('raw', container);
+      // No crash, container unchanged
+      expect(container.innerHTML).toBe('');
+    });
+
+    it('does not re-fetch on mode switch', () => {
+      const renderer = new FilePreviewRenderer();
+      renderer._cachedText = 'cached content';
+      renderer._cachedFilePath = 'file.js';
+      renderer._cachedIsConverted = false;
+
+      globalThis.fetch = vi.fn();
+      renderer.setRenderMode('raw', container);
+      expect(globalThis.fetch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('CR-002: destroy clears cache', () => {
+    it('clears cached text and file path on destroy', () => {
+      const renderer = new FilePreviewRenderer();
+      renderer._cachedText = 'some content';
+      renderer._cachedFilePath = 'file.md';
+      renderer._cachedIsConverted = false;
+
+      renderer.destroy();
+
+      expect(renderer._cachedText).toBeNull();
+      expect(renderer._cachedFilePath).toBeNull();
+      expect(renderer._cachedIsConverted).toBe(false);
+    });
+  });
+
+  describe('CR-002: renderPreview caches text', () => {
+    it('caches text after fetch for text-renderable files', async () => {
+      globalThis.marked = { parse: vi.fn((md) => `<p>${md}</p>`) };
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: async () => '# Cached Content',
+        headers: { get: () => null }
+      });
+
+      const renderer = new FilePreviewRenderer();
+      await renderer.renderPreview('readme.md', container);
+
+      expect(renderer._cachedText).toBe('# Cached Content');
+      expect(renderer._cachedFilePath).toBe('readme.md');
+      expect(renderer._cachedIsConverted).toBe(false);
+    });
+
+    it('renders in raw mode when renderMode is raw', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: async () => 'const x = 1;',
+        headers: { get: () => null }
+      });
+
+      const renderer = new FilePreviewRenderer({ renderMode: 'raw' });
+      await renderer.renderPreview('app.js', container);
+
+      const pre = container.querySelector('pre.preview-raw-content');
+      expect(pre).not.toBeNull();
+      expect(pre.textContent).toBe('const x = 1;');
+    });
+  });
 });

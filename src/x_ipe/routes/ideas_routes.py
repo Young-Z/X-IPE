@@ -713,6 +713,10 @@ def get_idea_file():
     if not target.is_file():
         return jsonify({'error': 'File not found'}), 404
 
+    # CR-002: Download bypass — serve original file without conversion
+    if request.args.get('download') == 'true':
+        return send_file(target, as_attachment=True, download_name=target.name)
+
     # Serve known binary types with correct Content-Type
     import mimetypes
     mime_type, _ = mimetypes.guess_type(str(target))
