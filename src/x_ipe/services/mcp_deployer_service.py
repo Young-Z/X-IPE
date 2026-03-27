@@ -122,6 +122,16 @@ class MCPDeployerService:
                     entry["environment"] = cfg["env"]
                 transformed[name] = entry
             source_servers = transformed
+        else:
+            # Standardize to standard MCP format for project/global targets
+            # Strip Copilot-specific fields: "tools" and "type": "local"
+            standardized = {}
+            for name, cfg in source_servers.items():
+                entry = {k: v for k, v in cfg.items() if k != "tools"}
+                if entry.get("type") == "local":
+                    del entry["type"]
+                standardized[name] = entry
+            source_servers = standardized
 
         # Merge
         merged_count = 0

@@ -317,6 +317,16 @@ class ScaffoldManager:
                     entry["environment"] = cfg["env"]
                 transformed[name] = entry
             project_servers = transformed
+        else:
+            # Standardize to standard MCP format for project/global targets
+            # Strip Copilot-specific fields: "tools" and "type": "local"
+            standardized = {}
+            for name, cfg in project_servers.items():
+                entry = {k: v for k, v in cfg.items() if k != "tools"}
+                if entry.get("type") == "local":
+                    del entry["type"]
+                standardized[name] = entry
+            project_servers = standardized
         
         # Merge: add project servers to config
         merged_count = 0
