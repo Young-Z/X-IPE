@@ -1,9 +1,9 @@
 # Feature Specification: Enhanced Deliverable Viewer
 
 > Feature ID: FEATURE-038-C
-> Version: v1.3
+> Version: v1.4
 > Status: Refined
-> Last Updated: 03-26-2026
+> Last Updated: 03-27-2026
 
 ## Version History
 
@@ -13,6 +13,7 @@
 | v1.1 | 03-16-2026 | [CR-001](CR-001.md): Add .docx and .msg file content preview via server-side conversion (mammoth + extract-msg). Updates AC-038-C.15, BR-038-C.3, Out-of-Scope. |
 | v1.2 | 03-26-2026 | [CR-002](CR-002.md): Add download icon, preview/raw toggle, and smart default mode (raw for `*/src/*` files) to deliverable preview modal header. Updates Out-of-Scope, adds US-038-C.4/5, AC-038-C.06, FR-038-C.9/10/11, BR-038-C.6/7. |
 | v1.3 | 03-26-2026 | Refinement of CR-002: Expand AC-038-C.06 (7→10 ACs) with toggle visibility rules (hidden for non-text files), per-file mode reset, download for all file types. Add UI/UX components and user flow for toolbar. Add CR-002 edge cases. Update FR-038-C.10 with visibility logic. |
+| v1.4 | 03-27-2026 | [CR-003](CR-003.md): Extend CR-002 toolbar (download `?download=true`, preview/raw toggle, smart defaults) to folder browser modal's inline file preview (`FolderBrowserModal._makePreviewHeader`). Adds AC-038-C.07a-07d. |
 
 ## Linked Mockups
 
@@ -109,6 +110,15 @@ This is a **CR on FEATURE-036-E** (Deliverables, Polling & Lifecycle).
 | AC-038-C.06h | GIVEN the preview modal with toggle icon WHEN the user toggles between modes THEN the FilePreviewRenderer re-renders without re-fetching the file content from the API | Unit |
 | AC-038-C.06i | GIVEN the user has toggled to raw mode on file A WHEN the user selects a different file B THEN file B opens in its own default mode (smart defaults applied independently) AND the toggle state from file A is NOT carried over | Unit |
 | AC-038-C.06j | GIVEN a file under `/src/` path (e.g., `src/x_ipe/app.py`) WHEN the file type is non-text (e.g., `src/images/logo.png`) THEN the `/src/` smart default is ignored AND the toggle icon is hidden (non-text rules take precedence) | Unit |
+
+### CR-003: Folder Browser Modal Toolbar Parity
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|----------------------------|-----------|
+| AC-038-C.07a | GIVEN a text-renderable file selected in the folder browser modal WHEN the preview header renders THEN it shows filename (left) + toolbar group (right) containing download icon (⬇ with `?download=true`), toggle icon (</> or 👁), matching the single-file preview toolbar pattern | Frontend-UI |
+| AC-038-C.07b | GIVEN a non-text file (image/PDF) selected in the folder browser modal WHEN the preview header renders THEN the toggle icon is hidden AND only download + filename are shown | Unit |
+| AC-038-C.07c | GIVEN a text file under a `/src/` path selected in the folder browser modal WHEN the preview renders THEN it defaults to raw mode (same smart default logic as single-file preview) | Unit |
+| AC-038-C.07d | GIVEN the folder browser modal with toggle icon visible WHEN the user clicks toggle THEN the content switches between preview and raw mode without re-fetching AND the toggle icon updates | Unit |
 
 ## Functional Requirements
 

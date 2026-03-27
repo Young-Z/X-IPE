@@ -405,17 +405,23 @@ class FolderBrowserModal {
         // CR-008: Use shared FilePreviewRenderer for all file types
         if (typeof FilePreviewRenderer !== 'undefined') {
             this.previewPanel.innerHTML = '';
-            this.previewPanel.appendChild(this._makePreviewHeader(filePath));
             const contentEl = document.createElement('div');
             contentEl.className = 'folder-browser-preview-content';
             contentEl.style.cssText = 'flex:1;overflow:auto;position:relative';
+
+            // CR-003: Pass contentEl to header for toggle wiring
+            this.previewPanel.appendChild(this._makePreviewHeader(filePath, contentEl));
             this.previewPanel.appendChild(contentEl);
 
             if (this._filePreviewRenderer) this._filePreviewRenderer.destroy();
+            // CR-003: Smart default — raw mode for /src/ paths
+            const isText = FilePreviewRenderer.isTextRenderable(filePath);
+            const smartDefault = isText && /\/src\//.test(filePath) ? 'raw' : 'auto';
             this._filePreviewRenderer = new FilePreviewRenderer({
                 apiEndpoint: '/api/ideas/file?path={path}',
                 endpointStyle: 'query',
-                downloadUrl: '/api/ideas/file?path={path}'
+                downloadUrl: '/api/ideas/file?path={path}',
+                renderMode: smartDefault
             });
             await this._filePreviewRenderer.renderPreview(filePath, contentEl);
             return;
@@ -463,21 +469,47 @@ class FolderBrowserModal {
         }
     }
 
-    _makePreviewHeader(filePath) {
+    _makePreviewHeader(filePath, contentEl) {
         const header = document.createElement('div');
         header.className = 'folder-browser-preview-header';
         const nameSpan = document.createElement('span');
+        nameSpan.className = 'folder-browser-preview-title';
         nameSpan.textContent = filePath.split('/').pop();
         header.appendChild(nameSpan);
 
+        // CR-003: Toolbar group with download + toggle
+        const toolbar = document.createElement('span');
+        toolbar.className = 'folder-browser-toolbar-group';
+
         const dlBtn = document.createElement('a');
         dlBtn.className = 'folder-browser-download-btn';
-        dlBtn.href = `/api/ideas/file?path=${encodeURIComponent(filePath)}`;
+        dlBtn.href = `/api/ideas/file?path=${encodeURIComponent(filePath)}&download=true`;
         dlBtn.download = filePath.split('/').pop();
-        dlBtn.textContent = '\u2B07\uFE0F';
+        dlBtn.innerHTML = '⬇';
         dlBtn.title = 'Download';
-        header.appendChild(dlBtn);
+        toolbar.appendChild(dlBtn);
 
+        // CR-003: Toggle button (only for text-renderable files)
+        const isText = (typeof FilePreviewRenderer !== 'undefined') &&
+            FilePreviewRenderer.isTextRenderable(filePath);
+        if (isText && contentEl) {
+            const smartDefault = /\/src\//.test(filePath) ? 'raw' : 'auto';
+            const toggleBtn = document.createElement('span');
+            toggleBtn.className = 'folder-browser-toggle-btn';
+            toggleBtn.innerHTML = smartDefault === 'raw' ? '&#x1F441;' : '&lt;/&gt;';
+            toggleBtn.title = smartDefault === 'raw' ? 'Raw mode' : 'Preview mode';
+            toggleBtn.onclick = () => {
+                if (!this._filePreviewRenderer) return;
+                const current = this._filePreviewRenderer.getRenderMode();
+                const newMode = current === 'auto' ? 'raw' : 'auto';
+                this._filePreviewRenderer.setRenderMode(newMode, contentEl);
+                toggleBtn.innerHTML = newMode === 'raw' ? '&#x1F441;' : '&lt;/&gt;';
+                toggleBtn.title = newMode === 'raw' ? 'Raw mode' : 'Preview mode';
+            };
+            toolbar.appendChild(toggleBtn);
+        }
+
+        header.appendChild(toolbar);
         return header;
     }
 

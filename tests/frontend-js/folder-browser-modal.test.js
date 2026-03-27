@@ -909,4 +909,137 @@ describe('FEATURE-039-A: Folder Browser Modal (MVP)', () => {
       });
     });
   });
+
+  // ────────────────────────────────────────────────────
+  // CR-003: Folder Browser Modal Toolbar Parity
+  // ────────────────────────────────────────────────────
+  describe('CR-003: Folder Browser Toolbar Parity', () => {
+    let _fprLoaded = false;
+    function ensureFPR() {
+      if (!_fprLoaded) {
+        try { loadFeatureScript('../core/file-preview-renderer.js'); } catch { /* skip */ }
+        _fprLoaded = true;
+      }
+      return typeof globalThis.FilePreviewRenderer !== 'undefined';
+    }
+
+    beforeEach(() => {
+      ensureFPR();
+      // marked is needed by FilePreviewRenderer for .md rendering
+      globalThis.marked = {
+        parse: vi.fn((md) => `<p>${md}</p>`),
+        Renderer: function MockRenderer() { this.link = function() { return ''; }; },
+        setOptions: vi.fn()
+      };
+    });
+
+    const MOCK_HEADERS = { get: () => null };
+
+    it('should show toolbar group with download and toggle for text file (AC-07a)', async () => {
+      if (!ensureFPR()) return;
+      const FBM = globalThis.FolderBrowserModal;
+      globalThis.fetch
+        .mockResolvedValueOnce({ ok: true, json: async () => TREE_RESPONSE })
+        .mockResolvedValueOnce({ ok: true, text: async () => '# Hello', headers: MOCK_HEADERS });
+      const modal = new FBM({ workflowName: 'test-wf' });
+      modal.open('refined-idea/');
+      await vi.waitFor(() => expect(document.querySelector('.file-tree')).not.toBeNull());
+      document.querySelector('.file-item[data-path="refined-idea/idea-summary.md"]').click();
+      await vi.waitFor(() => {
+        const toolbar = document.querySelector('.folder-browser-toolbar-group');
+        expect(toolbar).not.toBeNull();
+        const dl = toolbar.querySelector('.folder-browser-download-btn');
+        expect(dl).not.toBeNull();
+        expect(dl.href).toContain('download=true');
+        const toggle = toolbar.querySelector('.folder-browser-toggle-btn');
+        expect(toggle).not.toBeNull();
+      });
+    });
+
+    it('should hide toggle for non-text file like .png (AC-07b)', async () => {
+      if (!ensureFPR()) return;
+      const FBM = globalThis.FolderBrowserModal;
+      globalThis.fetch
+        .mockResolvedValueOnce({ ok: true, json: async () => TREE_RESPONSE })
+        .mockResolvedValueOnce({ ok: true, text: async () => 'binary', headers: MOCK_HEADERS });
+      const modal = new FBM({ workflowName: 'test-wf' });
+      modal.open('refined-idea/');
+      await vi.waitFor(() => expect(document.querySelector('.file-tree')).not.toBeNull());
+      document.querySelector('.file-item[data-path="refined-idea/mockups/sketch.png"]').click();
+      await vi.waitFor(() => {
+        const header = document.querySelector('.folder-browser-preview-header');
+        expect(header).not.toBeNull();
+      });
+      // Image goes through _renderImagePreview fallback — no toggle
+      const toggle = document.querySelector('.folder-browser-toggle-btn');
+      expect(toggle).toBeNull();
+    });
+
+    it('should default to raw mode for /src/ path (AC-07c)', async () => {
+      if (!ensureFPR()) return;
+      const FBM = globalThis.FolderBrowserModal;
+      const srcTree = [
+        { name: 'app.js', type: 'file', path: 'project/src/app.js' },
+      ];
+      globalThis.fetch
+        .mockResolvedValueOnce({ ok: true, json: async () => srcTree })
+        .mockResolvedValueOnce({ ok: true, text: async () => 'const x = 1;', headers: MOCK_HEADERS });
+      const modal = new FBM({ workflowName: 'test-wf' });
+      modal.open('project/');
+      await vi.waitFor(() => expect(document.querySelector('.file-tree')).not.toBeNull());
+      document.querySelector('.file-item[data-path="project/src/app.js"]').click();
+      await vi.waitFor(() => {
+        const raw = document.querySelector('.preview-raw-content');
+        expect(raw).not.toBeNull();
+        expect(raw.textContent).toBe('const x = 1;');
+      });
+    });
+
+    it('should toggle between preview and raw without re-fetching (AC-07d)', async () => {
+      if (!ensureFPR()) return;
+      const FBM = globalThis.FolderBrowserModal;
+      globalThis.fetch
+        .mockResolvedValueOnce({ ok: true, json: async () => TREE_RESPONSE })
+        .mockResolvedValueOnce({ ok: true, text: async () => '# Toggle Me', headers: MOCK_HEADERS });
+      const modal = new FBM({ workflowName: 'test-wf' });
+      modal.open('refined-idea/');
+      await vi.waitFor(() => expect(document.querySelector('.file-tree')).not.toBeNull());
+      document.querySelector('.file-item[data-path="refined-idea/idea-summary.md"]').click();
+      await vi.waitFor(() => {
+        expect(document.querySelector('.folder-browser-toggle-btn')).not.toBeNull();
+      });
+      const fetchCountBefore = globalThis.fetch.mock.calls.length;
+      // Click toggle to switch to raw
+      document.querySelector('.folder-browser-toggle-btn').click();
+      await vi.waitFor(() => {
+        expect(document.querySelector('.preview-raw-content')).not.toBeNull();
+      });
+      // No additional fetch calls
+      expect(globalThis.fetch.mock.calls.length).toBe(fetchCountBefore);
+      // Click toggle again to switch back to preview
+      document.querySelector('.folder-browser-toggle-btn').click();
+      await vi.waitFor(() => {
+        expect(document.querySelector('.preview-raw-content')).toBeNull();
+      });
+      expect(globalThis.fetch.mock.calls.length).toBe(fetchCountBefore);
+    });
+
+    it('should include download=true in download link href', async () => {
+      if (!ensureFPR()) return;
+      const FBM = globalThis.FolderBrowserModal;
+      globalThis.fetch
+        .mockResolvedValueOnce({ ok: true, json: async () => TREE_RESPONSE })
+        .mockResolvedValueOnce({ ok: true, text: async () => 'content', headers: MOCK_HEADERS });
+      const modal = new FBM({ workflowName: 'test-wf' });
+      modal.open('refined-idea/');
+      await vi.waitFor(() => expect(document.querySelector('.file-tree')).not.toBeNull());
+      document.querySelector('.file-item[data-path="refined-idea/notes.txt"]').click();
+      await vi.waitFor(() => {
+        const dl = document.querySelector('.folder-browser-download-btn');
+        expect(dl).not.toBeNull();
+        expect(dl.href).toContain('download=true');
+        expect(dl.getAttribute('download')).toBe('notes.txt');
+      });
+    });
+  });
 });
