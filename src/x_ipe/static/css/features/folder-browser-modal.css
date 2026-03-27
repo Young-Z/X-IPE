@@ -223,16 +223,13 @@
     outline-offset: -2px;
 }
 
-/* Download button */
+/* Download button — matches deliverable viewer .preview-download-btn */
 .folder-browser-download-btn {
-    margin-left: auto;
-    padding: 2px 6px;
-    font-size: 14px;
-    text-decoration: none;
-    border-radius: 4px;
-    transition: background 0.15s;
+    cursor: pointer; color: #94a3b8; font-size: 16px; line-height: 1;
+    padding: 4px; border-radius: 4px; transition: all 0.15s;
+    text-decoration: none; display: inline-flex; align-items: center;
 }
-.folder-browser-download-btn:hover { background: rgba(0,0,0,0.06); }
+.folder-browser-download-btn:hover { color: #3b82f6; background: #eff6ff; }
 .folder-browser-download-link {
     display: inline-block;
     margin-top: 12px;
@@ -252,12 +249,12 @@
 /* Binary info */
 .folder-browser-binary-info { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
 
-/* Preview header with download */
-.folder-browser-preview-header { display: flex; align-items: center; }
-.folder-browser-preview-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Preview header with toolbar — matches deliverable viewer */
+.folder-browser-preview-header { display: flex; align-items: center; padding: 14px 20px; }
+.folder-browser-preview-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; color: #1e293b; }
 .folder-browser-toolbar-group { display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: auto; }
-.folder-browser-toggle-btn { cursor: pointer; font-size: 13px; padding: 2px 6px; border-radius: 4px; transition: background 0.15s; user-select: none; }
-.folder-browser-toggle-btn:hover { background: rgba(0,0,0,0.06); }
+.folder-browser-toggle-btn { cursor: pointer; color: #94a3b8; font-size: 14px; line-height: 1; padding: 4px 6px; border-radius: 4px; transition: all 0.15s; user-select: none; }
+.folder-browser-toggle-btn:hover { color: #1e293b; background: #f1f5f9; }
 
 /* Error state */
 .folder-browser-error {
