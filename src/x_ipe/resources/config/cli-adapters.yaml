@@ -26,9 +26,9 @@ adapters:
   claude-code:
     display_name: "Claude Code CLI"
     command: "claude"
-    run_args: ""
+    run_args: "--permission-mode bypassPermissions"
     inline_prompt_flag: ""
-    prompt_format: '{command} "{escaped_prompt}"'
+    prompt_format: '{command} {run_args} "{escaped_prompt}"'
     instructions_file: ".claude/instructions.md"
     skills_folder: ".claude/skills/"
     mcp_config_path: ".mcp.json"
