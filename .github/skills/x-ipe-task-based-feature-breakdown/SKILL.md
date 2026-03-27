@@ -319,7 +319,7 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
       <constraints>
         - BLOCKING: Feature List goes into PART FILE, NOT index
         - BLOCKING: MUST use feature-board-management skill
-        - MANDATORY: Use full project-root-relative paths
+        - MANDATORY: File links in generated markdown MUST use project-root-relative paths so the UI can intercept them and open a preview modal. **Avoid** relative paths (`../`, `./`, `../../`) and absolute filesystem paths (`/Users/...`). **Correct:** `[spec](x-ipe-docs/requirements/EPIC-001/specification.md)`, `[skill](.github/skills/x-ipe-task-based-bug-fix/SKILL.md)`. **Wrong:** `[spec](../specification.md)`, `[spec](./specification.md)`.
       </constraints>
       <output>Requirement-details updated, features on board with status "Planned"</output>
     </step_5_2>

@@ -287,7 +287,7 @@ BLOCKING: Step 3.1 special-case delegations run BEFORE semantic routing.
         - CRITICAL: Tool skills invoked sequentially, NOT in parallel
         - CRITICAL: Only ENABLED tools participate in semantic matching (step 7)
         - MANDATORY: Use standard tool skill I/O contract (see references/implementation-guidelines.md)
-        - MANDATORY: All internal markdown links MUST use full project-root-relative paths
+        - MANDATORY: File links in generated markdown MUST use project-root-relative paths so the UI can intercept them and open a preview modal. **Avoid** relative paths (`../`, `./`, `../../`) and absolute filesystem paths (`/Users/...`). **Correct:** `[spec](x-ipe-docs/requirements/EPIC-001/specification.md)`, `[skill](.github/skills/x-ipe-task-based-bug-fix/SKILL.md)`. **Wrong:** `[spec](../specification.md)`, `[spec](./specification.md)`.
         - MANDATORY: Log diagnostic messages for all skipped (disabled/undeclared) tools
       </constraints>
       <output>All tool skill outputs collected</output>

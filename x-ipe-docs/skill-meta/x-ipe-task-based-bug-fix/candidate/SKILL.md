@@ -43,7 +43,7 @@ IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-
 input:
   # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "Bug Fix"
+  task_based_skill: "x-ipe-task-based-bug-fix"
 
   # Execution context (passed by x-ipe-workflow-task-execution)
   execution_mode: "free-mode | workflow-mode"  # default: free-mode

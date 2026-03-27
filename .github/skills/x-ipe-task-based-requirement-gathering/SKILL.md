@@ -327,7 +327,7 @@ BLOCKING (auto): Proceed automatically after DoD verification.
       <constraints>
         - BLOCKING: MUST split before adding new content if over 500-line threshold
         - CRITICAL: Document the "why", not just the "what"
-        - MANDATORY: Use full project-root-relative paths for links
+        - MANDATORY: File links in generated markdown MUST use project-root-relative paths so the UI can intercept them and open a preview modal. **Avoid** relative paths (`../`, `./`, `../../`) and absolute filesystem paths (`/Users/...`). **Correct:** `[spec](x-ipe-docs/requirements/EPIC-001/specification.md)`, `[skill](.github/skills/x-ipe-task-based-bug-fix/SKILL.md)`. **Wrong:** `[spec](../specification.md)`, `[spec](./specification.md)`.
       </constraints>
       <output>requirement-details.md created or updated</output>
     </step_5_1>

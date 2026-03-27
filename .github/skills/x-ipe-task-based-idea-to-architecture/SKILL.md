@@ -262,7 +262,7 @@ BLOCKING (manual/stop_for_question): Step 5.4 - present diagrams, ask if archite
       </action>
       <constraints>
         - CRITICAL: Focus on system-level components, not implementation details
-        - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
+        - MANDATORY: File links in generated markdown MUST use project-root-relative paths so the UI can intercept them and open a preview modal. **Avoid** relative paths (`../`, `./`, `../../`) and absolute filesystem paths (`/Users/...`). **Correct:** `[spec](x-ipe-docs/requirements/EPIC-001/specification.md)`, `[skill](.github/skills/x-ipe-task-based-bug-fix/SKILL.md)`. **Wrong:** `[spec](../specification.md)`, `[spec](./specification.md)`.
         - BLOCKING: Stop if no tools AND human declines manual mode (auto: DAO decides whether to proceed with manual mode)
       </constraints>
       <output>Generated diagram files</output>

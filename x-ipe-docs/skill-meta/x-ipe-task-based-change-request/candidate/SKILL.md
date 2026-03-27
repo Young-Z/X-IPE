@@ -39,7 +39,7 @@ input:
   workflow:
     name: "N/A"  # workflow name, default: N/A
     extra_context_reference:  # optional, default: N/A for all refs
-      eval-report: "path | N/A | auto-detect"
+      closing-report: "path | N/A | auto-detect"
       specification: "path | N/A | auto-detect"
 
   # Task type attributes
@@ -192,7 +192,7 @@ BLOCKING: Large-scope CRs require human confirmation of the proposed feature cha
     <step_2_2>
       <name>Analyze Impact</name>
       <action>
-        0. Resolve extra_context_reference inputs (eval-report, specification)
+        0. Resolve extra_context_reference inputs (closing-report, specification)
         1. READ requirement-details.md: understand project scope, identify related requirements
         2. READ features.md: list all features, note statuses, identify related features
         3. FOR EACH related feature: read specification if exists (ACs, user stories, out-of-scope)
@@ -304,7 +304,7 @@ BLOCKING: Large-scope CRs require human confirmation of the proposed feature cha
            c. SET next_task_based_skill = x-ipe-task-based-feature-breakdown
            d. NOTE: CR-XXX.md created after feature breakdown creates folder
         3. Create CR record at FEATURE-XXX/CR-XXX.md
-        4. Verify all DoD checkpoints
+        4. IF execution_mode == "workflow-mode": Call `update_workflow_action` MCP tool (action: "change_request", status: "done", deliverables: {cr-doc: CR path})
         5. Verify all DoD checkpoints are met
         6. IF manual/stop_for_question: present CR summary to human
       </action>
@@ -363,49 +363,15 @@ BLOCKING: Large-scope CRs require human confirmation of the proposed feature cha
 
 ### Classification Criteria
 
-**Decision Tree:**
+**Decision Tree:** No related feature → `new_feature` | Related feature + fundamental scope change → `new_feature` | Related feature + within boundaries → `modification`
 
-```yaml
-classification_logic:
-  step_1_check_existing:
-    action: Search features.md for related functionality
-    IF no_related_feature_exists:
-      THEN: classification = "new_feature"
-    IF related_feature_exists:
-      THEN: proceed to step_2
+| Classification | Indicators |
+|---|---|
+| `new_feature` (scope change) | New workflows, data models, user types/roles, integration points, purpose change |
+| `modification` | Within boundaries, extends user stories, no new endpoints/screens, same users |
+| `new_feature` (boundary) | Expands boundaries, new user stories, new UI/API/data models, separate docs |
 
-  step_2_evaluate_scope:
-    IF cr_changes_fundamental_scope:
-      THEN: classification = "new_feature"
-    ELSE:
-      THEN: classification = "modification"
-```
-
-**Scope change indicators** (any of these means fundamental scope change):
-- Introduces entirely new workflows
-- Requires new data models
-- Adds new user types or roles
-- Creates new integration points
-- Significantly changes the feature's purpose
-
-**Modification indicators:**
-- Works within current system boundaries
-- Builds upon existing user stories
-- No new API endpoints/screens required
-- Same users, extended functionality
-
-**New feature indicators:**
-- Expands system boundaries
-- Requires new user stories
-- Needs new UI screens, API endpoints, or data models
-- May require separate documentation/onboarding
-
-**When to update requirement-details.md (modification path):**
-- CR adds new high-level capability to existing feature
-- CR changes project constraints
-- CR affects multiple features
-- CR changes user types or stakeholders
-- CR modifies business rules at project level
+**Update requirement-details.md (modification path) when:** CR adds high-level capability, changes constraints, affects multiple features, changes user types, or modifies project-level business rules.
 
 ---
 
@@ -429,6 +395,7 @@ task_completion_output:
     - "x-ipe-docs/requirements/FEATURE-XXX/CR-XXX.md"
 
   # Dynamic attributes
+  feature_id: "{FEATURE-XXX}"            # Primary affected feature (modification path)
   cr_id: "CR-XXX"
   cr_classification: modification | new_feature
   affected_features: ["FEATURE-XXX"]    # For modifications

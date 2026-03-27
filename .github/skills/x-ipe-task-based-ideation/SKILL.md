@@ -327,7 +327,7 @@ BLOCKING (auto): Proceed after DoD verification; auto-select next task from next
       <constraints>
         - CRITICAL: Only use tools that appear in the enabled tool list from step 1.1 -- if a tool is not in the enabled list, do NOT use it
         - MANDATORY: Include all sections from template
-        - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
+        - MANDATORY: File links in generated markdown MUST use project-root-relative paths so the UI can intercept them and open a preview modal. **Avoid** relative paths (`../`, `./`, `../../`) and absolute filesystem paths (`/Users/...`). **Correct:** `[spec](x-ipe-docs/requirements/EPIC-001/specification.md)`, `[skill](.github/skills/x-ipe-task-based-bug-fix/SKILL.md)`. **Wrong:** `[spec](../specification.md)`, `[spec](./specification.md)`.
         - RECOMMENDED: Prefer enabled tools over plain markdown for richer idea presentation
       </constraints>
       <output>idea_summary_path</output>

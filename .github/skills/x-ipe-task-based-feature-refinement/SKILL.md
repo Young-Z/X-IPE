@@ -330,7 +330,7 @@ BLOCKING (auto): Proceed automatically after DoD verification.
         - BLOCKING: If current mockups are linked, spec MUST reference them in ACs and UI/UX sections
         - CRITICAL: Focus on WHAT not HOW in Technical Considerations
         - CRITICAL: Only add mockup-comparison ACs for current mockups
-        - MANDATORY: Use full project-root-relative paths for ALL links (e.g., `x-ipe-docs/requirements/EPIC-XXX/mockups/file.html`). Do NOT use relative paths (`../`, `../../`). This enables link preview (IDEA-033).
+        - MANDATORY: File links in generated markdown MUST use project-root-relative paths so the UI can intercept them and open a preview modal. **Avoid** relative paths (`../`, `./`, `../../`) and absolute filesystem paths (`/Users/...`). **Correct:** `[spec](x-ipe-docs/requirements/EPIC-001/specification.md)`, `[skill](.github/skills/x-ipe-task-based-bug-fix/SKILL.md)`. **Wrong:** `[spec](../specification.md)`, `[spec](./specification.md)`.
       </constraints>
       <output>specification.md created/updated with mockup-referenced, test-type-classified ACs</output>
     </step_5_1>
