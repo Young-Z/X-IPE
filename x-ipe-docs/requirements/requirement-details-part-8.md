@@ -307,6 +307,12 @@ The user wants:
 | FEATURE-008 (Workplace / Idea Management) | Scope — both manage idea folder data | **New standalone feature** | UIUX Reference adds its own subfolder (`uiux-references/`); uses existing folder structure without modification |
 | FEATURE-012 (Design Themes) | Functional — both manage design tokens | **Complementary features** (cross-referenced) | UIUX Reference extracts tokens from web pages; FEATURE-012 stores/applies themes; Phase 3 promotion path connects them |
 
+> **⚠️ CR Impact Note** (added 2026-03-30, ref: EPIC-052 / IDEA-036)
+> - **Change:** The `x-ipe-app-and-agent-interaction` MCP server (FEATURE-033-A) is being replaced by standalone skill-level Python scripts in a new `x-ipe-tool-x-ipe-app-interactor` skill. All 6 MCP tools (`save_uiux_reference`, `update_workflow_action`, `get_workflow_state`, `get_kb_index`, `set_kb_index_entry`, `remove_kb_index_entry`) will be superseded by CLI scripts with direct JSON file I/O.
+> - **Affected Components:** MCP server (`src/x_ipe/mcp/app_agent_interaction.py`), `x-ipe-mcp` console entry point, MCP deployment config in FEATURE-027-D
+> - **Action Required:** Phase-out: scripts built first → skills migrated → MCP server removed. Flask API routes remain unchanged (serve web UI).
+> - **New Feature Ref:** EPIC-052 — see [requirement-details-part-21.md](x-ipe-docs/requirements/requirement-details-part-21.md)
+
 ## Linked Mockups
 
 | Mockup Function Name | Mockup Link |

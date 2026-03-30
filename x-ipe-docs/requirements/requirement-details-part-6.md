@@ -250,6 +250,12 @@ FEATURE-027-A (Registry & Service) ──┬── FEATURE-027-B (Init & Selecti
 
 - None (all clarifications resolved during gathering)
 
+> **⚠️ CR Impact Note** (added 2026-03-30, ref: EPIC-052 / IDEA-036)
+> - **Change:** The `x-ipe-app-and-agent-interaction` MCP server deployment managed by FEATURE-027-D (MCP Config Deployment) is being deprecated. The MCP server will be replaced by standalone skill-level scripts that require no MCP deployment.
+> - **Affected FRs:** FEATURE-027-D MCP deployment entries for `x-ipe-app-and-agent-interaction`
+> - **Action Required:** After EPIC-052 Phase 3, remove `x-ipe-app-and-agent-interaction` from MCP deployment configurations. Other MCP servers (chrome-devtools, etc.) remain unaffected.
+> - **New Feature Ref:** EPIC-052 — see [requirement-details-part-21.md](x-ipe-docs/requirements/requirement-details-part-21.md)
+
 ---
 
 ## References

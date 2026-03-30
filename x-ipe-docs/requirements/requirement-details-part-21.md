@@ -285,3 +285,223 @@ Create the tool skill referenced as an external dependency by EPIC-050. The Appl
 | Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
 |------------|---------|---------------|---------|-------------------|-------------------|
 | FEATURE-051-A | EPIC-051 | User Manual Tool Skill | v1.0 | Complete tool skill with playbook, collection template, acceptance criteria, app-type mixins, and 5 operations | None |
+| FEATURE-052-A | EPIC-052 | Shared Utility & Workflow Scripts | v1.0 | `_lib.py` shared module (atomic I/O, fcntl locking, path resolution) + `workflow_update_action.py` + `workflow_get_state.py` | None |
+| FEATURE-052-B | EPIC-052 | KB Index Scripts | v1.0 | `kb_get_index.py` + `kb_set_entry.py` + `kb_remove_entry.py` for .kb-index.json operations | FEATURE-052-A |
+| FEATURE-052-C | EPIC-052 | UIUX Reference Script | v1.0 | `uiux_save_reference.py` — screenshot decode, element enrichment, HTML/CSS/MD file generation | FEATURE-052-A |
+| FEATURE-052-D | EPIC-052 | Skill Migration & MCP Removal | v1.0 | Update 15 consuming skills to use scripts, create SKILL.md, deprecate MCP server | FEATURE-052-A, FEATURE-052-B, FEATURE-052-C |
+
+---
+
+## EPIC-052: Replace MCP Server with Skill-Level Scripts
+
+> Version: 1.0
+> Source Idea: [IDEA-036 — CR-Replace existing MCP function](x-ipe-docs/ideas/036.%20CR-Replace%20existing%20mcp%20function/idea-summary-v1.md)
+> CR Impact On: EPIC-033 (App-Agent Interaction MCP), EPIC-036 (Engineering Workflow View), EPIC-027 (Multi-CLI Adapter)
+
+### Project Overview
+
+Replace the `x-ipe-app-and-agent-interaction` MCP server (6 tools, FastMCP/stdio → HTTP → Flask → Service → JSON) with a single lightweight skill `x-ipe-tool-x-ipe-app-interactor` containing standalone Python scripts that directly read/write JSON files. This eliminates the MCP protocol overhead, Flask backend dependency, and HTTP round-trip for all agent-to-application interactions.
+
+The current architecture requires 6 layers (Agent → MCP stdio → FastMCP → HTTP POST → Flask route → Service → JSON file) for what are fundamentally file operations. The replacement scripts follow the proven `lint_dsl.py` pattern from `x-ipe-tool-architecture-dsl`: `python3 script.py <args> --format json` with direct file I/O, fcntl locking, and atomic writes.
+
+### User Request
+
+Review all tools in `x-ipe-app-and-agent-interaction` MCP server and replace them with skill-level scripts. Scripts should directly update workflow JSON files with validation. Reference implementation: `x-ipe-tool-architecture-dsl/scripts/lint_dsl.py`.
+
+### Clarifications
+
+| Question | Answer |
+|----------|--------|
+| Standalone or API-dependent? | Fully standalone — direct JSON file I/O, no Flask backend needed |
+| Scope? | All 6 MCP tools — replace everything with scripts |
+| Script location? | Single shared skill `x-ipe-tool-x-ipe-app-interactor` with `scripts/` folder |
+| Migration strategy? | Phase out gradually — scripts first, remove MCP after validation |
+| Flask routes? | Keep unchanged — they serve the web UI, scripts are the agent-only path |
+
+### High-Level Requirements
+
+#### Functional Requirements
+
+1. **FR-052.01** — Create a new skill `x-ipe-tool-x-ipe-app-interactor` with a `scripts/` folder containing 6 standalone Python scripts plus a shared utility module
+2. **FR-052.02** — `workflow_update_action.py`: Replicate full `update_workflow_action` logic — status validation, fcntl file locking, deliverable format transformation (list → keyed dict), schema versioning (3.0/4.0), stage gating re-evaluation, feature breakdown population
+3. **FR-052.03** — `workflow_get_state.py`: Read and return full workflow state from `workflow-{name}.json`, handle missing/corrupted files, support schema auto-migration (v1→v2)
+4. **FR-052.04** — `kb_get_index.py`: Read `.kb-index.json` from specified folder, normalize flat vs canonical format, return entries
+5. **FR-052.05** — `kb_set_entry.py`: Create or update entry in `.kb-index.json` with atomic write, support all file types
+6. **FR-052.06** — `kb_remove_entry.py`: Remove metadata entry from `.kb-index.json` (file itself untouched)
+7. **FR-052.07** — `uiux_save_reference.py`: Replicate full UIUX reference pipeline — input validation, base64 screenshot decoding, element merging/enrichment, HTML/CSS resource file generation, summarized-uiux-reference.md generation, mimic-strategy.md generation
+8. **FR-052.08** — `_lib.py` shared utility module: `atomic_read_json()`, `atomic_write_json()` (tempfile + fsync + os.replace), `with_file_lock()` (fcntl.flock LOCK_EX), `resolve_project_root()`, `resolve_workflow_dir()`, `resolve_kb_root()`, `output_result()`, `exit_with_error()`
+9. **FR-052.09** — All scripts MUST use only Python standard library (json, os, tempfile, fcntl, argparse, pathlib, base64, re, datetime) — zero pip dependencies
+10. **FR-052.10** — All scripts MUST support `--format json` for machine-readable output and `--format text` for human-readable output
+11. **FR-052.11** — Exit codes: `0` = success, `1` = validation error, `2` = file not found, `3` = lock timeout
+12. **FR-052.12** — Update all 13 task-based skills to call scripts instead of MCP tools (replace `update_workflow_action` MCP call with `python3 workflow_update_action.py`)
+13. **FR-052.13** — Update `x-ipe-tool-uiux-reference` skill to call `uiux_save_reference.py` instead of `save_uiux_reference` MCP tool
+14. **FR-052.14** — Update `x-ipe-tool-kb-librarian` skill to call `kb_*.py` scripts instead of KB MCP tools
+15. **FR-052.15** — After all skills migrated and validated, deprecate and remove `x-ipe-app-and-agent-interaction` MCP server (`src/x_ipe/mcp/app_agent_interaction.py`) and `x-ipe-mcp` entry point from `pyproject.toml`
+16. **FR-052.16** — Create SKILL.md for `x-ipe-tool-x-ipe-app-interactor` with operations mapping to each script, CLI usage examples, and error handling documentation
+
+#### Non-Functional Requirements
+
+17. **NFR-052.01** — Atomic writes: All JSON writes MUST use tempfile + os.fsync + os.replace pattern — crash-safe persistence
+18. **NFR-052.02** — File locking: All write operations on workflow JSON MUST use `fcntl.flock(LOCK_EX)` on a `.lock` file — prevents concurrent write corruption
+19. **NFR-052.03** — Lock timeout: Scripts MUST handle stale lock files with configurable timeout (default 10s), failing with exit code 3 if lock cannot be acquired
+20. **NFR-052.04** — Backward compatibility: During migration phase, both MCP and scripts MUST coexist reading/writing the same JSON files without conflict
+21. **NFR-052.05** — Script output MUST match current MCP tool JSON response structure for seamless skill migration
+22. **NFR-052.06** — Platform: `fcntl.flock()` is Unix/macOS only — acceptable since X-IPE targets macOS/Linux development environments
+
+### Constraints
+
+- Scripts must have zero external dependencies (stdlib only)
+- Flask API routes remain unchanged (serve web UI)
+- `workflow_update_action.py` needs read access to `workflow-template.json` for deliverable tag resolution and feature structure initialization
+- `uiux_save_reference.py` is estimated at 400-500 lines due to multi-file generation pipeline
+- Schema version upgrades are upward-only (2.0 → 3.0 → 4.0)
+- `$output-folder` deliverable tags CANNOT have array values
+
+### Related Features
+
+| Feature | Overlap Type | Decision | Rationale |
+|---------|-------------|----------|-----------|
+| EPIC-033 / FEATURE-033-A (App-Agent Interaction MCP) | Direct — EPIC-052 replaces MCP server | **CR on EPIC-033** | MCP server deprecated; scripts supersede all 6 tools |
+| EPIC-036 / FEATURE-036-A (Engineering Workflow View) | Direct — workflow MCP tools replaced | **CR on EPIC-036** | Scripts are evolution of same feature, just different delivery mechanism |
+| EPIC-027 / FEATURE-027-D (MCP Config Deployment) | Indirect — MCP deployment becomes obsolete | **CR on EPIC-027** | Only x-ipe-app-and-agent-interaction entry removed; other MCP servers unaffected |
+
+### Feature List (Suggested Breakdown)
+
+| Feature ID | Feature Title | Brief Description | Dependency |
+|------------|---------------|-------------------|------------|
+| FEATURE-052-A | Shared Utility & Workflow Scripts | `_lib.py` shared module + `workflow_update_action.py` + `workflow_get_state.py` — core infrastructure + highest-usage scripts | None |
+| FEATURE-052-B | KB Index Scripts | `kb_get_index.py` + `kb_set_entry.py` + `kb_remove_entry.py` — simple JSON ops for KB metadata | FEATURE-052-A (_lib.py) |
+| FEATURE-052-C | UIUX Reference Script | `uiux_save_reference.py` — complex multi-file generation pipeline | FEATURE-052-A (_lib.py) |
+| FEATURE-052-D | Skill Migration & MCP Removal | Update 15 consuming skills + create SKILL.md + deprecate MCP server | FEATURE-052-A, B, C |
+
+### Open Questions
+
+- None (all clarifications resolved during ideation and requirement gathering)
+
+### Linked Mockups
+
+| Mockup Function Name | Mockup Link |
+|---------------------|-------------|
+| N/A — backend/skill infrastructure change, no UI | — |
+
+---
+
+### FEATURE-052-A: Shared Utility & Workflow Scripts
+
+**Version:** v1.0
+**Brief Description:** Core shared utility module `_lib.py` plus the two highest-usage scripts `workflow_update_action.py` and `workflow_get_state.py`. This is the MVP — it covers 14 of 15 consuming skills.
+
+**Acceptance Criteria:**
+- [ ] `_lib.py` provides `atomic_read_json()` and `atomic_write_json()` (tempfile + fsync + os.replace)
+- [ ] `_lib.py` provides `with_file_lock()` using fcntl.flock(LOCK_EX) on `.lock` file with configurable timeout
+- [ ] `_lib.py` provides `resolve_project_root()`, `resolve_workflow_dir()`, `resolve_kb_root()` path helpers
+- [ ] `_lib.py` provides `output_result()` supporting `--format json` and `--format text`
+- [ ] `_lib.py` exit codes: 0=success, 1=validation error, 2=file not found, 3=lock timeout
+- [ ] `workflow_update_action.py` accepts --workflow, --action, --status, --feature-id, --deliverables, --context, --features, --format
+- [ ] `workflow_update_action.py` validates status in {pending, in_progress, done, skipped, failed}
+- [ ] `workflow_update_action.py` transforms deliverables: list → keyed dict via template tags
+- [ ] `workflow_update_action.py` handles schema versioning: keyed dict → 3.0, array values → 4.0
+- [ ] `workflow_update_action.py` performs stage gating re-evaluation when action completes
+- [ ] `workflow_update_action.py` handles feature_breakdown special case (populate per-feature lanes)
+- [ ] `workflow_get_state.py` accepts --workflow, --format and returns full workflow state
+- [ ] `workflow_get_state.py` handles missing/corrupted files with structured error output
+- [ ] All scripts use only Python standard library (zero pip dependencies)
+- [ ] Script output matches current MCP tool JSON response structure
+
+**Dependencies:**
+- None (foundation feature)
+
+**Technical Considerations:**
+- Must read `workflow-template.json` for deliverable tag resolution
+- fcntl.flock is Unix/macOS only — acceptable per NFR-052.06
+- Lock timeout default 10s with --lock-timeout override
+
+---
+
+### FEATURE-052-B: KB Index Scripts
+
+**Version:** v1.0
+**Brief Description:** Three simple scripts for `.kb-index.json` CRUD operations — read entries, create/update entry, remove entry.
+
+**Acceptance Criteria:**
+- [ ] `kb_get_index.py` accepts --folder, --format and returns `.kb-index.json` content
+- [ ] `kb_get_index.py` normalizes flat format (legacy) to canonical format on read
+- [ ] `kb_get_index.py` returns empty index if file missing or corrupted
+- [ ] `kb_set_entry.py` accepts --folder, --name, --entry (JSON), --format
+- [ ] `kb_set_entry.py` performs atomic write after merging entry into existing index
+- [ ] `kb_remove_entry.py` accepts --folder, --name, --format
+- [ ] `kb_remove_entry.py` is a no-op if entry doesn't exist
+- [ ] All three scripts reuse `_lib.py` for atomic I/O and path resolution
+
+**Dependencies:**
+- FEATURE-052-A: Requires `_lib.py` shared utility module
+
+**Technical Considerations:**
+- KB root resolved via `resolve_kb_root()` from _lib.py
+- Entry structure supports any metadata fields (title, description, tags, author, type, etc.)
+- `.kb-index.json` version is "1.0"
+
+---
+
+### FEATURE-052-C: UIUX Reference Script
+
+**Version:** v1.0
+**Brief Description:** Complex multi-file generation script replicating the full UIUX reference pipeline — input validation, base64 screenshot decoding, element enrichment, HTML/CSS/MD resource generation.
+
+**Acceptance Criteria:**
+- [ ] `uiux_save_reference.py` accepts --data-file (JSON path) or --data (JSON string), --format
+- [ ] Validates required fields: version, source_url, timestamp, idea_folder + at least one of colors/elements/design_tokens
+- [ ] Decodes base64-prefixed screenshots to PNG files in screenshots/ subfolder
+- [ ] Merges incoming elements with existing referenced-elements.json (keyed by area_id)
+- [ ] Enriches discovered elements with purpose, relationships, element_details structure
+- [ ] Generates per-element HTML structure files ({id}-structure.html) and CSS files ({id}-styles.css)
+- [ ] Generates summarized-uiux-reference.md with colors table, per-area sections, resource tables
+- [ ] Generates mimic-strategy.md with 6-dimension validation rubric (layout, typography, color, spacing, effects, resources)
+- [ ] Output structure matches current service: page-element-references/, screenshots/, mimic-strategy.md
+- [ ] Uses `_lib.py` for atomic writes and path resolution
+
+**Dependencies:**
+- FEATURE-052-A: Requires `_lib.py` shared utility module
+
+**Technical Considerations:**
+- Estimated 400-500 lines due to multi-file generation pipeline
+- Uses base64, re modules in addition to standard _lib.py dependencies
+- Must handle incremental updates (merge with existing referenced-elements.json)
+
+---
+
+### FEATURE-052-D: Skill Migration & MCP Removal
+
+**Version:** v1.0
+**Brief Description:** Update all 15 consuming skills to invoke scripts instead of MCP tools, create SKILL.md for the new skill, and deprecate the MCP server.
+
+**Acceptance Criteria:**
+- [ ] SKILL.md created for `x-ipe-tool-x-ipe-app-interactor` with operations for each script
+- [ ] All 13 task-based skills updated: `update_workflow_action` MCP call → `python3 workflow_update_action.py`
+- [ ] `x-ipe-tool-uiux-reference` skill updated: `save_uiux_reference` MCP call → `python3 uiux_save_reference.py`
+- [ ] `x-ipe-tool-kb-librarian` skill updated: KB MCP calls → `python3 kb_*.py` scripts
+- [ ] `x-ipe-workflow-task-execution` skill updated: `get_workflow_state` MCP call → `python3 workflow_get_state.py`
+- [ ] MCP server deprecated: `src/x_ipe/mcp/app_agent_interaction.py` removed
+- [ ] `x-ipe-mcp` entry point removed from `pyproject.toml`
+- [ ] MCP deployment config for `x-ipe-app-and-agent-interaction` removed from CLI adapter configs
+- [ ] All updated skills pass smoke tests (scripts produce expected output)
+
+**Dependencies:**
+- FEATURE-052-A: Workflow scripts must be working
+- FEATURE-052-B: KB scripts must be working
+- FEATURE-052-C: UIUX script must be working
+
+**Technical Considerations:**
+- Flask API routes remain unchanged (serve web UI)
+- 15 SKILL.md files need targeted edits (replace MCP invocation blocks)
+- Must validate backward compatibility during migration period
+
+---
+
+### Dependency Graph
+
+```
+FEATURE-052-A (Shared Utility & Workflow Scripts) ──┬── FEATURE-052-B (KB Index Scripts) ──────┐
+                                                    ├── FEATURE-052-C (UIUX Reference Script) ──┤── FEATURE-052-D (Skill Migration & MCP Removal)
+                                                    └────────────────────────────────────────────┘
+```

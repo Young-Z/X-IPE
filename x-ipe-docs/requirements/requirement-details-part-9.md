@@ -443,6 +443,12 @@ The user wants:
 |-----------------|--------------|----------|-----------|
 | FEATURE-008 (Workplace/Idea Management) | Navigation competition — both occupy middle content area | **New standalone feature** | Different lifecycle: Workplace creates ideas; Engineering Workflow orchestrates delivery of those ideas. Coexist as separate top-nav entries. |
 | FEATURE-033 (App-Agent Interaction MCP) | Infrastructure reuse — both use app↔agent MCP communication | **New standalone feature with dependency** | New MCP tools (`update_workflow_status`, `get_workflow_state`) owned by this feature; depends on FEATURE-033 for MCP infrastructure. No CR on FEATURE-033. |
+
+> **⚠️ CR Impact Note** (added 2026-03-30, ref: EPIC-052 / IDEA-036)
+> - **Change:** The MCP tools `update_workflow_action` and `get_workflow_state` (registered on `x-ipe-app-and-agent-interaction` MCP server) are being replaced by standalone scripts `workflow_update_action.py` and `workflow_get_state.py` in `x-ipe-tool-x-ipe-app-interactor` skill. Scripts perform direct JSON file I/O with fcntl locking — no Flask backend dependency.
+> - **Affected FRs:** FR-036.34 (MCP tool registration), FR-036.35 (Workflow state persistence via MCP)
+> - **Action Required:** All 13 task-based skills that call `update_workflow_action` MCP tool must be updated to invoke the replacement script. FEATURE-036-A's MCP dependency on FEATURE-033 becomes obsolete after migration.
+> - **New Feature Ref:** EPIC-052 — see [requirement-details-part-21.md](x-ipe-docs/requirements/requirement-details-part-21.md)
 | FEATURE-005/029 (Console/Terminal) | Session management — both create/manage console sessions | **New standalone feature with dependency** | Engineering Workflow reuses console APIs without modification. Dependency ensures console refactoring is flagged. |
 
 ---
