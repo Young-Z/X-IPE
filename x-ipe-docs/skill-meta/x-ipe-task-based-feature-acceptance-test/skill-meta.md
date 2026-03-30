@@ -6,7 +6,7 @@ skill_type: x-ipe-task-based
 version: "2.0.0"
 status: candidate
 created: 2025-01-30
-updated: 2026-03-11
+updated: 2026-03-30
 
 summary: |
   Execute acceptance tests for ALL feature types by classifying acceptance criteria

@@ -29,13 +29,13 @@ CRITICAL: Existing frontmatter in markdown files MUST be preserved. Only merge m
 
 ## About
 
-The KB AI Librarian automates the organization of files dropped into the knowledge base intake folder. When a user clicks "✨ Run AI Librarian" in the KB Browse Modal or triggers the command via CLI, this skill processes all pending intake files: analyzing their content, assigning appropriate tags from the project's tag taxonomy, generating frontmatter metadata for markdown files, and moving them to the correct destination folder.
+The KB AI Librarian automates the organization of files dropped into the knowledge base intake folder. When a user clicks "✨ Run AI Librarian" in the KB Browse Modal or triggers the command via CLI, this skill processes all pending intake files: analyzing their content, assigning appropriate tags from the project's tag taxonomy, generating metadata index entries for ALL file types, and moving them to the correct destination folder.
 
 **Key Concepts:**
 - **Intake Folder** — The `.intake/` directory under the KB root where new files are dropped for processing
 - **Intake Status** — Tracked in `.intake-status.json`: `pending` → `processing` → `filed`
 - **Tag Taxonomy** — Lifecycle tags (7) and domain tags (10) defined in `knowledgebase-config.json`
-- **Frontmatter** — YAML metadata block at the top of markdown files (title, tags, author, created, auto_generated)
+- **Metadata Index** — Per-folder `.kb-index.json` registry storing metadata (title, description, tags, author, type) for ALL file types (replaces YAML frontmatter)
 - **Destination Folder** — Target folder within the KB where a file should live, determined by UI assignment or AI analysis
 
 ---
@@ -147,15 +147,16 @@ input:
           - Select 1-3 domain tags (e.g., "API", "Security")
           - Use conservative tagging — only assign tags with clear evidence in content
 
-       e. Handle file based on type:
+       e. Generate metadata index entry for ALL file types:
+          - Generate entry: title, description (< 100 words), tags (lifecycle + domain), author, created, type, auto_generated: true
           - IF markdown (.md) file:
-            * Parse existing frontmatter (if any)
-            * Generate frontmatter fields: title, tags (lifecycle + domain), author, created, auto_generated: true
-            * MERGE with existing frontmatter — preserve existing values, only fill missing fields
-            * Write updated content with merged frontmatter
-          - IF non-markdown file:
-            * Skip frontmatter generation entirely
-            * File will be moved as-is
+            * Analyze content for title, description, tags
+            * Parse existing frontmatter (if any) as hints — DO NOT inject new frontmatter into file
+          - IF non-markdown file (images, PDFs, videos, etc.):
+            * Derive title from filename
+            * Generate description from context/filename
+            * type field set automatically from file extension
+          - Run via bash: `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/kb_set_entry.py --name {name} --entry '{json}' --folder {folder}`
 
        f. Move file to destination:
           - Move file from .intake/{filename} to {destination_folder}/{filename}
@@ -206,8 +207,8 @@ operation_output:
     <verification>Every file with status "pending" was attempted (status changed from pending)</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Markdown files have frontmatter</name>
-    <verification>All processed .md files have YAML frontmatter with title, tags, author, created, auto_generated</verification>
+    <name>All files have index entries</name>
+    <verification>All processed files (markdown AND non-markdown) have entries in destination folder's .kb-index.json with title, description, tags, author, type, auto_generated</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Files moved to destinations</name>

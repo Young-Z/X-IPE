@@ -22,7 +22,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the workflow state was updated before marking the task complete.
+**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST run the workflow update script via bash: `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py` with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the script exits with code 0 before marking the task complete.
 
 MANDATORY: This skill MUST call feature-board-management to create features on the board. Never edit features.md manually.
 
@@ -319,7 +319,7 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
       <constraints>
         - BLOCKING: Feature List goes into PART FILE, NOT index
         - BLOCKING: MUST use feature-board-management skill
-        - MANDATORY: Use full project-root-relative paths
+        - MANDATORY: File links in generated markdown MUST use project-root-relative paths so the UI can intercept them and open a preview modal. **Avoid** relative paths (`../`, `./`, `../../`) and absolute filesystem paths (`/Users/...`). **Correct:** `[spec](x-ipe-docs/requirements/EPIC-001/specification.md)`, `[skill](.github/skills/x-ipe-task-based-bug-fix/SKILL.md)`. **Wrong:** `[spec](../specification.md)`, `[spec](./specification.md)`.
       </constraints>
       <output>Requirement-details updated, features on board with status "Planned"</output>
     </step_5_2>
@@ -327,7 +327,7 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
     <step_5_3>
       <name>Complete & Verify</name>
       <action>
-        1. IF workflow-mode: call update_workflow_action with status "done", features list
+        1. IF workflow-mode: run `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py` with status "done", features list
         2. Verify all DoD checkpoints
         3. IF manual/stop_for_question: present feature breakdown, ask if any features are missing or miscategorized
       </action>
@@ -454,7 +454,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Workflow Action Status Updated</name>
-    <verification>If execution_mode == "workflow-mode", called update_workflow_action with status "done"</verification>
+    <verification>If execution_mode == "workflow-mode", ran `workflow_update_action.py` script with status "done"</verification>
   </checkpoint>
 </definition_of_done>
 ```

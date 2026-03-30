@@ -304,7 +304,7 @@ BLOCKING: Large-scope CRs require human confirmation of the proposed feature cha
            c. SET next_task_based_skill = x-ipe-task-based-feature-breakdown
            d. NOTE: CR-XXX.md created after feature breakdown creates folder
         3. Create CR record at FEATURE-XXX/CR-XXX.md
-        4. IF execution_mode == "workflow-mode": Call `update_workflow_action` MCP tool (action: "change_request", status: "done", deliverables: {cr-doc: CR path})
+        4. IF execution_mode == "workflow-mode": Run `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py` (action: "change_request", status: "done", deliverables: {cr-doc: CR path})
         5. Verify all DoD checkpoints are met
         6. IF manual/stop_for_question: present CR summary to human
       </action>

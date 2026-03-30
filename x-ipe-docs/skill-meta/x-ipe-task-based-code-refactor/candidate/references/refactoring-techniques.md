@@ -306,7 +306,7 @@ Output:
   status: completed | blocked
   next_task_based_skill: null
   require_human_review: Yes
-  interaction_mode: {from input Interaction Mode}
+  interaction_mode: {from input Auto Proceed}
   task_output_links: [<paths to refactored files>]
   
   # Dynamic attributes

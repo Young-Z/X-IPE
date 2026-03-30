@@ -10,7 +10,7 @@ skill_type: x-ipe-tool
 version: "1.0.0"
 status: candidate
 created: 2026-03-16
-updated: 2026-03-16
+updated: 2026-03-30
 
 # ─────────────────────────────────────────────────────────────
 # PURPOSE

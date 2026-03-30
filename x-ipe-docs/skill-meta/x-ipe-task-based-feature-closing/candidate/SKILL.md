@@ -322,7 +322,7 @@ BLOCKING: Phase 1 to Phase 2 is BLOCKED if any acceptance criterion is not met. 
       <name>Output Summary</name>
       <action>
         1. IF execution_mode == "workflow-mode":
-           a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
+           a. Run the workflow update script via bash (`python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py`) with:
               - workflow_name: {from context}
               - action: "feature_closing"
               - status: "done"

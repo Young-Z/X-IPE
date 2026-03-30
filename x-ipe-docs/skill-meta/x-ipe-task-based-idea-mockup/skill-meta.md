@@ -10,7 +10,7 @@ skill_type: x-ipe-task-based
 version: "1.1.0"
 status: candidate
 created: 2026-02-20
-updated: 2026-02-20
+updated: 2026-03-30
 
 # ─────────────────────────────────────────────────────────────
 # PURPOSE

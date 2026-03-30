@@ -86,6 +86,7 @@ This prevents context overflow by processing one layer at a time.
 
 ```yaml
 tool_skill_input:
+  operation: "implement"  # Supported: "implement" | "fix" | "refactor"
   aaa_scenarios:
     - scenario_text: |
         @backend
@@ -98,12 +99,24 @@ tool_skill_input:
             - Response status is 201
   source_code_path: "src/my_app/"
   test_code_path: "tests/"
-  feature_context:
+  feature_context:  # OPTIONAL for "fix"/"refactor"; REQUIRED for "implement"
     feature_id: "FEATURE-XXX-X"
     feature_title: "..."
     technical_design_link: "x-ipe-docs/requirements/EPIC-XXX/FEATURE-XXX-X/technical-design.md"
     specification_link: "x-ipe-docs/requirements/EPIC-XXX/FEATURE-XXX-X/specification.md"
 ```
+
+### Operation Semantics
+
+| Operation | Purpose | AAA Scenarios | feature_context | TDD Gate |
+|-----------|---------|--------------|-----------------|----------|
+| `implement` | Build new feature code | Full set from orchestrator | Required | N/A |
+| `fix` | Fix a bug via TDD | 1-2 narrow scenarios from bug context | Optional (synthetic fallback) | Test MUST fail before fix |
+| `refactor` | Restructure preserving behavior | Per-phase target state scenarios | Optional (synthetic fallback) | Baseline tests must pass first |
+
+When `feature_context` is absent for fix/refactor, tool skills generate synthetic context:
+- Fix: `feature_id: "BUG-{task_id}"`, `technical_design_link: "N/A"`
+- Refactor: `feature_id: "REFACTOR-{task_id}"`, `technical_design_link: "N/A"`
 
 ### Output (Tool Skill → Orchestrator)
 

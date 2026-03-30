@@ -302,7 +302,7 @@ BLOCKING: Phase 4 halts if any test fails (must fix or revert).
            - INVOKE x-ipe-tool-tracing-instrumentation for new files/functions
            - RE-RUN tests, UPDATE tracing counts
         9. IF execution_mode == "workflow-mode":
-           Call update_workflow_action of x-ipe-app-and-agent-interaction MCP:
+           Run workflow update script via bash (`python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py`):
              - workflow_name: {from context}
              - action: "code_refactor"
              - status: "done"

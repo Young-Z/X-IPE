@@ -25,7 +25,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **BLOCKING: Single Feature Only.** This skill operates on exactly ONE feature at a time. Do NOT batch or combine multiple features in a single execution. If multiple features need processing, run this skill separately for each feature.
 
-**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the workflow state was updated before marking the task complete.
+**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST run the workflow update script via bash: `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py` with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the script exits with code 0 before marking the task complete.
 
 CRITICAL: Only use testing tools that are explicitly enabled (`true`) in `x-ipe-docs/config/tools.json` under `stages.validation.acceptance_test`. Only `true` counts as enabled — `false`, absent, or any other value means DISABLED. The tools.json config is the single source of truth for which tools are allowed.
 
@@ -273,7 +273,7 @@ BLOCKING: Step 4.1 - Tests for a given type are blocked if the required tool is 
       </action>
       <constraints>
         - MANDATORY: Every test case must pass reflection checklist (see references/detailed-procedures.md)
-        - MANDATORY: All internal markdown links MUST use full project-root-relative paths
+        - MANDATORY: File links in generated markdown MUST use project-root-relative paths so the UI can intercept them and open a preview modal. **Avoid** relative paths (`../`, `./`, `../../`) and absolute filesystem paths (`/Users/...`). **Correct:** `[spec](x-ipe-docs/requirements/EPIC-001/specification.md)`, `[skill](.github/skills/x-ipe-task-based-bug-fix/SKILL.md)`. **Wrong:** `[spec](../specification.md)`, `[spec](./specification.md)`.
       </constraints>
       <output>Refined test cases with implementation-specific test code</output>
     </step_3_1>
@@ -347,7 +347,7 @@ BLOCKING: Step 4.1 - Tests for a given type are blocked if the required tool is 
       <name>Update Workflow Status</name>
       <action>
         1. IF execution_mode == "workflow-mode":
-           a. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with:
+           a. Run the workflow update script via bash (`python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py`) with:
               - workflow_name: {from context}
               - action: {workflow.action}
               - status: "done"
@@ -464,7 +464,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Workflow Action Updated</name>
-    <verification>If execution_mode == "workflow-mode", called update_workflow_action with status "done"</verification>
+    <verification>If execution_mode == "workflow-mode", ran `workflow_update_action.py` script with status "done"</verification>
   </checkpoint>
 </definition_of_done>
 ```

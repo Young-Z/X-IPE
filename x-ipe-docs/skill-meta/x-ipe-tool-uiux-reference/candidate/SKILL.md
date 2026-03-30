@@ -96,8 +96,8 @@ input:
     <verification>idea_folder is known from context or asked from user</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>save_uiux_reference MCP tool available</name>
-    <verification>App-Agent Interaction MCP server is running (provides save_uiux_reference tool)</verification>
+    <name>uiux_save_reference.py script available</name>
+    <verification>Script exists at .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/uiux_save_reference.py</verification>
   </checkpoint>
 </definition_of_ready>
 ```
@@ -175,7 +175,7 @@ input:
     2. CONSTRUCT theme reference data:
        { version: "2.0", source_url, timestamp: ISO 8601 now, idea_folder, colors: result.colors }
 
-    3. CALL save_uiux_reference(data: constructed_json)
+    3. RUN via bash: `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/uiux_save_reference.py --data-file {temp_json_path}`
 
     4. INVOKE brand-theme-creator skill with the annotated colors
        - Pass colors with their semantic roles → generates design-system.md + component-visualization.html
@@ -270,7 +270,7 @@ input:
     6b. PERSIST as referenced-elements.json (single source of truth):
         a. Construct from enriched data (see references/data-schema.md for full schema)
         b. Write to {idea_folder}/uiux-references/page-element-references/referenced-elements.json
-        c. CALL save_uiux_reference(data: {...}) — service also generates:
+        c. RUN via bash: `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/uiux_save_reference.py --data-file {temp_json_path}` — service also generates:
            summarized-uiux-reference.md, {area-id}-structure.html, {area-id}-styles.css, mimic-strategy.md
         d. Verify generated files exist; create manually if missing
 
@@ -286,7 +286,7 @@ input:
     8. LOAD referenced-elements.json from page-element-references/
        - If missing, fall back to result.areas from toolbar data
 
-    9. PERSIST BEFORE GENERATE: CALL save_uiux_reference with current data
+    9. PERSIST BEFORE GENERATE: RUN `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/uiux_save_reference.py --data-file {temp_json_path}`
 
     10. GENERATE versioned mockup:
         a. Scan for existing mockup-v*.html → next version. NEVER overwrite.
@@ -387,7 +387,7 @@ operation_output:
   </checkpoint>
   <checkpoint required="true">
     <name>Data saved via MCP</name>
-    <verification>save_uiux_reference returned success</verification>
+    <verification>uiux_save_reference.py script exited with code 0</verification>
   </checkpoint>
   <checkpoint required="true" mode="theme">
     <name>Theme colors saved with roles</name>

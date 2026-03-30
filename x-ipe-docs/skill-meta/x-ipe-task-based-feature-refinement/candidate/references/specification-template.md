@@ -24,8 +24,12 @@
 
 | Mockup | Type | Path | Description | Status | Linked Date |
 |--------|------|------|-------------|--------|-------------|
-| Dashboard Main | HTML | [mockups/dashboard-v1.html](mockups/dashboard-v1.html) | Main dashboard layout | current | MM-DD-YYYY |
+| Dashboard Main | HTML | [x-ipe-docs/requirements/EPIC-XXX/mockups/dashboard-v1.html](x-ipe-docs/requirements/EPIC-XXX/mockups/dashboard-v1.html) | Main dashboard layout | current | MM-DD-YYYY |
 
+> **Path Convention:** Use full project-root-relative paths for mockup links (e.g., `x-ipe-docs/requirements/EPIC-XXX/mockups/file.html`).
+> This enables the link preview feature (IDEA-033) — clicking opens an in-app DeliverableViewer modal.
+> Do NOT use relative paths like `../mockups/` or `../../mockups/`.
+>
 > **Note:** UI/UX requirements and acceptance criteria below are derived from mockups marked as "current".  
 > Mockups marked as "outdated" are directional references only -- do not use for AC comparison.
 >

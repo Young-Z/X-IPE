@@ -7,7 +7,7 @@ skill_type: x-ipe-task-based
 version: "3.0.0"
 status: candidate
 created: 2026-02-11
-updated: 2026-03-05
+updated: 2026-03-30
 
 summary: |
   Breaks requirements into Epics and features. Assesses scope to determine Epic grouping, then breaks each Epic into features with MVP-first criteria. Tracks on feature board and verifies no parent-child duplication after splitting.

@@ -11,7 +11,7 @@
 4. User picks 4 colors with magnifier, assigns roles (primary, secondary, accent, neutral)
 5. User clicks "Create Theme" → `__xipeRefReady` becomes true
 6. Agent reads `result.mode === "theme"`, extracts annotated colors
-7. Agent calls `save_uiux_reference` with colors and roles
+7. Agent runs `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/uiux_save_reference.py` with colors and roles
 8. Agent invokes `x-ipe-tool-brand-theme-creator` with annotated colors
 9. Output: "Theme created — 4 colors extracted from https://stripe.com/pricing"
 
@@ -44,7 +44,7 @@
 4. Agent detects URL change → navigates to `https://app.figma.com/file/xyz`
 5. Inject toolbar via 2-call compressed injection
 6. User collects references (theme or mockup mode)
-7. Save via `save_uiux_reference` MCP tool
+7. Save via `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/uiux_save_reference.py`
 
 ## Example 4: ARIA Workaround for Screenshots (LL-001)
 
