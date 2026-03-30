@@ -23,7 +23,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the workflow state was updated before marking the task complete.
+**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST run the workflow update script via bash: `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py` with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the script exits with code 0 before marking the task complete.
 
 MANDATORY: Every requirement MUST create an Epic with ID format `EPIC-{nnn}` (e.g., EPIC-001, EPIC-035). Features created during Feature Breakdown use format `FEATURE-{nnn}-{X}` (e.g., FEATURE-035-A). The `{nnn}` in Feature IDs always matches the parent Epic number.
 
@@ -336,7 +336,7 @@ BLOCKING (auto): Proceed automatically after DoD verification.
       <name>Complete & Verify</name>
       <action>
         1. IF execution_mode == "workflow-mode":
-           a. Call update_workflow_action with:
+           a. Run `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py` with:
               - workflow_name, action, status: "done"
               - deliverables: {"requirement-doc": "{path}", "requirements-folder": "{path}"}
            b. Log: "Workflow action status updated to done"
@@ -409,7 +409,7 @@ task_completion_output:
   workflow:
     name: "{from input}"
   workflow_action: "{workflow.action}"       # triggers workflow status update when execution_mode == workflow-mode
-  workflow_action_updated: true | false # true if update_workflow_action was called
+  workflow_action_updated: true | false # true if workflow_update_action.py was run
   task_output_links:
     - "x-ipe-docs/requirements/requirement-details.md"  # or requirement-details-part-X.md
   mockup_list: "{inherited from input or N/A}"
@@ -458,7 +458,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Workflow Action Status Updated</name>
-    <verification>If execution_mode == "workflow-mode", called the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with status "done" and deliverables keyed dict</verification>
+    <verification>If execution_mode == "workflow-mode", ran `workflow_update_action.py` script with status "done" and deliverables keyed dict</verification>
   </checkpoint>
 </definition_of_done>
 ```

@@ -156,7 +156,7 @@ input:
             * Derive title from filename
             * Generate description from context/filename
             * type field set automatically from file extension
-          - Write entry via MCP tool `set_kb_index_entry(name, entry, folder)`
+          - Run via bash: `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/kb_set_entry.py --name {name} --entry '{json}' --folder {folder}`
 
        f. Move file to destination:
           - Move file from .intake/{filename} to {destination_folder}/{filename}

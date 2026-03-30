@@ -338,7 +338,7 @@ BLOCKING (auto): Proceed automatically after DoD verification.
     <step_5_2>
       <name>Complete & Verify</name>
       <action>
-        1. IF workflow-mode: call update_workflow_action with:
+        1. IF workflow-mode: run `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py` with:
            - workflow_name, action, status: "done", feature_id
            - deliverables: {"specification": "{path}", "feature-docs-folder": "{path}"}
         2. Verify all DoD checkpoints are met
@@ -407,7 +407,7 @@ task_completion_output:
   workflow:
     name: "{from input}"
   workflow_action: "{workflow.action}"   # triggers workflow status update when execution_mode == workflow-mode
-  workflow_action_updated: true | false # true if update_workflow_action was called
+  workflow_action_updated: true | false # true if workflow_update_action.py was run
   task_output_links:
     - "x-ipe-docs/requirements/FEATURE-XXX/specification.md"
   feature_id: "FEATURE-XXX"
@@ -462,7 +462,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Workflow Action Updated</name>
-    <verification>If execution_mode == "workflow-mode", called the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server with status "done" and deliverables keyed dict</verification>
+    <verification>If execution_mode == "workflow-mode", ran `workflow_update_action.py` script with status "done" and deliverables keyed dict</verification>
   </checkpoint>
 </definition_of_done>
 ```

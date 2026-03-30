@@ -171,7 +171,7 @@ All values are strings as returned by `getComputedStyle()`:
 ## Notes
 
 - This file is the **single source of truth** for analysis data — do NOT create `reference-data.json` or session files.
-- The `save_uiux_reference` MCP tool also generates derivative files from this data:
+- The `uiux_save_reference.py` script (at `.github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/`) also generates derivative files from this data:
   - `page-element-references/summarized-uiux-reference.md`
   - `page-element-references/resources/{area-id}-structure.html`
   - `page-element-references/resources/{area-id}-styles.css`

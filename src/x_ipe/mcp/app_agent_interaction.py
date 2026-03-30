@@ -1,6 +1,13 @@
 """
 App-Agent Interaction MCP Server (FEATURE-033)
 
+⚠️ DEPRECATED (EPIC-052): This MCP server is superseded by standalone
+Python scripts in `.github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/`.
+The scripts require zero external dependencies and operate via direct file I/O.
+This module is retained for backward compatibility during the migration period.
+Refer to `.github/skills/x-ipe-tool-x-ipe-app-interactor/SKILL.md` for the
+replacement API. Scheduled for removal in a future release.
+
 Standalone MCP server (FastMCP, stdio transport) that bridges
 CLI agents and the X-IPE Flask backend.
 

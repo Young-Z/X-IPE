@@ -359,7 +359,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
            a. Extract workflow_name and workflow_action from output
            b. READ instance/workflows/wf-{nnn}-{workflow_name}.json
            c. CHECK that actions.{workflow_action}.status is NOT "pending"
-           d. IF status is "pending" → FLAG task as incomplete: "Workflow action '{workflow_action}' status not updated. Call the `update_workflow_action` tool of `x-ipe-app-and-agent-interaction` MCP server before completing."
+           d. IF status is "pending" → FLAG task as incomplete: "Workflow action '{workflow_action}' status not updated. Run `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py` before completing."
            e. CHECK that actions.{workflow_action}.deliverables is a keyed dict (not a list). Keys must match extract tags from workflow-template.json for this action.
            f. IF workflow JSON file not found → WARN and skip (non-blocking)
          ELSE IF execution_mode == "free-mode":
