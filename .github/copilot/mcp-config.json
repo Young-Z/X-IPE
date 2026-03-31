@@ -19,8 +19,6 @@
       ],
       "args": [
         "run",
-        "--directory",
-        "/Users/yzhang/Library/CloudStorage/OneDrive-Personal/ML/2026/agent/X-IPE",
         "python",
         "-m",
         "x_ipe.mcp.app_agent_interaction"

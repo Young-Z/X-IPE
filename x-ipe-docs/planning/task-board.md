@@ -5,6 +5,7 @@
 ## Active Tasks
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
+| TASK-1026 | Ideation | Refine idea wf-009-test-greedy-snake: Greedy Snake game — brainstorm, research game design principles, produce structured idea summary. Workflow mode. | Flux ⚡ | 🔄 in_progress | 03-31-2026 | — | x-ipe-task-based-requirement-gathering |
 | TASK-1021 | Feature Refinement | Refine FEATURE-052-C (UIUX Reference Script): Specification with 45 GWT ACs for uiux_save_reference.py — input validation, screenshot decoding, element merge, HTML/CSS/MD generation. | Sage 🌿 | ✅ done | 03-30-2026 | [specification.md](x-ipe-docs/requirements/EPIC-052/FEATURE-052-C/specification.md) | x-ipe-task-based-technical-design |
 | TASK-1022 | Technical Design | Design FEATURE-052-C (UIUX Reference Script): Two-part design for uiux_save_reference.py — CLI interface, 7-stage pipeline, file generation. | Sage 🌿 | ✅ done | 03-30-2026 | [technical-design.md](x-ipe-docs/requirements/EPIC-052/FEATURE-052-C/technical-design.md) | x-ipe-task-based-code-implementation |
 | TASK-1024 | Feature Refinement + Design | Refine & design FEATURE-052-D (Skill Migration & MCP Removal): Spec (14 ACs) + design for batch text replacement across 17 files, SKILL.md creation, MCP deprecation. | Sage 🌿 | ✅ done | 03-30-2026 | [specification.md](x-ipe-docs/requirements/EPIC-052/FEATURE-052-D/specification.md) | x-ipe-task-based-code-implementation |
