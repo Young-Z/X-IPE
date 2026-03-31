@@ -35,6 +35,8 @@ class ContentRenderer {
     initMarked() {
         if (typeof marked !== 'undefined') {
             const renderer = new marked.Renderer();
+            const self = this;
+
             const originalLink = renderer.link.bind(renderer);
             renderer.link = function(href, title, text) {
                 if (href && (href.startsWith('x-ipe-docs/') || href.startsWith('.github/skills/'))) {
@@ -46,6 +48,27 @@ class ContentRenderer {
                 }
                 return originalLink(href, title, text);
             };
+
+            // TASK-1034: Resolve relative image paths against the current file's directory
+            const originalImage = typeof renderer.image === 'function' ? renderer.image.bind(renderer) : null;
+            renderer.image = function(href, title, text) {
+                if (href && self.currentPath &&
+                    !href.startsWith('http://') && !href.startsWith('https://') &&
+                    !href.startsWith('data:') && !href.startsWith('/')) {
+                    const dir = self.currentPath.substring(0, self.currentPath.lastIndexOf('/'));
+                    const resolvedPath = dir ? dir + '/' + href : href;
+                    const encodedPath = resolvedPath.split('/').map(encodeURIComponent).join('/');
+                    const apiUrl = '/api/kb/files/' + encodedPath + '/raw';
+                    const safeAlt = (text || '').replace(/"/g, '&quot;');
+                    const safeTitle = title ? ` title="${title.replace(/"/g, '&quot;')}"` : '';
+                    return `<img src="${apiUrl}" alt="${safeAlt}"${safeTitle} style="max-width:100%;">`;
+                }
+                if (originalImage) return originalImage(href, title, text);
+                const safeAlt = (text || '').replace(/"/g, '&quot;');
+                const safeTitle = title ? ` title="${title.replace(/"/g, '&quot;')}"` : '';
+                return `<img src="${href}" alt="${safeAlt}"${safeTitle}>`;
+            };
+
             marked.setOptions({
                 renderer,
                 highlight: function(code, lang) {
@@ -114,8 +137,11 @@ class ContentRenderer {
     
     /**
      * Render markdown content with Mermaid diagrams, Infographic DSL, and Architecture DSL
+     * @param {string} content - Markdown content
+     * @param {string} [basePath] - File path for resolving relative image URLs
      */
-    renderMarkdown(content) {
+    renderMarkdown(content, basePath) {
+        if (basePath) this.currentPath = basePath;
         // Pre-process Mermaid blocks
         const mermaidBlocks = [];
         let processedContent = content.replace(

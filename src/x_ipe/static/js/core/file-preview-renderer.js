@@ -213,7 +213,7 @@ class FilePreviewRenderer {
 
         const type = FilePreviewRenderer.detectType(filePath);
         if (type === 'markdown') {
-            this._renderMarkdown(container, text);
+            this._renderMarkdown(container, text, filePath);
         } else if (type === 'html') {
             this._renderHtml(container, text);
         } else {
@@ -276,11 +276,11 @@ class FilePreviewRenderer {
         container.appendChild(iframe);
     }
 
-    _renderMarkdown(container, text) {
+    _renderMarkdown(container, text, filePath) {
         container.innerHTML = '';
         if (typeof ContentRenderer !== 'undefined') {
             const renderer = new ContentRenderer(container);
-            renderer.renderMarkdown(text);
+            renderer.renderMarkdown(text, filePath);
         } else if (typeof marked !== 'undefined' && marked.parse) {
             container.innerHTML = marked.parse(text);
         } else {
