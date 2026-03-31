@@ -455,7 +455,7 @@ def main(argv: list[str] | None = None) -> None:
     if isinstance(deliverables, dict) and deliverables:
         validate_deliverables(template, args.action, deliverables)
 
-    with with_file_lock(lock_path, timeout=args.lock_timeout):
+    with with_file_lock(lock_path, timeout=args.lock_timeout, cleanup=True):
         state = atomic_read_json(state_path)
         if state.get("success") is False:
             exit_with_error(

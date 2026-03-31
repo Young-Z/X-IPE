@@ -261,6 +261,13 @@ class TestFileLocking:
             assert lock_path.exists()
         assert executed
 
+    def test_lock_file_cleaned_up_after_release(self, tmp_path):
+        """Lock file should be removed from disk after context exits when cleanup=True."""
+        lock_path = tmp_path / "test.lock"
+        with _lib.with_file_lock(lock_path, timeout=5, cleanup=True):
+            assert lock_path.exists()
+        assert not lock_path.exists(), ".lock file should be cleaned up after context exit"
+
     def test_lock_timeout(self, tmp_path):
         """AC-052-A-02b: Exits with code 3 on lock timeout."""
         lock_path = tmp_path / "test.lock"

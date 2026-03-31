@@ -278,12 +278,14 @@ class WorkflowManagerService:
 
     @x_ipe_tracing()
     def delete_workflow(self, name: str) -> dict:
-        """Delete a workflow JSON file."""
+        """Delete a workflow JSON file and its associated lock file."""
         path = self._get_workflow_path(name)
         if not path.exists():
             return {"success": False, "error": "NOT_FOUND",
                     "message": f"Workflow '{name}' not found"}
         path.unlink()
+        lock_path = path.with_suffix(".lock")
+        lock_path.unlink(missing_ok=True)
         return {"success": True, "message": f"Workflow '{name}' deleted"}
 
     @x_ipe_tracing()

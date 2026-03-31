@@ -165,6 +165,15 @@ class TestWorkflowCRUD:
         workflow_service.delete_workflow(sample_workflow)
         assert not os.path.exists(filepath)
 
+    def test_delete_workflow_removes_lock_file(self, workflow_service, sample_workflow, workflow_dir):
+        """AC: delete_workflow also removes the associated .lock file."""
+        lock_path = os.path.join(workflow_dir, f"workflow-{sample_workflow}.lock")
+        # Trigger lock file creation via an update
+        workflow_service.update_action_status(sample_workflow, "compose_idea", "done")
+        assert os.path.exists(lock_path), ".lock file should exist after update"
+        workflow_service.delete_workflow(sample_workflow)
+        assert not os.path.exists(lock_path), ".lock file should be cleaned up on delete"
+
     def test_delete_workflow_not_found_error(self, workflow_service):
         """AC: delete_workflow returns error if not found."""
         result = workflow_service.delete_workflow("nonexistent")

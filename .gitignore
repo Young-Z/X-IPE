@@ -65,3 +65,6 @@ package-lock.json
 
 # Screenshots (dev artifacts)
 screenshots/
+
+# Workflow lock files (advisory flock coordination)
+x-ipe-docs/engineering-workflow/*.lock

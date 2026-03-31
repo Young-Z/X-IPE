@@ -142,7 +142,7 @@ def atomic_write_json(path: Path, data: dict) -> None:
 
 
 @contextmanager
-def with_file_lock(lock_path: Path, timeout: int = 10):
+def with_file_lock(lock_path: Path, timeout: int = 10, cleanup: bool = False):
     """Acquire exclusive flock with timeout. Yields on success, exit(3) on timeout."""
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     fd = os.open(str(lock_path), os.O_CREAT | os.O_RDWR)
@@ -168,6 +168,11 @@ def with_file_lock(lock_path: Path, timeout: int = 10):
         if acquired:
             fcntl.flock(fd, fcntl.LOCK_UN)
             os.close(fd)
+            if cleanup:
+                try:
+                    lock_path.unlink()
+                except OSError:
+                    pass
 
 
 def output_result(result: dict, fmt: str = "json") -> None:
