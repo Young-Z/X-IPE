@@ -222,6 +222,13 @@ input:
        overall_status = "success" if failed==0 AND blocked==0
                         ELSE "partial_failure" if passed > 0
                         ELSE "failure"
+
+    6. CLEANUP — Close browser pages opened during testing:
+       a. Call list_pages to get all open pages
+       b. FOR EACH page opened by this test session (pages navigated to target_url or mockup):
+          → close_page pageId={pageId}
+       c. NOTE: The last open page cannot be closed — leave at least one page open
+       d. This prevents stale browser sessions from accumulating across test runs
   </action>
   <constraints>
     - BLOCKING: Always take_snapshot before interacting with elements — UIDs change after page mutations
@@ -284,6 +291,10 @@ operation_output:
   <checkpoint required="true">
     <name>No batch abort</name>
     <verification>All TCs attempted even if earlier TCs failed</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Browser pages cleaned up</name>
+    <verification>Pages opened during test session closed via close_page (except the last remaining page)</verification>
   </checkpoint>
 </definition_of_done>
 ```

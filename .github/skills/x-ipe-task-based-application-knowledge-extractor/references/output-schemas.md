@@ -118,6 +118,7 @@ error_summary:
 extraction_status: "complete | partial | failed"
 quality_score: 0.0       # 0.0–1.0, overall quality (2 decimal places)
 quality_label: "high | acceptable | low"   # ≥0.80 high, 0.50–0.79 acceptable, <0.50 low
+extraction_id: "{app_name}-{category}"     # e.g., "x-ipe-user-manual", "my-app-workflow-mode-user-manual"
 kb_output_path: "x-ipe-docs/knowledge-base/.intake/{extraction_id}/"
 ```
 
@@ -126,7 +127,8 @@ kb_output_path: "x-ipe-docs/knowledge-base/.intake/{extraction_id}/"
 extraction_status: "complete"
 quality_score: 0.82
 quality_label: "high"
-kb_output_path: "x-ipe-docs/knowledge-base/.intake/session-20260317-143022/"
+extraction_id: "x-ipe-user-manual"
+kb_output_path: "x-ipe-docs/knowledge-base/.intake/x-ipe-user-manual/"
 ```
 
 **Example — Partial Extraction:**
@@ -134,5 +136,6 @@ kb_output_path: "x-ipe-docs/knowledge-base/.intake/session-20260317-143022/"
 extraction_status: "partial"
 quality_score: 0.61
 quality_label: "acceptable"
-kb_output_path: "x-ipe-docs/knowledge-base/.intake/session-20260317-150000/"
+extraction_id: "x-ipe-workflow-mode-user-manual"
+kb_output_path: "x-ipe-docs/knowledge-base/.intake/x-ipe-workflow-mode-user-manual/"
 ```

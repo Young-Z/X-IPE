@@ -8,7 +8,8 @@
       ],
       "args": [
         "-y",
-        "chrome-devtools-mcp@latest"
+        "chrome-devtools-mcp@latest",
+        "--isolated"
       ]
     },
     "x-ipe-app-and-agent-interaction": {

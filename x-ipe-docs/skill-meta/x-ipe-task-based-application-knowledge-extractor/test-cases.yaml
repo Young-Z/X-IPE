@@ -805,3 +805,72 @@ test_cases:
       - "Execute Step 1.4 — Initialize Handoff"
       - "Verify .checkpoint/ created in CWD, NOT in /some/external/path/"
     expected: ".checkpoint/ is in CWD, not target directory"
+
+  # ============================================================
+  # EXTRACTION ID NAMING CONVENTION
+  # ============================================================
+
+  - id: TC-059
+    ac_ref: AC-050A-05a
+    category: naming
+    name: "extraction_id uses app_name-category format"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Set target to running web app with <title>X-IPE</title>"
+      - "Execute Phase 1.1 — detect app_name from page title"
+      - "Verify source_metadata.app_name = 'x-ipe'"
+      - "Execute Phase 5.2 with selected_category = 'user-manual'"
+      - "Verify extraction_id = 'x-ipe-user-manual'"
+      - "Verify output folder = 'x-ipe-docs/knowledge-base/.intake/x-ipe-user-manual/'"
+    expected: "extraction_id = 'x-ipe-user-manual', folder created with meaningful name"
+
+  - id: TC-060
+    ac_ref: AC-050A-05a
+    category: naming
+    name: "extraction_id includes scope when user provides focus"
+    type: should_pass
+    test_method: behavioral
+    steps:
+      - "Set target to web app with app_name='x-ipe'"
+      - "User request mentions 'workflow mode' as scope/focus"
+      - "Execute Phase 5.2 with selected_category = 'user-manual'"
+      - "Verify extraction_id = 'x-ipe-workflow-mode-user-manual'"
+    expected: "extraction_id includes scope: 'x-ipe-workflow-mode-user-manual'"
+
+  - id: TC-061
+    ac_ref: AC-050A-05a
+    category: naming
+    name: "extraction_id collision appends numeric suffix"
+    type: must_pass
+    test_method: behavioral
+    steps:
+      - "Create existing folder .intake/x-ipe-user-manual/"
+      - "Execute Phase 5.2 with app_name='x-ipe', category='user-manual'"
+      - "Verify extraction_id = 'x-ipe-user-manual-2'"
+      - "Verify output folder = 'x-ipe-docs/knowledge-base/.intake/x-ipe-user-manual-2/'"
+    expected: "Collision detected, suffix appended: 'x-ipe-user-manual-2'"
+
+  - id: TC-062
+    ac_ref: AC-050A-05a
+    category: naming
+    name: "app_name detected from package.json for source_code_repo"
+    type: should_pass
+    test_method: behavioral
+    steps:
+      - "Set target to repo with package.json containing name='my-cool-app'"
+      - "Execute Phase 1.1 app_name detection"
+      - "Verify source_metadata.app_name = 'my-cool-app'"
+    expected: "app_name extracted from package.json name field"
+
+  - id: TC-063
+    ac_ref: AC-050A-05a
+    category: naming
+    name: "app_name slugified from page title with special characters"
+    type: should_pass
+    test_method: behavioral
+    steps:
+      - "Set target to web app with <title>My Cool App! v2.0</title>"
+      - "Execute Phase 1.1 app_name detection"
+      - "Verify source_metadata.app_name = 'my-cool-app-v2-0'"
+    expected: "Special chars replaced with hyphens, lowercase"

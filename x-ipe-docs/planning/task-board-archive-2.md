@@ -236,14 +236,12 @@
 | TASK-602 | Bug Fix | Feedback panel: add copy icon beside delete to copy folder path of submitted feedbacks. Feedback-20260222-133420 | Flux 🔄 | ✅ completed | 02-22-2026 05:39:00 | uiux-feedback.js, uiux-feedback.css | - |
 | TASK-603 | Bug Fix | Create Workflow shows "Network error" when backend throws unhandled exception — route has no try/except, Flask returns HTML 500, resp.json() fails. Feedback-20260222-133736 | Sage 🔮 | ✅ completed | 02-22-2026 05:46:00 | workflow_routes.py, workflow.js, test_workflow_manager.py | - |
 | TASK-604 | Bug Fix | FEATURE-038-B: Session idle detection uses fragile prompt suffix matching — replace with OS-level `tcgetpgrp()` process-based detection. Update technical-design.md and specification.md | Drift 🌊 | ✅ completed | 02-22-2026 05:44:00 | terminal_service.py, test_feature_038b.py, technical-design.md, specification.md | - |
-| TASK-593 | Ideation | Refine idea wf-001-greedy-snake v2 — add multi-head snake concept, make it scary | Spark ⚡ | ✅ completed | 02-21-2026 12:14:00 | idea-summary-v2.md | Idea Mockup / Idea to Architecture |
 | TASK-592 | Bug Fix | Refine Idea modal: add idea file selector — default to compose_idea deliverable, list refined-idea/ folder files, update instructions on switch. Feedback-20260221-194456 | Zephyr 🌬️ | ✅ completed | 02-21-2026 11:50:00 | action-execution-modal.js, action-execution-modal.css | - |
 | TASK-591 | Bug Fix | ~~Suggested action btn: only change bg, not border.~~ REVERTED — dashed border already present. Feedback-20260221-191915 | Zephyr 🌬️ | 🔁 reverted | 02-21-2026 11:24:00 | workflow.css | - |
 | TASK-591 | Bug Fix | Suggested action: only change background, keep border style from base state (solid=mandatory, dashed=optional). Feedback-20260221-191915 | Zephyr 🌬️ | ✅ completed | 02-21-2026 11:27:00 | workflow.css, workflow-stage.js | - |
 | TASK-590 | Bug Fix | next_actions_suggested not shown for actions in completed stages — design_mockup missing suggested highlight. Feedback-20260221-190457 | Rune 🔮 | ✅ completed | 02-21-2026 11:10:00 | workflow-stage.js, workflow-stage-suggestions.test.js | - |
 | TASK-589 | Bug Fix | Deliverable cards: (1) grid alignment — folder-type card misaligned with file cards, (2) no click-to-preview on regular file deliverables. Feedback-20260221-175407 | Drift 🌊 | ✅ completed | 02-21-2026 10:08:00 | workflow.css, deliverable-viewer.js, workflow-stage.js | - |
 | TASK-588 | Bug Fix | Deliverable card styling: (1) folder icon missing background, (2) folder name/path on same line, (3) hide x-ipe-docs/ prefix in all deliverables. Feedback-20260221-174334 | Pulse 🔵 | ✅ completed | 02-21-2026 09:51:00 | deliverable-viewer.js, workflow-stage.js, workflow.css | - |
-| TASK-587 | Ideation | Refine idea wf-001-greedy-snake — 贪吃蛇 web app | Bolt ⚡ | ✅ completed | 02-21-2026 09:21:00 | idea-summary-v1.md | Idea Mockup / Idea to Architecture |
 | TASK-584 | Ideation | IDEA-026: Refine idea wf-001-test-the-workflow — Snake game (贪吃蛇) | Ember 🔥 | ✅ completed | 02-21-2026 07:08:00 | idea-summary-v1.md | Idea Mockup / Idea to Architecture |
 | TASK-585 | Code Implementation | EPIC-038: Add --workflow-mode execution context — frontend injects prefix, workflow skill detects and passes execution_mode, ideation skill conditionally calls update_workflow_action | Nova ✅ | ✅ completed | 02-21-2026 04:39:00 | action-execution-modal.js, x-ipe-workflow-task-execution/SKILL.md, x-ipe-task-based-ideation-v2/SKILL.md | - |
 | TASK-586 | Bug Fix | EPIC-038: 5 user-reported bugs — modal size (80vw), placeholder resolution, double-wrapped command, console expand, in-progress indicator | Nova ✅ | ✅ completed | 02-21-2026 03:30:00 | action-execution-modal.js, workflow-stage.js, action-execution-modal.css | - |
@@ -457,4 +455,4 @@
 
 ---
 
-*Total tasks in this archive: 437*
+*Total tasks in this archive: 435*

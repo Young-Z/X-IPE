@@ -148,8 +148,15 @@ input:
     <action>
       1. Read target parameter, classify input_type (source_code_repo, documentation_folder, public_url, running_web_app, single_file)
       2. Detect source format label(s) and application-context label(s); store summary labels in `format` / `app_type` and preserve all detections in `source_metadata.detected_formats` / `source_metadata.detected_app_types`
-      3. Build InputAnalysis object with source_metadata
-      4. Determine extraction techniques based on input_type:
+      3. Detect `app_name` for extraction_id derivation:
+         - running_web_app / public_url → page title (first heading or `<title>` tag), slugified
+         - source_code_repo → package name from package.json `name` or pyproject.toml `[project] name`
+         - documentation_folder → directory name
+         - single_file → file name without extension
+         - Slugify: lowercase, replace spaces/special chars with hyphens, strip leading/trailing hyphens
+         - Store as `source_metadata.app_name` (e.g., "x-ipe", "my-cool-app")
+      4. Build InputAnalysis object with source_metadata (including app_name)
+      5. Determine extraction techniques based on input_type:
          - source_code_repo / documentation_folder → file reading, code analysis
          - public_url / running_web_app → Chrome DevTools (navigate, take_snapshot, take_screenshot for UI knowledge)
          - IF visual content would aid knowledge explanation → plan screenshot capture points
@@ -158,7 +165,7 @@ input:
     <constraints>
       - BLOCKING: Empty directory or unreachable URL → halt with error
     </constraints>
-    <output>InputAnalysis {input_type, format, app_type, source_metadata}</output>
+    <output>InputAnalysis {input_type, format, app_type, app_name, source_metadata}</output>
   </step_1_1>
 
   <step_1_2>
@@ -320,9 +327,13 @@ input:
   <step_5_2>
     <name>Package KB Articles & Report</name>
     <action>
-      1. Create x-ipe-docs/knowledge-base/.intake/{extraction_id}/
-      2. Write article .md files for accepted sections with YAML frontmatter
-      3. Generate extraction_report.md (summary, scores, validation stats, error log, provenance)
+      1. Derive `extraction_id` from InputAnalysis: `{app_name}-{selected_category}` (e.g., `x-ipe-user-manual`)
+         - Use `source_metadata.app_name` (slugified in Phase 1.1) + selected_category
+         - IF user provided a scope/focus in their request → include it: `{app_name}-{scope}-{category}` (e.g., `x-ipe-workflow-mode-user-manual`)
+         - IF folder already exists → append `-{N}` suffix (e.g., `x-ipe-user-manual-2`)
+      2. Create x-ipe-docs/knowledge-base/.intake/{extraction_id}/
+      3. Write article .md files for accepted sections with YAML frontmatter
+      4. Generate extraction_report.md (summary, scores, validation stats, error log, provenance)
     </action>
     <constraints>
       - All files UTF-8, no BOM
@@ -385,10 +396,11 @@ task_completion_output:
     - "x-ipe-docs/knowledge-base/.intake/{extraction_id}/"
 
   # Dynamic outputs — schemas and examples in references/output-schemas.md
-  input_analysis: { input_type, format, app_type, source_metadata }
+  input_analysis: { input_type, format, app_type, app_name, source_metadata }
   selected_category: "user-manual"
   loaded_tool_skill: "x-ipe-tool-knowledge-extraction-{category} | null"
   checkpoint_path: ".x-ipe-checkpoint/session-{timestamp}/"
+  extraction_id: "{app_name}-{category}"  # e.g., "x-ipe-user-manual", "x-ipe-workflow-mode-user-manual"
   extraction_summary: { sections_extracted, sections_skipped, sections_error }
   validation_summary: { final_coverage_ratio, exit_reason, sections_accepted }
   error_summary: { total_errors, transient_retried, permanent_halted }

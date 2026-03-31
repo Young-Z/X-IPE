@@ -1,13 +1,13 @@
-# Task Board
+# Task Board Archive 3
 
-> Task Board Management - Task Tracking
+> Archived tasks from task-board.md (2026-03-31)
+> Previous archives: [task-board-archive-1.md](task-board-archive-1.md) (405 tasks), [task-board-archive-2.md](task-board-archive-2.md) (437 tasks)
 
-## Active Tasks
+## Previously Active Tasks
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
-| TASK-1030 | Bug Fix | Fix workflow .lock files not cleaned up — add cleanup in delete_workflow() and with_file_lock(cleanup=True) in scripts, .gitignore lock files | Bolt ⚡ | ✅ done | 03-31-2026 | — | — |
-| TASK-1029 | Skill Update | Update x-ipe-task-based-application-knowledge-extractor: extraction folder naming from opaque IDs (EXTRACT-1028) to meaningful names ({app_name}-{category}, e.g., x-ipe-workflow-mode-user-manual). Updated candidate + production SKILL.md, 3 reference files, 5 new test cases. | Nova ✨ | ✅ done | 03-31-2026 | [SKILL.md](.github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md) | — |
-| TASK-1026 | Ideation | Refine idea wf-009-test-greedy-snake: Greedy Snake game — brainstorm, research game design principles, produce structured idea summary. Workflow mode. | Flux ⚡ | 🔄 in_progress | 03-31-2026 | — | x-ipe-task-based-requirement-gathering |
+|---------|-----------|-------------|------|--------|--------------|--------------|----------|
+| TASK-1027 | Skill Update | Add --isolated flag to Chrome DevTools MCP config (3 files) and add browser cleanup steps to x-ipe-tool-ui-testing-via-chrome-mcp and x-ipe-tool-uiux-reference skills. | Bolt ⚡ | ✅ done | 03-31-2026 | [mcp-config.json](.github/copilot/mcp-config.json) | — |
 | TASK-1021 | Feature Refinement | Refine FEATURE-052-C (UIUX Reference Script): Specification with 45 GWT ACs for uiux_save_reference.py — input validation, screenshot decoding, element merge, HTML/CSS/MD generation. | Sage 🌿 | ✅ done | 03-30-2026 | [specification.md](x-ipe-docs/requirements/EPIC-052/FEATURE-052-C/specification.md) | x-ipe-task-based-technical-design |
 | TASK-1022 | Technical Design | Design FEATURE-052-C (UIUX Reference Script): Two-part design for uiux_save_reference.py — CLI interface, 7-stage pipeline, file generation. | Sage 🌿 | ✅ done | 03-30-2026 | [technical-design.md](x-ipe-docs/requirements/EPIC-052/FEATURE-052-C/technical-design.md) | x-ipe-task-based-code-implementation |
 | TASK-1024 | Feature Refinement + Design | Refine & design FEATURE-052-D (Skill Migration & MCP Removal): Spec (14 ACs) + design for batch text replacement across 17 files, SKILL.md creation, MCP deprecation. | Sage 🌿 | ✅ done | 03-30-2026 | [specification.md](x-ipe-docs/requirements/EPIC-052/FEATURE-052-D/specification.md) | x-ipe-task-based-code-implementation |
@@ -23,7 +23,6 @@
 | TASK-1013 | Feature Breakdown | Break EPIC-052 (Replace MCP Server with Skill-Level Scripts) into features. 4 features: A (shared util + workflow scripts), B (KB index scripts), C (UIUX reference script), D (skill migration + MCP removal). | Sage 🌿 | ✅ done | 03-30-2026 | [requirement-details-part-21.md](x-ipe-docs/requirements/requirement-details-part-21.md), [features.md](x-ipe-docs/planning/features.md) | x-ipe-task-based-feature-refinement |
 | TASK-1012 | Requirement Gathering | Gather requirements for IDEA-036: Replace x-ipe-app-and-agent-interaction MCP with skill-level scripts. CRs on EPIC-033, EPIC-036, EPIC-027. | Sage 🌿 | ✅ done | 03-30-2026 | [requirement-details-part-21.md](x-ipe-docs/requirements/requirement-details-part-21.md) | x-ipe-task-based-feature-breakdown |
 | TASK-1011 | Ideation | Refine idea 036: Evaluate replacing x-ipe-app-and-agent-interaction MCP functions with skill-level scripts for lighter-weight workflow action updates. | Sage 🌿 | ✅ done | 03-30-2026 | [idea-summary-v1.md](x-ipe-docs/ideas/036.%20CR-Replace%20existing%20mcp%20function/idea-summary-v1.md) | x-ipe-task-based-requirement-gathering |
-| TASK-1010 | Code Implementation | Implement CR-003 for FEATURE-038-C: Update FolderBrowserModal._makePreviewHeader() with toggle + download=true, pass renderMode to FilePreviewRenderer, add tests. | Quill ✒️ | 🔄 in_progress | 03-27-2026 | — | x-ipe-task-based-feature-closing |
 | TASK-1009 | Change Request | CR-003 for FEATURE-038-C: Extend CR-002 toolbar (download + toggle) to folder browser modal's inline file preview (_makePreviewHeader). | Quill ✒️ | ✅ done | 03-27-2026 | [CR-003.md](x-ipe-docs/requirements/EPIC-038/FEATURE-038-C/CR-003.md) | x-ipe-task-based-feature-refinement |
 | TASK-1008 | Feature Closing | Close CR-002 for FEATURE-038-C: Verify ACs, code-to-docs review, refactoring analysis, commit and push to main. | Quill ✒️ | ✅ done | 03-27-2026 | [commit cd006ed](https://github.com/Young-Z/X-IPE/commit/cd006ed) | — |
 | TASK-1007 | Acceptance Test | Execute acceptance tests for CR-002 FEATURE-038-C: Validate 10 ACs (06a-06j) covering toolbar header, download, toggle, smart defaults, state reset. | Quill ✒️ | ✅ done | 03-27-2026 | [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-038/FEATURE-038-C/acceptance-test-cases.md) | x-ipe-task-based-feature-closing |
@@ -47,7 +46,6 @@
 | TASK-989 | Bug Fix | KB preview rendering defects: (1) preview window height not fully utilizing available space, (2) docx icons (ww, lz, mj) not rendering correctly vs original format. Source: Feedback-20260324-154826. FEATURE-049-F. DAO mode. | Spark ⚡ | ✅ done | 03-24-2026 | [kb-browse-modal.css](src/x_ipe/static/css/kb-browse-modal.css), [file-preview-renderer.js](src/x_ipe/static/js/core/file-preview-renderer.js), [kb-preview-rendering-fix.test.js](tests/frontend-js/kb-preview-rendering-fix.test.js) | — |
 | TASK-990 | Bug Fix | Compose idea bugs: (1) new idea file not shown in deliverable panel after submit, (2) typed idea text and uploaded file not restored when reopening compose idea, (3) need cross icon to remove uploaded files. Source: Feedback-20260324-161921. DAO mode. | Pixel 🎨 | ✅ done | 03-24-2026 | [compose-idea-modal.js](src/x_ipe/static/js/features/compose-idea-modal.js), [compose-idea-modal.test.js](tests/frontend-js/compose-idea-modal.test.js) | — |
 | TASK-987 | Skill Update | Bug-fix skill: (1) simplify UI detection from program_type to context check, (2) add x-ipe-tool-ui-testing-via-chrome-mcp to tools.json. DAO mode. | Drift 🌊 | ✅ done | 03-24-2026 | — | — |
-|---------|-----------|-------------|------|--------|--------------|--------------|----------|
 | TASK-988 | Bug Fix | Language switch fails with FileNotFoundError when config_file_path is "package-defaults" (regression from TASK-986 layered config). Settings should write to package-bundled default .x-ipe.yaml when no project config exists. Source: Feedback-20260324-150712. DAO mode. | Ember 🔥 | ✅ done | 03-24-2026 | [settings_routes.py](src/x_ipe/routes/settings_routes.py), [test_settings_language.py](tests/test_settings_language.py) | — |
 | TASK-986 | Code Implementation | Add layered .x-ipe.yaml config: bundle default config in package (src/x_ipe/defaults/), load as fallback in both entry points (uv run python -m x_ipe.app + x-ipe serve), deep-merge project-level .x-ipe.yaml over defaults. DAO mode. | Ember 🔥 | ✅ done | 03-24-2026 | [config_utils.py](src/x_ipe/core/config_utils.py), [defaults/.x-ipe.yaml](src/x_ipe/defaults/.x-ipe.yaml), [test_config_layered.py](tests/test_config_layered.py) | — |
 | TASK-985 | Bug Fix | UIUX feedback simulator browser shows blank viewport when previewing KB content — "cannot preview" in simulator but works in direct KB access. Root cause: proxy JSON-wraps HTML responses, hiding X-Converted header. Source: Feedback-20260324-141037. DAO mode. | Ember 🔥 | ✅ done | 03-24-2026 | [file-preview-renderer.js](src/x_ipe/static/js/core/file-preview-renderer.js), [kb_routes.py](src/x_ipe/routes/kb_routes.py), [uiux-feedback.js](src/x_ipe/static/js/uiux-feedback.js) | — |
@@ -103,7 +101,6 @@
 | TASK-929 | Technical Design | Design FEATURE-050-B: Source Extraction Engine. program_type=skills. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 08:40:00 | [technical-design.md](x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/technical-design.md) | x-ipe-task-based-code-implementation |
 | TASK-928 | Feature Refinement | Refine specification for FEATURE-050-B: Source Extraction Engine. 29 ACs, 7 groups, 7 FRs, 3 NFRs. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 08:30:00 | [specification.md](x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/specification.md) | x-ipe-task-based-technical-design |
 | TASK-927 | Feature Closing | Close FEATURE-050-A: Extractor Skill Foundation & Input Detection. Verify ACs, code-to-docs review, commit, output summary. Workflow: Knowledge-Extraction | Nova ☄️ | ✅ done | 03-17-2026 08:10:00 | [05a8a14] | x-ipe-task-based-feature-refinement |
-| TASK-925 | CR + Implementation | CR-004 for FEATURE-049-F: Add rich file preview to KB browse — markdown+DSL via ContentRenderer, docx/msg conversion, image/PDF/HTML preview, syntax highlighting | Zephyr 🌬️ | 🔄 in_progress | 03-17-2026 06:25:00 | [CR-004.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/CR-004.md) | — |
 | TASK-926 | Skill Update | Update x-ipe-task-based-bug-fix: add webapp-testing (Chrome DevTools) as optional_tool for browser-based UI bug validation | Zephyr 🌬️ | ✅ done | 03-17-2026 06:40:00 | [SKILL.md](.github/skills/x-ipe-task-based-bug-fix/SKILL.md) | — |
 | TASK-922 | KB Librarian | Run AI Librarian on 2 pending .docx intake files (teams会议-文字记录模板.docx, teams会议摘要模块模版.docx) — analyze content, assign tags, generate index entries, move to destination | Spark ⚡ | ✅ done | 03-17-2026 05:33:00 | [jd-store-operations/](x-ipe-docs/knowledge-base/jd-store-operations/) | — |
 | TASK-921 | CR + Implementation | CR-003 for FEATURE-049-F: Add MCP tools (get_kb_index, set_kb_index_entry, remove_kb_index_entry) + Flask routes + 11 tests | Zephyr 🌬️ | ✅ done | 03-17-2026 05:25:00 | [98ffe0a], [CR-003.md](x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/CR-003.md) | — |
@@ -208,18 +205,10 @@
 | TASK-856 | Skill Update | Add mockup_link to code-implementation + html5 tool skill | Sage 🌿 | ✅ done | 03-12-2026 12:24:00 |
 | TASK-857 | Bug Fix | Intake view doesn't show uploaded files — _renderIntakeScene() uses hardcoded zeros, trigger-intake-upload closes modal, intake files not persisted on scene re-render | Echo 📡 | ✅ done | 03-13-2026 00:23:00 | [kb-browse-modal.js](src/x_ipe/static/js/features/kb-browse-modal.js) | DAO-062 |
 | TASK-854 | Skill Update | Simplify DAO 格物 (Phase 1) and 致知 (Phase 2) — merged 6 substeps into 3: Step 1.1 (Parse+Decompose), Step 1.2 (Quick Perspectives), Step 2.1 (Match+Decide+Commit). 401→356 lines. | Zephyr 🌬️ | ✅ done | 03-12-2026 10:55:00 | [SKILL.md](.github/skills/x-ipe-dao-end-user-representative/SKILL.md), [phases-ref](.github/skills/x-ipe-dao-end-user-representative/references/dao-phases-and-output-format.md) | DAO-060 |
-
----
-
-
-## Completed Tasks
 | TASK-957 | Bug Fix | KB article preview renders image files (.jpg, .png, etc.) inline. Added /api/kb/files/{path}/raw route + frontend image type detection + CSS. 4 Python + 6 JS tests. | Spark ✨ | ✅ completed | 03-18-2026 | [9928d31] | Source: UIUX Feedback Feedback-20260318-095642 |
 | TASK-033 | Implement CR-002: Refocus Extractor on Knowledge Learning | Execute CR-002 that adds Chrome DevTools extraction support, tool skill feedback during extraction, and delegates quality scoring to tool skills. Affects extractor SKILL.md (4 changes), execution-procedures.md (4 changes), and adds score_quality operation to user manual tool skill. | EPIC-050, EPIC-051 | ✅ completed | Atom | 03-17-2026 | 03-17-2026 |
-
-| Task ID | Task | Description | Role | Status | Last Updated | Output Links | Notes |
 | TASK-988 | Skill Update | Migrate auto_proceed → interaction_mode in bug-fix production SKILL.md + sync 8 candidate SKILL.md from production. DAO mode. | Drift 🌊 | ✅ done | 03-24-2026 | — | — |
 | TASK-987 | Skill Update | Bug-fix skill: (1) simplify UI detection from program_type to context check, (2) add x-ipe-tool-ui-testing-via-chrome-mcp to tools.json. DAO mode. | Drift 🌊 | ✅ done | 03-24-2026 | — | — |
-|---------|-----------|-------------|------|--------|--------------|--------------|-------|
 | TASK-981 | Bug Fix | UIUX Feedback Feedback-20260321-090349: Creating an idea with a knowledge base reference fails and the compose action remains in progress. DAO mode. | Echo | ✅ completed | 03-21-2026 09:25:00 | [workflow-template.json](x-ipe-docs/config/workflow-template.json), [test_workflow_manager.py](tests/test_workflow_manager.py) | Restored `compose_idea` support for optional `kb-references` deliverables in the live workflow template, added a regression test, and verified the focused backend/frontend suites. Unrelated pre-existing failures remain in `tests/test_workflow_manager.py::TestWorkflowTracing::test_service_methods_have_tracing` and full `npm test` unhandled errors from KB sidebar/intake tests. |
 | TASK-982 | Bug Fix | Chinese filenames display as Unicode escape sequences (`\u6D4B...` instead of `测试文档.doc`). Two root causes: (1) `yaml.dump()` in `_write_kb_references` missing `allow_unicode=True`, (2) manual YAML parser in `_maybe_expand_kb_reference` not decoding `\uXXXX` escapes. Also added `ensure_ascii=False` to Flask JSON and 4 other `json.dump` calls as defense-in-depth. DAO mode. | Echo 📡 | ✅ completed | 03-21-2026 | [ideas_service.py](src/x_ipe/services/ideas_service.py), [workflow_manager_service.py](src/x_ipe/services/workflow_manager_service.py), [app.py](src/x_ipe/app.py) | Fixed YAML + YAML parser + Flask JSON + 4 json.dump calls. Repaired 6 corrupted YAML files. 2 regression tests added. 87/88 Python tests pass (1 pre-existing). 125/125 JS tests pass. |
 | TASK-966 | Code Refactor | Replace `watchdog` with `watchfiles` in backend file watching while preserving `FileWatcher` behavior and public lifecycle methods. DAO mode. | Sage 🌿 | ✅ completed | 03-18-2026 07:46:02 | [file_service.py](src/x_ipe/services/file_service.py), [analysis-TASK-966.md](x-ipe-docs/refactoring/analysis-TASK-966.md), [validation-TASK-966.md](x-ipe-docs/refactoring/validation-TASK-966.md) | Replaced watcher engine with `watchfiles`, preserved event semantics via normalization, updated dependency metadata/docs, and validated with watcher-focused pytest. Unrelated failures remain in `test_navigation.py::test_get_structure_returns_five_sections` and broader `npm test`. |
@@ -238,66 +227,7 @@
 | TASK-826 | Skill Update | Optimize x-ipe-dao-end-user-representative: (1) add yy-mm-dd date subfolders for DAO logs, update Phase 3 paths; (2) restore DoR/DoD/Input Init to mandatory XML format per skill creator template | Cipher 🔐 | ✅ done | 03-11-2026 03:21:00 | - | - |
 | TASK-823 | Design Mockup | KB interface mockup — 4 scenes: Browse Articles (grid/list, 2D tags, sort, dual-mode upload w/ folder picker), Article Detail, Reference Picker (copy+insert), 📥 Intake (AI Librarian file management) | Echo 📡 | ✅ done | 03-11-2026 03:50:00 | [kb-interface-v1.html](x-ipe-docs/ideas/wf-007-knowledge-base-implementation/mockups/kb-interface-v1.html) | x-ipe-task-based-requirement-gathering |
 | TASK-825 | Skill Update | Optimize x-ipe-dao-end-user-representative: compress execution procedure steps via reference extraction and concise rewrites, following x-ipe-meta-skill-creator process | Cipher 🔐 | ✅ done | 03-11-2026 03:08:00 | - | - |
-| | | *See [task-board-archive-1.md](task-board-archive-1.md) and [task-board-archive-2.md](task-board-archive-2.md) for all completed tasks (842 total)* | | | | | |
 
 ---
 
-## Cancelled Tasks
-
-| Task ID | Task | Description | Reason | Last Updated | Output Links |
-| TASK-988 | Skill Update | Migrate auto_proceed → interaction_mode in bug-fix production SKILL.md + sync 8 candidate SKILL.md from production. DAO mode. | Drift 🌊 | ✅ done | 03-24-2026 | — | — |
-| TASK-987 | Skill Update | Bug-fix skill: (1) simplify UI detection from program_type to context check, (2) add x-ipe-tool-ui-testing-via-chrome-mcp to tools.json. DAO mode. | Drift 🌊 | ✅ done | 03-24-2026 | — | — |
-|---------|-----------|-------------|--------|--------------|--------------|
-| TASK-042 | Human Playground | Interactive testing for FEATURE-003: Content Editor | No longer needed | 01-23-2026 04:52:00 | - |
-| TASK-032 | Human Playground | Create interactive playground for FEATURE-005: Interactive Console | No longer needed | 01-23-2026 04:52:00 | - |
-
----
-
-## Status Legend
-
-| Status | Symbol | Description |
-|--------|--------|-------------|
-| pending | ⏳ | Waiting to start |
-| in_progress | 🔄 | Working |
-| blocked | 🚫 | Waiting for dependency |
-| deferred | ⏸️ | Paused by human |
-| completed | ✅ | Done |
-| cancelled | ❌ | Stopped |
-
----
-
-## Task-Based Skills Quick Reference
-
-| Task | Skill | Default Next |
-|-----------|-------|--------------|
-| Requirement Gathering | x-ipe-task-based-requirement-gathering | Feature Breakdown |
-| Feature Breakdown | x-ipe-task-based-feature-breakdown | Technical Design |
-| Technical Design | x-ipe-task-based-technical-design | Code Implementation |
-| Code Implementation | x-ipe-task-based-code-implementation | Feature Acceptance Test |
-| Feature Acceptance Test | x-ipe-task-based-feature-acceptance-test | Feature Closing |
-| Human Playground | x-ipe-task-based-human-playground | Feature Closing |
-| Feature Closing | x-ipe-task-based-feature-closing | - |
-| Code Refactor | x-ipe-task-based-code-refactor | - |
-| Project Initialization | x-ipe-task-based-project-init | Dev Environment Setup |
-| Dev Environment Setup | x-ipe-task-based-dev-environment | - |
-
----
-
-## Quick Stats
-
-- **Total Active:** 20
-- **In Progress:** 0
-- **Pending:** 0
-- **Completed (archived):** 890
-- **Deferred:** 0
-- **Reverted:** 8
-- **Pending Review:** 0
-- **Blocked:** 0
-
----
-
-## Global Settings
-
-```yaml
-interaction_mode: "dao-represent-human-to-interact"  # Options: interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill
-```
+*Total tasks in this archive: 220*

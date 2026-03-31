@@ -272,10 +272,10 @@ For EACH section in collection template order:
 
 ### Step 5.2 — Package KB Articles & Report
 
-**CONTEXT:** Read all packed content files from `.x-ipe-checkpoint/session-{timestamp}/packed/`. Read quality scores from Step 5.1. Read manifest for provenance data (target, loaded_tool_skill, timestamps). Derive `extraction_id` from session folder name.
+**CONTEXT:** Read all packed content files from `.x-ipe-checkpoint/session-{timestamp}/packed/`. Read quality scores from Step 5.1. Read manifest for provenance data (target, loaded_tool_skill, timestamps). Derive `extraction_id` from `source_metadata.app_name` + `selected_category`: format as `{app_name}-{category}` (e.g., `x-ipe-user-manual`). If user provided a scope/focus, include it: `{app_name}-{scope}-{category}` (e.g., `x-ipe-workflow-mode-user-manual`). If folder already exists, append `-{N}` suffix.
 
 **DECISION — Determine Output Path & Status:**
-- Output folder: `x-ipe-docs/knowledge-base/.intake/{extraction_id}/`
+- Output folder: `x-ipe-docs/knowledge-base/.intake/{extraction_id}/` (e.g., `.intake/x-ipe-user-manual/`)
 - IF zero accepted sections → extraction_status = "failed" (still generate report)
 - IF all accepted → extraction_status = "complete"
 - IF some accepted, some error/skipped → extraction_status = "partial"

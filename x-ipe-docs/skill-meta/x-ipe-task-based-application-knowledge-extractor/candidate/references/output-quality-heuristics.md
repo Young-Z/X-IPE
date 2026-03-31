@@ -84,7 +84,7 @@
 
 ## §4. Intake Folder Convention
 
-  The extractor deposits raw output into `.intake/{extraction_id}/`. No index file is generated — downstream skills (e.g., KB librarian) own indexing and cataloguing.
+  The extractor deposits raw output into `.intake/{extraction_id}/`. The `extraction_id` is derived from `{app_name}-{category}` (e.g., `x-ipe-user-manual`, `my-app-workflow-mode-user-manual`). No index file is generated — downstream skills (e.g., KB librarian) own indexing and cataloguing.
 
   Folder contents:
   - `section-{NN}-{slug}.md` — one article per accepted section

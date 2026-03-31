@@ -347,6 +347,7 @@ input:
     - CRITICAL: Sub-agents must receive file paths to referenced-elements.json, area screenshots, and mockup HTML
     - CRITICAL: When opening mockup for screenshot/comparison, ALWAYS use new_page() to open in a new tab — NEVER navigate_page on the target website tab, as this destroys the injected toolbar and breaks further polling
     - After each flow, always re-enable buttons and resume polling
+    - MANDATORY: When the entire UIUX reference session is complete (user signals done or session ends), close all pages opened during this session via close_page to prevent stale browser sessions from accumulating. The last open page cannot be closed — leave at least one page open.
   </constraints>
 </operation>
 ```
@@ -400,6 +401,10 @@ operation_output:
   <checkpoint required="true" mode="mockup">
     <name>Buttons re-enabled after processing</name>
     <verification>Re-enable script executed, polling resumed for next user action</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Browser pages cleaned up</name>
+    <verification>All pages opened during this session closed via close_page (except the last remaining page)</verification>
   </checkpoint>
 </definition_of_done>
 ```
