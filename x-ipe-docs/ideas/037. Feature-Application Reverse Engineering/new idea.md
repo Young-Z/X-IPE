@@ -1,0 +1,3 @@
+let's create a skill x-ipe-knowledge-extraction-application-reverse-engineering, it can be called by knowledge extractor skill. 1.  x-i
+pe-knowledge-extraction-application-reverse-engineering should be similar to user-manual skill in skill structure, but it's focus on application reverse
+engineering. 2. the scope of the reverse engineering, you can search online and base on your knowledge to suggest.

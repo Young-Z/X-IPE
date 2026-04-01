@@ -28,7 +28,7 @@ triggers:
 
 ### ⚠️ BLOCKING Rules
 
-1. **v1 Scope:** Only "user-manual" extraction category is supported. Requests for other categories (API-reference, architecture, runbook, configuration) will halt with error listing v1-supported categories.
+1. **v1 Scope:** Only "user-manual" and "application-reverse-engineering" extraction categories are supported. Requests for other categories (API-reference, runbook, configuration) will halt with error listing supported categories.
 2. **Tool Skill Required:** Extraction cannot proceed without a matching tool skill (e.g., `x-ipe-tool-knowledge-extraction-user-manual`). If no tool skill is found, the skill halts with error.
 3. **File-Based Handoff:** All knowledge exchange between extractor and tool skills MUST use `.x-ipe-checkpoint/` folder. Inline text exchange is prohibited.
 4. **Checkpoint Location:** `.x-ipe-checkpoint/` is created in CWD (project root), NEVER inside target directory. For URL-only targets, CWD is used.
@@ -54,13 +54,18 @@ input:
   
   # Required inputs
   target: "{path or URL to application/documentation}"
-  purpose: "user-manual"  # v1: only user-manual supported
+  purpose: "user-manual | application-reverse-engineering"  # supported categories
   
   # Optional
   config_overrides:
     max_retries: 3
     web_search_enabled: true
     timeout_seconds: 15
+
+  # Deep Research Mode (optional)
+  deep_research:
+    rounds: 1           # default: 1 (single pass), max: 10, or "smart"
+                         # "smart": auto-exit when 100% of functions/UI covered
 ```
 
 ### Input Initialization
@@ -70,16 +75,20 @@ input:
   <field name="task_id" source="auto-generated" />
   <field name="execution_mode" source="workflow or free-mode" />
   <field name="target" source="user-provided (path or URL)" />
-  <field name="purpose" source="user-provided, v1: 'user-manual' only" />
+  <field name="purpose" source="user-provided: 'user-manual' or 'application-reverse-engineering'" />
   <field name="config_overrides" source="optional, defaults: max_retries=3, web_search_enabled=true, timeout_seconds=15, max_files_per_section=50, max_validation_iterations=3, coverage_target=0.8" />
+  <field name="deep_research.rounds" source="ask-user, default: 1, values: 1-10 or 'smart'" />
 </input_init>
 ```
 
 **Validation Gates:**
-- IF `target` missing → halt; IF `purpose` not "user-manual" → halt
+- IF `target` missing → halt; IF `purpose` not in ["user-manual", "application-reverse-engineering"] → halt
 - IF target path missing or URL unreachable → halt
 - IF CWD not writable → halt
 - Set defaults for unspecified config_overrides
+- IF `deep_research.rounds` not provided → prompt user:
+  - "How many deep research rounds? (default: 1, max: 10, or 'smart' for auto-detect)"
+  - IF numeric → clamp to 1–10; IF "smart" → set rounds = "smart"
 
 ---
 
@@ -92,7 +101,7 @@ input:
   </checkpoint>
   <checkpoint required="true">
     <name>Input Validated</name>
-    <verification>Target exists/reachable, purpose is v1-supported category</verification>
+    <verification>Target exists/reachable, purpose is a supported category</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Working Directory Writable</name>
@@ -120,6 +129,7 @@ input:
 | 4. 明辨之 | 4.1 | Resume, Checkpoint & Error Handling | Detect prior sessions, save checkpoints, classify errors | errors handled |
 | 5. 笃行之 | 5.1 | Quality Scoring | Delegate to tool skill score_quality, loop if low | scores computed |
 | 5. 笃行之 | 5.2 | Package KB Articles & Report | Generate .intake/ output files | output packaged |
+| 5. 笃行之 | 5.3 | Deep Research Iteration | Analyze gaps, loop to Phase 2 if rounds remain | rounds exhausted or coverage 100% |
 | 6. 继续执行 | 6.1 | Finalize & Clean Up | Update manifest, cleanup temp files | manifest finalized |
 | 6. 继续执行 | 6.2 | Route Next Action | DAO-assisted routing to KB librarian | next action decided |
 
@@ -172,13 +182,13 @@ input:
     <name>Select Category</name>
     <action>
       1. Read purpose parameter from input
-      2. Validate against v1-supported categories (user-manual only)
+      2. Validate against supported categories: "user-manual", "application-reverse-engineering"
       3. Halt with error if unsupported or unknown category
     </action>
     <constraints>
-      - BLOCKING: purpose not "user-manual" → halt listing v1-supported categories
+      - BLOCKING: purpose not in ["user-manual", "application-reverse-engineering"] → halt listing supported categories
     </constraints>
-    <output>selected_category = "user-manual"</output>
+    <output>selected_category = "{purpose}"</output>
   </step_1_2>
 
   <step_1_3>
@@ -341,6 +351,31 @@ input:
     </constraints>
     <output>.intake/ folder with article files and extraction_report.md</output>
   </step_5_2>
+
+  <step_5_3>
+    <name>Deep Research Iteration</name>
+    <action>
+      1. Read `deep_research.rounds` from input and `current_round` from manifest (default: 1)
+      2. IF rounds == 1 → skip (single-pass, backward-compatible); proceed to Phase 6
+      3. Build **coverage inventory**: list documented features/UI/APIs vs total discoverable items
+         - Compute `coverage_pct` = (documented / total) × 100
+      4. **Exit conditions** (any triggers exit → proceed to Phase 6):
+         - Numeric mode: `current_round >= rounds`
+         - Smart mode: `coverage_pct >= 100%` OR `coverage_pct == previous_round` (plateau)
+      5. **Prepare next round** (if continuing):
+         a. Generate gap analysis targeting only undocumented areas
+         b. Update manifest: increment current_round, store coverage_pct
+         c. **Loop back to Phase 2** with gap-targeted prompts; Phases 2→3→3.5→4→5.1→5.2 run on new content
+         d. New findings merge additively into existing .intake/ articles
+         e. Return to Step 5.3 for next iteration
+    </action>
+    <constraints>
+      - BLOCKING: Each round MUST add new content; stagnant rounds → forced exit
+      - Max 10 rounds regardless of mode (safety cap)
+      - Prior round content is READ-ONLY during gap analysis
+    </constraints>
+    <output>deep_research_summary { total_rounds_executed, final_coverage_pct, gap_analysis_per_round[] }</output>
+  </step_5_3>
 </phase_5>
 
 <phase_6 name="继续执行 — Route and Execute">
@@ -404,6 +439,7 @@ task_completion_output:
   extraction_summary: { sections_extracted, sections_skipped, sections_error }
   validation_summary: { final_coverage_ratio, exit_reason, sections_accepted }
   error_summary: { total_errors, transient_retried, permanent_halted }
+  deep_research_summary: { total_rounds_executed, final_coverage_pct, gap_analysis_per_round[] }
   extraction_status: "complete | partial | failed"
   quality_score: 0.0  # 0.0–1.0
   quality_label: "high | acceptable | low"
@@ -457,7 +493,6 @@ REFERENCE: See `references/output-schemas.md` for full dynamic output schemas wi
 3. **Checkpoint Inside Target:** Creating `.x-ipe-checkpoint/` inside target directory instead of CWD
 4. **Multi-Category Parallel:** Attempting multiple extraction categories in one session
 5. **Implicit Knowledge:** Assuming the reader knows to press Enter, click a specific button, etc. without documenting it
-
 ---
 
 ## Examples

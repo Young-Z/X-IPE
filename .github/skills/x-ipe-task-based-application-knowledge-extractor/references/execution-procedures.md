@@ -295,6 +295,49 @@ For EACH section in collection template order:
 
 ---
 
+### Step 5.3 — Deep Research Iteration
+
+**CONTEXT:** Read `deep_research.rounds` from input parameters and `current_round` from manifest (defaults to 1 if not set). Read all accepted section content from `.intake/{extraction_id}/` as the baseline knowledge.
+
+**DECISION — Continue or Exit:**
+- IF `rounds == 1` → **SKIP** this step entirely (single-pass mode, backward-compatible)
+- IF `rounds` is numeric AND `current_round >= rounds` → **EXIT** loop, proceed to Phase 6
+- IF `rounds == "smart"` AND `coverage_pct >= 100%` → **EXIT** loop (full coverage achieved)
+- IF `rounds == "smart"` AND `coverage_pct == previous_round_coverage_pct` → **EXIT** loop (plateau, no progress)
+- OTHERWISE → **CONTINUE** to next round
+
+**ACTION — Build Coverage Inventory:**
+1. Parse all extracted content to enumerate documented items:
+   - Features/functions documented (from Section 4 files)
+   - Workflows/scenarios covered (from Section 5 files)
+   - UI elements/pages visited (from screenshots + Section 3)
+   - API endpoints/settings documented (from Sections 6, 8)
+2. Discover total available items from the target application:
+   - For web apps: crawl navigation, list all menu items, count unique routes/pages
+   - For source repos: grep for exported functions, CLI commands, config options
+   - For documentation: count TOC entries, linked pages
+3. Compute `coverage_pct = (documented_items / total_discoverable_items) × 100`
+4. Generate gap analysis: list specific undocumented areas with exploration hints
+
+**ACTION — Prepare Next Round:**
+1. Create targeted extraction prompts focusing ONLY on gaps (avoid re-extracting covered content)
+2. Mark sections needing expansion (e.g., "Section 4 has 5/9 features")
+3. Update manifest: increment `current_round`, store `coverage_pct`, append `gap_analysis`
+4. **Loop back to Phase 2 (Step 2.1)** with:
+   - Existing content as READ-ONLY context
+   - Gap-targeted extraction prompts
+   - Clear instruction: "Explore ONLY these undocumented areas: [list]"
+5. Phases 2→3→3.5→4→5.1→5.2 run on new content; new findings are **merged** into existing `.intake/` articles
+6. Return to Step 5.3 for next iteration check
+
+**VERIFY:**
+- ✅ Each round adds measurable new content (stagnant rounds → forced exit)
+- ✅ `current_round` never exceeds 10 (safety cap)
+- ✅ Coverage inventory is reproducible between rounds
+- ✅ Manifest tracks per-round: `{ round_number, coverage_pct, items_added, gap_summary }`
+
+---
+
 ## Phase 6: 继续执行 — Continue Execution
 
 ### Step 6.1 — Finalize & Clean Up
