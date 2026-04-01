@@ -5,7 +5,7 @@
 ## Active Tasks
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
-| TASK-1040 | Feature Closing | Close FEATURE-053-A: Verify ACs, code-to-docs review, refactoring analysis, commit to main. git_strategy=main-branch-only. | Cipher 🔐 | 🔄 in_progress | 04-01-2026 | — | — |
+| TASK-1040 | Feature Closing | Close FEATURE-053-A: ACs verified (74/74), code-to-docs reviewed, refactoring analysis (8/10), committed + pushed to main (0e52770). | Cipher 🔐 | ✅ done | 04-01-2026 | Pushed to main (no PR, main-branch-only) | — |
 | TASK-1039 | Acceptance Testing | Execute acceptance tests for FEATURE-053-A: Structured review of 74 ACs across 16 groups. 1 defect found+fixed (INVALID_SECTION_ID error). Final: 74/74 PASS (100%). | Cipher 🔐 | ✅ done | 03-31-2026 | [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-053/FEATURE-053-A/acceptance-test-cases.md) | x-ipe-task-based-feature-closing |
 | TASK-1038 | Code Implementation | Implement FEATURE-053-A (Application Reverse Engineering Tool Skill): Created 15 skill files via x-ipe-meta-skill-creator delegation (SKILL.md, 3 core templates, 9 mixin files, references, test-cases). Updated extractor category registration. program_type=skills. | Cipher 🔐 | ✅ done | 03-31-2026 | [SKILL.md](.github/skills/x-ipe-tool-knowledge-extraction-application-reverse-engineering/SKILL.md) | x-ipe-task-based-feature-acceptance-test |
 | TASK-1037 | Technical Design | Design FEATURE-053-A (Application Reverse Engineering Tool Skill): Two-part design for skill file structure, 8-section phased playbook, collection template, acceptance criteria, 9 mixin files (4 repo-type + 5 language-type), quality scoring weight profiles, verification walkthrough. | Cipher 🔐 | ✅ done | 03-31-2026 | [technical-design.md](x-ipe-docs/requirements/EPIC-053/FEATURE-053-A/technical-design.md) | x-ipe-task-based-code-implementation |
@@ -296,7 +296,7 @@
 ## Quick Stats
 
 - **Total Active:** 25
-- **In Progress:** 1
+- **In Progress:** 0
 - **Pending:** 0
 - **Completed (archived):** 894
 - **Deferred:** 0

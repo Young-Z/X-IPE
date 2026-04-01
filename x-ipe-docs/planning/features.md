@@ -155,4 +155,4 @@ This board tracks all features across the project lifecycle.
 | FEATURE-052-B | EPIC-052 | KB Index Scripts | v1.0 | Closed | [specification.md](x-ipe-docs/requirements/EPIC-052/FEATURE-052-B/specification.md) | 03-30-2026 | 03-30-2026 |
 | FEATURE-052-C | EPIC-052 | UIUX Reference Script | v1.0 | Closed | FEATURE-052-A | 03-30-2026 | 03-30-2026 14:15:47 |
 | FEATURE-052-D | EPIC-052 | Skill Migration & MCP Removal | v1.0 | Closed | FEATURE-052-A, FEATURE-052-B, FEATURE-052-C | 03-30-2026 | 03-30-2026 |
-| FEATURE-053-A | EPIC-053 | Application Reverse Engineering Tool Skill | v1.0 | Tested | [specification.md](x-ipe-docs/requirements/EPIC-053/FEATURE-053-A/specification.md) | 03-31-2026 | 03-31-2026 |
+| FEATURE-053-A | EPIC-053 | Application Reverse Engineering Tool Skill | v1.0 | Closed | [specification.md](x-ipe-docs/requirements/EPIC-053/FEATURE-053-A/specification.md) | 03-31-2026 | 04-01-2026 |
