@@ -161,9 +161,61 @@ X-IPE includes built-in tracing for diagnosing issues:
 
 ---
 
+## Workflow Mode Specific Issues (Round 2)
+
+### 9. "Cannot re-open" Error When Clicking Completed Action
+
+**Symptom:** Toast message: "Cannot re-open: {action} in {stage} is already started"
+
+**Cause:** You clicked a completed action, but a later stage has already progressed beyond that point.
+
+**Solutions:**
+- **Use context menu:** Right-click the action → "Reset to Pending" to force reopen
+- **Caveat:** Only works if dependent actions haven't started; resetting may break the workflow chain
+- **Alternative:** Create a new workflow if you need to restart from an earlier stage
+
+### 10. Action Stuck in "in_progress"
+
+**Symptom:** Action shows ⏳ spinner but never completes.
+
+**Solutions:**
+- **Right-click** the action → **"Mark as Done"** (if the AI actually completed the work)
+- **Right-click** the action → **"Reset to Pending"** (to retry from scratch)
+- Check the terminal — the AI CLI tool may be waiting for input
+
+### 11. Workflow View Not Updating
+
+**Symptom:** Action statuses seem stale; changes from the terminal aren't reflected.
+
+**Solutions:**
+- **Collapse and re-expand** the workflow card (restarts the 7-second polling interval)
+- **Refresh the page** (F5) for a full state reload
+- Check that the console shows **"Connected"** (WebSocket must be active)
+
+### 12. Skills Modal Empty
+
+**Symptom:** Clicking "Skills" button shows an empty modal.
+
+**Solutions:**
+- Ensure `.github/skills/` directory contains `SKILL.md` files
+- Check that `/api/skills` endpoint returns data (open browser console → Network tab)
+- Verify the Flask backend is running without errors
+
+### 13. WebSocket Keeps Disconnecting
+
+**Symptom:** Console shows "Disconnected" repeatedly.
+
+**Solutions:**
+- Check that Flask backend is running on port 5858: `lsof -i :5858`
+- Check for firewall or proxy interference
+- Auto-reconnect triggers when page regains focus; try clicking the page
+- If persistent, restart the backend: `x-ipe serve`
+
+---
+
 ## Getting Help
 
 - **Project repository:** Check the GitHub repository for issues and discussions
 - **README:** Contains latest setup and configuration documentation
 - **Debug logs:** Run with `--debug` flag and check terminal output
-- **Workflow files:** Inspect `x-ipe-docs/engineering-workflow/workflow-{name}.json` directly
+- **Workflow files:** Inspect `.x-ipe/engineering-workflow/workflow-{name}.json` directly

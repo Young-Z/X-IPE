@@ -148,3 +148,75 @@ This file defines the structure of workflow stages, available actions per stage,
 | `POST` | `/api/settings` | Save settings (project root, preferences) |
 | `POST` | `/api/settings/language` | Change interface language |
 | `PATCH` | `/api/workflow/{name}/settings` | Update per-workflow settings (interaction mode) |
+
+---
+
+## CLI Tool Configuration (Round 3)
+
+### Supported CLI Tools
+
+X-IPE supports three AI CLI tools for code development:
+
+| CLI Tool | Identifier | Detection |
+|----------|-----------|-----------|
+| **GitHub Copilot CLI** | `copilot` | Auto-detected via `copilot` command |
+| **OpenCode CLI** | `opencode` | Auto-detected via `opencode` command |
+| **Claude Code CLI** | `claude-code` | Auto-detected via `claude` command |
+
+### Auto-Detection and Priority
+
+On startup, X-IPE automatically detects which CLI tools are installed and selects the highest-priority one:
+1. **copilot** (highest priority)
+2. **opencode**
+3. **claude-code** (lowest priority)
+
+If no CLI is detected, it defaults to GitHub Copilot.
+
+### Switching CLI Tool
+
+To switch the active CLI tool:
+- **API:** `POST /api/cli-adapter/switch` with `{"cli": "opencode"}`
+- The selection is saved to `.x-ipe.yaml` under the `cli` key
+- Restart the terminal session for the change to take effect
+
+### Per-CLI Configuration
+
+Each CLI adapter defines:
+
+| Property | Description | Example |
+|----------|-------------|---------|
+| `display_name` | Human-readable name | "GitHub Copilot" |
+| `command` | Shell command | `copilot` |
+| `instructions_file` | Target instruction file | `.github/copilot-instructions.md` |
+| `skills_folder` | Skill definitions path | `.github/skills/` |
+| `mcp_config_path` | MCP config location | `.vscode/mcp.json` |
+
+Configuration source: `x-ipe-docs/config/cli-adapters.yaml`
+
+---
+
+## DAO Message Interception (Round 3)
+
+### What It Does
+
+The "DAO Message Interception" toggle on the Settings page controls how the AI CLI tool processes your messages:
+
+- **When Enabled:** Every user message is processed through the DAO (Data Access Object) human representative skill before action. The AI uses structured interaction patterns to parse and respond to requests.
+- **When Disabled:** The AI agent classifies requests directly into skills without DAO mediation. Direct, simpler interaction.
+
+> **Note:** DAO within-skill interaction is unaffected by this toggle. This setting only controls the top-level message interception.
+
+### How to Toggle
+
+1. Go to **Settings** page (`/settings`)
+2. Find the **"DAO Message Interception"** section
+3. Toggle the switch on/off
+4. The copilot instructions file is automatically regenerated
+
+### Technical Effect
+
+Toggling this setting:
+1. Regenerates the CLI instructions file (e.g., `.github/copilot-instructions.md`)
+2. Selects between DAO-first and no-DAO instruction variants
+3. Updates `.x-ipe.yaml` configuration
+4. Changes take effect for all subsequent AI interactions

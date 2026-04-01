@@ -26,8 +26,8 @@
 | 1 | Overview | [Overview](01-overview.md) |
 | 2 | Installation & Setup | [Installation & Setup](02-installation-setup.md) |
 | 3 | Getting Started | [Getting Started](03-getting-started.md) |
-| 4 | Core Features | [Core Features](04-core-features.md) |
-| 5 | Common Workflow Scenarios | [Common Workflow Scenarios](05-common-workflow-scenarios.md) |
+| 4 | Core Features | [Core Features](04-core-features/_index.md) |
+| 5 | Common Workflow Scenarios | [Common Workflow Scenarios](05-common-workflows/_index.md) |
 | 6 | Configuration | [Configuration](06-configuration.md) |
 | 7 | Troubleshooting | [Troubleshooting](07-troubleshooting.md) |
 | 8 | FAQ & Reference | [FAQ & Reference](08-faq-reference.md) |
@@ -74,21 +74,40 @@
 
 **What belongs here:** Feature-by-feature usage guide covering all primary capabilities. This is the main body of the user manual — each feature should be detailed enough for a user to understand and use it independently.
 
-**Subsections:**
-- One H3 per feature (e.g., `### User Management`, `### Data Export`)
-- Each feature subsection MUST include:
-  - **Interaction Pattern** — One of: FORM | MODAL | CLI_DISPATCH | NAVIGATION | TOGGLE
-  - **Description** — What it does and why a user would use it
-  - **Instructions** — Step-by-step usage guide using the format:
-    1. [Action] Click/Type/Press... [Element] "Button Label" → [Expected] "You should see..."
-  - **Example** — Concrete usage example with expected output
-  - **Screenshots** — Reference screenshots for UI features: `![{Alt text}](references/{nn}-core-features-{feature-slug}.png)`
-  - **Tips** — Best practices, common pitfalls, or power-user shortcuts (optional but recommended)
+**Output structure:** Subfolder with one file per feature:
+```
+04-core-features/
+  feature01-{feature-slug}.md
+  feature02-{feature-slug}.md
+  ...
+```
 
-**Screenshot convention:** `references/04-core-features-{feature-slug}-{description}.png`
-(e.g., `references/04-core-features-user-mgmt-create-dialog.png`)
+**File naming convention:** `feature{nn}-{feature-slug}.md` (e.g., `feature01-workflow-mode.md`, `feature02-free-mode.md`)
 
-**When content is insufficient:** If extracted content lacks detail for any feature subsection (e.g., missing instructions or only has a one-liner description), flag it as INCOMPLETE and request the extractor to gather more source material for that specific feature.
+**Each feature file MUST include:**
+- **H1 heading:** `# Feature {nn}: {Feature Name}`
+- **Interaction Pattern** — One of: FORM | MODAL | CLI_DISPATCH | NAVIGATION | TOGGLE
+- **Description** — What it does and why a user would use it
+- **Instructions** — Step-by-step usage guide using the format:
+  1. [Action] Click/Type/Press... [Element] "Button Label" → [Expected] "You should see..."
+- **Example** — Concrete usage example with expected output
+- **Screenshots** — Reference screenshots: `![{Alt text}](screenshots/feature{nn}-{feature-slug}-{description}.png)`
+- **Tips** — Best practices, common pitfalls, or power-user shortcuts (optional but recommended)
+
+**Screenshot convention:** `screenshots/feature{nn}-{feature-slug}-{description}.png`
+(e.g., `screenshots/feature01-workflow-mode-stage-panel.png`)
+
+**Index file:** The subfolder MUST contain a `_index.md` with a table listing all features:
+```markdown
+# Core Features
+
+| # | Feature | File | Interaction |
+|---|---------|------|-------------|
+| 1 | Workflow Mode | [feature01-workflow-mode.md](feature01-workflow-mode.md) | NAVIGATION |
+| 2 | Free Mode | [feature02-free-mode.md](feature02-free-mode.md) | NAVIGATION |
+```
+
+**When content is insufficient:** If extracted content lacks detail for any feature (e.g., missing instructions or only has a one-liner description), flag it as INCOMPLETE and request the extractor to gather more source material for that specific feature.
 
 ---
 
@@ -96,20 +115,39 @@
 
 **What belongs here:** End-to-end workflow walkthroughs showing how multiple features work together to accomplish real-world tasks. Unlike Section 4 (which documents individual features), this section demonstrates feature combinations in context.
 
-**Subsections:**
-- One H3 per scenario (e.g., `### Onboarding a New Team Member`, `### Deploying to Production`)
-- Each scenario MUST include:
-  - **Goal** — What the user wants to accomplish (1 sentence)
-  - **Prerequisites** — What must be set up before starting
-  - **Steps** — Numbered walkthrough referencing features from Section 4 (with cross-links), using the format:
-    1. [Action] ... [Element] ... → [Expected] ...
-       ⚠️ If this dispatches a CLI command: Press **Enter** to execute. Wait for completion (1-5 min).
-  - **Expected Result** — What success looks like
-  - **Screenshots** — Key UI states during the workflow: `![{Alt text}](references/{nn}-workflows-{scenario-slug}.png)`
-  - **Tips** — Variations, shortcuts, or "what if" guidance (optional)
+**Output structure:** Subfolder with one file per workflow:
+```
+05-common-workflows/
+  workflow01-{scenario-slug}.md
+  workflow02-{scenario-slug}.md
+  ...
+```
 
-**Screenshot convention:** `references/05-workflows-{scenario-slug}-{description}.png`
-(e.g., `references/05-workflows-deploy-prod-pipeline-view.png`)
+**File naming convention:** `workflow{nn}-{scenario-slug}.md` (e.g., `workflow01-create-new-project.md`, `workflow02-implement-feature.md`)
+
+**Each workflow file MUST include:**
+- **H1 heading:** `# Workflow {nn}: {Scenario Name}`
+- **Goal** — What the user wants to accomplish (1 sentence)
+- **Prerequisites** — What must be set up before starting
+- **Steps** — Numbered walkthrough referencing features from Section 4 (with cross-links to feature files), using the format:
+  1. [Action] ... [Element] ... → [Expected] ...
+     ⚠️ If this dispatches a CLI command: Press **Enter** to execute. Wait for completion (1-5 min).
+- **Expected Result** — What success looks like
+- **Screenshots** — Key UI states: `![{Alt text}](screenshots/workflow{nn}-{scenario-slug}-{description}.png)`
+- **Tips** — Variations, shortcuts, or "what if" guidance (optional)
+
+**Screenshot convention:** `screenshots/workflow{nn}-{scenario-slug}-{description}.png`
+(e.g., `screenshots/workflow01-create-project-setup-wizard.png`)
+
+**Index file:** The subfolder MUST contain a `_index.md` with a table listing all workflows:
+```markdown
+# Common Workflow Scenarios
+
+| # | Workflow | File | Complexity |
+|---|----------|------|-----------|
+| 1 | Create a New Project | [workflow01-create-new-project.md](workflow01-create-new-project.md) | Basic |
+| 2 | Implement a Feature | [workflow02-implement-feature.md](workflow02-implement-feature.md) | Intermediate |
+```
 
 **Minimum:** At least 3 scenarios covering the most common user journeys.
 
@@ -158,9 +196,18 @@
 **Threshold:** If the assembled playbook exceeds **800 lines**, split into sub-files.
 
 **File naming convention:**
-- Sub-markdown files: `{nn}-{section-slug}.md` (e.g., `01-overview.md`, `04-core-features.md`)
-- Screenshot images: `references/{nn}-{section-slug}-{description}.png` (e.g., `references/04-core-features-dashboard-view.png`)
-- Sub-markdown files stored alongside the main playbook; all images stored in `references/` subfolder
+- Sub-markdown files: `{nn}-{section-slug}.md` (e.g., `01-overview.md`, `06-configuration.md`)
+- Screenshot images: `screenshots/{nn}-{section-slug}-{description}.png` (e.g., `screenshots/04-core-features-dashboard-view.png`)
+- Sub-markdown files stored alongside the main playbook; all images stored in `screenshots/` subfolder
+
+**Subfolder convention for Sections 4 and 5:**
+Sections 4 (Core Features) and 5 (Common Workflows) ALWAYS use subfolders with per-item files, regardless of content length:
+- `04-core-features/feature{nn}-{slug}.md` — one file per feature
+- `04-core-features/_index.md` — feature listing table
+- `04-core-features/screenshots/` — feature screenshots
+- `05-common-workflows/workflow{nn}-{slug}.md` — one file per workflow
+- `05-common-workflows/_index.md` — workflow listing table
+- `05-common-workflows/screenshots/` — workflow screenshots
 
 **Sub-file structure:**
 Each sub-markdown file follows this structure:

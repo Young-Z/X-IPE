@@ -70,12 +70,16 @@ SOURCE PRIORITY:
 - What are the feature entry points? (look for route handlers, CLI commands, menu items)
 - Are there best practices or tips per feature? (look for "tips", "best practices", "pro tips" sections)
 
-PER-FEATURE DETAIL (extract for EACH feature individually):
+PER-FEATURE DETAIL (extract EACH feature as a SEPARATE item — each becomes its own file):
 - Step-by-step instructions: What does a user click/type to use this feature?
 - Input/output: What goes in, what comes out?
 - UI elements: What does the user see? (capture screenshots if web/app via Chrome DevTools)
 - Edge cases: What happens with invalid input, empty state, or limits?
 - Permissions: Does this feature require specific roles or access?
+
+OUTPUT FORMAT: Extract each feature as a clearly delimited block (H3 heading per feature).
+These will be split into individual files: feature{nn}-{feature-slug}.md
+Enumerate features sequentially starting from 01.
 
 INTERACTION PATTERN DETECTION:
 For each feature/action, identify its interaction pattern:
@@ -93,9 +97,9 @@ For CLI_DISPATCH patterns (most error-prone), MUST document:
 5. What success/failure looks like
 
 SCREENSHOT GUIDANCE:
-- For each major feature, capture a screenshot showing the feature in action
-- Save to: references/04-core-features-{feature-slug}-{description}.png
-- Reference in markdown as: ![{Alt text}](references/04-core-features-{feature-slug}-{description}.png)
+- For each feature, capture a screenshot showing the feature in action
+- Save to: screenshots/feature{nn}-{feature-slug}-{description}.png
+- Reference in markdown as: ![{Alt text}](screenshots/feature{nn}-{feature-slug}-{description}.png)
 - Prioritize: main UI state, key dialogs, result/output views
 
 WHEN CONTENT IS THIN:
@@ -122,12 +126,16 @@ SOURCE PRIORITY:
 - Are there documented use cases or stories? (look for use-case docs, user stories, case studies)
 - What recurring patterns appear in issues/discussions? (look for "how do I" questions, common support requests)
 
-PER-SCENARIO DETAIL:
+PER-SCENARIO DETAIL (extract EACH workflow as a SEPARATE item — each becomes its own file):
 - Goal: What is the user trying to accomplish?
 - Prerequisites: What must already be set up?
 - Steps: Numbered walkthrough showing which features are used and in what order
 - Expected result: What does success look like?
-- Cross-references: Link back to relevant Section 4 features
+- Cross-references: Link back to relevant Section 4 feature files (e.g., `[Workflow Mode](../04-core-features/feature01-workflow-mode.md)`)
+
+OUTPUT FORMAT: Extract each workflow as a clearly delimited block (H3 heading per workflow).
+These will be split into individual files: workflow{nn}-{scenario-slug}.md
+Enumerate workflows sequentially starting from 01.
 
 EXPECTED OUTCOMES:
 For each step in a workflow scenario, document:
@@ -138,8 +146,8 @@ For each step in a workflow scenario, document:
 
 SCREENSHOT GUIDANCE:
 - Capture key transition points in the workflow (start state, intermediate states, end state)
-- Save to: references/05-workflows-{scenario-slug}-{description}.png
-- Reference in markdown as: ![{Alt text}](references/05-workflows-{scenario-slug}-{description}.png)
+- Save to: screenshots/workflow{nn}-{scenario-slug}-{description}.png
+- Reference in markdown as: ![{Alt text}](screenshots/workflow{nn}-{scenario-slug}-{description}.png)
 
 WHEN CONTENT IS THIN:
 - If no explicit workflow docs exist → flag INCOMPLETE

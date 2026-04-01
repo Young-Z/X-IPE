@@ -242,33 +242,46 @@ input:
 ```xml
 <operation name="pack_section">
   <input>
-    <field name="section_id" type="string" required="true">Section identifier (e.g., "1-overview", "2-installation-setup")</field>
+    <field name="section_id" type="string" required="true">Section identifier (e.g., "1-overview", "4-core-features")</field>
     <field name="content_path" type="string" required="true">Path to validated content file in .x-ipe-checkpoint/</field>
     <field name="split_mode" type="boolean" required="false" default="false">If true, output as standalone sub-markdown file with Instructions and Screenshots sections</field>
   </input>
   <action>
     1. Read the playbook template to get section heading and structure
     2. Read validated content at content_path
-    3. IF split_mode is true:
+    3. **IF section_id is "4-core-features" or "5-common-workflow-scenarios":**
+       a. Create subfolder: `04-core-features/` or `05-common-workflows/`
+       b. Parse content to identify individual features/workflows (split on H3 headings or feature boundaries)
+       c. For each feature/workflow item:
+          - Create individual file: `feature{nn}-{slug}.md` or `workflow{nn}-{slug}.md`
+          - Number sequentially starting at 01
+          - Slug derived from feature/workflow name (lowercase, hyphens)
+          - Structure: H1 heading with number and name → content sections per playbook template
+       d. Create `_index.md` with table listing all items and cross-links
+       e. Create `screenshots/` subfolder; move item-specific screenshots there
+       f. Return list of created file paths
+    4. ELSE IF split_mode is true:
        a. Create standalone sub-markdown file with naming convention: {nn}-{section-slug}.md
        b. Structure: H1 heading → ## Instructions → ## Content → ## Screenshots (optional)
        c. Instructions section explains what this section covers and how to use it
-       d. Screenshots section includes references to images in references/ subfolder: references/{nn}-{section-slug}-{description}.png
-    4. ELSE (split_mode is false):
+       d. Screenshots section includes references to images in screenshots/ subfolder
+    5. ELSE (split_mode is false):
        a. Format content under proper H2 heading with consistent style
        b. Apply section numbering from playbook
        c. Ensure subsection headings use H3
        d. Wrap code examples in fenced code blocks
        e. Normalize list formatting
-    5. Return formatted section ready for assembly
+    6. Return formatted section ready for assembly
   </action>
   <constraints>
     - BLOCKING: section_id and content_path are required
     - CRITICAL: Do not alter factual content — only apply formatting
-    - CRITICAL: Follow naming convention for sub-files and images per Content Splitting Guidelines in playbook-template.md
-    - CRITICAL: All screenshot images MUST be placed in references/ subfolder, never at output root
+    - CRITICAL: Sections 4 and 5 ALWAYS use subfolder output with per-item files, regardless of split_mode
+    - CRITICAL: Feature files use `feature{nn}-{slug}.md` naming; workflow files use `workflow{nn}-{slug}.md`
+    - CRITICAL: Each subfolder MUST have `_index.md` and `screenshots/` subfolder
+    - CRITICAL: All screenshot images MUST be placed in the section's screenshots/ subfolder
   </constraints>
-  <output>Formatted markdown section (inline or sub-file path) ready for final assembly</output>
+  <output>Formatted markdown section (inline, sub-file path, or subfolder path) ready for final assembly</output>
 </operation>
 ```
 

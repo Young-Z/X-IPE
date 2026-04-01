@@ -1,36 +1,60 @@
 ---
-extraction_id: EXTRACT-1028
-task_id: TASK-1028
+extraction_id: x-ipe-workflow-mode-user-manual
+task_id: TASK-1032
 category: user-manual
 status: complete
-extracted_at: "2026-03-31T15:25:00Z"
+extracted_at: "2026-03-31T16:27:00Z"
+deep_research:
+  total_rounds: 3
+  round_1_coverage: 65%
+  round_2_coverage: 93%
+  round_3_coverage: 97%
 ---
 
-# Extraction Report — EXTRACT-1028
+# Extraction Report — x-ipe-workflow-mode-user-manual
 
 ## Summary
 
 | Field | Value |
 |-------|-------|
-| **Extraction ID** | EXTRACT-1028 |
-| **Task ID** | TASK-1028 |
+| **Extraction ID** | x-ipe-workflow-mode-user-manual |
+| **Task IDs** | TASK-1028 (Round 1), TASK-1032 (Rounds 2–3) |
 | **Category** | user-manual |
 | **Target** | Running web app at `http://127.0.0.1:5858` |
 | **Input Type** | running_web_app |
 | **Format** | HTML (Flask/Jinja2) |
 | **App Type** | Web application |
 | **Status** | ✅ Complete |
+| **Deep Research Rounds** | 3 |
 
 ## Quality Scores
 
 | Dimension | Score | Notes |
 |-----------|-------|-------|
-| **Completeness** | 0.90 | All 8 sections + web mixin covered; Docker setup N/A |
-| **Structure** | 0.92 | Consistent headings, tables, code blocks throughout |
-| **Clarity** | 0.85 | Step-by-step instructions with exact UI element names |
-| **Followability** | 0.87 | CLI_DISPATCH pattern documented with Enter key guidance, async completion signals |
-| **Freshness** | 0.88 | Extracted from live running app (2026-03-31) |
-| **Overall** | **0.88** | **High quality** |
+| **Completeness** | 0.95 | All 8 sections + 10 feature files + 8 workflow files + Round 3 enhancements |
+| **Structure** | 0.94 | Consistent headings, subfolder structure for features/workflows |
+| **Clarity** | 0.92 | Step-by-step instructions with screenshots, UI element IDs |
+| **Followability** | 0.93 | CLI_DISPATCH, context menu, modal workflows fully documented |
+| **Freshness** | 0.95 | Extracted from live running app with Chrome DevTools (2026-03-31) |
+| **Overall** | **0.94** | **High quality** |
+
+## Deep Research Summary
+
+| Round | Coverage | New Items Documented | Focus Areas |
+|-------|----------|---------------------|-------------|
+| Round 1 | 65% | 8 section files, 23 features described | Base extraction: stages, actions, lanes, modes, terminal, config |
+| Round 2 | 93% | 10 feature files + 8 workflow files | Stage Toolbox, Skills modal, Context Menu, KB Browser, Compose Idea, Folder Browser, Candidates, Polling, Error Recovery, State Persistence |
+| Round 3 | 97% | 3 partial gaps filled inline | CLI tool vendors & switching, DAO message interception, Stage gate unlock formula |
+
+### Gap Analysis Per Round
+
+**Round 1 → Round 2 gaps (13 full gaps, 11 partial):**
+- Stage Toolbox, Skills Button, Context Menu, KB Button, Deliverables Folder, Action Candidates, Polling, Error Recovery, Feature Lane Actions, Re-opening Actions
+
+**Round 2 → Round 3 gaps (3 partial):**
+- CLI tool vendor-specific setup → Documented in section-06
+- DAO message interception detail → Documented in section-06
+- Stage gate unlock formula → Documented in section-04
 
 ## Sections Extracted
 
@@ -39,10 +63,10 @@ extracted_at: "2026-03-31T15:25:00Z"
 | 1 | Overview | ✅ PASS | ~80 | App description, audience, 8 features, architecture diagram |
 | 2 | Installation & Setup | ✅ PASS | ~90 | Prerequisites, install commands, config, verification |
 | 3 | Getting Started | ✅ PASS | ~120 | 6-step quickstart with screenshots, explicit Enter key guidance |
-| 4 | Core Features | ✅ PASS | ~280 | 9 features, interaction patterns, CLI_DISPATCH details |
-| 5 | Common Workflows | ✅ PASS | ~200 | 4 end-to-end scenarios with numbered steps |
-| 6 | Configuration | ✅ PASS | ~120 | Settings page, .x-ipe.yaml, env vars, API endpoints |
-| 7 | Troubleshooting | ✅ PASS | ~130 | 8 issues, debug mode, error code catalog |
+| 4 | Core Features | ✅ PASS | ~395 | 9 features + stage gate formula + 10 subfolder feature files |
+| 5 | Common Workflows | ✅ PASS | ~230 | 5 phases + 8 subfolder workflow files |
+| 6 | Configuration | ✅ PASS | ~200 | Settings, CLI adapters, DAO interception, .x-ipe.yaml |
+| 7 | Troubleshooting | ✅ PASS | ~220 | 13 issues, debug mode, error code catalog, Round 2 additions |
 | 8 | FAQ & Reference | ✅ PASS | ~180 | 12 FAQs, 18-term glossary, API reference, file structure |
 
 ## Validation Summary
