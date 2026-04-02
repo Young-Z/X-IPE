@@ -218,7 +218,7 @@ x-ipe upgrade --cli opencode
 
 Each CLI gets its own:
 - **Skills folder** — `.github/skills/` (Copilot), `.opencode/skills/` (OpenCode), `.claude/skills/` (Claude Code)
-- **Instructions file** — `copilot-instructions.md`, `.opencode/instructions.md`, `.claude/instructions.md`
+- **Instructions file** — `copilot-instructions.md`, `.opencode/instructions.md`, `CLAUDE.md`
 - **MCP config** — `~/.copilot/mcp-config.json` (global), `opencode.json` (project), `.mcp.json` (project)
 
 ### Running from Source

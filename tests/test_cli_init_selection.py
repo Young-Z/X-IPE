@@ -67,7 +67,7 @@ def temp_adapters_yaml():
     run_args: ""
     inline_prompt_flag: "-p"
     prompt_format: '{command} {inline_prompt_flag} "{escaped_prompt}"'
-    instructions_file: ".claude/instructions.md"
+    instructions_file: "CLAUDE.md"
     skills_folder: ".claude/skills/"
     mcp_config_path: ".mcp.json"
     mcp_config_format: "project"
@@ -528,13 +528,13 @@ class TestCLISpecificInstructions:
         assert not (temp_project / ".github" / "copilot-instructions.md").exists()
 
     def test_instructions_claude_code_targets_claude_path(self, temp_project):
-        """copy_copilot_instructions(cli_name='claude-code') creates .claude/instructions.md."""
+        """copy_copilot_instructions(cli_name='claude-code') creates CLAUDE.md."""
         from x_ipe.core.scaffold import ScaffoldManager
 
         scaffold = ScaffoldManager(temp_project)
         scaffold.copy_copilot_instructions(cli_name='claude-code')
 
-        target = temp_project / ".claude" / "instructions.md"
+        target = temp_project / "CLAUDE.md"
         assert target in scaffold.created
         assert not (temp_project / ".github" / "copilot-instructions.md").exists()
 

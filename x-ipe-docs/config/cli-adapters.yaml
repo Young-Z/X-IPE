@@ -29,7 +29,7 @@ adapters:
     run_args: "--permission-mode bypassPermissions"
     inline_prompt_flag: ""
     prompt_format: '{command} "{escaped_prompt}"'
-    instructions_file: ".claude/instructions.md"
+    instructions_file: "CLAUDE.md"
     skills_folder: ".claude/skills/"
     mcp_config_path: ".mcp.json"
     mcp_config_format: "project"
