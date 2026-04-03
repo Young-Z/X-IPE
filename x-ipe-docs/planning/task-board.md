@@ -5,6 +5,7 @@
 ## Active Tasks
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
+| TASK-1074 | Feature Pipeline | Full pipeline for FEATURE-056-B (Feature Board API): refine → design → implement → test → close. DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | 04-03-2026 | — |
 | TASK-1073 | Feature Pipeline | Full pipeline for FEATURE-056-A (Feature CRUD Scripts): refine → design → implement → test → close. DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | 04-03-2026 | — |
 | TASK-1072 | Acceptance Test + Closing | Acceptance test and close FEATURE-055-C (Task Board API). 29 ACs. DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | 04-03-2026 | x-ipe-task-based-feature-refinement |
 | TASK-1071 | Code Implementation | Implement FEATURE-055-C (Task Board API). Routes + service + tests. DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | 04-03-2026 | x-ipe-task-based-feature-acceptance-test |

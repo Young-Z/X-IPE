@@ -194,6 +194,7 @@ def _register_blueprints(app):
     from x_ipe.routes.workflow_routes import workflow_bp
     from x_ipe.routes.kb_routes import kb_bp
     from x_ipe.routes.task_board_routes import task_board_bp
+    from x_ipe.routes.feature_board_routes import feature_board_bp
     
     # Initialize tracing middleware (FEATURE-023)
     from x_ipe.tracing.middleware import init_tracing_middleware
@@ -214,6 +215,7 @@ def _register_blueprints(app):
     app.register_blueprint(kb_bp)
     app.register_blueprint(learn_bp)
     app.register_blueprint(task_board_bp)
+    app.register_blueprint(feature_board_bp)
 
 
 def _register_handlers():
