@@ -270,13 +270,13 @@
 
 /* Column widths */
 .tb-table colgroup col.tb-col-id     { width: 100px; }
-.tb-table colgroup col.tb-col-type   { width: 130px; }
-.tb-table colgroup col.tb-col-desc   { }
-.tb-table colgroup col.tb-col-role   { width: 80px; }
-.tb-table colgroup col.tb-col-status { width: 110px; }
+.tb-table colgroup col.tb-col-type   { width: 150px; }
+.tb-table colgroup col.tb-col-desc   { width: 340px; }
+.tb-table colgroup col.tb-col-role   { width: 120px; }
+.tb-table colgroup col.tb-col-status { width: 120px; }
 .tb-table colgroup col.tb-col-date   { width: 100px; }
-.tb-table colgroup col.tb-col-output { width: 100px; }
-.tb-table colgroup col.tb-col-next   { width: 90px; }
+.tb-table colgroup col.tb-col-output { width: 120px; }
+.tb-table colgroup col.tb-col-next   { width: 110px; }
 
 .tb-table thead {
     position: sticky;
