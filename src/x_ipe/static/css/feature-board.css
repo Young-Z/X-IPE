@@ -1,0 +1,433 @@
+/* Feature Board Page Styles — FEATURE-057-B
+ * Slate/Emerald palette, DM Sans/DM Mono fonts
+ * Epic accordion grouping with per-epic progress bars
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap');
+
+.fb-page {
+    --bg-page: #f8fafc;
+    --bg-card: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --accent: #10b981;
+    --accent-light: #d1fae5;
+    --accent-dark: #059669;
+
+    --status-planned: #94a3b8;
+    --status-planned-bg: #f1f5f9;
+    --status-refined: #8b5cf6;
+    --status-refined-bg: #f5f3ff;
+    --status-designed: #3b82f6;
+    --status-designed-bg: #eff6ff;
+    --status-implemented: #f59e0b;
+    --status-implemented-bg: #fffbeb;
+    --status-tested: #06b6d4;
+    --status-tested-bg: #ecfeff;
+    --status-completed: #22c55e;
+    --status-completed-bg: #f0fdf4;
+    --status-retired: #64748b;
+    --status-retired-bg: #f1f5f9;
+
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.04);
+    --shadow-md: 0 4px 12px rgb(0 0 0 / 0.06);
+    --radius: 10px;
+    --radius-sm: 6px;
+    --radius-full: 9999px;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+    --font-mono: 'DM Mono', 'JetBrains Mono', monospace;
+
+    font-family: var(--font-body);
+    background: var(--bg-page);
+    color: var(--text-primary);
+    padding: 32px 40px;
+    min-height: 100vh;
+}
+
+/* --- Header --- */
+.fb-header { margin-bottom: 24px; }
+.fb-title { font-size: 28px; font-weight: 700; margin: 0 0 4px; }
+.fb-subtitle { font-size: 14px; color: var(--text-secondary); margin: 0; }
+
+/* --- Filter Bar --- */
+.fb-filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 24px;
+    animation: fbFadeIn 0.4s 0.1s ease forwards;
+    opacity: 0;
+}
+
+.fb-search-wrap {
+    position: relative;
+    flex: 1;
+    max-width: 360px;
+}
+
+.fb-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.fb-search-input {
+    width: 100%;
+    padding: 8px 12px 8px 36px;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text-primary);
+    background: #f8fafc;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.fb-search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgb(16 185 129 / 0.1);
+}
+
+.fb-search-input::placeholder { color: var(--text-muted); }
+
+.fb-filter-divider {
+    width: 1px;
+    height: 24px;
+    background: #e2e8f0;
+    flex-shrink: 0;
+}
+
+.fb-select {
+    padding: 8px 32px 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text-primary);
+    background: #f8fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M2.5 4.5L6 8l3.5-3.5'/%3E%3C/svg%3E") no-repeat right 10px center;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+}
+
+.fb-select:focus { border-color: var(--accent); }
+
+/* --- Error Banner --- */
+.fb-error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    background: #fef2f2;
+    color: #ef4444;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 16px;
+}
+
+/* --- Empty State --- */
+.fb-empty {
+    text-align: center;
+    padding: 64px 24px;
+    color: var(--text-muted);
+}
+
+.fb-empty i { font-size: 48px; display: block; margin-bottom: 16px; }
+.fb-empty p { font-size: 16px; font-weight: 600; margin: 0 0 4px; color: var(--text-secondary); }
+.fb-empty span { font-size: 13px; }
+
+/* --- Epic Accordion --- */
+.fb-epics {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.fb-epic-group {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    animation: fbFadeIn 0.4s ease forwards;
+    opacity: 0;
+}
+
+.fb-epic-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+}
+
+.fb-epic-header:hover { background: #fafbfc; }
+
+.fb-epic-chevron {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+}
+
+.fb-epic-group.open .fb-epic-chevron {
+    transform: rotate(90deg);
+}
+
+.fb-epic-id {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+}
+
+.fb-epic-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.fb-epic-count {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    margin-right: 12px;
+}
+
+/* Per-epic progress bar */
+.fb-progress-bar {
+    width: 120px;
+    height: 6px;
+    background: #f1f5f9;
+    border-radius: 3px;
+    overflow: hidden;
+    display: flex;
+    flex-shrink: 0;
+}
+
+.fb-progress-segment {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+/* Epic body (collapsible) */
+.fb-epic-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+}
+
+.fb-epic-group.open .fb-epic-body {
+    max-height: 2000px;
+}
+
+/* Feature table inside epic */
+.fb-feature-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.fb-feature-table thead th {
+    background: #f8fafc;
+    padding: 10px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    border-bottom: 1px solid #e2e8f0;
+    border-top: 1px solid #f1f5f9;
+    white-space: nowrap;
+}
+
+.fb-feature-table tbody tr {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.fb-feature-table tbody tr:hover { background: #fafbfc; }
+
+.fb-feature-table tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.fb-feature-id {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.fb-version-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    background: #f1f5f9;
+    color: var(--text-secondary);
+}
+
+.fb-date {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.fb-spec-link {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent-dark);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--accent);
+}
+
+.fb-spec-link:hover { color: var(--accent); border-bottom-style: solid; }
+
+.fb-dash { color: var(--text-muted); }
+
+/* --- Status Badge --- */
+.fb-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.fb-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.fb-status-badge.planned { background: var(--status-planned-bg); color: var(--status-planned); }
+.fb-status-badge.planned .fb-status-dot { background: var(--status-planned); }
+
+.fb-status-badge.refined { background: var(--status-refined-bg); color: var(--status-refined); }
+.fb-status-badge.refined .fb-status-dot { background: var(--status-refined); }
+
+.fb-status-badge.designed { background: var(--status-designed-bg); color: var(--status-designed); }
+.fb-status-badge.designed .fb-status-dot { background: var(--status-designed); }
+
+.fb-status-badge.implemented { background: var(--status-implemented-bg); color: var(--status-implemented); }
+.fb-status-badge.implemented .fb-status-dot { background: var(--status-implemented); }
+
+.fb-status-badge.tested { background: var(--status-tested-bg); color: var(--status-tested); }
+.fb-status-badge.tested .fb-status-dot { background: var(--status-tested); }
+
+.fb-status-badge.completed { background: var(--status-completed-bg); color: var(--status-completed); }
+.fb-status-badge.completed .fb-status-dot { background: var(--status-completed); }
+
+.fb-status-badge.retired { background: var(--status-retired-bg); color: var(--status-retired); }
+.fb-status-badge.retired .fb-status-dot { background: var(--status-retired); }
+
+/* --- Detail Expansion Row --- */
+.fb-detail-row td {
+    padding: 0 !important;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.fb-detail-content {
+    padding: 16px 24px;
+    background: #fafbfc;
+    border-top: 1px solid #f1f5f9;
+    animation: fbSlideDown 0.2s ease;
+}
+
+.fb-detail-content h4 {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 8px;
+}
+
+.fb-detail-content p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0 0 12px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.fb-detail-meta {
+    display: flex;
+    gap: 24px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.fb-detail-meta strong { color: var(--text-secondary); }
+
+.fb-detail-deps {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.fb-detail-deps span {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 6px;
+}
+
+/* Loading spinner inside epic body */
+.fb-loading {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+/* --- Animations --- */
+@keyframes fbFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fbSlideDown {
+    from { opacity: 0; max-height: 0; }
+    to { opacity: 1; max-height: 500px; }
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+    .fb-page { padding: 20px 16px; }
+    .fb-filters { flex-wrap: wrap; }
+    .fb-search-wrap { max-width: 100%; flex-basis: 100%; }
+    .fb-progress-bar { width: 80px; }
+}

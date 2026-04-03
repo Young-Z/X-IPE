@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Feature Board{% endblock %}
+
+{% block extra_css %}
+<link href="/static/css/feature-board.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="fb-page">
+    <div class="fb-header">
+        <h1 class="fb-title">Feature Board</h1>
+        <p class="fb-subtitle">Track features across epics in the engineering workflow</p>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="fb-filters">
+        <div class="fb-search-wrap">
+            <i class="bi bi-search fb-search-icon"></i>
+            <input id="fb-search" class="fb-search-input" type="text" placeholder="Search by feature ID, title, or Epic…">
+        </div>
+        <div class="fb-filter-divider"></div>
+        <select id="fb-status-filter" class="fb-select">
+            <option value="">All Statuses</option>
+            <option value="Planned">Planned</option>
+            <option value="Refined">Refined</option>
+            <option value="Designed">Designed</option>
+            <option value="Implemented">Implemented</option>
+            <option value="Tested">Tested</option>
+            <option value="Completed">Completed</option>
+            <option value="Retired">Retired</option>
+        </select>
+    </div>
+
+    <!-- Error Banner -->
+    <div id="fb-error" class="fb-error" style="display:none;">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span id="fb-error-msg"></span>
+    </div>
+
+    <!-- Epic Accordion Container -->
+    <div id="fb-epics" class="fb-epics"></div>
+
+    <!-- Empty State -->
+    <div id="fb-empty" class="fb-empty" style="display:none;">
+        <i class="bi bi-inbox"></i>
+        <p>No features found</p>
+        <span>Try adjusting your search or status filter</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/features/feature-board.js"></script>
+{% endblock %}

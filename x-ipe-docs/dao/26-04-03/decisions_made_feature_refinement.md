@@ -95,3 +95,29 @@ All 8 decisions align with KISS/YAGNI/DRY principles and existing project patter
 | 9 | Status filter | Single select dropdown | KISS, mockup shows `<select>` |
 | 10 | Sort order | `last_updated` descending | Most useful default |
 
+
+---
+
+## FEATURE-057-B: Feature Board Web Page — Refinement Decisions
+
+**Task:** TASK-1075  
+**Feature:** FEATURE-057-B  
+**Timestamp:** 2026-04-03T08:25:00Z  
+**Disposition:** instruction  
+**Confidence:** 0.93
+
+### Decisions
+
+| # | Question | Decision | Rationale |
+|---|----------|----------|-----------|
+| 1 | Page URL | `/feature-board`, add to nav bar | Consistent with `/task-board` |
+| 2 | Epic accordion default | All collapsed | Overview first, expand on demand |
+| 3 | Progress bar | Per-epic only in header | YAGNI on global bar |
+| 4 | Retired color | `#64748b` (Slate 500) | Distinct from Planned gray |
+| 5 | Epic summary data | Use `/api/features/epic-summary` endpoint | Server-computed, avoid fetching all features |
+| 6 | Feature detail | Inline expand (same as task board) | KISS, consistency |
+| 7 | Search scope | feature_id, title, epic_id | API already supports |
+| 8 | Sort order | Status priority → feature_id asc | Active work first |
+| 9 | Shared CSS | Extract board-common.css for shared styles | DRY |
+| 10 | Nav label | "Features" with bi-kanban icon | Short, matches "Tasks" |
+

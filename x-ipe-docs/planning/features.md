@@ -168,7 +168,7 @@ This board tracks all features across the project lifecycle.
 | FEATURE-056-A | EPIC-056 | Feature CRUD Scripts | v1.0 | Completed | [technical-design.md](x-ipe-docs/requirements/EPIC-056/FEATURE-056-A/technical-design.md) | 04-03-2026 | 04-03-2026 |
 | FEATURE-056-B | EPIC-056 | Feature Board API | v1.0 | Completed | [technical-design.md](x-ipe-docs/requirements/EPIC-056/FEATURE-056-B/technical-design.md) | 04-03-2026 | 04-03-2026 |
 | FEATURE-057-A | EPIC-057 | Task Board Web Page | v1.0 | Completed | FEATURE-055-C | 04-03-2026 | 04-03-2026 |
-| FEATURE-057-B | EPIC-057 | Feature Board Web Page | v1.0 | Planned | FEATURE-056-B | 04-03-2026 | 04-03-2026 |
+| FEATURE-057-B | EPIC-057 | Feature Board Web Page | v1.0 | Completed | FEATURE-056-B | 04-03-2026 | 04-03-2026 |
 | FEATURE-057-C | EPIC-057 | Data Migration | v1.0 | Planned | FEATURE-055-B, FEATURE-056-A | 04-03-2026 | 04-03-2026 |
 | FEATURE-057-D | EPIC-057 | Skill Updates | v1.0 | Planned | FEATURE-057-C | 04-03-2026 | 04-03-2026 |
 | FEATURE-057-E | EPIC-057 | Cleanup & Scaffold Update | v1.0 | Planned | FEATURE-057-D | 04-03-2026 | 04-03-2026 |
