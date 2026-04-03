@@ -1,74 +1,98 @@
 /**
  * FEATURE-054-C: CircularBuffer Tests
  * FEATURE-054-E: PIIMasker Tests
- * Tests for injected tracker-toolbar.js components
+ * Tests for injected tracker-toolbar.js components (CR-001: simplified <5KB IIFE)
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import vm from 'vm';
 
-function loadTrackerClasses() {
+function makeMockElement(tag) {
+    const children = {};
+    const el = {
+        id: '', tagName: tag, style: { cssText: '' }, textContent: '',
+        _innerHTML: '',
+        get innerHTML() { return this._innerHTML; },
+        set innerHTML(v) {
+            this._innerHTML = v;
+            // Parse button/span ids from simple HTML
+            const re = /id="([^"]+)"/g;
+            let m;
+            while ((m = re.exec(v)) !== null) {
+                children[`#${m[1]}`] = makeMockElement('SPAN');
+            }
+        },
+        querySelector: (sel) => children[sel] || null,
+        querySelectorAll: (sel) => {
+            if (sel === 'button') {
+                return Object.values(children).filter(() => true).map(c => { c.style = c.style || { cssText: '' }; return c; });
+            }
+            return [];
+        },
+        appendChild: () => {},
+        onclick: null
+    };
+    return el;
+}
+
+function loadTrackerSandbox() {
     const source = readFileSync(
         resolve(import.meta.dirname, '../../.github/skills/x-ipe-tool-learning-behavior-tracker-for-web/references/tracker-toolbar.js'),
         'utf-8'
     );
 
-    // Execute the IIFE inside a sandbox with a mock window
     const sandbox = {
         window: { __xipeBehaviorTrackerInjected: false },
-        document: { createElement: () => ({ attachShadow: () => ({ innerHTML: '' }), style: {} }), body: { appendChild: () => {} } },
+        document: {
+            createElement: (tag) => makeMockElement(tag),
+            body: { appendChild: () => {} },
+            getElementById: () => null,
+            title: 'Test Page',
+            addEventListener: () => {},
+            removeEventListener: () => {},
+            scrollingElement: { tagName: 'HTML' }
+        },
+        location: { href: 'https://test.example.com/page' },
+        scrollX: 0, scrollY: 0,
         setInterval: () => 0,
         clearInterval: () => {},
+        clearTimeout: () => {},
+        setTimeout: (fn) => { fn(); return 0; },
         __xipeConfig: {
-            sessionId: 'test',
+            sessionId: 'test-session',
             purpose: 'Test',
             piiWhitelist: [],
             bufferCapacity: 100
         },
         console: { log: () => {}, warn: () => {}, error: () => {} },
         localStorage: { setItem: () => {}, getItem: () => null, removeItem: () => {} },
-        requestAnimationFrame: (fn) => fn(),
         JSON: JSON,
+        Date: Date,
     };
     sandbox.globalThis = sandbox;
     vm.createContext(sandbox);
     vm.runInContext(source, sandbox);
-
-    // After running, tracker object is on sandbox.window
     return sandbox;
 }
 
-let sandbox;
-try {
-    sandbox = loadTrackerClasses();
-} catch (e) {
-    // TDD phase — tests will skip if classes not available
-}
-
-// Extract classes by extracting just class code
 function extractClass(className) {
     const source = readFileSync(
         resolve(import.meta.dirname, '../../.github/skills/x-ipe-tool-learning-behavior-tracker-for-web/references/tracker-toolbar.js'),
         'utf-8'
     );
-    // Find class definition (indented 4 spaces in the IIFE)
     const start = source.indexOf(`class ${className} {`);
     if (start === -1) return null;
-    // Find matching closing brace at the same indent level
     let depth = 0;
     let i = source.indexOf('{', start);
-    const startBrace = i;
     for (; i < source.length; i++) {
         if (source[i] === '{') depth++;
         if (source[i] === '}') depth--;
         if (depth === 0) break;
     }
-    const classCode = source.substring(start, i + 1);
-    return classCode;
+    return source.substring(start, i + 1);
 }
 
-// Create classes by eval-ing their source in isolation
 function makeClass(className) {
     const code = extractClass(className);
     if (!code) throw new Error(`Class ${className} not found`);
@@ -86,49 +110,30 @@ try {
 describe('CircularBuffer (FEATURE-054-C)', () => {
     it('should push and retrieve items', () => {
         const buf = new CircularBuffer(5);
-        buf.push('a');
-        buf.push('b');
-        buf.push('c');
+        buf.push('a'); buf.push('b'); buf.push('c');
         expect(buf.toArray()).toEqual(['a', 'b', 'c']);
-        expect(buf.getSize()).toBe(3);
+        expect(buf.size()).toBe(3);
     });
 
     it('should prune oldest when full', () => {
         const buf = new CircularBuffer(3);
-        buf.push('a');
-        buf.push('b');
-        buf.push('c');
-        buf.push('d'); // Should prune 'a'
+        buf.push('a'); buf.push('b'); buf.push('c'); buf.push('d');
         expect(buf.toArray()).toEqual(['b', 'c', 'd']);
-        expect(buf.getSize()).toBe(3);
+        expect(buf.size()).toBe(3);
     });
 
     it('should handle wrapping correctly', () => {
         const buf = new CircularBuffer(3);
-        buf.push(1);
-        buf.push(2);
-        buf.push(3);
-        buf.push(4);
-        buf.push(5);
+        for (let i = 1; i <= 5; i++) buf.push(i);
         expect(buf.toArray()).toEqual([3, 4, 5]);
-    });
-
-    it('should report full correctly', () => {
-        const buf = new CircularBuffer(2);
-        expect(buf.isFull()).toBe(false);
-        buf.push('a');
-        expect(buf.isFull()).toBe(false);
-        buf.push('b');
-        expect(buf.isFull()).toBe(true);
     });
 
     it('should clear buffer', () => {
         const buf = new CircularBuffer(5);
-        buf.push('a');
-        buf.push('b');
+        buf.push('a'); buf.push('b');
         buf.clear();
         expect(buf.toArray()).toEqual([]);
-        expect(buf.getSize()).toBe(0);
+        expect(buf.size()).toBe(0);
     });
 
     it('should handle capacity of 1', () => {
@@ -139,11 +144,10 @@ describe('CircularBuffer (FEATURE-054-C)', () => {
         expect(buf.toArray()).toEqual(['b']);
     });
 
-    it('should handle large capacity without overflow', () => {
+    it('should handle large capacity', () => {
         const buf = new CircularBuffer(10000);
         for (let i = 0; i < 100; i++) buf.push(i);
-        expect(buf.getSize()).toBe(100);
-        expect(buf.toArray().length).toBe(100);
+        expect(buf.size()).toBe(100);
     });
 });
 
@@ -168,7 +172,7 @@ describe('PIIMasker (FEATURE-054-E)', () => {
         expect(result.target.textContent).toBe('iPhone 15');
     });
 
-    it('should ALWAYS mask password fields even if whitelisted', () => {
+    it('should ALWAYS mask password fields', () => {
         const pii = new PIIMasker({ piiWhitelist: ['input#password'] });
         const event = {
             type: 'input',
@@ -181,7 +185,7 @@ describe('PIIMasker (FEATURE-054-E)', () => {
         expect(result.target.value).toBe('[PASSWORD_FIELD]');
     });
 
-    it('should mask autocomplete=current-password fields', () => {
+    it('should mask autocomplete password fields', () => {
         const pii = new PIIMasker({ piiWhitelist: [] });
         const event = {
             type: 'input',
@@ -197,16 +201,7 @@ describe('PIIMasker (FEATURE-054-E)', () => {
     it('should handle events without target', () => {
         const pii = new PIIMasker({ piiWhitelist: [] });
         const event = { type: 'scroll' };
-        const result = pii.mask(event);
-        expect(result.type).toBe('scroll');
-    });
-
-    it('should add and remove whitelist entries', () => {
-        const pii = new PIIMasker({ piiWhitelist: [] });
-        pii.addToWhitelist('.name');
-        expect(pii.getWhitelist()).toContain('.name');
-        pii.removeFromWhitelist('.name');
-        expect(pii.getWhitelist()).not.toContain('.name');
+        expect(pii.mask(event).type).toBe('scroll');
     });
 
     it('should not mask empty textContent', () => {
@@ -215,7 +210,52 @@ describe('PIIMasker (FEATURE-054-E)', () => {
             type: 'click',
             target: { tagName: 'DIV', textContent: '', value: '', cssSelector: 'div.empty' }
         };
-        const result = pii.mask(event);
-        expect(result.target.textContent).toBe('');
+        expect(pii.mask(event).target.textContent).toBe('');
+    });
+});
+
+describe('Tracker IIFE Integration (CR-001)', () => {
+    let sandbox;
+    beforeEach(() => {
+        try { sandbox = loadTrackerSandbox(); } catch (e) { sandbox = null; }
+    });
+
+    it('should expose __xipeBehaviorTracker API', () => {
+        expect(sandbox.window.__xipeBehaviorTracker).toBeDefined();
+        expect(typeof sandbox.window.__xipeBehaviorTracker.collect).toBe('function');
+        expect(typeof sandbox.window.__xipeBehaviorTracker.stop).toBe('function');
+        expect(typeof sandbox.window.__xipeBehaviorTracker.start).toBe('function');
+        expect(typeof sandbox.window.__xipeBehaviorTracker.clear).toBe('function');
+        expect(typeof sandbox.window.__xipeBehaviorTracker.getStatus).toBe('function');
+        expect(typeof sandbox.window.__xipeBehaviorTracker.getAnalysisFlag).toBe('function');
+    });
+
+    it('should have collect return events array and url', () => {
+        const result = sandbox.window.__xipeBehaviorTracker.collect();
+        expect(result.events).toBeDefined();
+        expect(Array.isArray(result.events)).toBe(true);
+        expect(result.url).toBeDefined();
+        expect(result.eventCount).toBeDefined();
+    });
+
+    it('should have analysis flag default to false', () => {
+        const flag = sandbox.window.__xipeBehaviorTracker.getAnalysisFlag();
+        expect(flag).toBe(false);
+    });
+
+    it('should set and clear analysis flag', () => {
+        sandbox.window.__xipe_analysis_requested = true;
+        const flag = sandbox.window.__xipeBehaviorTracker.getAnalysisFlag();
+        expect(flag).toBe(true);
+        // Should auto-clear after read
+        expect(sandbox.window.__xipeBehaviorTracker.getAnalysisFlag()).toBe(false);
+    });
+
+    it('should have status default to idle', () => {
+        expect(sandbox.window.__xipeBehaviorTracker.getStatus()).toBe('idle');
+    });
+
+    it('should set injection guard', () => {
+        expect(sandbox.window.__xipeBehaviorTrackerInjected).toBe(true);
     });
 });

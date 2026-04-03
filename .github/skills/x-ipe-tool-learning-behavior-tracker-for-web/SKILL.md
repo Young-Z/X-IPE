@@ -130,83 +130,92 @@ input:
 
 ## Operations
 
+### Operation: Setup
+
+**When:** Creating a new tracking session with output folder.
+
+```xml
+<operation name="setup">
+  <action>
+    1. Create BehaviorTrackerSkill instance with URL and purpose
+    2. Call setup_output_folder(project_root, folder_name) to create:
+       - x-ipe-docs/learning/{folder_name}/track/
+       - x-ipe-docs/learning/{folder_name}/imgs/
+    3. The folder_name should be semantic (e.g., "checkout-flow-shopify")
+  </action>
+  <output>session_id, output_folder_path</output>
+</operation>
+```
+
 ### Operation: Inject
 
-**When:** Starting a new behavior tracking session on a target URL.
+**When:** Injecting the passive event capture IIFE into a target page.
 
 ```xml
 <operation name="inject">
   <action>
-    1. Create BehaviorTrackerSkill instance with URL and purpose
-    2. Call navigate_page to open target URL in Chrome
-    3. Build injection script via InjectionManager with session config:
-       - Read tracker-toolbar.mini.js content
-       - Prepend __xipeConfig with sessionId, purpose, piiWhitelist, bufferCapacity
-    4. Call evaluate_script to inject the IIFE into the page
-    5. Mark session as started
+    1. Call navigate_page to open target URL in Chrome
+    2. Build injection script via InjectionManager.build_injection_script()
+       - Reads tracker-toolbar.mini.js (< 5KB)
+       - Prepends __xipeConfig with sessionId, purpose, piiWhitelist, bufferCapacity
+    3. Call evaluate_script to inject the IIFE into the page
+    4. Mark session as started
   </action>
   <constraints>
-    - BLOCKING: Must use tracker-toolbar.mini.js (minified) for injection
-    - BLOCKING: Check IIFE guard before injection to prevent duplicates
+    - BLOCKING: Must use tracker-toolbar.mini.js for injection
+    - BLOCKING: IIFE guard prevents double injection
   </constraints>
-  <output>session_id, injection_status</output>
+  <output>injection_status</output>
 </operation>
 ```
 
-### Operation: Collect
+### Operation: Poll (5s Loop)
 
-**When:** Gathering current event buffer without stopping the session.
+**When:** Every 5 seconds after injection to collect events and detect changes.
 
 ```xml
-<operation name="collect">
+<operation name="poll">
   <action>
-    1. Call evaluate_script with collection script:
-       `() => window.__xipeBehaviorTracker?.getEvents()`
-    2. Parse returned JSON array of events
-    3. Return event count and raw events
+    1. Call evaluate_script with InjectionManager.build_collect_script()
+       - Returns: {events, eventCount, url, analysisRequested, status}
+    2. Call skill.process_poll_result(poll_data) which returns:
+       - new_events: bool — if event count increased
+       - url_changed: bool — if page URL differs from last known
+       - analysis_requested: bool — user clicked Analysis button
+    3. IF new_events:
+       a. Call take_screenshot → save to skill.get_screenshot_path()
+       b. Call skill.write_track_list() to update track-list.json
+    4. IF url_changed:
+       a. evaluate_script(build_clear_guard_script()) to clear guard
+       b. Re-inject: evaluate_script(build_injection_script())
+       c. IIFE auto-restores events from localStorage
+    5. IF analysis_requested:
+       a. Call skill.run_analysis() → triggers PostProcessor
+       b. Writes analysis.json alongside track-list.json
+    6. Wait 5 seconds, repeat from step 1
   </action>
-  <output>events[], event_count</output>
+  <constraints>
+    - BLOCKING: Polling interval is 5 seconds (not configurable)
+    - Screenshot only on event count change (not every poll)
+    - Analysis triggered ONLY when user clicks Analysis button in toolbar
+  </constraints>
+  <output>poll_result per iteration</output>
 </operation>
 ```
 
 ### Operation: Stop
 
-**When:** Ending the recording session and collecting final events.
+**When:** Ending the recording session.
 
 ```xml
 <operation name="stop">
   <action>
-    1. Call evaluate_script with stop script:
-       `() => { const t = window.__xipeBehaviorTracker; if(t) { t.stop(); return t.getEvents(); } }`
-    2. Parse returned events
+    1. Call evaluate_script with InjectionManager.build_stop_script()
+    2. Parse returned final events
     3. Mark session as stopped
+    4. Write final track-list.json
   </action>
   <output>events[], session_metadata</output>
-</operation>
-```
-
-### Operation: Post-Process & Output
-
-**When:** After stop, generating the final behavior-recording JSON.
-
-```xml
-<operation name="post_process">
-  <action>
-    1. Instantiate PostProcessor
-    2. Run process(events, session_meta) to generate:
-       - statistics (event counts, page count, duration)
-       - flow_narrative (natural language session summary)
-       - key_paths (ordered list of significant interactions)
-       - key_path_summary (condensed key-path view)
-       - pain_points (hesitations, rage clicks, back-navigation)
-       - ai_annotations (per-event: comment, is_key_path, intent_category, confidence)
-    3. Extract unique pages[] from events
-    4. Write behavior-recording-{sessionId}.json to project folder
-  </action>
-  <constraints>
-    - BLOCKING: Auto-retry once on post-processing failure; fallback to raw events with 'failed' status
-  </constraints>
-  <output>file_path, statistics, analysis</output>
 </operation>
 ```
 
@@ -219,14 +228,16 @@ operation_output:
   success: true | false
   result:
     session_id: "{uuid}"
-    file_path: "behavior-recording-{sessionId}.json"
+    output_folder: "x-ipe-docs/learning/{folder_name}/"
+    track_list: "x-ipe-docs/learning/{folder_name}/track/track-list.json"
+    analysis: "x-ipe-docs/learning/{folder_name}/track/analysis.json"
+    screenshots: "x-ipe-docs/learning/{folder_name}/imgs/"
     statistics:
       totalEvents: 0
       pageCount: 0
-    analysis:
+    analysis_result:
       flow_narrative: ""
       key_paths: []
-      key_path_summary: []
       pain_points: []
       ai_annotations: []
   errors: []
@@ -243,16 +254,20 @@ operation_output:
     <verification>operation_output.success is true</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>IIFE Injected (inject op)</name>
+    <name>IIFE Injected</name>
     <verification>window.__xipeBehaviorTrackerInjected is true on target page</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Events Captured (collect/stop op)</name>
-    <verification>events[] returned with correct schema (type, timestamp, target, metadata)</verification>
+    <name>Polling Active</name>
+    <verification>Events collected every 5s, screenshots taken on change</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Output File Written (post_process op)</name>
-    <verification>behavior-recording-{sessionId}.json exists with schema_version, session, pages, statistics, events, analysis</verification>
+    <name>Output Folder Created</name>
+    <verification>x-ipe-docs/learning/{name}/track/ and imgs/ directories exist</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Track List Written</name>
+    <verification>track-list.json exists with schema_version 2.0, session, events</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>PII Masked</name>
@@ -270,9 +285,9 @@ operation_output:
 | `INJECTION_FAILED` | Chrome DevTools MCP not connected or page not loaded | Verify MCP connection, retry navigate_page |
 | `INVALID_URL` | URL missing protocol or invalid hostname | Provide URL with https:// protocol |
 | `PURPOSE_REQUIRED` | Empty purpose string | Provide non-empty tracking purpose |
-| `COLLECTION_FAILED` | IIFE not injected or page navigated away | Re-inject tracker before collecting |
+| `COLLECTION_FAILED` | IIFE not injected or page navigated away | Re-inject tracker (poll loop handles this) |
 | `POST_PROCESSING_FAILED` | PostProcessor error | Auto-retried once; falls back to raw events |
-| `DOUBLE_INJECTION` | IIFE guard flag already set | Clear flag or skip injection |
+| `URL_CHANGE_DETECTED` | Page navigated to new URL | Auto-handled: clear guard → reinject → restore from localStorage |
 
 ---
 
@@ -280,9 +295,9 @@ operation_output:
 
 | File | Purpose |
 |------|---------|
-| `references/tracker-toolbar.js` | Readable source — IIFE with RecordingEngine, PIIMasker, TrackerToolbox, CircularBuffer, EventSerializer, BackupManager |
-| `references/tracker-toolbar.mini.js` | Minified version for injection (use this in production) |
-| `scripts/track_behavior.py` | BehaviorTrackerSkill (session orchestrator) + InjectionManager (script builder) |
+| `references/tracker-toolbar.js` | Readable source — <5KB IIFE with RecordingEngine, PIIMasker, CircularBuffer, EventSerializer, minimal UI bar |
+| `references/tracker-toolbar.mini.js` | Minified version for injection (<5KB) |
+| `scripts/track_behavior.py` | BehaviorTrackerSkill (session orchestrator with polling model) + InjectionManager (script builder) |
 | `scripts/post_processor.py` | PostProcessor — flow narrative, key paths, pain points, AI annotations |
 | `scripts/__init__.py` | Package init |
 
@@ -290,25 +305,26 @@ operation_output:
 
 ## Examples
 
-**Example 1: Track checkout flow**
+**Example 1: Track checkout flow with 5s polling**
 ```
 User: "Track behavior on https://shop.example.com"
 Agent:
-  1. inject → navigates to URL, injects tracker-toolbar.mini.js
-  2. User interacts with checkout flow
-  3. stop → collects 847 events
-  4. post_process → writes behavior-recording-abc123.json
-     - 12 key paths identified
-     - 3 pain points (hesitation on payment form, back-navigation)
-     - Per-event AI annotations with intent categories
+  1. setup → creates x-ipe-docs/learning/checkout-flow-shopify/
+  2. inject → navigates to URL, injects tracker-toolbar.mini.js
+  3. poll loop (every 5s):
+     - Events detected → screenshot saved to imgs/
+     - track-list.json updated
+  4. User clicks Analysis button → PostProcessor runs → analysis.json written
+  5. stop → final track-list.json with 847 events, 15 screenshots
 ```
 
-**Example 2: Record onboarding flow**
+**Example 2: Multi-page onboarding with URL change detection**
 ```
 User: "Learn from website https://app.example.com/onboard"
 Agent:
-  1. inject with purpose "Onboarding flow for AI agent training"
-  2. User completes 5-step wizard
-  3. stop + post_process → 234 events, 5 pages
-  4. Analysis: linear flow, no pain points, clear key path through wizard steps
+  1. setup with folder "onboarding-app-example"
+  2. inject with purpose "Onboarding flow for AI agent training"
+  3. poll loop detects URL change (step1 → step2) → reinjects → continues
+  4. 5 URL changes handled automatically
+  5. stop → 234 events across 5 pages, screenshots at each transition
 ```
