@@ -114,6 +114,12 @@
 > - **Action Required:** Feature specification refactoring to v2.0 needed before implementation
 > - **Source:** IDEA-019 (CR-UIUX Reference) — see [idea-summary-v3.md](x-ipe-docs/ideas/019. CR-UIUX Reference/idea-summary-v3.md)
 
+> **⚠️ CR Impact Note** (added 04-02-2026, ref: EPIC-054 Learn Module)
+> - **Change:** Extract shared Chrome DevTools injection infrastructure (navigate_page + evaluate_script patterns, script injection utilities, page lifecycle monitoring) into reusable utility `x-ipe-util-chrome-devtools-integration`
+> - **Affected FRs:** FR-030-B.1 (script injection), FR-030-B.3 (page lifecycle handling)
+> - **Action Required:** Refactor FEATURE-030-B to consume shared utility instead of inline implementation
+> - **New Feature Ref:** See EPIC-054 in requirement-details-part-22.md
+
 #### v2.0 Feature Breakdown (CR-002)
 
 | Feature ID | Epic ID | Feature Title | Version | Priority | Dependencies | Brief Description |

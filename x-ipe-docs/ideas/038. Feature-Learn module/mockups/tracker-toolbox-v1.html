@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDEA-038 Mockup — Injected Tracker Toolbox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --color-accent: #10b981;
+    --color-accent-dark: #059669;
+    --color-accent-glow: rgba(16, 185, 129, 0.15);
+    --color-accent-subtle: #d1fae5;
+    --color-error: #ef4444;
+    --color-warning: #f59e0b;
+
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --slate-950: #020617;
+
+    --font-heading: 'DM Sans', system-ui, sans-serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+    --font-mono: 'DM Mono', 'JetBrains Mono', monospace;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    --glass-bg: rgba(15, 23, 42, 0.88);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-highlight: rgba(255, 255, 255, 0.04);
+  }
+
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #f0f0f0;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* === SIMULATED TARGET WEBSITE === */
+  .target-website {
+    position: fixed;
+    inset: 0;
+    background: white;
+    overflow: hidden;
+  }
+
+  .site-nav {
+    background: white;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 12px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .site-logo {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111;
+    letter-spacing: -0.5px;
+  }
+
+  .site-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+  .site-links a {
+    font-size: 14px;
+    color: #666;
+    text-decoration: none;
+  }
+  .site-links a.active { color: #111; font-weight: 600; }
+
+  .site-cart-btn {
+    font-size: 13px;
+    padding: 8px 20px;
+    background: #111;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .site-hero {
+    padding: 40px;
+    background: linear-gradient(135deg, #fafafa, #f5f5f5);
+    border-bottom: 1px solid #eee;
+    text-align: center;
+  }
+  .site-hero h1 { font-size: 32px; color: #111; margin-bottom: 8px; font-weight: 700; }
+  .site-hero p { color: #888; font-size: 16px; }
+
+  .site-products {
+    padding: 32px 40px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+
+  .product-card {
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    overflow: hidden;
+    background: white;
+  }
+  .product-img {
+    width: 100%;
+    height: 160px;
+    background: linear-gradient(135deg, #e8e8e8 0%, #d4d4d4 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #bbb;
+    font-size: 32px;
+  }
+  .product-info { padding: 12px 16px; }
+  .product-info h3 { font-size: 14px; color: #333; margin-bottom: 4px; }
+  .product-info .price { font-size: 16px; color: #111; font-weight: 700; }
+  .product-info .add-btn {
+    margin-top: 8px;
+    width: 100%;
+    padding: 8px;
+    background: #111;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  /* === RECORDING BORDER INDICATOR === */
+  .recording-border {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9998;
+    border: 2px solid var(--color-error);
+    opacity: 0.6;
+    animation: borderPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes borderPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.2; }
+  }
+
+  /* === RECORDING INDICATOR (top bar) === */
+  .recording-bar {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 18px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-top: none;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    animation: slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes slideDown {
+    from { transform: translateX(-50%) translateY(-100%); }
+    to { transform: translateX(-50%) translateY(0); }
+  }
+
+  .rec-dot {
+    width: 7px;
+    height: 7px;
+    background: var(--color-error);
+    border-radius: 50%;
+    animation: recPulse 1.5s infinite;
+  }
+  @keyframes recPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+    50% { box-shadow: 0 0 0 4px rgba(239,68,68,0); }
+  }
+
+  .rec-label { color: var(--color-error); font-weight: 500; }
+  .rec-timer { color: rgba(255,255,255,0.5); }
+  .rec-sep { color: rgba(255,255,255,0.15); }
+  .rec-purpose { color: rgba(255,255,255,0.4); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .rec-shield {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: rgba(16,185,129,0.15);
+    border-radius: var(--radius-sm);
+    color: var(--color-accent);
+    font-size: 10px;
+  }
+  .rec-shield svg { width: 10px; height: 10px; }
+
+  /* === TRACKER TOOLBOX (floating panel) === */
+  .tracker-toolbox {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    width: 380px;
+    max-height: calc(100vh - 100px);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow:
+      0 20px 60px rgba(0,0,0,0.3),
+      0 0 0 1px rgba(255,255,255,0.05) inset,
+      0 1px 0 rgba(255,255,255,0.06) inset;
+    overflow: hidden;
+    animation: toolboxAppear 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: var(--font-body);
+  }
+
+  @keyframes toolboxAppear {
+    from { opacity: 0; transform: translateX(40px) scale(0.95); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+  }
+
+  /* Toolbox Header */
+  .toolbox-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--glass-border);
+    background: var(--glass-highlight);
+    cursor: grab;
+  }
+
+  .toolbox-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .toolbox-logo {
+    width: 22px;
+    height: 22px;
+    background: linear-gradient(135deg, var(--color-accent), #06b6d4);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .toolbox-logo svg { width: 12px; height: 12px; color: white; }
+
+  .toolbox-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: -0.2px;
+  }
+  .toolbox-subtitle {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: rgba(255,255,255,0.35);
+  }
+
+  .toolbox-header-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .header-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .header-btn:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); }
+  .header-btn svg { width: 14px; height: 14px; }
+
+  /* Stats Row */
+  .toolbox-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--glass-border);
+    gap: 4px;
+  }
+
+  .toolbox-stat {
+    text-align: center;
+  }
+  .toolbox-stat .stat-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    font-family: var(--font-mono);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+  .toolbox-stat .stat-label {
+    font-size: 9px;
+    font-family: var(--font-mono);
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .toolbox-stat .stat-value.accent { color: var(--color-accent); }
+  .toolbox-stat .stat-value.timer { color: var(--color-error); }
+
+  /* Controls Row */
+  .toolbox-controls {
+    display: flex;
+    padding: 10px 16px;
+    gap: 8px;
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .control-btn {
+    flex: 1;
+    padding: 8px 0;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.7);
+    font-size: 11px;
+    font-weight: 500;
+    font-family: var(--font-body);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .control-btn:hover { background: rgba(255,255,255,0.08); }
+  .control-btn svg { width: 14px; height: 14px; }
+  .control-btn.stop-btn {
+    border-color: rgba(239,68,68,0.3);
+    color: var(--color-error);
+  }
+  .control-btn.stop-btn:hover { background: rgba(239,68,68,0.1); }
+  .control-btn.annotate-btn {
+    border-color: rgba(16,185,129,0.3);
+    color: var(--color-accent);
+  }
+  .control-btn.annotate-btn:hover { background: rgba(16,185,129,0.1); }
+
+  /* Event List */
+  .toolbox-events {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.1) transparent;
+  }
+  .toolbox-events::-webkit-scrollbar { width: 4px; }
+  .toolbox-events::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+  .events-title {
+    padding: 4px 16px 8px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: rgba(255,255,255,0.25);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .event-row {
+    padding: 8px 16px;
+    display: flex;
+    gap: 10px;
+    transition: background 0.1s;
+    cursor: default;
+    animation: eventSlide 0.3s ease-out both;
+  }
+  .event-row:hover { background: rgba(255,255,255,0.03); }
+
+  @keyframes eventSlide {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .event-row:nth-child(2) { animation-delay: 0.03s; }
+  .event-row:nth-child(3) { animation-delay: 0.06s; }
+  .event-row:nth-child(4) { animation-delay: 0.09s; }
+  .event-row:nth-child(5) { animation-delay: 0.12s; }
+  .event-row:nth-child(6) { animation-delay: 0.15s; }
+  .event-row:nth-child(7) { animation-delay: 0.18s; }
+  .event-row:nth-child(8) { animation-delay: 0.21s; }
+
+  .event-row.not-key-path { opacity: 0.4; }
+  .event-row.not-key-path:hover { opacity: 0.6; }
+
+  .event-row-indicator {
+    width: 3px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    align-self: stretch;
+  }
+  .event-row-indicator.key { background: var(--color-accent); box-shadow: 0 0 6px var(--color-accent-glow); }
+  .event-row-indicator.not-key { background: rgba(255,255,255,0.08); }
+
+  .event-row-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .event-row-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+  }
+
+  .evt-type {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .evt-type.click { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .evt-type.type { background: rgba(245,158,11,0.15); color: #fbbf24; }
+  .evt-type.scroll { background: rgba(99,102,241,0.15); color: #818cf8; }
+  .evt-type.nav { background: rgba(236,72,153,0.15); color: #f472b6; }
+  .evt-type.hover { background: rgba(168,85,247,0.12); color: #c084fc; }
+
+  .evt-timestamp {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: rgba(255,255,255,0.25);
+    margin-left: auto;
+  }
+
+  .evt-target {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: rgba(255,255,255,0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+  }
+
+  .evt-annotation {
+    font-size: 11px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.4;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 9px;
+    font-family: var(--font-mono);
+    padding: 1px 5px;
+    background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(6,182,212,0.15));
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 3px;
+    color: var(--color-accent);
+    flex-shrink: 0;
+    margin-top: 1px;
+    letter-spacing: 0.3px;
+  }
+
+  .evt-annotation .note {
+    color: rgba(255,255,255,0.45);
+  }
+
+  .evt-kp-tag {
+    font-size: 9px;
+    font-family: var(--font-mono);
+    padding: 1px 5px;
+    border-radius: 3px;
+    letter-spacing: 0.3px;
+  }
+  .evt-kp-tag.on { background: rgba(16,185,129,0.12); color: var(--color-accent); }
+  .evt-kp-tag.off { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.25); }
+
+  /* Toolbox Footer */
+  .toolbox-footer {
+    padding: 8px 16px;
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--glass-highlight);
+  }
+
+  .footer-purpose {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .footer-purpose svg { width: 12px; height: 12px; flex-shrink: 0; opacity: 0.5; }
+
+  .footer-pii {
+    font-size: 9px;
+    font-family: var(--font-mono);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: rgba(16,185,129,0.08);
+    color: rgba(16,185,129,0.6);
+    letter-spacing: 0.3px;
+  }
+  .footer-pii svg { width: 10px; height: 10px; }
+
+  /* === HIGHLIGHT OVERLAY (showing element being interacted with) === */
+  .element-highlight {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9997;
+    border: 2px solid var(--color-accent);
+    background: rgba(16, 185, 129, 0.08);
+    border-radius: 4px;
+    animation: highlightPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes highlightPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.2); }
+    50% { box-shadow: 0 0 0 4px rgba(16,185,129,0); }
+  }
+
+  .element-tooltip {
+    position: absolute;
+    top: -32px;
+    left: 0;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    padding: 4px 10px;
+    background: var(--glass-bg);
+    color: var(--color-accent);
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    border: 1px solid rgba(16,185,129,0.2);
+  }
+
+  /* The highlight positioned over one of the "Add to Cart" buttons */
+  .element-highlight.demo {
+    top: 497px;
+    left: 288px;
+    width: 220px;
+    height: 34px;
+  }
+
+  /* === MOCKUP BADGE === */
+  .mockup-badge {
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    padding: 6px 14px;
+    background: var(--slate-900);
+    color: var(--slate-400);
+    border-radius: var(--radius-sm);
+    z-index: 99999;
+    letter-spacing: 0.3px;
+  }
+
+  /* === COLLAPSED STATE INDICATOR === */
+  .collapse-hint {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: rgba(255,255,255,0.4);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    cursor: pointer;
+    animation: fadeUp 0.4s ease-out 1.5s both;
+  }
+  .collapse-hint svg { width: 14px; height: 14px; color: var(--color-accent); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIMULATED TARGET WEBSITE (e-commerce site) -->
+<div class="target-website">
+  <nav class="site-nav">
+    <span class="site-logo">ShopExample</span>
+    <ul class="site-links">
+      <li><a href="#">Home</a></li>
+      <li><a href="#" class="active">Products</a></li>
+      <li><a href="#">Categories</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+    <button class="site-cart-btn">🛒 Cart (1)</button>
+  </nav>
+
+  <div class="site-hero">
+    <h1>Featured Products</h1>
+    <p>Browse our collection of premium widgets and gadgets</p>
+  </div>
+
+  <div class="site-products">
+    <div class="product-card">
+      <div class="product-img">📦</div>
+      <div class="product-info">
+        <h3>Blue Widget Pro</h3>
+        <div class="price">$49.99</div>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-img">📦</div>
+      <div class="product-info">
+        <h3>Red Gadget Max</h3>
+        <div class="price">$79.99</div>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-img">📦</div>
+      <div class="product-info">
+        <h3>Green Toolkit Plus</h3>
+        <div class="price">$34.99</div>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-img">📦</div>
+      <div class="product-info">
+        <h3>Silver Connector</h3>
+        <div class="price">$19.99</div>
+        <button class="add-btn">Add to Cart</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RECORDING BORDER (subtle red border around viewport) -->
+<div class="recording-border"></div>
+
+<!-- RECORDING INDICATOR BAR (top center) -->
+<div class="recording-bar">
+  <span class="rec-dot"></span>
+  <span class="rec-label">REC</span>
+  <span class="rec-timer">02:34</span>
+  <span class="rec-sep">·</span>
+  <span class="rec-purpose">Learn checkout flow — cart to payment</span>
+  <span class="rec-sep">·</span>
+  <span class="rec-shield">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    PII Masked
+  </span>
+</div>
+
+<!-- ELEMENT HIGHLIGHT (showing which element is being tracked) -->
+<div class="element-highlight demo">
+  <div class="element-tooltip">button.add-btn → Click captured</div>
+</div>
+
+<!-- === THE TRACKER TOOLBOX === -->
+<div class="tracker-toolbox">
+
+  <!-- Header (draggable) -->
+  <div class="toolbox-header">
+    <div class="toolbox-brand">
+      <div class="toolbox-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      </div>
+      <div>
+        <div class="toolbox-title">X-IPE Learn</div>
+        <div class="toolbox-subtitle">behavior tracker</div>
+      </div>
+    </div>
+    <div class="toolbox-header-actions">
+      <button class="header-btn" title="Minimize">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <button class="header-btn" title="Move">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 9l-3 3 3 3"/><path d="M9 5l3-3 3 3"/><path d="M15 19l-3 3-3-3"/><path d="M19 9l3 3-3 3"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Live Stats -->
+  <div class="toolbox-stats">
+    <div class="toolbox-stat">
+      <div class="stat-value timer">2:34</div>
+      <div class="stat-label">Time</div>
+    </div>
+    <div class="toolbox-stat">
+      <div class="stat-value">23</div>
+      <div class="stat-label">Events</div>
+    </div>
+    <div class="toolbox-stat">
+      <div class="stat-value">3</div>
+      <div class="stat-label">Pages</div>
+    </div>
+    <div class="toolbox-stat">
+      <div class="stat-value accent">8</div>
+      <div class="stat-label">Key Path</div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="toolbox-controls">
+    <button class="control-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      Pause
+    </button>
+    <button class="control-btn stop-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+      Stop
+    </button>
+    <button class="control-btn annotate-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Note
+    </button>
+  </div>
+
+  <!-- Event List -->
+  <div class="toolbox-events">
+    <div class="events-title">
+      <span>Live Events</span>
+      <span style="color: rgba(255,255,255,0.15)">newest first ↓</span>
+    </div>
+
+    <!-- Event 1 — Latest -->
+    <div class="event-row">
+      <div class="event-row-indicator key"></div>
+      <div class="event-row-content">
+        <div class="event-row-top">
+          <span class="evt-type click">Click</span>
+          <span class="evt-kp-tag on">Key</span>
+          <span class="evt-timestamp">02:34</span>
+        </div>
+        <div class="evt-target">button.add-btn → "Add to Cart"</div>
+        <div class="evt-annotation">
+          <span class="ai-badge">AI</span>
+          <span class="note">Second product added — user building multi-item cart before checkout</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event 2 -->
+    <div class="event-row not-key-path">
+      <div class="event-row-indicator not-key"></div>
+      <div class="event-row-content">
+        <div class="event-row-top">
+          <span class="evt-type scroll">Scroll</span>
+          <span class="evt-kp-tag off">—</span>
+          <span class="evt-timestamp">02:28</span>
+        </div>
+        <div class="evt-target">window → scrollY: 320px</div>
+        <div class="evt-annotation">
+          <span class="ai-badge">AI</span>
+          <span class="note">Browsing products — not on checkout path</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event 3 -->
+    <div class="event-row">
+      <div class="event-row-indicator key"></div>
+      <div class="event-row-content">
+        <div class="event-row-top">
+          <span class="evt-type nav">Nav</span>
+          <span class="evt-kp-tag on">Key</span>
+          <span class="evt-timestamp">02:15</span>
+        </div>
+        <div class="evt-target">/categories → /products</div>
+        <div class="evt-annotation">
+          <span class="ai-badge">AI</span>
+          <span class="note">Product listing page — entering shopping funnel</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event 4 -->
+    <div class="event-row">
+      <div class="event-row-indicator key"></div>
+      <div class="event-row-content">
+        <div class="event-row-top">
+          <span class="evt-type click">Click</span>
+          <span class="evt-kp-tag on">Key</span>
+          <span class="evt-timestamp">01:48</span>
+        </div>
+        <div class="evt-target">button.add-btn → "Add to Cart"</div>
+        <div class="evt-annotation">
+          <span class="ai-badge">AI</span>
+          <span class="note">🎯 First cart add — primary conversion action</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event 5 -->
+    <div class="event-row not-key-path">
+      <div class="event-row-indicator not-key"></div>
+      <div class="event-row-content">
+        <div class="event-row-top">
+          <span class="evt-type hover">Hover</span>
+          <span class="evt-kp-tag off">—</span>
+          <span class="evt-timestamp">01:42</span>
+        </div>
+        <div class="evt-target">img.product-img[alt="Blue Widget"]</div>
+        <div class="evt-annotation">
+          <span class="ai-badge">AI</span>
+          <span class="note">Product inspection — exploring before purchase</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event 6 -->
+    <div class="event-row">
+      <div class="event-row-indicator key"></div>
+      <div class="event-row-content">
+        <div class="event-row-top">
+          <span class="evt-type type">Input</span>
+          <span class="evt-kp-tag on">Key</span>
+          <span class="evt-timestamp">01:20</span>
+        </div>
+        <div class="evt-target">input#search[type="text"]</div>
+        <div class="evt-annotation">
+          <span class="ai-badge">AI</span>
+          <span class="note">Search query: <code style="font-size:10px;padding:0 4px;background:rgba(255,255,255,0.06);border-radius:2px;color:rgba(255,255,255,0.6)">blue widget</code> — product discovery</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event 7 -->
+    <div class="event-row">
+      <div class="event-row-indicator key"></div>
+      <div class="event-row-content">
+        <div class="event-row-top">
+          <span class="evt-type nav">Nav</span>
+          <span class="evt-kp-tag on">Key</span>
+          <span class="evt-timestamp">00:05</span>
+        </div>
+        <div class="evt-target">→ shop.example.com/</div>
+        <div class="evt-annotation">
+          <span class="ai-badge">AI</span>
+          <span class="note">Session start — landing on homepage</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="toolbox-footer">
+    <div class="footer-purpose">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      Learn checkout flow — cart to payment
+    </div>
+    <span class="footer-pii">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      PII MASKED
+    </span>
+  </div>
+
+</div>
+
+<!-- Collapsed-state hint -->
+<div class="collapse-hint">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+  <span>Drag to move · Click — to collapse</span>
+</div>
+
+<div class="mockup-badge">IDEA-038 · Tracker Toolbox Overlay · Mockup v1</div>
+
+</body>
+</html>

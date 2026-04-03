@@ -5,6 +5,15 @@
 ## Active Tasks
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
+| TASK-1050 | Feature Closing | Close EPIC-054 all 6 features (FEATURE-054-A through F). Final verification, code-to-docs review, refactoring analysis, commit + push to main. DAO mode. | Spark ✨ | 🔄 in_progress | 04-03-2026 | (pending) | — |
+| TASK-1049 | Acceptance Testing | Execute acceptance tests for EPIC-054 all 6 features (103 ACs). 45 automated tests (32 JS + 13 Python) all PASS. 58 code-review TCs all PASS. 103/103 = 100% pass rate. Zero defects. | Spark ✨ | ✅ done | 04-03-2026 | [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-054/acceptance-test-cases.md) | x-ipe-task-based-feature-closing |
+| TASK-1048 | Code Implementation | Code Implementation — EPIC-054 all 6 features: learn-panel.js, learn_routes.py, tracker-toolbar.js IIFE (RecordingEngine, PIIMasker, TrackerToolbox, BackupManager), track_behavior.py, post_processor.py. 45 tests (32 JS + 13 Python) all pass. | Spark ✨ | ✅ done | 04-02-2026 | src/x_ipe/static/js/features/learn-panel.js, .github/skills/x-ipe-learning-behavior-tracker-for-web/ | x-ipe-task-based-feature-acceptance-test |
+| TASK-1047 | Technical Design | Technical Design — EPIC-054 (all 6 features). Design FEATURE-054-A through F in MVP order: A→B→C→E→F→D | Spark ✨ | ✅ done | (pending) | (pending) | (pending) |
+| TASK-1046 | Feature Refinement | Feature Refinement — EPIC-054 (all 6 features). Refine FEATURE-054-A through F in MVP order: A→B→C→E→F→D | Spark ✨ | ✅ done | (pending) | (pending) | x-ipe-task-based-technical-design |
+| TASK-1045 | Feature Breakdown | Feature Breakdown for EPIC-054 Learn Module — Break down into features with MVP-first criteria. | x-ipe-task-based-feature-breakdown | ✅ done | (pending) | (pending) | x-ipe-task-based-feature-refinement |
+| TASK-1044 | Requirement Gathering | Gather requirements for IDEA-038: Learn Module (EPIC-054) — Define feature scope, user workflows, integration points with behavior tracking and web event recording. | Spark ✨ | ✅ done | 04-02-2026 | requirement-details-part-22.md (EPIC-054), EPIC-054/mockups/ | x-ipe-task-based-feature-breakdown |
+| TASK-1043 | Idea Mockup | Create visual mockups for IDEA-038: Learn Module — Workplace GUI entry point + injected tracker toolbox overlay. | Spark ✨ | ✅ done | 04-02-2026 | mockups/learn-panel-v1.html, mockups/tracker-toolbox-v1.html | x-ipe-task-based-requirement-gathering |
+| TASK-1042 | Ideation | Refine idea 038: Feature-Learn module — brainstorm learning function with behavior tracking, web event recording, AI-assisted annotation. DAO mode. | Spark ✨ | ✅ done | 04-02-2026 | [idea-summary-v1.md](x-ipe-docs/ideas/038.%20Feature-Learn%20module/refined-idea/idea-summary-v1.md) | x-ipe-task-based-requirement-gathering |
 | TASK-1041 | Change Request | CR: Change Claude Code instructions_file from `.claude/instructions.md` to `CLAUDE.md` (project root). Modification to FEATURE-027-C — aligns config with existing spec AC-4.4. Updated 2 configs, 3 test files, README. | Pixel 🎨 | ✅ done | 04-02-2026 | — | — |
 | TASK-1040 | Feature Closing | Close FEATURE-053-A: ACs verified (74/74), code-to-docs reviewed, refactoring analysis (8/10), committed + pushed to main (0e52770). | Cipher 🔐 | ✅ done | 04-01-2026 | Pushed to main (no PR, main-branch-only) | — |
 | TASK-1039 | Acceptance Testing | Execute acceptance tests for FEATURE-053-A: Structured review of 74 ACs across 16 groups. 1 defect found+fixed (INVALID_SECTION_ID error). Final: 74/74 PASS (100%). | Cipher 🔐 | ✅ done | 03-31-2026 | [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-053/FEATURE-053-A/acceptance-test-cases.md) | x-ipe-task-based-feature-closing |
@@ -296,10 +305,10 @@
 
 ## Quick Stats
 
-- **Total Active:** 25
+- **Total Active:** 31
 - **In Progress:** 0
 - **Pending:** 0
-- **Completed (archived):** 894
+- **Completed (archived):** 901
 - **Deferred:** 0
 - **Reverted:** 8
 - **Pending Review:** 0

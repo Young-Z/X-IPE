@@ -52,6 +52,9 @@ function initializeApp() {
     // Workplace manager for idea management
     window.workplaceManager = new WorkplaceManager();
     
+    // FEATURE-054-A: Learn Panel manager
+    window.learnPanelManager = new LearnPanelManager();
+    
     // Project sidebar navigation
     window.projectSidebar = new ProjectSidebar('sidebar-content');
     window.projectSidebar.load();

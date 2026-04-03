@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDEA-038 Mockup — Learn Module Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* === RESET & ROOT === */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --color-primary: #0f172a;
+    --color-secondary: #475569;
+    --color-accent: #10b981;
+    --color-accent-dark: #059669;
+    --color-accent-glow: rgba(16, 185, 129, 0.15);
+    --color-accent-subtle: #d1fae5;
+    --color-neutral: #e2e8f0;
+    --color-success: #22c55e;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    --color-info: #3b82f6;
+
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --slate-950: #020617;
+
+    --font-heading: 'DM Sans', system-ui, sans-serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+    --font-mono: 'DM Mono', 'JetBrains Mono', monospace;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--slate-100);
+    color: var(--color-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* === LAYOUT === */
+  .app-shell {
+    display: grid;
+    grid-template-columns: 56px var(--panel-width, 480px) 6px 1fr;
+    height: 100vh;
+  }
+
+  /* === DRAG DIVIDER === */
+  .panel-divider {
+    background: var(--slate-200);
+    cursor: col-resize;
+    position: relative;
+    transition: background 0.15s;
+    z-index: 10;
+  }
+  .panel-divider:hover,
+  .panel-divider.dragging {
+    background: var(--color-accent);
+  }
+  .panel-divider::before {
+    content: '';
+    position: absolute;
+    inset: 0 -4px;
+    z-index: 1;
+  }
+  .panel-divider::after {
+    content: '⋮';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    color: var(--slate-400);
+    pointer-events: none;
+    transition: color 0.15s;
+  }
+  .panel-divider:hover::after,
+  .panel-divider.dragging::after {
+    color: white;
+  }
+  body.resizing { cursor: col-resize; user-select: none; }
+  body.resizing iframe, body.resizing img { pointer-events: none; }
+
+  /* === ICON SIDEBAR (far left) === */
+  .icon-sidebar {
+    background: var(--slate-900);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 0;
+    gap: 4px;
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .icon-sidebar .logo {
+    width: 32px;
+    height: 32px;
+    background: var(--color-accent);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    color: white;
+    font-size: 14px;
+    letter-spacing: -0.5px;
+  }
+
+  .nav-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--slate-400);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .nav-icon:hover { color: var(--slate-200); background: rgba(255,255,255,0.06); }
+  .nav-icon.active {
+    color: var(--color-accent);
+    background: rgba(16, 185, 129, 0.1);
+  }
+  .nav-icon.active::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    width: 3px;
+    height: 20px;
+    background: var(--color-accent);
+    border-radius: 0 2px 2px 0;
+  }
+  .nav-icon svg { width: 20px; height: 20px; }
+
+  .nav-spacer { flex: 1; }
+
+  /* === LEARN PANEL (middle) === */
+  .learn-panel {
+    background: white;
+    border-right: 1px solid var(--slate-200);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--slate-200);
+    flex-shrink: 0;
+  }
+
+  .panel-header .breadcrumb {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--slate-400);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .panel-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--slate-900);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.3px;
+  }
+
+  .panel-header h1 .learn-icon {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--color-accent), #06b6d4);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .panel-content {
+    padding: 20px 24px;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* === NEW SESSION CARD === */
+  .new-session-card {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    animation: slideUp 0.4s ease-out;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-section-title {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--slate-400);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .input-group {
+    margin-bottom: 16px;
+  }
+
+  .input-group:last-child { margin-bottom: 0; }
+
+  .input-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--slate-700);
+    margin-bottom: 6px;
+  }
+
+  .input-field {
+    width: 100%;
+    background: white;
+    border: 1.5px solid var(--slate-200);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: var(--font-body);
+    color: var(--slate-900);
+    transition: all 0.2s;
+    outline: none;
+  }
+  .input-field:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-glow);
+  }
+  .input-field::placeholder { color: var(--slate-400); font-size: 13px; }
+
+  .input-field.url-input {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding-left: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'%3E%3C/path%3E%3Cpath d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 12px center;
+    background-size: 14px;
+  }
+
+  textarea.input-field {
+    resize: vertical;
+    min-height: 72px;
+    line-height: 1.5;
+  }
+
+  .purpose-hints {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  .hint-chip {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    padding: 3px 10px;
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-sm);
+    color: var(--slate-500);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .hint-chip:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: var(--color-accent-glow);
+  }
+
+  .track-button {
+    width: 100%;
+    padding: 12px 20px;
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .track-button:hover { background: var(--color-accent-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+  .track-button svg { width: 16px; height: 16px; }
+
+  /* === SESSIONS LIST === */
+  .sessions-section {
+    animation: slideUp 0.5s ease-out 0.1s both;
+  }
+
+  .sessions-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .session-count {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--slate-400);
+    padding: 2px 8px;
+    background: var(--slate-100);
+    border-radius: var(--radius-sm);
+  }
+
+  .session-card {
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .session-card:hover {
+    border-color: var(--slate-300);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+  }
+  .session-card.active {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 1px var(--color-accent), var(--shadow-sm);
+  }
+
+  .session-card .session-status {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    border-radius: 3px 0 0 3px;
+  }
+  .session-status.recording { background: var(--color-error); }
+  .session-status.completed { background: var(--color-accent); }
+  .session-status.paused { background: var(--color-warning); }
+
+  .session-card .session-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    padding-left: 8px;
+  }
+
+  .session-domain {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--slate-800);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .session-domain .live-dot {
+    width: 7px;
+    height: 7px;
+    background: var(--color-error);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    50% { opacity: 0.8; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
+  }
+
+  .session-time {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--slate-400);
+  }
+
+  .session-purpose {
+    font-size: 12px;
+    color: var(--slate-500);
+    padding-left: 8px;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+
+  .session-stats {
+    display: flex;
+    gap: 12px;
+    padding-left: 8px;
+  }
+
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--slate-400);
+  }
+  .stat svg { width: 12px; height: 12px; }
+  .stat .value { color: var(--slate-600); font-weight: 500; }
+
+  .stat-badge {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    font-family: var(--font-mono);
+  }
+  .stat-badge.key-path {
+    background: var(--color-accent-subtle);
+    color: var(--color-accent-dark);
+  }
+
+  /* === MAIN CONTENT AREA (right) === */
+  .main-area {
+    background: var(--slate-50);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .main-header {
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--slate-200);
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .main-header .session-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--slate-800);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .recording-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    padding: 4px 10px;
+    background: rgba(239, 68, 68, 0.08);
+    color: var(--color-error);
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+  }
+  .recording-badge .rec-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--color-error);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+
+  .main-header .controls {
+    display: flex;
+    gap: 8px;
+  }
+
+  .ctrl-btn {
+    padding: 7px 14px;
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--font-body);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+    border: 1px solid var(--slate-200);
+    background: white;
+    color: var(--slate-600);
+  }
+  .ctrl-btn:hover { background: var(--slate-50); border-color: var(--slate-300); }
+  .ctrl-btn.danger { color: var(--color-error); border-color: rgba(239,68,68,0.2); }
+  .ctrl-btn.danger:hover { background: rgba(239,68,68,0.04); }
+  .ctrl-btn svg { width: 14px; height: 14px; }
+
+  /* === EVENT TIMELINE (preview) === */
+  .timeline-area {
+    flex: 1;
+    padding: 24px 32px;
+    overflow-y: auto;
+  }
+
+  .timeline-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .timeline-header h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--slate-700);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .filter-pills {
+    display: flex;
+    gap: 4px;
+  }
+
+  .filter-pill {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--slate-200);
+    background: white;
+    color: var(--slate-500);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-pill:hover { border-color: var(--slate-300); }
+  .filter-pill.active {
+    background: var(--slate-900);
+    color: white;
+    border-color: var(--slate-900);
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 28px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 4px;
+    bottom: 4px;
+    width: 1.5px;
+    background: var(--slate-200);
+  }
+
+  .event-item {
+    position: relative;
+    margin-bottom: 16px;
+    animation: fadeIn 0.3s ease-out both;
+  }
+  .event-item:nth-child(1) { animation-delay: 0s; }
+  .event-item:nth-child(2) { animation-delay: 0.06s; }
+  .event-item:nth-child(3) { animation-delay: 0.12s; }
+  .event-item:nth-child(4) { animation-delay: 0.18s; }
+  .event-item:nth-child(5) { animation-delay: 0.24s; }
+  .event-item:nth-child(6) { animation-delay: 0.30s; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .event-item::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 16px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 2px solid var(--color-accent);
+    background: white;
+    z-index: 1;
+  }
+  .event-item.key-path::before {
+    background: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-glow);
+  }
+  .event-item.not-key-path::before {
+    border-color: var(--slate-300);
+  }
+
+  .event-card {
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    transition: all 0.15s;
+  }
+  .event-item.key-path .event-card {
+    border-left: 3px solid var(--color-accent);
+  }
+  .event-item.not-key-path .event-card {
+    opacity: 0.55;
+    border-left: 3px solid var(--slate-200);
+  }
+  .event-card:hover { box-shadow: var(--shadow-sm); }
+
+  .event-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .event-type-badge {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .event-type-badge.click { background: #dbeafe; color: #2563eb; }
+  .event-type-badge.type { background: #fef3c7; color: #d97706; }
+  .event-type-badge.scroll { background: #e0e7ff; color: #4f46e5; }
+  .event-type-badge.nav { background: #fce7f3; color: #db2777; }
+  .event-type-badge.drag { background: #ccfbf1; color: #0d9488; }
+
+  .event-time {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--slate-400);
+  }
+
+  .event-path-badge {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    margin-left: auto;
+  }
+  .event-path-badge.on-path { background: var(--color-accent-subtle); color: var(--color-accent-dark); }
+  .event-path-badge.off-path { background: var(--slate-100); color: var(--slate-400); }
+
+  .event-target {
+    font-size: 12px;
+    font-family: var(--font-mono);
+    color: var(--slate-600);
+    margin-bottom: 8px;
+    padding: 4px 8px;
+    background: var(--slate-50);
+    border-radius: var(--radius-sm);
+    display: inline-block;
+  }
+
+  .event-annotation {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    padding: 8px 10px;
+    background: linear-gradient(135deg, rgba(16,185,129,0.04), rgba(6,182,212,0.04));
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(16,185,129,0.1);
+  }
+
+  .annotation-avatar {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-accent), #06b6d4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .annotation-avatar svg { width: 10px; height: 10px; color: white; }
+
+  .annotation-text {
+    font-size: 12px;
+    color: var(--slate-600);
+    line-height: 1.45;
+  }
+
+  /* === INFO BADGE === */
+  .mockup-badge {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    padding: 6px 14px;
+    background: var(--slate-900);
+    color: var(--slate-400);
+    border-radius: var(--radius-sm);
+    z-index: 999;
+    letter-spacing: 0.3px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- Icon Sidebar -->
+  <nav class="icon-sidebar">
+    <div class="logo">X</div>
+
+    <div class="nav-icon" title="Ideas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </div>
+
+    <div class="nav-icon active" title="Learn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/><path d="M8 12h.01"/><path d="M16 12h.01"/><path d="M12 4v.01"/><path d="M12 20v.01"/><path d="M4.93 4.93l.01.01"/><path d="M19.07 19.07l.01.01"/></svg>
+    </div>
+
+    <div class="nav-icon" title="Tracing">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    </div>
+
+    <div class="nav-spacer"></div>
+
+    <div class="nav-icon" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </div>
+  </nav>
+
+  <!-- Learn Panel -->
+  <div class="learn-panel">
+    <div class="panel-header">
+      <div class="breadcrumb">Workplace → Ideation</div>
+      <h1>
+        <span class="learn-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        </span>
+        Learn
+      </h1>
+    </div>
+
+    <div class="panel-content">
+
+      <!-- New Session Card -->
+      <div class="new-session-card">
+        <div class="card-section-title">New Recording Session</div>
+
+        <div class="input-group">
+          <label class="input-label">Target Website</label>
+          <input type="url" class="input-field url-input" placeholder="https://example.com/checkout" value="https://shop.example.com">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Tracking Purpose</label>
+          <textarea class="input-field" placeholder="Describe what you want to learn from this session...">Learn the complete checkout flow — from cart to payment confirmation</textarea>
+          <div class="purpose-hints">
+            <span class="hint-chip">checkout flow</span>
+            <span class="hint-chip">navigation map</span>
+            <span class="hint-chip">form filling</span>
+            <span class="hint-chip">search UX</span>
+          </div>
+        </div>
+
+        <button class="track-button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+          Track Behavior
+        </button>
+      </div>
+
+      <!-- Sessions -->
+      <div class="sessions-section">
+        <div class="sessions-header">
+          <div class="card-section-title" style="margin-bottom:0">Recent Sessions</div>
+          <span class="session-count">3</span>
+        </div>
+
+        <!-- Active Session -->
+        <div class="session-card active">
+          <div class="session-status recording"></div>
+          <div class="session-top">
+            <span class="session-domain">
+              <span class="live-dot"></span>
+              shop.example.com
+            </span>
+            <span class="session-time">02:34</span>
+          </div>
+          <div class="session-purpose">Learn checkout flow — cart to payment</div>
+          <div class="session-stats">
+            <span class="stat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/></svg>
+              <span class="value">23</span> events
+            </span>
+            <span class="stat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <span class="value">3</span> pages
+            </span>
+            <span class="stat-badge key-path">8 key-path</span>
+          </div>
+        </div>
+
+        <!-- Completed Session -->
+        <div class="session-card">
+          <div class="session-status completed"></div>
+          <div class="session-top">
+            <span class="session-domain">dashboard.app.io</span>
+            <span class="session-time">12:45</span>
+          </div>
+          <div class="session-purpose">Map admin dashboard navigation patterns</div>
+          <div class="session-stats">
+            <span class="stat"><span class="value">47</span> events</span>
+            <span class="stat"><span class="value">6</span> pages</span>
+            <span class="stat-badge key-path">15 key-path</span>
+          </div>
+        </div>
+
+        <!-- Paused Session -->
+        <div class="session-card">
+          <div class="session-status paused"></div>
+          <div class="session-top">
+            <span class="session-domain">forms.internal.co</span>
+            <span class="session-time">paused</span>
+          </div>
+          <div class="session-purpose">Learn multi-step registration form</div>
+          <div class="session-stats">
+            <span class="stat"><span class="value">12</span> events</span>
+            <span class="stat"><span class="value">2</span> pages</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Draggable Divider -->
+  <div class="panel-divider" id="divider"></div>
+
+  <!-- Main Content Area -->
+  <div class="main-area">
+    <div class="main-header">
+      <div class="session-title">
+        shop.example.com — Checkout Flow
+        <span class="recording-badge"><span class="rec-dot"></span>Recording</span>
+      </div>
+      <div class="controls">
+        <button class="ctrl-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          Pause
+        </button>
+        <button class="ctrl-btn danger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+          Stop
+        </button>
+      </div>
+    </div>
+
+    <div class="timeline-area">
+      <div class="timeline-header">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+          Event Timeline
+        </h2>
+        <div class="filter-pills">
+          <span class="filter-pill active">All</span>
+          <span class="filter-pill">Key Path</span>
+          <span class="filter-pill">Clicks</span>
+          <span class="filter-pill">Input</span>
+          <span class="filter-pill">Nav</span>
+        </div>
+      </div>
+
+      <div class="timeline">
+
+        <div class="event-item key-path">
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-type-badge click">Click</span>
+              <span class="event-time">00:05</span>
+              <span class="event-path-badge on-path">Key Path</span>
+            </div>
+            <div class="event-target">button.add-to-cart[data-id="123"]</div>
+            <div class="event-annotation">
+              <div class="annotation-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <span class="annotation-text">User adds "Blue Widget" to cart — <strong>primary conversion action</strong> on product listing page</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="event-item not-key-path">
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-type-badge scroll">Scroll</span>
+              <span class="event-time">00:12</span>
+              <span class="event-path-badge off-path">Not Key</span>
+            </div>
+            <div class="event-target">window → scrollY: 450px</div>
+            <div class="event-annotation">
+              <div class="annotation-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <span class="annotation-text">Browsing scroll to view more products — not part of checkout critical path</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="event-item key-path">
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-type-badge nav">Nav</span>
+              <span class="event-time">00:18</span>
+              <span class="event-path-badge on-path">Key Path</span>
+            </div>
+            <div class="event-target">/products → /cart</div>
+            <div class="event-annotation">
+              <div class="annotation-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <span class="annotation-text">Navigation to cart page — <strong>entering checkout funnel</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="event-item key-path">
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-type-badge type">Input</span>
+              <span class="event-time">00:34</span>
+              <span class="event-path-badge on-path">Key Path</span>
+            </div>
+            <div class="event-target">input#shipping-address[name="address"]</div>
+            <div class="event-annotation">
+              <div class="annotation-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <span class="annotation-text">Filling shipping address — form field <code style="font-size:11px;background:rgba(0,0,0,0.05);padding:1px 4px;border-radius:3px">[MASKED]</code> (PII protected)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="event-item key-path">
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-type-badge click">Click</span>
+              <span class="event-time">01:02</span>
+              <span class="event-path-badge on-path">Key Path</span>
+            </div>
+            <div class="event-target">button#place-order.btn-checkout</div>
+            <div class="event-annotation">
+              <div class="annotation-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <span class="annotation-text">🎯 <strong>Place order click — checkout completion</strong>. Final conversion event in the funnel.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="event-item not-key-path">
+          <div class="event-card">
+            <div class="event-top">
+              <span class="event-type-badge scroll">Scroll</span>
+              <span class="event-time">01:15</span>
+              <span class="event-path-badge off-path">Not Key</span>
+            </div>
+            <div class="event-target">window → scrollY: 0px (scroll to top)</div>
+            <div class="event-annotation">
+              <div class="annotation-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <span class="annotation-text">Post-purchase scroll — viewing confirmation page header</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="mockup-badge">IDEA-038 · Learn Module Panel · Mockup v1</div>
+
+<script>
+(() => {
+  const shell = document.querySelector('.app-shell');
+  const divider = document.getElementById('divider');
+  const SIDEBAR = 56;
+  const DIVIDER = 6;
+  const MIN_PANEL = 280;
+  const MAX_PANEL = 600;
+  let panelWidth = 480;
+
+  function setWidth(w) {
+    panelWidth = Math.min(MAX_PANEL, Math.max(MIN_PANEL, w));
+    shell.style.setProperty('--panel-width', panelWidth + 'px');
+  }
+
+  divider.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    divider.classList.add('dragging');
+    document.body.classList.add('resizing');
+
+    const onMove = (ev) => {
+      setWidth(ev.clientX - SIDEBAR - DIVIDER / 2);
+    };
+    const onUp = () => {
+      divider.classList.remove('dragging');
+      document.body.classList.remove('resizing');
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  });
+})();
+</script>
+
+</body>
+</html>

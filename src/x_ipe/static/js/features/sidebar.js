@@ -373,6 +373,10 @@ class ProjectSidebar {
                             <i class="bi bi-clipboard-check"></i>
                             <span>Quality Evaluation</span>
                         </div>
+                        <div class="nav-section-header sidebar-child nav-learn-panel" data-section-id="learn">
+                            <i class="bi bi-mortarboard"></i>
+                            <span>Learn</span>
+                        </div>
                     </div>
                 </div>
             `;
@@ -910,6 +914,32 @@ class ProjectSidebar {
             });
         }
         
+        // CR-004: Prevent parent item click action
+        // FEATURE-054-A: Learn Panel click handler
+        const learnHeader = this.container.querySelector('.nav-learn-panel');
+        if (learnHeader) {
+            learnHeader.addEventListener('click', () => {
+                fileItems.forEach(f => f.classList.remove('active'));
+                this.selectedFile = null;
+                const sidebarChildren = this.container.querySelectorAll('.sidebar-child');
+                sidebarChildren.forEach(child => child.classList.remove('active'));
+                learnHeader.classList.add('active');
+                if (window.contentRenderer) {
+                    window.contentRenderer.currentPath = null;
+                }
+                const createIdeaBtn = document.getElementById('btn-create-idea');
+                if (createIdeaBtn) {
+                    createIdeaBtn.classList.add('d-none');
+                }
+                const breadcrumb = document.getElementById('breadcrumb');
+                breadcrumb.innerHTML = '<li class="breadcrumb-item active">Learn</li>';
+                const container = document.getElementById('content-body');
+                if (window.learnPanelManager) {
+                    window.learnPanelManager.render(container);
+                }
+            });
+        }
+
         // CR-004: Prevent parent item click action
         const parentItems = this.container.querySelectorAll('.sidebar-parent[data-no-action="true"]');
         parentItems.forEach(item => {
