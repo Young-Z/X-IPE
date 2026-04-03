@@ -5,7 +5,7 @@
 ## Active Tasks
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
-| TASK-1072 | Acceptance Test + Closing | Acceptance test and close FEATURE-055-C (Task Board API). 29 ACs. DAO mode. | Drift 🌊 | 🔄 in_progress | 04-03-2026 | — | x-ipe-task-based-feature-refinement |
+| TASK-1072 | Acceptance Test + Closing | Acceptance test and close FEATURE-055-C (Task Board API). 29 ACs. DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | 04-03-2026 | x-ipe-task-based-feature-refinement |
 | TASK-1071 | Code Implementation | Implement FEATURE-055-C (Task Board API). Routes + service + tests. DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | 04-03-2026 | x-ipe-task-based-feature-acceptance-test |
 | TASK-1070 | Technical Design | Design FEATURE-055-C (Task Board API). Flask blueprint + service layer. DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | 04-03-2026 | x-ipe-task-based-code-implementation |
 | TASK-1069 | Feature Refinement | Refine FEATURE-055-C (Task Board API). Flask read-only endpoints. DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | 04-03-2026 | x-ipe-task-based-technical-design |
