@@ -382,6 +382,29 @@ class ProjectSidebar {
             `;
         }
         
+        // FEATURE-057: Special handling for Project Plan section - show Task Board and Feature Board links
+        if (section.id === 'planning') {
+            return `
+                <div class="nav-section" data-section-id="${section.id}">
+                    <div class="nav-section-header sidebar-parent" data-section-id="${section.id}" data-no-action="true">
+                        <i class="bi ${icon}"></i>
+                        <span>${section.label}</span>
+                        <i class="bi bi-chevron-down submenu-indicator"></i>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <div class="nav-section-header sidebar-child nav-task-board" data-section-id="task-board">
+                            <i class="bi bi-kanban"></i>
+                            <span>Task Board</span>
+                        </div>
+                        <div class="nav-section-header sidebar-child nav-feature-board" data-section-id="feature-board">
+                            <i class="bi bi-list-check"></i>
+                            <span>Feature Board</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
         // FEATURE-049-B: Knowledge Base section with folder tree, drag-drop, and Intake placeholder
         if (section.id === 'knowledge-base') {
             return this._renderKBSection(section, icon, hasChildren);
@@ -937,6 +960,22 @@ class ProjectSidebar {
                 if (window.learnPanelManager) {
                     window.learnPanelManager.render(container);
                 }
+            });
+        }
+
+        // FEATURE-057: Task Board sidebar link → navigates to /task-board page
+        const taskBoardHeader = this.container.querySelector('.nav-task-board');
+        if (taskBoardHeader) {
+            taskBoardHeader.addEventListener('click', () => {
+                window.location.href = '/task-board';
+            });
+        }
+
+        // FEATURE-057: Feature Board sidebar link → navigates to /feature-board page
+        const featureBoardHeader = this.container.querySelector('.nav-feature-board');
+        if (featureBoardHeader) {
+            featureBoardHeader.addEventListener('click', () => {
+                window.location.href = '/feature-board';
             });
         }
 

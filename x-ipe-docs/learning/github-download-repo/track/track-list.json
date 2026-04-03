@@ -1,0 +1,420 @@
+{
+  "schema_version": "2.0",
+  "session": {
+    "id": "8262e748-1ebe-4a6d-a7e5-1237a20eeec4",
+    "domain": "github.com",
+    "purpose": "learn downloading repo",
+    "startedAt": "2026-04-03T12:06:45Z",
+    "stoppedAt": null,
+    "piiWhitelist": [],
+    "bufferCapacity": 10000
+  },
+  "events": [
+    {
+      "type": "focus",
+      "timestamp": 1775218085572,
+      "target": {
+        "tagName": "BUTTON",
+        "cssSelector": "button.header-search-button"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/",
+        "pageTitle": "GitHub"
+      },
+      "details": {}
+    },
+    {
+      "type": "click",
+      "timestamp": 1775218085694,
+      "target": {
+        "tagName": "SPAN",
+        "cssSelector": "span.flex-1",
+        "textContent": "[MASKED]"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/",
+        "pageTitle": "GitHub"
+      },
+      "details": {
+        "x": 1299,
+        "y": 32
+      }
+    },
+    {
+      "type": "focus",
+      "timestamp": 1775218085709,
+      "target": {
+        "tagName": "BUTTON",
+        "cssSelector": "button.header-search-button"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/",
+        "pageTitle": "GitHub"
+      },
+      "details": {}
+    },
+    {
+      "type": "focus",
+      "timestamp": 1775218085710,
+      "target": {
+        "tagName": "INPUT",
+        "cssSelector": "input#query-builder-test",
+        "type": "text"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/",
+        "pageTitle": "GitHub"
+      },
+      "details": {}
+    },
+    {
+      "type": "input",
+      "timestamp": 1775218087975,
+      "target": {
+        "tagName": "INPUT",
+        "cssSelector": "input#query-builder-test",
+        "value": "[MASKED]",
+        "type": "text"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/",
+        "pageTitle": "GitHub"
+      },
+      "details": {
+        "inputType": "insertText"
+      }
+    },
+    {
+      "type": "input",
+      "timestamp": 1775218088468,
+      "target": {
+        "tagName": "INPUT",
+        "cssSelector": "input#query-builder-test",
+        "value": "[MASKED]",
+        "type": "text"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/",
+        "pageTitle": "GitHub"
+      },
+      "details": {
+        "inputType": "insertText"
+      }
+    },
+    {
+      "type": "input",
+      "timestamp": 1775218089062,
+      "target": {
+        "tagName": "INPUT",
+        "cssSelector": "input#query-builder-test",
+        "value": "[MASKED]",
+        "type": "text"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/",
+        "pageTitle": "GitHub"
+      },
+      "details": {
+        "inputType": "insertText"
+      }
+    },
+    {
+      "type": "input",
+      "timestamp": 1775218089261,
+      "target": {
+        "tagName": "INPUT",
+        "cssSelector": "input#query-builder-test",
+        "value": "[MASKED]",
+        "type": "text"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/",
+        "pageTitle": "GitHub"
+      },
+      "details": {
+        "inputType": "insertText"
+      }
+    },
+    {
+      "type": "input",
+      "timestamp": 1775218089416,
+      "target": {
+        "tagName": "INPUT",
+        "cssSelector": "input#query-builder-test",
+        "value": "[MASKED]",
+        "type": "text"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/",
+        "pageTitle": "GitHub"
+      },
+      "details": {
+        "inputType": "insertText"
+      }
+    },
+    {
+      "type": "focus",
+      "timestamp": 1775218090860,
+      "target": {
+        "tagName": "INPUT",
+        "cssSelector": "input#query-builder-test",
+        "type": "text"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/",
+        "pageTitle": "GitHub"
+      },
+      "details": {}
+    },
+    {
+      "type": "focus",
+      "timestamp": 1775218090860,
+      "target": {
+        "tagName": "BUTTON",
+        "cssSelector": "button.header-search-button"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/",
+        "pageTitle": "GitHub"
+      },
+      "details": {}
+    },
+    {
+      "type": "focus",
+      "timestamp": 1775218333769,
+      "target": {
+        "tagName": "H2",
+        "cssSelector": "h2#search-results-count",
+        "textContent": "[MASKED]"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/search?q=x-ipe&type=repositories",
+        "pageTitle": "Repository search results"
+      },
+      "details": {}
+    },
+    {
+      "type": "focus",
+      "timestamp": 1775218333770,
+      "target": {
+        "tagName": "A",
+        "cssSelector": "a.prc-Link-Link-9ZwDx",
+        "textContent": "[MASKED]"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/search?q=x-ipe&type=repositories",
+        "pageTitle": "Repository search results"
+      },
+      "details": {}
+    },
+    {
+      "type": "click",
+      "timestamp": 1775218333884,
+      "target": {
+        "tagName": "EM",
+        "cssSelector": "em",
+        "textContent": "[MASKED]"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/search?q=x-ipe&type=repositories",
+        "pageTitle": "Repository search results"
+      },
+      "details": {
+        "x": 445,
+        "y": 169
+      }
+    },
+    {
+      "type": "focus",
+      "timestamp": 1775218391534,
+      "target": {
+        "tagName": "BUTTON",
+        "cssSelector": "button#_R_3idajal1d_",
+        "textContent": "[MASKED]",
+        "type": "button"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/Young-Z/X-IPE",
+        "pageTitle": "GitHub - Young-Z/X-IPE"
+      },
+      "details": {}
+    },
+    {
+      "type": "click",
+      "timestamp": 1775218391654,
+      "target": {
+        "tagName": "SPAN",
+        "cssSelector": "span.prc-Button-ButtonContent-Iohp5",
+        "textContent": "[MASKED]"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/Young-Z/X-IPE",
+        "pageTitle": "GitHub - Young-Z/X-IPE"
+      },
+      "details": {
+        "x": 1076,
+        "y": 224
+      }
+    },
+    {
+      "type": "focus",
+      "timestamp": 1775218391664,
+      "target": {
+        "tagName": "BUTTON",
+        "cssSelector": "button#_R_3idajal1d_",
+        "type": "button"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/Young-Z/X-IPE",
+        "pageTitle": "GitHub - Young-Z/X-IPE"
+      },
+      "details": {}
+    },
+    {
+      "type": "focus",
+      "timestamp": 1775218391664,
+      "target": {
+        "tagName": "A",
+        "cssSelector": "a.prc-Link-Link-9ZwDx"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/Young-Z/X-IPE",
+        "pageTitle": "GitHub - Young-Z/X-IPE"
+      },
+      "details": {}
+    },
+    {
+      "type": "focus",
+      "timestamp": 1775218392738,
+      "target": {
+        "tagName": "A",
+        "cssSelector": "a.prc-Link-Link-9ZwDx"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/Young-Z/X-IPE",
+        "pageTitle": "GitHub - Young-Z/X-IPE"
+      },
+      "details": {}
+    },
+    {
+      "type": "focus",
+      "timestamp": 1775218392739,
+      "target": {
+        "tagName": "A",
+        "cssSelector": "a#_r_l_",
+        "textContent": "[MASKED]"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/Young-Z/X-IPE",
+        "pageTitle": "GitHub - Young-Z/X-IPE"
+      },
+      "details": {}
+    },
+    {
+      "type": "click",
+      "timestamp": 1775218392838,
+      "target": {
+        "tagName": "SPAN",
+        "cssSelector": "span#_r_l_--label",
+        "textContent": "[MASKED]"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/Young-Z/X-IPE",
+        "pageTitle": "GitHub - Young-Z/X-IPE"
+      },
+      "details": {
+        "x": 858,
+        "y": 477
+      }
+    },
+    {
+      "type": "focus",
+      "timestamp": 1775218397130,
+      "target": {
+        "tagName": "A",
+        "cssSelector": "a#_r_l_",
+        "textContent": "[MASKED]"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/Young-Z/X-IPE",
+        "pageTitle": "GitHub - Young-Z/X-IPE"
+      },
+      "details": {}
+    },
+    {
+      "type": "focus",
+      "timestamp": 1775218397133,
+      "target": {
+        "tagName": "BUTTON",
+        "cssSelector": "button#_R_3idajal1d_",
+        "type": "button"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/Young-Z/X-IPE",
+        "pageTitle": "GitHub - Young-Z/X-IPE"
+      },
+      "details": {}
+    },
+    {
+      "type": "focus",
+      "timestamp": 1775218397135,
+      "target": {
+        "tagName": "BUTTON",
+        "cssSelector": "button#_R_3idajal1d_",
+        "type": "button"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/Young-Z/X-IPE",
+        "pageTitle": "GitHub - Young-Z/X-IPE"
+      },
+      "details": {}
+    },
+    {
+      "type": "focus",
+      "timestamp": 1775218397136,
+      "target": {
+        "tagName": "BUTTON",
+        "cssSelector": "button#__xb-analysis",
+        "type": "submit"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/Young-Z/X-IPE",
+        "pageTitle": "GitHub - Young-Z/X-IPE"
+      },
+      "details": {}
+    },
+    {
+      "type": "click",
+      "timestamp": 1775218397246,
+      "target": {
+        "tagName": "BUTTON",
+        "cssSelector": "button#__xb-analysis",
+        "type": "submit"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/Young-Z/X-IPE",
+        "pageTitle": "GitHub - Young-Z/X-IPE"
+      },
+      "details": {
+        "x": 186,
+        "y": 927
+      }
+    },
+    {
+      "type": "focus",
+      "timestamp": 1775218397246,
+      "target": {
+        "tagName": "BUTTON",
+        "cssSelector": "button#__xb-analysis",
+        "type": "submit"
+      },
+      "metadata": {
+        "pageUrl": "https://github.com/Young-Z/X-IPE",
+        "pageTitle": "GitHub - Young-Z/X-IPE"
+      },
+      "details": {}
+    }
+  ],
+  "event_count": 27,
+  "last_updated": "2026-04-03T12:14:06.118149+00:00"
+}
