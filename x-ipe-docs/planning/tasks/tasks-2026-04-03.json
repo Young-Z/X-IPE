@@ -435,6 +435,34 @@
       "next_task": "",
       "created_at": "2026-04-03T12:36:44.059873+00:00",
       "last_updated": "2026-04-03T12:37:32.178207+00:00"
+    },
+    {
+      "task_id": "TASK-1081",
+      "task_type": "Code Implementation",
+      "description": "Add task board integration (task_create + task_update) to all 19 task-based skills. Feature-stage skills also call feature_update.",
+      "role": "Drift",
+      "status": "done",
+      "output_links": [
+        ".github/skills/x-ipe-task-based-*/SKILL.md"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-03T15:55:38.983425+00:00",
+      "last_updated": "2026-04-03T15:55:38.983425+00:00"
+    },
+    {
+      "task_id": "TASK-1082",
+      "task_type": "Bug Fix",
+      "description": "Fix feature board filter - status and search filters did not update epic summary list. Backend epic_summary() now accepts status/search params; frontend filter handlers call fetchSummary().",
+      "role": "Drift",
+      "status": "done",
+      "output_links": [
+        "src/x_ipe/static/js/features/feature-board.js",
+        "src/x_ipe/services/feature_board_service.py",
+        "src/x_ipe/routes/feature_board_routes.py"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-03T15:55:47.040926+00:00",
+      "last_updated": "2026-04-03T15:55:47.040926+00:00"
     }
   ]
 }
