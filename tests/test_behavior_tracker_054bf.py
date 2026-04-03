@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 # Add scripts to path
-sys.path.insert(0, str(Path(__file__).parent.parent / '.github' / 'skills' / 'x-ipe-learning-behavior-tracker-for-web' / 'scripts'))
+sys.path.insert(0, str(Path(__file__).parent.parent / '.github' / 'skills' / 'x-ipe-tool-learning-behavior-tracker-for-web' / 'scripts'))
 
 from post_processor import PostProcessor
 from track_behavior import BehaviorTrackerSkill, InjectionManager

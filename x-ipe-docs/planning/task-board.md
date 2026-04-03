@@ -5,7 +5,8 @@
 ## Active Tasks
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
-| TASK-1052 | Ideation | Refine idea 039: CR-Feature and Task Board — separate data/UI for task board and features (JSON + web page), new manager skills, filtering/pagination. | Drift 🌊 | 🔄 in_progress | 04-03-2026 | (pending) | x-ipe-task-based-requirement-gathering |
+| TASK-1053 | Skill Creation | Rename x-ipe-learning-behavior-tracker-for-web → x-ipe-tool-learning-behavior-tracker-for-web. Recreate SKILL.md following x-ipe-tool template. Create tracker-toolbar.mini.js minified version. | Spark ✨ | ✅ done | 04-03-2026 | .github/skills/x-ipe-tool-learning-behavior-tracker-for-web/ | — |
+| TASK-1052 | Ideation | Refine idea 039: CR-Feature and Task Board — separate data/UI for task board and features (JSON + web page), new manager skills, filtering/pagination. DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | [idea-summary-v1.md](x-ipe-docs/ideas/039.%20CR-Feature%20and%20Task%20Board/refined-idea/idea-summary-v1.md) | x-ipe-task-based-requirement-gathering |
 | TASK-1051 | Bug Fix | FEATURE-054-A: (1) Tracking Purpose required textarea with 200-word limit. (2) Track Behavior button sends command to terminal via terminalManager API. | Spark ✨ | ✅ done | 04-03-2026 | a9fcacc | — |
 | TASK-1050 | Feature Closing | Close EPIC-054 all 6 features (FEATURE-054-A through F). Final verification, code-to-docs review, refactoring analysis, commit + push to main. DAO mode. | Spark ✨ | ✅ done | 04-03-2026 | 04-03-2026 | 06c89c3 |
 | TASK-1049 | Acceptance Testing | Execute acceptance tests for EPIC-054 all 6 features (103 ACs). 45 automated tests (32 JS + 13 Python) all PASS. 58 code-review TCs all PASS. 103/103 = 100% pass rate. Zero defects. | Spark ✨ | ✅ done | 04-03-2026 | [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-054/acceptance-test-cases.md) | x-ipe-task-based-feature-closing |

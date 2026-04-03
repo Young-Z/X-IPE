@@ -10,7 +10,7 @@ import vm from 'vm';
 
 function loadTrackerClasses() {
     const source = readFileSync(
-        resolve(import.meta.dirname, '../../.github/skills/x-ipe-learning-behavior-tracker-for-web/references/tracker-toolbar.js'),
+        resolve(import.meta.dirname, '../../.github/skills/x-ipe-tool-learning-behavior-tracker-for-web/references/tracker-toolbar.js'),
         'utf-8'
     );
 
@@ -49,7 +49,7 @@ try {
 // Extract classes by extracting just class code
 function extractClass(className) {
     const source = readFileSync(
-        resolve(import.meta.dirname, '../../.github/skills/x-ipe-learning-behavior-tracker-for-web/references/tracker-toolbar.js'),
+        resolve(import.meta.dirname, '../../.github/skills/x-ipe-tool-learning-behavior-tracker-for-web/references/tracker-toolbar.js'),
         'utf-8'
     );
     // Find class definition (indented 4 spaces in the IIFE)
