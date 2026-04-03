@@ -307,7 +307,7 @@ operation_output:
 
 **Example 1: Track checkout flow with 5s polling**
 ```
-User: "Track behavior on https://shop.example.com"
+User: "Use x-ipe-tool-learning-behavior-tracker-for-web skill to track behavior on https://shop.example.com"
 Agent:
   1. setup → creates x-ipe-docs/learning/checkout-flow-shopify/
   2. inject → navigates to URL, injects tracker-toolbar.mini.js
@@ -320,7 +320,7 @@ Agent:
 
 **Example 2: Multi-page onboarding with URL change detection**
 ```
-User: "Learn from website https://app.example.com/onboard"
+User: "Use x-ipe-tool-learning-behavior-tracker-for-web skill to learn from website https://app.example.com/onboard"
 Agent:
   1. setup with folder "onboarding-app-example"
   2. inject with purpose "Onboarding flow for AI agent training"
