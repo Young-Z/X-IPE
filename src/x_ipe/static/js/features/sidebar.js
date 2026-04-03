@@ -751,10 +751,17 @@ class ProjectSidebar {
      * Bind click events to file items
      */
     bindEvents() {
+        // Helper: stop board polling when navigating away
+        const cleanupBoardPolling = () => {
+            if (window.TaskBoardPanel && window.TaskBoardPanel.destroy) window.TaskBoardPanel.destroy();
+            if (window.FeatureBoardPanel && window.FeatureBoardPanel.destroy) window.FeatureBoardPanel.destroy();
+        };
+
         // File click events
         const fileItems = this.container.querySelectorAll('.nav-file');
         fileItems.forEach(item => {
             item.addEventListener('click', (e) => {
+                cleanupBoardPolling();
                 // Remove active from all files
                 fileItems.forEach(f => f.classList.remove('active'));
                 // Add active to clicked
@@ -786,6 +793,7 @@ class ProjectSidebar {
         const workplaceHeader = this.container.querySelector('.nav-workplace-header');
         if (workplaceHeader) {
             workplaceHeader.addEventListener('click', () => {
+                cleanupBoardPolling();
                 // Clear file selection
                 fileItems.forEach(f => f.classList.remove('active'));
                 this.selectedFile = null;
@@ -823,6 +831,7 @@ class ProjectSidebar {
         const uiuxFeedbacksHeader = this.container.querySelector('.nav-uiux-feedbacks');
         if (uiuxFeedbacksHeader) {
             uiuxFeedbacksHeader.addEventListener('click', () => {
+                cleanupBoardPolling();
                 // Clear file selection
                 fileItems.forEach(f => f.classList.remove('active'));
                 this.selectedFile = null;
@@ -859,10 +868,10 @@ class ProjectSidebar {
         const tracingHeader = this.container.querySelector('.nav-tracing');
         if (tracingHeader) {
             tracingHeader.addEventListener('click', () => {
+                cleanupBoardPolling();
                 // Clear file selection
                 fileItems.forEach(f => f.classList.remove('active'));
                 this.selectedFile = null;
-                
                 // Update sidebar-child active state
                 const sidebarChildren = this.container.querySelectorAll('.sidebar-child');
                 sidebarChildren.forEach(child => child.classList.remove('active'));
@@ -900,6 +909,7 @@ class ProjectSidebar {
         const qualityEvalHeader = this.container.querySelector('.nav-quality-evaluation');
         if (qualityEvalHeader) {
             qualityEvalHeader.addEventListener('click', () => {
+                cleanupBoardPolling();
                 // Clear file selection
                 fileItems.forEach(f => f.classList.remove('active'));
                 this.selectedFile = null;
@@ -942,6 +952,7 @@ class ProjectSidebar {
         const learnHeader = this.container.querySelector('.nav-learn-panel');
         if (learnHeader) {
             learnHeader.addEventListener('click', () => {
+                cleanupBoardPolling();
                 fileItems.forEach(f => f.classList.remove('active'));
                 this.selectedFile = null;
                 const sidebarChildren = this.container.querySelectorAll('.sidebar-child');
@@ -967,6 +978,7 @@ class ProjectSidebar {
         const taskBoardHeader = this.container.querySelector('.nav-task-board');
         if (taskBoardHeader) {
             taskBoardHeader.addEventListener('click', () => {
+                cleanupBoardPolling();
                 fileItems.forEach(f => f.classList.remove('active'));
                 this.selectedFile = null;
                 const sidebarChildren = this.container.querySelectorAll('.sidebar-child');
@@ -992,6 +1004,7 @@ class ProjectSidebar {
         const featureBoardHeader = this.container.querySelector('.nav-feature-board');
         if (featureBoardHeader) {
             featureBoardHeader.addEventListener('click', () => {
+                cleanupBoardPolling();
                 fileItems.forEach(f => f.classList.remove('active'));
                 this.selectedFile = null;
                 const sidebarChildren = this.container.querySelectorAll('.sidebar-child');

@@ -17,6 +17,11 @@
         expandedFeature: null,
     };
 
+    // ── Auto-refresh ────────────────────────────────────────────────
+    var POLL_INTERVAL = 15000; // 15 seconds
+    var _pollTimer = null;
+    var _lastSummaryHash = '';
+
     // ── Constants ────────────────────────────────────────────────────
     var STATUS_ORDER = ['Planned', 'Refined', 'Designed', 'Implemented', 'Tested', 'Completed', 'Retired'];
 
@@ -51,6 +56,7 @@
             state.epicLoaded = {};
             state.expandedEpic = null;
             state.expandedFeature = null;
+            _lastSummaryHash = JSON.stringify(state.summaries);
             renderEpics();
         } catch (err) {
             showError('Error loading features: ' + err.message);
@@ -77,6 +83,49 @@
             var body = document.getElementById('fb-body-' + epicId);
             if (body) body.innerHTML = '<div class="fb-loading">Error loading features</div>';
         }
+    }
+
+    /** Background poll — preserves expanded epic/feature & only re-renders on data change. */
+    async function refreshSummary() {
+        try {
+            var params = new URLSearchParams();
+            if (state.status) params.set('status', state.status);
+            if (state.search) params.set('search', state.search);
+            var qs = params.toString();
+            var url = '/api/features/epic-summary' + (qs ? '?' + qs : '');
+            var resp = await fetch(url);
+            if (!resp.ok) return;
+            var json = await resp.json();
+            if (!json.success) return;
+            var newSummaries = json.data.summaries || [];
+            var newHash = JSON.stringify(newSummaries);
+            if (newHash === _lastSummaryHash) return; // no change
+            var prevEpic = state.expandedEpic;
+            var prevFeature = state.expandedFeature;
+            var prevLoaded = Object.assign({}, state.epicLoaded);
+            var prevFeatures = Object.assign({}, state.epicFeatures);
+            state.summaries = newSummaries;
+            _lastSummaryHash = newHash;
+            // Preserve expanded state
+            state.expandedEpic = prevEpic;
+            state.expandedFeature = prevFeature;
+            state.epicLoaded = prevLoaded;
+            state.epicFeatures = prevFeatures;
+            renderEpics();
+            // Re-fetch expanded epic's features if it was loaded
+            if (prevEpic && prevLoaded[prevEpic]) {
+                fetchEpicFeatures(prevEpic);
+            }
+        } catch (_) { /* silent on background refresh */ }
+    }
+
+    function startPolling() {
+        stopPolling();
+        _pollTimer = setInterval(refreshSummary, POLL_INTERVAL);
+    }
+
+    function stopPolling() {
+        if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
     }
 
     // ── Render ───────────────────────────────────────────────────────
@@ -333,6 +382,7 @@
         }, 300));
 
         fetchSummary();
+        startPolling();
     }
 
     // ── SPA entry point ─────────────────────────────────────────────
@@ -347,6 +397,9 @@
             }
             container.innerHTML = TEMPLATE;
             init();
+        },
+        destroy: function () {
+            stopPolling();
         }
     };
 

@@ -20,6 +20,11 @@
         sortDir: 'desc',
     };
 
+    // ── Auto-refresh ────────────────────────────────────────────────
+    const POLL_INTERVAL = 15000; // 15 seconds
+    let _pollTimer = null;
+    let _lastDataHash = '';
+
     // ── Constants ────────────────────────────────────────────────────
     const STATUS_COLORS = {
         done: { color: '#22c55e', bg: '#f0fdf4', label: 'Done' },
@@ -82,6 +87,7 @@
             state.tasks = json.data.tasks || [];
             state.pagination = json.data.pagination || null;
             state.expandedTaskId = null;
+            _lastDataHash = JSON.stringify(state.tasks);
             renderAll();
         } catch (err) {
             showError('Error loading tasks: ' + err.message);
@@ -89,6 +95,47 @@
             state.pagination = null;
             renderAll();
         }
+    }
+
+    /** Background poll — preserves expanded row & only re-renders on data change. */
+    async function refreshTasks() {
+        var params = new URLSearchParams({
+            range: state.range,
+            page: String(state.page),
+            page_size: String(state.pageSize),
+        });
+        if (state.status) params.set('status', state.status);
+        if (state.search) params.set('search', state.search);
+
+        try {
+            var resp = await fetch('/api/tasks/list?' + params.toString());
+            if (!resp.ok) return;
+            var json = await resp.json();
+            if (!json.success) return;
+            var newTasks = json.data.tasks || [];
+            var newHash = JSON.stringify(newTasks);
+            if (newHash === _lastDataHash) return; // no change
+            var prevExpanded = state.expandedTaskId;
+            state.tasks = newTasks;
+            state.pagination = json.data.pagination || null;
+            _lastDataHash = newHash;
+            // Preserve expanded row if it still exists
+            if (prevExpanded && newTasks.some(function (t) { return t.task_id === prevExpanded; })) {
+                state.expandedTaskId = prevExpanded;
+            } else {
+                state.expandedTaskId = null;
+            }
+            renderAll();
+        } catch (_) { /* silent on background refresh */ }
+    }
+
+    function startPolling() {
+        stopPolling();
+        _pollTimer = setInterval(refreshTasks, POLL_INTERVAL);
+    }
+
+    function stopPolling() {
+        if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
     }
 
     // ── Sorting ───────────────────────────────────────────────────────
@@ -415,6 +462,7 @@
         });
 
         fetchTasks();
+        startPolling();
     }
 
     // ── SPA entry point ─────────────────────────────────────────────
@@ -429,6 +477,9 @@
             }
             container.innerHTML = TEMPLATE;
             init();
+        },
+        destroy: function () {
+            stopPolling();
         }
     };
 
