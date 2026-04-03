@@ -474,6 +474,17 @@
       "next_task": "",
       "created_at": "2026-04-03T16:02:52.938429+00:00",
       "last_updated": "2026-04-03T16:02:52.938429+00:00"
+    },
+    {
+      "task_id": "TASK-1084",
+      "task_type": "maintenance",
+      "description": "Audit and update feature board statuses to match real feature state",
+      "role": "Drift",
+      "status": "in_progress",
+      "output_links": [],
+      "next_task": "",
+      "created_at": "2026-04-03T16:11:05.317777+00:00",
+      "last_updated": "2026-04-03T16:11:05.317777+00:00"
     }
   ]
 }

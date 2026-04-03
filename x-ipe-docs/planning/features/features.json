@@ -582,12 +582,12 @@
       "epic_id": "EPIC-029",
       "title": "Session Explorer Core",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Tested",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-029/FEATURE-029-A/specification.md",
       "created_at": "2026-02-11T00:00:00+00:00",
-      "last_updated": "2026-02-11T16:30:00+00:00"
+      "last_updated": "2026-04-03T16:16:59.366919+00:00"
     },
     {
       "feature_id": "FEATURE-029-B",
@@ -642,12 +642,12 @@
       "epic_id": "EPIC-030",
       "title": "UIUX Reference Agent Skill & Toolbar",
       "version": "v2.0",
-      "status": "Implemented",
+      "status": "Tested",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-030/FEATURE-030-B/specification.md",
       "created_at": "2026-02-14T00:00:00+00:00",
-      "last_updated": "2026-02-14T09:20:00+00:00"
+      "last_updated": "2026-04-03T16:16:59.427109+00:00"
     },
     {
       "feature_id": "FEATURE-030-B-THEME",
@@ -930,12 +930,12 @@
       "epic_id": "EPIC-039",
       "title": "Enhanced Modal Features",
       "version": "v1.0",
-      "status": "Planned",
+      "status": "Designed",
       "description": "",
       "dependencies": [],
       "specification_link": "FEATURE-039-A",
       "created_at": "2026-02-22T00:00:00+00:00",
-      "last_updated": "2026-02-22T03:50:00+00:00"
+      "last_updated": "2026-04-03T16:16:59.488355+00:00"
     },
     {
       "feature_id": "FEATURE-040-A",
@@ -1446,156 +1446,156 @@
       "epic_id": "EPIC-049",
       "title": "KB Backend & Storage Foundation",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Tested",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-A/specification.md",
       "created_at": "2026-03-11T00:00:00+00:00",
-      "last_updated": "2026-03-11T10:30:00+00:00"
+      "last_updated": "2026-04-03T16:16:59.549043+00:00"
     },
     {
       "feature_id": "FEATURE-049-B",
       "epic_id": "EPIC-049",
       "title": "KB Sidebar & Navigation",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Tested",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/specification.md",
       "created_at": "2026-03-11T00:00:00+00:00",
-      "last_updated": "2026-03-11T10:50:00+00:00"
+      "last_updated": "2026-04-03T16:16:59.610174+00:00"
     },
     {
       "feature_id": "FEATURE-049-C",
       "epic_id": "EPIC-049",
       "title": "KB Browse & Search",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Tested",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-C/specification.md",
       "created_at": "2026-03-11T00:00:00+00:00",
-      "last_updated": "2026-03-11T11:10:00+00:00"
+      "last_updated": "2026-04-03T16:16:59.671736+00:00"
     },
     {
       "feature_id": "FEATURE-049-D",
       "epic_id": "EPIC-049",
       "title": "KB Article Editor",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Tested",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-D/specification.md",
       "created_at": "2026-03-11T00:00:00+00:00",
-      "last_updated": "2026-03-11T10:55:00+00:00"
+      "last_updated": "2026-04-03T16:16:59.731065+00:00"
     },
     {
       "feature_id": "FEATURE-049-E",
       "epic_id": "EPIC-049",
       "title": "KB File Upload",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Tested",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-E/specification.md",
       "created_at": "2026-03-11T00:00:00+00:00",
-      "last_updated": "2026-03-11T11:30:00+00:00"
+      "last_updated": "2026-04-03T16:16:59.791157+00:00"
     },
     {
       "feature_id": "FEATURE-049-F",
       "epic_id": "EPIC-049",
       "title": "KB AI Librarian & Intake",
       "version": "v1.0",
-      "status": "Planned",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "FEATURE-049-A, FEATURE-049-E",
       "created_at": "2026-03-11T00:00:00+00:00",
-      "last_updated": "2026-03-11T05:18:00+00:00"
+      "last_updated": "2026-04-03T16:16:59.852854+00:00"
     },
     {
       "feature_id": "FEATURE-049-G",
       "epic_id": "EPIC-049",
       "title": "KB Reference Picker",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Tested",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/specification.md",
       "created_at": "2026-03-11T00:00:00+00:00",
-      "last_updated": "2026-03-11T11:45:00+00:00"
+      "last_updated": "2026-04-03T16:16:59.913035+00:00"
     },
     {
       "feature_id": "FEATURE-050-A",
       "epic_id": "EPIC-050",
       "title": "Extractor Skill Foundation & Input Detection",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-A/specification.md",
       "created_at": "2026-03-17T00:00:00+00:00",
-      "last_updated": "2026-03-17T07:45:00+00:00"
+      "last_updated": "2026-04-03T16:16:59.972711+00:00"
     },
     {
       "feature_id": "FEATURE-050-B",
       "epic_id": "EPIC-050",
       "title": "Source Extraction Engine",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "FEATURE-050-A",
       "created_at": "2026-03-17T00:00:00+00:00",
-      "last_updated": "2026-03-17T08:50:00+00:00"
+      "last_updated": "2026-04-03T16:17:00.032413+00:00"
     },
     {
       "feature_id": "FEATURE-050-C",
       "epic_id": "EPIC-050",
       "title": "Extract-Validate Loop & Coverage Control",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-C/specification.md",
       "created_at": "2026-03-17T00:00:00+00:00",
-      "last_updated": "2026-03-17T09:26:00+00:00"
+      "last_updated": "2026-04-03T16:17:00.093411+00:00"
     },
     {
       "feature_id": "FEATURE-050-D",
       "epic_id": "EPIC-050",
       "title": "Checkpoint, Resume & Error Handling",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-050/FEATURE-050-D/specification.md",
       "created_at": "2026-03-17T00:00:00+00:00",
-      "last_updated": "2026-03-17T10:00:00+00:00"
+      "last_updated": "2026-04-03T16:17:00.153061+00:00"
     },
     {
       "feature_id": "FEATURE-050-E",
       "epic_id": "EPIC-050",
       "title": "KB Intake Output & Quality Scoring",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "FEATURE-050-C",
       "created_at": "2026-03-17T00:00:00+00:00",
-      "last_updated": "2026-03-17T00:00:00+00:00"
+      "last_updated": "2026-04-03T16:17:00.213369+00:00"
     },
     {
       "feature_id": "FEATURE-051-A",
       "epic_id": "EPIC-051",
       "title": "User Manual Tool Skill",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/specification.md",
       "created_at": "2026-03-17T00:00:00+00:00",
-      "last_updated": "2026-03-17T00:00:00+00:00"
+      "last_updated": "2026-04-03T16:17:00.273865+00:00"
     },
     {
       "feature_id": "FEATURE-052-A",
