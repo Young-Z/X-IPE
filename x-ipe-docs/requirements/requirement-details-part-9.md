@@ -634,17 +634,22 @@ The user wants:
 
 ---
 
-##### FEATURE-035-B: Feature Board Epic Tracking
+##### [RETIRED by EPIC-055/EPIC-056] FEATURE-035-B: Feature Board Epic Tracking
+
+> **⚠️ CR Impact Note** (added 04-03-2026, ref: EPIC-055/EPIC-056)
+> - **Change:** EPIC-055 (Task Board Manager) and EPIC-056 (Feature Board Manager) replace the markdown-based features.md with a JSON data layer (`features.json`). The `feature-board-management` skill is being replaced by `x-ipe-tool-feature-board-manager` with CRUD scripts.
+> - **Retirement Reason:** Adding an Epic ID column to markdown is superseded by the full JSON migration — `features.json` includes `epic_id` natively in its schema.
+> - **Replacement:** See EPIC-055/EPIC-056 in [requirement-details-part-23.md](x-ipe-docs/requirements/requirement-details-part-23.md)
 
 **Version:** v1.0
-**Brief Description:** Add Epic ID column to the features.md tracking table and update the feature-board-management skill to support Epic-based organization.
+**Brief Description:** ~~Add Epic ID column to the features.md tracking table and update the feature-board-management skill to support Epic-based organization.~~
 
 **Acceptance Criteria:**
-- [ ] features.md table includes `Epic ID` column
-- [ ] features.md rows sorted by Epic ID
-- [ ] feature-board-management skill populates Epic ID when creating features
-- [ ] Epic status derivable from constituent Feature statuses (all completed → completed, any in_progress → in_progress)
-- [ ] Specification links updated to `EPIC-{nnn}/FEATURE-{nnn}-{X}/specification.md` paths
+- [ ] ~~features.md table includes `Epic ID` column~~ → Superseded by EPIC-056 `features.json` schema
+- [ ] ~~features.md rows sorted by Epic ID~~ → Superseded by EPIC-056 query scripts
+- [ ] ~~feature-board-management skill populates Epic ID when creating features~~ → Superseded by `x-ipe-tool-feature-board-manager`
+- [ ] Epic status derivable from constituent Feature statuses (all completed → completed, any in_progress → in_progress) → **Carried forward** into EPIC-056
+- [ ] ~~Specification links updated to `EPIC-{nnn}/FEATURE-{nnn}-{X}/specification.md` paths~~ → Superseded by EPIC-056 JSON schema
 
 **Dependencies:** FEATURE-035-A
 
@@ -654,20 +659,25 @@ The user wants:
 
 ---
 
-##### FEATURE-035-C: Feature Lifecycle Skill Updates
+##### [RETIRED by EPIC-057] FEATURE-035-C: Feature Lifecycle Skill Updates
+
+> **⚠️ CR Impact Note** (added 04-03-2026, ref: EPIC-057)
+> - **Change:** EPIC-057 (Web Pages + Migration) includes updating ~34 referencing skills to use the new JSON-based board managers instead of markdown editing. This subsumes the 10+ skill updates planned here.
+> - **Retirement Reason:** Updating skills for Epic-aware markdown paths is superseded by updating them to use JSON APIs/scripts entirely — a more complete migration.
+> - **Replacement:** See EPIC-057 in [requirement-details-part-23.md](x-ipe-docs/requirements/requirement-details-part-23.md)
 
 **Version:** v1.0
-**Brief Description:** Update all feature lifecycle skills to use Epic-aware paths (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`) instead of flat `FEATURE-{nnn}/` paths.
+**Brief Description:** ~~Update all feature lifecycle skills to use Epic-aware paths (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`) instead of flat `FEATURE-{nnn}/` paths.~~
 
 **Acceptance Criteria:**
-- [ ] Change Request skill uses `EPIC-{nnn}/FEATURE-{nnn}-{X}/` paths for CR files
-- [ ] Feature Refinement skill reads/writes specs at `EPIC-{nnn}/FEATURE-{nnn}-{X}/specification.md`
-- [ ] Technical Design skill uses Epic-aware paths
-- [ ] Test Generation skill uses Epic-aware paths
-- [ ] Code Implementation skill uses Epic-aware paths
-- [ ] Feature Acceptance Test skill uses Epic-aware paths
-- [ ] Feature Closing skill uses Epic-aware paths
-- [ ] Git version control skill supports Epic references in commit messages
+- [ ] ~~Change Request skill uses `EPIC-{nnn}/FEATURE-{nnn}-{X}/` paths for CR files~~ → Superseded by EPIC-057 JSON migration
+- [ ] ~~Feature Refinement skill reads/writes specs at `EPIC-{nnn}/FEATURE-{nnn}-{X}/specification.md`~~ → Superseded
+- [ ] ~~Technical Design skill uses Epic-aware paths~~ → Superseded
+- [ ] ~~Test Generation skill uses Epic-aware paths~~ → Superseded
+- [ ] ~~Code Implementation skill uses Epic-aware paths~~ → Superseded
+- [ ] ~~Feature Acceptance Test skill uses Epic-aware paths~~ → Superseded
+- [ ] ~~Feature Closing skill uses Epic-aware paths~~ → Superseded
+- [ ] ~~Git version control skill supports Epic references in commit messages~~ → **Carried forward** into EPIC-057
 
 **Dependencies:** FEATURE-035-A, FEATURE-035-B
 

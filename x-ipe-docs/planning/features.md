@@ -1,6 +1,6 @@
 # Feature Board
 
-> Last Updated: 04-02-2026
+> Last Updated: 04-03-2026
 
 ## Overview
 
@@ -162,3 +162,13 @@ This board tracks all features across the project lifecycle.
 | FEATURE-054-D | EPIC-054 | Injected Tracker Toolbox (Shadow DOM) | v1.0 | Closed | [specification.md](x-ipe-docs/requirements/EPIC-054/FEATURE-054-D/specification.md) | 04-02-2026 | 04-03-2026 |
 | FEATURE-054-E | EPIC-054 | PII Protection & Masking | v1.0 | Closed | [specification.md](x-ipe-docs/requirements/EPIC-054/FEATURE-054-E/specification.md) | 04-02-2026 | 04-03-2026 |
 | FEATURE-054-F | EPIC-054 | behavior-recording.json Output & Post-Processing | v1.0 | Closed | [specification.md](x-ipe-docs/requirements/EPIC-054/FEATURE-054-F/specification.md) | 04-02-2026 | 04-03-2026 |
+| FEATURE-055-A | EPIC-055 | Board Shared Library | v1.0 | Tested | [specification.md](x-ipe-docs/requirements/EPIC-055/FEATURE-055-A/specification.md) | 04-03-2026 | 04-03-2026 |
+| FEATURE-055-B | EPIC-055 | Task CRUD Scripts | v1.0 | Planned | FEATURE-055-A | 04-03-2026 | 04-03-2026 |
+| FEATURE-055-C | EPIC-055 | Task Board API | v1.0 | Planned | FEATURE-055-B | 04-03-2026 | 04-03-2026 |
+| FEATURE-056-A | EPIC-056 | Feature CRUD Scripts | v1.0 | Planned | FEATURE-055-A | 04-03-2026 | 04-03-2026 |
+| FEATURE-056-B | EPIC-056 | Feature Board API | v1.0 | Planned | FEATURE-056-A | 04-03-2026 | 04-03-2026 |
+| FEATURE-057-A | EPIC-057 | Task Board Web Page | v1.0 | Planned | FEATURE-055-C | 04-03-2026 | 04-03-2026 |
+| FEATURE-057-B | EPIC-057 | Feature Board Web Page | v1.0 | Planned | FEATURE-056-B | 04-03-2026 | 04-03-2026 |
+| FEATURE-057-C | EPIC-057 | Data Migration | v1.0 | Planned | FEATURE-055-B, FEATURE-056-A | 04-03-2026 | 04-03-2026 |
+| FEATURE-057-D | EPIC-057 | Skill Updates | v1.0 | Planned | FEATURE-057-C | 04-03-2026 | 04-03-2026 |
+| FEATURE-057-E | EPIC-057 | Cleanup & Scaffold Update | v1.0 | Planned | FEATURE-057-D | 04-03-2026 | 04-03-2026 |

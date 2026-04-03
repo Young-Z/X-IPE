@@ -5,8 +5,14 @@
 ## Active Tasks
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
-| TASK-1057 | Requirement Gathering | Gather requirements for IDEA-039: CR-Feature and Task Board (EPIC-055) — JSON data layer, CRUD skill scripts, Flask API, view-only web UI, migration strategy. | Drift 🌊 | 🔄 in_progress | 04-03-2026 | (pending) | x-ipe-task-based-feature-breakdown |
-| TASK-1056 | Code Implementation | CR-001 Implementation: Rewrite tracker-toolbar.js (<5KB), update track_behavior.py (polling, screenshots, folder mgmt), update SKILL.md, update tests. | Spark ✨ | 🔄 in_progress | 04-03-2026 | (pending) | — |
+| TASK-1063 | Feature Closing | Close FEATURE-055-A (Board Shared Library): Final verification, code-to-docs review, refactoring analysis, commit + push to main. DAO mode. | Drift 🌊 | 🔄 in_progress | 04-03-2026 | — | x-ipe-task-based-feature-refinement |
+| TASK-1062 | Acceptance Testing | Execute acceptance tests for FEATURE-055-A (Board Shared Library): 32 TCs (30 unit + 2 integration), all PASS, 100% pass rate. 47 pytest tests, 93% coverage. | Drift 🌊 | ✅ done | 04-03-2026 | [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-055/FEATURE-055-A/acceptance-test-cases.md) | x-ipe-task-based-feature-closing |
+| TASK-1061 | Code Implementation | Implement FEATURE-055-A (Board Shared Library): _board_lib.py with atomic JSON I/O, file locking, schema validation, path resolution. Python stdlib only. program_type=library. 47 tests, 93% coverage. | Drift 🌊 | ✅ done | 04-03-2026 | [_board_lib.py](.github/skills/x-ipe-tool-task-board-manager/scripts/_board_lib.py), [test_board_lib.py](tests/test_board_lib.py) | x-ipe-task-based-feature-acceptance-test |
+| TASK-1060 | Technical Design | Design FEATURE-055-A (Board Shared Library): Two-part design for _board_lib.py — atomic JSON I/O, file locking, schema validation, path resolution. Library type. | Drift 🌊 | ✅ done | 04-03-2026 | [technical-design.md](x-ipe-docs/requirements/EPIC-055/FEATURE-055-A/technical-design.md) | x-ipe-task-based-code-implementation |
+| TASK-1059 | Feature Refinement | Refine FEATURE-055-A (Board Shared Library): Create specification.md with GWT acceptance criteria for atomic JSON I/O, file locking, schema validation, path resolution utilities. | Drift 🌊 | ✅ done | 04-03-2026 | [specification.md](x-ipe-docs/requirements/EPIC-055/FEATURE-055-A/specification.md) | x-ipe-task-based-technical-design |
+| TASK-1058 | Feature Breakdown | Break EPIC-055 (3 features), EPIC-056 (2 features), EPIC-057 (5 features) into 10 total features with MVP-first criteria. | Drift 🌊 | ✅ done | 04-03-2026 | [requirement-details-part-23.md](x-ipe-docs/requirements/requirement-details-part-23.md), [features.md](x-ipe-docs/planning/features.md) | x-ipe-task-based-feature-refinement |
+| TASK-1057 | Requirement Gathering | Gather requirements for IDEA-039: CR-Feature and Task Board (EPIC-055, EPIC-056, EPIC-057) — JSON data layer, CRUD skill scripts, Flask API, view-only web UI, migration strategy. | Drift 🌊 | ✅ done | 04-03-2026 | [requirement-details-part-23.md](x-ipe-docs/requirements/requirement-details-part-23.md), [EPIC-055/](x-ipe-docs/requirements/EPIC-055/), [EPIC-056/](x-ipe-docs/requirements/EPIC-056/), [EPIC-057/](x-ipe-docs/requirements/EPIC-057/) | x-ipe-task-based-feature-breakdown |
+| TASK-1056 | Code Implementation | CR-001 Implementation: Rewrite tracker-toolbar.js (<5KB), update track_behavior.py (polling, screenshots, folder mgmt), update SKILL.md, update tests. | Spark ✨ | ✅ done | 04-03-2026 | 04-03-2026 | 5da9c6d |
 | TASK-1055 | Change Request | CR-001: EPIC-054 Behavior Tracker overhaul — simplify IIFE to <5KB, 5s polling model, screenshot on change, localStorage persistence, URL-change reinjection, new x-ipe-docs/learning/ folder structure. Classification: MODIFICATION. | Spark ✨ | ✅ done | 04-03-2026 | [CR-001.md](x-ipe-docs/requirements/EPIC-054/FEATURE-054-B/CR-001.md) | x-ipe-task-based-feature-refinement |
 | TASK-1054 | Idea Mockup | Create web UI mockups for IDEA-039: Task Board Page (filters, search, table) + Feature Board Page (Epic grouping, accordion). | Drift 🌊 | ✅ done | 04-03-2026 | [task-board-v1.html](x-ipe-docs/ideas/039.%20CR-Feature%20and%20Task%20Board/mockups/task-board-v1.html), [feature-board-v1.html](x-ipe-docs/ideas/039.%20CR-Feature%20and%20Task%20Board/mockups/feature-board-v1.html) | x-ipe-task-based-requirement-gathering |
 | TASK-1053 | Skill Creation | Rename x-ipe-learning-behavior-tracker-for-web → x-ipe-tool-learning-behavior-tracker-for-web. Recreate SKILL.md following x-ipe-tool template. Create tracker-toolbar.mini.js minified version. | Spark ✨ | ✅ done | 04-03-2026 | .github/skills/x-ipe-tool-learning-behavior-tracker-for-web/ | — |
@@ -312,10 +318,10 @@
 
 ## Quick Stats
 
-- **Total Active:** 31
-- **In Progress:** 0
+- **Total Active:** 36
+- **In Progress:** 1
 - **Pending:** 0
-- **Completed (archived):** 903
+- **Completed (archived):** 905
 - **Deferred:** 0
 - **Reverted:** 8
 - **Pending Review:** 0

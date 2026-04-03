@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X-IPE Task Board</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-page: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-sidebar: #0f172a;
+    --border: #e2e8f0;
+    --border-focus: #10b981;
+
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --text-inverse: #f8fafc;
+
+    --accent: #10b981;
+    --accent-light: #d1fae5;
+    --accent-dark: #059669;
+
+    --status-done: #22c55e;
+    --status-done-bg: #f0fdf4;
+    --status-progress: #3b82f6;
+    --status-progress-bg: #eff6ff;
+    --status-pending: #f59e0b;
+    --status-pending-bg: #fffbeb;
+    --status-blocked: #ef4444;
+    --status-blocked-bg: #fef2f2;
+    --status-deferred: #8b5cf6;
+    --status-deferred-bg: #f5f3ff;
+
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.04);
+    --shadow-md: 0 4px 12px rgb(0 0 0 / 0.06);
+    --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.08);
+
+    --radius: 10px;
+    --radius-sm: 6px;
+    --radius-full: 9999px;
+
+    --font-body: 'DM Sans', system-ui, sans-serif;
+    --font-mono: 'DM Mono', 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-page);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── Sidebar ─────────────────────────────── */
+  .sidebar {
+    width: 240px;
+    background: var(--bg-sidebar);
+    color: var(--text-inverse);
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 10;
+  }
+  .sidebar-logo {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sidebar-logo .dot {
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
+  }
+  .sidebar-subtitle {
+    font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 36px;
+  }
+  .sidebar-nav { list-style: none; flex: 1; }
+  .sidebar-nav li {
+    margin-bottom: 4px;
+  }
+  .sidebar-nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+  }
+  .sidebar-nav a:hover { color: #e2e8f0; background: rgba(255,255,255,0.05); }
+  .sidebar-nav a.active { color: #ffffff; background: rgba(16,185,129,0.12); }
+  .sidebar-nav a.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 3px; height: 20px;
+    background: var(--accent);
+    border-radius: 0 3px 3px 0;
+  }
+  .sidebar-nav a { position: relative; }
+  .nav-icon { width: 18px; text-align: center; font-size: 15px; }
+  .sidebar-footer {
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    font-size: 11px;
+    color: #475569;
+  }
+
+  /* ── Main Content ────────────────────────── */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    padding: 32px 40px;
+    max-width: 1400px;
+  }
+
+  /* ── Header ──────────────────────────────── */
+  .page-header {
+    margin-bottom: 28px;
+  }
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.8px;
+    color: var(--text-primary);
+  }
+  .page-header p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  /* ── Stats Row ───────────────────────────── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .stat-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .stat-card.total::after { background: var(--text-primary); }
+  .stat-card.progress::after { background: var(--status-progress); }
+  .stat-card.done::after { background: var(--status-done); }
+  .stat-card.blocked::after { background: var(--status-blocked); }
+  .stat-card.pending::after { background: var(--status-pending); }
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    font-family: var(--font-mono);
+  }
+  .stat-card.total .stat-value { color: var(--text-primary); }
+  .stat-card.progress .stat-value { color: var(--status-progress); }
+  .stat-card.done .stat-value { color: var(--status-done); }
+  .stat-card.blocked .stat-value { color: var(--status-blocked); }
+  .stat-card.pending .stat-value { color: var(--status-pending); }
+
+  /* ── Filter Bar ──────────────────────────── */
+  .filter-bar {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .filter-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 8px;
+    white-space: nowrap;
+  }
+  .toggle-group {
+    display: flex;
+    background: var(--bg-page);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+    gap: 2px;
+  }
+  .toggle-btn {
+    padding: 7px 16px;
+    border: none;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font-body);
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-secondary);
+    transition: all 0.15s ease;
+  }
+  .toggle-btn:hover { color: var(--text-primary); }
+  .toggle-btn.active {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+    font-weight: 600;
+  }
+
+  .status-select {
+    padding: 7px 32px 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    background: var(--bg-card);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M3 5l3 3 3-3'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .status-select:focus { border-color: var(--accent); outline: none; }
+
+  .search-wrap {
+    flex: 1;
+    position: relative;
+  }
+  .search-wrap::before {
+    content: '⌕';
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+  .search-input {
+    width: 100%;
+    padding: 8px 14px 8px 36px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    transition: border-color 0.15s;
+  }
+  .search-input::placeholder { color: var(--text-muted); }
+  .search-input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgb(16 185 129 / 0.1); }
+
+  .divider { width: 1px; height: 28px; background: var(--border); }
+
+  /* ── Table ───────────────────────────────── */
+  .table-wrap {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead th {
+    background: #f8fafc;
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    white-space: nowrap;
+  }
+  tbody tr {
+    transition: background 0.1s;
+  }
+  tbody tr:hover { background: #f8fafc; }
+  tbody td {
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .task-id {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+  .task-type {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .task-type.ideation { background: #fef3c7; color: #92400e; }
+  .task-type.bug-fix { background: #fce7f3; color: #9d174d; }
+  .task-type.implementation { background: #dbeafe; color: #1e40af; }
+  .task-type.refinement { background: #e0e7ff; color: #3730a3; }
+  .task-type.closing { background: #d1fae5; color: #065f46; }
+  .task-type.testing { background: #fae8ff; color: #86198f; }
+  .task-type.design { background: #f1f5f9; color: #334155; }
+  .task-type.skill { background: #ccfbf1; color: #134e4a; }
+  .task-type.breakdown { background: #fed7aa; color: #9a3412; }
+
+  .task-desc {
+    max-width: 340px;
+    color: var(--text-primary);
+    font-weight: 400;
+  }
+  .task-role {
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  /* Status badges */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .status-badge .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .status-badge.done { background: var(--status-done-bg); color: #15803d; }
+  .status-badge.done .dot { background: var(--status-done); }
+  .status-badge.in-progress { background: var(--status-progress-bg); color: #1d4ed8; }
+  .status-badge.in-progress .dot { background: var(--status-progress); animation: pulse-dot 1.5s ease-in-out infinite; }
+  .status-badge.pending { background: var(--status-pending-bg); color: #b45309; }
+  .status-badge.pending .dot { background: var(--status-pending); }
+  .status-badge.blocked { background: var(--status-blocked-bg); color: #dc2626; }
+  .status-badge.blocked .dot { background: var(--status-blocked); }
+  .status-badge.deferred { background: var(--status-deferred-bg); color: #7c3aed; }
+  .status-badge.deferred .dot { background: var(--status-deferred); }
+
+  .date-cell {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .link-cell a {
+    color: var(--accent-dark);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    border-bottom: 1px dashed var(--accent);
+    transition: border-color 0.15s;
+  }
+  .link-cell a:hover { border-bottom-style: solid; }
+  .next-cell {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* ── Pagination ──────────────────────────── */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    background: #fafbfc;
+  }
+  .pagination-info {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .pagination-info strong { color: var(--text-primary); font-weight: 600; }
+  .pagination-controls {
+    display: flex;
+    gap: 4px;
+  }
+  .page-btn {
+    width: 34px; height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    font-size: 13px;
+    font-family: var(--font-body);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .page-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .page-btn.active {
+    background: var(--text-primary);
+    border-color: var(--text-primary);
+    color: white;
+    font-weight: 600;
+  }
+  .page-btn.disabled { opacity: 0.4; cursor: default; pointer-events: none; }
+
+  /* ── Animations ──────────────────────────── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .stat-card { animation: fadeIn 0.4s ease both; }
+  .stat-card:nth-child(1) { animation-delay: 0.05s; }
+  .stat-card:nth-child(2) { animation-delay: 0.10s; }
+  .stat-card:nth-child(3) { animation-delay: 0.15s; }
+  .stat-card:nth-child(4) { animation-delay: 0.20s; }
+  .stat-card:nth-child(5) { animation-delay: 0.25s; }
+  .filter-bar { animation: fadeIn 0.4s ease 0.15s both; }
+  .table-wrap { animation: fadeIn 0.4s ease 0.25s both; }
+
+  tbody tr { animation: fadeIn 0.3s ease both; }
+  tbody tr:nth-child(1) { animation-delay: 0.30s; }
+  tbody tr:nth-child(2) { animation-delay: 0.34s; }
+  tbody tr:nth-child(3) { animation-delay: 0.38s; }
+  tbody tr:nth-child(4) { animation-delay: 0.42s; }
+  tbody tr:nth-child(5) { animation-delay: 0.46s; }
+  tbody tr:nth-child(6) { animation-delay: 0.50s; }
+  tbody tr:nth-child(7) { animation-delay: 0.54s; }
+  tbody tr:nth-child(8) { animation-delay: 0.58s; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo"><span class="dot"></span> X-IPE</div>
+  <div class="sidebar-subtitle">Engineering Platform</div>
+  <ul class="sidebar-nav">
+    <li><a href="#"><span class="nav-icon">◈</span> Dashboard</a></li>
+    <li><a href="#" class="active"><span class="nav-icon">☰</span> Task Board</a></li>
+    <li><a href="#"><span class="nav-icon">◇</span> Features</a></li>
+    <li><a href="#"><span class="nav-icon">⬡</span> Workflows</a></li>
+    <li><a href="#"><span class="nav-icon">◎</span> Ideas</a></li>
+    <li><a href="#"><span class="nav-icon">▤</span> Knowledge Base</a></li>
+  </ul>
+  <div class="sidebar-footer">
+    X-IPE v0.6 · IDEA-039 Mockup
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+  <div class="page-header">
+    <h1>Task Board</h1>
+    <p>Track all development tasks across the engineering workflow</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card total">
+      <div class="stat-label">Total Tasks</div>
+      <div class="stat-value">48</div>
+    </div>
+    <div class="stat-card progress">
+      <div class="stat-label">In Progress</div>
+      <div class="stat-value">3</div>
+    </div>
+    <div class="stat-card done">
+      <div class="stat-label">Completed</div>
+      <div class="stat-value">41</div>
+    </div>
+    <div class="stat-card blocked">
+      <div class="stat-label">Blocked</div>
+      <div class="stat-value">1</div>
+    </div>
+    <div class="stat-card pending">
+      <div class="stat-label">Pending</div>
+      <div class="stat-value">3</div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>Range</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" onclick="setRange(this)">1 Week</button>
+        <button class="toggle-btn" onclick="setRange(this)">1 Month</button>
+        <button class="toggle-btn" onclick="setRange(this)">All</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="filter-group">
+      <label>Status</label>
+      <select class="status-select">
+        <option>All Statuses</option>
+        <option>In Progress</option>
+        <option>Completed</option>
+        <option>Pending</option>
+        <option>Blocked</option>
+        <option>Deferred</option>
+      </select>
+    </div>
+    <div class="divider"></div>
+    <div class="search-wrap">
+      <input type="text" class="search-input" placeholder="Search tasks by ID, description, or role…">
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Task ID</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Last Updated</th>
+          <th>Output</th>
+          <th>Next</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="task-id">TASK-1054</td>
+          <td><span class="task-type ideation">Ideation</span></td>
+          <td class="task-desc">Create web UI mockups for IDEA-039: Task Board + Feature Board pages</td>
+          <td class="task-role">Drift 🌊</td>
+          <td><span class="status-badge in-progress"><span class="dot"></span>In Progress</span></td>
+          <td class="date-cell">04-03-2026</td>
+          <td class="link-cell">—</td>
+          <td class="next-cell">Requirement Gathering</td>
+        </tr>
+        <tr>
+          <td class="task-id">TASK-1053</td>
+          <td><span class="task-type skill">Skill Creation</span></td>
+          <td class="task-desc">Rename learning-behavior-tracker skill, recreate SKILL.md, create minified JS</td>
+          <td class="task-role">Spark ✨</td>
+          <td><span class="status-badge done"><span class="dot"></span>Done</span></td>
+          <td class="date-cell">04-03-2026</td>
+          <td class="link-cell"><a href="#">skill/SKILL.md</a></td>
+          <td class="next-cell">—</td>
+        </tr>
+        <tr>
+          <td class="task-id">TASK-1052</td>
+          <td><span class="task-type ideation">Ideation</span></td>
+          <td class="task-desc">Refine idea 039: CR-Feature and Task Board — JSON + web pages</td>
+          <td class="task-role">Drift 🌊</td>
+          <td><span class="status-badge done"><span class="dot"></span>Done</span></td>
+          <td class="date-cell">04-03-2026</td>
+          <td class="link-cell"><a href="#">idea-summary-v1.md</a></td>
+          <td class="next-cell">Requirement Gathering</td>
+        </tr>
+        <tr>
+          <td class="task-id">TASK-1051</td>
+          <td><span class="task-type bug-fix">Bug Fix</span></td>
+          <td class="task-desc">FEATURE-054-A: Tracking Purpose required textarea with 200-word limit</td>
+          <td class="task-role">Spark ✨</td>
+          <td><span class="status-badge done"><span class="dot"></span>Done</span></td>
+          <td class="date-cell">04-03-2026</td>
+          <td class="link-cell"><a href="#">a9fcacc</a></td>
+          <td class="next-cell">—</td>
+        </tr>
+        <tr>
+          <td class="task-id">TASK-1050</td>
+          <td><span class="task-type closing">Feature Closing</span></td>
+          <td class="task-desc">Close EPIC-054 all 6 features. Final verification, code-to-docs review</td>
+          <td class="task-role">Spark ✨</td>
+          <td><span class="status-badge done"><span class="dot"></span>Done</span></td>
+          <td class="date-cell">04-03-2026</td>
+          <td class="link-cell"><a href="#">06c89c3</a></td>
+          <td class="next-cell">—</td>
+        </tr>
+        <tr>
+          <td class="task-id">TASK-1049</td>
+          <td><span class="task-type testing">Acceptance Test</span></td>
+          <td class="task-desc">EPIC-054 all 6 features — 103 ACs, 45 automated tests, 100% pass rate</td>
+          <td class="task-role">Spark ✨</td>
+          <td><span class="status-badge done"><span class="dot"></span>Done</span></td>
+          <td class="date-cell">04-03-2026</td>
+          <td class="link-cell"><a href="#">acceptance-tests.md</a></td>
+          <td class="next-cell">Feature Closing</td>
+        </tr>
+        <tr>
+          <td class="task-id">TASK-1048</td>
+          <td><span class="task-type implementation">Implementation</span></td>
+          <td class="task-desc">Code Implementation — EPIC-054 all 6 features: learn-panel.js, tracker-toolbar.js</td>
+          <td class="task-role">Spark ✨</td>
+          <td><span class="status-badge done"><span class="dot"></span>Done</span></td>
+          <td class="date-cell">04-02-2026</td>
+          <td class="link-cell"><a href="#">learn-panel.js</a></td>
+          <td class="next-cell">Acceptance Test</td>
+        </tr>
+        <tr>
+          <td class="task-id">TASK-1047</td>
+          <td><span class="task-type design">Technical Design</span></td>
+          <td class="task-desc">Technical Design — EPIC-054 (all 6 features), MVP order: A→B→C→E→F→D</td>
+          <td class="task-role">Spark ✨</td>
+          <td><span class="status-badge done"><span class="dot"></span>Done</span></td>
+          <td class="date-cell">04-02-2026</td>
+          <td class="link-cell"><a href="#">technical-design.md</a></td>
+          <td class="next-cell">Implementation</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <div class="pagination-info">
+        Showing <strong>1–8</strong> of <strong>48</strong> tasks
+      </div>
+      <div class="pagination-controls">
+        <button class="page-btn disabled">‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">4</button>
+        <button class="page-btn">5</button>
+        <button class="page-btn">›</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+function setRange(btn) {
+  btn.parentElement.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
