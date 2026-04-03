@@ -463,6 +463,17 @@
       "next_task": "",
       "created_at": "2026-04-03T15:55:47.040926+00:00",
       "last_updated": "2026-04-03T15:55:47.040926+00:00"
+    },
+    {
+      "task_id": "TASK-1083",
+      "task_type": "documentation",
+      "description": "Update instruction files to remove x-ipe-workflow-task-execution references - skills now call board manager directly",
+      "role": "Drift",
+      "status": "done",
+      "output_links": [],
+      "next_task": "",
+      "created_at": "2026-04-03T16:02:52.938429+00:00",
+      "last_updated": "2026-04-03T16:02:52.938429+00:00"
     }
   ]
 }

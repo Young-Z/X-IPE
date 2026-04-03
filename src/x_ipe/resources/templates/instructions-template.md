@@ -58,10 +58,11 @@ If ANY of these are missing → **STOP. Do not touch code.**
 
 ✅ What should have happened:
    Agent: *DAO interprets → disposition: instruction →
-           classifies as bug fix → loads x-ipe-workflow-task-execution → loads x-ipe-task-based-bug-fix →
-           creates TASK-681 on board → diagnoses root cause →
-           runs conflict analysis → writes FAILING test first →
-           implements fix → verifies test passes → updates board*
+           classifies as bug fix → loads x-ipe-task-based-bug-fix →
+           Phase 0: creates TASK-681 on board via x-ipe-tool-task-board-manager →
+           diagnoses root cause → writes FAILING test first →
+           implements fix → verifies test passes →
+           final step: updates board (task done) via x-ipe-tool-task-board-manager*
 ```
 
 ---
@@ -71,8 +72,8 @@ If ANY of these are missing → **STOP. Do not touch code.**
 **The task board (JSON-based, managed by `x-ipe-tool-task-board-manager`) is MANDATORY for ALL work.**
 
 ### Before ANY Work:
-1. **Create task** using `x-ipe-tool-task-board-manager` skill
-2. **Verify task exists** on board (Step 2 of x-ipe-workflow-task-execution)
+1. **Create task** using `x-ipe-tool-task-board-manager` skill (each task-based skill does this in its Phase 0)
+2. **Verify task exists** on board before proceeding
 3. **Only then** proceed to actual work
 
 ### After Completing Work:

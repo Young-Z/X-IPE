@@ -49,10 +49,11 @@
            修复之后才写测试，没有任务看板记录*
 
 ✅ 应该这样做：
-   Agent：*分类为 bug 修复 → 加载 x-ipe-workflow-task-execution → 加载 x-ipe-task-based-bug-fix →
-           在看板创建 TASK-681 → 诊断根因 →
-           执行冲突分析 → 先写失败测试 →
-           实现修复 → 验证测试通过 → 更新看板*
+   Agent：*分类为 bug 修复 → 加载 x-ipe-task-based-bug-fix →
+           Phase 0：通过 x-ipe-tool-task-board-manager 在看板创建 TASK-681 →
+           诊断根因 → 先写失败测试 →
+           实现修复 → 验证测试通过 →
+           最终步骤：通过 x-ipe-tool-task-board-manager 更新看板（任务完成）*
 ```
 
 ---
@@ -62,8 +63,8 @@
 **任务看板（JSON格式，由 `x-ipe-tool-task-board-manager` 管理）是所有工作的必备工具。**
 
 ### 开始任何工作之前：
-1. **使用 `x-ipe-tool-task-board-manager` 技能创建任务**
-2. **验证任务已在看板上**（x-ipe-workflow-task-execution 的第2步）
+1. **使用 `x-ipe-tool-task-board-manager` 技能创建任务**（每个任务型技能在其 Phase 0 中自动执行）
+2. **验证任务已在看板上** 后再继续
 3. **然后才能** 开始实际工作
 
 ### 完成工作之后：
