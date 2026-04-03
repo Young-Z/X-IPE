@@ -222,4 +222,76 @@ describe('LearnPanelManager', () => {
             expect(html).not.toContain('View Recording');
         });
     });
+
+    describe('Track Behavior Button', () => {
+        it('should send command to terminalManager when clicked', async () => {
+            const mgr = new globalThis.LearnPanelManager();
+            global.fetch = vi.fn().mockResolvedValue({
+                json: () => Promise.resolve({ success: true, sessions: [] })
+            });
+
+            const container = document.getElementById('content-body');
+            await mgr.render(container);
+
+            // Set up valid URL and purpose
+            const urlInput = container.querySelector('#learn-url-input');
+            const purposeInput = container.querySelector('#learn-purpose-input');
+            urlInput.value = 'https://example.com';
+            urlInput.dispatchEvent(new Event('input'));
+            purposeInput.value = 'Test checkout flow';
+            purposeInput.dispatchEvent(new Event('input'));
+
+            // Mock terminalManager
+            globalThis.window.terminalManager = {
+                sendCopilotPromptCommandNoEnter: vi.fn()
+            };
+            globalThis.window.terminalPanel = {
+                expand: vi.fn()
+            };
+
+            const btn = container.querySelector('#learn-track-btn');
+            btn.click();
+
+            expect(globalThis.window.terminalManager.sendCopilotPromptCommandNoEnter).toHaveBeenCalledTimes(1);
+            const calledWith = globalThis.window.terminalManager.sendCopilotPromptCommandNoEnter.mock.calls[0][0];
+            expect(calledWith).toContain('https://example.com');
+            expect(calledWith).toContain('Test checkout flow');
+
+            // Cleanup
+            delete globalThis.window.terminalManager;
+            delete globalThis.window.terminalPanel;
+        });
+
+        it('should expand terminal panel before sending command', async () => {
+            const mgr = new globalThis.LearnPanelManager();
+            global.fetch = vi.fn().mockResolvedValue({
+                json: () => Promise.resolve({ success: true, sessions: [] })
+            });
+
+            const container = document.getElementById('content-body');
+            await mgr.render(container);
+
+            const urlInput = container.querySelector('#learn-url-input');
+            const purposeInput = container.querySelector('#learn-purpose-input');
+            urlInput.value = 'https://example.com';
+            urlInput.dispatchEvent(new Event('input'));
+            purposeInput.value = 'Test flow';
+            purposeInput.dispatchEvent(new Event('input'));
+
+            globalThis.window.terminalManager = {
+                sendCopilotPromptCommandNoEnter: vi.fn()
+            };
+            globalThis.window.terminalPanel = {
+                expand: vi.fn()
+            };
+
+            const btn = container.querySelector('#learn-track-btn');
+            btn.click();
+
+            expect(globalThis.window.terminalPanel.expand).toHaveBeenCalledTimes(1);
+
+            delete globalThis.window.terminalManager;
+            delete globalThis.window.terminalPanel;
+        });
+    });
 });

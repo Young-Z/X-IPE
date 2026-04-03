@@ -161,9 +161,16 @@ class LearnPanelManager {
         const purposeArg = ` --purpose "${purpose.replace(/"/g, '\\"')}"`;
         const command = `Track behavior on ${url}${purposeArg}`;
 
-        // Invoke via terminal if available
-        if (window.workplaceManager && typeof window.workplaceManager._openTerminalWithCommand === 'function') {
-            window.workplaceManager._openTerminalWithCommand(command);
+        // Expand terminal panel
+        if (window.terminalPanel) {
+            window.terminalPanel.expand();
+        }
+
+        // Send command to terminal (user reviews before executing)
+        if (window.terminalManager?.sendCopilotPromptCommandNoEnter) {
+            window.terminalManager.sendCopilotPromptCommandNoEnter(command);
+        } else if (window.terminalManager?.sendCopilotPromptCommand) {
+            window.terminalManager.sendCopilotPromptCommand(command);
         } else {
             console.log('[LearnPanel] Terminal not available, command:', command);
         }
